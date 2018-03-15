@@ -270,7 +270,7 @@ public:
      */
     void drawText(const uint16_t* text, int start, int count, int contextCount, float x, float y,
                   minikin::Bidi bidiFlags, const Paint& origPaint, const Typeface* typeface,
-                  minikin::MeasuredText* mt, int mtOffset);
+                  minikin::MeasuredText* mt);
 
     void drawTextOnPath(const uint16_t* text, int count, minikin::Bidi bidiFlags,
                         const SkPath& path, float hOffset, float vOffset, const Paint& paint,
