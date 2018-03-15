@@ -30,4 +30,5 @@ LOCAL_CERTIFICATE := platform
 LOCAL_DEX_PREOPT := false
 LOCAL_PROGUARD_ENABLED := disabled
 
+LOCAL_COMPATIBILITY_SUITE := device-tests
 include $(BUILD_PACKAGE)

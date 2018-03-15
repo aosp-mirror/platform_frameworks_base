@@ -14,7 +14,9 @@
      limitations under the License.
 -->
 <configuration description="Runs Frameworks WebView Loading Tests.">
-    <target_preparer class="com.android.tradefed.targetprep.TestAppInstallSetup">
+    <option name="test-suite-tag" value="apct" />
+    <option name="test-suite-tag" value="apct-instrumentation" />
+    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
         <option name="test-file-name" value="WebViewLoadingTests.apk" />
         <option name="test-file-name" value="WebViewLoadingOnDiskTestApk.apk" />
         <option name="test-file-name" value="WebViewLoadingFromApkTestApk.apk" />
@@ -24,6 +26,5 @@
 
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.webkit.tests" />
-        <option name="runner" value="android.support.test.runner.AndroidJUnitRunner" />
     </test>
 </configuration>
