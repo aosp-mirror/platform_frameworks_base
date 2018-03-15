@@ -528,7 +528,6 @@ import android.view.autofill.AutofillValue;
  *     &lt;compatibility-package android:name="foo.bar.baz" android:maxLongVersionCode="1000000000"/&gt;
  * &lt;/autofill-service&gt;</pre>
  */
-// TODO(b/70407264): add code snippets to field classification ???
 public abstract class AutofillService extends Service {
     private static final String TAG = "AutofillService";
 
