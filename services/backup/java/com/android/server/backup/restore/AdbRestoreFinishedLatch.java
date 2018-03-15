@@ -18,10 +18,11 @@ package com.android.server.backup.restore;
 
 import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.BackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL;
 
 import android.util.Slog;
 
+import com.android.internal.util.Preconditions;
+import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.BackupRestoreTask;
 
@@ -37,18 +38,24 @@ public class AdbRestoreFinishedLatch implements BackupRestoreTask {
     private BackupManagerService backupManagerService;
     final CountDownLatch mLatch;
     private final int mCurrentOpToken;
+    private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
     public AdbRestoreFinishedLatch(BackupManagerService backupManagerService,
             int currentOpToken) {
         this.backupManagerService = backupManagerService;
         mLatch = new CountDownLatch(1);
         mCurrentOpToken = currentOpToken;
+        mAgentTimeoutParameters = Preconditions.checkNotNull(
+                backupManagerService.getAgentTimeoutParameters(),
+                "Timeout parameters cannot be null");
     }
 
     void await() {
         boolean latched = false;
+        long fullBackupAgentTimeoutMillis =
+                mAgentTimeoutParameters.getFullBackupAgentTimeoutMillis();
         try {
-            latched = mLatch.await(TIMEOUT_FULL_BACKUP_INTERVAL, TimeUnit.MILLISECONDS);
+            latched = mLatch.await(fullBackupAgentTimeoutMillis, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             Slog.w(TAG, "Interrupted!");
         }
