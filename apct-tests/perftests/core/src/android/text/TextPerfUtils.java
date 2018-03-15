@@ -76,7 +76,7 @@ public class TextPerfUtils {
         }
 
         SpannableStringBuilder ssb = new SpannableStringBuilder(cs);
-        for (int i = 0; i < ssb.length(); i += wordLen) {
+        for (int i = 0; i < ssb.length(); i += wordLen + 1) {
             final int spanStart = i;
             final int spanEnd = (i + wordLen) > ssb.length() ? ssb.length() : i + wordLen;
 
