@@ -21,6 +21,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.text.AutoGrowArray.ByteArray;
 import android.text.AutoGrowArray.FloatArray;
 import android.text.AutoGrowArray.IntArray;
@@ -294,6 +295,18 @@ public class MeasuredParagraph {
             // We have result in native.
             return nGetWidth(mNativePtr, start, end);
         }
+    }
+
+    /**
+     * Retrieves the bounding rectangle that encloses all of the characters, with an implied origin
+     * at (0, 0).
+     *
+     * This is available only if the MeasuredParagraph is computed with buildForStaticLayout.
+     */
+    public void getBounds(@NonNull Paint paint, @IntRange(from = 0) int start,
+            @IntRange(from = 0) int end, @NonNull Rect bounds) {
+        nGetBounds(mNativePtr, mCopiedBuffer, paint.getNativeInstance(), start, end,
+                paint.getBidiFlags(), bounds);
     }
 
     /**
@@ -728,4 +741,7 @@ public class MeasuredParagraph {
 
     @CriticalNative
     private static native int nGetMemoryUsage(/* Non Zero */ long nativePtr);
+
+    private static native void nGetBounds(long nativePtr, char[] buf, long paintPtr, int start,
+            int end, int bidiFlag, Rect rect);
 }
