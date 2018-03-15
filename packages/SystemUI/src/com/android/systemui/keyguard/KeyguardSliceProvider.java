@@ -40,10 +40,10 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-import androidx.app.slice.Slice;
-import androidx.app.slice.SliceProvider;
-import androidx.app.slice.builders.ListBuilder;
-import androidx.app.slice.builders.ListBuilder.RowBuilder;
+import androidx.slice.Slice;
+import androidx.slice.SliceProvider;
+import androidx.slice.builders.ListBuilder;
+import androidx.slice.builders.ListBuilder.RowBuilder;
 
 /**
  * Simple Slice provider that shows the current date.

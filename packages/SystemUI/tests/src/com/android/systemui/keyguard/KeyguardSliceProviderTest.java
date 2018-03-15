@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
-import androidx.app.slice.Slice;
+import androidx.slice.Slice;
 
 import android.app.AlarmManager;
 import android.content.ContentResolver;
@@ -45,10 +45,10 @@ import org.mockito.MockitoAnnotations;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import androidx.app.slice.SliceItem;
-import androidx.app.slice.SliceProvider;
-import androidx.app.slice.SliceSpecs;
-import androidx.app.slice.core.SliceQuery;
+import androidx.slice.SliceItem;
+import androidx.slice.SliceProvider;
+import androidx.slice.SliceSpecs;
+import androidx.slice.core.SliceQuery;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)

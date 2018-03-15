@@ -47,12 +47,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
 
-import androidx.app.slice.Slice;
-import androidx.app.slice.SliceItem;
-import androidx.app.slice.core.SliceQuery;
-import androidx.app.slice.widget.ListContent;
-import androidx.app.slice.widget.RowContent;
-import androidx.app.slice.widget.SliceLiveData;
+import androidx.slice.Slice;
+import androidx.slice.SliceItem;
+import androidx.slice.core.SliceQuery;
+import androidx.slice.widget.ListContent;
+import androidx.slice.widget.RowContent;
+import androidx.slice.widget.SliceLiveData;
 
 /**
  * View visible under the clock on the lock screen and AoD.
@@ -117,7 +117,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
 
     private void showSlice(Slice slice) {
 
-        ListContent lc = new ListContent(slice);
+        ListContent lc = new ListContent(getContext(), slice);
         mHasHeader = lc.hasHeader();
         List<SliceItem> subItems = lc.getRowItems();
         if (!mHasHeader) {
@@ -125,7 +125,8 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         } else {
             mTitle.setVisibility(VISIBLE);
             // If there's a header it'll be the first subitem
-            RowContent header = new RowContent(subItems.get(0), true /* showStartItem */);
+            RowContent header = new RowContent(getContext(), subItems.get(0),
+                    true /* showStartItem */);
             SliceItem mainTitle = header.getTitleItem();
             CharSequence title = mainTitle != null ? mainTitle.getText() : null;
             mTitle.setText(title);
@@ -149,7 +150,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         final int startIndex = mHasHeader ? 1 : 0; // First item is header; skip it
         for (int i = startIndex; i < subItemsCount; i++) {
             SliceItem item = subItems.get(i);
-            RowContent rc = new RowContent(item, true /* showStartItem */);
+            RowContent rc = new RowContent(getContext(), item, true /* showStartItem */);
             final Uri itemTag = item.getSlice().getUri();
             // Try to reuse the view if already exists in the layout
             KeyguardSliceButton button = mRow.findViewWithTag(itemTag);
