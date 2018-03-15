@@ -68,8 +68,6 @@ public interface MediaSession2Provider extends TransportControlProvider {
     void setPlaylistParams_impl(PlaylistParams params);
     PlaylistParams getPlaylistParams_impl();
     void notifyError_impl(int errorCode, Bundle extras);
-    void registerPlayerEventCallback_impl(Executor executor, PlayerEventCallback callback);
-    void unregisterPlayerEventCallback_impl(PlayerEventCallback callback);
 
     interface CommandProvider {
         int getCommandCode_impl();
