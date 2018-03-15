@@ -258,7 +258,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Current rotation of the display.
      * Constants as per {@link android.view.Surface.Rotation}.
      *
-     * @see #updateRotationUnchecked(boolean)
+     * @see #updateRotationUnchecked()
      */
     private int mRotation = 0;
 
@@ -274,7 +274,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Flag indicating that the application is receiving an orientation that has different metrics
      * than it expected. E.g. Portrait instead of Landscape.
      *
-     * @see #updateRotationUnchecked(boolean)
+     * @see #updateRotationUnchecked()
      */
     private boolean mAltOrientation = false;
 
@@ -926,7 +926,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Returns true if the rotation has been changed.  In this case YOU MUST CALL
      * {@link WindowManagerService#sendNewConfiguration(int)} TO UNFREEZE THE SCREEN.
      */
-    boolean updateRotationUnchecked(boolean inTransaction) {
+    boolean updateRotationUnchecked() {
         if (mService.mDeferredRotationPauseCount > 0) {
             // Rotation updates have been paused temporarily.  Defer the update until
             // updates have been resumed.
@@ -1030,7 +1030,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mService.mPolicy.selectRotationAnimationLw(anim);
 
         if (!rotateSeamlessly) {
-            mService.startFreezingDisplayLocked(inTransaction, anim[0], anim[1], this);
+            mService.startFreezingDisplayLocked(anim[0], anim[1], this);
             // startFreezingDisplayLocked can reset the ScreenRotationAnimation.
             screenRotationAnimation = mService.mAnimator.getScreenRotationAnimationLocked(
                     mDisplayId);
@@ -1041,9 +1041,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // to their rotated state independently and without a freeze required.
             screenRotationAnimation = null;
 
-            // We have to reset this in case a window was removed before it
-            // finished seamless rotation.
-            mService.mSeamlessRotationCount = 0;
+            mService.startSeamlessRotation();
         }
 
         // We need to update our screen size information to match the new rotation. If the rotation
@@ -1053,39 +1051,26 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // #computeScreenConfiguration() later.
         updateDisplayAndOrientation(getConfiguration().uiMode);
 
-        if (!inTransaction) {
-            if (SHOW_TRANSACTIONS) {
-                Slog.i(TAG_WM, ">>> OPEN TRANSACTION setRotationUnchecked");
-            }
-            mService.openSurfaceTransaction();
-        }
-        try {
-            // NOTE: We disable the rotation in the emulator because
-            //       it doesn't support hardware OpenGL emulation yet.
-            if (CUSTOM_SCREEN_ROTATION && screenRotationAnimation != null
-                    && screenRotationAnimation.hasScreenshot()) {
-                if (screenRotationAnimation.setRotationInTransaction(rotation,
-                        MAX_ANIMATION_DURATION, mService.getTransitionAnimationScaleLocked(),
-                        mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight)) {
-                    mService.scheduleAnimationLocked();
-                }
-            }
-
-            if (rotateSeamlessly) {
-                forAllWindows(w -> {
-                    w.mWinAnimator.seamlesslyRotateWindow(oldRotation, rotation);
-                }, true /* traverseTopToBottom */);
-            }
-
-            mService.mDisplayManagerInternal.performTraversalInTransactionFromWindowManager();
-        } finally {
-            if (!inTransaction) {
-                mService.closeSurfaceTransaction("setRotationUnchecked");
-                if (SHOW_LIGHT_TRANSACTIONS) {
-                    Slog.i(TAG_WM, "<<< CLOSE TRANSACTION setRotationUnchecked");
-                }
+        // NOTE: We disable the rotation in the emulator because
+        //       it doesn't support hardware OpenGL emulation yet.
+        if (CUSTOM_SCREEN_ROTATION && screenRotationAnimation != null
+                && screenRotationAnimation.hasScreenshot()) {
+            if (screenRotationAnimation.setRotation(getPendingTransaction(), rotation,
+                    MAX_ANIMATION_DURATION, mService.getTransitionAnimationScaleLocked(),
+                    mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight)) {
+                mService.scheduleAnimationLocked();
             }
         }
+
+        if (rotateSeamlessly) {
+            forAllWindows(w -> {
+                    w.mWinAnimator.seamlesslyRotateWindow(getPendingTransaction(),
+                            oldRotation, rotation);
+            }, true /* traverseTopToBottom */);
+        }
+
+        mService.mDisplayManagerInternal.performTraversal(getPendingTransaction());
+        scheduleAnimation();
 
         forAllWindows(w -> {
             if (w.mHasSurface && !rotateSeamlessly) {
@@ -2808,7 +2793,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
             if (isDefaultDisplay && (pendingLayoutChanges & FINISH_LAYOUT_REDO_CONFIG) != 0) {
                 if (DEBUG_LAYOUT) Slog.v(TAG, "Computing new config from layout");
-                if (mService.updateOrientationFromAppTokensLocked(true, mDisplayId)) {
+                if (mService.updateOrientationFromAppTokensLocked(mDisplayId)) {
                     setLayoutNeeded();
                     mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, mDisplayId).sendToTarget();
                 }

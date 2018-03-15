@@ -584,10 +584,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void requestDisplayModesInTransactionLocked(
-                int colorMode, int modeId) {
-            if (requestModeInTransactionLocked(modeId) ||
-                    requestColorModeInTransactionLocked(colorMode)) {
+        public void requestDisplayModesLocked(int colorMode, int modeId) {
+            if (requestModeLocked(modeId) ||
+                    requestColorModeLocked(colorMode)) {
                 updateDeviceInfoLocked();
             }
         }
@@ -597,7 +596,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             updateDeviceInfoLocked();
         }
 
-        public boolean requestModeInTransactionLocked(int modeId) {
+        public boolean requestModeLocked(int modeId) {
             if (modeId == 0) {
                 modeId = mDefaultModeId;
             } else if (mSupportedModes.indexOfKey(modeId) < 0) {
@@ -623,7 +622,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             return true;
         }
 
-        public boolean requestColorModeInTransactionLocked(int colorMode) {
+        public boolean requestColorModeLocked(int colorMode) {
             if (mActiveColorMode == colorMode) {
                 return false;
             }

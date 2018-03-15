@@ -239,10 +239,13 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                         | WindowManager.LayoutParams.FLAG_SLIPPERY
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                 PixelFormat.TRANSLUCENT);
-        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
+        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS
+                | WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
+
         if (!DEBUG_SCREENSHOT_ROUNDED_CORNERS) {
             lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
         }
+
         lp.setTitle("ScreenDecorOverlay");
         lp.gravity = Gravity.TOP | Gravity.LEFT;
         lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;

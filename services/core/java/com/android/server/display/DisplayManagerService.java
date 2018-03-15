@@ -74,6 +74,7 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
+import android.view.SurfaceControl;
 
 import com.android.internal.util.Preconditions;
 import com.android.server.AnimationThread;
@@ -457,14 +458,14 @@ public final class DisplayManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    void performTraversalInTransactionFromWindowManagerInternal() {
+    void performTraversalInternal(SurfaceControl.Transaction t) {
         synchronized (mSyncRoot) {
             if (!mPendingTraversal) {
                 return;
             }
             mPendingTraversal = false;
 
-            performTraversalInTransactionLocked();
+            performTraversalLocked(t);
         }
 
         // List is self-synchronized copy-on-write.
@@ -1056,7 +1057,7 @@ public final class DisplayManagerService extends SystemService {
         return changed;
     }
 
-    private void performTraversalInTransactionLocked() {
+    private void performTraversalLocked(SurfaceControl.Transaction t) {
         // Clear all viewports before configuring displays so that we can keep
         // track of which ones we have configured.
         clearViewportsLocked();
@@ -1065,8 +1066,8 @@ public final class DisplayManagerService extends SystemService {
         final int count = mDisplayDevices.size();
         for (int i = 0; i < count; i++) {
             DisplayDevice device = mDisplayDevices.get(i);
-            configureDisplayInTransactionLocked(device);
-            device.performTraversalInTransactionLocked();
+            configureDisplayLocked(t, device);
+            device.performTraversalLocked(t);
         }
 
         // Tell the input system about these new viewports.
@@ -1150,7 +1151,7 @@ public final class DisplayManagerService extends SystemService {
         mVirtualTouchViewports.clear();
     }
 
-    private void configureDisplayInTransactionLocked(DisplayDevice device) {
+    private void configureDisplayLocked(SurfaceControl.Transaction t, DisplayDevice device) {
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         final boolean ownContent = (info.flags & DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY) != 0;
 
@@ -1175,7 +1176,7 @@ public final class DisplayManagerService extends SystemService {
                     + device.getDisplayDeviceInfoLocked());
             return;
         }
-        display.configureDisplayInTransactionLocked(device, info.state == Display.STATE_OFF);
+        display.configureDisplayLocked(t, device, info.state == Display.STATE_OFF);
 
         // Update the viewports if needed.
         if (!mDefaultViewport.valid
@@ -1233,7 +1234,7 @@ public final class DisplayManagerService extends SystemService {
         mHandler.sendMessage(msg);
     }
 
-    // Requests that performTraversalsInTransactionFromWindowManager be called at a
+    // Requests that performTraversals be called at a
     // later time to apply changes to surfaces and displays.
     private void scheduleTraversalLocked(boolean inTraversal) {
         if (!mPendingTraversal && mWindowManagerInternal != null) {
@@ -2031,8 +2032,8 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
-        public void performTraversalInTransactionFromWindowManager() {
-            performTraversalInTransactionFromWindowManagerInternal();
+        public void performTraversal(SurfaceControl.Transaction t) {
+            performTraversalInternal(t);
         }
 
         @Override

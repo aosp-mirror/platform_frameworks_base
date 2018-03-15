@@ -2015,7 +2015,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             removeImmediately();
             // Removing a visible window will effect the computed orientation
             // So just update orientation if needed.
-            if (wasVisible && mService.updateOrientationFromAppTokensLocked(false, displayId)) {
+            if (wasVisible && mService.updateOrientationFromAppTokensLocked(displayId)) {
                 mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayId).sendToTarget();
             }
             mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
