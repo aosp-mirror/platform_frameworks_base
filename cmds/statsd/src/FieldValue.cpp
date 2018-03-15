@@ -48,6 +48,11 @@ bool Field::matches(const Matcher& matcher) const {
         return true;
     }
 
+    if (matcher.hasAllPositionMatcher() &&
+        (mField & (matcher.mMask & kClearAllPositionMatcherMask)) == matcher.mMatcher.getField()) {
+        return true;
+    }
+
     return false;
 }
 
@@ -67,6 +72,10 @@ void translateFieldMatcher(int tag, const FieldMatcher& matcher, int depth, int*
             return;
         }
         switch (matcher.position()) {
+            case Position::ALL:
+                pos[depth] = 0x00;
+                mask[depth] = 0x7f;
+                break;
             case Position::ANY:
                 pos[depth] = 0;
                 mask[depth] = 0;

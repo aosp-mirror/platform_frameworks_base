@@ -54,28 +54,12 @@ static void BM_FilterValue(benchmark::State& state) {
     translateFieldMatcher(field_matcher, &matchers);
 
     while (state.KeepRunning()) {
-        vector<HashableDimensionKey> output;
-        filterValues(matchers, event.getValues(), &output);
-    }
-}
-
-BENCHMARK(BM_FilterValue);
-
-static void BM_FilterValue2(benchmark::State& state) {
-    LogEvent event(1, 100000);
-    FieldMatcher field_matcher;
-    createLogEventAndMatcher(&event, &field_matcher);
-
-    std::vector<Matcher> matchers;
-    translateFieldMatcher(field_matcher, &matchers);
-
-    while (state.KeepRunning()) {
         HashableDimensionKey output;
         filterValues(matchers, event.getValues(), &output);
     }
 }
 
-BENCHMARK(BM_FilterValue2);
+BENCHMARK(BM_FilterValue);
 
 }  //  namespace statsd
 }  //  namespace os

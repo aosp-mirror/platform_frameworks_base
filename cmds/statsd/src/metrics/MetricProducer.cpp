@@ -53,39 +53,17 @@ void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const Lo
         dimensionKeysInCondition.insert(DEFAULT_DIMENSION_KEY);
     }
 
-    if (mContainANYPositionInDimensionsInWhat) {
-        vector<HashableDimensionKey> dimensionInWhatValues;
-        if (!mDimensionsInWhat.empty()) {
-            filterValues(mDimensionsInWhat, event.getValues(), &dimensionInWhatValues);
-        } else {
-            dimensionInWhatValues.push_back(DEFAULT_DIMENSION_KEY);
-        }
-
-        for (const auto& whatDimension : dimensionInWhatValues) {
-            for (const auto& conditionDimensionKey : dimensionKeysInCondition) {
-                onMatchedLogEventInternalLocked(
-                        matcherIndex, MetricDimensionKey(whatDimension, conditionDimensionKey),
-                        conditionKey, condition, event);
-            }
-            if (dimensionKeysInCondition.empty()) {
-                onMatchedLogEventInternalLocked(
-                        matcherIndex, MetricDimensionKey(whatDimension, DEFAULT_DIMENSION_KEY),
-                         conditionKey, condition, event);
-            }
-        }
-    } else {
-        HashableDimensionKey dimensionInWhat;
-        filterValues(mDimensionsInWhat, event.getValues(), &dimensionInWhat);
-        MetricDimensionKey metricKey(dimensionInWhat, DEFAULT_DIMENSION_KEY);
-        for (const auto& conditionDimensionKey : dimensionKeysInCondition) {
-            metricKey.setDimensionKeyInCondition(conditionDimensionKey);
-            onMatchedLogEventInternalLocked(
-                    matcherIndex, metricKey, conditionKey, condition, event);
-        }
-        if (dimensionKeysInCondition.empty()) {
-            onMatchedLogEventInternalLocked(
-                    matcherIndex, metricKey, conditionKey, condition, event);
-        }
+    HashableDimensionKey dimensionInWhat;
+    filterValues(mDimensionsInWhat, event.getValues(), &dimensionInWhat);
+    MetricDimensionKey metricKey(dimensionInWhat, DEFAULT_DIMENSION_KEY);
+    for (const auto& conditionDimensionKey : dimensionKeysInCondition) {
+        metricKey.setDimensionKeyInCondition(conditionDimensionKey);
+        onMatchedLogEventInternalLocked(
+                matcherIndex, metricKey, conditionKey, condition, event);
+    }
+    if (dimensionKeysInCondition.empty()) {
+        onMatchedLogEventInternalLocked(
+                matcherIndex, metricKey, conditionKey, condition, event);
     }
 
  }

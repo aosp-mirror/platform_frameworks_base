@@ -52,8 +52,6 @@ public:
 protected:
     void onMatchedLogEventLocked(const size_t matcherIndex, const LogEvent& event) override;
 
-    void onMatchedLogEventLocked_simple(const size_t matcherIndex, const LogEvent& event);
-
     void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const MetricDimensionKey& eventKey,
             const ConditionKey& conditionKeys, bool condition,
