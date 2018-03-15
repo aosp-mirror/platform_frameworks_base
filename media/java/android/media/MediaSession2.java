@@ -1779,20 +1779,41 @@ public class MediaSession2 implements AutoCloseable {
     }
 
     /**
-     * Skip to the item in the play list.
+     * Skips to the item in the playlist.
+     * <p>
+     * This calls {@link MediaPlaylistAgent#skipToPlaylistItem(MediaItem2)} and the behavior depends
+     * on the playlist agent implementation, especially with the shuffle/repeat mode.
      *
-     * @param item item in the play list you want to play
-     * @throws IllegalArgumentException if the play list is null
-     * @throws NullPointerException if index is outside play list range
+     * @param item The item in the playlist you want to play
+     * @see #getShuffleMode()
+     * @see #getRepeatMode()
      */
     public void skipToPlaylistItem(@NonNull MediaItem2 item) {
         mProvider.skipToPlaylistItem_impl(item);
     }
 
+    /**
+     * Skips to the previous item.
+     * <p>
+     * This calls {@link MediaPlaylistAgent#skipToPreviousItem()} and the behavior depends on the
+     * playlist agent implementation, especially with the shuffle/repeat mode.
+     *
+     * @see #getShuffleMode()
+     * @see #getRepeatMode()
+     **/
     public void skipToPreviousItem() {
         mProvider.skipToPreviousItem_impl();
     }
 
+    /**
+     * Skips to the next item.
+     * <p>
+     * This calls {@link MediaPlaylistAgent#skipToNextItem()} and the behavior depends on the
+     * playlist agent implementation, especially with the shuffle/repeat mode.
+     *
+     * @see #getShuffleMode()
+     * @see #getRepeatMode()
+     */
     public void skipToNextItem() {
         mProvider.skipToNextItem_impl();
     }
