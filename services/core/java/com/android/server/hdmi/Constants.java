@@ -179,25 +179,6 @@ final class Constants {
     static final int MENU_STATE_ACTIVATED = 0;
     static final int MENU_STATE_DEACTIVATED = 1;
 
-    // Audio Format Codes
-    // Refer to CEA Standard (CEA-861-D), Table 37 Audio Format Codes.
-    static final int MSAPI_CODEC_NONE = 0x0;
-    static final int MSAPI_CODEC_LPCM = 0x1;       // Support LPCM
-    static final int MSAPI_CODEC_DD = 0x2;         // Support DD
-    static final int MSAPI_CODEC_MPEG1 = 0x3;      // Support MPEG1
-    static final int MSAPI_CODEC_MP3 = 0x4;        // Support MP3
-    static final int MSAPI_CODEC_MPEG2 = 0x5;      // Support MPEG2
-    static final int MSAPI_CODEC_AAC = 0x6;        // Support AAC
-    static final int MSAPI_CODEC_DTS = 0x7;        // Support DTS
-    static final int MSAPI_CODEC_ATRAC = 0x8;      // Support ATRAC
-    static final int MSAPI_CODEC_ONEBITAUDIO = 0x9;// Support One-Bit Audio
-    static final int MSAPI_CODEC_DDP = 0xA;        // Support DDP
-    static final int MSAPI_CODEC_DTSHD = 0xB;      // Support DTSHD
-    static final int MSAPI_CODEC_TRUEHD = 0xC;     // Support MLP/TRUE-HD
-    static final int MSAPI_CODEC_DST = 0xD;        // Support DST
-    static final int MSAPI_CODEC_WMAPRO = 0xE;     // Support WMA-Pro
-    static final int MSAPI_CODEC_MAX = 0xF;
-
     // Bit mask used to get the routing path of the top level device.
     // When &'d with the path 1.2.2.0 (0x1220), for instance, gives 1.0.0.0.
     static final int ROUTING_PATH_TOP_MASK = 0xF000;
@@ -270,9 +251,6 @@ final class Constants {
     // Passes the language used in the system when updated. The value to use is the 3 byte
     // code as defined in ISO/FDIS 639-2.
     static final int OPTION_CEC_SET_LANGUAGE = 5;
-
-    // If set to enabled, system support multichannels.
-    static final int OPTION_CEC_SUPPORT_MULTICHANNELS = 6;
 
     // If set to disabled, TV does not switch ports when mobile device is connected.
     static final int OPTION_MHL_INPUT_SWITCHING = 101;
