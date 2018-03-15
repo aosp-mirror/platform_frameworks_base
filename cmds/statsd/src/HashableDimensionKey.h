@@ -122,16 +122,13 @@ android::hash_t hashDimension(const HashableDimensionKey& key);
 /**
  * Creating HashableDimensionKeys from FieldValues using matcher.
  *
- * This function may make modifications to the Field if the matcher has Position=LAST or ANY in
- * it. This is because: for example, when we create dimension from last uid in attribution chain,
+ * This function may make modifications to the Field if the matcher has Position=FIRST,LAST or ALL
+ * in it. This is because: for example, when we create dimension from last uid in attribution chain,
  * In one event, uid 1000 is at position 5 and it's the last
  * In another event, uid 1000 is at position 6, and it's the last
  * these 2 events should be mapped to the same dimension.  So we will remove the original position
  * from the dimension key for the uid field (by applying 0x80 bit mask).
  */
-bool filterValues(const std::vector<Matcher>& matcherFields, const std::vector<FieldValue>& values,
-                  std::vector<HashableDimensionKey>* output);
-// This function is used when there is at most one output dimension key. (no ANY matcher)
 bool filterValues(const std::vector<Matcher>& matcherFields, const std::vector<FieldValue>& values,
                   HashableDimensionKey* output);
 

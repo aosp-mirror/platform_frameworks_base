@@ -45,19 +45,40 @@ TEST(AtomMatcherTest, TestFieldTranslation) {
 
     const auto& matcher12 = output[0];
     EXPECT_EQ((int32_t)10, matcher12.mMatcher.getTag());
-    EXPECT_EQ((int32_t)0x2010001, matcher12.mMatcher.getField());
+    EXPECT_EQ((int32_t)0x02010001, matcher12.mMatcher.getField());
     EXPECT_EQ((int32_t)0xff7f007f, matcher12.mMask);
 }
 
-TEST(AtomMatcherTest, TestFilter) {
+TEST(AtomMatcherTest, TestFieldTranslation_ALL) {
     FieldMatcher matcher1;
     matcher1.set_field(10);
     FieldMatcher* child = matcher1.add_child();
     child->set_field(1);
-    child->set_position(Position::ANY);
+    child->set_position(Position::ALL);
 
     child = child->add_child();
     child->set_field(1);
+
+    vector<Matcher> output;
+    translateFieldMatcher(matcher1, &output);
+
+    EXPECT_EQ((size_t)1, output.size());
+
+    const auto& matcher12 = output[0];
+    EXPECT_EQ((int32_t)10, matcher12.mMatcher.getTag());
+    EXPECT_EQ((int32_t)0x02010001, matcher12.mMatcher.getField());
+    EXPECT_EQ((int32_t)0xff7f7f7f, matcher12.mMask);
+}
+
+TEST(AtomMatcherTest, TestFilter_ALL) {
+    FieldMatcher matcher1;
+    matcher1.set_field(10);
+    FieldMatcher* child = matcher1.add_child();
+    child->set_field(1);
+    child->set_position(Position::ALL);
+
+    child->add_child()->set_field(1);
+    child->add_child()->set_field(2);
 
     child = matcher1.add_child();
     child->set_field(2);
@@ -85,32 +106,28 @@ TEST(AtomMatcherTest, TestFilter) {
     event.write("some value");
     // Convert to a LogEvent
     event.init();
-    vector<HashableDimensionKey> output;
+    HashableDimensionKey output;
 
     filterValues(matchers, event.getValues(), &output);
 
-    EXPECT_EQ((size_t)(3), output.size());
+    EXPECT_EQ((size_t)7, output.getValues().size());
+    EXPECT_EQ((int32_t)0x02010101, output.getValues()[0].mField.getField());
+    EXPECT_EQ((int32_t)1111, output.getValues()[0].mValue.int_value);
+    EXPECT_EQ((int32_t)0x02010102, output.getValues()[1].mField.getField());
+    EXPECT_EQ("location1", output.getValues()[1].mValue.str_value);
 
-    const auto& key1 = output[0];
-    EXPECT_EQ((size_t)2, key1.getValues().size());
-    EXPECT_EQ((int32_t)0x02010001, key1.getValues()[0].mField.getField());
-    EXPECT_EQ((int32_t)1111, key1.getValues()[0].mValue.int_value);
-    EXPECT_EQ((int32_t)0x00020000, key1.getValues()[1].mField.getField());
-    EXPECT_EQ("some value", key1.getValues()[1].mValue.str_value);
+    EXPECT_EQ((int32_t)0x02010201, output.getValues()[2].mField.getField());
+    EXPECT_EQ((int32_t)2222, output.getValues()[2].mValue.int_value);
+    EXPECT_EQ((int32_t)0x02010202, output.getValues()[3].mField.getField());
+    EXPECT_EQ("location2", output.getValues()[3].mValue.str_value);
 
-    const auto& key2 = output[1];
-    EXPECT_EQ((size_t)2, key2.getValues().size());
-    EXPECT_EQ((int32_t)0x02010001, key2.getValues()[0].mField.getField());
-    EXPECT_EQ((int32_t)2222, key2.getValues()[0].mValue.int_value);
-    EXPECT_EQ((int32_t)0x00020000, key2.getValues()[1].mField.getField());
-    EXPECT_EQ("some value", key2.getValues()[1].mValue.str_value);
+    EXPECT_EQ((int32_t)0x02010301, output.getValues()[4].mField.getField());
+    EXPECT_EQ((int32_t)3333, output.getValues()[4].mValue.int_value);
+    EXPECT_EQ((int32_t)0x02010302, output.getValues()[5].mField.getField());
+    EXPECT_EQ("location3", output.getValues()[5].mValue.str_value);
 
-    const auto& key3 = output[2];
-    EXPECT_EQ((size_t)2, key3.getValues().size());
-    EXPECT_EQ((int32_t)0x02010001, key3.getValues()[0].mField.getField());
-    EXPECT_EQ((int32_t)3333, key3.getValues()[0].mValue.int_value);
-    EXPECT_EQ((int32_t)0x00020000, key3.getValues()[1].mField.getField());
-    EXPECT_EQ("some value", key3.getValues()[1].mValue.str_value);
+    EXPECT_EQ((int32_t)0x00020000, output.getValues()[6].mField.getField());
+    EXPECT_EQ("some value", output.getValues()[6].mValue.str_value);
 }
 
 TEST(AtomMatcherTest, TestSubDimension) {

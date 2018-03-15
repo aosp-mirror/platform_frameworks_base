@@ -163,7 +163,8 @@ private:
 
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensions);
     FRIEND_TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks);
-    FRIEND_TEST(AttributionE2eTest, TestAttributionMatchAndSlice);
+    FRIEND_TEST(AttributionE2eTest, TestAttributionMatchAndSliceByFirstUid);
+    FRIEND_TEST(AttributionE2eTest, TestAttributionMatchAndSliceByChain);
     FRIEND_TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent);
     FRIEND_TEST(DimensionInConditionE2eTest, TestCreateCountMetric_NoLink_OR_CombinationCondition);
     FRIEND_TEST(DimensionInConditionE2eTest, TestCreateCountMetric_Link_OR_CombinationCondition);
