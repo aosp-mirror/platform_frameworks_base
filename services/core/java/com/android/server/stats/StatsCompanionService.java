@@ -720,11 +720,13 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
         mKernelUidCpuFreqTimeReader.readAbsolute((uid, cpuFreqTimeMs) -> {
             for (int freqIndex = 0; freqIndex < cpuFreqTimeMs.length; ++freqIndex) {
-                StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 3);
-                e.writeInt(uid);
-                e.writeInt(freqIndex);
-                e.writeLong(cpuFreqTimeMs[freqIndex]);
-                pulledData.add(e);
+                if(cpuFreqTimeMs[freqIndex] != 0) {
+                    StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 3);
+                    e.writeInt(uid);
+                    e.writeInt(freqIndex);
+                    e.writeLong(cpuFreqTimeMs[freqIndex]);
+                    pulledData.add(e);
+                }
             }
         });
     }
