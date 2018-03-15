@@ -51,6 +51,7 @@ public class StackScrollAlgorithm {
     private boolean mClipNotificationScrollToTop;
     private int mStatusBarHeight;
     private float mHeadsUpInset;
+    private int mPinnedZTranslationExtra;
 
     public StackScrollAlgorithm(Context context) {
         initView(context);
@@ -71,6 +72,8 @@ public class StackScrollAlgorithm {
         mClipNotificationScrollToTop = res.getBoolean(R.bool.config_clipNotificationScrollToTop);
         mHeadsUpInset = mStatusBarHeight + res.getDimensionPixelSize(
                 R.dimen.heads_up_status_bar_padding);
+        mPinnedZTranslationExtra = res.getDimensionPixelSize(
+                R.dimen.heads_up_pinned_elevation);
     }
 
     public void getStackScrollState(AmbientState ambientState, StackScrollState resultState) {
@@ -595,6 +598,13 @@ public class StackScrollAlgorithm {
         } else {
             childViewState.zTranslation = baseZ;
         }
+
+        // We need to scrim the notification more from its surrounding content when we are pinned,
+        // and we therefore elevate it higher.
+        // We can use the headerVisibleAmount for this, since the value nicely goes from 0 to 1 when
+        // expanding after which we have a normal elevation again.
+        childViewState.zTranslation += (1.0f - child.getHeaderVisibleAmount())
+                * mPinnedZTranslationExtra;
         return childrenOnTop;
     }
 

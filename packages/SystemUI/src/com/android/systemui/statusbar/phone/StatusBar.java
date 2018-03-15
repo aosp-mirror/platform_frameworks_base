@@ -903,9 +903,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         ScrimView scrimBehind = mStatusBarWindow.findViewById(R.id.scrim_behind);
         ScrimView scrimInFront = mStatusBarWindow.findViewById(R.id.scrim_in_front);
-        View headsUpScrim = mStatusBarWindow.findViewById(R.id.heads_up_scrim);
         mScrimController = SystemUIFactory.getInstance().createScrimController(mLightBarController,
-                scrimBehind, scrimInFront, headsUpScrim, mLockscreenWallpaper,
+                scrimBehind, scrimInFront, mLockscreenWallpaper,
                 scrimsVisible -> {
                     if (mStatusBarWindowManager != null) {
                         mStatusBarWindowManager.setScrimsVisibility(scrimsVisible);
@@ -920,7 +919,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             mBackdrop.setOnVisibilityChangedRunnable(runnable);
             runnable.run();
         }
-        mHeadsUpManager.addListener(mScrimController);
         mStackScroller.setScrimController(mScrimController);
         mDozeScrimController = new DozeScrimController(mScrimController, context);
 
@@ -1077,7 +1075,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             mReinflateNotificationsOnUserSwitched = true;
         }
         // end old BaseStatusBar.onDensityOrFontScaleChanged().
-        mScrimController.onDensityOrFontScaleChanged();
         // TODO: Remove this.
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.onDensityOrFontScaleChanged();

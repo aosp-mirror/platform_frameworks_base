@@ -390,6 +390,10 @@ public abstract class ExpandableView extends FrameLayout {
         }
     }
 
+    public float getHeaderVisibleAmount() {
+        return 1.0f;
+    }
+
     protected boolean shouldClipToActualHeight() {
         return true;
     }

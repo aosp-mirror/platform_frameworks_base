@@ -113,6 +113,9 @@
     <!-- padding between the heads up and the statusbar -->
     <dimen name="heads_up_status_bar_padding">8dp</dimen>
 
+    <!-- heads up elevation that is added if the view is pinned -->
+    <dimen name="heads_up_pinned_elevation">16dp</dimen>
+
     <!-- Height of a messaging notifications with actions at least. Not that this is an upper bound
          and the notification won't use this much, but is measured with wrap_content -->
     <dimen name="notification_messaging_actions_min_height">196dp</dimen>
@@ -454,7 +457,6 @@
     <dimen name="keyguard_clock_notifications_margin">30dp</dimen>
     <!-- Minimum margin between clock and status bar -->
     <dimen name="keyguard_clock_top_margin">36dp</dimen>
-    <dimen name="heads_up_scrim_height">250dp</dimen>
 
     <item name="scrim_behind_alpha" format="float" type="dimen">0.62</item>
 

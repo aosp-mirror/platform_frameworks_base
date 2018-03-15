@@ -51,14 +51,6 @@
         sysui:ignoreRightInset="true"
         />
 
-    <com.android.systemui.statusbar.AlphaOptimizedView
-        android:id="@+id/heads_up_scrim"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/heads_up_scrim_height"
-        android:background="@drawable/heads_up_scrim"
-        sysui:ignoreRightInset="true"
-        android:importantForAccessibility="no"/>
-
     <FrameLayout
         android:id="@+id/status_bar_container"
         android:layout_width="match_parent"

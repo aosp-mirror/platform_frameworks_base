@@ -552,7 +552,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
-    @VisibleForTesting
+    @Override
     public float getHeaderVisibleAmount() {
         return mHeaderVisibleAmount;
     }
