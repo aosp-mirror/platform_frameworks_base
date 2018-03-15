@@ -868,8 +868,12 @@ include $(BUILD_STATIC_JAVA_LIBRARY)
 
 $(eval $(call copy-one-file,frameworks/base/config/hiddenapi-blacklist.txt,\
                             $(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST)))
-$(eval $(call copy-one-file,frameworks/base/config/hiddenapi-light-greylist.txt,\
-                            $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST)))
+
+# Temporarily merge light greylist from two files. Vendor list will become dark
+# grey once we remove the UI toast.
+$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): frameworks/base/config/hiddenapi-light-greylist.txt \
+                                               frameworks/base/config/hiddenapi-vendor-list.txt
+	sort $^ > $@
 
 # Generate dark greylist as private API minus (blacklist plus light greylist).
 
