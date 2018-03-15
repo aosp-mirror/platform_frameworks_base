@@ -104,11 +104,16 @@ public class FullBackupUtils {
         printer.println((installerName != null) ? installerName : "");
 
         printer.println(withApk ? "1" : "0");
-        if (pkg.signatures == null) {
+
+        // write the signature block
+        Signature[][] signingHistory = pkg.signingCertificateHistory;
+        if (signingHistory == null) {
             printer.println("0");
         } else {
-            printer.println(Integer.toString(pkg.signatures.length));
-            for (Signature sig : pkg.signatures) {
+            // retrieve the newest sigs to write
+            Signature[] signatures = signingHistory[signingHistory.length - 1];
+            printer.println(Integer.toString(signatures.length));
+            for (Signature sig : signatures) {
                 printer.println(sig.toCharsString());
             }
         }

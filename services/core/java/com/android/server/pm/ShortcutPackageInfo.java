@@ -18,10 +18,13 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ShortcutInfo;
+import android.content.pm.Signature;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.LocalServices;
 import com.android.server.backup.BackupUtils;
 
 import libcore.util.HexEncoding;
@@ -137,7 +140,8 @@ class ShortcutPackageInfo {
 
     //@DisabledReason
     public int canRestoreTo(ShortcutService s, PackageInfo currentPackage, boolean anyVersionOkay) {
-        if (!BackupUtils.signaturesMatch(mSigHashes, currentPackage)) {
+        PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+        if (!BackupUtils.signaturesMatch(mSigHashes, currentPackage, pmi)) {
             Slog.w(TAG, "Can't restore: Package signature mismatch");
             return ShortcutInfo.DISABLED_REASON_SIGNATURE_MISMATCH;
         }
@@ -159,13 +163,15 @@ class ShortcutPackageInfo {
     public static ShortcutPackageInfo generateForInstalledPackageForTest(
             ShortcutService s, String packageName, @UserIdInt int packageUserId) {
         final PackageInfo pi = s.getPackageInfoWithSignatures(packageName, packageUserId);
-        if (pi.signatures == null || pi.signatures.length == 0) {
+        // retrieve the newest sigs
+        Signature[][] signingHistory = pi.signingCertificateHistory;
+        if (signingHistory == null || signingHistory.length == 0) {
             Slog.e(TAG, "Can't get signatures: package=" + packageName);
             return null;
         }
+        Signature[] signatures = signingHistory[signingHistory.length - 1];
         final ShortcutPackageInfo ret = new ShortcutPackageInfo(pi.getLongVersionCode(),
-                pi.lastUpdateTime, BackupUtils.hashSignatureArray(pi.signatures),
-                /* shadow=*/ false);
+                pi.lastUpdateTime, BackupUtils.hashSignatureArray(signatures), /* shadow=*/ false);
 
         ret.mBackupSourceBackupAllowed = s.shouldBackupApp(pi);
         ret.mBackupSourceVersionCode = pi.getLongVersionCode();
@@ -185,7 +191,15 @@ class ShortcutPackageInfo {
             Slog.w(TAG, "Package not found: " + pkg.getPackageName());
             return;
         }
-        mSigHashes = BackupUtils.hashSignatureArray(pi.signatures);
+        // retrieve the newest sigs
+        Signature[][] signingHistory = pi.signingCertificateHistory;
+        if (signingHistory == null || signingHistory.length == 0) {
+            Slog.w(TAG, "Not refreshing signature for " + pkg.getPackageName()
+                    + " since it appears to have no signature history.");
+            return;
+        }
+        Signature[] signatures = signingHistory[signingHistory.length - 1];
+        mSigHashes = BackupUtils.hashSignatureArray(signatures);
     }
 
     public void saveToXml(ShortcutService s, XmlSerializer out, boolean forBackup)
@@ -221,7 +235,6 @@ class ShortcutPackageInfo {
 
     public void loadFromXml(XmlPullParser parser, boolean fromBackup)
             throws IOException, XmlPullParserException {
-
         // Don't use the version code from the backup file.
         final long versionCode = ShortcutService.parseLongAttribute(parser, ATTR_VERSION,
                 ShortcutInfo.VERSION_CODE_UNKNOWN);

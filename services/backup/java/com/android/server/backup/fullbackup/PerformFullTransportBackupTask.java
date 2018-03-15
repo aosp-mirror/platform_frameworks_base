@@ -181,7 +181,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         for (String pkg : whichPackages) {
             try {
                 PackageManager pm = backupManagerService.getPackageManager();
-                PackageInfo info = pm.getPackageInfo(pkg, PackageManager.GET_SIGNATURES);
+                PackageInfo info = pm.getPackageInfo(pkg, PackageManager.GET_SIGNING_CERTIFICATES);
                 mCurrentPackage = info;
                 if (!AppBackupUtils.appIsEligibleForBackup(info.applicationInfo, pm)) {
                     // Cull any packages that have indicated that backups are not permitted,
