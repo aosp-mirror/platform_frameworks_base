@@ -29,6 +29,7 @@
 #include "android_util_Binder.h"
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
 
 #include <android/hardware/cas/native/1.0/IDescrambler.h>
 
@@ -98,6 +99,13 @@ static struct {
     jint AesCbc;
 } gCryptoModes;
 
+static struct {
+    jclass capsClazz;
+    jmethodID capsCtorId;
+    jclass profileLevelClazz;
+    jfieldID profileField;
+    jfieldID levelField;
+} gCodecInfo;
 
 struct fields_t {
     jfieldID context;
@@ -621,6 +629,103 @@ status_t JMediaCodec::getName(JNIEnv *env, jstring *nameStr) const {
     }
 
     *nameStr = env->NewStringUTF(name.c_str());
+
+    return OK;
+}
+
+static jobject getCodecCapabilitiesObject(
+        JNIEnv *env, const char *mime, bool isEncoder,
+        const sp<MediaCodecInfo::Capabilities> &capabilities) {
+    Vector<MediaCodecInfo::ProfileLevel> profileLevels;
+    Vector<uint32_t> colorFormats;
+
+    sp<AMessage> defaultFormat = new AMessage();
+    defaultFormat->setString("mime", mime);
+
+    capabilities->getSupportedColorFormats(&colorFormats);
+    capabilities->getSupportedProfileLevels(&profileLevels);
+    uint32_t flags = capabilities->getFlags();
+    sp<AMessage> details = capabilities->getDetails();
+
+    jobject defaultFormatObj = NULL;
+    if (ConvertMessageToMap(env, defaultFormat, &defaultFormatObj)) {
+        return NULL;
+    }
+    ScopedLocalRef<jobject> defaultFormatRef(env, defaultFormatObj);
+
+    jobject detailsObj = NULL;
+    if (ConvertMessageToMap(env, details, &detailsObj)) {
+        return NULL;
+    }
+    ScopedLocalRef<jobject> detailsRef(env, detailsObj);
+
+    ScopedLocalRef<jobjectArray> profileLevelArray(env, env->NewObjectArray(
+            profileLevels.size(), gCodecInfo.profileLevelClazz, NULL));
+
+    for (size_t i = 0; i < profileLevels.size(); ++i) {
+        const MediaCodecInfo::ProfileLevel &src = profileLevels.itemAt(i);
+
+        ScopedLocalRef<jobject> srcRef(env, env->AllocObject(
+                gCodecInfo.profileLevelClazz));
+
+        env->SetIntField(srcRef.get(), gCodecInfo.profileField, src.mProfile);
+        env->SetIntField(srcRef.get(), gCodecInfo.levelField, src.mLevel);
+
+        env->SetObjectArrayElement(profileLevelArray.get(), i, srcRef.get());
+    }
+
+    ScopedLocalRef<jintArray> colorFormatsArray(
+            env, env->NewIntArray(colorFormats.size()));
+    for (size_t i = 0; i < colorFormats.size(); ++i) {
+        jint val = colorFormats.itemAt(i);
+        env->SetIntArrayRegion(colorFormatsArray.get(), i, 1, &val);
+    }
+
+    return env->NewObject(
+            gCodecInfo.capsClazz, gCodecInfo.capsCtorId,
+            profileLevelArray.get(), colorFormatsArray.get(), isEncoder, flags,
+            defaultFormatRef.get(), detailsRef.get());
+}
+
+status_t JMediaCodec::getCodecInfo(JNIEnv *env, jobject *codecInfoObject) const {
+    sp<MediaCodecInfo> codecInfo;
+
+    status_t err = mCodec->getCodecInfo(&codecInfo);
+
+    if (err != OK) {
+        return err;
+    }
+
+    ScopedLocalRef<jstring> nameObject(env,
+            env->NewStringUTF(codecInfo->getCodecName()));
+
+    bool isEncoder = codecInfo->isEncoder();
+
+    Vector<AString> mimes;
+    codecInfo->getSupportedMimes(&mimes);
+
+    ScopedLocalRef<jobjectArray> capsArrayObj(env,
+        env->NewObjectArray(mimes.size(), gCodecInfo.capsClazz, NULL));
+
+    for (size_t i = 0; i < mimes.size(); i++) {
+        const sp<MediaCodecInfo::Capabilities> caps =
+                codecInfo->getCapabilitiesFor(mimes[i].c_str());
+
+        ScopedLocalRef<jobject> capsObj(env, getCodecCapabilitiesObject(
+                env, mimes[i].c_str(), isEncoder, caps));
+
+        env->SetObjectArrayElement(capsArrayObj.get(), i, capsObj.get());
+    }
+
+    ScopedLocalRef<jclass> codecInfoClazz(env,
+            env->FindClass("android/media/MediaCodecInfo"));
+    CHECK(codecInfoClazz.get() != NULL);
+
+    jmethodID codecInfoCtorID = env->GetMethodID(codecInfoClazz.get(), "<init>",
+            "(Ljava/lang/String;Z[Landroid/media/MediaCodecInfo$CodecCapabilities;)V");
+
+    *codecInfoObject = env->NewObject(codecInfoClazz.get(), codecInfoCtorID,
+            nameObject.get(), isEncoder, capsArrayObj.get());
 
     return OK;
 }
@@ -1665,6 +1770,29 @@ static jobject android_media_MediaCodec_getName(
     return NULL;
 }
 
+static jobject android_media_MediaCodec_getOwnCodecInfo(
+        JNIEnv *env, jobject thiz) {
+    ALOGV("android_media_MediaCodec_getOwnCodecInfo");
+
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION);
+        return NULL;
+    }
+
+    jobject codecInfoObj;
+    status_t err = codec->getCodecInfo(env, &codecInfoObj);
+
+    if (err == OK) {
+        return codecInfoObj;
+    }
+
+    throwExceptionAsNecessary(env, err);
+
+    return NULL;
+}
+
 static jobject
 android_media_MediaCodec_native_getMetrics(JNIEnv *env, jobject thiz)
 {
@@ -1877,6 +2005,28 @@ static void android_media_MediaCodec_native_init(JNIEnv *env) {
     field = env->GetFieldID(clazz.get(), "mPersistentObject", "J");
     CHECK(field != NULL);
     gPersistentSurfaceClassInfo.mPersistentObject = field;
+
+    clazz.reset(env->FindClass("android/media/MediaCodecInfo$CodecCapabilities"));
+    CHECK(clazz.get() != NULL);
+    gCodecInfo.capsClazz = (jclass)env->NewGlobalRef(clazz.get());
+
+    method = env->GetMethodID(clazz.get(), "<init>",
+            "([Landroid/media/MediaCodecInfo$CodecProfileLevel;[IZI"
+            "Ljava/util/Map;Ljava/util/Map;)V");
+    CHECK(method != NULL);
+    gCodecInfo.capsCtorId = method;
+
+    clazz.reset(env->FindClass("android/media/MediaCodecInfo$CodecProfileLevel"));
+    CHECK(clazz.get() != NULL);
+    gCodecInfo.profileLevelClazz = (jclass)env->NewGlobalRef(clazz.get());
+
+    field = env->GetFieldID(clazz.get(), "profile", "I");
+    CHECK(field != NULL);
+    gCodecInfo.profileField = field;
+
+    field = env->GetFieldID(clazz.get(), "level", "I");
+    CHECK(field != NULL);
+    gCodecInfo.levelField = field;
 }
 
 static void android_media_MediaCodec_native_setup(
@@ -2001,6 +2151,9 @@ static const JNINativeMethod gMethods[] = {
 
     { "getName", "()Ljava/lang/String;",
       (void *)android_media_MediaCodec_getName },
+
+    { "getOwnCodecInfo", "()Landroid/media/MediaCodecInfo;",
+        (void *)android_media_MediaCodec_getOwnCodecInfo },
 
     { "native_getMetrics", "()Landroid/os/PersistableBundle;",
       (void *)android_media_MediaCodec_native_getMetrics},
