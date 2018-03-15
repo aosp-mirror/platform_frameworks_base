@@ -147,6 +147,8 @@ public final class RangingResult implements Parcelable {
      * @return The distance (in mm) to the device specified by {@link #getMacAddress()} or
      * {@link #getPeerHandle()}.
      * <p>
+     * Note: the measured distance may be negative for very close devices.
+     * <p>
      * Only valid if {@link #getStatus()} returns {@link #STATUS_SUCCESS}, otherwise will throw an
      * exception.
      */
