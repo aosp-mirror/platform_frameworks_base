@@ -579,6 +579,7 @@
   <java-symbol type="string" name="RestrictedOnEmergencyTitle" />
   <java-symbol type="string" name="RestrictedOnNormalTitle" />
   <java-symbol type="string" name="RestrictedStateContent" />
+  <java-symbol type="string" name="RestrictedStateContentMsimTemplate" />
   <java-symbol type="string" name="notification_channel_network_alert" />
   <java-symbol type="string" name="notification_channel_call_forward" />
   <java-symbol type="string" name="notification_channel_emergency_callback" />
@@ -2029,6 +2030,10 @@
   <java-symbol type="string" name="mmcc_imsi_unknown_in_hlr" />
   <java-symbol type="string" name="mmcc_illegal_ms" />
   <java-symbol type="string" name="mmcc_illegal_me" />
+  <java-symbol type="string" name="mmcc_authentication_reject_msim_template" />
+  <java-symbol type="string" name="mmcc_imsi_unknown_in_hlr_msim_template" />
+  <java-symbol type="string" name="mmcc_illegal_ms_msim_template" />
+  <java-symbol type="string" name="mmcc_illegal_me_msim_template" />
   <java-symbol type="string" name="notification_listener_binding_label" />
   <java-symbol type="string" name="vr_listener_binding_label" />
   <java-symbol type="string" name="condition_provider_service_binding_label" />
