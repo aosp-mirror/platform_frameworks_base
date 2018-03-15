@@ -5503,6 +5503,10 @@ message MetricsEvent {
     // OS: P
     ACTION_MANAGE_NOTIFICATIONS = 1358;
 
+    // This value should never appear in log outputs - it is reserved for
+    // internal platform metrics use.
+    RESERVED_FOR_LOGBUILDER_LATENCY_MILLIS = 1359;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
