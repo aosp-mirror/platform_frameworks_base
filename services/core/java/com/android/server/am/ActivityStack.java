@@ -5283,6 +5283,14 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     boolean shouldSleepActivities() {
         final ActivityDisplay display = getDisplay();
+
+        // Do not sleep activities in this stack if we're marked as focused and the keyguard
+        // is in the process of going away.
+        if (mStackSupervisor.getFocusedStack() == this
+                && mStackSupervisor.getKeyguardController().isKeyguardGoingAway()) {
+            return false;
+        }
+
         return display != null ? display.isSleeping() : mService.isSleepingLocked();
     }
 
