@@ -232,6 +232,7 @@ import com.android.systemui.statusbar.policy.PreviewInflater;
 import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.util.NotificationChannels;
 import com.android.systemui.volume.VolumeComponent;
@@ -407,6 +408,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationEntryManager mEntryManager;
     protected NotificationViewHierarchyManager mViewHierarchyManager;
     protected AppOpsListener mAppOpsListener;
+    private ZenModeController mZenController;
 
     /**
      * Helper that is responsible for showing the right toast when a disallowed activity operation
@@ -626,6 +628,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mViewHierarchyManager = Dependency.get(NotificationViewHierarchyManager.class);
         mAppOpsListener = Dependency.get(AppOpsListener.class);
         mAppOpsListener.setUpWithPresenter(this, mEntryManager);
+        mZenController = Dependency.get(ZenModeController.class);
 
         mColorExtractor = Dependency.get(SysuiColorExtractor.class);
         mColorExtractor.addOnColorsChangedListener(this);
@@ -1166,6 +1169,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         mEmptyShadeView = (EmptyShadeView) LayoutInflater.from(mContext).inflate(
                 R.layout.status_bar_no_notifications, mStackScroller, false);
+        mEmptyShadeView.setText(R.string.empty_shade_text);
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
     }
 
@@ -1498,6 +1502,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         return entry.row.getParent() instanceof NotificationStackScrollLayout;
     }
 
+    public boolean areNotificationsHidden() {
+        return mZenController.areNotificationsHiddenInShade();
+    }
 
     public void requestNotificationUpdate() {
         mEntryManager.updateNotifications();

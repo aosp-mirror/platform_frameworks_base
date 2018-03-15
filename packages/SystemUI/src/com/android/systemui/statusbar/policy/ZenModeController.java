@@ -35,6 +35,7 @@ public interface ZenModeController extends CallbackController<Callback> {
     boolean isCountdownConditionSupported();
     int getCurrentUser();
     boolean isVolumeRestricted();
+    boolean areNotificationsHiddenInShade();
 
     public static interface Callback {
         default void onZenChanged(int zen) {}
