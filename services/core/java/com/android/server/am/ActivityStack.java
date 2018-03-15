@@ -4501,11 +4501,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return hasVisibleActivities;
     }
 
-    private void updateTransitLocked(int transit, ActivityRecord starting,
-            ActivityOptions options) {
+    private void updateTransitLocked(int transit, ActivityOptions options) {
         if (options != null) {
-            if (starting != null && !starting.isState(RESUMED)) {
-                starting.updateOptionsLocked(options);
+            ActivityRecord r = topRunningActivityLocked();
+            if (r != null && !r.isState(RESUMED)) {
+                r.updateOptionsLocked(options);
             } else {
                 ActivityOptions.abort(options);
             }
@@ -4542,9 +4542,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
     }
 
-    final void moveTaskToFrontLocked(TaskRecord tr, ActivityRecord starting,
-            boolean noAnimation, ActivityOptions options, AppTimeTracker timeTracker,
-            String reason) {
+    final void moveTaskToFrontLocked(TaskRecord tr, boolean noAnimation, ActivityOptions options,
+            AppTimeTracker timeTracker, String reason) {
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "moveTaskToFront: " + tr);
 
         final ActivityStack topStack = getDisplay().getTopStack();
@@ -4556,7 +4555,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (noAnimation) {
                 ActivityOptions.abort(options);
             } else {
-                updateTransitLocked(TRANSIT_TASK_TO_FRONT, starting, options);
+                updateTransitLocked(TRANSIT_TASK_TO_FRONT, options);
             }
             return;
         }
@@ -4594,7 +4593,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             }
             ActivityOptions.abort(options);
         } else {
-            updateTransitLocked(TRANSIT_TASK_TO_FRONT, starting, options);
+            updateTransitLocked(TRANSIT_TASK_TO_FRONT, options);
         }
         // If a new task is moved to the front, then mark the existing top activity as supporting
         // picture-in-picture while paused only if the task would not be considered an oerlay on top
