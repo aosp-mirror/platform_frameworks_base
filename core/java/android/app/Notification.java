@@ -763,6 +763,11 @@ public class Notification implements Parcelable
     public static final String CATEGORY_CALL = "call";
 
     /**
+     * Notification category: map turn-by-turn navigation.
+     */
+    public static final String CATEGORY_NAVIGATION = "navigation";
+
+    /**
      * Notification category: incoming direct message (SMS, instant message, etc.).
      */
     public static final String CATEGORY_MESSAGE = "msg";
@@ -833,6 +838,27 @@ public class Notification implements Parcelable
      * Notification category: user-scheduled reminder.
      */
     public static final String CATEGORY_REMINDER = "reminder";
+
+    /**
+     * Notification category: extreme car emergencies.
+     * @hide
+     */
+    @SystemApi
+    public static final String CATEGORY_CAR_EMERGENCY = "car_emergency";
+
+    /**
+     * Notification category: car warnings.
+     * @hide
+     */
+    @SystemApi
+    public static final String CATEGORY_CAR_WARNING = "car_warning";
+
+    /**
+     * Notification category: general car system information.
+     * @hide
+     */
+    @SystemApi
+    public static final String CATEGORY_CAR_INFORMATION = "car_information";
 
     /**
      * One of the predefined notification categories (see the <code>CATEGORY_*</code> constants)
