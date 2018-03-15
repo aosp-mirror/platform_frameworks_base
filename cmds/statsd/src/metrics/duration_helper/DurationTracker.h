@@ -55,7 +55,6 @@ struct DurationBucket {
     uint64_t mBucketStartNs;
     uint64_t mBucketEndNs;
     uint64_t mDuration;
-    uint64_t mBucketNum;
 };
 
 class DurationTracker {

@@ -51,4 +51,12 @@ interface IRecentsAnimationController {
      * and then enable it mid-animation to start receiving touch events.
      */
     void setInputConsumerEnabled(boolean enabled);
+
+    /**
+    * Informs the system whether the animation targets passed into
+    * IRecentsAnimationRunner.onAnimationStart are currently behind the system bars. If they are,
+    * they can control the SystemUI flags, otherwise the SystemUI flags from home activity will be
+    * taken.
+    */
+    void setAnimationTargetsBehindSystemBars(boolean behindSystemBars);
 }

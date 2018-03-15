@@ -2707,9 +2707,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     if (DEBUG_STATES) Slog.v(TAG_STATES, "Resume failed; resetting state to "
                             + lastState + ": " + next);
                     next.setState(lastState, "resumeTopActivityInnerLocked");
-                    if (lastStack != null) {
+
+                    // lastResumedActivity being non-null implies there is a lastStack present.
+                    if (lastResumedActivity != null) {
                         lastResumedActivity.setState(RESUMED, "resumeTopActivityInnerLocked");
                     }
+
                     Slog.i(TAG, "Restarting because process died: " + next);
                     if (!next.hasBeenLaunched) {
                         next.hasBeenLaunched = true;
@@ -4494,11 +4497,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return hasVisibleActivities;
     }
 
-    private void updateTransitLocked(int transit, ActivityOptions options) {
+    private void updateTransitLocked(int transit, ActivityRecord starting,
+            ActivityOptions options) {
         if (options != null) {
-            ActivityRecord r = topRunningActivityLocked();
-            if (r != null && !r.isState(RESUMED)) {
-                r.updateOptionsLocked(options);
+            if (starting != null && !starting.isState(RESUMED)) {
+                starting.updateOptionsLocked(options);
             } else {
                 ActivityOptions.abort(options);
             }
@@ -4535,8 +4538,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
     }
 
-    final void moveTaskToFrontLocked(TaskRecord tr, boolean noAnimation, ActivityOptions options,
-            AppTimeTracker timeTracker, String reason) {
+    final void moveTaskToFrontLocked(TaskRecord tr, ActivityRecord starting,
+            boolean noAnimation, ActivityOptions options, AppTimeTracker timeTracker,
+            String reason) {
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "moveTaskToFront: " + tr);
 
         final ActivityStack topStack = getDisplay().getTopStack();
@@ -4548,7 +4552,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (noAnimation) {
                 ActivityOptions.abort(options);
             } else {
-                updateTransitLocked(TRANSIT_TASK_TO_FRONT, options);
+                updateTransitLocked(TRANSIT_TASK_TO_FRONT, starting, options);
             }
             return;
         }
@@ -4586,7 +4590,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             }
             ActivityOptions.abort(options);
         } else {
-            updateTransitLocked(TRANSIT_TASK_TO_FRONT, options);
+            updateTransitLocked(TRANSIT_TASK_TO_FRONT, r, options);
         }
         // If a new task is moved to the front, then mark the existing top activity as supporting
         // picture-in-picture while paused only if the task would not be considered an oerlay on top

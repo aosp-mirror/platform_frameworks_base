@@ -484,7 +484,7 @@ static void drawTextChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray t
     const Typeface* typeface = paint->getAndroidTypeface();
     jchar* jchars = env->GetCharArrayElements(text, NULL);
     get_canvas(canvasHandle)->drawText(jchars + index, 0, count, count, x, y,
-            static_cast<minikin::Bidi>(bidiFlags), *paint, typeface, nullptr, 0);
+            static_cast<minikin::Bidi>(bidiFlags), *paint, typeface, nullptr);
     env->ReleaseCharArrayElements(text, jchars, JNI_ABORT);
 }
 
@@ -496,13 +496,13 @@ static void drawTextString(JNIEnv* env, jobject, jlong canvasHandle, jstring tex
     const int count = end - start;
     const jchar* jchars = env->GetStringChars(text, NULL);
     get_canvas(canvasHandle)->drawText(jchars + start, 0, count, count, x, y,
-            static_cast<minikin::Bidi>(bidiFlags), *paint, typeface, nullptr, 0);
+            static_cast<minikin::Bidi>(bidiFlags), *paint, typeface, nullptr);
     env->ReleaseStringChars(text, jchars);
 }
 
 static void drawTextRunChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray text, jint index,
                              jint count, jint contextIndex, jint contextCount, jfloat x, jfloat y,
-                             jboolean isRtl, jlong paintHandle, jlong mtHandle, jint mtOffset) {
+                             jboolean isRtl, jlong paintHandle, jlong mtHandle) {
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
     minikin::MeasuredText* mt = reinterpret_cast<minikin::MeasuredText*>(mtHandle);
     const Typeface* typeface = paint->getAndroidTypeface();
@@ -510,8 +510,7 @@ static void drawTextRunChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArra
     const minikin::Bidi bidiFlags = isRtl ? minikin::Bidi::FORCE_RTL : minikin::Bidi::FORCE_LTR;
     jchar* jchars = env->GetCharArrayElements(text, NULL);
     get_canvas(canvasHandle)->drawText(jchars + contextIndex, index - contextIndex, count,
-                                       contextCount, x, y, bidiFlags, *paint, typeface, mt,
-                                       mtOffset);
+                                       contextCount, x, y, bidiFlags, *paint, typeface, mt);
     env->ReleaseCharArrayElements(text, jchars, JNI_ABORT);
 }
 
@@ -526,7 +525,7 @@ static void drawTextRunString(JNIEnv* env, jobject obj, jlong canvasHandle, jstr
     jint contextCount = contextEnd - contextStart;
     const jchar* jchars = env->GetStringChars(text, NULL);
     get_canvas(canvasHandle)->drawText(jchars + contextStart, start - contextStart, count,
-                                       contextCount, x, y, bidiFlags, *paint, typeface, nullptr, 0);
+                                       contextCount, x, y, bidiFlags, *paint, typeface, nullptr);
     env->ReleaseStringChars(text, jchars);
 }
 
@@ -640,7 +639,7 @@ static const JNINativeMethod gDrawMethods[] = {
     {"nDrawBitmap", "(J[IIIFFIIZJ)V", (void*)CanvasJNI::drawBitmapArray},
     {"nDrawText","(J[CIIFFIJ)V", (void*) CanvasJNI::drawTextChars},
     {"nDrawText","(JLjava/lang/String;IIFFIJ)V", (void*) CanvasJNI::drawTextString},
-    {"nDrawTextRun","(J[CIIIIFFZJJI)V", (void*) CanvasJNI::drawTextRunChars},
+    {"nDrawTextRun","(J[CIIIIFFZJJ)V", (void*) CanvasJNI::drawTextRunChars},
     {"nDrawTextRun","(JLjava/lang/String;IIIIFFZJ)V", (void*) CanvasJNI::drawTextRunString},
     {"nDrawTextOnPath","(J[CIIJFFIJ)V", (void*) CanvasJNI::drawTextOnPathChars},
     {"nDrawTextOnPath","(JLjava/lang/String;JFFIJ)V", (void*) CanvasJNI::drawTextOnPathString},

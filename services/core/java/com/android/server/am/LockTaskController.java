@@ -469,6 +469,7 @@ public class LockTaskController {
             if (mLockTaskModeState == LOCK_TASK_MODE_PINNED) {
                 getStatusBarService().showPinningEnterExitToast(false /* entering */);
             }
+            mWindowManager.onLockTaskStateChanged(LOCK_TASK_MODE_NONE);
         } catch (RemoteException ex) {
             throw new RuntimeException(ex);
         } finally {
@@ -580,6 +581,7 @@ public class LockTaskController {
             if (lockTaskModeState == LOCK_TASK_MODE_PINNED) {
                 getStatusBarService().showPinningEnterExitToast(true /* entering */);
             }
+            mWindowManager.onLockTaskStateChanged(lockTaskModeState);
             mLockTaskModeState = lockTaskModeState;
             setStatusBarState(lockTaskModeState, userId);
             setKeyguardState(lockTaskModeState, userId);

@@ -336,6 +336,9 @@ package android.app {
   }
 
   public class Notification implements android.os.Parcelable {
+    field public static final java.lang.String CATEGORY_CAR_EMERGENCY = "car_emergency";
+    field public static final java.lang.String CATEGORY_CAR_INFORMATION = "car_information";
+    field public static final java.lang.String CATEGORY_CAR_WARNING = "car_warning";
     field public static final java.lang.String EXTRA_ALLOW_DURING_SETUP = "android.allowDuringSetup";
     field public static final java.lang.String EXTRA_SUBSTITUTE_APP_NAME = "android.substName";
     field public static final int FLAG_AUTOGROUP_SUMMARY = 1024; // 0x400
@@ -719,10 +722,8 @@ package android.app.usage {
 
   public static final class UsageEvents.Event {
     method public java.lang.String getNotificationChannelId();
-    method public int getStandbyBucket();
     field public static final int NOTIFICATION_INTERRUPTION = 12; // 0xc
     field public static final int NOTIFICATION_SEEN = 10; // 0xa
-    field public static final int STANDBY_BUCKET_CHANGED = 11; // 0xb
   }
 
   public final class UsageStatsManager {

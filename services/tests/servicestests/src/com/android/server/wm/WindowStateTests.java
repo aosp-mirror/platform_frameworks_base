@@ -38,7 +38,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
-import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
 import static org.junit.Assert.assertEquals;
@@ -287,6 +286,16 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(app.canAffectSystemUiFlags());
         app.mToken.setHidden(false);
         app.mAttrs.alpha = 0.0f;
+        assertFalse(app.canAffectSystemUiFlags());
+
+    }
+
+    @Test
+    public void testCanAffectSystemUiFlags_disallow() throws Exception {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        app.mToken.setHidden(false);
+        assertTrue(app.canAffectSystemUiFlags());
+        app.getTask().setCanAffectSystemUiFlags(false);
         assertFalse(app.canAffectSystemUiFlags());
     }
 

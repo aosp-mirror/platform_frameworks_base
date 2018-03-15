@@ -102,15 +102,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
         }
 
-        public void onRecentsAnimationStarted() {
-            long token = Binder.clearCallingIdentity();
-            try {
-                mHandler.post(OverviewProxyService.this::notifyRecentsAnimationStarted);
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
         public void onSplitScreenInvoked() {
             long token = Binder.clearCallingIdentity();
             try {
@@ -283,9 +274,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
-    private void notifyRecentsAnimationStarted() {
+    public void notifyQuickStepStarted() {
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
-            mConnectionCallbacks.get(i).onRecentsAnimationStarted();
+            mConnectionCallbacks.get(i).onQuickStepStarted();
         }
     }
 
@@ -300,7 +291,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     public interface OverviewProxyListener {
         default void onConnectionChanged(boolean isConnected) {}
-        default void onRecentsAnimationStarted() {}
+        default void onQuickStepStarted() {}
         default void onInteractionFlagsChanged(@InteractionType int flags) {}
     }
 }

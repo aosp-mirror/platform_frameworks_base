@@ -69,8 +69,12 @@ public:
     void dumpStates(FILE* out, bool verbose);
 
     // Returns the elapsed realtime when this metric manager last reported metrics.
-    uint64_t getLastReportTimeNs() {
+    inline int64_t getLastReportTimeNs() const {
         return mLastReportTimeNs;
+    };
+
+    inline int64_t getLastReportWallClockNs() const {
+        return mLastReportWallClockNs;
     };
 
     virtual void dropData(const uint64_t dropTimeNs);
@@ -89,7 +93,8 @@ private:
 
     bool mConfigValid = false;
 
-    uint64_t mLastReportTimeNs;
+    int64_t mLastReportTimeNs;
+    int64_t mLastReportWallClockNs;
 
     // The uid log sources from StatsdConfig.
     std::vector<int32_t> mAllowedUid;
@@ -158,7 +163,8 @@ private:
 
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensions);
     FRIEND_TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks);
-    FRIEND_TEST(AttributionE2eTest, TestAttributionMatchAndSlice);
+    FRIEND_TEST(AttributionE2eTest, TestAttributionMatchAndSliceByFirstUid);
+    FRIEND_TEST(AttributionE2eTest, TestAttributionMatchAndSliceByChain);
     FRIEND_TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent);
     FRIEND_TEST(DimensionInConditionE2eTest, TestCreateCountMetric_NoLink_OR_CombinationCondition);
     FRIEND_TEST(DimensionInConditionE2eTest, TestCreateCountMetric_Link_OR_CombinationCondition);

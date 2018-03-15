@@ -30,6 +30,7 @@ const int32_t kAttributionField = 1;
 const int32_t kMaxLogDepth = 2;
 const int32_t kLastBitMask = 0x80;
 const int32_t kClearLastBitDeco = 0x7f;
+const int32_t kClearAllPositionMatcherMask = 0xffff00ff;
 
 enum Type { UNKNOWN, INT, LONG, FLOAT, STRING };
 
@@ -205,6 +206,7 @@ public:
  * First: [Matcher Field] 0x02010101  [Mask]0xff7f7f7f
  * Last:  [Matcher Field] 0x02018001  [Mask]0xff7f807f
  * Any:   [Matcher Field] 0x02010001  [Mask]0xff7f007f
+ * All:   [Matcher Field] 0x02010001  [Mask]0xff7f7f7f
  *
  * [To match a log Field with a Matcher] we apply the bit mask to the log Field and check if
  * the result is equal to the Matcher Field. That's a bit wise AND operation + check if 2 ints are
@@ -226,9 +228,21 @@ struct Matcher {
         return mMask;
     }
 
+    inline int32_t getRawMaskAtDepth(int32_t depth) const {
+        int32_t field = (mMask & 0x00ffffff);
+        int32_t shift = 8 * (kMaxLogDepth - depth);
+        int32_t mask = 0xff << shift;
+
+        return (field & mask) >> shift;
+    }
+
+    bool hasAllPositionMatcher() const {
+        return mMatcher.getDepth() == 2 && getRawMaskAtDepth(1) == 0x7f;
+    }
+
     bool hasAnyPositionMatcher(int* prefix) const {
-        if (mMatcher.getDepth() == 2 && mMatcher.getRawPosAtDepth(2) == 0) {
-            (*prefix) = mMatcher.getPrefix(2);
+        if (mMatcher.getDepth() == 2 && mMatcher.getRawPosAtDepth(1) == 0) {
+            (*prefix) = mMatcher.getPrefix(1);
             return true;
         }
         return false;

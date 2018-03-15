@@ -49,8 +49,7 @@ minikin::MinikinPaint MinikinUtils::prepareMinikinPaint(const Paint* paint,
 
 minikin::Layout MinikinUtils::doLayout(const Paint* paint, minikin::Bidi bidiFlags,
                                        const Typeface* typeface, const uint16_t* buf, size_t start,
-                                       size_t count, size_t bufSize, minikin::MeasuredText* mt,
-                                       int mtOffset) {
+                                       size_t count, size_t bufSize, minikin::MeasuredText* mt) {
     minikin::MinikinPaint minikinPaint = prepareMinikinPaint(paint, typeface);
     minikin::Layout layout;
 
@@ -62,15 +61,9 @@ minikin::Layout MinikinUtils::doLayout(const Paint* paint, minikin::Bidi bidiFla
 
     if (mt == nullptr) {
         layout.doLayout(textBuf,range, bidiFlags, minikinPaint, startHyphen, endHyphen);
-        return layout;
+    } else {
+        mt->buildLayout(textBuf, range, minikinPaint, bidiFlags, startHyphen, endHyphen, &layout);
     }
-
-    if (mt->buildLayout(textBuf, range, minikinPaint, bidiFlags, mtOffset, startHyphen, endHyphen,
-                        &layout)) {
-        return layout;
-    }
-
-    layout.doLayout(textBuf, range, bidiFlags, minikinPaint, startHyphen, endHyphen);
     return layout;
 }
 
@@ -85,7 +78,8 @@ float MinikinUtils::measureText(const Paint* paint, minikin::Bidi bidiFlags,
     const minikin::EndHyphenEdit endHyphen = minikin::endHyphenEdit(hyphenEdit);
 
     return minikin::Layout::measureText(textBuf, range, bidiFlags, minikinPaint, startHyphen,
-                                        endHyphen, advances, nullptr /* extent */);
+                                        endHyphen, advances, nullptr /* extent */,
+                                        nullptr /* layout pieces */);
 }
 
 bool MinikinUtils::hasVariationSelector(const Typeface* typeface, uint32_t codepoint, uint32_t vs) {

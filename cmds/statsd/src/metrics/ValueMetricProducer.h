@@ -34,7 +34,6 @@ struct ValueBucket {
     int64_t mBucketStartNs;
     int64_t mBucketEndNs;
     int64_t mValue;
-    uint64_t mBucketNum;
 };
 
 class ValueMetricProducer : public virtual MetricProducer, public virtual PullDataReceiver {
@@ -99,7 +98,7 @@ private:
     // Internal function to calculate the current used bytes.
     size_t byteSizeLocked() const override;
 
-    void dumpStatesLocked(FILE* out, bool verbose) const override{};
+    void dumpStatesLocked(FILE* out, bool verbose) const override;
 
     // Util function to flush the old packet.
     void flushIfNeededLocked(const uint64_t& eventTime) override;

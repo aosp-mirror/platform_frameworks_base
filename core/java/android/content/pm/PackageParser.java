@@ -3492,7 +3492,7 @@ public class PackageParser {
 
         if (sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestApplication_usesCleartextTraffic,
-                true)) {
+                owner.applicationInfo.targetSdkVersion < Build.VERSION_CODES.P)) {
             ai.flags |= ApplicationInfo.FLAG_USES_CLEARTEXT_TRAFFIC;
         }
 

@@ -56,6 +56,7 @@ const int FIELD_ID_START_BUCKET_ELAPSED_NANOS = 1;
 const int FIELD_ID_END_BUCKET_ELAPSED_NANOS = 2;
 const int FIELD_ID_ATOM = 3;
 const int FIELD_ID_ELAPSED_ATOM_TIMESTAMP = 4;
+const int FIELD_ID_WALL_CLOCK_ATOM_TIMESTAMP = 5;
 
 GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& metric,
                                          const int conditionIndex,
@@ -126,6 +127,24 @@ GaugeMetricProducer::~GaugeMetricProducer() {
     }
 }
 
+void GaugeMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
+    if (mCurrentSlicedBucket == nullptr ||
+        mCurrentSlicedBucket->size() == 0) {
+        return;
+    }
+
+    fprintf(out, "GaugeMetric %lld dimension size %lu\n", (long long)mMetricId,
+            (unsigned long)mCurrentSlicedBucket->size());
+    if (verbose) {
+        for (const auto& it : *mCurrentSlicedBucket) {
+            fprintf(out, "\t(what)%s\t(condition)%s  %d atoms\n",
+                it.first.getDimensionKeyInWhat().toString().c_str(),
+                it.first.getDimensionKeyInCondition().toString().c_str(),
+                (int)it.second.size());
+        }
+    }
+}
+
 void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                                              ProtoOutputStream* protoOutput) {
     VLOG("gauge metric %lld report now...", (long long)mMetricId);
@@ -168,21 +187,28 @@ void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                                (long long)bucket.mBucketEndNs);
 
             if (!bucket.mGaugeAtoms.empty()) {
-                uint64_t atomsToken =
-                    protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_ATOM);
                 for (const auto& atom : bucket.mGaugeAtoms) {
+                    uint64_t atomsToken =
+                        protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                                           FIELD_ID_ATOM);
                     writeFieldValueTreeToStream(mTagId, *(atom.mFields), protoOutput);
+                    protoOutput->end(atomsToken);
                 }
-                protoOutput->end(atomsToken);
+                const bool truncateTimestamp =
+                    android::util::kNotTruncatingTimestampAtomWhiteList.find(mTagId) ==
+                    android::util::kNotTruncatingTimestampAtomWhiteList.end();
+                const int64_t wall_clock_ns = truncateTimestamp ?
+                    truncateTimestampNsToFiveMinutes(getWallClockNs()) : getWallClockNs();
                 for (const auto& atom : bucket.mGaugeAtoms) {
-                    const bool truncateTimestamp =
-                        android::util::kNotTruncatingTimestampAtomWhiteList.find(mTagId) ==
-                        android::util::kNotTruncatingTimestampAtomWhiteList.end();
                     int64_t timestampNs =  truncateTimestamp ?
                         truncateTimestampNsToFiveMinutes(atom.mTimestamps) : atom.mTimestamps;
                     protoOutput->write(
                         FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED | FIELD_ID_ELAPSED_ATOM_TIMESTAMP,
                         (long long)timestampNs);
+                    protoOutput->write(
+                        FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED |
+                            FIELD_ID_WALL_CLOCK_ATOM_TIMESTAMP,
+                        (long long)wall_clock_ns);
                 }
             }
             protoOutput->end(bucketInfoToken);
@@ -393,7 +419,6 @@ void GaugeMetricProducer::flushCurrentBucketLocked(const uint64_t& eventTimeNs) 
     } else {
         info.mBucketEndNs = fullBucketEndTimeNs;
     }
-    info.mBucketNum = mCurrentBucketNum;
 
     for (const auto& slice : *mCurrentSlicedBucket) {
         info.mGaugeAtoms = slice.second;

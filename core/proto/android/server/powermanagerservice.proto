@@ -198,7 +198,7 @@ message WakeLockProto {
     }
 
     optional .android.os.WakeLockLevelEnum lock_level = 1;
-    optional string tag = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional string tag = 2;
     optional WakeLockFlagsProto flags = 3;
     optional bool is_disabled = 4;
     // Acquire time in ms

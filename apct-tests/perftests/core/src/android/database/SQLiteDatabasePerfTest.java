@@ -118,6 +118,52 @@ public class SQLiteDatabasePerfTest {
     }
 
     @Test
+    public void testCursorIterateForward() {
+        // A larger dataset is needed to exceed default CursorWindow size
+        int datasetSize = DEFAULT_DATASET_SIZE * 50;
+        insertT1TestDataSet(datasetSize);
+
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            try (Cursor cursor = mDatabase
+                    .rawQuery("SELECT _ID, COL_A, COL_B, COL_C FROM T1 ORDER BY _ID", null)) {
+                int i = 0;
+                while(cursor.moveToNext()) {
+                    assertEquals(i, cursor.getInt(0));
+                    assertEquals(i, cursor.getInt(1));
+                    assertEquals("T1Value" + i, cursor.getString(2));
+                    assertEquals(1.1 * i, cursor.getDouble(3), 0.0000001d);
+                    i++;
+                }
+                assertEquals(datasetSize, i);
+            }
+        }
+    }
+
+    @Test
+    public void testCursorIterateBackwards() {
+        // A larger dataset is needed to exceed default CursorWindow size
+        int datasetSize = DEFAULT_DATASET_SIZE * 50;
+        insertT1TestDataSet(datasetSize);
+
+        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+        while (state.keepRunning()) {
+            try (Cursor cursor = mDatabase
+                    .rawQuery("SELECT _ID, COL_A, COL_B, COL_C FROM T1 ORDER BY _ID", null)) {
+                int i = datasetSize - 1;
+                while(cursor.moveToPosition(i)) {
+                    assertEquals(i, cursor.getInt(0));
+                    assertEquals(i, cursor.getInt(1));
+                    assertEquals("T1Value" + i, cursor.getString(2));
+                    assertEquals(1.1 * i, cursor.getDouble(3), 0.0000001d);
+                    i--;
+                }
+                assertEquals(-1, i);
+            }
+        }
+    }
+
+    @Test
     public void testInnerJoin() {
         mDatabase.setForeignKeyConstraintsEnabled(true);
         mDatabase.beginTransaction();
@@ -201,8 +247,12 @@ public class SQLiteDatabasePerfTest {
     }
 
     private void insertT1TestDataSet() {
+        insertT1TestDataSet(DEFAULT_DATASET_SIZE);
+    }
+
+    private void insertT1TestDataSet(int size) {
         mDatabase.beginTransaction();
-        for (int i = 0; i < DEFAULT_DATASET_SIZE; i++) {
+        for (int i = 0; i < size; i++) {
             mDatabase.execSQL("INSERT INTO T1 VALUES (?, ?, ?, ?)",
                     new Object[]{i, i, "T1Value" + i, i * 1.1});
         }

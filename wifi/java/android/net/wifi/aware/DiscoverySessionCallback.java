@@ -133,7 +133,8 @@ public class DiscoverySessionCallback {
      *                    match filter. For {@link PublishConfig#PUBLISH_TYPE_SOLICITED},
      *                    {@link SubscribeConfig#SUBSCRIBE_TYPE_ACTIVE} discovery sessions this
      *                    is the subscriber's match filter.
-     * @param distanceMm The measured distance to the Publisher in mm.
+     * @param distanceMm The measured distance to the Publisher in mm. Note: the measured distance
+     *                   may be negative for very close devices.
      */
     public void onServiceDiscoveredWithinRange(PeerHandle peerHandle,
         byte[] serviceSpecificInfo, List<byte[]> matchFilter, int distanceMm) {

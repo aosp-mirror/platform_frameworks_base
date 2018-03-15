@@ -243,6 +243,23 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
     }
 }
 
+void ValueMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
+    if (mCurrentSlicedBucket.size() == 0) {
+        return;
+    }
+
+    fprintf(out, "ValueMetric %lld dimension size %lu\n", (long long)mMetricId,
+            (unsigned long)mCurrentSlicedBucket.size());
+    if (verbose) {
+        for (const auto& it : mCurrentSlicedBucket) {
+            fprintf(out, "\t(what)%s\t(condition)%s  (value)%lld\n",
+                it.first.getDimensionKeyInWhat().toString().c_str(),
+                it.first.getDimensionKeyInCondition().toString().c_str(),
+                (unsigned long long)it.second.sum);
+        }
+    }
+}
+
 bool ValueMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey) {
     // ===========GuardRail==============
     // 1. Report the tuple count if the tuple count > soft limit
@@ -355,7 +372,6 @@ void ValueMetricProducer::flushCurrentBucketLocked(const uint64_t& eventTimeNs) 
     } else {
         info.mBucketEndNs = fullBucketEndTimeNs;
     }
-    info.mBucketNum = mCurrentBucketNum;
 
     int tainted = 0;
     for (const auto& slice : mCurrentSlicedBucket) {

@@ -46,7 +46,7 @@ message EventMetricData {
 
   optional Atom atom = 2;
 
-  optional int64 wall_clock_timestamp_sec = 3;
+  optional int64 wall_clock_timestamp_nanos = 3;
 }
 
 message CountBucketInfo {
@@ -105,6 +105,8 @@ message GaugeBucketInfo {
   repeated Atom atom = 3;
 
   repeated int64 elapsed_timestamp_nanos = 4;
+
+  repeated int64 wall_clock_timestamp_nanos = 5;
 }
 
 message GaugeMetricData {
@@ -154,6 +156,10 @@ message ConfigMetricsReport {
   optional int64 last_report_elapsed_nanos = 3;
 
   optional int64 current_report_elapsed_nanos = 4;
+
+  optional int64 last_report_wall_clock_nanos = 5;
+
+  optional int64 current_report_wall_clock_nanos = 6;
 }
 
 message ConfigMetricsReportList {
