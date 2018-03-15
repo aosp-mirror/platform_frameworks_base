@@ -19,7 +19,6 @@ package com.android.server.backup.internal;
 import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
-import static com.android.server.backup.BackupManagerService.TIMEOUT_RESTORE_INTERVAL;
 
 import android.app.backup.RestoreSet;
 import android.content.Intent;
@@ -34,6 +33,7 @@ import android.util.Slog;
 
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.EventLogTags;
+import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.DataChangedJournal;
@@ -81,10 +81,12 @@ public class BackupHandler extends Handler {
     public static final int MSG_OP_COMPLETE = 21;
 
     private final BackupManagerService backupManagerService;
+    private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
     public BackupHandler(BackupManagerService backupManagerService, Looper looper) {
         super(looper);
         this.backupManagerService = backupManagerService;
+        mAgentTimeoutParameters = backupManagerService.getAgentTimeoutParameters();
     }
 
     public void handleMessage(Message msg) {
@@ -322,7 +324,8 @@ public class BackupHandler extends Handler {
 
                     // Done: reset the session timeout clock
                     removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
-                    sendEmptyMessageDelayed(MSG_RESTORE_SESSION_TIMEOUT, TIMEOUT_RESTORE_INTERVAL);
+                    sendEmptyMessageDelayed(MSG_RESTORE_SESSION_TIMEOUT,
+                            mAgentTimeoutParameters.getRestoreAgentTimeoutMillis());
 
                     params.listener.onFinished(callerLogString);
                 }
