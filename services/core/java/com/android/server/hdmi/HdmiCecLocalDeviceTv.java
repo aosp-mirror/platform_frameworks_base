@@ -50,6 +50,7 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.hdmi.DeviceDiscoveryAction.DeviceDiscoveryCallback;
+import com.android.server.hdmi.RequestShortAudioDescriptorAction.RequestSADCallback;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 import java.io.UnsupportedEncodingException;
@@ -848,6 +849,24 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         synchronized (mLock) {
             if (mSystemAudioActivated != on) {
                 mSystemAudioActivated = on;
+                if (getAvrDeviceInfo() != null) {
+                    RequestShortAudioDescriptorAction action =
+                            new RequestShortAudioDescriptorAction(this,
+                                    getAvrDeviceInfo().getLogicalAddress(),
+                                    getAvrDeviceInfo().getPortId(), on,
+                                    new RequestSADCallback(){
+                                        @Override
+                                        public void updateSAD(String keyValuePairs,
+                                                boolean supportMultiChannels) {
+                                            mService.getAudioManager().setParameters(keyValuePairs);
+                                            mService.setCecOption(
+                                                    Constants.OPTION_CEC_SUPPORT_MULTICHANNELS,
+                                                    supportMultiChannels ?
+                                                            Constants.ENABLED : Constants.DISABLED);
+                                        }
+                                    });
+                    addAndStartAction(action);
+                }
                 mService.announceSystemAudioModeChange(on);
             }
             startArcAction(on);
@@ -1464,6 +1483,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     final void removeCecDevice(int address) {
         assertRunOnServiceThread();
+
+        HdmiDeviceInfo avr = getAvrDeviceInfo();
+        if ((avr != null) && (address == avr.getLogicalAddress())) {
+            removeAction(RequestShortAudioDescriptorAction.class);
+            RequestShortAudioDescriptorAction.removeAudioFormat();
+        }
+
         HdmiDeviceInfo info = removeDeviceInfo(HdmiDeviceInfo.idForCecDevice(address));
 
         mCecMessageCache.flushMessagesFrom(address);
@@ -1660,6 +1686,8 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             return;
         }
 
+        removeAction(RequestShortAudioDescriptorAction.class);
+        RequestShortAudioDescriptorAction.removeAudioFormat();
         // Seq #44.
         removeAction(RequestArcInitiationAction.class);
         if (!hasAction(RequestArcTerminationAction.class) && isArcEstablished()) {
