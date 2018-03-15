@@ -70,8 +70,6 @@ public class WindowManagerShellCommand extends ShellCommand {
                     return runDisplayOverscan(pw);
                 case "scaling":
                     return runDisplayScaling(pw);
-                case "screen-capture":
-                    return runSetScreenCapture(pw);
                 case "dismiss-keyguard":
                     return runDismissKeyguard(pw);
                 case "tracing":
@@ -210,24 +208,6 @@ public class WindowManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int runSetScreenCapture(PrintWriter pw) throws RemoteException {
-        String userIdStr = getNextArg();
-        String enableStr = getNextArg();
-        int userId;
-        boolean disable;
-
-        try {
-            userId = Integer.parseInt(userIdStr);
-        } catch (NumberFormatException e) {
-            getErrPrintWriter().println("Error: bad number " + e);
-            return -1;
-        }
-
-        disable = !Boolean.parseBoolean(enableStr);
-        mInternal.setScreenCaptureDisabled(userId, disable);
-        return 0;
-    }
-
     private int runDismissKeyguard(PrintWriter pw) throws RemoteException {
         mInterface.dismissKeyguard(null /* callback */, null /* message */);
         return 0;
@@ -265,8 +245,6 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("    Set overscan area for display.");
         pw.println("  scaling [off|auto]");
         pw.println("    Set display scaling mode.");
-        pw.println("  screen-capture [userId] [true|false]");
-        pw.println("    Enable or disable screen capture.");
         pw.println("  dismiss-keyguard");
         pw.println("    Dismiss the keyguard, prompting user for auth if necessary.");
         if (!IS_USER) {

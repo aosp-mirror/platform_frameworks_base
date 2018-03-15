@@ -141,4 +141,10 @@ public abstract class DevicePolicyManagerInternal {
      * @return localized error message
      */
     public abstract CharSequence getPrintingDisabledReasonForUser(@UserIdInt int userId);
+
+    /**
+     * @return cached version of DPM policies that can be accessed without risking deadlocks.
+     * Do not call it directly. Use {@link DevicePolicyCache#getInstance()} instead.
+     */
+    protected abstract DevicePolicyCache getDevicePolicyCache();
 }
