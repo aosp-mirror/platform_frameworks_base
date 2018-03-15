@@ -560,6 +560,7 @@ Landroid/graphics/Bitmap;->reinit(IIZ)V
 Landroid/graphics/Camera;->native_instance:J
 Landroid/graphics/Canvas;-><init>(J)V
 Landroid/graphics/Canvas;->release()V
+Landroid/graphics/ColorMatrixColorFilter;->setColorMatrix(Landroid/graphics/ColorMatrix;)V
 Landroid/graphics/drawable/AnimatedImageDrawable;->onAnimationEnd()V
 Landroid/graphics/drawable/AnimatedStateListDrawable$AnimatedStateListState;->mStateIds:Landroid/util/SparseIntArray;
 Landroid/graphics/drawable/AnimatedStateListDrawable$AnimatedStateListState;->mTransitions:Landroid/util/LongSparseLongArray;
