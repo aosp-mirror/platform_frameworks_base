@@ -98,6 +98,7 @@ import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DeviceAdminReceiver;
+import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.NetworkEvent;
@@ -435,6 +436,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private final DevicePolicyConstants mConstants;
     private final DeviceAdminServiceController mDeviceAdminServiceController;
     private final OverlayPackagesProvider mOverlayPackagesProvider;
+
+    private final DevicePolicyCacheImpl mPolicyCache = new DevicePolicyCacheImpl();
 
     /**
      * Contains (package-user) pairs to remove. An entry (p, u) implies that removal of package p
@@ -2176,6 +2179,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 Slog.w(LOG_TAG, "Tried to remove device policy file for user 0! Ignoring.");
                 return;
             }
+            mPolicyCache.onUserRemoved(userHandle);
+
             mOwners.removeProfileOwner(userHandle);
             mOwners.writeProfileOwner(userHandle);
 
@@ -2188,7 +2193,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             policyFile.delete();
             Slog.i(LOG_TAG, "Removed device policy file " + policyFile.getAbsolutePath());
         }
-        updateScreenCaptureDisabledInWindowManager(userHandle, false /* default value */);
     }
 
     void loadOwners() {
@@ -3395,7 +3399,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     void handleStartUser(int userId) {
-        updateScreenCaptureDisabledInWindowManager(userId,
+        updateScreenCaptureDisabled(userId,
                 getScreenCaptureDisabled(null, userId));
         pushUserRestrictions(userId);
 
@@ -6632,7 +6636,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (ap.disableScreenCapture != disabled) {
                 ap.disableScreenCapture = disabled;
                 saveSettingsLocked(userHandle);
-                updateScreenCaptureDisabledInWindowManager(userHandle, disabled);
+                updateScreenCaptureDisabled(userHandle, disabled);
             }
         }
     }
@@ -6664,13 +6668,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void updateScreenCaptureDisabledInWindowManager(final int userHandle,
-            final boolean disabled) {
+    private void updateScreenCaptureDisabled(int userHandle, boolean disabled) {
+        mPolicyCache.setScreenCaptureDisabled(userHandle, disabled);
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 try {
-                    mInjector.getIWindowManager().setScreenCaptureDisabled(userHandle, disabled);
+                    mInjector.getIWindowManager().refreshScreenCaptureDisabled(userHandle);
                 } catch (RemoteException e) {
                     Log.w(LOG_TAG, "Unable to notify WindowManager.", e);
                 }
@@ -10501,6 +10505,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 return ((Context) ActivityThread.currentActivityThread().getSystemUiContext())
                         .getResources().getString(R.string.printing_disabled_by, appLabel);
             }
+        }
+
+        @Override
+        protected DevicePolicyCache getDevicePolicyCache() {
+            return mPolicyCache;
         }
     }
 

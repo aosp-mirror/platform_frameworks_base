@@ -25,7 +25,6 @@ import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
-import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_USER_HANDLE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
@@ -122,6 +121,7 @@ import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.IAssistDataReceiver;
+import android.app.admin.DevicePolicyCache;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -380,14 +380,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 case ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED:
                     mKeyguardDisableHandler.sendEmptyMessage(KEYGUARD_POLICY_CHANGED);
                     break;
-                case ACTION_USER_REMOVED:
-                    final int userId = intent.getIntExtra(EXTRA_USER_HANDLE, USER_NULL);
-                    if (userId != USER_NULL) {
-                        synchronized (mWindowMap) {
-                            mScreenCaptureDisabled.remove(userId);
-                        }
-                    }
-                    break;
             }
         }
     };
@@ -518,13 +510,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** List of window currently causing non-system overlay windows to be hidden. */
     private ArrayList<WindowState> mHidingNonSystemOverlayWindows = new ArrayList<>();
-
-    /**
-     * Stores for each user whether screencapture is disabled
-     * This array is essentially a cache for all userId for
-     * {@link android.app.admin.DevicePolicyManager#getScreenCaptureDisabled}
-     */
-    private SparseArray<Boolean> mScreenCaptureDisabled = new SparseArray<>();
 
     IInputMethodManager mInputMethodManager;
 
@@ -1039,8 +1024,6 @@ public class WindowManagerService extends IWindowManager.Stub
         IntentFilter filter = new IntentFilter();
         // Track changes to DevicePolicyManager state so we can enable/disable keyguard.
         filter.addAction(ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
-        // Listen to user removal broadcasts so that we can remove the user-specific data.
-        filter.addAction(Intent.ACTION_USER_REMOVED);
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
         mLatencyTracker = LatencyTracker.getInstance(context);
@@ -1572,41 +1555,32 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    /**
-     * Returns whether screen capture is disabled for all windows of a specific user.
-     */
-    boolean isScreenCaptureDisabledLocked(int userId) {
-        Boolean disabled = mScreenCaptureDisabled.get(userId);
-        if (disabled == null) {
-            return false;
-        }
-        return disabled;
-    }
-
     boolean isSecureLocked(WindowState w) {
         if ((w.mAttrs.flags&WindowManager.LayoutParams.FLAG_SECURE) != 0) {
             return true;
         }
-        if (isScreenCaptureDisabledLocked(UserHandle.getUserId(w.mOwnerUid))) {
+        if (DevicePolicyCache.getInstance().getScreenCaptureDisabled(
+                UserHandle.getUserId(w.mOwnerUid))) {
             return true;
         }
         return false;
     }
 
     /**
-     * Set mScreenCaptureDisabled for specific user
+     * Set whether screen capture is disabled for all windows of a specific user from
+     * the device policy cache.
      */
     @Override
-    public void setScreenCaptureDisabled(int userId, boolean disabled) {
+    public void refreshScreenCaptureDisabled(int userId) {
         int callingUid = Binder.getCallingUid();
         if (callingUid != SYSTEM_UID) {
-            throw new SecurityException("Only system can call setScreenCaptureDisabled.");
+            throw new SecurityException("Only system can call refreshScreenCaptureDisabled.");
         }
 
         synchronized(mWindowMap) {
-            mScreenCaptureDisabled.put(userId, disabled);
             // Update secure surface for all windows belonging to this user.
-            mRoot.setSecureSurfaceState(userId, disabled);
+            mRoot.setSecureSurfaceState(userId,
+                    DevicePolicyCache.getInstance().getScreenCaptureDisabled(userId));
         }
     }
 
