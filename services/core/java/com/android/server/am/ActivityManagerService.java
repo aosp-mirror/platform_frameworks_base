@@ -23603,6 +23603,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                     } catch (IOException e) {
                     }
                     mProfilerInfo.profileFd = null;
+
+                    if (proc.pid == MY_PID) {
+                        // When profiling the system server itself, avoid closing the file
+                        // descriptor, as profilerControl will not create a copy.
+                        // Note: it is also not correct to just set profileFd to null, as the
+                        //       whole ProfilerInfo instance is passed down!
+                        profilerInfo = null;
+                    }
                 } else {
                     stopProfilerLocked(proc, profileType);
                     if (profilerInfo != null && profilerInfo.profileFd != null) {
