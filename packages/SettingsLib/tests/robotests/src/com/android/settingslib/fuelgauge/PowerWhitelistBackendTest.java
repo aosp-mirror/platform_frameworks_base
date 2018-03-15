@@ -48,6 +48,7 @@ public class PowerWhitelistBackendTest {
         MockitoAnnotations.initMocks(this);
         doReturn(new String[] {}).when(mDeviceIdleService).getFullPowerWhitelist();
         doReturn(new String[] {}).when(mDeviceIdleService).getSystemPowerWhitelist();
+        doReturn(new String[] {}).when(mDeviceIdleService).getSystemPowerWhitelistExceptIdle();
         doNothing().when(mDeviceIdleService).addPowerSaveWhitelistApp(anyString());
         doNothing().when(mDeviceIdleService).removePowerSaveWhitelistApp(anyString());
         mPowerWhitelistBackend = new PowerWhitelistBackend(mDeviceIdleService);
@@ -88,6 +89,15 @@ public class PowerWhitelistBackendTest {
         assertThat(mPowerWhitelistBackend.isSysWhitelisted(PACKAGE_ONE)).isTrue();
         assertThat(mPowerWhitelistBackend.isSysWhitelisted(PACKAGE_TWO)).isFalse();
         assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_ONE)).isFalse();
+    }
 
+    @Test
+    public void testIsSystemWhitelistedExceptIdle() throws Exception {
+        doReturn(new String[]{PACKAGE_TWO}).when(
+                mDeviceIdleService).getSystemPowerWhitelistExceptIdle();
+        mPowerWhitelistBackend.refreshList();
+
+        assertThat(mPowerWhitelistBackend.isSysWhitelistedExceptIdle(PACKAGE_ONE)).isFalse();
+        assertThat(mPowerWhitelistBackend.isSysWhitelistedExceptIdle(PACKAGE_TWO)).isTrue();
     }
 }
