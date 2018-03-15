@@ -25,8 +25,8 @@ import "frameworks/base/libs/incident/proto/android/privacy.proto";
 message LooperProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional string thread_name = 1 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    // the thread name, usually set by developers.
+    optional string thread_name = 1;
     optional int64 thread_id = 2;
-    optional int32 identity_hash_code = 3;
-    optional android.os.MessageQueueProto queue = 4;
+    optional android.os.MessageQueueProto queue = 3;
 }

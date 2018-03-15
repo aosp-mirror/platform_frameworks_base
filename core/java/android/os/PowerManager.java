@@ -1643,12 +1643,12 @@ public final class PowerManager {
         public void writeToProto(ProtoOutputStream proto, long fieldId) {
             synchronized (mToken) {
                 final long token = proto.start(fieldId);
-                proto.write(PowerManagerProto.WakeLockProto.HEX_STRING,
-                        Integer.toHexString(System.identityHashCode(this)));
-                proto.write(PowerManagerProto.WakeLockProto.HELD, mHeld);
-                proto.write(PowerManagerProto.WakeLockProto.INTERNAL_COUNT, mInternalCount);
+                proto.write(PowerManagerProto.WakeLock.TAG, mTag);
+                proto.write(PowerManagerProto.WakeLock.PACKAGE_NAME, mPackageName);
+                proto.write(PowerManagerProto.WakeLock.HELD, mHeld);
+                proto.write(PowerManagerProto.WakeLock.INTERNAL_COUNT, mInternalCount);
                 if (mWorkSource != null) {
-                    mWorkSource.writeToProto(proto, PowerManagerProto.WakeLockProto.WORK_SOURCE);
+                    mWorkSource.writeToProto(proto, PowerManagerProto.WakeLock.WORK_SOURCE);
                 }
                 proto.end(token);
             }

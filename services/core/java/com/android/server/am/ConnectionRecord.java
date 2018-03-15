@@ -176,10 +176,6 @@ final class ConnectionRecord {
         if (binding.service != null) {
             proto.write(ConnectionRecordProto.SERVICE_NAME, binding.service.shortName);
         }
-        if (conn != null) {
-            proto.write(ConnectionRecordProto.CONN_HEX_HASH,
-                    Integer.toHexString(System.identityHashCode(conn.asBinder())));
-        }
         proto.end(token);
     }
 }
