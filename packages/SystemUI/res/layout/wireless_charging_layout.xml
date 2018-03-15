@@ -44,13 +44,6 @@
             android:layout_gravity="center"
             android:textSize="32sp"
             android:textColor="?attr/wallpaperTextColor"/>
-
-        <TextView
-            android:id="@+id/wireless_charging_secondary_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:textColor="?attr/wallpaperTextColor"/>
     </LinearLayout>
 
 </FrameLayout>
