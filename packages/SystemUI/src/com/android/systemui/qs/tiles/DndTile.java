@@ -215,15 +215,18 @@ public class DndTile extends QSTileImpl<BooleanState> {
         switch (zen) {
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
                 state.contentDescription = mContext.getString(
-                        R.string.accessibility_quick_settings_dnd_priority_on);
+                        R.string.accessibility_quick_settings_dnd_priority_on) + ", "
+                        + state.secondaryLabel;
                 break;
             case Global.ZEN_MODE_NO_INTERRUPTIONS:
                 state.contentDescription = mContext.getString(
-                        R.string.accessibility_quick_settings_dnd_none_on);
+                        R.string.accessibility_quick_settings_dnd_none_on) + ", "
+                        + state.secondaryLabel;
                 break;
             case ZEN_MODE_ALARMS:
                 state.contentDescription = mContext.getString(
-                        R.string.accessibility_quick_settings_dnd_alarms_on);
+                        R.string.accessibility_quick_settings_dnd_alarms_on) + ", "
+                        + state.secondaryLabel;
                 break;
             default:
                 state.contentDescription = mContext.getString(
