@@ -764,6 +764,13 @@ void SkiaCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int count, const SkPaint& p
 void SkiaCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,
                                   const SkPaint& paint, const SkPath& path, size_t start,
                                   size_t end) {
+    // Set align to left for drawing, as we don't want individual
+    // glyphs centered or right-aligned; the offsets take care of
+    // that portion of the alignment.
+    SkPaint paintCopy(paint);
+    paintCopy.setTextAlign(SkPaint::kLeft_Align);
+    SkASSERT(paintCopy.getTextEncoding() == SkPaint::kGlyphID_TextEncoding);
+
     const int N = end - start;
     SkAutoSTMalloc<1024, uint8_t> storage(N * (sizeof(uint16_t) + sizeof(SkRSXform)));
     SkRSXform* xform = (SkRSXform*)storage.get();
@@ -788,7 +795,7 @@ void SkiaCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOffset, 
         xform[i - start].fTy = pos.y() + tan.x() * y - halfWidth * tan.y();
     }
 
-    this->asSkCanvas()->drawTextRSXform(glyphs, sizeof(uint16_t) * N, xform, nullptr, paint);
+    this->asSkCanvas()->drawTextRSXform(glyphs, sizeof(uint16_t) * N, xform, nullptr, paintCopy);
 }
 
 // ----------------------------------------------------------------------------
