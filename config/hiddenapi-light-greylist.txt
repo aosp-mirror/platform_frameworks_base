@@ -699,8 +699,13 @@ Landroid/hardware/usb/UsbManager;->getPortStatus(Landroid/hardware/usb/UsbPort;)
 Landroid/hardware/usb/UsbManager;->setCurrentFunction(Ljava/lang/String;Z)V
 Landroid/hardware/usb/UsbManager;->setPortRoles(Landroid/hardware/usb/UsbPort;II)V
 Landroid/hardware/usb/UsbPortStatus;->getCurrentDataRole()I
+Landroid/hardware/usb/UsbPortStatus;->getCurrentMode()I
+Landroid/hardware/usb/UsbPortStatus;->getCurrentPowerRole()I
+Landroid/hardware/usb/UsbPortStatus;->getSupportedRoleCombinations()I
 Landroid/hardware/usb/UsbPortStatus;->isConnected()Z
 Landroid/hardware/usb/UsbPortStatus;->isRoleCombinationSupported(II)Z
+Landroid/hardware/usb/UsbRequest;->mBuffer:Ljava/nio/ByteBuffer;
+Landroid/hardware/usb/UsbRequest;->mLength:I
 Landroid/hardware/usb/UsbRequest;->mNativeContext:J
 Landroid/icu/impl/CurrencyData;-><init>()V
 Landroid/icu/impl/number/DecimalFormatProperties;->readObject(Ljava/io/ObjectInputStream;)V
