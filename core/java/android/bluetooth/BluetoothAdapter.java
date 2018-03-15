@@ -676,6 +676,10 @@ public final class BluetoothAdapter {
         if (!getLeAccess()) {
             return null;
         }
+        if (!isMultipleAdvertisementSupported()) {
+            Log.e(TAG, "Bluetooth LE advertising not supported");
+            return null;
+        }
         synchronized (mLock) {
             if (sBluetoothLeAdvertiser == null) {
                 sBluetoothLeAdvertiser = new BluetoothLeAdvertiser(mManagerService);
