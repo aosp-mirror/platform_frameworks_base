@@ -1435,9 +1435,11 @@ public abstract class CameraMetadata<TKey> {
      * for the external flash. Otherwise, this mode acts like ON.</p>
      * <p>When the external flash is turned off, AE mode should be changed to one of the
      * other available AE modes.</p>
-     * <p>If the camera device supports AE external flash mode, aeState must be
-     * FLASH_REQUIRED after the camera device finishes AE scan and it's too dark without
+     * <p>If the camera device supports AE external flash mode, {@link CaptureResult#CONTROL_AE_STATE android.control.aeState} must
+     * be FLASH_REQUIRED after the camera device finishes AE scan and it's too dark without
      * flash.</p>
+     *
+     * @see CaptureResult#CONTROL_AE_STATE
      * @see CaptureRequest#CONTROL_AE_MODE
      */
     public static final int CONTROL_AE_MODE_ON_EXTERNAL_FLASH = 5;
