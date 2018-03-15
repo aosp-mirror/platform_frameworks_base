@@ -4,8 +4,8 @@ import static android.os.ParcelFileDescriptor.MODE_CREATE;
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.ParcelFileDescriptor.MODE_TRUNCATE;
+
 import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP_WAIT;
-import static com.android.server.backup.BackupManagerService.TIMEOUT_BACKUP_INTERVAL;
 
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
@@ -59,6 +59,7 @@ public class KeyValueAdbBackupEngine {
     private ParcelFileDescriptor mSavedState;
     private ParcelFileDescriptor mBackupData;
     private ParcelFileDescriptor mNewState;
+    private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
     public KeyValueAdbBackupEngine(OutputStream output, PackageInfo packageInfo,
             BackupManagerServiceInterface backupManagerService, PackageManager packageManager,
@@ -81,6 +82,7 @@ public class KeyValueAdbBackupEngine {
                 pkg + BACKUP_KEY_VALUE_NEW_STATE_FILENAME_SUFFIX);
 
         mManifestFile = new File(mDataDir, BackupManagerService.BACKUP_MANIFEST_FILENAME);
+        mAgentTimeoutParameters = backupManagerService.getAgentTimeoutParameters();
     }
 
     public void backupOnePackage() throws IOException {
@@ -148,8 +150,9 @@ public class KeyValueAdbBackupEngine {
     // Return true on backup success, false otherwise
     private boolean invokeAgentForAdbBackup(String packageName, IBackupAgent agent) {
         int token = mBackupManagerService.generateRandomIntegerToken();
+        long kvBackupAgentTimeoutMillis = mAgentTimeoutParameters.getKvBackupAgentTimeoutMillis();
         try {
-            mBackupManagerService.prepareOperationTimeout(token, TIMEOUT_BACKUP_INTERVAL, null,
+            mBackupManagerService.prepareOperationTimeout(token, kvBackupAgentTimeoutMillis, null,
                     OP_TYPE_BACKUP_WAIT);
 
             // Start backup and wait for BackupManagerService to get callback for success or timeout
@@ -231,14 +234,14 @@ public class KeyValueAdbBackupEngine {
     }
 
     private void writeBackupData() throws IOException {
-
         int token = mBackupManagerService.generateRandomIntegerToken();
+        long kvBackupAgentTimeoutMillis = mAgentTimeoutParameters.getKvBackupAgentTimeoutMillis();
 
         ParcelFileDescriptor[] pipes = null;
         try {
             pipes = ParcelFileDescriptor.createPipe();
 
-            mBackupManagerService.prepareOperationTimeout(token, TIMEOUT_BACKUP_INTERVAL, null,
+            mBackupManagerService.prepareOperationTimeout(token, kvBackupAgentTimeoutMillis, null,
                     OP_TYPE_BACKUP_WAIT);
 
             // We will have to create a runnable that will read the manifest and backup data we
