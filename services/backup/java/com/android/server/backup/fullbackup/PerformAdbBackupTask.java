@@ -129,7 +129,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
                 try {
                     PackageInfo info = backupManagerService.getPackageManager().getPackageInfo(
                             pkgName,
-                            PackageManager.GET_SIGNATURES);
+                            PackageManager.GET_SIGNING_CERTIFICATES);
                     set.put(pkgName, info);
                 } catch (NameNotFoundException e) {
                     Slog.w(TAG, "Unknown package " + pkgName + ", skipping");
@@ -240,7 +240,8 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
 
         // doAllApps supersedes the package set if any
         if (mAllApps) {
-            List<PackageInfo> allPackages = pm.getInstalledPackages(PackageManager.GET_SIGNATURES);
+            List<PackageInfo> allPackages = pm.getInstalledPackages(
+                    PackageManager.GET_SIGNING_CERTIFICATES);
             for (int i = 0; i < allPackages.size(); i++) {
                 PackageInfo pkg = allPackages.get(i);
                 // Exclude system apps if we've been asked to do so

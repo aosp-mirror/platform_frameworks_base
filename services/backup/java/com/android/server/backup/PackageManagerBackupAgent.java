@@ -23,6 +23,7 @@ import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
@@ -30,6 +31,7 @@ import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
 
+import com.android.server.LocalServices;
 import com.android.server.backup.utils.AppBackupUtils;
 
 import java.io.BufferedInputStream;
@@ -154,7 +156,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
 
     public static List<PackageInfo> getStorableApplications(PackageManager pm) {
         List<PackageInfo> pkgs;
-        pkgs = pm.getInstalledPackages(PackageManager.GET_SIGNATURES);
+        pkgs = pm.getInstalledPackages(PackageManager.GET_SIGNING_CERTIFICATES);
         int N = pkgs.size();
         for (int a = N-1; a >= 0; a--) {
             PackageInfo pkg = pkgs.get(a);
@@ -235,10 +237,17 @@ public class PackageManagerBackupAgent extends BackupAgent {
         if (home != null) {
             try {
                 homeInfo = mPackageManager.getPackageInfo(home.getPackageName(),
-                        PackageManager.GET_SIGNATURES);
+                        PackageManager.GET_SIGNING_CERTIFICATES);
                 homeInstaller = mPackageManager.getInstallerPackageName(home.getPackageName());
                 homeVersion = homeInfo.getLongVersionCode();
-                homeSigHashes = BackupUtils.hashSignatureArray(homeInfo.signatures);
+                Signature[][] signingHistory = homeInfo.signingCertificateHistory;
+                if (signingHistory == null || signingHistory.length == 0) {
+                    Slog.e(TAG, "Home app has no signing history");
+                } else {
+                    // retrieve the newest sigs to back up
+                    Signature[] homeInfoSignatures = signingHistory[signingHistory.length - 1];
+                    homeSigHashes = BackupUtils.hashSignatureArray(homeInfoSignatures);
+                }
             } catch (NameNotFoundException e) {
                 Slog.w(TAG, "Can't access preferred home info");
                 // proceed as though there were no preferred home set
@@ -252,10 +261,11 @@ public class PackageManagerBackupAgent extends BackupAgent {
             //    2. the home app [or absence] we now use differs from the prior state,
             // OR 3. it looks like we use the same home app + version as before, but
             //       the signatures don't match so we treat them as different apps.
+            PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
             final boolean needHomeBackup = (homeVersion != mStoredHomeVersion)
                     || !Objects.equals(home, mStoredHomeComponent)
                     || (home != null
-                        && !BackupUtils.signaturesMatch(mStoredHomeSigHashes, homeInfo));
+                        && !BackupUtils.signaturesMatch(mStoredHomeSigHashes, homeInfo, pmi));
             if (needHomeBackup) {
                 if (DEBUG) {
                     Slog.i(TAG, "Home preference changed; backing up new state " + home);
@@ -304,7 +314,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
                     PackageInfo info = null;
                     try {
                         info = mPackageManager.getPackageInfo(packName,
-                                PackageManager.GET_SIGNATURES);
+                                PackageManager.GET_SIGNING_CERTIFICATES);
                     } catch (NameNotFoundException e) {
                         // Weird; we just found it, and now are told it doesn't exist.
                         // Treat it as having been removed from the device.
@@ -323,9 +333,9 @@ public class PackageManagerBackupAgent extends BackupAgent {
                             continue;
                         }
                     }
-                    
-                    if (info.signatures == null || info.signatures.length == 0)
-                    {
+
+                    Signature[][] signingHistory = info.signingCertificateHistory;
+                    if (signingHistory == null || signingHistory.length == 0) {
                         Slog.w(TAG, "Not backing up package " + packName
                                 + " since it appears to have no signatures.");
                         continue;
@@ -347,8 +357,10 @@ public class PackageManagerBackupAgent extends BackupAgent {
                     } else {
                         outputBufferStream.writeInt(info.versionCode);
                     }
+                    // retrieve the newest sigs to back up
+                    Signature[] infoSignatures = signingHistory[signingHistory.length - 1];
                     writeSignatureHashArray(outputBufferStream,
-                            BackupUtils.hashSignatureArray(info.signatures));
+                            BackupUtils.hashSignatureArray(infoSignatures));
 
                     if (DEBUG) {
                         Slog.v(TAG, "+ writing metadata for " + packName
