@@ -34,11 +34,11 @@ FdBuffer::FdBuffer()
 
 FdBuffer::~FdBuffer() {}
 
-status_t FdBuffer::read(int fd, int64_t timeout) {
-    struct pollfd pfds = {.fd = fd, .events = POLLIN};
+status_t FdBuffer::read(unique_fd* fd, int64_t timeout) {
+    struct pollfd pfds = {.fd = fd->get(), .events = POLLIN};
     mStartTime = uptimeMillis();
 
-    fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
+    fcntl(fd->get(), F_SETFL, fcntl(fd->get(), F_GETFL, 0) | O_NONBLOCK);
 
     while (true) {
         if (mBuffer.size() >= MAX_BUFFER_COUNT * BUFFER_SIZE) {
@@ -67,16 +67,16 @@ status_t FdBuffer::read(int fd, int64_t timeout) {
                 VLOG("return event has error %s", strerror(errno));
                 return errno != 0 ? -errno : UNKNOWN_ERROR;
             } else {
-                ssize_t amt = ::read(fd, mBuffer.writeBuffer(), mBuffer.currentToWrite());
+                ssize_t amt = ::read(fd->get(), mBuffer.writeBuffer(), mBuffer.currentToWrite());
                 if (amt < 0) {
                     if (errno == EAGAIN || errno == EWOULDBLOCK) {
                         continue;
                     } else {
-                        VLOG("Fail to read %d: %s", fd, strerror(errno));
+                        VLOG("Fail to read %d: %s", fd->get(), strerror(errno));
                         return -errno;
                     }
                 } else if (amt == 0) {
-                    VLOG("Reached EOF of fd=%d", fd);
+                    VLOG("Reached EOF of fd=%d", fd->get());
                     break;
                 }
                 mBuffer.wp()->move(amt);
@@ -87,7 +87,7 @@ status_t FdBuffer::read(int fd, int64_t timeout) {
     return NO_ERROR;
 }
 
-status_t FdBuffer::readFully(int fd) {
+status_t FdBuffer::readFully(unique_fd* fd) {
     mStartTime = uptimeMillis();
 
     while (true) {
@@ -99,10 +99,10 @@ status_t FdBuffer::readFully(int fd) {
         }
         if (mBuffer.writeBuffer() == NULL) return NO_MEMORY;
 
-        ssize_t amt =
-                TEMP_FAILURE_RETRY(::read(fd, mBuffer.writeBuffer(), mBuffer.currentToWrite()));
+        ssize_t amt = TEMP_FAILURE_RETRY(
+                ::read(fd->get(), mBuffer.writeBuffer(), mBuffer.currentToWrite()));
         if (amt < 0) {
-            VLOG("Fail to read %d: %s", fd, strerror(errno));
+            VLOG("Fail to read %d: %s", fd->get(), strerror(errno));
             return -errno;
         } else if (amt == 0) {
             VLOG("Done reading %zu bytes", mBuffer.size());
@@ -116,20 +116,20 @@ status_t FdBuffer::readFully(int fd) {
     return NO_ERROR;
 }
 
-status_t FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeoutMs,
-                                             const bool isSysfs) {
+status_t FdBuffer::readProcessedDataInStream(unique_fd* fd, unique_fd* toFd, unique_fd* fromFd,
+                                             int64_t timeoutMs, const bool isSysfs) {
     struct pollfd pfds[] = {
-            {.fd = fd, .events = POLLIN},
-            {.fd = toFd, .events = POLLOUT},
-            {.fd = fromFd, .events = POLLIN},
+            {.fd = fd->get(), .events = POLLIN},
+            {.fd = toFd->get(), .events = POLLOUT},
+            {.fd = fromFd->get(), .events = POLLIN},
     };
 
     mStartTime = uptimeMillis();
 
     // mark all fds non blocking
-    fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
-    fcntl(toFd, F_SETFL, fcntl(toFd, F_GETFL, 0) | O_NONBLOCK);
-    fcntl(fromFd, F_SETFL, fcntl(fromFd, F_GETFL, 0) | O_NONBLOCK);
+    fcntl(fd->get(), F_SETFL, fcntl(fd->get(), F_GETFL, 0) | O_NONBLOCK);
+    fcntl(toFd->get(), F_SETFL, fcntl(toFd->get(), F_GETFL, 0) | O_NONBLOCK);
+    fcntl(fromFd->get(), F_SETFL, fcntl(fromFd->get(), F_GETFL, 0) | O_NONBLOCK);
 
     // A circular buffer holds data read from fd and writes to parsing process
     uint8_t cirBuf[BUFFER_SIZE];
@@ -166,10 +166,10 @@ status_t FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64
         for (int i = 0; i < 3; ++i) {
             if ((pfds[i].revents & POLLERR) != 0) {
                 if (i == 0 && isSysfs) {
-                    VLOG("fd %d is sysfs, ignore its POLLERR return value", fd);
+                    VLOG("fd %d is sysfs, ignore its POLLERR return value", fd->get());
                     continue;
                 }
-                VLOG("fd[%d]=%d returns error events: %s", i, fd, strerror(errno));
+                VLOG("fd[%d]=%d returns error events: %s", i, fd->get(), strerror(errno));
                 return errno != 0 ? -errno : UNKNOWN_ERROR;
             }
         }
@@ -178,17 +178,17 @@ status_t FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64
         if (cirSize != BUFFER_SIZE && pfds[0].fd != -1) {
             ssize_t amt;
             if (rpos >= wpos) {
-                amt = ::read(fd, cirBuf + rpos, BUFFER_SIZE - rpos);
+                amt = ::read(fd->get(), cirBuf + rpos, BUFFER_SIZE - rpos);
             } else {
-                amt = ::read(fd, cirBuf + rpos, wpos - rpos);
+                amt = ::read(fd->get(), cirBuf + rpos, wpos - rpos);
             }
             if (amt < 0) {
                 if (!(errno == EAGAIN || errno == EWOULDBLOCK)) {
-                    VLOG("Fail to read fd %d: %s", fd, strerror(errno));
+                    VLOG("Fail to read fd %d: %s", fd->get(), strerror(errno));
                     return -errno;
                 }  // otherwise just continue
             } else if (amt == 0) {
-                VLOG("Reached EOF of input file %d", fd);
+                VLOG("Reached EOF of input file %d", fd->get());
                 pfds[0].fd = -1;  // reach EOF so don't have to poll pfds[0].
             } else {
                 rpos += amt;
@@ -200,13 +200,13 @@ status_t FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64
         if (cirSize > 0 && pfds[1].fd != -1) {
             ssize_t amt;
             if (rpos > wpos) {
-                amt = ::write(toFd, cirBuf + wpos, rpos - wpos);
+                amt = ::write(toFd->get(), cirBuf + wpos, rpos - wpos);
             } else {
-                amt = ::write(toFd, cirBuf + wpos, BUFFER_SIZE - wpos);
+                amt = ::write(toFd->get(), cirBuf + wpos, BUFFER_SIZE - wpos);
             }
             if (amt < 0) {
                 if (!(errno == EAGAIN || errno == EWOULDBLOCK)) {
-                    VLOG("Fail to write toFd %d: %s", toFd, strerror(errno));
+                    VLOG("Fail to write toFd %d: %s", toFd->get(), strerror(errno));
                     return -errno;
                 }  // otherwise just continue
             } else {
@@ -217,8 +217,8 @@ status_t FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64
 
         // if buffer is empty and fd is closed, close write fd.
         if (cirSize == 0 && pfds[0].fd == -1 && pfds[1].fd != -1) {
-            VLOG("Close write pipe %d", toFd);
-            ::close(pfds[1].fd);
+            VLOG("Close write pipe %d", toFd->get());
+            toFd->reset();
             pfds[1].fd = -1;
         }
 
@@ -231,14 +231,14 @@ status_t FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64
         }
 
         // read from parsing process
-        ssize_t amt = ::read(fromFd, mBuffer.writeBuffer(), mBuffer.currentToWrite());
+        ssize_t amt = ::read(fromFd->get(), mBuffer.writeBuffer(), mBuffer.currentToWrite());
         if (amt < 0) {
             if (!(errno == EAGAIN || errno == EWOULDBLOCK)) {
-                VLOG("Fail to read fromFd %d: %s", fromFd, strerror(errno));
+                VLOG("Fail to read fromFd %d: %s", fromFd->get(), strerror(errno));
                 return -errno;
             }  // otherwise just continue
         } else if (amt == 0) {
-            VLOG("Reached EOF of fromFd %d", fromFd);
+            VLOG("Reached EOF of fromFd %d", fromFd->get());
             break;
         } else {
             mBuffer.wp()->move(amt);

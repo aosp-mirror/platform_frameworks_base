@@ -53,16 +53,17 @@ bool Fpipe::close() {
 
 bool Fpipe::init() { return Pipe(&mRead, &mWrite); }
 
-int Fpipe::readFd() const { return mRead.get(); }
+unique_fd& Fpipe::readFd() { return mRead; }
 
-int Fpipe::writeFd() const { return mWrite.get(); }
+unique_fd& Fpipe::writeFd() { return mWrite; }
 
 pid_t fork_execute_cmd(const char* cmd, char* const argv[], Fpipe* input, Fpipe* output) {
     // fork used in multithreaded environment, avoid adding unnecessary code in child process
     pid_t pid = fork();
     if (pid == 0) {
-        if (TEMP_FAILURE_RETRY(dup2(input->readFd(), STDIN_FILENO)) < 0 || !input->close() ||
-            TEMP_FAILURE_RETRY(dup2(output->writeFd(), STDOUT_FILENO)) < 0 || !output->close()) {
+        if (TEMP_FAILURE_RETRY(dup2(input->readFd().get(), STDIN_FILENO)) < 0 || !input->close() ||
+            TEMP_FAILURE_RETRY(dup2(output->writeFd().get(), STDOUT_FILENO)) < 0 ||
+            !output->close()) {
             ALOGW("Can't setup stdin and stdout for command %s", cmd);
             _exit(EXIT_FAILURE);
         }
@@ -76,8 +77,8 @@ pid_t fork_execute_cmd(const char* cmd, char* const argv[], Fpipe* input, Fpipe*
         _exit(EXIT_FAILURE);  // always exits with failure if any
     }
     // close the fds used in child process.
-    close(input->readFd());
-    close(output->writeFd());
+    input->readFd().reset();
+    output->writeFd().reset();
     return pid;
 }
 

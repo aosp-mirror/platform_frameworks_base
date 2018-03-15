@@ -18,10 +18,12 @@
 #ifndef FD_BUFFER_H
 #define FD_BUFFER_H
 
+#include <android-base/unique_fd.h>
 #include <android/util/EncodedBuffer.h>
 #include <utils/Errors.h>
 
 using namespace android;
+using namespace android::base;
 using namespace android::util;
 using namespace std;
 
@@ -38,13 +40,13 @@ public:
      * Returns NO_ERROR if there were no errors or if we timed out.
      * Will mark the file O_NONBLOCK.
      */
-    status_t read(int fd, int64_t timeoutMs);
+    status_t read(unique_fd* fd, int64_t timeoutMs);
 
     /**
      * Read the data until we hit eof.
      * Returns NO_ERROR if there were no errors.
      */
-    status_t readFully(int fd);
+    status_t readFully(unique_fd* fd);
 
     /**
      * Read processed results by streaming data to a parsing process, e.g. incident helper.
@@ -56,8 +58,8 @@ public:
      *
      * Poll will return POLLERR if fd is from sysfs, handle this edge case.
      */
-    status_t readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeoutMs,
-                                       const bool isSysfs = false);
+    status_t readProcessedDataInStream(unique_fd* fd, unique_fd* toFd, unique_fd* fromFd,
+                                       int64_t timeoutMs, const bool isSysfs = false);
 
     /**
      * Whether we timed out.

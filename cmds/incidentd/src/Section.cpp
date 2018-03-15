@@ -277,8 +277,8 @@ FileSection::~FileSection() {}
 status_t FileSection::Execute(ReportRequestSet* requests) const {
     // read from mFilename first, make sure the file is available
     // add O_CLOEXEC to make sure it is closed when exec incident helper
-    int fd = open(mFilename, O_RDONLY | O_CLOEXEC);
-    if (fd == -1) {
+    unique_fd fd(open(mFilename, O_RDONLY | O_CLOEXEC));
+    if (fd.get() == -1) {
         ALOGW("FileSection '%s' failed to open file", this->name.string());
         return -errno;
     }
@@ -299,9 +299,8 @@ status_t FileSection::Execute(ReportRequestSet* requests) const {
     }
 
     // parent process
-    status_t readStatus = buffer.readProcessedDataInStream(fd, p2cPipe.writeFd(), c2pPipe.readFd(),
-                                                           this->timeoutMs, mIsSysfs);
-    close(fd);  // close the fd anyway.
+    status_t readStatus = buffer.readProcessedDataInStream(
+            &fd, &p2cPipe.writeFd(), &c2pPipe.readFd(), this->timeoutMs, mIsSysfs);
 
     if (readStatus != NO_ERROR || buffer.timedOut()) {
         ALOGW("FileSection '%s' failed to read data from incident helper: %s, timedout: %s",
@@ -342,17 +341,17 @@ GZipSection::~GZipSection() {}
 status_t GZipSection::Execute(ReportRequestSet* requests) const {
     // Reads the files in order, use the first available one.
     int index = 0;
-    int fd = -1;
+    unique_fd fd;
     while (mFilenames[index] != NULL) {
-        fd = open(mFilenames[index], O_RDONLY | O_CLOEXEC);
-        if (fd != -1) {
+        fd.reset(open(mFilenames[index], O_RDONLY | O_CLOEXEC));
+        if (fd.get() != -1) {
             break;
         }
         ALOGW("GZipSection failed to open file %s", mFilenames[index]);
         index++;  // look at the next file.
     }
-    VLOG("GZipSection is using file %s, fd=%d", mFilenames[index], fd);
-    if (fd == -1) return -1;
+    VLOG("GZipSection is using file %s, fd=%d", mFilenames[index], fd.get());
+    if (fd.get() == -1) return -1;
 
     FdBuffer buffer;
     Fpipe p2cPipe;
@@ -388,9 +387,9 @@ status_t GZipSection::Execute(ReportRequestSet* requests) const {
     VLOG("GZipSection '%s' editPos=%zd, dataBeginAt=%zd", this->name.string(), editPos,
          dataBeginAt);
 
-    status_t readStatus = buffer.readProcessedDataInStream(
-            fd, p2cPipe.writeFd(), c2pPipe.readFd(), this->timeoutMs, isSysfs(mFilenames[index]));
-    close(fd);  // close the fd anyway.
+    status_t readStatus =
+            buffer.readProcessedDataInStream(&fd, &p2cPipe.writeFd(), &c2pPipe.readFd(),
+                                             this->timeoutMs, isSysfs(mFilenames[index]));
 
     if (readStatus != NO_ERROR || buffer.timedOut()) {
         ALOGW("GZipSection '%s' failed to read data from gzip: %s, timedout: %s",
@@ -424,7 +423,7 @@ status_t GZipSection::Execute(ReportRequestSet* requests) const {
 // ================================================================================
 struct WorkerThreadData : public virtual RefBase {
     const WorkerThreadSection* section;
-    int fds[2];
+    Fpipe pipe;
 
     // Lock protects these fields
     mutex lock;
@@ -433,16 +432,10 @@ struct WorkerThreadData : public virtual RefBase {
 
     WorkerThreadData(const WorkerThreadSection* section);
     virtual ~WorkerThreadData();
-
-    int readFd() { return fds[0]; }
-    int writeFd() { return fds[1]; }
 };
 
 WorkerThreadData::WorkerThreadData(const WorkerThreadSection* sec)
-    : section(sec), workerDone(false), workerError(NO_ERROR) {
-    fds[0] = -1;
-    fds[1] = -1;
-}
+    : section(sec), workerDone(false), workerError(NO_ERROR) {}
 
 WorkerThreadData::~WorkerThreadData() {}
 
@@ -454,7 +447,7 @@ WorkerThreadSection::~WorkerThreadSection() {}
 
 static void* worker_thread_func(void* cookie) {
     WorkerThreadData* data = (WorkerThreadData*)cookie;
-    status_t err = data->section->BlockingCall(data->writeFd());
+    status_t err = data->section->BlockingCall(data->pipe.writeFd().get());
 
     {
         unique_lock<mutex> lock(data->lock);
@@ -462,7 +455,7 @@ static void* worker_thread_func(void* cookie) {
         data->workerError = err;
     }
 
-    close(data->writeFd());
+    data->pipe.writeFd().reset();
     data->decStrong(data->section);
     // data might be gone now. don't use it after this point in this thread.
     return NULL;
@@ -479,8 +472,7 @@ status_t WorkerThreadSection::Execute(ReportRequestSet* requests) const {
     sp<WorkerThreadData> data = new WorkerThreadData(this);
 
     // Create the pipe
-    err = pipe(data->fds);
-    if (err != 0) {
+    if (!data->pipe.init()) {
         return -errno;
     }
 
@@ -507,7 +499,7 @@ status_t WorkerThreadSection::Execute(ReportRequestSet* requests) const {
     pthread_attr_destroy(&attr);
 
     // Loop reading until either the timeout or the worker side is done (i.e. eof).
-    err = buffer.read(data->readFd(), this->timeoutMs);
+    err = buffer.read(&data->pipe.readFd(), this->timeoutMs);
     if (err != NO_ERROR) {
         // TODO: Log this error into the incident report.
         ALOGW("WorkerThreadSection '%s' reader failed with error '%s'", this->name.string(),
@@ -516,7 +508,7 @@ status_t WorkerThreadSection::Execute(ReportRequestSet* requests) const {
 
     // Done with the read fd. The worker thread closes the write one so
     // we never race and get here first.
-    close(data->readFd());
+    data->pipe.readFd().reset();
 
     // If the worker side is finished, then return its error (which may overwrite
     // our possible error -- but it's more interesting anyway).  If not, then we timed out.
@@ -602,7 +594,8 @@ status_t CommandSection::Execute(ReportRequestSet* requests) const {
     // child process to execute the command as root
     if (cmdPid == 0) {
         // replace command's stdout with ihPipe's write Fd
-        if (dup2(cmdPipe.writeFd(), STDOUT_FILENO) != 1 || !ihPipe.close() || !cmdPipe.close()) {
+        if (dup2(cmdPipe.writeFd().get(), STDOUT_FILENO) != 1 || !ihPipe.close() ||
+            !cmdPipe.close()) {
             ALOGW("CommandSection '%s' failed to set up stdout: %s", this->name.string(),
                   strerror(errno));
             _exit(EXIT_FAILURE);
@@ -619,8 +612,8 @@ status_t CommandSection::Execute(ReportRequestSet* requests) const {
         return -errno;
     }
 
-    close(cmdPipe.writeFd());
-    status_t readStatus = buffer.read(ihPipe.readFd(), this->timeoutMs);
+    cmdPipe.writeFd().reset();
+    status_t readStatus = buffer.read(&ihPipe.readFd(), this->timeoutMs);
     if (readStatus != NO_ERROR || buffer.timedOut()) {
         ALOGW("CommandSection '%s' failed to read data from incident helper: %s, timedout: %s",
               this->name.string(), strerror(-readStatus), buffer.timedOut() ? "true" : "false");
@@ -921,10 +914,10 @@ status_t TombstoneSection::BlockingCall(int pipeWriteFd) const {
             break;
         } else if (child == 0) {
             // This is the child process.
-            close(dumpPipe.readFd());
+            dumpPipe.readFd().reset();
             const int ret = dump_backtrace_to_file_timeout(
                     pid, is_java_process ? kDebuggerdJavaBacktrace : kDebuggerdNativeBacktrace,
-                    is_java_process ? 5 : 20, dumpPipe.writeFd());
+                    is_java_process ? 5 : 20, dumpPipe.writeFd().get());
             if (ret == -1) {
                 if (errno == 0) {
                     ALOGW("Dumping failed for pid '%d', likely due to a timeout\n", pid);
@@ -932,25 +925,17 @@ status_t TombstoneSection::BlockingCall(int pipeWriteFd) const {
                     ALOGE("Dumping failed for pid '%d': %s\n", pid, strerror(errno));
                 }
             }
-            if (close(dumpPipe.writeFd()) != 0) {
-                ALOGW("TombstoneSection '%s' failed to close dump pipe writeFd: %d",
-                      this->name.string(), errno);
-                _exit(EXIT_FAILURE);
-            }
-
+            dumpPipe.writeFd().reset();
             _exit(EXIT_SUCCESS);
         }
-        close(dumpPipe.writeFd());
+        dumpPipe.writeFd().reset();
         // Parent process.
         // Read from the pipe concurrently to avoid blocking the child.
         FdBuffer buffer;
-        err = buffer.readFully(dumpPipe.readFd());
+        err = buffer.readFully(&dumpPipe.readFd());
         if (err != NO_ERROR) {
             ALOGW("TombstoneSection '%s' failed to read stack dump: %d", this->name.string(), err);
-            if (close(dumpPipe.readFd()) != 0) {
-                ALOGW("TombstoneSection '%s' failed to close dump pipe readFd: %s",
-                      this->name.string(), strerror(errno));
-            }
+            dumpPipe.readFd().reset();
             break;
         }
 
@@ -967,13 +952,7 @@ status_t TombstoneSection::BlockingCall(int pipeWriteFd) const {
         proto.write(android::os::BackTraceProto::Stack::DUMP_DURATION_NS,
                     static_cast<long long>(Nanotime() - start));
         proto.end(token);
-
-        if (close(dumpPipe.readFd()) != 0) {
-            ALOGW("TombstoneSection '%s' failed to close dump pipe readFd: %d", this->name.string(),
-                  errno);
-            err = -errno;
-            break;
-        }
+        dumpPipe.readFd().reset();
     }
 
     proto.flush(pipeWriteFd);
