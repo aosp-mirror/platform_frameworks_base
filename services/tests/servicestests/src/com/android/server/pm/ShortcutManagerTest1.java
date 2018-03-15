@@ -62,6 +62,7 @@ import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -3987,6 +3988,10 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         if (!nowBackupAllowed) {
             pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_ALLOW_BACKUP;
         }
+
+        doReturn(expected != DISABLED_REASON_SIGNATURE_MISMATCH).when(
+                mMockPackageManagerInternal).isDataRestoreSafe(any(byte[].class), anyString());
+
         assertEquals(expected, spi.canRestoreTo(mService, pi, anyVersionOk));
     }
 
@@ -4959,6 +4964,9 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertNull(user0.getAllLaunchersForTest().get(PackageWithUser.of(USER_0, LAUNCHER_3)));
         assertNull(user0.getAllLaunchersForTest().get(PackageWithUser.of(USER_P0, LAUNCHER_1)));
 
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(any(byte[].class),
+                anyString());
+
         installPackage(USER_0, CALLING_PACKAGE_1);
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertWith(getCallerVisibleShortcuts())
@@ -5151,6 +5159,10 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
     protected void checkBackupAndRestore_publisherNotRestored(
             int package1DisabledReason) {
+        doReturn(package1DisabledReason != ShortcutInfo.DISABLED_REASON_SIGNATURE_MISMATCH).when(
+                mMockPackageManagerInternal).isDataRestoreSafe(any(byte[].class),
+                eq(CALLING_PACKAGE_1));
+
         installPackage(USER_0, CALLING_PACKAGE_1);
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertEquals(0, mManager.getDynamicShortcuts().size());
@@ -5159,6 +5171,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertFalse(mService.getPackageShortcutForTest(CALLING_PACKAGE_1, USER_0)
                 .getPackageInfo().isShadow());
 
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(
+                any(byte[].class), anyString());
 
         installPackage(USER_0, CALLING_PACKAGE_2);
         runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
@@ -5276,7 +5290,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         addPackage(LAUNCHER_1, LAUNCHER_UID_1, 10, "sigx"); // different signature
 
-        checkBackupAndRestore_launcherNotRestored();
+        checkBackupAndRestore_launcherNotRestored(true);
     }
 
     public void testBackupAndRestore_launcherNoLongerBackupTarget() {
@@ -5285,10 +5299,13 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         updatePackageInfo(LAUNCHER_1,
                 pi -> pi.applicationInfo.flags &= ~ApplicationInfo.FLAG_ALLOW_BACKUP);
 
-        checkBackupAndRestore_launcherNotRestored();
+        checkBackupAndRestore_launcherNotRestored(false);
     }
 
-    protected void checkBackupAndRestore_launcherNotRestored() {
+    protected void checkBackupAndRestore_launcherNotRestored(boolean differentSignatures) {
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(
+                any(byte[].class), anyString());
+
         installPackage(USER_0, CALLING_PACKAGE_1);
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertEquals(0, mManager.getDynamicShortcuts().size());
@@ -5306,6 +5323,9 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     mManager.getPinnedShortcuts()),
                     "s1", "s2", "s3");
         });
+
+        doReturn(!differentSignatures).when(mMockPackageManagerInternal).isDataRestoreSafe(
+                any(byte[].class), eq(LAUNCHER_1));
 
         // Now we try to restore launcher 1.  Then we realize it's not restorable, so L1 has no pinned
         // shortcuts.
@@ -5332,6 +5352,9 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     mManager.getPinnedShortcuts()),
                     "s2");
         });
+
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(
+                any(byte[].class), anyString());
 
         installPackage(USER_0, LAUNCHER_2);
         runWithCaller(LAUNCHER_2, USER_0, () -> {
@@ -5388,6 +5411,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
     }
 
     protected void checkBackupAndRestore_publisherAndLauncherNotRestored() {
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(any(byte[].class),
+                anyString());
         installPackage(USER_0, CALLING_PACKAGE_1);
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertEquals(0, mManager.getDynamicShortcuts().size());
@@ -5501,6 +5526,9 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertNull(user0.getAllLaunchersForTest().get(PackageWithUser.of(USER_0, LAUNCHER_3)));
         assertNull(user0.getAllLaunchersForTest().get(PackageWithUser.of(USER_P0, LAUNCHER_1)));
 
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(any(byte[].class),
+                anyString());
+
         installPackage(USER_0, CALLING_PACKAGE_1);
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertWith(getCallerVisibleShortcuts())
@@ -5586,6 +5614,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     .areAllDisabled();
         });
 
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(
+                any(byte[].class), anyString());
         backupAndRestore();
 
         // When re-installing the app, the manifest shortcut should be re-published.
@@ -5695,6 +5725,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     .haveIds("s1", "ms1");
         });
 
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(any(byte[].class),
+                anyString());
         // Backup and *without restarting the service, just call applyRestore()*.
         {
             int prevUid = mInjectedCallingUid;
@@ -5767,6 +5799,9 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_1,
                     list("ms1", "ms2", "ms3", "ms4", "s1", "s2"), HANDLE_USER_0);
         });
+
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(
+                any(byte[].class), anyString());
 
         backupAndRestore();
 
@@ -5993,6 +6028,9 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
         addPackage(CALLING_PACKAGE_1, CALLING_UID_1, 10, "22222");
         addPackage(LAUNCHER_1, LAUNCHER_UID_1, 10, "11111");
+
+        doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(
+                any(byte[].class), anyString());
 
         runWithSystemUid(() -> mService.applyRestore(payload, USER_0));
 
