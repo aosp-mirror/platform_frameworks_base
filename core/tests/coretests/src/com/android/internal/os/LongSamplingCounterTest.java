@@ -100,7 +100,6 @@ public class LongSamplingCounterTest {
         updateCounts(COUNT, CURRENT_COUNT);
         mCounter.onTimeStarted(0, 0, 0);
         assertEquals(COUNT, mCounter.mCount);
-        assertEquals(COUNT, mCounter.mUnpluggedCount);
     }
 
     @Test
