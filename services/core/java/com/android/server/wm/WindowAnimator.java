@@ -30,6 +30,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.view.Choreographer;
+import android.view.SurfaceControl;
 
 import com.android.server.AnimationThread;
 import com.android.server.policy.WindowManagerPolicy;
@@ -93,6 +94,8 @@ public class WindowAnimator {
      */
     private final ArrayList<Runnable> mAfterPrepareSurfacesRunnables = new ArrayList<>();
     private boolean mInExecuteAfterPrepareSurfacesRunnables;
+
+    private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
 
     WindowAnimator(final WindowManagerService service) {
         mService = service;
@@ -203,7 +206,7 @@ public class WindowAnimator {
                     final ScreenRotationAnimation screenRotationAnimation =
                             mDisplayContentsAnimators.valueAt(i).mScreenRotationAnimation;
                     if (screenRotationAnimation != null) {
-                        screenRotationAnimation.updateSurfacesInTransaction();
+                        screenRotationAnimation.updateSurfaces(mTransaction);
                     }
                     orAnimating(dc.getDockedDividerController().animate(mCurrentTime));
                     //TODO (multidisplay): Magnification is supported only for the default display.
@@ -219,6 +222,8 @@ public class WindowAnimator {
                 if (mService.mWatermark != null) {
                     mService.mWatermark.drawIfNeeded();
                 }
+
+                SurfaceControl.mergeToGlobalTransaction(mTransaction);
             } catch (RuntimeException e) {
                 Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
             } finally {

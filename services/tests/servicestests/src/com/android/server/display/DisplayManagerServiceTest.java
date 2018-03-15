@@ -44,6 +44,7 @@ import java.util.List;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 @SmallTest
 public class DisplayManagerServiceTest extends AndroidTestCase {
@@ -123,7 +124,7 @@ public class DisplayManagerServiceTest extends AndroidTestCase {
                 "Test Virtual Display", width, height, dpi, null /* surface */, flags /* flags */,
                 uniqueId);
 
-        displayManager.performTraversalInTransactionFromWindowManagerInternal();
+        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
 
         // flush the handler
         displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
@@ -161,7 +162,7 @@ public class DisplayManagerServiceTest extends AndroidTestCase {
                 "Test Virtual Display", width, height, dpi, null /* surface */, flags /* flags */,
                 uniqueId);
 
-        displayManager.performTraversalInTransactionFromWindowManagerInternal();
+        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
 
         // flush the handler
         displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
