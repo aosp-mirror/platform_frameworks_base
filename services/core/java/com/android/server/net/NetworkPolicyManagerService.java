@@ -2852,6 +2852,32 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
 
+            } else if ("month_over".equals(fake)) {
+                plans.add(SubscriptionPlan.Builder
+                        .createRecurringMonthly(ZonedDateTime.parse("2007-03-14T00:00:00.000Z"))
+                        .setTitle("G-Mobile is the carriers name who this plan belongs to")
+                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                                SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
+                        .setDataUsage(6 * TrafficStats.GB_IN_BYTES,
+                                ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
+                        .build());
+                plans.add(SubscriptionPlan.Builder
+                        .createRecurringMonthly(ZonedDateTime.parse("2017-03-14T00:00:00.000Z"))
+                        .setTitle("G-Mobile, Throttled after limit")
+                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                                SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
+                        .setDataUsage(5 * TrafficStats.GB_IN_BYTES,
+                                ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
+                        .build());
+                plans.add(SubscriptionPlan.Builder
+                        .createRecurringMonthly(ZonedDateTime.parse("2017-03-14T00:00:00.000Z"))
+                        .setTitle("G-Mobile, No data connection after limit")
+                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                                SubscriptionPlan.LIMIT_BEHAVIOR_DISABLED)
+                        .setDataUsage(5 * TrafficStats.GB_IN_BYTES,
+                                ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
+                        .build());
+
             } else if ("month_none".equals(fake)) {
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2007-03-14T00:00:00.000Z"))
