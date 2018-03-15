@@ -926,6 +926,34 @@ message WifiAwareLog {
   // total time within the logging window that aware was enabled
   optional int64 enabled_time_ms = 40;
 
+  // maximum number of concurrent publish sessions enabling ranging in a single app
+  optional int32 max_concurrent_publish_with_ranging_in_app = 41;
+
+  // maximum number of concurrent subscribe sessions specifying a geofence in a single app
+  optional int32 max_concurrent_subscribe_with_ranging_in_app = 42;
+
+  // maximum number of concurrent publish sessions enabling ranging in the system
+  optional int32 max_concurrent_publish_with_ranging_in_system = 43;
+
+  // maximum number of concurrent subscribe sessions specifying a geofence in the system
+  optional int32 max_concurrent_subscribe_with_ranging_in_system = 44;
+
+  // histogram of subscribe session geofence minimum (only when specified)
+  repeated HistogramBucket histogram_subscribe_geofence_min = 45;
+
+  // histogram of subscribe session geofence maximum (only when specified)
+  repeated HistogramBucket histogram_subscribe_geofence_max = 46;
+
+  // total number of subscribe sessions which enabled ranging
+  optional int32 num_subscribes_with_ranging = 47;
+
+  // total number of matches (service discovery indication) with ranging provided
+  optional int32 num_matches_with_ranging = 48;
+
+  // total number of matches (service discovery indication) for service discovery with ranging
+  // enabled which did not trigger ranging
+  optional int32 num_matches_without_ranging_for_ranging_enabled_subscribes = 49;
+
   // Histogram bucket for Wi-Fi Aware logs. Range is [start, end)
   message HistogramBucket {
     // lower range of the bucket (inclusive)
