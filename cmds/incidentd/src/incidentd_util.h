@@ -41,8 +41,8 @@ public:
 
     bool init();
     bool close();
-    int readFd() const;
-    int writeFd() const;
+    unique_fd& readFd();
+    unique_fd& writeFd();
 
 private:
     unique_fd mRead;
