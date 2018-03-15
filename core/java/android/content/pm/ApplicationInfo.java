@@ -1188,7 +1188,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             if (category != CATEGORY_UNDEFINED) {
                 pw.println(prefix + "category=" + category);
             }
-            pw.println("isAllowedToUseHiddenApi=" + isAllowedToUseHiddenApi());
+            pw.println(prefix + "isAllowedToUseHiddenApi=" + isAllowedToUseHiddenApi());
         }
         super.dumpBack(pw, prefix);
     }
