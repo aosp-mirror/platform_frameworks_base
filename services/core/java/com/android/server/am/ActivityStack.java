@@ -4590,7 +4590,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             }
             ActivityOptions.abort(options);
         } else {
-            updateTransitLocked(TRANSIT_TASK_TO_FRONT, starting, options);
+            updateTransitLocked(TRANSIT_TASK_TO_FRONT, r, options);
         }
         // If a new task is moved to the front, then mark the existing top activity as supporting
         // picture-in-picture while paused only if the task would not be considered an oerlay on top
