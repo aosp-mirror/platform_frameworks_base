@@ -60,7 +60,7 @@ class KeyguardEsimArea extends Button implements View.OnClickListener {
                                         .setMessage(R.string.error_disable_esim_msg)
                                         .setTitle(R.string.error_disable_esim_title)
                                         .setCancelable(false /* cancelable */)
-                                        .setNeutralButton(R.string.ok, null /* listener */);
+                                        .setPositiveButton(R.string.ok, null /* listener */);
                         AlertDialog alertDialog = builder.create();
                         alertDialog.getWindow().setType(
                                 WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
