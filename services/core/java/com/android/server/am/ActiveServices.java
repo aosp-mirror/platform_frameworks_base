@@ -3390,10 +3390,15 @@ public final class ActiveServices {
                 return;
             }
 
+            app = r.app;
+            if (app != null && app.debugging) {
+                // The app's being debugged; let it ride
+                return;
+            }
+
             if (DEBUG_BACKGROUND_CHECK) {
                 Slog.i(TAG, "Service foreground-required timeout for " + r);
             }
-            app = r.app;
             r.fgWaiting = false;
             stopServiceLocked(r);
         }
