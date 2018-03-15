@@ -32,6 +32,9 @@ enum AppTransitionReasonEnum {
     APP_TRANSITION_TIMEOUT = 3;
     // The transition was started because of a we drew a task snapshot.
     APP_TRANSITION_SNAPSHOT = 4;
+    // The transition was started because it was a recents animation and we only needed to wait on
+    // the wallpaper.
+    APP_TRANSITION_RECENTS_ANIM = 5;
 }
 
 // ActivityManager.java PROCESS_STATEs

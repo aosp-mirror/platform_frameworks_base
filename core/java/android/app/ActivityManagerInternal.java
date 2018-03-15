@@ -69,6 +69,13 @@ public abstract class ActivityManagerInternal {
               AppProtoEnums.APP_TRANSITION_SNAPSHOT; // 4
 
     /**
+     * Type for {@link #notifyAppTransitionStarting}: The transition was started because it was a
+     * recents animation and we only needed to wait on the wallpaper.
+     */
+    public static final int APP_TRANSITION_RECENTS_ANIM =
+            AppProtoEnums.APP_TRANSITION_RECENTS_ANIM; // 5
+
+    /**
      * The bundle key to extract the assist data.
      */
     public static final String ASSIST_KEY_DATA = "data";
