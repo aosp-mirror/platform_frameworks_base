@@ -148,31 +148,6 @@ void SkiaRecordingCanvas::drawVectorDrawable(VectorDrawableRoot* tree) {
 // Recording Canvas draw operations: Bitmaps
 // ----------------------------------------------------------------------------
 
-inline static const SkPaint* bitmapPaint(const SkPaint* origPaint, SkPaint* tmpPaint,
-                                         sk_sp<SkColorFilter> colorSpaceFilter) {
-    if ((origPaint && origPaint->isAntiAlias()) || colorSpaceFilter) {
-        if (origPaint) {
-            *tmpPaint = *origPaint;
-        }
-
-        if (colorSpaceFilter) {
-            if (tmpPaint->getColorFilter()) {
-                tmpPaint->setColorFilter(
-                        SkColorFilter::MakeComposeFilter(tmpPaint->refColorFilter(), colorSpaceFilter));
-            } else {
-                tmpPaint->setColorFilter(colorSpaceFilter);
-            }
-            LOG_ALWAYS_FATAL_IF(!tmpPaint->getColorFilter());
-        }
-
-
-        // disabling AA on bitmap draws matches legacy HWUI behavior
-        tmpPaint->setAntiAlias(false);
-        return tmpPaint;
-    } else {
-        return origPaint;
-    }
-}
 
 void SkiaRecordingCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const SkPaint* paint) {
     SkPaint tmpPaint;
