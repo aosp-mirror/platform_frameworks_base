@@ -16,6 +16,8 @@
 
 package android.util;
 
+import android.os.Process;
+
 /**
  * StatsLog provides an API for developers to send events to statsd. The events can be used to
  * define custom metrics inside statsd. We will rate-limit how often the calls can be made inside
@@ -34,7 +36,8 @@ public final class StatsLog extends StatsLogInternal {
      */
     public static boolean logStart(int label) {
         if (label >= 0 && label < 16) {
-            StatsLog.write(APP_BREADCRUMB_REPORTED, label, APP_BREADCRUMB_REPORTED__STATE__START);
+            StatsLog.write(APP_BREADCRUMB_REPORTED, Process.myUid(),
+                    label, APP_BREADCRUMB_REPORTED__STATE__START);
             return true;
         }
         return false;
@@ -48,7 +51,8 @@ public final class StatsLog extends StatsLogInternal {
      */
     public static boolean logStop(int label) {
         if (label >= 0 && label < 16) {
-            StatsLog.write(APP_BREADCRUMB_REPORTED, label, APP_BREADCRUMB_REPORTED__STATE__STOP);
+            StatsLog.write(APP_BREADCRUMB_REPORTED, Process.myUid(),
+                    label, APP_BREADCRUMB_REPORTED__STATE__STOP);
             return true;
         }
         return false;
@@ -62,7 +66,7 @@ public final class StatsLog extends StatsLogInternal {
      */
     public static boolean logEvent(int label) {
         if (label >= 0 && label < 16) {
-            StatsLog.write(APP_BREADCRUMB_REPORTED, label,
+            StatsLog.write(APP_BREADCRUMB_REPORTED, Process.myUid(), label,
                     APP_BREADCRUMB_REPORTED__STATE__UNSPECIFIED);
             return true;
         }
