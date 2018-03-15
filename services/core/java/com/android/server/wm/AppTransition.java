@@ -469,10 +469,16 @@ public class AppTransition implements Dump {
      * boost the priorities to a more important value whenever an app transition is going to happen
      * soon or an app transition is running.
      */
-    private void updateBooster() {
-        WindowManagerService.sThreadPriorityBooster.setAppTransitionRunning(
-                mNextAppTransition != TRANSIT_UNSET || mAppTransitionState == APP_STATE_READY
-                        || mAppTransitionState == APP_STATE_RUNNING);
+    void updateBooster() {
+        WindowManagerService.sThreadPriorityBooster.setAppTransitionRunning(needsBoosting());
+    }
+
+    private boolean needsBoosting() {
+        final boolean recentsAnimRunning = mService.getRecentsAnimationController() != null;
+        return mNextAppTransition != TRANSIT_UNSET
+                || mAppTransitionState == APP_STATE_READY
+                || mAppTransitionState == APP_STATE_RUNNING
+                || recentsAnimRunning;
     }
 
     void registerListenerLocked(AppTransitionListener listener) {
