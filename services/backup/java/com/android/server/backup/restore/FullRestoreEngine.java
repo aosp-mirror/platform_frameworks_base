@@ -23,9 +23,6 @@ import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.OP_TYPE_RESTORE_WAIT;
 import static com.android.server.backup.BackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 import static com.android.server.backup.BackupManagerService.TAG;
-import static com.android.server.backup.BackupManagerService.TIMEOUT_RESTORE_INTERVAL;
-import static com.android.server.backup.BackupManagerService
-        .TIMEOUT_SHARED_BACKUP_INTERVAL;
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_OPERATION_TIMEOUT;
 
 import android.app.ApplicationThreadConstants;
@@ -42,11 +39,13 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
+import com.android.server.backup.BackupAgentTimeoutParameters;
+import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.FileMetadata;
 import com.android.server.backup.KeyValueAdbRestoreEngine;
-import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.fullbackup.FullBackupObbConnection;
 import com.android.server.backup.utils.BytesReadListener;
 import com.android.server.backup.utils.FullBackupRestoreObserverUtils;
@@ -121,6 +120,8 @@ public class FullRestoreEngine extends RestoreEngine {
 
     final int mEphemeralOpToken;
 
+    private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
+
     public FullRestoreEngine(BackupManagerService backupManagerService,
             BackupRestoreTask monitorTask, IFullBackupRestoreObserver observer,
             IBackupManagerMonitor monitor, PackageInfo onlyPackage, boolean allowApks,
@@ -135,6 +136,9 @@ public class FullRestoreEngine extends RestoreEngine {
         mAllowObbs = allowObbs;
         mBuffer = new byte[32 * 1024];
         mBytes = 0;
+        mAgentTimeoutParameters = Preconditions.checkNotNull(
+                backupManagerService.getAgentTimeoutParameters(),
+                "Timeout parameters cannot be null");
     }
 
     public IBackupAgent getAgent() {
@@ -381,8 +385,8 @@ public class FullRestoreEngine extends RestoreEngine {
                         long toCopy = info.size;
                         final boolean isSharedStorage = pkg.equals(SHARED_BACKUP_AGENT_PACKAGE);
                         final long timeout = isSharedStorage ?
-                                TIMEOUT_SHARED_BACKUP_INTERVAL :
-                                TIMEOUT_RESTORE_INTERVAL;
+                                mAgentTimeoutParameters.getSharedBackupAgentTimeoutMillis() :
+                                mAgentTimeoutParameters.getRestoreAgentTimeoutMillis();
                         try {
                             mBackupManagerService.prepareOperationTimeout(token,
                                     timeout,

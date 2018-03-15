@@ -41,12 +41,14 @@ import android.app.backup.IRestoreSession;
 import android.app.backup.RestoreSet;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 
 import com.android.server.EventLogTags;
+import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.internal.BackupHandler;
@@ -115,6 +117,15 @@ public class ActiveRestoreSessionTest {
 
         Looper backupLooper = startBackupThreadAndGetLooper();
         mShadowBackupLooper = shadowOf(backupLooper);
+
+        Handler mainHandler = new Handler(Looper.getMainLooper());
+        BackupAgentTimeoutParameters agentTimeoutParameters =
+                new BackupAgentTimeoutParameters(mainHandler, application.getContentResolver());
+        agentTimeoutParameters.start();
+
+        // We need to mock BMS timeout parameters before initializing the BackupHandler since
+        // the constructor of BackupHandler relies on it.
+        when(mBackupManagerService.getAgentTimeoutParameters()).thenReturn(agentTimeoutParameters);
         BackupHandler backupHandler = new BackupHandler(mBackupManagerService, backupLooper);
 
         mWakeLock = createBackupWakeLock(application);
@@ -125,7 +136,8 @@ public class ActiveRestoreSessionTest {
                 mTransportManager,
                 application.getPackageManager(),
                 backupHandler,
-                mWakeLock);
+                mWakeLock,
+                agentTimeoutParameters);
         when(mBackupManagerService.getPendingRestores()).thenReturn(new ArrayDeque<>());
     }
 
