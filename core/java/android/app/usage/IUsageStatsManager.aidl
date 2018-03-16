@@ -16,6 +16,7 @@
 
 package android.app.usage;
 
+import android.app.PendingIntent;
 import android.app.usage.UsageEvents;
 import android.content.pm.ParceledListSlice;
 
@@ -43,4 +44,7 @@ interface IUsageStatsManager {
     void setAppStandbyBucket(String packageName, int bucket, int userId);
     ParceledListSlice getAppStandbyBuckets(String callingPackage, int userId);
     void setAppStandbyBuckets(in ParceledListSlice appBuckets, int userId);
+    void registerAppUsageObserver(int observerId, in String[] packages, long timeLimitMs,
+            in PendingIntent callback, String callingPackage);
+    void unregisterAppUsageObserver(int observerId, String callingPackage);
 }

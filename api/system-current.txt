@@ -729,9 +729,14 @@ package android.app.usage {
   public final class UsageStatsManager {
     method public int getAppStandbyBucket(java.lang.String);
     method public java.util.Map<java.lang.String, java.lang.Integer> getAppStandbyBuckets();
+    method public void registerAppUsageObserver(int, java.lang.String[], long, java.util.concurrent.TimeUnit, android.app.PendingIntent);
     method public void setAppStandbyBucket(java.lang.String, int);
     method public void setAppStandbyBuckets(java.util.Map<java.lang.String, java.lang.Integer>);
+    method public void unregisterAppUsageObserver(int);
     method public void whitelistAppTemporarily(java.lang.String, long, android.os.UserHandle);
+    field public static final java.lang.String EXTRA_OBSERVER_ID = "android.app.usage.extra.OBSERVER_ID";
+    field public static final java.lang.String EXTRA_TIME_LIMIT = "android.app.usage.extra.TIME_LIMIT";
+    field public static final java.lang.String EXTRA_TIME_USED = "android.app.usage.extra.TIME_USED";
     field public static final int STANDBY_BUCKET_EXEMPTED = 5; // 0x5
     field public static final int STANDBY_BUCKET_NEVER = 50; // 0x32
   }
