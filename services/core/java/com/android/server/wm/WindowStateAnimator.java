@@ -221,6 +221,10 @@ class WindowStateAnimator {
 
     private final SurfaceControl.Transaction mReparentTransaction = new SurfaceControl.Transaction();
 
+    // Used to track whether we have called detach children on the way to invisibility, in which
+    // case we need to give the client a new Surface if it lays back out to a visible state.
+    boolean mChildrenDetached = false;
+
     WindowStateAnimator(final WindowState win) {
         final WindowManagerService service = win.mService;
 
@@ -430,6 +434,7 @@ class WindowStateAnimator {
         if (mSurfaceController != null) {
             return mSurfaceController;
         }
+        mChildrenDetached = false;
 
         if ((mWin.mAttrs.privateFlags & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0) {
             windowType = SurfaceControl.WINDOW_TYPE_DONT_SCREENSHOT;
@@ -1478,6 +1483,7 @@ class WindowStateAnimator {
         if (mSurfaceController != null) {
             mSurfaceController.detachChildren();
         }
+        mChildrenDetached = true;
     }
 
     int getLayer() {
