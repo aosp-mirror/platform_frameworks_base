@@ -28,7 +28,6 @@ import android.media.MediaSession2.CommandButton;
 import android.media.MediaSession2.CommandGroup;
 import android.media.MediaSession2.ControllerInfo;
 import android.media.MediaSession2.ErrorCode;
-import android.media.MediaSession2.PlaylistParams;
 import android.media.session.MediaSessionManager;
 import android.media.update.ApiLoader;
 import android.media.update.MediaController2Provider;
@@ -249,17 +248,6 @@ public class MediaController2 implements AutoCloseable {
         public void onRepeatModeChanged(@NonNull MediaController2 controller,
                 @NonNull MediaPlaylistAgent playlistAgent,
                 @MediaPlaylistAgent.RepeatMode int repeatMode) { }
-
-        /**
-         * Called when the playlist parameters are changed.
-         *
-         * @param controller the controller for this event
-         * @param params The new play list parameters.
-         * @hide
-         */
-        // TODO(jaewan): Remove (b/74116823)
-        public void onPlaylistParamsChanged(@NonNull MediaController2 controller,
-                @NonNull PlaylistParams params) { }
     }
 
     /**
@@ -458,19 +446,6 @@ public class MediaController2 implements AutoCloseable {
      */
     public void seekTo(long pos) {
         mProvider.seekTo_impl(pos);
-    }
-
-    /**
-     * Sets the {@link PlaylistParams} for the current play list. Repeat/shuffle mode and metadata
-     * for the list can be set by calling this method.
-     *
-     * @param params A {@link PlaylistParams} object to set.
-     * @throws IllegalArgumentException if given {@param param} is null.
-     * @hide
-     */
-    // TODO(jaewan): Remove (b/74116823)
-    public void setPlaylistParams(@NonNull PlaylistParams params) {
-        mProvider.setPlaylistParams_impl(params);
     }
 
     /**
@@ -761,17 +736,6 @@ public class MediaController2 implements AutoCloseable {
     }
 
     /**
-     * Returns the {@link PlaylistParams} for the current play list.
-     * Can return {@code null} if the controller doesn't have enough permission, or if the session
-     * has not set the parameters.
-     * @hide
-     */
-    // TODO(jaewan): Remove (b/74116823)
-    public @Nullable PlaylistParams getPlaylistParams() {
-        return mProvider.getPlaylistParams_impl();
-    }
-
-    /**
      * Inserts the media item to the playlist at position index.
      * <p>
      * This will not change the currently playing media item.
@@ -819,6 +783,24 @@ public class MediaController2 implements AutoCloseable {
     }
 
     /**
+     * Skips to the previous item in the playlist.
+     * <p>
+     * This calls {@link MediaPlaylistAgent#skipToPreviousItem()}.
+     */
+     public void skipToPreviousItem() {
+         mProvider.skipToPreviousItem_impl();
+     }
+
+    /**
+     * Skips to the next item in the playlist.
+     * <p>
+     * This calls {@link MediaPlaylistAgent#skipToNextItem()}.
+     */
+    public void skipToNextItem() {
+        mProvider.skipToNextItem_impl();
+    }
+
+    /**
      * Skips to the item in the playlist.
      * <p>
      * This calls {@link MediaPlaylistAgent#skipToPlaylistItem(MediaItem2)}.
@@ -830,38 +812,54 @@ public class MediaController2 implements AutoCloseable {
     }
 
     /**
-     * Skips to the previous item in the playlist.
-     * <p>
-     * This calls {@link MediaPlaylistAgent#skipToPreviousItem()}.
+     * Gets the cached repeat mode from the {@link ControllerCallback#onRepeatModeChanged(
+     * MediaController2, MediaPlaylistAgent, int)}.
+     *
+     * @return repeat mode
+     * @see MediaPlaylistAgent#REPEAT_MODE_NONE
+     * @see MediaPlaylistAgent#REPEAT_MODE_ONE
+     * @see MediaPlaylistAgent#REPEAT_MODE_ALL
+     * @see MediaPlaylistAgent#REPEAT_MODE_GROUP
      */
-    public void skipToPreviousItem() {
-        mProvider.skipToPreviousItem_impl();
+    public @RepeatMode int getRepeatMode() {
+        return mProvider.getRepeatMode_impl();
     }
 
     /**
-     * Skips to the next item in the playlist.
-     * <p>
-     * This calls {@link MediaPlaylistAgent#skipToNextItem()}.
+     * Sets the repeat mode.
+     *
+     * @param repeatMode repeat mode
+     * @see MediaPlaylistAgent#REPEAT_MODE_NONE
+     * @see MediaPlaylistAgent#REPEAT_MODE_ONE
+     * @see MediaPlaylistAgent#REPEAT_MODE_ALL
+     * @see MediaPlaylistAgent#REPEAT_MODE_GROUP
      */
-    public void skipToNextItem() {
-        mProvider.skipToNextItem_impl();
-    }
-
-    public @RepeatMode int getRepeatMode() {
-        // TODO(jaewan): Implement (b/74118768)
-        return 0;
-    }
-
     public void setRepeatMode(@RepeatMode int repeatMode) {
-        // TODO(jaewan): Implement (b/74118768)
+        mProvider.setRepeatMode_impl(repeatMode);
     }
 
+    /**
+     * Gets the cached shuffle mode from the {@link ControllerCallback#onShuffleModeChanged(
+     * MediaController2, MediaPlaylistAgent, int)}.
+     *
+     * @return The shuffle mode
+     * @see MediaPlaylistAgent#SHUFFLE_MODE_NONE
+     * @see MediaPlaylistAgent#SHUFFLE_MODE_ALL
+     * @see MediaPlaylistAgent#SHUFFLE_MODE_GROUP
+     */
     public @ShuffleMode int getShuffleMode() {
-        // TODO(jaewan): Implement (b/74118768)
-        return 0;
+        return mProvider.getShuffleMode_impl();
     }
 
+    /**
+     * Sets the shuffle mode.
+     *
+     * @param shuffleMode The shuffle mode
+     * @see MediaPlaylistAgent#SHUFFLE_MODE_NONE
+     * @see MediaPlaylistAgent#SHUFFLE_MODE_ALL
+     * @see MediaPlaylistAgent#SHUFFLE_MODE_GROUP
+     */
     public void setShuffleMode(@ShuffleMode int shuffleMode) {
-        // TODO(jaewan): Implement (b/74118768)
+        mProvider.setShuffleMode_impl(shuffleMode);
     }
 }
