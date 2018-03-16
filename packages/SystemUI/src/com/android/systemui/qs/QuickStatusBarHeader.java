@@ -33,7 +33,9 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
+import android.view.WindowInsets;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -47,6 +49,7 @@ import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSDetail.Callback;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
@@ -260,6 +263,19 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
     public void onAttachedToWindow() {
         SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallbacks(this);
         Dependency.get(StatusBarIconController.class).addIconGroup(mIconManager);
+        requestApplyInsets();
+    }
+
+    @Override
+    public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        Pair<Integer, Integer> padding = PhoneStatusBarView.cornerCutoutMargins(
+                insets.getDisplayCutout(), getDisplay());
+        if (padding == null) {
+            setPadding(0, 0, 0, 0);
+        } else {
+            setPadding(padding.first, 0, padding.second, 0);
+        }
+        return super.onApplyWindowInsets(insets);
     }
 
     @Override
