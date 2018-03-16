@@ -26,8 +26,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
-import android.media.AudioDeviceCallback;
-import android.media.AudioDeviceInfo;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.IVolumeController;
@@ -40,6 +39,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.Condition;
@@ -59,9 +59,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -77,6 +75,11 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
     private static final int DYNAMIC_STREAM_START_INDEX = 100;
     private static final int VIBRATE_HINT_DURATION = 50;
+    private static final AudioAttributes SONFICIATION_VIBRATION_ATTRIBUTES =
+            new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                    .build();
 
     static final ArrayMap<Integer, Integer> STREAMS = new ArrayMap<>();
     static {
@@ -299,7 +302,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
     public void vibrate() {
         if (mHasVibrator) {
-            mVibrator.vibrate(VIBRATE_HINT_DURATION);
+            mVibrator.vibrate(VibrationEffect.createOneShot(VIBRATE_HINT_DURATION,
+                    VibrationEffect.DEFAULT_AMPLITUDE), SONFICIATION_VIBRATION_ATTRIBUTES);
         }
     }
 
@@ -308,7 +312,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     }
 
     private void onNotifyVisibleW(boolean visible) {
-        if (mDestroyed) return;
+        if (mDestroyed) return; 
         mAudio.notifyVolumeControllerVisible(mVolumeController, visible);
         if (!visible) {
             if (updateActiveStreamW(-1)) {
