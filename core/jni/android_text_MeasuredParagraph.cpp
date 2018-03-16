@@ -16,6 +16,7 @@
 
 #define LOG_TAG "MeasuredParagraph"
 
+#include "GraphicsJNI.h"
 #include "ScopedIcuLocale.h"
 #include "unicode/locid.h"
 #include "unicode/brkiter.h"
@@ -109,6 +110,33 @@ static jfloat nGetWidth(jlong ptr, jint start, jint end) {
     return r;
 }
 
+// Regular JNI
+static void nGetBounds(JNIEnv* env, jobject, jlong ptr, jcharArray javaText, jlong paintPtr,
+                           jint start, jint end, jint bidiFlags, jobject bounds) {
+    ScopedCharArrayRO text(env, javaText);
+    const minikin::U16StringPiece textBuffer(text.get(), text.size());
+
+    minikin::MeasuredText* mt = toMeasuredParagraph(ptr);
+    Paint* paint = toPaint(paintPtr);
+    const Typeface* typeface = Typeface::resolveDefault(paint->getAndroidTypeface());
+    minikin::Layout layout = MinikinUtils::doLayout(paint,
+            static_cast<minikin::Bidi>(bidiFlags), typeface, textBuffer.data(), start, end - start,
+            textBuffer.size(), mt);
+
+    minikin::MinikinRect rect;
+    layout.getBounds(&rect);
+
+    SkRect r;
+    r.fLeft = rect.mLeft;
+    r.fTop = rect.mTop;
+    r.fRight = rect.mRight;
+    r.fBottom = rect.mBottom;
+
+    SkIRect ir;
+    r.roundOut(&ir);
+    GraphicsJNI::irect_to_jrect(ir, env, bounds);
+}
+
 // CriticalNative
 static jlong nGetReleaseFunc() {
     return toJLong(&releaseMeasuredParagraph);
@@ -128,6 +156,7 @@ static const JNINativeMethod gMethods[] = {
 
     // MeasuredParagraph native functions.
     {"nGetWidth", "(JII)F", (void*) nGetWidth},  // Critical Natives
+    {"nGetBounds", "(J[CJIIILandroid/graphics/Rect;)V", (void*) nGetBounds},  // Regular JNI
     {"nGetReleaseFunc", "()J", (void*) nGetReleaseFunc},  // Critical Natives
     {"nGetMemoryUsage", "(J)I", (void*) nGetMemoryUsage},  // Critical Native
 };
