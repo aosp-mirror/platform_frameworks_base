@@ -16,7 +16,9 @@
 
 package com.android.server.textclassifier;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -25,12 +27,14 @@ import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Slog;
-import android.service.textclassifier.ITextClassifierService;
+import android.os.UserHandle;
 import android.service.textclassifier.ITextClassificationCallback;
+import android.service.textclassifier.ITextClassifierService;
 import android.service.textclassifier.ITextLinksCallback;
 import android.service.textclassifier.ITextSelectionCallback;
 import android.service.textclassifier.TextClassifierService;
+import android.util.Slog;
+import android.util.SparseArray;
 import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassifier;
@@ -38,12 +42,13 @@ import android.view.textclassifier.TextLinks;
 import android.view.textclassifier.TextSelection;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.FunctionalUtils;
+import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 import java.util.Queue;
-import java.util.concurrent.Callable;
 
 /**
  * A manager for TextClassifier services.
@@ -73,58 +78,44 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                 Slog.e(LOG_TAG, "Could not start the TextClassificationManagerService.", t);
             }
         }
+
+        @Override
+        public void onStartUser(int userId) {
+            processAnyPendingWork(userId);
+        }
+
+        @Override
+        public void onUnlockUser(int userId) {
+            // Rebind if we failed earlier due to locked encrypted user
+            processAnyPendingWork(userId);
+        }
+
+        private void processAnyPendingWork(int userId) {
+            synchronized (mManagerService.mLock) {
+                mManagerService.getUserStateLocked(userId).bindIfHasPendingRequestsLocked();
+            }
+        }
+
+        @Override
+        public void onStopUser(int userId) {
+            synchronized (mManagerService.mLock) {
+                UserState userState = mManagerService.peekUserStateLocked(userId);
+                if (userState != null) {
+                    userState.mConnection.cleanupService();
+                    mManagerService.mUserStates.remove(userId);
+                }
+            }
+        }
+
     }
 
     private final Context mContext;
-    private final Intent mServiceIntent;
-    private final ServiceConnection mConnection;
     private final Object mLock;
     @GuardedBy("mLock")
-    private final Queue<PendingRequest> mPendingRequests;
-
-    @GuardedBy("mLock")
-    private ITextClassifierService mService;
-    @GuardedBy("mLock")
-    private boolean mBinding;
+    final SparseArray<UserState> mUserStates = new SparseArray<>();
 
     private TextClassificationManagerService(Context context) {
         mContext = Preconditions.checkNotNull(context);
-        mServiceIntent = new Intent(TextClassifierService.SERVICE_INTERFACE)
-                .setComponent(TextClassifierService.getServiceComponentName(mContext));
-        mConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                synchronized (mLock) {
-                    mService = ITextClassifierService.Stub.asInterface(service);
-                    setBindingLocked(false);
-                    handlePendingRequestsLocked();
-                }
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-                cleanupService();
-            }
-
-            @Override
-            public void onBindingDied(ComponentName name) {
-                cleanupService();
-            }
-
-            @Override
-            public void onNullBinding(ComponentName name) {
-                cleanupService();
-            }
-
-            private void cleanupService() {
-                synchronized (mLock) {
-                    mService = null;
-                    setBindingLocked(false);
-                    handlePendingRequestsLocked();
-                }
-            }
-        };
-        mPendingRequests = new LinkedList<>();
         mLock = new Object();
     }
 
@@ -133,30 +124,20 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             CharSequence text, int selectionStartIndex, int selectionEndIndex,
             TextSelection.Options options, ITextSelectionCallback callback)
             throws RemoteException {
-        // TODO(b/72481438): All remote calls need to take userId.
         validateInput(text, selectionStartIndex, selectionEndIndex, callback);
 
-        if (!bind()) {
-            callback.onFailure();
-            return;
-        }
-
         synchronized (mLock) {
-            if (isBoundLocked()) {
-                mService.onSuggestSelection(
+            UserState userState = getCallingUserStateLocked();
+            if (!userState.bindLocked()) {
+                callback.onFailure();
+            } else if (userState.isBoundLocked()) {
+                userState.mService.onSuggestSelection(
                         text, selectionStartIndex, selectionEndIndex, options, callback);
             } else {
-                final Callable<Void> request = () -> {
-                    onSuggestSelection(
-                            text, selectionStartIndex, selectionEndIndex,
-                            options, callback);
-                    return null;
-                };
-                final Callable<Void> onServiceFailure = () -> {
-                    callback.onFailure();
-                    return null;
-                };
-                enqueueRequestLocked(request, onServiceFailure, callback.asBinder());
+                userState.mPendingRequests.add(new PendingRequest(
+                        () -> onSuggestSelection(
+                                text, selectionStartIndex, selectionEndIndex, options, callback),
+                        callback::onFailure, callback.asBinder(), this, userState));
             }
         }
     }
@@ -168,24 +149,16 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             throws RemoteException {
         validateInput(text, startIndex, endIndex, callback);
 
-        if (!bind()) {
-            callback.onFailure();
-            return;
-        }
-
         synchronized (mLock) {
-            if (isBoundLocked()) {
-                mService.onClassifyText(text, startIndex, endIndex, options, callback);
+            UserState userState = getCallingUserStateLocked();
+            if (!userState.bindLocked()) {
+                callback.onFailure();
+            } else if (userState.isBoundLocked()) {
+                userState.mService.onClassifyText(text, startIndex, endIndex, options, callback);
             } else {
-                final Callable<Void> request = () -> {
-                    onClassifyText(text, startIndex, endIndex, options, callback);
-                    return null;
-                };
-                final Callable<Void> onServiceFailure = () -> {
-                    callback.onFailure();
-                    return null;
-                };
-                enqueueRequestLocked(request, onServiceFailure, callback.asBinder());
+                userState.mPendingRequests.add(new PendingRequest(
+                        () -> onClassifyText(text, startIndex, endIndex, options, callback),
+                        callback::onFailure, callback.asBinder(), this, userState));
             }
         }
     }
@@ -196,24 +169,16 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             throws RemoteException {
         validateInput(text, callback);
 
-        if (!bind()) {
-            callback.onFailure();
-            return;
-        }
-
         synchronized (mLock) {
-            if (isBoundLocked()) {
-                mService.onGenerateLinks(text, options, callback);
+            UserState userState = getCallingUserStateLocked();
+            if (!userState.bindLocked()) {
+                callback.onFailure();
+            } else if (userState.isBoundLocked()) {
+                userState.mService.onGenerateLinks(text, options, callback);
             } else {
-                final Callable<Void> request = () -> {
-                    onGenerateLinks(text, options, callback);
-                    return null;
-                };
-                final Callable<Void> onServiceFailure = () -> {
-                    callback.onFailure();
-                    return null;
-                };
-                enqueueRequestLocked(request, onServiceFailure, callback.asBinder());
+                userState.mPendingRequests.add(new PendingRequest(
+                        () -> onGenerateLinks(text, options, callback),
+                        callback::onFailure, callback.asBinder(), this, userState));
             }
         }
     }
@@ -223,99 +188,63 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         validateInput(event, mContext);
 
         synchronized (mLock) {
-            if (isBoundLocked()) {
-                mService.onSelectionEvent(event);
+            UserState userState = getCallingUserStateLocked();
+            if (userState.isBoundLocked()) {
+                userState.mService.onSelectionEvent(event);
             } else {
-                final Callable<Void> request = () -> {
-                    onSelectionEvent(event);
-                    return null;
-                };
-                enqueueRequestLocked(request, null /* onServiceFailure */, null /* binder */);
+                userState.mPendingRequests.add(new PendingRequest(
+                        () -> onSelectionEvent(event),
+                        null /* onServiceFailure */, null /* binder */, this, userState));
             }
         }
     }
 
-    /**
-     * @return true if the service is bound or in the process of being bound.
-     *      Returns false otherwise.
-     */
-    private boolean bind() {
-        synchronized (mLock) {
-            if (isBoundLocked() || isBindingLocked()) {
-                return true;
-            }
+    private UserState getCallingUserStateLocked() {
+        return getUserStateLocked(UserHandle.getCallingUserId());
+    }
 
-            // TODO: Handle bind timeout.
-            final boolean willBind;
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                Slog.d(LOG_TAG, "Binding to " + mServiceIntent.getComponent());
-                willBind = mContext.bindServiceAsUser(
-                        mServiceIntent, mConnection,
-                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
-                        Binder.getCallingUserHandle());
-                setBindingLocked(willBind);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-            return willBind;
+    private UserState getUserStateLocked(int userId) {
+        UserState result = mUserStates.get(userId);
+        if (result == null) {
+            result = new UserState(userId, mContext, mLock);
+            mUserStates.put(userId, result);
         }
+        return result;
     }
 
-    @GuardedBy("mLock")
-    private boolean isBoundLocked() {
-        return mService != null;
+    UserState peekUserStateLocked(int userId) {
+        return mUserStates.get(userId);
     }
 
-    @GuardedBy("mLock")
-    private boolean isBindingLocked() {
-        return mBinding;
-    }
+    private static final class PendingRequest implements IBinder.DeathRecipient {
 
-    @GuardedBy("mLock")
-    private void setBindingLocked(boolean binding) {
-        mBinding = binding;
-    }
-
-    @GuardedBy("mLock")
-    private void enqueueRequestLocked(
-            Callable<Void> request, Callable<Void> onServiceFailure, IBinder binder) {
-        mPendingRequests.add(new PendingRequest(request, onServiceFailure, binder));
-    }
-
-    @GuardedBy("mLock")
-    private void handlePendingRequestsLocked() {
-        // TODO(b/72481146): Implement PendingRequest similar to that in RemoteFillService.
-        final PendingRequest[] pendingRequests =
-                mPendingRequests.toArray(new PendingRequest[mPendingRequests.size()]);
-        for (PendingRequest pendingRequest : pendingRequests) {
-            if (isBoundLocked()) {
-                pendingRequest.executeLocked();
-            } else {
-                pendingRequest.notifyServiceFailureLocked();
-            }
-        }
-    }
-
-    private final class PendingRequest implements IBinder.DeathRecipient {
-
-        private final Callable<Void> mRequest;
-        @Nullable private final Callable<Void> mOnServiceFailure;
         @Nullable private final IBinder mBinder;
+        @NonNull private final Runnable mRequest;
+        @Nullable private final Runnable mOnServiceFailure;
+        @GuardedBy("mLock")
+        @NonNull private final UserState mOwningUser;
+        @NonNull private final TextClassificationManagerService mService;
 
         /**
          * Initializes a new pending request.
-         *
          * @param request action to perform when the service is bound
          * @param onServiceFailure action to perform when the service dies or disconnects
          * @param binder binder to the process that made this pending request
+         * @param service
+         * @param owningUser
          */
         PendingRequest(
-                Callable<Void> request, @Nullable Callable<Void> onServiceFailure,
-                @Nullable IBinder binder) {
-            mRequest = Preconditions.checkNotNull(request);
-            mOnServiceFailure = onServiceFailure;
+                @NonNull ThrowingRunnable request, @Nullable ThrowingRunnable onServiceFailure,
+                @Nullable IBinder binder,
+                TextClassificationManagerService service,
+                UserState owningUser) {
+            mRequest =
+                    logOnFailure(Preconditions.checkNotNull(request), "handling pending request");
+            mOnServiceFailure =
+                    logOnFailure(onServiceFailure, "notifying callback of service failure");
             mBinder = binder;
+            mService = service;
+            mOwningUser = owningUser;
             if (mBinder != null) {
                 try {
                     mBinder.linkToDeath(this, 0);
@@ -325,32 +254,9 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             }
         }
 
-        @GuardedBy("mLock")
-        void executeLocked() {
-            removeLocked();
-            try {
-                mRequest.call();
-            } catch (Exception e) {
-                Slog.d(LOG_TAG, "Error handling pending request: " + e.getMessage());
-            }
-        }
-
-        @GuardedBy("mLock")
-        void notifyServiceFailureLocked() {
-            removeLocked();
-            if (mOnServiceFailure != null) {
-                try {
-                    mOnServiceFailure.call();
-                } catch (Exception e) {
-                    Slog.d(LOG_TAG, "Error notifying callback of service failure: "
-                            + e.getMessage());
-                }
-            }
-        }
-
         @Override
         public void binderDied() {
-            synchronized (mLock) {
+            synchronized (mService.mLock) {
                 // No need to handle this pending request anymore. Remove.
                 removeLocked();
             }
@@ -358,11 +264,17 @@ public final class TextClassificationManagerService extends ITextClassifierServi
 
         @GuardedBy("mLock")
         private void removeLocked() {
-            mPendingRequests.remove(this);
+            mOwningUser.mPendingRequests.remove(this);
             if (mBinder != null) {
                 mBinder.unlinkToDeath(this, 0);
             }
         }
+    }
+
+    private static Runnable logOnFailure(@Nullable ThrowingRunnable r, String opDesc) {
+        if (r == null) return null;
+        return FunctionalUtils.handleExceptions(r,
+                e -> Slog.d(LOG_TAG, "Error " + opDesc + ": " + e.getMessage()));
     }
 
     private static void validateInput(
@@ -394,6 +306,121 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         } catch (IllegalArgumentException | NullPointerException |
                 PackageManager.NameNotFoundException e) {
             throw new RemoteException(e.getMessage());
+        }
+    }
+
+    private static final class UserState {
+        @UserIdInt final int mUserId;
+        final TextClassifierServiceConnection mConnection = new TextClassifierServiceConnection();
+        @GuardedBy("mLock")
+        final Queue<PendingRequest> mPendingRequests = new ArrayDeque<>();
+        @GuardedBy("mLock")
+        ITextClassifierService mService;
+        @GuardedBy("mLock")
+        boolean mBinding;
+
+        private final Context mContext;
+        private final Object mLock;
+
+        private UserState(int userId, Context context, Object lock) {
+            mUserId = userId;
+            mContext = Preconditions.checkNotNull(context);
+            mLock = Preconditions.checkNotNull(lock);
+        }
+
+        @GuardedBy("mLock")
+        boolean isBoundLocked() {
+            return mService != null;
+        }
+
+        @GuardedBy("mLock")
+        private void handlePendingRequestsLocked() {
+            // TODO(b/72481146): Implement PendingRequest similar to that in RemoteFillService.
+            PendingRequest request;
+            while ((request = mPendingRequests.poll()) != null) {
+                if (isBoundLocked()) {
+                    request.mRequest.run();
+                } else {
+                    if (request.mOnServiceFailure != null) {
+                        request.mOnServiceFailure.run();
+                    }
+                }
+
+                if (request.mBinder != null) {
+                    request.mBinder.unlinkToDeath(request, 0);
+                }
+            }
+        }
+
+        private boolean bindIfHasPendingRequestsLocked() {
+            return !mPendingRequests.isEmpty() && bindLocked();
+        }
+
+        /**
+         * @return true if the service is bound or in the process of being bound.
+         *      Returns false otherwise.
+         */
+        private boolean bindLocked() {
+            if (isBoundLocked() || mBinding) {
+                return true;
+            }
+
+            // TODO: Handle bind timeout.
+            final boolean willBind;
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                ComponentName componentName =
+                        TextClassifierService.getServiceComponentName(mContext);
+                if (componentName == null) {
+                    // Might happen if the storage is encrypted and the user is not unlocked
+                    return false;
+                }
+                Intent serviceIntent = new Intent(TextClassifierService.SERVICE_INTERFACE)
+                        .setComponent(componentName);
+                Slog.d(LOG_TAG, "Binding to " + serviceIntent.getComponent());
+                willBind = mContext.bindServiceAsUser(
+                        serviceIntent, mConnection,
+                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
+                        UserHandle.of(mUserId));
+                mBinding = willBind;
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+            return willBind;
+        }
+
+        private final class TextClassifierServiceConnection implements ServiceConnection {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                init(ITextClassifierService.Stub.asInterface(service));
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                cleanupService();
+            }
+
+            @Override
+            public void onBindingDied(ComponentName name) {
+                cleanupService();
+            }
+
+            @Override
+            public void onNullBinding(ComponentName name) {
+                cleanupService();
+            }
+
+            void cleanupService() {
+                init(null);
+            }
+
+            private void init(@Nullable ITextClassifierService service) {
+                synchronized (mLock) {
+                    mService = service;
+                    mBinding = false;
+                    handlePendingRequestsLocked();
+                }
+            }
         }
     }
 }

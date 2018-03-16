@@ -17,6 +17,7 @@
 package com.android.internal.util;
 
 import android.os.RemoteException;
+import android.util.ExceptionUtils;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -36,10 +37,24 @@ public class FunctionalUtils {
     }
 
     /**
-     *
+     * Wraps a given {@code action} into one that ignores any {@link RemoteException}s
      */
     public static <T> Consumer<T> ignoreRemoteException(RemoteExceptionIgnoringConsumer<T> action) {
         return action;
+    }
+
+    /**
+     * Wraps the given {@link ThrowingRunnable} into one that handles any exceptions using the
+     * provided {@code handler}
+     */
+    public static Runnable handleExceptions(ThrowingRunnable r, Consumer<Throwable> handler) {
+        return () -> {
+            try {
+                r.run();
+            } catch (Throwable t) {
+                handler.accept(t);
+            }
+        };
     }
 
     /**
@@ -49,8 +64,18 @@ public class FunctionalUtils {
      * to be handled within it
      */
     @FunctionalInterface
-    public interface ThrowingRunnable {
+    @SuppressWarnings("FunctionalInterfaceMethodChanged")
+    public interface ThrowingRunnable extends Runnable {
         void runOrThrow() throws Exception;
+
+        @Override
+        default void run() {
+            try {
+                runOrThrow();
+            } catch (Exception ex) {
+                throw ExceptionUtils.propagate(ex);
+            }
+        }
     }
 
     /**
@@ -80,7 +105,7 @@ public class FunctionalUtils {
             try {
                 acceptOrThrow(t);
             } catch (Exception ex) {
-                throw new RuntimeException(ex);
+                throw ExceptionUtils.propagate(ex);
             }
         }
     }
