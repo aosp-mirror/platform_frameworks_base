@@ -273,7 +273,8 @@ public class SliceManager {
      */
     public @Nullable Uri mapIntentToUri(@NonNull Intent intent) {
         Preconditions.checkNotNull(intent, "intent");
-        Preconditions.checkArgument(intent.getComponent() != null || intent.getPackage() != null,
+        Preconditions.checkArgument(intent.getComponent() != null || intent.getPackage() != null
+                || intent.getData() != null,
                 "Slice intent must be explicit %s", intent);
         ContentResolver resolver = mContext.getContentResolver();
 
@@ -337,7 +338,8 @@ public class SliceManager {
     public @Nullable Slice bindSlice(@NonNull Intent intent,
             @NonNull List<SliceSpec> supportedSpecs) {
         Preconditions.checkNotNull(intent, "intent");
-        Preconditions.checkArgument(intent.getComponent() != null || intent.getPackage() != null,
+        Preconditions.checkArgument(intent.getComponent() != null || intent.getPackage() != null
+                || intent.getData() != null,
                 "Slice intent must be explicit %s", intent);
         ContentResolver resolver = mContext.getContentResolver();
 
