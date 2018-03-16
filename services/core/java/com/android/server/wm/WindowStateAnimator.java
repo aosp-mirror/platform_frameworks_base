@@ -981,7 +981,7 @@ class WindowStateAnimator {
             mForceScaleUntilResize = true;
         } else {
             if (!w.mSeamlesslyRotated) {
-                mSurfaceController.setPositionInTransaction(0, 0, recoveringMemory);
+                mSurfaceController.setPositionInTransaction(mXOffset, mYOffset, recoveringMemory);
             }
         }
 
