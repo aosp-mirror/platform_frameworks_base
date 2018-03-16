@@ -71,7 +71,7 @@ public class FingerprintDialog implements BiometricAuthenticator, BiometricFinge
      * after this amount of time.
      * @hide
      */
-    public static final int HIDE_DIALOG_DELAY = 3000; // ms
+    public static final int HIDE_DIALOG_DELAY = 2000; // ms
     /**
      * @hide
      */
@@ -166,7 +166,9 @@ public class FingerprintDialog implements BiometricAuthenticator, BiometricFinge
         }
 
         /**
-         * Required: Set the text for the negative button.
+         * Required: Set the text for the negative button. This would typically be used as a
+         * "Cancel" button, but may be also used to show an alternative method for authentication,
+         * such as screen that asks for a backup password.
          * @param text
          * @return
          */

@@ -55,7 +55,8 @@ public class FingerprintDialogView extends LinearLayout {
 
     private static final String TAG = "FingerprintDialogView";
 
-    private static final int ANIMATION_DURATION = 250; // ms
+    private static final int ANIMATION_DURATION_SHOW = 250; // ms
+    private static final int ANIMATION_DURATION_AWAY = 350; // ms
 
     private static final int STATE_NONE = 0;
     private static final int STATE_FINGERPRINT = 1;
@@ -164,8 +165,23 @@ public class FingerprintDialogView extends LinearLayout {
 
         title.setText(mBundle.getCharSequence(FingerprintDialog.KEY_TITLE));
         title.setSelected(true);
-        subtitle.setText(mBundle.getCharSequence(FingerprintDialog.KEY_SUBTITLE));
-        description.setText(mBundle.getCharSequence(FingerprintDialog.KEY_DESCRIPTION));
+
+        final CharSequence subtitleText = mBundle.getCharSequence(FingerprintDialog.KEY_SUBTITLE);
+        if (subtitleText == null) {
+            subtitle.setVisibility(View.GONE);
+        } else {
+            subtitle.setVisibility(View.VISIBLE);
+            subtitle.setText(subtitleText);
+        }
+
+        final CharSequence descriptionText = mBundle.getCharSequence(FingerprintDialog.KEY_DESCRIPTION);
+        if (descriptionText == null) {
+            subtitle.setVisibility(View.VISIBLE);
+            description.setVisibility(View.GONE);
+        } else {
+            description.setText(mBundle.getCharSequence(FingerprintDialog.KEY_DESCRIPTION));
+        }
+
         negative.setText(mBundle.getCharSequence(FingerprintDialog.KEY_NEGATIVE_TEXT));
 
         final CharSequence positiveText =
@@ -185,13 +201,13 @@ public class FingerprintDialogView extends LinearLayout {
             public void run() {
                 mLayout.animate()
                         .alpha(1f)
-                        .setDuration(ANIMATION_DURATION)
+                        .setDuration(ANIMATION_DURATION_SHOW)
                         .setInterpolator(mLinearOutSlowIn)
                         .withLayer()
                         .start();
                 mDialog.animate()
                         .translationY(0)
-                        .setDuration(ANIMATION_DURATION)
+                        .setDuration(ANIMATION_DURATION_SHOW)
                         .setInterpolator(mLinearOutSlowIn)
                         .withLayer()
                         .start();
@@ -221,13 +237,13 @@ public class FingerprintDialogView extends LinearLayout {
             public void run() {
                 mLayout.animate()
                         .alpha(0f)
-                        .setDuration(ANIMATION_DURATION)
+                        .setDuration(ANIMATION_DURATION_AWAY)
                         .setInterpolator(mLinearOutSlowIn)
                         .withLayer()
                         .start();
                 mDialog.animate()
                         .translationY(mAnimationTranslationOffset)
-                        .setDuration(ANIMATION_DURATION)
+                        .setDuration(ANIMATION_DURATION_AWAY)
                         .setInterpolator(mLinearOutSlowIn)
                         .withLayer()
                         .withEndAction(endActionRunnable)
