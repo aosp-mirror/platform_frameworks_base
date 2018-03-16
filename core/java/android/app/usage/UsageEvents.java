@@ -81,6 +81,7 @@ public final class UsageEvents implements Parcelable {
          * An event type denoting that a package was interacted with in some way by the system.
          * @hide
          */
+        @SystemApi
         public static final int SYSTEM_INTERACTION = 6;
 
         /**
