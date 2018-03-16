@@ -36,13 +36,14 @@ message PowerManagerProto {
     }
 
     // WakeLock class in android.os.PowerManager, it is the one used by sdk
-    message WakeLockProto {
+    message WakeLock {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-        optional string hex_string = 1;
-        optional bool held = 2;
-        optional int32 internal_count = 3;
-        optional WorkSourceProto work_source = 4;
+        optional string tag = 1;
+        optional string package_name = 2;
+        optional bool held = 3;
+        optional int32 internal_count = 4;
+        optional WorkSourceProto work_source = 5;
     }
 }
 

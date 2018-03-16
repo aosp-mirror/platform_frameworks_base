@@ -148,7 +148,6 @@ public final class UidRecord {
 
     void writeToProto(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
-        proto.write(UidRecordProto.HEX_HASH, Integer.toHexString(System.identityHashCode(this)));
         proto.write(UidRecordProto.UID, uid);
         proto.write(UidRecordProto.CURRENT, ProcessList.makeProcStateProtoEnum(curProcState));
         proto.write(UidRecordProto.EPHEMERAL, ephemeral);
