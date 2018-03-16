@@ -74,8 +74,8 @@ package android.app {
     field public static final java.lang.String OPSTR_AUDIO_NOTIFICATION_VOLUME = "android:audio_notification_volume";
     field public static final java.lang.String OPSTR_AUDIO_RING_VOLUME = "android:audio_ring_volume";
     field public static final java.lang.String OPSTR_AUDIO_VOICE_VOLUME = "android:audio_voice_volume";
-    field public static final java.lang.String OPSTR_BIND_ACCESSIBILITY_SERVICE = "bind_accessibility_service";
-    field public static final java.lang.String OPSTR_CHANGE_WIFI_STATE = "change_wifi_state";
+    field public static final java.lang.String OPSTR_BIND_ACCESSIBILITY_SERVICE = "android:bind_accessibility_service";
+    field public static final java.lang.String OPSTR_CHANGE_WIFI_STATE = "android:change_wifi_state";
     field public static final java.lang.String OPSTR_GET_ACCOUNTS = "android:get_accounts";
     field public static final java.lang.String OPSTR_GPS = "android:gps";
     field public static final java.lang.String OPSTR_INSTANT_APP_START_FOREGROUND = "android:instant_app_start_foreground";
@@ -87,7 +87,7 @@ package android.app {
     field public static final java.lang.String OPSTR_READ_CLIPBOARD = "android:read_clipboard";
     field public static final java.lang.String OPSTR_READ_ICC_SMS = "android:read_icc_sms";
     field public static final java.lang.String OPSTR_RECEIVE_EMERGENCY_BROADCAST = "android:receive_emergency_broadcast";
-    field public static final java.lang.String OPSTR_REQUEST_DELETE_PACKAGES = "request_delete_packages";
+    field public static final java.lang.String OPSTR_REQUEST_DELETE_PACKAGES = "android:request_delete_packages";
     field public static final java.lang.String OPSTR_REQUEST_INSTALL_PACKAGES = "android:request_install_packages";
     field public static final java.lang.String OPSTR_RUN_ANY_IN_BACKGROUND = "android:run_any_in_background";
     field public static final java.lang.String OPSTR_RUN_IN_BACKGROUND = "android:run_in_background";
