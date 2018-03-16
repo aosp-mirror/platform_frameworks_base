@@ -2651,6 +2651,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             mRecentsAnimationController = new RecentsAnimationController(this,
                     recentsAnimationRunner, callbacks, displayId);
+            mAppTransition.updateBooster();
             mRecentsAnimationController.initialize(recentTaskIds);
         }
     }
@@ -2687,6 +2688,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mRecentsAnimationController != null) {
                 mRecentsAnimationController.cleanupAnimation();
                 mRecentsAnimationController = null;
+                mAppTransition.updateBooster();
             }
         }
     }
