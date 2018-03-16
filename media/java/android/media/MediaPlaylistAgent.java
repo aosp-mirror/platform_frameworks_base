@@ -46,7 +46,7 @@ public abstract class MediaPlaylistAgent {
     @IntDef({REPEAT_MODE_NONE, REPEAT_MODE_ONE, REPEAT_MODE_ALL,
             REPEAT_MODE_GROUP})
     @Retention(RetentionPolicy.SOURCE)
-    @interface RepeatMode {}
+    public @interface RepeatMode {}
 
     /**
      * Playback will be stopped at the end of the playing media list.
@@ -75,7 +75,7 @@ public abstract class MediaPlaylistAgent {
      */
     @IntDef({SHUFFLE_MODE_NONE, SHUFFLE_MODE_ALL, SHUFFLE_MODE_GROUP})
     @Retention(RetentionPolicy.SOURCE)
-    @interface ShuffleMode {}
+    public @interface ShuffleMode {}
 
     /**
      * Media list will be played in order.
@@ -281,7 +281,7 @@ public abstract class MediaPlaylistAgent {
     }
 
     /**
-     * Get repeat mode
+     * Gets the repeat mode
      *
      * @return repeat mode
      * @see #REPEAT_MODE_NONE
@@ -294,7 +294,7 @@ public abstract class MediaPlaylistAgent {
     }
 
     /**
-     * Set repeat mode
+     * Sets the repeat mode
      *
      * @param repeatMode repeat mode
      * @see #REPEAT_MODE_NONE
@@ -307,9 +307,9 @@ public abstract class MediaPlaylistAgent {
     }
 
     /**
-     * Get shuffle mode
+     * Gets the shuffle mode
      *
-     * @return shuffle mode
+     * @return The shuffle mode
      * @see #SHUFFLE_MODE_NONE
      * @see #SHUFFLE_MODE_ALL
      * @see #SHUFFLE_MODE_GROUP
@@ -319,9 +319,9 @@ public abstract class MediaPlaylistAgent {
     }
 
     /**
-     * Set shuffle mode
+     * Sets the shuffle mode
      *
-     * @param shuffleMode shuffle mode
+     * @param shuffleMode The shuffle mode
      * @see #SHUFFLE_MODE_NONE
      * @see #SHUFFLE_MODE_ALL
      * @see #SHUFFLE_MODE_GROUP

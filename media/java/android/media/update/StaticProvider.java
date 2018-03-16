@@ -31,7 +31,6 @@ import android.media.MediaLibraryService2.MediaLibrarySession.MediaLibrarySessio
 import android.media.MediaMetadata2;
 import android.media.MediaPlaylistAgent;
 import android.media.MediaSession2;
-import android.media.MediaSession2.PlaylistParams;
 import android.media.MediaSession2.SessionCallback;
 import android.media.MediaSessionService2;
 import android.media.MediaSessionService2.MediaNotification;
@@ -44,7 +43,6 @@ import android.media.update.MediaSession2Provider.CommandButtonProvider;
 import android.media.update.MediaSession2Provider.CommandGroupProvider;
 import android.media.update.MediaSession2Provider.CommandProvider;
 import android.media.update.MediaSession2Provider.ControllerInfoProvider;
-import android.media.update.MediaSession2Provider.PlaylistParamsProvider;
 import android.media.update.MediaSessionService2Provider.MediaNotificationProvider;
 import android.os.Bundle;
 import android.os.IInterface;
@@ -78,10 +76,6 @@ public interface StaticProvider {
     ControllerInfoProvider createMediaSession2ControllerInfo(Context context,
             MediaSession2.ControllerInfo instance, int uid, int pid,
             String packageName, IInterface callback);
-    PlaylistParamsProvider createMediaSession2PlaylistParams(Context context,
-            PlaylistParams playlistParams, int repeatMode, int shuffleMode,
-            MediaMetadata2 playlistMetadata);
-    PlaylistParams fromBundle_PlaylistParams(Context context, Bundle bundle);
     CommandButtonProvider.BuilderProvider createMediaSession2CommandButtonBuilder(Context context,
             MediaSession2.CommandButton.Builder instance);
     BuilderBaseProvider<MediaSession2, SessionCallback> createMediaSession2Builder(

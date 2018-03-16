@@ -29,7 +29,6 @@ import android.media.MediaSession2.CommandButton;
 import android.media.MediaSession2.CommandButton.Builder;
 import android.media.MediaSession2.CommandGroup;
 import android.media.MediaSession2.ControllerInfo;
-import android.media.MediaSession2.PlaylistParams;
 import android.media.MediaSession2.SessionCallback;
 import android.media.SessionToken2;
 import android.media.VolumeProvider2;
@@ -65,8 +64,6 @@ public interface MediaSession2Provider extends TransportControlProvider {
     List<MediaItem2> getPlaylist_impl();
     void setPlaylist_impl(List<MediaItem2> list, MediaMetadata2 metadata);
     MediaItem2 getCurrentPlaylistItem_impl();
-    void setPlaylistParams_impl(PlaylistParams params);
-    PlaylistParams getPlaylistParams_impl();
     void notifyError_impl(int errorCode, Bundle extras);
 
     interface CommandProvider {
@@ -113,13 +110,6 @@ public interface MediaSession2Provider extends TransportControlProvider {
         int hashCode_impl();
         boolean equals_impl(Object obj);
         String toString_impl();
-    }
-
-    interface PlaylistParamsProvider {
-        int getRepeatMode_impl();
-        int getShuffleMode_impl();
-        MediaMetadata2 getPlaylistMetadata_impl();
-        Bundle toBundle_impl();
     }
 
     interface BuilderBaseProvider<T extends MediaSession2, C extends SessionCallback> {
