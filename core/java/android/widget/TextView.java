@@ -5642,6 +5642,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             needEditableForNotification = true;
         }
 
+        PrecomputedText precomputed =
+                (text instanceof PrecomputedText) ? (PrecomputedText) text : null;
         if (type == BufferType.EDITABLE || getKeyListener() != null
                 || needEditableForNotification) {
             createEditorIfNeeded();
@@ -5651,10 +5653,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             setFilters(t, mFilters);
             InputMethodManager imm = InputMethodManager.peekInstance();
             if (imm != null) imm.restartInput(this);
-        } else if (type == BufferType.SPANNABLE || mMovement != null) {
-            text = mSpannableFactory.newSpannable(text);
-        } else if (text instanceof PrecomputedText) {
-            PrecomputedText precomputed = (PrecomputedText) text;
+        } else if (precomputed != null) {
             if (mTextDir == null) {
                 mTextDir = getTextDirectionHeuristic();
             }
@@ -5667,6 +5666,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         + "PrecomputedText: " + precomputed.getParams()
                         + "TextView: " + getTextMetricsParams());
             }
+        } else if (type == BufferType.SPANNABLE || mMovement != null) {
+            text = mSpannableFactory.newSpannable(text);
         } else if (!(text instanceof CharWrapper)) {
             text = TextUtils.stringOrSpannedString(text);
         }
