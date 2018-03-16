@@ -18,7 +18,6 @@
 
 #include "config/ConfigKey.h"
 #include "config/ConfigListener.h"
-#include "frameworks/base/cmds/statsd/src/stats_log_common.pb.h"
 #include "packages/PackageInfoListener.h"
 
 #include <binder/IResultReceiver.h>
@@ -27,6 +26,7 @@
 #include <log/logprint.h>
 #include <stdio.h>
 #include <utils/RefBase.h>
+#include <list>
 #include <mutex>
 #include <set>
 #include <string>
@@ -43,6 +43,45 @@ struct AppData {
     int64_t versionCode;
 
     AppData(const string& a, const int64_t v) : packageName(a), versionCode(v){};
+};
+
+// When calling getOutput, we retrieve all the ChangeRecords since the last
+// timestamp we called getOutput for this configuration key.
+struct ChangeRecord {
+    const bool deletion;
+    const int64_t timestampNs;
+    const string package;
+    const int32_t uid;
+    const int32_t version;
+
+    ChangeRecord(const bool isDeletion, const int64_t timestampNs, const string& package,
+                 const int32_t uid, const int32_t version)
+        : deletion(isDeletion),
+          timestampNs(timestampNs),
+          package(package),
+          uid(uid),
+          version(version) {
+    }
+};
+
+const unsigned int kBytesChangeRecord = sizeof(struct ChangeRecord);
+
+// Storing the int64 for a timestamp is expected to take 10 bytes (could take
+// less because of varint encoding).
+const unsigned int kBytesTimestampField = 10;
+
+// When calling getOutput, we retrieve all the snapshots since the last
+// timestamp we called getOutput for this configuration key.
+struct SnapshotRecord {
+    const int64_t timestampNs;
+
+    // For performance reasons, we convert the package_info field (which is a
+    // repeated field of PackageInfo messages).
+    vector<char> bytes;
+
+    SnapshotRecord(const int64_t timestampNs, vector<char> bytes)
+        : timestampNs(timestampNs), bytes(bytes) {
+    }
 };
 
 // UidMap keeps track of what the corresponding app name (APK name) and version code for every uid
@@ -93,8 +132,10 @@ public:
     // Returns the host uid if it exists. Otherwise, returns the same uid that was passed-in.
     virtual int getHostUidOrSelf(int uid) const;
 
-    // Gets the output. If every config key has received the output, then the output is cleared.
-    UidMapping getOutput(const ConfigKey& key);
+    // Gets all snapshots and changes that have occurred since the last output.
+    // If every config key has received a change or snapshot record, then this
+    // record is deleted.
+    void getOutput(const ConfigKey& key, vector<uint8_t>* outData);
 
     // Forces the output to be cleared. We still generate a snapshot based on the current state.
     // This results in extra data uploaded but helps us reconstruct the uid mapping on the server
@@ -117,7 +158,7 @@ private:
                    const int64_t& versionCode);
     void removeApp(const int64_t& timestamp, const String16& packageName, const int32_t& uid);
 
-    UidMapping getOutput(const int64_t& timestamp, const ConfigKey& key);
+    void getOutput(const int64_t& timestamp, const ConfigKey& key, vector<uint8_t>* outData);
 
     void getListenerListCopyLocked(std::vector<wp<PackageInfoListener>>* output);
 
@@ -133,8 +174,11 @@ private:
     // to the parent uid.
     std::unordered_map<int, int> mIsolatedUidMap;
 
-    // We prepare the output proto as apps are updated, so that we can grab the current output.
-    UidMapping mOutput;
+    // Record the changes that can be provided with the uploads.
+    std::list<ChangeRecord> mChanges;
+
+    // Record the snapshots that can be provided with the uploads.
+    std::list<SnapshotRecord> mSnapshots;
 
     // Metric producers that should be notified if there's an upgrade in any app.
     set<wp<PackageInfoListener>> mSubscribers;
