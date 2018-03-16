@@ -1798,76 +1798,52 @@ public class SettingsProvider extends ContentProvider {
         if (TextUtils.isEmpty(value)) {
             return false;
         }
-
-        final char prefix = value.charAt(0);
-        if (prefix != '+' && prefix != '-') {
-            if (forceNotify) {
-                final int key = makeKey(SETTINGS_TYPE_SECURE, owningUserId);
-                mSettingsRegistry.notifyForSettingsChange(key,
-                        Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-            }
+        Setting oldSetting = getSecureSetting(
+                Settings.Secure.LOCATION_PROVIDERS_ALLOWED, owningUserId);
+        if (oldSetting == null) {
             return false;
         }
+        String oldProviders = oldSetting.getValue();
+        List<String> oldProvidersList = TextUtils.isEmpty(oldProviders)
+                ? new ArrayList<>() : new ArrayList<>(Arrays.asList(oldProviders.split(",")));
+        Set<String> newProvidersSet = new ArraySet<>();
+        newProvidersSet.addAll(oldProvidersList);
 
-        // skip prefix
-        value = value.substring(1);
-
-        Setting settingValue = getSecureSetting(
-                    Settings.Secure.LOCATION_PROVIDERS_ALLOWED, owningUserId);
-        if (settingValue == null) {
-            return false;
-        }
-
-        String oldProviders = !settingValue.isNull() ? settingValue.getValue() : "";
-
-        int index = oldProviders.indexOf(value);
-        int end = index + value.length();
-
-        // check for commas to avoid matching on partial string
-        if (index > 0 && oldProviders.charAt(index - 1) != ',') {
-            index = -1;
-        }
-
-        // check for commas to avoid matching on partial string
-        if (end < oldProviders.length() && oldProviders.charAt(end) != ',') {
-            index = -1;
-        }
-
-        String newProviders;
-
-        if (prefix == '+' && index < 0) {
-            // append the provider to the list if not present
-            if (oldProviders.length() == 0) {
-                newProviders = value;
-            } else {
-                newProviders = oldProviders + ',' + value;
+        String[] providerUpdates = value.split(",");
+        boolean inputError = false;
+        for (String provider : providerUpdates) {
+            // do not update location_providers_allowed when input is invalid
+            if (TextUtils.isEmpty(provider)) {
+                inputError = true;
+                break;
             }
-        } else if (prefix == '-' && index >= 0) {
-            // remove the provider from the list if present
-            // remove leading or trailing comma
-            if (index > 0) {
-                index--;
-            } else if (end < oldProviders.length()) {
-                end++;
+            final char prefix = provider.charAt(0);
+            // do not update location_providers_allowed when input is invalid
+            if (prefix != '+' && prefix != '-') {
+                inputError = true;
+                break;
             }
-
-            newProviders = oldProviders.substring(0, index);
-            if (end < oldProviders.length()) {
-                newProviders += oldProviders.substring(end);
+            // skip prefix
+            provider = provider.substring(1);
+            if (prefix == '+') {
+                newProvidersSet.add(provider);
+            } else if (prefix == '-') {
+                newProvidersSet.remove(provider);
             }
-        } else {
+        }
+        String newProviders = TextUtils.join(",", newProvidersSet.toArray());
+        if (inputError == true || newProviders.equals(oldProviders)) {
             // nothing changed, so no need to update the database
             if (forceNotify) {
-                final int key = makeKey(SETTINGS_TYPE_SECURE, owningUserId);
-                mSettingsRegistry.notifyForSettingsChange(key,
+                mSettingsRegistry.notifyForSettingsChange(
+                        makeKey(SETTINGS_TYPE_SECURE, owningUserId),
                         Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
             }
             return false;
         }
-
         return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_SECURE,
-                owningUserId, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, newProviders,
-                tag, makeDefault, getCallingPackage(), forceNotify, CRITICAL_SECURE_SETTINGS);
+                owningUserId, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, newProviders, tag,
+                makeDefault, getCallingPackage(), forceNotify, CRITICAL_SECURE_SETTINGS);
     }
 
     private static void warnOrThrowForUndesiredSecureSettingsMutationForTargetSdk(

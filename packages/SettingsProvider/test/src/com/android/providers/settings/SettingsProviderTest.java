@@ -17,8 +17,8 @@
 package com.android.providers.settings;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.fail;
 
 import android.content.ContentResolver;
@@ -32,9 +32,8 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
-import org.junit.Test;
-
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.junit.Test;
 
 /**
  * Tests for the SettingContentProvider.
@@ -687,5 +686,113 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
         } finally {
             cursor.close();
         }
+    }
+
+    @Test
+    public void testUpdateLocationProvidersAllowedLocked_enableProviders() throws Exception {
+        setSettingViaFrontEndApiAndAssertSuccessfulChange(
+                SETTING_TYPE_SECURE,
+                Settings.Secure.LOCATION_MODE,
+                String.valueOf(Settings.Secure.LOCATION_MODE_OFF),
+                UserHandle.USER_SYSTEM);
+
+        // Enable one provider
+        updateStringViaProviderApiSetting(
+                SETTING_TYPE_SECURE, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "+gps");
+
+        assertEquals(
+                "Wrong location providers",
+                "gps",
+                queryStringViaProviderApi(
+                        SETTING_TYPE_SECURE, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
+
+        // Enable a list of providers, including the one that is already enabled
+        updateStringViaProviderApiSetting(
+                SETTING_TYPE_SECURE,
+                Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                "+gps,+network,+network");
+
+        assertEquals(
+                "Wrong location providers",
+                "gps,network",
+                queryStringViaProviderApi(
+                        SETTING_TYPE_SECURE, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
+    }
+
+    @Test
+    public void testUpdateLocationProvidersAllowedLocked_disableProviders() throws Exception {
+        setSettingViaFrontEndApiAndAssertSuccessfulChange(
+                SETTING_TYPE_SECURE,
+                Settings.Secure.LOCATION_MODE,
+                String.valueOf(Settings.Secure.LOCATION_MODE_HIGH_ACCURACY),
+                UserHandle.USER_SYSTEM);
+
+        // Disable providers that were enabled
+        updateStringViaProviderApiSetting(
+                SETTING_TYPE_SECURE,
+                Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                "-gps,-network");
+
+        assertEquals(
+                "Wrong location providers",
+                "",
+                queryStringViaProviderApi(
+                        SETTING_TYPE_SECURE, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
+
+        // Disable a provider that was not enabled
+        updateStringViaProviderApiSetting(
+                SETTING_TYPE_SECURE,
+                Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                "-test");
+
+        assertEquals(
+                "Wrong location providers",
+                "",
+                queryStringViaProviderApi(
+                        SETTING_TYPE_SECURE, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
+    }
+
+    @Test
+    public void testUpdateLocationProvidersAllowedLocked_enableAndDisable() throws Exception {
+        setSettingViaFrontEndApiAndAssertSuccessfulChange(
+                SETTING_TYPE_SECURE,
+                Settings.Secure.LOCATION_MODE,
+                String.valueOf(Settings.Secure.LOCATION_MODE_OFF),
+                UserHandle.USER_SYSTEM);
+
+        updateStringViaProviderApiSetting(
+                SETTING_TYPE_SECURE,
+                Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                "+gps,+network,+test");
+        updateStringViaProviderApiSetting(
+                SETTING_TYPE_SECURE, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, "-test");
+
+        assertEquals(
+                "Wrong location providers",
+                "gps,network",
+                queryStringViaProviderApi(
+                        SETTING_TYPE_SECURE, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
+    }
+
+    @Test
+    public void testUpdateLocationProvidersAllowedLocked_invalidInput() throws Exception {
+        setSettingViaFrontEndApiAndAssertSuccessfulChange(
+                SETTING_TYPE_SECURE,
+                Settings.Secure.LOCATION_MODE,
+                String.valueOf(Settings.Secure.LOCATION_MODE_OFF),
+                UserHandle.USER_SYSTEM);
+
+        // update providers with a invalid string
+        updateStringViaProviderApiSetting(
+                SETTING_TYPE_SECURE,
+                Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                "+gps, invalid-string");
+
+        // Verifies providers list does not change
+        assertEquals(
+                "Wrong location providers",
+                "",
+                queryStringViaProviderApi(
+                        SETTING_TYPE_SECURE, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
     }
 }
