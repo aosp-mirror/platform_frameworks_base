@@ -220,8 +220,7 @@
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"私人 DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"選取私人 DNS 模式"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"停用"</string>
-    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
-    <skip />
+    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"自動"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"私人 DNS 供應商主機名稱"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"輸入 DNS 供應商的主機名稱"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"顯示無線螢幕分享認證的選項"</string>
@@ -274,8 +273,8 @@
     <string name="show_touches_summary" msgid="6101183132903926324">"顯示觸控位置的視覺回應"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"顯示表層更新"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"更新表層時閃爍顯示整個視窗表層"</string>
-    <string name="show_hw_screen_updates" msgid="5036904558145941590">"顯示 GPU 畫面更新"</string>
-    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"使用 GPU 繪圖時在視窗中閃爍顯示畫面"</string>
+    <string name="show_hw_screen_updates" msgid="4117270979975470789">"顯示畫面更新"</string>
+    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"繪圖時在視窗中閃爍顯示畫面"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"顯示硬體層更新"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"在硬體層更新時閃綠燈"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"針對 GPU 重複繪圖進行偵錯"</string>
@@ -289,12 +288,10 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"顯示剪輯範圍、邊界等。"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"強制使用從右至左版面配置方向"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"強制將所有語言代碼的畫面配置方向改為從右至左"</string>
-    <string name="force_hw_ui" msgid="6426383462520888732">"強制使用 GPU 轉譯"</string>
-    <string name="force_hw_ui_summary" msgid="5535991166074861515">"強制使用 GPU 進行 2D 繪圖"</string>
     <string name="force_msaa" msgid="7920323238677284387">"強制 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"在 OpenGL ES 2.0 應用程式中啟用 4x MSAA"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"針對非矩形裁剪操作進行偵錯"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"剖析 GPU 轉譯"</string>
+    <string name="track_frame_time" msgid="6094365083096851167">"剖析 HWUI 轉譯"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"啟用 GPU 偵錯圖層"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"允許載入 GPU 偵錯圖層為應用程式偵錯"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"視窗動畫比例"</string>
@@ -305,8 +302,8 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"不要保留活動"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"使用者離開活動後立刻刪除所有活動內容"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"背景處理程序限制"</string>
-    <string name="show_all_anrs" msgid="28462979638729082">"顯示所有無回應程式"</string>
-    <string name="show_all_anrs_summary" msgid="641908614413544127">"為背景應用程式顯示「應用程式無回應」對話方塊"</string>
+    <string name="show_all_anrs" msgid="4924885492787069007">"顯示背景 ANR"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"為背景應用程式顯示「應用程式無回應」對話方塊"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"顯示通知管道警告"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"當應用程式未經有效管道發佈通知時，在畫面上顯示警告"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"強制允許將應用程式寫入外部儲存空間"</string>
@@ -357,39 +354,24 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"這是一項實驗性功能，可能會對效能造成影響。"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"已改為<xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"還有大約 <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="6655472132189365839">"目前電量為 <xliff:g id="LEVEL">%2$s</xliff:g>，還能持續使用 <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"根據你的使用情形，剩餘時間大約還有 <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
-    <skip />
+    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"根據你的使用情形，目前電量為 <xliff:g id="LEVEL">%2$s</xliff:g>，還能持續使用 <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"還剩 <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
-    <skip />
-    <!-- no translation found for power_discharge_by (6427074755635635749) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
-    <skip />
+    <string name="power_discharge_by_enhanced" msgid="8305422490607220844">"根據你的使用情形，裝置電量 (<xliff:g id="LEVEL">%2$s</xliff:g>) 將於<xliff:g id="TIME">%1$s</xliff:g> 耗盡"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="896515698736070025">"根據你的使用情形，裝置電量將於<xliff:g id="TIME">%1$s</xliff:g> 耗盡"</string>
+    <string name="power_discharge_by" msgid="6052127431194780229">"裝置電量 (<xliff:g id="LEVEL">%2$s</xliff:g>) 將於<xliff:g id="TIME">%1$s</xliff:g> 耗盡"</string>
+    <string name="power_discharge_by_only" msgid="4850425421176271395">"裝置電量將於<xliff:g id="TIME">%1$s</xliff:g> 耗盡"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"電池可用時間不到 <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
-    <skip />
+    <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"電池可用時間不到 <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"電池可用時間超過 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"電池可用時間超過 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"手機可能即將關機"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"平板電腦可能即將關機"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"裝置可能即將關機"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"手機可能即將關機 (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"平板電腦可能即將關機 (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"裝置可能即將關機 (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"再過 <xliff:g id="TIME">%1$s</xliff:g>就能完成充電"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>後充飽"</string>
@@ -440,8 +422,9 @@
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"增加時間。"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"減少時間。"</string>
-    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"開啟"</string>
     <string name="cancel" msgid="6859253417269739139">"取消"</string>
+    <string name="okay" msgid="1997666393121016642">"確定"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"開啟"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"開啟「零打擾」模式"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"永不"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"僅限優先通知"</string>
@@ -450,4 +433,6 @@
     <string name="zen_alarm_warning" msgid="6236690803924413088">"你不會聽到下一個<xliff:g id="WHEN">%1$s</xliff:g> 的鬧鐘"</string>
     <string name="alarm_template" msgid="4996153414057676512">"時間：<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"時間：<xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"時間長度"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"每次都詢問"</string>
 </resources>
