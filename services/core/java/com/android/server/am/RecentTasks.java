@@ -285,7 +285,7 @@ class RecentTasks {
     boolean isRecentsComponentHomeActivity(int userId) {
         final ComponentName defaultHomeActivity = mService.getPackageManagerInternalLocked()
                 .getDefaultHomeActivity(userId);
-        return defaultHomeActivity != null &&
+        return defaultHomeActivity != null && mRecentsComponent != null &&
                 defaultHomeActivity.getPackageName().equals(mRecentsComponent.getPackageName());
     }
 
