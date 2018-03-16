@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 
 import android.content.Context;
 import android.database.ContentObserver;
+import android.media.AudioAttributes;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.UserHandle;
@@ -30,6 +31,11 @@ public class VibratorHelper {
     private final Vibrator mVibrator;
     private final Context mContext;
     private boolean mHapticFeedbackEnabled;
+    private static final AudioAttributes STATUS_BAR_VIBRATION_ATTRIBUTES =
+            new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                    .build();
 
     final private ContentObserver mVibrationObserver = new ContentObserver(Handler.getMain()) {
         @Override
@@ -51,7 +57,8 @@ public class VibratorHelper {
     public void vibrate(final int effectId) {
         if (mHapticFeedbackEnabled) {
             AsyncTask.execute(() ->
-                    mVibrator.vibrate(VibrationEffect.get(effectId, false /* fallback */)));
+                    mVibrator.vibrate(VibrationEffect.get(effectId, false /* fallback */),
+                            STATUS_BAR_VIBRATION_ATTRIBUTES));
         }
     }
 
