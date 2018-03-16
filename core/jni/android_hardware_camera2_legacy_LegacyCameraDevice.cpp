@@ -49,6 +49,22 @@ using namespace android;
 
 #define ALIGN(x, mask) ( ((x) + (mask) - 1) & ~((mask) - 1) )
 
+// Use BAD_VALUE for surface abandoned error
+#define OVERRIDE_SURFACE_ERROR(err) \
+do {                                \
+    if (err == -ENODEV) {           \
+        err = BAD_VALUE;            \
+    }                               \
+} while (0)
+
+#define UPDATE(md, tag, data, size)               \
+do {                                              \
+    if ((md).update((tag), (data), (size))) {     \
+        ALOGE("Update " #tag " failed!");         \
+        return BAD_VALUE;                         \
+    }                                             \
+} while (0)
+
 /**
  * Convert from RGB 888 to Y'CbCr using the conversion specified in JFIF v1.02
  */
@@ -108,6 +124,7 @@ static status_t connectSurface(const sp<Surface>& surface, int32_t maxBufferSlac
     if (err != NO_ERROR) {
         ALOGE("%s: Failed to set native window usage flag, error %s (%d).", __FUNCTION__,
                 strerror(-err), err);
+        OVERRIDE_SURFACE_ERROR(err);
         return err;
     }
 
@@ -117,6 +134,7 @@ static status_t connectSurface(const sp<Surface>& surface, int32_t maxBufferSlac
     if (err != NO_ERROR) {
         ALOGE("%s: Failed to get native window min undequeued buffers, error %s (%d).",
                 __FUNCTION__, strerror(-err), err);
+        OVERRIDE_SURFACE_ERROR(err);
         return err;
     }
 
@@ -126,6 +144,7 @@ static status_t connectSurface(const sp<Surface>& surface, int32_t maxBufferSlac
     if (err != NO_ERROR) {
         ALOGE("%s: Failed to set native window buffer count, error %s (%d).", __FUNCTION__,
                 strerror(-err), err);
+        OVERRIDE_SURFACE_ERROR(err);
         return err;
     }
     return NO_ERROR;
@@ -180,7 +199,12 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
 
     // TODO: Switch to using Surface::lock and Surface::unlockAndPost
     err = native_window_dequeue_buffer_and_wait(anw.get(), &anb);
-    if (err != NO_ERROR) return err;
+    if (err != NO_ERROR) {
+        ALOGE("%s: Failed to dequeue buffer, error %s (%d).", __FUNCTION__,
+                strerror(-err), err);
+        OVERRIDE_SURFACE_ERROR(err);
+        return err;
+    }
 
     sp<GraphicBuffer> buf(GraphicBuffer::from(anb));
     uint32_t grallocBufWidth = buf->getWidth();
@@ -198,6 +222,7 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
     if (err != NO_ERROR) {
         ALOGE("%s: Error while querying surface pixel format %s (%d).", __FUNCTION__,
                 strerror(-err), err);
+        OVERRIDE_SURFACE_ERROR(err);
         return err;
     }
 
@@ -345,6 +370,7 @@ static status_t produceFrame(const sp<ANativeWindow>& anw,
     err = anw->queueBuffer(anw.get(), buf->getNativeBuffer(), /*fenceFd*/-1);
     if (err != NO_ERROR) {
         ALOGE("%s: Failed to queue buffer, error %s (%d).", __FUNCTION__, strerror(-err), err);
+        OVERRIDE_SURFACE_ERROR(err);
         return err;
     }
     return NO_ERROR;
@@ -420,6 +446,7 @@ static jint LegacyCameraDevice_nativeDetectSurfaceType(JNIEnv* env, jobject thiz
     if(err != NO_ERROR) {
         ALOGE("%s: Error while querying surface pixel format %s (%d).", __FUNCTION__, strerror(-err),
                 err);
+        OVERRIDE_SURFACE_ERROR(err);
         return err;
     }
     return fmt;
@@ -437,6 +464,7 @@ static jint LegacyCameraDevice_nativeDetectSurfaceDataspace(JNIEnv* env, jobject
     if(err != NO_ERROR) {
         ALOGE("%s: Error while querying surface dataspace  %s (%d).", __FUNCTION__, strerror(-err),
                 err);
+        OVERRIDE_SURFACE_ERROR(err);
         return err;
     }
     return fmt;
@@ -466,12 +494,14 @@ static jint LegacyCameraDevice_nativeDetectSurfaceDimens(JNIEnv* env, jobject th
     if(err != NO_ERROR) {
         ALOGE("%s: Error while querying surface width %s (%d).", __FUNCTION__, strerror(-err),
                 err);
+        OVERRIDE_SURFACE_ERROR(err);
         return err;
     }
     err = anw->query(anw.get(), NATIVE_WINDOW_HEIGHT, dimenBuf + 1);
     if(err != NO_ERROR) {
         ALOGE("%s: Error while querying surface height %s (%d).", __FUNCTION__, strerror(-err),
                 err);
+        OVERRIDE_SURFACE_ERROR(err);
         return err;
     }
     env->SetIntArrayRegion(dimens, /*start*/0, /*length*/ARRAY_SIZE(dimenBuf), dimenBuf);
@@ -493,6 +523,7 @@ static jint LegacyCameraDevice_nativeDetectSurfaceUsageFlags(JNIEnv* env, jobjec
     if(err != NO_ERROR) {
         jniThrowException(env, "java/lang/UnsupportedOperationException;",
             "Error while querying surface usage bits");
+        OVERRIDE_SURFACE_ERROR(err);
         return err;
     }
     return usage;
@@ -513,6 +544,7 @@ static jint LegacyCameraDevice_nativeDisconnectSurface(JNIEnv* env, jobject thiz
     if(err != NO_ERROR) {
         jniThrowException(env, "java/lang/UnsupportedOperationException;",
             "Error while disconnecting surface");
+        OVERRIDE_SURFACE_ERROR(err);
         return err;
     }
     return NO_ERROR;
@@ -532,6 +564,7 @@ static jint LegacyCameraDevice_nativeDetectTextureDimens(JNIEnv* env, jobject th
     if(err != NO_ERROR) {
         ALOGE("%s: Error while querying SurfaceTexture width %s (%d)", __FUNCTION__,
                 strerror(-err), err);
+        OVERRIDE_SURFACE_ERROR(err);
         return err;
     }
 
@@ -539,6 +572,7 @@ static jint LegacyCameraDevice_nativeDetectTextureDimens(JNIEnv* env, jobject th
     if(err != NO_ERROR) {
         ALOGE("%s: Error while querying SurfaceTexture height %s (%d)", __FUNCTION__,
                 strerror(-err), err);
+        OVERRIDE_SURFACE_ERROR(err);
         return err;
     }
 
@@ -559,6 +593,7 @@ static jint LegacyCameraDevice_nativeConnectSurface(JNIEnv* env, jobject thiz, j
     status_t err = connectSurface(s, CAMERA_DEVICE_BUFFER_SLACK);
     if (err != NO_ERROR) {
         ALOGE("%s: Error while configuring surface %s (%d).", __FUNCTION__, strerror(-err), err);
+        OVERRIDE_SURFACE_ERROR(err);
         return err;
     }
     return NO_ERROR;
@@ -609,6 +644,7 @@ static jint LegacyCameraDevice_nativeSetSurfaceFormat(JNIEnv* env, jobject thiz,
     status_t err = native_window_set_buffers_format(anw.get(), pixelFormat);
     if (err != NO_ERROR) {
         ALOGE("%s: Error while setting surface format %s (%d).", __FUNCTION__, strerror(-err), err);
+        OVERRIDE_SURFACE_ERROR(err);
         return err;
     }
     return NO_ERROR;
@@ -629,6 +665,7 @@ static jint LegacyCameraDevice_nativeSetSurfaceDimens(JNIEnv* env, jobject thiz,
     if (err != NO_ERROR) {
         ALOGE("%s: Error while setting surface user dimens %s (%d).", __FUNCTION__, strerror(-err),
                 err);
+        OVERRIDE_SURFACE_ERROR(err);
         return err;
     }
     return NO_ERROR;
