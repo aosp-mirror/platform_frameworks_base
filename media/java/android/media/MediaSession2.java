@@ -1651,6 +1651,7 @@ public class MediaSession2 implements AutoCloseable {
      * @return player state
      * @hide
      */
+    // TODO(jaewan): Unhide (b/74578458)
     public @PlayerState int getPlayerState() {
         // TODO(jaewan): implement this (b/74578458)
         return PLAYER_STATE_IDLE;
@@ -1662,6 +1663,7 @@ public class MediaSession2 implements AutoCloseable {
      * @return position
      * @hide
      */
+    // TODO(jaewan): Unhide (b/74578458)
     public long getCurrentPosition() {
         // TODO(jaewan): implement this (b/74578458)
         return -1;
@@ -1673,6 +1675,7 @@ public class MediaSession2 implements AutoCloseable {
      * @return buffered position
      * @hide
      */
+    // TODO(jaewan): Unhide (b/74578458)
     public long getBufferedPosition() {
         // TODO(jaewan): implement this (b/74578458)
         return -1;
