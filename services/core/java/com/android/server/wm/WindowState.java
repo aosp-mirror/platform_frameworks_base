@@ -4297,6 +4297,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final boolean wasVisible = isVisibleLw();
 
         result |= (!wasVisible || !isDrawnLw()) ? RELAYOUT_RES_FIRST_TIME : 0;
+
+        if (mWinAnimator.mChildrenDetached) {
+            // If there are detached children hanging around we need to force
+            // the client receiving a new Surface.
+            mWinAnimator.preserveSurfaceLocked();
+            result |= RELAYOUT_RES_SURFACE_CHANGED
+                    | RELAYOUT_RES_FIRST_TIME;
+        }
+
         if (mAnimatingExit) {
             Slog.d(TAG, "relayoutVisibleWindow: " + this + " mAnimatingExit=true, mRemoveOnExit="
                     + mRemoveOnExit + ", mDestroying=" + mDestroying);
