@@ -5507,6 +5507,10 @@ message MetricsEvent {
     // internal platform metrics use.
     RESERVED_FOR_LOGBUILDER_LATENCY_MILLIS = 1359;
 
+    // OPEN: Settings > Gestures > Prevent Ringing
+    // OS: P
+    SETTINGS_PREVENT_RINGING = 1360;
+
     // ---- End P Constants, all P constants go above this line ----
 
     // First Q constant in master goes here:
