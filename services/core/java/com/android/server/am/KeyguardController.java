@@ -98,6 +98,14 @@ class KeyguardController {
     }
 
     /**
+     * @return {@code true} if the keyguard is going away, {@code false} otherwise.
+     */
+    boolean isKeyguardGoingAway() {
+        // Also check keyguard showing in case value is stale.
+        return mKeyguardGoingAway && mKeyguardShowing;
+    }
+
+    /**
      * Update the Keyguard showing state.
      */
     void setKeyguardShown(boolean showing, int secondaryDisplayShowing) {

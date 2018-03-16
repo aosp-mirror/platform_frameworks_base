@@ -316,6 +316,7 @@ public class ActivityTestsBase {
         @Override
         final protected ActivityStackSupervisor createStackSupervisor() {
             final ActivityStackSupervisor supervisor = spy(createTestSupervisor());
+            final KeyguardController keyguardController = mock(KeyguardController.class);
 
             // No home stack is set.
             doNothing().when(supervisor).moveHomeStackToFront(any());
@@ -330,6 +331,7 @@ public class ActivityTestsBase {
             doNothing().when(supervisor).scheduleIdleTimeoutLocked(any());
             // unit test version does not handle launch wake lock
             doNothing().when(supervisor).acquireLaunchWakelock();
+            doReturn(keyguardController).when(supervisor).getKeyguardController();
 
             supervisor.initialize();
 

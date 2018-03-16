@@ -37,12 +37,15 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.servertransaction.DestroyActivityItem;
 import android.content.pm.ActivityInfo;
+import android.os.Debug;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
@@ -518,4 +521,37 @@ public class ActivityStackTests extends ActivityTestsBase {
         assertTrue(mTask.mActivities.isEmpty());
         assertTrue(mStack.getAllTasks().isEmpty());
     }
+
+    @Test
+    public void testShouldSleepActivities() throws Exception {
+        // When focused activity and keyguard is going away, we should not sleep regardless
+        // of the display state
+        verifyShouldSleepActivities(true /* focusedStack */, true /*keyguardGoingAway*/,
+                true /* displaySleeping */, false /* expected*/);
+
+        // When not the focused stack, defer to display sleeping state.
+        verifyShouldSleepActivities(false /* focusedStack */, true /*keyguardGoingAway*/,
+                true /* displaySleeping */, true /* expected*/);
+
+        // If keyguard is going away, defer to the display sleeping state.
+        verifyShouldSleepActivities(true /* focusedStack */, false /*keyguardGoingAway*/,
+                true /* displaySleeping */, true /* expected*/);
+        verifyShouldSleepActivities(true /* focusedStack */, false /*keyguardGoingAway*/,
+                false /* displaySleeping */, false /* expected*/);
+    }
+
+    private void verifyShouldSleepActivities(boolean focusedStack,
+            boolean keyguardGoingAway, boolean displaySleeping, boolean expected) {
+        mSupervisor.mFocusedStack = focusedStack ? mStack : null;
+
+        final ActivityDisplay display = mock(ActivityDisplay.class);
+        final KeyguardController keyguardController = mSupervisor.getKeyguardController();
+
+        doReturn(display).when(mSupervisor).getActivityDisplay(anyInt());
+        doReturn(keyguardGoingAway).when(keyguardController).isKeyguardGoingAway();
+        doReturn(displaySleeping).when(display).isSleeping();
+
+        assertEquals(expected, mStack.shouldSleepActivities());
+    }
+
 }
