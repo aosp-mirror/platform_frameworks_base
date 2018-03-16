@@ -271,12 +271,12 @@ final class SystemServiceRegistry {
             }});
 
         registerService(Context.IPSEC_SERVICE, IpSecManager.class,
-                new StaticServiceFetcher<IpSecManager>() {
+                new CachedServiceFetcher<IpSecManager>() {
             @Override
-            public IpSecManager createService() {
+            public IpSecManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 IBinder b = ServiceManager.getService(Context.IPSEC_SERVICE);
                 IIpSecService service = IIpSecService.Stub.asInterface(b);
-                return new IpSecManager(service);
+                return new IpSecManager(ctx, service);
             }});
 
         registerService(Context.COUNTRY_DETECTOR, CountryDetector.class,

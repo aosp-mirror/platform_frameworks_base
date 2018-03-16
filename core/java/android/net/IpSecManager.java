@@ -140,6 +140,7 @@ public final class IpSecManager {
         }
     }
 
+    private final Context mContext;
     private final IIpSecService mService;
 
     /**
@@ -667,6 +668,7 @@ public final class IpSecManager {
      */
     @SystemApi
     public static final class IpSecTunnelInterface implements AutoCloseable {
+        private final String mOpPackageName;
         private final IIpSecService mService;
         private final InetAddress mRemoteAddress;
         private final InetAddress mLocalAddress;
@@ -694,7 +696,8 @@ public final class IpSecManager {
         @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
         public void addAddress(@NonNull LinkAddress address) throws IOException {
             try {
-                mService.addAddressToTunnelInterface(mResourceId, address);
+                mService.addAddressToTunnelInterface(
+                        mResourceId, address, mOpPackageName);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -712,16 +715,18 @@ public final class IpSecManager {
         @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
         public void removeAddress(@NonNull LinkAddress address) throws IOException {
             try {
-                mService.removeAddressFromTunnelInterface(mResourceId, address);
+                mService.removeAddressFromTunnelInterface(
+                        mResourceId, address, mOpPackageName);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
         }
 
-        private IpSecTunnelInterface(@NonNull IIpSecService service,
+        private IpSecTunnelInterface(@NonNull Context ctx, @NonNull IIpSecService service,
                 @NonNull InetAddress localAddress, @NonNull InetAddress remoteAddress,
                 @NonNull Network underlyingNetwork)
                 throws ResourceUnavailableException, IOException {
+            mOpPackageName = ctx.getOpPackageName();
             mService = service;
             mLocalAddress = localAddress;
             mRemoteAddress = remoteAddress;
@@ -733,7 +738,8 @@ public final class IpSecManager {
                                 localAddress.getHostAddress(),
                                 remoteAddress.getHostAddress(),
                                 underlyingNetwork,
-                                new Binder());
+                                new Binder(),
+                                mOpPackageName);
                 switch (result.status) {
                     case Status.OK:
                         break;
@@ -762,7 +768,7 @@ public final class IpSecManager {
         @Override
         public void close() {
             try {
-                mService.deleteTunnelInterface(mResourceId);
+                mService.deleteTunnelInterface(mResourceId, mOpPackageName);
                 mResourceId = INVALID_RESOURCE_ID;
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -807,7 +813,8 @@ public final class IpSecManager {
     public IpSecTunnelInterface createIpSecTunnelInterface(@NonNull InetAddress localAddress,
             @NonNull InetAddress remoteAddress, @NonNull Network underlyingNetwork)
             throws ResourceUnavailableException, IOException {
-        return new IpSecTunnelInterface(mService, localAddress, remoteAddress, underlyingNetwork);
+        return new IpSecTunnelInterface(
+                mContext, mService, localAddress, remoteAddress, underlyingNetwork);
     }
 
     /**
@@ -833,7 +840,8 @@ public final class IpSecManager {
             @PolicyDirection int direction, @NonNull IpSecTransform transform) throws IOException {
         try {
             mService.applyTunnelModeTransform(
-                    tunnel.getResourceId(), direction, transform.getResourceId());
+                    tunnel.getResourceId(), direction,
+                    transform.getResourceId(), mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -845,7 +853,8 @@ public final class IpSecManager {
      * @param context the application context for this manager
      * @hide
      */
-    public IpSecManager(IIpSecService service) {
+    public IpSecManager(Context ctx, IIpSecService service) {
+        mContext = ctx;
         mService = checkNotNull(service, "missing service");
     }
 }

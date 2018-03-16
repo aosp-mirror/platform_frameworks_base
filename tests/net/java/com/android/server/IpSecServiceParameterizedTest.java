@@ -27,6 +27,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.net.INetd;
 import android.net.IpSecAlgorithm;
@@ -40,6 +41,7 @@ import android.net.Network;
 import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
+import android.test.mock.MockContext;
 import android.support.test.filters.SmallTest;
 import android.system.Os;
 
@@ -92,7 +94,28 @@ public class IpSecServiceParameterizedTest {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7F
     };
 
-    Context mMockContext;
+    AppOpsManager mMockAppOps = mock(AppOpsManager.class);
+
+    MockContext mMockContext = new MockContext() {
+        @Override
+        public Object getSystemService(String name) {
+            switch(name) {
+                case Context.APP_OPS_SERVICE:
+                    return mMockAppOps;
+                default:
+                    return null;
+            }
+        }
+
+        @Override
+        public void enforceCallingOrSelfPermission(String permission, String message) {
+            if (permission == android.Manifest.permission.MANAGE_IPSEC_TUNNELS) {
+                return;
+            }
+            throw new SecurityException("Unavailable permission requested");
+        }
+    };
+
     INetd mMockNetd;
     IpSecService.IpSecServiceConfiguration mMockIpSecSrvConfig;
     IpSecService mIpSecService;
@@ -114,13 +137,22 @@ public class IpSecServiceParameterizedTest {
 
     @Before
     public void setUp() throws Exception {
-        mMockContext = mock(Context.class);
         mMockNetd = mock(INetd.class);
         mMockIpSecSrvConfig = mock(IpSecService.IpSecServiceConfiguration.class);
         mIpSecService = new IpSecService(mMockContext, mMockIpSecSrvConfig);
 
         // Injecting mock netd
         when(mMockIpSecSrvConfig.getNetdInstance()).thenReturn(mMockNetd);
+        // A package granted the AppOp for MANAGE_IPSEC_TUNNELS will be MODE_ALLOWED.
+        when(mMockAppOps.noteOp(anyInt(), anyInt(), eq("blessedPackage")))
+            .thenReturn(AppOpsManager.MODE_ALLOWED);
+        // A system package will not be granted the app op, so this should fall back to
+        // a permissions check, which should pass.
+        when(mMockAppOps.noteOp(anyInt(), anyInt(), eq("systemPackage")))
+            .thenReturn(AppOpsManager.MODE_DEFAULT);
+        // A mismatch between the package name and the UID will return MODE_IGNORED.
+        when(mMockAppOps.noteOp(anyInt(), anyInt(), eq("badPackage")))
+            .thenReturn(AppOpsManager.MODE_IGNORED);
     }
 
     @Test
@@ -232,7 +264,7 @@ public class IpSecServiceParameterizedTest {
         addAuthAndCryptToIpSecConfig(ipSecConfig);
 
         IpSecTransformResponse createTransformResp =
-                mIpSecService.createTransform(ipSecConfig, new Binder());
+                mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
         assertEquals(IpSecManager.Status.OK, createTransformResp.status);
 
         verify(mMockNetd)
@@ -267,7 +299,7 @@ public class IpSecServiceParameterizedTest {
         ipSecConfig.setAuthenticatedEncryption(AEAD_ALGO);
 
         IpSecTransformResponse createTransformResp =
-                mIpSecService.createTransform(ipSecConfig, new Binder());
+                mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
         assertEquals(IpSecManager.Status.OK, createTransformResp.status);
 
         verify(mMockNetd)
@@ -301,12 +333,12 @@ public class IpSecServiceParameterizedTest {
         addAuthAndCryptToIpSecConfig(ipSecConfig);
 
         IpSecTransformResponse createTransformResp =
-                mIpSecService.createTransform(ipSecConfig, new Binder());
+                mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
         assertEquals(IpSecManager.Status.OK, createTransformResp.status);
 
         // Attempting to create transform a second time with the same SPIs should throw an error...
         try {
-                mIpSecService.createTransform(ipSecConfig, new Binder());
+                mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
                 fail("IpSecService should have thrown an error for reuse of SPI");
         } catch (IllegalStateException expected) {
         }
@@ -314,7 +346,7 @@ public class IpSecServiceParameterizedTest {
         // ... even if the transform is deleted
         mIpSecService.deleteTransform(createTransformResp.resourceId);
         try {
-                mIpSecService.createTransform(ipSecConfig, new Binder());
+                mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
                 fail("IpSecService should have thrown an error for reuse of SPI");
         } catch (IllegalStateException expected) {
         }
@@ -327,7 +359,7 @@ public class IpSecServiceParameterizedTest {
         addAuthAndCryptToIpSecConfig(ipSecConfig);
 
         IpSecTransformResponse createTransformResp =
-                mIpSecService.createTransform(ipSecConfig, new Binder());
+                mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
         IpSecService.UserRecord userRecord =
                 mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
         assertEquals(1, userRecord.mSpiQuotaTracker.mCurrent);
@@ -351,7 +383,7 @@ public class IpSecServiceParameterizedTest {
         addAuthAndCryptToIpSecConfig(ipSecConfig);
 
         IpSecTransformResponse createTransformResp =
-                mIpSecService.createTransform(ipSecConfig, new Binder());
+                mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
         mIpSecService.deleteTransform(createTransformResp.resourceId);
 
         verify(mMockNetd, times(1))
@@ -398,7 +430,7 @@ public class IpSecServiceParameterizedTest {
         addAuthAndCryptToIpSecConfig(ipSecConfig);
 
         IpSecTransformResponse createTransformResp =
-                mIpSecService.createTransform(ipSecConfig, new Binder());
+                mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
 
         IpSecService.UserRecord userRecord =
                 mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
@@ -435,7 +467,7 @@ public class IpSecServiceParameterizedTest {
         addAuthAndCryptToIpSecConfig(ipSecConfig);
 
         IpSecTransformResponse createTransformResp =
-                mIpSecService.createTransform(ipSecConfig, new Binder());
+                mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
         ParcelFileDescriptor pfd = ParcelFileDescriptor.fromSocket(new Socket());
 
         int resourceId = createTransformResp.resourceId;
@@ -460,10 +492,10 @@ public class IpSecServiceParameterizedTest {
     }
 
     private IpSecTunnelInterfaceResponse createAndValidateTunnel(
-            String localAddr, String remoteAddr) {
+            String localAddr, String remoteAddr, String pkgName) {
         IpSecTunnelInterfaceResponse createTunnelResp =
                 mIpSecService.createTunnelInterface(
-                        mSourceAddr, mDestinationAddr, fakeNetwork, new Binder());
+                        mSourceAddr, mDestinationAddr, fakeNetwork, new Binder(), pkgName);
 
         assertNotNull(createTunnelResp);
         assertEquals(IpSecManager.Status.OK, createTunnelResp.status);
@@ -473,7 +505,7 @@ public class IpSecServiceParameterizedTest {
     @Test
     public void testCreateTunnelInterface() throws Exception {
         IpSecTunnelInterfaceResponse createTunnelResp =
-                createAndValidateTunnel(mSourceAddr, mDestinationAddr);
+                createAndValidateTunnel(mSourceAddr, mDestinationAddr, "blessedPackage");
 
         // Check that we have stored the tracking object, and retrieve it
         IpSecService.UserRecord userRecord =
@@ -495,12 +527,12 @@ public class IpSecServiceParameterizedTest {
     @Test
     public void testDeleteTunnelInterface() throws Exception {
         IpSecTunnelInterfaceResponse createTunnelResp =
-                createAndValidateTunnel(mSourceAddr, mDestinationAddr);
+                createAndValidateTunnel(mSourceAddr, mDestinationAddr, "blessedPackage");
 
         IpSecService.UserRecord userRecord =
                 mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
 
-        mIpSecService.deleteTunnelInterface(createTunnelResp.resourceId);
+        mIpSecService.deleteTunnelInterface(createTunnelResp.resourceId, "blessedPackage");
 
         // Verify quota and RefcountedResource objects cleaned up
         assertEquals(0, userRecord.mTunnelQuotaTracker.mCurrent);
@@ -516,7 +548,7 @@ public class IpSecServiceParameterizedTest {
     @Test
     public void testTunnelInterfaceBinderDeath() throws Exception {
         IpSecTunnelInterfaceResponse createTunnelResp =
-                createAndValidateTunnel(mSourceAddr, mDestinationAddr);
+                createAndValidateTunnel(mSourceAddr, mDestinationAddr, "blessedPackage");
 
         IpSecService.UserRecord userRecord =
                 mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
@@ -539,22 +571,34 @@ public class IpSecServiceParameterizedTest {
 
     @Test
     public void testAddRemoveAddressFromTunnelInterface() throws Exception {
-        IpSecTunnelInterfaceResponse createTunnelResp =
-                createAndValidateTunnel(mSourceAddr, mDestinationAddr);
+        for (String pkgName : new String[]{"blessedPackage", "systemPackage"}) {
+            IpSecTunnelInterfaceResponse createTunnelResp =
+                    createAndValidateTunnel(mSourceAddr, mDestinationAddr, pkgName);
+            mIpSecService.addAddressToTunnelInterface(
+                    createTunnelResp.resourceId, mLocalInnerAddress, pkgName);
+            verify(mMockNetd, times(1))
+                    .interfaceAddAddress(
+                            eq(createTunnelResp.interfaceName),
+                            eq(mLocalInnerAddress.getAddress().getHostAddress()),
+                            eq(mLocalInnerAddress.getPrefixLength()));
+            mIpSecService.removeAddressFromTunnelInterface(
+                    createTunnelResp.resourceId, mLocalInnerAddress, pkgName);
+            verify(mMockNetd, times(1))
+                    .interfaceDelAddress(
+                            eq(createTunnelResp.interfaceName),
+                            eq(mLocalInnerAddress.getAddress().getHostAddress()),
+                            eq(mLocalInnerAddress.getPrefixLength()));
+            mIpSecService.deleteTunnelInterface(createTunnelResp.resourceId, pkgName);
+        }
+    }
 
-        mIpSecService.addAddressToTunnelInterface(createTunnelResp.resourceId, mLocalInnerAddress);
-        verify(mMockNetd)
-                .interfaceAddAddress(
-                        eq(createTunnelResp.interfaceName),
-                        eq(mLocalInnerAddress.getAddress().getHostAddress()),
-                        eq(mLocalInnerAddress.getPrefixLength()));
-
-        mIpSecService.removeAddressFromTunnelInterface(
-                createTunnelResp.resourceId, mLocalInnerAddress);
-        verify(mMockNetd)
-                .interfaceDelAddress(
-                        eq(createTunnelResp.interfaceName),
-                        eq(mLocalInnerAddress.getAddress().getHostAddress()),
-                        eq(mLocalInnerAddress.getPrefixLength()));
+    @Test
+    public void testAddTunnelFailsForBadPackageName() throws Exception {
+        try {
+            IpSecTunnelInterfaceResponse createTunnelResp =
+                    createAndValidateTunnel(mSourceAddr, mDestinationAddr, "badPackage");
+            fail("Expected a SecurityException for badPackage.");
+        } catch (SecurityException expected) {
+        }
     }
 }

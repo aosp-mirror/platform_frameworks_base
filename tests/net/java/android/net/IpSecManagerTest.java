@@ -30,6 +30,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.test.mock.MockContext;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.system.Os;
@@ -70,11 +71,17 @@ public class IpSecManagerTest {
 
     private IpSecService mMockIpSecService;
     private IpSecManager mIpSecManager;
+    private MockContext mMockContext = new MockContext() {
+        @Override
+        public String getOpPackageName() {
+            return "fooPackage";
+        }
+    };
 
     @Before
     public void setUp() throws Exception {
         mMockIpSecService = mock(IpSecService.class);
-        mIpSecManager = new IpSecManager(mMockIpSecService);
+        mIpSecManager = new IpSecManager(mMockContext, mMockIpSecService);
     }
 
     /*
@@ -255,7 +262,7 @@ public class IpSecManagerTest {
                 new IpSecTunnelInterfaceResponse(IpSecManager.Status.OK, resourceId, intfName);
         when(mMockIpSecService.createTunnelInterface(
                 eq(VTI_LOCAL_ADDRESS.getHostAddress()), eq(GOOGLE_DNS_4.getHostAddress()),
-                anyObject(), anyObject()))
+                anyObject(), anyObject(), anyString()))
                         .thenReturn(dummyResponse);
 
         IpSecManager.IpSecTunnelInterface tunnelIntf = mIpSecManager.createIpSecTunnelInterface(
@@ -273,7 +280,7 @@ public class IpSecManagerTest {
         assertEquals(VTI_INTF_NAME, tunnelIntf.getInterfaceName());
 
         tunnelIntf.close();
-        verify(mMockIpSecService).deleteTunnelInterface(eq(DUMMY_RESOURCE_ID));
+        verify(mMockIpSecService).deleteTunnelInterface(eq(DUMMY_RESOURCE_ID), anyString());
     }
 
     @Test
@@ -283,10 +290,12 @@ public class IpSecManagerTest {
 
         tunnelIntf.addAddress(VTI_INNER_ADDRESS);
         verify(mMockIpSecService)
-                .addAddressToTunnelInterface(eq(DUMMY_RESOURCE_ID), eq(VTI_INNER_ADDRESS));
+                .addAddressToTunnelInterface(
+                        eq(DUMMY_RESOURCE_ID), eq(VTI_INNER_ADDRESS), anyString());
 
         tunnelIntf.removeAddress(VTI_INNER_ADDRESS);
         verify(mMockIpSecService)
-                .addAddressToTunnelInterface(eq(DUMMY_RESOURCE_ID), eq(VTI_INNER_ADDRESS));
+                .addAddressToTunnelInterface(
+                        eq(DUMMY_RESOURCE_ID), eq(VTI_INNER_ADDRESS), anyString());
     }
 }
