@@ -21,6 +21,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -114,6 +115,8 @@ public class BluetoothEventManager {
         addHandler(BluetoothA2dp.ACTION_ACTIVE_DEVICE_CHANGED,
                    new ActiveDeviceChangedHandler());
         addHandler(BluetoothHeadset.ACTION_ACTIVE_DEVICE_CHANGED,
+                   new ActiveDeviceChangedHandler());
+        addHandler(BluetoothHearingAid.ACTION_ACTIVE_DEVICE_CHANGED,
                    new ActiveDeviceChangedHandler());
 
         mContext.registerReceiver(mBroadcastReceiver, mAdapterIntentFilter, null, mReceiverHandler);
@@ -434,6 +437,8 @@ public class BluetoothEventManager {
                 bluetoothProfile = BluetoothProfile.A2DP;
             } else if (Objects.equals(action, BluetoothHeadset.ACTION_ACTIVE_DEVICE_CHANGED)) {
                 bluetoothProfile = BluetoothProfile.HEADSET;
+            } else if (Objects.equals(action, BluetoothHearingAid.ACTION_ACTIVE_DEVICE_CHANGED)) {
+                bluetoothProfile = BluetoothProfile.HEARING_AID;
             } else {
                 Log.w(TAG, "ActiveDeviceChangedHandler: unknown action " + action);
                 return;
