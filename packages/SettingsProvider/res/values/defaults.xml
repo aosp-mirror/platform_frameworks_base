@@ -207,4 +207,7 @@
         Else (if negative), turning on dnd manually will surface a dialog that prompts
             user to specify a duration.-->
     <integer name="def_zen_duration">0</integer>
+
+    <!-- Default for Settings.Global.BACKUP_AGENT_TIMEOUT_PARAMETERS -->
+    <string name="def_backup_agent_timeout_parameters"></string>
 </resources>

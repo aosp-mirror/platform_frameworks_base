@@ -2938,7 +2938,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 157;
+            private static final int SETTINGS_VERSION = 158;
 
             private final int mUserId;
 
@@ -3584,7 +3584,7 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 155) {
-                    // Version 155: Set the default value for CHARGING_STARTED_SOUND.
+                    // Version 156: Set the default value for CHARGING_STARTED_SOUND.
                     final SettingsState globalSettings = getGlobalSettingsLocked();
                     final String oldValue = globalSettings.getSettingLocked(
                             Global.CHARGING_STARTED_SOUND).getValue();
@@ -3605,7 +3605,7 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 156) {
-                    // Version 156: Set a default value for zen duration
+                    // Version 157: Set a default value for zen duration
                     final SettingsState globalSettings = getGlobalSettingsLocked();
                     final Setting currentSetting = globalSettings.getSettingLocked(
                             Global.ZEN_DURATION);
@@ -3616,8 +3616,25 @@ public class SettingsProvider extends ContentProvider {
                                 Global.ZEN_DURATION, defaultZenDuration,
                                 null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
-
                     currentVersion = 157;
+                }
+
+                if (currentVersion == 157) {
+                    // Version 158: Set default value for BACKUP_AGENT_TIMEOUT_PARAMETERS.
+                    final SettingsState globalSettings = getGlobalSettingsLocked();
+                    final String oldValue = globalSettings.getSettingLocked(
+                            Settings.Global.BACKUP_AGENT_TIMEOUT_PARAMETERS).getValue();
+                    if (TextUtils.equals(null, oldValue)) {
+                        final String defaultValue = getContext().getResources().getString(
+                                R.string.def_backup_agent_timeout_parameters);
+                        if (!TextUtils.isEmpty(defaultValue)) {
+                            globalSettings.insertSettingLocked(
+                                    Settings.Global.BACKUP_AGENT_TIMEOUT_PARAMETERS, defaultValue,
+                                    null, true,
+                                    SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                    }
+                    currentVersion = 158;
                 }
                 // vXXX: Add new settings above this point.
 
