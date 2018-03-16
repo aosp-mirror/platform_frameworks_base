@@ -56,6 +56,7 @@ import android.service.notification.ZenModeConfig.ScheduleInfo;
 import android.service.notification.ZenModeConfig.ZenRule;
 import android.service.notification.ZenModeProto;
 import android.util.AndroidRuntimeException;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -234,23 +235,10 @@ public class ZenModeHelper {
             config = mDefaultConfig.copy();
             config.user = user;
         }
-        enforceDefaultRulesExist(config);
         synchronized (mConfig) {
             setConfigLocked(config, reason);
         }
         cleanUpZenRules();
-    }
-
-    private void enforceDefaultRulesExist(ZenModeConfig config) {
-        for (String id : ZenModeConfig.DEFAULT_RULE_IDS) {
-            if (!config.automaticRules.containsKey(id)) {
-                if (id.equals(ZenModeConfig.EVENTS_DEFAULT_RULE_ID)) {
-                    appendDefaultEventRules(config);
-                } else if (id.equals(ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID)) {
-                    appendDefaultEveryNightRule(config);
-                }
-            }
-        }
     }
 
     public int getZenModeListenerInterruptionFilter() {
@@ -623,43 +611,59 @@ public class ZenModeHelper {
 
     public void readXml(XmlPullParser parser, boolean forRestore)
             throws XmlPullParserException, IOException {
-        final ZenModeConfig config = ZenModeConfig.readXml(parser);
+        ZenModeConfig config = ZenModeConfig.readXml(parser);
+        String reason = "readXml";
+
         if (config != null) {
-            if (config.version < ZenModeConfig.XML_VERSION || forRestore) {
-                Settings.Global.putInt(mContext.getContentResolver(),
-                        Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 1);
-            }
             if (forRestore) {
                 //TODO: http://b/22388012
                 if (config.user != UserHandle.USER_SYSTEM) {
                     return;
                 }
                 config.manualRule = null;  // don't restore the manual rule
-                long time = System.currentTimeMillis();
-                if (config.automaticRules != null) {
-                    for (ZenRule automaticRule : config.automaticRules.values()) {
+            }
+
+            boolean resetToDefaultRules = true;
+            long time = System.currentTimeMillis();
+            if (config.automaticRules != null && config.automaticRules.size() > 0) {
+                for (ZenRule automaticRule : config.automaticRules.values()) {
+                    if (forRestore) {
                         // don't restore transient state from restored automatic rules
                         automaticRule.snoozing = false;
                         automaticRule.condition = null;
                         automaticRule.creationTime = time;
                     }
+                    resetToDefaultRules &= !automaticRule.enabled;
                 }
             }
-            if (DEBUG) Log.d(TAG, "readXml");
+
+            if (config.version < ZenModeConfig.XML_VERSION || forRestore) {
+                Settings.Global.putInt(mContext.getContentResolver(),
+                        Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 1);
+
+                // resets zen automatic rules to default
+                // if all prev auto rules were disabled on update
+                if (resetToDefaultRules) {
+                    config.automaticRules = new ArrayMap<>();
+                    appendDefaultRules(config);
+                    reason += ", reset to default rules";
+                }
+            }
+            if (DEBUG) Log.d(TAG, reason);
             synchronized (mConfig) {
-                setConfigLocked(config, "readXml");
+                setConfigLocked(config, reason);
             }
         }
     }
 
-    public void writeXml(XmlSerializer out, boolean forBackup) throws IOException {
+    public void writeXml(XmlSerializer out, boolean forBackup, Integer version) throws IOException {
         final int N = mConfigs.size();
         for (int i = 0; i < N; i++) {
             //TODO: http://b/22388012
             if (forBackup && mConfigs.keyAt(i) != UserHandle.USER_SYSTEM) {
                 continue;
             }
-            mConfigs.valueAt(i).writeXml(out);
+            mConfigs.valueAt(i).writeXml(out, version);
         }
     }
 

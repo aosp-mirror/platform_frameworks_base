@@ -593,7 +593,7 @@ public class NotificationManagerService extends SystemService {
         out.startDocument(null, true);
         out.startTag(null, TAG_NOTIFICATION_POLICY);
         out.attribute(null, ATTR_VERSION, Integer.toString(DB_VERSION));
-        mZenModeHelper.writeXml(out, forBackup);
+        mZenModeHelper.writeXml(out, forBackup, null);
         mRankingHelper.writeXml(out, forBackup);
         mListeners.writeXml(out, forBackup);
         mAssistants.writeXml(out, forBackup);
