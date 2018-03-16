@@ -24,7 +24,6 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "frameworks/base/cmds/statsd/src/stats_log_common.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "packages/UidMap.h"
 #include "stats_util.h"

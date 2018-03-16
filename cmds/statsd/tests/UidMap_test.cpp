@@ -174,41 +174,52 @@ TEST(UidMapTest, TestClearingOutput) {
     versions.push_back(4);
     versions.push_back(5);
     m.updateMap(1, uids, versions, apps);
-    EXPECT_EQ(1, m.mOutput.snapshots_size());
+    EXPECT_EQ(1U, m.mSnapshots.size());
 
-    UidMapping results = m.getOutput(2, config1);
+    vector<uint8_t> bytes;
+    m.getOutput(2, config1, &bytes);
+    UidMapping results;
+    results.ParseFromArray(bytes.data(), bytes.size());
     EXPECT_EQ(1, results.snapshots_size());
 
     // It should be cleared now
-    EXPECT_EQ(1, m.mOutput.snapshots_size());
-    results = m.getOutput(3, config1);
+    EXPECT_EQ(1U, m.mSnapshots.size());
+    bytes.clear();
+    m.getOutput(2, config1, &bytes);
+    results.ParseFromArray(bytes.data(), bytes.size());
     EXPECT_EQ(1, results.snapshots_size());
 
     // Now add another configuration.
     m.OnConfigUpdated(config2);
     m.updateApp(5, String16(kApp1.c_str()), 1000, 40);
-    EXPECT_EQ(1, m.mOutput.changes_size());
-    results = m.getOutput(6, config1);
+    EXPECT_EQ(1U, m.mChanges.size());
+    bytes.clear();
+    m.getOutput(6, config1, &bytes);
+    results.ParseFromArray(bytes.data(), bytes.size());
     EXPECT_EQ(1, results.snapshots_size());
     EXPECT_EQ(1, results.changes_size());
-    EXPECT_EQ(1, m.mOutput.changes_size());
+    EXPECT_EQ(1U, m.mChanges.size());
 
     // Add another delta update.
     m.updateApp(7, String16(kApp2.c_str()), 1001, 41);
-    EXPECT_EQ(2, m.mOutput.changes_size());
+    EXPECT_EQ(2U, m.mChanges.size());
 
     // We still can't remove anything.
-    results = m.getOutput(8, config1);
+    bytes.clear();
+    m.getOutput(8, config1, &bytes);
+    results.ParseFromArray(bytes.data(), bytes.size());
     EXPECT_EQ(1, results.snapshots_size());
-    EXPECT_EQ(2, results.changes_size());
-    EXPECT_EQ(2, m.mOutput.changes_size());
+    EXPECT_EQ(1, results.changes_size());
+    EXPECT_EQ(2U, m.mChanges.size());
 
-    results = m.getOutput(9, config2);
+    bytes.clear();
+    m.getOutput(9, config2, &bytes);
+    results.ParseFromArray(bytes.data(), bytes.size());
     EXPECT_EQ(1, results.snapshots_size());
     EXPECT_EQ(2, results.changes_size());
     // At this point both should be cleared.
-    EXPECT_EQ(1, m.mOutput.snapshots_size());
-    EXPECT_EQ(0, m.mOutput.changes_size());
+    EXPECT_EQ(1U, m.mSnapshots.size());
+    EXPECT_EQ(0U, m.mChanges.size());
 }
 
 TEST(UidMapTest, TestMemoryComputed) {
@@ -231,10 +242,11 @@ TEST(UidMapTest, TestMemoryComputed) {
     m.updateApp(3, String16(kApp1.c_str()), 1000, 40);
     EXPECT_TRUE(m.mBytesUsed > snapshot_bytes);
 
-    m.getOutput(2, config1);
+    vector<uint8_t> bytes;
+    m.getOutput(2, config1, &bytes);
     size_t prevBytes = m.mBytesUsed;
 
-    m.getOutput(4, config1);
+    m.getOutput(4, config1, &bytes);
     EXPECT_TRUE(m.mBytesUsed < prevBytes);
 }
 
@@ -256,17 +268,17 @@ TEST(UidMapTest, TestMemoryGuardrail) {
         versions.push_back(1);
     }
     m.updateMap(1, uids, versions, apps);
-    EXPECT_EQ(1, m.mOutput.snapshots_size());
+    EXPECT_EQ(1U, m.mSnapshots.size());
 
     m.updateApp(3, String16("EXTREMELY_LONG_STRING_FOR_APP_TO_WASTE_MEMORY.0"), 1000, 2);
-    EXPECT_EQ(1, m.mOutput.snapshots_size());
-    EXPECT_EQ(1, m.mOutput.changes_size());
+    EXPECT_EQ(1U, m.mSnapshots.size());
+    EXPECT_EQ(1U, m.mChanges.size());
 
     // Now force deletion by limiting the memory to hold one delta change.
     m.maxBytesOverride = 80; // Since the app string alone requires >45 characters.
     m.updateApp(5, String16("EXTREMELY_LONG_STRING_FOR_APP_TO_WASTE_MEMORY.0"), 1000, 4);
-    EXPECT_EQ(0, m.mOutput.snapshots_size());
-    EXPECT_EQ(1, m.mOutput.changes_size());
+    EXPECT_EQ(0U, m.mSnapshots.size());
+    EXPECT_EQ(1U, m.mChanges.size());
 }
 #else
 GTEST_LOG_(INFO) << "This test does nothing.\n";
