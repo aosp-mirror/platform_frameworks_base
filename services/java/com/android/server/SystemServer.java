@@ -685,11 +685,6 @@ public final class SystemServer {
      * Starts some essential services that are not tangled up in the bootstrap process.
      */
     private void startCoreServices() {
-        // Records errors and logs, for example wtf()
-        traceBeginAndSlog("StartDropBoxManager");
-        mSystemServiceManager.startService(DropBoxManagerService.class);
-        traceEnd();
-
         traceBeginAndSlog("StartBatteryService");
         // Tracks the battery level.  Requires LightService.
         mSystemServiceManager.startService(BatteryService.class);
@@ -814,6 +809,13 @@ public final class SystemServer {
             mActivityManagerService.installSystemProviders();
             // Now that SettingsProvider is ready, reactivate SQLiteCompatibilityWalFlags
             SQLiteCompatibilityWalFlags.reset();
+            traceEnd();
+
+            // Records errors and logs, for example wtf()
+            // Currently this service indirectly depends on SettingsProvider so do this after
+            // InstallSystemProviders.
+            traceBeginAndSlog("StartDropBoxManager");
+            mSystemServiceManager.startService(DropBoxManagerService.class);
             traceEnd();
 
             traceBeginAndSlog("StartVibratorService");
