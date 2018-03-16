@@ -51,6 +51,7 @@ public final class DisplayCutout {
     private static final String TAG = "DisplayCutout";
     private static final String BOTTOM_MARKER = "@bottom";
     private static final String DP_MARKER = "@dp";
+    private static final String RIGHT_MARKER = "@right";
 
     /**
      * Category for overlays that allow emulating a display cutout on devices that don't have
@@ -373,6 +374,13 @@ public final class DisplayCutout {
             }
         }
         spec = spec.trim();
+        final float offsetX;
+        if (spec.endsWith(RIGHT_MARKER)) {
+            offsetX = displayWidth;
+            spec = spec.substring(0, spec.length() - RIGHT_MARKER.length()).trim();
+        } else {
+            offsetX = displayWidth / 2f;
+        }
         final boolean inDp = spec.endsWith(DP_MARKER);
         if (inDp) {
             spec = spec.substring(0, spec.length() - DP_MARKER.length());
@@ -397,7 +405,7 @@ public final class DisplayCutout {
         if (inDp) {
             m.postScale(density, density);
         }
-        m.postTranslate(displayWidth / 2f, 0);
+        m.postTranslate(offsetX, 0);
         p.transform(m);
 
         if (bottomSpec != null) {
