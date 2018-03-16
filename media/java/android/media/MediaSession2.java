@@ -1465,39 +1465,37 @@ public class MediaSession2 implements AutoCloseable {
     }
 
     /**
-     * Get the player state.
+     * Gets the current player state.
      *
-     * @return player state
+     * @return the current player state
      * @hide
      */
     // TODO(jaewan): Unhide (b/74578458)
     public @PlayerState int getPlayerState() {
-        // TODO(jaewan): implement this (b/74578458)
-        return PLAYER_STATE_IDLE;
+        return mProvider.getPlayerState_impl();
     }
 
     /**
-     * Get the current position.
+     * Gets the current position.
      *
-     * @return position
+     * @return the current playback position in ms, or {@link MediaPlayerBase#UNKNOWN_TIME} if
+     *         unknown.
      * @hide
      */
     // TODO(jaewan): Unhide (b/74578458)
-    public long getCurrentPosition() {
-        // TODO(jaewan): implement this (b/74578458)
-        return -1;
+    public long getPosition() {
+        return mProvider.getPosition_impl();
     }
 
     /**
-     * Get the buffered position.
+     * Gets the buffered position, or {@link MediaPlayerBase#UNKNOWN_TIME} if unknown.
      *
-     * @return buffered position
+     * @return the buffered position in ms, or {@link MediaPlayerBase#UNKNOWN_TIME}.
      * @hide
      */
     // TODO(jaewan): Unhide (b/74578458)
     public long getBufferedPosition() {
-        // TODO(jaewan): implement this (b/74578458)
-        return -1;
+        return mProvider.getBufferedPosition_impl();
     }
 
     /**
