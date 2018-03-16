@@ -111,6 +111,13 @@ public class TelephonyManager {
             BatteryStats.RESULT_RECEIVER_CONTROLLER_KEY;
 
     /**
+     * The process name of the Phone app as well as many other apps that use this process name, such
+     * as settings and vendor components.
+     * @hide
+     */
+    public static final String PHONE_PROCESS_NAME = "com.android.phone";
+
+    /**
      * The allowed states of Wi-Fi calling.
      *
      * @hide
