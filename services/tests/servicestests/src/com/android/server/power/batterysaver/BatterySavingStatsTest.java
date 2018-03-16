@@ -15,8 +15,6 @@
  */
 package com.android.server.power.batterysaver;
 
-import static com.android.server.power.batterysaver.BatterySavingStats.SEND_TRON_EVENTS;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -105,9 +103,23 @@ public class BatterySavingStatsTest {
 
     public MetricsLogger mMetricsLogger = mock(MetricsLogger.class);
 
+    private boolean sendTronEvents;
+
     @Test
-    public void testAll() {
+    public void testAll_withTron() {
+        sendTronEvents = true;
+        checkAll();
+    }
+
+    @Test
+    public void testAll_noTron() {
+        sendTronEvents = false;
+        checkAll();
+    }
+
+    private void checkAll() {
         final BatterySavingStatsTestable target = new BatterySavingStatsTestable();
+        target.setSendTronLog(sendTronEvents);
 
         target.assertDumpable();
 
@@ -229,7 +241,7 @@ public class BatterySavingStatsTest {
 
     private void assertLog(boolean batterySaver, boolean interactive, long deltaTimeMs,
             int deltaBatteryLevelUa, int deltaBatteryLevelPercent) {
-        if (SEND_TRON_EVENTS) {
+        if (sendTronEvents) {
             ArgumentCaptor<LogMaker> ac = ArgumentCaptor.forClass(LogMaker.class);
             verify(mMetricsLogger, times(1)).write(ac.capture());
 
@@ -251,9 +263,22 @@ public class BatterySavingStatsTest {
         }
     }
 
+
     @Test
-    public void testMetricsLogger() {
+    public void testMetricsLogger_withTron() {
+        sendTronEvents = true;
+        checkMetricsLogger();
+    }
+
+    @Test
+    public void testMetricsLogger_noTron() {
+        sendTronEvents = false;
+        checkMetricsLogger();
+    }
+
+    private void checkMetricsLogger() {
         final BatterySavingStatsTestable target = new BatterySavingStatsTestable();
+        target.setSendTronLog(sendTronEvents);
 
         target.advanceClock(1);
         target.drainBattery(1000);
