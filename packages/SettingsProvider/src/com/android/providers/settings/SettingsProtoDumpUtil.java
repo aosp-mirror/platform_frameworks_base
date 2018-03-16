@@ -1253,6 +1253,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.SHOW_ZEN_UPGRADE_NOTIFICATION,
                 GlobalSettingsProto.SHOW_ZEN_UPGRADE_NOTIFICATION);
+        dumpSetting(s, p,
+                Settings.Global.BACKUP_AGENT_TIMEOUT_PARAMETERS,
+                GlobalSettingsProto.BACKUP_AGENT_TIMEOUT_PARAMETERS);
         // Please insert new settings using the same order as in Settings.Global.
 
         p.end(token);
