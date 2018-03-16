@@ -26,6 +26,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Pair;
 import android.util.TypedValue;
 import android.view.DisplayCutout;
 import android.view.Gravity;
@@ -43,7 +44,6 @@ import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.ScreenDecorations;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -213,6 +213,7 @@ public class KeyguardStatusBarView extends RelativeLayout
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        mLayoutState = LAYOUT_NONE;
         if (updateLayoutConsideringCutout()) {
             requestLayout();
         }
@@ -221,10 +222,21 @@ public class KeyguardStatusBarView extends RelativeLayout
 
     private boolean updateLayoutConsideringCutout() {
         DisplayCutout dc = getRootWindowInsets().getDisplayCutout();
-        if (dc == null) {
+        Pair<Integer, Integer> cornerCutoutMargins =
+                PhoneStatusBarView.cornerCutoutMargins(dc, getDisplay());
+        updateCornerCutoutPadding(cornerCutoutMargins);
+        if (dc == null || cornerCutoutMargins != null) {
             return updateLayoutParamsNoCutout();
         } else {
             return updateLayoutParamsForCutout(dc);
+        }
+    }
+
+    private void updateCornerCutoutPadding(Pair<Integer, Integer> cornerCutoutMargins) {
+        if (cornerCutoutMargins != null) {
+            setPadding(cornerCutoutMargins.first, 0, cornerCutoutMargins.second, 0);
+        } else {
+            setPadding(0, 0, 0, 0);
         }
     }
 
