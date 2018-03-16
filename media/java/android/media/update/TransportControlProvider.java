@@ -33,4 +33,9 @@ public interface TransportControlProvider {
     void rewind_impl();
     void seekTo_impl(long pos);
     void skipToPlaylistItem_impl(MediaItem2 item);
+
+    int getRepeatMode_impl();
+    void setRepeatMode_impl(int repeatMode);
+    int getShuffleMode_impl();
+    void setShuffleMode_impl(int shuffleMode);
 }
