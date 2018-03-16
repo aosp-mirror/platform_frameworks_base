@@ -209,12 +209,14 @@ public final class TextClassifierImpl implements TextClassifier {
     public TextLinks generateLinks(
             @NonNull CharSequence text, @Nullable TextLinks.Options options) {
         Utils.validate(text, getMaxGenerateLinksTextLength(), false /* allowInMainThread */);
+
+        final boolean legacyFallback = options != null && options.isLegacyFallback();
+        if (!mSettings.isSmartLinkifyEnabled() && legacyFallback) {
+            return Utils.generateLegacyLinks(text, options);
+        }
+
         final String textString = text.toString();
         final TextLinks.Builder builder = new TextLinks.Builder(textString);
-
-        if (!mSettings.isSmartLinkifyEnabled()) {
-            return builder.build();
-        }
 
         try {
             final long startTimeMs = System.currentTimeMillis();

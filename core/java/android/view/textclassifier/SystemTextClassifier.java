@@ -30,6 +30,8 @@ import android.service.textclassifier.ITextLinksCallback;
 import android.service.textclassifier.ITextSelectionCallback;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.internal.util.Preconditions;
 
 import java.util.concurrent.CountDownLatch;
@@ -37,8 +39,10 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Proxy to the system's default TextClassifier.
+ * @hide
  */
-final class SystemTextClassifier implements TextClassifier {
+@VisibleForTesting(visibility = Visibility.PACKAGE)
+public final class SystemTextClassifier implements TextClassifier {
 
     private static final String LOG_TAG = "SystemTextClassifier";
 
@@ -53,13 +57,13 @@ final class SystemTextClassifier implements TextClassifier {
     @GuardedBy("mLoggerLock")
     private Logger mLogger;
 
-    SystemTextClassifier(Context context, TextClassificationConstants settings)
+    public SystemTextClassifier(Context context, TextClassificationConstants settings)
                 throws ServiceManager.ServiceNotFoundException {
         mManagerService = ITextClassifierService.Stub.asInterface(
                 ServiceManager.getServiceOrThrow(Context.TEXT_CLASSIFICATION_SERVICE));
         mSettings = Preconditions.checkNotNull(settings);
         mFallback = new TextClassifierImpl(context, settings);
-        mPackageName = context.getPackageName();
+        mPackageName = Preconditions.checkNotNull(context.getPackageName());
     }
 
     /**
@@ -124,8 +128,9 @@ final class SystemTextClassifier implements TextClassifier {
             @NonNull CharSequence text, @Nullable TextLinks.Options options) {
         Utils.validate(text, false /* allowInMainThread */);
 
-        if (!mSettings.isSmartLinkifyEnabled()) {
-            return TextClassifier.NO_OP.generateLinks(text, options);
+        final boolean legacyFallback = options != null && options.isLegacyFallback();
+        if (!mSettings.isSmartLinkifyEnabled() && legacyFallback) {
+            return Utils.generateLegacyLinks(text, options);
         }
 
         try {
