@@ -69,6 +69,7 @@ public class BatterySaverPolicy extends ContentObserver {
     private static final String KEY_FORCE_BACKGROUND_CHECK = "force_background_check";
     private static final String KEY_OPTIONAL_SENSORS_DISABLED = "optional_sensors_disabled";
     private static final String KEY_AOD_DISABLED = "aod_disabled";
+    private static final String KEY_SEND_TRON_LOG = "send_tron_log";
 
     private static final String KEY_CPU_FREQ_INTERACTIVE = "cpufreq-i";
     private static final String KEY_CPU_FREQ_NONINTERACTIVE = "cpufreq-n";
@@ -212,6 +213,12 @@ public class BatterySaverPolicy extends ContentObserver {
     @GuardedBy("mLock")
     private boolean mAodDisabled;
 
+    /**
+     * Whether BatterySavingStats should send tron events.
+     */
+    @GuardedBy("mLock")
+    private boolean mSendTronLog;
+
     @GuardedBy("mLock")
     private Context mContext;
 
@@ -347,6 +354,7 @@ public class BatterySaverPolicy extends ContentObserver {
         mForceBackgroundCheck = parser.getBoolean(KEY_FORCE_BACKGROUND_CHECK, true);
         mOptionalSensorsDisabled = parser.getBoolean(KEY_OPTIONAL_SENSORS_DISABLED, true);
         mAodDisabled = parser.getBoolean(KEY_AOD_DISABLED, true);
+        mSendTronLog = parser.getBoolean(KEY_SEND_TRON_LOG, true);
 
         // Get default value from Settings.Secure
         final int defaultGpsMode = Settings.Secure.getInt(mContentResolver, SECURE_KEY_GPS_MODE,
@@ -384,10 +392,13 @@ public class BatterySaverPolicy extends ContentObserver {
         if (mLaunchBoostDisabled) sb.append("l");
         if (mOptionalSensorsDisabled) sb.append("S");
         if (mAodDisabled) sb.append("o");
+        if (mSendTronLog) sb.append("t");
 
         sb.append(mGpsMode);
 
         mEventLogKeys = sb.toString();
+
+        BatterySavingStats.getInstance().setSendTronLog(mSendTronLog);
     }
 
     /**
@@ -483,7 +494,10 @@ public class BatterySaverPolicy extends ContentObserver {
     public void dump(PrintWriter pw) {
         synchronized (mLock) {
             pw.println();
-            pw.println("Battery saver policy");
+            BatterySavingStats.getInstance().dump(pw, "");
+
+            pw.println();
+            pw.println("Battery saver policy (*NOTE* they only apply when battery saver is ON):");
             pw.println("  Settings: " + Settings.Global.BATTERY_SAVER_CONSTANTS);
             pw.println("    value: " + mSettings);
             pw.println("  Settings: " + mDeviceSpecificSettingsSource);
@@ -504,6 +518,7 @@ public class BatterySaverPolicy extends ContentObserver {
             pw.println("  " + KEY_FORCE_BACKGROUND_CHECK + "=" + mForceBackgroundCheck);
             pw.println("  " + KEY_OPTIONAL_SENSORS_DISABLED + "=" + mOptionalSensorsDisabled);
             pw.println("  " + KEY_AOD_DISABLED + "=" + mAodDisabled);
+            pw.println("  " + KEY_SEND_TRON_LOG + "=" + mSendTronLog);
             pw.println();
 
             pw.print("  Interactive File values:\n");
@@ -512,9 +527,6 @@ public class BatterySaverPolicy extends ContentObserver {
 
             pw.print("  Noninteractive File values:\n");
             dumpMap(pw, "    ", mFilesForNoninteractive);
-            pw.println();
-            pw.println();
-            BatterySavingStats.getInstance().dump(pw, "  ");
         }
     }
 
