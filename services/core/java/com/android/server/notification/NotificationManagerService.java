@@ -256,6 +256,9 @@ public class NotificationManagerService extends SystemService {
     static final int LONG_DELAY = PhoneWindowManager.TOAST_WINDOW_TIMEOUT;
     static final int SHORT_DELAY = 2000; // 2 seconds
 
+    // 1 second past the ANR timeout.
+    static final int FINISH_TOKEN_TIMEOUT = 11 * 1000;
+
     static final long[] DEFAULT_VIBRATE_PATTERN = {0, 250, 250, 250};
 
     static final long SNOOZE_UNTIL_UNSPECIFIED = -1;
@@ -4804,7 +4807,7 @@ public class NotificationManagerService extends SystemService {
     {
         mHandler.removeCallbacksAndMessages(token);
         Message m = Message.obtain(mHandler, MESSAGE_FINISH_TOKEN_TIMEOUT, token);
-        mHandler.sendMessageDelayed(m, 5);
+        mHandler.sendMessageDelayed(m, FINISH_TOKEN_TIMEOUT);
     }
 
     private void handleKillTokenTimeout(IBinder token)
