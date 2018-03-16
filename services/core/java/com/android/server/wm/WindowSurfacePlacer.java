@@ -454,7 +454,7 @@ class WindowSurfacePlacer {
             AppWindowToken wtoken = mService.mOpeningApps.valueAt(i);
             if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Now opening app" + wtoken);
 
-            if (!wtoken.setVisibility(animLp, true, transit, false, voiceInteraction)){
+            if (!wtoken.setVisibility(animLp, true, transit, false, voiceInteraction)) {
                 // This token isn't going to be animating. Add it to the list of tokens to
                 // be notified of app transition complete since the notification will not be
                 // sent be the app window animator.
