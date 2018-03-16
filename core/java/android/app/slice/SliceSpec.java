@@ -89,7 +89,7 @@ public final class SliceSpec implements Parcelable {
      *
      * @param candidate candidate format of data.
      * @return true if versions are compatible.
-     * @see androidx.app.slice.widget.SliceView
+     * @see androidx.slice.widget.SliceView
      */
     public boolean canRender(@NonNull SliceSpec candidate) {
         if (!mType.equals(candidate.mType)) return false;
