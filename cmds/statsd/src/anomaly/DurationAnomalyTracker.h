@@ -59,9 +59,6 @@ protected:
     // Anomaly alarm monitor.
     sp<AlarmMonitor> mAlarmMonitor;
 
-    // Resets all bucket data. For use when all the data gets stale.
-    void resetStorage() override;
-
     FRIEND_TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp);
     FRIEND_TEST(OringDurationTrackerTest, TestAnomalyDetectionExpiredAlarm);
     FRIEND_TEST(OringDurationTrackerTest, TestAnomalyDetectionFiredAlarm);

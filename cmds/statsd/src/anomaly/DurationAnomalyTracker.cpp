@@ -26,16 +26,13 @@ namespace statsd {
 
 DurationAnomalyTracker::DurationAnomalyTracker(const Alert& alert, const ConfigKey& configKey,
                                                const sp<AlarmMonitor>& alarmMonitor)
-    : AnomalyTracker(alert, configKey), mAlarmMonitor(alarmMonitor) {
+        : AnomalyTracker(alert, configKey), mAlarmMonitor(alarmMonitor) {
+    VLOG("DurationAnomalyTracker() called");
 }
 
 DurationAnomalyTracker::~DurationAnomalyTracker() {
+    VLOG("~DurationAnomalyTracker() called");
     cancelAllAlarms();
-}
-
-void DurationAnomalyTracker::resetStorage() {
-    AnomalyTracker::resetStorage();
-    if (!mAlarms.empty()) ALOGW("AnomalyTracker.resetStorage() called but mAlarms is NOT empty!");
 }
 
 void DurationAnomalyTracker::startAlarm(const MetricDimensionKey& dimensionKey,
