@@ -1467,6 +1467,13 @@ public class IpSecService extends IIpSecService.Stub {
         IpSecAlgorithm crypt = c.getEncryption();
         IpSecAlgorithm authCrypt = c.getAuthenticatedEncryption();
 
+        String cryptName;
+        if (crypt == null) {
+            cryptName = (authCrypt == null) ? IpSecAlgorithm.CRYPT_NULL : "";
+        } else {
+            cryptName = crypt.getName();
+        }
+
         mSrvConfig
                 .getNetdInstance()
                 .ipSecAddSecurityAssociation(
@@ -1481,7 +1488,7 @@ public class IpSecService extends IIpSecService.Stub {
                         (auth != null) ? auth.getName() : "",
                         (auth != null) ? auth.getKey() : new byte[] {},
                         (auth != null) ? auth.getTruncationLengthBits() : 0,
-                        (crypt != null) ? crypt.getName() : "",
+                        cryptName,
                         (crypt != null) ? crypt.getKey() : new byte[] {},
                         (crypt != null) ? crypt.getTruncationLengthBits() : 0,
                         (authCrypt != null) ? authCrypt.getName() : "",
