@@ -1331,6 +1331,20 @@ public class TaskStack extends WindowContainer<Task> implements
         return mMinimizeAmount != 0f;
     }
 
+    /**
+     * @return {@code true} if we have a {@link Task} that is animating (currently only used for the
+     *         recents animation); {@code false} otherwise.
+     */
+    boolean isTaskAnimating() {
+        for (int j = mChildren.size() - 1; j >= 0; j--) {
+            final Task task = mChildren.get(j);
+            if (task.isTaskAnimating()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @CallSuper
     @Override
     public void writeToProto(ProtoOutputStream proto, long fieldId, boolean trim) {

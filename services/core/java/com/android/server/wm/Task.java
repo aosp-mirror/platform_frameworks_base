@@ -44,6 +44,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Surface;
 
+import android.view.SurfaceControl;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
@@ -557,6 +558,23 @@ class Task extends WindowContainer<AppWindowToken> {
     boolean isFloating() {
         return getWindowConfiguration().tasksAreFloating()
                 && !mStack.isAnimatingBoundsToFullscreen() && !mPreserveNonFloatingState;
+    }
+
+    @Override
+    public SurfaceControl getAnimationLeashParent() {
+        // Reparent to the animation layer so that we aren't clipped by the non-minimized
+        // stack bounds, currently we only animate the task for the recents animation
+        return getAppAnimationLayer(false /* boosted */);
+    }
+
+    boolean isTaskAnimating() {
+        final RecentsAnimationController recentsAnim = mService.getRecentsAnimationController();
+        if (recentsAnim != null) {
+            if (recentsAnim.isAnimatingTask(this)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     WindowState getTopVisibleAppMainWindow() {

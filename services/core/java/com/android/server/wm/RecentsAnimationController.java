@@ -432,6 +432,15 @@ public class RecentsAnimationController implements DeathRecipient {
         return mHomeAppToken.windowsCanBeWallpaperTarget();
     }
 
+    boolean isAnimatingTask(Task task) {
+        for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
+            if (task == mPendingAnimations.get(i).mTask) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean isAnimatingApp(AppWindowToken appToken) {
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final Task task = mPendingAnimations.get(i).mTask;
@@ -452,18 +461,18 @@ public class RecentsAnimationController implements DeathRecipient {
         private OnAnimationFinishedCallback mCapturedFinishCallback;
         private final boolean mIsRecentTaskInvisible;
         private RemoteAnimationTarget mTarget;
+        private final Point mPosition = new Point();
+        private final Rect mBounds = new Rect();
 
         TaskAnimationAdapter(Task task, boolean isRecentTaskInvisible) {
             mTask = task;
             mIsRecentTaskInvisible = isRecentTaskInvisible;
+            final WindowContainer container = mTask.getParent();
+            container.getRelativePosition(mPosition);
+            container.getBounds(mBounds);
         }
 
         RemoteAnimationTarget createRemoteAnimationApp() {
-            final Point position = new Point();
-            final Rect bounds = new Rect();
-            final WindowContainer container = mTask.getParent();
-            container.getRelativePosition(position);
-            container.getBounds(bounds);
             final WindowState mainWindow = mTask.getTopVisibleAppMainWindow();
             if (mainWindow == null) {
                 return null;
@@ -472,7 +481,7 @@ public class RecentsAnimationController implements DeathRecipient {
             InsetUtils.addInsets(insets, mainWindow.mAppToken.getLetterboxInsets());
             mTarget = new RemoteAnimationTarget(mTask.mTaskId, MODE_CLOSING, mCapturedLeash,
                     !mTask.fillsParent(), mainWindow.mWinAnimator.mLastClipRect,
-                    insets, mTask.getPrefixOrderIndex(), position, bounds,
+                    insets, mTask.getPrefixOrderIndex(), mPosition, mBounds,
                     mTask.getWindowConfiguration(), mIsRecentTaskInvisible);
             return mTarget;
         }
@@ -495,6 +504,7 @@ public class RecentsAnimationController implements DeathRecipient {
         @Override
         public void startAnimation(SurfaceControl animationLeash, Transaction t,
                 OnAnimationFinishedCallback finishCallback) {
+            t.setPosition(animationLeash, mPosition.x, mPosition.y);
             mCapturedLeash = animationLeash;
             mCapturedFinishCallback = finishCallback;
         }
