@@ -89,6 +89,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private static final boolean VDBG = false; // STOPSHIP if true
 
     private static class Record {
+        Context context;
+
         String callingPackage;
 
         IBinder binder;
@@ -107,14 +109,21 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
         int phoneId = SubscriptionManager.INVALID_PHONE_INDEX;
 
-        boolean canReadPhoneState;
-
         boolean matchPhoneStateListenerEvent(int events) {
             return (callback != null) && ((events & this.events) != 0);
         }
 
         boolean matchOnSubscriptionsChangedListener() {
             return (onSubscriptionsChangedListenerCallback != null);
+        }
+
+        boolean canReadPhoneState() {
+            try {
+                return TelephonyPermissions.checkReadPhoneState(
+                        context, subId, callerPid, callerUid, callingPackage, "listen");
+            } catch (SecurityException e) {
+                return false;
+            }
         }
 
         @Override
@@ -124,8 +133,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     + " onSubscriptionsChangedListenererCallback="
                                             + onSubscriptionsChangedListenerCallback
                     + " callerUid=" + callerUid + " subId=" + subId + " phoneId=" + phoneId
-                    + " events=" + Integer.toHexString(events)
-                    + " canReadPhoneState=" + canReadPhoneState + "}";
+                    + " events=" + Integer.toHexString(events) + "}";
         }
     }
 
@@ -205,11 +213,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR |
                 PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR |
                 PhoneStateListener.LISTEN_VOLTE_STATE;
-
-    static final int CHECK_PHONE_STATE_PERMISSION_MASK =
-                PhoneStateListener.LISTEN_CALL_STATE |
-                PhoneStateListener.LISTEN_DATA_ACTIVITY |
-                PhoneStateListener.LISTEN_DATA_CONNECTION_STATE;
 
     static final int PRECISE_PHONE_STATE_PERMISSION_MASK =
                 PhoneStateListener.LISTEN_PRECISE_CALL_STATE |
@@ -376,21 +379,12 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     public void addOnSubscriptionsChangedListener(String callingPackage,
             IOnSubscriptionsChangedListener callback) {
         int callerUserId = UserHandle.getCallingUserId();
-        mContext.getSystemService(AppOpsManager.class)
-                .checkPackage(Binder.getCallingUid(), callingPackage);
+        mAppOps.checkPackage(Binder.getCallingUid(), callingPackage);
         if (VDBG) {
             log("listen oscl: E pkg=" + callingPackage + " myUserId=" + UserHandle.myUserId()
                 + " callerUserId="  + callerUserId + " callback=" + callback
                 + " callback.asBinder=" + callback.asBinder());
         }
-
-        // TODO(b/70041899): Find a way to make this work for carrier-privileged callers.
-        if (!TelephonyPermissions.checkCallingOrSelfReadPhoneState(
-                mContext, SubscriptionManager.INVALID_SUBSCRIPTION_ID, callingPackage,
-                "addOnSubscriptionsChangedListener")) {
-            return;
-        }
-
 
         synchronized (mRecords) {
             // register
@@ -401,12 +395,12 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 return;
             }
 
+            r.context = mContext;
             r.onSubscriptionsChangedListenerCallback = callback;
             r.callingPackage = callingPackage;
             r.callerUid = Binder.getCallingUid();
             r.callerPid = Binder.getCallingPid();
             r.events = 0;
-            r.canReadPhoneState = true; // permission has been enforced above
             if (DBG) {
                 log("listen oscl:  Register r=" + r);
             }
@@ -475,8 +469,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private void listen(String callingPackage, IPhoneStateListener callback, int events,
             boolean notifyNow, int subId) {
         int callerUserId = UserHandle.getCallingUserId();
-        mContext.getSystemService(AppOpsManager.class)
-                .checkPackage(Binder.getCallingUid(), callingPackage);
+        mAppOps.checkPackage(Binder.getCallingUid(), callingPackage);
         if (VDBG) {
             log("listen: E pkg=" + callingPackage + " events=0x" + Integer.toHexString(events)
                 + " notifyNow=" + notifyNow + " subId=" + subId + " myUserId="
@@ -487,7 +480,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             // Checks permission and throws SecurityException for disallowed operations. For pre-M
             // apps whose runtime permission has been revoked, we return immediately to skip sending
             // events to the app without crashing it.
-            if (!checkListenerPermission(events, callingPackage, "listen")) {
+            if (!checkListenerPermission(events, subId, callingPackage, "listen")) {
                 return;
             }
 
@@ -501,14 +494,11 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     return;
                 }
 
+                r.context = mContext;
                 r.callback = callback;
                 r.callingPackage = callingPackage;
                 r.callerUid = Binder.getCallingUid();
                 r.callerPid = Binder.getCallingPid();
-                boolean isPhoneStateEvent = (events & (CHECK_PHONE_STATE_PERMISSION_MASK
-                        | ENFORCE_PHONE_STATE_PERMISSION_MASK)) != 0;
-                r.canReadPhoneState =
-                        isPhoneStateEvent && canReadPhoneState(callingPackage, "listen");
                 // Legacy applications pass SubscriptionManager.DEFAULT_SUB_ID,
                 // force all illegal subId to SubscriptionManager.DEFAULT_SUB_ID
                 if (!SubscriptionManager.isValidSubscriptionId(subId)) {
@@ -676,19 +666,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    private boolean canReadPhoneState(String callingPackage, String message) {
-        try {
-            // TODO(b/70041899): Find a way to make this work for carrier-privileged callers.
-            return TelephonyPermissions.checkCallingOrSelfReadPhoneState(
-                    mContext, SubscriptionManager.INVALID_SUBSCRIPTION_ID, callingPackage, message);
-        } catch (SecurityException e) {
-            return false;
-        }
-    }
-
     private String getCallIncomingNumber(Record record, int phoneId) {
-        // Hide the number if record's process has no READ_PHONE_STATE permission
-        return record.canReadPhoneState ? mCallIncomingNumber[phoneId] : "";
+        // Hide the number if record's process can't currently read phone state.
+        return record.canReadPhoneState() ? mCallIncomingNumber[phoneId] : "";
     }
 
     private Record add(IBinder binder) {
@@ -763,7 +743,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 if (r.matchPhoneStateListenerEvent(PhoneStateListener.LISTEN_CALL_STATE) &&
                         (r.subId == SubscriptionManager.DEFAULT_SUBSCRIPTION_ID)) {
                     try {
-                        String incomingNumberOrEmpty = r.canReadPhoneState ? incomingNumber : "";
+                        String incomingNumberOrEmpty = r.canReadPhoneState() ? incomingNumber : "";
                         r.callback.onCallStateChanged(state, incomingNumberOrEmpty);
                     } catch (RemoteException ex) {
                         mRemoveList.add(r.binder);
@@ -1690,7 +1670,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    private boolean checkListenerPermission(int events, String callingPackage, String message) {
+    private boolean checkListenerPermission(
+            int events, int subId, String callingPackage, String message) {
         if ((events & ENFORCE_COARSE_LOCATION_PERMISSION_MASK) != 0) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.ACCESS_COARSE_LOCATION, null);
@@ -1701,9 +1682,8 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
 
         if ((events & ENFORCE_PHONE_STATE_PERMISSION_MASK) != 0) {
-            // TODO(b/70041899): Find a way to make this work for carrier-privileged callers.
-            if (!TelephonyPermissions.checkCallingOrSelfReadPhoneState(mContext,
-                    SubscriptionManager.INVALID_SUBSCRIPTION_ID, callingPackage, message)) {
+            if (!TelephonyPermissions.checkCallingOrSelfReadPhoneState(
+                    mContext, subId, callingPackage, message)) {
                 return false;
             }
         }
