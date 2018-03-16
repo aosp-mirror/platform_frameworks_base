@@ -1617,35 +1617,6 @@ public class MediaSession2 implements AutoCloseable {
     }
 
     /**
-     * Register {@link PlayerEventCallback} to listen changes in the underlying
-     * {@link MediaPlayerBase}, regardless of the change in the underlying player.
-     * <p>
-     * Registered callbacks will be also called when the underlying player is changed.
-     *
-     * @param executor a callback Executor
-     * @param callback a EventCallback
-     * @throws IllegalArgumentException if executor or callback is {@code null}.
-     * @hide
-     */
-    // TODO(jaewan): Remove (b/74157064)
-    public void registerPlayerEventCallback(@NonNull @CallbackExecutor Executor executor,
-            @NonNull PlayerEventCallback callback) {
-        mProvider.registerPlayerEventCallback_impl(executor, callback);
-    }
-
-    /**
-     * Unregister the previously registered {@link PlayerEventCallback}.
-     *
-     * @param callback the callback to be removed
-     * @throws IllegalArgumentException if the callback is {@code null}.
-     * @hide
-     */
-    // TODO(jaewan): Remove (b/74157064)
-    public void unregisterPlayerEventCallback(@NonNull PlayerEventCallback callback) {
-        mProvider.unregisterPlayerEventCallback_impl(callback);
-    }
-
-    /**
      * Get the player state.
      *
      * @return player state
