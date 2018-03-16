@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.Surface;
@@ -29,12 +30,14 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
+import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+import static android.view.WindowManager.TRANSIT_UNSET;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -43,7 +46,7 @@ import static org.junit.Assert.assertTrue;
  * Tests for the {@link AppWindowToken} class.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.wm.AppWindowTokenTests
+ *  atest FrameworksServicesTests:com.android.server.wm.AppWindowTokenTests
  */
 @SmallTest
 // TODO: b/68267650
@@ -230,5 +233,21 @@ public class AppWindowTokenTests extends WindowTestsBase {
         // Finish relaunching and ensure flag is now not reported
         mToken.finishRelaunching();
         assertFalse(mToken.containsShowWhenLockedWindow() || mToken.containsDismissKeyguardWindow());
+    }
+
+    @Test
+    @FlakyTest(detail = "Promote once confirmed non-flaky")
+    public void testStuckExitingWindow() throws Exception {
+        final WindowState closingWindow = createWindow(null, FIRST_APPLICATION_WINDOW,
+                "closingWindow");
+        closingWindow.mAnimatingExit = true;
+        closingWindow.mRemoveOnExit = true;
+        closingWindow.mAppToken.setVisibility(null, false /* visible */, TRANSIT_UNSET,
+                true /* performLayout */, false /* isVoiceInteraction */);
+
+        // We pretended that we were running an exit animation, but that should have been cleared up
+        // by changing visibility of AppWindowToken
+        closingWindow.removeIfPossible();
+        assertTrue(closingWindow.mRemoved);
     }
 }
