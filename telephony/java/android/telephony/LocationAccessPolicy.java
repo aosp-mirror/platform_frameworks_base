@@ -21,31 +21,25 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.location.LocationManager;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Process;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
-import android.util.SparseBooleanArray;
+import android.util.Log;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Helper for performing location access checks.
  * @hide
  */
 public final class LocationAccessPolicy {
+    private static final String LOG_TAG = LocationAccessPolicy.class.getSimpleName();
     /**
      * API to determine if the caller has permissions to get cell location.
      *
@@ -94,10 +88,12 @@ public final class LocationAccessPolicy {
     }
 
     private static boolean isLocationModeEnabled(@NonNull Context context, @UserIdInt int userId) {
-        int locationMode = Settings.Secure.getIntForUser(context.getContentResolver(),
-                Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF, userId);
-        return locationMode != Settings.Secure.LOCATION_MODE_OFF
-                && locationMode != Settings.Secure.LOCATION_MODE_SENSORS_ONLY;
+        LocationManager locationManager = context.getSystemService(LocationManager.class);
+        if (locationManager == null) {
+            Log.w(LOG_TAG, "Couldn't get location manager, denying location access");
+            return false;
+        }
+        return locationManager.isLocationEnabledForUser(UserHandle.of(userId));
     }
 
     private static boolean checkInteractAcrossUsersFull(@NonNull Context context) {
