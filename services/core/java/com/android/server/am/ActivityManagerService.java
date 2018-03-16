@@ -2696,13 +2696,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * Encapsulates the globla setting "hidden_api_blacklist_exemptions", including tracking the
+     * Encapsulates the global setting "hidden_api_blacklist_exemptions", including tracking the
      * latest value via a content observer.
      */
     static class HiddenApiBlacklist extends ContentObserver {
 
         private final Context mContext;
         private boolean mBlacklistDisabled;
+        private String mExemptionsStr;
+        private List<String> mExemptions = Collections.emptyList();
 
         public HiddenApiBlacklist(Handler handler, Context context) {
             super(handler);
@@ -2718,8 +2720,22 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         private void update() {
-            mBlacklistDisabled = "*".equals(Settings.Global.getString(mContext.getContentResolver(),
-                    Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS));
+            String exemptions = Settings.Global.getString(mContext.getContentResolver(),
+                    Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS);
+            if (!TextUtils.equals(exemptions, mExemptionsStr)) {
+                mExemptionsStr = exemptions;
+                if ("*".equals(exemptions)) {
+                    mBlacklistDisabled = true;
+                    mExemptions = Collections.emptyList();
+                } else {
+                    mBlacklistDisabled = false;
+                    mExemptions = TextUtils.isEmpty(exemptions)
+                            ? Collections.emptyList()
+                            : Arrays.asList(exemptions.split(":"));
+                }
+                zygoteProcess.setApiBlacklistExemptions(mExemptions);
+            }
+
         }
 
         boolean isDisabled() {
