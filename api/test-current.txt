@@ -437,7 +437,7 @@ package android.telephony {
   }
 
   public class ServiceState implements android.os.Parcelable {
-    method public void setSystemAndNetworkId(int, int);
+    method public void setCdmaSystemAndNetworkId(int, int);
   }
 
 }
