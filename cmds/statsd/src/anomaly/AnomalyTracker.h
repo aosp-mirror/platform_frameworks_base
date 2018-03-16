@@ -62,7 +62,7 @@ public:
 
     // Returns true if, based on past buckets plus the new currentBucketValue (which generally
     // represents the partially-filled current bucket), an anomaly has happened.
-    // Also advances to currBucketNum -1.
+    // Also advances to currBucketNum-1.
     bool detectAnomaly(const int64_t& currBucketNum, const MetricDimensionKey& key,
                        const int64_t& currentBucketValue);
 
@@ -72,7 +72,7 @@ public:
     // Detects if, based on past buckets plus the new currentBucketValue (which generally
     // represents the partially-filled current bucket), an anomaly has happened, and if so,
     // declares an anomaly and informs relevant subscribers.
-    // Also advances to currBucketNum -1.
+    // Also advances to currBucketNum-1.
     void detectAndDeclareAnomaly(const uint64_t& timestampNs, const int64_t& currBucketNum,
                                  const MetricDimensionKey& key, const int64_t& currentBucketValue);
 

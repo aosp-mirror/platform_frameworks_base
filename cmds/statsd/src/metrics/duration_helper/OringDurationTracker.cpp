@@ -92,7 +92,6 @@ void OringDurationTracker::noteStart(const HashableDimensionKey& key, bool condi
 
 void OringDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_t timestamp,
                                     const bool stopAll) {
-    declareAnomalyIfAlarmExpired(timestamp);
     VLOG("Oring: %s stop", key.toString().c_str());
     auto it = mStarted.find(key);
     if (it != mStarted.end()) {
@@ -118,12 +117,11 @@ void OringDurationTracker::noteStop(const HashableDimensionKey& key, const uint6
         }
     }
     if (mStarted.empty()) {
-        stopAnomalyAlarm();
+        stopAnomalyAlarm(timestamp);
     }
 }
 
 void OringDurationTracker::noteStopAll(const uint64_t timestamp) {
-    declareAnomalyIfAlarmExpired(timestamp);
     if (!mStarted.empty()) {
         mDuration += (timestamp - mLastStartTime);
         VLOG("Oring Stop all: record duration %lld %lld ", (long long)timestamp - mLastStartTime,
@@ -131,7 +129,7 @@ void OringDurationTracker::noteStopAll(const uint64_t timestamp) {
         detectAndDeclareAnomaly(timestamp, mCurrentBucketNum, mDuration + mDurationFullBucket);
     }
 
-    stopAnomalyAlarm();
+    stopAnomalyAlarm(timestamp);
     mStarted.clear();
     mPaused.clear();
     mConditionKeyMap.clear();
@@ -213,7 +211,6 @@ bool OringDurationTracker::flushIfNeeded(
 }
 
 void OringDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) {
-    declareAnomalyIfAlarmExpired(timestamp);
     vector<pair<HashableDimensionKey, int>> startedToPaused;
     vector<pair<HashableDimensionKey, int>> pausedToStarted;
     if (!mStarted.empty()) {
@@ -291,12 +288,11 @@ void OringDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) 
     mPaused.insert(startedToPaused.begin(), startedToPaused.end());
 
     if (mStarted.empty()) {
-        stopAnomalyAlarm();
+        stopAnomalyAlarm(timestamp);
     }
 }
 
 void OringDurationTracker::onConditionChanged(bool condition, const uint64_t timestamp) {
-    declareAnomalyIfAlarmExpired(timestamp);
     if (condition) {
         if (!mPaused.empty()) {
             VLOG("Condition true, all started");
@@ -319,7 +315,7 @@ void OringDurationTracker::onConditionChanged(bool condition, const uint64_t tim
         }
     }
     if (mStarted.empty()) {
-        stopAnomalyAlarm();
+        stopAnomalyAlarm(timestamp);
     }
 }
 
