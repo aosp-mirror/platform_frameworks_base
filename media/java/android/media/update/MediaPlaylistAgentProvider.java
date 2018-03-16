@@ -16,6 +16,7 @@
 
 package android.media.update;
 
+import android.media.DataSourceDesc;
 import android.media.MediaItem2;
 import android.media.MediaMetadata2;
 import android.media.MediaPlaylistAgent.PlaylistEventCallback;
@@ -50,4 +51,5 @@ public interface MediaPlaylistAgentProvider {
     void setRepeatMode_impl(int repeatMode);
     int getShuffleMode_impl();
     void setShuffleMode_impl(int shuffleMode);
+    MediaItem2 getMediaItem_impl(DataSourceDesc dsd);
 }
