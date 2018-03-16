@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.IntDef;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Intent;
@@ -25,6 +26,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -74,8 +77,13 @@ public final class RemoteInput implements Parcelable {
     private static final String EXTRA_DATA_TYPE_RESULTS_DATA =
             "android.remoteinput.dataTypeResultsData";
 
-    /** Extra added to a clip data intent object identifying the source of the results. */
+    /** Extra added to a clip data intent object identifying the {@link Source} of the results. */
     private static final String EXTRA_RESULTS_SOURCE = "android.remoteinput.resultsSource";
+
+    /** @hide */
+    @IntDef(prefix = {"SOURCE_"}, value = {SOURCE_FREE_FORM_INPUT, SOURCE_CHOICE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Source {}
 
     /** The user manually entered the data. */
     public static final int SOURCE_FREE_FORM_INPUT = 0;
@@ -437,10 +445,9 @@ public final class RemoteInput implements Parcelable {
      *
      * @param intent The intent to add remote input source to. The {@link ClipData}
      *               field of the intent will be modified to contain the source.
-     *               field of the intent will be modified to contain the source.
      * @param source The source of the results.
      */
-    public static void setResultsSource(Intent intent, int source) {
+    public static void setResultsSource(Intent intent, @Source int source) {
         Intent clipDataIntent = getClipDataIntentFromIntent(intent);
         if (clipDataIntent == null) {
             clipDataIntent = new Intent();  // First time we've added a result.
@@ -460,6 +467,7 @@ public final class RemoteInput implements Parcelable {
      * @return The source of the results. If no source was set, {@link #SOURCE_FREE_FORM_INPUT} will
      * be returned.
      */
+    @Source
     public static int getResultsSource(Intent intent) {
         Intent clipDataIntent = getClipDataIntentFromIntent(intent);
         if (clipDataIntent == null) {
