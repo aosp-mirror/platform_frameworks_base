@@ -142,11 +142,9 @@ public class EuiccManager {
             "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_DETAILED_CODE";
 
     /**
-     * Key for an extra set on {@link #getDownloadableSubscriptionMetadata} PendingIntent result
+     * Key for an extra set on {@code #getDownloadableSubscriptionMetadata} PendingIntent result
      * callbacks providing the downloadable subscription metadata.
-     * @hide
      */
-    @SystemApi
     public static final String EXTRA_EMBEDDED_SUBSCRIPTION_DOWNLOADABLE_SUBSCRIPTION =
             "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_DOWNLOADABLE_SUBSCRIPTION";
 
