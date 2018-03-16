@@ -86,8 +86,8 @@ private:
 
     sp<AlarmMonitor> mPeriodicAlarmMonitor;
 
-    void onDumpReportLocked(const ConfigKey& key, const uint64_t dumpTimeNs,
-                            vector<uint8_t>* outData);
+    void onConfigMetricsReportLocked(const ConfigKey& key, const uint64_t dumpTimeStampNs,
+                                     util::ProtoOutputStream* proto);
 
     /* Check if we should send a broadcast if approaching memory limits and if we're over, we
      * actually delete the data. */
