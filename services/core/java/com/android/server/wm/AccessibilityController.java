@@ -1096,10 +1096,7 @@ final class AccessibilityController {
                     // Add windows of certain types not covered by modal windows.
                     if (isReportedWindowType(windowState.mAttrs.type)) {
                         // Add the window to the ones to be reported.
-                        WindowInfo window = obtainPopulatedWindowInfo(windowState, boundsInScreen);
-                        window.layer = addedWindows.size();
-                        addedWindows.add(window.token);
-                        windows.add(window);
+                        addPopulatedWindowInfo(windowState, boundsInScreen, windows, addedWindows);
                         if (windowState.isFocused()) {
                             focusedWindowAdded = true;
                         }
@@ -1150,10 +1147,8 @@ final class AccessibilityController {
                             computeWindowBoundsInScreen(windowState, boundsInScreen);
 
                             // Add the window to the ones to be reported.
-                            WindowInfo window = obtainPopulatedWindowInfo(windowState,
-                                    boundsInScreen);
-                            addedWindows.add(window.token);
-                            windows.add(window);
+                            addPopulatedWindowInfo(
+                                    windowState, boundsInScreen, windows, addedWindows);
                             break;
                         }
                     }
@@ -1244,11 +1239,14 @@ final class AccessibilityController {
                     (int) windowFrame.right, (int) windowFrame.bottom);
         }
 
-        private static WindowInfo obtainPopulatedWindowInfo(
-                WindowState windowState, Rect boundsInScreen) {
+        private static void addPopulatedWindowInfo(
+                WindowState windowState, Rect boundsInScreen,
+                List<WindowInfo> out, Set<IBinder> tokenOut) {
             final WindowInfo window = windowState.getWindowInfo();
             window.boundsInScreen.set(boundsInScreen);
-            return window;
+            window.layer = tokenOut.size();
+            out.add(window);
+            tokenOut.add(window.token);
         }
 
         private void cacheWindows(List<WindowInfo> windows) {
