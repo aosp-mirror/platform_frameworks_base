@@ -8692,6 +8692,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             disabledPkgSetting /* pkgSetting */, null /* disabledPkgSetting */,
                             null /* originalPkgSetting */, null, parseFlags, scanFlags,
                             (pkg == mPlatformPackage), user);
+                    applyPolicy(pkg, parseFlags, scanFlags);
                     scanPackageOnlyLI(request, mFactoryTest, -1L);
                 }
             }
@@ -9981,6 +9982,10 @@ public class PackageManagerService extends IPackageManager.Stub
         return scanFlags;
     }
 
+    // TODO: scanPackageNewLI() and scanPackageOnly() should be merged. But, first, commiting
+    // the results / removing app data needs to be moved up a level to the callers of this
+    // method. Also, we need to solve the problem of potentially creating a new shared user
+    // setting. That can probably be done later and patch things up after the fact.
     @GuardedBy("mInstallLock")
     private PackageParser.Package scanPackageNewLI(@NonNull PackageParser.Package pkg,
             final @ParseFlags int parseFlags, @ScanFlags int scanFlags, long currentTime,
