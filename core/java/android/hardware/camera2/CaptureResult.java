@@ -1001,8 +1001,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * </tbody>
      * </table>
      * <p>If the camera device supports AE external flash mode (ON_EXTERNAL_FLASH is included in
-     * {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_MODES android.control.aeAvailableModes}), aeState must be FLASH_REQUIRED after the camera device
-     * finishes AE scan and it's too dark without flash.</p>
+     * {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_MODES android.control.aeAvailableModes}), {@link CaptureResult#CONTROL_AE_STATE android.control.aeState} must be FLASH_REQUIRED after
+     * the camera device finishes AE scan and it's too dark without flash.</p>
      * <p>For the above table, the camera device may skip reporting any state changes that happen
      * without application intervention (i.e. mode switch, trigger, locking). Any state that
      * can be skipped in that manner is called a transient state.</p>
@@ -1081,6 +1081,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CaptureRequest#CONTROL_AE_LOCK
      * @see CaptureRequest#CONTROL_AE_MODE
      * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
+     * @see CaptureResult#CONTROL_AE_STATE
      * @see CaptureRequest#CONTROL_MODE
      * @see CaptureRequest#CONTROL_SCENE_MODE
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL

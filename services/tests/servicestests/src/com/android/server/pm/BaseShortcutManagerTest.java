@@ -1015,7 +1015,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 | ApplicationInfo.FLAG_ALLOW_BACKUP;
         pi.versionCode = version;
         pi.applicationInfo.versionCode = version;
-        pi.signatures = genSignatures(signatures);
+        pi.signatures = null;
+        pi.signingCertificateHistory = new Signature[][] {genSignatures(signatures)};
 
         return pi;
     }
@@ -1103,7 +1104,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                 !mDisabledPackages.contains(PackageWithUser.of(userId, packageName));
 
         if (getSignatures) {
-            ret.signatures = pi.signatures;
+            ret.signatures = null;
+            ret.signingCertificateHistory = pi.signingCertificateHistory;
         }
 
         return ret;

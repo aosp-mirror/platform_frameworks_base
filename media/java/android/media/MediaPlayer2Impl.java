@@ -82,7 +82,6 @@ import java.util.Vector;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
 /**
  * @hide
  */
@@ -116,8 +115,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private boolean mNextSourcePlayPending = false;
     //--- guarded by |mSrcLock| end
 
-    private AtomicInteger mBufferedPercentageCurrent;
-    private AtomicInteger mBufferedPercentageNext;
+    private AtomicInteger mBufferedPercentageCurrent = new AtomicInteger(0);
+    private AtomicInteger mBufferedPercentageNext = new AtomicInteger(0);
+    private volatile float mVolume = 1.0f;
 
     // Modular DRM
     private final Object mDrmLock = new Object();
@@ -553,6 +553,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         addTask(new Task(CALL_COMPLETED_SET_PLAYER_VOLUME, false) {
             @Override
             void process() {
+                mVolume = volume;
                 _setVolume(volume, volume);
             }
         });
@@ -567,8 +568,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      */
     @Override
     public float getPlayerVolume() {
-        // TODO: get real volume
-        return 1.0f;
+        return mVolume;
     }
 
     /**
@@ -3227,9 +3227,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     @Override
     public void clearMediaPlayer2EventCallback() {
         synchronized (mEventCbLock) {
-            for (Pair<Executor, MediaPlayer2EventCallback> cb : mEventCallbackRecords) {
-                mEventCallbackRecords.remove(cb);
-            }
+            mEventCallbackRecords.clear();
         }
     }
 
@@ -3300,9 +3298,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     @Override
     public void clearDrmEventCallback() {
         synchronized (mDrmEventCbLock) {
-            for (Pair<Executor, DrmEventCallback> cb : mDrmEventCallbackRecords) {
-                mDrmEventCallbackRecords.remove(cb);
-            }
+            mDrmEventCallbackRecords.clear();
         }
     }
 

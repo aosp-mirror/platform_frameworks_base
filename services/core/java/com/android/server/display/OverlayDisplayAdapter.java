@@ -271,12 +271,12 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void performTraversalInTransactionLocked() {
+        public void performTraversalLocked(SurfaceControl.Transaction t) {
             if (mSurfaceTexture != null) {
                 if (mSurface == null) {
                     mSurface = new Surface(mSurfaceTexture);
                 }
-                setSurfaceInTransactionLocked(mSurface);
+                setSurfaceLocked(t, mSurface);
             }
         }
 
@@ -315,7 +315,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         }
 
         @Override
-        public void requestDisplayModesInTransactionLocked(int color, int id) {
+        public void requestDisplayModesLocked(int color, int id) {
             int index = -1;
             if (id == 0) {
                 // Use the default.

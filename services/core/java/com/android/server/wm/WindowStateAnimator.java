@@ -221,6 +221,10 @@ class WindowStateAnimator {
 
     private final SurfaceControl.Transaction mReparentTransaction = new SurfaceControl.Transaction();
 
+    // Used to track whether we have called detach children on the way to invisibility, in which
+    // case we need to give the client a new Surface if it lays back out to a visible state.
+    boolean mChildrenDetached = false;
+
     WindowStateAnimator(final WindowState win) {
         final WindowManagerService service = win.mService;
 
@@ -430,6 +434,7 @@ class WindowStateAnimator {
         if (mSurfaceController != null) {
             return mSurfaceController;
         }
+        mChildrenDetached = false;
 
         if ((mWin.mAttrs.privateFlags & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0) {
             windowType = SurfaceControl.WINDOW_TYPE_DONT_SCREENSHOT;
@@ -981,7 +986,7 @@ class WindowStateAnimator {
             mForceScaleUntilResize = true;
         } else {
             if (!w.mSeamlesslyRotated) {
-                mSurfaceController.setPositionInTransaction(0, 0, recoveringMemory);
+                mSurfaceController.setPositionInTransaction(mXOffset, mYOffset, recoveringMemory);
             }
         }
 
@@ -1415,7 +1420,8 @@ class WindowStateAnimator {
         }
     }
 
-    void seamlesslyRotateWindow(int oldRotation, int newRotation) {
+    void seamlesslyRotateWindow(SurfaceControl.Transaction t,
+            int oldRotation, int newRotation) {
         final WindowState w = mWin;
         if (!w.isVisibleNow() || w.mIsWallpaper) {
             return;
@@ -1456,11 +1462,9 @@ class WindowStateAnimator {
         float DsDy = mService.mTmpFloats[Matrix.MSCALE_Y];
         float nx = mService.mTmpFloats[Matrix.MTRANS_X];
         float ny = mService.mTmpFloats[Matrix.MTRANS_Y];
-        mSurfaceController.setPositionInTransaction(nx, ny, false);
-        mSurfaceController.setMatrixInTransaction(DsDx * w.mHScale,
-                DtDx * w.mVScale,
-                DtDy * w.mHScale,
-                DsDy * w.mVScale, false);
+        mSurfaceController.setPosition(t, nx, ny, false);
+        mSurfaceController.setMatrix(t, DsDx * w.mHScale, DtDx * w.mVScale, DtDy
+                * w.mHScale, DsDy * w.mVScale, false);
     }
 
     /** The force-scaled state for a given window can persist past
@@ -1479,6 +1483,7 @@ class WindowStateAnimator {
         if (mSurfaceController != null) {
             mSurfaceController.detachChildren();
         }
+        mChildrenDetached = true;
     }
 
     int getLayer() {

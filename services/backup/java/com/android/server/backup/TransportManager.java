@@ -177,7 +177,7 @@ public class TransportManager {
     }
 
     @Nullable
-    String getCurrentTransportName() {
+    public String getCurrentTransportName() {
         return mCurrentTransportName;
     }
 

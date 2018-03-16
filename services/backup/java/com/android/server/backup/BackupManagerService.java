@@ -851,6 +851,10 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         mJournal = null;        // will be created on first use
 
         mConstants = new BackupManagerConstants(mBackupHandler, mContext.getContentResolver());
+        // We are observing changes to the constants throughout the lifecycle of BMS. This is
+        // because we reference the constants in multiple areas of BMS, which otherwise would
+        // require frequent starting and stopping.
+        mConstants.start();
 
         // Set up the various sorts of package tracking we do
         mFullBackupScheduleFile = new File(mBaseStateDir, "fb-schedule");
@@ -1394,7 +1398,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     // Returns the set of all applications that define an android:backupAgent attribute
     private List<PackageInfo> allAgentPackages() {
         // !!! TODO: cache this and regenerate only when necessary
-        int flags = PackageManager.GET_SIGNATURES;
+        int flags = PackageManager.GET_SIGNING_CERTIFICATES;
         List<PackageInfo> packages = mPackageManager.getInstalledPackages(flags);
         int N = packages.size();
         for (int a = N - 1; a >= 0; a--) {
@@ -1639,7 +1643,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
             }
             try {
                 PackageInfo packageInfo = mPackageManager.getPackageInfo(packageName,
-                        PackageManager.GET_SIGNATURES);
+                        PackageManager.GET_SIGNING_CERTIFICATES);
                 if (!AppBackupUtils.appIsEligibleForBackup(packageInfo.applicationInfo,
                         mPackageManager)) {
                     BackupObserverUtils.sendBackupOnPackageResult(observer, packageName,
@@ -2349,7 +2353,8 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         if (DEBUG) Slog.v(TAG, "clearBackupData() of " + packageName + " on " + transportName);
         PackageInfo info;
         try {
-            info = mPackageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
+            info = mPackageManager.getPackageInfo(packageName,
+                    PackageManager.GET_SIGNING_CERTIFICATES);
         } catch (NameNotFoundException e) {
             Slog.d(TAG, "No such package '" + packageName + "' - not clearing backup data");
             return;

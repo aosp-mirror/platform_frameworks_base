@@ -17,7 +17,6 @@ LOCAL_PATH:= $(call my-dir)
 statsd_common_src := \
     ../../core/java/android/os/IStatsCompanionService.aidl \
     ../../core/java/android/os/IStatsManager.aidl \
-    src/stats_log_common.proto \
     src/statsd_config.proto \
     src/FieldValue.cpp \
     src/stats_log_util.cpp \
@@ -82,10 +81,8 @@ statsd_common_static_libraries := \
 statsd_common_shared_libraries := \
     libbase \
     libbinder \
-    libcutils \
     libincident \
     liblog \
-    libselinux \
     libutils \
     libservices \
     libprotoutil \
@@ -198,7 +195,7 @@ LOCAL_SRC_FILES := \
     tests/e2e/WakelockDuration_e2e_test.cpp \
     tests/e2e/MetricConditionLink_e2e_test.cpp \
     tests/e2e/Attribution_e2e_test.cpp \
-    tests/e2e/GaugeMetric_e2e_test.cpp \
+    tests/e2e/GaugeMetric_e2e_push_test.cpp \
     tests/e2e/DimensionInCondition_e2e_combination_AND_cond_test.cpp \
     tests/e2e/DimensionInCondition_e2e_combination_OR_cond_test.cpp \
     tests/e2e/DimensionInCondition_e2e_simple_cond_test.cpp
@@ -226,7 +223,6 @@ LOCAL_MODULE := statsdprotolite
 
 LOCAL_SRC_FILES := \
     src/stats_log.proto \
-    src/stats_log_common.proto \
     src/statsd_config.proto \
     src/perfetto/perfetto_config.proto \
     src/atoms.proto

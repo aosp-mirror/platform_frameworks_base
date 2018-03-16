@@ -36,7 +36,6 @@ struct CountBucket {
     int64_t mBucketStartNs;
     int64_t mBucketEndNs;
     int64_t mCount;
-    uint64_t mBucketNum;
 };
 
 class CountMetricProducer : public MetricProducer {
@@ -67,7 +66,7 @@ private:
     // Internal function to calculate the current used bytes.
     size_t byteSizeLocked() const override;
 
-    void dumpStatesLocked(FILE* out, bool verbose) const override{};
+    void dumpStatesLocked(FILE* out, bool verbose) const override;
 
     void dropDataLocked(const uint64_t dropTimeNs) override;
 

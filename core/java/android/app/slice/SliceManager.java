@@ -184,6 +184,18 @@ public class SliceManager {
     }
 
     /**
+     * Get the list of currently pinned slices for this app.
+     * @see SliceProvider#onSlicePinned
+     */
+    public @NonNull List<Uri> getPinnedSlices() {
+        try {
+            return Arrays.asList(mService.getPinnedSlices(mContext.getPackageName()));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Obtains a list of slices that are descendants of the specified Uri.
      * <p>
      * Not all slice providers will implement this functionality, in which case,
@@ -261,7 +273,8 @@ public class SliceManager {
      */
     public @Nullable Uri mapIntentToUri(@NonNull Intent intent) {
         Preconditions.checkNotNull(intent, "intent");
-        Preconditions.checkArgument(intent.getComponent() != null || intent.getPackage() != null,
+        Preconditions.checkArgument(intent.getComponent() != null || intent.getPackage() != null
+                || intent.getData() != null,
                 "Slice intent must be explicit %s", intent);
         ContentResolver resolver = mContext.getContentResolver();
 
@@ -325,7 +338,8 @@ public class SliceManager {
     public @Nullable Slice bindSlice(@NonNull Intent intent,
             @NonNull List<SliceSpec> supportedSpecs) {
         Preconditions.checkNotNull(intent, "intent");
-        Preconditions.checkArgument(intent.getComponent() != null || intent.getPackage() != null,
+        Preconditions.checkArgument(intent.getComponent() != null || intent.getPackage() != null
+                || intent.getData() != null,
                 "Slice intent must be explicit %s", intent);
         ContentResolver resolver = mContext.getContentResolver();
 

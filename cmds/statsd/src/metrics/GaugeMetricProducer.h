@@ -44,7 +44,6 @@ struct GaugeBucket {
     int64_t mBucketStartNs;
     int64_t mBucketEndNs;
     std::vector<GaugeAtom> mGaugeAtoms;
-    uint64_t mBucketNum;
 };
 
 typedef std::unordered_map<MetricDimensionKey, std::vector<GaugeAtom>>
@@ -106,7 +105,7 @@ private:
     // Internal function to calculate the current used bytes.
     size_t byteSizeLocked() const override;
 
-    void dumpStatesLocked(FILE* out, bool verbose) const override{};
+    void dumpStatesLocked(FILE* out, bool verbose) const override;
 
     void dropDataLocked(const uint64_t dropTimeNs) override;
 

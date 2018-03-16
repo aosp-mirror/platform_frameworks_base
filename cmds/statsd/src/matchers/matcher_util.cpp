@@ -185,6 +185,9 @@ bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
                 ranges.push_back(std::make_pair(newStart, end));
                 break;
             }
+            case Position::ALL:
+                ALOGE("Not supported: field matcher with ALL position.");
+                break;
             case Position::POSITION_UNKNOWN:
                 break;
         }

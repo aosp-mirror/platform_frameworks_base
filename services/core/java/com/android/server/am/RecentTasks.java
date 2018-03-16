@@ -1238,20 +1238,16 @@ class RecentTasks {
      * list (if any).
      */
     private int findRemoveIndexForAddTask(TaskRecord task) {
-        int recentsCount = mTasks.size();
+        final int recentsCount = mTasks.size();
+        final int taskActivityType = task.getActivityType();
         final Intent intent = task.intent;
         final boolean document = intent != null && intent.isDocument();
         int maxRecents = task.maxRecents - 1;
-        final ActivityStack stack = task.getStack();
         for (int i = 0; i < recentsCount; i++) {
             final TaskRecord tr = mTasks.get(i);
-            final ActivityStack trStack = tr.getStack();
-
+            final int trActivityType = tr.getActivityType();
             if (task != tr) {
-                if (stack != null && trStack != null && stack != trStack) {
-                    continue;
-                }
-                if (task.userId != tr.userId) {
+                if (taskActivityType != trActivityType || task.userId != tr.userId) {
                     continue;
                 }
                 final Intent trIntent = tr.intent;

@@ -224,8 +224,7 @@ class ScreenRotationAnimation {
     }
 
     public ScreenRotationAnimation(Context context, DisplayContent displayContent,
-            boolean inTransaction, boolean forceDefaultOrientation,
-            boolean isSecure, WindowManagerService service) {
+            boolean forceDefaultOrientation, boolean isSecure, WindowManagerService service) {
         mService = service;
         mContext = context;
         mDisplayContent = displayContent;
@@ -260,52 +259,39 @@ class ScreenRotationAnimation {
         mOriginalWidth = originalWidth;
         mOriginalHeight = originalHeight;
 
-        if (!inTransaction) {
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM,
-                    ">>> OPEN TRANSACTION ScreenRotationAnimation");
-            mService.openSurfaceTransaction();
-        }
-
+        final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         try {
-            try {
-                mSurfaceControl = displayContent.makeOverlay()
-                        .setName("ScreenshotSurface")
-                        .setSize(mWidth, mHeight)
-                        .setSecure(isSecure)
-                        .build();
+            mSurfaceControl = displayContent.makeOverlay()
+                    .setName("ScreenshotSurface")
+                    .setSize(mWidth, mHeight)
+                    .setSecure(isSecure)
+                    .build();
 
-                // capture a screenshot into the surface we just created
-                Surface sur = new Surface();
-                sur.copyFrom(mSurfaceControl);
-                // TODO(multidisplay): we should use the proper display
-                SurfaceControl.screenshot(SurfaceControl.getBuiltInDisplay(
-                        SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN), sur);
-                mSurfaceControl.setLayer(SCREEN_FREEZE_LAYER_SCREENSHOT);
-                mSurfaceControl.setAlpha(0);
-                mSurfaceControl.show();
-                sur.destroy();
-            } catch (OutOfResourcesException e) {
-                Slog.w(TAG, "Unable to allocate freeze surface", e);
-            }
-
-            if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG_WM,
-                    "  FREEZE " + mSurfaceControl + ": CREATE");
-
-            setRotationInTransaction(originalRotation);
-        } finally {
-            if (!inTransaction) {
-                mService.closeSurfaceTransaction("ScreenRotationAnimation");
-                if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG_WM,
-                        "<<< CLOSE TRANSACTION ScreenRotationAnimation");
-            }
+            // capture a screenshot into the surface we just created
+            Surface sur = new Surface();
+            sur.copyFrom(mSurfaceControl);
+            // TODO(multidisplay): we should use the proper display
+            SurfaceControl.screenshot(SurfaceControl.getBuiltInDisplay(
+                            SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN), sur);
+            t.setLayer(mSurfaceControl, SCREEN_FREEZE_LAYER_SCREENSHOT);
+            t.setAlpha(mSurfaceControl, 0);
+            t.show(mSurfaceControl);
+            sur.destroy();
+        } catch (OutOfResourcesException e) {
+            Slog.w(TAG, "Unable to allocate freeze surface", e);
         }
+
+        if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG_WM,
+                "  FREEZE " + mSurfaceControl + ": CREATE");
+        setRotation(t, originalRotation);
+        t.apply();
     }
 
     boolean hasScreenshot() {
         return mSurfaceControl != null;
     }
 
-    private void setSnapshotTransformInTransaction(Matrix matrix, float alpha) {
+    private void setSnapshotTransform(SurfaceControl.Transaction t, Matrix matrix, float alpha) {
         if (mSurfaceControl != null) {
             matrix.getValues(mTmpFloats);
             float x = mTmpFloats[Matrix.MTRANS_X];
@@ -315,11 +301,11 @@ class ScreenRotationAnimation {
                 x -= mCurrentDisplayRect.left;
                 y -= mCurrentDisplayRect.top;
             }
-            mSurfaceControl.setPosition(x, y);
-            mSurfaceControl.setMatrix(
+            t.setPosition(mSurfaceControl, x, y);
+            t.setMatrix(mSurfaceControl,
                     mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
                     mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);
-            mSurfaceControl.setAlpha(alpha);
+            t.setAlpha(mSurfaceControl, alpha);
             if (DEBUG_TRANSFORMS) {
                 float[] srcPnts = new float[] { 0, 0, mWidth, mHeight };
                 float[] dstPnts = new float[4];
@@ -353,8 +339,7 @@ class ScreenRotationAnimation {
         }
     }
 
-    // Must be called while in a transaction.
-    private void setRotationInTransaction(int rotation) {
+    private void setRotation(SurfaceControl.Transaction t, int rotation) {
         mCurRotation = rotation;
 
         // Compute the transformation matrix that must be applied
@@ -364,15 +349,14 @@ class ScreenRotationAnimation {
         createRotationMatrix(delta, mWidth, mHeight, mSnapshotInitialMatrix);
 
         if (DEBUG_STATE) Slog.v(TAG, "**** ROTATION: " + delta);
-        setSnapshotTransformInTransaction(mSnapshotInitialMatrix, 1.0f);
+        setSnapshotTransform(t, mSnapshotInitialMatrix, 1.0f);
     }
 
-    // Must be called while in a transaction.
-    public boolean setRotationInTransaction(int rotation,
+    public boolean setRotation(SurfaceControl.Transaction t, int rotation,
             long maxAnimationDuration, float animationScale, int finalWidth, int finalHeight) {
-        setRotationInTransaction(rotation);
+        setRotation(t, rotation);
         if (TWO_PHASE_ANIMATION) {
-            return startAnimation(maxAnimationDuration, animationScale,
+            return startAnimation(t, maxAnimationDuration, animationScale,
                     finalWidth, finalHeight, false, 0, 0);
         }
 
@@ -383,7 +367,7 @@ class ScreenRotationAnimation {
     /**
      * Returns true if animating.
      */
-    private boolean startAnimation(long maxAnimationDuration,
+    private boolean startAnimation(SurfaceControl.Transaction t, long maxAnimationDuration,
             float animationScale, int finalWidth, int finalHeight, boolean dismissing,
             int exitAnim, int enterAnim) {
         if (mSurfaceControl == null) {
@@ -542,11 +526,6 @@ class ScreenRotationAnimation {
 
         final int layerStack = mDisplayContent.getDisplay().getLayerStack();
         if (USE_CUSTOM_BLACK_FRAME && mCustomBlackFrame == null) {
-            if (SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
-                    TAG_WM,
-                    ">>> OPEN TRANSACTION ScreenRotationAnimation.startAnimation");
-            mService.openSurfaceTransaction();
-
             // Compute the transformation matrix that must be applied
             // the the black frame to make it stay in the initial position
             // before the new screen rotation.  This is different than the
@@ -559,24 +538,15 @@ class ScreenRotationAnimation {
                 Rect outer = new Rect(-mOriginalWidth*1, -mOriginalHeight*1,
                         mOriginalWidth*2, mOriginalHeight*2);
                 Rect inner = new Rect(0, 0, mOriginalWidth, mOriginalHeight);
-                mCustomBlackFrame = new BlackFrame(outer, inner,
+                mCustomBlackFrame = new BlackFrame(t, outer, inner,
                         SCREEN_FREEZE_LAYER_CUSTOM, mDisplayContent, false);
-                mCustomBlackFrame.setMatrix(mFrameInitialMatrix);
+                mCustomBlackFrame.setMatrix(t, mFrameInitialMatrix);
             } catch (OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
-            } finally {
-                mService.closeSurfaceTransaction("ScreenRotationAnimation.startAnimation");
-                if (SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
-                        TAG_WM,
-                        "<<< CLOSE TRANSACTION ScreenRotationAnimation.startAnimation");
             }
         }
 
         if (!customAnim && mExitingBlackFrame == null) {
-            if (SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
-                    TAG_WM,
-                    ">>> OPEN TRANSACTION ScreenRotationAnimation.startAnimation");
-            mService.openSurfaceTransaction();
             try {
                 // Compute the transformation matrix that must be applied
                 // the the black frame to make it stay in the initial position
@@ -599,38 +569,23 @@ class ScreenRotationAnimation {
                             mOriginalWidth*2, mOriginalHeight*2);
                     inner = new Rect(0, 0, mOriginalWidth, mOriginalHeight);
                 }
-                mExitingBlackFrame = new BlackFrame(outer, inner,
+                mExitingBlackFrame = new BlackFrame(t, outer, inner,
                         SCREEN_FREEZE_LAYER_EXIT, mDisplayContent, mForceDefaultOrientation);
-                mExitingBlackFrame.setMatrix(mFrameInitialMatrix);
+                mExitingBlackFrame.setMatrix(t, mFrameInitialMatrix);
             } catch (OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
-            } finally {
-                mService.closeSurfaceTransaction("ScreenRotationAnimation.startAnimation");
-                if (SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
-                        TAG_WM,
-                        "<<< CLOSE TRANSACTION ScreenRotationAnimation.startAnimation");
             }
         }
 
         if (customAnim && mEnteringBlackFrame == null) {
-            if (SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
-                    TAG_WM,
-                    ">>> OPEN TRANSACTION ScreenRotationAnimation.startAnimation");
-            mService.openSurfaceTransaction();
-
             try {
                 Rect outer = new Rect(-finalWidth*1, -finalHeight*1,
                         finalWidth*2, finalHeight*2);
                 Rect inner = new Rect(0, 0, finalWidth, finalHeight);
-                mEnteringBlackFrame = new BlackFrame(outer, inner,
+                mEnteringBlackFrame = new BlackFrame(t, outer, inner,
                         SCREEN_FREEZE_LAYER_ENTER, mDisplayContent, false);
             } catch (OutOfResourcesException e) {
                 Slog.w(TAG, "Unable to allocate black surface", e);
-            } finally {
-                mService.closeSurfaceTransaction("ScreenRotationAnimation.startAnimation");
-                if (SHOW_LIGHT_TRANSACTIONS || DEBUG_STATE) Slog.i(
-                        TAG_WM,
-                        "<<< CLOSE TRANSACTION ScreenRotationAnimation.startAnimation");
             }
         }
 
@@ -640,7 +595,7 @@ class ScreenRotationAnimation {
     /**
      * Returns true if animating.
      */
-    public boolean dismiss(long maxAnimationDuration,
+    public boolean dismiss(SurfaceControl.Transaction t, long maxAnimationDuration,
             float animationScale, int finalWidth, int finalHeight, int exitAnim, int enterAnim) {
         if (DEBUG_STATE) Slog.v(TAG, "Dismiss!");
         if (mSurfaceControl == null) {
@@ -648,7 +603,7 @@ class ScreenRotationAnimation {
             return false;
         }
         if (!mStarted) {
-            startAnimation(maxAnimationDuration, animationScale, finalWidth, finalHeight,
+            startAnimation(t, maxAnimationDuration, animationScale, finalWidth, finalHeight,
                     true, exitAnim, enterAnim);
         }
         if (!mStarted) {
@@ -919,7 +874,7 @@ class ScreenRotationAnimation {
         return more;
     }
 
-    void updateSurfacesInTransaction() {
+    void updateSurfaces(SurfaceControl.Transaction t) {
         if (!mStarted) {
             return;
         }
@@ -927,28 +882,28 @@ class ScreenRotationAnimation {
         if (mSurfaceControl != null) {
             if (!mMoreStartExit && !mMoreFinishExit && !mMoreRotateExit) {
                 if (DEBUG_STATE) Slog.v(TAG, "Exit animations done, hiding screenshot surface");
-                mSurfaceControl.hide();
+                t.hide(mSurfaceControl);
             }
         }
 
         if (mCustomBlackFrame != null) {
             if (!mMoreStartFrame && !mMoreFinishFrame && !mMoreRotateFrame) {
                 if (DEBUG_STATE) Slog.v(TAG, "Frame animations done, hiding black frame");
-                mCustomBlackFrame.hide();
+                mCustomBlackFrame.hide(t);
             } else {
-                mCustomBlackFrame.setMatrix(mFrameTransformation.getMatrix());
+                mCustomBlackFrame.setMatrix(t, mFrameTransformation.getMatrix());
             }
         }
 
         if (mExitingBlackFrame != null) {
             if (!mMoreStartExit && !mMoreFinishExit && !mMoreRotateExit) {
                 if (DEBUG_STATE) Slog.v(TAG, "Frame animations done, hiding exiting frame");
-                mExitingBlackFrame.hide();
+                mExitingBlackFrame.hide(t);
             } else {
                 mExitFrameFinalMatrix.setConcat(mExitTransformation.getMatrix(), mFrameInitialMatrix);
-                mExitingBlackFrame.setMatrix(mExitFrameFinalMatrix);
+                mExitingBlackFrame.setMatrix(t, mExitFrameFinalMatrix);
                 if (mForceDefaultOrientation) {
-                    mExitingBlackFrame.setAlpha(mExitTransformation.getAlpha());
+                    mExitingBlackFrame.setAlpha(t, mExitTransformation.getAlpha());
                 }
             }
         }
@@ -956,13 +911,13 @@ class ScreenRotationAnimation {
         if (mEnteringBlackFrame != null) {
             if (!mMoreStartEnter && !mMoreFinishEnter && !mMoreRotateEnter) {
                 if (DEBUG_STATE) Slog.v(TAG, "Frame animations done, hiding entering frame");
-                mEnteringBlackFrame.hide();
+                mEnteringBlackFrame.hide(t);
             } else {
-                mEnteringBlackFrame.setMatrix(mEnterTransformation.getMatrix());
+                mEnteringBlackFrame.setMatrix(t, mEnterTransformation.getMatrix());
             }
         }
 
-        setSnapshotTransformInTransaction(mSnapshotFinalMatrix, mExitTransformation.getAlpha());
+        setSnapshotTransform(t, mSnapshotFinalMatrix, mExitTransformation.getAlpha());
     }
 
     public boolean stepAnimationLocked(long now) {

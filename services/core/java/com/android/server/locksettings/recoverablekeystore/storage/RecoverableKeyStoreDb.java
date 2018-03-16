@@ -320,6 +320,20 @@ public class RecoverableKeyStoreDb {
     }
 
     /**
+     * Updates status of old keys to {@code RecoveryController.RECOVERY_STATUS_PERMANENT_FAILURE}.
+     */
+    public void invalidateKeysForUserIdOnCustomScreenLock(int userId) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KeysEntry.COLUMN_NAME_RECOVERY_STATUS,
+            RecoveryController.RECOVERY_STATUS_PERMANENT_FAILURE);
+        String selection =
+            KeysEntry.COLUMN_NAME_USER_ID + " = ?";
+        db.update(KeysEntry.TABLE_NAME, values, selection,
+            new String[] {String.valueOf(userId)});
+    }
+
+    /**
      * Returns the generation ID associated with the platform key of the user with {@code userId}.
      */
     public int getPlatformKeyGenerationId(int userId) {

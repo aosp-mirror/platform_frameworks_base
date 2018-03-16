@@ -342,6 +342,30 @@ public class RecoverableKeyStoreDbTest {
     }
 
     @Test
+    public void testInvalidateKeysForUserIdOnCustomScreenLock() {
+        int userId = 12;
+        int uid = 1009;
+        int generationId = 6;
+        int status = 120;
+        int status2 = 121;
+        String alias = "test";
+        byte[] nonce = getUtf8Bytes("nonce");
+        byte[] keyMaterial = getUtf8Bytes("keymaterial");
+        WrappedKey wrappedKey = new WrappedKey(nonce, keyMaterial, generationId, status);
+        mRecoverableKeyStoreDb.insertKey(userId, uid, alias, wrappedKey);
+
+        WrappedKey retrievedKey = mRecoverableKeyStoreDb.getKey(uid, alias);
+        assertThat(retrievedKey.getRecoveryStatus()).isEqualTo(status);
+
+        mRecoverableKeyStoreDb.setRecoveryStatus(uid, alias, status2);
+        mRecoverableKeyStoreDb.invalidateKeysForUserIdOnCustomScreenLock(userId);
+
+        retrievedKey = mRecoverableKeyStoreDb.getKey(uid, alias);
+        assertThat(retrievedKey.getRecoveryStatus())
+            .isEqualTo(RecoveryController.RECOVERY_STATUS_PERMANENT_FAILURE);
+    }
+
+    @Test
     public void setRecoveryServicePublicKey_replaceOldKey() throws Exception {
         int userId = 12;
         int uid = 10009;

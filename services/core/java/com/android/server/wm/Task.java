@@ -96,6 +96,9 @@ class Task extends WindowContainer<AppWindowToken> {
     private Dimmer mDimmer = new Dimmer(this);
     private final Rect mTmpDimBoundsRect = new Rect();
 
+    /** @see #setCanAffectSystemUiFlags */
+    private boolean mCanAffectSystemUiFlags = true;
+
     Task(int taskId, TaskStack stack, int userId, WindowManagerService service, int resizeMode,
             boolean supportsPictureInPicture, TaskDescription taskDescription,
             TaskWindowContainerController controller) {
@@ -625,6 +628,21 @@ class Task extends WindowContainer<AppWindowToken> {
     @Override
     void forAllTasks(Consumer<Task> callback) {
         callback.accept(this);
+    }
+
+    /**
+     * @param canAffectSystemUiFlags If false, all windows in this task can not affect SystemUI
+     *                               flags. See {@link WindowState#canAffectSystemUiFlags()}.
+     */
+    void setCanAffectSystemUiFlags(boolean canAffectSystemUiFlags) {
+        mCanAffectSystemUiFlags = canAffectSystemUiFlags;
+    }
+
+    /**
+     * @see #setCanAffectSystemUiFlags
+     */
+    boolean canAffectSystemUiFlags() {
+        return mCanAffectSystemUiFlags;
     }
 
     @Override

@@ -176,6 +176,7 @@ import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageParser.ParseFlags;
 import android.content.pm.PackageParser.ServiceIntentInfo;
+import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.PackageStats;
 import android.content.pm.PackageUserState;
@@ -4090,14 +4091,24 @@ public class PackageManagerService extends IPackageManager.Stub
             @Nullable ComponentName component, @ComponentType int type) {
         if (type == TYPE_ACTIVITY) {
             final PackageParser.Activity activity = mActivities.mActivities.get(component);
-            return activity != null
-                    ? (activity.info.flags & ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP) != 0
-                    : false;
+            if (activity == null) {
+                return false;
+            }
+            final boolean visibleToInstantApp =
+                    (activity.info.flags & ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP) != 0;
+            final boolean explicitlyVisibleToInstantApp =
+                    (activity.info.flags & ActivityInfo.FLAG_IMPLICITLY_VISIBLE_TO_INSTANT_APP) == 0;
+            return visibleToInstantApp && explicitlyVisibleToInstantApp;
         } else if (type == TYPE_RECEIVER) {
             final PackageParser.Activity activity = mReceivers.mActivities.get(component);
-            return activity != null
-                    ? (activity.info.flags & ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP) != 0
-                    : false;
+            if (activity == null) {
+                return false;
+            }
+            final boolean visibleToInstantApp =
+                    (activity.info.flags & ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP) != 0;
+            final boolean explicitlyVisibleToInstantApp =
+                    (activity.info.flags & ActivityInfo.FLAG_IMPLICITLY_VISIBLE_TO_INSTANT_APP) == 0;
+            return visibleToInstantApp && !explicitlyVisibleToInstantApp;
         } else if (type == TYPE_SERVICE) {
             final PackageParser.Service service = mServices.mServices.get(component);
             return service != null
@@ -4142,6 +4153,10 @@ public class PackageManagerService extends IPackageManager.Stub
             return false;
         }
         if (callerIsInstantApp) {
+            // both caller and target are both instant, but, different applications, filter
+            if (ps.getInstantApp(userId)) {
+                return true;
+            }
             // request for a specific component; if it hasn't been explicitly exposed through
             // property or instrumentation target, filter
             if (component != null) {
@@ -4154,7 +4169,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 return !isComponentVisibleToInstantApp(component, componentType);
             }
             // request for application; if no components have been explicitly exposed, filter
-            return ps.getInstantApp(userId) || !ps.pkg.visibleToInstantApps;
+            return !ps.pkg.visibleToInstantApps;
         }
         if (ps.getInstantApp(userId)) {
             // caller can see all components of all instant applications, don't filter
@@ -23398,6 +23413,36 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
 
         @Override
+        public boolean isDataRestoreSafe(byte[] restoringFromSigHash, String packageName) {
+            SigningDetails sd = getSigningDetails(packageName);
+            if (sd == null) {
+                return false;
+            }
+            return sd.hasSha256Certificate(restoringFromSigHash,
+                    SigningDetails.CertCapabilities.INSTALLED_DATA);
+        }
+
+        @Override
+        public boolean isDataRestoreSafe(Signature restoringFromSig, String packageName) {
+            SigningDetails sd = getSigningDetails(packageName);
+            if (sd == null) {
+                return false;
+            }
+            return sd.hasCertificate(restoringFromSig,
+                    SigningDetails.CertCapabilities.INSTALLED_DATA);
+        }
+
+        private SigningDetails getSigningDetails(@NonNull String packageName) {
+            synchronized (mPackages) {
+                PackageParser.Package p = mPackages.get(packageName);
+                if (p == null) {
+                    return null;
+                }
+                return p.mSigningDetails;
+            }
+        }
+
+        @Override
         public int getPermissionFlagsTEMP(String permName, String packageName, int userId) {
             return PackageManagerService.this.getPermissionFlags(permName, packageName, userId);
         }
@@ -23859,6 +23904,15 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         @Override
         public boolean canAccessInstantApps(int callingUid, int userId) {
             return PackageManagerService.this.canViewInstantApps(callingUid, userId);
+        }
+
+        @Override
+        public boolean canAccessComponent(int callingUid, ComponentName component, int userId) {
+            synchronized (mPackages) {
+                final PackageSetting ps = mSettings.mPackages.get(component.getPackageName());
+                return !PackageManagerService.this.filterAppAccessLPr(
+                        ps, callingUid, component, TYPE_UNKNOWN, userId);
+            }
         }
 
         @Override

@@ -19,6 +19,7 @@ package com.android.settingslib.fuelgauge;
 import android.os.IDeviceIdleController;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.support.annotation.VisibleForTesting;
 import android.util.ArraySet;
 import android.util.Log;
@@ -37,6 +38,7 @@ public class PowerWhitelistBackend {
     private final IDeviceIdleController mDeviceIdleService;
     private final ArraySet<String> mWhitelistedApps = new ArraySet<>();
     private final ArraySet<String> mSysWhitelistedApps = new ArraySet<>();
+    private final ArraySet<String> mSysWhitelistedAppsExceptIdle = new ArraySet<>();
 
     public PowerWhitelistBackend() {
         mDeviceIdleService = IDeviceIdleController.Stub.asInterface(
@@ -62,6 +64,10 @@ public class PowerWhitelistBackend {
         return mWhitelistedApps.contains(pkg);
     }
 
+    public boolean isSysWhitelistedExceptIdle(String pkg) {
+        return mSysWhitelistedAppsExceptIdle.contains(pkg);
+    }
+
     public void addApp(String pkg) {
         try {
             mDeviceIdleService.addPowerSaveWhitelistApp(pkg);
@@ -83,6 +89,7 @@ public class PowerWhitelistBackend {
     @VisibleForTesting
     public void refreshList() {
         mSysWhitelistedApps.clear();
+        mSysWhitelistedAppsExceptIdle.clear();
         mWhitelistedApps.clear();
         try {
             String[] whitelistedApps = mDeviceIdleService.getFullPowerWhitelist();
@@ -92,6 +99,11 @@ public class PowerWhitelistBackend {
             String[] sysWhitelistedApps = mDeviceIdleService.getSystemPowerWhitelist();
             for (String app : sysWhitelistedApps) {
                 mSysWhitelistedApps.add(app);
+            }
+            String[] sysWhitelistedAppsExceptIdle =
+                    mDeviceIdleService.getSystemPowerWhitelistExceptIdle();
+            for (String app : sysWhitelistedAppsExceptIdle) {
+                mSysWhitelistedAppsExceptIdle.add(app);
             }
         } catch (RemoteException e) {
             Log.w(TAG, "Unable to reach IDeviceIdleController", e);

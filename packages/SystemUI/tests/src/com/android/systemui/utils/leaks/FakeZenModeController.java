@@ -77,4 +77,9 @@ public class FakeZenModeController extends BaseLeakChecker<Callback> implements 
     public boolean isVolumeRestricted() {
         return false;
     }
+
+    @Override
+    public boolean areNotificationsHiddenInShade() {
+        return false;
+    }
 }

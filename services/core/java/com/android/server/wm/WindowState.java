@@ -1573,7 +1573,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final boolean exiting = mAnimatingExit || mDestroying;
             return shown && !exiting;
         } else {
-            return !mAppToken.isHidden();
+            final Task task = getTask();
+            final boolean canFromTask = task != null && task.canAffectSystemUiFlags();
+            return canFromTask && !mAppToken.isHidden();
         }
     }
 
@@ -2013,7 +2015,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             removeImmediately();
             // Removing a visible window will effect the computed orientation
             // So just update orientation if needed.
-            if (wasVisible && mService.updateOrientationFromAppTokensLocked(false, displayId)) {
+            if (wasVisible && mService.updateOrientationFromAppTokensLocked(displayId)) {
                 mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayId).sendToTarget();
             }
             mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
@@ -4295,6 +4297,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final boolean wasVisible = isVisibleLw();
 
         result |= (!wasVisible || !isDrawnLw()) ? RELAYOUT_RES_FIRST_TIME : 0;
+
+        if (mWinAnimator.mChildrenDetached) {
+            // If there are detached children hanging around we need to force
+            // the client receiving a new Surface.
+            mWinAnimator.preserveSurfaceLocked();
+            result |= RELAYOUT_RES_SURFACE_CHANGED
+                    | RELAYOUT_RES_FIRST_TIME;
+        }
+
         if (mAnimatingExit) {
             Slog.d(TAG, "relayoutVisibleWindow: " + this + " mAnimatingExit=true, mRemoveOnExit="
                     + mRemoveOnExit + ", mDestroying=" + mDestroying);

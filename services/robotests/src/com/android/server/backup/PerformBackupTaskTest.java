@@ -160,6 +160,7 @@ public class PerformBackupTaskTest {
 
         BackupManagerConstants constants =
                 new BackupManagerConstants(mainHandler, mApplication.getContentResolver());
+        constants.start();
 
         setUpBackupManagerServiceBasics(
                 mBackupManagerService,

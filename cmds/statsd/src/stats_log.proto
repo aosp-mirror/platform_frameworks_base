@@ -22,7 +22,6 @@ option java_package = "com.android.os";
 option java_outer_classname = "StatsLog";
 
 import "frameworks/base/cmds/statsd/src/atoms.proto";
-import "frameworks/base/cmds/statsd/src/stats_log_common.proto";
 
 message DimensionsValue {
   optional int32 field = 1;
@@ -46,7 +45,7 @@ message EventMetricData {
 
   optional Atom atom = 2;
 
-  optional int64 wall_clock_timestamp_sec = 3;
+  optional int64 wall_clock_timestamp_nanos = 3;
 }
 
 message CountBucketInfo {
@@ -105,6 +104,8 @@ message GaugeBucketInfo {
   repeated Atom atom = 3;
 
   repeated int64 elapsed_timestamp_nanos = 4;
+
+  repeated int64 wall_clock_timestamp_nanos = 5;
 }
 
 message GaugeMetricData {
@@ -146,6 +147,33 @@ message StatsLogReport {
   }
 }
 
+message UidMapping {
+    message PackageInfoSnapshot {
+        message PackageInfo {
+            optional string name = 1;
+
+            optional int64 version = 2;
+
+            optional int32 uid = 3;
+        }
+        optional int64 elapsed_timestamp_nanos = 1;
+
+        repeated PackageInfo package_info = 2;
+    }
+    repeated PackageInfoSnapshot snapshots = 1;
+
+    message Change {
+        optional bool deletion = 1;
+
+        optional int64 elapsed_timestamp_nanos = 2;
+        optional string app = 3;
+        optional int32 uid = 4;
+
+        optional int64 version = 5;
+    }
+    repeated Change changes = 2;
+}
+
 message ConfigMetricsReport {
   repeated StatsLogReport metrics = 1;
 
@@ -154,6 +182,10 @@ message ConfigMetricsReport {
   optional int64 last_report_elapsed_nanos = 3;
 
   optional int64 current_report_elapsed_nanos = 4;
+
+  optional int64 last_report_wall_clock_nanos = 5;
+
+  optional int64 current_report_wall_clock_nanos = 6;
 }
 
 message ConfigMetricsReportList {

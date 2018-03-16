@@ -62,6 +62,9 @@ const int FIELD_ID_ID = 2;
 const int FIELD_ID_UID_MAP = 2;
 const int FIELD_ID_LAST_REPORT_ELAPSED_NANOS = 3;
 const int FIELD_ID_CURRENT_REPORT_ELAPSED_NANOS = 4;
+const int FIELD_ID_LAST_REPORT_WALL_CLOCK_NANOS = 5;
+const int FIELD_ID_CURRENT_REPORT_WALL_CLOCK_NANOS = 6;
+
 
 #define STATS_DATA_DIR "/data/misc/stats-data"
 
@@ -260,22 +263,26 @@ void StatsLogProcessor::onDumpReportLocked(const ConfigKey& key, const uint64_t 
             proto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_REPORTS);
 
     int64_t lastReportTimeNs = it->second->getLastReportTimeNs();
+    int64_t lastReportWallClockNs = it->second->getLastReportWallClockNs();
+
     // First, fill in ConfigMetricsReport using current data on memory, which
     // starts from filling in StatsLogReport's.
     it->second->onDumpReport(dumpTimeStampNs, &proto);
 
     // Fill in UidMap.
-    auto uidMap = mUidMap->getOutput(key);
-    const int uidMapSize = uidMap.ByteSize();
-    char uidMapBuffer[uidMapSize];
-    uidMap.SerializeToArray(&uidMapBuffer[0], uidMapSize);
-    proto.write(FIELD_TYPE_MESSAGE | FIELD_ID_UID_MAP, uidMapBuffer, uidMapSize);
+    vector<uint8_t> uidMap;
+    mUidMap->getOutput(key, &uidMap);
+    proto.write(FIELD_TYPE_MESSAGE | FIELD_ID_UID_MAP, uidMap.data());
 
     // Fill in the timestamps.
     proto.write(FIELD_TYPE_INT64 | FIELD_ID_LAST_REPORT_ELAPSED_NANOS,
                 (long long)lastReportTimeNs);
     proto.write(FIELD_TYPE_INT64 | FIELD_ID_CURRENT_REPORT_ELAPSED_NANOS,
                 (long long)dumpTimeStampNs);
+    proto.write(FIELD_TYPE_INT64 | FIELD_ID_LAST_REPORT_WALL_CLOCK_NANOS,
+                (long long)lastReportWallClockNs);
+    proto.write(FIELD_TYPE_INT64 | FIELD_ID_CURRENT_REPORT_WALL_CLOCK_NANOS,
+                (long long)getWallClockNs());
 
     // End of ConfigMetricsReport (reports).
     proto.end(reportsToken);

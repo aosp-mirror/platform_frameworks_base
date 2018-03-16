@@ -22,7 +22,6 @@ import android.media.MediaController2.PlaybackInfo;
 import android.media.MediaItem2;
 import android.media.MediaMetadata2;
 import android.media.MediaSession2.Command;
-import android.media.MediaSession2.PlaylistParams;
 import android.media.Rating2;
 import android.media.SessionToken2;
 import android.net.Uri;
@@ -65,8 +64,6 @@ public interface MediaController2Provider extends TransportControlProvider {
     void replacePlaylistItem_impl(int index, MediaItem2 item);
     void removePlaylistItem_impl(MediaItem2 item);
 
-    PlaylistParams getPlaylistParams_impl();
-    void setPlaylistParams_impl(PlaylistParams params);
     int getPlayerState_impl();
     long getPosition_impl();
     float getPlaybackSpeed_impl();

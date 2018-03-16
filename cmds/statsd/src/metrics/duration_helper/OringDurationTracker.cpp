@@ -165,13 +165,12 @@ bool OringDurationTracker::flushCurrentBucket(
         DurationBucket current_info;
         current_info.mBucketStartNs = mCurrentBucketStartTimeNs;
         current_info.mBucketEndNs = currentBucketEndTimeNs;
-        current_info.mBucketNum = mCurrentBucketNum;
         current_info.mDuration = mDuration;
         (*output)[mEventKey].push_back(current_info);
         mDurationFullBucket += mDuration;
         if (eventTimeNs > fullBucketEnd) {
             // End of full bucket, can send to anomaly tracker now.
-            addPastBucketToAnomalyTrackers(mDurationFullBucket, current_info.mBucketNum);
+            addPastBucketToAnomalyTrackers(mDurationFullBucket, mCurrentBucketNum);
             mDurationFullBucket = 0;
         }
         VLOG("  duration: %lld", (long long)current_info.mDuration);
@@ -182,12 +181,11 @@ bool OringDurationTracker::flushCurrentBucket(
             DurationBucket info;
             info.mBucketStartNs = fullBucketEnd + mBucketSizeNs * (i - 1);
             info.mBucketEndNs = info.mBucketStartNs + mBucketSizeNs;
-            info.mBucketNum = mCurrentBucketNum + i;
             info.mDuration = mBucketSizeNs;
             (*output)[mEventKey].push_back(info);
             // Safe to send these buckets to anomaly tracker since they must be full buckets.
             // If it's a partial bucket, numBucketsForward would be 0.
-            addPastBucketToAnomalyTrackers(info.mDuration, info.mBucketNum);
+            addPastBucketToAnomalyTrackers(info.mDuration, mCurrentBucketNum + i);
             VLOG("  add filling bucket with duration %lld", (long long)info.mDuration);
         }
     }

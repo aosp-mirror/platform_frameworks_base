@@ -15,6 +15,8 @@
  */
 package android.ext.services.autofill;
 
+import static android.ext.services.autofill.EditDistanceScorer.DEFAULT_ALGORITHM;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
@@ -29,8 +31,6 @@ import java.util.List;
 public class AutofillFieldClassificationServiceImpl extends AutofillFieldClassificationService {
 
     private static final String TAG = "AutofillFieldClassificationServiceImpl";
-    // TODO(b/70291841): set to false before launching
-    private static final boolean DEBUG = true;
 
     @Nullable
     @Override
@@ -40,30 +40,13 @@ public class AutofillFieldClassificationServiceImpl extends AutofillFieldClassif
         if (ArrayUtils.isEmpty(actualValues) || ArrayUtils.isEmpty(userDataValues)) {
             Log.w(TAG, "getScores(): empty currentvalues (" + actualValues + ") or userValues ("
                     + userDataValues + ")");
-            // TODO(b/70939974): add unit test
             return null;
         }
-        if (algorithmName != null && !algorithmName.equals(EditDistanceScorer.NAME)) {
+        if (algorithmName != null && !algorithmName.equals(DEFAULT_ALGORITHM)) {
             Log.w(TAG, "Ignoring invalid algorithm (" + algorithmName + ") and using "
-                    + EditDistanceScorer.NAME + " instead");
+                    + DEFAULT_ALGORITHM + " instead");
         }
 
-        final String actualAlgorithmName = EditDistanceScorer.NAME;
-        final int actualValuesSize = actualValues.size();
-        final int userDataValuesSize = userDataValues.size();
-        if (DEBUG) {
-            Log.d(TAG, "getScores() will return a " + actualValuesSize + "x"
-                    + userDataValuesSize + " matrix for " + actualAlgorithmName);
-        }
-        final float[][] scores = new float[actualValuesSize][userDataValuesSize];
-
-        final EditDistanceScorer algorithm = EditDistanceScorer.getInstance();
-        for (int i = 0; i < actualValuesSize; i++) {
-            for (int j = 0; j < userDataValuesSize; j++) {
-                final float score = algorithm.getScore(actualValues.get(i), userDataValues.get(j));
-                scores[i][j] = score;
-            }
-        }
-        return scores;
+        return EditDistanceScorer.getScores(actualValues, userDataValues);
     }
 }

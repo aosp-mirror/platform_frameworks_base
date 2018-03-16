@@ -17,6 +17,8 @@
 package com.android.server.testing.shadows;
 
 import android.annotation.Nullable;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
 import com.android.server.backup.transport.TransportClient;
@@ -25,22 +27,49 @@ import com.android.server.backup.utils.AppBackupUtils;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 
-import java.util.function.Function;
+import java.util.HashSet;
+import java.util.Set;
 
 @Implements(AppBackupUtils.class)
 public class ShadowAppBackupUtils {
-    public static Function<String, Boolean> sAppIsRunningAndEligibleForBackupWithTransport;
-    static {
-        reset();
+    private static final Set<String> sAppsRunningAndEligibleForBackupWithTransport =
+            new HashSet<>();
+    private static final Set<String> sAppsEligibleForBackup = new HashSet<>();
+    private static final Set<String> sAppsGetFullBackup = new HashSet<>();
+
+    public static void setAppRunningAndEligibleForBackupWithTransport(String packageName) {
+        sAppsEligibleForBackup.add(packageName);
+        sAppsRunningAndEligibleForBackupWithTransport.add(packageName);
+    }
+
+    public static void setAppEligibleForBackup(String packageName) {
+        sAppsEligibleForBackup.add(packageName);
+    }
+
+    /** By default the app will be key-value. */
+    public static void setAppGetsFullBackup(String packageName) {
+        sAppsGetFullBackup.add(packageName);
     }
 
     @Implementation
     public static boolean appIsRunningAndEligibleForBackupWithTransport(
             @Nullable TransportClient transportClient, String packageName, PackageManager pm) {
-        return sAppIsRunningAndEligibleForBackupWithTransport.apply(packageName);
+        return sAppsRunningAndEligibleForBackupWithTransport.contains(packageName);
+    }
+
+    @Implementation
+    public static boolean appIsEligibleForBackup(ApplicationInfo app, PackageManager pm) {
+        return sAppsEligibleForBackup.contains(app.packageName);
+    }
+
+    @Implementation
+    public static boolean appGetsFullBackup(PackageInfo packageInfo) {
+        return sAppsGetFullBackup.contains(packageInfo.packageName);
     }
 
     public static void reset() {
-        sAppIsRunningAndEligibleForBackupWithTransport = p -> true;
+        sAppsRunningAndEligibleForBackupWithTransport.clear();
+        sAppsEligibleForBackup.clear();
+        sAppsGetFullBackup.clear();
     }
 }

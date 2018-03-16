@@ -104,7 +104,6 @@ import android.support.v4.graphics.ColorUtils;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -3984,6 +3983,11 @@ public class NotificationStackScrollLayout extends ViewGroup
                     mEmptyShadeView.cancelAnimation();
                 } else {
                     mEmptyShadeView.setInvisible();
+                }
+                if (mStatusBar.areNotificationsHidden()) {
+                    mEmptyShadeView.setText(R.string.dnd_suppressing_shade_text);
+                } else {
+                    mEmptyShadeView.setText(R.string.empty_shade_text);
                 }
                 mEmptyShadeView.setVisibility(newVisibility);
                 mEmptyShadeView.setWillBeGone(false);

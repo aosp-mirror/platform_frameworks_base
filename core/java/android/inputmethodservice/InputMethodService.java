@@ -20,6 +20,8 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
 import android.annotation.IntDef;
@@ -239,19 +241,89 @@ public class InputMethodService extends AbstractInputMethodService {
     static final boolean DEBUG = false;
 
     /**
-     * The back button will close the input window.
+     * Allows the system to optimize the back button affordance based on the presence of software
+     * keyboard.
+     *
+     * <p>For instance, on devices that have navigation bar and software-rendered back button, the
+     * system may use a different icon while {@link #isInputViewShown()} returns {@code true}, to
+     * indicate that the back button has "dismiss" affordance.</p>
+     *
+     * <p>Note that {@link KeyEvent#KEYCODE_BACK} events continue to be sent to
+     * {@link #onKeyDown(int, KeyEvent)} even when this mode is specified. The default
+     * implementation of {@link #onKeyDown(int, KeyEvent)} for {@link KeyEvent#KEYCODE_BACK} does
+     * not take this mode into account.</p>
+     *
+     * <p>For API level {@link android.os.Build.VERSION_CODES#O_MR1} and lower devices, this is the
+     * only mode you can safely specify without worrying about the compatibility.</p>
+     *
+     * @see #setBackDisposition(int)
      */
-    public static final int BACK_DISPOSITION_DEFAULT = 0;  // based on window
+    public static final int BACK_DISPOSITION_DEFAULT = 0;
 
     /**
-     * This input method will not consume the back key.
+     * Deprecated flag.
+     *
+     * <p>To avoid compatibility issues, IME developers should not use this flag.</p>
+     *
+     * @deprecated on {@link android.os.Build.VERSION_CODES#P} and later devices, this flag is
+     *             handled as a synonym of {@link #BACK_DISPOSITION_DEFAULT}. On
+     *             {@link android.os.Build.VERSION_CODES#O_MR1} and prior devices, expected behavior
+     *             of this mode had not been well defined. Most likely the end result would be the
+     *             same as {@link #BACK_DISPOSITION_DEFAULT}. Either way it is not recommended to
+     *             use this mode
+     * @see #setBackDisposition(int)
      */
-    public static final int BACK_DISPOSITION_WILL_NOT_DISMISS = 1; // back
+    @Deprecated
+    public static final int BACK_DISPOSITION_WILL_NOT_DISMISS = 1;
 
     /**
-     * This input method will consume the back key.
+     * Deprecated flag.
+     *
+     * <p>To avoid compatibility issues, IME developers should not use this flag.</p>
+     *
+     * @deprecated on {@link android.os.Build.VERSION_CODES#P} and later devices, this flag is
+     *             handled as a synonym of {@link #BACK_DISPOSITION_DEFAULT}. On
+     *             {@link android.os.Build.VERSION_CODES#O_MR1} and prior devices, expected behavior
+     *             of this mode had not been well defined. In AOSP implementation running on devices
+     *             that have navigation bar, specifying this flag could change the software back
+     *             button to "Dismiss" icon no matter whether the software keyboard is shown or not,
+     *             but there would be no easy way to restore the icon state even after IME lost the
+     *             connection to the application. To avoid user confusions, do not specify this mode
+     *             anyway
+     * @see #setBackDisposition(int)
      */
-    public static final int BACK_DISPOSITION_WILL_DISMISS = 2; // down
+    @Deprecated
+    public static final int BACK_DISPOSITION_WILL_DISMISS = 2;
+
+    /**
+     * Asks the system to not adjust the back button affordance even when the software keyboard is
+     * shown.
+     *
+     * <p>This mode is useful for UI modes where IME's main soft input window is used for some
+     * supplemental UI, such as floating candidate window for languages such as Chinese and
+     * Japanese, where users expect the back button is, or at least looks to be, handled by the
+     * target application rather than the UI shown by the IME even while {@link #isInputViewShown()}
+     * returns {@code true}.</p>
+     *
+     * <p>Note that {@link KeyEvent#KEYCODE_BACK} events continue to be sent to
+     * {@link #onKeyDown(int, KeyEvent)} even when this mode is specified. The default
+     * implementation of {@link #onKeyDown(int, KeyEvent)} for {@link KeyEvent#KEYCODE_BACK} does
+     * not take this mode into account.</p>
+     *
+     * @see #setBackDisposition(int)
+     */
+    public static final int BACK_DISPOSITION_ADJUST_NOTHING = 3;
+
+    /**
+     * Enum flag to be used for {@link #setBackDisposition(int)}.
+     *
+     * @hide
+     */
+    @Retention(SOURCE)
+    @IntDef(value = {BACK_DISPOSITION_DEFAULT, BACK_DISPOSITION_WILL_NOT_DISMISS,
+            BACK_DISPOSITION_WILL_DISMISS, BACK_DISPOSITION_ADJUST_NOTHING},
+            prefix = "BACK_DISPOSITION_")
+    public @interface BackDispositionMode {}
 
     /**
      * @hide
@@ -267,7 +339,7 @@ public class InputMethodService extends AbstractInputMethodService {
 
     // Min and max values for back disposition.
     private static final int BACK_DISPOSITION_MIN = BACK_DISPOSITION_DEFAULT;
-    private static final int BACK_DISPOSITION_MAX = BACK_DISPOSITION_WILL_DISMISS;
+    private static final int BACK_DISPOSITION_MAX = BACK_DISPOSITION_ADJUST_NOTHING;
 
     InputMethodManager mImm;
     
@@ -331,6 +403,8 @@ public class InputMethodService extends AbstractInputMethodService {
     boolean mIsInputViewShown;
     
     int mStatusIcon;
+
+    @BackDispositionMode
     int mBackDisposition;
 
     /**
@@ -1015,8 +1089,19 @@ public class InputMethodService extends AbstractInputMethodService {
     public Dialog getWindow() {
         return mWindow;
     }
-    
-    public void setBackDisposition(int disposition) {
+
+    /**
+     * Sets the disposition mode that indicates the expected affordance for the back button.
+     *
+     * <p>Keep in mind that specifying this flag does not change the the default behavior of
+     * {@link #onKeyDown(int, KeyEvent)}.  It is IME developers' responsibility for making sure that
+     * their custom implementation of {@link #onKeyDown(int, KeyEvent)} is consistent with the mode
+     * specified to this API.</p>
+     *
+     * @see #getBackDisposition()
+     * @param disposition disposition mode to be set
+     */
+    public void setBackDisposition(@BackDispositionMode int disposition) {
         if (disposition == mBackDisposition) {
             return;
         }
@@ -1029,6 +1114,13 @@ public class InputMethodService extends AbstractInputMethodService {
                 mBackDisposition);
     }
 
+    /**
+     * Retrieves the current disposition mode that indicates the expected back button affordance.
+     *
+     * @see #setBackDisposition(int)
+     * @return currently selected disposition mode
+     */
+    @BackDispositionMode
     public int getBackDisposition() {
         return mBackDisposition;
     }
@@ -1894,7 +1986,6 @@ public class InputMethodService extends AbstractInputMethodService {
         mInputStarted = false;
         mStartedInputConnection = null;
         mCurCompletions = null;
-        mBackDisposition = BACK_DISPOSITION_DEFAULT;
     }
 
     void doStartInput(InputConnection ic, EditorInfo attribute, boolean restarting) {
@@ -2096,25 +2187,31 @@ public class InputMethodService extends AbstractInputMethodService {
         return mExtractEditText;
     }
 
+
     /**
-     * Override this to intercept key down events before they are processed by the
-     * application.  If you return true, the application will not 
-     * process the event itself.  If you return false, the normal application processing
-     * will occur as if the IME had not seen the event at all.
-     * 
-     * <p>The default implementation intercepts {@link KeyEvent#KEYCODE_BACK
-     * KeyEvent.KEYCODE_BACK} if the IME is currently shown, to
-     * possibly hide it when the key goes up (if not canceled or long pressed).  In
-     * addition, in fullscreen mode only, it will consume DPAD movement
-     * events to move the cursor in the extracted text view, not allowing
-     * them to perform navigation in the underlying application.
+     * Called back when a {@link KeyEvent} is forwarded from the target application.
+     *
+     * <p>The default implementation intercepts {@link KeyEvent#KEYCODE_BACK} if the IME is
+     * currently shown , to possibly hide it when the key goes up (if not canceled or long pressed).
+     * In addition, in fullscreen mode only, it will consume DPAD movement events to move the cursor
+     * in the extracted text view, not allowing them to perform navigation in the underlying
+     * application.</p>
+     *
+     * <p>The default implementation does not take flags specified to
+     * {@link #setBackDisposition(int)} into account, even on API version
+     * {@link android.os.Build.VERSION_CODES#P} and later devices.  IME developers are responsible
+     * for making sure that their special handling for {@link KeyEvent#KEYCODE_BACK} are consistent
+     * with the flag they specified to {@link #setBackDisposition(int)}.</p>
+     *
+     * @param keyCode The value in {@code event.getKeyCode()}
+     * @param event Description of the key event
+     *
+     * @return {@code true} if the event is consumed by the IME and the application no longer needs
+     *         to consume it.  Return {@code false} when the event should be handled as if the IME
+     *         had not seen the event at all.
      */
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-
         if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-            if (mBackDisposition == BACK_DISPOSITION_WILL_NOT_DISMISS) {
-                return false;
-            }
             final ExtractEditText eet = getExtractEditTextIfVisible();
             if (eet != null && eet.handleBackInTextActionModeIfNeeded(event)) {
                 return true;
