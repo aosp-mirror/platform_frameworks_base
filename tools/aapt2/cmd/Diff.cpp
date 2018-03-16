@@ -64,6 +64,10 @@ class DiffContext : public IAaptContext {
     return 0;
   }
 
+  bool IsAutoNamespace() override {
+    return false;
+  }
+
  private:
   std::string empty_;
   StdErrDiagnostics diagnostics_;
