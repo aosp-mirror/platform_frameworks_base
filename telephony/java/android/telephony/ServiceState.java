@@ -221,7 +221,7 @@ public class ServiceState implements Parcelable {
     public static final int ROAMING_TYPE_INTERNATIONAL = 3;
 
     /**
-     * Unknown ID. Could be returned by {@link #getNetworkId()} or {@link #getSystemId()}
+     * Unknown ID. Could be returned by {@link #getCdmaNetworkId()} or {@link #getCdmaSystemId()}
      */
     public static final int UNKNOWN_ID = -1;
 
@@ -1222,7 +1222,7 @@ public class ServiceState implements Parcelable {
 
     /** @hide */
     @TestApi
-    public void setSystemAndNetworkId(int systemId, int networkId) {
+    public void setCdmaSystemAndNetworkId(int systemId, int networkId) {
         this.mSystemId = systemId;
         this.mNetworkId = networkId;
     }
@@ -1388,7 +1388,7 @@ public class ServiceState implements Parcelable {
      * within a wireless system. (Defined in 3GPP2 C.S0023 3.4.8)
      * @return The CDMA NID or {@link #UNKNOWN_ID} if not available.
      */
-    public int getNetworkId() {
+    public int getCdmaNetworkId() {
         return this.mNetworkId;
     }
 
@@ -1397,7 +1397,7 @@ public class ServiceState implements Parcelable {
      * system. (Defined in 3GPP2 C.S0023 3.4.8)
      * @return The CDMA SID or {@link #UNKNOWN_ID} if not available.
      */
-    public int getSystemId() {
+    public int getCdmaSystemId() {
         return this.mSystemId;
     }
 
