@@ -139,23 +139,6 @@ public class MediaController2 implements AutoCloseable {
                 @Nullable ResultReceiver receiver) { }
 
         /**
-         * Called when the playlist is changed.
-         * <p>
-         * If the previously playing media item is gone, you should invalidate previous playback
-         * information and wait for later callbacks.
-         *
-         * @param controller the controller for this event
-         * @param playlist A new playlist set by the session.
-         * @see #onPositionChanged(MediaController2, long, long)
-         * @see #onBufferedPositionChanged(MediaController2, long)
-         * @see #onCurrentMediaItemChanged(MediaController2, MediaItem2)
-         * @hide
-         */
-        // TODO(jaewan): Remove (b/74174728)
-        public void onPlaylistChanged(@NonNull MediaController2 controller,
-                @NonNull List<MediaItem2> playlist) { }
-
-        /**
          * Called when the player state is changed.
          *
          * @param controller the controller for this event
