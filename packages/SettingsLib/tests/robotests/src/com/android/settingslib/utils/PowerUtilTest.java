@@ -40,7 +40,7 @@ public class PowerUtilTest {
     public static final long TEN_MINUTES_MILLIS = Duration.ofMinutes(10).toMillis();
     public static final long THREE_DAYS_MILLIS = Duration.ofDays(3).toMillis();
     public static final long THIRTY_HOURS_MILLIS = Duration.ofHours(30).toMillis();
-    public static final String NORMAL_CASE_EXPECTED_PREFIX = "Will last until about";
+    public static final String NORMAL_CASE_EXPECTED_PREFIX = "Should last until about";
     public static final String ENHANCED_SUFFIX = " based on your usage";
     // matches a time (ex: '1:15 PM', '2 AM')
     public static final String TIME_OF_DAY_REGEX = " (\\d)+:?(\\d)* (AM)|(PM)";
