@@ -16,6 +16,9 @@
 
 package android.os;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import junit.framework.TestCase;
 
 import android.os.SystemProperties;
@@ -139,6 +142,50 @@ public class SystemPropertiesTest extends TestCase {
             SystemProperties.getLong(null, 0);
             fail("Expected NullPointerException");
         } catch (NullPointerException npe) {
+        }
+    }
+
+    @SmallTest
+    public void testCallbacks() {
+        // Latches are not really necessary, but are easy to use.
+        final CountDownLatch wait1 = new CountDownLatch(1);
+        final CountDownLatch wait2 = new CountDownLatch(1);
+
+        Runnable r1 = new Runnable() {
+            boolean done = false;
+            @Override
+            public void run() {
+                if (done) {
+                    return;
+                }
+                done = true;
+
+                wait1.countDown();
+                throw new RuntimeException("test");
+            }
+        };
+
+        Runnable r2 = new Runnable() {
+            @Override
+            public void run() {
+                wait2.countDown();
+            }
+        };
+
+        SystemProperties.addChangeCallback(r1);
+        SystemProperties.addChangeCallback(r2);
+
+        SystemProperties.reportSyspropChanged();
+
+        try {
+            assertTrue(wait1.await(5, TimeUnit.SECONDS));
+        } catch (InterruptedException e) {
+            fail("InterruptedException");
+        }
+        try {
+            assertTrue(wait2.await(5, TimeUnit.SECONDS));
+        } catch (InterruptedException e) {
+            fail("InterruptedException");
         }
     }
 }
