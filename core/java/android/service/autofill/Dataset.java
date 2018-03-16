@@ -316,8 +316,8 @@ public final class Dataset implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeParcelable(mPresentation, flags);
-        parcel.writeTypedArrayList(mFieldIds, flags);
-        parcel.writeTypedArrayList(mFieldValues, flags);
+        parcel.writeTypedList(mFieldIds, flags);
+        parcel.writeTypedList(mFieldValues, flags);
         parcel.writeParcelableList(mFieldPresentations, flags);
         parcel.writeParcelable(mAuthentication, flags);
         parcel.writeString(mId);
@@ -333,8 +333,9 @@ public final class Dataset implements Parcelable {
             final Builder builder = (presentation == null)
                     ? new Builder()
                     : new Builder(presentation);
-            final ArrayList<AutofillId> ids = parcel.readTypedArrayList(null);
-            final ArrayList<AutofillValue> values = parcel.readTypedArrayList(null);
+            final ArrayList<AutofillId> ids = parcel.createTypedArrayList(AutofillId.CREATOR);
+            final ArrayList<AutofillValue> values =
+                    parcel.createTypedArrayList(AutofillValue.CREATOR);
             final ArrayList<RemoteViews> presentations = new ArrayList<>();
             parcel.readParcelableList(presentations, null);
             final int idCount = (ids != null) ? ids.size() : 0;
