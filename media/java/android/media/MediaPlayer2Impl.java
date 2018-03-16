@@ -115,8 +115,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private boolean mNextSourcePlayPending = false;
     //--- guarded by |mSrcLock| end
 
-    private AtomicInteger mBufferedPercentageCurrent;
-    private AtomicInteger mBufferedPercentageNext;
+    private AtomicInteger mBufferedPercentageCurrent = new AtomicInteger(0);
+    private AtomicInteger mBufferedPercentageNext = new AtomicInteger(0);
     private volatile float mVolume = 1.0f;
 
     // Modular DRM
