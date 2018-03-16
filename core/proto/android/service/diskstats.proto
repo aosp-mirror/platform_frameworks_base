@@ -37,8 +37,8 @@ message DiskStatsServiceDumpProto {
     }
     // Whether the latency test resulted in an error
     optional bool has_test_error = 1;
-    // If the test errored, error message is contained here
-    optional string error_message = 2 [ (android.privacy).dest = DEST_EXPLICIT ];
+    // If the test errored, error message is contained here, it is just IOException.
+    optional string error_message = 2;
     // 512B write latency in milliseconds, if the test was successful
     optional int32 write_512b_latency_millis = 3;
     // Free Space in the major partitions
