@@ -138,7 +138,7 @@ public class FuseAppLoop implements Handler.Callback {
     private static final int FUSE_FSYNC = 20;
 
     // Defined in FuseBuffer.h
-    private static final int FUSE_MAX_WRITE = 256 * 1024;
+    private static final int FUSE_MAX_WRITE = 128 * 1024;
 
     @Override
     public boolean handleMessage(Message msg) {
