@@ -731,25 +731,25 @@ status_t LogSection::BlockingCall(int pipeWriteFd) const {
             android_logger_list_free);
 
     if (android_logger_open(loggers.get(), mLogID) == NULL) {
-        ALOGW("LogSection %s: Can't get logger.", this->name.string());
-        return NO_ERROR;
+        ALOGE("LogSection %s: Can't get logger.", this->name.string());
+        return -1;
     }
 
     log_msg msg;
     log_time lastTimestamp(0);
 
-    status_t err = NO_ERROR;
     ProtoOutputStream proto;
     while (true) {  // keeps reading until logd buffer is fully read.
-        err = android_logger_list_read(loggers.get(), &msg);
+        status_t err = android_logger_list_read(loggers.get(), &msg);
         // err = 0 - no content, unexpected connection drop or EOF.
         // err = +ive number - size of retrieved data from logger
         // err = -ive number, OS supplied error _except_ for -EAGAIN
         // err = -EAGAIN, graceful indication for ANDRODI_LOG_NONBLOCK that this is the end of data.
         if (err <= 0) {
             if (err != -EAGAIN) {
-                ALOGE("LogSection %s: fails to read a log_msg.\n", this->name.string());
+                ALOGW("LogSection %s: fails to read a log_msg.\n", this->name.string());
             }
+            // dump previous logs and don't consider this error a failure.
             break;
         }
         if (mBinary) {
@@ -818,7 +818,7 @@ status_t LogSection::BlockingCall(int pipeWriteFd) const {
             AndroidLogEntry entry;
             err = android_log_processLogBuffer(&msg.entry_v1, &entry);
             if (err != NO_ERROR) {
-                ALOGE("LogSection %s: fails to process to an entry.\n", this->name.string());
+                ALOGW("LogSection %s: fails to process to an entry.\n", this->name.string());
                 break;
             }
             lastTimestamp.tv_sec = entry.tv_sec;
@@ -840,7 +840,7 @@ status_t LogSection::BlockingCall(int pipeWriteFd) const {
     }
     gLastLogsRetrieved[mLogID] = lastTimestamp;
     proto.flush(pipeWriteFd);
-    return err;
+    return NO_ERROR;
 }
 
 // ================================================================================
