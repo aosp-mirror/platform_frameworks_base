@@ -20,6 +20,7 @@ import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.IUidObserver;
+import android.app.PendingIntent;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.IUsageStatsManager;
@@ -72,6 +73,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A service that collects, aggregates, and persists application usage data.
@@ -117,6 +119,8 @@ public class UsageStatsService extends SystemService implements
 
     AppStandbyController mAppStandby;
 
+    AppTimeLimitController mAppTimeLimit;
+
     private UsageStatsManagerInternal.AppIdleStateChangeListener mStandbyChangeListener =
             new UsageStatsManagerInternal.AppIdleStateChangeListener() {
                 @Override
@@ -150,6 +154,20 @@ public class UsageStatsService extends SystemService implements
         mHandler = new H(BackgroundThread.get().getLooper());
 
         mAppStandby = new AppStandbyController(getContext(), BackgroundThread.get().getLooper());
+
+        mAppTimeLimit = new AppTimeLimitController(
+                (observerId, userId, timeLimit, timeElapsed, callbackIntent) -> {
+                    Intent intent = new Intent();
+                    intent.putExtra(UsageStatsManager.EXTRA_OBSERVER_ID, observerId);
+                    intent.putExtra(UsageStatsManager.EXTRA_TIME_LIMIT, timeLimit);
+                    intent.putExtra(UsageStatsManager.EXTRA_TIME_USED, timeElapsed);
+                    try {
+                        callbackIntent.send(getContext(), 0, intent);
+                    } catch (PendingIntent.CanceledException e) {
+                        Slog.w(TAG, "Couldn't deliver callback: "
+                                + callbackIntent);
+                    }
+                }, mHandler.getLooper());
 
         mAppStandby.addListener(mStandbyChangeListener);
         File systemDataDir = new File(Environment.getDataDirectory(), "system");
@@ -374,6 +392,16 @@ public class UsageStatsService extends SystemService implements
             service.reportEvent(event);
 
             mAppStandby.reportEvent(event, elapsedRealtime, userId);
+            switch (event.mEventType) {
+                case Event.MOVE_TO_FOREGROUND:
+                    mAppTimeLimit.moveToForeground(event.getPackageName(), event.getClassName(),
+                            userId);
+                    break;
+                case Event.MOVE_TO_BACKGROUND:
+                    mAppTimeLimit.moveToBackground(event.getPackageName(), event.getClassName(),
+                            userId);
+                    break;
+            }
         }
     }
 
@@ -394,6 +422,7 @@ public class UsageStatsService extends SystemService implements
             Slog.i(TAG, "Removing user " + userId + " and all data.");
             mUserState.remove(userId);
             mAppStandby.onUserRemoved(userId);
+            mAppTimeLimit.onUserRemoved(userId);
             cleanUpRemovedUsersLocked();
         }
     }
@@ -549,6 +578,8 @@ public class UsageStatsService extends SystemService implements
                 pw.println();
                 mAppStandby.dumpState(args, pw);
             }
+
+            mAppTimeLimit.dump(pw);
         }
     }
 
@@ -927,6 +958,60 @@ public class UsageStatsService extends SystemService implements
 
             mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
         }
+
+        @Override
+        public void registerAppUsageObserver(int observerId,
+                String[] packages, long timeLimitMs, PendingIntent
+                callbackIntent, String callingPackage) {
+            if (!hasPermission(callingPackage)) {
+                throw new SecurityException("Caller doesn't have PACKAGE_USAGE_STATS permission");
+            }
+
+            if (packages == null || packages.length == 0) {
+                throw new IllegalArgumentException("Must specify at least one package");
+            }
+            if (timeLimitMs <= 0) {
+                throw new IllegalArgumentException("Time limit must be > 0");
+            }
+            if (callbackIntent == null) {
+                throw new NullPointerException("callbackIntent can't be null");
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int userId = UserHandle.getUserId(callingUid);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                UsageStatsService.this.registerAppUsageObserver(callingUid, observerId,
+                        packages, timeLimitMs, callbackIntent, userId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void unregisterAppUsageObserver(int observerId, String callingPackage) {
+            if (!hasPermission(callingPackage)) {
+                throw new SecurityException("Caller doesn't have PACKAGE_USAGE_STATS permission");
+            }
+
+            final int callingUid = Binder.getCallingUid();
+            final int userId = UserHandle.getUserId(callingUid);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                UsageStatsService.this.unregisterAppUsageObserver(callingUid, observerId, userId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+    }
+
+    void registerAppUsageObserver(int callingUid, int observerId, String[] packages,
+            long timeLimitMs, PendingIntent callbackIntent, int userId) {
+        mAppTimeLimit.addObserver(callingUid, observerId, packages, timeLimitMs, callbackIntent,
+                userId);
+    }
+
+    void unregisterAppUsageObserver(int callingUid, int observerId, int userId) {
+        mAppTimeLimit.removeObserver(callingUid, observerId, userId);
     }
 
     /**
