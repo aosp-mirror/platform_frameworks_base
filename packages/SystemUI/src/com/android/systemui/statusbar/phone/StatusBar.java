@@ -5043,8 +5043,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                     RemoteAnimationAdapter adapter = mActivityLaunchAnimator.getLaunchAnimation(
                             row);
                     try {
-                        ActivityManager.getService().registerRemoteAnimationForNextActivityStart(
-                                intent.getCreatorPackage(), adapter);
+                        if (adapter != null) {
+                            ActivityManager.getService()
+                                    .registerRemoteAnimationForNextActivityStart(
+                                            intent.getCreatorPackage(), adapter);
+                        }
                         launchResult = intent.sendAndReturnResult(mContext, 0, fillInIntent, null,
                                 null, null, getActivityOptions(adapter));
                         mActivityLaunchAnimator.setLaunchResult(launchResult);
