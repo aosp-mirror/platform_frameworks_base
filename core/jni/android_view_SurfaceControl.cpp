@@ -290,7 +290,7 @@ static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerHandl
     }
 
     sp<GraphicBuffer> buffer;
-    status_t res = ScreenshotClient::captureLayers(layerHandle, sourceCrop, frameScale, &buffer);
+    status_t res = ScreenshotClient::captureChildLayers(layerHandle, sourceCrop, frameScale, &buffer);
     if (res != NO_ERROR) {
         return NULL;
     }
