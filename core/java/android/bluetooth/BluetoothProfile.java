@@ -38,7 +38,7 @@ public interface BluetoothProfile {
      * This extra represents the current connection state of the profile of the
      * Bluetooth device.
      */
-    public static final String EXTRA_STATE = "android.bluetooth.profile.extra.STATE";
+    String EXTRA_STATE = "android.bluetooth.profile.extra.STATE";
 
     /**
      * Extra for the connection state intents of the individual profiles.
@@ -46,123 +46,130 @@ public interface BluetoothProfile {
      * This extra represents the previous connection state of the profile of the
      * Bluetooth device.
      */
-    public static final String EXTRA_PREVIOUS_STATE =
+    String EXTRA_PREVIOUS_STATE =
             "android.bluetooth.profile.extra.PREVIOUS_STATE";
 
     /** The profile is in disconnected state */
-    public static final int STATE_DISCONNECTED = 0;
+    int STATE_DISCONNECTED = 0;
     /** The profile is in connecting state */
-    public static final int STATE_CONNECTING = 1;
+    int STATE_CONNECTING = 1;
     /** The profile is in connected state */
-    public static final int STATE_CONNECTED = 2;
+    int STATE_CONNECTED = 2;
     /** The profile is in disconnecting state */
-    public static final int STATE_DISCONNECTING = 3;
+    int STATE_DISCONNECTING = 3;
 
     /**
      * Headset and Handsfree profile
      */
-    public static final int HEADSET = 1;
+    int HEADSET = 1;
 
     /**
      * A2DP profile.
      */
-    public static final int A2DP = 2;
+    int A2DP = 2;
 
     /**
      * Health Profile
      */
-    public static final int HEALTH = 3;
+    int HEALTH = 3;
 
     /**
      * HID Host
      *
      * @hide
      */
-    public static final int HID_HOST = 4;
+    int HID_HOST = 4;
 
     /**
      * PAN Profile
      *
      * @hide
      */
-    public static final int PAN = 5;
+    int PAN = 5;
 
     /**
      * PBAP
      *
      * @hide
      */
-    public static final int PBAP = 6;
+    int PBAP = 6;
 
     /**
      * GATT
      */
-    public static final int GATT = 7;
+    int GATT = 7;
 
     /**
      * GATT_SERVER
      */
-    public static final int GATT_SERVER = 8;
+    int GATT_SERVER = 8;
 
     /**
      * MAP Profile
      *
      * @hide
      */
-    public static final int MAP = 9;
+    int MAP = 9;
 
     /*
      * SAP Profile
      * @hide
      */
-    public static final int SAP = 10;
+    int SAP = 10;
 
     /**
      * A2DP Sink Profile
      *
      * @hide
      */
-    public static final int A2DP_SINK = 11;
+    int A2DP_SINK = 11;
 
     /**
      * AVRCP Controller Profile
      *
      * @hide
      */
-    public static final int AVRCP_CONTROLLER = 12;
+    int AVRCP_CONTROLLER = 12;
+
+    /**
+     * AVRCP Target Profile
+     *
+     * @hide
+     */
+    int AVRCP = 13;
 
     /**
      * Headset Client - HFP HF Role
      *
      * @hide
      */
-    public static final int HEADSET_CLIENT = 16;
+    int HEADSET_CLIENT = 16;
 
     /**
      * PBAP Client
      *
      * @hide
      */
-    public static final int PBAP_CLIENT = 17;
+    int PBAP_CLIENT = 17;
 
     /**
      * MAP Messaging Client Equipment (MCE)
      *
      * @hide
      */
-    public static final int MAP_CLIENT = 18;
+    int MAP_CLIENT = 18;
 
     /**
      * HID Device
      */
-    public static final int HID_DEVICE = 19;
+    int HID_DEVICE = 19;
 
     /**
      * Object Push Profile (OPP)
      *
      * @hide
      */
-    public static final int OPP = 20;
+    int OPP = 20;
 
     /**
      * Hearing Aid Device
@@ -185,7 +192,7 @@ public interface BluetoothProfile {
      *
      * @hide
      **/
-    public static final int PRIORITY_AUTO_CONNECT = 1000;
+    int PRIORITY_AUTO_CONNECT = 1000;
 
     /**
      * Default priority for devices that allow incoming
@@ -194,7 +201,7 @@ public interface BluetoothProfile {
      * @hide
      **/
     @SystemApi
-    public static final int PRIORITY_ON = 100;
+    int PRIORITY_ON = 100;
 
     /**
      * Default priority for devices that does not allow incoming
@@ -203,14 +210,14 @@ public interface BluetoothProfile {
      * @hide
      **/
     @SystemApi
-    public static final int PRIORITY_OFF = 0;
+    int PRIORITY_OFF = 0;
 
     /**
      * Default priority when not set or when the device is unpaired
      *
      * @hide
      */
-    public static final int PRIORITY_UNDEFINED = -1;
+    int PRIORITY_UNDEFINED = -1;
 
     /**
      * Get connected devices for this specific profile.
