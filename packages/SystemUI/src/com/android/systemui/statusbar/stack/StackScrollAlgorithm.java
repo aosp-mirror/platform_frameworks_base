@@ -528,9 +528,6 @@ public class StackScrollAlgorithm {
             childViewState.inShelf = true;
             childViewState.headsUpIsVisible = false;
         }
-        if (!ambientState.isShadeExpanded()) {
-            childViewState.height = (int) (mStatusBarHeight - childViewState.yTranslation);
-        }
     }
 
     protected int getMaxAllowedChildHeight(View child) {

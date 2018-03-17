@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -296,19 +297,24 @@ public abstract class ExpandableView extends FrameLayout {
 
     /**
      * Perform a remove animation on this view.
-     *
      * @param duration The duration of the remove animation.
+     * @param delay The delay of the animation
      * @param translationDirection The direction value from [-1 ... 1] indicating in which the
-     *                             animation should be performed. A value of -1 means that The
-     *                             remove animation should be performed upwards,
-     *                             such that the  child appears to be going away to the top. 1
-     *                             Should mean the opposite.
+ *                             animation should be performed. A value of -1 means that The
+ *                             remove animation should be performed upwards,
+ *                             such that the  child appears to be going away to the top. 1
+ *                             Should mean the opposite.
+     * @param isHeadsUpAnimation Is this a headsUp animation.
+     * @param endLocation The location where the horizonal heads up disappear animation should end.
      * @param onFinishedRunnable A runnable which should be run when the animation is finished.
+     * @param animationListener An animation listener to add to the animation.
      */
-    public abstract void performRemoveAnimation(long duration, float translationDirection,
-            Runnable onFinishedRunnable);
+    public abstract void performRemoveAnimation(long duration,
+            long delay, float translationDirection, boolean isHeadsUpAnimation, float endLocation,
+            Runnable onFinishedRunnable,
+            AnimatorListenerAdapter animationListener);
 
-    public abstract void performAddAnimation(long delay, long duration);
+    public abstract void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear);
 
     /**
      * Set the notification appearance to be below the speed bump.

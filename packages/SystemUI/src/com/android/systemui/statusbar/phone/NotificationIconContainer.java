@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.phone.HeadsUpAppearanceController.CONTENT_FADE_DURATION;
+import static com.android.systemui.statusbar.phone.HeadsUpAppearanceController.CONTENT_FADE_DELAY;
+
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
@@ -109,8 +112,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         public AnimationFilter getAnimationFilter() {
             return mAnimationFilter;
         }
-    }.setDuration(HeadsUpAppearanceController.CONTENT_FADE_DURATION).setDelay(
-            HeadsUpAppearanceController.CONTENT_FADE_DURATION);
+    }.setDuration(CONTENT_FADE_DURATION);
 
     /**
      * The animation property used for the icon when its isolation ends.
@@ -123,7 +125,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         public AnimationFilter getAnimationFilter() {
             return mAnimationFilter;
         }
-    }.setDuration(HeadsUpAppearanceController.CONTENT_FADE_DURATION);
+    }.setDuration(CONTENT_FADE_DURATION);
 
     public static final int MAX_VISIBLE_ICONS_WHEN_DARK = 5;
     public static final int MAX_STATIC_ICONS = 4;
@@ -319,7 +321,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                     boolean isIsolatedIcon = child == mIsolatedIcon;
                     icon.setVisibleState(StatusBarIconView.STATE_HIDDEN, true /* animate */,
                             () -> removeTransientView(icon),
-                            isIsolatedIcon ? HeadsUpAppearanceController.CONTENT_FADE_DURATION : 0);
+                            isIsolatedIcon ? CONTENT_FADE_DURATION : 0);
                 }
             }
         }
@@ -620,14 +622,19 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         mReplacingIcons = replacingIcons;
     }
 
-    public void showIconIsolated(StatusBarIconView icon, Rect absoluteIconPosition,
-            boolean animated) {
+    public void showIconIsolated(StatusBarIconView icon, boolean animated) {
         if (animated) {
-            mIsolatedIconForAnimation = mIsolatedIcon;
+            mIsolatedIconForAnimation = icon != null ? icon : mIsolatedIcon;
         }
         mIsolatedIcon = icon;
-        mIsolatedIconLocation = absoluteIconPosition;
         updateState();
+    }
+
+    public void setIsolatedIconLocation(Rect isolatedIconLocation, boolean requireUpdate) {
+        mIsolatedIconLocation = isolatedIconLocation;
+        if (requireUpdate) {
+            updateState();
+        }
     }
 
     public class IconState extends ViewState {
@@ -706,8 +713,12 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                     if (mIsolatedIconForAnimation != null) {
                         if (view == mIsolatedIconForAnimation) {
                             animationProperties = UNISOLATION_PROPERTY;
+                            animationProperties.setDelay(
+                                    mIsolatedIcon != null ? CONTENT_FADE_DELAY : 0);
                         } else {
                             animationProperties = UNISOLATION_PROPERTY_OTHERS;
+                            animationProperties.setDelay(
+                                    mIsolatedIcon == null ? CONTENT_FADE_DELAY : 0);
                         }
                         animate = true;
                     }

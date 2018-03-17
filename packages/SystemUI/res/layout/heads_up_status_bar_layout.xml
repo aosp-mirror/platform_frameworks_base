@@ -20,6 +20,7 @@
     android:layout_width="match_parent"
     android:visibility="invisible"
     android:id="@+id/heads_up_status_bar_view"
+    android:alpha="0"
 >
     <!-- This is a space just used as a layout and it's not actually displaying anything. We're
          repositioning the statusbar icon to the position where this is laid out when showing this

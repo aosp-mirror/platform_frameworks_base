@@ -72,18 +72,35 @@ class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         mHeadsUpManager = headsUpManager;
         mHeadsUpManager.addListener(this);
         mHeadsUpStatusBarView = headsUpStatusBarView;
+        headsUpStatusBarView.setOnDrawingRectChangedListener(
+                () -> updateIsolatedIconLocation(true /* requireUpdate */));
         mStackScroller = stackScroller;
         panelView.addTrackingHeadsUpListener(this::setTrackingHeadsUp);
+        panelView.setVerticalTranslationListener(this::updatePanelTranslation);
+        panelView.setHeadsUpAppearanceController(this);
         mStackScroller.addOnExpandedHeightListener(this::setExpandedHeight);
+        mStackScroller.addOnLayoutChangeListener(
+                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom)
+                        -> updatePanelTranslation());
         mClockView = clockView;
         mDarkIconDispatcher = Dependency.get(DarkIconDispatcher.class);
         mDarkIconDispatcher.addDarkReceiver(this);
+    }
+
+    private void updateIsolatedIconLocation(boolean requireStateUpdate) {
+        mNotificationIconAreaController.setIsolatedIconLocation(
+                mHeadsUpStatusBarView.getIconDrawingRect(), requireStateUpdate);
     }
 
     @Override
     public void onHeadsUpPinned(ExpandableNotificationRow headsUp) {
         updateTopEntry();
         updateHeader(headsUp.getEntry());
+    }
+
+    public void updatePanelTranslation() {
+        float newTranslation = mStackScroller.getLeft() + mStackScroller.getTranslationX();
+        mHeadsUpStatusBarView.setTranslationX(newTranslation);
     }
 
     private void updateTopEntry() {
@@ -104,9 +121,11 @@ class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
                 // We now have a headsUp and didn't have one before. Let's start the disappear
                 // animation
                 setShown(true);
+                animateIsolation = !mIsExpanded;
             }
+            updateIsolatedIconLocation(false /* requireUpdate */);
             mNotificationIconAreaController.showIconIsolated(newEntry == null ? null
-                    : newEntry.icon, mHeadsUpStatusBarView.getIconDrawingRect(), animateIsolation);
+                    : newEntry.icon, animateIsolation);
         }
     }
 
@@ -132,6 +151,16 @@ class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
     @VisibleForTesting
     public boolean isShown() {
         return mShown;
+    }
+
+    /**
+     * Should the headsup status bar view be visible right now? This may be different from isShown,
+     * since the headsUp manager might not have notified us yet of the state change.
+     *
+     * @return if the heads up status bar view should be shown
+     */
+    public boolean shouldBeVisible() {
+        return !mIsExpanded && mHeadsUpManager.hasPinnedHeadsUp();
     }
 
     @Override

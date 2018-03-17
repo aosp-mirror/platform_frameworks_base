@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -37,10 +38,15 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
     private View mIconPlaceholder;
     private TextView mTextView;
     private NotificationData.Entry mShowingEntry;
-    private Rect mIconRect = new Rect();
+    private Rect mLayoutedIconRect = new Rect();
     private int[] mTmpPosition = new int[2];
     private boolean mFirstLayout = true;
     private boolean mPublicMode;
+    private int mMaxWidth;
+    private View mRootView;
+    private int mLeftInset;
+    private Rect mIconDrawingRect = new Rect();
+    private Runnable mOnDrawingRectChangedListener;
 
     public HeadsUpStatusBarView(Context context) {
         this(context, null);
@@ -64,6 +70,33 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
         mEndMargin = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_content_margin_end);
         setPaddingRelative(mAbsoluteStartPadding, 0, mEndMargin, 0);
+        updateMaxWidth();
+    }
+
+    private void updateMaxWidth() {
+        int maxWidth = getResources().getDimensionPixelSize(R.dimen.qs_panel_width);
+        if (maxWidth != mMaxWidth) {
+            // maxWidth doesn't work with fill_parent, let's manually make it at most as big as the
+            // notification panel
+            mMaxWidth = maxWidth;
+            requestLayout();
+        }
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if (mMaxWidth > 0) {
+            int newSize = Math.min(MeasureSpec.getSize(widthMeasureSpec), mMaxWidth);
+            widthMeasureSpec = MeasureSpec.makeMeasureSpec(newSize,
+                    MeasureSpec.getMode(widthMeasureSpec));
+        }
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        updateMaxWidth();
     }
 
     @VisibleForTesting
@@ -97,13 +130,15 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
         mIconPlaceholder.getLocationOnScreen(mTmpPosition);
-        int left = mTmpPosition[0];
+        int left = (int) (mTmpPosition[0] - getTranslationX());
         int top = mTmpPosition[1];
         int right = left + mIconPlaceholder.getWidth();
         int bottom = top + mIconPlaceholder.getHeight();
-        mIconRect.set(left, top, right, bottom);
-        if (left != mAbsoluteStartPadding) {
-            int newPadding = mAbsoluteStartPadding - left + getPaddingStart();
+        mLayoutedIconRect.set(left, top, right, bottom);
+        updateDrawingRect();
+        int targetPadding = mAbsoluteStartPadding + mLeftInset;
+        if (left != targetPadding) {
+            int newPadding = targetPadding - left + getPaddingStart();
             setPaddingRelative(newPadding, 0, mEndMargin, 0);
         }
         if (mFirstLayout) {
@@ -115,12 +150,33 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
         }
     }
 
+    @Override
+    public void setTranslationX(float translationX) {
+        super.setTranslationX(translationX);
+        updateDrawingRect();
+    }
+
+    private void updateDrawingRect() {
+        float oldLeft = mIconDrawingRect.left;
+        mIconDrawingRect.set(mLayoutedIconRect);
+        mIconDrawingRect.offset((int) getTranslationX(), 0);
+        if (oldLeft != mIconDrawingRect.left && mOnDrawingRectChangedListener != null) {
+            mOnDrawingRectChangedListener.run();
+        }
+    }
+
+    @Override
+    protected boolean fitSystemWindows(Rect insets) {
+        mLeftInset = insets.left;
+        return super.fitSystemWindows(insets);
+    }
+
     public NotificationData.Entry getShowingEntry() {
         return mShowingEntry;
     }
 
     public Rect getIconDrawingRect() {
-        return mIconRect;
+        return mIconDrawingRect;
     }
 
     public void onDarkChanged(Rect area, float darkIntensity, int tint) {
@@ -129,5 +185,9 @@ public class HeadsUpStatusBarView extends AlphaOptimizedLinearLayout {
 
     public void setPublicMode(boolean publicMode) {
         mPublicMode = publicMode;
+    }
+
+    public void setOnDrawingRectChangedListener(Runnable onDrawingRectChangedListener) {
+        mOnDrawingRectChangedListener = onDrawingRectChangedListener;
     }
 }

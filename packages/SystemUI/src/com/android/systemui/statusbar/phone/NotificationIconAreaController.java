@@ -311,8 +311,11 @@ public class NotificationIconAreaController implements DarkReceiver {
         mShelfIcons.setDark(dark, false, 0);
     }
 
-    public void showIconIsolated(StatusBarIconView icon, Rect absoluteIconPosition,
-            boolean animated) {
-        mNotificationIcons.showIconIsolated(icon, absoluteIconPosition, animated);
+    public void showIconIsolated(StatusBarIconView icon, boolean animated) {
+        mNotificationIcons.showIconIsolated(icon, animated);
+    }
+
+    public void setIsolatedIconLocation(Rect iconDrawingRect, boolean requireStateUpdate) {
+        mNotificationIcons.setIsolatedIconLocation(iconDrawingRect, requireStateUpdate);
     }
 }

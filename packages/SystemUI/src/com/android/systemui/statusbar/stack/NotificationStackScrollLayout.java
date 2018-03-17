@@ -4885,7 +4885,8 @@ public class NotificationStackScrollLayout extends ViewGroup
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
-                        .animateZ(),
+                        .animateZ()
+                        .hasDelays(),
 
                 // ANIMATION_TYPE_HEADS_UP_DISAPPEAR_CLICK
                 new AnimationFilter()
