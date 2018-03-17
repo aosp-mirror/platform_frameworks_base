@@ -58,14 +58,18 @@ public final class IpSecManager {
     private static final String TAG = "IpSecManager";
 
     /**
-     * For direction-specific attributes of an {@link IpSecTransform}, indicates that an attribute
-     * applies to traffic towards the host.
+     * Used when applying a transform to direct traffic through an {@link IpSecTransform}
+     * towards the host.
+     *
+     * <p>See {@link #applyTransportModeTransform(Socket, int, IpSecTransform)}.
      */
     public static final int DIRECTION_IN = 0;
 
     /**
-     * For direction-specific attributes of an {@link IpSecTransform}, indicates that an attribute
-     * applies to traffic from the host.
+     * Used when applying a transform to direct traffic through an {@link IpSecTransform}
+     * away from the host.
+     *
+     * <p>See {@link #applyTransportModeTransform(Socket, int, IpSecTransform)}.
      */
     public static final int DIRECTION_OUT = 1;
 
@@ -301,19 +305,21 @@ public final class IpSecManager {
      *
      * <h4>Rekey Procedure</h4>
      *
-     * <p>When applying a new tranform to a socket, the previous transform will be removed. However,
-     * inbound traffic on the old transform will continue to be decrypted until that transform is
-     * deallocated by calling {@link IpSecTransform#close()}. This overlap allows rekey procedures
-     * where both transforms are valid until both endpoints are using the new transform and all
-     * in-flight packets have been received.
+     * <p>When applying a new tranform to a socket in the outbound direction, the previous transform
+     * will be removed and the new transform will take effect immediately, sending all traffic on
+     * the new transform; however, when applying a transform in the inbound direction, traffic
+     * on the old transform will continue to be decrypted and delivered until that transform is
+     * deallocated by calling {@link IpSecTransform#close()}. This overlap allows lossless rekey
+     * procedures where both transforms are valid until both endpoints are using the new transform
+     * and all in-flight packets have been received.
      *
      * @param socket a stream socket
-     * @param direction the policy direction either {@link #DIRECTION_IN} or {@link #DIRECTION_OUT}
+     * @param direction the direction in which the transform should be applied
      * @param transform a transport mode {@code IpSecTransform}
      * @throws IOException indicating that the transform could not be applied
      */
     public void applyTransportModeTransform(
-            Socket socket, int direction, IpSecTransform transform)
+            Socket socket, @PolicyDirection int direction, IpSecTransform transform)
             throws IOException {
         applyTransportModeTransform(socket.getFileDescriptor$(), direction, transform);
     }
@@ -334,19 +340,22 @@ public final class IpSecManager {
      *
      * <h4>Rekey Procedure</h4>
      *
-     * <p>When applying a new tranform to a socket, the previous transform will be removed. However,
-     * inbound traffic on the old transform will continue to be decrypted until that transform is
-     * deallocated by calling {@link IpSecTransform#close()}. This overlap allows rekey procedures
-     * where both transforms are valid until both endpoints are using the new transform and all
-     * in-flight packets have been received.
+     * <p>When applying a new tranform to a socket in the outbound direction, the previous transform
+     * will be removed and the new transform will take effect immediately, sending all traffic on
+     * the new transform; however, when applying a transform in the inbound direction, traffic
+     * on the old transform will continue to be decrypted and delivered until that transform is
+     * deallocated by calling {@link IpSecTransform#close()}. This overlap allows lossless rekey
+     * procedures where both transforms are valid until both endpoints are using the new transform
+     * and all in-flight packets have been received.
      *
      * @param socket a datagram socket
-     * @param direction the policy direction either DIRECTION_IN or DIRECTION_OUT
+     * @param direction the direction in which the transform should be applied
      * @param transform a transport mode {@code IpSecTransform}
      * @throws IOException indicating that the transform could not be applied
      */
     public void applyTransportModeTransform(
-            DatagramSocket socket, int direction, IpSecTransform transform) throws IOException {
+            DatagramSocket socket, @PolicyDirection int direction, IpSecTransform transform)
+            throws IOException {
         applyTransportModeTransform(socket.getFileDescriptor$(), direction, transform);
     }
 
@@ -366,19 +375,21 @@ public final class IpSecManager {
      *
      * <h4>Rekey Procedure</h4>
      *
-     * <p>When applying a new tranform to a socket, the previous transform will be removed. However,
-     * inbound traffic on the old transform will continue to be decrypted until that transform is
-     * deallocated by calling {@link IpSecTransform#close()}. This overlap allows rekey procedures
-     * where both transforms are valid until both endpoints are using the new transform and all
-     * in-flight packets have been received.
+     * <p>When applying a new tranform to a socket in the outbound direction, the previous transform
+     * will be removed and the new transform will take effect immediately, sending all traffic on
+     * the new transform; however, when applying a transform in the inbound direction, traffic
+     * on the old transform will continue to be decrypted and delivered until that transform is
+     * deallocated by calling {@link IpSecTransform#close()}. This overlap allows lossless rekey
+     * procedures where both transforms are valid until both endpoints are using the new transform
+     * and all in-flight packets have been received.
      *
      * @param socket a socket file descriptor
-     * @param direction the policy direction either DIRECTION_IN or DIRECTION_OUT
+     * @param direction the direction in which the transform should be applied
      * @param transform a transport mode {@code IpSecTransform}
      * @throws IOException indicating that the transform could not be applied
      */
     public void applyTransportModeTransform(
-            FileDescriptor socket, int direction, IpSecTransform transform)
+            FileDescriptor socket, @PolicyDirection int direction, IpSecTransform transform)
             throws IOException {
         // We dup() the FileDescriptor here because if we don't, then the ParcelFileDescriptor()
         // constructor takes control and closes the user's FD when we exit the method.
@@ -388,21 +399,6 @@ public final class IpSecManager {
             throw e.rethrowFromSystemServer();
         }
     }
-
-    /**
-     * Apply an active Tunnel Mode IPsec Transform to a network, which will tunnel all traffic to
-     * and from that network's interface with IPsec (applies an outer IP header and IPsec Header to
-     * all traffic, and expects an additional IP header and IPsec Header on all inbound traffic).
-     * Applications should probably not use this API directly. Instead, they should use {@link
-     * VpnService} to provide VPN capability in a more generic fashion.
-     *
-     * <p>TODO: Update javadoc for tunnel mode APIs at the same time the APIs are re-worked.
-     *
-     * @param net a {@link Network} that will be tunneled via IP Sec.
-     * @param transform an {@link IpSecTransform}, which must be an active Tunnel Mode transform.
-     * @hide
-     */
-    public void applyTunnelModeTransform(Network net, IpSecTransform transform) {}
 
     /**
      * Remove an IPsec transform from a stream socket.
@@ -770,7 +766,12 @@ public final class IpSecManager {
     }
 
     /**
-     * Apply a transform to the IpSecTunnelInterface
+     * Apply an active Tunnel Mode IPsec Transform to a {@link IpSecTunnelInterface}, which will
+     * tunnel all traffic for the given direction through the underlying network's interface with
+     * IPsec (applies an outer IP header and IPsec Header to all traffic, and expects an additional
+     * IP header and IPsec Header on all inbound traffic).
+     * <p>Applications should probably not use this API directly.
+     *
      *
      * @param tunnel The {@link IpSecManager#IpSecTunnelInterface} that will use the supplied
      *        transform.
@@ -783,8 +784,8 @@ public final class IpSecManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
-    public void applyTunnelModeTransform(IpSecTunnelInterface tunnel, int direction,
-            IpSecTransform transform) throws IOException {
+    public void applyTunnelModeTransform(IpSecTunnelInterface tunnel,
+            @PolicyDirection int direction, IpSecTransform transform) throws IOException {
         try {
             mService.applyTunnelModeTransform(
                     tunnel.getResourceId(), direction, transform.getResourceId());
@@ -792,6 +793,7 @@ public final class IpSecManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
     /**
      * Construct an instance of IpSecManager within an application context.
      *
