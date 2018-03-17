@@ -19,7 +19,7 @@ option java_multiple_files = true;
 
 package android.os;
 
-import "frameworks/base/core/proto/android/app/jobparameters.proto";
+import "frameworks/base/core/proto/android/app/job/enums.proto";
 import "frameworks/base/core/proto/android/os/powermanager.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
@@ -637,7 +637,7 @@ message UidProto {
     message ReasonCount {
       option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-      optional android.app.JobParametersProto.CancelReason name = 1;
+      optional android.app.job.StopReasonEnum name = 1;
       optional int32 count = 2;
     }
     repeated ReasonCount reason_count = 2;
