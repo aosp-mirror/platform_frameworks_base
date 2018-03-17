@@ -30,7 +30,7 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Collection of parameters which define a key derivation function.
- * Currently only supports salted SHA-256
+ * Currently only supports salted SHA-256.
  *
  * @hide
  */

@@ -450,6 +450,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         if (isReallyAnimating()) {
             delayed = true;
+        } else {
+
+            // We aren't animating anything, but exiting windows rely on the animation finished
+            // callback being called in case the AppWindowToken was pretending to be animating,
+            // which we might have done because we were in closing/opening apps list.
+            onAnimationFinished();
         }
 
         for (int i = mChildren.size() - 1; i >= 0 && !delayed; i--) {

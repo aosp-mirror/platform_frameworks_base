@@ -224,12 +224,13 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
     private final boolean mRandomizedEncryptionRequired;
     private final boolean mUserAuthenticationRequired;
     private final int mUserAuthenticationValidityDurationSeconds;
-    private final boolean mTrustedUserPresenceRequred;
+    private final boolean mTrustedUserPresenceRequired;
     private final boolean mUserAuthenticationValidWhileOnBody;
     private final boolean mInvalidatedByBiometricEnrollment;
     private final long mBoundToSecureUserId;
     private final boolean mCriticalToDeviceEncryption;
     private final boolean mUserConfirmationRequired;
+    private final boolean mUnlockedDeviceRequired;
 
     private KeyProtection(
             Date keyValidityStart,
@@ -243,12 +244,13 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
             boolean randomizedEncryptionRequired,
             boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds,
-            boolean trustedUserPresenceRequred,
+            boolean trustedUserPresenceRequired,
             boolean userAuthenticationValidWhileOnBody,
             boolean invalidatedByBiometricEnrollment,
             long boundToSecureUserId,
             boolean criticalToDeviceEncryption,
-            boolean userConfirmationRequired) {
+            boolean userConfirmationRequired,
+            boolean unlockedDeviceRequired) {
         mKeyValidityStart = Utils.cloneIfNotNull(keyValidityStart);
         mKeyValidityForOriginationEnd = Utils.cloneIfNotNull(keyValidityForOriginationEnd);
         mKeyValidityForConsumptionEnd = Utils.cloneIfNotNull(keyValidityForConsumptionEnd);
@@ -262,12 +264,13 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
         mRandomizedEncryptionRequired = randomizedEncryptionRequired;
         mUserAuthenticationRequired = userAuthenticationRequired;
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
-        mTrustedUserPresenceRequred = trustedUserPresenceRequred;
+        mTrustedUserPresenceRequired = trustedUserPresenceRequired;
         mUserAuthenticationValidWhileOnBody = userAuthenticationValidWhileOnBody;
         mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
         mBoundToSecureUserId = boundToSecureUserId;
         mCriticalToDeviceEncryption = criticalToDeviceEncryption;
         mUserConfirmationRequired = userConfirmationRequired;
+        mUnlockedDeviceRequired = unlockedDeviceRequired;
     }
 
     /**
@@ -444,7 +447,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
      * been performed between the {@code Signature.initSign()} and {@code Signature.sign()} calls.
      */
     public boolean isTrustedUserPresenceRequired() {
-        return mTrustedUserPresenceRequred;
+        return mTrustedUserPresenceRequired;
     }
 
     /**
@@ -505,6 +508,15 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
     }
 
     /**
+     * @hide Returns {@code true} if the key cannot be used unless the device screen is unlocked.
+     *
+     * @see Builder#setUnlockedDeviceRequired(boolean)
+     */
+    public boolean isUnlockedDeviceRequired() {
+        return mUnlockedDeviceRequired;
+    }
+
+    /**
      * Builder of {@link KeyProtection} instances.
      */
     public final static class Builder {
@@ -524,6 +536,8 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
         private boolean mUserAuthenticationValidWhileOnBody;
         private boolean mInvalidatedByBiometricEnrollment = true;
         private boolean mUserConfirmationRequired;
+        private boolean mUnlockedDeviceRequired = false;
+
         private long mBoundToSecureUserId = GateKeeper.INVALID_SECURE_USER_ID;
         private boolean mCriticalToDeviceEncryption = false;
 
@@ -914,6 +928,18 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
         }
 
         /**
+         * @hide Sets whether the keystore requires the screen to be unlocked before allowing decryption
+         * using this key. If this is set to {@code true}, any attempt to decrypt using this key
+         * while the screen is locked will fail. A locked device requires a PIN, password,
+         * fingerprint, or other trusted factor to access.
+         */
+        @NonNull
+        public Builder setUnlockedDeviceRequired(boolean unlockedDeviceRequired) {
+            mUnlockedDeviceRequired = unlockedDeviceRequired;
+            return this;
+        }
+
+        /**
          * Builds an instance of {@link KeyProtection}.
          *
          * @throws IllegalArgumentException if a required field is missing
@@ -937,7 +963,8 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
                     mInvalidatedByBiometricEnrollment,
                     mBoundToSecureUserId,
                     mCriticalToDeviceEncryption,
-                    mUserConfirmationRequired);
+                    mUserConfirmationRequired,
+                    mUnlockedDeviceRequired);
         }
     }
 }

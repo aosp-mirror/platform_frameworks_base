@@ -7527,6 +7527,8 @@ public class Notification implements Parcelable
         @Nullable private Icon mIcon;
         @Nullable private String mUri;
         @Nullable private String mKey;
+        private boolean mBot;
+        private boolean mImportant;
 
         protected Person(Parcel in) {
             mName = in.readCharSequence();
@@ -7535,6 +7537,8 @@ public class Notification implements Parcelable
             }
             mUri = in.readString();
             mKey = in.readString();
+            mImportant = in.readBoolean();
+            mBot = in.readBoolean();
         }
 
         /**
@@ -7611,6 +7615,27 @@ public class Notification implements Parcelable
             return this;
         }
 
+        /**
+         * Sets whether this is an important person. Use this method to denote users who frequently
+         * interact with the user of this device, when it is not possible to refer to the user
+         * by {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}.
+         *
+         * @param isImportant {@code true} if this is an important person, {@code false} otherwise.
+         */
+        public Person setImportant(boolean isImportant) {
+            mImportant = isImportant;
+            return this;
+        }
+
+        /**
+         * Sets whether this person is a machine rather than a human.
+         *
+         * @param isBot {@code true}  if this person is a machine, {@code false} otherwise.
+         */
+        public Person setBot(boolean isBot) {
+            mBot = isBot;
+            return this;
+        }
 
         /**
          * @return the uri provided for this person or {@code null} if no Uri was provided
@@ -7645,6 +7670,20 @@ public class Notification implements Parcelable
         }
 
         /**
+         * @return whether this Person is a machine.
+         */
+        public boolean isBot() {
+            return mBot;
+        }
+
+        /**
+         * @return whether this Person is important.
+         */
+        public boolean isImportant() {
+            return mImportant;
+        }
+
+        /**
          * @return the URI associated with this person, or "name:mName" otherwise
          *  @hide
          */
@@ -7674,6 +7713,8 @@ public class Notification implements Parcelable
             }
             dest.writeString(mUri);
             dest.writeString(mKey);
+            dest.writeBoolean(mImportant);
+            dest.writeBoolean(mBot);
         }
 
         public static final Creator<Person> CREATOR = new Creator<Person>() {

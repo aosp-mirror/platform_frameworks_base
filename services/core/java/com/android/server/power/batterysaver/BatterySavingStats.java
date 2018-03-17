@@ -163,7 +163,13 @@ public class BatterySavingStats {
     private int mBatterySaverEnabledCount = 0;
 
     @GuardedBy("mLock")
+    private boolean mIsBatterySaverEnabled;
+
+    @GuardedBy("mLock")
     private long mLastBatterySaverEnabledTime = 0;
+
+    @GuardedBy("mLock")
+    private long mLastBatterySaverDisabledTime = 0;
 
     private final MetricsLoggerHelper mMetricsLoggerHelper = new MetricsLoggerHelper();
 
@@ -312,11 +318,12 @@ public class BatterySavingStats {
         final boolean newBatterySaverEnabled =
                 BatterySaverState.fromIndex(newState) != BatterySaverState.OFF;
         if (oldBatterySaverEnabled != newBatterySaverEnabled) {
+            mIsBatterySaverEnabled = newBatterySaverEnabled;
             if (newBatterySaverEnabled) {
                 mBatterySaverEnabledCount++;
                 mLastBatterySaverEnabledTime = injectCurrentTime();
             } else {
-                mLastBatterySaverEnabledTime = 0;
+                mLastBatterySaverDisabledTime = injectCurrentTime();
             }
         }
 
@@ -391,25 +398,35 @@ public class BatterySavingStats {
 
             indent = indent + "  ";
 
+            final long now = System.currentTimeMillis();
+            final long nowElapsed = injectCurrentTime();
+            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
             pw.print(indent);
-            pw.print("Battery Saver state: ");
-            if (mLastBatterySaverEnabledTime == 0) {
-                pw.print("OFF");
-            } else {
-                pw.print("ON since ");
-
-                final long now = System.currentTimeMillis();
-                final long nowElapsed = injectCurrentTime();
-
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            pw.print("Battery Saver is currently: ");
+            pw.println(mIsBatterySaverEnabled ? "ON" : "OFF");
+            if (mLastBatterySaverEnabledTime > 0) {
+                pw.print(indent);
+                pw.print("  ");
+                pw.print("Last ON time: ");
                 pw.print(sdf.format(new Date(now - nowElapsed + mLastBatterySaverEnabledTime)));
-
                 pw.print(" ");
                 TimeUtils.formatDuration(mLastBatterySaverEnabledTime, nowElapsed, pw);
+                pw.println();
             }
-            pw.println();
+
+            if (mLastBatterySaverDisabledTime > 0) {
+                pw.print(indent);
+                pw.print("  ");
+                pw.print("Last OFF time: ");
+                pw.print(sdf.format(new Date(now - nowElapsed + mLastBatterySaverDisabledTime)));
+                pw.print(" ");
+                TimeUtils.formatDuration(mLastBatterySaverDisabledTime, nowElapsed, pw);
+                pw.println();
+            }
 
             pw.print(indent);
+            pw.print("  ");
             pw.print("Times enabled: ");
             pw.println(mBatterySaverEnabledCount);
 

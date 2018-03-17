@@ -677,6 +677,10 @@ class CompileContext : public IAaptContext {
     return 0;
   }
 
+  bool IsAutoNamespace() override {
+    return false;
+  }
+
  private:
   DISALLOW_COPY_AND_ASSIGN(CompileContext);
 

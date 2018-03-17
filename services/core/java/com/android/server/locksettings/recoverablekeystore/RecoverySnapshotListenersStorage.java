@@ -18,6 +18,7 @@ package com.android.server.locksettings.recoverablekeystore;
 
 import android.annotation.Nullable;
 import android.app.PendingIntent;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -36,6 +37,9 @@ public class RecoverySnapshotListenersStorage {
     @GuardedBy("this")
     private SparseArray<PendingIntent> mAgentIntents = new SparseArray<>();
 
+    @GuardedBy("this")
+    private ArraySet<Integer> mAgentsWithPendingSnapshots = new ArraySet<>();
+
     /**
      * Sets new listener for the recovery agent, identified by {@code uid}.
      *
@@ -46,6 +50,11 @@ public class RecoverySnapshotListenersStorage {
             int recoveryAgentUid, @Nullable PendingIntent intent) {
         Log.i(TAG, "Registered listener for agent with uid " + recoveryAgentUid);
         mAgentIntents.put(recoveryAgentUid, intent);
+
+        if (mAgentsWithPendingSnapshots.contains(recoveryAgentUid)) {
+            Log.i(TAG, "Snapshot already created for agent. Immediately triggering intent.");
+            tryToSendIntent(recoveryAgentUid, intent);
+        }
     }
 
     /**
@@ -56,21 +65,39 @@ public class RecoverySnapshotListenersStorage {
     }
 
     /**
-     * Notifies recovery agent that new snapshot is available. Does nothing if a listener was not
-     * registered.
+     * Notifies recovery agent that new snapshot is available. If a recovery agent has not yet
+     * registered a {@link PendingIntent}, remembers that a snapshot is pending for it, so that
+     * when it does register, that intent is immediately triggered.
      *
      * @param recoveryAgentUid uid of recovery agent.
      */
     public synchronized void recoverySnapshotAvailable(int recoveryAgentUid) {
         PendingIntent intent = mAgentIntents.get(recoveryAgentUid);
-        if (intent != null) {
-            try {
-                intent.send();
-            } catch (PendingIntent.CanceledException e) {
-                Log.e(TAG,
-                        "Failed to trigger PendingIntent for " + recoveryAgentUid,
-                        e);
-            }
+        if (intent == null) {
+            Log.i(TAG, "Snapshot available for agent " + recoveryAgentUid
+                    + " but agent has not yet initialized. Will notify agent when it does.");
+            mAgentsWithPendingSnapshots.add(recoveryAgentUid);
+            return;
+        }
+
+        tryToSendIntent(recoveryAgentUid, intent);
+    }
+
+    /**
+     * Attempts to send {@code intent} for the recovery agent. If this fails, remembers to notify
+     * the recovery agent immediately if it registers a new intent.
+     */
+    private synchronized void tryToSendIntent(int recoveryAgentUid, PendingIntent intent) {
+        try {
+            intent.send();
+            mAgentsWithPendingSnapshots.remove(recoveryAgentUid);
+            Log.d(TAG, "Successfully notified listener.");
+        } catch (PendingIntent.CanceledException e) {
+            Log.e(TAG,
+                    "Failed to trigger PendingIntent for " + recoveryAgentUid,
+                    e);
+            // As it failed to trigger, trigger immediately if a new intent is registered later.
+            mAgentsWithPendingSnapshots.add(recoveryAgentUid);
         }
     }
 }

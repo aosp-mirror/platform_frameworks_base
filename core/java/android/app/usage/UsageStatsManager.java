@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.os.RemoteException;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Provides access to device usage history and statistics. Usage data is aggregated into
@@ -178,6 +180,31 @@ public final class UsageStatsManager {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface StandbyBuckets {}
+
+    /**
+     * Observer id of the registered observer for the group of packages that reached the usage
+     * time limit. Included as an extra in the PendingIntent that was registered.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_OBSERVER_ID = "android.app.usage.extra.OBSERVER_ID";
+
+    /**
+     * Original time limit in milliseconds specified by the registered observer for the group of
+     * packages that reached the usage time limit. Included as an extra in the PendingIntent that
+     * was registered.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_TIME_LIMIT = "android.app.usage.extra.TIME_LIMIT";
+
+    /**
+     * Actual usage time in milliseconds for the group of packages that reached the specified time
+     * limit. Included as an extra in the PendingIntent that was registered.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_TIME_USED = "android.app.usage.extra.TIME_USED";
 
     private static final UsageEvents sEmptyResults = new UsageEvents();
 
@@ -466,6 +493,53 @@ public final class UsageStatsManager {
         final ParceledListSlice<AppStandbyInfo> slice = new ParceledListSlice<>(bucketInfoList);
         try {
             mService.setAppStandbyBuckets(slice, mContext.getUserId());
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * @hide
+     * Register an app usage limit observer that receives a callback on the provided intent when
+     * the sum of usages of apps in the packages array exceeds the timeLimit specified. The
+     * observer will automatically be unregistered when the time limit is reached and the intent
+     * is delivered.
+     * @param observerId A unique id associated with the group of apps to be monitored. There can
+     *                  be multiple groups with common packages and different time limits.
+     * @param packages The list of packages to observe for foreground activity time. Must include
+     *                 at least one package.
+     * @param timeLimit The total time the set of apps can be in the foreground before the
+     *                  callbackIntent is delivered. Must be greater than 0.
+     * @param timeUnit The unit for time specified in timeLimit.
+     * @param callbackIntent The PendingIntent that will be dispatched when the time limit is
+     *                       exceeded by the group of apps. The delivered Intent will also contain
+     *                       the extras {@link #EXTRA_OBSERVER_ID}, {@link #EXTRA_TIME_LIMIT} and
+     *                       {@link #EXTRA_TIME_USED}.
+     * @throws SecurityException if the caller doesn't have the PACKAGE_USAGE_STATS permission.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    public void registerAppUsageObserver(int observerId, String[] packages, long timeLimit,
+            TimeUnit timeUnit, PendingIntent callbackIntent) {
+        try {
+            mService.registerAppUsageObserver(observerId, packages, timeUnit.toMillis(timeLimit),
+                    callbackIntent, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * @hide
+     * Unregister the app usage observer specified by the observerId. This will only apply to any
+     * observer registered by this application. Unregistering an observer that was already
+     * unregistered or never registered will have no effect.
+     * @param observerId The id of the observer that was previously registered.
+     * @throws SecurityException if the caller doesn't have the PACKAGE_USAGE_STATS permission.
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    public void unregisterAppUsageObserver(int observerId) {
+        try {
+            mService.unregisterAppUsageObserver(observerId, mContext.getOpPackageName());
         } catch (RemoteException e) {
         }
     }

@@ -157,7 +157,7 @@ message ReceiverListProto {
   optional BroadcastRecordProto current = 5;
   optional bool linked_to_death = 6;
   repeated BroadcastFilterProto filters = 7;
-  optional string hex_hash = 8; // this hash is used to find the object in IntentResolver
+  optional string hex_hash = 8; // used to find this ReceiverList object in IntentResolver
 }
 
 message ProcessRecordProto {
@@ -184,7 +184,7 @@ message BroadcastFilterProto {
 
   optional .android.content.IntentFilterProto intent_filter = 1;
   optional string required_permission = 2;
-  optional string hex_hash = 3; // used to find the object in IntentResolver
+  optional string hex_hash = 3; // used to find the BroadcastFilter object in IntentResolver
   optional int32 owning_user_id = 4;
 }
 
@@ -458,13 +458,12 @@ message ServiceRecordProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
   optional string short_name = 1;
-  optional string hex_hash = 2;
-  optional bool is_running = 3; // false if the application service is null
-  optional int32 pid = 4;
-  optional .android.content.IntentProto intent = 5;
-  optional string package_name = 6;
-  optional string process_name = 7;
-  optional string permission = 8;
+  optional bool is_running = 2; // false if the application service is null
+  optional int32 pid = 3;
+  optional .android.content.IntentProto intent = 4;
+  optional string package_name = 5;
+  optional string process_name = 6;
+  optional string permission = 7;
 
   message AppInfo {
     option (.android.msg_privacy).dest = DEST_EXPLICIT;
@@ -473,11 +472,11 @@ message ServiceRecordProto {
     optional string res_dir = 2;
     optional string data_dir = 3;
   }
-  optional AppInfo appinfo = 9;
-  optional ProcessRecordProto app = 10;
-  optional ProcessRecordProto isolated_proc = 11;
-  optional bool whitelist_manager = 12;
-  optional bool delayed = 13;
+  optional AppInfo appinfo = 8;
+  optional ProcessRecordProto app = 9;
+  optional ProcessRecordProto isolated_proc = 10;
+  optional bool whitelist_manager = 11;
+  optional bool delayed = 12;
 
   message Foreground {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -485,13 +484,13 @@ message ServiceRecordProto {
     optional int32 id = 1;
     optional .android.app.NotificationProto notification = 2;
   }
-  optional Foreground foreground = 14;
+  optional Foreground foreground = 13;
 
-  optional .android.util.Duration create_real_time = 15;
-  optional .android.util.Duration starting_bg_timeout = 16;
-  optional .android.util.Duration last_activity_time = 17;
-  optional .android.util.Duration restart_time = 18;
-  optional bool created_from_fg = 19;
+  optional .android.util.Duration create_real_time = 14;
+  optional .android.util.Duration starting_bg_timeout = 15;
+  optional .android.util.Duration last_activity_time = 16;
+  optional .android.util.Duration restart_time = 17;
+  optional bool created_from_fg = 18;
 
   // variables used to track states related to service start
   message Start {
@@ -503,7 +502,7 @@ message ServiceRecordProto {
     optional bool call_start = 4;
     optional int32 last_start_id = 5;
   }
-  optional Start start = 20;
+  optional Start start = 19;
 
   message ExecuteNesting {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -512,9 +511,9 @@ message ServiceRecordProto {
     optional bool execute_fg = 2;
     optional .android.util.Duration executing_start = 3;
   }
-  optional ExecuteNesting execute = 21;
+  optional ExecuteNesting execute = 20;
 
-  optional .android.util.Duration destory_time = 22;
+  optional .android.util.Duration destory_time = 21;
 
   message Crash {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -524,9 +523,9 @@ message ServiceRecordProto {
     optional .android.util.Duration next_restart_time = 3;
     optional int32 crash_count = 4;
   }
-  optional Crash crash = 23;
+  optional Crash crash = 22;
 
-  message StartItemProto {
+  message StartItem {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional int32 id = 1;
@@ -537,17 +536,20 @@ message ServiceRecordProto {
     optional NeededUriGrantsProto needed_grants = 6;
     optional UriPermissionOwnerProto uri_permissions = 7;
   }
-  repeated StartItemProto delivered_starts = 24;
-  repeated StartItemProto pending_starts = 25;
+  repeated StartItem delivered_starts = 23;
+  repeated StartItem pending_starts = 24;
 
-  repeated IntentBindRecordProto bindings = 26;
-  repeated ConnectionRecordProto connections = 27;
+  repeated IntentBindRecordProto bindings = 25;
+  repeated ConnectionRecordProto connections = 26;
+
+  // Next Tag: 27
 }
 
 message ConnectionRecordProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional string hex_hash = 1;
+  // used to find same record, e.g. AppBindRecord has the hex_hash
+  optional string hex_hash = 1; // cross reference the object and avoid double logging.
   optional int32 user_id = 2;
 
   enum Flag {
@@ -570,30 +572,28 @@ message ConnectionRecordProto {
   }
   repeated Flag flags = 3;
   optional string service_name = 4;
-  optional string conn_hex_hash = 5;
 }
 
 message AppBindRecordProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional string hex_hash = 1;
-  optional ProcessRecordProto client = 2;
-  repeated ConnectionRecordProto connections = 3;
+  optional string service_name = 1;
+  optional string client_proc_name = 2;
+  repeated string connections = 3; // hex_hash of ConnectionRecordProto
 }
 
 message IntentBindRecordProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional string hex_hash = 1;
-  optional bool is_create = 2;
-  optional .android.content.IntentProto intent = 3;
-  optional string binder = 4;
-  optional bool requested = 5;
-  optional bool received = 6;
-  optional bool has_bound = 7;
-  optional bool do_rebind = 8;
+  optional .android.content.IntentProto intent = 1;
+  optional string binder = 2;
+  optional bool auto_create = 3; // value of BIND_AUTO_CREATE flag.
+  optional bool requested = 4;
+  optional bool received = 5;
+  optional bool has_bound = 6;
+  optional bool do_rebind = 7;
 
-  repeated AppBindRecordProto apps = 9;
+  repeated AppBindRecordProto apps = 8;
 }
 
 // TODO: "dumpsys activity --proto processes"
@@ -688,10 +688,10 @@ message ActivityManagerServiceDumpProcessesProto {
   optional SleepStatus sleep_status = 27;
 
   message VoiceProto {
-    option (.android.msg_privacy).dest = DEST_EXPLICIT;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional string session = 1;
-    optional .android.os.PowerManagerProto.WakeLockProto wakelock = 2;
+    optional .android.os.PowerManagerProto.WakeLock wakelock = 2;
   }
   optional VoiceProto running_voice = 28;
 
@@ -780,8 +780,8 @@ message ActivityManagerServiceDumpProcessesProto {
   optional bool call_finish_booting = 44;
   optional bool boot_animation_complete = 45;
   optional int64 last_power_check_uptime_ms = 46;
-  optional .android.os.PowerManagerProto.WakeLockProto going_to_sleep = 47;
-  optional .android.os.PowerManagerProto.WakeLockProto launching_activity = 48;
+  optional .android.os.PowerManagerProto.WakeLock going_to_sleep = 47;
+  optional .android.os.PowerManagerProto.WakeLock launching_activity = 48;
   optional int32 adj_seq = 49;
   optional int32 lru_seq = 50;
   optional int32 num_non_cached_procs = 51;
@@ -813,14 +813,13 @@ message ActiveInstrumentationProto {
 message UidRecordProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional string hex_hash = 1;
-  optional int32 uid = 2;
-  optional .android.app.ProcessStateEnum current = 3;
-  optional bool ephemeral = 4;
-  optional bool fg_services = 5;
-  optional bool whilelist = 6;
-  optional .android.util.Duration last_background_time = 7;
-  optional bool idle = 8;
+  optional int32 uid = 1;
+  optional .android.app.ProcessStateEnum current = 2;
+  optional bool ephemeral = 3;
+  optional bool fg_services = 4;
+  optional bool whilelist = 5;
+  optional .android.util.Duration last_background_time = 6;
+  optional bool idle = 7;
 
   enum Change {
     CHANGE_GONE = 0;
@@ -829,8 +828,8 @@ message UidRecordProto {
     CHANGE_CACHED = 3;
     CHANGE_UNCACHED = 4;
   }
-  repeated Change last_reported_changes = 9;
-  optional int32 num_procs = 10;
+  repeated Change last_reported_changes = 8;
+  optional int32 num_procs = 9;
 
   message ProcStateSequence {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
@@ -839,7 +838,9 @@ message UidRecordProto {
     optional int64 last_network_updated = 2;
     optional int64 last_dispatched = 3;
   }
-  optional ProcStateSequence network_state_update = 11;
+  optional ProcStateSequence network_state_update = 10;
+
+  // Next Tag: 11
 }
 
 // proto of class ImportanceToken in ActivityManagerService

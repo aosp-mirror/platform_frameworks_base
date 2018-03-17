@@ -101,14 +101,19 @@ public abstract class KeymasterUtils {
      *         state (e.g., secure lock screen not set up) for generating or importing keys that
      *         require user authentication.
      */
-    public static void addUserAuthArgs(KeymasterArguments args,
-            UserAuthArgs spec) {
+    public static void addUserAuthArgs(KeymasterArguments args, UserAuthArgs spec) {
+        args.addUnsignedInt(KeymasterDefs.KM_TAG_USER_ID, UserHandle.getCallingUserId());
+
         if (spec.isUserConfirmationRequired()) {
             args.addBoolean(KeymasterDefs.KM_TAG_TRUSTED_CONFIRMATION_REQUIRED);
         }
 
         if (spec.isTrustedUserPresenceRequired()) {
             args.addBoolean(KeymasterDefs.KM_TAG_TRUSTED_USER_PRESENCE_REQUIRED);
+        }
+
+        if (spec.isUnlockedDeviceRequired()) {
+            args.addBoolean(KeymasterDefs.KM_TAG_UNLOCKED_DEVICE_REQUIRED);
         }
 
         if (!spec.isUserAuthenticationRequired()) {

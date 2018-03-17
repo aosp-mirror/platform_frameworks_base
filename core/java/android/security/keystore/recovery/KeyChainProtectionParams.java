@@ -215,8 +215,8 @@ public final class KeyChainProtectionParams implements Parcelable {
 
         /**
          * Creates a new {@link KeyChainProtectionParams} instance.
-         * The instance will include default values, if {@link setSecret}
-         * or {@link setUserSecretType} were not called.
+         * The instance will include default values, if {@link #setSecret}
+         * or {@link #setUserSecretType} were not called.
          *
          * @return new instance
          * @throws NullPointerException if some required fields were not set.

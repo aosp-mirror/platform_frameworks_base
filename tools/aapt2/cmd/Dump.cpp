@@ -298,6 +298,10 @@ class DumpContext : public IAaptContext {
     return 0;
   }
 
+  bool IsAutoNamespace() override {
+    return false;
+  }
+
  private:
   StdErrDiagnostics diagnostics_;
   bool verbose_ = false;

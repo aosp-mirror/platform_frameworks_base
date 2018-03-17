@@ -29,6 +29,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import android.Manifest;
 import android.animation.LayoutTransition;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.ResourcesManager;
@@ -4152,9 +4153,7 @@ public final class ViewRootImpl implements ViewParent,
                         Log.v(TAG, "Dispatching key " + msg.obj + " from Autofill to " + mView);
                     }
                     KeyEvent event = (KeyEvent) msg.obj;
-                    // send InputEvent to pre IME, set FLAG_FROM_AUTOFILL so the InputEvent
-                    // wont be dropped as app window is not focus.
-                    enqueueInputEvent(event, null, QueuedInputEvent.FLAG_FROM_AUTOFILL, true);
+                    enqueueInputEvent(event, null, 0, true);
                 } break;
                 case MSG_CHECK_FOCUS: {
                     InputMethodManager imm = InputMethodManager.peekInstance();
@@ -4447,7 +4446,7 @@ public final class ViewRootImpl implements ViewParent,
                 return true;
             } else if ((!mAttachInfo.mHasWindowFocus
                     && !q.mEvent.isFromSource(InputDevice.SOURCE_CLASS_POINTER)
-                    && (q.mFlags & QueuedInputEvent.FLAG_FROM_AUTOFILL) == 0) || mStopped
+                    && !isAutofillUiShowing()) || mStopped
                     || (mIsAmbientMode && !q.mEvent.isFromSource(InputDevice.SOURCE_CLASS_BUTTON))
                     || (mPausedForTransition && !isBack(q.mEvent))) {
                 // This is a focus event and the window doesn't currently have input focus or
@@ -4782,18 +4781,11 @@ public final class ViewRootImpl implements ViewParent,
                 ensureTouchMode(event.isFromSource(InputDevice.SOURCE_TOUCHSCREEN));
             }
 
-            if (action == MotionEvent.ACTION_DOWN && mView instanceof ViewGroup) {
+            if (action == MotionEvent.ACTION_DOWN) {
                 // Upon motion event within app window, close autofill ui.
-                ViewGroup decorView = (ViewGroup) mView;
-                if (decorView.getChildCount() > 0) {
-                    // We cannot use decorView's Context for querying AutofillManager: DecorView's
-                    // context is based on Application Context, it would allocate a different
-                    // AutofillManager instance.
-                    AutofillManager afm = (AutofillManager) decorView.getChildAt(0).getContext()
-                            .getSystemService(Context.AUTOFILL_MANAGER_SERVICE);
-                    if (afm != null) {
-                        afm.requestHideFillUi();
-                    }
+                AutofillManager afm = getAutofillManager();
+                if (afm != null) {
+                    afm.requestHideFillUi();
                 }
             }
 
@@ -6435,6 +6427,28 @@ public final class ViewRootImpl implements ViewParent,
         return mAudioManager;
     }
 
+    private @Nullable AutofillManager getAutofillManager() {
+        if (mView instanceof ViewGroup) {
+            ViewGroup decorView = (ViewGroup) mView;
+            if (decorView.getChildCount() > 0) {
+                // We cannot use decorView's Context for querying AutofillManager: DecorView's
+                // context is based on Application Context, it would allocate a different
+                // AutofillManager instance.
+                return decorView.getChildAt(0).getContext()
+                        .getSystemService(AutofillManager.class);
+            }
+        }
+        return null;
+    }
+
+    private boolean isAutofillUiShowing() {
+        AutofillManager afm = getAutofillManager();
+        if (afm == null) {
+            return false;
+        }
+        return afm.isAutofillUiShowing();
+    }
+
     public AccessibilityInteractionController getAccessibilityInteractionController() {
         if (mView == null) {
             throw new IllegalStateException("getAccessibilityInteractionController"
@@ -6840,7 +6854,6 @@ public final class ViewRootImpl implements ViewParent,
         public static final int FLAG_FINISHED_HANDLED = 1 << 3;
         public static final int FLAG_RESYNTHESIZED = 1 << 4;
         public static final int FLAG_UNHANDLED = 1 << 5;
-        public static final int FLAG_FROM_AUTOFILL = 1 << 6;
 
         public QueuedInputEvent mNext;
 

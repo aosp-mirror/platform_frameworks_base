@@ -111,6 +111,7 @@ struct LinkOptions {
 
   // Static lib options.
   bool no_static_lib_packages = false;
+  bool auto_namespace_static_lib = false;
 
   // AndroidManifest.xml massaging options.
   ManifestFixerOptions manifest_fixer_options;
@@ -193,6 +194,14 @@ class LinkContext : public IAaptContext {
     min_sdk_version_ = minSdk;
   }
 
+  bool IsAutoNamespace() override {
+    return auto_namespace_;
+  }
+
+  void SetAutoNamespace(bool val) {
+    auto_namespace_ = val;
+  }
+
  private:
   DISALLOW_COPY_AND_ASSIGN(LinkContext);
 
@@ -204,6 +213,7 @@ class LinkContext : public IAaptContext {
   SymbolTable symbols_;
   bool verbose_ = false;
   int min_sdk_version_ = 0;
+  bool auto_namespace_ = false;
 };
 
 // A custom delegate that generates compatible pre-O IDs for use with feature splits.
@@ -2112,6 +2122,10 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
           .OptionalSwitch("--no-static-lib-packages",
                           "Merge all library resources under the app's package.",
                           &options.no_static_lib_packages)
+          .OptionalSwitch("--auto-namespace-static-lib",
+                          "Automatically namespace resource references when building a static\n"
+                          "library.",
+                          &options.auto_namespace_static_lib)
           .OptionalSwitch("--non-final-ids",
                           "Generates R.java without the final modifier. This is implied when\n"
                           "--static-lib is specified.",
@@ -2152,7 +2166,7 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
           .OptionalFlagList("-0", "File extensions not to compress.",
                             &options.extensions_to_not_compress)
           .OptionalSwitch("--no-compress", "Do not compress any resources.",
-                            &options.do_not_compress_anything)
+                          &options.do_not_compress_anything)
           .OptionalSwitch("--warn-manifest-validation",
                           "Treat manifest validation errors as warnings.",
                           &options.manifest_fixer_options.warn_validation)
@@ -2219,6 +2233,15 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
     options.output_format = OutputFormat::kProto;
   } else if (proto_format) {
     options.output_format = OutputFormat::kProto;
+  }
+
+  if (options.auto_namespace_static_lib) {
+    if (!static_lib) {
+      context.GetDiagnostics()->Error(
+          DiagMessage() << "--auto-namespace-static-lib can only be used with --static-lib");
+      return 1;
+    }
+    context.SetAutoNamespace(true);
   }
 
   if (package_id) {
