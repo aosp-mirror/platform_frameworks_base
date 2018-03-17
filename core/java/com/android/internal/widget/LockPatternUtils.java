@@ -1455,6 +1455,11 @@ public class LockPatternUtils {
         return (getStrongAuthForUser(userId) & ~StrongAuthTracker.ALLOWING_FINGERPRINT) == 0;
     }
 
+    public boolean isUserInLockdown(int userId) {
+        return getStrongAuthForUser(userId)
+                == StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+    }
+
     private ICheckCredentialProgressCallback wrapCallback(
             final CheckCredentialProgressCallback callback) {
         if (callback == null) {
