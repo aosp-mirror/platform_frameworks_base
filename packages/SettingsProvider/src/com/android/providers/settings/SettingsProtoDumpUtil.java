@@ -914,8 +914,8 @@ class SettingsProtoDumpUtil {
                 Settings.Global.WIFI_ON_WHEN_PROXY_DISCONNECTED,
                 GlobalSettingsProto.WIFI_ON_WHEN_PROXY_DISCONNECTED);
         dumpSetting(s, p,
-                Settings.Global.TIME_ONLY_MODE_ENABLED,
-                GlobalSettingsProto.TIME_ONLY_MODE_ENABLED);
+                Settings.Global.TIME_ONLY_MODE_CONSTANTS,
+                GlobalSettingsProto.TIME_ONLY_MODE_CONSTANTS);
         dumpSetting(s, p,
                 Settings.Global.NETWORK_WATCHLIST_ENABLED,
                 GlobalSettingsProto.NETWORK_WATCHLIST_ENABLED);
