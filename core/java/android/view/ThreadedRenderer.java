@@ -20,13 +20,11 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.AnimatedVectorDrawable;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -936,6 +934,20 @@ public final class ThreadedRenderer {
         nSetHighContrastText(highContrastText);
     }
 
+    /**
+     * If set RenderThread will avoid doing any IPC using instead a fake vsync & DisplayInfo source
+     */
+    public static void setIsolatedProcess(boolean isIsolated) {
+        nSetIsolatedProcess(isIsolated);
+    }
+
+    /**
+     * If set extra graphics debugging abilities will be enabled such as dumping skp
+     */
+    public static void setDebuggingEnabled(boolean enable) {
+        nSetDebuggingEnabled(enable);
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
@@ -1071,10 +1083,6 @@ public final class ThreadedRenderer {
             initSched(renderProxy);
 
             if (mAppContext != null) {
-                final boolean appDebuggable =
-                        (mAppContext.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE)
-                        != 0;
-                nSetDebuggingEnabled(appDebuggable || Build.IS_DEBUGGABLE);
                 initGraphicsStats();
             }
         }
@@ -1204,4 +1212,5 @@ public final class ThreadedRenderer {
     // For temporary experimentation b/66945974
     private static native void nHackySetRTAnimationsEnabled(boolean enabled);
     private static native void nSetDebuggingEnabled(boolean enabled);
+    private static native void nSetIsolatedProcess(boolean enabled);
 }

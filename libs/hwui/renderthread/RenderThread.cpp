@@ -17,6 +17,7 @@
 #include "RenderThread.h"
 
 #include "CanvasContext.h"
+#include "DeviceInfo.h"
 #include "EglManager.h"
 #include "OpenGLReadback.h"
 #include "RenderProxy.h"
@@ -29,10 +30,9 @@
 #include "renderstate/RenderState.h"
 #include "renderthread/OpenGLPipeline.h"
 #include "utils/FatVector.h"
+#include "utils/TimeUtils.h"
 
 #include <gui/DisplayEventReceiver.h>
-#include <gui/ISurfaceComposer.h>
-#include <gui/SurfaceComposerClient.h>
 #include <sys/resource.h>
 #include <utils/Condition.h>
 #include <utils/Log.h>
@@ -54,6 +54,58 @@ static bool gHasRenderThreadInstance = false;
 
 static void (*gOnStartHook)() = nullptr;
 
+class DisplayEventReceiverWrapper : public VsyncSource {
+public:
+    DisplayEventReceiverWrapper(std::unique_ptr<DisplayEventReceiver>&& receiver)
+            : mDisplayEventReceiver(std::move(receiver)) {}
+
+    virtual void requestNextVsync() override {
+        status_t status = mDisplayEventReceiver->requestNextVsync();
+        LOG_ALWAYS_FATAL_IF(status != NO_ERROR, "requestNextVsync failed with status: %d", status);
+    }
+
+    virtual nsecs_t latestVsyncEvent() override {
+        DisplayEventReceiver::Event buf[EVENT_BUFFER_SIZE];
+        nsecs_t latest = 0;
+        ssize_t n;
+        while ((n = mDisplayEventReceiver->getEvents(buf, EVENT_BUFFER_SIZE)) > 0) {
+            for (ssize_t i = 0; i < n; i++) {
+                const DisplayEventReceiver::Event& ev = buf[i];
+                switch (ev.header.type) {
+                    case DisplayEventReceiver::DISPLAY_EVENT_VSYNC:
+                        latest = ev.header.timestamp;
+                        break;
+                }
+            }
+        }
+        if (n < 0) {
+            ALOGW("Failed to get events from display event receiver, status=%d", status_t(n));
+        }
+        return latest;
+    }
+
+private:
+    std::unique_ptr<DisplayEventReceiver> mDisplayEventReceiver;
+};
+
+class DummyVsyncSource : public VsyncSource {
+public:
+    DummyVsyncSource(RenderThread* renderThread) : mRenderThread(renderThread) {}
+
+    virtual void requestNextVsync() override {
+        mRenderThread->queue().postDelayed(16_ms, [this]() {
+            mRenderThread->drainDisplayEventQueue();
+        });
+    }
+
+    virtual nsecs_t latestVsyncEvent() override {
+        return systemTime(CLOCK_MONOTONIC);
+    }
+
+private:
+    RenderThread* mRenderThread;
+};
+
 bool RenderThread::hasInstance() {
     return gHasRenderThreadInstance;
 }
@@ -74,7 +126,7 @@ RenderThread& RenderThread::getInstance() {
 
 RenderThread::RenderThread()
         : ThreadBase()
-        , mDisplayEventReceiver(nullptr)
+        , mVsyncSource(nullptr)
         , mVsyncRequested(false)
         , mFrameCallbackTaskPending(false)
         , mRenderState(nullptr)
@@ -89,23 +141,27 @@ RenderThread::~RenderThread() {
 }
 
 void RenderThread::initializeDisplayEventReceiver() {
-    LOG_ALWAYS_FATAL_IF(mDisplayEventReceiver, "Initializing a second DisplayEventReceiver?");
-    mDisplayEventReceiver = new DisplayEventReceiver();
-    status_t status = mDisplayEventReceiver->initCheck();
-    LOG_ALWAYS_FATAL_IF(status != NO_ERROR,
-                        "Initialization of DisplayEventReceiver "
-                        "failed with status: %d",
-                        status);
+    LOG_ALWAYS_FATAL_IF(mVsyncSource, "Initializing a second DisplayEventReceiver?");
 
-    // Register the FD
-    mLooper->addFd(mDisplayEventReceiver->getFd(), 0, Looper::EVENT_INPUT,
-                   RenderThread::displayEventReceiverCallback, this);
+    if (!Properties::isolatedProcess) {
+        auto receiver = std::make_unique<DisplayEventReceiver>();
+        status_t status = receiver->initCheck();
+        LOG_ALWAYS_FATAL_IF(status != NO_ERROR,
+                "Initialization of DisplayEventReceiver "
+                        "failed with status: %d",
+                status);
+
+        // Register the FD
+        mLooper->addFd(receiver->getFd(), 0, Looper::EVENT_INPUT,
+                RenderThread::displayEventReceiverCallback, this);
+        mVsyncSource = new DisplayEventReceiverWrapper(std::move(receiver));
+    } else {
+        mVsyncSource = new DummyVsyncSource(this);
+    }
 }
 
 void RenderThread::initThreadLocals() {
-    sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(ISurfaceComposer::eDisplayIdMain));
-    status_t status = SurfaceComposerClient::getDisplayInfo(dtoken, &mDisplayInfo);
-    LOG_ALWAYS_FATAL_IF(status, "Failed to get display info\n");
+    mDisplayInfo = DeviceInfo::queryDisplayInfo();
     nsecs_t frameIntervalNanos = static_cast<nsecs_t>(1000000000 / mDisplayInfo.fps);
     mTimeLord.setFrameInterval(frameIntervalNanos);
     initializeDisplayEventReceiver();
@@ -201,29 +257,9 @@ int RenderThread::displayEventReceiverCallback(int fd, int events, void* data) {
     return 1;  // keep the callback
 }
 
-static nsecs_t latestVsyncEvent(DisplayEventReceiver* receiver) {
-    DisplayEventReceiver::Event buf[EVENT_BUFFER_SIZE];
-    nsecs_t latest = 0;
-    ssize_t n;
-    while ((n = receiver->getEvents(buf, EVENT_BUFFER_SIZE)) > 0) {
-        for (ssize_t i = 0; i < n; i++) {
-            const DisplayEventReceiver::Event& ev = buf[i];
-            switch (ev.header.type) {
-                case DisplayEventReceiver::DISPLAY_EVENT_VSYNC:
-                    latest = ev.header.timestamp;
-                    break;
-            }
-        }
-    }
-    if (n < 0) {
-        ALOGW("Failed to get events from display event receiver, status=%d", status_t(n));
-    }
-    return latest;
-}
-
 void RenderThread::drainDisplayEventQueue() {
     ATRACE_CALL();
-    nsecs_t vsyncEvent = latestVsyncEvent(mDisplayEventReceiver);
+    nsecs_t vsyncEvent = mVsyncSource->latestVsyncEvent();
     if (vsyncEvent > 0) {
         mVsyncRequested = false;
         if (mTimeLord.vsyncReceived(vsyncEvent) && !mFrameCallbackTaskPending) {
@@ -256,8 +292,7 @@ void RenderThread::dispatchFrameCallbacks() {
 void RenderThread::requestVsync() {
     if (!mVsyncRequested) {
         mVsyncRequested = true;
-        status_t status = mDisplayEventReceiver->requestNextVsync();
-        LOG_ALWAYS_FATAL_IF(status != NO_ERROR, "requestNextVsync failed with status: %d", status);
+        mVsyncSource->requestNextVsync();
     }
 }
 

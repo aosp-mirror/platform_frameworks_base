@@ -269,6 +269,7 @@ public:
     static bool runningInEmulator;
 
     ANDROID_API static bool debuggingEnabled;
+    ANDROID_API static bool isolatedProcess;
 
 private:
     static ProfileType sProfileType;

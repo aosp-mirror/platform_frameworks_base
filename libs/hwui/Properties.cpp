@@ -63,6 +63,7 @@ bool Properties::enableRTAnimations = true;
 
 bool Properties::runningInEmulator = false;
 bool Properties::debuggingEnabled = false;
+bool Properties::isolatedProcess = false;
 
 static int property_get_int(const char* key, int defaultValue) {
     char buf[PROPERTY_VALUE_MAX] = {

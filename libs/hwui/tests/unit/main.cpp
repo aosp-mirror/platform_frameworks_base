@@ -21,6 +21,7 @@
 #include "debug/GlesDriver.h"
 #include "debug/NullGlesDriver.h"
 #include "hwui/Typeface.h"
+#include "Properties.h"
 #include "tests/common/LeakChecker.h"
 #include "thread/TaskManager.h"
 
@@ -67,6 +68,7 @@ int main(int argc, char* argv[]) {
 
     // Replace the default GLES driver
     debug::GlesDriver::replace(std::make_unique<debug::NullGlesDriver>());
+    Properties::isolatedProcess = true;
 
     // Run the tests
     testing::InitGoogleTest(&argc, argv);
