@@ -10670,13 +10670,21 @@ public final class Settings {
                 = "wifi_on_when_proxy_disconnected";
 
         /**
-         * Whether or not to enable Time Only Mode for watch type devices.
-         * Type: int (0 for false, 1 for true)
-         * Default: 0
+         * Time Only Mode specific settings.
+         * This is encoded as a key=value list, separated by commas. Ex: "foo=1,bar=true"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * enabled                  (boolean)
+         * disable_tilt_to_wake     (boolean)
+         * disable_touch_to_wake    (boolean)
+         * </pre>
+         * Type: string
          * @hide
          */
-        public static final String TIME_ONLY_MODE_ENABLED
-                = "time_only_mode_enabled";
+        public static final String TIME_ONLY_MODE_CONSTANTS
+                = "time_only_mode_constants";
 
         /**
          * Whether or not Network Watchlist feature is enabled.

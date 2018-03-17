@@ -392,7 +392,7 @@ public class SettingsBackupTest {
                     Settings.Global.TETHER_SUPPORTED,
                     Settings.Global.TEXT_CLASSIFIER_CONSTANTS,
                     Settings.Global.THEATER_MODE_ON,
-                    Settings.Global.TIME_ONLY_MODE_ENABLED,
+                    Settings.Global.TIME_ONLY_MODE_CONSTANTS,
                     Settings.Global.TRANSITION_ANIMATION_SCALE,
                     Settings.Global.TRUSTED_SOUND,
                     Settings.Global.TZINFO_UPDATE_CONTENT_URL,
