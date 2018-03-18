@@ -10378,6 +10378,17 @@ public final class Settings {
         public static final String SYS_UIDCPUPOWER = "sys_uidcpupower";
 
         /**
+        * traced global setting. This controls weather the deamons: traced and
+        * traced_probes run. This links the sys.traced system property.
+        * The following values are supported:
+        * 0 -> traced and traced_probes are disabled
+        * 1 -> traced and traced_probes are enabled
+        * Any other value defaults to disabled.
+        * @hide
+        */
+        public static final String SYS_TRACED = "sys_traced";
+
+        /**
          * An integer to reduce the FPS by this factor. Only for experiments. Need to reboot the
          * device for this setting to take full effect.
          *
@@ -10659,13 +10670,21 @@ public final class Settings {
                 = "wifi_on_when_proxy_disconnected";
 
         /**
-         * Whether or not to enable Time Only Mode for watch type devices.
-         * Type: int (0 for false, 1 for true)
-         * Default: 0
+         * Time Only Mode specific settings.
+         * This is encoded as a key=value list, separated by commas. Ex: "foo=1,bar=true"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * enabled                  (boolean)
+         * disable_tilt_to_wake     (boolean)
+         * disable_touch_to_wake    (boolean)
+         * </pre>
+         * Type: string
          * @hide
          */
-        public static final String TIME_ONLY_MODE_ENABLED
-                = "time_only_mode_enabled";
+        public static final String TIME_ONLY_MODE_CONSTANTS
+                = "time_only_mode_constants";
 
         /**
          * Whether or not Network Watchlist feature is enabled.
@@ -12327,6 +12346,28 @@ public final class Settings {
          * @hide
          */
         public static final String SHOW_ZEN_UPGRADE_NOTIFICATION = "show_zen_upgrade_notification";
+
+        /**
+         * Backup and restore agent timeout parameters.
+         * These parameters are represented by a comma-delimited key-value list.
+         *
+         * The following strings are supported as keys:
+         * <pre>
+         *     kv_backup_agent_timeout_millis         (long)
+         *     full_backup_agent_timeout_millis       (long)
+         *     shared_backup_agent_timeout_millis     (long)
+         *     restore_agent_timeout_millis           (long)
+         *     restore_agent_finished_timeout_millis  (long)
+         * </pre>
+         *
+         * They map to milliseconds represented as longs.
+         *
+         * Ex: "kv_backup_agent_timeout_millis=30000,full_backup_agent_timeout_millis=300000"
+         *
+         * @hide
+         */
+        public static final String BACKUP_AGENT_TIMEOUT_PARAMETERS =
+                "backup_agent_timeout_parameters";
     }
 
     /**

@@ -4,4 +4,6 @@
         android:title="View Log"/>
     <item android:id="@+id/call_is_app_inactive"
         android:title="Call isAppInactive()"/>
+    <item android:id="@+id/set_app_limit"
+        android:title="Set App Limit" />
 </menu>

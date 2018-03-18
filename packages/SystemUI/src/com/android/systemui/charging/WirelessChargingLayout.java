@@ -65,9 +65,6 @@ public class WirelessChargingLayout extends FrameLayout {
         // amount of battery:
         final TextView mPercentage = findViewById(R.id.wireless_charging_percentage);
 
-        // (optional) time until full charge if available
-        final TextView mSecondaryText = findViewById(R.id.wireless_charging_secondary_text);
-
         if (batteryLevel != UNKNOWN_BATTERY_LEVEL) {
             mPercentage.setText(NumberFormat.getPercentInstance().format(mBatteryLevel / 100f));
             mPercentage.setAlpha(0);
@@ -110,17 +107,10 @@ public class WirelessChargingLayout extends FrameLayout {
         circleFadeAnimator.setInterpolator(Interpolators.LINEAR);
         circleFadeAnimator.setStartDelay(chargingAnimationFadeStartOffset);
 
-        // Animation Opacity: secondary text animation fades from 1 to 0 opacity
-        ValueAnimator secondaryTextFadeAnimator = ObjectAnimator.ofFloat(mSecondaryText, "alpha",
-                1, 0);
-        circleFadeAnimator.setDuration(chargingAnimationFadeDuration);
-        secondaryTextFadeAnimator.setInterpolator(Interpolators.LINEAR);
-        secondaryTextFadeAnimator.setStartDelay(chargingAnimationFadeStartOffset);
-
         // play all animations together
         AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(textSizeAnimator, textOpacityAnimator, textFadeAnimator,
-                circleFadeAnimator, secondaryTextFadeAnimator);
+                circleFadeAnimator);
         animatorSet.start();
     }
 }

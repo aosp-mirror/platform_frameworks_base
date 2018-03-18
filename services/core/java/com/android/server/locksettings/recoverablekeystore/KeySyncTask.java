@@ -172,7 +172,7 @@ public class KeySyncTask implements Runnable {
 
     private void syncKeysForAgent(int recoveryAgentUid) {
         boolean recreateCurrentVersion = false;
-        if (!shoudCreateSnapshot(recoveryAgentUid)) {
+        if (!shouldCreateSnapshot(recoveryAgentUid)) {
             recreateCurrentVersion =
                     (mRecoverableKeyStoreDb.getSnapshotVersion(mUserId, recoveryAgentUid) != null)
                     && (mRecoverySnapshotStorage.get(recoveryAgentUid) == null);
@@ -182,11 +182,6 @@ public class KeySyncTask implements Runnable {
                 Log.d(TAG, "Key sync not needed.");
                 return;
             }
-        }
-
-        if (!mSnapshotListenersStorage.hasListener(recoveryAgentUid)) {
-            Log.w(TAG, "No pending intent registered for recovery agent " + recoveryAgentUid);
-            return;
         }
 
         PublicKey publicKey;
@@ -313,7 +308,6 @@ public class KeySyncTask implements Runnable {
             return;
         }
         mRecoverySnapshotStorage.put(recoveryAgentUid, keyChainSnapshotBuilder.build());
-
         mSnapshotListenersStorage.recoverySnapshotAvailable(recoveryAgentUid);
     }
 
@@ -354,7 +348,7 @@ public class KeySyncTask implements Runnable {
      * Returns {@code true} if a sync is pending.
      * @param recoveryAgentUid uid of the recovery agent.
      */
-    private boolean shoudCreateSnapshot(int recoveryAgentUid) {
+    private boolean shouldCreateSnapshot(int recoveryAgentUid) {
         int[] types = mRecoverableKeyStoreDb.getRecoverySecretTypes(mUserId, recoveryAgentUid);
         if (!ArrayUtils.contains(types, KeyChainProtectionParams.TYPE_LOCKSCREEN)) {
             // Only lockscreen type is supported.

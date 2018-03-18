@@ -547,4 +547,18 @@ public abstract class PackageManagerInternal {
     /** Updates the flags for the given permission. */
     public abstract void updatePermissionFlagsTEMP(@NonNull String permName,
             @NonNull String packageName, int flagMask, int flagValues, int userId);
+
+    /**
+     * Returns true if it's still safe to restore data backed up from this app's version
+     * that was signed with restoringFromSigHash.
+     */
+    public abstract boolean isDataRestoreSafe(@NonNull byte[] restoringFromSigHash,
+            @NonNull String packageName);
+
+    /**
+     * Returns true if it's still safe to restore data backed up from this app's version
+     * that was signed with restoringFromSig.
+     */
+    public abstract boolean isDataRestoreSafe(@NonNull Signature restoringFromSig,
+            @NonNull String packageName);
 }

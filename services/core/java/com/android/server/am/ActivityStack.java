@@ -195,8 +195,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     // How long we wait for the activity to tell us it has stopped before
     // giving up.  This is a good amount of time because we really need this
-    // from the application in order to get its saved state.
-    private static final int STOP_TIMEOUT = 10 * 1000;
+    // from the application in order to get its saved state. Once the stop
+    // is complete we may start destroying client resources triggering
+    // crashes if the UI thread was hung. We put this timeout one second behind
+    // the ANR timeout so these situations will generate ANR instead of
+    // Surface lost or other errors.
+    private static final int STOP_TIMEOUT = 11 * 1000;
 
     // How long we wait until giving up on an activity telling us it has
     // finished destroying itself.
@@ -5283,6 +5287,14 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     boolean shouldSleepActivities() {
         final ActivityDisplay display = getDisplay();
+
+        // Do not sleep activities in this stack if we're marked as focused and the keyguard
+        // is in the process of going away.
+        if (mStackSupervisor.getFocusedStack() == this
+                && mStackSupervisor.getKeyguardController().isKeyguardGoingAway()) {
+            return false;
+        }
+
         return display != null ? display.isSleeping() : mService.isSleepingLocked();
     }
 

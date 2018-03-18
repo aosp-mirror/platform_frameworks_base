@@ -164,21 +164,20 @@ final class ServiceRecord extends Binder {
 
         public void writeToProto(ProtoOutputStream proto, long fieldId, long now) {
             long token = proto.start(fieldId);
-            proto.write(ServiceRecordProto.StartItemProto.ID, id);
+            proto.write(ServiceRecordProto.StartItem.ID, id);
             ProtoUtils.toDuration(proto,
-                    ServiceRecordProto.StartItemProto.DURATION, deliveredTime, now);
-            proto.write(ServiceRecordProto.StartItemProto.DELIVERY_COUNT, deliveryCount);
-            proto.write(ServiceRecordProto.StartItemProto.DONE_EXECUTING_COUNT, doneExecutingCount);
+                    ServiceRecordProto.StartItem.DURATION, deliveredTime, now);
+            proto.write(ServiceRecordProto.StartItem.DELIVERY_COUNT, deliveryCount);
+            proto.write(ServiceRecordProto.StartItem.DONE_EXECUTING_COUNT, doneExecutingCount);
             if (intent != null) {
-                intent.writeToProto(proto, ServiceRecordProto.StartItemProto.INTENT, true, true,
+                intent.writeToProto(proto, ServiceRecordProto.StartItem.INTENT, true, true,
                         true, false);
             }
             if (neededGrants != null) {
-                neededGrants.writeToProto(proto, ServiceRecordProto.StartItemProto.NEEDED_GRANTS);
+                neededGrants.writeToProto(proto, ServiceRecordProto.StartItem.NEEDED_GRANTS);
             }
             if (uriPermissions != null) {
-                uriPermissions.writeToProto(proto,
-                        ServiceRecordProto.StartItemProto.URI_PERMISSIONS);
+                uriPermissions.writeToProto(proto, ServiceRecordProto.StartItem.URI_PERMISSIONS);
             }
             proto.end(token);
         }
@@ -236,8 +235,6 @@ final class ServiceRecord extends Binder {
     void writeToProto(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(ServiceRecordProto.SHORT_NAME, this.shortName);
-        proto.write(ServiceRecordProto.HEX_HASH,
-                Integer.toHexString(System.identityHashCode(this)));
         proto.write(ServiceRecordProto.IS_RUNNING, app != null);
         if (app != null) {
             proto.write(ServiceRecordProto.PID, app.pid);

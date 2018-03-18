@@ -704,7 +704,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                         streamingOutput);
                 profiling = true;
             } catch (RuntimeException e) {
-                Slog.w(TAG, "Profiling failed on path " + profileFile);
+                Slog.w(TAG, "Profiling failed on path " + profileFile, e);
                 try {
                     profileFd.close();
                     profileFd = null;

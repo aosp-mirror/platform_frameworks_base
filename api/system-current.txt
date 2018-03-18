@@ -729,9 +729,14 @@ package android.app.usage {
   public final class UsageStatsManager {
     method public int getAppStandbyBucket(java.lang.String);
     method public java.util.Map<java.lang.String, java.lang.Integer> getAppStandbyBuckets();
+    method public void registerAppUsageObserver(int, java.lang.String[], long, java.util.concurrent.TimeUnit, android.app.PendingIntent);
     method public void setAppStandbyBucket(java.lang.String, int);
     method public void setAppStandbyBuckets(java.util.Map<java.lang.String, java.lang.Integer>);
+    method public void unregisterAppUsageObserver(int);
     method public void whitelistAppTemporarily(java.lang.String, long, android.os.UserHandle);
+    field public static final java.lang.String EXTRA_OBSERVER_ID = "android.app.usage.extra.OBSERVER_ID";
+    field public static final java.lang.String EXTRA_TIME_LIMIT = "android.app.usage.extra.TIME_LIMIT";
+    field public static final java.lang.String EXTRA_TIME_USED = "android.app.usage.extra.TIME_USED";
     field public static final int STANDBY_BUCKET_EXEMPTED = 5; // 0x5
     field public static final int STANDBY_BUCKET_NEVER = 50; // 0x32
   }
@@ -4327,11 +4332,14 @@ package android.security.keystore.recovery {
     method public deprecated java.util.List<java.lang.String> getAliases(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public java.util.List<java.lang.String> getAliases() throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public static android.security.keystore.recovery.RecoveryController getInstance(android.content.Context);
+    method public java.security.Key getKey(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException, java.security.UnrecoverableKeyException;
+    method public android.security.keystore.recovery.KeyChainSnapshot getKeyChainSnapshot() throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public int[] getPendingRecoverySecretTypes() throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public deprecated android.security.keystore.recovery.KeyChainSnapshot getRecoveryData() throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public int[] getRecoverySecretTypes() throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public deprecated int getRecoveryStatus(java.lang.String, java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public int getRecoveryStatus(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public java.security.Key importKey(java.lang.String, byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
     method public deprecated void initRecoveryService(java.lang.String, byte[]) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void initRecoveryService(java.lang.String, byte[], byte[]) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void recoverySecretAvailable(android.security.keystore.recovery.KeyChainProtectionParams) throws android.security.keystore.recovery.InternalRecoveryServiceException;

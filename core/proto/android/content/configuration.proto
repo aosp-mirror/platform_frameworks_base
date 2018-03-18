@@ -32,7 +32,7 @@ message ConfigurationProto {
 
   optional float font_scale = 1;
   optional uint32 mcc = 2;
-  optional uint32 mnc = 3;
+  optional uint32 mnc = 3 [ (.android.privacy).dest = DEST_EXPLICIT ];
   repeated LocaleProto locales = 4;
   optional uint32 screen_layout = 5;
   optional uint32 color_mode = 6;

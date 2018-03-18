@@ -256,6 +256,7 @@ import android.app.RemoteAction;
 import android.app.WaitResult;
 import android.app.WindowConfiguration.ActivityType;
 import android.app.WindowConfiguration.WindowingMode;
+import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyManager;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
@@ -13727,9 +13728,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             userId = activity.userId;
         }
-        DevicePolicyManager dpm = (DevicePolicyManager) mContext.getSystemService(
-                Context.DEVICE_POLICY_SERVICE);
-        return (dpm == null) || (!dpm.getScreenCaptureDisabled(null, userId));
+        return !DevicePolicyCache.getInstance().getScreenCaptureDisabled(userId);
     }
 
     @Override
@@ -25378,6 +25377,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                     } catch (IOException e) {
                     }
                     mProfilerInfo.profileFd = null;
+
+                    if (proc.pid == MY_PID) {
+                        // When profiling the system server itself, avoid closing the file
+                        // descriptor, as profilerControl will not create a copy.
+                        // Note: it is also not correct to just set profileFd to null, as the
+                        //       whole ProfilerInfo instance is passed down!
+                        profilerInfo = null;
+                    }
                 } else {
                     stopProfilerLocked(proc, profileType);
                     if (profilerInfo != null && profilerInfo.profileFd != null) {
@@ -25925,16 +25932,19 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Bundle bOptions) {
             Preconditions.checkNotNull(intents, "intents");
             final String[] resolvedTypes = new String[intents.length];
-            for (int i = 0; i < intents.length; i++) {
-                resolvedTypes[i] = intents[i].resolveTypeIfNeeded(mContext.getContentResolver());
-            }
 
             // UID of the package on user userId.
             // "= 0" is needed because otherwise catch(RemoteException) would make it look like
             // packageUid may not be initialized.
             int packageUid = 0;
             final long ident = Binder.clearCallingIdentity();
+
             try {
+                for (int i = 0; i < intents.length; i++) {
+                    resolvedTypes[i] =
+                            intents[i].resolveTypeIfNeeded(mContext.getContentResolver());
+                }
+
                 packageUid = AppGlobals.getPackageManager().getPackageUid(
                         packageName, PackageManager.MATCH_DEBUG_TRIAGED_MISSING, userId);
             } catch (RemoteException e) {

@@ -383,6 +383,7 @@ public class SettingsBackupTest {
                     Settings.Global.SYS_STORAGE_THRESHOLD_PERCENTAGE,
                     Settings.Global.SYS_VDSO,
                     Settings.Global.SYS_UIDCPUPOWER,
+                    Settings.Global.SYS_TRACED,
                     Settings.Global.FPS_DEVISOR,
                     Settings.Global.TCP_DEFAULT_INIT_RWND,
                     Settings.Global.TETHER_DUN_APN,
@@ -391,7 +392,7 @@ public class SettingsBackupTest {
                     Settings.Global.TETHER_SUPPORTED,
                     Settings.Global.TEXT_CLASSIFIER_CONSTANTS,
                     Settings.Global.THEATER_MODE_ON,
-                    Settings.Global.TIME_ONLY_MODE_ENABLED,
+                    Settings.Global.TIME_ONLY_MODE_CONSTANTS,
                     Settings.Global.TRANSITION_ANIMATION_SCALE,
                     Settings.Global.TRUSTED_SOUND,
                     Settings.Global.TZINFO_UPDATE_CONTENT_URL,
@@ -462,8 +463,8 @@ public class SettingsBackupTest {
                     Settings.Global.ZRAM_ENABLED,
                     Settings.Global.OVERRIDE_SETTINGS_PROVIDER_RESTORE_ANY_VERSION,
                     Settings.Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED,
-                    Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS);
-
+                    Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS,
+                    Settings.Global.BACKUP_AGENT_TIMEOUT_PARAMETERS);
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(
                  Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,

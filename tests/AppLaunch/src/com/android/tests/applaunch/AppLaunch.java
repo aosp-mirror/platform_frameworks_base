@@ -76,6 +76,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final String KEY_DROP_CACHE = "drop_cache";
     private static final String KEY_SIMPLEPERF_CMD = "simpleperf_cmd";
     private static final String KEY_SIMPLEPERF_APP = "simpleperf_app";
+    private static final String KEY_CYCLE_CLEAN = "cycle_clean";
     private static final String KEY_TRACE_ITERATIONS = "trace_iterations";
     private static final String KEY_LAUNCH_DIRECTORY = "launch_directory";
     private static final String KEY_TRACE_DIRECTORY = "trace_directory";
@@ -137,6 +138,11 @@ public class AppLaunch extends InstrumentationTestCase {
     private BufferedWriter mBufferedWriter = null;
     private boolean mSimplePerfAppOnly = false;
     private String[] mCompilerFilters = null;
+    private String mLastAppName = "";
+    private boolean mCycleCleanUp = false;
+    private boolean mIterationCycle = false;
+    private long mCycleTime = 0;
+    private StringBuilder mCycleTimes = new StringBuilder();
 
     @Override
     protected void setUp() throws Exception {
@@ -236,6 +242,7 @@ public class AppLaunch extends InstrumentationTestCase {
                 // App launch times for trial launch will not be used for final
                 // launch time calculations.
                 if (launch.getLaunchReason().equals(TRIAL_LAUNCH)) {
+                    mIterationCycle = false;
                     // In the "applaunch.txt" file, trail launches is referenced using
                     // "TRIAL_LAUNCH"
                     String appPkgName = mNameToIntent.get(launch.getApp())
@@ -273,6 +280,7 @@ public class AppLaunch extends InstrumentationTestCase {
 
                 // App launch times used for final calculation
                 else if (launch.getLaunchReason().contains(LAUNCH_ITERATION_PREFIX)) {
+                    mIterationCycle = true;
                     AppLaunchResult launchResults = null;
                     if (hasFailureOnFirstLaunch(launch)) {
                         // skip if the app has failures while launched first
@@ -286,6 +294,7 @@ public class AppLaunch extends InstrumentationTestCase {
                         // if it fails once, skip the rest of the launches
                         continue;
                     } else {
+                        mCycleTime += launchResults.mLaunchTime;
                         addLaunchResult(launch, launchResults);
                     }
                     sleep(POST_LAUNCH_IDLE_TIMEOUT);
@@ -294,6 +303,7 @@ public class AppLaunch extends InstrumentationTestCase {
                 // App launch times for trace launch will not be used for final
                 // launch time calculations.
                 else if (launch.getLaunchReason().contains(TRACE_ITERATION_PREFIX)) {
+                    mIterationCycle = false;
                     AtraceLogger atraceLogger = AtraceLogger
                             .getAtraceLoggerInstance(getInstrumentation());
                     // Start the trace
@@ -314,6 +324,20 @@ public class AppLaunch extends InstrumentationTestCase {
                     startHomeIntent();
                 }
                 sleep(BETWEEN_LAUNCH_SLEEP_TIMEOUT);
+
+                // If cycle clean up is enabled and last app launched is
+                // current app then the cycle is completed and eligible for
+                // cleanup.
+                if (LAUNCH_ORDER_CYCLIC.equalsIgnoreCase(mLaunchOrder) && mCycleCleanUp
+                        && launch.getApp().equalsIgnoreCase(mLastAppName)) {
+                    // Kill all the apps and drop all the cache
+                    cleanUpAfterCycle();
+                    if (mIterationCycle) {
+                        // Save the previous cycle time and reset the cycle time to 0
+                        mCycleTimes.append(String.format("%d,", mCycleTime));
+                        mCycleTime = 0;
+                    }
+                }
             }
         } finally {
             if (null != mBufferedWriter) {
@@ -321,6 +345,9 @@ public class AppLaunch extends InstrumentationTestCase {
             }
         }
 
+        if (mCycleTimes.length() != 0) {
+                mResult.putString("Cycle_Times", mCycleTimes.toString());
+        }
         for (String app : mNameToResultKey.keySet()) {
             for (String compilerFilter : mCompilerFilters) {
                 StringBuilder launchTimes = new StringBuilder();
@@ -453,6 +480,7 @@ public class AppLaunch extends InstrumentationTestCase {
 
             mNameToResultKey.put(parts[0], parts[1]);
             mNameToLaunchTime.put(parts[0], null);
+            mLastAppName = parts[0];
         }
         String requiredAccounts = args.getString(KEY_REQUIRED_ACCOUNTS);
         if (requiredAccounts != null) {
@@ -487,6 +515,7 @@ public class AppLaunch extends InstrumentationTestCase {
         mSimplePerfCmd = args.getString(KEY_SIMPLEPERF_CMD);
         mLaunchOrder = args.getString(KEY_LAUNCH_ORDER, LAUNCH_ORDER_CYCLIC);
         mSimplePerfAppOnly = Boolean.parseBoolean(args.getString(KEY_SIMPLEPERF_APP));
+        mCycleCleanUp = Boolean.parseBoolean(args.getString(KEY_CYCLE_CLEAN));
         mTrialLaunch = mTrialLaunch || Boolean.parseBoolean(args.getString(KEY_TRIAL_LAUNCH));
 
         if (mSimplePerfCmd != null && mSimplePerfAppOnly) {
@@ -595,6 +624,18 @@ public class AppLaunch extends InstrumentationTestCase {
                 | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
         getInstrumentation().getContext().startActivity(homeIntent);
         sleep(POST_LAUNCH_IDLE_TIMEOUT);
+    }
+
+    private void cleanUpAfterCycle() {
+        // Kill all the apps
+        for (String appName : mNameToIntent.keySet()) {
+            Log.w(TAG, String.format("killing %s", appName));
+            closeApp(appName);
+        }
+        // Drop all the cache.
+        assertNotNull("Issue in dropping the cache",
+                getInstrumentation().getUiAutomation()
+                        .executeShellCommand(DROP_CACHE_SCRIPT));
     }
 
     private void closeApp(String appName) {

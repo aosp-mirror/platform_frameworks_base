@@ -270,11 +270,9 @@ void StatsLogProcessor::onDumpReportLocked(const ConfigKey& key, const uint64_t 
     it->second->onDumpReport(dumpTimeStampNs, &proto);
 
     // Fill in UidMap.
-    auto uidMap = mUidMap->getOutput(key);
-    const int uidMapSize = uidMap.ByteSize();
-    char uidMapBuffer[uidMapSize];
-    uidMap.SerializeToArray(&uidMapBuffer[0], uidMapSize);
-    proto.write(FIELD_TYPE_MESSAGE | FIELD_ID_UID_MAP, uidMapBuffer, uidMapSize);
+    vector<uint8_t> uidMap;
+    mUidMap->getOutput(key, &uidMap);
+    proto.write(FIELD_TYPE_MESSAGE | FIELD_ID_UID_MAP, uidMap.data());
 
     // Fill in the timestamps.
     proto.write(FIELD_TYPE_INT64 | FIELD_ID_LAST_REPORT_ELAPSED_NANOS,

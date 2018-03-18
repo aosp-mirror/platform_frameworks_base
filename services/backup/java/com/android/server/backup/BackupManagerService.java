@@ -1398,7 +1398,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     // Returns the set of all applications that define an android:backupAgent attribute
     private List<PackageInfo> allAgentPackages() {
         // !!! TODO: cache this and regenerate only when necessary
-        int flags = PackageManager.GET_SIGNATURES;
+        int flags = PackageManager.GET_SIGNING_CERTIFICATES;
         List<PackageInfo> packages = mPackageManager.getInstalledPackages(flags);
         int N = packages.size();
         for (int a = N - 1; a >= 0; a--) {
@@ -1643,7 +1643,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
             }
             try {
                 PackageInfo packageInfo = mPackageManager.getPackageInfo(packageName,
-                        PackageManager.GET_SIGNATURES);
+                        PackageManager.GET_SIGNING_CERTIFICATES);
                 if (!AppBackupUtils.appIsEligibleForBackup(packageInfo.applicationInfo,
                         mPackageManager)) {
                     BackupObserverUtils.sendBackupOnPackageResult(observer, packageName,
@@ -2353,7 +2353,8 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         if (DEBUG) Slog.v(TAG, "clearBackupData() of " + packageName + " on " + transportName);
         PackageInfo info;
         try {
-            info = mPackageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
+            info = mPackageManager.getPackageInfo(packageName,
+                    PackageManager.GET_SIGNING_CERTIFICATES);
         } catch (NameNotFoundException e) {
             Slog.d(TAG, "No such package '" + packageName + "' - not clearing backup data");
             return;

@@ -36,8 +36,9 @@
 #include <stdio.h>
 #include <system/graphics.h>
 #include <ui/DisplayInfo.h>
-#include <ui/HdrCapabilities.h>
 #include <ui/FrameStats.h>
+#include <ui/GraphicsTypes.h>
+#include <ui/HdrCapabilities.h>
 #include <ui/Rect.h>
 #include <ui/Region.h>
 #include <utils/Log.h>
@@ -290,7 +291,7 @@ static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerHandl
     }
 
     sp<GraphicBuffer> buffer;
-    status_t res = ScreenshotClient::captureLayers(layerHandle, sourceCrop, frameScale, &buffer);
+    status_t res = ScreenshotClient::captureChildLayers(layerHandle, sourceCrop, frameScale, &buffer);
     if (res != NO_ERROR) {
         return NULL;
     }
@@ -593,7 +594,7 @@ static jboolean nativeSetActiveConfig(JNIEnv* env, jclass clazz, jobject tokenOb
 static jintArray nativeGetDisplayColorModes(JNIEnv* env, jclass, jobject tokenObj) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == NULL) return NULL;
-    Vector<android_color_mode_t> colorModes;
+    Vector<ColorMode> colorModes;
     if (SurfaceComposerClient::getDisplayColorModes(token, &colorModes) != NO_ERROR ||
             colorModes.isEmpty()) {
         return NULL;
@@ -623,7 +624,7 @@ static jboolean nativeSetActiveColorMode(JNIEnv* env, jclass,
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
     if (token == NULL) return JNI_FALSE;
     status_t err = SurfaceComposerClient::setActiveColorMode(token,
-            static_cast<android_color_mode_t>(colorMode));
+            static_cast<ColorMode>(colorMode));
     return err == NO_ERROR ? JNI_TRUE : JNI_FALSE;
 }
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define DEBUG true  // STOPSHIP if true
+#define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
 #include "stats_log_util.h"
@@ -28,9 +28,32 @@
 
 using namespace android;
 
+using android::base::StringPrintf;
+using android::util::FIELD_COUNT_REPEATED;
+using android::util::FIELD_TYPE_BOOL;
+using android::util::FIELD_TYPE_FLOAT;
+using android::util::FIELD_TYPE_INT32;
+using android::util::FIELD_TYPE_INT64;
+using android::util::FIELD_TYPE_MESSAGE;
+using android::util::FIELD_TYPE_STRING;
+using android::util::ProtoOutputStream;
+
 namespace android {
 namespace os {
 namespace statsd {
+
+const int FIELD_ID_SNAPSHOT_PACKAGE_NAME = 1;
+const int FIELD_ID_SNAPSHOT_PACKAGE_VERSION = 2;
+const int FIELD_ID_SNAPSHOT_PACKAGE_UID = 3;
+const int FIELD_ID_SNAPSHOT_TIMESTAMP = 1;
+const int FIELD_ID_SNAPSHOT_PACKAGE_INFO = 2;
+const int FIELD_ID_SNAPSHOTS = 1;
+const int FIELD_ID_CHANGES = 2;
+const int FIELD_ID_CHANGE_DELETION = 1;
+const int FIELD_ID_CHANGE_TIMESTAMP = 2;
+const int FIELD_ID_CHANGE_PACKAGE = 3;
+const int FIELD_ID_CHANGE_UID = 4;
+const int FIELD_ID_CHANGE_VERSION = 5;
 
 UidMap::UidMap() : mBytesUsed(0) {}
 
@@ -93,23 +116,35 @@ void UidMap::updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
         lock_guard<mutex> lock(mMutex);  // Exclusively lock for updates.
 
         mMap.clear();
+        ProtoOutputStream proto;
+        uint64_t token = proto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                                      FIELD_ID_SNAPSHOT_PACKAGE_INFO);
         for (size_t j = 0; j < uid.size(); j++) {
-            mMap.insert(make_pair(
-                    uid[j], AppData(string(String8(packageName[j]).string()), versionCode[j])));
+            string package = string(String8(packageName[j]).string());
+            mMap.insert(make_pair(uid[j], AppData(package, versionCode[j])));
+            proto.write(FIELD_TYPE_STRING | FIELD_ID_SNAPSHOT_PACKAGE_NAME, package);
+            proto.write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_VERSION, (int)versionCode[j]);
+            proto.write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_UID, (int)uid[j]);
         }
+        proto.end(token);
 
-        auto snapshot = mOutput.add_snapshots();
-        snapshot->set_elapsed_timestamp_nanos(timestamp);
-        for (size_t j = 0; j < uid.size(); j++) {
-            auto t = snapshot->add_package_info();
-            t->set_name(string(String8(packageName[j]).string()));
-            t->set_version(int(versionCode[j]));
-            t->set_uid(uid[j]);
+        // Copy ProtoOutputStream output to
+        auto iter = proto.data();
+        size_t pos = 0;
+        vector<char> outData(proto.size());
+        while (iter.readBuffer() != NULL) {
+            size_t toRead = iter.currentToRead();
+            std::memcpy(&(outData[pos]), iter.readBuffer(), toRead);
+            pos += toRead;
+            iter.rp()->move(toRead);
         }
-        mBytesUsed += snapshot->ByteSize();
+        SnapshotRecord record(timestamp, outData);
+        mSnapshots.push_back(record);
+
+        mBytesUsed += proto.size() + kBytesTimestampField;
         ensureBytesUsedBelowLimit();
         StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
-        StatsdStats::getInstance().setUidMapSnapshots(mOutput.snapshots_size());
+        StatsdStats::getInstance().setUidMapSnapshots(mSnapshots.size());
         getListenerListCopyLocked(&broadcastList);
     }
     // To avoid invoking callback while holding the internal lock. we get a copy of the listener
@@ -136,16 +171,11 @@ void UidMap::updateApp(const int64_t& timestamp, const String16& app_16, const i
     {
         lock_guard<mutex> lock(mMutex);
 
-        auto log = mOutput.add_changes();
-        log->set_deletion(false);
-        log->set_elapsed_timestamp_nanos(timestamp);
-        log->set_app(appName);
-        log->set_uid(uid);
-        log->set_version(versionCode);
-        mBytesUsed += log->ByteSize();
+        mChanges.emplace_back(false, timestamp, appName, uid, versionCode);
+        mBytesUsed += kBytesChangeRecord;
         ensureBytesUsedBelowLimit();
         StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
-        StatsdStats::getInstance().setUidMapChanges(mOutput.changes_size());
+        StatsdStats::getInstance().setUidMapChanges(mChanges.size());
 
         auto range = mMap.equal_range(int(uid));
         bool found = false;
@@ -180,17 +210,16 @@ void UidMap::ensureBytesUsedBelowLimit() {
         limit = maxBytesOverride;
     }
     while (mBytesUsed > limit) {
-        VLOG("Bytes used %zu is above limit %zu, need to delete something", mBytesUsed, limit);
-        if (mOutput.snapshots_size() > 0) {
-            auto snapshots = mOutput.mutable_snapshots();
-            snapshots->erase(snapshots->begin());  // Remove first snapshot.
+        ALOGI("Bytes used %zu is above limit %zu, need to delete something", mBytesUsed, limit);
+        if (mSnapshots.size() > 0) {
+            mBytesUsed -= mSnapshots.front().bytes.size() + kBytesTimestampField;
+            mSnapshots.pop_front();
             StatsdStats::getInstance().noteUidMapDropped(1, 0);
-        } else if (mOutput.changes_size() > 0) {
-            auto changes = mOutput.mutable_changes();
-            changes->DeleteSubrange(0, 1);
+        } else if (mChanges.size() > 0) {
+            mBytesUsed -= kBytesChangeRecord;
+            mChanges.pop_front();
             StatsdStats::getInstance().noteUidMapDropped(0, 1);
         }
-        mBytesUsed = mOutput.ByteSize();
     }
 }
 
@@ -217,15 +246,11 @@ void UidMap::removeApp(const int64_t& timestamp, const String16& app_16, const i
     {
         lock_guard<mutex> lock(mMutex);
 
-        auto log = mOutput.add_changes();
-        log->set_deletion(true);
-        log->set_elapsed_timestamp_nanos(timestamp);
-        log->set_app(app);
-        log->set_uid(uid);
-        mBytesUsed += log->ByteSize();
+        mChanges.emplace_back(true, timestamp, app, uid, 0);
+        mBytesUsed += kBytesChangeRecord;
         ensureBytesUsedBelowLimit();
         StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
-        StatsdStats::getInstance().setUidMapChanges(mOutput.changes_size());
+        StatsdStats::getInstance().setUidMapChanges(mChanges.size());
 
         auto range = mMap.equal_range(int(uid));
         for (auto it = range.first; it != range.second; ++it) {
@@ -281,7 +306,8 @@ int UidMap::getHostUidOrSelf(int uid) const {
 }
 
 void UidMap::clearOutput() {
-    mOutput.Clear();
+    mSnapshots.clear();
+    mChanges.clear();
     // Also update the guardrail trackers.
     StatsdStats::getInstance().setUidMapChanges(0);
     StatsdStats::getInstance().setUidMapSnapshots(1);
@@ -305,59 +331,111 @@ size_t UidMap::getBytesUsed() const {
     return mBytesUsed;
 }
 
-UidMapping UidMap::getOutput(const ConfigKey& key) {
-    return getOutput(getElapsedRealtimeNs(), key);
+void UidMap::getOutput(const ConfigKey& key, vector<uint8_t>* outData) {
+    getOutput(getElapsedRealtimeNs(), key, outData);
 }
 
-UidMapping UidMap::getOutput(const int64_t& timestamp, const ConfigKey& key) {
+void UidMap::getOutput(const int64_t& timestamp, const ConfigKey& key, vector<uint8_t>* outData) {
     lock_guard<mutex> lock(mMutex);  // Lock for updates
 
-    auto ret = UidMapping(mOutput);  // Copy that will be returned.
+    ProtoOutputStream proto;
+    for (const ChangeRecord& record : mChanges) {
+        if (record.timestampNs > mLastUpdatePerConfigKey[key]) {
+            uint64_t changesToken =
+                    proto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_CHANGES);
+            proto.write(FIELD_TYPE_BOOL | FIELD_ID_CHANGE_DELETION, (bool)record.deletion);
+            proto.write(FIELD_TYPE_INT64 | FIELD_ID_CHANGE_TIMESTAMP,
+                        (long long)record.timestampNs);
+            proto.write(FIELD_TYPE_STRING | FIELD_ID_CHANGE_PACKAGE, record.package);
+            proto.write(FIELD_TYPE_INT32 | FIELD_ID_CHANGE_UID, (int)record.uid);
+            proto.write(FIELD_TYPE_INT32 | FIELD_ID_CHANGE_VERSION, (int)record.version);
+            proto.end(changesToken);
+        }
+    }
+
+    bool atLeastOneSnapshot = false;
+    unsigned int count = 0;
+    for (const SnapshotRecord& record : mSnapshots) {
+        // Ensure that we include at least the latest snapshot.
+        if ((count == mSnapshots.size() - 1 && !atLeastOneSnapshot) ||
+            record.timestampNs > mLastUpdatePerConfigKey[key]) {
+            uint64_t snapshotsToken =
+                    proto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_SNAPSHOTS);
+            atLeastOneSnapshot = true;
+            count++;
+            proto.write(FIELD_TYPE_INT64 | FIELD_ID_SNAPSHOT_TIMESTAMP,
+                        (long long)record.timestampNs);
+            proto.write(FIELD_TYPE_MESSAGE | FIELD_ID_SNAPSHOT_PACKAGE_INFO, record.bytes.data());
+            proto.end(snapshotsToken);
+        }
+    }
+
     int64_t prevMin = getMinimumTimestampNs();
     mLastUpdatePerConfigKey[key] = timestamp;
     int64_t newMin = getMinimumTimestampNs();
 
-    if (newMin > prevMin) {  // Delete anything possible now that the minimum has moved forward.
+    if (newMin > prevMin) {  // Delete anything possible now that the minimum has
+                             // moved forward.
         int64_t cutoff_nanos = newMin;
-        auto snapshots = mOutput.mutable_snapshots();
-        auto it_snapshots = snapshots->cbegin();
-        while (it_snapshots != snapshots->cend()) {
-            if (it_snapshots->elapsed_timestamp_nanos() < cutoff_nanos) {
-                // it_snapshots points to the following element after erasing.
-                it_snapshots = snapshots->erase(it_snapshots);
-            } else {
-                ++it_snapshots;
+        for (auto it_snapshots = mSnapshots.begin(); it_snapshots != mSnapshots.end();
+             ++it_snapshots) {
+            if (it_snapshots->timestampNs < cutoff_nanos) {
+                mBytesUsed -= it_snapshots->bytes.size() + kBytesTimestampField;
+                mSnapshots.erase(it_snapshots);
             }
         }
-        auto deltas = mOutput.mutable_changes();
-        auto it_deltas = deltas->cbegin();
-        while (it_deltas != deltas->cend()) {
-            if (it_deltas->elapsed_timestamp_nanos() < cutoff_nanos) {
-                // it_snapshots points to the following element after erasing.
-                it_deltas = deltas->erase(it_deltas);
-            } else {
-                ++it_deltas;
+        for (auto it_changes = mChanges.begin(); it_changes != mChanges.end(); ++it_changes) {
+            if (it_changes->timestampNs < cutoff_nanos) {
+                mBytesUsed -= kBytesChangeRecord;
+                mChanges.erase(it_changes);
             }
         }
 
-        if (mOutput.snapshots_size() == 0) {
-            // Produce another snapshot. This results in extra data being uploaded but helps
-            // ensure we can re-construct the UID->app name, versionCode mapping in server.
-            auto snapshot = mOutput.add_snapshots();
-            snapshot->set_elapsed_timestamp_nanos(timestamp);
-            for (auto it : mMap) {
-                auto t = snapshot->add_package_info();
-                t->set_name(it.second.packageName);
-                t->set_version(it.second.versionCode);
-                t->set_uid(it.first);
+        if (mSnapshots.size() == 0) {
+            // Produce another snapshot. This results in extra data being uploaded but
+            // helps ensure we can re-construct the UID->app name, versionCode mapping
+            // in server.
+            ProtoOutputStream proto;
+            uint64_t token = proto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                                          FIELD_ID_SNAPSHOT_PACKAGE_INFO);
+            for (const auto& it : mMap) {
+                proto.write(FIELD_TYPE_STRING | FIELD_ID_SNAPSHOT_PACKAGE_NAME,
+                            it.second.packageName);
+                proto.write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_VERSION,
+                            (int)it.second.versionCode);
+                proto.write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_UID, (int)it.first);
             }
+            proto.end(token);
+
+            // Copy ProtoOutputStream output to
+            auto iter = proto.data();
+            vector<char> outData(proto.size());
+            size_t pos = 0;
+            while (iter.readBuffer() != NULL) {
+                size_t toRead = iter.currentToRead();
+                std::memcpy(&(outData[pos]), iter.readBuffer(), toRead);
+                pos += toRead;
+                iter.rp()->move(toRead);
+            }
+            mSnapshots.emplace_back(timestamp, outData);
+            mBytesUsed += kBytesTimestampField + outData.size();
         }
     }
-    mBytesUsed = mOutput.ByteSize();  // Compute actual size after potential deletions.
     StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
-    StatsdStats::getInstance().setUidMapChanges(mOutput.changes_size());
-    StatsdStats::getInstance().setUidMapSnapshots(mOutput.snapshots_size());
-    return ret;
+    StatsdStats::getInstance().setUidMapChanges(mChanges.size());
+    StatsdStats::getInstance().setUidMapSnapshots(mSnapshots.size());
+    if (outData != nullptr) {
+        outData->clear();
+        outData->resize(proto.size());
+        size_t pos = 0;
+        auto iter = proto.data();
+        while (iter.readBuffer() != NULL) {
+            size_t toRead = iter.currentToRead();
+            std::memcpy(&((*outData)[pos]), iter.readBuffer(), toRead);
+            pos += toRead;
+            iter.rp()->move(toRead);
+        }
+    }
 }
 
 void UidMap::printUidMap(FILE* out) const {
@@ -374,7 +452,7 @@ void UidMap::OnConfigUpdated(const ConfigKey& key) {
 
     // Ensure there is at least one snapshot available since this configuration also needs to know
     // what all the uid's represent.
-    if (mOutput.snapshots_size() == 0) {
+    if (mSnapshots.size() == 0) {
         sp<IStatsCompanionService> statsCompanion = nullptr;
         // Get statscompanion service from service manager
         const sp<IServiceManager> sm(defaultServiceManager());

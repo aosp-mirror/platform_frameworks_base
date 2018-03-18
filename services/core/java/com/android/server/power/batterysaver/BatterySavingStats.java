@@ -20,6 +20,7 @@ import android.os.BatteryManagerInternal;
 import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -31,6 +32,8 @@ import com.android.server.LocalServices;
 import com.android.server.power.BatterySaverPolicy;
 
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * This class keeps track of battery drain rate.
@@ -45,9 +48,6 @@ public class BatterySavingStats {
     private static final String TAG = "BatterySavingStats";
 
     private static final boolean DEBUG = BatterySaverPolicy.DEBUG;
-
-    @VisibleForTesting
-    static final boolean SEND_TRON_EVENTS = true;
 
     private final Object mLock = new Object();
 
@@ -159,7 +159,23 @@ public class BatterySavingStats {
     @GuardedBy("mLock")
     final ArrayMap<Integer, Stat> mStats = new ArrayMap<>();
 
+    @GuardedBy("mLock")
+    private int mBatterySaverEnabledCount = 0;
+
+    @GuardedBy("mLock")
+    private boolean mIsBatterySaverEnabled;
+
+    @GuardedBy("mLock")
+    private long mLastBatterySaverEnabledTime = 0;
+
+    @GuardedBy("mLock")
+    private long mLastBatterySaverDisabledTime = 0;
+
     private final MetricsLoggerHelper mMetricsLoggerHelper = new MetricsLoggerHelper();
+
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    private boolean mSendTronLog;
 
     /**
      * Don't call it directly -- use {@link #getInstance()}. Not private for testing.
@@ -176,6 +192,12 @@ public class BatterySavingStats {
             sInstance = new BatterySavingStats(new MetricsLogger());
         }
         return sInstance;
+    }
+
+    public void setSendTronLog(boolean send) {
+        synchronized (mLock) {
+            mSendTronLog = send;
+        }
     }
 
     private BatteryManagerInternal getBatteryManagerInternal() {
@@ -291,9 +313,23 @@ public class BatterySavingStats {
         final int batteryLevel = injectBatteryLevel();
         final int batteryPercent = injectBatteryPercent();
 
+        final boolean oldBatterySaverEnabled =
+                BatterySaverState.fromIndex(mCurrentState) != BatterySaverState.OFF;
+        final boolean newBatterySaverEnabled =
+                BatterySaverState.fromIndex(newState) != BatterySaverState.OFF;
+        if (oldBatterySaverEnabled != newBatterySaverEnabled) {
+            mIsBatterySaverEnabled = newBatterySaverEnabled;
+            if (newBatterySaverEnabled) {
+                mBatterySaverEnabledCount++;
+                mLastBatterySaverEnabledTime = injectCurrentTime();
+            } else {
+                mLastBatterySaverDisabledTime = injectCurrentTime();
+            }
+        }
+
         endLastStateLocked(now, batteryLevel, batteryPercent);
         startNewStateLocked(newState, now, batteryLevel, batteryPercent);
-        mMetricsLoggerHelper.transitionState(newState, now, batteryLevel, batteryPercent);
+        mMetricsLoggerHelper.transitionStateLocked(newState, now, batteryLevel, batteryPercent);
     }
 
     @GuardedBy("mLock")
@@ -358,12 +394,49 @@ public class BatterySavingStats {
     public void dump(PrintWriter pw, String indent) {
         synchronized (mLock) {
             pw.print(indent);
-            pw.println("Battery Saving Stats:");
+            pw.println("Battery saving stats:");
 
             indent = indent + "  ";
 
+            final long now = System.currentTimeMillis();
+            final long nowElapsed = injectCurrentTime();
+            final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
             pw.print(indent);
-            pw.println("Battery Saver:     w/Off                                      w/On");
+            pw.print("Battery Saver is currently: ");
+            pw.println(mIsBatterySaverEnabled ? "ON" : "OFF");
+            if (mLastBatterySaverEnabledTime > 0) {
+                pw.print(indent);
+                pw.print("  ");
+                pw.print("Last ON time: ");
+                pw.print(sdf.format(new Date(now - nowElapsed + mLastBatterySaverEnabledTime)));
+                pw.print(" ");
+                TimeUtils.formatDuration(mLastBatterySaverEnabledTime, nowElapsed, pw);
+                pw.println();
+            }
+
+            if (mLastBatterySaverDisabledTime > 0) {
+                pw.print(indent);
+                pw.print("  ");
+                pw.print("Last OFF time: ");
+                pw.print(sdf.format(new Date(now - nowElapsed + mLastBatterySaverDisabledTime)));
+                pw.print(" ");
+                TimeUtils.formatDuration(mLastBatterySaverDisabledTime, nowElapsed, pw);
+                pw.println();
+            }
+
+            pw.print(indent);
+            pw.print("  ");
+            pw.print("Times enabled: ");
+            pw.println(mBatterySaverEnabledCount);
+
+            pw.println();
+
+            pw.print(indent);
+            pw.println("Drain stats:");
+
+            pw.print(indent);
+            pw.println("                   Battery saver OFF                          ON");
             dumpLineLocked(pw, indent, InteractiveState.NON_INTERACTIVE, "NonIntr",
                     DozeState.NOT_DOZING, "NonDoze");
             dumpLineLocked(pw, indent, InteractiveState.INTERACTIVE, "   Intr",
@@ -378,8 +451,6 @@ public class BatterySavingStats {
                     DozeState.LIGHT, "Light  ");
             dumpLineLocked(pw, indent, InteractiveState.INTERACTIVE, "   Intr",
                     DozeState.LIGHT, "       ");
-
-            pw.println();
         }
     }
 
@@ -395,7 +466,7 @@ public class BatterySavingStats {
         final Stat offStat = getStat(BatterySaverState.OFF, interactiveState, dozeState);
         final Stat onStat = getStat(BatterySaverState.ON, interactiveState, dozeState);
 
-        pw.println(String.format("%6dm %6dmA (%3d%%) %8.1fmA/h      %6dm %6dmA (%3d%%) %8.1fmA/h",
+        pw.println(String.format("%6dm %6dmAh(%3d%%) %8.1fmAh/h     %6dm %6dmAh(%3d%%) %8.1fmAh/h",
                 offStat.totalMinutes(),
                 offStat.totalBatteryDrain / 1000,
                 offStat.totalBatteryDrainPercent,
@@ -417,7 +488,8 @@ public class BatterySavingStats {
                 (BatterySaverState.MASK << BatterySaverState.SHIFT) |
                 (InteractiveState.MASK << InteractiveState.SHIFT);
 
-        public void transitionState(int newState, long now, int batteryLevel, int batteryPercent) {
+        public void transitionStateLocked(
+                int newState, long now, int batteryLevel, int batteryPercent) {
             final boolean stateChanging =
                     ((mLastState >= 0) ^ (newState >= 0)) ||
                     (((mLastState ^ newState) & STATE_CHANGE_DETECT_MASK) != 0);
@@ -425,7 +497,7 @@ public class BatterySavingStats {
                 if (mLastState >= 0) {
                     final long deltaTime = now - mStartTime;
 
-                    report(mLastState, deltaTime, mStartBatteryLevel, mStartPercent,
+                    reportLocked(mLastState, deltaTime, mStartBatteryLevel, mStartPercent,
                             batteryLevel, batteryPercent);
                 }
                 mStartTime = now;
@@ -435,10 +507,10 @@ public class BatterySavingStats {
             mLastState = newState;
         }
 
-        void report(int state, long deltaTimeMs,
+        void reportLocked(int state, long deltaTimeMs,
                 int startBatteryLevelUa, int startBatteryLevelPercent,
                 int endBatteryLevelUa, int endBatteryLevelPercent) {
-            if (!SEND_TRON_EVENTS) {
+            if (!mSendTronLog) {
                 return;
             }
             final boolean batterySaverOn =

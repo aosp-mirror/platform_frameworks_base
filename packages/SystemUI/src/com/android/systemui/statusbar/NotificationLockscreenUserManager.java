@@ -38,6 +38,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.OverviewProxyService;
@@ -67,6 +68,7 @@ public class NotificationLockscreenUserManager implements Dumpable {
             Dependency.get(DeviceProvisionedController.class);
     private final UserManager mUserManager;
     private final IStatusBarService mBarService;
+    private final LockPatternUtils mLockPatternUtils;
 
     private boolean mShowLockscreenNotifications;
     private boolean mAllowLockscreenRemoteInput;
@@ -155,6 +157,7 @@ public class NotificationLockscreenUserManager implements Dumpable {
         mCurrentUserId = ActivityManager.getCurrentUser();
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+        mLockPatternUtils = new LockPatternUtils(mContext);
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -259,12 +262,24 @@ public class NotificationLockscreenUserManager implements Dumpable {
     }
 
     /**
+     * Returns true if notifications are temporarily disabled for this user for security reasons,
+     * regardless of the normal settings for that user.
+     */
+    private boolean shouldTemporarilyHideNotifications(int userId) {
+        if (userId == UserHandle.USER_ALL) {
+            userId = mCurrentUserId;
+        }
+        return mLockPatternUtils.isUserInLockdown(userId);
+    }
+
+    /**
      * Returns true if we're on a secure lockscreen and the user wants to hide notification data.
      * If so, notifications should be hidden.
      */
     public boolean shouldHideNotifications(int userId) {
         return isLockscreenPublicMode(userId) && !userAllowsNotificationsInPublic(userId)
-                || (userId != mCurrentUserId && shouldHideNotifications(mCurrentUserId));
+                || (userId != mCurrentUserId && shouldHideNotifications(mCurrentUserId))
+                || shouldTemporarilyHideNotifications(userId);
     }
 
     /**
