@@ -368,7 +368,7 @@ message GlobalSettingsProto {
     optional SettingProto off_body_radios_off_for_small_battery_enabled = 271 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto off_body_radios_off_delay_ms = 272 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto wifi_on_when_proxy_disconnected = 273 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto time_only_mode_enabled = 274 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto time_only_mode_constants = 274 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto network_watchlist_enabled = 275 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto keep_profile_in_background = 276 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto window_animation_scale = 277 [ (android.privacy).dest = DEST_AUTOMATIC ];
