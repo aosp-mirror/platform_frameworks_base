@@ -389,7 +389,7 @@ public class NotificationLockscreenUserManager implements Dumpable {
      * "public" (secure & locked) mode?
      */
     private boolean userAllowsNotificationsInPublic(int userHandle) {
-        if (userHandle == UserHandle.USER_ALL) {
+        if (isCurrentProfile(userHandle)) {
             return true;
         }
 
