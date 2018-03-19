@@ -2938,7 +2938,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 158;
+            private static final int SETTINGS_VERSION = 159;
 
             private final int mUserId;
 
@@ -3636,6 +3636,16 @@ public class SettingsProvider extends ContentProvider {
                     }
                     currentVersion = 158;
                 }
+
+                if (currentVersion == 158) {
+                    // Remove setting that specifies wifi bgscan throttling params
+                    getGlobalSettingsLocked().deleteSettingLocked(
+                        "wifi_scan_background_throttle_interval_ms");
+                    getGlobalSettingsLocked().deleteSettingLocked(
+                        "wifi_scan_background_throttle_package_whitelist");
+                    currentVersion = 159;
+                }
+
                 // vXXX: Add new settings above this point.
 
                 if (currentVersion != newVersion) {
