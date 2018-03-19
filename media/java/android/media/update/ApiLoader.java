@@ -16,49 +16,73 @@
 
 package android.media.update;
 
-import android.annotation.NonNull;
-import android.content.res.Resources;
+import android.app.ActivityManager;
+import android.app.AppGlobals;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
+import android.os.RemoteException;
+import android.os.UserHandle;
+
+import com.android.internal.annotations.GuardedBy;
+
+import dalvik.system.PathClassLoader;
+
+import java.io.File;
 
 /**
  * @hide
  */
 public final class ApiLoader {
-    private static Object sMediaLibrary;
+    @GuardedBy("this")
+    private static StaticProvider sMediaUpdatable;
 
     private static final String UPDATE_PACKAGE = "com.android.media.update";
     private static final String UPDATE_CLASS = "com.android.media.update.ApiFactory";
     private static final String UPDATE_METHOD = "initialize";
+    private static final boolean REGISTER_UPDATE_DEPENDENCY = true;
 
     private ApiLoader() { }
 
-    public static StaticProvider getProvider(@NonNull Context context) {
-        if (context == null) {
-            throw new IllegalArgumentException("context shouldn't be null");
-        }
+    @Deprecated
+    public static StaticProvider getProvider(Context context) {
+        return getProvider();
+    }
+
+    public static StaticProvider getProvider() {
+        if (sMediaUpdatable != null) return sMediaUpdatable;
+
         try {
-            return (StaticProvider) getMediaLibraryImpl(context);
-        } catch (PackageManager.NameNotFoundException | ReflectiveOperationException e) {
+            return getMediaUpdatable();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (NameNotFoundException | ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
     }
 
     // TODO This method may do I/O; Ensure it does not violate (emit warnings in) strict mode.
-    private static synchronized Object getMediaLibraryImpl(Context context)
-            throws PackageManager.NameNotFoundException, ReflectiveOperationException {
-        if (sMediaLibrary != null) return sMediaLibrary;
+    private static synchronized StaticProvider getMediaUpdatable()
+            throws NameNotFoundException, ReflectiveOperationException, RemoteException {
+        if (sMediaUpdatable != null) return sMediaUpdatable;
 
         // TODO Figure out when to use which package (query media update service)
         int flags = Build.IS_DEBUGGABLE ? 0 : PackageManager.MATCH_FACTORY_ONLY;
-        Context libContext = context.createApplicationContext(
-                context.getPackageManager().getPackageInfo(UPDATE_PACKAGE, flags).applicationInfo,
-                Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
-        sMediaLibrary = libContext.getClassLoader()
-                .loadClass(UPDATE_CLASS)
-                .getMethod(UPDATE_METHOD, Resources.class, Resources.Theme.class)
-                .invoke(null, libContext.getResources(), libContext.getTheme());
-        return sMediaLibrary;
+        flags |= PackageManager.GET_SHARED_LIBRARY_FILES;
+        ApplicationInfo ai = AppGlobals.getPackageManager().getApplicationInfo(
+                UPDATE_PACKAGE, flags, UserHandle.myUserId());
+
+        if (REGISTER_UPDATE_DEPENDENCY) {
+            // Register a dependency to the updatable in order to be killed during updates
+            ActivityManager.getService().addPackageDependency(ai.packageName);
+        }
+
+        PathClassLoader classLoader = new PathClassLoader(ai.sourceDir,
+                ai.nativeLibraryDir + File.pathSeparator + System.getProperty("java.library.path"),
+                ClassLoader.getSystemClassLoader().getParent());
+        return sMediaUpdatable = (StaticProvider) classLoader.loadClass(UPDATE_CLASS)
+                .getMethod(UPDATE_METHOD, ApplicationInfo.class).invoke(null, ai);
     }
 }
