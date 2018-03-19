@@ -62,9 +62,6 @@ public class PhoneStateListener {
     /**
      * Listen for changes to the network signal strength (cellular).
      * {@more}
-     * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
-     * READ_PHONE_STATE}
-     * <p>
      *
      * @see #onSignalStrengthChanged
      *
@@ -77,7 +74,8 @@ public class PhoneStateListener {
      * Listen for changes to the message-waiting indicator.
      * {@more}
      * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
-     * READ_PHONE_STATE}
+     * READ_PHONE_STATE} or that the calling app has carrier privileges (see
+     * {@link TelephonyManager#hasCarrierPrivileges}).
      * <p>
      * Example: The status bar uses this to determine when to display the
      * voicemail icon.
@@ -90,7 +88,9 @@ public class PhoneStateListener {
      * Listen for changes to the call-forwarding indicator.
      * {@more}
      * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
-     * READ_PHONE_STATE}
+     * READ_PHONE_STATE} or that the calling app has carrier privileges (see
+     * {@link TelephonyManager#hasCarrierPrivileges}).
+     *
      * @see #onCallForwardingIndicatorChanged
      */
     public static final int LISTEN_CALL_FORWARDING_INDICATOR                = 0x00000008;
@@ -439,8 +439,9 @@ public class PhoneStateListener {
      *
      * @param state call state
      * @param phoneNumber call phone number. If application does not have
-     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} permission, an empty
-     * string will be passed as an argument.
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE} permission or carrier
+     * privileges (see {@link TelephonyManager#hasCarrierPrivileges}), an empty string will be
+     * passed as an argument.
      */
     public void onCallStateChanged(@TelephonyManager.CallState int state, String phoneNumber) {
         // default implementation empty
