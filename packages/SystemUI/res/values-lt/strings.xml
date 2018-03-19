@@ -40,9 +40,12 @@
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Liko: <xliff:g id="PERCENTAGE">%s</xliff:g> (atsižvelgiant į naudojimą liko maždaug <xliff:g id="TIME">%s</xliff:g>)"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Liko: <xliff:g id="PERCENTAGE">%s</xliff:g> (liko maždaug <xliff:g id="TIME">%s</xliff:g>)"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Liko <xliff:g id="PERCENTAGE">%s</xliff:g>. Akumuliatoriaus tausojimo priemonė įjungta."</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"USB krovimas nepalaikomas.\nNaudokite tik pateiktą įkroviklį."</string>
-    <string name="invalid_charger_title" msgid="3515740382572798460">"USB įkrovimas nepalaikomas."</string>
-    <string name="invalid_charger_text" msgid="5474997287953892710">"Naudokite tik pateiktą kroviklį."</string>
+    <!-- no translation found for invalid_charger (2741987096648693172) -->
+    <skip />
+    <!-- no translation found for invalid_charger_title (2836102177577255404) -->
+    <skip />
+    <!-- no translation found for invalid_charger_text (6480624964117840005) -->
+    <skip />
     <string name="battery_low_why" msgid="4553600287639198111">"Nustatymai"</string>
     <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Įjungti Akumuliatoriaus tausojimo priemonę?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Įjungti"</string>
@@ -149,28 +152,29 @@
     <string name="accessibility_desc_off" msgid="6475508157786853157">"Išjungta."</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Prijungta."</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Prisijungiama."</string>
-    <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
-    <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
-    <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
-    <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
-    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
-    <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
-    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
-    <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
-    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
-    <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
-    <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Tarptinklinis ryšys"</string>
-    <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Kraštas"</string>
+    <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
+    <string name="data_connection_1x" msgid="396105635197711584">"1 X"</string>
+    <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
+    <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
+    <string name="data_connection_3_5g" msgid="5218328297191657602">"3.5G"</string>
+    <string name="data_connection_3_5g_plus" msgid="7570783890290275297">"3.5G+"</string>
+    <string name="data_connection_4g" msgid="9139963475267449144">"4G"</string>
+    <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
+    <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
+    <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_cdma" msgid="4677985502159869585">"CDMA"</string>
+    <string name="data_connection_roaming" msgid="6037232010953697354">"Tarptinklinis ryšys"</string>
+    <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Nėra SIM kortelės."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Mobiliojo ryšio duomenys"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Mobiliojo ryšio duomenys įjungti"</string>
-    <string name="accessibility_cell_data_off" msgid="443267573897409704">"Mobiliojo ryšio duomenys išjungti"</string>
+    <string name="cell_data_off" msgid="5287705247512911922">"Mobiliojo ryšio duomenys išjungti"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"„Bluetooth“ įrenginio kaip modemo naudojimas."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Lėktuvo režimas."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN įjungtas."</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"Nėra SIM kortelės."</string>
-    <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Keičiamas operatoriaus tinklas."</string>
+    <string name="carrier_network_change_mode" msgid="8149202439957837762">"Keičiamas operatoriaus tinklas"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Atidaryti išsamią akumuliatoriaus informaciją"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Akumuliatorius: <xliff:g id="NUMBER">%d</xliff:g> proc."</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Įkraunamas akumuliatorius, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> proc."</string>
@@ -209,7 +213,8 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Lėktuvo režimas įjungtas."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Lėktuvo režimas išjungtas."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Lėktuvo režimas įjungtas."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Funkcija „Netrukdyti“ įjungta. Tik prioritetiniai įvykiai."</string>
+    <!-- no translation found for accessibility_quick_settings_dnd_priority_on (5836205286254617194) -->
+    <skip />
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Įjungta funkcija „Netrukdyti“, visiška tyla."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Funkcija „Netrukdyti“ įjungta. Leidžiami tik signalai."</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Netrukdyti."</string>
@@ -290,6 +295,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Garsas"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Virtualiosios realybės įrenginys"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Įvestis"</string>
+    <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"Įjungiama…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Šviesumas"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Automatinis pasukimas"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Automatiškai sukti ekraną"</string>
@@ -314,7 +320,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"„Wi-Fi“ išjungta"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"„Wi-Fi“ įjungtas"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Nėra jokių pasiekiamų „Wi-Fi“ tinklų"</string>
-    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"Signalas"</string>
+    <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"Įjungiama…"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Perdavimas"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Perduodama"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Įrenginys be pavadinimo"</string>
@@ -331,7 +337,8 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Prisijungiama..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Susiejimas"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Viešosios interneto prieigos taškas"</string>
-    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"Įjungiama..."</string>
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="8010579363691405477">"Įjungiama…"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="5672131949987422420">"Duom. taup. pr. įj."</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
       <item quantity="one">%d įrenginys</item>
       <item quantity="few">%d įrenginiai</item>
@@ -347,8 +354,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"Išnaudota: <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Limitas: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> įspėjimas"</string>
-    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"Darbo profilis"</string>
-    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"Pranešimai ir programos išjungti"</string>
+    <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"Darbo profilis"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Nakties šviesa"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Per saulėlydį"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Iki saulėtekio"</string>
@@ -401,9 +407,9 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Visiška\ntyla"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Tik\nprioritetiniai"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Tik\nsignalai"</string>
-    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"Kraunama (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> iki visiško įkrovimo)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"Greitai kraunama (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> iki visiško įkrovimo)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"Lėtai kraunama (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> iki visiško įkrovimo)"</string>
+    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Įkraunama (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> iki visiško įkrovimo)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Greitai įkraunama (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> iki visiško įkr.)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Lėtai įkraunama (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> iki visiško įkr.)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Perjungti naudotoją"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Perjungti naudotoją, dabartinis naudotojas <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Dabartinis naudotojas <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -437,6 +443,8 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"„<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>“ pradės fiksuoti viską, kas rodoma jūsų ekrane."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Daugiau neberodyti"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Viską išvalyti"</string>
+    <!-- no translation found for dnd_suppressing_shade_text (7986451830430707907) -->
+    <skip />
     <string name="media_projection_action_text" msgid="8470872969457985954">"Pradėti dabar"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Nėra įspėjimų"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Profilis gali būti stebimas"</string>
@@ -504,6 +512,7 @@
     <string name="hidden_notifications_setup" msgid="41079514801976810">"Nustatyti"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="6930243045593601084">"Išjungti dabar"</string>
+    <string name="accessibility_volume_settings" msgid="4915364006817819212">"Garso nustatymai"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Išskleisti"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Sutraukti"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Perjungti išvesties įrenginį"</string>
@@ -541,12 +550,9 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Palieskite, kad nustatytumėte vibravimą."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Palieskite, kad nutildytumėte."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"Garsumo valdikliai: %s"</string>
-    <!-- no translation found for volume_dialog_ringer_guidance_vibrate (8902050240801159042) -->
-    <skip />
-    <!-- no translation found for volume_dialog_ringer_guidance_silent (2128975224280276122) -->
-    <skip />
-    <!-- no translation found for volume_dialog_ringer_guidance_ring (6144469689490528338) -->
-    <skip />
+    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Skambučiai ir pranešimai vibruos"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Skambučiai ir pranešimai bus nutildyti"</string>
+    <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"Skambučiai ir pranešimai skambės"</string>
     <string name="output_title" msgid="5355078100792942802">"Medijos išvestis"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Telefono skambučių išvestis"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Įrenginių nerasta"</string>
@@ -602,12 +608,31 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Naudodami pranešimų valdiklius galite nustatyti programos pranešimų svarbos lygį nuo 0 iki 5. \n\n"<b>"5 lygis"</b>" \n– Rodyti pranešimų sąrašo viršuje \n– Leisti pertraukti, kai veikia viso ekrano režimas \n– Visada rodyti pranešimus \n\n"<b>"4 lygis"</b>" \n– Neleisti pertraukti viso ekrano režimo \n– Visada rodyti pranešimus \n\n"<b>"3 lygis"</b>" \n– Neleisti pertraukti viso ekrano režimo \n– Niekada nerodyti pranešimų \n\n"<b>"2 lygis"</b>" \n– Neleisti pertraukti viso ekrano režimo \n– Niekada nerodyti pranešimų \n– Niekada neleisti garso ir nevibruoti \n\n"<b>"1 lygis"</b>" \n– Neleisti pertraukti viso ekrano režimo \n– Niekada nerodyti pranešimų \n– Niekada neleisti garso ir nevibruoti \n– Slėpti užrakinimo ekrane ir būsenos juostoje \n– Rodyti pranešimų sąrašo apačioje \n\n"<b>"0 lygis"</b>" \n– Blokuoti visus programos pranešimus"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Pranešimai"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Nebematysite šių pranešimų"</string>
+    <string name="notification_channel_minimized" msgid="1664411570378910931">"Šie pranešimai bus sumažinti"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Paprastai šių pranešimų atsisakote. \nToliau juos rodyti?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Toliau rodyti šiuos pranešimus?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Sustabdyti pranešimus"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Toliau rodyti"</string>
+    <string name="inline_minimize_button" msgid="966233327974702195">"Sumažinti"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Toliau rodyti iš šios programos gautus pranešimus?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Šių pranešimų negalima išjungti"</string>
+    <string name="notification_appops_camera_active" msgid="730959943016785931">"fotoaparatą"</string>
+    <string name="notification_appops_microphone_active" msgid="1546319728924580686">"mikrofoną"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"rodo virš kitų programų jūsų ekrane"</string>
+    <plurals name="notification_appops" formatted="false" msgid="1258122060887196817">
+      <item quantity="one">Ši programa <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> ir <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>.</item>
+      <item quantity="few">Ši programa <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> ir <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>.</item>
+      <item quantity="many">Ši programa <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> ir <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>.</item>
+      <item quantity="other">Ši programa <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> ir <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>.</item>
+    </plurals>
+    <plurals name="notification_using" formatted="false" msgid="2211008461429037973">
+      <item quantity="one">naudoja <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> ir <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
+      <item quantity="few">naudoja <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> ir <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
+      <item quantity="many">naudoja <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> ir <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
+      <item quantity="other">naudoja <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g> ir <xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g></item>
+    </plurals>
+    <string name="notification_appops_settings" msgid="1028328314935908050">"Nustatymai"</string>
+    <string name="notification_appops_ok" msgid="602562195588819631">"Gerai"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"„<xliff:g id="APP_NAME">%1$s</xliff:g>“ pranešimų valdikliai atidaryti"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"„<xliff:g id="APP_NAME">%1$s</xliff:g>“ pranešimų valdikliai uždaryti"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Leisti pranešimus iš šio kanalo"</string>
@@ -764,7 +789,7 @@
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Uždaryti sparčiuosius nustatymus."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Signalas nustatytas."</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Prisijungta kaip <xliff:g id="ID_1">%s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Nėra interneto ryšio."</string>
+    <string name="data_connection_no_internet" msgid="4503302451650972989">"Nėra interneto ryšio"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Atidaryti išsamią informaciją."</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Atidaryti „<xliff:g id="ID_1">%s</xliff:g>“ nustatymus."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Redaguoti nustatymų tvarką."</string>
@@ -812,6 +837,7 @@
     <string name="app_info" msgid="6856026610594615344">"Programos informacija"</string>
     <string name="go_to_web" msgid="2650669128861626071">"Eiti į naršyklę"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobilieji duomenys"</string>
+    <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g>–<xliff:g id="ID_2">%s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"„Wi-Fi“ išjungtas"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"„Bluetooth“ išjungtas"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"Netrukdymo režimas išjungtas"</string>
