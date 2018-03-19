@@ -77,6 +77,9 @@ public class ActivityLaunchAnimator {
 
     public RemoteAnimationAdapter getLaunchAnimation(
             ExpandableNotificationRow sourceNotification) {
+        if (mStatusBar.getBarState() != StatusBarState.SHADE) {
+            return null;
+        }
         AnimationRunner animationRunner = new AnimationRunner(sourceNotification);
         return new RemoteAnimationAdapter(animationRunner, ANIMATION_DURATION,
                 0 /* statusBarTransitionDelay */);
