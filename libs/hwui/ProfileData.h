@@ -33,7 +33,6 @@ enum JankType {
     kSlowUI,
     kSlowSync,
     kSlowRT,
-    kMissedDeadline,
 
     // must be last
     NUM_BUCKETS,
