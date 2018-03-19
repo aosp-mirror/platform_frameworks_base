@@ -220,7 +220,7 @@ public class Handler {
      *
      * Asynchronous messages represent interrupts or events that do not require global ordering
      * with respect to synchronous messages.  Asynchronous messages are not subject to
-     * the synchronization barriers introduced by {@link MessageQueue#enqueueSyncBarrier(long)}.
+     * the synchronization barriers introduced by conditions such as display vsync.
      *
      * @param looper The looper, must not be null.
      * @param callback The callback interface in which to handle messages, or null.
@@ -234,6 +234,43 @@ public class Handler {
         mQueue = looper.mQueue;
         mCallback = callback;
         mAsynchronous = async;
+    }
+
+    /**
+     * Create a new Handler whose posted messages and runnables are not subject to
+     * synchronization barriers such as display vsync.
+     *
+     * <p>Messages sent to an async handler are guaranteed to be ordered with respect to one another,
+     * but not necessarily with respect to messages from other Handlers.</p>
+     *
+     * @see #createAsync(Looper, Callback) to create an async Handler with custom message handling.
+     *
+     * @param looper the Looper that the new Handler should be bound to
+     * @return a new async Handler instance
+     */
+    @NonNull
+    public static Handler createAsync(@NonNull Looper looper) {
+        if (looper == null) throw new NullPointerException("looper must not be null");
+        return new Handler(looper, null, true);
+    }
+
+    /**
+     * Create a new Handler whose posted messages and runnables are not subject to
+     * synchronization barriers such as display vsync.
+     *
+     * <p>Messages sent to an async handler are guaranteed to be ordered with respect to one another,
+     * but not necessarily with respect to messages from other Handlers.</p>
+     *
+     * @see #createAsync(Looper) to create an async Handler without custom message handling.
+     *
+     * @param looper the Looper that the new Handler should be bound to
+     * @return a new async Handler instance
+     */
+    @NonNull
+    public static Handler createAsync(@NonNull Looper looper, @NonNull Callback callback) {
+        if (looper == null) throw new NullPointerException("looper must not be null");
+        if (callback == null) throw new NullPointerException("callback must not be null");
+        return new Handler(looper, callback, true);
     }
 
     /** @hide */
