@@ -30,6 +30,7 @@ namespace {
 
 StatsdConfig CreateStatsdConfig(const Position position) {
     StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT"); // LogEvent defaults to UID of root.
     auto wakelockAcquireMatcher = CreateAcquireWakelockAtomMatcher();
     auto attributionNodeMatcher =
         wakelockAcquireMatcher.mutable_simple_atom_matcher()->add_field_value_matcher();

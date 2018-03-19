@@ -31,6 +31,7 @@ namespace {
 StatsdConfig CreateDurationMetricConfig_NoLink_SimpleCondition(
         DurationMetric::AggregationType aggregationType, bool addExtraDimensionInCondition) {
     StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT"); // LogEvent defaults to UID of root.
     *config.add_atom_matcher() = CreateStartScheduledJobAtomMatcher();
     *config.add_atom_matcher() = CreateFinishScheduledJobAtomMatcher();
     *config.add_atom_matcher() = CreateSyncStartAtomMatcher();
@@ -306,6 +307,7 @@ namespace {
 StatsdConfig createDurationMetric_Link_SimpleConditionConfig(
         DurationMetric::AggregationType aggregationType, bool addExtraDimensionInCondition) {
     StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT"); // LogEvent defaults to UID of root.
     *config.add_atom_matcher() = CreateStartScheduledJobAtomMatcher();
     *config.add_atom_matcher() = CreateFinishScheduledJobAtomMatcher();
     *config.add_atom_matcher() = CreateSyncStartAtomMatcher();
@@ -525,6 +527,7 @@ namespace {
 StatsdConfig createDurationMetric_PartialLink_SimpleConditionConfig(
         DurationMetric::AggregationType aggregationType) {
     StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT"); // LogEvent defaults to UID of root.
     *config.add_atom_matcher() = CreateStartScheduledJobAtomMatcher();
     *config.add_atom_matcher() = CreateFinishScheduledJobAtomMatcher();
     *config.add_atom_matcher() = CreateSyncStartAtomMatcher();
