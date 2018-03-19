@@ -32,21 +32,20 @@ public:
 
     virtual ~DurationAnomalyTracker();
 
-    // Starts the alarm at the given timestamp.
+    // Sets an alarm for the given timestamp.
+    // Replaces previous alarm if one already exists.
     void startAlarm(const MetricDimensionKey& dimensionKey, const uint64_t& eventTime);
 
     // Stops the alarm.
-    void stopAlarm(const MetricDimensionKey& dimensionKey);
+    // If it should have already fired, but hasn't yet (e.g. because the AlarmManager is delayed),
+    // declare the anomaly now.
+    void stopAlarm(const MetricDimensionKey& dimensionKey, const uint64_t& timestampNs);
 
-    // Stop all the alarms owned by this tracker.
-    void stopAllAlarms();
-
-    // Declares the anomaly when the alarm expired given the current timestamp.
-    void declareAnomalyIfAlarmExpired(const MetricDimensionKey& dimensionKey,
-                                      const uint64_t& timestampNs);
+    // Stop all the alarms owned by this tracker. Does not declare any anomalies.
+    void cancelAllAlarms();
 
     // Declares an anomaly for each alarm in firedAlarms that belongs to this DurationAnomalyTracker
-    // and removes it from firedAlarms.
+    // and removes it from firedAlarms. The AlarmMonitor is not informed.
     // Note that this will generally be called from a different thread from the other functions;
     // the caller is responsible for thread safety.
     void informAlarmsFired(const uint64_t& timestampNs,
@@ -59,9 +58,6 @@ protected:
 
     // Anomaly alarm monitor.
     sp<AlarmMonitor> mAlarmMonitor;
-
-    // Resets all bucket data. For use when all the data gets stale.
-    void resetStorage() override;
 
     FRIEND_TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp);
     FRIEND_TEST(OringDurationTrackerTest, TestAnomalyDetectionExpiredAlarm);

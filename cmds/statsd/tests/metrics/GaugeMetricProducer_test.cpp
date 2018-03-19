@@ -20,6 +20,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <math.h>
 #include <stdio.h>
 #include <vector>
 
@@ -392,7 +393,7 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
                            .mFields->begin()
                            ->mValue.int_value);
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_METRIC_DIMENSION_KEY),
-            event2->GetElapsedTimestampNs() / NS_PER_SEC + refPeriodSec);
+            std::ceil(1.0 * event2->GetElapsedTimestampNs() / NS_PER_SEC) + refPeriodSec);
 
     std::shared_ptr<LogEvent> event3 =
             std::make_shared<LogEvent>(tagId, bucketStartTimeNs + 2 * bucketSizeNs + 10);
@@ -407,7 +408,7 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
                            .mFields->begin()
                            ->mValue.int_value);
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_METRIC_DIMENSION_KEY),
-            event2->GetElapsedTimestampNs() / NS_PER_SEC + refPeriodSec);
+            std::ceil(1.0 * event2->GetElapsedTimestampNs() / NS_PER_SEC + refPeriodSec));
 
     // The event4 does not have the gauge field. Thus the current bucket value is 0.
     std::shared_ptr<LogEvent> event4 =

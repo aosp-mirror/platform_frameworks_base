@@ -16,6 +16,7 @@
 #include "../metrics/metrics_test_helper.h"
 
 #include <gtest/gtest.h>
+#include <math.h>
 #include <stdio.h>
 #include <vector>
 
@@ -104,12 +105,12 @@ void checkRefractoryTimes(AnomalyTracker& tracker,
     for (const auto& kv : timestamps) {
         if (kv.second < 0) {
             // Make sure that, if there is a refractory period, it is already past.
-            EXPECT_LT(tracker.getRefractoryPeriodEndsSec(kv.first),
-                    currTimestampNs / NS_PER_SEC + 1)
+            EXPECT_LT(tracker.getRefractoryPeriodEndsSec(kv.first) * NS_PER_SEC,
+                    (uint64_t)currTimestampNs)
                     << "Failure was at currTimestampNs " << currTimestampNs;
         } else {
             EXPECT_EQ(tracker.getRefractoryPeriodEndsSec(kv.first),
-                      kv.second / NS_PER_SEC + refractoryPeriodSec)
+                      std::ceil(1.0 * kv.second / NS_PER_SEC) + refractoryPeriodSec)
                       << "Failure was at currTimestampNs " << currTimestampNs;
         }
     }
