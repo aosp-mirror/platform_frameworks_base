@@ -47,7 +47,9 @@ import android.content.ContentProvider;
 import android.content.Context;
 import android.content.IContentProvider;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.media.AudioAttributes;
@@ -97,6 +99,8 @@ public class RankingHelperTest extends UiServiceTestCase {
     private static final UserHandle USER = UserHandle.of(0);
     private static final String UPDATED_PKG = "updatedPkg";
     private static final int UID2 = 1111;
+    private static final String SYSTEM_PKG = "android";
+    private static final int SYSTEM_UID= 1000;
     private static final UserHandle USER2 = UserHandle.of(10);
     private static final String TEST_CHANNEL_ID = "test_channel_id";
     private static final String TEST_AUTHORITY = "test";
@@ -136,8 +140,15 @@ public class RankingHelperTest extends UiServiceTestCase {
         upgrade.targetSdkVersion = Build.VERSION_CODES.O;
         when(mPm.getApplicationInfoAsUser(eq(PKG), anyInt(), anyInt())).thenReturn(legacy);
         when(mPm.getApplicationInfoAsUser(eq(UPDATED_PKG), anyInt(), anyInt())).thenReturn(upgrade);
+        when(mPm.getApplicationInfoAsUser(eq(SYSTEM_PKG), anyInt(), anyInt())).thenReturn(upgrade);
         when(mPm.getPackageUidAsUser(eq(PKG), anyInt())).thenReturn(UID);
         when(mPm.getPackageUidAsUser(eq(UPDATED_PKG), anyInt())).thenReturn(UID2);
+        when(mPm.getPackageUidAsUser(eq(SYSTEM_PKG), anyInt())).thenReturn(SYSTEM_UID);
+        PackageInfo info = mock(PackageInfo.class);
+        info.signatures = new Signature[] {mock(Signature.class)};
+        when(mPm.getPackageInfoAsUser(eq(SYSTEM_PKG), anyInt(), anyInt())).thenReturn(info);
+        when(mPm.getPackageInfoAsUser(eq(PKG), anyInt(), anyInt()))
+                .thenReturn(mock(PackageInfo.class));
         when(mContext.getResources()).thenReturn(
                 InstrumentationRegistry.getContext().getResources());
         when(mContext.getContentResolver()).thenReturn(
@@ -1626,5 +1637,53 @@ public class RankingHelperTest extends UiServiceTestCase {
                 PKG, UID, group.getId(), false);
         assertEquals(1, retrieved.getChannels().size());
         compareChannels(a, findChannel(retrieved.getChannels(), a.getId()));
+    }
+
+    @Test
+    public void testAndroidPkgCanBypassDnd_creation() {
+
+        NotificationChannel test = new NotificationChannel("A", "a", IMPORTANCE_LOW);
+        test.setBypassDnd(true);
+
+        mHelper.createNotificationChannel(SYSTEM_PKG, SYSTEM_UID, test, true);
+
+        assertTrue(mHelper.getNotificationChannel(SYSTEM_PKG, SYSTEM_UID, "A", false)
+                .canBypassDnd());
+    }
+
+    @Test
+    public void testNormalPkgCannotBypassDnd_creation() {
+        NotificationChannel test = new NotificationChannel("A", "a", IMPORTANCE_LOW);
+        test.setBypassDnd(true);
+
+        mHelper.createNotificationChannel(PKG, 1000, test, true);
+
+        assertFalse(mHelper.getNotificationChannel(PKG, 1000, "A", false).canBypassDnd());
+    }
+
+    @Test
+    public void testAndroidPkgCanBypassDnd_update() throws Exception {
+        NotificationChannel test = new NotificationChannel("A", "a", IMPORTANCE_LOW);
+        mHelper.createNotificationChannel(SYSTEM_PKG, SYSTEM_UID, test, true);
+
+        NotificationChannel update = new NotificationChannel("A", "a", IMPORTANCE_LOW);
+        update.setBypassDnd(true);
+        mHelper.createNotificationChannel(SYSTEM_PKG, SYSTEM_UID, update, true);
+
+        assertTrue(mHelper.getNotificationChannel(SYSTEM_PKG, SYSTEM_UID, "A", false)
+                .canBypassDnd());
+
+        // setup + 1st check
+        verify(mPm, times(2)).getPackageInfoAsUser(any(), anyInt(), anyInt());
+    }
+
+    @Test
+    public void testNormalPkgCannotBypassDnd_update() {
+        NotificationChannel test = new NotificationChannel("A", "a", IMPORTANCE_LOW);
+        mHelper.createNotificationChannel(PKG, 1000, test, true);
+        NotificationChannel update = new NotificationChannel("A", "a", IMPORTANCE_LOW);
+        update.setBypassDnd(true);
+        mHelper.createNotificationChannel(PKG, 1000, update, true);
+        assertFalse(mHelper.getNotificationChannel(PKG, 1000, "A", false).canBypassDnd());
     }
 }
