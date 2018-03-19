@@ -944,7 +944,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     }
 
     @Override
-    protected ConfigurationContainer getChildAt(int index) {
+    protected ActivityRecord getChildAt(int index) {
         return mActivities.get(index);
     }
 
@@ -1895,6 +1895,12 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         if (mRootProcess != null) {
             mRootProcess.recentTasks.remove(this);
             mRootProcess = null;
+        }
+    }
+
+    void clearAllPendingOptions() {
+        for (int i = getChildCount() - 1; i >= 0; i--) {
+            getChildAt(i).clearOptionsLocked(false /* withAbort */);
         }
     }
 

@@ -34,6 +34,8 @@ import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_BOTTOM;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_LEFT;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_RIGHT;
 
+import static junit.framework.TestCase.assertNotNull;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -45,6 +47,8 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import android.app.ActivityOptions;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.PauseActivityItem;
 import android.graphics.Rect;
@@ -199,6 +203,35 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         testSupportsLaunchingResizeable(true /*taskPresent*/, true /*taskResizeable*/,
                 false /*activityResizeable*/, true /*expected*/);
+    }
+
+    @Test
+    public void testsApplyOptionsLocked() {
+        ActivityOptions activityOptions = ActivityOptions.makeBasic();
+
+        // Set and apply options for ActivityRecord. Pending options should be cleared
+        mActivity.updateOptionsLocked(activityOptions);
+        mActivity.applyOptionsLocked();
+        assertNull(mActivity.pendingOptions);
+
+        // Set options for two ActivityRecords in same Task. Apply one ActivityRecord options.
+        // Pending options should be cleared for both ActivityRecords
+        ActivityRecord activity2 = new ActivityBuilder(mService).setTask(mTask).build();
+        activity2.updateOptionsLocked(activityOptions);
+        mActivity.updateOptionsLocked(activityOptions);
+        mActivity.applyOptionsLocked();
+        assertNull(mActivity.pendingOptions);
+        assertNull(activity2.pendingOptions);
+
+        // Set options for two ActivityRecords in separate Tasks. Apply one ActivityRecord options.
+        // Pending options should be cleared for only ActivityRecord that was applied
+        TaskRecord task2 = new TaskBuilder(mService.mStackSupervisor).setStack(mStack).build();
+        activity2 = new ActivityBuilder(mService).setTask(task2).build();
+        activity2.updateOptionsLocked(activityOptions);
+        mActivity.updateOptionsLocked(activityOptions);
+        mActivity.applyOptionsLocked();
+        assertNull(mActivity.pendingOptions);
+        assertNotNull(activity2.pendingOptions);
     }
 
     private void testSupportsLaunchingResizeable(boolean taskPresent, boolean taskResizeable,
