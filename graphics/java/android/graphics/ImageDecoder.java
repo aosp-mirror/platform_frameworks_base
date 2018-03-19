@@ -24,7 +24,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RawRes;
 import android.content.ContentResolver;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager.AssetInputStream;
@@ -543,17 +542,15 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     /**
-     * Create a new {@link Source} from an asset.
-     * @hide
+     * Create a new {@link Source} from a resource.
      *
      * @param res the {@link Resources} object containing the image data.
      * @param resId resource ID of the image data.
-     *      // FIXME: Can be an @DrawableRes?
      * @return a new Source object, which can be passed to
      *      {@link #decodeDrawable} or {@link #decodeBitmap}.
      */
     @NonNull
-    public static Source createSource(@NonNull Resources res, @RawRes int resId)
+    public static Source createSource(@NonNull Resources res, int resId)
     {
         return new ResourceSource(res, resId);
     }
