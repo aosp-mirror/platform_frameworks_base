@@ -22,6 +22,7 @@ import com.android.server.pm.UserRestrictionsUtils;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.os.BaseBundle;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.ArraySet;
@@ -92,7 +93,10 @@ public class MockUtils {
             public boolean matches(Object item) {
                 if (item == null) return false;
                 if (!intent.filterEquals((Intent) item)) return false;
-                return intent.getExtras().kindofEquals(((Intent) item).getExtras());
+                BaseBundle extras = intent.getExtras();
+                BaseBundle itemExtras = ((Intent) item).getExtras();
+                return (extras == itemExtras) || (extras != null &&
+                        extras.kindofEquals(itemExtras));
             }
             @Override
             public void describeTo(Description description) {
