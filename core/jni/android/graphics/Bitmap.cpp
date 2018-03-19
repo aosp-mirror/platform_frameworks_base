@@ -1269,6 +1269,15 @@ static jboolean Bitmap_isSRGB(JNIEnv* env, jobject, jlong bitmapHandle) {
     return GraphicsJNI::isColorSpaceSRGB(colorSpace);
 }
 
+static jboolean Bitmap_isSRGBLinear(JNIEnv* env, jobject, jlong bitmapHandle) {
+    LocalScopedBitmap bitmapHolder(bitmapHandle);
+    if (!bitmapHolder.valid()) return JNI_FALSE;
+
+    SkColorSpace* colorSpace = bitmapHolder->info().colorSpace();
+    sk_sp<SkColorSpace> srgbLinear = SkColorSpace::MakeSRGBLinear();
+    return colorSpace == srgbLinear.get() ? JNI_TRUE : JNI_FALSE;
+}
+
 static jboolean Bitmap_getColorSpace(JNIEnv* env, jobject, jlong bitmapHandle,
         jfloatArray xyzArray, jfloatArray paramsArray) {
 
@@ -1614,6 +1623,7 @@ static const JNINativeMethod gBitmapMethods[] = {
         (void*) Bitmap_createGraphicBufferHandle },
     {   "nativeGetColorSpace",      "(J[F[F)Z", (void*)Bitmap_getColorSpace },
     {   "nativeIsSRGB",             "(J)Z", (void*)Bitmap_isSRGB },
+    {   "nativeIsSRGBLinear",       "(J)Z", (void*)Bitmap_isSRGBLinear},
     {   "nativeCopyColorSpace",     "(JJ)V",
         (void*)Bitmap_copyColorSpace },
 };
