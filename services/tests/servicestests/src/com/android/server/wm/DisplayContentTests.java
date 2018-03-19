@@ -33,7 +33,6 @@ import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import android.support.test.filters.FlakyTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -302,7 +301,6 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 37908381)
     public void testFocusedWindowMultipleDisplays() throws Exception {
         // Create a focusable window and check that focus is calculated correctly
         final WindowState window1 =
