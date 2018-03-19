@@ -34,6 +34,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.DisplayMetrics;
@@ -58,6 +59,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *  Class for decoding images as {@link Bitmap}s or {@link Drawable}s.
  */
 public final class ImageDecoder implements AutoCloseable {
+    /** @hide **/
+    public static int sApiLevel;
+
     /**
      *  Source of the encoded image data.
      */
@@ -1262,17 +1266,19 @@ public final class ImageDecoder implements AutoCloseable {
             return srcDensity;
         }
 
-        // downscale the bitmap if the asset has a higher density than the default
+        // For P and above, only resize if it would be a downscale. Scale up prior
+        // to P in case the app relies on the Bitmap's size without considering density.
         final int dstDensity = src.computeDstDensity();
-        if (srcDensity != Bitmap.DENSITY_NONE && srcDensity > dstDensity) {
-            float scale = (float) dstDensity / srcDensity;
-            int scaledWidth = (int) (decoder.mWidth * scale + 0.5f);
-            int scaledHeight = (int) (decoder.mHeight * scale + 0.5f);
-            decoder.setResize(scaledWidth, scaledHeight);
-            return dstDensity;
+        if (srcDensity == Bitmap.DENSITY_NONE || srcDensity == dstDensity
+                || (srcDensity < dstDensity && sApiLevel >= Build.VERSION_CODES.P)) {
+            return srcDensity;
         }
 
-        return srcDensity;
+        float scale = (float) dstDensity / srcDensity;
+        int scaledWidth = (int) (decoder.mWidth * scale + 0.5f);
+        int scaledHeight = (int) (decoder.mHeight * scale + 0.5f);
+        decoder.setResize(scaledWidth, scaledHeight);
+        return dstDensity;
     }
 
     @NonNull
