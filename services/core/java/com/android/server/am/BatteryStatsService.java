@@ -1193,6 +1193,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         pw.println("  --new-daily: immediately create and write new daily stats record.");
         pw.println("  --read-daily: read-load last written daily stats.");
         pw.println("  --settings: dump the settings key/values related to batterystats");
+        pw.println("  --cpu: dump cpu stats for debugging purpose");
         pw.println("  <package.name>: optional name of package to filter output by.");
         pw.println("  -h: print this help text.");
         pw.println("Battery stats (batterystats) commands:");
@@ -1208,6 +1209,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     private void dumpSettings(PrintWriter pw) {
         synchronized (mStats) {
             mStats.dumpConstantsLocked(pw);
+        }
+    }
+
+    private void dumpCpuStats(PrintWriter pw) {
+        synchronized (mStats) {
+            mStats.dumpCpuStatsLocked(pw);
         }
     }
 
@@ -1323,6 +1330,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     return;
                 } else if ("--settings".equals(arg)) {
                     dumpSettings(pw);
+                    return;
+                } else if ("--cpu".equals(arg)) {
+                    dumpCpuStats(pw);
                     return;
                 } else if ("-a".equals(arg)) {
                     flags |= BatteryStats.DUMP_VERBOSE;

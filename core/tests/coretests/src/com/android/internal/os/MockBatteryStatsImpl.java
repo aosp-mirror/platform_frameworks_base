@@ -22,6 +22,7 @@ import android.util.SparseIntArray;
 
 import com.android.internal.location.gnssmetrics.GnssMetrics;
 import java.util.ArrayList;
+import java.util.Queue;
 import java.util.concurrent.Future;
 
 /**
@@ -64,6 +65,10 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
 
     public int getScreenState() {
         return mScreenState;
+    }
+
+    public Queue<UidToRemove> getPendingRemovedUids() {
+        return mPendingRemovedUids;
     }
 
     public boolean isOnBattery() {

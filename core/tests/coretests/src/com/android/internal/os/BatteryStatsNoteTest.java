@@ -244,13 +244,16 @@ public class BatteryStatsNoteTest extends TestCase {
         assertEquals(bi.getScreenState(), Display.STATE_OFF);
     }
 
-    /**
+    /*
      * Test BatteryStatsImpl.noteScreenStateLocked updates timers correctly.
      *
      * Unknown and doze should both be subset of off state
      *
-     * Timeline 0----100----200----310----400------------1000 Unknown         ------- On ------- Off
-     * -------       ---------------------- Doze ----------------
+     * Timeline 0----100----200----310----400------------1000
+     * Unknown         -------
+     * On                     -------
+     * Off             -------       ----------------------
+     * Doze                                ----------------
      */
     @SmallTest
     public void testNoteScreenStateTimersLocked() throws Exception {
