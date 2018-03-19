@@ -31,9 +31,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
-// TODO: Get rid of bucketNumbers, and return to the original circular array method.
 AnomalyTracker::AnomalyTracker(const Alert& alert, const ConfigKey& configKey)
-    : mAlert(alert), mConfigKey(configKey), mNumOfPastBuckets(mAlert.num_buckets() - 1) {
+        : mAlert(alert), mConfigKey(configKey), mNumOfPastBuckets(mAlert.num_buckets() - 1) {
     VLOG("AnomalyTracker() called");
     if (mAlert.num_buckets() <= 0) {
         ALOGE("Cannot create AnomalyTracker with %lld buckets", (long long)mAlert.num_buckets());
@@ -60,85 +59,102 @@ void AnomalyTracker::resetStorage() {
 
 size_t AnomalyTracker::index(int64_t bucketNum) const {
     if (bucketNum < 0) {
-        // To support this use-case, we can easily modify index to wrap around. But currently
-        // AnomalyTracker should never need this, so if it happens, it's a bug we should log.
-        // TODO: Audit this.
         ALOGE("index() was passed a negative bucket number (%lld)!", (long long)bucketNum);
     }
     return bucketNum % mNumOfPastBuckets;
 }
 
-void AnomalyTracker::flushPastBuckets(const int64_t& latestPastBucketNum) {
-    VLOG("addPastBucket() called.");
-    if (latestPastBucketNum <= mMostRecentBucketNum - mNumOfPastBuckets) {
-        ALOGE("Cannot add a past bucket %lld units in past", (long long)latestPastBucketNum);
+void AnomalyTracker::advanceMostRecentBucketTo(const int64_t& bucketNum) {
+    VLOG("advanceMostRecentBucketTo() called.");
+    if (bucketNum <= mMostRecentBucketNum) {
+        ALOGW("Cannot advance buckets backwards (bucketNum=%lld but mMostRecentBucketNum=%lld)",
+              (long long)bucketNum, (long long)mMostRecentBucketNum);
         return;
     }
-
-    // The past packets are ancient. Empty out old mPastBuckets[i] values and reset
-    // mSumOverPastBuckets.
-    if (latestPastBucketNum - mMostRecentBucketNum >= mNumOfPastBuckets) {
+    // If in the future (i.e. buckets are ancient), just empty out all past info.
+    if (bucketNum >= mMostRecentBucketNum + mNumOfPastBuckets) {
         resetStorage();
-    } else {
-        for (int64_t i = std::max(0LL, (long long)(mMostRecentBucketNum - mNumOfPastBuckets + 1));
-             i <= latestPastBucketNum - mNumOfPastBuckets; i++) {
-            const int idx = index(i);
-            subtractBucketFromSum(mPastBuckets[idx]);
-            mPastBuckets[idx] = nullptr;  // release (but not clear) the old bucket.
+        mMostRecentBucketNum = bucketNum;
+        return;
+    }
+
+    // Clear out space by emptying out old mPastBuckets[i] values and update mSumOverPastBuckets.
+    for (int64_t i = mMostRecentBucketNum + 1; i <= bucketNum; i++) {
+        const int idx = index(i);
+        subtractBucketFromSum(mPastBuckets[idx]);
+        mPastBuckets[idx] = nullptr;  // release (but not clear) the old bucket.
+    }
+    mMostRecentBucketNum = bucketNum;
+}
+
+void AnomalyTracker::addPastBucket(const MetricDimensionKey& key,
+                                   const int64_t& bucketValue,
+                                   const int64_t& bucketNum) {
+    VLOG("addPastBucket(bucketValue) called.");
+    if (mNumOfPastBuckets == 0 ||
+        bucketNum < 0 || bucketNum <= mMostRecentBucketNum - mNumOfPastBuckets) {
+        return;
+    }
+
+    const int bucketIndex = index(bucketNum);
+    if (bucketNum <= mMostRecentBucketNum && (mPastBuckets[bucketIndex] != nullptr)) {
+        // We need to insert into an already existing past bucket.
+        std::shared_ptr<DimToValMap>& bucket = mPastBuckets[bucketIndex];
+        auto itr = bucket->find(key);
+        if (itr != bucket->end()) {
+            // Old entry already exists; update it.
+            subtractValueFromSum(key, itr->second);
+            itr->second = bucketValue;
+        } else {
+            bucket->insert({key, bucketValue});
         }
-    }
-
-    // It is an update operation.
-    if (latestPastBucketNum <= mMostRecentBucketNum &&
-        latestPastBucketNum > mMostRecentBucketNum - mNumOfPastBuckets) {
-        subtractBucketFromSum(mPastBuckets[index(latestPastBucketNum)]);
+        mSumOverPastBuckets[key] += bucketValue;
+    } else {
+        // Bucket does not exist yet (in future or was never made), so we must make it.
+        std::shared_ptr<DimToValMap> bucket = std::make_shared<DimToValMap>();
+        bucket->insert({key, bucketValue});
+        addPastBucket(bucket, bucketNum);
     }
 }
 
-void AnomalyTracker::addPastBucket(const MetricDimensionKey& key, const int64_t& bucketValue,
+void AnomalyTracker::addPastBucket(std::shared_ptr<DimToValMap> bucket,
                                    const int64_t& bucketNum) {
-    if (mNumOfPastBuckets == 0) {
+    VLOG("addPastBucket(bucket) called.");
+    if (mNumOfPastBuckets == 0 ||
+            bucketNum < 0 || bucketNum <= mMostRecentBucketNum - mNumOfPastBuckets) {
         return;
     }
-    flushPastBuckets(bucketNum);
 
-    auto& bucket = mPastBuckets[index(bucketNum)];
-    if (bucket == nullptr) {
-        bucket = std::make_shared<DimToValMap>();
+    if (bucketNum <= mMostRecentBucketNum) {
+        // We are updating an old bucket, not adding a new one.
+        subtractBucketFromSum(mPastBuckets[index(bucketNum)]);
+    } else {
+        // Clear space for the new bucket to be at bucketNum.
+        advanceMostRecentBucketTo(bucketNum);
     }
-    bucket->insert({key, bucketValue});
+    mPastBuckets[index(bucketNum)] = bucket;
     addBucketToSum(bucket);
-    mMostRecentBucketNum = std::max(mMostRecentBucketNum, bucketNum);
-}
-
-void AnomalyTracker::addPastBucket(std::shared_ptr<DimToValMap> bucketValues,
-                                   const int64_t& bucketNum) {
-    VLOG("addPastBucket() called.");
-    if (mNumOfPastBuckets == 0) {
-        return;
-    }
-    flushPastBuckets(bucketNum);
-    // Replace the oldest bucket with the new bucket we are adding.
-    mPastBuckets[index(bucketNum)] = bucketValues;
-    addBucketToSum(bucketValues);
-    mMostRecentBucketNum = std::max(mMostRecentBucketNum, bucketNum);
 }
 
 void AnomalyTracker::subtractBucketFromSum(const shared_ptr<DimToValMap>& bucket) {
     if (bucket == nullptr) {
         return;
     }
-    // For each dimension present in the bucket, subtract its value from its corresponding sum.
     for (const auto& keyValuePair : *bucket) {
-        auto itr = mSumOverPastBuckets.find(keyValuePair.first);
-        if (itr == mSumOverPastBuckets.end()) {
-            continue;
-        }
-        itr->second -= keyValuePair.second;
-        // TODO: No need to look up the object twice like this. Use a var.
-        if (itr->second == 0) {
-            mSumOverPastBuckets.erase(itr);
-        }
+        subtractValueFromSum(keyValuePair.first, keyValuePair.second);
+    }
+}
+
+
+void AnomalyTracker::subtractValueFromSum(const MetricDimensionKey& key,
+                                          const int64_t& bucketValue) {
+    auto itr = mSumOverPastBuckets.find(key);
+    if (itr == mSumOverPastBuckets.end()) {
+        return;
+    }
+    itr->second -= bucketValue;
+    if (itr->second == 0) {
+        mSumOverPastBuckets.erase(itr);
     }
 }
 
@@ -154,7 +170,8 @@ void AnomalyTracker::addBucketToSum(const shared_ptr<DimToValMap>& bucket) {
 
 int64_t AnomalyTracker::getPastBucketValue(const MetricDimensionKey& key,
                                            const int64_t& bucketNum) const {
-    if (mNumOfPastBuckets == 0 || bucketNum < 0) {
+    if (bucketNum < 0 || bucketNum <= mMostRecentBucketNum - mNumOfPastBuckets
+            || bucketNum > mMostRecentBucketNum) {
         return 0;
     }
 
@@ -174,11 +191,13 @@ int64_t AnomalyTracker::getSumOverPastBuckets(const MetricDimensionKey& key) con
     return 0;
 }
 
-bool AnomalyTracker::detectAnomaly(const int64_t& currentBucketNum, const MetricDimensionKey& key,
+bool AnomalyTracker::detectAnomaly(const int64_t& currentBucketNum,
+                                   const MetricDimensionKey& key,
                                    const int64_t& currentBucketValue) {
+
+    // currentBucketNum should be the next bucket after pastBuckets. If not, advance so that it is.
     if (currentBucketNum > mMostRecentBucketNum + 1) {
-        // TODO: This creates a needless 0 entry in mSumOverPastBuckets. Fix this.
-        addPastBucket(key, 0, currentBucketNum - 1);
+        advanceMostRecentBucketTo(currentBucketNum - 1);
     }
     return mAlert.has_trigger_if_sum_gt() &&
            getSumOverPastBuckets(key) + currentBucketValue > mAlert.trigger_if_sum_gt();
@@ -190,19 +209,17 @@ void AnomalyTracker::declareAnomaly(const uint64_t& timestampNs, const MetricDim
         VLOG("Skipping anomaly declaration since within refractory period");
         return;
     }
-    mRefractoryPeriodEndsSec[key] = (timestampNs / NS_PER_SEC) + mAlert.refractory_period_secs();
-
-    // TODO: If we had access to the bucket_size_millis, consider calling resetStorage()
-    // if (mAlert.refractory_period_secs() > mNumOfPastBuckets * bucketSizeNs) { resetStorage(); }
+    if (mAlert.has_refractory_period_secs()) {
+        mRefractoryPeriodEndsSec[key] = ((timestampNs + NS_PER_SEC - 1) / NS_PER_SEC) // round up
+                                        + mAlert.refractory_period_secs();
+        // TODO: If we had access to the bucket_size_millis, consider calling resetStorage()
+        // if (mAlert.refractory_period_secs() > mNumOfPastBuckets * bucketSizeNs) {resetStorage();}
+    }
 
     if (!mSubscriptions.empty()) {
-        if (mAlert.has_id()) {
-            ALOGI("An anomaly (%lld) %s has occurred! Informing subscribers.", mAlert.id(),
-                  key.toString().c_str());
-            informSubscribers(key);
-        } else {
-            ALOGI("An anomaly (with no id) has occurred! Not informing any subscribers.");
-        }
+        ALOGI("An anomaly (%lld) %s has occurred! Informing subscribers.",
+                mAlert.id(), key.toString().c_str());
+        informSubscribers(key);
     } else {
         ALOGI("An anomaly has occurred! (But no subscriber for that alert.)");
     }
@@ -227,7 +244,7 @@ bool AnomalyTracker::isInRefractoryPeriod(const uint64_t& timestampNs,
                                           const MetricDimensionKey& key) {
     const auto& it = mRefractoryPeriodEndsSec.find(key);
     if (it != mRefractoryPeriodEndsSec.end()) {
-        if ((timestampNs / NS_PER_SEC) <= it->second) {
+        if (timestampNs < it->second * NS_PER_SEC) {
             return true;
         } else {
             mRefractoryPeriodEndsSec.erase(key);
