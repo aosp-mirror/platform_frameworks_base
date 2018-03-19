@@ -377,17 +377,20 @@ void UidMap::getOutput(const int64_t& timestamp, const ConfigKey& key, vector<ui
     if (newMin > prevMin) {  // Delete anything possible now that the minimum has
                              // moved forward.
         int64_t cutoff_nanos = newMin;
-        for (auto it_snapshots = mSnapshots.begin(); it_snapshots != mSnapshots.end();
-             ++it_snapshots) {
+        for (auto it_snapshots = mSnapshots.begin(); it_snapshots != mSnapshots.end();) {
             if (it_snapshots->timestampNs < cutoff_nanos) {
                 mBytesUsed -= it_snapshots->bytes.size() + kBytesTimestampField;
-                mSnapshots.erase(it_snapshots);
+                it_snapshots = mSnapshots.erase(it_snapshots);
+            } else {
+                ++it_snapshots;
             }
         }
-        for (auto it_changes = mChanges.begin(); it_changes != mChanges.end(); ++it_changes) {
+        for (auto it_changes = mChanges.begin(); it_changes != mChanges.end();) {
             if (it_changes->timestampNs < cutoff_nanos) {
                 mBytesUsed -= kBytesChangeRecord;
-                mChanges.erase(it_changes);
+                it_changes = mChanges.erase(it_changes);
+            } else {
+                ++it_changes;
             }
         }
 
