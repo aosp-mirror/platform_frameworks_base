@@ -16,10 +16,14 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.keyguard.KeyguardHostView.OnDismissAction;
+import static com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+
 import android.content.Context;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.util.StatsLog;
@@ -29,7 +33,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
-import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardHostView;
@@ -41,9 +44,6 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
-
-import static com.android.keyguard.KeyguardHostView.OnDismissAction;
-import static com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 
 /**
  * A class which manages the bouncer on the lockscreen.
@@ -76,13 +76,13 @@ public class KeyguardBouncer {
 
     public KeyguardBouncer(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils, ViewGroup container,
-            DismissCallbackRegistry dismissCallbackRegistry) {
+            DismissCallbackRegistry dismissCallbackRegistry, FalsingManager falsingManager) {
         mContext = context;
         mCallback = callback;
         mLockPatternUtils = lockPatternUtils;
         mContainer = container;
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateMonitorCallback);
-        mFalsingManager = FalsingManager.getInstance(mContext);
+        mFalsingManager = falsingManager;
         mDismissCallbackRegistry = dismissCallbackRegistry;
         mHandler = new Handler();
     }
@@ -91,7 +91,14 @@ public class KeyguardBouncer {
         show(resetSecuritySelection, true /* notifyFalsing */);
     }
 
-    public void show(boolean resetSecuritySelection, boolean notifyFalsing) {
+    /**
+     * Shows the bouncer.
+     *
+     * @param resetSecuritySelection Cleans keyguard view
+     * @param animated true when the bouncer show show animated, false when the user will be
+     *                 dragging it and animation should be deferred.
+     */
+    public void show(boolean resetSecuritySelection, boolean animated) {
         final int keyguardUserId = KeyguardUpdateMonitor.getCurrentUser();
         if (keyguardUserId == UserHandle.USER_SYSTEM && UserManager.isSplitSystemUser()) {
             // In split system user mode, we never unlock system user.
@@ -104,9 +111,11 @@ public class KeyguardBouncer {
         // are valid.
         // Later, at the end of the animation, when the bouncer is at the top of the screen,
         // onFullyShown() will be called and FalsingManager will stop recording touches.
-        if (notifyFalsing) {
+        if (animated) {
             mFalsingManager.onBouncerShown();
+            setExpansion(0);
         }
+
         if (resetSecuritySelection) {
             // showPrimarySecurityScreen() updates the current security method. This is needed in
             // case we are already showing and the current security method changed.
@@ -157,7 +166,9 @@ public class KeyguardBouncer {
     public void onFullyHidden() {
         if (!mShowingSoon) {
             cancelShowRunnable();
-            mRoot.setVisibility(View.INVISIBLE);
+            if (mRoot != null) {
+                mRoot.setVisibility(View.INVISIBLE);
+            }
             mFalsingManager.onBouncerHidden();
         }
     }
@@ -202,11 +213,19 @@ public class KeyguardBouncer {
      *               and {@link KeyguardSecurityView#PROMPT_REASON_RESTART}
      */
     public void showPromptReason(int reason) {
-        mKeyguardView.showPromptReason(reason);
+        if (mKeyguardView != null) {
+            mKeyguardView.showPromptReason(reason);
+        } else {
+            Log.w(TAG, "Trying to show prompt reason on empty bouncer");
+        }
     }
 
     public void showMessage(String message, int color) {
-        mKeyguardView.showMessage(message, color);
+        if (mKeyguardView != null) {
+            mKeyguardView.showMessage(message, color);
+        } else {
+            Log.w(TAG, "Trying to show message on empty bouncer");
+        }
     }
 
     private void cancelShowRunnable() {
@@ -290,7 +309,8 @@ public class KeyguardBouncer {
      */
     public void setExpansion(float fraction) {
         if (mKeyguardView != null) {
-            mKeyguardView.setAlpha(MathUtils.map(ALPHA_EXPANSION_THRESHOLD, 1, 1, 0, fraction));
+            float alpha = MathUtils.map(ALPHA_EXPANSION_THRESHOLD, 1, 1, 0, fraction);
+            mKeyguardView.setAlpha(MathUtils.constrain(alpha, 0f, 1f));
             mKeyguardView.setTranslationY(fraction * mKeyguardView.getHeight());
         }
     }

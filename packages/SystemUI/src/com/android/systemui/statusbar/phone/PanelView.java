@@ -947,6 +947,17 @@ public abstract class PanelView extends FrameLayout {
         return mClosing || mLaunchingNotification;
     }
 
+    /**
+     * Bouncer might need a scrim when you double tap on notifications or edit QS.
+     * On other cases, when you drag up the bouncer with the finger or just fling,
+     * the scrim should be hidden to avoid occluding the clock.
+     *
+     * @return true when we need a scrim to show content on top of the notification panel.
+     */
+    public boolean needsScrimming() {
+        return !isTracking() && !isCollapsing() && !isFullyCollapsed();
+    }
+
     public boolean isTracking() {
         return mTracking;
     }
