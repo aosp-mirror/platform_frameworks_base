@@ -268,12 +268,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
         // AOD wallpapers should fade away after a while
         if (mWallpaperSupportsAmbientMode && mDozeParameters.getAlwaysOn()
-                && (mState == ScrimState.AOD || mState == ScrimState.PULSING)) {
+                && mState == ScrimState.AOD) {
             if (!mWallpaperVisibilityTimedOut) {
                 mTimeTicker.schedule(mDozeParameters.getWallpaperAodDuration(),
                         AlarmTimeout.MODE_IGNORE_IF_SCHEDULED);
             }
-        } else {
+        // Do not re-schedule timeout when pulsing, let's save some extra battery.
+        } else if (mState != ScrimState.PULSING) {
             mTimeTicker.cancel();
             mWallpaperVisibilityTimedOut = false;
         }
@@ -317,7 +318,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
     @VisibleForTesting
     protected void onHideWallpaperTimeout() {
-        if (mState != ScrimState.AOD && mState != ScrimState.PULSING) {
+        if (mState != ScrimState.AOD) {
             return;
         }
 
@@ -478,11 +479,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             mLightBarController.setScrimColor(mScrimInFront.getColors());
         }
 
-        // We want to override the back scrim opacity for AOD and PULSING
+        // We want to override the back scrim opacity for AOD
         // when it's time to fade the wallpaper away.
-        boolean overrideBackScrimAlpha = (mState == ScrimState.PULSING || mState == ScrimState.AOD)
-                && mWallpaperVisibilityTimedOut;
-        if (overrideBackScrimAlpha) {
+        if (mState == ScrimState.AOD && mWallpaperVisibilityTimedOut) {
             mCurrentBehindAlpha = 1;
         }
 
