@@ -30,6 +30,7 @@ namespace {
 
 StatsdConfig CreateCountMetric_NoLink_CombinationCondition_Config() {
     StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT"); // LogEvent defaults to UID of root.
     auto screenBrightnessChangeAtomMatcher = CreateScreenBrightnessChangedAtomMatcher();
     *config.add_atom_matcher() = screenBrightnessChangeAtomMatcher;
     *config.add_atom_matcher() = CreateScreenTurnedOnAtomMatcher();
@@ -229,6 +230,7 @@ namespace {
 
 StatsdConfig CreateCountMetric_Link_CombinationCondition() {
     StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT"); // LogEvent defaults to UID of root.
     auto appCrashMatcher = CreateProcessCrashAtomMatcher();
     *config.add_atom_matcher() = appCrashMatcher;
     *config.add_atom_matcher() = CreateScreenTurnedOnAtomMatcher();
@@ -416,6 +418,7 @@ namespace {
 StatsdConfig CreateDurationMetricConfig_NoLink_CombinationCondition(
         DurationMetric::AggregationType aggregationType) {
     StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT"); // LogEvent defaults to UID of root.
     *config.add_atom_matcher() = CreateBatterySaverModeStartAtomMatcher();
     *config.add_atom_matcher() = CreateBatterySaverModeStopAtomMatcher();
     *config.add_atom_matcher() = CreateScreenTurnedOnAtomMatcher();
@@ -603,6 +606,7 @@ namespace {
 StatsdConfig CreateDurationMetricConfig_Link_CombinationCondition(
         DurationMetric::AggregationType aggregationType) {
     StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT"); // LogEvent defaults to UID of root.
     *config.add_atom_matcher() = CreateMoveToBackgroundAtomMatcher();
     *config.add_atom_matcher() = CreateMoveToForegroundAtomMatcher();
     *config.add_atom_matcher() = CreateScreenTurnedOnAtomMatcher();
