@@ -195,7 +195,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                         .setShowWhen(true)
                         .setColor(r.getColor(
                                 com.android.internal.R.color.system_notification_accent_color));
-        SystemUI.overrideNotificationAppName(context, mPublicNotificationBuilder);
+        SystemUI.overrideNotificationAppName(context, mPublicNotificationBuilder, true);
 
         mNotificationBuilder = new Notification.Builder(context,
                 NotificationChannels.SCREENSHOTS_HEADSUP)
@@ -210,7 +210,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             .setStyle(mNotificationStyle)
             .setPublicVersion(mPublicNotificationBuilder.build());
         mNotificationBuilder.setFlag(Notification.FLAG_NO_CLEAR, true);
-        SystemUI.overrideNotificationAppName(context, mNotificationBuilder);
+        SystemUI.overrideNotificationAppName(context, mNotificationBuilder, true);
 
         mNotificationManager.notify(SystemMessage.NOTE_GLOBAL_SCREENSHOT,
                 mNotificationBuilder.build());
@@ -889,7 +889,7 @@ class GlobalScreenshot {
             b.setContentIntent(pendingIntent);
         }
 
-        SystemUI.overrideNotificationAppName(context, b);
+        SystemUI.overrideNotificationAppName(context, b, true);
 
         Notification n = new Notification.BigTextStyle(b)
                 .bigText(errorMsg)
