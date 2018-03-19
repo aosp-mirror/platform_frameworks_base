@@ -881,7 +881,7 @@ public final class Call {
          */
         @IntDef(prefix = { "HANDOVER_" },
                 value = {HANDOVER_FAILURE_DEST_APP_REJECTED, HANDOVER_FAILURE_NOT_SUPPORTED,
-                HANDOVER_FAILURE_USER_REJECTED, HANDOVER_FAILURE_ONGOING_EMERG_CALL,
+                HANDOVER_FAILURE_USER_REJECTED, HANDOVER_FAILURE_ONGOING_EMERGENCY_CALL,
                 HANDOVER_FAILURE_UNKNOWN})
         @Retention(RetentionPolicy.SOURCE)
         public @interface HandoverFailureErrors {}
@@ -939,7 +939,7 @@ public final class Call {
          * For more information on call handovers, see
          * {@link #handoverTo(PhoneAccountHandle, int, Bundle)}.
          */
-        public static final int HANDOVER_FAILURE_ONGOING_EMERG_CALL = 4;
+        public static final int HANDOVER_FAILURE_ONGOING_EMERGENCY_CALL = 4;
 
         /**
          * Handover failure reason returned via {@link #onHandoverFailed(Call, int)} when a handover
