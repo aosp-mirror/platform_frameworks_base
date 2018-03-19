@@ -176,6 +176,7 @@ Landroid/app/backup/BackupHelperDispatcher$Header;->chunkSize:I
 Landroid/app/backup/BackupHelperDispatcher$Header;->keyPrefix:Ljava/lang/String;
 Landroid/app/backup/FullBackup;->backupToTar(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Landroid/app/backup/FullBackupDataOutput;)I
 Landroid/app/backup/FullBackupDataOutput;->addSize(J)V
+Landroid/app/backup/FullBackupDataOutput;-><init>(Landroid/os/ParcelFileDescriptor;)V
 Landroid/app/backup/FullBackupDataOutput;->mData:Landroid/app/backup/BackupDataOutput;
 Landroid/app/ContentProviderHolder;->info:Landroid/content/pm/ProviderInfo;
 Landroid/app/ContentProviderHolder;-><init>(Landroid/content/pm/ProviderInfo;)V
