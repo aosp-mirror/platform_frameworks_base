@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
@@ -95,6 +96,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
             }
         }
 
+        mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunching();
+
         mService.setRunningRemoteAnimation(mCallingPid, true);
 
         mWindowManager.deferSurfaceLayout();
@@ -143,6 +146,9 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
             // If we updated the launch-behind state, update the visibility of the activities after
             // we fetch the visible tasks to be controlled by the animation
             mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, PRESERVE_WINDOWS);
+
+            mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunched(START_TASK_TO_FRONT,
+                    homeActivity);
         } finally {
             mWindowManager.continueSurfaceLayout();
             Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
