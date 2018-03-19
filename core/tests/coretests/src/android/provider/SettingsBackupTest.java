@@ -170,6 +170,7 @@ public class SettingsBackupTest {
                     Settings.Global.CONNECTIVITY_SAMPLING_INTERVAL_IN_SECONDS,
                     Settings.Global.CONTACT_METADATA_SYNC_ENABLED,
                     Settings.Global.CONTACTS_DATABASE_WAL_ENABLED,
+                    Settings.Global.CPU_SCALING_ENABLED,
                     Settings.Global.DATA_ACTIVITY_TIMEOUT_MOBILE,
                     Settings.Global.DATA_ACTIVITY_TIMEOUT_WIFI,
                     Settings.Global.DATABASE_CREATION_BUILDID,
