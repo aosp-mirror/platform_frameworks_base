@@ -4705,6 +4705,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         displayFrames.mStable.top = displayFrames.mUnrestricted.top
                 + mStatusBarHeightForRotation[displayFrames.mRotation];
 
+        // Tell the bar controller where the collapsed status bar content is
+        mTmpRect.set(mStatusBar.getContentFrameLw());
+        mTmpRect.intersect(displayFrames.mDisplayCutoutSafe);
+        mTmpRect.top = mStatusBar.getContentFrameLw().top;  // Ignore top display cutout inset
+        mTmpRect.bottom = displayFrames.mStable.top;  // Use collapsed status bar size
+        mStatusBarController.setContentFrame(mTmpRect);
+
         boolean statusBarTransient = (sysui & View.STATUS_BAR_TRANSIENT) != 0;
         boolean statusBarTranslucent = (sysui
                 & (View.STATUS_BAR_TRANSLUCENT | View.STATUS_BAR_TRANSPARENT)) != 0;
@@ -4838,6 +4845,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mTmpNavigationFrame, displayFrames.mDisplayCutoutSafe, mTmpNavigationFrame, dcf,
                 mTmpNavigationFrame, displayFrames.mDisplayCutoutSafe,
                 displayFrames.mDisplayCutout);
+        mNavigationBarController.setContentFrame(mNavigationBar.getContentFrameLw());
+
         if (DEBUG_LAYOUT) Slog.i(TAG, "mNavigationBar frame: " + mTmpNavigationFrame);
         return mNavigationBarController.checkHiddenLw();
     }
@@ -8025,11 +8034,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // If the top fullscreen-or-dimming window is also the top fullscreen, respect
             // its light flag.
             vis &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-            if (!statusColorWin.isLetterboxedForDisplayCutoutLw()) {
-                // Only allow white status bar if the window was not letterboxed.
-                vis |= PolicyControl.getSystemUiVisibility(statusColorWin, null)
-                        & View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-            }
+            vis |= PolicyControl.getSystemUiVisibility(statusColorWin, null)
+                    & View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
         } else if (statusColorWin != null && statusColorWin.isDimming()) {
             // Otherwise if it's dimming, clear the light flag.
             vis &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
@@ -8097,15 +8103,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return vis;
     }
 
-    private boolean drawsSystemBarBackground(WindowState win) {
-        return win == null || (win.getAttrs().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
-    }
-
-    private boolean forcesDrawStatusBarBackground(WindowState win) {
-        return win == null || (win.getAttrs().privateFlags
-                & PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND) != 0;
-    }
-
     private int updateSystemBarsLw(WindowState win, int oldVis, int vis) {
         final boolean dockedStackVisible =
                 mWindowManagerInternal.isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
@@ -8129,13 +8126,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mTopDockedOpaqueWindowState, 0, 0);
 
         final boolean fullscreenDrawsStatusBarBackground =
-                (drawsSystemBarBackground(mTopFullscreenOpaqueWindowState)
-                        && (vis & View.STATUS_BAR_TRANSLUCENT) == 0)
-                || forcesDrawStatusBarBackground(mTopFullscreenOpaqueWindowState);
+                drawsStatusBarBackground(vis, mTopFullscreenOpaqueWindowState);
         final boolean dockedDrawsStatusBarBackground =
-                (drawsSystemBarBackground(mTopDockedOpaqueWindowState)
-                        && (dockedVis & View.STATUS_BAR_TRANSLUCENT) == 0)
-                || forcesDrawStatusBarBackground(mTopDockedOpaqueWindowState);
+                drawsStatusBarBackground(dockedVis, mTopDockedOpaqueWindowState);
 
         // prevent status bar interaction from clearing certain flags
         int type = win.getAttrs().type;
@@ -8236,6 +8229,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mWindowManagerFuncs.getInputMethodWindowLw(), navColorWin);
 
         return vis;
+    }
+
+    private boolean drawsStatusBarBackground(int vis, WindowState win) {
+        if (!mStatusBarController.isTransparentAllowed(win)) {
+            return false;
+        }
+        if (win == null) {
+            return true;
+        }
+
+        final boolean drawsSystemBars =
+                (win.getAttrs().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
+        final boolean forceDrawsSystemBars =
+                (win.getAttrs().privateFlags & PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND) != 0;
+
+        return forceDrawsSystemBars || drawsSystemBars && (vis & View.STATUS_BAR_TRANSLUCENT) == 0;
     }
 
     /**
