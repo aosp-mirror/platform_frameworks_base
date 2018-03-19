@@ -220,8 +220,7 @@
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Privat DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Vælg privat DNS-tilstand"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Fra"</string>
-    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
-    <skip />
+    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automatisk"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Hostname for privat DNS-udbyder"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Angiv hostname for DNS-udbyder"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Vis valgmuligheder for certificering af trådløs skærm"</string>
@@ -244,7 +243,7 @@
     <string name="adb_warning_message" msgid="7316799925425402244">"USB-fejlretning er kun beregnet til udvikling og kan bruges til at kopiere data mellem din computer og enheden, installere apps på enheden uden underretning og læse logdata."</string>
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Vil du ophæve adgangen til USB-fejlfinding for alle computere, du tidligere har godkendt?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Vil du tillade udviklingsindstillinger?"</string>
-    <string name="dev_settings_warning_message" msgid="2298337781139097964">"Disse indstillinger er kun beregnet til brug i forbindelse med udvikling. De kan forårsage, at din enhed og dens applikationer går ned eller ikke fungerer korrekt."</string>
+    <string name="dev_settings_warning_message" msgid="2298337781139097964">"Disse indstillinger er kun beregnet til brug i forbindelse med udvikling. De kan forårsage, at din enhed og dens apps går ned eller ikke fungerer korrekt."</string>
     <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Verificer apps via USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Tjek apps, der er installeret via ADB/ADT, for skadelig adfærd."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Bluetooth-enheder uden navne (kun MAC-adresser) vises"</string>
@@ -274,8 +273,8 @@
     <string name="show_touches_summary" msgid="6101183132903926324">"Vis visuel feedback ved tryk"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Vis overfladeopdateringer"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Fremhæv hele vinduesoverflader, når de opdateres"</string>
-    <string name="show_hw_screen_updates" msgid="5036904558145941590">"Vis opdat. af GPU-eksp."</string>
-    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Fremhæv visninger i vinduer, når de tegnes med GPU"</string>
+    <string name="show_hw_screen_updates" msgid="4117270979975470789">"Se visningsopdateringer"</string>
+    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Fremhæv visninger i vinduer, når de tegnes"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Se opdat. af hardwarelag"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Hardwarelag blinker grønt, når de opdateres"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Ret GPU-overlapsfejl"</string>
@@ -289,12 +288,10 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Vis grænser for klip, margener osv."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Tving læsning mod venstre"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Tving til højre mod venstre-layout for alle sprog"</string>
-    <string name="force_hw_ui" msgid="6426383462520888732">"Tving gengivelse af GPU"</string>
-    <string name="force_hw_ui_summary" msgid="5535991166074861515">"Gennemtving brug af GPU til 2D-tegning"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Tving 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Aktivér 4x MSAA i apps med OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Fejlfind på ikke-rektangulære klippehandlinger"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"GPU-profilgengivelse"</string>
+    <string name="track_frame_time" msgid="6094365083096851167">"HWUI-profilgengivelse"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Aktivér fejlretningslag for grafikprocessor"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Tillad, at fejlretningslag indlæses for grafikprocessor i apps til fejlretning"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Animationsskala for vindue"</string>
@@ -305,8 +302,8 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Behold ikke aktiviteter"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Luk hver aktivitet, så snart brugeren forlader den"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Grænse for baggrundsprocesser"</string>
-    <string name="show_all_anrs" msgid="28462979638729082">"Vis alle \"Appen svarer ikke\""</string>
-    <string name="show_all_anrs_summary" msgid="641908614413544127">"Vis \"Appen svarer ikke\" for baggrundsapps"</string>
+    <string name="show_all_anrs" msgid="4924885492787069007">"Vis ANR-fejl i baggrunden"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Vis dialogboksen \"Appen svarer ikke\" for baggrundsapps"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Vis advarsler om underretningskanal"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Viser en advarsel, når en app sender en underretning uden en gyldig kanal"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Gennemtving tilladelse til eksternt lager"</string>
@@ -357,39 +354,24 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Denne funktion er eksperimentel og kan påvirke ydeevnen."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Tilsidesat af <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"Ca. <xliff:g id="TIME">%1$s</xliff:g> tilbage"</string>
-    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="6655472132189365839">"Ca. <xliff:g id="TIME">%1$s</xliff:g> tilbage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Der er ca. <xliff:g id="TIME">%1$s</xliff:g> tilbage, alt efter hvordan du bruger enheden"</string>
-    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
-    <skip />
+    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"Ca. <xliff:g id="TIME">%1$s</xliff:g> tilbage, alt efter hvordan du bruger enheden (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> tilbage"</string>
-    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
-    <skip />
-    <!-- no translation found for power_discharge_by (6427074755635635749) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
-    <skip />
+    <string name="power_discharge_by_enhanced" msgid="8305422490607220844">"Batteriet kan holde indtil ca. <xliff:g id="TIME">%1$s</xliff:g> baseret på dit forbrug (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="896515698736070025">"Batteriet kan holde indtil ca. <xliff:g id="TIME">%1$s</xliff:g> baseret på dit forbrug"</string>
+    <string name="power_discharge_by" msgid="6052127431194780229">"Batteriet kan holde indtil ca. <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="4850425421176271395">"Batteriet kan holde indtil ca. <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Der er mindre end <xliff:g id="THRESHOLD">%1$s</xliff:g> tilbage"</string>
-    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
-    <skip />
+    <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Der er mindre end <xliff:g id="THRESHOLD">%1$s</xliff:g> tilbage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Der er mere end <xliff:g id="TIME_REMAINING">%1$s</xliff:g> tilbage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"Der er mere end <xliff:g id="TIME_REMAINING">%1$s</xliff:g> tilbage"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"Telefonen lukker muligvis snart ned"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"Denne tablet lukker muligvis snart ned"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"Enheden lukker muligvis snart ned"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"Telefonen lukker muligvis snart ned (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"Denne tablet lukker muligvis snart ned (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"Enheden lukker muligvis snart ned (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> til det er fuldt opladet"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> til det er fuldt opladet"</string>
@@ -440,8 +422,9 @@
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Mere tid."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Mindre tid."</string>
-    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Aktivér"</string>
     <string name="cancel" msgid="6859253417269739139">"Annuller"</string>
+    <string name="okay" msgid="1997666393121016642">"OK"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Aktivér"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"Aktivér Forstyr ikke"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Aldrig"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Kun prioritet"</string>
@@ -450,4 +433,6 @@
     <string name="zen_alarm_warning" msgid="6236690803924413088">"Du vil ikke kunne høre din næste alarm <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="4996153414057676512">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"på <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Varighed"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Spørg hver gang"</string>
 </resources>

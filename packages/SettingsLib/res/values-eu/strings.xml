@@ -220,8 +220,7 @@
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS pribatua"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Hautatu DNS pribatuaren modua"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Desaktibatuta"</string>
-    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
-    <skip />
+    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automatikoa"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"DNS hornitzaile pribatuaren ostalari-izena"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Idatzi DNS hornitzailearen ostalari-izena"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Erakutsi hari gabeko bistaratze-egiaztapenaren aukerak"</string>
@@ -274,8 +273,8 @@
     <string name="show_touches_summary" msgid="6101183132903926324">"Erakutsi sakatutako elementuak"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Erakutsi azaleko egunera."</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Distiratu leiho osoen azalak eguneratzen direnean"</string>
-    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU ikuspegi-eguneratzeak"</string>
-    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Ikuspegi-distira leiho barrutik GPUz marraztean"</string>
+    <string name="show_hw_screen_updates" msgid="4117270979975470789">"Erakutsi ikuspegi-aldaketak"</string>
+    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Nabarmendu leiho barruko ikuspegiak marraztean"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Hardware-geruzen eguneratzeak"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Eguneratu bitartean, hardware-geruzak berdez"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Araztu GPU gainidazketa"</string>
@@ -289,12 +288,10 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Erakutsi kliparen mugak, marjinak, etab."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Behartu eskuin-ezker norabidea."</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Behartu pantaila-diseinuaren norabidea eskuin-ezker izatera eskualdeko ezarpen guztiekin."</string>
-    <string name="force_hw_ui" msgid="6426383462520888732">"Behartu GPU errendatzea"</string>
-    <string name="force_hw_ui_summary" msgid="5535991166074861515">"Behartu GPUa erabiltzera 2 dimentsioko marrazkietan."</string>
     <string name="force_msaa" msgid="7920323238677284387">"Behartu 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Gaitu 4x MSAA, OpenGL ES 2.0 aplikazioetan."</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Araztu angeluzuzenak ez diren klip-eragiketak."</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"GPU errendatze-profila"</string>
+    <string name="track_frame_time" msgid="6094365083096851167">"Profilaren HWUI errendatzea"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Gaitu GPUaren arazte-geruzak"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Onartu GPUaren arazte-geruzak kargatzea arazte-aplikazioetarako"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Leihoen animazio-eskala"</string>
@@ -305,8 +302,8 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Ez mantendu jarduerak"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Ezabatu jarduerak erabiltzailea haietatik irtetean"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Atzeko planoko prozesuen muga"</string>
-    <string name="show_all_anrs" msgid="28462979638729082">"Erakutsi ANR guztiak"</string>
-    <string name="show_all_anrs_summary" msgid="641908614413544127">"\"Erantzunik ez\" mezua atz. planoko aplikazioetarako"</string>
+    <string name="show_all_anrs" msgid="4924885492787069007">"Erakutsi atzeko planoko ANRak"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Erakutsi aplikazioak ez erantzutearen (ANR) leihoa atzeko planoan dabiltzan aplikazioen kasuan"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Erakutsi jakinarazpenen kanalen abisuak"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Bistaratu abisuak aplikazioek baliozko kanalik gabeko jakinarazpenak argitaratzean"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Behartu aplikazioak onartzea kanpoko biltegian"</string>
@@ -357,39 +354,24 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Eginbidea esperimentala da eta eragina izan dezake funtzionamenduan."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> hobespena gainjarri zaio"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"<xliff:g id="TIME">%1$s</xliff:g> inguru gelditzen dira"</string>
-    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="6655472132189365839">"<xliff:g id="TIME">%1$s</xliff:g> inguru gelditzen dira (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"<xliff:g id="TIME">%1$s</xliff:g> inguru gelditzen dira, erabileraren arabera"</string>
-    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
-    <skip />
+    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"Erabilera kontuan izanda, <xliff:g id="TIME">%1$s</xliff:g> inguru gelditzen dira (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> guztiz kargatu arte"</string>
-    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
-    <skip />
-    <!-- no translation found for power_discharge_by (6427074755635635749) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
-    <skip />
+    <string name="power_discharge_by_enhanced" msgid="8305422490607220844">"Erabilera kontuan izanda, bateriak ordu honetara arte iraungo du, gutxi gorabehera: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="896515698736070025">"Erabilera kontuan izanda, bateriak ordu honetara arte iraungo du, gutxi gorabehera: <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by" msgid="6052127431194780229">"Bateriak ordu honetara arte iraungo du, gutxi gorabehera: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="4850425421176271395">"Bateriak ordu honetara arte iraungo du, gutxi gorabehera: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g> baino gutxiago gelditzen dira"</string>
-    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
-    <skip />
+    <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"<xliff:g id="THRESHOLD">%1$s</xliff:g> baino gutxiago gelditzen da (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> baino gehiago gelditzen da (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> baino gehiago gelditzen da"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"Baliteke telefonoa laster itzaltzea"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"Baliteke tableta laster itzaltzea"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"Baliteke gailua laster itzaltzea"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"Baliteke telefonoa laster itzaltzea (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"Baliteke tableta laster itzaltzea (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"Baliteke gailua laster itzaltzea (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"<xliff:g id="TIME">%1$s</xliff:g> falta dira guztiz kargatu arte"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> guztiz kargatu arte"</string>
@@ -440,8 +422,9 @@
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Denbora gehiago."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Denbora gutxiago."</string>
-    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Aktibatu"</string>
     <string name="cancel" msgid="6859253417269739139">"Utzi"</string>
+    <string name="okay" msgid="1997666393121016642">"Ados"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Aktibatu"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"Aktibatu \"Ez molestatu\" modua"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Inoiz ez"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Lehentasuna dutenak soilik"</string>
@@ -450,4 +433,6 @@
     <string name="zen_alarm_warning" msgid="6236690803924413088">"Ez duzu entzungo hurrengo alarma (<xliff:g id="WHEN">%1$s</xliff:g>)"</string>
     <string name="alarm_template" msgid="4996153414057676512">"ordua: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"data: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Iraupena"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Galdetu beti"</string>
 </resources>

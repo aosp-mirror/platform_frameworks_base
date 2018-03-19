@@ -220,8 +220,7 @@
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"ব্যক্তিগত ডিএনএস"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"ব্যক্তিগত ডিএনএস মোড বেছে নিন"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"বন্ধ আছে"</string>
-    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
-    <skip />
+    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"অটোমেটিক"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"ব্যক্তিগত ডিএনএস প্রদানকারীর হোস্টনেম"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"ডিএনএস প্রদানকারীর হোস্টনেম লিখুন"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ওয়্যারলেস প্রদর্শন সার্টিফিকেশন জন্য বিকল্পগুলি দেখান"</string>
@@ -274,8 +273,8 @@
     <string name="show_touches_summary" msgid="6101183132903926324">"আলতো চাপ দিলে ভিজ্যুয়াল প্রতিক্রিয়া দেখান"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"সারফেস আপডেটগুলি দেখান"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"সম্পূর্ণ উইন্ডোর সারফেস আপডেট হয়ে গেলে সেটিকে ফ্ল্যাশ করুন"</string>
-    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU দৃশ্য আপডেটগুলি প্রদর্শন করুন"</string>
-    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"GPU এর সহ অঙ্কনের সময় উইন্ডোগুলির মধ্যেকার দৃশ্যগুলি ফ্ল্যাশ করুন।"</string>
+    <string name="show_hw_screen_updates" msgid="4117270979975470789">"ভিউয়ের আপডেট দেখুন"</string>
+    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"ড্র করা থাকলে উইন্ডোর মধ্যে কী ঘটছে তা দেখানো হবে"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"হার্ডওয়্যার স্তর আপডেটগুলি প্রদর্শন করুন"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"যখন হার্ডওয়্যার স্তরগুলি আপডেট হয় তখন সেগুলিকে সবুজ রঙে ফ্ল্যাশ করুন"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"ডিবাগ GPU ওভারড্র"</string>
@@ -289,12 +288,10 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"ক্লিপ বাউন্ড, মার্জিন ইত্যাদি দেখান"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL লেআউট দিকনির্দেশ জোর দিন"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"সমস্ত স্থানের জন্য RTL এ স্ক্রীন লেআউট দিকনির্দেশে জোর দেয়"</string>
-    <string name="force_hw_ui" msgid="6426383462520888732">"জোর করে GPU রেন্ডারিং করুন"</string>
-    <string name="force_hw_ui_summary" msgid="5535991166074861515">"2D অঙ্কনের জন্য GPU-এর ব্যবহারে জোর দিন"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA এ জোর দিন"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 অ্যাপ্লিকেশানগুলির মধ্যে 4x MSAA সক্রিয় করুন"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"অ-আয়তক্ষেত্রাকার ক্লিপ কার্যকলাপ ডিবাগ করুন"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"প্রোফাইল GPU রেন্ডারিং"</string>
+    <string name="track_frame_time" msgid="6094365083096851167">"প্রোফাইল HWUI রেন্ডারিং"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU ডিবাগ স্তর সক্ষম করুন"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"ডিবাগ অ্যাপের জন্য GPU ডিবাগ স্তর লোড হতে দিন"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"উইন্ডো অ্যানিমেশন স্কেল"</string>
@@ -305,8 +302,8 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"কার্যকলাপ রাখবেন না"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ব্যবহারকারী এটি ছেড়ে যাওয়ার পরে যত তাড়াতাড়ি সম্ভব প্রতিটি কার্যকলাপ ধ্বংস করুন"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"পশ্চাদপট প্রক্রিয়ার সীমা"</string>
-    <string name="show_all_anrs" msgid="28462979638729082">"সব ANR দেখান"</string>
-    <string name="show_all_anrs_summary" msgid="641908614413544127">"পশ্চাদপটের অ্যাপ্লিকেশানগুলির জন্য অ্যাপ্লিকেশান কোনো প্রতিক্রিয়া দিচ্ছে না এমন কথোপকথন দেখান"</string>
+    <string name="show_all_anrs" msgid="4924885492787069007">"ব্যাকগ্রাউন্ডের ANR দেখুন"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"ব্যাকগ্রাউন্ডের অ্যাপগুলির জন্য \'অ্যাপ থেকে সাড়া পাওয়া যাচ্ছে না\' মেসেজ দেখান"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"বিজ্ঞপ্তির সতর্কতা দেখুন"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"অ্যাপ সঠিক চ্যানেল ছাড়া বিজ্ঞপ্তি দেখালে সতর্ক করে"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"বহিরাগততে বলপূর্বক মঞ্জুরি"</string>
@@ -357,39 +354,24 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"এই বৈশিষ্ট্যটি পরীক্ষামূলক এবং এটি কার্য-সম্পাদনা প্রভাবিত করতে পারে।"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> এর দ্বারা ওভাররাইড করা হয়েছে"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"প্রায় <xliff:g id="TIME">%1$s</xliff:g> বাকি"</string>
-    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="6655472132189365839">"আর <xliff:g id="TIME">%1$s</xliff:g> চলবে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"বর্তমান ব্যাটারি ব্যবহার অনুযায়ী আর <xliff:g id="TIME">%1$s</xliff:g> বাকি"</string>
-    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
-    <skip />
+    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"বর্তমান ব্যবহার অনুযায়ী আর আনুমানিক <xliff:g id="TIME">%1$s</xliff:g> চলবে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> বাকী আছে"</string>
-    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
-    <skip />
-    <!-- no translation found for power_discharge_by (6427074755635635749) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
-    <skip />
+    <string name="power_discharge_by_enhanced" msgid="8305422490607220844">"বর্তমান ব্যবহার অনুযায়ী আর আনুমানিক <xliff:g id="TIME">%1$s</xliff:g> চলবে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="896515698736070025">"বর্তমান ব্যবহার অনুযায়ী আর আনুমানিক <xliff:g id="TIME">%1$s</xliff:g> চলবে"</string>
+    <string name="power_discharge_by" msgid="6052127431194780229">"আর আনুমানিক <xliff:g id="TIME">%1$s</xliff:g> চলবে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="4850425421176271395">"আর আনুমানিক <xliff:g id="TIME">%1$s</xliff:g> চলবে"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g> এর থেকেও কম বাকি আছে"</string>
-    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
-    <skip />
+    <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"আর <xliff:g id="THRESHOLD">%1$s</xliff:g>-এর কম চার্জ বাকি আছে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"আরও <xliff:g id="TIME_REMAINING">%1$s</xliff:g>-এর বেশি চলবে (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"আরও <xliff:g id="TIME_REMAINING">%1$s</xliff:g>-এর বেশি চলবে"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"ফোনটি শীঘ্রই বন্ধ হয়ে যেতে পারে"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"ট্যাবলেটটি শীঘ্রই বন্ধ হয়ে যেতে পারে"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"ডিভাইসটি শীঘ্রই বন্ধ হয়ে যেতে পারে"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"ফোনটি শীঘ্রই বন্ধ হয়ে যেতে পারে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"ট্যাবলেটটি শীঘ্রই বন্ধ হয়ে যেতে পারে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"ডিভাইসটি শীঘ্রই বন্ধ হয়ে যেতে পারে (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"সম্পূর্ণ চার্জ হতে <xliff:g id="TIME">%1$s</xliff:g> বাকি"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - সম্পূর্ণ চার্জ হতে <xliff:g id="TIME">%2$s</xliff:g> লাগবে"</string>
@@ -440,8 +422,9 @@
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"আরও বেশি।"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"আরও কম।"</string>
-    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"চালু করুন"</string>
     <string name="cancel" msgid="6859253417269739139">"বাতিল"</string>
+    <string name="okay" msgid="1997666393121016642">"ঠিক আছে"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"চালু করুন"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"\'বিরক্ত করবেন না\' মোড চালু করুন"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"কখনও নয়"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"শুধুমাত্র অগ্রাধিকার"</string>
@@ -450,4 +433,6 @@
     <string name="zen_alarm_warning" msgid="6236690803924413088">"<xliff:g id="WHEN">%1$s</xliff:g> এর সময় আপনার পরবর্তী অ্যালার্ম শুনতে পাবেন না"</string>
     <string name="alarm_template" msgid="4996153414057676512">"সময় <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"তারিখ ও সময় <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"সময়কাল"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"প্রতিবার জিজ্ঞেস করা হবে"</string>
 </resources>

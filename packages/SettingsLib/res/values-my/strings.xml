@@ -220,8 +220,7 @@
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"သီးသန့် DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"သီးသန့် DNS မုဒ်ကို ရွေးပါ"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"ပိတ်ရန်"</string>
-    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
-    <skip />
+    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"အလိုအလျောက်"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"သီးသန့် DNS ပံ့ပိုးသူ၏ အင်တာနက်လက်ခံဝန်ဆောင်ပေးသူအမည်"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS ဝန်ဆောင်မှုပေးသူ၏ အင်တာနက်လက်ခံဝန်ဆောင်ပေးသူအမည်ကို ထည့်ပါ"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ကြိုးမဲ့ အခင်းအကျင်း အသိအမှတ်ပြုလက်မှတ်အတွက် ရွေးချယ်စရာများပြရန်"</string>
@@ -274,8 +273,8 @@
     <string name="show_touches_summary" msgid="6101183132903926324">"တို့ခြင်းများအတွက် အမြင်ဖြင့် တုံ့ပြန်မှုပြပါ"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"surface အဆင့်မြှင့်မှုများပြပါ"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"အပ်ဒိတ်လုပ်စဉ် ဝင်းဒိုးမျက်နှာပြင်တွင် အချက်ပြရန်"</string>
-    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPUမြင်ကွင်းအဆင့်မြှင့်ခြင်းများပြရန်"</string>
-    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"GPU နှင့်ဆွဲစဉ် ၀င်းဒိုးအတွင်းပိုင်း လျှပ်တပြက်မြင်ကွင်းများ"</string>
+    <string name="show_hw_screen_updates" msgid="4117270979975470789">"အပ်ဒိတ်မြင်ကွင်း ပြရန်"</string>
+    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"ပုံရေးဆွဲစဉ် ဝင်းဒိုးအတွင်း လျှပ်တစ်ပြက်မြင်ကွင်းများ"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"ဟာ့ဒ်ဝဲအလွှာများအဆင်မြှင့်မှုကိုပြရန်"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"အပ်ဒိတ်လုပ်ချိန် ဟာ့ဒ်ဝဲအလွှာများ အစိမ်းရောင်ပြပါ"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU ပိုသုံးစွဲမှုအမှားရှာဖွေပြင်ဆင်ရန်"</string>
@@ -289,12 +288,10 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"ဖြတ်ပိုင်းအနားသတ်များ၊ အနားများ စသဖြင့် ပြပါ။"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL ဖွဲ့စည်းပုံအညွှန်း မဖြစ်မနေလုပ်ပါ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"လိုကယ်လ်အားလုံးအတွက် မျက်နှာပြင် ဖွဲ့စည်းပုံအညွှန်း မဖြစ်မနေလုပ်ရန်"</string>
-    <string name="force_hw_ui" msgid="6426383462520888732">"GPUအား အတင်းအကျပ်ဖြစ်စေမည်"</string>
-    <string name="force_hw_ui_summary" msgid="5535991166074861515">"GPUကို ၂ဖက်မြင်ပုံဆွဲခြင်းအတွက် မဖြစ်မနေအသုံးပြုစေရန်"</string>
     <string name="force_msaa" msgid="7920323238677284387">"တွန်းအား ၄× MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 apps တွင် ၄×MSAA အသုံးပြုခွင့်ပေးရန်"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"စတုဂံပုံမကျသောဖြတ်ပိုင်း လုပ်ဆောင်ချက်များကို အမှားဖယ်ရှားသည်"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"GPU တင်ဆက်မှု ကိုယ်ရေးအချက်အလက်"</string>
+    <string name="track_frame_time" msgid="6094365083096851167">"HWUI ပြင်ဆင်စဉ် ပရိုဖိုင်"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU အမှားရှာ အလွှာများဖွင့်ထားပါ"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"အမှားရှာအက်ပ်များအတွက် GPU အမှားရှာအလွှာများ ထည့်သွင်းခွင့်ပြုပါ"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"လှုပ်ရှားသက်ဝင်ပုံစကေး"</string>
@@ -305,8 +302,8 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"ဆောင်ရွက်မှုများကို မသိမ်းထားပါနှင့်"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"အသုံးပြုသူထွက်ခွါသွားသည်နှင့် လုပ်ဆောင်ချက်များကို ဖျက်ပစ်မည်"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"နောက်ခံလုပ်ငန်းစဉ်ကန့်သတ်ခြင်း"</string>
-    <string name="show_all_anrs" msgid="28462979638729082">"ANRsအားလုံးအား ပြသရန်"</string>
-    <string name="show_all_anrs_summary" msgid="641908614413544127">"နောက်ခံအပ်ပလီကေးရှင်းအတွက်တုံ့ပြန်မှုမရှိပြရန်"</string>
+    <string name="show_all_anrs" msgid="4924885492787069007">"နောက်ခံ ANR များကို ပြရန်"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"နောက်ခံ အပလီကေးရှင်းများ အတွက် \'အက်ပ်တုံ့ပြန်မှုမရှိ\' ဟု ပြရန်"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"ချန်နယ်သတိပေးချက်များပြပါ"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"ချန်နယ်မရှိဘဲ အကြောင်းကြားလျှင် စကရင်တွင်သတိပေးသည်"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"အပြင်မှာ အတင်း ခွင့်ပြုရန်"</string>
@@ -357,39 +354,24 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ဤဝန်ဆောင်မှုမှာ စမ်းသပ်အဆင့်သာဖြစ်၍ လုပ်ဆောင်မှုအားနည်းနိုင်သည်။"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> မှ ကျော်၍ လုပ်ထားသည်။"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"<xliff:g id="TIME">%1$s</xliff:g> ခန့်လိုပါသည်"</string>
-    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="6655472132189365839">"<xliff:g id="TIME">%1$s</xliff:g> ခန့် ကျန်သည် (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"သင့်အသုံးပြုမှုအရ <xliff:g id="TIME">%1$s</xliff:g> ခန့် ကျန်ပါသည်"</string>
-    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
-    <skip />
+    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"သင်၏ အသုံးပြုမှု အပေါ် မူတည်၍ <xliff:g id="TIME">%1$s</xliff:g> ခန့် ကျန်သည် (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> ကျန်သည်"</string>
-    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
-    <skip />
-    <!-- no translation found for power_discharge_by (6427074755635635749) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
-    <skip />
+    <string name="power_discharge_by_enhanced" msgid="8305422490607220844">"သင်၏ အသုံးပြုမှုအပေါ် မူတည်၍ <xliff:g id="TIME">%1$s</xliff:g> ခန့်အထိ သုံးနိုင်သည် (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="896515698736070025">"သင်၏ အသုံးပြုမှုအပေါ် အခြေခံ၍ <xliff:g id="TIME">%1$s</xliff:g> ခန့်အထိ သုံးနိုင်သည်"</string>
+    <string name="power_discharge_by" msgid="6052127431194780229">"<xliff:g id="TIME">%1$s</xliff:g> ခန့်အထိ သုံးနိုင်သည် (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="4850425421176271395">"<xliff:g id="TIME">%1$s</xliff:g> ခန့်အထိ သုံးနိုင်သည်"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ခန့်သာ ကျန်တော့သည်"</string>
-    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
-    <skip />
+    <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"<xliff:g id="THRESHOLD">%1$s</xliff:g> အောက်သာ ကျန်သည် (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ကျော် ကျန်သည် (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ကျော် ကျန်သေးသည်"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"မကြာမီ ဖုန်းပိတ်သွားနိုင်သည်"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"မကြာမီ တက်ဘလက်ပိတ်သွားနိုင်သည်"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"မကြာမီ စက်ပိတ်သွားနိုင်သည်"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"မကြာမီ ဖုန်းပိတ်သွားနိုင်သည် (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"မကြာမီ တက်ဘလက် ပိတ်သွားနိုင်သည် (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"မကြာမီ စက်ပိတ်သွားနိုင်သည် (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"အားပြည့်ရန် <xliff:g id="TIME">%1$s</xliff:g> လိုပါသည်"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> − အားပြည့်ရန် <xliff:g id="TIME">%2$s</xliff:g> ကျန်သည်"</string>
@@ -440,8 +422,9 @@
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"အချိန်တိုးရန်။"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"အချိန်လျှော့ရန်။"</string>
-    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"ဖွင့်ရန်"</string>
     <string name="cancel" msgid="6859253417269739139">"မလုပ်တော့"</string>
+    <string name="okay" msgid="1997666393121016642">"OK"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"ဖွင့်ရန်"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"\'မနှောင့်ယှက်ရ\' ဖွင့်ခြင်း"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"ဘယ်တော့မှ"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"ဦးစားပေးများသာ"</string>
@@ -450,4 +433,6 @@
     <string name="zen_alarm_warning" msgid="6236690803924413088">"သင်၏ နောက်ထပ် <xliff:g id="WHEN">%1$s</xliff:g> နှိုးစက်ကို ကြားမည်မဟုတ်ပါ"</string>
     <string name="alarm_template" msgid="4996153414057676512">"<xliff:g id="WHEN">%1$s</xliff:g> တွင်"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g> တွင်"</string>
+    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"ကြာချိန်"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"အမြဲမေးပါ"</string>
 </resources>
