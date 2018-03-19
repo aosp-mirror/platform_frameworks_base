@@ -104,7 +104,10 @@ public final class GnssStatus {
     final int mSvCount;
     final float[] mCarrierFrequencies;
 
-    GnssStatus(int svCount, int[] svidWithFlags, float[] cn0s, float[] elevations,
+    /**
+     * @hide
+     */
+    public GnssStatus(int svCount, int[] svidWithFlags, float[] cn0s, float[] elevations,
             float[] azimuths, float[] carrierFrequencies) {
         mSvCount = svCount;
         mSvidWithFlags = svidWithFlags;
