@@ -129,42 +129,22 @@ void JankTracker::finishFrame(const FrameInfo& frame) {
             totalDuration -= forgiveAmount;
         }
     }
-
     LOG_ALWAYS_FATAL_IF(totalDuration <= 0, "Impossible totalDuration %" PRId64, totalDuration);
     mData->reportFrame(totalDuration);
     (*mGlobalData)->reportFrame(totalDuration);
 
+    // Keep the fast path as fast as possible.
+    if (CC_LIKELY(totalDuration < mFrameInterval)) {
+        return;
+    }
+
     // Only things like Surface.lockHardwareCanvas() are exempt from tracking
-    if (CC_UNLIKELY(frame[FrameInfoIndex::Flags] & EXEMPT_FRAMES_FLAGS)) {
+    if (frame[FrameInfoIndex::Flags] & EXEMPT_FRAMES_FLAGS) {
         return;
     }
 
-    if (totalDuration > mFrameInterval) {
-        mData->reportJank();
-        (*mGlobalData)->reportJank();
-    }
-
-    bool isTripleBuffered = mSwapDeadline > frame[FrameInfoIndex::IntendedVsync];
-
-    mSwapDeadline = std::max(mSwapDeadline + mFrameInterval,
-                             frame[FrameInfoIndex::IntendedVsync] + mFrameInterval);
-
-    // If we hit the deadline, cool!
-    if (frame[FrameInfoIndex::FrameCompleted] < mSwapDeadline) {
-        if (isTripleBuffered) {
-            mData->reportJankType(JankType::kHighInputLatency);
-            (*mGlobalData)->reportJankType(JankType::kHighInputLatency);
-        }
-        return;
-    }
-
-    mData->reportJankType(JankType::kMissedDeadline);
-    (*mGlobalData)->reportJankType(JankType::kMissedDeadline);
-
-    // Janked, reset the swap deadline
-    nsecs_t jitterNanos = frame[FrameInfoIndex::FrameCompleted] - frame[FrameInfoIndex::Vsync];
-    nsecs_t lastFrameOffset = jitterNanos % mFrameInterval;
-    mSwapDeadline = frame[FrameInfoIndex::FrameCompleted] - lastFrameOffset + mFrameInterval;
+    mData->reportJank();
+    (*mGlobalData)->reportJank();
 
     for (int i = 0; i < NUM_BUCKETS; i++) {
         int64_t delta = frame.duration(COMPARISONS[i].start, COMPARISONS[i].end);
