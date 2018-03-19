@@ -208,32 +208,12 @@ message SystemProto {
 
   message DataConnection {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    enum Name {
-      NONE = 0;
-      GPRS = 1;
-      EDGE = 2;
-      UMTS = 3;
-      CDMA = 4;
-      EVDO_0 = 5;
-      EVDO_A = 6;
-      ONE_X_RTT = 7; // 1xRTT.
-      HSDPA = 8;
-      HSUPA = 9;
-      HSPA = 10;
-      IDEN = 11;
-      EVDO_B = 12;
-      LTE = 13;
-      EHRPD = 14;
-      HSPAP = 15;
-      GSM = 16;
-      TD_SCDMA = 17;
-      IWLAN = 18;
-      LTE_CA = 19;
-      OTHER = 20;
-    };
-    optional Name name = 1;
-    optional TimerProto total = 2;
+    oneof type {
+      android.telephony.NetworkTypeEnum name = 1;
+      // If is_none is not set, then the name is a valid network type.
+      bool is_none = 2;
+    }
+    optional TimerProto total = 3;
   };
   repeated DataConnection data_connection = 8;
 
