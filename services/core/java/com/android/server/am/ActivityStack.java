@@ -3420,7 +3420,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     /** Find next proper focusable stack and make it focused. */
-    private boolean adjustFocusToNextFocusableStack(String reason) {
+    boolean adjustFocusToNextFocusableStack(String reason) {
         return adjustFocusToNextFocusableStack(reason, false /* allowFocusSelf */);
     }
 
