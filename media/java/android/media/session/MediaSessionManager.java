@@ -342,16 +342,17 @@ public final class MediaSessionManager {
     /**
      * Returns whether the api
      *
-     * @param uid uid of the app
      * @param packageName packageName
+     * @param pid pid of the app
+     * @param uid uid of the app
      * @hide
      */
-    public boolean isTrusted(int uid, @NonNull String packageName) {
+    public boolean isTrusted(@NonNull String packageName, int pid, int uid) {
         if (packageName == null) {
             return false;
         }
         try {
-            return mService.isTrusted(uid, packageName);
+            return mService.isTrusted(packageName, pid, uid);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Cannot communicate with the service.", e);
         }
@@ -403,7 +404,8 @@ public final class MediaSessionManager {
     public List<SessionToken2> getActiveSessionTokens() {
         try {
             List<Bundle> bundles = mService.getSessionTokens(
-                    /* activeSessionOnly */ true, /* sessionServiceOnly */ false);
+                    /* activeSessionOnly */ true, /* sessionServiceOnly */ false,
+                    mContext.getPackageName());
             return toTokenList(mContext, bundles);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Cannot communicate with the service.", e);
@@ -424,7 +426,8 @@ public final class MediaSessionManager {
     public List<SessionToken2> getSessionServiceTokens() {
         try {
             List<Bundle> bundles = mService.getSessionTokens(
-                    /* activeSessionOnly */ false, /* sessionServiceOnly */ true);
+                    /* activeSessionOnly */ false, /* sessionServiceOnly */ true,
+                    mContext.getPackageName());
             return toTokenList(mContext, bundles);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Cannot communicate with the service.", e);
@@ -447,7 +450,8 @@ public final class MediaSessionManager {
     public List<SessionToken2> getAllSessionTokens() {
         try {
             List<Bundle> bundles = mService.getSessionTokens(
-                    /* activeSessionOnly */ false, /* sessionServiceOnly */ false);
+                    /* activeSessionOnly */ false, /* sessionServiceOnly */ false,
+                    mContext.getPackageName());
             return toTokenList(mContext, bundles);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Cannot communicate with the service.", e);
@@ -521,7 +525,7 @@ public final class MediaSessionManager {
             SessionTokensChangedWrapper wrapper = mSessionTokensListener.remove(listener);
             if (wrapper != null) {
                 try {
-                    mService.removeSessionTokensListener(wrapper.mStub);
+                    mService.removeSessionTokensListener(wrapper.mStub, mContext.getPackageName());
                 } catch (RemoteException e) {
                     Log.e(TAG, "Error in removeSessionTokensListener.", e);
                 } finally {
