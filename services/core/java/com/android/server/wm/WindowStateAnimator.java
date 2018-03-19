@@ -225,6 +225,11 @@ class WindowStateAnimator {
     // case we need to give the client a new Surface if it lays back out to a visible state.
     boolean mChildrenDetached = false;
 
+    // Set to true after the first frame of the Pinned stack animation
+    // and reset after the last to ensure we only reset mForceScaleUntilResize
+    // once per animation.
+    boolean mPipAnimationStarted = false;
+
     WindowStateAnimator(final WindowState win) {
         final WindowManagerService service = win.mService;
 
@@ -983,8 +988,13 @@ class WindowStateAnimator {
             // As we are in SCALING_MODE_SCALE_TO_WINDOW, SurfaceFlinger will
             // then take over the scaling until the new buffer arrives, and things
             // will be seamless.
-            mForceScaleUntilResize = true;
+            if (mPipAnimationStarted == false) {
+                mForceScaleUntilResize = true;
+                mPipAnimationStarted = true;
+            }
         } else {
+            mPipAnimationStarted = false;
+
             if (!w.mSeamlesslyRotated) {
                 mSurfaceController.setPositionInTransaction(mXOffset, mYOffset, recoveringMemory);
             }
