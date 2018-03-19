@@ -19,6 +19,7 @@ package com.android.settingslib.deviceinfo;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.annotation.SuppressLint;
@@ -26,6 +27,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.provider.Settings;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceScreen;
 
@@ -54,6 +56,8 @@ public class WifiMacAddressPreferenceControllerTest {
     @Mock
     private Preference mPreference;
 
+    private static final String TEST_MAC_ADDRESS = "00:11:22:33:44:55";
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -80,7 +84,6 @@ public class WifiMacAddressPreferenceControllerTest {
     public void testWifiMacAddress() {
         final WifiManager wifiManager = mock(WifiManager.class);
         final WifiInfo wifiInfo = mock(WifiInfo.class);
-        doReturn("00:11:22:33:44:55").when(wifiInfo).getMacAddress();
 
         doReturn(null).when(wifiManager).getConnectionInfo();
         doReturn(wifiManager).when(mContext).getSystemService(WifiManager.class);
@@ -89,14 +92,21 @@ public class WifiMacAddressPreferenceControllerTest {
                 new ConcreteWifiMacAddressPreferenceController(mContext, mLifecycle);
 
         wifiMacAddressPreferenceController.displayPreference(mScreen);
-
         verify(mPreference).setSummary(R.string.status_unavailable);
 
         doReturn(wifiInfo).when(wifiManager).getConnectionInfo();
-
+        doReturn(TEST_MAC_ADDRESS).when(wifiInfo).getMacAddress();
         wifiMacAddressPreferenceController.displayPreference(mScreen);
+        verify(mPreference).setSummary(TEST_MAC_ADDRESS);
 
-        verify(mPreference).setSummary("00:11:22:33:44:55");
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED, 1);
+        wifiMacAddressPreferenceController.displayPreference(mScreen);
+        verify(mPreference, times(2)).setSummary(TEST_MAC_ADDRESS);
+
+        doReturn(WifiInfo.DEFAULT_MAC_ADDRESS).when(wifiInfo).getMacAddress();
+        wifiMacAddressPreferenceController.displayPreference(mScreen);
+        verify(mPreference).setSummary(R.string.wifi_status_mac_randomized);
     }
 
     private static class ConcreteWifiMacAddressPreferenceController
