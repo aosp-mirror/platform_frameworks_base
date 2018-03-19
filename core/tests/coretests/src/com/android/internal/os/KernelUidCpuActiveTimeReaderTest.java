@@ -57,7 +57,7 @@ public class KernelUidCpuActiveTimeReaderTest {
     }
 
     @Test
-    public void testReadDelta() throws Exception {
+    public void testReadDelta() {
         final int cores = 8;
         final int[] uids = {1, 22, 333, 4444, 5555};
 
@@ -104,7 +104,7 @@ public class KernelUidCpuActiveTimeReaderTest {
     }
 
     @Test
-    public void testReadAbsolute() throws Exception {
+    public void testReadAbsolute() {
         final int cores = 8;
         final int[] uids = {1, 22, 333, 4444, 5555};
 
@@ -128,7 +128,7 @@ public class KernelUidCpuActiveTimeReaderTest {
     }
 
     @Test
-    public void testReadDelta_malformedData() throws Exception {
+    public void testReadDelta_malformedData() {
         final int cores = 8;
         final int[] uids = {1, 22, 333, 4444, 5555};
         final long[][] times = increaseTime(new long[uids.length][cores]);
