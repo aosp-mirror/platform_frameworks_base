@@ -3858,6 +3858,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; password: ").append(isPassword());
         builder.append("; scrollable: ").append(isScrollable());
         builder.append("; importantForAccessibility: ").append(isImportantForAccessibility());
+        builder.append("; visible: ").append(isVisibleToUser());
         builder.append("; actions: ").append(mActions);
 
         return builder.toString();
