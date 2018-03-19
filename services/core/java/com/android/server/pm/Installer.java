@@ -484,11 +484,11 @@ public class Installer extends SystemService {
         }
     }
 
-    public void installApkVerity(String filePath, FileDescriptor verityInput)
+    public void installApkVerity(String filePath, FileDescriptor verityInput, int contentSize)
             throws InstallerException {
         if (!checkBeforeRemote()) return;
         try {
-            mInstalld.installApkVerity(filePath, verityInput);
+            mInstalld.installApkVerity(filePath, verityInput, contentSize);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
