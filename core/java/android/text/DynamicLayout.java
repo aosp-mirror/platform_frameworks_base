@@ -704,12 +704,7 @@ public class DynamicLayout extends Layout {
         // Spans other than ReplacementSpan can be ignored because line top and bottom are
         // disjunction of all tops and bottoms, although it's not optimal.
         final Paint paint = getPaint();
-        if (text instanceof PrecomputedText) {
-            PrecomputedText precomputed = (PrecomputedText) text;
-            precomputed.getBounds(start, end, mTempRect);
-        } else {
-            paint.getTextBounds(text, start, end, mTempRect);
-        }
+        paint.getTextBounds(text, start, end, mTempRect);
         final Paint.FontMetricsInt fm = paint.getFontMetricsInt();
         return mTempRect.top < fm.top || mTempRect.bottom > fm.bottom;
     }
