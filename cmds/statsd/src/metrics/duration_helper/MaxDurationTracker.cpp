@@ -130,7 +130,7 @@ void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_
         case DurationState::kStarted: {
             duration.startCount--;
             if (forceStop || !mNested || duration.startCount <= 0) {
-                stopAnomalyAlarm();
+                stopAnomalyAlarm(eventTime);
                 duration.state = DurationState::kStopped;
                 int64_t durationTime = eventTime - duration.lastStartTime;
                 VLOG("Max, key %s, Stop %lld %lld %lld", key.toString().c_str(),
@@ -284,7 +284,7 @@ void MaxDurationTracker::noteConditionChanged(const HashableDimensionKey& key, b
             // If condition becomes false, kStarted -> kPaused. Record the current duration and
             // stop anomaly alarm.
             if (!conditionMet) {
-                stopAnomalyAlarm();
+                stopAnomalyAlarm(timestamp);
                 it->second.state = DurationState::kPaused;
                 it->second.lastDuration += (timestamp - it->second.lastStartTime);
                 if (anyStarted()) {

@@ -79,7 +79,7 @@ public enum ScrimState {
     /**
      * Showing password challenge on top of a FLAG_SHOW_WHEN_LOCKED activity.
      */
-    BOUNCER_OCCLUDED(2) {
+    BOUNCER_SCRIMMED(2) {
         @Override
         public void prepare(ScrimState previousState) {
             mCurrentBehindAlpha = 0;
@@ -115,6 +115,11 @@ public enum ScrimState {
             // DisplayPowerManager will blank the screen for us, we just need
             // to set our state.
             mAnimateChange = mCanControlScreenOff;
+        }
+
+        @Override
+        public boolean isLowPowerState() {
+            return true;
         }
     },
 
@@ -249,5 +254,9 @@ public enum ScrimState {
 
     public void setWallpaperSupportsAmbientMode(boolean wallpaperSupportsAmbientMode) {
         mWallpaperSupportsAmbientMode = wallpaperSupportsAmbientMode;
+    }
+
+    public boolean isLowPowerState() {
+        return false;
     }
 }

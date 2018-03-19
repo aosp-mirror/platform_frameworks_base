@@ -22,6 +22,7 @@
 #include "format/binary/TableFlattener.h"
 #include "format/binary/XmlFlattener.h"
 #include "format/proto/ProtoDeserialize.h"
+#include "format/proto/ProtoSerialize.h"
 #include "io/BigBufferStream.h"
 #include "io/Util.h"
 #include "xml/XmlDom.h"
@@ -110,7 +111,7 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadProtoApkFromFileCollection(
     return {};
   }
   return util::make_unique<LoadedApk>(source, std::move(collection), std::move(table),
-                                      std::move(manifest));
+                                      std::move(manifest), ApkFormat::kProto);
 }
 
 std::unique_ptr<LoadedApk> LoadedApk::LoadBinaryApkFromFileCollection(
@@ -153,7 +154,7 @@ std::unique_ptr<LoadedApk> LoadedApk::LoadBinaryApkFromFileCollection(
     return {};
   }
   return util::make_unique<LoadedApk>(source, std::move(collection), std::move(table),
-                                      std::move(manifest));
+                                      std::move(manifest), ApkFormat::kBinary);
 }
 
 bool LoadedApk::WriteToArchive(IAaptContext* context, const TableFlattenerOptions& options,
@@ -205,7 +206,7 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
     }
 
     // The resource table needs to be re-serialized since it might have changed.
-    if (path == "resources.arsc") {
+    if (format_ == ApkFormat::kBinary && path == kApkResourceTablePath) {
       BigBuffer buffer(4096);
       // TODO(adamlesinski): How to determine if there were sparse entries (and if to encode
       // with sparse entries) b/35389232.
@@ -215,11 +216,22 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
       }
 
       io::BigBufferInputStream input_stream(&buffer);
-      if (!io::CopyInputStreamToArchive(context, &input_stream, path, ArchiveEntry::kAlign,
+      if (!io::CopyInputStreamToArchive(context,
+                                        &input_stream,
+                                        path,
+                                        ArchiveEntry::kAlign,
                                         writer)) {
         return false;
       }
-
+    } else if (format_ == ApkFormat::kProto && path == kProtoResourceTablePath) {
+      pb::ResourceTable pb_table;
+      SerializeTableToPb(*split_table, &pb_table);
+      if (!io::CopyProtoToArchive(context,
+                                  &pb_table,
+                                  path,
+                                  ArchiveEntry::kAlign, writer)) {
+        return false;
+      }
     } else if (manifest != nullptr && path == "AndroidManifest.xml") {
       BigBuffer buffer(8192);
       XmlFlattenerOptions xml_flattener_options;
@@ -246,9 +258,9 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
 }
 
 ApkFormat LoadedApk::DetermineApkFormat(io::IFileCollection* apk) {
-  if (apk->FindFile("resources.arsc") != nullptr) {
+  if (apk->FindFile(kApkResourceTablePath) != nullptr) {
     return ApkFormat::kBinary;
-  } else if (apk->FindFile("resources.pb") != nullptr) {
+  } else if (apk->FindFile(kProtoResourceTablePath) != nullptr) {
     return ApkFormat::kProto;
   } else {
     // If the resource table is not present, attempt to read the manifest.

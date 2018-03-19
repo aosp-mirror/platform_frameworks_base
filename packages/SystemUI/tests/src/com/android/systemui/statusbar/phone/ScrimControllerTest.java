@@ -42,6 +42,7 @@ import android.testing.TestableLooper;
 import android.view.Choreographer;
 import android.view.View;
 
+import com.android.internal.util.Preconditions;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.ScrimView;
@@ -181,7 +182,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void transitionToBouncer() {
-        mScrimController.transitionTo(ScrimState.BOUNCER_OCCLUDED);
+        mScrimController.transitionTo(ScrimState.BOUNCER_SCRIMMED);
         mScrimController.finishAnimationsImmediately();
         // Front scrim should be transparent
         // Back scrim should be visible without tint
@@ -461,6 +462,17 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         Assert.assertEquals("Heads-up scrim should not be visible when shade is expanded", 0f,
                 mHeadsUpScrim.getAlpha(), 0.01f);
+    }
+
+    @Test
+    public void testScrimFocus() {
+        mScrimController.transitionTo(ScrimState.AOD);
+        Assert.assertFalse("Should not be focusable on AOD", mScrimBehind.isFocusable());
+        Assert.assertFalse("Should not be focusable on AOD", mScrimInFront.isFocusable());
+
+        mScrimController.transitionTo(ScrimState.KEYGUARD);
+        Assert.assertTrue("Should be focusable on keyguard", mScrimBehind.isFocusable());
+        Assert.assertTrue("Should be focusable on keyguard", mScrimInFront.isFocusable());
     }
 
     /**
