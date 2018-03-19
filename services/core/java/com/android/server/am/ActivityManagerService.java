@@ -26259,10 +26259,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             return mUserController.mMaxRunningUsers;
         }
 
+        @Override
         public boolean isCallerRecents(int callingUid) {
             return getRecentTasks().isCallerRecents(callingUid);
         }
 
+        @Override
         public boolean isRecentsComponentHomeActivity(int userId) {
             return getRecentTasks().isRecentsComponentHomeActivity(userId);
         }
@@ -26300,6 +26302,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             return processMemoryStates;
+        }
+
+        @Override
+        public void enforceCallerIsRecentsOrHasPermission(String permission, String func) {
+            ActivityManagerService.this.enforceCallerIsRecentsOrHasPermission(permission, func);
         }
     }
 

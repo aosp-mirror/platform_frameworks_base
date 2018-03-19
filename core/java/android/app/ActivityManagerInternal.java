@@ -385,4 +385,10 @@ public abstract class ActivityManagerInternal {
      * Returns a list that contains the memory stats for currently running processes.
      */
     public abstract List<ProcessMemoryState> getMemoryStateForProcesses();
+
+    /**
+     * This enforces {@code func} can only be called if either the caller is Recents activity or
+     * has {@code permission}.
+     */
+    public abstract void enforceCallerIsRecentsOrHasPermission(String permission, String func);
 }
