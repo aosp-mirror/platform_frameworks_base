@@ -3907,12 +3907,12 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private void showBouncerIfKeyguard() {
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
-            showBouncer();
+            showBouncer(true /* animated */);
         }
     }
 
-    protected void showBouncer() {
-        mStatusBarKeyguardViewManager.dismiss();
+    protected void showBouncer(boolean animated) {
+        mStatusBarKeyguardViewManager.showBouncer(animated);
     }
 
     private void instantExpandNotificationsPanel() {
@@ -4026,7 +4026,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void onTrackingStopped(boolean expand) {
         if (mState == StatusBarState.KEYGUARD || mState == StatusBarState.SHADE_LOCKED) {
             if (!expand && !mUnlockMethodCache.canSkipBouncer()) {
-                showBouncerIfKeyguard();
+                showBouncer(false /* animated */);
             }
         }
     }
@@ -4165,7 +4165,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onLockedRemoteInput(ExpandableNotificationRow row, View clicked) {
         mLeaveOpenOnKeyguardHide = true;
-        showBouncer();
+        showBouncer(true /* animated */);
         mPendingRemoteInputView = clicked;
     }
 
@@ -4631,9 +4631,10 @@ public class StatusBar extends SystemUI implements DemoMode,
                 != FingerprintUnlockController.MODE_UNLOCK);
 
         if (mBouncerShowing) {
-            final boolean qsExpanded = mQSPanel != null && mQSPanel.isExpanded();
-            mScrimController.transitionTo(mIsOccluded || qsExpanded ?
-                    ScrimState.BOUNCER_OCCLUDED : ScrimState.BOUNCER);
+            // Bouncer needs the front scrim when it's on top of an activity,
+            // tapping on a notification or editing QS.
+            mScrimController.transitionTo(mIsOccluded || mNotificationPanel.needsScrimming() ?
+                    ScrimState.BOUNCER_SCRIMMED : ScrimState.BOUNCER);
         } else if (mLaunchCameraOnScreenTurningOn || isInLaunchTransition()) {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         } else if (mBrightnessMirrorVisible) {

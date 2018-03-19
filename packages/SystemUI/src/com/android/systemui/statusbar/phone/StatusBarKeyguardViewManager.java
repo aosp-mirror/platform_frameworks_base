@@ -198,9 +198,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         cancelPendingWakeupAction();
     }
 
-    private void showBouncer() {
+    public void showBouncer(boolean animated) {
         if (mShowing) {
-            mBouncer.show(false /* resetSecuritySelection */);
+            mBouncer.show(false /* resetSecuritySelection */, animated);
         }
         updateStates();
     }
@@ -483,10 +483,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      */
     public void dismissAndCollapse() {
         mStatusBar.executeRunnableDismissingKeyguard(null, null, true, false, true);
-    }
-
-    public void dismiss() {
-        showBouncer();
     }
 
     /**
