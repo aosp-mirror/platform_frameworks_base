@@ -3301,4 +3301,7 @@
 
   <java-symbol type="string" name="config_managed_provisioning_package" />
 
+  <java-symbol type="string" name="notification_app_name_system" />
+  <java-symbol type="string" name="notification_app_name_settings" />
+
 </resources>
