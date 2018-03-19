@@ -39,7 +39,6 @@
 namespace android {
 
 class Bitmap;
-class DisplayEventReceiver;
 
 namespace uirenderer {
 
@@ -62,6 +61,14 @@ public:
 protected:
     ~IFrameCallback() {}
 };
+
+struct VsyncSource {
+    virtual void requestNextVsync() = 0;
+    virtual nsecs_t latestVsyncEvent() = 0;
+    virtual ~VsyncSource() {}
+};
+
+class DummyVsyncSource;
 
 class RenderThread : private ThreadBase {
     PREVENT_COPY_AND_ASSIGN(RenderThread);
@@ -110,6 +117,7 @@ protected:
 private:
     friend class DispatchFrameCallbacks;
     friend class RenderProxy;
+    friend class DummyVsyncSource;
     friend class android::uirenderer::TestUtils;
 
     RenderThread();
@@ -127,7 +135,7 @@ private:
 
     DisplayInfo mDisplayInfo;
 
-    DisplayEventReceiver* mDisplayEventReceiver;
+    VsyncSource* mVsyncSource;
     bool mVsyncRequested;
     std::set<IFrameCallback*> mFrameCallbacks;
     // We defer the actual registration of these callbacks until
