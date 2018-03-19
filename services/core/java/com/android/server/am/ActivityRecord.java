@@ -1193,6 +1193,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     boolean isFocusable() {
+        if (inSplitScreenPrimaryWindowingMode() && mStackSupervisor.mIsDockMinimized) {
+            return false;
+        }
         return getWindowConfiguration().canReceiveKeys() || isAlwaysFocusable();
     }
 
