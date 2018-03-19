@@ -220,8 +220,7 @@
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Privat DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Välj läget Privat DNS"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Av"</string>
-    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
-    <skip />
+    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automatisk"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Värdnamn för leverantör av privat DNS"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Ange värdnamn för DNS-leverantör"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Visa certifieringsalternativ för Wi-Fi-skärmdelning"</string>
@@ -274,8 +273,8 @@
     <string name="show_touches_summary" msgid="6101183132903926324">"Visa visuell feedback för tryck"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Visa ytuppdateringar"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Hela fönstret blinkar vid uppdatering"</string>
-    <string name="show_hw_screen_updates" msgid="5036904558145941590">"Visa GPU-visningsuppdateringar"</string>
-    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Visningar blinkar i fönster vid GPU-ritningar"</string>
+    <string name="show_hw_screen_updates" msgid="4117270979975470789">"Visa visningsuppdatering"</string>
+    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Visningar blinkar i fönster vid ritningar"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Visa maskinvaruskiktuppd."</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Låt maskinvaruskikt blinka grönt vid uppdateringar"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Felsök GPU-överritning"</string>
@@ -289,12 +288,10 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Visa gränser för videoklipp, marginaler m.m."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Tvinga fram RTL-layout"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Tvinga fram RTL-skärmlayout (hö–vä) för alla språk"</string>
-    <string name="force_hw_ui" msgid="6426383462520888732">"Framtvinga GPU-rendering"</string>
-    <string name="force_hw_ui_summary" msgid="5535991166074861515">"Tvingad användning av GPU för 2D-ritning"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Force 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Aktivera 4x MSAA i OpenGL ES 2.0-appar"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Felsök icke-rektangulära urklippsåtgärder"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"Profilens GPU-rendering"</string>
+    <string name="track_frame_time" msgid="6094365083096851167">"Profilens HWUI-rendering"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Aktivera GPU-felsökningslager"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Tillåt att felsökningsappar läser in GPU-felsökningslager"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Skala, fönsteranimering"</string>
@@ -305,8 +302,8 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Behåll inte aktiviteter"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Förstör aktiviteter så fort användaren lämnar dem"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Begränsa bakgrundsprocess"</string>
-    <string name="show_all_anrs" msgid="28462979638729082">"Visa alla som inte svarar"</string>
-    <string name="show_all_anrs_summary" msgid="641908614413544127">"Visa dialogrutan om att appen inte svarar för bakgrundsappar"</string>
+    <string name="show_all_anrs" msgid="4924885492787069007">"Visa ANR-fel i bakgruden"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Visa dialogrutan om att appen inte svarar för bakgrundsappar"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Visa varningar om aviseringskanal"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Visa varningar på skärmen när en app lägger upp en avisering utan en giltig kanal"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Tillåt appar i externt lagringsutrymme"</string>
@@ -357,39 +354,24 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Den här funktionen är experimentell och kan påverka prestandan."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Har åsidosatts av <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"Cirka <xliff:g id="TIME">%1$s</xliff:g> återstår"</string>
-    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="6655472132189365839">"Ungefär <xliff:g id="TIME">%1$s</xliff:g> kvar (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Cirka <xliff:g id="TIME">%1$s</xliff:g> kvar utifrån din användning"</string>
-    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
-    <skip />
+    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"About <xliff:g id="TIME">%1$s</xliff:g> kvar utifrån din användning (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> kvar"</string>
-    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
-    <skip />
-    <!-- no translation found for power_discharge_by (6427074755635635749) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
-    <skip />
+    <string name="power_discharge_by_enhanced" msgid="8305422490607220844">"Batteriet räcker ungefär till klockan <xliff:g id="TIME">%1$s</xliff:g> utifrån din användning (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="896515698736070025">"Batteriet räcker ungefär till klockan <xliff:g id="TIME">%1$s</xliff:g> utifrån din användning"</string>
+    <string name="power_discharge_by" msgid="6052127431194780229">"Batteriet räcker ungefär till klockan <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="4850425421176271395">"Batteriet räcker ungefär till klockan <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Mindre än <xliff:g id="THRESHOLD">%1$s</xliff:g> återstår"</string>
-    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
-    <skip />
+    <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Mindre än <xliff:g id="THRESHOLD">%1$s</xliff:g> återstår (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Mer än <xliff:g id="TIME_REMAINING">%1$s</xliff:g> återstår (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"Mer än <xliff:g id="TIME_REMAINING">%1$s</xliff:g> återstår"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"Mobilen kan stängas av snart"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"Surfplattan kan stängas av snart"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"Enheten kan stängas av snart"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"Mobilen kan stängas av snart (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"Surfplattan kan stängas av snart (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"Enheten kan stängas av snart (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Batteriet är fulladdat om <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> tills det är fulladdat"</string>
@@ -440,8 +422,9 @@
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Längre tid."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Kortare tid."</string>
-    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Aktivera"</string>
     <string name="cancel" msgid="6859253417269739139">"Avbryt"</string>
+    <string name="okay" msgid="1997666393121016642">"OK"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Aktivera"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"Aktivera Stör ej."</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Aldrig"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Endast prioriterade"</string>
@@ -450,4 +433,6 @@
     <string name="zen_alarm_warning" msgid="6236690803924413088">"Nästa alarm, kl. <xliff:g id="WHEN">%1$s</xliff:g>, kommer inte att höras"</string>
     <string name="alarm_template" msgid="4996153414057676512">"kl. <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"på <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Varaktighet"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Fråga varje gång"</string>
 </resources>
