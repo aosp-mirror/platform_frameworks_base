@@ -27,8 +27,10 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.MediumTest;
+import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.suitebuilder.annotation.MediumTest;
 
 import java.io.File;
 import java.lang.reflect.Array;
@@ -126,6 +128,8 @@ public class PackageParserTest {
     }
 
     @Test
+    @SmallTest
+    @Presubmit
     public void test_roundTripKnownFields() throws Exception {
         PackageParser.Package pkg = new PackageParser.Package("foo");
         setKnownFields(pkg);
@@ -266,6 +270,9 @@ public class PackageParserTest {
         assertEquals(a.mRestrictedAccountType, b.mRestrictedAccountType);
         assertEquals(a.mRequiredAccountType, b.mRequiredAccountType);
         assertEquals(a.mOverlayTarget, b.mOverlayTarget);
+        assertEquals(a.mOverlayCategory, b.mOverlayCategory);
+        assertEquals(a.mOverlayPriority, b.mOverlayPriority);
+        assertEquals(a.mOverlayIsStatic, b.mOverlayIsStatic);
         assertEquals(a.mSigningDetails.publicKeys, b.mSigningDetails.publicKeys);
         assertEquals(a.mUpgradeKeySets, b.mUpgradeKeySets);
         assertEquals(a.mKeySetMapping, b.mKeySetMapping);
@@ -524,6 +531,15 @@ public class PackageParserTest {
         pkg.mCompileSdkVersionCodename = "foo23";
         pkg.mCompileSdkVersion = 100;
         pkg.mVersionCodeMajor = 100;
+
+        pkg.mOverlayCategory = "foo24";
+        pkg.mOverlayIsStatic = true;
+
+        pkg.baseHardwareAccelerated = true;
+        pkg.coreApp = true;
+        pkg.mRequiredForAllUsers = true;
+        pkg.visibleToInstantApps = true;
+        pkg.use32bitAbi = true;
     }
 
     private static void assertAllFieldsExist(PackageParser.Package pkg) throws Exception {
@@ -532,6 +548,7 @@ public class PackageParserTest {
         Set<String> nonSerializedFields = new HashSet<>();
         nonSerializedFields.add("mExtras");
         nonSerializedFields.add("packageUsageTimeMillis");
+        nonSerializedFields.add("isStub");
 
         for (Field f : fields) {
             final Class<?> fieldType = f.getType();
@@ -560,6 +577,10 @@ public class PackageParserTest {
                 // int fields: Check that they're set to 100.
                 int value = (int) f.get(pkg);
                 assertEquals("Bad value for field: " + f, 100, value);
+            } else if (fieldType == boolean.class) {
+                // boolean fields: Check that they're set to true.
+                boolean value = (boolean) f.get(pkg);
+                assertEquals("Bad value for field: " + f, true, value);
             } else {
                 // All other fields: Check that they're set.
                 Object o = f.get(pkg);
