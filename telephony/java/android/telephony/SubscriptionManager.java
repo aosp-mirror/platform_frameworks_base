@@ -541,8 +541,6 @@ public class SubscriptionManager {
      * @param listener an instance of {@link OnSubscriptionsChangedListener} with
      *                 onSubscriptionsChanged overridden.
      */
-    // TODO(b/70041899): Find a way to extend this to carrier-privileged apps.
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public void addOnSubscriptionsChangedListener(OnSubscriptionsChangedListener listener) {
         String pkgName = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         if (DBG) {
