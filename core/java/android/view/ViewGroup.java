@@ -4285,6 +4285,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 recreateChildDisplayList(child);
             }
         }
+        final int transientCount = mTransientViews == null ? 0 : mTransientIndices.size();
+        for (int i = 0; i < transientCount; ++i) {
+            View child = mTransientViews.get(i);
+            if (((child.mViewFlags & VISIBILITY_MASK) == VISIBLE || child.getAnimation() != null)) {
+                recreateChildDisplayList(child);
+            }
+        }
         if (mOverlay != null) {
             View overlayView = mOverlay.getOverlayView();
             recreateChildDisplayList(overlayView);
