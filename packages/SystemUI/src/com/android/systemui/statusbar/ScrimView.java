@@ -107,11 +107,6 @@ public class ScrimView extends View implements ConfigurationController.Configura
     }
 
     @Override
-    public void setBackground(Drawable background) {
-        Log.wtfStack(TAG, "ScrimView should never have a background.");
-    }
-
-    @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         int densityDpi = newConfig.densityDpi;
