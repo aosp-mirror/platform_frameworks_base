@@ -446,8 +446,6 @@ public class SettingsBackupTest {
                     Settings.Global.WIFI_REENABLE_DELAY_MS,
                     Settings.Global.WIFI_SAVED_STATE,
                     Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE,
-                    Settings.Global.WIFI_SCAN_BACKGROUND_THROTTLE_INTERVAL_MS,
-                    Settings.Global.WIFI_SCAN_BACKGROUND_THROTTLE_PACKAGE_WHITELIST,
                     Settings.Global.WIFI_SCAN_INTERVAL_WHEN_P2P_CONNECTED_MS,
                     Settings.Global.WIFI_SLEEP_POLICY,
                     Settings.Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS,

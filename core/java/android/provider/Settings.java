@@ -8768,21 +8768,6 @@ public final class Settings {
             "location_background_throttle_package_whitelist";
 
         /**
-         * The interval in milliseconds at which wifi scan requests will be throttled when they are
-         * coming from the background.
-         * @hide
-         */
-        public static final String WIFI_SCAN_BACKGROUND_THROTTLE_INTERVAL_MS =
-                "wifi_scan_background_throttle_interval_ms";
-
-        /**
-         * Packages that are whitelisted to be exempt for wifi background throttling.
-         * @hide
-         */
-        public static final String WIFI_SCAN_BACKGROUND_THROTTLE_PACKAGE_WHITELIST =
-                "wifi_scan_background_throttle_package_whitelist";
-
-        /**
         * Whether TV will switch to MHL port when a mobile device is plugged in.
         * (0 = false, 1 = true)
         * @hide
