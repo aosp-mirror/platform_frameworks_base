@@ -428,15 +428,17 @@ public abstract class SliceProvider extends ContentProvider {
         } finally {
             Handler.getMain().removeCallbacks(mAnr);
         }
-        return new Slice.Builder(sliceUri)
-                .addAction(action,
-                        new Slice.Builder(sliceUri.buildUpon().appendPath("permission").build())
-                                .addText(getPermissionString(context, callingPackage), null,
-                                        Collections.emptyList())
-                                .build(),
-                        null)
-                .addHints(Arrays.asList(Slice.HINT_LIST_ITEM))
-                .build();
+        Slice.Builder parent = new Slice.Builder(sliceUri);
+        Slice.Builder childAction = new Slice.Builder(parent)
+                .addHints(Arrays.asList(Slice.HINT_TITLE, Slice.HINT_SHORTCUT))
+                .addAction(action, new Slice.Builder(parent).build(), null);
+
+        parent.addSubSlice(new Slice.Builder(sliceUri.buildUpon().appendPath("permission").build())
+                .addText(getPermissionString(context, callingPackage), null,
+                        Collections.emptyList())
+                .addSubSlice(childAction.build(), null)
+                .build(), null);
+        return parent.addHints(Arrays.asList(Slice.HINT_PERMISSION_REQUEST)).build();
     }
 
     /**
