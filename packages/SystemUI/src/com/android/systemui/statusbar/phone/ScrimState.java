@@ -79,7 +79,7 @@ public enum ScrimState {
     /**
      * Showing password challenge on top of a FLAG_SHOW_WHEN_LOCKED activity.
      */
-    BOUNCER_OCCLUDED(2) {
+    BOUNCER_SCRIMMED(2) {
         @Override
         public void prepare(ScrimState previousState) {
             mCurrentBehindAlpha = 0;

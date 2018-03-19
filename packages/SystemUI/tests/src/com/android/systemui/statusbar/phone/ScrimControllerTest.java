@@ -181,7 +181,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void transitionToBouncer() {
-        mScrimController.transitionTo(ScrimState.BOUNCER_OCCLUDED);
+        mScrimController.transitionTo(ScrimState.BOUNCER_SCRIMMED);
         mScrimController.finishAnimationsImmediately();
         // Front scrim should be transparent
         // Back scrim should be visible without tint
