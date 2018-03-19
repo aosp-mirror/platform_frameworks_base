@@ -6465,8 +6465,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     /**
-     * Set the storage encryption request for a single admin.  Returns the new total request
-     * status (for all admins).
+     * Called by an application that is administering the device to request that the storage system
+     * be encrypted. Does nothing if the caller is on a secondary user or a managed profile.
+     *
+     * @return the new total request status (for all admins), or {@link
+     *         DevicePolicyManager#ENCRYPTION_STATUS_UNSUPPORTED} if called for a non-system user
      */
     @Override
     public int setStorageEncryption(ComponentName who, boolean encrypt) {
@@ -6481,7 +6484,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (userHandle != UserHandle.USER_SYSTEM) {
                 Slog.w(LOG_TAG, "Only owner/system user is allowed to set storage encryption. User "
                         + UserHandle.getCallingUserId() + " is not permitted.");
-                return 0;
+                return DevicePolicyManager.ENCRYPTION_STATUS_UNSUPPORTED;
             }
 
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,
