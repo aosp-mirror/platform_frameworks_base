@@ -2042,6 +2042,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void setOccluded(boolean occluded) {
         mIsOccluded = occluded;
+        mScrimController.setKeyguardOccluded(occluded);
         updateHideIconsForBouncer(false /* animate */);
     }
 

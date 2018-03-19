@@ -158,6 +158,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
     private final WakeLock mWakeLock;
     private boolean mWakeLockHeld;
+    private boolean mKeyguardOccluded;
 
     public ScrimController(LightBarController lightBarController, ScrimView scrimBehind,
             ScrimView scrimInFront, View headsUpScrim, Consumer<Integer> scrimVisibleListener,
@@ -479,9 +480,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             mLightBarController.setScrimColor(mScrimInFront.getColors());
         }
 
-        // We want to override the back scrim opacity for AOD
+        // We want to override the back scrim opacity for the AOD state
         // when it's time to fade the wallpaper away.
-        if (mState == ScrimState.AOD && mWallpaperVisibilityTimedOut) {
+        boolean aodWallpaperTimeout = mState == ScrimState.AOD && mWallpaperVisibilityTimedOut;
+        // We also want to hide FLAG_SHOW_WHEN_LOCKED activities under the scrim.
+        boolean occludedKeyguard = (mState == ScrimState.PULSING || mState == ScrimState.AOD)
+                && mKeyguardOccluded;
+        if (aodWallpaperTimeout || occludedKeyguard) {
             mCurrentBehindAlpha = 1;
         }
 
@@ -923,6 +928,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
     public void setExpansionAffectsAlpha(boolean expansionAffectsAlpha) {
         mExpansionAffectsAlpha = expansionAffectsAlpha;
+    }
+
+    public void setKeyguardOccluded(boolean keyguardOccluded) {
+        mKeyguardOccluded = keyguardOccluded;
     }
 
     public interface Callback {
