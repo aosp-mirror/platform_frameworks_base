@@ -24,6 +24,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.leak.ReferenceTestUtils.CollectionWaiter;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -82,6 +83,7 @@ public class LeakDetectorTest extends SysuiTestCase {
         collectionWaiter.waitForCollection();
     }
 
+    @Ignore("b/75329085")
     @Test
     public void trackCollection_doesNotLeakTrackedObject() {
         CollectionWaiter collectionWaiter = trackCollectionWith(mLeakDetector::trackCollection);
