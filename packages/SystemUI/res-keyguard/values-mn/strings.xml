@@ -31,9 +31,9 @@
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ПИН код буруу байна."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Карт хүчингүй байна."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"Цэнэглэсэн"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"Цэнэглэж байна"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"Хурдан цэнэглэж байна"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"Удаан цэнэглэж байна"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Цэнэглэж байна"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Хурдан цэнэглэж байна"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Удаан цэнэглэж байна"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Цэнэглэгчээ холбоно уу."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Түгжээг тайлах бол цэсийг дарна уу."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Сүлжээ түгжигдсэн"</string>
