@@ -36,6 +36,7 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
     AccessPointController getAccessPointController();
     DataUsageController getMobileDataController();
     DataSaverController getDataSaverController();
+    String getMobileDataNetworkName();
 
     boolean hasVoiceCallingFeature();
 

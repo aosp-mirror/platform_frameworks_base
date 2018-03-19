@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.tiles;
 
+import static com.android.systemui.Prefs.Key.QS_HAS_TURNED_OFF_MOBILE_DATA;
+
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
@@ -34,8 +36,8 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.Dependency;
+import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.R.string;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSIconView;
@@ -108,7 +110,11 @@ public class CellularTile extends QSTileImpl<SignalState> {
             if (mKeyguardMonitor.isSecure() && !mKeyguardMonitor.canSkipBouncer()) {
                 mActivityStarter.postQSRunnableDismissingKeyguard(this::showDisableDialog);
             } else {
-                mUiHandler.post(this::showDisableDialog);
+                if (Prefs.getBoolean(mContext, QS_HAS_TURNED_OFF_MOBILE_DATA, false)) {
+                    mDataController.setMobileDataEnabled(false);
+                } else {
+                    mUiHandler.post(this::showDisableDialog);
+                }
             }
         } else {
             mDataController.setMobileDataEnabled(true);
@@ -117,12 +123,20 @@ public class CellularTile extends QSTileImpl<SignalState> {
 
     private void showDisableDialog() {
         mHost.collapsePanels();
+        String carrierName = mController.getMobileDataNetworkName();
+        if (TextUtils.isEmpty(carrierName)) {
+            carrierName = mContext.getString(R.string.mobile_data_disable_message_default_carrier);
+        }
         AlertDialog dialog = new Builder(mContext)
-                .setMessage(string.data_usage_disable_mobile)
+                .setTitle(R.string.mobile_data_disable_title)
+                .setMessage(mContext.getString(R.string.mobile_data_disable_message, carrierName))
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(
                         com.android.internal.R.string.alert_windows_notification_turn_off_action,
-                        (d, w) -> mDataController.setMobileDataEnabled(false))
+                        (d, w) -> {
+                            mDataController.setMobileDataEnabled(false);
+                            Prefs.putBoolean(mContext, QS_HAS_TURNED_OFF_MOBILE_DATA, true);
+                        })
                 .create();
         dialog.getWindow().setType(LayoutParams.TYPE_KEYGUARD_DIALOG);
         SystemUIDialog.setShowForAllUsers(dialog, true);
