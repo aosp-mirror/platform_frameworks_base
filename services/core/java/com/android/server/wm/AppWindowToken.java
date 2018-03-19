@@ -2079,6 +2079,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         super.prepareSurfaces();
     }
 
+    /**
+     * @return Whether our {@link #getSurfaceControl} is currently showing.
+     */
+    boolean isSurfaceShowing() {
+        return mLastSurfaceShowing;
+    }
+
     boolean isFreezingScreen() {
         return mFreezingScreen;
     }
