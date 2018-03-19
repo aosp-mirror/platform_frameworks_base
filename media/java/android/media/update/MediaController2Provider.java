@@ -52,6 +52,8 @@ public interface MediaController2Provider extends TransportControlProvider {
     void playFromSearch_impl(String query, Bundle extras);
     void playFromUri_impl(Uri uri, Bundle extras);
     void playFromMediaId_impl(String mediaId, Bundle extras);
+    void fastForward_impl();
+    void rewind_impl();
 
     void setRating_impl(String mediaId, Rating2 rating);
     void sendCustomCommand_impl(Command command, Bundle args, ResultReceiver cb);
