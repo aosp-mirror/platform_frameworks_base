@@ -169,17 +169,15 @@ public final class UserData implements Parcelable {
          * @param categoryId string used to identify the category the value is associated with.
          *
          * @throws IllegalArgumentException if any of the following occurs:
-         * <ol>
+         * <ul>
          *   <li>{@code id} is empty</li>
          *   <li>{@code categoryId} is empty</li>
          *   <li>{@code value} is empty</li>
          *   <li>the length of {@code value} is lower than {@link UserData#getMinValueLength()}</li>
          *   <li>the length of {@code value} is higher than
          *       {@link UserData#getMaxValueLength()}</li>
-         * </ol>
-         *
+         * </ul>
          */
-        // TODO(b/70407264): ignore entry instead of throwing exception when settings changed
         public Builder(@NonNull String id, @NonNull String value, @NonNull String categoryId) {
             mId = checkNotEmpty("id", id);
             checkNotEmpty("categoryId", categoryId);
@@ -222,26 +220,25 @@ public final class UserData implements Parcelable {
          * @param categoryId string used to identify the category the value is associated with.
          *
          * @throws IllegalStateException if:
-         * <ol>
+         * <ul>
          *   <li>{@link #build()} already called</li>
          *   <li>the {@code value} has already been added</li>
          *   <li>the number of unique {@code categoryId} values added so far is more than
          *       {@link UserData#getMaxCategoryCount()}</li>
          *   <li>the number of {@code values} added so far is is more than
          *       {@link UserData#getMaxUserDataSize()}</li>
-         * </ol>
+         * </ul>
          *
          * @throws IllegalArgumentException if any of the following occurs:
-         * <ol>
+         * <ul>
          *   <li>{@code id} is empty</li>
          *   <li>{@code categoryId} is empty</li>
          *   <li>{@code value} is empty</li>
          *   <li>the length of {@code value} is lower than {@link UserData#getMinValueLength()}</li>
          *   <li>the length of {@code value} is higher than
          *       {@link UserData#getMaxValueLength()}</li>
-         * </ol>
+         * </ul>
          */
-        // TODO(b/70407264): ignore entry instead of throwing exception when settings changed
         public Builder add(@NonNull String value, @NonNull String categoryId) {
             throwIfDestroyed();
             checkNotEmpty("categoryId", categoryId);
