@@ -16,13 +16,16 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManagerInternal.APP_TRANSITION_RECENTS_ANIM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerService.H.NOTIFY_APP_TRANSITION_STARTING;
 import static com.android.server.wm.proto.RemoteAnimationAdapterWrapperProto.TARGET;
 import static com.android.server.wm.proto.AnimationAdapterProto.REMOTE;
 
@@ -37,6 +40,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;import android.util.proto.ProtoOutputStream;
 import android.util.SparseBooleanArray;
+import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.IRecentsAnimationController;
 import android.view.IRecentsAnimationRunner;
@@ -279,6 +283,10 @@ public class RecentsAnimationController {
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to start recents animation", e);
         }
+        final SparseIntArray reasons = new SparseIntArray();
+        reasons.put(WINDOWING_MODE_FULLSCREEN, APP_TRANSITION_RECENTS_ANIM);
+        mService.mH.obtainMessage(NOTIFY_APP_TRANSITION_STARTING,
+                reasons).sendToTarget();
     }
 
     void cancelAnimation() {
