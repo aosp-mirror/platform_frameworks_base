@@ -2231,6 +2231,7 @@ Landroid/widget/ActivityChooserModel;->get(Landroid/content/Context;Ljava/lang/S
 Landroid/widget/ActivityChooserView;->setExpandActivityOverflowButtonDrawable(Landroid/graphics/drawable/Drawable;)V
 Landroid/widget/AdapterView;->mDataChanged:Z
 Landroid/widget/AdapterView;->mFirstPosition:I
+Landroid/widget/AdapterView;->mOldSelectedPosition:I
 Landroid/widget/AdapterView;->setNextSelectedPositionInt(I)V
 Landroid/widget/AdapterView;->setSelectedPositionInt(I)V
 Landroid/widget/AutoCompleteTextView;->doAfterTextChanged()V
