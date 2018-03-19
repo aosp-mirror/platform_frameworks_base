@@ -31,6 +31,7 @@ import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.os.Binder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
@@ -40,6 +41,7 @@ import android.security.keystore.recovery.RecoveryCertPath;
 import android.security.keystore.recovery.RecoveryController;
 import android.security.keystore.recovery.WrappedApplicationKey;
 import android.security.KeyStore;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -550,6 +552,78 @@ public class RecoverableKeyStoreManager {
     }
 
     /**
+     * Invoked by a recovery agent after a successful recovery claim is sent to the remote vault
+     * service.
+     *
+     * @param sessionId The session ID used to generate the claim. See
+     *     {@link #startRecoverySession(String, byte[], byte[], byte[], List)}.
+     * @param encryptedRecoveryKey The encrypted recovery key blob returned by the remote vault
+     *     service.
+     * @param applicationKeys The encrypted key blobs returned by the remote vault service. These
+     *     were wrapped with the recovery key.
+     * @throws RemoteException if an error occurred recovering the keys.
+     */
+    public Map<String, String> recoverKeyChainSnapshot(
+            @NonNull String sessionId,
+            @NonNull byte[] encryptedRecoveryKey,
+            @NonNull List<WrappedApplicationKey> applicationKeys) throws RemoteException {
+        checkRecoverKeyStorePermission();
+        int userId = UserHandle.getCallingUserId();
+        int uid = Binder.getCallingUid();
+        RecoverySessionStorage.Entry sessionEntry = mRecoverySessionStorage.get(uid, sessionId);
+        if (sessionEntry == null) {
+            throw new ServiceSpecificException(ERROR_SESSION_EXPIRED,
+                    String.format(Locale.US,
+                            "Application uid=%d does not have pending session '%s'",
+                            uid,
+                            sessionId));
+        }
+
+        try {
+            byte[] recoveryKey = decryptRecoveryKey(sessionEntry, encryptedRecoveryKey);
+            Map<String, byte[]> keysByAlias = recoverApplicationKeys(recoveryKey, applicationKeys);
+            return importKeyMaterials(userId, uid, keysByAlias);
+        } catch (KeyStoreException e) {
+            throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
+        } finally {
+            sessionEntry.destroy();
+            mRecoverySessionStorage.remove(uid);
+        }
+    }
+
+    /**
+     * Imports the key materials, returning a map from alias to grant alias for the calling user.
+     *
+     * @param userId The calling user ID.
+     * @param uid The calling uid.
+     * @param keysByAlias The key materials, keyed by alias.
+     * @throws KeyStoreException if an error occurs importing the key or getting the grant.
+     */
+    private Map<String, String> importKeyMaterials(
+            int userId, int uid, Map<String, byte[]> keysByAlias) throws KeyStoreException {
+        ArrayMap<String, String> grantAliasesByAlias = new ArrayMap<>(keysByAlias.size());
+        for (String alias : keysByAlias.keySet()) {
+            mApplicationKeyStorage.setSymmetricKeyEntry(userId, uid, alias, keysByAlias.get(alias));
+            String grantAlias = getAlias(userId, uid, alias);
+            Log.i(TAG, String.format(Locale.US, "Import %s -> %s", alias, grantAlias));
+            grantAliasesByAlias.put(alias, grantAlias);
+        }
+        return grantAliasesByAlias;
+    }
+
+    /**
+     * Returns an alias for the key.
+     *
+     * @param userId The user ID of the calling process.
+     * @param uid The uid of the calling process.
+     * @param alias The alias of the key.
+     * @return The alias in the calling process's keystore.
+     */
+    private String getAlias(int userId, int uid, String alias) {
+        return mApplicationKeyStorage.getGrantAlias(userId, uid, alias);
+    }
+
+    /**
      * Deprecated
      * Generates a key named {@code alias} in the recoverable store for the calling uid. Then
      * returns the raw key material.
@@ -626,7 +700,7 @@ public class RecoverableKeyStoreManager {
             byte[] secretKey =
                     mRecoverableKeyGenerator.generateAndStoreKey(encryptionKey, userId, uid, alias);
             mApplicationKeyStorage.setSymmetricKeyEntry(userId, uid, alias, secretKey);
-            return mApplicationKeyStorage.getGrantAlias(userId, uid, alias);
+            return getAlias(userId, uid, alias);
         } catch (KeyStoreException | InvalidKeyException | RecoverableKeyStorageException e) {
             throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
         }
@@ -677,7 +751,7 @@ public class RecoverableKeyStoreManager {
 
             // Import the key to Android KeyStore and get grant
             mApplicationKeyStorage.setSymmetricKeyEntry(userId, uid, alias, keyBytes);
-            return mApplicationKeyStorage.getGrantAlias(userId, uid, alias);
+            return getAlias(userId, uid, alias);
         } catch (KeyStoreException | InvalidKeyException | RecoverableKeyStorageException e) {
             throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
         }
@@ -691,8 +765,7 @@ public class RecoverableKeyStoreManager {
     public String getKey(@NonNull String alias) throws RemoteException {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
-        String grantAlias = mApplicationKeyStorage.getGrantAlias(userId, uid, alias);
-        return grantAlias;
+        return getAlias(userId, uid, alias);
     }
 
     private byte[] decryptRecoveryKey(

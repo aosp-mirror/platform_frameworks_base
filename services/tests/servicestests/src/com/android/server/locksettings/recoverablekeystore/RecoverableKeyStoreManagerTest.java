@@ -40,6 +40,7 @@ import android.os.Binder;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 import android.security.KeyStore;
+import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
@@ -68,6 +69,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertPath;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -76,8 +78,10 @@ import java.util.concurrent.Executors;
 import java.util.Map;
 import java.util.Random;
 
+import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 @SmallTest
@@ -144,7 +148,6 @@ public class RecoverableKeyStoreManagerTest {
     @Mock private RecoverySnapshotListenersStorage mMockListenersStorage;
     @Mock private KeyguardManager mKeyguardManager;
     @Mock private PlatformKeyManager mPlatformKeyManager;
-    @Mock private KeyStore mKeyStore;
     @Mock private ApplicationKeyStorage mApplicationKeyStorage;
 
     private RecoverableKeyStoreDb mRecoverableKeyStoreDb;
@@ -175,7 +178,7 @@ public class RecoverableKeyStoreManagerTest {
 
         mRecoverableKeyStoreManager = new RecoverableKeyStoreManager(
                 mMockContext,
-                mKeyStore,
+                KeyStore.getInstance(),
                 mRecoverableKeyStoreDb,
                 mRecoverySessionStorage,
                 Executors.newSingleThreadExecutor(),
@@ -219,6 +222,7 @@ public class RecoverableKeyStoreManagerTest {
 
         assertThat(mRecoverableKeyStoreDb.getKey(uid, TEST_ALIAS)).isNotNull();
         assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
+        // TODO(76083050) Test the grant mechanism for the keys.
     }
 
     @Test
@@ -671,9 +675,9 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
-    public void recoverKeys_throwsIfNoSessionIsPresent() throws Exception {
+    public void recoverKeyChainSnapshot_throwsIfNoSessionIsPresent() throws Exception {
         try {
-            mRecoverableKeyStoreManager.recoverKeys(
+            mRecoverableKeyStoreManager.recoverKeyChainSnapshot(
                     TEST_SESSION_ID,
                     /*recoveryKeyBlob=*/ randomBytes(32),
                     /*applicationKeys=*/ ImmutableList.of(
@@ -686,7 +690,7 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
-    public void recoverKeys_throwsIfRecoveryClaimCannotBeDecrypted() throws Exception {
+    public void recoverKeyChainSnapshot_throwsIfRecoveryClaimCannotBeDecrypted() throws Exception {
         mRecoverableKeyStoreManager.startRecoverySession(
                 TEST_SESSION_ID,
                 TEST_PUBLIC_KEY,
@@ -699,7 +703,7 @@ public class RecoverableKeyStoreManagerTest {
                         TEST_SECRET)));
 
         try {
-            mRecoverableKeyStoreManager.recoverKeys(
+            mRecoverableKeyStoreManager.recoverKeyChainSnapshot(
                     TEST_SESSION_ID,
                     /*encryptedRecoveryKey=*/ randomBytes(60),
                     /*applicationKeys=*/ ImmutableList.of());
@@ -710,7 +714,7 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
-    public void recoverKeys_throwsIfFailedToDecryptAllApplicationKeys() throws Exception {
+    public void recoverKeyChainSnapshot_throwsIfFailedToDecryptAllApplicationKeys() throws Exception {
         mRecoverableKeyStoreManager.startRecoverySession(
                 TEST_SESSION_ID,
                 TEST_PUBLIC_KEY,
@@ -731,7 +735,7 @@ public class RecoverableKeyStoreManagerTest {
                 encryptedApplicationKey(randomRecoveryKey(), randomBytes(32)));
 
         try {
-            mRecoverableKeyStoreManager.recoverKeys(
+            mRecoverableKeyStoreManager.recoverKeyChainSnapshot(
                     TEST_SESSION_ID,
                     /*encryptedRecoveryKey=*/ encryptedClaimResponse,
                     /*applicationKeys=*/ ImmutableList.of(badApplicationKey));
@@ -742,7 +746,8 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
-    public void recoverKeys_doesNotThrowIfNoApplicationKeysToBeDecrypted() throws Exception {
+    public void recoverKeyChainSnapshot_doesNotThrowIfNoApplicationKeysToBeDecrypted()
+            throws Exception {
         mRecoverableKeyStoreManager.startRecoverySession(
                 TEST_SESSION_ID,
                 TEST_PUBLIC_KEY,
@@ -759,14 +764,14 @@ public class RecoverableKeyStoreManagerTest {
         byte[] encryptedClaimResponse = encryptClaimResponse(
                 keyClaimant, TEST_SECRET, TEST_VAULT_PARAMS, recoveryKey);
 
-        mRecoverableKeyStoreManager.recoverKeys(
+        mRecoverableKeyStoreManager.recoverKeyChainSnapshot(
                 TEST_SESSION_ID,
                 /*encryptedRecoveryKey=*/ encryptedClaimResponse,
                 /*applicationKeys=*/ ImmutableList.of());
     }
 
     @Test
-    public void recoverKeys_returnsDecryptedKeys() throws Exception {
+    public void recoverKeyChainSnapshot_returnsDecryptedKeys() throws Exception {
         mRecoverableKeyStoreManager.startRecoverySession(
                 TEST_SESSION_ID,
                 TEST_PUBLIC_KEY,
@@ -787,17 +792,18 @@ public class RecoverableKeyStoreManagerTest {
                 TEST_ALIAS,
                 encryptedApplicationKey(recoveryKey, applicationKeyBytes));
 
-        Map<String, byte[]> recoveredKeys = mRecoverableKeyStoreManager.recoverKeys(
+        Map<String, String> recoveredKeys = mRecoverableKeyStoreManager.recoverKeyChainSnapshot(
                 TEST_SESSION_ID,
                 encryptedClaimResponse,
                 ImmutableList.of(applicationKey));
 
         assertThat(recoveredKeys).hasSize(1);
-        assertThat(recoveredKeys.get(TEST_ALIAS)).isEqualTo(applicationKeyBytes);
+        assertThat(recoveredKeys).containsKey(TEST_ALIAS);
+        // TODO(76083050) Test the grant mechanism for the keys.
     }
 
     @Test
-    public void recoverKeys_worksOnOtherApplicationKeysIfOneDecryptionFails() throws Exception {
+    public void recoverKeyChainSnapshot_worksOnOtherApplicationKeysIfOneDecryptionFails() throws Exception {
         mRecoverableKeyStoreManager.startRecoverySession(
                 TEST_SESSION_ID,
                 TEST_PUBLIC_KEY,
@@ -825,13 +831,14 @@ public class RecoverableKeyStoreManagerTest {
                 TEST_ALIAS2,
                 encryptedApplicationKey(recoveryKey, applicationKeyBytes2));
 
-        Map<String, byte[]> recoveredKeys = mRecoverableKeyStoreManager.recoverKeys(
+        Map<String, String> recoveredKeys = mRecoverableKeyStoreManager.recoverKeyChainSnapshot(
                 TEST_SESSION_ID,
                 encryptedClaimResponse,
                 ImmutableList.of(applicationKey1, applicationKey2));
 
         assertThat(recoveredKeys).hasSize(1);
-        assertThat(recoveredKeys.get(TEST_ALIAS2)).isEqualTo(applicationKeyBytes2);
+        assertThat(recoveredKeys).containsKey(TEST_ALIAS2);
+        // TODO(76083050) Test the grant mechanism for the keys.
     }
 
     @Test
