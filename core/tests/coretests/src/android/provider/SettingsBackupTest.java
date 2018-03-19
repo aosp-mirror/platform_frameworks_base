@@ -569,6 +569,7 @@ public class SettingsBackupTest {
                  Settings.Secure.UNSAFE_VOLUME_MUSIC_ACTIVE_MS,
                  Settings.Secure.USB_AUDIO_AUTOMATIC_ROUTING_DISABLED,
                  Settings.Secure.USER_SETUP_COMPLETE,
+                 Settings.Secure.USER_SETUP_PERSONALIZATION_STATE,
                  Settings.Secure.VOICE_INTERACTION_SERVICE,
                  Settings.Secure.VOICE_RECOGNITION_SERVICE,
                  Settings.Secure.INSTANT_APPS_ENABLED,

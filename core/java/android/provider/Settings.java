@@ -1730,6 +1730,34 @@ public final class Settings {
     })
     public @interface ResetMode{}
 
+
+    /**
+     * User has not started setup personalization.
+     * @hide
+     */
+    public static final int USER_SETUP_PERSONALIZATION_NOT_STARTED = 0;
+
+    /**
+     * User has not yet completed setup personalization.
+     * @hide
+     */
+    public static final int USER_SETUP_PERSONALIZATION_STARTED = 1;
+
+    /**
+     * User has completed setup personalization.
+     * @hide
+     */
+    public static final int USER_SETUP_PERSONALIZATION_COMPLETE = 10;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            USER_SETUP_PERSONALIZATION_NOT_STARTED,
+            USER_SETUP_PERSONALIZATION_STARTED,
+            USER_SETUP_PERSONALIZATION_COMPLETE
+    })
+    public @interface UserSetupPersonalization {}
+
     /**
      * Activity Extra: Number of certificates
      * <p>
@@ -5454,6 +5482,15 @@ public final class Settings {
          */
         @TestApi
         public static final String USER_SETUP_COMPLETE = "user_setup_complete";
+
+        /**
+         * The current state of device personalization.
+         *
+         * @hide
+         * @see UserSetupPersonalization
+         */
+        public static final String USER_SETUP_PERSONALIZATION_STATE =
+                "user_setup_personalization_state";
 
         /**
          * Whether the current user has been set up via setup wizard (0 = false, 1 = true)
