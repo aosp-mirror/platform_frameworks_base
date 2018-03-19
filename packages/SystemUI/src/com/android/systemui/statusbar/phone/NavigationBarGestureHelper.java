@@ -73,6 +73,7 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
     private int mTouchDownY;
     private boolean mDownOnRecents;
     private VelocityTracker mVelocityTracker;
+    private boolean mIsInScreenPinning;
 
     private boolean mDockWindowEnabled;
     private boolean mDockWindowTouchSlopExceeded;
@@ -105,6 +106,9 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
     }
 
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            mIsInScreenPinning = mNavigationBarView.inScreenPinning();
+        }
         if (!canHandleGestures()) {
             return false;
         }
@@ -269,7 +273,7 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
     }
 
     private boolean canHandleGestures() {
-        return !mNavigationBarView.inScreenPinning() && !mStatusBar.isKeyguardShowing()
+        return !mIsInScreenPinning && !mStatusBar.isKeyguardShowing()
                 && mStatusBar.isPresenterFullyCollapsed();
     }
 
