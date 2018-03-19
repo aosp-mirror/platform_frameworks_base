@@ -70,17 +70,12 @@ import java.util.List;
  * - Temporary power save whitelist
  * - Global "force all apps standby" mode enforced by battery saver.
  *
- * TODO: Make it a LocalService.
- *
  * Test:
   atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server/AppStateTrackerTest.java
  */
 public class AppStateTracker {
-    private static final String TAG = "ForceAppStandbyTracker";
-    private static final boolean DEBUG = true;
-
-    @GuardedBy("AppStateTracker.class")
-    private static AppStateTracker sInstance;
+    private static final String TAG = "AppStateTracker";
+    private static final boolean DEBUG = false;
 
     private final Object mLock = new Object();
     private final Context mContext;
