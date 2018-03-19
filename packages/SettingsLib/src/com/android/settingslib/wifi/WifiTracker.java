@@ -176,33 +176,34 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     @Deprecated
     public WifiTracker(Context context, WifiListener wifiListener,
             boolean includeSaved, boolean includeScans) {
-        this(context, new WifiListenerExecutor(wifiListener),
+        this(context, wifiListener,
                 context.getSystemService(WifiManager.class),
                 context.getSystemService(ConnectivityManager.class),
                 context.getSystemService(NetworkScoreManager.class),
                 newIntentFilter());
     }
 
-    // TODO(Sghuman): Clean up includeSaved and includeScans from all constructors and linked
+    // TODO(sghuman): Clean up includeSaved and includeScans from all constructors and linked
     // calling apps once IC window is complete
     public WifiTracker(Context context, WifiListener wifiListener,
             @NonNull Lifecycle lifecycle, boolean includeSaved, boolean includeScans) {
-        this(context, new WifiListenerExecutor(wifiListener),
+        this(context, wifiListener,
                 context.getSystemService(WifiManager.class),
                 context.getSystemService(ConnectivityManager.class),
                 context.getSystemService(NetworkScoreManager.class),
                 newIntentFilter());
+
         lifecycle.addObserver(this);
     }
 
     @VisibleForTesting
-    WifiTracker(Context context, WifiListenerExecutor wifiListenerExecutor,
+    WifiTracker(Context context, WifiListener wifiListener,
             WifiManager wifiManager, ConnectivityManager connectivityManager,
             NetworkScoreManager networkScoreManager,
             IntentFilter filter) {
         mContext = context;
         mWifiManager = wifiManager;
-        mListener = wifiListenerExecutor;
+        mListener = new WifiListenerExecutor(wifiListener);
         mConnectivityManager = connectivityManager;
 
         // check if verbose logging developer option has been turned on or off
@@ -853,8 +854,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
      *
      * <p>Also logs all callbacks invocations when verbose logging is enabled.
      */
-    @VisibleForTesting
-    public static class WifiListenerExecutor implements WifiListener {
+    @VisibleForTesting class WifiListenerExecutor implements WifiListener {
 
         private final WifiListener mDelegatee;
 
@@ -864,27 +864,29 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
 
         @Override
         public void onWifiStateChanged(int state) {
-            if (isVerboseLoggingEnabled()) {
-                Log.i(TAG,
-                        String.format("Invoking onWifiStateChanged callback with state %d", state));
-            }
-            ThreadUtils.postOnMainThread(() -> mDelegatee.onWifiStateChanged(state));
+            runAndLog(() -> mDelegatee.onWifiStateChanged(state),
+                    String.format("Invoking onWifiStateChanged callback with state %d", state));
         }
 
         @Override
         public void onConnectedChanged() {
-            if (isVerboseLoggingEnabled()) {
-                Log.i(TAG, "Invoking onConnectedChanged callback");
-            }
-            ThreadUtils.postOnMainThread(() -> mDelegatee.onConnectedChanged());
+            runAndLog(mDelegatee::onConnectedChanged, "Invoking onConnectedChanged callback");
         }
 
         @Override
         public void onAccessPointsChanged() {
-            if (isVerboseLoggingEnabled()) {
-                Log.i(TAG, "Invoking onAccessPointsChanged callback");
-            }
-            ThreadUtils.postOnMainThread(() -> mDelegatee.onAccessPointsChanged());
+            runAndLog(mDelegatee::onAccessPointsChanged, "Invoking onAccessPointsChanged callback");
+        }
+
+        private void runAndLog(Runnable r, String verboseLog) {
+            ThreadUtils.postOnMainThread(() -> {
+                if (mRegistered) {
+                    if (isVerboseLoggingEnabled()) {
+                        Log.i(TAG, verboseLog);
+                    }
+                    r.run();
+                }
+            });
         }
     }
 
