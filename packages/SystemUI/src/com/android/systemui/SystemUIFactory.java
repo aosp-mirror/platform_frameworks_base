@@ -27,6 +27,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.Dependency.DependencyProvider;
+import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -95,7 +96,7 @@ public class SystemUIFactory {
             LockPatternUtils lockPatternUtils,
             ViewGroup container, DismissCallbackRegistry dismissCallbackRegistry) {
         return new KeyguardBouncer(context, callback, lockPatternUtils, container,
-                dismissCallbackRegistry);
+                dismissCallbackRegistry, FalsingManager.getInstance(context));
     }
 
     public ScrimController createScrimController(LightBarController lightBarController,

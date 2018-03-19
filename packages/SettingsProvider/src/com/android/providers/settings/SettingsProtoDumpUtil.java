@@ -269,12 +269,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST,
                 GlobalSettingsProto.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST);
         dumpSetting(s, p,
-                Settings.Global.WIFI_SCAN_BACKGROUND_THROTTLE_INTERVAL_MS,
-                GlobalSettingsProto.WIFI_SCAN_BACKGROUND_THROTTLE_INTERVAL_MS);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_SCAN_BACKGROUND_THROTTLE_PACKAGE_WHITELIST,
-                GlobalSettingsProto.WIFI_SCAN_BACKGROUND_THROTTLE_PACKAGE_WHITELIST);
-        dumpSetting(s, p,
                 Settings.Global.MHL_INPUT_SWITCHING_ENABLED,
                 GlobalSettingsProto.MHL_INPUT_SWITCHING_ENABLED);
         dumpSetting(s, p,

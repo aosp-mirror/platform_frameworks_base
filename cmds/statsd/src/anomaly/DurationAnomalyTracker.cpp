@@ -26,30 +26,13 @@ namespace statsd {
 
 DurationAnomalyTracker::DurationAnomalyTracker(const Alert& alert, const ConfigKey& configKey,
                                                const sp<AlarmMonitor>& alarmMonitor)
-    : AnomalyTracker(alert, configKey), mAlarmMonitor(alarmMonitor) {
+        : AnomalyTracker(alert, configKey), mAlarmMonitor(alarmMonitor) {
+    VLOG("DurationAnomalyTracker() called");
 }
 
 DurationAnomalyTracker::~DurationAnomalyTracker() {
-    stopAllAlarms();
-}
-
-void DurationAnomalyTracker::resetStorage() {
-    AnomalyTracker::resetStorage();
-    if (!mAlarms.empty()) VLOG("AnomalyTracker.resetStorage() called but mAlarms is NOT empty!");
-}
-
-void DurationAnomalyTracker::declareAnomalyIfAlarmExpired(const MetricDimensionKey& dimensionKey,
-                                                          const uint64_t& timestampNs) {
-    auto itr = mAlarms.find(dimensionKey);
-    if (itr == mAlarms.end()) {
-        return;
-    }
-
-    if (itr->second != nullptr &&
-        static_cast<uint32_t>(timestampNs / NS_PER_SEC) >= itr->second->timestampSec) {
-        declareAnomaly(timestampNs, dimensionKey);
-        stopAlarm(dimensionKey);
-    }
+    VLOG("~DurationAnomalyTracker() called");
+    cancelAllAlarms();
 }
 
 void DurationAnomalyTracker::startAlarm(const MetricDimensionKey& dimensionKey,
@@ -57,34 +40,47 @@ void DurationAnomalyTracker::startAlarm(const MetricDimensionKey& dimensionKey,
     // Alarms are stored in secs. Must round up, since if it fires early, it is ignored completely.
     uint32_t timestampSec = static_cast<uint32_t>((timestampNs -1)/ NS_PER_SEC) + 1; // round up
     if (isInRefractoryPeriod(timestampNs, dimensionKey)) {
+        // TODO: Bug! By the refractory's end, the data might be erased and the alarm inapplicable.
         VLOG("Setting a delayed anomaly alarm lest it fall in the refractory period");
         timestampSec = getRefractoryPeriodEndsSec(dimensionKey) + 1;
     }
+
+    auto itr = mAlarms.find(dimensionKey);
+    if (itr != mAlarms.end() && mAlarmMonitor != nullptr) {
+        mAlarmMonitor->remove(itr->second);
+    }
+
     sp<const InternalAlarm> alarm = new InternalAlarm{timestampSec};
-    mAlarms.insert({dimensionKey, alarm});
+    mAlarms[dimensionKey] = alarm;
     if (mAlarmMonitor != nullptr) {
         mAlarmMonitor->add(alarm);
     }
 }
 
-void DurationAnomalyTracker::stopAlarm(const MetricDimensionKey& dimensionKey) {
-    auto itr = mAlarms.find(dimensionKey);
-    if (itr != mAlarms.end()) {
-        mAlarms.erase(dimensionKey);
-        if (mAlarmMonitor != nullptr) {
-            mAlarmMonitor->remove(itr->second);
-        }
+void DurationAnomalyTracker::stopAlarm(const MetricDimensionKey& dimensionKey,
+                                       const uint64_t& timestampNs) {
+    const auto itr = mAlarms.find(dimensionKey);
+    if (itr == mAlarms.end()) {
+        return;
+    }
+
+    // If the alarm is set in the past but hasn't fired yet (due to lag), catch it now.
+    if (itr->second != nullptr && timestampNs >= NS_PER_SEC * itr->second->timestampSec) {
+        declareAnomaly(timestampNs, dimensionKey);
+    }
+    mAlarms.erase(dimensionKey);
+    if (mAlarmMonitor != nullptr) {
+        mAlarmMonitor->remove(itr->second);
     }
 }
 
-void DurationAnomalyTracker::stopAllAlarms() {
-    std::set<MetricDimensionKey> keys;
-    for (auto itr = mAlarms.begin(); itr != mAlarms.end(); ++itr) {
-        keys.insert(itr->first);
+void DurationAnomalyTracker::cancelAllAlarms() {
+    if (mAlarmMonitor != nullptr) {
+        for (const auto& itr : mAlarms) {
+            mAlarmMonitor->remove(itr.second);
+        }
     }
-    for (auto key : keys) {
-        stopAlarm(key);
-    }
+    mAlarms.clear();
 }
 
 void DurationAnomalyTracker::informAlarmsFired(const uint64_t& timestampNs,

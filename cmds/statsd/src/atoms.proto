@@ -115,7 +115,6 @@ message Atom {
         HardwareFailed hardware_failed = 72;
         PhysicalDropDetected physical_drop_detected = 73;
         ChargeCyclesReported charge_cycles_reported = 74;
-        // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
     // Pulled events will start at field 10000.
