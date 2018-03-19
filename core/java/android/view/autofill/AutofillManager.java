@@ -1413,7 +1413,7 @@ public final class AutofillManager {
      */
     public boolean isAutofillUiShowing() {
         final AutofillClient client = mContext.getAutofillClient();
-        return client != null & client.autofillClientIsFillUiShowing();
+        return client != null && client.autofillClientIsFillUiShowing();
     }
 
     /** @hide */
