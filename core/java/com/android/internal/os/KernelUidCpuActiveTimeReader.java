@@ -24,6 +24,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.function.Consumer;
 
 /**
  * Reads binary proc file /proc/uid_cpupower/concurrent_active_time and reports CPU active time to
@@ -54,6 +55,7 @@ public class KernelUidCpuActiveTimeReader extends
 
     private final KernelCpuProcReader mProcReader;
     private SparseArray<Double> mLastUidCpuActiveTimeMs = new SparseArray<>();
+    private int mCores;
 
     public interface Callback extends KernelUidCpuTimeReaderBase.Callback {
         /**
@@ -75,7 +77,60 @@ public class KernelUidCpuActiveTimeReader extends
     }
 
     @Override
-    protected void readDeltaImpl(@Nullable Callback cb) {
+    protected void readDeltaImpl(@Nullable Callback callback) {
+        readImpl((buf) -> {
+            int uid = buf.get();
+            double activeTime = sumActiveTime(buf);
+            if (activeTime > 0) {
+                double delta = activeTime - mLastUidCpuActiveTimeMs.get(uid, 0.0);
+                if (delta > 0) {
+                    mLastUidCpuActiveTimeMs.put(uid, activeTime);
+                    if (callback != null) {
+                        callback.onUidCpuActiveTime(uid, (long) delta);
+                    }
+                } else if (delta < 0) {
+                    Slog.e(TAG, "Negative delta from active time proc: " + delta);
+                }
+            }
+        });
+    }
+
+    public void readAbsolute(Callback callback) {
+        readImpl((buf) -> {
+            int uid = buf.get();
+            double activeTime = sumActiveTime(buf);
+            if (activeTime > 0) {
+                callback.onUidCpuActiveTime(uid, (long) activeTime);
+            }
+        });
+    }
+
+    private double sumActiveTime(IntBuffer buffer) {
+        double sum = 0;
+        boolean corrupted = false;
+        for (int j = 1; j <= mCores; j++) {
+            int time = buffer.get();
+            if (time < 0) {
+                // Even if error happens, we still need to continue reading.
+                // Buffer cannot be skipped.
+                Slog.e(TAG, "Negative time from active time proc: " + time);
+                corrupted = true;
+            } else {
+                sum += (double) time * 10 / j; // Unit is 10ms.
+            }
+        }
+        return corrupted ? -1 : sum;
+    }
+
+    /**
+     * readImpl accepts a callback to process the uid entry. readDeltaImpl needs to store the last
+     * seen results while processing the buffer, while readAbsolute returns the absolute value read
+     * from the buffer without storing. So readImpl contains the common logic of the two, leaving
+     * the difference to a processUid function.
+     *
+     * @param processUid the callback function to process the uid entry in the buffer.
+     */
+    private void readImpl(Consumer<IntBuffer> processUid) {
         synchronized (mProcReader) {
             final ByteBuffer bytes = mProcReader.readBytes();
             if (bytes == null || bytes.remaining() <= 4) {
@@ -89,6 +144,11 @@ public class KernelUidCpuActiveTimeReader extends
             }
             final IntBuffer buf = bytes.asIntBuffer();
             final int cores = buf.get();
+            if (mCores != 0 && cores != mCores) {
+                Slog.wtf(TAG, "Cpu active time wrong # cores: " + cores);
+                return;
+            }
+            mCores = cores;
             if (cores <= 0 || buf.remaining() % (cores + 1) != 0) {
                 Slog.wtf(TAG,
                         "Cpu active time format error: " + buf.remaining() + " / " + (cores
@@ -97,39 +157,10 @@ public class KernelUidCpuActiveTimeReader extends
             }
             int numUids = buf.remaining() / (cores + 1);
             for (int i = 0; i < numUids; i++) {
-                int uid = buf.get();
-                boolean corrupted = false;
-                double curTime = 0;
-                for (int j = 1; j <= cores; j++) {
-                    int time = buf.get();
-                    if (time < 0) {
-                        Slog.e(TAG, "Corrupted data from active time proc: " + time);
-                        corrupted = true;
-                    } else {
-                        curTime += (double) time * 10 / j; // Unit is 10ms.
-                    }
-                }
-                double delta = curTime - mLastUidCpuActiveTimeMs.get(uid, 0.0);
-                if (delta > 0 && !corrupted) {
-                    mLastUidCpuActiveTimeMs.put(uid, curTime);
-                    if (cb != null) {
-                        cb.onUidCpuActiveTime(uid, (long) delta);
-                    }
-                }
+                processUid.accept(buf);
             }
             if (DEBUG) {
                 Slog.d(TAG, "Read uids: " + numUids);
-            }
-        }
-    }
-
-    public void readAbsolute(Callback cb) {
-        synchronized (mProcReader) {
-            readDelta(null);
-            int total = mLastUidCpuActiveTimeMs.size();
-            for (int i = 0; i < total; i ++){
-                int uid = mLastUidCpuActiveTimeMs.keyAt(i);
-                cb.onUidCpuActiveTime(uid, mLastUidCpuActiveTimeMs.get(uid).longValue());
             }
         }
     }
@@ -139,10 +170,6 @@ public class KernelUidCpuActiveTimeReader extends
     }
 
     public void removeUidsInRange(int startUid, int endUid) {
-        if (endUid < startUid) {
-            Slog.w(TAG, "End UID " + endUid + " is smaller than start UID " + startUid);
-            return;
-        }
         mLastUidCpuActiveTimeMs.put(startUid, null);
         mLastUidCpuActiveTimeMs.put(endUid, null);
         final int firstIndex = mLastUidCpuActiveTimeMs.indexOfKey(startUid);
