@@ -198,7 +198,10 @@ public class SmsMessage {
      */
     public static SmsMessage createFromPdu(byte[] pdu, String format) {
         SmsMessageBase wrappedMessage;
-
+        if (pdu == null) {
+            Rlog.i(LOG_TAG, "createFromPdu(): pdu is null");
+            return null;
+        }
         if (SmsConstants.FORMAT_3GPP2.equals(format)) {
             wrappedMessage = com.android.internal.telephony.cdma.SmsMessage.createFromPdu(pdu);
         } else if (SmsConstants.FORMAT_3GPP.equals(format)) {
