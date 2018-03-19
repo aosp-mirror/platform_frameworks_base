@@ -103,12 +103,12 @@ public final class StatsManager {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    if (DEBUG) Slog.d(TAG, "Failed to find statsd when adding configuration");
+                    Slog.e(TAG, "Failed to find statsd when adding configuration");
                     return false;
                 }
                 return service.addConfiguration(configKey, config);
             } catch (RemoteException e) {
-                if (DEBUG) Slog.d(TAG, "Failed to connect to statsd when adding configuration");
+                Slog.e(TAG, "Failed to connect to statsd when adding configuration");
                 return false;
             }
         }
@@ -126,12 +126,12 @@ public final class StatsManager {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    if (DEBUG) Slog.d(TAG, "Failed to find statsd when removing configuration");
+                    Slog.e(TAG, "Failed to find statsd when removing configuration");
                     return false;
                 }
                 return service.removeConfiguration(configKey);
             } catch (RemoteException e) {
-                if (DEBUG) Slog.d(TAG, "Failed to connect to statsd when removing configuration");
+                Slog.e(TAG, "Failed to connect to statsd when removing configuration");
                 return false;
             }
         }
@@ -173,7 +173,7 @@ public final class StatsManager {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    Slog.w(TAG, "Failed to find statsd when adding broadcast subscriber");
+                    Slog.e(TAG, "Failed to find statsd when adding broadcast subscriber");
                     return false;
                 }
                 if (pendingIntent != null) {
@@ -184,7 +184,7 @@ public final class StatsManager {
                     return service.unsetBroadcastSubscriber(configKey, subscriberId);
                 }
             } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to connect to statsd when adding broadcast subscriber", e);
+                Slog.e(TAG, "Failed to connect to statsd when adding broadcast subscriber", e);
                 return false;
             }
         }
@@ -210,7 +210,7 @@ public final class StatsManager {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    Slog.d(TAG, "Failed to find statsd when registering data listener.");
+                    Slog.e(TAG, "Failed to find statsd when registering data listener.");
                     return false;
                 }
                 if (pendingIntent == null) {
@@ -222,7 +222,7 @@ public final class StatsManager {
                 }
 
             } catch (RemoteException e) {
-                Slog.d(TAG, "Failed to connect to statsd when registering data listener.");
+                Slog.e(TAG, "Failed to connect to statsd when registering data listener.");
                 return false;
             }
         }
@@ -241,12 +241,12 @@ public final class StatsManager {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    if (DEBUG) Slog.d(TAG, "Failed to find statsd when getting data");
+                    Slog.e(TAG, "Failed to find statsd when getting data");
                     return null;
                 }
                 return service.getData(configKey);
             } catch (RemoteException e) {
-                if (DEBUG) Slog.d(TAG, "Failed to connecto statsd when getting data");
+                Slog.e(TAG, "Failed to connect to statsd when getting data");
                 return null;
             }
         }
@@ -265,12 +265,12 @@ public final class StatsManager {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    if (DEBUG) Slog.d(TAG, "Failed to find statsd when getting metadata");
+                    Slog.e(TAG, "Failed to find statsd when getting metadata");
                     return null;
                 }
                 return service.getMetadata();
             } catch (RemoteException e) {
-                if (DEBUG) Slog.d(TAG, "Failed to connecto statsd when getting metadata");
+                Slog.e(TAG, "Failed to connect to statsd when getting metadata");
                 return null;
             }
         }
