@@ -227,11 +227,31 @@ public class ConfirmationDialog {
         return uiOptionsAsFlags;
     }
 
+    private boolean isAccessibilityServiceRunning() {
+        boolean serviceRunning = false;
+        try {
+            ContentResolver contentResolver = mContext.getContentResolver();
+            int a11yEnabled = Settings.Secure.getInt(contentResolver,
+                    Settings.Secure.ACCESSIBILITY_ENABLED);
+            if (a11yEnabled == 1) {
+                serviceRunning = true;
+            }
+        } catch (SettingNotFoundException e) {
+            Log.w(TAG, "Unexpected SettingNotFoundException");
+            e.printStackTrace();
+        }
+        return serviceRunning;
+    }
+
     /**
      * Requests a confirmation prompt to be presented to the user.
      *
      * When the prompt is no longer being presented, one of the methods in
      * {@link ConfirmationCallback} is called on the supplied callback object.
+     *
+     * Confirmation dialogs may not be available when accessibility services are running so this
+     * may fail with a {@link ConfirmationNotAvailableException} exception even if
+     * {@link #isSupported} returns {@code true}.
      *
      * @param executor the executor identifying the thread that will receive the callback.
      * @param callback the callback to use when the dialog is done showing.
@@ -244,6 +264,9 @@ public class ConfirmationDialog {
             ConfirmationNotAvailableException {
         if (mCallback != null) {
             throw new ConfirmationAlreadyPresentingException();
+        }
+        if (isAccessibilityServiceRunning()) {
+            throw new ConfirmationNotAvailableException();
         }
         mCallback = callback;
         mExecutor = executor;
