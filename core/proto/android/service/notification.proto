@@ -93,7 +93,8 @@ message ManagedServicesProto {
     message ServiceProto {
         option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-        repeated string name = 1 [ (.android.privacy).dest = DEST_EXPLICIT ];
+        // Package or component name.
+        repeated string name = 1;
         optional int32 user_id = 2;
         optional bool is_primary = 3;
     }
@@ -169,16 +170,16 @@ message ConditionProto {
 message ZenRuleProto {
     option (android.msg_privacy).dest = DEST_EXPLICIT;
 
-    // Required for automatic (unique).
+    // Required for automatic ZenRules (unique).
     optional string id = 1;
-    // Required for automatic.
+    // Required for automatic ZenRules.
     optional string name = 2;
-    // Required for automatic.
+    // Required for automatic ZenRules.
     optional int64 creation_time_ms = 3 [
         (android.privacy).dest = DEST_AUTOMATIC
     ];
     optional bool enabled = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    // Package name, only used for manual rules.
+    // Package name, only used for manual ZenRules.
     optional string enabler = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // User manually disabled this instance.
     optional bool is_snoozing = 6 [
@@ -188,7 +189,7 @@ message ZenRuleProto {
         (android.privacy).dest = DEST_AUTOMATIC
     ];
 
-    // Required for automatic.
+    // Required for automatic ZenRules.
     optional string condition_id = 8;
     optional ConditionProto condition = 9;
     optional android.content.ComponentNameProto component = 10;
