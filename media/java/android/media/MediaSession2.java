@@ -1543,7 +1543,7 @@ public class MediaSession2 implements AutoCloseable {
      * @see #COMMAND_CODE_PLAYLIST_REPLACE_ITEM
      */
     public void setOnDataSourceMissingHelper(@NonNull OnDataSourceMissingHelper helper) {
-        // TODO(jaewan): Implement (b/74090741).
+        mProvider.setOnDataSourceMissingHelper_impl(helper);
     }
 
     /**
@@ -1552,7 +1552,7 @@ public class MediaSession2 implements AutoCloseable {
      * @see #setOnDataSourceMissingHelper(OnDataSourceMissingHelper)
      */
     public void clearOnDataSourceMissingHelper() {
-        // TODO(jaewan): Implement (b/74090741)
+        mProvider.clearOnDataSourceMissingHelper_impl();
     }
 
     /**
