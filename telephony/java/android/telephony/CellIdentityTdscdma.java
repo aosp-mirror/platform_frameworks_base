@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.text.TextUtils;
 
@@ -34,6 +35,10 @@ public final class CellIdentityTdscdma extends CellIdentity {
     private final int mCid;
     // 8-bit Cell Parameters ID described in TS 25.331, 0..127, INT_MAX if unknown.
     private final int mCpid;
+    // long alpha Operator Name String or Enhanced Operator Name String
+    private final String mAlphaLong;
+    // short alpha Operator Name String or Enhanced Operator Name String
+    private final String mAlphaShort;
 
     /**
      * @hide
@@ -43,6 +48,8 @@ public final class CellIdentityTdscdma extends CellIdentity {
         mLac = Integer.MAX_VALUE;
         mCid = Integer.MAX_VALUE;
         mCpid = Integer.MAX_VALUE;
+        mAlphaLong = null;
+        mAlphaShort = null;
     }
 
     /**
@@ -55,7 +62,7 @@ public final class CellIdentityTdscdma extends CellIdentity {
      * @hide
      */
     public CellIdentityTdscdma(int mcc, int mnc, int lac, int cid, int cpid) {
-        this(String.valueOf(mcc), String.valueOf(mnc), lac, cid, cpid);
+        this(String.valueOf(mcc), String.valueOf(mnc), lac, cid, cpid, null, null);
     }
 
     /**
@@ -65,6 +72,7 @@ public final class CellIdentityTdscdma extends CellIdentity {
      * @param cid 28-bit UMTS Cell Identity described in TS 25.331, 0..268435455, INT_MAX if unknown
      * @param cpid 8-bit Cell Parameters ID described in TS 25.331, 0..127, INT_MAX if unknown
      *
+     * FIXME: This is a temporary constructor to facilitate migration.
      * @hide
      */
     public CellIdentityTdscdma(String mcc, String mnc, int lac, int cid, int cpid) {
@@ -72,10 +80,34 @@ public final class CellIdentityTdscdma extends CellIdentity {
         mLac = lac;
         mCid = cid;
         mCpid = cpid;
+        mAlphaLong = null;
+        mAlphaShort = null;
+    }
+
+    /**
+     * @param mcc 3-digit Mobile Country Code in string format
+     * @param mnc 2 or 3-digit Mobile Network Code in string format
+     * @param lac 16-bit Location Area Code, 0..65535, INT_MAX if unknown
+     * @param cid 28-bit UMTS Cell Identity described in TS 25.331, 0..268435455, INT_MAX if unknown
+     * @param cpid 8-bit Cell Parameters ID described in TS 25.331, 0..127, INT_MAX if unknown
+     * @param alphal long alpha Operator Name String or Enhanced Operator Name String
+     * @param alphas short alpha Operator Name String or Enhanced Operator Name String
+     *
+     * @hide
+     */
+    public CellIdentityTdscdma(String mcc, String mnc, int lac, int cid, int cpid,
+            String alphal, String alphas) {
+        super(TAG, TYPE_TDSCDMA, mcc, mnc);
+        mLac = lac;
+        mCid = cid;
+        mCpid = cpid;
+        mAlphaLong = alphal;
+        mAlphaShort = alphas;
     }
 
     private CellIdentityTdscdma(CellIdentityTdscdma cid) {
-        this(cid.mMccStr, cid.mMncStr, cid.mLac, cid.mCid, cid.mCpid);
+        this(cid.mMccStr, cid.mMncStr, cid.mLac, cid.mCid,
+                cid.mCpid, cid.mAlphaLong, cid.mAlphaShort);
     }
 
     CellIdentityTdscdma copy() {
@@ -119,9 +151,31 @@ public final class CellIdentityTdscdma extends CellIdentity {
         return mCpid;
     }
 
+    /**
+     * @return The long alpha tag associated with the current scan result (may be the operator
+     * name string or extended operator name string). May be null if unknown.
+     *
+     * @hide
+     */
+    @Nullable
+    public CharSequence getOperatorAlphaLong() {
+        return mAlphaLong;
+    }
+
+    /**
+     * @return The short alpha tag associated with the current scan result (may be the operator
+     * name string or extended operator name string).  May be null if unknown.
+     *
+     * @hide
+     */
+    @Nullable
+    public CharSequence getOperatorAlphaShort() {
+        return mAlphaShort;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(mMccStr, mMncStr, mLac, mCid, mCpid);
+        return Objects.hash(mMccStr, mMncStr, mLac, mCid, mCpid, mAlphaLong, mAlphaShort);
     }
 
     @Override
@@ -139,7 +193,9 @@ public final class CellIdentityTdscdma extends CellIdentity {
                 && TextUtils.equals(mMncStr, o.mMncStr)
                 && mLac == o.mLac
                 && mCid == o.mCid
-                && mCpid == o.mCpid;
+                && mCpid == o.mCpid
+                && mAlphaLong == o.mAlphaLong
+                && mAlphaShort == o.mAlphaShort;
     }
 
     @Override
@@ -150,6 +206,8 @@ public final class CellIdentityTdscdma extends CellIdentity {
         .append(" mLac=").append(mLac)
         .append(" mCid=").append(mCid)
         .append(" mCpid=").append(mCpid)
+        .append(" mAlphaLong=").append(mAlphaLong)
+        .append(" mAlphaShort=").append(mAlphaShort)
         .append("}").toString();
     }
 
@@ -161,6 +219,8 @@ public final class CellIdentityTdscdma extends CellIdentity {
         dest.writeInt(mLac);
         dest.writeInt(mCid);
         dest.writeInt(mCpid);
+        dest.writeString(mAlphaLong);
+        dest.writeString(mAlphaShort);
     }
 
     /** Construct from Parcel, type has already been processed */
@@ -169,6 +229,8 @@ public final class CellIdentityTdscdma extends CellIdentity {
         mLac = in.readInt();
         mCid = in.readInt();
         mCpid = in.readInt();
+        mAlphaLong = in.readString();
+        mAlphaShort = in.readString();
 
         if (DBG) log(toString());
     }
