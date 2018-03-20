@@ -1356,17 +1356,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (DEBUG_USER_LEAVING) Slog.v(TAG_USER_LEAVING,
                     "Sleep => pause with userLeaving=false");
 
-            // If we are in the middle of resuming the top activity in
-            // {@link #resumeTopActivityUncheckedLocked}, mResumedActivity will be set but not
-            // resumed yet. We must not proceed pausing the activity here. This method will be
-            // called again if necessary as part of {@link #checkReadyForSleep} or
-            // {@link ActivityStackSupervisor#checkReadyForSleepLocked}.
-            if (mStackSupervisor.inResumeTopActivity) {
-                if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "In the middle of resuming top activity "
-                        + mResumedActivity);
-            } else {
-                startPausingLocked(false, true, null, false);
-            }
+            startPausingLocked(false, true, null, false);
             shouldSleep = false ;
         } else if (mPausingActivity != null) {
             // Still waiting for something to pause; can't sleep yet.

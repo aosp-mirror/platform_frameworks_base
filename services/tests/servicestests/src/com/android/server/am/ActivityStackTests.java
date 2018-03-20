@@ -98,24 +98,6 @@ public class ActivityStackTests extends ActivityTestsBase {
     }
 
     @Test
-    public void testNoPauseDuringResumeTopActivity() throws Exception {
-        final ActivityRecord r = new ActivityBuilder(mService).setTask(mTask).build();
-
-        // Simulate the a resumed activity set during
-        // {@link ActivityStack#resumeTopActivityUncheckedLocked}.
-        mSupervisor.inResumeTopActivity = true;
-        r.setState(RESUMED, "testNoPauseDuringResumeTopActivity");
-
-        final boolean waiting = mStack.goToSleepIfPossible(false);
-
-        // Ensure we report not being ready for sleep.
-        assertFalse(waiting);
-
-        // Make sure the resumed activity is untouched.
-        assertEquals(mStack.getResumedActivity(), r);
-    }
-
-    @Test
     public void testResumedActivity() throws Exception {
         final ActivityRecord r = new ActivityBuilder(mService).setTask(mTask).build();
         assertEquals(mStack.getResumedActivity(), null);
