@@ -29,18 +29,23 @@ import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.Signature;
+import android.content.res.Resources;
 import android.metrics.LogMaker;
 import android.os.Build;
 import android.os.UserHandle;
+import android.print.PrintManager;
 import android.provider.Settings.Secure;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.RankingHelperProto;
 import android.service.notification.RankingHelperProto.RecordProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
@@ -95,11 +100,17 @@ public class RankingHelper implements RankingConfig {
     private final ArrayMap<String, Record> mRecords = new ArrayMap<>(); // pkg|uid => Record
     private final ArrayMap<String, NotificationRecord> mProxyByGroupTmp = new ArrayMap<>();
     private final ArrayMap<String, Record> mRestoredWithoutUids = new ArrayMap<>(); // pkg => Record
+    private final ArrayMap<Pair<String, Integer>, Boolean> mSystemAppCache = new ArrayMap<>();
 
     private final Context mContext;
     private final RankingHandler mRankingHandler;
     private final PackageManager mPm;
     private SparseBooleanArray mBadgingEnabled;
+
+    private Signature[] mSystemSignature;
+    private String mPermissionControllerPackageName;
+    private String mServicesSystemSharedLibPackageName;
+    private String mSharedSystemSharedLibPackageName;
 
     public RankingHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
             ZenModeHelper zenHelper, NotificationUsageStats usageStats, String[] extractorNames) {
@@ -130,6 +141,8 @@ public class RankingHelper implements RankingConfig {
                 Slog.w(TAG, "Problem accessing extractor " + extractorNames[i] + ".", e);
             }
         }
+
+        getSignatures();
     }
 
     @SuppressWarnings("unchecked")
@@ -571,7 +584,7 @@ public class RankingHelper implements RankingConfig {
         if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(channel.getId())) {
             throw new IllegalArgumentException("Reserved id");
         }
-
+        final boolean isSystemApp = isSystemPackage(pkg, uid);
         NotificationChannel existing = r.channels.get(channel.getId());
         // Keep most of the existing settings
         if (existing != null && fromTargetApp) {
@@ -597,6 +610,11 @@ public class RankingHelper implements RankingConfig {
                 existing.setImportance(channel.getImportance());
             }
 
+            // system apps can bypass dnd if the user hasn't changed any fields on the channel yet
+            if (existing.getUserLockedFields() == 0 & isSystemApp) {
+                existing.setBypassDnd(channel.canBypassDnd());
+            }
+
             updateConfig();
             return;
         }
@@ -604,9 +622,12 @@ public class RankingHelper implements RankingConfig {
                 || channel.getImportance() > NotificationManager.IMPORTANCE_MAX) {
             throw new IllegalArgumentException("Invalid importance level");
         }
+
         // Reset fields that apps aren't allowed to set.
-        if (fromTargetApp) {
+        if (fromTargetApp && !isSystemApp) {
             channel.setBypassDnd(r.priority == Notification.PRIORITY_MAX);
+        }
+        if (fromTargetApp) {
             channel.setLockscreenVisibility(r.visibility);
         }
         clearLockedFields(channel);
@@ -616,6 +637,7 @@ public class RankingHelper implements RankingConfig {
         if (!r.showBadge) {
             channel.setShowBadge(false);
         }
+
         r.channels.put(channel.getId(), channel);
         MetricsLogger.action(getChannelLog(channel, pkg).setType(
                 MetricsProto.MetricsEvent.TYPE_OPEN));
@@ -623,6 +645,65 @@ public class RankingHelper implements RankingConfig {
 
     void clearLockedFields(NotificationChannel channel) {
         channel.unlockFields(channel.getUserLockedFields());
+    }
+
+    /**
+     * Determine whether a package is a "system package", in which case certain things (like
+     * bypassing DND) should be allowed.
+     */
+    private boolean isSystemPackage(String pkg, int uid) {
+        Pair<String, Integer> app = new Pair(pkg, uid);
+        if (mSystemAppCache.containsKey(app)) {
+            return mSystemAppCache.get(app);
+        }
+
+        PackageInfo pi;
+        try {
+            pi = mPm.getPackageInfoAsUser(
+                    pkg, PackageManager.GET_SIGNATURES, UserHandle.getUserId(uid));
+        } catch (NameNotFoundException e) {
+            Slog.w(TAG, "Can't find pkg", e);
+            return false;
+        }
+        boolean isSystem = (mSystemSignature[0] != null
+                && mSystemSignature[0].equals(getFirstSignature(pi)))
+                || pkg.equals(mPermissionControllerPackageName)
+                || pkg.equals(mServicesSystemSharedLibPackageName)
+                || pkg.equals(mSharedSystemSharedLibPackageName)
+                || pkg.equals(PrintManager.PRINT_SPOOLER_PACKAGE_NAME)
+                || isDeviceProvisioningPackage(pkg);
+        mSystemAppCache.put(app, isSystem);
+        return isSystem;
+    }
+
+    private Signature getFirstSignature(PackageInfo pkg) {
+        if (pkg != null && pkg.signatures != null && pkg.signatures.length > 0) {
+            return pkg.signatures[0];
+        }
+        return null;
+    }
+
+    private Signature getSystemSignature() {
+        try {
+            final PackageInfo sys = mPm.getPackageInfoAsUser(
+                    "android", PackageManager.GET_SIGNATURES, UserHandle.USER_SYSTEM);
+            return getFirstSignature(sys);
+        } catch (NameNotFoundException e) {
+        }
+        return null;
+    }
+
+    private boolean isDeviceProvisioningPackage(String packageName) {
+        String deviceProvisioningPackage = mContext.getResources().getString(
+                com.android.internal.R.string.config_deviceProvisioningPackage);
+        return deviceProvisioningPackage != null && deviceProvisioningPackage.equals(packageName);
+    }
+
+    private void getSignatures() {
+        mSystemSignature = new Signature[]{getSystemSignature()};
+        mPermissionControllerPackageName = mPm.getPermissionControllerPackageName();
+        mServicesSystemSharedLibPackageName = mPm.getServicesSystemSharedLibraryPackageName();
+        mSharedSystemSharedLibPackageName = mPm.getSharedSystemSharedLibraryPackageName();
     }
 
     @Override
