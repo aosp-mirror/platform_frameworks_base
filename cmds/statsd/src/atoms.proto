@@ -1151,7 +1151,7 @@ message PhoneSignalStrengthChanged {
 /**
  * Logs that a setting was updated.
  * Logged from:
- *   frameworks/base/core/java/android/provider/Settings.java
+ *   frameworks/base/packages/SettingsProvider/src/com/android/providers/settings/SettingsState.java
  * The tag and is_default allow resetting of settings to default values based on the specified
  * tag. See Settings#putString(ContentResolver, String, String, String, boolean) for more details.
  */
@@ -1177,8 +1177,14 @@ message SettingChanged {
     // True if this setting with tag should be resettable.
     optional bool is_default = 6;
 
-    // The user ID associated. Defined in android/os/UserHandle.java
+    // The associated user (for multi-user feature). Defined in android/os/UserHandle.java
     optional int32 user = 7;
+
+    enum ChangeReason {
+        UPDATED = 1; // Updated can be an insertion or an update.
+        DELETED = 2;
+    }
+    optional ChangeReason reason = 8;
 }
 
 /**
