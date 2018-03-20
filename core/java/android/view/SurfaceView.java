@@ -179,6 +179,8 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
 
     private int mPendingReportDraws;
 
+    private SurfaceControl.Transaction mRtTransaction = new SurfaceControl.Transaction();
+
     public SurfaceView(Context context) {
         this(context, null);
     }
@@ -774,21 +776,34 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         });
     }
 
+    /**
+     * A place to over-ride for applying child-surface transactions.
+     * These can be synchronized with the viewroot surface using deferTransaction.
+     *
+     * Called from RenderWorker while UI thread is paused.
+     * @hide
+     */
+    protected void applyChildSurfaceTransaction_renderWorker(SurfaceControl.Transaction t,
+            Surface viewRootSurface, long nextViewRootFrameNumber) {
+    }
+
     private void setParentSpaceRectangle(Rect position, long frameNumber) {
         ViewRootImpl viewRoot = getViewRootImpl();
 
-        SurfaceControl.openTransaction();
-        try {
-            if (frameNumber > 0) {
-                mSurfaceControl.deferTransactionUntil(viewRoot.mSurface, frameNumber);
-            }
-            mSurfaceControl.setPosition(position.left, position.top);
-            mSurfaceControl.setMatrix(position.width() / (float) mSurfaceWidth,
-                    0.0f, 0.0f,
-                    position.height() / (float) mSurfaceHeight);
-        } finally {
-            SurfaceControl.closeTransaction();
+        if (frameNumber > 0) {
+            mRtTransaction.deferTransactionUntilSurface(mSurfaceControl, viewRoot.mSurface,
+                    frameNumber);
         }
+        mRtTransaction.setPosition(mSurfaceControl,position.left, position.top);
+        mRtTransaction.setMatrix(mSurfaceControl,
+                position.width() / (float) mSurfaceWidth,
+                0.0f, 0.0f,
+                position.height() / (float) mSurfaceHeight);
+
+        applyChildSurfaceTransaction_renderWorker(mRtTransaction, viewRoot.mSurface,
+                frameNumber);
+
+        mRtTransaction.apply();
     }
 
     private Rect mRTLastReportedPosition = new Rect();
