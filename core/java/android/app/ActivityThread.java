@@ -30,12 +30,15 @@ import android.annotation.Nullable;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.BackupAgent;
+import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityLifecycleItem.LifecycleState;
+import android.app.servertransaction.ActivityRelaunchItem;
 import android.app.servertransaction.ActivityResultItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.PendingTransactionActions;
 import android.app.servertransaction.PendingTransactionActions.StopInfo;
 import android.app.servertransaction.TransactionExecutor;
+import android.app.servertransaction.TransactionExecutorHelper;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
@@ -517,6 +520,10 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         public boolean isPersistable() {
             return activityInfo.persistableMode == ActivityInfo.PERSIST_ACROSS_REBOOTS;
+        }
+
+        public boolean isVisibleFromServer() {
+            return activity != null && activity.mVisibleFromServer;
         }
 
         public String toString() {
@@ -1796,6 +1803,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                         // message is handled.
                         transaction.recycle();
                     }
+                    // TODO(lifecycler): Recycle locally scheduled transactions.
                     break;
             }
             Object obj = msg.obj;
@@ -4709,14 +4717,25 @@ public final class ActivityThread extends ClientTransactionHandler {
             return;
         }
 
-        // TODO(b/73747058): Investigate converting this to use transaction to relaunch.
-        handleRelaunchActivityInner(r, 0 /* configChanges */, null /* pendingResults */,
-                null /* pendingIntents */, null /* pendingActions */, prevState != ON_RESUME,
-                r.overrideConfig, "handleRelaunchActivityLocally");
 
-        // Restore back to the previous state before relaunch if needed.
-        if (prevState != r.getLifecycleState()) {
-            mTransactionExecutor.cycleToPath(r, prevState);
+        // Initialize a relaunch request.
+        final MergedConfiguration mergedConfiguration = new MergedConfiguration(
+                r.createdConfig != null ? r.createdConfig : mConfiguration,
+                r.overrideConfig);
+        final ActivityRelaunchItem activityRelaunchItem = ActivityRelaunchItem.obtain(
+                null /* pendingResults */, null /* pendingIntents */, 0 /* configChanges */,
+                mergedConfiguration, r.mPreserveWindow);
+        // Make sure to match the existing lifecycle state in the end of the transaction.
+        final ActivityLifecycleItem lifecycleRequest =
+                TransactionExecutorHelper.getLifecycleRequestForCurrentState(r);
+        // Schedule the transaction.
+        final ClientTransaction transaction = ClientTransaction.obtain(this.mAppThread, r.token);
+        transaction.addCallback(activityRelaunchItem);
+        transaction.setLifecycleStateRequest(lifecycleRequest);
+        try {
+            mAppThread.scheduleTransaction(transaction);
+        } catch (RemoteException e) {
+            // Local scheduling
         }
     }
 
