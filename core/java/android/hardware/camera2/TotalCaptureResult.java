@@ -138,7 +138,7 @@ public final class TotalCaptureResult extends CaptureResult {
      *
      * <p>This function can be called for logical multi-camera devices, which are devices that have
      * REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA capability and calls to {@link
-     * CameraCharacteristics#getPhysicalCameraIds} return a non-empty list of physical devices that
+     * CameraCharacteristics#getPhysicalCameraIds} return a non-empty set of physical devices that
      * are backing the logical camera.</p>
      *
      * <p>If one or more streams from the underlying physical cameras were requested by the
