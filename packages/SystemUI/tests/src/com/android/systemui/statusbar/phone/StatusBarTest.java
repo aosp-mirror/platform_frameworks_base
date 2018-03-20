@@ -153,8 +153,8 @@ public class StatusBarTest extends SysuiTestCase {
 
         mMetricsLogger = new FakeMetricsLogger();
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
-        mNotificationLogger = new NotificationLogger();
         mDependency.injectTestDependency(NotificationLogger.class, mNotificationLogger);
+        mNotificationLogger = new NotificationLogger();
 
         IPowerManager powerManagerService = mock(IPowerManager.class);
         HandlerThread handlerThread = new HandlerThread("TestThread");
@@ -506,9 +506,9 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.disable(StatusBarManager.DISABLE_NONE, StatusBarManager.DISABLE2_NONE, false);
         verify(mNotificationPanelView).setQsExpansionEnabled(true);
         mStatusBar.animateExpandNotificationsPanel();
-        verify(mNotificationPanelView).expand(anyBoolean());
+        verify(mNotificationPanelView).expandWithoutQs();
         mStatusBar.animateExpandSettingsPanel(null);
-        verify(mNotificationPanelView).expand(anyBoolean());
+        verify(mNotificationPanelView).expandWithQs();
     }
 
     @Test

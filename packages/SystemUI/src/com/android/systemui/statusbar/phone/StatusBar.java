@@ -2283,7 +2283,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             return ;
         }
 
-        mNotificationPanel.expand(true /* animate */);
+        mNotificationPanel.expandWithoutQs();
 
         if (false) postStartTracing();
     }
