@@ -119,8 +119,12 @@ public class PrecomputedTextMemoryUsageTest {
         // Report median of randomly generated PrecomputedText.
         for (int i = 0; i < TRIAL_COUNT; ++i) {
             CharSequence cs = mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
-            memories[i] = PrecomputedText.createWidthOnly(cs, param, 0, cs.length())
-                .getMemoryUsage();
+            PrecomputedText.ParagraphInfo[] paragraphInfo =
+                    PrecomputedText.createMeasuredParagraphs(cs, param, 0, cs.length(), false);
+            memories[i] = 0;
+            for (PrecomputedText.ParagraphInfo info : paragraphInfo) {
+                memories[i] += info.measured.getMemoryUsage();
+            }
         }
         reportMemoryUsage(median(memories), "MemoryUsage_NoHyphenation_WidthOnly");
     }
@@ -136,8 +140,12 @@ public class PrecomputedTextMemoryUsageTest {
         // Report median of randomly generated PrecomputedText.
         for (int i = 0; i < TRIAL_COUNT; ++i) {
             CharSequence cs = mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
-            memories[i] = PrecomputedText.createWidthOnly(cs, param, 0, cs.length())
-                .getMemoryUsage();
+            PrecomputedText.ParagraphInfo[] paragraphInfo =
+                    PrecomputedText.createMeasuredParagraphs(cs, param, 0, cs.length(), false);
+            memories[i] = 0;
+            for (PrecomputedText.ParagraphInfo info : paragraphInfo) {
+                memories[i] += info.measured.getMemoryUsage();
+            }
         }
         reportMemoryUsage(median(memories), "MemoryUsage_Hyphenation_WidthOnly");
     }

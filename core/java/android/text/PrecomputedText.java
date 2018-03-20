@@ -19,7 +19,6 @@ package android.text;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.util.IntArray;
 
 import com.android.internal.util.Preconditions;
 
@@ -267,6 +266,22 @@ public class PrecomputedText implements Spanned {
         }
     };
 
+    /** @hide */
+    public static class ParagraphInfo {
+        public final @IntRange(from = 0) int paragraphEnd;
+        public final @NonNull MeasuredParagraph measured;
+
+        /**
+         * @param paraEnd the end offset of this paragraph
+         * @param measured a measured paragraph
+         */
+        public ParagraphInfo(@IntRange(from = 0) int paraEnd, @NonNull MeasuredParagraph measured) {
+            this.paragraphEnd = paraEnd;
+            this.measured = measured;
+        }
+    };
+
+
     // The original text.
     private final @NonNull SpannedString mText;
 
@@ -278,11 +293,8 @@ public class PrecomputedText implements Spanned {
 
     private final @NonNull Params mParams;
 
-    // The measured paragraph texts.
-    private final @NonNull MeasuredParagraph[] mMeasuredParagraphs;
-
-    // The sorted paragraph end offsets.
-    private final @NonNull int[] mParagraphBreakPoints;
+    // The list of measured paragraph info.
+    private final @NonNull ParagraphInfo[] mParagraphInfo;
 
     /**
      * Create a new {@link PrecomputedText} which will pre-compute text measurement and glyph
@@ -293,28 +305,25 @@ public class PrecomputedText implements Spanned {
      * </p>
      *
      * @param text the text to be measured
-     * @param param parameters that define how text will be precomputed
+     * @param params parameters that define how text will be precomputed
      * @return A {@link PrecomputedText}
      */
-    public static PrecomputedText create(@NonNull CharSequence text, @NonNull Params param) {
-        return createInternal(text, param, 0, text.length(), true /* compute full Layout */);
+    public static PrecomputedText create(@NonNull CharSequence text, @NonNull Params params) {
+        ParagraphInfo[] paraInfo = createMeasuredParagraphs(
+                text, params, 0, text.length(), true /* computeLayout */);
+        return new PrecomputedText(text, 0, text.length(), params, paraInfo);
     }
 
     /** @hide */
-    public static PrecomputedText createWidthOnly(@NonNull CharSequence text, @NonNull Params param,
-            @IntRange(from = 0) int start, @IntRange(from = 0) int end) {
-        return createInternal(text, param, start, end, false /* compute width only */);
-    }
-
-    private static PrecomputedText createInternal(@NonNull CharSequence text, @NonNull Params param,
+    public static ParagraphInfo[] createMeasuredParagraphs(
+            @NonNull CharSequence text, @NonNull Params params,
             @IntRange(from = 0) int start, @IntRange(from = 0) int end, boolean computeLayout) {
-        Preconditions.checkNotNull(text);
-        Preconditions.checkNotNull(param);
-        final boolean needHyphenation = param.getBreakStrategy() != Layout.BREAK_STRATEGY_SIMPLE
-                && param.getHyphenationFrequency() != Layout.HYPHENATION_FREQUENCY_NONE;
+        ArrayList<ParagraphInfo> result = new ArrayList<>();
 
-        final IntArray paragraphEnds = new IntArray();
-        final ArrayList<MeasuredParagraph> measuredTexts = new ArrayList<>();
+        Preconditions.checkNotNull(text);
+        Preconditions.checkNotNull(params);
+        final boolean needHyphenation = params.getBreakStrategy() != Layout.BREAK_STRATEGY_SIMPLE
+                && params.getHyphenationFrequency() != Layout.HYPHENATION_FREQUENCY_NONE;
 
         int paraEnd = 0;
         for (int paraStart = start; paraStart < end; paraStart = paraEnd) {
@@ -327,27 +336,22 @@ public class PrecomputedText implements Spanned {
                 paraEnd++;  // Includes LINE_FEED(U+000A) to the prev paragraph.
             }
 
-            paragraphEnds.add(paraEnd);
-            measuredTexts.add(MeasuredParagraph.buildForStaticLayout(
-                    param.getTextPaint(), text, paraStart, paraEnd, param.getTextDirection(),
-                    needHyphenation, computeLayout, null /* no recycle */));
+            result.add(new ParagraphInfo(paraEnd, MeasuredParagraph.buildForStaticLayout(
+                    params.getTextPaint(), text, paraStart, paraEnd, params.getTextDirection(),
+                    needHyphenation, computeLayout, null /* no recycle */)));
         }
-
-        return new PrecomputedText(text, start, end, param,
-                                measuredTexts.toArray(new MeasuredParagraph[measuredTexts.size()]),
-                                paragraphEnds.toArray());
+        return result.toArray(new ParagraphInfo[result.size()]);
     }
 
     // Use PrecomputedText.create instead.
     private PrecomputedText(@NonNull CharSequence text, @IntRange(from = 0) int start,
-            @IntRange(from = 0) int end, @NonNull Params param,
-            @NonNull MeasuredParagraph[] measuredTexts, @NonNull int[] paragraphBreakPoints) {
+            @IntRange(from = 0) int end, @NonNull Params params,
+            @NonNull ParagraphInfo[] paraInfo) {
         mText = new SpannedString(text);
         mStart = start;
         mEnd = end;
-        mParams = param;
-        mMeasuredParagraphs = measuredTexts;
-        mParagraphBreakPoints = paragraphBreakPoints;
+        mParams = params;
+        mParagraphInfo = paraInfo;
     }
 
     /**
@@ -384,7 +388,7 @@ public class PrecomputedText implements Spanned {
      * Returns the count of paragraphs.
      */
     public @IntRange(from = 0) int getParagraphCount() {
-        return mParagraphBreakPoints.length;
+        return mParagraphInfo.length;
     }
 
     /**
@@ -392,7 +396,7 @@ public class PrecomputedText implements Spanned {
      */
     public @IntRange(from = 0) int getParagraphStart(@IntRange(from = 0) int paraIndex) {
         Preconditions.checkArgumentInRange(paraIndex, 0, getParagraphCount(), "paraIndex");
-        return paraIndex == 0 ? mStart : mParagraphBreakPoints[paraIndex - 1];
+        return paraIndex == 0 ? mStart : getParagraphEnd(paraIndex - 1);
     }
 
     /**
@@ -400,12 +404,17 @@ public class PrecomputedText implements Spanned {
      */
     public @IntRange(from = 0) int getParagraphEnd(@IntRange(from = 0) int paraIndex) {
         Preconditions.checkArgumentInRange(paraIndex, 0, getParagraphCount(), "paraIndex");
-        return mParagraphBreakPoints[paraIndex];
+        return mParagraphInfo[paraIndex].paragraphEnd;
     }
 
     /** @hide */
     public @NonNull MeasuredParagraph getMeasuredParagraph(@IntRange(from = 0) int paraIndex) {
-        return mMeasuredParagraphs[paraIndex];
+        return mParagraphInfo[paraIndex].measured;
+    }
+
+    /** @hide */
+    public @NonNull ParagraphInfo[] getParagraphInfo() {
+        return mParagraphInfo;
     }
 
     /**
@@ -425,13 +434,13 @@ public class PrecomputedText implements Spanned {
     public int findParaIndex(@IntRange(from = 0) int pos) {
         // TODO: Maybe good to remove paragraph concept from PrecomputedText and add substring
         //       layout support to StaticLayout.
-        for (int i = 0; i < mParagraphBreakPoints.length; ++i) {
-            if (pos < mParagraphBreakPoints[i]) {
+        for (int i = 0; i < mParagraphInfo.length; ++i) {
+            if (pos < mParagraphInfo[i].paragraphEnd) {
                 return i;
             }
         }
         throw new IndexOutOfBoundsException(
-            "pos must be less than " + mParagraphBreakPoints[mParagraphBreakPoints.length - 1]
+            "pos must be less than " + mParagraphInfo[mParagraphInfo.length - 1].paragraphEnd
             + ", gave " + pos);
     }
 
