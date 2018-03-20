@@ -113,6 +113,98 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
     fprintf(out, "// the single event tag id for all stats logs\n");
     fprintf(out, "const static int kStatsEventTag = 1937006964;\n");
 
+    std::set<string> kTruncatingAtomNames = {"mobile_radio_power_state_changed",
+                                             "audio_state_changed",
+                                             "call_state_changed",
+                                             "phone_signal_strength_changed",
+                                             "mobile_bytes_transfer_by_fg_bg",
+                                             "mobile_bytes_transfer"};
+    fprintf(out,
+            "const std::set<int> "
+            "AtomsInfo::kNotTruncatingTimestampAtomWhiteList = {\n");
+    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
+         atom != atoms.decls.end(); atom++) {
+        if (kTruncatingAtomNames.find(atom->name) ==
+            kTruncatingAtomNames.end()) {
+            string constant = make_constant_name(atom->name);
+            fprintf(out, " %s,\n", constant.c_str());
+        }
+    }
+    fprintf(out, "};\n");
+    fprintf(out, "\n");
+
+    fprintf(out,
+            "const std::set<int> AtomsInfo::kAtomsWithAttributionChain = {\n");
+    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
+         atom != atoms.decls.end(); atom++) {
+        for (vector<AtomField>::const_iterator field = atom->fields.begin();
+             field != atom->fields.end(); field++) {
+            if (field->javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
+                string constant = make_constant_name(atom->name);
+                fprintf(out, " %s,\n", constant.c_str());
+                break;
+            }
+        }
+    }
+    fprintf(out, "};\n");
+    fprintf(out, "\n");
+
+    fprintf(out,
+            "static std::map<int, int> "
+            "getAtomUidField() {\n");
+    fprintf(out, "  std::map<int, int> uidField;\n");
+    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
+         atom != atoms.decls.end(); atom++) {
+        if (atom->uidField == 0) {
+            continue;
+        }
+        fprintf(out,
+                "\n    // Adding uid field for atom "
+                "(%d)%s\n",
+                atom->code, atom->name.c_str());
+        fprintf(out, "    uidField[static_cast<int>(%s)] = %d;\n",
+                make_constant_name(atom->name).c_str(), atom->uidField);
+    }
+
+    fprintf(out, "    return uidField;\n");
+    fprintf(out, "};\n");
+
+    fprintf(out,
+            "const std::map<int, int> AtomsInfo::kAtomsWithUidField = "
+            "getAtomUidField();\n");
+
+    fprintf(out,
+            "static std::map<int, StateAtomFieldOptions> "
+            "getStateAtomFieldOptions() {\n");
+    fprintf(out, "    std::map<int, StateAtomFieldOptions> options;\n");
+    fprintf(out, "    StateAtomFieldOptions opt;\n");
+    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
+         atom != atoms.decls.end(); atom++) {
+        if (atom->primaryFields.size() == 0 && atom->exclusiveField == 0) {
+            continue;
+        }
+        fprintf(out,
+                "\n    // Adding primary and exclusive fields for atom "
+                "(%d)%s\n",
+                atom->code, atom->name.c_str());
+        fprintf(out, "    opt.primaryFields.clear();\n");
+        for (const auto& field : atom->primaryFields) {
+            fprintf(out, "    opt.primaryFields.push_back(%d);\n", field);
+        }
+
+        fprintf(out, "    opt.exclusiveField = %d;\n", atom->exclusiveField);
+        fprintf(out, "    options[static_cast<int>(%s)] = opt;\n",
+                make_constant_name(atom->name).c_str());
+    }
+
+    fprintf(out, "    return options;\n");
+    fprintf(out, "  }\n");
+
+    fprintf(out,
+            "const std::map<int, StateAtomFieldOptions> "
+            "AtomsInfo::kStateAtomsFieldOptions = "
+            "getStateAtomFieldOptions();\n");
+
     // Print write methods
     fprintf(out, "\n");
     for (set<vector<java_type_t>>::const_iterator signature = atoms.signatures.begin();
@@ -366,89 +458,26 @@ write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributio
     fprintf(out, "};\n");
     fprintf(out, "\n");
 
-    std::set<string> kTruncatingAtomNames =
-        { "mobile_radio_power_state_changed", "audio_state_changed", "call_state_changed",
-          "phone_signal_strength_changed", "mobile_bytes_transfer_by_fg_bg",
-          "mobile_bytes_transfer"};
-    fprintf(out, "const static std::set<int> kNotTruncatingTimestampAtomWhiteList = {\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-        atom != atoms.decls.end(); atom++) {
-        if (kTruncatingAtomNames.find(atom->name) == kTruncatingAtomNames.end()) {
-            string constant = make_constant_name(atom->name);
-            fprintf(out, " %s,\n", constant.c_str());
-        }
-    }
-    fprintf(out, "};\n");
-    fprintf(out, "\n");
-
-    fprintf(out, "const static std::set<int> kAtomsWithUidField = {\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-        atom != atoms.decls.end(); atom++) {
-        for (vector<AtomField>::const_iterator field = atom->fields.begin();
-                field != atom->fields.end(); field++) {
-            if (field->name == "uid") {
-                string constant = make_constant_name(atom->name);
-                fprintf(out, " %s,\n", constant.c_str());
-                break;
-            }
-        }
-    }
-    fprintf(out, "};\n");
-    fprintf(out, "\n");
-
-    fprintf(out, "const static std::set<int> kAtomsWithAttributionChain = {\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-        atom != atoms.decls.end(); atom++) {
-        for (vector<AtomField>::const_iterator field = atom->fields.begin();
-                field != atom->fields.end(); field++) {
-            if (field->javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-                string constant = make_constant_name(atom->name);
-                fprintf(out, " %s,\n", constant.c_str());
-                break;
-            }
-        }
-    }
-    fprintf(out, "};\n");
-    fprintf(out, "\n");
-
-    fprintf(out, "const static int kMaxPushedAtomId = %d;\n\n", maxPushedAtomId);
-
     fprintf(out, "struct StateAtomFieldOptions {\n");
     fprintf(out, "  std::vector<int> primaryFields;\n");
     fprintf(out, "  int exclusiveField;\n");
+    fprintf(out, "};\n");
     fprintf(out, "\n");
+
+    fprintf(out, "struct AtomsInfo {\n");
     fprintf(out,
-            "  static std::map<int, StateAtomFieldOptions> "
-            "getStateAtomFieldOptions() {\n");
-    fprintf(out, "    std::map<int, StateAtomFieldOptions> options;\n");
-    fprintf(out, "    StateAtomFieldOptions opt;\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-         atom != atoms.decls.end(); atom++) {
-        if (atom->primaryFields.size() == 0 && atom->exclusiveField == 0) {
-            continue;
-        }
-        fprintf(out,
-                "\n    // Adding primary and exclusive fields for atom "
-                "(%d)%s\n",
-                atom->code, atom->name.c_str());
-        fprintf(out, "    opt.primaryFields.clear();\n");
-        for (const auto& field : atom->primaryFields) {
-            fprintf(out, "    opt.primaryFields.push_back(%d);\n", field);
-        }
-
-        fprintf(out, "    opt.exclusiveField = %d;\n", atom->exclusiveField);
-        fprintf(out, "    options[static_cast<int>(%s)] = opt;\n",
-                make_constant_name(atom->name).c_str());
-    }
-
-    fprintf(out, "    return options;\n");
-    fprintf(out, "  }\n");
+            "  const static std::set<int> "
+            "kNotTruncatingTimestampAtomWhiteList;\n");
+    fprintf(out, "  const static std::map<int, int> kAtomsWithUidField;\n");
+    fprintf(out,
+            "  const static std::set<int> kAtomsWithAttributionChain;\n");
+    fprintf(out,
+            "  const static std::map<int, StateAtomFieldOptions> "
+            "kStateAtomsFieldOptions;\n");
     fprintf(out, "};\n");
 
-    fprintf(out,
-            "const static std::map<int, StateAtomFieldOptions> "
-            "kStateAtomsFieldOptions = "
-            "StateAtomFieldOptions::getStateAtomFieldOptions();\n");
+    fprintf(out, "const static int kMaxPushedAtomId = %d;\n\n",
+            maxPushedAtomId);
 
     // Print write methods
     fprintf(out, "//\n");

@@ -112,8 +112,8 @@ void updateUid(Value* value, int hostUid) {
 }
 
 void StatsLogProcessor::mapIsolatedUidToHostUidIfNecessaryLocked(LogEvent* event) const {
-    if (android::util::kAtomsWithAttributionChain.find(event->GetTagId()) !=
-        android::util::kAtomsWithAttributionChain.end()) {
+    if (android::util::AtomsInfo::kAtomsWithAttributionChain.find(event->GetTagId()) !=
+        android::util::AtomsInfo::kAtomsWithAttributionChain.end()) {
         for (auto& value : *(event->getMutableValues())) {
             if (value.mField.getPosAtDepth(0) > kAttributionField) {
                 break;
@@ -123,12 +123,20 @@ void StatsLogProcessor::mapIsolatedUidToHostUidIfNecessaryLocked(LogEvent* event
                 updateUid(&value.mValue, hostUid);
             }
         }
-    } else if (android::util::kAtomsWithUidField.find(event->GetTagId()) !=
-                       android::util::kAtomsWithUidField.end() &&
-               event->getValues().size() > 0 && (event->getValues())[0].mValue.getType() == INT) {
-        Value& value = (*event->getMutableValues())[0].mValue;
-        const int hostUid = mUidMap->getHostUidOrSelf(value.int_value);
-        updateUid(&value, hostUid);
+    } else {
+        auto it = android::util::AtomsInfo::kAtomsWithUidField.find(event->GetTagId());
+        if (it != android::util::AtomsInfo::kAtomsWithUidField.end()) {
+            int uidField = it->second;  // uidField is the field number in proto,
+                                        // starting from 1
+            if (uidField > 0 && (int)event->getValues().size() >= uidField &&
+                (event->getValues())[uidField - 1].mValue.getType() == INT) {
+                Value& value = (*event->getMutableValues())[uidField - 1].mValue;
+                const int hostUid = mUidMap->getHostUidOrSelf(value.int_value);
+                updateUid(&value, hostUid);
+            } else {
+                ALOGE("Malformed log, uid not found. %s", event->ToString().c_str());
+            }
+        }
     }
 }
 

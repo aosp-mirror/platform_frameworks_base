@@ -195,8 +195,9 @@ void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                     protoOutput->end(atomsToken);
                 }
                 const bool truncateTimestamp =
-                    android::util::kNotTruncatingTimestampAtomWhiteList.find(mTagId) ==
-                    android::util::kNotTruncatingTimestampAtomWhiteList.end();
+                        android::util::AtomsInfo::kNotTruncatingTimestampAtomWhiteList.find(
+                                mTagId) ==
+                        android::util::AtomsInfo::kNotTruncatingTimestampAtomWhiteList.end();
                 const int64_t wall_clock_ns = truncateTimestamp ?
                     truncateTimestampNsToFiveMinutes(getWallClockNs()) : getWallClockNs();
                 for (const auto& atom : bucket.mGaugeAtoms) {
