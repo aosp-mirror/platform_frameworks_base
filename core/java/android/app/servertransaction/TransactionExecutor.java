@@ -204,7 +204,8 @@ public class TransactionExecutor {
                     break;
                 case ON_STOP:
                     mTransactionHandler.handleStopActivity(r.token, false /* show */,
-                            0 /* configChanges */, mPendingActions, "LIFECYCLER_STOP_ACTIVITY");
+                            0 /* configChanges */, mPendingActions, false /* finalStateRequest */,
+                            "LIFECYCLER_STOP_ACTIVITY");
                     break;
                 case ON_DESTROY:
                     mTransactionHandler.handleDestroyActivity(r.token, false /* finishing */,
