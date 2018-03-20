@@ -114,6 +114,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_ROTATION = true;
     private static final String EXTRA_DISABLE_STATE = "disabled_state";
+    private static final String EXTRA_DISABLE2_STATE = "disabled2_state";
 
     private final static int BUTTON_FADE_IN_OUT_DURATION_MS = 100;
     private final static int NAVBAR_HIDDEN_PENDING_ICON_TIMEOUT_MS = 20000;
@@ -137,6 +138,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
 
     private int mDisabledFlags1;
+    private int mDisabledFlags2;
     private StatusBar mStatusBar;
     private Recents mRecents;
     private Divider mDivider;
@@ -212,6 +214,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
         if (savedInstanceState != null) {
             mDisabledFlags1 = savedInstanceState.getInt(EXTRA_DISABLE_STATE, 0);
+            mDisabledFlags2 = savedInstanceState.getInt(EXTRA_DISABLE2_STATE, 0);
         }
         mAssistManager = Dependency.get(AssistManager.class);
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
@@ -277,6 +280,8 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         prepareNavigationBarView();
         checkNavBarModes();
 
+        setDisabled2Flags(mDisabledFlags2);
+
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         getContext().registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
@@ -296,6 +301,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(EXTRA_DISABLE_STATE, mDisabledFlags1);
+        outState.putInt(EXTRA_DISABLE2_STATE, mDisabledFlags2);
         if (mNavigationBarView != null) {
             mNavigationBarView.getLightTransitionsController().saveState(outState);
         }
@@ -398,14 +404,19 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     @Override
     public void onRotationProposal(final int rotation, boolean isValid) {
         final int winRotation = mWindowManager.getDefaultDisplay().getRotation();
+        final boolean rotateSuggestionsDisabled = hasDisable2RotateSuggestionFlag(mDisabledFlags2);
         if (DEBUG_ROTATION) {
             Log.v(TAG, "onRotationProposal proposedRotation=" + Surface.rotationToString(rotation)
                     + ", winRotation=" + Surface.rotationToString(winRotation)
                     + ", isValid=" + isValid + ", mNavBarWindowState="
                     + StatusBarManager.windowStateToString(mNavigationBarWindowState)
+                    + ", rotateSuggestionsDisabled=" + rotateSuggestionsDisabled
                     + ", isRotateButtonVisible=" + (mNavigationBarView == null ? "null" :
                         mNavigationBarView.isRotateButtonVisible()));
         }
+
+        // Respect the disabled flag, no need for action as flag change callback will handle hiding
+        if (rotateSuggestionsDisabled) return;
 
         // This method will be called on rotation suggestion changes even if the proposed rotation
         // is not valid for the top app. Use invalid rotation choices as a signal to remove the
@@ -448,6 +459,12 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         } else { // The navbar is visible so show the icon right away
             showAndLogRotationSuggestion();
         }
+    }
+
+    private void onRotationSuggestionsDisabled() {
+        // Immediately hide the rotate button and clear any planned removal
+        setRotateSuggestionButtonState(false, true);
+        getView().removeCallbacks(mRemoveRotationProposal);
     }
 
     private void showAndLogRotationSuggestion() {
@@ -643,8 +660,8 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
     @Override
     public void disable(int state1, int state2, boolean animate) {
-        // All navigation bar flags are in state1.
-        int masked = state1 & (StatusBarManager.DISABLE_HOME
+        // Navigation bar flags are in both state1 and state2.
+        final int masked = state1 & (StatusBarManager.DISABLE_HOME
                 | StatusBarManager.DISABLE_RECENT
                 | StatusBarManager.DISABLE_BACK
                 | StatusBarManager.DISABLE_SEARCH);
@@ -653,6 +670,22 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
             if (mNavigationBarView != null) mNavigationBarView.setDisabledFlags(state1);
             updateScreenPinningGestures();
         }
+
+        final int masked2 = state2 & (StatusBarManager.DISABLE2_ROTATE_SUGGESTIONS);
+        if (masked2 != mDisabledFlags2) {
+            mDisabledFlags2 = masked2;
+            setDisabled2Flags(masked2);
+        }
+    }
+
+    private void setDisabled2Flags(int state2) {
+        // Method only called on change of disable2 flags
+        final boolean rotateSuggestionsDisabled = hasDisable2RotateSuggestionFlag(state2);
+        if (rotateSuggestionsDisabled) onRotationSuggestionsDisabled();
+    }
+
+    private boolean hasDisable2RotateSuggestionFlag(int disable2Flags) {
+        return (disable2Flags & StatusBarManager.DISABLE2_ROTATE_SUGGESTIONS) != 0;
     }
 
     // ----- Internal stuffz -----

@@ -2196,7 +2196,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         final ActivityRecord r = task.getTopActivity();
-        currentStack.moveTaskToFrontLocked(task, r, false /* noAnimation */, options,
+        currentStack.moveTaskToFrontLocked(task, false /* noAnimation */, options,
                 r == null ? null : r.appTimeTracker, reason);
 
         if (DEBUG_STACK) Slog.d(TAG_STACK,
@@ -2455,18 +2455,19 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
                 if (currentWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                         && candidate == null && stack.inSplitScreenPrimaryWindowingMode()) {
-                    // If the currently focused stack is in split-screen secondary we would prefer
-                    // the focus to move to another split-screen secondary stack or fullscreen stack
-                    // over the primary split screen stack to avoid:
-                    // - Moving the focus to the primary split-screen stack when it can't be focused
-                    //   because it will be minimized, but AM doesn't know that yet
-                    // - primary split-screen stack overlapping with a fullscreen stack when a
-                    //   fullscreen stack is higher in z than the next split-screen stack. Assistant
-                    //   stack, I am looking at you...
+                    // If the currently focused stack is in split-screen secondary we save off the
+                    // top primary split-screen stack as a candidate for focus because we might
+                    // prefer focus to move to an other stack to avoid primary split-screen stack
+                    // overlapping with a fullscreen stack when a fullscreen stack is higher in z
+                    // than the next split-screen stack. Assistant stack, I am looking at you...
                     // We only move the focus to the primary-split screen stack if there isn't a
                     // better alternative.
                     candidate = stack;
                     continue;
+                }
+                if (candidate != null && stack.inSplitScreenSecondaryWindowingMode()) {
+                    // Use the candidate stack since we are now at the secondary split-screen.
+                    return candidate;
                 }
                 return stack;
             }
@@ -4413,6 +4414,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     void setDockedStackMinimized(boolean minimized) {
         mIsDockMinimized = minimized;
+        if (mIsDockMinimized) {
+            final ActivityStack current = getFocusedStack();
+            if (current.inSplitScreenPrimaryWindowingMode()) {
+                // The primary split-screen stack can't be focused while it is minimize, so move
+                // focus to something else.
+                current.adjustFocusToNextFocusableStack("setDockedStackMinimized");
+            }
+        }
     }
 
     void wakeUp(String reason) {

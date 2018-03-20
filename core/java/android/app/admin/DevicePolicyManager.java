@@ -3769,7 +3769,7 @@ public class DevicePolicyManager {
 
     /**
      * Called by an application that is administering the device to request that the storage system
-     * be encrypted.
+     * be encrypted. Does nothing if the caller is on a secondary user or a managed profile.
      * <p>
      * When multiple device administrators attempt to control device encryption, the most secure,
      * supported setting will always be used. If any device administrator requests device
@@ -3791,10 +3791,13 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param encrypt true to request encryption, false to release any previous request
-     * @return the new request status (for all active admins) - will be one of
-     *         {@link #ENCRYPTION_STATUS_UNSUPPORTED}, {@link #ENCRYPTION_STATUS_INACTIVE}, or
-     *         {@link #ENCRYPTION_STATUS_ACTIVE}. This is the value of the requests; Use
-     *         {@link #getStorageEncryptionStatus()} to query the actual device state.
+     * @return the new total request status (for all active admins), or {@link
+     *         DevicePolicyManager#ENCRYPTION_STATUS_UNSUPPORTED} if called for a non-system user.
+     *         Will be one of {@link #ENCRYPTION_STATUS_UNSUPPORTED}, {@link
+     *         #ENCRYPTION_STATUS_INACTIVE}, or {@link #ENCRYPTION_STATUS_ACTIVE}. This is the value
+     *         of the requests; use {@link #getStorageEncryptionStatus()} to query the actual device
+     *         state.
+     *
      * @throws SecurityException if {@code admin} is not an active administrator or does not use
      *             {@link DeviceAdminInfo#USES_ENCRYPTED_STORAGE}
      */

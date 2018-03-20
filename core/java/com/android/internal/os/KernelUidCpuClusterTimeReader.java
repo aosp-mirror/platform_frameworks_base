@@ -24,6 +24,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.function.Consumer;
 
 /**
  * Reads binary proc file /proc/uid_cpupower/concurrent_policy_time and reports CPU cluster times
@@ -89,6 +90,72 @@ public class KernelUidCpuClusterTimeReader extends
 
     @Override
     protected void readDeltaImpl(@Nullable Callback cb) {
+        readImpl((buf) -> {
+            int uid = buf.get();
+            double[] lastTimes = mLastUidPolicyTimeMs.get(uid);
+            if (lastTimes == null) {
+                lastTimes = new double[mNumClusters];
+                mLastUidPolicyTimeMs.put(uid, lastTimes);
+            }
+            if (!sumClusterTime(buf, mCurTime)) {
+                return;
+            }
+            boolean valid = true;
+            boolean notify = false;
+            for (int i = 0; i < mNumClusters; i++) {
+                mDeltaTime[i] = (long) (mCurTime[i] - lastTimes[i]);
+                if (mDeltaTime[i] < 0) {
+                    Slog.e(TAG, "Negative delta from cluster time proc: " + mDeltaTime[i]);
+                    valid = false;
+                }
+                notify |= mDeltaTime[i] > 0;
+            }
+            if (notify && valid) {
+                System.arraycopy(mCurTime, 0, lastTimes, 0, mNumClusters);
+                if (cb != null) {
+                    cb.onUidCpuPolicyTime(uid, mDeltaTime);
+                }
+            }
+        });
+    }
+
+    public void readAbsolute(Callback callback) {
+        readImpl((buf) -> {
+            int uid = buf.get();
+            if (sumClusterTime(buf, mCurTime)) {
+                for (int i = 0; i < mNumClusters; i++) {
+                    mCurTimeRounded[i] = (long) mCurTime[i];
+                }
+                callback.onUidCpuPolicyTime(uid, mCurTimeRounded);
+            }
+        });
+    }
+
+    private boolean sumClusterTime(IntBuffer buffer, double[] clusterTime) {
+        boolean valid = true;
+        for (int i = 0; i < mNumClusters; i++) {
+            clusterTime[i] = 0;
+            for (int j = 1; j <= mNumCoresOnCluster[i]; j++) {
+                int time = buffer.get();
+                if (time < 0) {
+                    Slog.e(TAG, "Negative time from cluster time proc: " + time);
+                    valid = false;
+                }
+                clusterTime[i] += (double) time * 10 / j; // Unit is 10ms.
+            }
+        }
+        return valid;
+    }
+
+    /**
+     * readImpl accepts a callback to process the uid entry. readDeltaImpl needs to store the last
+     * seen results while processing the buffer, while readAbsolute returns the absolute value read
+     * from the buffer without storing. So readImpl contains the common logic of the two, leaving
+     * the difference to a processUid function.
+     *
+     * @param processUid the callback function to process the uid entry in the buffer.
+     */
+    private void readImpl(Consumer<IntBuffer> processUid) {
         synchronized (mProcReader) {
             ByteBuffer bytes = mProcReader.readBytes();
             if (bytes == null || bytes.remaining() <= 4) {
@@ -130,61 +197,10 @@ public class KernelUidCpuClusterTimeReader extends
             int numUids = buf.remaining() / (mNumCores + 1);
 
             for (int i = 0; i < numUids; i++) {
-                processUid(buf, cb);
+                processUid.accept(buf);
             }
             if (DEBUG) {
                 Slog.d(TAG, "Read uids: " + numUids);
-            }
-        }
-    }
-
-    public void readAbsolute(Callback cb) {
-        synchronized (mProcReader) {
-            readDelta(null);
-            int total = mLastUidPolicyTimeMs.size();
-            for (int i = 0; i < total; i ++){
-                int uid = mLastUidPolicyTimeMs.keyAt(i);
-                double[] lastTimes = mLastUidPolicyTimeMs.get(uid);
-                for (int j = 0; j < mNumClusters; j++) {
-                    mCurTimeRounded[j] = (long) lastTimes[j];
-                }
-                cb.onUidCpuPolicyTime(uid, mCurTimeRounded);
-            }
-        }
-    }
-
-    private void processUid(IntBuffer buf, @Nullable Callback cb) {
-        int uid = buf.get();
-        double[] lastTimes = mLastUidPolicyTimeMs.get(uid);
-        if (lastTimes == null) {
-            lastTimes = new double[mNumClusters];
-            mLastUidPolicyTimeMs.put(uid, lastTimes);
-        }
-
-        boolean notify = false;
-        boolean corrupted = false;
-
-        for (int j = 0; j < mNumClusters; j++) {
-            mCurTime[j] = 0;
-            for (int k = 1; k <= mNumCoresOnCluster[j]; k++) {
-                int time = buf.get();
-                if (time < 0) {
-                    Slog.e(TAG, "Corrupted data from cluster time proc uid: " + uid);
-                    corrupted = true;
-                }
-                mCurTime[j] += (double) time * 10 / k; // Unit is 10ms.
-            }
-            mDeltaTime[j] = (long) (mCurTime[j] - lastTimes[j]);
-            if (mDeltaTime[j] < 0) {
-                Slog.e(TAG, "Unexpected delta from cluster time proc uid: " + uid);
-                corrupted = true;
-            }
-            notify |= mDeltaTime[j] > 0;
-        }
-        if (notify && !corrupted) {
-            System.arraycopy(mCurTime, 0, lastTimes, 0, mNumClusters);
-            if (cb != null) {
-                cb.onUidCpuPolicyTime(uid, mDeltaTime);
             }
         }
     }
@@ -214,10 +230,6 @@ public class KernelUidCpuClusterTimeReader extends
     }
 
     public void removeUidsInRange(int startUid, int endUid) {
-        if (endUid < startUid) {
-            Slog.w(TAG, "End UID " + endUid + " is smaller than start UID " + startUid);
-            return;
-        }
         mLastUidPolicyTimeMs.put(startUid, null);
         mLastUidPolicyTimeMs.put(endUid, null);
         final int firstIndex = mLastUidPolicyTimeMs.indexOfKey(startUid);

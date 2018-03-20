@@ -299,7 +299,7 @@ class ActivityMetricsLogger {
 
         final boolean otherWindowModesLaunching =
                 mWindowingModeTransitionInfo.size() > 0 && info == null;
-        if ((resultCode < 0 || launchedActivity == null || !processSwitch
+        if ((!isLoggableResultCode(resultCode) || launchedActivity == null || !processSwitch
                 || windowingMode == WINDOWING_MODE_UNDEFINED) && !otherWindowModesLaunching) {
 
             // Failed to launch or it was not a process switch, so we don't care about the timing.
@@ -319,6 +319,14 @@ class ActivityMetricsLogger {
         mWindowingModeTransitionInfo.put(windowingMode, newInfo);
         mLastWindowingModeTransitionInfo.put(windowingMode, newInfo);
         mCurrentTransitionDeviceUptime = (int) (SystemClock.uptimeMillis() / 1000);
+    }
+
+    /**
+     * @return True if we should start logging an event for an activity start that returned
+     *         {@code resultCode} and that we'll indeed get a windows drawn event.
+     */
+    private boolean isLoggableResultCode(int resultCode) {
+        return resultCode == START_SUCCESS || resultCode == START_TASK_TO_FRONT;
     }
 
     /**

@@ -306,6 +306,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 for (int uid : uidsToRemove) {
                     mStats.removeIsolatedUidLocked(uid);
                 }
+                mStats.clearPendingRemovedUids();
             }
         }
     };

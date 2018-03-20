@@ -74,6 +74,17 @@ public abstract class AuthenticationClient extends ClientMonitor {
         }
     };
 
+    /**
+     * This method is called when authentication starts.
+     */
+    public abstract void onStart();
+
+    /**
+     * This method is called when a fingerprint is authenticated or authentication is stopped
+     * (cancelled by the user, or an error such as lockout has occurred).
+     */
+    public abstract void onStop();
+
     public AuthenticationClient(Context context, long halDeviceId, IBinder token,
             IFingerprintServiceReceiver receiver, int targetUserId, int groupId, long opId,
             boolean restricted, String owner, Bundle bundle,
@@ -220,6 +231,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
             }
             result |= true; // we have a valid fingerprint, done
             resetFailedAttempts();
+            onStop();
         }
         return result;
     }
@@ -234,6 +246,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
             Slog.w(TAG, "start authentication: no fingerprint HAL!");
             return ERROR_ESRCH;
         }
+        onStart();
         try {
             final int result = daemon.authenticate(mOpId, getGroupId());
             if (result != 0) {
@@ -266,6 +279,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
             return 0;
         }
 
+        onStop();
         IBiometricsFingerprint daemon = getFingerprintDaemon();
         if (daemon == null) {
             Slog.w(TAG, "stopAuthentication: no fingerprint HAL!");

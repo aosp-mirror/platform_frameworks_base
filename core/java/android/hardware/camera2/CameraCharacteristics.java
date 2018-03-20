@@ -28,7 +28,9 @@ import android.util.Rational;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p>The properties describing a
@@ -450,23 +452,20 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     }
 
     /**
-     * Returns the list of physical camera ids that this logical {@link CameraDevice} is
+     * Returns the set of physical camera ids that this logical {@link CameraDevice} is
      * made up of.
      *
      * <p>A camera device is a logical camera if it has
      * REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA capability. If the camera device
-     * doesn't have the capability, the return value will be an empty list. </p>
+     * doesn't have the capability, the return value will be an empty set. </p>
      *
-     * <p>The list returned is not modifiable, so any attempts to modify it will throw
+     * <p>The set returned is not modifiable, so any attempts to modify it will throw
      * a {@code UnsupportedOperationException}.</p>
      *
-     * <p>Each physical camera id is only listed once in the list. The order of the keys
-     * is undefined.</p>
-     *
-     * @return List of physical camera ids for this logical camera device.
+     * @return Set of physical camera ids for this logical camera device.
      */
     @NonNull
-    public List<String> getPhysicalCameraIds() {
+    public Set<String> getPhysicalCameraIds() {
         int[] availableCapabilities = get(REQUEST_AVAILABLE_CAPABILITIES);
         if (availableCapabilities == null) {
             throw new AssertionError("android.request.availableCapabilities must be non-null "
@@ -475,7 +474,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
 
         if (!ArrayUtils.contains(availableCapabilities,
                 REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA)) {
-            return Collections.emptyList();
+            return Collections.emptySet();
         }
         byte[] physicalCamIds = get(LOGICAL_MULTI_CAMERA_PHYSICAL_IDS);
 
@@ -485,9 +484,9 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
         } catch (java.io.UnsupportedEncodingException e) {
             throw new AssertionError("android.logicalCam.physicalIds must be UTF-8 string");
         }
-        String[] physicalCameraIdList = physicalCamIdString.split("\0");
+        String[] physicalCameraIdArray = physicalCamIdString.split("\0");
 
-        return Collections.unmodifiableList(Arrays.asList(physicalCameraIdList));
+        return Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(physicalCameraIdArray)));
     }
 
     /*@O~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~

@@ -84,7 +84,7 @@
     <string name="bluetooth_sap_profile_summary_connected" msgid="8561765057453083838">"Ulanish nuqtasiga ulandi"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="1267091356089086285">"Fayl uzatish serveriga ulanmagan"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3381760054215168689">"Kiritish qurilmasiga ulanildi"</string>
-    <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"Internet manbai qurilmasiga ulanildi"</string>
+    <string name="bluetooth_pan_user_profile_summary_connected" msgid="6436258151814414028">"Boshqa qurilma ulanishidan foydalanilmoqda"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="1322694224800769308">"Qurilma modem rejimida ishlamoqda"</string>
     <string name="bluetooth_pan_profile_summary_use_for" msgid="5736111170225304239">"Internetga kirish uchun foydalanish"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="5154200119919927434">"Xaritada foydalanish"</string>

@@ -637,6 +637,10 @@
          type icon is wide. -->
     <dimen name="wide_type_icon_start_padding">2dp</dimen>
 
+    <!-- Padding between the mobile signal indicator and the start icon when the roaming icon
+         is displayed in the upper left corner. -->
+    <dimen name="roaming_icon_start_padding">2dp</dimen>
+
     <!-- Extra padding between multiple phone signal icons. -->
     <dimen name="secondary_telephony_padding">2dp</dimen>
 

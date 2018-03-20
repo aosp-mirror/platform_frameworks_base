@@ -115,6 +115,8 @@ message Atom {
         HardwareFailed hardware_failed = 72;
         PhysicalDropDetected physical_drop_detected = 73;
         ChargeCyclesReported charge_cycles_reported = 74;
+        MobileConnectionStateChanged mobile_connection_state_changed = 75;
+        MobileRadioTechnologyChanged mobile_radio_technology_changed = 76;
     }
 
     // Pulled events will start at field 10000.
@@ -910,6 +912,56 @@ message ResourceConfigurationChanged {
     // See: https://d.android.com/reference/android/content/res/Configuration.html#uiMode
     optional int32 uiMode = 17;
 }
+
+
+/**
+ * Logs changes in the connection state of the mobile radio.
+ *
+ * Logged from:
+ *    frameworks/opt/telephony/src/java/com/android/internal/telephony/dataconnection/DataConnection.java
+ */
+message MobileConnectionStateChanged {
+    // States are from the state machine DataConnection.java.
+    enum State {
+        UNKNOWN = 0;
+        // The connection is inactive, or disconnected.
+        INACTIVE = 1;
+        // The connection is being activated, or connecting.
+        ACTIVATING = 2;
+        // The connection is active, or connected.
+        ACTIVE = 3;
+        // The connection is disconnecting.
+        DISCONNECTING = 4;
+        // The connection is disconnecting after creating a connection.
+        DISCONNECTION_ERROR_CREATING_CONNECTION = 5;
+    }
+    optional State state  = 1;
+    // For multi-sim phones, this distinguishes between the sim cards.
+    optional int32 sim_slot_index = 2;
+    // Used to identify the connection. Starts at 0 and increments by 1 for
+    // every new network created. Resets whenever the device reboots.
+    optional int32 data_connection_id = 3;
+    // A bitmask for the capabilities of this connection.
+    // Eg. DEFAULT (internet), MMS, SUPL, DUN, IMS.
+    // Default value (if we have no information): 0
+    optional int64 capabilities = 4;
+    // If this connection has internet.
+    // This just checks if the DEFAULT bit of capabilities is set.
+    optional bool has_internet = 5;
+}
+
+/**
+ * Logs changes in mobile radio technology. eg: LTE, EDGE, CDMA.
+ *
+ * Logged from:
+ *   frameworks/opt/telephony/src/java/com/android/internal/telephony/ServiceStateTracker.java
+ */
+message MobileRadioTechnologyChanged {
+    optional android.telephony.NetworkTypeEnum state = 1;
+    // For multi-sim phones, this distinguishes between the sim cards.
+    optional int32 sim_slot_index = 2;
+}
+
 
 /**
  * Logs when Bluetooth is enabled and disabled.

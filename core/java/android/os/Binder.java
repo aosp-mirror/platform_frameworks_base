@@ -376,7 +376,9 @@ public class Binder implements IBinder {
      * Add the calling thread to the IPC thread pool.  This function does
      * not return until the current process is exiting.
      */
-    public static final native void joinThreadPool();
+    public static final void joinThreadPool() {
+        BinderInternal.joinThreadPool();
+    }
 
     /**
      * Returns true if the specified interface is a proxy.

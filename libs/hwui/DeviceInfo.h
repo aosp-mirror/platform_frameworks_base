@@ -47,12 +47,13 @@ public:
         return di.w * di.h * in;
     }
 
+    static DisplayInfo queryDisplayInfo();
+
 private:
     DeviceInfo() {}
     ~DeviceInfo() {}
 
     void load();
-    void loadDisplayInfo();
 
     int mMaxTextureSize;
     DisplayInfo mDisplayInfo;

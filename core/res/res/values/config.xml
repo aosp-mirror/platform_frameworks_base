@@ -1277,7 +1277,7 @@
          in darkness (although they may not be visible in a bright room). -->
     <integer name="config_screenBrightnessDark">1</integer>
 
-    <!-- Array of light sensor LUX values to define our levels for auto backlight brightness support.
+    <!-- Array of light sensor lux values to define our levels for auto backlight brightness support.
          The N entries of this array define N + 1 control points as follows:
          (1-based arrays)
 
@@ -1289,18 +1289,18 @@
 
          The control points must be strictly increasing.  Each control point
          corresponds to an entry in the brightness backlight values arrays.
-         For example, if LUX == level[1] (first element of the levels array)
+         For example, if lux == level[1] (first element of the levels array)
          then the brightness will be determined by value[2] (second element
          of the brightness values array).
 
          Spline interpolation is used to determine the auto-brightness
-         backlight values for LUX levels between these control points.
+         backlight values for lux levels between these control points.
 
          Must be overridden in platform specific overlays -->
     <integer-array name="config_autoBrightnessLevels">
     </integer-array>
 
-    <!-- Array of output values for LCD backlight corresponding to the LUX values
+    <!-- Array of output values for LCD backlight corresponding to the lux values
          in the config_autoBrightnessLevels array.  This array should have size one greater
          than the size of the config_autoBrightnessLevels array.
          The brightness values must be between 0 and 255 and be non-decreasing.
@@ -1324,7 +1324,7 @@
     <array name="config_autoBrightnessDisplayValuesNits">
     </array>
 
-    <!-- Array of output values for button backlight corresponding to the LUX values
+    <!-- Array of output values for button backlight corresponding to the luX values
          in the config_autoBrightnessLevels array.  This array should have size one greater
          than the size of the config_autoBrightnessLevels array.
          The brightness values must be between 0 and 255 and be non-decreasing.
@@ -1332,7 +1332,7 @@
     <integer-array name="config_autoBrightnessButtonBacklightValues">
     </integer-array>
 
-    <!-- Array of output values for keyboard backlight corresponding to the LUX values
+    <!-- Array of output values for keyboard backlight corresponding to the lux values
          in the config_autoBrightnessLevels array.  This array should have size one greater
          than the size of the config_autoBrightnessLevels array.
          The brightness values must be between 0 and 255 and be non-decreasing.
@@ -2956,8 +2956,8 @@
     <item name="config_pictureInPictureAspectRatioLimitForMinSize" format="float" type="dimen">1.777778</item>
 
     <!-- The default gravity for the picture-in-picture window.
-         Currently, this maps to Gravity.TOP | Gravity.RIGHT -->
-    <integer name="config_defaultPictureInPictureGravity">0x35</integer>
+         Currently, this maps to Gravity.BOTTOM | Gravity.RIGHT -->
+    <integer name="config_defaultPictureInPictureGravity">0x55</integer>
 
     <!-- The minimum aspect ratio (width/height) that is supported for picture-in-picture.  Any
          ratio smaller than this is considered too tall and thin to be usable. Currently, this

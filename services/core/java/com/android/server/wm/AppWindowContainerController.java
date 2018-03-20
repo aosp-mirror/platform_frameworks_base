@@ -617,7 +617,8 @@ public class AppWindowContainerController
 
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Schedule remove starting " + mContainer
                     + " startingWindow=" + mContainer.startingWindow
-                    + " startingView=" + mContainer.startingSurface);
+                    + " startingView=" + mContainer.startingSurface
+                    + " Callers=" + Debug.getCallers(5));
 
             // Use the same thread to remove the window as we used to add it, as otherwise we end up
             // with things in the view hierarchy being called from different threads.

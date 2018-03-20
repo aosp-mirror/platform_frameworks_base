@@ -117,8 +117,8 @@ Landroid/app/admin/DevicePolicyManager;->getTrustAgentConfiguration(Landroid/con
 Landroid/app/admin/DevicePolicyManager;->packageHasActiveAdmins(Ljava/lang/String;I)Z
 Landroid/app/admin/DevicePolicyManager;->setActiveAdmin(Landroid/content/ComponentName;ZI)V
 Landroid/app/admin/DevicePolicyManager;->setActiveAdmin(Landroid/content/ComponentName;Z)V
-Landroid/app/admin/DevicePolicyManager;->throwIfParentInstance(Ljava/lang/String;)V
 Landroid/app/admin/DevicePolicyManager;->setDefaultSmsApplication(Landroid/content/ComponentName;Ljava/lang/String;)V
+Landroid/app/admin/DevicePolicyManager;->throwIfParentInstance(Ljava/lang/String;)V
 Landroid/app/admin/IDevicePolicyManager$Stub;->TRANSACTION_packageHasActiveAdmins:I
 Landroid/app/admin/IDevicePolicyManager$Stub;->TRANSACTION_removeActiveAdmin:I
 Landroid/app/admin/SecurityLog$SecurityEvent;-><init>([B)V
@@ -148,6 +148,7 @@ Landroid/app/Application;->mComponentCallbacks:Ljava/util/ArrayList;
 Landroid/app/Application;->mLoadedApk:Landroid/app/LoadedApk;
 Landroid/app/ApplicationPackageManager;->configurationChanged()V
 Landroid/app/ApplicationPackageManager;->deletePackage(Ljava/lang/String;Landroid/content/pm/IPackageDeleteObserver;I)V
+Landroid/app/ApplicationPackageManager;->getPackageCurrentVolume(Landroid/content/pm/ApplicationInfo;)Landroid/os/storage/VolumeInfo;
 Landroid/app/ApplicationPackageManager;->getPackageSizeInfoAsUser(Ljava/lang/String;ILandroid/content/pm/IPackageStatsObserver;)V
 Landroid/app/ApplicationPackageManager;-><init>(Landroid/app/ContextImpl;Landroid/content/pm/IPackageManager;)V
 Landroid/app/ApplicationPackageManager;->mPM:Landroid/content/pm/IPackageManager;
@@ -175,6 +176,7 @@ Landroid/app/backup/BackupHelperDispatcher$Header;->chunkSize:I
 Landroid/app/backup/BackupHelperDispatcher$Header;->keyPrefix:Ljava/lang/String;
 Landroid/app/backup/FullBackup;->backupToTar(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Landroid/app/backup/FullBackupDataOutput;)I
 Landroid/app/backup/FullBackupDataOutput;->addSize(J)V
+Landroid/app/backup/FullBackupDataOutput;-><init>(Landroid/os/ParcelFileDescriptor;)V
 Landroid/app/backup/FullBackupDataOutput;->mData:Landroid/app/backup/BackupDataOutput;
 Landroid/app/ContentProviderHolder;->info:Landroid/content/pm/ProviderInfo;
 Landroid/app/ContentProviderHolder;-><init>(Landroid/content/pm/ProviderInfo;)V
@@ -281,6 +283,7 @@ Landroid/app/Notification;->mGroupKey:Ljava/lang/String;
 Landroid/app/Notification;->mLargeIcon:Landroid/graphics/drawable/Icon;
 Landroid/app/Notification;->mSmallIcon:Landroid/graphics/drawable/Icon;
 Landroid/app/Notification;->setLatestEventInfo(Landroid/content/Context;Ljava/lang/CharSequence;Ljava/lang/CharSequence;Landroid/app/PendingIntent;)V
+Landroid/app/Notification;->setSmallIcon(Landroid/graphics/drawable/Icon;)V
 Landroid/app/PendingIntent;->getActivityAsUser(Landroid/content/Context;ILandroid/content/Intent;ILandroid/os/Bundle;Landroid/os/UserHandle;)Landroid/app/PendingIntent;
 Landroid/app/PendingIntent;->getIntent()Landroid/content/Intent;
 Landroid/app/PendingIntent;->isActivity()Z
@@ -327,7 +330,9 @@ Landroid/appwidget/AppWidgetManager;->bindAppWidgetId(ILandroid/content/Componen
 Landroid/appwidget/AppWidgetManager;->mService:Lcom/android/internal/appwidget/IAppWidgetService;
 Landroid/bluetooth/BluetoothA2dp;->connect(Landroid/bluetooth/BluetoothDevice;)Z
 Landroid/bluetooth/BluetoothAdapter;->disable(Z)Z
+Landroid/bluetooth/BluetoothAdapter;->factoryReset()Z
 Landroid/bluetooth/BluetoothAdapter;->getDiscoverableTimeout()I
+Landroid/bluetooth/BluetoothAdapter;->getLeState()I
 Landroid/bluetooth/BluetoothAdapter;->mService:Landroid/bluetooth/IBluetooth;
 Landroid/bluetooth/BluetoothAdapter;->setScanMode(II)Z
 Landroid/bluetooth/BluetoothAdapter;->setScanMode(I)Z
@@ -337,8 +342,11 @@ Landroid/bluetooth/BluetoothGattCharacteristic;->mInstance:I
 Landroid/bluetooth/BluetoothGattCharacteristic;->mService:Landroid/bluetooth/BluetoothGattService;
 Landroid/bluetooth/BluetoothGattDescriptor;->mCharacteristic:Landroid/bluetooth/BluetoothGattCharacteristic;
 Landroid/bluetooth/BluetoothGattDescriptor;->mInstance:I
+Landroid/bluetooth/BluetoothGatt;->mAuthRetryState:I
 Landroid/bluetooth/BluetoothGatt;->refresh()Z
 Landroid/bluetooth/BluetoothHeadset;->close()V
+Landroid/bluetooth/BluetoothPan;->isTetheringOn()Z
+Landroid/bluetooth/BluetoothPan;->setBluetoothTethering(Z)V
 Landroid/bluetooth/BluetoothUuid;->RESERVED_UUIDS:[Landroid/os/ParcelUuid;
 Landroid/bluetooth/IBluetooth;->getAddress()Ljava/lang/String;
 Landroid/bluetooth/IBluetoothManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
@@ -610,6 +618,12 @@ Landroid/graphics/drawable/GradientDrawable$GradientState;->mThickness:I
 Landroid/graphics/drawable/GradientDrawable$GradientState;->mThicknessRatio:F
 Landroid/graphics/drawable/GradientDrawable$GradientState;->mWidth:I
 Landroid/graphics/drawable/GradientDrawable;->mPadding:Landroid/graphics/Rect;
+Landroid/graphics/drawable/Icon;->getBitmap()Landroid/graphics/Bitmap;
+Landroid/graphics/drawable/Icon;->getDataBytes()[B
+Landroid/graphics/drawable/Icon;->getDataLength()I
+Landroid/graphics/drawable/Icon;->getDataOffset()I
+Landroid/graphics/drawable/Icon;->getResources()Landroid/content/res/Resources;
+Landroid/graphics/drawable/Icon;->hasTint()Z
 Landroid/graphics/drawable/Icon;->mType:I
 Landroid/graphics/drawable/InsetDrawable;->mState:Landroid/graphics/drawable/InsetDrawable$InsetState;
 Landroid/graphics/drawable/NinePatchDrawable;->mNinePatchState:Landroid/graphics/drawable/NinePatchDrawable$NinePatchState;
@@ -817,6 +831,7 @@ Landroid/media/AudioManager;->getOutputLatency(I)I
 Landroid/media/AudioManager;->getService()Landroid/media/IAudioService;
 Landroid/media/AudioManager;->mAudioFocusIdListenerMap:Ljava/util/concurrent/ConcurrentHashMap;
 Landroid/media/AudioManager;->setMasterMute(ZI)V
+Landroid/media/AudioManager;->startBluetoothScoVirtualCall()V
 Landroid/media/AudioManager;->STREAM_BLUETOOTH_SCO:I
 Landroid/media/AudioManager;->STREAM_SYSTEM_ENFORCED:I
 Landroid/media/AudioManager;->STREAM_TTS:I
@@ -860,6 +875,7 @@ Landroid/media/AudioSystem;->dynamicPolicyCallbackFromNative(ILjava/lang/String;
 Landroid/media/AudioSystem;->errorCallbackFromNative(I)V
 Landroid/media/AudioSystem;->getPrimaryOutputFrameCount()I
 Landroid/media/AudioSystem;->getPrimaryOutputSamplingRate()I
+Landroid/media/AudioSystem;->isStreamActive(II)Z
 Landroid/media/AudioSystem;->recordingCallbackFromNative(IIII[I)V
 Landroid/media/AudioSystem;->setDeviceConnectionState(IILjava/lang/String;Ljava/lang/String;)I
 Landroid/media/AudioSystem;->setErrorCallback(Landroid/media/AudioSystem$ErrorCallback;)V
@@ -1045,6 +1061,22 @@ Landroid/net/wifi/ScanResult;->distanceCm:I
 Landroid/net/wifi/ScanResult;->distanceSdCm:I
 Landroid/net/wifi/ScanResult;->flags:J
 Landroid/net/wifi/ScanResult;->hessid:J
+Landroid/net/wifi/ScanResult$InformationElement;->bytes:[B
+Landroid/net/wifi/ScanResult$InformationElement;->EID_BSS_LOAD:I
+Landroid/net/wifi/ScanResult$InformationElement;->EID_ERP:I
+Landroid/net/wifi/ScanResult$InformationElement;->EID_EXTENDED_CAPS:I
+Landroid/net/wifi/ScanResult$InformationElement;->EID_EXTENDED_SUPPORTED_RATES:I
+Landroid/net/wifi/ScanResult$InformationElement;->EID_HT_OPERATION:I
+Landroid/net/wifi/ScanResult$InformationElement;->EID_INTERWORKING:I
+Landroid/net/wifi/ScanResult$InformationElement;->EID_ROAMING_CONSORTIUM:I
+Landroid/net/wifi/ScanResult$InformationElement;->EID_RSN:I
+Landroid/net/wifi/ScanResult$InformationElement;->EID_SSID:I
+Landroid/net/wifi/ScanResult$InformationElement;->EID_SUPPORTED_RATES:I
+Landroid/net/wifi/ScanResult$InformationElement;->EID_TIM:I
+Landroid/net/wifi/ScanResult$InformationElement;->EID_VHT_OPERATION:I
+Landroid/net/wifi/ScanResult$InformationElement;->EID_VSA:I
+Landroid/net/wifi/ScanResult$InformationElement;->id:I
+Landroid/net/wifi/ScanResult;->informationElements:[Landroid/net/wifi/ScanResult$InformationElement;
 Landroid/net/wifi/ScanResult;->numUsage:I
 Landroid/net/wifi/ScanResult;->seen:J
 Landroid/net/wifi/ScanResult;->untrusted:Z
@@ -1182,6 +1214,7 @@ Landroid/os/Parcel;->mNativePtr:J
 Landroid/os/Parcel;->readArrayMap(Landroid/util/ArrayMap;Ljava/lang/ClassLoader;)V
 Landroid/os/Parcel$ReadWriteHelper;-><init>()V
 Landroid/os/Parcel;->writeArrayMap(Landroid/util/ArrayMap;)V
+Landroid/os/PowerManager;->getDefaultScreenBrightnessSetting()I
 Landroid/os/PowerManager;->getMaximumScreenBrightnessSetting()I
 Landroid/os/PowerManager;->getMinimumScreenBrightnessSetting()I
 Landroid/os/PowerManager;->isLightDeviceIdleMode()Z
@@ -1371,6 +1404,8 @@ Landroid/provider/Settings$ContentProviderHolder;->mContentProvider:Landroid/con
 Landroid/provider/Settings$Global;->ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED:Ljava/lang/String;
 Landroid/provider/Settings$Global;->PACKAGE_VERIFIER_ENABLE:Ljava/lang/String;
 Landroid/provider/Settings$Global;->sNameValueCache:Landroid/provider/Settings$NameValueCache;
+Landroid/provider/Settings;->isCallingPackageAllowedToDrawOverlays(Landroid/content/Context;ILjava/lang/String;Z)Z
+Landroid/provider/Settings;->isCallingPackageAllowedToWriteSettings(Landroid/content/Context;ILjava/lang/String;Z)Z
 Landroid/provider/Settings$NameValueCache;->mProviderHolder:Landroid/provider/Settings$ContentProviderHolder;
 Landroid/provider/Settings$Secure;->ACCESSIBILITY_AUTOCLICK_ENABLED:Ljava/lang/String;
 Landroid/provider/Settings$Secure;->ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED:Ljava/lang/String;
@@ -1385,6 +1420,7 @@ Landroid/provider/Settings$System;->getStringForUser(Landroid/content/ContentRes
 Landroid/provider/Settings$System;->HEARING_AID:Ljava/lang/String;
 Landroid/provider/Settings$System;->MASTER_MONO:Ljava/lang/String;
 Landroid/provider/Settings$System;->putStringForUser(Landroid/content/ContentResolver;Ljava/lang/String;Ljava/lang/String;I)Z
+Landroid/provider/Settings$System;->SCREEN_AUTO_BRIGHTNESS_ADJ:Ljava/lang/String;
 Landroid/provider/Settings$System;->sNameValueCache:Landroid/provider/Settings$NameValueCache;
 Landroid/provider/Telephony$Sms;->addMessageToUri(ILandroid/content/ContentResolver;Landroid/net/Uri;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;ZZJ)Landroid/net/Uri;
 Landroid/provider/Telephony$Sms;->addMessageToUri(ILandroid/content/ContentResolver;Landroid/net/Uri;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;ZZ)Landroid/net/Uri;
@@ -2036,6 +2072,7 @@ Landroid/view/View;->dispatchAttachedToWindow(Landroid/view/View$AttachInfo;I)V
 Landroid/view/View;->dispatchDetachedFromWindow()V
 Landroid/view/View;->fitsSystemWindows()Z
 Landroid/view/View;->getAccessibilityDelegate()Landroid/view/View$AccessibilityDelegate;
+Landroid/view/View;->getInverseMatrix()Landroid/graphics/Matrix;
 Landroid/view/View;->getListenerInfo()Landroid/view/View$ListenerInfo;
 Landroid/view/View;->getLocationOnScreen()[I
 Landroid/view/View;->getTransitionAlpha()F
@@ -2195,6 +2232,7 @@ Landroid/widget/ActivityChooserModel;->get(Landroid/content/Context;Ljava/lang/S
 Landroid/widget/ActivityChooserView;->setExpandActivityOverflowButtonDrawable(Landroid/graphics/drawable/Drawable;)V
 Landroid/widget/AdapterView;->mDataChanged:Z
 Landroid/widget/AdapterView;->mFirstPosition:I
+Landroid/widget/AdapterView;->mOldSelectedPosition:I
 Landroid/widget/AdapterView;->setNextSelectedPositionInt(I)V
 Landroid/widget/AdapterView;->setSelectedPositionInt(I)V
 Landroid/widget/AutoCompleteTextView;->doAfterTextChanged()V
@@ -2207,6 +2245,7 @@ Landroid/widget/DatePicker;->mDelegate:Landroid/widget/DatePicker$DatePickerDele
 Landroid/widget/EdgeEffect;->mPaint:Landroid/graphics/Paint;
 Landroid/widget/Editor;->invalidateTextDisplayList()V
 Landroid/widget/Editor;->mShowCursor:J
+Landroid/widget/Editor;->mShowSoftInputOnFocus:Z
 Landroid/widget/ExpandableListView;->mChildDivider:Landroid/graphics/drawable/Drawable;
 Landroid/widget/FastScroller;->mContainerRect:Landroid/graphics/Rect;
 Landroid/widget/FastScroller;->mHeaderCount:I

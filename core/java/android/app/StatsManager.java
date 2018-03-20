@@ -16,6 +16,7 @@
 package android.app;
 
 import android.Manifest;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.os.IBinder;
@@ -81,14 +82,6 @@ public final class StatsManager {
     }
 
     /**
-     * Temporary. Will be deleted.
-     */
-    @RequiresPermission(Manifest.permission.DUMP)
-    public boolean addConfiguration(long configKey, byte[] config, String a, String b) {
-        return addConfiguration(configKey, config);
-    }
-
-    /**
      * Clients can send a configuration and simultaneously registers the name of a broadcast
      * receiver that listens for when it should request data.
      *
@@ -103,12 +96,12 @@ public final class StatsManager {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    if (DEBUG) Slog.d(TAG, "Failed to find statsd when adding configuration");
+                    Slog.e(TAG, "Failed to find statsd when adding configuration");
                     return false;
                 }
                 return service.addConfiguration(configKey, config);
             } catch (RemoteException e) {
-                if (DEBUG) Slog.d(TAG, "Failed to connect to statsd when adding configuration");
+                Slog.e(TAG, "Failed to connect to statsd when adding configuration");
                 return false;
             }
         }
@@ -126,12 +119,12 @@ public final class StatsManager {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    if (DEBUG) Slog.d(TAG, "Failed to find statsd when removing configuration");
+                    Slog.e(TAG, "Failed to find statsd when removing configuration");
                     return false;
                 }
                 return service.removeConfiguration(configKey);
             } catch (RemoteException e) {
-                if (DEBUG) Slog.d(TAG, "Failed to connect to statsd when removing configuration");
+                Slog.e(TAG, "Failed to connect to statsd when removing configuration");
                 return false;
             }
         }
@@ -173,7 +166,7 @@ public final class StatsManager {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    Slog.w(TAG, "Failed to find statsd when adding broadcast subscriber");
+                    Slog.e(TAG, "Failed to find statsd when adding broadcast subscriber");
                     return false;
                 }
                 if (pendingIntent != null) {
@@ -184,7 +177,7 @@ public final class StatsManager {
                     return service.unsetBroadcastSubscriber(configKey, subscriberId);
                 }
             } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to connect to statsd when adding broadcast subscriber", e);
+                Slog.e(TAG, "Failed to connect to statsd when adding broadcast subscriber", e);
                 return false;
             }
         }
@@ -210,7 +203,7 @@ public final class StatsManager {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    Slog.d(TAG, "Failed to find statsd when registering data listener.");
+                    Slog.e(TAG, "Failed to find statsd when registering data listener.");
                     return false;
                 }
                 if (pendingIntent == null) {
@@ -222,7 +215,7 @@ public final class StatsManager {
                 }
 
             } catch (RemoteException e) {
-                Slog.d(TAG, "Failed to connect to statsd when registering data listener.");
+                Slog.e(TAG, "Failed to connect to statsd when registering data listener.");
                 return false;
             }
         }
@@ -233,20 +226,21 @@ public final class StatsManager {
      * the retrieved metrics from statsd memory.
      *
      * @param configKey Configuration key to retrieve data from.
-     * @return Serialized ConfigMetricsReportList proto. Returns null on failure.
+     * @return Serialized ConfigMetricsReportList proto. Returns null on failure (eg, if statsd
+     * crashed).
      */
     @RequiresPermission(Manifest.permission.DUMP)
-    public byte[] getData(long configKey) {
+    public @Nullable byte[] getData(long configKey) {
         synchronized (this) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    if (DEBUG) Slog.d(TAG, "Failed to find statsd when getting data");
+                    Slog.e(TAG, "Failed to find statsd when getting data");
                     return null;
                 }
                 return service.getData(configKey);
             } catch (RemoteException e) {
-                if (DEBUG) Slog.d(TAG, "Failed to connecto statsd when getting data");
+                Slog.e(TAG, "Failed to connect to statsd when getting data");
                 return null;
             }
         }
@@ -257,20 +251,20 @@ public final class StatsManager {
      * the actual metrics themselves (metrics must be collected via {@link #getData(String)}.
      * This getter is not destructive and will not reset any metrics/counters.
      *
-     * @return Serialized StatsdStatsReport proto. Returns null on failure.
+     * @return Serialized StatsdStatsReport proto. Returns null on failure (eg, if statsd crashed).
      */
     @RequiresPermission(Manifest.permission.DUMP)
-    public byte[] getMetadata() {
+    public @Nullable byte[] getMetadata() {
         synchronized (this) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    if (DEBUG) Slog.d(TAG, "Failed to find statsd when getting metadata");
+                    Slog.e(TAG, "Failed to find statsd when getting metadata");
                     return null;
                 }
                 return service.getMetadata();
             } catch (RemoteException e) {
-                if (DEBUG) Slog.d(TAG, "Failed to connecto statsd when getting metadata");
+                Slog.e(TAG, "Failed to connect to statsd when getting metadata");
                 return null;
             }
         }

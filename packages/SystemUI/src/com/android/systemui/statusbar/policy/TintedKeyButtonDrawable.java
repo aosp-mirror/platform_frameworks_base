@@ -63,7 +63,7 @@ public class TintedKeyButtonDrawable extends KeyButtonDrawable {
     }
 
     public boolean isDarkIntensitySet() {
-        return mDarkIntensity == DARK_INTENSITY_NOT_SET;
+        return mDarkIntensity != DARK_INTENSITY_NOT_SET;
     }
 
     public float getDarkIntensity() {

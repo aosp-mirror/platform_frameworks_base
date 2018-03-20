@@ -1918,19 +1918,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // Calculate the sizes set based on minimum size, maximum size and step size if we do
             // not have a predefined set of sizes or if the current sizes array is empty.
             if (!mHasPresetAutoSizeValues || mAutoSizeTextSizesInPx.length == 0) {
-                int autoSizeValuesLength = 1;
-                float currentSize = Math.round(mAutoSizeMinTextSizeInPx);
-                while (Math.round(currentSize + mAutoSizeStepGranularityInPx)
-                        <= Math.round(mAutoSizeMaxTextSizeInPx)) {
-                    autoSizeValuesLength++;
-                    currentSize += mAutoSizeStepGranularityInPx;
-                }
-
-                int[] autoSizeTextSizesInPx = new int[autoSizeValuesLength];
-                float sizeToAdd = mAutoSizeMinTextSizeInPx;
+                final int autoSizeValuesLength = ((int) Math.floor((mAutoSizeMaxTextSizeInPx
+                        - mAutoSizeMinTextSizeInPx) / mAutoSizeStepGranularityInPx)) + 1;
+                final int[] autoSizeTextSizesInPx = new int[autoSizeValuesLength];
                 for (int i = 0; i < autoSizeValuesLength; i++) {
-                    autoSizeTextSizesInPx[i] = Math.round(sizeToAdd);
-                    sizeToAdd += mAutoSizeStepGranularityInPx;
+                    autoSizeTextSizesInPx[i] = Math.round(
+                            mAutoSizeMinTextSizeInPx + (i * mAutoSizeStepGranularityInPx));
                 }
                 mAutoSizeTextSizesInPx = cleanupAutoSizePresetSizes(autoSizeTextSizesInPx);
             }

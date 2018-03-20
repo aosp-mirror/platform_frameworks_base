@@ -200,11 +200,15 @@ public class PipManager implements BasePipManager {
         }
 
         @Override
+        public void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight) {}
+
+        @Override
         public void onMinimizedStateChanged(boolean isMinimized) {}
 
         @Override
         public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds,
-                Rect animatingBounds, boolean fromImeAdjustement, int displayRotation) {
+                Rect animatingBounds, boolean fromImeAdjustment, boolean fromShelfAdjustment,
+                int displayRotation) {
             mHandler.post(() -> {
                 mDefaultPipBounds.set(normalBounds);
             });

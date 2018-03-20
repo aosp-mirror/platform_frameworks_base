@@ -422,6 +422,8 @@ message ActiveServicesProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
   message ServicesByUser {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     optional int32 user_id = 1;
     repeated ServiceRecordProto service_records = 2;
   }

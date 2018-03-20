@@ -1193,6 +1193,9 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     boolean isFocusable() {
+        if (inSplitScreenPrimaryWindowingMode() && mStackSupervisor.mIsDockMinimized) {
+            return false;
+        }
         return getWindowConfiguration().canReceiveKeys() || isAlwaysFocusable();
     }
 
@@ -1540,7 +1543,13 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                     Slog.e(TAG, "applyOptionsLocked: Unknown animationType=" + animationType);
                     break;
             }
-            pendingOptions = null;
+
+            if (task == null) {
+                clearOptionsLocked(false /* withAbort */);
+            } else {
+                // This will clear the options for all the ActivityRecords for this Task.
+                task.clearAllPendingOptions();
+            }
         }
     }
 
@@ -1549,10 +1558,14 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     void clearOptionsLocked() {
-        if (pendingOptions != null) {
+        clearOptionsLocked(true /* withAbort */);
+    }
+
+    void clearOptionsLocked(boolean withAbort) {
+        if (withAbort && pendingOptions != null) {
             pendingOptions.abort();
-            pendingOptions = null;
         }
+        pendingOptions = null;
     }
 
     ActivityOptions takeOptionsLocked() {

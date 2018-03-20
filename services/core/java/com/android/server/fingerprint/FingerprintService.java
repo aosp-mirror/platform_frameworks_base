@@ -259,11 +259,6 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         mActivityManager = ((ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE))
                 .getService();
-        try {
-            mActivityManager.registerTaskStackListener(mTaskStackListener);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Could not register task stack listener", e);
-        }
     }
 
     @Override
@@ -858,6 +853,24 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         AuthenticationClient client = new AuthenticationClient(getContext(), mHalDeviceId, token,
                 receiver, mCurrentUserId, groupId, opId, restricted, opPackageName, bundle,
                 dialogReceiver, mStatusBarService) {
+            @Override
+            public void onStart() {
+                try {
+                    mActivityManager.registerTaskStackListener(mTaskStackListener);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Could not register task stack listener", e);
+                }
+            }
+
+            @Override
+            public void onStop() {
+                try {
+                    mActivityManager.unregisterTaskStackListener(mTaskStackListener);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Could not unregister task stack listener", e);
+                }
+            }
+
             @Override
             public int handleFailedAttempt() {
                 final int currentUser = ActivityManager.getCurrentUser();

@@ -319,8 +319,10 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"কাৰ্যকলাপসমূহ নাৰাখিব"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ব্যৱহাৰকাৰী ওলোৱাৰ লগে লগে সকলো কাৰ্যকলাপ মচক"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"নেপথ্যত চলা প্ৰক্ৰিয়াৰ সীমা"</string>
-    <string name="show_all_anrs" msgid="28462979638729082">"সকলো এএনআৰ দেখুৱাওক"</string>
-    <string name="show_all_anrs_summary" msgid="641908614413544127">"নেপথ্য এপসমূহৰ বাবে এপে সঁহাৰি দিয়া নাই মন্তব্য দেখুৱাওক"</string>
+    <!-- no translation found for show_all_anrs (4924885492787069007) -->
+    <skip />
+    <!-- no translation found for show_all_anrs_summary (6636514318275139826) -->
+    <skip />
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"জাননী চ্চেনেলৰ সকীয়নিসমূহ দেখুৱাওক"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"কোনো এপে বৈধ চ্চেনেল নোহোৱাকৈ কোনো জাননী প\'ষ্ট কৰিলে স্ক্ৰীণত সকীয়নি প্ৰদৰ্শন হয়"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"বাহ্যিক সঞ্চয়াগাৰত এপক বলেৰে অনুমতি দিয়ক"</string>
@@ -379,13 +381,13 @@
     <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
     <skip />
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> বাকী"</string>
-    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
+    <!-- no translation found for power_discharge_by_enhanced (8305422490607220844) -->
     <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
+    <!-- no translation found for power_discharge_by_only_enhanced (896515698736070025) -->
     <skip />
-    <!-- no translation found for power_discharge_by (6427074755635635749) -->
+    <!-- no translation found for power_discharge_by (6052127431194780229) -->
     <skip />
-    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
+    <!-- no translation found for power_discharge_by_only (4850425421176271395) -->
     <skip />
     <!-- no translation found for power_remaining_less_than_duration_only (5996752448813295329) -->
     <skip />
@@ -456,9 +458,10 @@
     <skip />
     <!-- no translation found for accessibility_manual_zen_less_time (6590887204171164991) -->
     <skip />
+    <string name="cancel" msgid="6859253417269739139">"বাতিল কৰক"</string>
+    <string name="okay" msgid="1997666393121016642">"ঠিক"</string>
     <!-- no translation found for zen_mode_enable_dialog_turn_on (8287824809739581837) -->
     <skip />
-    <string name="cancel" msgid="6859253417269739139">"বাতিল কৰক"</string>
     <!-- no translation found for zen_mode_settings_turn_on_dialog_title (2297134204747331078) -->
     <skip />
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"কেতিয়াও নহয়"</string>
@@ -473,5 +476,9 @@
     <!-- no translation found for alarm_template (4996153414057676512) -->
     <skip />
     <!-- no translation found for alarm_template_far (3779172822607461675) -->
+    <skip />
+    <!-- no translation found for zen_mode_duration_settings_title (229547412251222757) -->
+    <skip />
+    <!-- no translation found for zen_mode_duration_always_prompt_title (6478923750878945501) -->
     <skip />
 </resources>

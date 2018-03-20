@@ -1715,6 +1715,34 @@ public final class Settings {
     })
     public @interface ResetMode{}
 
+
+    /**
+     * User has not started setup personalization.
+     * @hide
+     */
+    public static final int USER_SETUP_PERSONALIZATION_NOT_STARTED = 0;
+
+    /**
+     * User has not yet completed setup personalization.
+     * @hide
+     */
+    public static final int USER_SETUP_PERSONALIZATION_STARTED = 1;
+
+    /**
+     * User has completed setup personalization.
+     * @hide
+     */
+    public static final int USER_SETUP_PERSONALIZATION_COMPLETE = 10;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            USER_SETUP_PERSONALIZATION_NOT_STARTED,
+            USER_SETUP_PERSONALIZATION_STARTED,
+            USER_SETUP_PERSONALIZATION_COMPLETE
+    })
+    public @interface UserSetupPersonalization {}
+
     /**
      * Activity Extra: Number of certificates
      * <p>
@@ -5441,6 +5469,15 @@ public final class Settings {
         public static final String USER_SETUP_COMPLETE = "user_setup_complete";
 
         /**
+         * The current state of device personalization.
+         *
+         * @hide
+         * @see UserSetupPersonalization
+         */
+        public static final String USER_SETUP_PERSONALIZATION_STATE =
+                "user_setup_personalization_state";
+
+        /**
          * Whether the current user has been set up via setup wizard (0 = false, 1 = true)
          * This value differs from USER_SETUP_COMPLETE in that it can be reset back to 0
          * in case SetupWizard has been re-enabled on TV devices.
@@ -8751,21 +8788,6 @@ public final class Settings {
          */
         public static final String LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST =
             "location_background_throttle_package_whitelist";
-
-        /**
-         * The interval in milliseconds at which wifi scan requests will be throttled when they are
-         * coming from the background.
-         * @hide
-         */
-        public static final String WIFI_SCAN_BACKGROUND_THROTTLE_INTERVAL_MS =
-                "wifi_scan_background_throttle_interval_ms";
-
-        /**
-         * Packages that are whitelisted to be exempt for wifi background throttling.
-         * @hide
-         */
-        public static final String WIFI_SCAN_BACKGROUND_THROTTLE_PACKAGE_WHITELIST =
-                "wifi_scan_background_throttle_package_whitelist";
 
         /**
         * Whether TV will switch to MHL port when a mobile device is plugged in.

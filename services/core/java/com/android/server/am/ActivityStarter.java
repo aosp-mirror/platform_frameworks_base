@@ -1815,9 +1815,8 @@ class ActivityStarter {
                         // We only want to move to the front, if we aren't going to launch on a
                         // different stack. If we launch on a different stack, we will put the
                         // task on top there.
-                        mTargetStack.moveTaskToFrontLocked(intentTask, mStartActivity, mNoAnimation,
-                                mOptions, mStartActivity.appTimeTracker,
-                                "bringingFoundTaskToFront");
+                        mTargetStack.moveTaskToFrontLocked(intentTask, mNoAnimation, mOptions,
+                                mStartActivity.appTimeTracker, "bringingFoundTaskToFront");
                         mMovedToFront = true;
                     } else if (launchStack.inSplitScreenWindowingMode()) {
                         if ((mLaunchFlags & FLAG_ACTIVITY_LAUNCH_ADJACENT) != 0) {
@@ -1831,7 +1830,7 @@ class ActivityStarter {
                             // We choose to move task to front instead of launching it adjacent
                             // when specific stack was requested explicitly and it appeared to be
                             // adjacent stack, but FLAG_ACTIVITY_LAUNCH_ADJACENT was not set.
-                            mTargetStack.moveTaskToFrontLocked(intentTask, mStartActivity,
+                            mTargetStack.moveTaskToFrontLocked(intentTask,
                                     mNoAnimation, mOptions, mStartActivity.appTimeTracker,
                                     "bringToFrontInsteadOfAdjacentLaunch");
                         }
@@ -2060,7 +2059,7 @@ class ActivityStarter {
 
         final TaskRecord topTask = mTargetStack.topTask();
         if (topTask != sourceTask && !mAvoidMoveToFront) {
-            mTargetStack.moveTaskToFrontLocked(sourceTask, mStartActivity, mNoAnimation, mOptions,
+            mTargetStack.moveTaskToFrontLocked(sourceTask, mNoAnimation, mOptions,
                     mStartActivity.appTimeTracker, "sourceTaskToFront");
         } else if (mDoResume) {
             mTargetStack.moveToFront("sourceStackToFront");
@@ -2126,7 +2125,7 @@ class ActivityStarter {
                 && top.userId == mStartActivity.userId) {
             if ((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0
                     || isLaunchModeOneOf(LAUNCH_SINGLE_TOP, LAUNCH_SINGLE_TASK)) {
-                mTargetStack.moveTaskToFrontLocked(mInTask, mStartActivity, mNoAnimation, mOptions,
+                mTargetStack.moveTaskToFrontLocked(mInTask, mNoAnimation, mOptions,
                         mStartActivity.appTimeTracker, "inTaskToFront");
                 if ((mStartFlags & START_FLAG_ONLY_IF_NEEDED) != 0) {
                     // We don't need to start a new activity, and the client said not to do
@@ -2139,7 +2138,7 @@ class ActivityStarter {
         }
 
         if (!mAddingToTask) {
-            mTargetStack.moveTaskToFrontLocked(mInTask, mStartActivity, mNoAnimation, mOptions,
+            mTargetStack.moveTaskToFrontLocked(mInTask, mNoAnimation, mOptions,
                     mStartActivity.appTimeTracker, "inTaskToFront");
             // We don't actually want to have this activity added to the task, so just
             // stop here but still tell the caller that we consumed the intent.
@@ -2159,8 +2158,8 @@ class ActivityStarter {
             updateBounds(mInTask, mLaunchParams.mBounds);
         }
 
-        mTargetStack.moveTaskToFrontLocked(mInTask, mStartActivity, mNoAnimation, mOptions,
-                mStartActivity.appTimeTracker, "inTaskToFront");
+        mTargetStack.moveTaskToFrontLocked(
+                mInTask, mNoAnimation, mOptions, mStartActivity.appTimeTracker, "inTaskToFront");
 
         addOrReparentStartingActivity(mInTask, "setTaskFromInTask");
         if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Starting new activity " + mStartActivity

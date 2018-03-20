@@ -220,8 +220,7 @@
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"ప్రైవేట్ DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"ప్రైవేట్ DNS మోడ్‌ను ఎంచుకోండి"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"ఆఫ్"</string>
-    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
-    <skip />
+    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"ఆటోమేటిక్"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"ప్రైవేట్ DNS ప్రదాత హోస్ట్‌పేరు"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS ప్రదాత యొక్క హోస్ట్‌పేరును నమోదు చేయండి"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"వైర్‌లెస్ ప్రదర్శన సర్టిఫికెట్ కోసం ఎంపికలను చూపు"</string>
@@ -305,8 +304,8 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"కార్యాచరణలను ఉంచవద్దు"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ప్రతి కార్యాచరణను వినియోగదారు నిష్క్రమించిన వెంటనే తొలగించండి"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"నేపథ్య ప్రాసెస్ పరిమితి"</string>
-    <string name="show_all_anrs" msgid="28462979638729082">"అన్ని ANRలను చూపు"</string>
-    <string name="show_all_anrs_summary" msgid="641908614413544127">"నేపథ్య యాప్‌ల కోసం యాప్ ప్రతిస్పందించడం లేదు డైలాగ్‌ను చూపు"</string>
+    <string name="show_all_anrs" msgid="4924885492787069007">"నేపథ్య ANRలను చూపు"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"నేపథ్య యాప్‌ల కోసం యాప్ ప్రతిస్పందించడం లేదు అనే డైలాగ్‌ను చూపు"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"ఛానెల్ హెచ్చరికల నోటిఫికేషన్‌‌ను చూపు"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"చెల్లుబాటు అయ్యే ఛానెల్ లేకుండా యాప్ నోటిఫికేషన్‌ను పోస్ట్ చేస్తున్నప్పుడు స్క్రీన్‌పై హెచ్చరికను చూపిస్తుంది"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"అనువర్తనాలను బాహ్య నిల్వలో నిర్బంధంగా అనుమతించు"</string>
@@ -357,39 +356,24 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ఈ లక్షణం ప్రయోగాత్మకమైనది మరియు పనితీరుపై ప్రభావం చూపవచ్చు."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> ద్వారా భర్తీ చేయబడింది"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"మిగిలి ఉన్న సమయం, <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="6655472132189365839">"దాదాపు <xliff:g id="TIME">%1$s</xliff:g> ఉండవచ్చు (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"మీ వినియోగం ఆధారంగా సుమారు <xliff:g id="TIME">%1$s</xliff:g> సమయం మిగిలి ఉంది"</string>
-    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
-    <skip />
+    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"మీ వినియోగం ఆధారంగా దాదాపు <xliff:g id="TIME">%1$s</xliff:g> ఉండవచ్చు (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> మిగిలి ఉంది"</string>
-    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
-    <skip />
-    <!-- no translation found for power_discharge_by (6427074755635635749) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
-    <skip />
+    <string name="power_discharge_by_enhanced" msgid="8305422490607220844">"మీ వినియోగం ఆధారంగా దాదాపు <xliff:g id="TIME">%1$s</xliff:g> వరకు కొనసాగవచ్చు (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="896515698736070025">"మీ వినియోగం ఆధారంగా దాదాపు <xliff:g id="TIME">%1$s</xliff:g> వరకు కొనసాగవచ్చు"</string>
+    <string name="power_discharge_by" msgid="6052127431194780229">"దాదాపు <xliff:g id="TIME">%1$s</xliff:g> వరకు కొనసాగవచ్చు (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="4850425421176271395">"దాదాపు <xliff:g id="TIME">%1$s</xliff:g> వరకు కొనసాగవచ్చు"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g> కంటే తక్కువ సమయం మిగిలి ఉంది"</string>
-    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
-    <skip />
+    <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"<xliff:g id="THRESHOLD">%1$s</xliff:g> కంటే తక్కువ సమయం మిగిలి ఉంది (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> కంటే ఎక్కువ సమయం మిగిలి ఉంది (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> కంటే ఎక్కువ సమయం మిగిలి ఉంది"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"ఫోన్ త్వరలో షట్‌డౌన్ కావచ్చు"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"టాబ్లెట్ త్వరలో షట్‌డౌన్ కావచ్చు"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"పరికరం త్వరలో షట్‌డౌన్ కావచ్చు"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"ఫోన్ షట్‌డౌన్ కావచ్చు (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"టాబ్లెట్ షట్‌డౌన్ కావచ్చు (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"పరికరం త్వరలో షట్‌డౌన్ కావచ్చు (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"పూర్తిగా ఛార్జ్ కావడానికి <xliff:g id="TIME">%1$s</xliff:g> పడుతుంది"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g>లో పూర్తిగా ఛార్జ్ అవుతుంది"</string>
@@ -440,8 +424,9 @@
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"ఎక్కువ సమయం."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"తక్కువ సమయం."</string>
-    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"ఆన్ చేయండి"</string>
     <string name="cancel" msgid="6859253417269739139">"రద్దు చేయి"</string>
+    <string name="okay" msgid="1997666393121016642">"సరే"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"ఆన్ చేయండి"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"అంతరాయం కలిగించవద్దును ఆన్ చేయండి"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"ఎప్పటికీ"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"ప్రాధాన్యత మాత్రమే"</string>
@@ -450,4 +435,6 @@
     <string name="zen_alarm_warning" msgid="6236690803924413088">"మీరు <xliff:g id="WHEN">%1$s</xliff:g> సెట్ చేసిన మీ తర్వాత అలారం మీకు వినిపించదు"</string>
     <string name="alarm_template" msgid="4996153414057676512">"<xliff:g id="WHEN">%1$s</xliff:g>కి"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g>కి"</string>
+    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"వ్యవధి"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"ప్రతిసారి అడుగు"</string>
 </resources>

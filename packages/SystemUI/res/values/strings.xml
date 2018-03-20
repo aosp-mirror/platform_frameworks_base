@@ -2152,8 +2152,14 @@
         been identified for them as running). [CHAR LIMIT=NONE] -->
     <string name="running_foreground_services_msg">Tap for details on battery and data usage</string>
 
-    <!-- Prompt to turn off data usage [CHAR LIMIT=NONE] -->
-    <string name="data_usage_disable_mobile" msgid="8656552431969276305">Turn off mobile data?</string>
+    <!-- Title of the dialog to turn off data usage [CHAR LIMIT=NONE] -->
+    <string name="mobile_data_disable_title">Turn off mobile data?</string>
+
+    <!-- Message body of the dialog to turn off data usage [CHAR LIMIT=NONE] -->
+    <string name="mobile_data_disable_message">You won\’t have access to data or the internet through <xliff:g id="carrier" example="T-Mobile">%s</xliff:g>. Internet will only be available via Wi-Fi.</string>
+
+    <!-- Text used to refer to the user's current carrier in mobile_data_disable_message if the users's mobile network carrier name is not available [CHAR LIMIT=NONE] -->
+    <string name="mobile_data_disable_message_default_carrier">your carrier</string>
 
     <!-- Warning shown when user input has been blocked due to another app overlaying screen
      content. Since we don't know what the app is showing on top of the input target, we

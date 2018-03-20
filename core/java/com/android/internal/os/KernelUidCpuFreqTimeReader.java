@@ -21,11 +21,9 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.StrictMode;
-import android.os.SystemClock;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TimeUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -34,6 +32,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.function.Consumer;
 
 /**
  * Reads /proc/uid_time_in_state which has the format:
@@ -75,9 +74,6 @@ public class KernelUidCpuFreqTimeReader extends
     private long[] mCurTimes; // Reuse to prevent GC.
     private long[] mDeltaTimes; // Reuse to prevent GC.
     private int mCpuFreqsCount;
-    private long mLastTimeReadMs = Long.MIN_VALUE;
-    private long mNowTimeMs;
-    private boolean mReadBinary = true;
     private final KernelCpuProcReader mProcReader;
 
     private SparseArray<long[]> mLastUidCpuFreqTimeMs = new SparseArray<>();
@@ -140,180 +136,6 @@ public class KernelUidCpuFreqTimeReader extends
         if (line == null) {
             return null;
         }
-        return readCpuFreqs(line, powerProfile);
-    }
-
-    public void setReadBinary(boolean readBinary) {
-        mReadBinary = readBinary;
-    }
-
-    @Override
-    protected void readDeltaImpl(@Nullable Callback callback) {
-        if (mCpuFreqs == null) {
-            return;
-        }
-        if (mReadBinary) {
-            readDeltaBinary(callback);
-        } else {
-            readDeltaString(callback);
-        }
-    }
-
-    private void readDeltaString(@Nullable Callback callback) {
-        mNowTimeMs = SystemClock.elapsedRealtime();
-        final int oldMask = StrictMode.allowThreadDiskReadsMask();
-        try (BufferedReader reader = new BufferedReader(new FileReader(UID_TIMES_PROC_FILE))) {
-            readDelta(reader, callback);
-        } catch (IOException e) {
-            Slog.e(TAG, "Failed to read " + UID_TIMES_PROC_FILE + ": " + e);
-        } finally {
-            StrictMode.setThreadPolicyMask(oldMask);
-        }
-        mLastTimeReadMs = mNowTimeMs;
-    }
-
-    @VisibleForTesting
-    public void readDeltaBinary(@Nullable Callback callback) {
-        synchronized (mProcReader) {
-            ByteBuffer bytes = mProcReader.readBytes();
-            if (bytes == null || bytes.remaining() <= 4) {
-                // Error already logged in mProcReader.
-                return;
-            }
-            if ((bytes.remaining() & 3) != 0) {
-                Slog.wtf(TAG, "Cannot parse cluster time proc bytes to int: " + bytes.remaining());
-                return;
-            }
-            IntBuffer buf = bytes.asIntBuffer();
-            final int freqs = buf.get();
-            if (freqs != mCpuFreqsCount) {
-                Slog.wtf(TAG, "Cpu freqs expect " + mCpuFreqsCount + " , got " + freqs);
-                return;
-            }
-            if (buf.remaining() % (freqs + 1) != 0) {
-                Slog.wtf(TAG, "Freq time format error: " + buf.remaining() + " / " + (freqs + 1));
-                return;
-            }
-            int numUids = buf.remaining() / (freqs + 1);
-            for (int i = 0; i < numUids; i++) {
-                int uid = buf.get();
-                long[] lastTimes = mLastUidCpuFreqTimeMs.get(uid);
-                if (lastTimes == null) {
-                    lastTimes = new long[mCpuFreqsCount];
-                    mLastUidCpuFreqTimeMs.put(uid, lastTimes);
-                }
-                boolean notify = false;
-                boolean corrupted = false;
-                for (int j = 0; j < freqs; j++) {
-                    mCurTimes[j] = (long) buf.get() * 10; // Unit is 10ms.
-                    mDeltaTimes[j] = mCurTimes[j] - lastTimes[j];
-                    if (mCurTimes[j] < 0 || mDeltaTimes[j] < 0) {
-                        Slog.e(TAG, "Unexpected data from freq time proc: " + mCurTimes[j]);
-                        corrupted = true;
-                    }
-                    notify |= mDeltaTimes[j] > 0;
-                }
-                if (notify && !corrupted) {
-                    System.arraycopy(mCurTimes, 0, lastTimes, 0, freqs);
-                    if (callback != null) {
-                        callback.onUidCpuFreqTime(uid, mDeltaTimes);
-                    }
-                }
-            }
-            if (DEBUG) {
-                Slog.d(TAG, "Read uids: " + numUids);
-            }
-        }
-    }
-
-    public void readAbsolute(Callback cb) {
-        synchronized (mProcReader) {
-            readDelta(null);
-            int total = mLastUidCpuFreqTimeMs.size();
-            for (int i = 0; i < total; i ++){
-                int uid = mLastUidCpuFreqTimeMs.keyAt(i);
-                cb.onUidCpuFreqTime(uid, mLastUidCpuFreqTimeMs.get(uid));
-            }
-        }
-    }
-
-    public void removeUid(int uid) {
-        mLastUidCpuFreqTimeMs.delete(uid);
-    }
-
-    public void removeUidsInRange(int startUid, int endUid) {
-        if (endUid < startUid) {
-            return;
-        }
-        mLastUidCpuFreqTimeMs.put(startUid, null);
-        mLastUidCpuFreqTimeMs.put(endUid, null);
-        final int firstIndex = mLastUidCpuFreqTimeMs.indexOfKey(startUid);
-        final int lastIndex = mLastUidCpuFreqTimeMs.indexOfKey(endUid);
-        mLastUidCpuFreqTimeMs.removeAtRange(firstIndex, lastIndex - firstIndex + 1);
-    }
-
-    @VisibleForTesting
-    public void readDelta(BufferedReader reader, @Nullable Callback callback) throws IOException {
-        String line = reader.readLine();
-        if (line == null) {
-            return;
-        }
-        while ((line = reader.readLine()) != null) {
-            final int index = line.indexOf(' ');
-            final int uid = Integer.parseInt(line.substring(0, index - 1), 10);
-            readTimesForUid(uid, line.substring(index + 1, line.length()), callback);
-        }
-    }
-
-    private void readTimesForUid(int uid, String line, Callback callback) {
-        long[] uidTimeMs = mLastUidCpuFreqTimeMs.get(uid);
-        if (uidTimeMs == null) {
-            uidTimeMs = new long[mCpuFreqsCount];
-            mLastUidCpuFreqTimeMs.put(uid, uidTimeMs);
-        }
-        final String[] timesStr = line.split(" ");
-        final int size = timesStr.length;
-        if (size != uidTimeMs.length) {
-            Slog.e(TAG, "No. of readings don't match cpu freqs, readings: " + size
-                    + " cpuFreqsCount: " + uidTimeMs.length);
-            return;
-        }
-        final long[] deltaUidTimeMs = new long[size];
-        final long[] curUidTimeMs = new long[size];
-        boolean notify = false;
-        for (int i = 0; i < size; ++i) {
-            // Times read will be in units of 10ms
-            final long totalTimeMs = Long.parseLong(timesStr[i], 10) * 10;
-            deltaUidTimeMs[i] = totalTimeMs - uidTimeMs[i];
-            // If there is malformed data for any uid, then we just log about it and ignore
-            // the data for that uid.
-            if (deltaUidTimeMs[i] < 0 || totalTimeMs < 0) {
-                if (DEBUG) {
-                    final StringBuilder sb = new StringBuilder("Malformed cpu freq data for UID=")
-                            .append(uid).append("\n");
-                    sb.append("data=").append("(").append(uidTimeMs[i]).append(",")
-                            .append(totalTimeMs).append(")").append("\n");
-                    sb.append("times=").append("(");
-                    TimeUtils.formatDuration(mLastTimeReadMs, sb);
-                    sb.append(",");
-                    TimeUtils.formatDuration(mNowTimeMs, sb);
-                    sb.append(")");
-                    Slog.e(TAG, sb.toString());
-                }
-                return;
-            }
-            curUidTimeMs[i] = totalTimeMs;
-            notify = notify || (deltaUidTimeMs[i] > 0);
-        }
-        if (notify) {
-            System.arraycopy(curUidTimeMs, 0, uidTimeMs, 0, size);
-            if (callback != null) {
-                callback.onUidCpuFreqTime(uid, deltaUidTimeMs);
-            }
-        }
-    }
-
-    private long[] readCpuFreqs(String line, PowerProfile powerProfile) {
         final String[] freqStr = line.split(" ");
         // First item would be "uid: " which needs to be ignored.
         mCpuFreqsCount = freqStr.length - 1;
@@ -339,8 +161,114 @@ public class KernelUidCpuFreqTimeReader extends
             mPerClusterTimesAvailable = false;
         }
         Slog.i(TAG, "mPerClusterTimesAvailable=" + mPerClusterTimesAvailable);
-
         return mCpuFreqs;
+    }
+
+    @Override
+    @VisibleForTesting
+    public void readDeltaImpl(@Nullable Callback callback) {
+        if (mCpuFreqs == null) {
+            return;
+        }
+        readImpl((buf) -> {
+            int uid = buf.get();
+            long[] lastTimes = mLastUidCpuFreqTimeMs.get(uid);
+            if (lastTimes == null) {
+                lastTimes = new long[mCpuFreqsCount];
+                mLastUidCpuFreqTimeMs.put(uid, lastTimes);
+            }
+            if (!getFreqTimeForUid(buf, mCurTimes)) {
+                return;
+            }
+            boolean notify = false;
+            boolean valid = true;
+            for (int i = 0; i < mCpuFreqsCount; i++) {
+                mDeltaTimes[i] = mCurTimes[i] - lastTimes[i];
+                if (mDeltaTimes[i] < 0) {
+                    Slog.e(TAG, "Negative delta from freq time proc: " + mDeltaTimes[i]);
+                    valid = false;
+                }
+                notify |= mDeltaTimes[i] > 0;
+            }
+            if (notify && valid) {
+                System.arraycopy(mCurTimes, 0, lastTimes, 0, mCpuFreqsCount);
+                if (callback != null) {
+                    callback.onUidCpuFreqTime(uid, mDeltaTimes);
+                }
+            }
+        });
+    }
+
+    public void readAbsolute(Callback callback) {
+        readImpl((buf) -> {
+            int uid = buf.get();
+            if (getFreqTimeForUid(buf, mCurTimes)) {
+                callback.onUidCpuFreqTime(uid, mCurTimes);
+            }
+        });
+    }
+
+    private boolean getFreqTimeForUid(IntBuffer buffer, long[] freqTime) {
+        boolean valid = true;
+        for (int i = 0; i < mCpuFreqsCount; i++) {
+            freqTime[i] = (long) buffer.get() * 10; // Unit is 10ms.
+            if (freqTime[i] < 0) {
+                Slog.e(TAG, "Negative time from freq time proc: " + freqTime[i]);
+                valid = false;
+            }
+        }
+        return valid;
+    }
+
+    /**
+     * readImpl accepts a callback to process the uid entry. readDeltaImpl needs to store the last
+     * seen results while processing the buffer, while readAbsolute returns the absolute value read
+     * from the buffer without storing. So readImpl contains the common logic of the two, leaving
+     * the difference to a processUid function.
+     *
+     * @param processUid the callback function to process the uid entry in the buffer.
+     */
+    private void readImpl(Consumer<IntBuffer> processUid) {
+        synchronized (mProcReader) {
+            ByteBuffer bytes = mProcReader.readBytes();
+            if (bytes == null || bytes.remaining() <= 4) {
+                // Error already logged in mProcReader.
+                return;
+            }
+            if ((bytes.remaining() & 3) != 0) {
+                Slog.wtf(TAG, "Cannot parse freq time proc bytes to int: " + bytes.remaining());
+                return;
+            }
+            IntBuffer buf = bytes.asIntBuffer();
+            final int freqs = buf.get();
+            if (freqs != mCpuFreqsCount) {
+                Slog.wtf(TAG, "Cpu freqs expect " + mCpuFreqsCount + " , got " + freqs);
+                return;
+            }
+            if (buf.remaining() % (freqs + 1) != 0) {
+                Slog.wtf(TAG, "Freq time format error: " + buf.remaining() + " / " + (freqs + 1));
+                return;
+            }
+            int numUids = buf.remaining() / (freqs + 1);
+            for (int i = 0; i < numUids; i++) {
+                processUid.accept(buf);
+            }
+            if (DEBUG) {
+                Slog.d(TAG, "Read uids: #" + numUids);
+            }
+        }
+    }
+
+    public void removeUid(int uid) {
+        mLastUidCpuFreqTimeMs.delete(uid);
+    }
+
+    public void removeUidsInRange(int startUid, int endUid) {
+        mLastUidCpuFreqTimeMs.put(startUid, null);
+        mLastUidCpuFreqTimeMs.put(endUid, null);
+        final int firstIndex = mLastUidCpuFreqTimeMs.indexOfKey(startUid);
+        final int lastIndex = mLastUidCpuFreqTimeMs.indexOfKey(endUid);
+        mLastUidCpuFreqTimeMs.removeAtRange(firstIndex, lastIndex - firstIndex + 1);
     }
 
     /**
