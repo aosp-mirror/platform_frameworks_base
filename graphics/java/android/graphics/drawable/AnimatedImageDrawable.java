@@ -292,8 +292,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
         mState = new State(nCreate(nativeImageDecoder, decoder, width, height, cropRect),
                 inputStream, afd);
 
-        // FIXME: Use the right size for the native allocation.
-        long nativeSize = 200;
+        final long nativeSize = nNativeByteSize(mState.mNativePtr);
         NativeAllocationRegistry registry = new NativeAllocationRegistry(
                 AnimatedImageDrawable.class.getClassLoader(), nGetNativeFinalizer(), nativeSize);
         registry.registerNativeAllocation(mState, mState.mNativePtr);

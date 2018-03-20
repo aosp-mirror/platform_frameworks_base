@@ -42,7 +42,6 @@ static jlong AnimatedImageDrawable_nCreate(JNIEnv* env, jobject /*clazz*/,
     }
 
     auto* imageDecoder = reinterpret_cast<ImageDecoder*>(nativeImageDecoder);
-    auto info = imageDecoder->mCodec->getInfo();
     const SkISize scaledSize = SkISize::Make(width, height);
     SkIRect subset;
     if (jsubset) {
@@ -51,6 +50,35 @@ static jlong AnimatedImageDrawable_nCreate(JNIEnv* env, jobject /*clazz*/,
         subset = SkIRect::MakeWH(width, height);
     }
 
+    auto info = imageDecoder->mCodec->getInfo();
+    bool hasRestoreFrame = false;
+    if (imageDecoder->mCodec->getEncodedFormat() == SkEncodedImageFormat::kWEBP) {
+        if (width < info.width() && height < info.height()) {
+            // WebP will scale its SkBitmap to the scaled size.
+            // FIXME: b/73529447 GIF should do the same.
+            info = info.makeWH(width, height);
+        }
+    } else {
+        const int frameCount = imageDecoder->mCodec->codec()->getFrameCount();
+        for (int i = 0; i < frameCount; ++i) {
+            SkCodec::FrameInfo frameInfo;
+            if (!imageDecoder->mCodec->codec()->getFrameInfo(i, &frameInfo)) {
+                doThrowIOE(env, "Failed to read frame info!");
+                return 0;
+            }
+            if (frameInfo.fDisposalMethod == SkCodecAnimation::DisposalMethod::kRestorePrevious) {
+                hasRestoreFrame = true;
+                break;
+            }
+        }
+    }
+
+    size_t bytesUsed = info.computeMinByteSize();
+    // SkAnimatedImage has one SkBitmap for decoding, plus an extra one if there is a
+    // kRestorePrevious frame. AnimatedImageDrawable has two SkPictures storing the current
+    // frame and the next frame. (The former assumes that the image is animated, and the
+    // latter assumes that it is drawn to a hardware canvas.)
+    bytesUsed *= hasRestoreFrame ? 4 : 3;
     sk_sp<SkPicture> picture;
     if (jpostProcess) {
         SkRect bounds = SkRect::MakeWH(subset.width(), subset.height());
@@ -63,6 +91,7 @@ static jlong AnimatedImageDrawable_nCreate(JNIEnv* env, jobject /*clazz*/,
             return 0;
         }
         picture = recorder.finishRecordingAsPicture();
+        bytesUsed += picture->approximateBytesUsed();
     }
 
 
@@ -74,7 +103,10 @@ static jlong AnimatedImageDrawable_nCreate(JNIEnv* env, jobject /*clazz*/,
         return 0;
     }
 
-    sk_sp<AnimatedImageDrawable> drawable(new AnimatedImageDrawable(animatedImg));
+    bytesUsed += sizeof(animatedImg.get());
+
+    sk_sp<AnimatedImageDrawable> drawable(new AnimatedImageDrawable(std::move(animatedImg),
+                                                                    bytesUsed));
     return reinterpret_cast<jlong>(drawable.release());
 }
 
@@ -202,10 +234,9 @@ static void AnimatedImageDrawable_nSetOnAnimationEndListener(JNIEnv* env, jobjec
     }
 }
 
-static long AnimatedImageDrawable_nNativeByteSize(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
+static jlong AnimatedImageDrawable_nNativeByteSize(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
     auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
-    // FIXME: Report the size of the internal SkBitmap etc.
-    return sizeof(drawable);
+    return drawable->byteSize();
 }
 
 static void AnimatedImageDrawable_nMarkInvisible(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
