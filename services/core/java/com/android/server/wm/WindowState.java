@@ -1030,15 +1030,21 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mAttrs.type == TYPE_DOCK_DIVIDER) {
             // For the docked divider, we calculate the stable insets like a full-screen window
             // so it can use it to calculate the snap positions.
-            mStableInsets.set(Math.max(mStableFrame.left - mDisplayFrame.left, 0),
-                    Math.max(mStableFrame.top - mDisplayFrame.top, 0),
-                    Math.max(mDisplayFrame.right - mStableFrame.right, 0),
-                    Math.max(mDisplayFrame.bottom - mStableFrame.bottom, 0));
+            final WmDisplayCutout c = displayCutout.calculateRelativeTo(mDisplayFrame);
+            mTmpRect.set(mDisplayFrame);
+            mTmpRect.inset(c.getDisplayCutout().getSafeInsets());
+            mTmpRect.intersectUnchecked(mStableFrame);
+
+            mStableInsets.set(Math.max(mTmpRect.left - mDisplayFrame.left, 0),
+                    Math.max(mTmpRect.top - mDisplayFrame.top, 0),
+                    Math.max(mDisplayFrame.right - mTmpRect.right, 0),
+                    Math.max(mDisplayFrame.bottom - mTmpRect.bottom, 0));
 
             // The divider doesn't care about insets in any case, so set it to empty so we don't
             // trigger a relayout when moving it.
             mContentInsets.setEmpty();
             mVisibleInsets.setEmpty();
+            displayCutout = WmDisplayCutout.NO_CUTOUT;
         } else {
             getDisplayContent().getBounds(mTmpRect);
             // Override right and/or bottom insets in case if the frame doesn't fit the screen in
