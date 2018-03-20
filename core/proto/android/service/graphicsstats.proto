@@ -56,7 +56,7 @@ message GraphicsStatsJankSummaryProto {
     // Number of "missed vsync" events.
     optional int32 missed_vsync_count = 3;
 
-    // Number of "high input latency" events.
+    // Number of frames in triple-buffering scenario (high input latency)
     optional int32 high_input_latency_count = 4;
 
     // Number of "slow UI thread" events.
@@ -67,6 +67,9 @@ message GraphicsStatsJankSummaryProto {
 
     // Number of "slow draw" events.
     optional int32 slow_draw_count = 7;
+
+    // Number of frames that missed their deadline (aka, visibly janked)
+    optional int32 missed_deadline_count = 8;
 }
 
 message GraphicsStatsHistogramBucketProto {
