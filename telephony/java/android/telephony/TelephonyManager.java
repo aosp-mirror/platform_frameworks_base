@@ -1794,11 +1794,17 @@ public class TelephonyManager {
      * invalid subscription ID is pinned to the TelephonyManager, the returned config will contain
      * default values.
      *
+     * <p>This method may take several seconds to complete, so it should only be called from a
+     * worker thread.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
      * @see CarrierConfigManager#getConfigForSubId(int)
      * @see #createForSubscriptionId(int)
      * @see #createForPhoneAccountHandle(PhoneAccountHandle)
      */
-    // TODO(b/73136824, b/70041899): Permit carrier-privileged callers as well.
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @WorkerThread
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public PersistableBundle getCarrierConfig() {
