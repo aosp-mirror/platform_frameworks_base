@@ -50,13 +50,18 @@ public class IpSecManagerTest {
 
     private static final int TEST_UDP_ENCAP_PORT = 34567;
     private static final int DROID_SPI = 0xD1201D;
+    private static final int DUMMY_RESOURCE_ID = 0x1234;
 
     private static final InetAddress GOOGLE_DNS_4;
+    private static final String VTI_INTF_NAME = "ipsec_test";
+    private static final InetAddress VTI_LOCAL_ADDRESS;
+    private static final LinkAddress VTI_INNER_ADDRESS = new LinkAddress("10.0.1.1/24");
 
     static {
         try {
             // Google Public DNS Addresses;
             GOOGLE_DNS_4 = InetAddress.getByName("8.8.8.8");
+            VTI_LOCAL_ADDRESS = InetAddress.getByName("8.8.4.4");
         } catch (UnknownHostException e) {
             throw new RuntimeException("Could not resolve DNS Addresses", e);
         }
@@ -77,9 +82,8 @@ public class IpSecManagerTest {
      */
     @Test
     public void testAllocSpi() throws Exception {
-        int resourceId = 1;
         IpSecSpiResponse spiResp =
-                new IpSecSpiResponse(IpSecManager.Status.OK, resourceId, DROID_SPI);
+                new IpSecSpiResponse(IpSecManager.Status.OK, DUMMY_RESOURCE_ID, DROID_SPI);
         when(mMockIpSecService.allocateSecurityParameterIndex(
                         eq(GOOGLE_DNS_4.getHostAddress()),
                         eq(DROID_SPI),
@@ -92,14 +96,13 @@ public class IpSecManagerTest {
 
         droidSpi.close();
 
-        verify(mMockIpSecService).releaseSecurityParameterIndex(resourceId);
+        verify(mMockIpSecService).releaseSecurityParameterIndex(DUMMY_RESOURCE_ID);
     }
 
     @Test
     public void testAllocRandomSpi() throws Exception {
-        int resourceId = 1;
         IpSecSpiResponse spiResp =
-                new IpSecSpiResponse(IpSecManager.Status.OK, resourceId, DROID_SPI);
+                new IpSecSpiResponse(IpSecManager.Status.OK, DUMMY_RESOURCE_ID, DROID_SPI);
         when(mMockIpSecService.allocateSecurityParameterIndex(
                         eq(GOOGLE_DNS_4.getHostAddress()),
                         eq(IpSecManager.INVALID_SECURITY_PARAMETER_INDEX),
@@ -113,7 +116,7 @@ public class IpSecManagerTest {
 
         randomSpi.close();
 
-        verify(mMockIpSecService).releaseSecurityParameterIndex(resourceId);
+        verify(mMockIpSecService).releaseSecurityParameterIndex(DUMMY_RESOURCE_ID);
     }
 
     /*
@@ -165,11 +168,10 @@ public class IpSecManagerTest {
 
     @Test
     public void testOpenEncapsulationSocket() throws Exception {
-        int resourceId = 1;
         IpSecUdpEncapResponse udpEncapResp =
                 new IpSecUdpEncapResponse(
                         IpSecManager.Status.OK,
-                        resourceId,
+                        DUMMY_RESOURCE_ID,
                         TEST_UDP_ENCAP_PORT,
                         Os.socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP));
         when(mMockIpSecService.openUdpEncapsulationSocket(eq(TEST_UDP_ENCAP_PORT), anyObject()))
@@ -182,16 +184,15 @@ public class IpSecManagerTest {
 
         encapSocket.close();
 
-        verify(mMockIpSecService).closeUdpEncapsulationSocket(resourceId);
+        verify(mMockIpSecService).closeUdpEncapsulationSocket(DUMMY_RESOURCE_ID);
     }
 
     @Test
     public void testOpenEncapsulationSocketOnRandomPort() throws Exception {
-        int resourceId = 1;
         IpSecUdpEncapResponse udpEncapResp =
                 new IpSecUdpEncapResponse(
                         IpSecManager.Status.OK,
-                        resourceId,
+                        DUMMY_RESOURCE_ID,
                         TEST_UDP_ENCAP_PORT,
                         Os.socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP));
 
@@ -206,7 +207,7 @@ public class IpSecManagerTest {
 
         encapSocket.close();
 
-        verify(mMockIpSecService).closeUdpEncapsulationSocket(resourceId);
+        verify(mMockIpSecService).closeUdpEncapsulationSocket(DUMMY_RESOURCE_ID);
     }
 
     @Test
@@ -219,4 +220,45 @@ public class IpSecManagerTest {
     }
 
     // TODO: add test when applicable transform builder interface is available
+
+    private IpSecManager.IpSecTunnelInterface createAndValidateVti(int resourceId, String intfName)
+            throws Exception {
+        IpSecTunnelInterfaceResponse dummyResponse =
+                new IpSecTunnelInterfaceResponse(IpSecManager.Status.OK, resourceId, intfName);
+        when(mMockIpSecService.createTunnelInterface(
+                eq(VTI_LOCAL_ADDRESS.getHostAddress()), eq(GOOGLE_DNS_4.getHostAddress()),
+                anyObject(), anyObject()))
+                        .thenReturn(dummyResponse);
+
+        IpSecManager.IpSecTunnelInterface tunnelIntf = mIpSecManager.createIpSecTunnelInterface(
+                VTI_LOCAL_ADDRESS, GOOGLE_DNS_4, mock(Network.class));
+
+        assertNotNull(tunnelIntf);
+        return tunnelIntf;
+    }
+
+    @Test
+    public void testCreateVti() throws Exception {
+        IpSecManager.IpSecTunnelInterface tunnelIntf =
+                createAndValidateVti(DUMMY_RESOURCE_ID, VTI_INTF_NAME);
+
+        assertEquals(VTI_INTF_NAME, tunnelIntf.getInterfaceName());
+
+        tunnelIntf.close();
+        verify(mMockIpSecService).deleteTunnelInterface(eq(DUMMY_RESOURCE_ID));
+    }
+
+    @Test
+    public void testAddRemoveAddressesFromVti() throws Exception {
+        IpSecManager.IpSecTunnelInterface tunnelIntf =
+                createAndValidateVti(DUMMY_RESOURCE_ID, VTI_INTF_NAME);
+
+        tunnelIntf.addAddress(VTI_INNER_ADDRESS);
+        verify(mMockIpSecService)
+                .addAddressToTunnelInterface(eq(DUMMY_RESOURCE_ID), eq(VTI_INNER_ADDRESS));
+
+        tunnelIntf.removeAddress(VTI_INNER_ADDRESS);
+        verify(mMockIpSecService)
+                .addAddressToTunnelInterface(eq(DUMMY_RESOURCE_ID), eq(VTI_INNER_ADDRESS));
+    }
 }
