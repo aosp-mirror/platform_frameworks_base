@@ -1648,7 +1648,8 @@ public class MediaSession2 implements AutoCloseable {
     }
 
     /**
-     * Adds the media item to the playlist at position index.
+     * Adds the media item to the playlist at position index. Index equals or greater than
+     * the current playlist size will add the item at the end of the playlist.
      * <p>
      * This will not change the currently playing media item.
      * If index is less than or equal to the current index of the play list,
