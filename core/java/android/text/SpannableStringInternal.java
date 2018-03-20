@@ -26,7 +26,7 @@ import java.lang.reflect.Array;
 /* package */ abstract class SpannableStringInternal
 {
     /* package */ SpannableStringInternal(CharSequence source,
-                                          int start, int end) {
+                                          int start, int end, boolean ignoreNoCopySpan) {
         if (start == 0 && end == source.length())
             mText = source.toString();
         else
@@ -38,11 +38,20 @@ import java.lang.reflect.Array;
 
         if (source instanceof Spanned) {
             if (source instanceof SpannableStringInternal) {
-                copySpans((SpannableStringInternal) source, start, end);
+                copySpans((SpannableStringInternal) source, start, end, ignoreNoCopySpan);
             } else {
-                copySpans((Spanned) source, start, end);
+                copySpans((Spanned) source, start, end, ignoreNoCopySpan);
             }
         }
+    }
+
+    /**
+     * This unused method is left since this is listed in hidden api list.
+     *
+     * Due to backward compatibility reasons, we copy even NoCopySpan by default
+     */
+    /* package */ SpannableStringInternal(CharSequence source, int start, int end) {
+        this(source, start, end, false /* ignoreNoCopySpan */);
     }
 
     /**
@@ -51,11 +60,15 @@ import java.lang.reflect.Array;
      * @param src Source object to copy from.
      * @param start Start index in the source object.
      * @param end End index in the source object.
+     * @param ignoreNoCopySpan whether to copy NoCopySpans in the {@code source}
      */
-    private final void copySpans(Spanned src, int start, int end) {
+    private void copySpans(Spanned src, int start, int end, boolean ignoreNoCopySpan) {
         Object[] spans = src.getSpans(start, end, Object.class);
 
         for (int i = 0; i < spans.length; i++) {
+            if (ignoreNoCopySpan && spans[i] instanceof NoCopySpan) {
+                continue;
+            }
             int st = src.getSpanStart(spans[i]);
             int en = src.getSpanEnd(spans[i]);
             int fl = src.getSpanFlags(spans[i]);
@@ -76,35 +89,48 @@ import java.lang.reflect.Array;
      * @param src Source object to copy from.
      * @param start Start index in the source object.
      * @param end End index in the source object.
+     * @param ignoreNoCopySpan copy NoCopySpan for backward compatible reasons.
      */
-    private final void copySpans(SpannableStringInternal src, int start, int end) {
-        if (start == 0 && end == src.length()) {
+    private void copySpans(SpannableStringInternal src, int start, int end,
+            boolean ignoreNoCopySpan) {
+        int count = 0;
+        final int[] srcData = src.mSpanData;
+        final Object[] srcSpans = src.mSpans;
+        final int limit = src.mSpanCount;
+        boolean hasNoCopySpan = false;
+
+        for (int i = 0; i < limit; i++) {
+            int spanStart = srcData[i * COLUMNS + START];
+            int spanEnd = srcData[i * COLUMNS + END];
+            if (isOutOfCopyRange(start, end, spanStart, spanEnd)) continue;
+            if (srcSpans[i] instanceof NoCopySpan) {
+                hasNoCopySpan = true;
+                if (ignoreNoCopySpan) {
+                    continue;
+                }
+            }
+            count++;
+        }
+
+        if (count == 0) return;
+
+        if (!hasNoCopySpan && start == 0 && end == src.length()) {
             mSpans = ArrayUtils.newUnpaddedObjectArray(src.mSpans.length);
             mSpanData = new int[src.mSpanData.length];
             mSpanCount = src.mSpanCount;
             System.arraycopy(src.mSpans, 0, mSpans, 0, src.mSpans.length);
             System.arraycopy(src.mSpanData, 0, mSpanData, 0, mSpanData.length);
         } else {
-            int count = 0;
-            int[] srcData = src.mSpanData;
-            int limit = src.mSpanCount;
-            for (int i = 0; i < limit; i++) {
-                int spanStart = srcData[i * COLUMNS + START];
-                int spanEnd = srcData[i * COLUMNS + END];
-                if (isOutOfCopyRange(start, end, spanStart, spanEnd)) continue;
-                count++;
-            }
-
-            if (count == 0) return;
-
-            Object[] srcSpans = src.mSpans;
             mSpanCount = count;
             mSpans = ArrayUtils.newUnpaddedObjectArray(mSpanCount);
             mSpanData = new int[mSpans.length * COLUMNS];
             for (int i = 0, j = 0; i < limit; i++) {
                 int spanStart = srcData[i * COLUMNS + START];
                 int spanEnd = srcData[i * COLUMNS + END];
-                if (isOutOfCopyRange(start, end, spanStart, spanEnd)) continue;
+                if (isOutOfCopyRange(start, end, spanStart, spanEnd)
+                        || (ignoreNoCopySpan && srcSpans[i] instanceof NoCopySpan)) {
+                    continue;
+                }
                 if (spanStart < start) spanStart = start;
                 if (spanEnd > end) spanEnd = end;
 
@@ -493,6 +519,21 @@ import java.lang.reflect.Array;
         }
         return hash;
     }
+
+    /**
+     * Following two unused methods are left since these are listed in hidden api list.
+     *
+     * Due to backward compatibility reasons, we copy even NoCopySpan by default
+     */
+    private void copySpans(Spanned src, int start, int end) {
+        copySpans(src, start, end, false);
+    }
+
+    private void copySpans(SpannableStringInternal src, int start, int end) {
+        copySpans(src, start, end, false);
+    }
+
+
 
     private String mText;
     private Object[] mSpans;
