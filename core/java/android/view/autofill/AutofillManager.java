@@ -2540,6 +2540,10 @@ public final class AutofillManager {
             ArraySet<AutofillId> updatedVisibleTrackedIds = null;
             ArraySet<AutofillId> updatedInvisibleTrackedIds = null;
             if (client != null) {
+                if (sVerbose) {
+                    Log.v(TAG, "onVisibleForAutofillChangedLocked(): inv= " + mInvisibleTrackedIds
+                            + " vis=" + mVisibleTrackedIds);
+                }
                 if (mInvisibleTrackedIds != null) {
                     final ArrayList<AutofillId> orderedInvisibleIds =
                             new ArrayList<>(mInvisibleTrackedIds);
