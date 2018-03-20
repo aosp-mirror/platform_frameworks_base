@@ -45,6 +45,7 @@ import android.os.ResultReceiver;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -535,7 +536,7 @@ public class MediaSession2 implements AutoCloseable {
             return mProvider.hasCommand_impl(code);
         }
 
-        public @NonNull List<Command> getCommands() {
+        public @NonNull Set<Command> getCommands() {
             return mProvider.getCommands_impl();
         }
 
