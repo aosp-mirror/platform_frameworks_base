@@ -325,14 +325,14 @@ public class PipSnapAlgorithm {
      * {@param stackBounds}.
      */
     public void getMovementBounds(Rect stackBounds, Rect insetBounds, Rect movementBoundsOut,
-            int imeHeight) {
+            int bottomOffset) {
         // Adjust the right/bottom to ensure the stack bounds never goes offscreen
         movementBoundsOut.set(insetBounds);
         movementBoundsOut.right = Math.max(insetBounds.left, insetBounds.right -
                 stackBounds.width());
         movementBoundsOut.bottom = Math.max(insetBounds.top, insetBounds.bottom -
                 stackBounds.height());
-        movementBoundsOut.bottom -= imeHeight;
+        movementBoundsOut.bottom -= bottomOffset;
     }
 
     /**
