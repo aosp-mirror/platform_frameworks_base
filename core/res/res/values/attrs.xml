@@ -2106,6 +2106,38 @@
              Corresponds to setting {@link android.view.View#SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR} on
              the decor view. -->
          <attr name="windowLightNavigationBar" format="boolean" />
+
+        <!-- Controls how the window is laid out if there is a {@code DisplayCutout}.
+        <p>
+        Defaults to {@code default}.
+        -->
+        <attr name="windowLayoutInDisplayCutoutMode">
+            <!-- <p>
+            The window is allowed to extend into the <code>DisplayCutout</code> area, only if
+            the <code>DisplayCutout</code> is fully contained within a system bar. Otherwise, the
+            window is laid out such that it does not overlap with the <code>DisplayCutout</code>
+            area.
+            -->
+            <enum name="default" value="0" />
+            <!-- <p>
+            The window is always allowed to extend into the <code>DisplayCutout</code> areas on the
+            short edges of the screen even if fullscreen or in landscape.
+            The window will never extend into a <code>DisplayCutout</code> area on the long edges of
+            the screen.
+            <p>
+            The window must make sure that no important content overlaps with the
+            <code>DisplayCutout</code>.
+            -->
+            <enum name="shortEdges" value="1" />
+            <!-- <p>
+            The window is never allowed to overlap with the <code>DisplayCutout</code> area.
+            <p>
+            This should be used with windows that transiently set
+            <code>SYSTEM_UI_FLAG_FULLSCREEN</code> to avoid a relayout of the window when the
+            flag is set or cleared.
+            -->
+            <enum name="never" value="2" />
+        </attr>
     </declare-styleable>
 
     <!-- The set of attributes that describe a AlertDialog's theme. -->

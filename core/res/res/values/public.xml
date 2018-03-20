@@ -2847,6 +2847,7 @@
     <public type="attr" name="classLoader" id="0x0101056b" />
     <public type="attr" name="windowLightNavigationBar" id="0x0101056c" />
     <public type="attr" name="navigationBarDividerColor" id="0x0101056d" />
+    <public type="attr" name="windowLayoutInDisplayCutoutMode" id="0x01010586" />
 
     <public type="string" name="autofill" id="0x0104001a"/>
 
