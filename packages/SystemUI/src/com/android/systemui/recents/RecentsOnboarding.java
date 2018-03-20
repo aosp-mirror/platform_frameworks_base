@@ -96,6 +96,9 @@ public class RecentsOnboarding {
         public void onTaskStackChanged() {
             ActivityManager.RunningTaskInfo info = ActivityManagerWrapper.getInstance()
                     .getRunningTask(ACTIVITY_TYPE_UNDEFINED /* ignoreActivityType */);
+            if (info == null) {
+                return;
+            }
             if (mBlacklistedPackages.contains(info.baseActivity.getPackageName())) {
                 hide(true);
                 return;
