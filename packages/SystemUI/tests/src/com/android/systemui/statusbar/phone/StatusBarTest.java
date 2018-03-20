@@ -30,6 +30,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -545,6 +546,16 @@ public class StatusBarTest extends SysuiTestCase {
                 .thenReturn(FingerprintUnlockController.MODE_WAKE_AND_UNLOCK);
         mStatusBar.updateScrimController();
         verify(mScrimController).transitionTo(eq(ScrimState.UNLOCKED), any());
+    }
+
+    @Test
+    public void testSetOccluded_propagatesToScrimController() {
+        mStatusBar.setOccluded(true);
+        verify(mScrimController).setKeyguardOccluded(eq(true));
+
+        reset(mScrimController);
+        mStatusBar.setOccluded(false);
+        verify(mScrimController).setKeyguardOccluded(eq(false));
     }
 
     static class TestableStatusBar extends StatusBar {
