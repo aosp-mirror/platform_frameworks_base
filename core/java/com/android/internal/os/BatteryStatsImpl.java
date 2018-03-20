@@ -33,9 +33,6 @@ import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Build;
-import android.os.connectivity.CellularBatteryStats;
-import android.os.connectivity.WifiBatteryStats;
-import android.os.connectivity.GpsBatteryStats;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBatteryPropertiesRegistrar;
@@ -53,6 +50,9 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.os.WorkSource.WorkChain;
+import android.os.connectivity.CellularBatteryStats;
+import android.os.connectivity.GpsBatteryStats;
+import android.os.connectivity.WifiBatteryStats;
 import android.provider.Settings;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ModemActivityInfo;
@@ -90,8 +90,8 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
 
-import java.util.List;
 import libcore.util.EmptyArray;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -109,11 +109,11 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Queue;
 import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -234,11 +234,15 @@ public class BatteryStatsImpl extends BatteryStats {
     protected final SparseIntArray mPendingUids = new SparseIntArray();
 
     @GuardedBy("this")
-    private long mNumCpuTimeReads;
+    private long mNumSingleUidCpuTimeReads;
     @GuardedBy("this")
-    private long mNumBatchedCpuTimeReads;
+    private long mNumBatchedSingleUidCpuTimeReads;
     @GuardedBy("this")
     private long mCpuTimeReadsTrackingStartTime = SystemClock.uptimeMillis();
+    @GuardedBy("this")
+    private int mNumUidsRemoved;
+    @GuardedBy("this")
+    private int mNumAllUidCpuTimeReads;
 
     /** Container for Resource Power Manager stats. Updated by updateRpmStatsLocked. */
     private final RpmStats mTmpRpmStats = new RpmStats();
@@ -246,6 +250,67 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final long RPM_STATS_UPDATE_FREQ_MS = 1000;
     /** Last time that RPM stats were updated by updateRpmStatsLocked. */
     private long mLastRpmStatsUpdateTimeMs = -RPM_STATS_UPDATE_FREQ_MS;
+    /**
+     * Use a queue to delay removing UIDs from {@link KernelUidCpuTimeReader},
+     * {@link KernelUidCpuActiveTimeReader}, {@link KernelUidCpuClusterTimeReader},
+     * {@link KernelUidCpuFreqTimeReader} and from the Kernel.
+     *
+     * Isolated and invalid UID info must be removed to conserve memory. However, STATSD and
+     * Batterystats both need to access UID cpu time. To resolve this race condition, only
+     * Batterystats shall remove UIDs, and a delay {@link Constants#UID_REMOVE_DELAY_MS} is
+     * implemented so that STATSD can capture those UID times before they are deleted.
+     */
+    @GuardedBy("this")
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    protected Queue<UidToRemove> mPendingRemovedUids = new LinkedList<>();
+
+    @VisibleForTesting
+    public final class UidToRemove {
+        int startUid;
+        int endUid;
+        long timeAddedInQueue;
+
+        /** Remove just one UID */
+        public UidToRemove(int uid, long timestamp) {
+            this(uid, uid, timestamp);
+        }
+
+        /** Remove a range of UIDs, startUid must be smaller than endUid. */
+        public UidToRemove(int startUid, int endUid, long timestamp) {
+            this.startUid = startUid;
+            this.endUid = endUid;
+            timeAddedInQueue = timestamp;
+        }
+
+        void remove() {
+            if (startUid == endUid) {
+                mKernelUidCpuTimeReader.removeUid(startUid);
+                mKernelUidCpuFreqTimeReader.removeUid(startUid);
+                if (mConstants.TRACK_CPU_ACTIVE_CLUSTER_TIME) {
+                    mKernelUidCpuActiveTimeReader.removeUid(startUid);
+                    mKernelUidCpuClusterTimeReader.removeUid(startUid);
+                }
+                if (mKernelSingleUidTimeReader != null) {
+                    mKernelSingleUidTimeReader.removeUid(startUid);
+                }
+                mNumUidsRemoved++;
+            } else if (startUid < endUid) {
+                mKernelUidCpuFreqTimeReader.removeUidsInRange(startUid, endUid);
+                mKernelUidCpuTimeReader.removeUidsInRange(startUid, endUid);
+                if (mConstants.TRACK_CPU_ACTIVE_CLUSTER_TIME) {
+                    mKernelUidCpuActiveTimeReader.removeUidsInRange(startUid, endUid);
+                    mKernelUidCpuClusterTimeReader.removeUidsInRange(startUid, endUid);
+                }
+                if (mKernelSingleUidTimeReader != null) {
+                    mKernelSingleUidTimeReader.removeUidsInRange(startUid, endUid);
+                }
+                // Treat as one. We don't know how many uids there are in between.
+                mNumUidsRemoved++;
+            } else {
+                Slog.w(TAG, "End UID " + endUid + " is smaller than start UID " + startUid);
+            }
+        }
+    }
 
     public interface BatteryCallback {
         public void batteryNeedsCpuUpdate();
@@ -373,6 +438,14 @@ public class BatteryStatsImpl extends BatteryStats {
                     u.addProcStateScreenOffTimesMs(procState, cpuTimesMs, onBatteryScreenOff);
                 }
             }
+        }
+    }
+
+    public void clearPendingRemovedUids() {
+        long cutOffTime = mClocks.elapsedRealtime() - mConstants.UID_REMOVE_DELAY_MS;
+        while (!mPendingRemovedUids.isEmpty()
+                && mPendingRemovedUids.peek().timeAddedInQueue < cutOffTime) {
+            mPendingRemovedUids.poll().remove();
         }
     }
 
@@ -3961,12 +4034,7 @@ public class BatteryStatsImpl extends BatteryStats {
             u.removeIsolatedUid(isolatedUid);
             mIsolatedUids.removeAt(idx);
         }
-        mKernelUidCpuTimeReader.removeUid(isolatedUid);
-        mKernelUidCpuFreqTimeReader.removeUid(isolatedUid);
-        if (mConstants.TRACK_CPU_ACTIVE_CLUSTER_TIME) {
-            mKernelUidCpuActiveTimeReader.removeUid(isolatedUid);
-            mKernelUidCpuClusterTimeReader.removeUid(isolatedUid);
-        }
+        mPendingRemovedUids.add(new UidToRemove(isolatedUid, mClocks.elapsedRealtime()));
     }
 
     public int mapUid(int uid) {
@@ -5284,69 +5352,15 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public void notePhoneDataConnectionStateLocked(int dataType, boolean hasData) {
+        // BatteryStats uses 0 to represent no network type.
+        // Telephony does not have a concept of no network type, and uses 0 to represent unknown.
+        // Unknown is included in DATA_CONNECTION_OTHER.
         int bin = DATA_CONNECTION_NONE;
         if (hasData) {
-            switch (dataType) {
-                case TelephonyManager.NETWORK_TYPE_EDGE:
-                    bin = DATA_CONNECTION_EDGE;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_GPRS:
-                    bin = DATA_CONNECTION_GPRS;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_UMTS:
-                    bin = DATA_CONNECTION_UMTS;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_CDMA:
-                    bin = DATA_CONNECTION_CDMA;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_EVDO_0:
-                    bin = DATA_CONNECTION_EVDO_0;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_EVDO_A:
-                    bin = DATA_CONNECTION_EVDO_A;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_1xRTT:
-                    bin = DATA_CONNECTION_1xRTT;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_HSDPA:
-                    bin = DATA_CONNECTION_HSDPA;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_HSUPA:
-                    bin = DATA_CONNECTION_HSUPA;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_HSPA:
-                    bin = DATA_CONNECTION_HSPA;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_IDEN:
-                    bin = DATA_CONNECTION_IDEN;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_EVDO_B:
-                    bin = DATA_CONNECTION_EVDO_B;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_LTE:
-                    bin = DATA_CONNECTION_LTE;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_EHRPD:
-                    bin = DATA_CONNECTION_EHRPD;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_HSPAP:
-                    bin = DATA_CONNECTION_HSPAP;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_GSM:
-                    bin = DATA_CONNECTION_GSM;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
-                    bin = DATA_CONNECTION_TD_SCDMA;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_IWLAN:
-                    bin = DATA_CONNECTION_IWLAN;
-                    break;
-                case TelephonyManager.NETWORK_TYPE_LTE_CA:
-                    bin = DATA_CONNECTION_LTE_CA;
-                    break;
-                default:
-                    bin = DATA_CONNECTION_OTHER;
-                    break;
+            if (dataType > 0 && dataType <= TelephonyManager.MAX_NETWORK_TYPE) {
+                bin = dataType;
+            } else {
+                bin = DATA_CONNECTION_OTHER;
             }
         }
         if (DEBUG) Log.i(TAG, "Phone Data Connection -> " + dataType + " = " + hasData);
@@ -9860,9 +9874,9 @@ public class BatteryStatsImpl extends BatteryStats {
                                     mBsi.mOnBatteryTimeBase.isRunning(),
                                     mBsi.mOnBatteryScreenOffTimeBase.isRunning(),
                                     mBsi.mConstants.PROC_STATE_CPU_TIMES_READ_DELAY_MS);
-                            mBsi.mNumCpuTimeReads++;
+                            mBsi.mNumSingleUidCpuTimeReads++;
                         } else {
-                            mBsi.mNumBatchedCpuTimeReads++;
+                            mBsi.mNumBatchedSingleUidCpuTimeReads++;
                         }
                         if (mBsi.mPendingUids.indexOfKey(mUid) < 0
                                 || ArrayUtils.contains(CRITICAL_PROC_STATES, mProcessState)) {
@@ -11024,6 +11038,9 @@ public class BatteryStatsImpl extends BatteryStats {
         mLastStepStatSoftIrqTime = mCurStepStatSoftIrqTime = 0;
         mLastStepStatIdleTime = mCurStepStatIdleTime = 0;
 
+        mNumAllUidCpuTimeReads = 0;
+        mNumUidsRemoved = 0;
+
         initDischarge();
 
         clearHistoryLocked();
@@ -12009,9 +12026,11 @@ public class BatteryStatsImpl extends BatteryStats {
         if (!onBattery) {
             mKernelUidCpuTimeReader.readDelta(null);
             mKernelUidCpuFreqTimeReader.readDelta(null);
+            mNumAllUidCpuTimeReads += 2;
             if (mConstants.TRACK_CPU_ACTIVE_CLUSTER_TIME) {
                 mKernelUidCpuActiveTimeReader.readDelta(null);
                 mKernelUidCpuClusterTimeReader.readDelta(null);
+                mNumAllUidCpuTimeReads += 2;
             }
             for (int cluster = mKernelCpuSpeedReaders.length - 1; cluster >= 0; --cluster) {
                 mKernelCpuSpeedReaders[cluster].readDelta();
@@ -12029,9 +12048,11 @@ public class BatteryStatsImpl extends BatteryStats {
             updateClusterSpeedTimes(updatedUids, onBattery);
         }
         readKernelUidCpuFreqTimesLocked(partialTimersToConsider, onBattery, onBatteryScreenOff);
+        mNumAllUidCpuTimeReads += 2;
         if (mConstants.TRACK_CPU_ACTIVE_CLUSTER_TIME) {
             readKernelUidCpuActiveTimesLocked(onBattery);
             readKernelUidCpuClusterTimesLocked(onBattery);
+            mNumAllUidCpuTimeReads += 2;
         }
     }
 
@@ -13256,11 +13277,8 @@ public class BatteryStatsImpl extends BatteryStats {
     public void onCleanupUserLocked(int userId) {
         final int firstUidForUser = UserHandle.getUid(userId, 0);
         final int lastUidForUser = UserHandle.getUid(userId, UserHandle.PER_USER_RANGE - 1);
-        mKernelUidCpuFreqTimeReader.removeUidsInRange(firstUidForUser, lastUidForUser);
-        mKernelUidCpuTimeReader.removeUidsInRange(firstUidForUser, lastUidForUser);
-        if (mKernelSingleUidTimeReader != null) {
-            mKernelSingleUidTimeReader.removeUidsInRange(firstUidForUser, lastUidForUser);
-        }
+        mPendingRemovedUids.add(
+                new UidToRemove(firstUidForUser, lastUidForUser, mClocks.elapsedRealtime()));
     }
 
     public void onUserRemovedLocked(int userId) {
@@ -13277,12 +13295,8 @@ public class BatteryStatsImpl extends BatteryStats {
      * Remove the statistics object for a particular uid.
      */
     public void removeUidStatsLocked(int uid) {
-        mKernelUidCpuTimeReader.removeUid(uid);
-        mKernelUidCpuFreqTimeReader.removeUid(uid);
-        if (mKernelSingleUidTimeReader != null) {
-            mKernelSingleUidTimeReader.removeUid(uid);
-        }
         mUidStats.remove(uid);
+        mPendingRemovedUids.add(new UidToRemove(uid, mClocks.elapsedRealtime()));
     }
 
     /**
@@ -13335,24 +13349,24 @@ public class BatteryStatsImpl extends BatteryStats {
                 = "track_cpu_times_by_proc_state";
         public static final String KEY_TRACK_CPU_ACTIVE_CLUSTER_TIME
                 = "track_cpu_active_cluster_time";
-        public static final String KEY_READ_BINARY_CPU_TIME
-                = "read_binary_cpu_time";
         public static final String KEY_PROC_STATE_CPU_TIMES_READ_DELAY_MS
                 = "proc_state_cpu_times_read_delay_ms";
         public static final String KEY_KERNEL_UID_READERS_THROTTLE_TIME
                 = "kernel_uid_readers_throttle_time";
+        public static final String KEY_UID_REMOVE_DELAY_MS
+                = "uid_remove_delay_ms";
 
         private static final boolean DEFAULT_TRACK_CPU_TIMES_BY_PROC_STATE = true;
         private static final boolean DEFAULT_TRACK_CPU_ACTIVE_CLUSTER_TIME = true;
-        private static final boolean DEFAULT_READ_BINARY_CPU_TIME = true;
         private static final long DEFAULT_PROC_STATE_CPU_TIMES_READ_DELAY_MS = 5_000;
         private static final long DEFAULT_KERNEL_UID_READERS_THROTTLE_TIME = 10_000;
+        private static final long DEFAULT_UID_REMOVE_DELAY_MS = 5L * 60L * 1000L;
 
         public boolean TRACK_CPU_TIMES_BY_PROC_STATE = DEFAULT_TRACK_CPU_TIMES_BY_PROC_STATE;
         public boolean TRACK_CPU_ACTIVE_CLUSTER_TIME = DEFAULT_TRACK_CPU_ACTIVE_CLUSTER_TIME;
-        public boolean READ_BINARY_CPU_TIME = DEFAULT_READ_BINARY_CPU_TIME;
         public long PROC_STATE_CPU_TIMES_READ_DELAY_MS = DEFAULT_PROC_STATE_CPU_TIMES_READ_DELAY_MS;
         public long KERNEL_UID_READERS_THROTTLE_TIME = DEFAULT_KERNEL_UID_READERS_THROTTLE_TIME;
+        public long UID_REMOVE_DELAY_MS = DEFAULT_UID_REMOVE_DELAY_MS;
 
         private ContentResolver mResolver;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -13390,14 +13404,14 @@ public class BatteryStatsImpl extends BatteryStats {
                                 DEFAULT_TRACK_CPU_TIMES_BY_PROC_STATE));
                 TRACK_CPU_ACTIVE_CLUSTER_TIME = mParser.getBoolean(
                         KEY_TRACK_CPU_ACTIVE_CLUSTER_TIME, DEFAULT_TRACK_CPU_ACTIVE_CLUSTER_TIME);
-                updateReadBinaryCpuTime(READ_BINARY_CPU_TIME,
-                        mParser.getBoolean(KEY_READ_BINARY_CPU_TIME, DEFAULT_READ_BINARY_CPU_TIME));
                 updateProcStateCpuTimesReadDelayMs(PROC_STATE_CPU_TIMES_READ_DELAY_MS,
                         mParser.getLong(KEY_PROC_STATE_CPU_TIMES_READ_DELAY_MS,
                                 DEFAULT_PROC_STATE_CPU_TIMES_READ_DELAY_MS));
                 updateKernelUidReadersThrottleTime(KERNEL_UID_READERS_THROTTLE_TIME,
                         mParser.getLong(KEY_KERNEL_UID_READERS_THROTTLE_TIME,
                                 DEFAULT_KERNEL_UID_READERS_THROTTLE_TIME));
+                updateUidRemoveDelay(
+                        mParser.getLong(KEY_UID_REMOVE_DELAY_MS, DEFAULT_UID_REMOVE_DELAY_MS));
             }
         }
 
@@ -13407,24 +13421,17 @@ public class BatteryStatsImpl extends BatteryStats {
                 mKernelSingleUidTimeReader.markDataAsStale(true);
                 mExternalSync.scheduleCpuSyncDueToSettingChange();
 
-                mNumCpuTimeReads = 0;
-                mNumBatchedCpuTimeReads = 0;
+                mNumSingleUidCpuTimeReads = 0;
+                mNumBatchedSingleUidCpuTimeReads = 0;
                 mCpuTimeReadsTrackingStartTime = mClocks.uptimeMillis();
-            }
-        }
-
-        private void updateReadBinaryCpuTime(boolean oldEnabled, boolean isEnabled) {
-            READ_BINARY_CPU_TIME = isEnabled;
-            if (oldEnabled != isEnabled) {
-                mKernelUidCpuFreqTimeReader.setReadBinary(isEnabled);
             }
         }
 
         private void updateProcStateCpuTimesReadDelayMs(long oldDelayMillis, long newDelayMillis) {
             PROC_STATE_CPU_TIMES_READ_DELAY_MS = newDelayMillis;
             if (oldDelayMillis != newDelayMillis) {
-                mNumCpuTimeReads = 0;
-                mNumBatchedCpuTimeReads = 0;
+                mNumSingleUidCpuTimeReads = 0;
+                mNumBatchedSingleUidCpuTimeReads = 0;
                 mCpuTimeReadsTrackingStartTime = mClocks.uptimeMillis();
             }
         }
@@ -13440,13 +13447,16 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
+        private void updateUidRemoveDelay(long newTimeMs) {
+            UID_REMOVE_DELAY_MS = newTimeMs;
+            clearPendingRemovedUids();
+        }
+
         public void dumpLocked(PrintWriter pw) {
             pw.print(KEY_TRACK_CPU_TIMES_BY_PROC_STATE); pw.print("=");
             pw.println(TRACK_CPU_TIMES_BY_PROC_STATE);
             pw.print(KEY_TRACK_CPU_ACTIVE_CLUSTER_TIME); pw.print("=");
             pw.println(TRACK_CPU_ACTIVE_CLUSTER_TIME);
-            pw.print(KEY_READ_BINARY_CPU_TIME); pw.print("=");
-            pw.println(READ_BINARY_CPU_TIME);
             pw.print(KEY_PROC_STATE_CPU_TIMES_READ_DELAY_MS); pw.print("=");
             pw.println(PROC_STATE_CPU_TIMES_READ_DELAY_MS);
             pw.print(KEY_KERNEL_UID_READERS_THROTTLE_TIME); pw.print("=");
@@ -13457,6 +13467,43 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     public void dumpConstantsLocked(PrintWriter pw) {
         mConstants.dumpLocked(pw);
+    }
+
+    @GuardedBy("this")
+    public void dumpCpuStatsLocked(PrintWriter pw) {
+        int size = mUidStats.size();
+        pw.println("Per UID CPU user & system time in ms:");
+        for (int i = 0; i < size; i++) {
+            int u = mUidStats.keyAt(i);
+            Uid uid = mUidStats.get(u);
+            pw.print("  "); pw.print(u); pw.print(": ");
+            pw.print(uid.getUserCpuTimeUs(STATS_SINCE_CHARGED) / 1000); pw.print(" ");
+            pw.println(uid.getSystemCpuTimeUs(STATS_SINCE_CHARGED) / 1000);
+        }
+        pw.println("Per UID CPU active time in ms:");
+        for (int i = 0; i < size; i++) {
+            int u = mUidStats.keyAt(i);
+            Uid uid = mUidStats.get(u);
+            if (uid.getCpuActiveTime() > 0) {
+                pw.print("  "); pw.print(u); pw.print(": "); pw.println(uid.getCpuActiveTime());
+            }
+        }
+        pw.println("Per UID CPU cluster time in ms:");
+        for (int i = 0; i < size; i++) {
+            int u = mUidStats.keyAt(i);
+            long[] times = mUidStats.get(u).getCpuClusterTimes();
+            if (times != null) {
+                pw.print("  "); pw.print(u); pw.print(": "); pw.println(Arrays.toString(times));
+            }
+        }
+        pw.println("Per UID CPU frequency time in ms:");
+        for (int i = 0; i < size; i++) {
+            int u = mUidStats.keyAt(i);
+            long[] times = mUidStats.get(u).getCpuFreqTimes(STATS_SINCE_CHARGED);
+            if (times != null) {
+                pw.print("  "); pw.print(u); pw.print(": "); pw.println(Arrays.toString(times));
+            }
+        }
     }
 
     Parcel mPendingWrite = null;
@@ -15183,10 +15230,14 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         super.dumpLocked(context, pw, flags, reqUid, histStart);
         pw.print("Total cpu time reads: ");
-        pw.println(mNumCpuTimeReads);
+        pw.println(mNumSingleUidCpuTimeReads);
         pw.print("Batched cpu time reads: ");
-        pw.println(mNumBatchedCpuTimeReads);
+        pw.println(mNumBatchedSingleUidCpuTimeReads);
         pw.print("Batching Duration (min): ");
         pw.println((mClocks.uptimeMillis() - mCpuTimeReadsTrackingStartTime) / (60 * 1000));
+        pw.print("All UID cpu time reads since the later of device start or stats reset: ");
+        pw.println(mNumAllUidCpuTimeReads);
+        pw.print("UIDs removed since the later of device start or stats reset: ");
+        pw.println(mNumUidsRemoved);
     }
 }

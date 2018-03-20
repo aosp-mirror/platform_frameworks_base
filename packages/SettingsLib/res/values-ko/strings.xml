@@ -220,8 +220,7 @@
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"비공개 DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"비공개 DNS 모드 선택"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"사용 안함"</string>
-    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
-    <skip />
+    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"자동"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"비공개 DNS 제공업체 호스트 이름"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS 제공업체의 호스트 이름 입력"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"무선 디스플레이 인증서 옵션 표시"</string>
@@ -274,8 +273,8 @@
     <string name="show_touches_summary" msgid="6101183132903926324">"탭한 항목에 대해 시각적인 의견 표시"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"표면 업데이트 표시"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"전체 창 표면이 업데이트되었을 때 플래시 처리"</string>
-    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU 보기 업데이트 표시"</string>
-    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"GPU로 드로잉했을 때 창 내부 보기 플래시 처리"</string>
+    <string name="show_hw_screen_updates" msgid="4117270979975470789">"업데이트 보기 표시"</string>
+    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"드로잉했을 때 창 내부 보기 플래시 처리"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"하드웨어 업데이트 표시"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"업데이트 할 때 하드웨어 레이어 깜박이기"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU 오버드로 디버깅"</string>
@@ -289,12 +288,10 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"클립 경계, 여백 등을 표시"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL 레이아웃 방향 강제 적용"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"모든 언어에 대해 화면 레이아웃 방향을 RTL로 강제 적용"</string>
-    <string name="force_hw_ui" msgid="6426383462520888732">"GPU 렌더링 강제 설정"</string>
-    <string name="force_hw_ui_summary" msgid="5535991166074861515">"2D 드로잉용으로 GPU 강제 사용"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA 강제 사용"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 앱에서 4x MSAA 사용"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"사각형이 아닌 클립 작업 디버그"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"프로필 GPU 렌더링"</string>
+    <string name="track_frame_time" msgid="6094365083096851167">"프로필 HWUI 렌더링"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU 디버그 레이어 사용 설정"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"디버그 앱에 GPU 디버그 레이어 로드 허용"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"창 애니메이션 배율"</string>
@@ -305,8 +302,8 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"액티비티 유지 안함"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"사용자가 종료하는 즉시 바로 제거"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"백그라운드 프로세스 수 제한"</string>
-    <string name="show_all_anrs" msgid="28462979638729082">"모든 ANR 보기"</string>
-    <string name="show_all_anrs_summary" msgid="641908614413544127">"백그라운드 앱에 대해 앱 응답 없음 대화상자 표시"</string>
+    <string name="show_all_anrs" msgid="4924885492787069007">"백그라운드 ANR 표시"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"백그라운드 앱과 관련해 앱 응답 없음 대화상자 표시"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"알림 채널 경고 표시"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"앱에서 유효한 채널 없이 알림을 게시하면 화면에 경고가 표시됩니다."</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"외부에서 앱 강제 허용"</string>
@@ -357,39 +354,24 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"실험실 기능이며 성능에 영향을 줄 수 있습니다."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> 우선 적용됨"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"약 <xliff:g id="TIME">%1$s</xliff:g> 남음"</string>
-    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="6655472132189365839">"약 <xliff:g id="TIME">%1$s</xliff:g> 남음(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"내 사용량을 기준으로 약 <xliff:g id="TIME">%1$s</xliff:g> 남음"</string>
-    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
-    <skip />
+    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"내 사용량(<xliff:g id="LEVEL">%2$s</xliff:g>)을 기준으로 약 <xliff:g id="TIME">%1$s</xliff:g> 남음"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> 남음"</string>
-    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
-    <skip />
-    <!-- no translation found for power_discharge_by (6427074755635635749) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
-    <skip />
+    <string name="power_discharge_by_enhanced" msgid="8305422490607220844">"내 사용량에 따르면 <xliff:g id="TIME">%1$s</xliff:g> 정도까지 사용 가능(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="896515698736070025">"내 사용량에 따르면 <xliff:g id="TIME">%1$s</xliff:g> 정도까지 사용 가능"</string>
+    <string name="power_discharge_by" msgid="6052127431194780229">"<xliff:g id="TIME">%1$s</xliff:g> 정도까지 사용 가능(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="4850425421176271395">"<xliff:g id="TIME">%1$s</xliff:g> 정도까지 사용 가능"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g> 미만 남음"</string>
-    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
-    <skip />
+    <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"<xliff:g id="THRESHOLD">%1$s</xliff:g> 미만 남음(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> 이상 남음(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> 이상 남음"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"휴대전화가 곧 종료될 수 있음"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"태블릿이 곧 종료될 수 있음"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"기기가 곧 종료될 수 있음"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"휴대전화가 곧 종료될 수 있음(<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"태블릿이 곧 종료될 수 있음(<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"기기가 곧 종료될 수 있음(<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"충전 완료까지 <xliff:g id="TIME">%1$s</xliff:g> 남음"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - 충전 완료까지 <xliff:g id="TIME">%2$s</xliff:g> 남음"</string>
@@ -440,8 +422,9 @@
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"시간 늘리기"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"시간 줄이기"</string>
-    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"켜기"</string>
     <string name="cancel" msgid="6859253417269739139">"취소"</string>
+    <string name="okay" msgid="1997666393121016642">"확인"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"켜기"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"알림 일시중지 사용 설정"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"사용 안함"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"중요 알림만"</string>
@@ -450,4 +433,6 @@
     <string name="zen_alarm_warning" msgid="6236690803924413088">"<xliff:g id="WHEN">%1$s</xliff:g>에 다음 알람을 들을 수 없습니다."</string>
     <string name="alarm_template" msgid="4996153414057676512">"시간: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"일시: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"지속 시간"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"항상 확인"</string>
 </resources>

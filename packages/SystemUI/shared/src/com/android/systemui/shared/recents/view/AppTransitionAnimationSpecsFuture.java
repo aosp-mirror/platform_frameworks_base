@@ -49,6 +49,10 @@ public abstract class AppTransitionAnimationSpecsFuture {
                     mHandler.post(mComposeTask);
                 }
                 List<AppTransitionAnimationSpecCompat> specs = mComposeTask.get();
+                // Clear reference to the compose task this future holds onto the reference to it's
+                // implementation (which can leak references to the bitmap it creates for the
+                // transition)
+                mComposeTask = null;
                 if (specs == null) {
                     return null;
                 }

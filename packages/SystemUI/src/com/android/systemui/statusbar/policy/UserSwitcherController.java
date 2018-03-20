@@ -83,12 +83,7 @@ public class UserSwitcherController {
     private static final boolean DEBUG = false;
     private static final String SIMPLE_USER_SWITCHER_GLOBAL_SETTING =
             "lockscreenSimpleUserSwitcher";
-    private static final String ACTION_REMOVE_GUEST = "com.android.systemui.REMOVE_GUEST";
-    private static final String ACTION_LOGOUT_USER = "com.android.systemui.LOGOUT_USER";
     private static final int PAUSE_REFRESH_USERS_TIMEOUT_MS = 3000;
-
-    private static final String TAG_REMOVE_GUEST = "remove_guest";
-    private static final String TAG_LOGOUT_USER = "logout_user";
 
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
 
@@ -134,8 +129,6 @@ public class UserSwitcherController {
         mSecondaryUserServiceIntent = new Intent(context, SystemUISecondaryUserService.class);
 
         filter = new IntentFilter();
-        filter.addAction(ACTION_REMOVE_GUEST);
-        filter.addAction(ACTION_LOGOUT_USER);
         mContext.registerReceiverAsUser(mReceiver, UserHandle.SYSTEM, filter,
                 PERMISSION_SELF, null /* scheduler */);
 
@@ -471,11 +464,6 @@ public class UserSwitcherController {
             if (mCallState == state) return;
             if (DEBUG) Log.v(TAG, "Call state changed: " + state);
             mCallState = state;
-            int currentUserId = ActivityManager.getCurrentUser();
-            UserInfo userInfo = mUserManager.getUserInfo(currentUserId);
-            if (userInfo != null && userInfo.isGuest()) {
-                showGuestNotification(currentUserId);
-            }
             refreshUsers(UserHandle.USER_NULL);
         }
     };
@@ -491,16 +479,7 @@ public class UserSwitcherController {
             boolean unpauseRefreshUsers = false;
             int forcePictureLoadForId = UserHandle.USER_NULL;
 
-            if (ACTION_REMOVE_GUEST.equals(intent.getAction())) {
-                int currentUser = ActivityManager.getCurrentUser();
-                UserInfo userInfo = mUserManager.getUserInfo(currentUser);
-                if (userInfo != null && userInfo.isGuest()) {
-                    showExitGuestDialog(currentUser);
-                }
-                return;
-            } else if (ACTION_LOGOUT_USER.equals(intent.getAction())) {
-                logoutCurrentUser();
-            } else if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
+            if (Intent.ACTION_USER_SWITCHED.equals(intent.getAction())) {
                 if (mExitGuestDialog != null && mExitGuestDialog.isShowing()) {
                     mExitGuestDialog.cancel();
                     mExitGuestDialog = null;
@@ -540,14 +519,6 @@ public class UserSwitcherController {
                             UserHandle.of(userInfo.id));
                     mSecondaryUser = userInfo.id;
                 }
-
-                if (UserManager.isSplitSystemUser() && userInfo != null && !userInfo.isGuest()
-                        && userInfo.id != UserHandle.USER_SYSTEM) {
-                    showLogoutNotification(currentId);
-                }
-                if (userInfo != null && userInfo.isGuest()) {
-                    showGuestNotification(currentId);
-                }
                 unpauseRefreshUsers = true;
             } else if (Intent.ACTION_USER_INFO_CHANGED.equals(intent.getAction())) {
                 forcePictureLoadForId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
@@ -564,51 +535,7 @@ public class UserSwitcherController {
                 mUnpauseRefreshUsers.run();
             }
         }
-
-        private void showLogoutNotification(int userId) {
-            PendingIntent logoutPI = PendingIntent.getBroadcastAsUser(mContext,
-                    0, new Intent(ACTION_LOGOUT_USER), 0, UserHandle.SYSTEM);
-            Notification.Builder builder =
-                    new Notification.Builder(mContext, NotificationChannels.GENERAL)
-                            .setVisibility(Notification.VISIBILITY_SECRET)
-                            .setSmallIcon(R.drawable.ic_person)
-                            .setContentTitle(mContext.getString(
-                                    R.string.user_logout_notification_title))
-                            .setContentText(mContext.getString(
-                                    R.string.user_logout_notification_text))
-                            .setContentIntent(logoutPI)
-                            .setOngoing(true)
-                            .setShowWhen(false)
-                            .addAction(R.drawable.ic_delete,
-                                    mContext.getString(R.string.user_logout_notification_action),
-                                    logoutPI);
-            SystemUI.overrideNotificationAppName(mContext, builder);
-            NotificationManager.from(mContext).notifyAsUser(TAG_LOGOUT_USER,
-                    SystemMessage.NOTE_LOGOUT_USER, builder.build(), new UserHandle(userId));
-        }
     };
-
-    private void showGuestNotification(int guestUserId) {
-        boolean canSwitchUsers = mUserManager.canSwitchUsers();
-        // Disable 'Remove guest' action if cannot switch users right now
-        PendingIntent removeGuestPI = canSwitchUsers ? PendingIntent.getBroadcastAsUser(mContext,
-                0, new Intent(ACTION_REMOVE_GUEST), 0, UserHandle.SYSTEM) : null;
-
-        Notification.Builder builder =
-                new Notification.Builder(mContext, NotificationChannels.GENERAL)
-                        .setVisibility(Notification.VISIBILITY_SECRET)
-                        .setSmallIcon(R.drawable.ic_person)
-                        .setContentTitle(mContext.getString(R.string.guest_notification_title))
-                        .setContentText(mContext.getString(R.string.guest_notification_text))
-                        .setContentIntent(removeGuestPI)
-                        .setShowWhen(false)
-                        .addAction(R.drawable.ic_delete,
-                                mContext.getString(R.string.guest_notification_remove_action),
-                                removeGuestPI);
-        SystemUI.overrideNotificationAppName(mContext, builder);
-        NotificationManager.from(mContext).notifyAsUser(TAG_REMOVE_GUEST,
-                SystemMessage.NOTE_REMOVE_GUEST, builder.build(), new UserHandle(guestUserId));
-    }
 
     private final Runnable mUnpauseRefreshUsers = new Runnable() {
         @Override

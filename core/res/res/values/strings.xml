@@ -319,9 +319,9 @@
     <!-- A notification is shown when there is a sync error.  This is the text that will scroll through the notification bar (will be seen by the user as he uses another application). -->
     <string name="contentServiceSync">Sync</string>
     <!-- A notification is shown when there is a sync error.  This is the title of the notification.  It will be seen in the pull-down notification tray. -->
-    <string name="contentServiceSyncNotificationTitle">Sync</string>
+    <string name="contentServiceSyncNotificationTitle">Can\'t sync</string>
     <!-- A notification is shown when there is a sync error.  This is the message of the notification.  It describes the error, in this case is there were too many deletes. The argument is the type of content, for example Gmail or Calendar. It will be seen in the pull-down notification tray. -->
-    <string name="contentServiceTooManyDeletesNotificationDesc">Too many <xliff:g id="content_type">%s</xliff:g> deletes.</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc">Attempted to delete too many <xliff:g id="content_type">%s</xliff:g>.</string>
 
     <!-- If MMS discovers there isn't much space left on the device, it will show a toast with this message. -->
     <string name="low_memory" product="tablet">Tablet storage is full. Delete some files to free space.</string>
@@ -670,7 +670,7 @@
     <string name="permgroupdesc_contacts">access your contacts</string>
     <!-- Message shown to the user when the apps requests permission from this group -->
     <string name="permgrouprequest_contacts">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access your contacts</string>
+        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access your contacts?</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_location">Location</string>
@@ -678,7 +678,7 @@
     <string name="permgroupdesc_location">access this device\'s location</string>
     <!-- Message shown to the user when the apps requests permission from this group -->
     <string name="permgrouprequest_location">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access this device\'s location</string>
+        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access this device\'s location?</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_calendar">Calendar</string>
@@ -686,7 +686,7 @@
     <string name="permgroupdesc_calendar">access your calendar</string>
     <!-- Message shown to the user when the apps requests permission from this group -->
     <string name="permgrouprequest_calendar">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access your calendar</string>
+        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access your calendar?</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_sms">SMS</string>
@@ -694,7 +694,7 @@
     <string name="permgroupdesc_sms">send and view SMS messages</string>
     <!-- Message shown to the user when the apps requests permission from this group -->
     <string name="permgrouprequest_sms">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to send and view SMS messages</string>
+        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to send and view SMS messages?</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_storage">Storage</string>
@@ -702,7 +702,7 @@
     <string name="permgroupdesc_storage">access photos, media, and files on your device</string>
     <!-- Message shown to the user when the apps requests permission from this group -->
     <string name="permgrouprequest_storage">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access photos, media, and files on your device</string>
+        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access photos, media, and files on your device?</string>
 
     <!-- Title of a category of application permissioncds, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_microphone">Microphone</string>
@@ -710,7 +710,7 @@
     <string name="permgroupdesc_microphone">record audio</string>
     <!-- Message shown to the user when the apps requests permission from this group -->
     <string name="permgrouprequest_microphone">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to record audio</string>
+        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to record audio?</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_camera">Camera</string>
@@ -718,7 +718,7 @@
     <string name="permgroupdesc_camera">take pictures and record video</string>
     <!-- Message shown to the user when the apps requests permission from this group -->
     <string name="permgrouprequest_camera">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to take pictures and record video</string>
+        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to take pictures and record video?</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_phone">Phone</string>
@@ -726,7 +726,7 @@
     <string name="permgroupdesc_phone">make and manage phone calls</string>
     <!-- Message shown to the user when the apps requests permission from this group -->
     <string name="permgrouprequest_phone">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to make and manage phone calls</string>
+        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to make and manage phone calls?</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_sensors">Body Sensors</string>
@@ -734,7 +734,7 @@
     <string name="permgroupdesc_sensors">access sensor data about your vital signs</string>
     <!-- Message shown to the user when the apps requests permission from this group -->
     <string name="permgrouprequest_sensors">Allow
-        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access sensor data about your vital signs</string>
+        &lt;b><xliff:g id="app_name" example="Gmail">%1$s</xliff:g>&lt;/b> to access sensor data about your vital signs?</string>
 
     <!-- Title for the capability of an accessibility service to retrieve window content. -->
     <string name="capability_title_canRetrieveWindowContent">Retrieve window content</string>
@@ -3007,8 +3007,7 @@
         limit</string>
 
     <!-- Notification details to tell the user that a process has exceeded its memory limit. -->
-    <string name="dump_heap_notification_detail">Heap dump has been collected;
-        tap to share</string>
+    <string name="dump_heap_notification_detail">Heap dump collected. Tap to share.</string>
 
     <!-- Title of dialog prompting the user to share a heap dump. -->
     <string name="dump_heap_title">Share heap dump?</string>
@@ -3574,7 +3573,7 @@
     <string name="vpn_lockdown_disconnected">Disconnected from always-on VPN</string>
     <!-- Notification title when error connecting to always-on VPN, a VPN that's set to always stay
          connected. -->
-    <string name="vpn_lockdown_error">Always-on VPN error</string>
+    <string name="vpn_lockdown_error">Couldn\'t connect to always-on VPN</string>
     <!-- Notification body that indicates user can touch to configure always-on VPN, a VPN that's
          set to always stay connected. -->
     <string name="vpn_lockdown_config">Change network or VPN settings</string>
@@ -3591,8 +3590,8 @@
 
     <!-- Strings for car mode notification -->
     <!-- Shown when car mode is enabled -->
-    <string name="car_mode_disable_notification_title">Car mode enabled</string>
-    <string name="car_mode_disable_notification_message">Tap to exit car mode.</string>
+    <string name="car_mode_disable_notification_title">Driving app is running</string>
+    <string name="car_mode_disable_notification_message">Tap to exit driving app.</string>
 
     <!-- Strings for tethered notification -->
     <!-- Shown when the device is tethered -->
@@ -4901,4 +4900,9 @@
     <string name="zen_upgrade_notification_title">Do Not Disturb has changed</string>
     <!-- Content of notification indicating users can tap on the notification to go to dnd behavior settings -->
     <string name="zen_upgrade_notification_content">Tap to check what\'s blocked.</string>
+
+    <!-- Application name displayed in notifications [CHAR LIMIT=60] -->
+    <string name="notification_app_name_system">System</string>
+    <!-- Application name displayed in notifications [CHAR LIMIT=60] -->
+    <string name="notification_app_name_settings">Settings</string>
 </resources>

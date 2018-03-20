@@ -1016,6 +1016,7 @@ doc_defaults {
     ],
     resourcesdir: "docs/html/reference/images",
     resourcesoutdir: "reference/android/images",
+    installable: false,
 }
 
 droiddoc {
@@ -1027,14 +1028,9 @@ droiddoc {
         "core/java/overview.html",
         ":current-support-api",
     ],
-    args: framework_docs_args +
-          "-referenceonly -api $(genDir)/PACKAGING/public_api.txt -privateApi $(genDir)/PACKAGING/private.txt "+
-          "-privateDexApi $(genDir)/PACKAGING/private-dex.txt -removedApi $(genDir)/PACKAGING/removed.txt -nodocs",
-    out: [
-        "PACKAGING/public_api.txt",
-        "PACKAGING/private.txt",
-        "PACKAGING/private-dex.txt",
-    ]
+    api_filename: "public_api.txt",
+    removed_api_filename: "removed.txt",
+    args: framework_docs_args + " -referenceonly -nodocs",
 }
 
 droiddoc {
@@ -1046,16 +1042,11 @@ droiddoc {
         "core/java/overview.html",
         ":current-support-api",
     ],
-    args: framework_docs_args +
-          "-referenceonly -showAnnotation android.annotation.SystemApi " +
-          "-api $(genDir)/PACKAGING/system-api.txt -privateApi $(genDir)/PACKAGING/system-private.txt " +
-          "-privateDexApi $(genDir)/PACKAGING/system-private-dex.txt -removedApi $(genDir)/PACKAGING/system-removed.txt " +
-          "-exactApi $(genDir)/PACKAGING/system-exact.txt -nodocs",
-    out: [
-        "PACKAGING/system-api.txt",
-        "PACKAGING/system-private.txt",
-        "PACKAGING/system-private-dex.txt",
-    ]
+    api_tag_name: "SYSTEM",
+    api_filename: "system-api.txt",
+    removed_api_filename: "system-removed.txt",
+    exact_api_filename: "system-exact.txt",
+    args: framework_docs_args + " -referenceonly -showAnnotation android.annotation.SystemApi -nodocs",
 }
 
 droiddoc {
@@ -1067,12 +1058,9 @@ droiddoc {
         "core/java/overview.html",
         ":current-support-api",
     ],
-    args: framework_docs_args +
-          "-referenceonly -showAnnotation android.annotation.TestApi " +
-          "-api $(genDir)/PACKAGING/test-api.txt " +
-          "-removedApi $(genDir)/PACKAGING/test-removed.txt " +
-          "-exactApi $(genDir)/PACKAGING/test-exact.txt -nodocs",
-    out: [
-        "PACKAGING/test-api.txt",
-    ]
+    api_tag_name: "TEST",
+    api_filename: "test-api.txt",
+    removed_api_filename: "test-removed.txt",
+    exact_api_filename: "test-exact.txt",
+    args: framework_docs_args + " -referenceonly -showAnnotation android.annotation.TestApi -nodocs",
 }

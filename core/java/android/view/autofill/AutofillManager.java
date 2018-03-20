@@ -1413,7 +1413,7 @@ public final class AutofillManager {
      */
     public boolean isAutofillUiShowing() {
         final AutofillClient client = mContext.getAutofillClient();
-        return client != null & client.autofillClientIsFillUiShowing();
+        return client != null && client.autofillClientIsFillUiShowing();
     }
 
     /** @hide */
@@ -2540,6 +2540,10 @@ public final class AutofillManager {
             ArraySet<AutofillId> updatedVisibleTrackedIds = null;
             ArraySet<AutofillId> updatedInvisibleTrackedIds = null;
             if (client != null) {
+                if (sVerbose) {
+                    Log.v(TAG, "onVisibleForAutofillChangedLocked(): inv= " + mInvisibleTrackedIds
+                            + " vis=" + mVisibleTrackedIds);
+                }
                 if (mInvisibleTrackedIds != null) {
                     final ArrayList<AutofillId> orderedInvisibleIds =
                             new ArrayList<>(mInvisibleTrackedIds);

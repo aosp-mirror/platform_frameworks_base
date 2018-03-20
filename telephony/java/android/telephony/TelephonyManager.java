@@ -1462,6 +1462,7 @@ public class TelephonyManager {
      * {@hide}
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public int getCurrentPhoneType() {
         return getCurrentPhoneType(getSubId());
     }
@@ -1477,7 +1478,17 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public int getCurrentPhoneType(int subId) {
+        return getCurrentPhoneType(subId, false);
+    }
+
+    /**
+     * getCurrentPhoneType() with optional check if device is voice capable.
+     *
+     * @hide
+     */
+    public int getCurrentPhoneType(int subId, boolean checkIsVoiceCapable) {
         int phoneId;
         if (subId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
             // if we don't have any sims, we don't have subscriptions, but we
@@ -1486,8 +1497,7 @@ public class TelephonyManager {
         } else {
             phoneId = SubscriptionManager.getPhoneId(subId);
         }
-
-        return getCurrentPhoneTypeForSlot(phoneId);
+        return getCurrentPhoneTypeForSlot(phoneId, checkIsVoiceCapable);
     }
 
     /**
@@ -1495,11 +1505,15 @@ public class TelephonyManager {
      *
      * @hide
      */
-    public int getCurrentPhoneTypeForSlot(int slotIndex) {
+    public int getCurrentPhoneTypeForSlot(int slotIndex, boolean checkIsVoiceCapable) {
         try{
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                return telephony.getActivePhoneTypeForSlot(slotIndex);
+                if (checkIsVoiceCapable) {
+                    return telephony.getVoiceCapableActivePhoneTypeForSlot(slotIndex);
+                } else {
+                    return telephony.getActivePhoneTypeForSlot(slotIndex);
+                }
             } else {
                 // This can happen when the ITelephony interface is not up yet.
                 return getPhoneTypeFromProperty(slotIndex);
@@ -1525,10 +1539,7 @@ public class TelephonyManager {
      * @see #PHONE_TYPE_SIP
      */
     public int getPhoneType() {
-        if (!isVoiceCapable()) {
-            return PHONE_TYPE_NONE;
-        }
-        return getCurrentPhoneType();
+        return getCurrentPhoneType(getSubId(), true);
     }
 
     private int getPhoneTypeFromProperty() {
@@ -1783,11 +1794,17 @@ public class TelephonyManager {
      * invalid subscription ID is pinned to the TelephonyManager, the returned config will contain
      * default values.
      *
+     * <p>This method may take several seconds to complete, so it should only be called from a
+     * worker thread.
+     *
+     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
      * @see CarrierConfigManager#getConfigForSubId(int)
      * @see #createForSubscriptionId(int)
      * @see #createForPhoneAccountHandle(PhoneAccountHandle)
      */
-    // TODO(b/73136824, b/70041899): Permit carrier-privileged callers as well.
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @WorkerThread
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public PersistableBundle getCarrierConfig() {
@@ -1872,47 +1889,52 @@ public class TelephonyManager {
     /*
      * When adding a network type to the list below, make sure to add the correct icon to
      * MobileSignalController.mapIconSets().
+     * Do not add negative types.
      */
     /** Network type is unknown */
-    public static final int NETWORK_TYPE_UNKNOWN = 0;
+    public static final int NETWORK_TYPE_UNKNOWN = TelephonyProtoEnums.NETWORK_TYPE_UNKNOWN; // = 0.
     /** Current network is GPRS */
-    public static final int NETWORK_TYPE_GPRS = 1;
+    public static final int NETWORK_TYPE_GPRS = TelephonyProtoEnums.NETWORK_TYPE_GPRS; // = 1.
     /** Current network is EDGE */
-    public static final int NETWORK_TYPE_EDGE = 2;
+    public static final int NETWORK_TYPE_EDGE = TelephonyProtoEnums.NETWORK_TYPE_EDGE; // = 2.
     /** Current network is UMTS */
-    public static final int NETWORK_TYPE_UMTS = 3;
+    public static final int NETWORK_TYPE_UMTS = TelephonyProtoEnums.NETWORK_TYPE_UMTS; // = 3.
     /** Current network is CDMA: Either IS95A or IS95B*/
-    public static final int NETWORK_TYPE_CDMA = 4;
+    public static final int NETWORK_TYPE_CDMA = TelephonyProtoEnums.NETWORK_TYPE_CDMA; // = 4.
     /** Current network is EVDO revision 0*/
-    public static final int NETWORK_TYPE_EVDO_0 = 5;
+    public static final int NETWORK_TYPE_EVDO_0 = TelephonyProtoEnums.NETWORK_TYPE_EVDO_0; // = 5.
     /** Current network is EVDO revision A*/
-    public static final int NETWORK_TYPE_EVDO_A = 6;
+    public static final int NETWORK_TYPE_EVDO_A = TelephonyProtoEnums.NETWORK_TYPE_EVDO_A; // = 6.
     /** Current network is 1xRTT*/
-    public static final int NETWORK_TYPE_1xRTT = 7;
+    public static final int NETWORK_TYPE_1xRTT = TelephonyProtoEnums.NETWORK_TYPE_1XRTT; // = 7.
     /** Current network is HSDPA */
-    public static final int NETWORK_TYPE_HSDPA = 8;
+    public static final int NETWORK_TYPE_HSDPA = TelephonyProtoEnums.NETWORK_TYPE_HSDPA; // = 8.
     /** Current network is HSUPA */
-    public static final int NETWORK_TYPE_HSUPA = 9;
+    public static final int NETWORK_TYPE_HSUPA = TelephonyProtoEnums.NETWORK_TYPE_HSUPA; // = 9.
     /** Current network is HSPA */
-    public static final int NETWORK_TYPE_HSPA = 10;
+    public static final int NETWORK_TYPE_HSPA = TelephonyProtoEnums.NETWORK_TYPE_HSPA; // = 10.
     /** Current network is iDen */
-    public static final int NETWORK_TYPE_IDEN = 11;
+    public static final int NETWORK_TYPE_IDEN = TelephonyProtoEnums.NETWORK_TYPE_IDEN; // = 11.
     /** Current network is EVDO revision B*/
-    public static final int NETWORK_TYPE_EVDO_B = 12;
+    public static final int NETWORK_TYPE_EVDO_B = TelephonyProtoEnums.NETWORK_TYPE_EVDO_B; // = 12.
     /** Current network is LTE */
-    public static final int NETWORK_TYPE_LTE = 13;
+    public static final int NETWORK_TYPE_LTE = TelephonyProtoEnums.NETWORK_TYPE_LTE; // = 13.
     /** Current network is eHRPD */
-    public static final int NETWORK_TYPE_EHRPD = 14;
+    public static final int NETWORK_TYPE_EHRPD = TelephonyProtoEnums.NETWORK_TYPE_EHRPD; // = 14.
     /** Current network is HSPA+ */
-    public static final int NETWORK_TYPE_HSPAP = 15;
+    public static final int NETWORK_TYPE_HSPAP = TelephonyProtoEnums.NETWORK_TYPE_HSPAP; // = 15.
     /** Current network is GSM */
-    public static final int NETWORK_TYPE_GSM = 16;
+    public static final int NETWORK_TYPE_GSM = TelephonyProtoEnums.NETWORK_TYPE_GSM; // = 16.
     /** Current network is TD_SCDMA */
-    public static final int NETWORK_TYPE_TD_SCDMA = 17;
+    public static final int NETWORK_TYPE_TD_SCDMA =
+            TelephonyProtoEnums.NETWORK_TYPE_TD_SCDMA; // = 17.
     /** Current network is IWLAN */
-    public static final int NETWORK_TYPE_IWLAN = 18;
+    public static final int NETWORK_TYPE_IWLAN = TelephonyProtoEnums.NETWORK_TYPE_IWLAN; // = 18.
     /** Current network is LTE_CA {@hide} */
-    public static final int NETWORK_TYPE_LTE_CA = 19;
+    public static final int NETWORK_TYPE_LTE_CA = TelephonyProtoEnums.NETWORK_TYPE_LTE_CA; // = 19.
+
+    /** Max network type number. Update as new types are added. Don't add negative types. {@hide} */
+    public static final int MAX_NETWORK_TYPE = NETWORK_TYPE_LTE_CA;
     /**
      * @return the NETWORK_TYPE_xxxx for current data connection.
      */
@@ -5857,12 +5879,14 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public List<String> getCarrierPackageNamesForIntent(Intent intent) {
         return getCarrierPackageNamesForIntentAndPhone(intent, getPhoneId());
     }
 
     /** @hide */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public List<String> getCarrierPackageNamesForIntentAndPhone(Intent intent, int phoneId) {
         try {
             ITelephony telephony = getITelephony();
@@ -5972,7 +5996,11 @@ public class TelephonyManager {
         }
     }
 
-    /** @hide */
+    /**
+     * @deprecated Use {@link android.telecom.TelecomManager#isInCall} instead
+     * @hide
+     */
+    @Deprecated
     @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
@@ -5989,7 +6017,11 @@ public class TelephonyManager {
         return false;
     }
 
-    /** @hide */
+    /**
+     * @deprecated Use {@link android.telecom.TelecomManager#isRinging} instead
+     * @hide
+     */
+    @Deprecated
     @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
@@ -6006,7 +6038,11 @@ public class TelephonyManager {
         return false;
     }
 
-    /** @hide */
+    /**
+     * @deprecated Use {@link android.telecom.TelecomManager#isInCall} instead
+     * @hide
+     */
+    @Deprecated
     @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
@@ -6023,7 +6059,11 @@ public class TelephonyManager {
         return true;
     }
 
-    /** @hide */
+    /**
+     * @deprecated Use {@link android.telephony.TelephonyManager#getServiceState} instead
+     * @hide
+     */
+    @Deprecated
     @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
@@ -6314,6 +6354,7 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isDataConnectivityPossible() {
         try {
             ITelephony telephony = getITelephony();
@@ -6328,6 +6369,7 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean needsOtaServiceProvisioning() {
         try {
             ITelephony telephony = getITelephony();
@@ -6430,10 +6472,7 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
-    @RequiresPermission(anyOf = {
-            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
-            android.Manifest.permission.READ_PHONE_STATE
-    })
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isVideoCallingEnabled() {
         try {
             ITelephony telephony = getITelephony();

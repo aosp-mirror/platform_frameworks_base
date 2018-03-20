@@ -35,7 +35,6 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.DisplayMetrics;
@@ -1185,6 +1184,11 @@ public class AppWidgetManager {
      * <p>It's up to the launcher how to handle previous pending requests when the same package
      * calls this API multiple times in a row.  It may ignore the previous requests,
      * for example.
+     *
+     * <p>Launcher will not show the configuration activity associated with the provider in this
+     * case. The app could either show the configuration activity as a response to the callback,
+     * or show if before calling the API (various configurations can be encapsulated in
+     * {@code successCallback} to avoid persisting them before the widgetId is known).
      *
      * @param provider The {@link ComponentName} for the {@link
      *    android.content.BroadcastReceiver BroadcastReceiver} provider for your AppWidget.

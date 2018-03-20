@@ -205,7 +205,12 @@ public class SystemProperties {
             }
             ArrayList<Runnable> callbacks = new ArrayList<Runnable>(sChangeCallbacks);
             for (int i=0; i<callbacks.size(); i++) {
-                callbacks.get(i).run();
+                try {
+                    callbacks.get(i).run();
+                } catch (Throwable t) {
+                    Log.wtf(TAG, "Exception in SystemProperties change callback", t);
+                    // Ignore and try to go on.
+                }
             }
         }
     }

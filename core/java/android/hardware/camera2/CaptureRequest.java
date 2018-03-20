@@ -808,7 +808,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          *
          *<p>This method can be called for logical camera devices, which are devices that have
          * REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA capability and calls to
-         * {@link CameraCharacteristics#getPhysicalCameraIds} return a non-empty list of
+         * {@link CameraCharacteristics#getPhysicalCameraIds} return a non-empty set of
          * physical devices that are backing the logical camera. The camera Id included in the
          * 'physicalCameraId' argument selects an individual physical device that will receive
          * the customized capture request field.</p>

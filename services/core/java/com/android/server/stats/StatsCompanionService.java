@@ -177,7 +177,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
         mKernelUidCpuFreqTimeReader.setThrottleInterval(0);
         long[] freqs = mKernelUidCpuFreqTimeReader.readFreqs(powerProfile);
-        mKernelUidCpuFreqTimeReader.setReadBinary(true);
         mKernelUidCpuClusterTimeReader.setThrottleInterval(0);
         mKernelUidCpuActiveTimeReader.setThrottleInterval(0);
     }

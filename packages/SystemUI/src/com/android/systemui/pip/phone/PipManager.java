@@ -133,6 +133,13 @@ public class PipManager implements BasePipManager {
         }
 
         @Override
+        public void onShelfVisibilityChanged(boolean shelfVisible, int shelfHeight) {
+            mHandler.post(() -> {
+               mTouchHandler.onShelfVisibilityChanged(shelfVisible, shelfHeight);
+            });
+        }
+
+        @Override
         public void onMinimizedStateChanged(boolean isMinimized) {
             mHandler.post(() -> {
                 mTouchHandler.setMinimizedState(isMinimized, true /* fromController */);
@@ -141,10 +148,11 @@ public class PipManager implements BasePipManager {
 
         @Override
         public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds,
-                Rect animatingBounds, boolean fromImeAdjustement, int displayRotation) {
+                Rect animatingBounds, boolean fromImeAdjustment, boolean fromShelfAdjustment,
+                int displayRotation) {
             mHandler.post(() -> {
                 mTouchHandler.onMovementBoundsChanged(insetBounds, normalBounds, animatingBounds,
-                        fromImeAdjustement, displayRotation);
+                        fromImeAdjustment, fromShelfAdjustment, displayRotation);
             });
         }
 

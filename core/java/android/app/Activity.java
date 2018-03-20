@@ -657,13 +657,13 @@ import java.util.List;
  * <a name="ProcessLifecycle"></a>
  * <h3>Process Lifecycle</h3>
  *
- * <p>The Android system attempts to keep application process around for as
+ * <p>The Android system attempts to keep an application process around for as
  * long as possible, but eventually will need to remove old processes when
- * memory runs low.  As described in <a href="#ActivityLifecycle">Activity
+ * memory runs low. As described in <a href="#ActivityLifecycle">Activity
  * Lifecycle</a>, the decision about which process to remove is intimately
- * tied to the state of the user's interaction with it.  In general, there
+ * tied to the state of the user's interaction with it. In general, there
  * are four states a process can be in based on the activities running in it,
- * listed here in order of importance.  The system will kill less important
+ * listed here in order of importance. The system will kill less important
  * processes (the last ones) before it resorts to killing more important
  * processes (the first ones).
  *

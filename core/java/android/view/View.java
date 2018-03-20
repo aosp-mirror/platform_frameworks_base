@@ -8910,7 +8910,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 if (node != null) {
                     return node.isVisibleToUser();
                 }
+                // if node is null, assume it's not visible anymore
+            } else {
+                Log.w(VIEW_LOG_TAG, "isVisibleToUserForAutofill(" + virtualId + "): no provider");
             }
+            return false;
         }
         return true;
     }

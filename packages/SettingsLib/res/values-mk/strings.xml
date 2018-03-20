@@ -220,8 +220,7 @@
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Приватен DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Изберете режим на приватен DNS"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Исклучено"</string>
-    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
-    <skip />
+    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Автоматски"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Име на хост на оператор на приватен DNS"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Внесете име на хост на операторот на DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Покажи ги опциите за безжичен приказ на сертификат"</string>
@@ -274,8 +273,8 @@
     <string name="show_touches_summary" msgid="6101183132903926324">"Прикажи визуелни повратни информации за допири"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Прикажи ажурир. површина"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Осветли површ. на прозорци при нивно ажурирање"</string>
-    <string name="show_hw_screen_updates" msgid="5036904558145941590">"Прикажи ажурир. со GPU"</string>
-    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Осветли прегледи во прозорците при цртање со GPU"</string>
+    <string name="show_hw_screen_updates" msgid="4117270979975470789">"Прикажи ажурирања на прегледи"</string>
+    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"Осветли прегледи во прозорците при цртање"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Ажурир. слоеви на хардвер"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Осветли слоеви на хардвер со зелено кога се ажур."</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Отстр. греш. на GPU"</string>
@@ -289,12 +288,10 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"Прикажи граници на клип, маргини, итн."</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Сила на RTL за насока на слој"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Присилно постави насока на распоред на екран во РТЛ за сите локални стандарди"</string>
-    <string name="force_hw_ui" msgid="6426383462520888732">"Присили рендерирање на GPU"</string>
-    <string name="force_hw_ui_summary" msgid="5535991166074861515">"Присилно користење на GPU за цртеж 2D"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Сила 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"Овозможи 4x MSAA за апликации OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Отстрани грешка на неправоаголни клип операции"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"Прикажување пофил на GPU"</string>
+    <string name="track_frame_time" msgid="6094365083096851167">"HWUI-прикажување профил"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"Овозм. отстр. греш. на GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"Дозволи отстр. греш. на GPU за поправање апликации"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"Опсег на аним. на прозор."</string>
@@ -305,8 +302,8 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Не чувај активности"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Уништи ја секоја активност штом корисникот ќе го остави"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Граница на процес во зад."</string>
-    <string name="show_all_anrs" msgid="28462979638729082">"Прикажи ги сите ANR"</string>
-    <string name="show_all_anrs_summary" msgid="641908614413544127">"Прикажи „Апл. не реагира“ за. апл. во заднина"</string>
+    <string name="show_all_anrs" msgid="4924885492787069007">"Прикажи заднински ANR"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Прикажи го дијалогот „Апликацијата не реагира“ за апликации во заднина"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Прикажи ги предупредувањата на каналот за известувањe"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Предупредува кога апликација дава известување без важечки канал"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Принуд. дозволете апликации на надворешна меморија"</string>
@@ -357,39 +354,24 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Функцијата е експериментална и може да влијае на изведбата."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"Прескокнато според <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"Преостануваат околу <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="6655472132189365839">"Уште околу <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Уште околу <xliff:g id="TIME">%1$s</xliff:g> според користењето"</string>
-    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
-    <skip />
+    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"Уште околу <xliff:g id="TIME">%1$s</xliff:g> според вашето користење (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"уште <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
-    <skip />
-    <!-- no translation found for power_discharge_by (6427074755635635749) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
-    <skip />
+    <string name="power_discharge_by_enhanced" msgid="8305422490607220844">"Ќе трае до околу <xliff:g id="TIME">%1$s</xliff:g> според вашето користење (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="896515698736070025">"Ќе трае до околу <xliff:g id="TIME">%1$s</xliff:g> според вашето користење"</string>
+    <string name="power_discharge_by" msgid="6052127431194780229">"Ќе трае до околу <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="4850425421176271395">"Ќе трае до околу <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Уште помалку од <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
-    <skip />
+    <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Уште помалку од <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Уште повеќе од <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"Уште повеќе од <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"Телефон може да се исклучи наскоро"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"Таблетот може да се исклучи наскоро"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"Уредот може да се исклучи наскоро"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"Телефон може да се исклучи наскоро (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"Таблетот може да се исклучи наскоро (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"Уредот може да се исклучи наскоро (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"Преостануваат <xliff:g id="TIME">%1$s</xliff:g> дури се наполни целосно"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> дури се наполни целосно"</string>
@@ -440,8 +422,9 @@
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Повеќе време."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Помалку време."</string>
-    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Вклучи"</string>
     <string name="cancel" msgid="6859253417269739139">"Откажи"</string>
+    <string name="okay" msgid="1997666393121016642">"Во ред"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Вклучи"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"Исклучување на „Не вознемирувај“"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Никогаш"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Само приоритетно"</string>
@@ -450,4 +433,6 @@
     <string name="zen_alarm_warning" msgid="6236690803924413088">"Нема да се вклучи следниот аларм <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="4996153414057676512">"во <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"во <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Времетраење"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Секогаш прашувај"</string>
 </resources>

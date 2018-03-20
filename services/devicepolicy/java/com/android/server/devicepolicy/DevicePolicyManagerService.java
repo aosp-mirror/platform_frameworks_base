@@ -566,7 +566,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         @NonNull PasswordMetrics mActivePasswordMetrics = new PasswordMetrics();
         int mFailedPasswordAttempts = 0;
         boolean mPasswordStateHasBeenSetSinceBoot = false;
-        boolean mPasswordValidAtLastCheckpoint = false;
+        boolean mPasswordValidAtLastCheckpoint = true;
 
         int mUserHandle;
         int mPasswordOwner = -1;
@@ -3887,23 +3887,28 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final PasswordMetrics metrics = ap.minimumPasswordMetrics;
             if (metrics.quality != quality) {
                 metrics.quality = quality;
-                updatePasswordValidityCheckpointLocked(userId);
-                saveSettingsLocked(userId);
+                updatePasswordValidityCheckpointLocked(userId, parent);
             }
             maybeLogPasswordComplexitySet(who, userId, parent, metrics);
         }
     }
 
     /**
-     * Updates flag in memory that tells us whether the user's password currently satisfies the
-     * requirements set by all of the user's active admins.  This should be called before
-     * {@link #saveSettingsLocked} whenever the password or the admin policies have changed.
+     * Updates a flag that tells us whether the user's password currently satisfies the
+     * requirements set by all of the user's active admins. The flag is updated both in memory
+     * and persisted to disk by calling {@link #saveSettingsLocked}, for the value of the flag
+     * be the correct one upon boot.
+     * This should be called whenever the password or the admin policies have changed.
      */
     @GuardedBy("DevicePolicyManagerService.this")
-    private void updatePasswordValidityCheckpointLocked(int userHandle) {
-        DevicePolicyData policy = getUserData(userHandle);
-        policy.mPasswordValidAtLastCheckpoint = isActivePasswordSufficientForUserLocked(
-                policy, policy.mUserHandle, false);
+    private void updatePasswordValidityCheckpointLocked(int userHandle, boolean parent) {
+        final int credentialOwner = getCredentialOwner(userHandle, parent);
+        DevicePolicyData policy = getUserData(credentialOwner);
+        policy.mPasswordValidAtLastCheckpoint =
+                isPasswordSufficientForUserWithoutCheckpointLocked(
+                        policy.mActivePasswordMetrics, userHandle, parent);
+
+        saveSettingsLocked(credentialOwner);
     }
 
     @Override
@@ -3990,8 +3995,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final PasswordMetrics metrics = ap.minimumPasswordMetrics;
             if (metrics.length != length) {
                 metrics.length = length;
-                updatePasswordValidityCheckpointLocked(userId);
-                saveSettingsLocked(userId);
+                updatePasswordValidityCheckpointLocked(userId, parent);
             }
             maybeLogPasswordComplexitySet(who, userId, parent, metrics);
         }
@@ -4015,8 +4019,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     who, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
             if (ap.passwordHistoryLength != length) {
                 ap.passwordHistoryLength = length;
-                updatePasswordValidityCheckpointLocked(userId);
-                saveSettingsLocked(userId);
+                updatePasswordValidityCheckpointLocked(userId, parent);
             }
         }
         if (SecurityLog.isLoggingEnabled()) {
@@ -4217,8 +4220,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final PasswordMetrics metrics = ap.minimumPasswordMetrics;
             if (metrics.upperCase != length) {
                 metrics.upperCase = length;
-                updatePasswordValidityCheckpointLocked(userId);
-                saveSettingsLocked(userId);
+                updatePasswordValidityCheckpointLocked(userId, parent);
             }
             maybeLogPasswordComplexitySet(who, userId, parent, metrics);
         }
@@ -4240,8 +4242,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final PasswordMetrics metrics = ap.minimumPasswordMetrics;
             if (metrics.lowerCase != length) {
                 metrics.lowerCase = length;
-                updatePasswordValidityCheckpointLocked(userId);
-                saveSettingsLocked(userId);
+                updatePasswordValidityCheckpointLocked(userId, parent);
             }
             maybeLogPasswordComplexitySet(who, userId, parent, metrics);
         }
@@ -4266,8 +4267,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final PasswordMetrics metrics = ap.minimumPasswordMetrics;
             if (metrics.letters != length) {
                 metrics.letters = length;
-                updatePasswordValidityCheckpointLocked(userId);
-                saveSettingsLocked(userId);
+                updatePasswordValidityCheckpointLocked(userId, parent);
             }
             maybeLogPasswordComplexitySet(who, userId, parent, metrics);
         }
@@ -4292,8 +4292,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final PasswordMetrics metrics = ap.minimumPasswordMetrics;
             if (metrics.numeric != length) {
                 metrics.numeric = length;
-                updatePasswordValidityCheckpointLocked(userId);
-                saveSettingsLocked(userId);
+                updatePasswordValidityCheckpointLocked(userId, parent);
             }
             maybeLogPasswordComplexitySet(who, userId, parent, metrics);
         }
@@ -4318,8 +4317,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final PasswordMetrics metrics = ap.minimumPasswordMetrics;
             if (metrics.symbols != length) {
                 ap.minimumPasswordMetrics.symbols = length;
-                updatePasswordValidityCheckpointLocked(userId);
-                saveSettingsLocked(userId);
+                updatePasswordValidityCheckpointLocked(userId, parent);
             }
             maybeLogPasswordComplexitySet(who, userId, parent, metrics);
         }
@@ -4344,8 +4342,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final PasswordMetrics metrics = ap.minimumPasswordMetrics;
             if (metrics.nonLetter != length) {
                 ap.minimumPasswordMetrics.nonLetter = length;
-                updatePasswordValidityCheckpointLocked(userId);
-                saveSettingsLocked(userId);
+                updatePasswordValidityCheckpointLocked(userId, parent);
             }
             maybeLogPasswordComplexitySet(who, userId, parent, metrics);
         }
@@ -4566,16 +4563,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private boolean isActivePasswordSufficientForUserLocked(
             DevicePolicyData policy, int userHandle, boolean parent) {
-        final int requiredPasswordQuality = getPasswordQuality(null, userHandle, parent);
-        if (requiredPasswordQuality == PASSWORD_QUALITY_UNSPECIFIED) {
-            // A special case is when there is no required password quality, then we just return
-            // true since any password would be sufficient. This is for the scenario when a work
-            // profile is first created so there is no information about the current password but
-            // it should be considered sufficient as there is no password requirement either.
-            // This is useful since it short-circuits the password checkpoint for FDE device below.
-            return true;
-        }
-
         if (!mInjector.storageManagerIsFileBasedEncryptionEnabled()
                 && !policy.mPasswordStateHasBeenSetSinceBoot) {
             // Before user enters their password for the first time after a reboot, return the
@@ -4586,28 +4573,41 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return policy.mPasswordValidAtLastCheckpoint;
         }
 
-        if (policy.mActivePasswordMetrics.quality < requiredPasswordQuality) {
+        return isPasswordSufficientForUserWithoutCheckpointLocked(
+                policy.mActivePasswordMetrics, userHandle, parent);
+    }
+
+    /**
+     * Returns {@code true} if the password represented by the {@code passwordMetrics} argument
+     * sufficiently fulfills the password requirements for the user corresponding to
+     * {@code userHandle} (or its parent, if {@code parent} is set to {@code true}).
+     */
+    private boolean isPasswordSufficientForUserWithoutCheckpointLocked(
+            PasswordMetrics passwordMetrics, int userHandle, boolean parent) {
+        final int requiredPasswordQuality = getPasswordQuality(null, userHandle, parent);
+
+        if (passwordMetrics.quality < requiredPasswordQuality) {
             return false;
         }
         if (requiredPasswordQuality >= DevicePolicyManager.PASSWORD_QUALITY_NUMERIC
-                && policy.mActivePasswordMetrics.length < getPasswordMinimumLength(
+                && passwordMetrics.length < getPasswordMinimumLength(
                         null, userHandle, parent)) {
             return false;
         }
         if (requiredPasswordQuality != DevicePolicyManager.PASSWORD_QUALITY_COMPLEX) {
             return true;
         }
-        return policy.mActivePasswordMetrics.upperCase >= getPasswordMinimumUpperCase(
+        return passwordMetrics.upperCase >= getPasswordMinimumUpperCase(
                     null, userHandle, parent)
-                && policy.mActivePasswordMetrics.lowerCase >= getPasswordMinimumLowerCase(
+                && passwordMetrics.lowerCase >= getPasswordMinimumLowerCase(
                         null, userHandle, parent)
-                && policy.mActivePasswordMetrics.letters >= getPasswordMinimumLetters(
+                && passwordMetrics.letters >= getPasswordMinimumLetters(
                         null, userHandle, parent)
-                && policy.mActivePasswordMetrics.numeric >= getPasswordMinimumNumeric(
+                && passwordMetrics.numeric >= getPasswordMinimumNumeric(
                         null, userHandle, parent)
-                && policy.mActivePasswordMetrics.symbols >= getPasswordMinimumSymbols(
+                && passwordMetrics.symbols >= getPasswordMinimumSymbols(
                         null, userHandle, parent)
-                && policy.mActivePasswordMetrics.nonLetter >= getPasswordMinimumNonLetter(
+                && passwordMetrics.nonLetter >= getPasswordMinimumNonLetter(
                         null, userHandle, parent);
     }
 
@@ -6148,8 +6148,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         try {
             synchronized (this) {
                 policy.mFailedPasswordAttempts = 0;
-                updatePasswordValidityCheckpointLocked(userId);
-                saveSettingsLocked(userId);
+                updatePasswordValidityCheckpointLocked(userId, /* parent */ false);
                 updatePasswordExpirationsLocked(userId);
                 setExpirationAlarmCheckLocked(mContext, userId, /* parent */ false);
 
@@ -6466,8 +6465,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     /**
-     * Set the storage encryption request for a single admin.  Returns the new total request
-     * status (for all admins).
+     * Called by an application that is administering the device to request that the storage system
+     * be encrypted. Does nothing if the caller is on a secondary user or a managed profile.
+     *
+     * @return the new total request status (for all admins), or {@link
+     *         DevicePolicyManager#ENCRYPTION_STATUS_UNSUPPORTED} if called for a non-system user
      */
     @Override
     public int setStorageEncryption(ComponentName who, boolean encrypt) {
@@ -6482,7 +6484,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (userHandle != UserHandle.USER_SYSTEM) {
                 Slog.w(LOG_TAG, "Only owner/system user is allowed to set storage encryption. User "
                         + UserHandle.getCallingUserId() + " is not permitted.");
-                return 0;
+                return DevicePolicyManager.ENCRYPTION_STATUS_UNSUPPORTED;
             }
 
             ActiveAdmin ap = getActiveAdminForCallerLocked(who,

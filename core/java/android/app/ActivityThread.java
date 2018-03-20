@@ -5652,6 +5652,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         // Allow application-generated systrace messages if we're debuggable.
         boolean isAppDebuggable = (data.appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         Trace.setAppTracingAllowed(isAppDebuggable);
+        ThreadedRenderer.setDebuggingEnabled(isAppDebuggable || Build.IS_DEBUGGABLE);
         if (isAppDebuggable && data.enableBinderTracking) {
             Binder.enableTracing();
         }
@@ -5710,6 +5711,8 @@ public final class ActivityThread extends ClientTransactionHandler {
             } finally {
                 StrictMode.setThreadPolicyMask(oldMask);
             }
+        } else {
+            ThreadedRenderer.setIsolatedProcess(true);
         }
 
         // If we use profiles, setup the dex reporter to notify package manager

@@ -21,6 +21,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.provider.Settings;
 import android.support.annotation.VisibleForTesting;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceScreen;
@@ -78,11 +79,16 @@ public abstract class AbstractWifiMacAddressPreferenceController
     @Override
     protected void updateConnectivity() {
         WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
-        String macAddress = wifiInfo == null ? null : wifiInfo.getMacAddress();
-        if (!TextUtils.isEmpty(macAddress)) {
-            mWifiMacAddress.setSummary(macAddress);
-        } else {
+        final int macRandomizationMode = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED, 0);
+        final String macAddress = wifiInfo == null ? null : wifiInfo.getMacAddress();
+
+        if (TextUtils.isEmpty(macAddress)) {
             mWifiMacAddress.setSummary(R.string.status_unavailable);
+        } else if (macRandomizationMode == 1 && WifiInfo.DEFAULT_MAC_ADDRESS.equals(macAddress)) {
+            mWifiMacAddress.setSummary(R.string.wifi_status_mac_randomized);
+        } else {
+            mWifiMacAddress.setSummary(macAddress);
         }
     }
 }

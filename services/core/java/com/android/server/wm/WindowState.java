@@ -3074,6 +3074,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return (fl & FLAG_FULLSCREEN) != 0 || (sysui & (SYSTEM_UI_FLAG_FULLSCREEN)) != 0;
     }
 
+    @Override
+    public boolean isLetterboxedOverlappingWith(Rect rect) {
+        return mAppToken != null && mAppToken.isLetterboxOverlappingWith(rect);
+    }
+
     boolean isDragResizeChanged() {
         return mDragResizing != computeDragResizing();
     }
@@ -4510,8 +4515,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 mAttrs.type == TYPE_NAVIGATION_BAR ||
                 // It's tempting to wonder: Have we forgotten the rounded corners overlay?
                 // worry not: it's a fake TYPE_NAVIGATION_BAR_PANEL
-                mAttrs.type == TYPE_NAVIGATION_BAR_PANEL ||
-                mAttrs.type == TYPE_STATUS_BAR) {
+                mAttrs.type == TYPE_NAVIGATION_BAR_PANEL) {
             return false;
         }
         return true;

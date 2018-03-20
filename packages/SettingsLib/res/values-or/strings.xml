@@ -288,8 +288,10 @@
     <string name="show_touches_summary" msgid="6101183132903926324">"ଟାପ୍ସ ପାଇଁ ଦୃଶ୍ୟ ମତାମତ ଦେଖାଅ"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"ସର୍ଫେସ୍‌ ଅପ୍‌ଡେଟ୍‌ ଦେଖାଅ"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"ସମଗ୍ର ୱିଣ୍ଡୋ ପୃଷ୍ଠ ଅପଡେଟ୍‌ ହେବା ବେଳେ ସେଗୁଡ଼ିକ ଫ୍ଲାସ୍‌ କରନ୍ତୁ"</string>
-    <string name="show_hw_screen_updates" msgid="5036904558145941590">"GPU ଭ୍ୟୁ ଅପଡେଟ୍‌ ଦେଖନ୍ତୁ"</string>
-    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"GPU ସହ ଅଙ୍କାଯାଇଥିବା ବେଳେ ୱିଣ୍ଡୋ ଭିତରେ ଦୃଶ୍ୟଗୁଡ଼ିକ ଫ୍ଲାଶ କରନ୍ତୁ"</string>
+    <!-- no translation found for show_hw_screen_updates (4117270979975470789) -->
+    <skip />
+    <!-- no translation found for show_hw_screen_updates_summary (6506943466625875655) -->
+    <skip />
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"ହାର୍ଡୱେର୍‌ ଲେୟର୍‌ର ଅପଡେଟଗୁଡ଼ିକ ଦେଖାନ୍ତୁ"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"ହାର୍ଡୱେୟାର ଲେୟାରଗୁଡିକ ଅପଡେଟ୍‌ ହେବା ବେଳେ ସେଗୁଡିକ ସବୁଜ ଫ୍ଲାସ୍‌ କରନ୍ତୁ"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"GPU ଓଭର୍‌ଡ୍ର ଡିବଗ୍‌ କର"</string>
@@ -303,12 +305,11 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"କ୍ଲିପ୍‌ ବାଉଣ୍ଡ, ମାର୍ଜିନ୍‌ ଆଦି ଦେଖନ୍ତୁ"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"RTL ଲେଆଉଟ୍ ଦିଗ ବାଧ୍ୟ କରନ୍ତୁ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"ସମସ୍ତ ଲୋକେଲ୍‌ ପାଇଁ ସ୍କ୍ରିନ୍‌ ଲେଆଉଟ୍‌ ଦିଗ ଡାହାଣରୁ ବାମକୁ ବାଧ୍ୟ କରନ୍ତୁ"</string>
-    <string name="force_hw_ui" msgid="6426383462520888732">"GPU ରେଣ୍ଡରିଂ ବାଧ୍ୟ କରନ୍ତୁ"</string>
-    <string name="force_hw_ui_summary" msgid="5535991166074861515">"2D ଅଙ୍କନ ପାଇଁ ଜିପିୟୁର ବ୍ୟବହାର ଉପରେ ଜୋର ଦେବା"</string>
     <string name="force_msaa" msgid="7920323238677284387">"4x MSAA ବାଧ୍ୟ କରନ୍ତୁ"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"OpenGL ES 2.0 ଆପ୍‌ରେ 4x MSAA ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"ଅଣ-ଆୟତାକାର କ୍ଲିପ୍‌ କାର୍ଯ୍ୟକୁ ଡିବଗ୍‌ କରନ୍ତୁ"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"ପ୍ରୋଫାଇଲ୍‌ GPU ରେଣ୍ଡରିଂ"</string>
+    <!-- no translation found for track_frame_time (6094365083096851167) -->
+    <skip />
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU ଡିବଗ୍‌ ଲେୟର୍‌ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"ଡିବଗ୍‌ ଆପ୍‌ଗୁଡ଼ିକ ପାଇଁ GPU ଡିବଗ୍‌ ଲେୟର୍‌ ଲୋଡ୍ କରିବାର ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"ୱିଣ୍ଡୋ ଆନିମେଶନ୍‌ ସ୍କେଲ୍‌"</string>
@@ -319,8 +320,10 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"କାର୍ଯ୍ୟକଳାପଗୁଡ଼ିକୁ ରଖନ୍ତୁ ନାହିଁ"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ଉପଯୋଗକର୍ତ୍ତା ଏହାକୁ ଛାଡ଼ିବା କ୍ଷଣି ସମସ୍ତ କାର୍ଯ୍ୟକଳାପକୁ ନଷ୍ଟ କରିଦିଅନ୍ତୁ"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"ପୃଷ୍ଠପଟ ପ୍ରକ୍ରିୟା ସୀମା"</string>
-    <string name="show_all_anrs" msgid="28462979638729082">"ସମସ୍ତ ANRs ଦେଖାଦେଉ"</string>
-    <string name="show_all_anrs_summary" msgid="641908614413544127">"ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡ ଆପ୍‌ଗୁଡ଼ିକ ପାଇଁ \"ଆପ୍‌ ଉତ୍ତର ଦେଉନାହିଁ\" ଡାୟଲଗ୍‌ ଦେଖାଅ"</string>
+    <!-- no translation found for show_all_anrs (4924885492787069007) -->
+    <skip />
+    <!-- no translation found for show_all_anrs_summary (6636514318275139826) -->
+    <skip />
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"ବିଜ୍ଞପ୍ତି ଚାନେଲ୍‌ ଚେତାବନୀ ଦେଖାଦେଉ"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"ଏକ ବୈଧ ଚ୍ୟାନେଲ୍‌ ବିନା ଏକ ଆପ୍‌ ଗୋଟିଏ ବିଜ୍ଞପ୍ତି ପୋଷ୍ଠ କରିବା ବେଳେ ଅନ୍‌-ସ୍କ୍ରୀନ୍‌ ସତର୍କତା ଦେଖାଏ"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"ଏକ୍ସଟର୍ନଲ୍ ଆପ୍‌ଗୁଡ଼ିକୁ ଜବରଦସ୍ତି ଅନୁମତି ଦିଅନ୍ତୁ"</string>
@@ -379,13 +382,13 @@
     <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
     <skip />
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> ଅବଶିଷ୍ଟ"</string>
-    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
+    <!-- no translation found for power_discharge_by_enhanced (8305422490607220844) -->
     <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
+    <!-- no translation found for power_discharge_by_only_enhanced (896515698736070025) -->
     <skip />
-    <!-- no translation found for power_discharge_by (6427074755635635749) -->
+    <!-- no translation found for power_discharge_by (6052127431194780229) -->
     <skip />
-    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
+    <!-- no translation found for power_discharge_by_only (4850425421176271395) -->
     <skip />
     <!-- no translation found for power_remaining_less_than_duration_only (5996752448813295329) -->
     <skip />
@@ -456,9 +459,10 @@
     <skip />
     <!-- no translation found for accessibility_manual_zen_less_time (6590887204171164991) -->
     <skip />
+    <string name="cancel" msgid="6859253417269739139">"କ୍ୟାନ୍ସଲ୍"</string>
+    <string name="okay" msgid="1997666393121016642">"ଠିକ୍‌ ଅଛି"</string>
     <!-- no translation found for zen_mode_enable_dialog_turn_on (8287824809739581837) -->
     <skip />
-    <string name="cancel" msgid="6859253417269739139">"କ୍ୟାନ୍ସଲ୍"</string>
     <!-- no translation found for zen_mode_settings_turn_on_dialog_title (2297134204747331078) -->
     <skip />
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"କଦାପି ନୁହେଁ"</string>
@@ -474,4 +478,6 @@
     <skip />
     <!-- no translation found for alarm_template_far (3779172822607461675) -->
     <skip />
+    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"ଅବଧି"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"ପ୍ରତ୍ୟେକ ଥର ପଚାରନ୍ତୁ"</string>
 </resources>

@@ -199,6 +199,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
+        if (mController == null) return;
         final int zen = arg instanceof Integer ? (Integer) arg : mController.getZen();
         final boolean newValue = zen != ZEN_MODE_OFF;
         final boolean valueChanged = state.value != newValue;

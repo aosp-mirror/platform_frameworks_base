@@ -1356,17 +1356,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (DEBUG_USER_LEAVING) Slog.v(TAG_USER_LEAVING,
                     "Sleep => pause with userLeaving=false");
 
-            // If we are in the middle of resuming the top activity in
-            // {@link #resumeTopActivityUncheckedLocked}, mResumedActivity will be set but not
-            // resumed yet. We must not proceed pausing the activity here. This method will be
-            // called again if necessary as part of {@link #checkReadyForSleep} or
-            // {@link ActivityStackSupervisor#checkReadyForSleepLocked}.
-            if (mStackSupervisor.inResumeTopActivity) {
-                if (DEBUG_PAUSE) Slog.v(TAG_PAUSE, "In the middle of resuming top activity "
-                        + mResumedActivity);
-            } else {
-                startPausingLocked(false, true, null, false);
-            }
+            startPausingLocked(false, true, null, false);
             shouldSleep = false ;
         } else if (mPausingActivity != null) {
             // Still waiting for something to pause; can't sleep yet.
@@ -3420,7 +3410,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     /** Find next proper focusable stack and make it focused. */
-    private boolean adjustFocusToNextFocusableStack(String reason) {
+    boolean adjustFocusToNextFocusableStack(String reason) {
         return adjustFocusToNextFocusableStack(reason, false /* allowFocusSelf */);
     }
 
@@ -4501,11 +4491,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return hasVisibleActivities;
     }
 
-    private void updateTransitLocked(int transit, ActivityRecord starting,
-            ActivityOptions options) {
+    private void updateTransitLocked(int transit, ActivityOptions options) {
         if (options != null) {
-            if (starting != null && !starting.isState(RESUMED)) {
-                starting.updateOptionsLocked(options);
+            ActivityRecord r = topRunningActivityLocked();
+            if (r != null && !r.isState(RESUMED)) {
+                r.updateOptionsLocked(options);
             } else {
                 ActivityOptions.abort(options);
             }
@@ -4542,9 +4532,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
     }
 
-    final void moveTaskToFrontLocked(TaskRecord tr, ActivityRecord starting,
-            boolean noAnimation, ActivityOptions options, AppTimeTracker timeTracker,
-            String reason) {
+    final void moveTaskToFrontLocked(TaskRecord tr, boolean noAnimation, ActivityOptions options,
+            AppTimeTracker timeTracker, String reason) {
         if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "moveTaskToFront: " + tr);
 
         final ActivityStack topStack = getDisplay().getTopStack();
@@ -4556,7 +4545,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (noAnimation) {
                 ActivityOptions.abort(options);
             } else {
-                updateTransitLocked(TRANSIT_TASK_TO_FRONT, starting, options);
+                updateTransitLocked(TRANSIT_TASK_TO_FRONT, options);
             }
             return;
         }
@@ -4594,7 +4583,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             }
             ActivityOptions.abort(options);
         } else {
-            updateTransitLocked(TRANSIT_TASK_TO_FRONT, r, options);
+            updateTransitLocked(TRANSIT_TASK_TO_FRONT, options);
         }
         // If a new task is moved to the front, then mark the existing top activity as supporting
         // picture-in-picture while paused only if the task would not be considered an oerlay on top

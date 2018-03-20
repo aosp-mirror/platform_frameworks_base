@@ -24,7 +24,6 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.SurfaceControl.HIDDEN;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
@@ -712,7 +711,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (destroyedSomething) {
             final DisplayContent dc = getDisplayContent();
             dc.assignWindowLayers(true /*setLayoutNeeded*/);
-            updateLetterbox(null);
+            updateLetterboxSurface(null);
         }
     }
 
@@ -979,7 +978,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     void removeChild(WindowState child) {
         super.removeChild(child);
         checkKeyguardFlagsChanged();
-        updateLetterbox(child);
+        updateLetterboxSurface(child);
     }
 
     private boolean waitingForReplacement() {
@@ -1470,7 +1469,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return isInterestingAndDrawn;
     }
 
-    void updateLetterbox(WindowState winHint) {
+    void layoutLetterbox(WindowState winHint) {
         final WindowState w = findMainWindow();
         if (w != winHint && winHint != null && w != null) {
             return;
@@ -1481,19 +1480,20 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             if (mLetterbox == null) {
                 mLetterbox = new Letterbox(() -> makeChildSurface(null));
             }
-            mLetterbox.setDimensions(mPendingTransaction, getParent().getBounds(), w.mFrame);
+            mLetterbox.layout(getParent().getBounds(), w.mFrame);
         } else if (mLetterbox != null) {
-            final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
-            // Make sure we have a transaction here, in case we're called outside of a transaction.
-            // This does not use mPendingTransaction, because SurfaceAnimator uses a
-            // global transaction in onAnimationEnd.
-            SurfaceControl.openTransaction();
-            try {
-                mLetterbox.hide(t);
-            } finally {
-                SurfaceControl.mergeToGlobalTransaction(t);
-                SurfaceControl.closeTransaction();
-            }
+            mLetterbox.hide();
+        }
+    }
+
+    void updateLetterboxSurface(WindowState winHint) {
+        final WindowState w = findMainWindow();
+        if (w != winHint && winHint != null && w != null) {
+            return;
+        }
+        layoutLetterbox(winHint);
+        if (mLetterbox != null && mLetterbox.needsApplySurfaceChanges()) {
+            mLetterbox.applySurfaceChanges(mPendingTransaction);
         }
     }
 
@@ -2079,6 +2079,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         super.prepareSurfaces();
     }
 
+    /**
+     * @return Whether our {@link #getSurfaceControl} is currently showing.
+     */
+    boolean isSurfaceShowing() {
+        return mLastSurfaceShowing;
+    }
+
     boolean isFreezingScreen() {
         return mFreezingScreen;
     }
@@ -2155,5 +2162,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         } else {
             return new Rect();
         }
+    }
+
+    /**
+     * @eturn true if there is a letterbox and any part of that letterbox overlaps with
+     * the given {@code rect}.
+     */
+    boolean isLetterboxOverlappingWith(Rect rect) {
+        return mLetterbox != null && mLetterbox.isOverlappingWith(rect);
     }
 }

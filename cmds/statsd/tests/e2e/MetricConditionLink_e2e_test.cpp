@@ -29,6 +29,8 @@ namespace {
 
 StatsdConfig CreateStatsdConfig() {
     StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT"); // LogEvent defaults to UID of root.
+
     *config.add_atom_matcher() = CreateScreenTurnedOnAtomMatcher();
     *config.add_atom_matcher() = CreateScreenTurnedOffAtomMatcher();
 

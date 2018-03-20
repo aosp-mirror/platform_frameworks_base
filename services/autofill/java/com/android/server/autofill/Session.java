@@ -1874,7 +1874,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         isIgnored ? ViewState.STATE_IGNORED : ViewState.STATE_INITIAL);
                 mViewStates.put(id, viewState);
 
-                // TODO(b/70407264): for optimization purposes, should also ignore if change is
+                // TODO(b/73648631): for optimization purposes, should also ignore if change is
                 // detectable, and batch-send them when the session is finished (but that will
                 // require tracking detectable fields on AutofillManager)
                 if (isIgnored) {

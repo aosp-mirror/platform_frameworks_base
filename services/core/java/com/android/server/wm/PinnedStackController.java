@@ -88,6 +88,8 @@ class PinnedStackController {
     private boolean mIsMinimized;
     private boolean mIsImeShowing;
     private int mImeHeight;
+    private boolean mIsShelfShowing;
+    private int mShelfHeight;
 
     // The set of actions and aspect-ratio for the that are currently allowed on the PiP activity
     private ArrayList<RemoteAction> mActions = new ArrayList<>();
@@ -213,9 +215,11 @@ class PinnedStackController {
             listener.onListenerRegistered(mCallbacks);
             mPinnedStackListener = listener;
             notifyImeVisibilityChanged(mIsImeShowing, mImeHeight);
+            notifyShelfVisibilityChanged(mIsShelfShowing, mShelfHeight);
             // The movement bounds notification needs to be sent before the minimized state, since
             // SystemUI may use the bounds to retore the minimized position
-            notifyMovementBoundsChanged(false /* fromImeAdjustment */);
+            notifyMovementBoundsChanged(false /* fromImeAdjustment */,
+                    false /* fromShelfAdjustment */);
             notifyActionsChanged(mActions);
             notifyMinimizeChanged(mIsMinimized);
         } catch (RemoteException e) {
@@ -297,7 +301,9 @@ class PinnedStackController {
                 mSnapAlgorithm.applySnapFraction(defaultBounds, movementBounds, snapFraction);
             } else {
                 Gravity.apply(mDefaultStackGravity, size.getWidth(), size.getHeight(), insetBounds,
-                        0, mIsImeShowing ? mImeHeight : 0, defaultBounds);
+                        0, Math.max(mIsImeShowing ? mImeHeight : 0,
+                                mIsShelfShowing ? mShelfHeight : 0),
+                        defaultBounds);
             }
             return defaultBounds;
         }
@@ -310,7 +316,7 @@ class PinnedStackController {
      */
     synchronized void onDisplayInfoChanged() {
         mDisplayInfo.copyFrom(mDisplayContent.getDisplayInfo());
-        notifyMovementBoundsChanged(false /* fromImeAdjustment */);
+        notifyMovementBoundsChanged(false /* fromImeAdjustment */, false /* fromShelfAdjustment */);
     }
 
     /**
@@ -342,14 +348,15 @@ class PinnedStackController {
             // Calculate the stack bounds in the new orientation to the same same fraction along the
             // rotated movement bounds.
             final Rect postChangeMovementBounds = getMovementBounds(postChangeStackBounds,
-                    false /* adjustForIme */);
+                    false /* adjustForIme */, false /* adjustForShelf */);
             mSnapAlgorithm.applySnapFraction(postChangeStackBounds, postChangeMovementBounds,
                     snapFraction);
             if (mIsMinimized) {
                 applyMinimizedOffset(postChangeStackBounds, postChangeMovementBounds);
             }
 
-            notifyMovementBoundsChanged(false /* fromImeAdjustment */);
+            notifyMovementBoundsChanged(false /* fromImeAdjustment */,
+                    false /* fromShelfAdjustment */);
 
             outBounds.set(postChangeStackBounds);
             return true;
@@ -373,7 +380,22 @@ class PinnedStackController {
         mIsImeShowing = imeShowing;
         mImeHeight = imeHeight;
         notifyImeVisibilityChanged(imeShowing, imeHeight);
-        notifyMovementBoundsChanged(true /* fromImeAdjustment */);
+        notifyMovementBoundsChanged(true /* fromImeAdjustment */, false /* fromShelfAdjustment */);
+    }
+
+    /**
+     * Sets the shelf state and height.
+     */
+    void setAdjustedForShelf(boolean adjustedForShelf, int shelfHeight) {
+        final boolean shelfShowing = adjustedForShelf && shelfHeight > 0;
+        if (shelfShowing == mIsShelfShowing && shelfHeight == mShelfHeight) {
+            return;
+        }
+
+        mIsShelfShowing = shelfShowing;
+        mShelfHeight = shelfHeight;
+        notifyShelfVisibilityChanged(shelfShowing, shelfHeight);
+        notifyMovementBoundsChanged(false /* fromImeAdjustment */, true /* fromShelfAdjustment */);
     }
 
     /**
@@ -382,7 +404,8 @@ class PinnedStackController {
     void setAspectRatio(float aspectRatio) {
         if (Float.compare(mAspectRatio, aspectRatio) != 0) {
             mAspectRatio = aspectRatio;
-            notifyMovementBoundsChanged(false /* fromImeAdjustment */);
+            notifyMovementBoundsChanged(false /* fromImeAdjustment */,
+                    false /* fromShelfAdjustment */);
         }
     }
 
@@ -411,6 +434,16 @@ class PinnedStackController {
         if (mPinnedStackListener != null) {
             try {
                 mPinnedStackListener.onImeVisibilityChanged(imeVisible, imeHeight);
+            } catch (RemoteException e) {
+                Slog.e(TAG_WM, "Error delivering bounds changed event.", e);
+            }
+        }
+    }
+
+    private void notifyShelfVisibilityChanged(boolean shelfVisible, int shelfHeight) {
+        if (mPinnedStackListener != null) {
+            try {
+                mPinnedStackListener.onShelfVisibilityChanged(shelfVisible, shelfHeight);
             } catch (RemoteException e) {
                 Slog.e(TAG_WM, "Error delivering bounds changed event.", e);
             }
@@ -446,7 +479,8 @@ class PinnedStackController {
     /**
      * Notifies listeners that the PIP movement bounds have changed.
      */
-    private void notifyMovementBoundsChanged(boolean fromImeAdjustement) {
+    private void notifyMovementBoundsChanged(boolean fromImeAdjustment,
+            boolean fromShelfAdjustment) {
         synchronized (mService.mWindowMap) {
             if (mPinnedStackListener == null) {
                 return;
@@ -467,7 +501,8 @@ class PinnedStackController {
                     animatingBounds.set(normalBounds);
                 }
                 mPinnedStackListener.onMovementBoundsChanged(insetBounds, normalBounds,
-                        animatingBounds, fromImeAdjustement, mDisplayInfo.rotation);
+                        animatingBounds, fromImeAdjustment, fromShelfAdjustment,
+                        mDisplayInfo.rotation);
             } catch (RemoteException e) {
                 Slog.e(TAG_WM, "Error delivering actions changed event.", e);
             }
@@ -493,7 +528,8 @@ class PinnedStackController {
      */
     private Rect getMovementBounds(Rect stackBounds) {
         synchronized (mService.mWindowMap) {
-            return getMovementBounds(stackBounds, true /* adjustForIme */);
+            return getMovementBounds(stackBounds, true /* adjustForIme */,
+                    true /* adjustForShelf */);
         }
     }
 
@@ -501,14 +537,15 @@ class PinnedStackController {
      * @return the movement bounds for the given {@param stackBounds} and the current state of the
      *         controller.
      */
-    private Rect getMovementBounds(Rect stackBounds, boolean adjustForIme) {
+    private Rect getMovementBounds(Rect stackBounds, boolean adjustForIme, boolean adjustForShelf) {
         synchronized (mService.mWindowMap) {
             final Rect movementBounds = new Rect();
             getInsetBounds(movementBounds);
 
             // Apply the movement bounds adjustments based on the current state
             mSnapAlgorithm.getMovementBounds(stackBounds, movementBounds, movementBounds,
-                    (adjustForIme && mIsImeShowing) ? mImeHeight : 0);
+                    Math.max((adjustForIme && mIsImeShowing) ? mImeHeight : 0,
+                            (adjustForShelf && mIsShelfShowing) ? mShelfHeight : 0));
             return movementBounds;
         }
     }
@@ -549,6 +586,9 @@ class PinnedStackController {
         pw.print(prefix + "  movementBounds="); getMovementBounds(mTmpRect).printShortString(pw);
         pw.println();
         pw.println(prefix + "  mIsImeShowing=" + mIsImeShowing);
+        pw.println(prefix + "  mImeHeight=" + mImeHeight);
+        pw.println(prefix + "  mIsShelfShowing=" + mIsShelfShowing);
+        pw.println(prefix + "  mShelfHeight=" + mShelfHeight);
         pw.println(prefix + "  mIsMinimized=" + mIsMinimized);
         if (mActions.isEmpty()) {
             pw.println(prefix + "  mActions=[]");

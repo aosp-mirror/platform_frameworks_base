@@ -23,7 +23,6 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.RemoteAnimationAdapter;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
@@ -122,6 +121,14 @@ public class WindowManagerWrapper {
                     .setNavBarVirtualKeyHapticFeedbackEnabled(enabled);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to enable or disable navigation bar button haptics: ", e);
+        }
+    }
+
+    public void setShelfHeight(boolean visible, int shelfHeight) {
+        try {
+            WindowManagerGlobal.getWindowManagerService().setShelfHeight(visible, shelfHeight);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to set shelf height");
         }
     }
 }

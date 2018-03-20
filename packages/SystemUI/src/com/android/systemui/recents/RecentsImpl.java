@@ -276,6 +276,9 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         }
     };
 
+    // Used to reset the dummy stack view
+    private final TaskStack mEmptyTaskStack = new TaskStack();
+
     public RecentsImpl(Context context) {
         mContext = context;
         mHandler = new Handler();
@@ -1108,6 +1111,10 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             }
         });
         EventBus.getDefault().send(hideMenuEvent);
+
+        // Once we have launched the activity, reset the dummy stack view tasks so we don't hold
+        // onto references to the same tasks consumed by the activity
+        mDummyStackView.setTasks(mEmptyTaskStack, false /* notifyStackChanges */);
     }
 
     /**** OnAnimationFinishedListener Implementation ****/

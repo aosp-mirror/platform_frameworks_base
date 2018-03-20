@@ -220,8 +220,7 @@
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS ឯកជន"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"ជ្រើសរើសមុខងារ DNS ឯកជន"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"បិទ"</string>
-    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
-    <skip />
+    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"ស្វ័យប្រវត្តិ"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"ឈ្មោះម៉ាស៊ីនក្រុមហ៊ុនផ្ដល់សេវា DNS ឯកជន"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"បញ្ចូលឈ្មោះម៉ាស៊ីនរបស់ក្រុមហ៊ុនផ្ដល់សេវា DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"បង្ហាញ​ជម្រើស​សម្រាប់​វិញ្ញាបនបត្រ​បង្ហាញ​ឥត​ខ្សែ"</string>
@@ -274,8 +273,8 @@
     <string name="show_touches_summary" msgid="6101183132903926324">"បង្ហាញមតិដែលអាចមើលឃើញសម្រាប់ការប៉ះ"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"បង្ហាញ​បច្ចុប្បន្នភាព​ផ្ទៃ"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"ផ្ទៃ​បង្អួច​ទាំង​មូល​បញ្ចេញ​ពន្លឺ​ពេល​ពួកវា​ធ្វើ​បច្ចុប្បន្នភាព"</string>
-    <string name="show_hw_screen_updates" msgid="5036904558145941590">"បង្ហាញ​បច្ចុប្បន្នភាព​ទិដ្ឋភាព GPU"</string>
-    <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"មើល Flash ក្នុង​វីនដូ​ពេល​បាន​គូរ​ជា​មួយ GPU"</string>
+    <string name="show_hw_screen_updates" msgid="4117270979975470789">"បង្ហាញ​ការធ្វើ​បច្ចុប្បន្នភាព​នៃការមើល"</string>
+    <string name="show_hw_screen_updates_summary" msgid="6506943466625875655">"ទិដ្ឋភាព​បញ្ចេញពន្លឺភ្លឹបភ្លែត​នៅក្នុង​វិនដូនៅ​ពេលគូរ"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"បង្ហាញ​​បច្ចុប្បន្នភាព​ស្រទាប់​ផ្នែក​រឹង"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"ស្រទាប់​ផ្នែក​រឹង​បញ្ចេញ​ពន្លឺ​បៃ​តង​ ពេល​ពួក​វា​ធ្វើ​បច្ចុប្បន្នភាព"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"កែ​កំហុស​ការ​លើស GPU"</string>
@@ -289,12 +288,10 @@
     <string name="debug_layout_summary" msgid="2001775315258637682">"បង្ហាញ​ការ​ភ្ជាប់​អត្ថបទ​សម្រង់ រឹម ។ល។"</string>
     <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"បង្ខំ​ទិស​ប្លង់ RTL"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"បង្ខំ​ទិស​ប្លង់​អេក្រង់​ទៅកាន់ RTL សម្រាប់​មូលដ្ឋាន​ទាំងអស់"</string>
-    <string name="force_hw_ui" msgid="6426383462520888732">"បង្ខំ​ឲ្យ​បង្ហាញ GPU"</string>
-    <string name="force_hw_ui_summary" msgid="5535991166074861515">"បង្ខំ​ប្រើ GPU សម្រាប់​ការ​គូរ​លើក​ទី​ពីរ"</string>
     <string name="force_msaa" msgid="7920323238677284387">"បង្ខំ 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9123553203895817537">"បើក 4x MSAA ក្នុង​កម្មវិធី OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"កែ​ប្រតិបត្តិការ​​ស្រង់ non-rectangular"</string>
-    <string name="track_frame_time" msgid="6146354853663863443">"ការ​បង្ហាញ​ទម្រង់ GPU"</string>
+    <string name="track_frame_time" msgid="6094365083096851167">"ការបំប្លែង​កម្រងព័ត៌មាន HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"បើក​ស្រទាប់​ជួសជុល GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"អនុញ្ញាតឱ្យ​ផ្ទុក​ស្រទាប់​ជួស​ជុល GPU សម្រាប់​កម្មវិធី​ជួសជុល"</string>
     <string name="window_animation_scale_title" msgid="6162587588166114700">"មាត្រដ្ឋាន​ចលនា​បង្អួច"</string>
@@ -305,8 +302,8 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"កុំ​រក្សា​ទុកសកម្មភាព"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"បំផ្លាញ​គ្រប់​សកម្មភាព ពេល​អ្នក​ប្រើ​ចាកចេញ"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"ដែន​កំណត់​ដំណើរការ​ក្នុង​ផ្ទៃ​ខាង​ក្រោយ"</string>
-    <string name="show_all_anrs" msgid="28462979638729082">"បង្ហាញ ANRs ទាំងអស់"</string>
-    <string name="show_all_anrs_summary" msgid="641908614413544127">"បង្ហាញ​ប្រអប់​កម្មវិធី​មិន​ឆ្លើយតប​សម្រាប់​កម្មវិធី​ផ្ទៃ​ខាង​ក្រោយ"</string>
+    <string name="show_all_anrs" msgid="4924885492787069007">"បង្ហាញ ANR ផ្ទៃខាង​ក្រោយ"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"បង្ហាញ​ប្រអប់​កម្មវិធី​មិន​ឆ្លើយតប​សម្រាប់​កម្មវិធី​ផ្ទៃ​ខាង​ក្រោយ"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"បង្ហាញការព្រមានអំពីបណ្តាញជូនដំណឹង"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"បង្ហាញការព្រមាននៅលើអេក្រង់ នៅពេលកម្មវិធីបង្ហោះការជូនដំណឹងដោយមិនមានបណ្តាញត្រឹមត្រូវ"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"បង្ខំឲ្យអនុញ្ញាតកម្មវិធីលើឧបករណ៍ផ្ទុកខាងក្រៅ"</string>
@@ -357,39 +354,24 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"មុខងារនេះ​គឺ​ជា​ការ​ពិសោធន៍ ហើយ​អាច​ប៉ះពាល់​ដំណើរការ​។"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"បដិសេធ​ដោយ <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"សល់​ប្រហែល <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="6655472132189365839">"នៅសល់ប្រហែល <xliff:g id="TIME">%1$s</xliff:g> ទៀត (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"សល់ប្រហែល <xliff:g id="TIME">%1$s</xliff:g> ទៀតផ្អែកលើការប្រើប្រាស់របស់អ្នក"</string>
-    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
-    <skip />
+    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"នៅសល់​ប្រហែល <xliff:g id="TIME">%1$s</xliff:g> ទៀត ផ្អែក​លើការ​ប្រើប្រាស់​របស់អ្នក (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"នៅសល់ <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_discharge_by_enhanced (8788299408879961465) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (7692297898877104416) -->
-    <skip />
-    <!-- no translation found for power_discharge_by (6427074755635635749) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only (5888058889261108064) -->
-    <skip />
+    <string name="power_discharge_by_enhanced" msgid="8305422490607220844">"នឹងអាច​ប្រើបាន​រហូតដល់​ម៉ោងប្រហែល <xliff:g id="TIME">%1$s</xliff:g> ដោយអាស្រ័យ​លើការ​ប្រើប្រាស់​របស់អ្នក (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="896515698736070025">"នឹងអាច​ប្រើបាន​រហូតដល់​ម៉ោងប្រហែល <xliff:g id="TIME">%1$s</xliff:g> ​ដោយ​អាស្រ័យលើ​ការប្រើប្រាស់​របស់អ្នក"</string>
+    <string name="power_discharge_by" msgid="6052127431194780229">"នឹងអាច​ប្រើបាន​រហូតដល់​ម៉ោងប្រហែល <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="4850425421176271395">"នឹងអាច​ប្រើបាន​រហូតដល់​ម៉ោងប្រហែល <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"នៅ​សល់​តិច​ជាង <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
-    <skip />
+    <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"នៅសល់​តិចជាង <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"នៅសល់​ច្រើនជាង <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"នៅ​សល់​ច្រើន​ជាង <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"ទូរសព្ទ​អាចនឹង​បិទក្នុង​ពេលបន្តិច​ទៀត"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"ថេប្លេត​អាចនឹង​បិទក្នុង​ពេលបន្តិច​ទៀត"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"ឧបករណ៍​អាចនឹង​បិទក្នុង​ពេលបន្តិច​ទៀត"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"ទូរសព្ទ​អាចនឹង​បិទក្នុង​ពេលបន្តិច​ទៀត (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"ថេប្លេត​អាចនឹង​បិទក្នុង​ពេលបន្តិច​ទៀត (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"ឧបករណ៍​អាចនឹង​បិទក្នុង​ពេលបន្តិច​ទៀត (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"សល់ <xliff:g id="TIME">%1$s</xliff:g> ទើប​សាកថ្ម​ពេញ"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> រហូតដល់សាកពេញ"</string>
@@ -440,8 +422,9 @@
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"រយៈពេល​ច្រើន​ជាង។"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"រយៈពេល​តិច​ជាង។"</string>
-    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"បើក"</string>
     <string name="cancel" msgid="6859253417269739139">"បោះ​បង់​"</string>
+    <string name="okay" msgid="1997666393121016642">"យល់ព្រម"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"បើក"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"បើកមុខងារកុំរំខាន"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"កុំឱ្យសោះ"</string>
     <string name="zen_interruption_level_priority" msgid="2078370238113347720">"អាទិភាពប៉ុណ្ណោះ"</string>
@@ -450,4 +433,6 @@
     <string name="zen_alarm_warning" msgid="6236690803924413088">"អ្នក​នឹង​មិន​ឮ​ម៉ោង​រោទ៍​បន្ទាប់​របស់​អ្នក​នៅ​ម៉ោង <xliff:g id="WHEN">%1$s</xliff:g> ទេ"</string>
     <string name="alarm_template" msgid="4996153414057676512">"នៅ​ម៉ោង <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3779172822607461675">"នៅ​ថ្ងៃ <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"រយៈពេល"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"សួរគ្រប់ពេល"</string>
 </resources>

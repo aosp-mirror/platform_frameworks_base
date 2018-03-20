@@ -19,8 +19,6 @@ package android.text;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.graphics.Rect;
-import android.text.style.MetricAffectingSpan;
 import android.util.IntArray;
 
 import com.android.internal.util.Preconditions;
@@ -63,7 +61,7 @@ import java.util.Objects;
  * {@link android.widget.TextView} will be rejected internally and compute the text layout again
  * with the current {@link android.widget.TextView} parameters.
  */
-public class PrecomputedText implements Spannable {
+public class PrecomputedText implements Spanned {
     private static final char LINE_FEED = '\n';
 
     /**
@@ -270,7 +268,7 @@ public class PrecomputedText implements Spannable {
     };
 
     // The original text.
-    private final @NonNull SpannableString mText;
+    private final @NonNull SpannedString mText;
 
     // The inclusive start offset of the measuring target.
     private final @IntRange(from = 0) int mStart;
@@ -344,7 +342,7 @@ public class PrecomputedText implements Spannable {
     private PrecomputedText(@NonNull CharSequence text, @IntRange(from = 0) int start,
             @IntRange(from = 0) int end, @NonNull Params param,
             @NonNull MeasuredParagraph[] measuredTexts, @NonNull int[] paragraphBreakPoints) {
-        mText = new SpannableString(text);
+        mText = new SpannedString(text);
         mStart = start;
         mEnd = end;
         mParams = param;
@@ -450,21 +448,6 @@ public class PrecomputedText implements Spannable {
         return getMeasuredParagraph(paraIndex).getWidth(start - paraStart, end - paraStart);
     }
 
-    /** @hide */
-    public void getBounds(@IntRange(from = 0) int start, @IntRange(from = 0) int end,
-            @NonNull Rect bounds) {
-        final int paraIndex = findParaIndex(start);
-        final int paraStart = getParagraphStart(paraIndex);
-        final int paraEnd = getParagraphEnd(paraIndex);
-        if (start < paraStart || paraEnd < end) {
-            throw new RuntimeException("Cannot measured across the paragraph:"
-                + "para: (" + paraStart + ", " + paraEnd + "), "
-                + "request: (" + start + ", " + end + ")");
-        }
-        getMeasuredParagraph(paraIndex).getBounds(mParams.mPaint,
-                start - paraStart, end - paraStart, bounds);
-    }
-
     /**
      * Returns the size of native PrecomputedText memory usage.
      *
@@ -477,35 +460,6 @@ public class PrecomputedText implements Spannable {
             r += getMeasuredParagraph(i).getMemoryUsage();
         }
         return r;
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    // Spannable overrides
-    //
-    // Do not allow to modify MetricAffectingSpan
-
-    /**
-     * @throws IllegalArgumentException if {@link MetricAffectingSpan} is specified.
-     */
-    @Override
-    public void setSpan(Object what, int start, int end, int flags) {
-        if (what instanceof MetricAffectingSpan) {
-            throw new IllegalArgumentException(
-                    "MetricAffectingSpan can not be set to PrecomputedText.");
-        }
-        mText.setSpan(what, start, end, flags);
-    }
-
-    /**
-     * @throws IllegalArgumentException if {@link MetricAffectingSpan} is specified.
-     */
-    @Override
-    public void removeSpan(Object what) {
-        if (what instanceof MetricAffectingSpan) {
-            throw new IllegalArgumentException(
-                    "MetricAffectingSpan can not be removed from PrecomputedText.");
-        }
-        mText.removeSpan(what);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////

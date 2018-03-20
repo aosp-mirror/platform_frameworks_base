@@ -1429,6 +1429,10 @@ public class LauncherApps {
          * Always non-null for a {@link #REQUEST_TYPE_APPWIDGET} request, and always null for a
          * different request type.
          *
+         * <p>Launcher should not show any configuration activity associated with the provider, and
+         * assume that the widget is already fully configured. Upon accepting the widget, it should
+         * pass the widgetId in {@link #accept(Bundle)}.
+         *
          * @return requested {@link AppWidgetProviderInfo} when a request is of the
          * {@link #REQUEST_TYPE_APPWIDGET} type.  Null otherwise.
          */

@@ -747,8 +747,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         KeyguardUpdateMonitor.getInstance(mContext).registerCallback(mUpdateCallback);
         putComponent(DozeHost.class, mDozeServiceHost);
 
-        notifyUserAboutHiddenNotifications();
-
         mScreenPinningRequest = new ScreenPinningRequest(mContext);
         mFalsingManager = FalsingManager.getInstance(mContext);
 
@@ -5044,8 +5042,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                     RemoteAnimationAdapter adapter = mActivityLaunchAnimator.getLaunchAnimation(
                             row);
                     try {
-                        ActivityManager.getService().registerRemoteAnimationForNextActivityStart(
-                                intent.getCreatorPackage(), adapter);
+                        if (adapter != null) {
+                            ActivityManager.getService()
+                                    .registerRemoteAnimationForNextActivityStart(
+                                            intent.getCreatorPackage(), adapter);
+                        }
                         launchResult = intent.sendAndReturnResult(mContext, 0, fillInIntent, null,
                                 null, null, getActivityOptions(adapter));
                         mActivityLaunchAnimator.setLaunchResult(launchResult);
@@ -5141,55 +5142,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     protected NotificationListener mNotificationListener;
-
-    protected void notifyUserAboutHiddenNotifications() {
-        if (0 != Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, 1)) {
-            Log.d(TAG, "user hasn't seen notification about hidden notifications");
-            if (!mLockPatternUtils.isSecure(KeyguardUpdateMonitor.getCurrentUser())) {
-                Log.d(TAG, "insecure lockscreen, skipping notification");
-                Settings.Secure.putInt(mContext.getContentResolver(),
-                        Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, 0);
-                return;
-            }
-            Log.d(TAG, "disabling lockscreen notifications and alerting the user");
-            // disable lockscreen notifications until user acts on the banner.
-            Settings.Secure.putInt(mContext.getContentResolver(),
-                    Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, 0);
-            Settings.Secure.putInt(mContext.getContentResolver(),
-                    Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0);
-
-            final String packageName = mContext.getPackageName();
-            PendingIntent cancelIntent = PendingIntent.getBroadcast(mContext, 0,
-                    new Intent(BANNER_ACTION_CANCEL).setPackage(packageName),
-                    PendingIntent.FLAG_CANCEL_CURRENT);
-            PendingIntent setupIntent = PendingIntent.getBroadcast(mContext, 0,
-                    new Intent(BANNER_ACTION_SETUP).setPackage(packageName),
-                    PendingIntent.FLAG_CANCEL_CURRENT);
-
-            final int colorRes = com.android.internal.R.color.system_notification_accent_color;
-            Notification.Builder note =
-                    new Notification.Builder(mContext, NotificationChannels.GENERAL)
-                            .setSmallIcon(R.drawable.ic_android)
-                            .setContentTitle(mContext.getString(
-                                    R.string.hidden_notifications_title))
-                            .setContentText(mContext.getString(R.string.hidden_notifications_text))
-                            .setOngoing(true)
-                            .setColor(mContext.getColor(colorRes))
-                            .setContentIntent(setupIntent)
-                            .addAction(R.drawable.ic_close,
-                                    mContext.getString(R.string.hidden_notifications_cancel),
-                                    cancelIntent)
-                            .addAction(R.drawable.ic_settings,
-                                    mContext.getString(R.string.hidden_notifications_setup),
-                                    setupIntent);
-            overrideNotificationAppName(mContext, note);
-
-            NotificationManager noMan =
-                    (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-            noMan.notify(SystemMessage.NOTE_HIDDEN_NOTIFICATIONS, note.build());
-        }
-    }
 
     @Override  // NotificationData.Environment
     public boolean isNotificationForCurrentProfiles(StatusBarNotification n) {

@@ -373,7 +373,6 @@ package android.app {
   }
 
   public final class StatsManager {
-    method public boolean addConfiguration(long, byte[], java.lang.String, java.lang.String);
     method public boolean addConfiguration(long, byte[]);
     method public byte[] getData(long);
     method public byte[] getMetadata();
@@ -3770,7 +3769,6 @@ package android.os {
 
   public class IncidentManager {
     method public void reportIncident(android.os.IncidentReportArgs);
-    method public void reportIncident(java.lang.String, byte[]);
   }
 
   public final class IncidentReportArgs implements android.os.Parcelable {
@@ -3781,7 +3779,6 @@ package android.os {
     method public boolean containsSection(int);
     method public int describeContents();
     method public boolean isAll();
-    method public static android.os.IncidentReportArgs parseSetting(java.lang.String) throws java.lang.IllegalArgumentException;
     method public void readFromParcel(android.os.Parcel);
     method public int sectionCount();
     method public void setAll(boolean);
@@ -5216,10 +5213,10 @@ package android.telephony {
     method public boolean handlePinMmi(java.lang.String);
     method public boolean handlePinMmiForSubscriber(int, java.lang.String);
     method public boolean isDataConnectivityPossible();
-    method public boolean isIdle();
-    method public boolean isOffhook();
-    method public boolean isRadioOn();
-    method public boolean isRinging();
+    method public deprecated boolean isIdle();
+    method public deprecated boolean isOffhook();
+    method public deprecated boolean isRadioOn();
+    method public deprecated boolean isRinging();
     method public boolean isVideoCallingEnabled();
     method public deprecated boolean isVisualVoicemailEnabled(android.telecom.PhoneAccountHandle);
     method public boolean needsOtaServiceProvisioning();

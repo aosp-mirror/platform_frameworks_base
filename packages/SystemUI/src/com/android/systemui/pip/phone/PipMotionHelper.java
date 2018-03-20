@@ -16,8 +16,6 @@
 
 package com.android.systemui.pip.phone;
 
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
-
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static com.android.systemui.Interpolators.FAST_OUT_LINEAR_IN;
@@ -71,7 +69,7 @@ public class PipMotionHelper implements Handler.Callback {
     private static final int EXPAND_STACK_TO_MENU_DURATION = 250;
     private static final int EXPAND_STACK_TO_FULLSCREEN_DURATION = 300;
     private static final int MINIMIZE_STACK_MAX_DURATION = 200;
-    private static final int IME_SHIFT_DURATION = 300;
+    private static final int SHIFT_DURATION = 300;
 
     // The fraction of the stack width that the user has to drag offscreen to minimize the PiP
     private static final float MINIMIZE_OFFSCREEN_FRACTION = 0.3f;
@@ -354,11 +352,11 @@ public class PipMotionHelper implements Handler.Callback {
     }
 
     /**
-     * Animates the PiP to offset it from the IME.
+     * Animates the PiP to offset it from the IME or shelf.
      */
-    void animateToIMEOffset(Rect toBounds) {
+    void animateToOffset(Rect toBounds) {
         cancelAnimations();
-        resizeAndAnimatePipUnchecked(toBounds, IME_SHIFT_DURATION);
+        resizeAndAnimatePipUnchecked(toBounds, SHIFT_DURATION);
     }
 
     /**
