@@ -660,6 +660,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final Rect mTmpStableFrame = new Rect();
     static final Rect mTmpNavigationFrame = new Rect();
     static final Rect mTmpOutsetFrame = new Rect();
+    private static final Rect mTmpDisplayCutoutSafeExceptMaybeBarsRect = new Rect();
     private static final Rect mTmpRect = new Rect();
 
     WindowState mTopFullscreenOpaqueWindowState;
@@ -4636,7 +4637,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             w.computeFrameLw(pf /* parentFrame */, df /* displayFrame */, df /* overlayFrame */,
                     df /* contentFrame */, df /* visibleFrame */, dcf /* decorFrame */,
-                    df /* stableFrame */, df /* outsetFrame */, displayFrames.mDisplayCutout);
+                    df /* stableFrame */, df /* outsetFrame */, displayFrames.mDisplayCutout,
+                    false /* parentFrameWasClippedByDisplayCutout */);
             final Rect frame = w.getFrameLw();
 
             if (frame.left <= 0 && frame.top <= 0) {
@@ -4699,7 +4701,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mStatusBar.computeFrameLw(pf /* parentFrame */, df /* displayFrame */,
                 vf /* overlayFrame */, vf /* contentFrame */, vf /* visibleFrame */,
                 dcf /* decorFrame */, vf /* stableFrame */, vf /* outsetFrame */,
-                displayFrames.mDisplayCutout);
+                displayFrames.mDisplayCutout, false /* parentFrameWasClippedByDisplayCutout */);
 
         // For layout, the status bar is always at the top with our fixed height.
         displayFrames.mStable.top = displayFrames.mUnrestricted.top
@@ -4844,7 +4846,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mNavigationBar.computeFrameLw(mTmpNavigationFrame, mTmpNavigationFrame,
                 mTmpNavigationFrame, displayFrames.mDisplayCutoutSafe, mTmpNavigationFrame, dcf,
                 mTmpNavigationFrame, displayFrames.mDisplayCutoutSafe,
-                displayFrames.mDisplayCutout);
+                displayFrames.mDisplayCutout, false /* parentFrameWasClippedByDisplayCutout */);
         mNavigationBarController.setContentFrame(mNavigationBar.getContentFrameLw());
 
         if (DEBUG_LAYOUT) Slog.i(TAG, "mNavigationBar frame: " + mTmpNavigationFrame);
@@ -5299,10 +5301,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         vf.set(cf);
                     }
                 }
-                pf.intersectUnchecked(displayFrames.mDisplayCutoutSafe);
             }
         }
 
+        boolean parentFrameWasClippedByDisplayCutout = false;
         final int cutoutMode = attrs.layoutInDisplayCutoutMode;
         final boolean attachedInParent = attached != null && !layoutInScreen;
         final boolean requestedHideNavigation =
@@ -5310,7 +5312,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // Ensure that windows with a DEFAULT or NEVER display cutout mode are laid out in
         // the cutout safe zone.
         if (cutoutMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
-            final Rect displayCutoutSafeExceptMaybeBars = mTmpRect;
+            final Rect displayCutoutSafeExceptMaybeBars = mTmpDisplayCutoutSafeExceptMaybeBarsRect;
             displayCutoutSafeExceptMaybeBars.set(displayFrames.mDisplayCutoutSafe);
             if (layoutInScreen && layoutInsetDecor && !requestedFullscreen
                     && cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT) {
@@ -5339,10 +5341,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // The IME can always extend under the bottom cutout if the navbar is there.
                 displayCutoutSafeExceptMaybeBars.bottom = Integer.MAX_VALUE;
             }
-            // Windows that are attached to a parent and laid out in said parent are already
-            // avoidingthe cutout according to that parent and don't need to be further constrained.
+            // Windows that are attached to a parent and laid out in said parent already avoid
+            // the cutout according to that parent and don't need to be further constrained.
             if (!attachedInParent) {
+                mTmpRect.set(pf);
                 pf.intersectUnchecked(displayCutoutSafeExceptMaybeBars);
+                parentFrameWasClippedByDisplayCutout |= !mTmpRect.equals(pf);
             }
             // Make sure that NO_LIMITS windows clipped to the display don't extend under the
             // cutout.
@@ -5400,7 +5404,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 + " sf=" + sf.toShortString()
                 + " osf=" + (osf == null ? "null" : osf.toShortString()));
 
-        win.computeFrameLw(pf, df, of, cf, vf, dcf, sf, osf, displayFrames.mDisplayCutout);
+        win.computeFrameLw(pf, df, of, cf, vf, dcf, sf, osf, displayFrames.mDisplayCutout,
+                parentFrameWasClippedByDisplayCutout);
 
         // Dock windows carve out the bottom of the screen, so normal windows
         // can't appear underneath them.
