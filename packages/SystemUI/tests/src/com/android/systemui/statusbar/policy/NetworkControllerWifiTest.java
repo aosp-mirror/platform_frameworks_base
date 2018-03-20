@@ -5,6 +5,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WifiSsid;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -21,6 +22,7 @@ import static junit.framework.Assert.assertEquals;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Mockito.when;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -143,10 +145,11 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     protected void setWifiState(boolean connected, String ssid) {
         Intent i = new Intent(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         NetworkInfo networkInfo = Mockito.mock(NetworkInfo.class);
-        Mockito.when(networkInfo.isConnected()).thenReturn(connected);
+        when(networkInfo.isConnected()).thenReturn(connected);
 
-        //TODO(b/69974497) mock of mWifiManager.getConnectionInfo() needed
-        // Mockito.when(wifiInfo.getSSID()).thenReturn(ssid);
+        WifiInfo wifiInfo = Mockito.mock(WifiInfo.class);
+        when(wifiInfo.getSSID()).thenReturn(ssid);
+        when(mMockWm.getConnectionInfo()).thenReturn(wifiInfo);
 
         i.putExtra(WifiManager.EXTRA_NETWORK_INFO, networkInfo);
         mNetworkController.onReceive(mContext, i);
@@ -175,8 +178,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         assertEquals("WiFi enabled, in quick settings", enabled, (boolean) enabledArg.getValue());
         assertEquals("WiFi connected, in quick settings", connected, iconState.visible);
         assertEquals("WiFi signal, in quick settings", icon, iconState.icon);
-        // TODO(b/69974497) Need to mock mWifiManager.getConnectionInfo() to supply the ssid.
-        // assertEquals("WiFI desc (ssid), in quick settings", description, descArg.getValue());
+        assertEquals("WiFI desc (ssid), in quick settings", description, descArg.getValue());
     }
 
     protected void verifyLastWifiIcon(boolean visible, int icon) {
