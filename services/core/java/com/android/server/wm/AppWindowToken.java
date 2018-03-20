@@ -251,6 +251,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     private final Point mTmpPoint = new Point();
     private final Rect mTmpRect = new Rect();
     private RemoteAnimationDefinition mRemoteAnimationDefinition;
+    private AnimatingAppWindowTokenRegistry mAnimatingAppWindowTokenRegistry;
 
     AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
             DisplayContent dc, long inputDispatchingTimeoutNanos, boolean fullscreen,
@@ -780,6 +781,16 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 task.mStack.mExitingAppTokens.remove(this);
             }
         }
+        final TaskStack stack = getStack();
+
+        // If we reparent, make sure to remove ourselves from the old animation registry.
+        if (mAnimatingAppWindowTokenRegistry != null) {
+            mAnimatingAppWindowTokenRegistry.notifyFinished(this);
+        }
+        mAnimatingAppWindowTokenRegistry = stack != null
+                ? stack.getAnimatingAppWindowTokenRegistry()
+                : null;
+
         mLastParent = task;
     }
 
@@ -1784,6 +1795,21 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     @Override
+    public boolean shouldDeferAnimationFinish(Runnable endDeferFinishCallback) {
+        return mAnimatingAppWindowTokenRegistry != null
+                && mAnimatingAppWindowTokenRegistry.notifyAboutToFinish(
+                        this, endDeferFinishCallback);
+    }
+
+    @Override
+    public void onAnimationLeashDestroyed(Transaction t) {
+        super.onAnimationLeashDestroyed(t);
+        if (mAnimatingAppWindowTokenRegistry != null) {
+            mAnimatingAppWindowTokenRegistry.notifyFinished(this);
+        }
+    }
+
+    @Override
     protected void setLayer(Transaction t, int layer) {
         if (!mSurfaceAnimator.hasLeash()) {
             t.setLayer(mSurfaceControl, layer);
@@ -1825,6 +1851,9 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         final DisplayContent dc = getDisplayContent();
         dc.assignStackOrdering(t);
+        if (mAnimatingAppWindowTokenRegistry != null) {
+            mAnimatingAppWindowTokenRegistry.notifyStarting(this);
+        }
     }
 
     /**
