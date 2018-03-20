@@ -49,11 +49,12 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
         GlLayer* glLayer = static_cast<GlLayer*>(layer);
         GrGLTextureInfo externalTexture;
         externalTexture.fTarget = glLayer->getRenderTarget();
+        SkASSERT(GL_RGBA == glLayer->getTexture().internalFormat());
+        externalTexture.fFormat = GL_RGBA8;
         externalTexture.fID = glLayer->getTextureId();
-        GrBackendTexture backendTexture(layerWidth, layerHeight, kRGBA_8888_GrPixelConfig,
-                                        externalTexture);
+        GrBackendTexture backendTexture(layerWidth, layerHeight, GrMipMapped::kNo, externalTexture);
         layerImage = SkImage::MakeFromTexture(context, backendTexture, kTopLeft_GrSurfaceOrigin,
-                                              kPremul_SkAlphaType, nullptr);
+                                              kRGBA_8888_SkColorType, kPremul_SkAlphaType, nullptr);
     } else {
         SkASSERT(layer->getApi() == Layer::Api::Vulkan);
         VkLayer* vkLayer = static_cast<VkLayer*>(layer);
