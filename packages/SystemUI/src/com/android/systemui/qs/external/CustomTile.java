@@ -348,7 +348,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         return ComponentName.unflattenFromString(action);
     }
 
-    public static QSTile create(QSTileHost host, String spec) {
+    public static CustomTile create(QSTileHost host, String spec) {
         if (spec == null || !spec.startsWith(PREFIX) || !spec.endsWith(")")) {
             throw new IllegalArgumentException("Bad custom tile spec: " + spec);
         }
