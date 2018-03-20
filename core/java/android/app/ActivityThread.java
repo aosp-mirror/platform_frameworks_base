@@ -4034,9 +4034,11 @@ public final class ActivityThread extends ClientTransactionHandler {
         r.setState(ON_PAUSE);
     }
 
+    /** Called from {@link LocalActivityManager}. */
     final void performStopActivity(IBinder token, boolean saveState, String reason) {
         ActivityClientRecord r = mActivities.get(token);
-        performStopActivityInner(r, null, false, saveState, reason);
+        performStopActivityInner(r, null /* stopInfo */, false /* keepShown */, saveState,
+                false /* finalStateRequest */, reason);
     }
 
     private static final class ProviderRefCount {
@@ -4068,9 +4070,16 @@ public final class ActivityThread extends ClientTransactionHandler {
      * it the result when it is done, but the window may still be visible.
      * For the client, we want to call onStop()/onStart() to indicate when
      * the activity's UI visibility changes.
+     * @param r Target activity client record.
+     * @param info Action that will report activity stop to server.
+     * @param keepShown Flag indicating whether the activity is still shown.
+     * @param saveState Flag indicating whether the activity state should be saved.
+     * @param finalStateRequest Flag indicating if this call is handling final lifecycle state
+     *                          request for a transaction.
+     * @param reason Reason for performing this operation.
      */
     private void performStopActivityInner(ActivityClientRecord r, StopInfo info, boolean keepShown,
-            boolean saveState, String reason) {
+            boolean saveState, boolean finalStateRequest, String reason) {
         if (localLOGV) Slog.v(TAG, "Performing stop of " + r);
         if (r != null) {
             if (!keepShown && r.stopped) {
@@ -4080,11 +4089,13 @@ public final class ActivityThread extends ClientTransactionHandler {
                     // if the activity isn't resumed.
                     return;
                 }
-                RuntimeException e = new RuntimeException(
-                        "Performing stop of activity that is already stopped: "
-                        + r.intent.getComponent().toShortString());
-                Slog.e(TAG, e.getMessage(), e);
-                Slog.e(TAG, r.getStateString());
+                if (!finalStateRequest) {
+                    final RuntimeException e = new RuntimeException(
+                            "Performing stop of activity that is already stopped: "
+                                    + r.intent.getComponent().toShortString());
+                    Slog.e(TAG, e.getMessage(), e);
+                    Slog.e(TAG, r.getStateString());
+                }
             }
 
             // One must first be paused before stopped...
@@ -4177,12 +4188,13 @@ public final class ActivityThread extends ClientTransactionHandler {
 
     @Override
     public void handleStopActivity(IBinder token, boolean show, int configChanges,
-            PendingTransactionActions pendingActions, String reason) {
+            PendingTransactionActions pendingActions, boolean finalStateRequest, String reason) {
         final ActivityClientRecord r = mActivities.get(token);
         r.activity.mConfigChangeFlags |= configChanges;
 
         final StopInfo stopInfo = new StopInfo();
-        performStopActivityInner(r, stopInfo, show, true, reason);
+        performStopActivityInner(r, stopInfo, show, true /* saveState */, finalStateRequest,
+                reason);
 
         if (localLOGV) Slog.v(
             TAG, "Finishing stop of " + r + ": show=" + show
@@ -4234,7 +4246,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         if (!show && !r.stopped) {
-            performStopActivityInner(r, null, show, false, "handleWindowVisibility");
+            performStopActivityInner(r, null /* stopInfo */, show, false /* saveState */,
+                    false /* finalStateRequest */, "handleWindowVisibility");
         } else if (show && r.stopped) {
             // If we are getting ready to gc after going to the background, well
             // we are back active so skip it.
