@@ -41,7 +41,7 @@ public class NotificationChannels extends SystemUI {
     @VisibleForTesting
     static void createAll(Context context) {
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
-        NotificationChannel batteryChannel = new NotificationChannel(BATTERY,
+        final NotificationChannel batteryChannel = new NotificationChannel(BATTERY,
                 context.getString(R.string.notification_channel_battery),
                 NotificationManager.IMPORTANCE_MAX);
         final String soundPath = Settings.Global.getString(context.getContentResolver(),
@@ -50,22 +50,33 @@ public class NotificationChannels extends SystemUI {
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
                 .build());
+        batteryChannel.setBlockableSystem(true);
+        batteryChannel.setBypassDnd(true);
+
+        final NotificationChannel alerts = new NotificationChannel(
+                ALERTS,
+                context.getString(R.string.notification_channel_alerts),
+                NotificationManager.IMPORTANCE_HIGH);
+        alerts.setBypassDnd(true);
+
+        final NotificationChannel general = new NotificationChannel(
+                GENERAL,
+                context.getString(R.string.notification_channel_general),
+                NotificationManager.IMPORTANCE_MIN);
+        general.setBypassDnd(true);
+
+        final NotificationChannel storage = new NotificationChannel(
+                STORAGE,
+                context.getString(R.string.notification_channel_storage),
+                isTv(context)
+                        ? NotificationManager.IMPORTANCE_DEFAULT
+                        : NotificationManager.IMPORTANCE_LOW);
+        storage.setBypassDnd(true);
 
         nm.createNotificationChannels(Arrays.asList(
-                new NotificationChannel(
-                        ALERTS,
-                        context.getString(R.string.notification_channel_alerts),
-                        NotificationManager.IMPORTANCE_HIGH),
-                new NotificationChannel(
-                        GENERAL,
-                        context.getString(R.string.notification_channel_general),
-                        NotificationManager.IMPORTANCE_MIN),
-                new NotificationChannel(
-                        STORAGE,
-                        context.getString(R.string.notification_channel_storage),
-                        isTv(context)
-                                ? NotificationManager.IMPORTANCE_DEFAULT
-                                : NotificationManager.IMPORTANCE_LOW),
+                alerts,
+                general,
+                storage,
                 createScreenshotChannel(
                         context.getString(R.string.notification_channel_screenshot),
                         nm.getNotificationChannel(SCREENSHOTS_LEGACY)),
@@ -101,6 +112,8 @@ public class NotificationChannels extends SystemUI {
 
         screenshotChannel.setSound(Uri.parse(""), // silent
                 new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION).build());
+        screenshotChannel.setBypassDnd(true);
+        screenshotChannel.setBlockableSystem(true);
 
         if (legacySS != null) {
             // Respect any user modified fields from the old channel.
