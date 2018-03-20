@@ -299,4 +299,24 @@ public class CachedBluetoothDeviceTest {
         // Verify new alias is returned on getName
         assertThat(cachedBluetoothDevice.getName()).isEqualTo(DEVICE_ALIAS_NEW);
     }
+
+    @Test
+    public void testSetActive() {
+        when(mProfileManager.getA2dpProfile()).thenReturn(mA2dpProfile);
+        when(mProfileManager.getHeadsetProfile()).thenReturn(mHfpProfile);
+        when(mA2dpProfile.setActiveDevice(any(BluetoothDevice.class))).thenReturn(true);
+        when(mHfpProfile.setActiveDevice(any(BluetoothDevice.class))).thenReturn(true);
+
+        assertThat(mCachedDevice.setActive()).isFalse();
+
+        mCachedDevice.onProfileStateChanged(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
+        assertThat(mCachedDevice.setActive()).isTrue();
+
+        mCachedDevice.onProfileStateChanged(mA2dpProfile, BluetoothProfile.STATE_DISCONNECTED);
+        mCachedDevice.onProfileStateChanged(mHfpProfile, BluetoothProfile.STATE_CONNECTED);
+        assertThat(mCachedDevice.setActive()).isTrue();
+
+        mCachedDevice.onProfileStateChanged(mHfpProfile, BluetoothProfile.STATE_DISCONNECTED);
+        assertThat(mCachedDevice.setActive()).isFalse();
+    }
 }
