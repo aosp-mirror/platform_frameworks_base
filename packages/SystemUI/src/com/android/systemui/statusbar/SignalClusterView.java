@@ -611,12 +611,14 @@ public class SignalClusterView extends LinearLayout implements NetworkController
         private String mMobileDescription, mMobileTypeDescription;
 
         private ViewGroup mMobileGroup;
-        private ImageView mMobile, mMobileDark, mMobileType, mMobileRoaming;
+        private ImageView mMobile, mMobileType, mMobileRoaming;
+        private View mMobileRoamingSpace;
         public boolean mRoaming;
         private ImageView mMobileActivityIn;
         private ImageView mMobileActivityOut;
         public boolean mActivityIn;
         public boolean mActivityOut;
+        private SignalDrawable mMobileSignalDrawable;
 
         public PhoneState(int subId, Context context) {
             ViewGroup root = (ViewGroup) LayoutInflater.from(context)
@@ -628,23 +630,19 @@ public class SignalClusterView extends LinearLayout implements NetworkController
         public void setViews(ViewGroup root) {
             mMobileGroup    = root;
             mMobile         = root.findViewById(R.id.mobile_signal);
-            mMobileDark     = root.findViewById(R.id.mobile_signal_dark);
             mMobileType     = root.findViewById(R.id.mobile_type);
             mMobileRoaming  = root.findViewById(R.id.mobile_roaming);
+            mMobileRoamingSpace  = root.findViewById(R.id.mobile_roaming_space);
             mMobileActivityIn = root.findViewById(R.id.mobile_in);
             mMobileActivityOut = root.findViewById(R.id.mobile_out);
-            // TODO: Remove the 2 instances because now the drawable can handle darkness.
-            mMobile.setImageDrawable(new SignalDrawable(mMobile.getContext()));
-            SignalDrawable drawable = new SignalDrawable(mMobileDark.getContext());
-            drawable.setDarkIntensity(1);
-            mMobileDark.setImageDrawable(drawable);
+            mMobileSignalDrawable = new SignalDrawable(mMobile.getContext());
+            mMobile.setImageDrawable(mMobileSignalDrawable);
         }
 
         public boolean apply(boolean isSecondaryIcon) {
             if (mMobileVisible && !mIsAirplaneMode) {
                 if (mLastMobileStrengthId != mMobileStrengthId) {
                     mMobile.getDrawable().setLevel(mMobileStrengthId);
-                    mMobileDark.getDrawable().setLevel(mMobileStrengthId);
                     mLastMobileStrengthId = mMobileStrengthId;
                 }
 
@@ -666,15 +664,13 @@ public class SignalClusterView extends LinearLayout implements NetworkController
             mMobile.setPaddingRelative(
                     mIsMobileTypeIconWide ? mWideTypeIconStartPadding : mMobileDataIconStartPadding,
                     0, 0, 0);
-            mMobileDark.setPaddingRelative(
-                    mIsMobileTypeIconWide ? mWideTypeIconStartPadding : mMobileDataIconStartPadding,
-                    0, 0, 0);
 
             if (DEBUG) Log.d(TAG, String.format("mobile: %s sig=%d typ=%d",
                         (mMobileVisible ? "VISIBLE" : "GONE"), mMobileStrengthId, mMobileTypeId));
 
             mMobileType.setVisibility(mMobileTypeId != 0 ? View.VISIBLE : View.GONE);
             mMobileRoaming.setVisibility(mRoaming ? View.VISIBLE : View.GONE);
+            mMobileRoamingSpace.setVisibility(mRoaming ? View.VISIBLE : View.GONE);
             mMobileActivityIn.setVisibility(mActivityIn ? View.VISIBLE : View.GONE);
             mMobileActivityOut.setVisibility(mActivityOut ? View.VISIBLE : View.GONE);
 
@@ -689,9 +685,7 @@ public class SignalClusterView extends LinearLayout implements NetworkController
         }
 
         public void setIconTint(int tint, float darkIntensity, Rect tintArea) {
-            applyDarkIntensity(
-                    DarkIconDispatcher.getDarkIntensity(tintArea, mMobile, darkIntensity),
-                    mMobile, mMobileDark);
+            mMobileSignalDrawable.setDarkIntensity(darkIntensity);
             setTint(mMobileType, DarkIconDispatcher.getTint(tintArea, mMobileType, tint));
             setTint(mMobileRoaming, DarkIconDispatcher.getTint(tintArea, mMobileRoaming,
                     tint));

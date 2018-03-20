@@ -14,11 +14,15 @@ Copyright (C) 2014 The Android Open Source Project
     limitations under the License.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-        android:width="8.5dp"
-        android:height="17dp"
-        android:viewportWidth="6.0"
-        android:viewportHeight="12.0">
+        android:width="@dimen/signal_icon_size"
+        android:height="@dimen/signal_icon_size"
+        android:viewportWidth="24"
+        android:viewportHeight="24">
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M2.800000,7.900000l-1.000000,0.000000L1.800000,11.000000L0.200000,11.000000L0.200000,2.500000l2.700000,0.000000c0.900000,0.000000 1.500000,0.200000 2.000000,0.700000s0.700000,1.100000 0.700000,1.900000c0.000000,0.600000 -0.100000,1.100000 -0.300000,1.500000S4.800000,7.200000 4.400000,7.400000l1.500000,3.500000L5.900000,11.000000L4.100000,11.000000L2.800000,7.900000zM1.800000,6.500000l1.100000,0.000000c0.400000,0.000000 0.600000,-0.100000 0.800000,-0.400000S4.000000,5.600000 4.000000,5.200000c0.000000,-0.400000 -0.100000,-0.800000 -0.300000,-1.000000S3.300000,3.800000 2.900000,3.800000L1.800000,3.800000L1.800000,6.500000z"/>
+        android:pathData="M7.8,7.2L9,10H7L5.87,7.33H4V10H2V2h5c1.13,0,2,0.87,2,2v1.33C9,6.13,8.47,6.87,7.8,7.2z M7,4H4v1.33h3V4z" />
+    <path
+        android:pathData="M 0 0 H 24 V 24 H 0 V 0 Z" />
+    <path
+        android:pathData="M0,0h24v24H0V0z" />
 </vector>
