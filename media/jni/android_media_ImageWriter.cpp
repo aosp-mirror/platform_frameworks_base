@@ -421,7 +421,7 @@ static void ImageWriter_cancelImage(JNIEnv* env, jobject thiz, jlong nativeCtx, 
 }
 
 static void ImageWriter_queueImage(JNIEnv* env, jobject thiz, jlong nativeCtx, jobject image,
-        jlong timestampNs, jint left, jint top, jint right, jint bottom) {
+        jlong timestampNs, jint left, jint top, jint right, jint bottom, jint transform) {
     ALOGV("%s", __FUNCTION__);
     JNIImageWriterContext* const ctx = reinterpret_cast<JNIImageWriterContext *>(nativeCtx);
     if (ctx == NULL || thiz == NULL) {
@@ -465,6 +465,12 @@ static void ImageWriter_queueImage(JNIEnv* env, jobject thiz, jlong nativeCtx, j
         return;
     }
 
+    res = native_window_set_buffers_transform(anw.get(), transform);
+    if (res != OK) {
+        jniThrowRuntimeException(env, "Set transform failed");
+        return;
+    }
+
     // Finally, queue input buffer
     res = anw->queueBuffer(anw.get(), buffer, fenceFd);
     if (res != OK) {
@@ -487,7 +493,7 @@ static void ImageWriter_queueImage(JNIEnv* env, jobject thiz, jlong nativeCtx, j
 
 static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nativeCtx,
         jlong nativeBuffer, jint imageFormat, jlong timestampNs, jint left, jint top,
-        jint right, jint bottom) {
+        jint right, jint bottom, jint transform) {
     ALOGV("%s", __FUNCTION__);
     JNIImageWriterContext* const ctx = reinterpret_cast<JNIImageWriterContext *>(nativeCtx);
     if (ctx == NULL || thiz == NULL) {
@@ -530,7 +536,7 @@ static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nat
     }
     sp < ANativeWindow > anw = surface;
 
-    // Step 2. Set timestamp and crop. Note that we do not need unlock the image because
+    // Step 2. Set timestamp, crop and transform. Note that we do not need unlock the image because
     // it was not locked.
     ALOGV("timestamp to be queued: %" PRId64, timestampNs);
     res = native_window_set_buffers_timestamp(anw.get(), timestampNs);
@@ -547,6 +553,12 @@ static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nat
     res = native_window_set_crop(anw.get(), &cropRect);
     if (res != OK) {
         jniThrowRuntimeException(env, "Set crop rect failed");
+        return res;
+    }
+
+    res = native_window_set_buffers_transform(anw.get(), transform);
+    if (res != OK) {
+        jniThrowRuntimeException(env, "Set transform failed");
         return res;
     }
 
@@ -785,9 +797,9 @@ static JNINativeMethod gImageWriterMethods[] = {
     {"nativeInit",              "(Ljava/lang/Object;Landroid/view/Surface;II)J",
                                                               (void*)ImageWriter_init },
     {"nativeClose",              "(J)V",                      (void*)ImageWriter_close },
-    {"nativeAttachAndQueueImage", "(JJIJIIII)I",          (void*)ImageWriter_attachAndQueueImage },
+    {"nativeAttachAndQueueImage", "(JJIJIIIII)I",          (void*)ImageWriter_attachAndQueueImage },
     {"nativeDequeueInputImage", "(JLandroid/media/Image;)V",  (void*)ImageWriter_dequeueImage },
-    {"nativeQueueInputImage",   "(JLandroid/media/Image;JIIII)V",  (void*)ImageWriter_queueImage },
+    {"nativeQueueInputImage",   "(JLandroid/media/Image;JIIIII)V",  (void*)ImageWriter_queueImage },
     {"cancelImage",             "(JLandroid/media/Image;)V",   (void*)ImageWriter_cancelImage },
 };
 
