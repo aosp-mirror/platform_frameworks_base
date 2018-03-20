@@ -1669,6 +1669,8 @@ public final class Bitmap implements Parcelable {
         if (mColorSpace == null) {
             if (nativeIsSRGB(mNativePtr)) {
                 mColorSpace = ColorSpace.get(ColorSpace.Named.SRGB);
+            } else if (getConfig() == Config.HARDWARE && nativeIsSRGBLinear(mNativePtr)) {
+                mColorSpace = ColorSpace.get(ColorSpace.Named.LINEAR_EXTENDED_SRGB);
             } else {
                 float[] xyz = new float[9];
                 float[] params = new float[7];
@@ -2092,5 +2094,6 @@ public final class Bitmap implements Parcelable {
     private static native GraphicBuffer nativeCreateGraphicBufferHandle(long nativeBitmap);
     private static native boolean nativeGetColorSpace(long nativePtr, float[] xyz, float[] params);
     private static native boolean nativeIsSRGB(long nativePtr);
+    private static native boolean nativeIsSRGBLinear(long nativePtr);
     private static native void nativeCopyColorSpace(long srcBitmap, long dstBitmap);
 }
