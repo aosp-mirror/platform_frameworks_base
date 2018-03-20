@@ -896,7 +896,7 @@ public final class PowerManagerService extends SystemService
         mDreamsBatteryLevelDrainCutoffConfig = resources.getInteger(
                 com.android.internal.R.integer.config_dreamsBatteryLevelDrainCutoff);
         mDozeAfterScreenOff = resources.getBoolean(
-                com.android.internal.R.bool.config_dozeAfterScreenOff);
+                com.android.internal.R.bool.config_dozeAfterScreenOffByDefault);
         mMinimumScreenOffTimeoutConfig = resources.getInteger(
                 com.android.internal.R.integer.config_minimumScreenOffTimeout);
         mMaximumScreenDimDurationConfig = resources.getInteger(
