@@ -37,25 +37,26 @@ import java.lang.annotation.RetentionPolicy;
 @SystemApi
 public final class KeyDerivationParams implements Parcelable {
     private final int mAlgorithm;
-    private byte[] mSalt;
+    private final byte[] mSalt;
+    private final int mDifficulty;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"ALGORITHM_"}, value = {ALGORITHM_SHA256, ALGORITHM_ARGON2ID})
+    @IntDef(prefix = {"ALGORITHM_"}, value = {ALGORITHM_SHA256, ALGORITHM_SCRYPT})
     public @interface KeyDerivationAlgorithm {
     }
 
     /**
-     * Salted SHA256
+     * Salted SHA256.
      */
     public static final int ALGORITHM_SHA256 = 1;
 
     /**
-     * Argon2ID
+     * SCRYPT.
+     *
      * @hide
      */
-    // TODO: add Argon2ID support.
-    public static final int ALGORITHM_ARGON2ID = 2;
+    public static final int ALGORITHM_SCRYPT = 2;
 
     /**
      * Creates instance of the class to to derive key using salted SHA256 hash.
@@ -65,12 +66,30 @@ public final class KeyDerivationParams implements Parcelable {
     }
 
     /**
+     * Creates instance of the class to to derive key using the password hashing algorithm SCRYPT.
+     *
+     * @hide
+     */
+    public static KeyDerivationParams createScryptParams(@NonNull byte[] salt, int difficulty) {
+        return new KeyDerivationParams(ALGORITHM_SCRYPT, salt, difficulty);
+    }
+
+    /**
      * @hide
      */
     // TODO: Make private once legacy API is removed
     public KeyDerivationParams(@KeyDerivationAlgorithm int algorithm, @NonNull byte[] salt) {
+        this(algorithm, salt, /*difficulty=*/ 0);
+    }
+
+    /**
+     * @hide
+     */
+    KeyDerivationParams(@KeyDerivationAlgorithm int algorithm, @NonNull byte[] salt,
+            int difficulty) {
         mAlgorithm = algorithm;
         mSalt = Preconditions.checkNotNull(salt);
+        mDifficulty = difficulty;
     }
 
     /**
@@ -85,6 +104,15 @@ public final class KeyDerivationParams implements Parcelable {
      */
     public @NonNull byte[] getSalt() {
         return mSalt;
+    }
+
+    /**
+     * Gets hashing difficulty.
+     *
+     * @hide
+     */
+    public int getDifficulty() {
+        return mDifficulty;
     }
 
     public static final Parcelable.Creator<KeyDerivationParams> CREATOR =
@@ -102,6 +130,7 @@ public final class KeyDerivationParams implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mAlgorithm);
         out.writeByteArray(mSalt);
+        out.writeInt(mDifficulty);
     }
 
     /**
@@ -110,6 +139,7 @@ public final class KeyDerivationParams implements Parcelable {
     protected KeyDerivationParams(Parcel in) {
         mAlgorithm = in.readInt();
         mSalt = in.createByteArray();
+        mDifficulty = in.readInt();
     }
 
     @Override
