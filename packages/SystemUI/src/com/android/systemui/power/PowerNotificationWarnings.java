@@ -27,7 +27,6 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioAttributes;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -37,6 +36,7 @@ import android.util.Slog;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.settingslib.Utils;
+import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.settingslib.utils.PowerUtil;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
@@ -72,6 +72,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             "PNW.clickedThermalShutdownWarning";
     private static final String ACTION_DISMISSED_THERMAL_SHUTDOWN_WARNING =
             "PNW.dismissedThermalShutdownWarning";
+    private static final String ACTION_SHOW_START_SAVER_CONFIRMATION =
+            BatterySaverUtils.ACTION_SHOW_START_SAVER_CONFIRMATION;
 
     private static final AudioAttributes AUDIO_ATTRIBUTES = new AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -404,7 +406,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         d.setTitle(R.string.battery_saver_confirmation_title);
         d.setMessage(com.android.internal.R.string.battery_saver_description);
         d.setNegativeButton(android.R.string.cancel, null);
-        d.setPositiveButton(R.string.battery_saver_confirmation_ok, mStartSaverMode);
+        d.setPositiveButton(R.string.battery_saver_confirmation_ok, mStartSaverModeNoConfirmation);
         d.setShowForAllUsers(true);
         d.setOnDismissListener(new OnDismissListener() {
             @Override
@@ -416,8 +418,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         mSaverConfirmation = d;
     }
 
-    private void setSaverMode(boolean mode) {
-        mPowerMan.setPowerSaveMode(mode);
+    private void setSaverMode(boolean mode, boolean needFirstTimeWarning) {
+        BatterySaverUtils.setPowerSaveMode(mContext, mode, needFirstTimeWarning);
     }
 
     private final class Receiver extends BroadcastReceiver {
@@ -431,8 +433,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             filter.addAction(ACTION_DISMISSED_TEMP_WARNING);
             filter.addAction(ACTION_CLICKED_THERMAL_SHUTDOWN_WARNING);
             filter.addAction(ACTION_DISMISSED_THERMAL_SHUTDOWN_WARNING);
+            filter.addAction(ACTION_SHOW_START_SAVER_CONFIRMATION);
             mContext.registerReceiverAsUser(this, UserHandle.ALL, filter,
-                    android.Manifest.permission.STATUS_BAR_SERVICE, mHandler);
+                    android.Manifest.permission.DEVICE_POWER, mHandler);
         }
 
         @Override
@@ -443,6 +446,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 dismissLowBatteryNotification();
                 mContext.startActivityAsUser(mOpenBatterySettings, UserHandle.CURRENT);
             } else if (action.equals(ACTION_START_SAVER)) {
+                setSaverMode(true, true);
+                dismissLowBatteryNotification();
+            } else if (action.equals(ACTION_SHOW_START_SAVER_CONFIRMATION)) {
                 dismissLowBatteryNotification();
                 showStartSaverConfirmation();
             } else if (action.equals(ACTION_DISMISSED_WARNING)) {
@@ -461,15 +467,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         }
     }
 
-    private final OnClickListener mStartSaverMode = new OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            AsyncTask.execute(new Runnable() {
-                @Override
-                public void run() {
-                    setSaverMode(true);
-                }
-            });
-        }
-    };
+    private final OnClickListener mStartSaverModeNoConfirmation =
+            (dialog, which) -> setSaverMode(true, false);
 }
