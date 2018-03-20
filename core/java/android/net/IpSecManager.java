@@ -658,7 +658,8 @@ public final class IpSecManager {
          * @param address the local address for traffic inside the tunnel
          * @hide
          */
-        public void addAddress(LinkAddress address) {
+        @SystemApi
+        public void addAddress(LinkAddress address) throws IOException {
             try {
                 mService.addAddressToTunnelInterface(mResourceId, address);
             } catch (RemoteException e) {
@@ -674,7 +675,8 @@ public final class IpSecManager {
          * @param address to be removed
          * @hide
          */
-        public void removeAddress(LinkAddress address) {
+        @SystemApi
+        public void removeAddress(LinkAddress address) throws IOException {
             try {
                 mService.removeAddressFromTunnelInterface(mResourceId, address);
             } catch (RemoteException e) {
