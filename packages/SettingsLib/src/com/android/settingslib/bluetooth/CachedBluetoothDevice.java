@@ -416,6 +416,29 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
     }
 
+    /**
+     * Set this device as active device
+     * @return true if at least one profile on this device is set to active, false otherwise
+     */
+    public boolean setActive() {
+        boolean result = false;
+        A2dpProfile a2dpProfile = mProfileManager.getA2dpProfile();
+        if (a2dpProfile != null && isConnectedProfile(a2dpProfile)) {
+            if (a2dpProfile.setActiveDevice(getDevice())) {
+                Log.i(TAG, "OnPreferenceClickListener: A2DP active device=" + this);
+                result = true;
+            }
+        }
+        HeadsetProfile headsetProfile = mProfileManager.getHeadsetProfile();
+        if ((headsetProfile != null) && isConnectedProfile(headsetProfile)) {
+            if (headsetProfile.setActiveDevice(getDevice())) {
+                Log.i(TAG, "OnPreferenceClickListener: Headset active device=" + this);
+                result = true;
+            }
+        }
+        return result;
+    }
+
     void refreshName() {
         fetchName();
         dispatchAttributesChanged();
