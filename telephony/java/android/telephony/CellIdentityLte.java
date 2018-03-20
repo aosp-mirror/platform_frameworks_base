@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.text.TextUtils;
 
@@ -201,6 +202,7 @@ public final class CellIdentityLte extends CellIdentity {
      * @return The long alpha tag associated with the current scan result (may be the operator
      * name string or extended operator name string). May be null if unknown.
      */
+    @Nullable
     public CharSequence getOperatorAlphaLong() {
         return mAlphaLong;
     }
@@ -209,6 +211,7 @@ public final class CellIdentityLte extends CellIdentity {
      * @return The short alpha tag associated with the current scan result (may be the operator
      * name string or extended operator name string).  May be null if unknown.
      */
+    @Nullable
     public CharSequence getOperatorAlphaShort() {
         return mAlphaShort;
     }
