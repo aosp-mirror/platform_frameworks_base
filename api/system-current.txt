@@ -5213,10 +5213,10 @@ package android.telephony {
     method public boolean handlePinMmi(java.lang.String);
     method public boolean handlePinMmiForSubscriber(int, java.lang.String);
     method public boolean isDataConnectivityPossible();
-    method public deprecated boolean isIdle();
-    method public deprecated boolean isOffhook();
-    method public deprecated boolean isRadioOn();
-    method public deprecated boolean isRinging();
+    method public boolean isIdle();
+    method public boolean isOffhook();
+    method public boolean isRadioOn();
+    method public boolean isRinging();
     method public boolean isVideoCallingEnabled();
     method public deprecated boolean isVisualVoicemailEnabled(android.telecom.PhoneAccountHandle);
     method public boolean needsOtaServiceProvisioning();
