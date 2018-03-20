@@ -475,6 +475,19 @@ public class ScrimControllerTest extends SysuiTestCase {
         Assert.assertTrue("Should be focusable on keyguard", mScrimInFront.isFocusable());
     }
 
+    @Test
+    public void testHidesShowWhenLockedActivity() {
+        mScrimController.setWallpaperSupportsAmbientMode(true);
+        mScrimController.setKeyguardOccluded(true);
+        mScrimController.transitionTo(ScrimState.AOD);
+        mScrimController.finishAnimationsImmediately();
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
+
+        mScrimController.transitionTo(ScrimState.PULSING);
+        mScrimController.finishAnimationsImmediately();
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
+    }
+
     /**
      * Conserves old notification density after leaving state and coming back.
      *
