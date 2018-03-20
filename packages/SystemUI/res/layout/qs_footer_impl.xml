@@ -60,7 +60,7 @@
             android:layout_marginEnd="32dp"
             android:gravity="center_vertical|start"
             android:ellipsize="marquee"
-            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textAppearance="@style/TextAppearance.QS.TileLabel"
             android:textColor="?android:attr/textColorPrimary"
             android:textDirection="locale"
             android:singleLine="true" />
