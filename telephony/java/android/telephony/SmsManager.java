@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
 import android.app.ActivityThread;
 import android.app.PendingIntent;
@@ -343,15 +344,16 @@ public final class SmsManager {
      * applications. Intended for internal carrier use only.
      * </p>
      *
-     * <p>Requires Permission:
-     * {@link android.Manifest.permission#SEND_SMS} and
-     * {@link android.Manifest.permission#MODIFY_PHONE_STATE} or the calling app has carrier
-     * privileges.
-     * </p>
+     * <p>Requires Permission: Both {@link android.Manifest.permission#SEND_SMS} and
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE}, or that the calling app has carrier
+     * privileges (see {@link TelephonyManager#hasCarrierPrivileges}), or that the calling app is
+     * the default IMS app (see
+     * {@link CarrierConfigManager#KEY_CONFIG_IMS_PACKAGE_OVERRIDE_STRING}).
      *
      * @see #sendTextMessage(String, String, String, PendingIntent, PendingIntent)
      */
     @SystemApi
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(allOf = {
             android.Manifest.permission.MODIFY_PHONE_STATE,
             android.Manifest.permission.SEND_SMS
