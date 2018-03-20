@@ -1455,7 +1455,6 @@ public class TelephonyManager {
      * {@hide}
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public int getCurrentPhoneType() {
         return getCurrentPhoneType(getSubId());
     }
@@ -1471,17 +1470,7 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public int getCurrentPhoneType(int subId) {
-        return getCurrentPhoneType(subId, false);
-    }
-
-    /**
-     * getCurrentPhoneType() with optional check if device is voice capable.
-     *
-     * @hide
-     */
-    public int getCurrentPhoneType(int subId, boolean checkIsVoiceCapable) {
         int phoneId;
         if (subId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
             // if we don't have any sims, we don't have subscriptions, but we
@@ -1490,7 +1479,8 @@ public class TelephonyManager {
         } else {
             phoneId = SubscriptionManager.getPhoneId(subId);
         }
-        return getCurrentPhoneTypeForSlot(phoneId, checkIsVoiceCapable);
+
+        return getCurrentPhoneTypeForSlot(phoneId);
     }
 
     /**
@@ -1498,15 +1488,11 @@ public class TelephonyManager {
      *
      * @hide
      */
-    public int getCurrentPhoneTypeForSlot(int slotIndex, boolean checkIsVoiceCapable) {
+    public int getCurrentPhoneTypeForSlot(int slotIndex) {
         try{
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                if (checkIsVoiceCapable) {
-                    return telephony.getVoiceCapableActivePhoneTypeForSlot(slotIndex);
-                } else {
-                    return telephony.getActivePhoneTypeForSlot(slotIndex);
-                }
+                return telephony.getActivePhoneTypeForSlot(slotIndex);
             } else {
                 // This can happen when the ITelephony interface is not up yet.
                 return getPhoneTypeFromProperty(slotIndex);
@@ -1532,7 +1518,10 @@ public class TelephonyManager {
      * @see #PHONE_TYPE_SIP
      */
     public int getPhoneType() {
-        return getCurrentPhoneType(getSubId(), true);
+        if (!isVoiceCapable()) {
+            return PHONE_TYPE_NONE;
+        }
+        return getCurrentPhoneType();
     }
 
     private int getPhoneTypeFromProperty() {
@@ -5842,14 +5831,12 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public List<String> getCarrierPackageNamesForIntent(Intent intent) {
         return getCarrierPackageNamesForIntentAndPhone(intent, getPhoneId());
     }
 
     /** @hide */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public List<String> getCarrierPackageNamesForIntentAndPhone(Intent intent, int phoneId) {
         try {
             ITelephony telephony = getITelephony();
@@ -5959,11 +5946,7 @@ public class TelephonyManager {
         }
     }
 
-    /**
-     * @deprecated Use {@link android.telecom.TelecomManager#isInCall} instead
-     * @hide
-     */
-    @Deprecated
+    /** @hide */
     @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
@@ -5980,11 +5963,7 @@ public class TelephonyManager {
         return false;
     }
 
-    /**
-     * @deprecated Use {@link android.telecom.TelecomManager#isRinging} instead
-     * @hide
-     */
-    @Deprecated
+    /** @hide */
     @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
@@ -6001,11 +5980,7 @@ public class TelephonyManager {
         return false;
     }
 
-    /**
-     * @deprecated Use {@link android.telecom.TelecomManager#isInCall} instead
-     * @hide
-     */
-    @Deprecated
+    /** @hide */
     @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
@@ -6022,11 +5997,7 @@ public class TelephonyManager {
         return true;
     }
 
-    /**
-     * @deprecated Use {@link android.telephony.TelephonyManager#getServiceState} instead
-     * @hide
-     */
-    @Deprecated
+    /** @hide */
     @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
@@ -6317,7 +6288,6 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isDataConnectivityPossible() {
         try {
             ITelephony telephony = getITelephony();
@@ -6332,7 +6302,6 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean needsOtaServiceProvisioning() {
         try {
             ITelephony telephony = getITelephony();
@@ -6435,7 +6404,10 @@ public class TelephonyManager {
 
     /** @hide */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE
+    })
     public boolean isVideoCallingEnabled() {
         try {
             ITelephony telephony = getITelephony();
