@@ -220,10 +220,13 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * @param outsetFrame The frame that includes areas that aren't part of the surface but we
          * want to treat them as such.
          * @param displayCutout the display cutout
+         * @param parentFrameWasClippedByDisplayCutout true if the parent frame would have been
+         * different if there was no display cutout.
          */
         public void computeFrameLw(Rect parentFrame, Rect displayFrame,
                 Rect overlayFrame, Rect contentFrame, Rect visibleFrame, Rect decorFrame,
-                Rect stableFrame, @Nullable Rect outsetFrame, WmDisplayCutout displayCutout);
+                Rect stableFrame, @Nullable Rect outsetFrame, WmDisplayCutout displayCutout,
+                boolean parentFrameWasClippedByDisplayCutout);
 
         /**
          * Retrieve the current frame of the window that has been assigned by

@@ -63,7 +63,8 @@ public class FakeWindowState implements WindowManagerPolicy.WindowState {
     @Override
     public void computeFrameLw(Rect parentFrame, Rect displayFrame, Rect overlayFrame,
             Rect contentFrame, Rect visibleFrame, Rect decorFrame, Rect stableFrame,
-            @Nullable Rect outsetFrame, WmDisplayCutout displayCutout) {
+            @Nullable Rect outsetFrame, WmDisplayCutout displayCutout,
+            boolean parentFrameWasClippedByDisplayCutout) {
         this.parentFrame.set(parentFrame);
         this.displayFrame.set(displayFrame);
         this.overscanFrame.set(overlayFrame);
