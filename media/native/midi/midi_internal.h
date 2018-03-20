@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,25 @@
 #ifndef ANDROID_MEDIA_MIDI_INTERNAL_H_
 #define ANDROID_MEDIA_MIDI_INTERNAL_H_
 
+#include <jni.h>
+
 #include "android/media/midi/BpMidiDeviceServer.h"
 
-struct AMIDI_Device {
-    android::sp<android::media::midi::BpMidiDeviceServer> server;
-    int32_t deviceId;
+typedef struct {
+    int32_t type;            /* one of AMIDI_DEVICE_TYPE_* constants */
+    int32_t inputPortCount;  /* number of input (send) ports associated with the device */
+    int32_t outputPortCount; /* number of output (received) ports associated with the device */
+} AMidiDeviceInfo;
+
+struct AMidiDevice {
+    android::sp<android::media::midi::BpMidiDeviceServer>
+        server;             /* The Binder interface to the MIDI server (from the Java MidiDevice) */
+    int32_t deviceId;       /* The integer id of the device assigned in the Java API */
+    JavaVM* javaVM;         /* The Java VM (so we can obtain the JNIEnv in the
+                               AMidiDevice_close function) */
+    jobject midiDeviceObj;  /* NewGlobalRef() reference to the Java MidiDevice associated with
+                               this native AMidiDevice. */
+    AMidiDeviceInfo deviceInfo; /* Attributes of the device. */
 };
 
 #endif // ANDROID_MEDIA_MIDI_INTERNAL_H_
