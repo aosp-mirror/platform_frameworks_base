@@ -28,7 +28,6 @@ import android.net.Network;
 import android.net.wifi.ISoftApCallback;
 import android.net.wifi.PasspointManagementObjectDefinition;
 import android.net.wifi.ScanResult;
-import android.net.wifi.ScanSettings;
 import android.net.wifi.WifiActivityEnergyInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
@@ -86,7 +85,7 @@ interface IWifiManager
 
     boolean disableNetwork(int netId, String packageName);
 
-    void startScan(in ScanSettings requested, in WorkSource ws, String packageName);
+    void startScan(String packageName);
 
     List<ScanResult> getScanResults(String callingPackage);
 
