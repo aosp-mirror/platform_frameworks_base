@@ -21,7 +21,6 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
-import android.provider.Settings;
 import android.util.Slog;
 
 /**
@@ -54,47 +53,6 @@ public class IncidentManager {
             android.Manifest.permission.PACKAGE_USAGE_STATS
     })
     public void reportIncident(IncidentReportArgs args) {
-        reportIncidentInternal(args);
-    }
-
-    /**
-     * Convenience method to trigger an incident report and put it in dropbox.
-     * <p>
-     * The fields that are reported will be looked up in the system setting named by
-     * the settingName parameter.  The setting must match one of these patterns:
-     *      The string "disabled": The report will not be taken.
-     *      The string "all": The report will taken with all sections.
-     *      The string "none": The report will taken with no sections, but with the header.
-     *      A comma separated list of field numbers: The report will have these fields.
-     * <p>
-     * The header parameter will be added as a header for the incident report.  Fill in a
-     * {@link android.util.proto.ProtoOutputStream ProtoOutputStream}, and then call the
-     * {@link android.util.proto.ProtoOutputStream#bytes bytes()} method to retrieve
-     * the encoded data for the header.
-     */
-    @RequiresPermission(allOf = {
-            android.Manifest.permission.DUMP,
-            android.Manifest.permission.PACKAGE_USAGE_STATS
-    })
-    public void reportIncident(String settingName, byte[] headerProto) {
-        // Sections
-        String setting = Settings.Global.getString(mContext.getContentResolver(), settingName);
-        IncidentReportArgs args;
-        try {
-            args = IncidentReportArgs.parseSetting(setting);
-        } catch (IllegalArgumentException ex) {
-            Slog.w(TAG, "Bad value for incident report setting '" + settingName + "'", ex);
-            return;
-        }
-        if (args == null) {
-            Slog.i(TAG, String.format("Incident report requested but disabled with "
-                    + "settings [name: %s, value: %s]", settingName, setting));
-            return;
-        }
-
-        args.addHeader(headerProto);
-
-        Slog.i(TAG, "Taking incident report: " + settingName);
         reportIncidentInternal(args);
     }
 

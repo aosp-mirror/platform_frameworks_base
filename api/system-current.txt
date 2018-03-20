@@ -3769,7 +3769,6 @@ package android.os {
 
   public class IncidentManager {
     method public void reportIncident(android.os.IncidentReportArgs);
-    method public void reportIncident(java.lang.String, byte[]);
   }
 
   public final class IncidentReportArgs implements android.os.Parcelable {
@@ -3780,7 +3779,6 @@ package android.os {
     method public boolean containsSection(int);
     method public int describeContents();
     method public boolean isAll();
-    method public static android.os.IncidentReportArgs parseSetting(java.lang.String) throws java.lang.IllegalArgumentException;
     method public void readFromParcel(android.os.Parcel);
     method public int sectionCount();
     method public void setAll(boolean);
