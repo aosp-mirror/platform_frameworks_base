@@ -17,8 +17,6 @@ package com.android.systemui.statusbar.phone;
 import static android.app.StatusBarManager.DISABLE_NOTIFICATION_ICONS;
 import static android.app.StatusBarManager.DISABLE_SYSTEM_INFO;
 
-import static com.android.systemui.statusbar.phone.StatusBar.reinflateSignalCluster;
-
 import android.annotation.Nullable;
 import android.app.Fragment;
 import android.app.StatusBarManager;
@@ -34,7 +32,6 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.phone.StatusBarIconController.DarkIconManager;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.EncryptionHelper;
@@ -63,7 +60,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private int mDisabled1;
     private StatusBar mStatusBarComponent;
     private DarkIconManager mDarkIconManager;
-    private SignalClusterView mSignalClusterView;
     private View mOperatorNameFrame;
 
     private SignalCallback mSignalCallback = new SignalCallback() {
@@ -99,9 +95,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         Dependency.get(StatusBarIconController.class).addIconGroup(mDarkIconManager);
         mSystemIconArea = mStatusBar.findViewById(R.id.system_icon_area);
         mClockView = mStatusBar.findViewById(R.id.clock);
-        mSignalClusterView = mStatusBar.findViewById(R.id.signal_cluster);
-        Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mSignalClusterView);
-        // Default to showing until we know otherwise.
         showSystemIconArea(false);
         initEmergencyCryptkeeperText();
         initOperatorName();
@@ -128,7 +121,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(mSignalClusterView);
         Dependency.get(StatusBarIconController.class).removeIconGroup(mDarkIconManager);
         if (mNetworkController.hasEmergencyCryptKeeperText()) {
             mNetworkController.removeCallback(mSignalCallback);

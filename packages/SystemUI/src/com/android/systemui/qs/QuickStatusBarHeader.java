@@ -47,7 +47,6 @@ import com.android.systemui.BatteryMeterView;
 import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.R.id;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSDetail.Callback;
@@ -161,7 +160,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
 
         // Set light text on the header icons because they will always be on a black background
         applyDarkness(R.id.clock, tintArea, 0, DarkIconDispatcher.DEFAULT_ICON_TINT);
-        applyDarkness(id.signal_cluster, tintArea, intensity, colorForeground);
 
         // Set the correct tint for the status icons so they contrast
         mIconManager.setTint(fillColor);

@@ -54,6 +54,7 @@ import com.android.systemui.R;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 
+import com.android.systemui.statusbar.policy.MobileSignalController.MobileState;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -848,6 +849,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
                         subs.add(addSignalController(i, i));
                     }
                     mCallbackHandler.setSubs(subs);
+                    for (int i = 0; i < mMobileSignalControllers.size(); i++) {
+                        int key = mMobileSignalControllers.keyAt(i);
+                        MobileSignalController controller = mMobileSignalControllers.get(key);
+                        controller.notifyListeners();
+                    }
                 }
             }
             String nosim = args.getString("nosim");
