@@ -12347,16 +12347,6 @@ public final class Settings {
                 "zram_enabled";
 
         /**
-         * Whether we have enable CPU frequency scaling for this device.
-         * For Wear, default is disable.
-         *
-         * The value is "1" for enable, "0" for disable.
-         * @hide
-         */
-        public static final String CPU_SCALING_ENABLED =
-                "cpu_frequency_scaling_enabled";
-
-        /**
          * Configuration flags for smart replies in notifications.
          * This is encoded as a key=value list, separated by commas. Ex:
          *
