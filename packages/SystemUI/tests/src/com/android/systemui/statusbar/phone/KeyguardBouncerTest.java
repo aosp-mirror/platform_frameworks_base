@@ -238,9 +238,19 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testIsShowing() {
+    public void testIsShowing_animated() {
         Assert.assertFalse("Show wasn't invoked yet", mBouncer.isShowing());
-        mBouncer.show(true);
+        mBouncer.show(true /* reset */);
+        Assert.assertTrue("Should be showing", mBouncer.isShowing());
+    }
+
+    @Test
+    public void testIsShowing_forSwipeUp() {
+        mBouncer.setExpansion(1f);
+        mBouncer.show(true /* reset */, false /* animated */);
+        Assert.assertFalse("Should only be showing after collapsing notification panel",
+                mBouncer.isShowing());
+        mBouncer.setExpansion(0f);
         Assert.assertTrue("Should be showing", mBouncer.isShowing());
     }
 
