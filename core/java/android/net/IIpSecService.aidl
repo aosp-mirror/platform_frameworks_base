@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.net.LinkAddress;
 import android.net.Network;
 import android.net.IpSecConfig;
 import android.net.IpSecUdpEncapResponse;
@@ -48,11 +49,11 @@ interface IIpSecService
 
     void addAddressToTunnelInterface(
             int tunnelResourceId,
-            String localAddr);
+            in LinkAddress localAddr);
 
     void removeAddressFromTunnelInterface(
             int tunnelResourceId,
-            String localAddr);
+            in LinkAddress localAddr);
 
     void deleteTunnelInterface(int resourceId);
 
