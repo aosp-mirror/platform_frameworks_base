@@ -1457,10 +1457,17 @@ public final class BroadcastQueue {
             return;
         }
 
-        Slog.w(TAG, "Timeout of broadcast " + r + " - receiver=" + r. receiver
+        // If the receiver app is being debugged we quietly ignore unresponsiveness, just
+        // tidying up and moving on to the next broadcast without crashing or ANRing this
+        // app just because it's stopped at a breakpoint.
+        final boolean debugging = (r.curApp != null && r.curApp.debugging);
+
+        Slog.w(TAG, "Timeout of broadcast " + r + " - receiver=" + r.receiver
                 + ", started " + (now - r.receiverTime) + "ms ago");
         r.receiverTime = now;
-        r.anrCount++;
+        if (!debugging) {
+            r.anrCount++;
+        }
 
         ProcessRecord app = null;
         String anrMessage = null;
@@ -1500,7 +1507,7 @@ public final class BroadcastQueue {
                 r.resultExtras, r.resultAbort, false);
         scheduleBroadcastsLocked();
 
-        if (anrMessage != null) {
+        if (!debugging && anrMessage != null) {
             // Post the ANR to the handler since we do not want to process ANRs while
             // potentially holding our lock.
             mHandler.post(new AppNotResponding(app, anrMessage));
