@@ -32,6 +32,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.Clock;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -41,6 +42,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
+@Ignore("Flaky")
 public class CarQsFragmentTest extends SysuiBaseFragmentTest {
     public CarQsFragmentTest() {
         super(CarQSFragment.class);
