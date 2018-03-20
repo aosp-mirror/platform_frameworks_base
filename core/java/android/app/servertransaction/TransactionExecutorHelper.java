@@ -26,7 +26,7 @@ import static android.app.servertransaction.ActivityLifecycleItem.ON_STOP;
 import static android.app.servertransaction.ActivityLifecycleItem.PRE_ON_CREATE;
 import static android.app.servertransaction.ActivityLifecycleItem.UNDEFINED;
 
-import android.app.ActivityThread;
+import android.app.ActivityThread.ActivityClientRecord;
 import android.util.IntArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -124,7 +124,7 @@ public class TransactionExecutorHelper {
      *         {@link ActivityLifecycleItem#UNDEFINED} if there is not path.
      */
     @VisibleForTesting
-    public int getClosestPreExecutionState(ActivityThread.ActivityClientRecord r,
+    public int getClosestPreExecutionState(ActivityClientRecord r,
             int postExecutionState) {
         switch (postExecutionState) {
             case UNDEFINED:
@@ -147,7 +147,7 @@ public class TransactionExecutorHelper {
      *         were provided or there is not path.
      */
     @VisibleForTesting
-    public int getClosestOfStates(ActivityThread.ActivityClientRecord r, int[] finalStates) {
+    public int getClosestOfStates(ActivityClientRecord r, int[] finalStates) {
         if (finalStates == null || finalStates.length == 0) {
             return UNDEFINED;
         }
@@ -166,6 +166,27 @@ public class TransactionExecutorHelper {
             }
         }
         return closestState;
+    }
+
+    /** Get the lifecycle state request to match the current state in the end of a transaction. */
+    public static ActivityLifecycleItem getLifecycleRequestForCurrentState(ActivityClientRecord r) {
+        final int prevState = r.getLifecycleState();
+        final ActivityLifecycleItem lifecycleItem;
+        switch (prevState) {
+            // TODO(lifecycler): Extend to support all possible states.
+            case ON_PAUSE:
+                lifecycleItem = PauseActivityItem.obtain();
+                break;
+            case ON_STOP:
+                lifecycleItem = StopActivityItem.obtain(r.isVisibleFromServer(),
+                        0 /* configChanges */);
+                break;
+            default:
+                lifecycleItem = ResumeActivityItem.obtain(false /* isForward */);
+                break;
+        }
+
+        return lifecycleItem;
     }
 
     /**
