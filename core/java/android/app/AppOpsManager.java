@@ -499,13 +499,14 @@ public class AppOpsManager {
     public static final String OPSTR_RUN_ANY_IN_BACKGROUND = "android:run_any_in_background";
     /** @hide */
     @SystemApi @TestApi
-    public static final String OPSTR_CHANGE_WIFI_STATE = "change_wifi_state";
+    public static final String OPSTR_CHANGE_WIFI_STATE = "android:change_wifi_state";
     /** @hide */
     @SystemApi @TestApi
-    public static final String OPSTR_REQUEST_DELETE_PACKAGES = "request_delete_packages";
+    public static final String OPSTR_REQUEST_DELETE_PACKAGES = "android:request_delete_packages";
     /** @hide */
     @SystemApi @TestApi
-    public static final String OPSTR_BIND_ACCESSIBILITY_SERVICE = "bind_accessibility_service";
+    public static final String OPSTR_BIND_ACCESSIBILITY_SERVICE =
+            "android:bind_accessibility_service";
 
     // Warning: If an permission is added here it also has to be added to
     // com.android.packageinstaller.permission.utils.EventLogger
