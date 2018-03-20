@@ -31,11 +31,13 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.telephony.mbms.DownloadStateCallback;
+import android.telephony.mbms.DownloadProgressListener;
+import android.telephony.mbms.DownloadStatusListener;
 import android.telephony.mbms.FileInfo;
 import android.telephony.mbms.DownloadRequest;
+import android.telephony.mbms.InternalDownloadProgressListener;
 import android.telephony.mbms.InternalDownloadSessionCallback;
-import android.telephony.mbms.InternalDownloadStateCallback;
+import android.telephony.mbms.InternalDownloadStatusListener;
 import android.telephony.mbms.MbmsDownloadSessionCallback;
 import android.telephony.mbms.MbmsDownloadReceiver;
 import android.telephony.mbms.MbmsErrors;
@@ -240,8 +242,10 @@ public class MbmsDownloadSession implements AutoCloseable {
 
     private AtomicReference<IMbmsDownloadService> mService = new AtomicReference<>(null);
     private final InternalDownloadSessionCallback mInternalCallback;
-    private final Map<DownloadStateCallback, InternalDownloadStateCallback>
-            mInternalDownloadCallbacks = new HashMap<>();
+    private final Map<DownloadStatusListener, InternalDownloadStatusListener>
+            mInternalDownloadStatusListeners = new HashMap<>();
+    private final Map<DownloadProgressListener, InternalDownloadProgressListener>
+            mInternalDownloadProgressListeners = new HashMap<>();
 
     private MbmsDownloadSession(Context context, Executor executor, int subscriptionId,
             MbmsDownloadSessionCallback callback) {
@@ -569,34 +573,33 @@ public class MbmsDownloadSession implements AutoCloseable {
     }
 
     /**
-     * Registers a callback for a {@link DownloadRequest} previously requested via
+     * Registers a listener download status for a {@link DownloadRequest} previously requested via
      * {@link #download(DownloadRequest)}. This callback will only be called as long as both this
      * app and the middleware are both running -- if either one stops, no further calls on the
-     * provided {@link DownloadStateCallback} will be enqueued.
+     * provided {@link DownloadStatusListener} will be enqueued.
      *
      * If the middleware is not aware of the specified download request,
      * this method will throw an {@link IllegalArgumentException}.
      *
      * @param request The {@link DownloadRequest} that you want updates on.
-     * @param executor The {@link Executor} on which calls to {@code callback} should be executed.
-     * @param callback The callback that should be called when the middleware has information to
-     *                 share on the download.
+     * @param executor The {@link Executor} on which calls to {@code listener } should be executed.
+     * @param listener The listener that should be called when the middleware has information to
+     *                 share on the status download.
      * @return {@link MbmsErrors#SUCCESS} if the operation did not encounter a synchronous error,
      * and some other error code otherwise.
      */
-    public int registerStateCallback(@NonNull DownloadRequest request,
-            @NonNull Executor executor, @NonNull DownloadStateCallback callback) {
+    public int addStatusListener(@NonNull DownloadRequest request,
+            @NonNull Executor executor, @NonNull DownloadStatusListener listener) {
         IMbmsDownloadService downloadService = mService.get();
         if (downloadService == null) {
             throw new IllegalStateException("Middleware not yet bound");
         }
 
-        InternalDownloadStateCallback internalCallback =
-                new InternalDownloadStateCallback(callback, executor);
+        InternalDownloadStatusListener internalListener =
+                new InternalDownloadStatusListener(listener, executor);
 
         try {
-            int result = downloadService.registerStateCallback(request, internalCallback,
-                    callback.getCallbackFilterFlags());
+            int result = downloadService.addStatusListener(request, internalListener);
             if (result != MbmsErrors.SUCCESS) {
                 if (result == MbmsErrors.DownloadErrors.ERROR_UNKNOWN_DOWNLOAD_REQUEST) {
                     throw new IllegalArgumentException("Unknown download request.");
@@ -608,40 +611,41 @@ public class MbmsDownloadSession implements AutoCloseable {
             sIsInitialized.set(false);
             return MbmsErrors.ERROR_MIDDLEWARE_LOST;
         }
-        mInternalDownloadCallbacks.put(callback, internalCallback);
+        mInternalDownloadStatusListeners.put(listener, internalListener);
         return MbmsErrors.SUCCESS;
+
     }
 
     /**
-     * Un-register a callback previously registered via
-     * {@link #registerStateCallback(DownloadRequest, Executor, DownloadStateCallback)}. After
-     * this method is called, no further callbacks will be enqueued on the {@link Handler}
+     * Un-register a listener previously registered via
+     * {@link #addStatusListener(DownloadRequest, Executor, DownloadStatusListener)}. After
+     * this method is called, no further calls will be enqueued on the {@link Executor}
      * provided upon registration, even if this method throws an exception.
      *
      * If the middleware is not aware of the specified download request,
      * this method will throw an {@link IllegalArgumentException}.
      *
      * @param request The {@link DownloadRequest} provided during registration
-     * @param callback The callback provided during registration.
+     * @param listener The listener provided during registration.
      * @return {@link MbmsErrors#SUCCESS} if the operation did not encounter a synchronous error,
      * and some other error code otherwise.
      */
-    public int unregisterStateCallback(@NonNull DownloadRequest request,
-            @NonNull DownloadStateCallback callback) {
+    public int removeStatusListener(@NonNull DownloadRequest request,
+            @NonNull DownloadStatusListener listener) {
         try {
             IMbmsDownloadService downloadService = mService.get();
             if (downloadService == null) {
                 throw new IllegalStateException("Middleware not yet bound");
             }
 
-            InternalDownloadStateCallback internalCallback =
-                    mInternalDownloadCallbacks.get(callback);
-            if (internalCallback == null) {
-                throw new IllegalArgumentException("Provided callback was never registered");
+            InternalDownloadStatusListener internalListener =
+                    mInternalDownloadStatusListeners.get(listener);
+            if (internalListener == null) {
+                throw new IllegalArgumentException("Provided listener was never registered");
             }
 
             try {
-                int result = downloadService.unregisterStateCallback(request, internalCallback);
+                int result = downloadService.removeStatusListener(request, internalListener);
                 if (result != MbmsErrors.SUCCESS) {
                     if (result == MbmsErrors.DownloadErrors.ERROR_UNKNOWN_DOWNLOAD_REQUEST) {
                         throw new IllegalArgumentException("Unknown download request.");
@@ -654,8 +658,102 @@ public class MbmsDownloadSession implements AutoCloseable {
                 return MbmsErrors.ERROR_MIDDLEWARE_LOST;
             }
         } finally {
-            InternalDownloadStateCallback internalCallback =
-                    mInternalDownloadCallbacks.remove(callback);
+            InternalDownloadStatusListener internalCallback =
+                    mInternalDownloadStatusListeners.remove(listener);
+            if (internalCallback != null) {
+                internalCallback.stop();
+            }
+        }
+        return MbmsErrors.SUCCESS;
+    }
+
+    /**
+     * Registers a listener for progress for a {@link DownloadRequest} previously requested via
+     * {@link #download(DownloadRequest)}. This listener will only be called as long as both this
+     * app and the middleware are both running -- if either one stops, no further calls on the
+     * provided {@link DownloadProgressListener} will be enqueued.
+     *
+     * If the middleware is not aware of the specified download request,
+     * this method will throw an {@link IllegalArgumentException}.
+     *
+     * @param request The {@link DownloadRequest} that you want updates on.
+     * @param executor The {@link Executor} on which calls to {@code listener} should be executed.
+     * @param listener The listener that should be called when the middleware has information to
+     *                 share on the progress of the download.
+     * @return {@link MbmsErrors#SUCCESS} if the operation did not encounter a synchronous error,
+     * and some other error code otherwise.
+     */
+    public int addProgressListener(@NonNull DownloadRequest request,
+            @NonNull Executor executor, @NonNull DownloadProgressListener listener) {
+        IMbmsDownloadService downloadService = mService.get();
+        if (downloadService == null) {
+            throw new IllegalStateException("Middleware not yet bound");
+        }
+
+        InternalDownloadProgressListener internalListener =
+                new InternalDownloadProgressListener(listener, executor);
+
+        try {
+            int result = downloadService.addProgressListener(request, internalListener);
+            if (result != MbmsErrors.SUCCESS) {
+                if (result == MbmsErrors.DownloadErrors.ERROR_UNKNOWN_DOWNLOAD_REQUEST) {
+                    throw new IllegalArgumentException("Unknown download request.");
+                }
+                return result;
+            }
+        } catch (RemoteException e) {
+            mService.set(null);
+            sIsInitialized.set(false);
+            return MbmsErrors.ERROR_MIDDLEWARE_LOST;
+        }
+        mInternalDownloadProgressListeners.put(listener, internalListener);
+        return MbmsErrors.SUCCESS;
+    }
+
+    /**
+     * Un-register a listener previously registered via
+     * {@link #addProgressListener(DownloadRequest, Executor, DownloadProgressListener)}. After
+     * this method is called, no further callbacks will be enqueued on the {@link Handler}
+     * provided upon registration, even if this method throws an exception.
+     *
+     * If the middleware is not aware of the specified download request,
+     * this method will throw an {@link IllegalArgumentException}.
+     *
+     * @param request The {@link DownloadRequest} provided during registration
+     * @param listener The listener provided during registration.
+     * @return {@link MbmsErrors#SUCCESS} if the operation did not encounter a synchronous error,
+     * and some other error code otherwise.
+     */
+    public int removeProgressListener(@NonNull DownloadRequest request,
+            @NonNull DownloadProgressListener listener) {
+        try {
+            IMbmsDownloadService downloadService = mService.get();
+            if (downloadService == null) {
+                throw new IllegalStateException("Middleware not yet bound");
+            }
+
+            InternalDownloadProgressListener internalListener =
+                    mInternalDownloadProgressListeners.get(listener);
+            if (internalListener == null) {
+                throw new IllegalArgumentException("Provided listener was never registered");
+            }
+
+            try {
+                int result = downloadService.removeProgressListener(request, internalListener);
+                if (result != MbmsErrors.SUCCESS) {
+                    if (result == MbmsErrors.DownloadErrors.ERROR_UNKNOWN_DOWNLOAD_REQUEST) {
+                        throw new IllegalArgumentException("Unknown download request.");
+                    }
+                    return result;
+                }
+            } catch (RemoteException e) {
+                mService.set(null);
+                sIsInitialized.set(false);
+                return MbmsErrors.ERROR_MIDDLEWARE_LOST;
+            }
+        } finally {
+            InternalDownloadProgressListener internalCallback =
+                    mInternalDownloadProgressListeners.remove(listener);
             if (internalCallback != null) {
                 internalCallback.stop();
             }
@@ -700,9 +798,9 @@ public class MbmsDownloadSession implements AutoCloseable {
      * Requests information about the state of a file pending download.
      *
      * The state will be delivered as a callback via
-     * {@link DownloadStateCallback#onStateUpdated(DownloadRequest, FileInfo, int)}. If no such
+     * {@link DownloadStatusListener#onStatusUpdated(DownloadRequest, FileInfo, int)}. If no such
      * callback has been registered via
-     * {@link #registerStateCallback(DownloadRequest, Executor, DownloadStateCallback)}, this
+     * {@link #addProgressListener(DownloadRequest, Executor, DownloadProgressListener)}, this
      * method will be a no-op.
      *
      * If the middleware has no record of the
