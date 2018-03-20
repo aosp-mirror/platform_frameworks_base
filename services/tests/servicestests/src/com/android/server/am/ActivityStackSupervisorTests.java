@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -33,17 +34,26 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.any;
+
 import android.app.ActivityManager;
 import android.app.WaitResult;
 import android.content.ComponentName;
+import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.SparseIntArray;
 
 import org.junit.runner.RunWith;
 import org.junit.Before;
 import org.junit.Test;
+
+import org.mockito.invocation.InvocationOnMock;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -237,5 +247,22 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         verify(stack, times(expectWakeFromSleep ? 1 : 0)).awakeFromSleepingLocked();
         verify(stack, times(expectResumeTopActivity ? 1 : 0)).resumeTopActivityUncheckedLocked(
                 null /* target */, null /* targetOptions */);
+    }
+
+    @Test
+    public void testTopRunningActivityLockedWithNonExistentDisplay() throws Exception {
+        // Create display that ActivityManagerService does not know about
+        final int unknownDisplayId = 100;
+
+        doAnswer((InvocationOnMock invocationOnMock) -> {
+            final SparseIntArray displayIds = invocationOnMock.<SparseIntArray>getArgument(0);
+            displayIds.put(0, unknownDisplayId);
+            return null;
+        }).when(mSupervisor.mWindowManager).getDisplaysInFocusOrder(any());
+
+        mSupervisor.mFocusedStack = mock(ActivityStack.class);
+
+        // Supervisor should skip over the non-existent display.
+        assertEquals(null, mSupervisor.topRunningActivityLocked());
     }
 }
