@@ -21,6 +21,7 @@ import android.content.Context;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
+import android.media.AudioAttributes;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.VibrationEffect;
@@ -39,6 +40,11 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     protected static final int ERROR_ESRCH = 3; // Likely fingerprint HAL is dead. See errno.h.
     protected static final boolean DEBUG = FingerprintService.DEBUG;
     private static final long[] DEFAULT_SUCCESS_VIBRATION_PATTERN = new long[] {0, 30};
+    private static final AudioAttributes FINGERPRINT_SONFICATION_ATTRIBUTES =
+            new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                    .build();
     private final Context mContext;
     private final long mHalDeviceId;
     private final int mTargetUserId;
@@ -223,14 +229,14 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     public final void vibrateSuccess() {
         Vibrator vibrator = mContext.getSystemService(Vibrator.class);
         if (vibrator != null) {
-            vibrator.vibrate(mSuccessVibrationEffect);
+            vibrator.vibrate(mSuccessVibrationEffect, FINGERPRINT_SONFICATION_ATTRIBUTES);
         }
     }
 
     public final void vibrateError() {
         Vibrator vibrator = mContext.getSystemService(Vibrator.class);
         if (vibrator != null) {
-            vibrator.vibrate(mErrorVibrationEffect);
+            vibrator.vibrate(mErrorVibrationEffect, FINGERPRINT_SONFICATION_ATTRIBUTES);
         }
     }
 
