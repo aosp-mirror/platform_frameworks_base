@@ -35,9 +35,9 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STACK;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.proto.ActivityDisplayProto.CONFIGURATION_CONTAINER;
-import static com.android.server.am.proto.ActivityDisplayProto.STACKS;
-import static com.android.server.am.proto.ActivityDisplayProto.ID;
+import static com.android.server.am.ActivityDisplayProto.CONFIGURATION_CONTAINER;
+import static com.android.server.am.ActivityDisplayProto.STACKS;
+import static com.android.server.am.ActivityDisplayProto.ID;
 
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;

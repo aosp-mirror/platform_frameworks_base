@@ -97,15 +97,15 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_VERBOSE_TRANSA
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.proto.WindowManagerServiceDumpProto.APP_TRANSITION;
-import static com.android.server.wm.proto.WindowManagerServiceDumpProto.DISPLAY_FROZEN;
-import static com.android.server.wm.proto.WindowManagerServiceDumpProto.FOCUSED_APP;
-import static com.android.server.wm.proto.WindowManagerServiceDumpProto.FOCUSED_WINDOW;
-import static com.android.server.wm.proto.WindowManagerServiceDumpProto.INPUT_METHOD_WINDOW;
-import static com.android.server.wm.proto.WindowManagerServiceDumpProto.LAST_ORIENTATION;
-import static com.android.server.wm.proto.WindowManagerServiceDumpProto.POLICY;
-import static com.android.server.wm.proto.WindowManagerServiceDumpProto.ROOT_WINDOW_CONTAINER;
-import static com.android.server.wm.proto.WindowManagerServiceDumpProto.ROTATION;
+import static com.android.server.wm.WindowManagerServiceDumpProto.APP_TRANSITION;
+import static com.android.server.wm.WindowManagerServiceDumpProto.DISPLAY_FROZEN;
+import static com.android.server.wm.WindowManagerServiceDumpProto.FOCUSED_APP;
+import static com.android.server.wm.WindowManagerServiceDumpProto.FOCUSED_WINDOW;
+import static com.android.server.wm.WindowManagerServiceDumpProto.INPUT_METHOD_WINDOW;
+import static com.android.server.wm.WindowManagerServiceDumpProto.LAST_ORIENTATION;
+import static com.android.server.wm.WindowManagerServiceDumpProto.POLICY;
+import static com.android.server.wm.WindowManagerServiceDumpProto.ROOT_WINDOW_CONTAINER;
+import static com.android.server.wm.WindowManagerServiceDumpProto.ROTATION;
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -6163,7 +6163,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Write to a protocol buffer output stream. Protocol buffer message definition is at
-     * {@link com.android.server.wm.proto.WindowManagerServiceDumpProto}.
+     * {@link com.android.server.wm.WindowManagerServiceDumpProto}.
      *
      * @param proto     Stream to write the WindowContainer object to.
      * @param trim      If true, reduce the amount of data written.

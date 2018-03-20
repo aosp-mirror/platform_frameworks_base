@@ -23,8 +23,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowStateAnimator.WINDOW_FREEZE_LAYER;
-import static com.android.server.wm.proto.ScreenRotationAnimationProto.ANIMATION_RUNNING;
-import static com.android.server.wm.proto.ScreenRotationAnimationProto.STARTED;
+import static com.android.server.wm.ScreenRotationAnimationProto.ANIMATION_RUNNING;
+import static com.android.server.wm.ScreenRotationAnimationProto.STARTED;
 
 import android.content.Context;
 import android.graphics.Matrix;

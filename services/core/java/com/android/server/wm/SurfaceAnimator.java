@@ -19,9 +19,9 @@ package com.android.server.wm;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.proto.SurfaceAnimatorProto.ANIMATION_ADAPTER;
-import static com.android.server.wm.proto.SurfaceAnimatorProto.ANIMATION_START_DELAYED;
-import static com.android.server.wm.proto.SurfaceAnimatorProto.LEASH;
+import static com.android.server.wm.SurfaceAnimatorProto.ANIMATION_ADAPTER;
+import static com.android.server.wm.SurfaceAnimatorProto.ANIMATION_START_DELAYED;
+import static com.android.server.wm.SurfaceAnimatorProto.LEASH;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -305,7 +305,7 @@ class SurfaceAnimator {
 
     /**
      * Write to a protocol buffer output stream. Protocol buffer message definition is at {@link
-     * com.android.server.wm.proto.SurfaceAnimatorProto}.
+     * com.android.server.wm.SurfaceAnimatorProto}.
      *
      * @param proto Stream to write the SurfaceAnimator object to.
      * @param fieldId Field Id of the SurfaceAnimator as defined in the parent message.

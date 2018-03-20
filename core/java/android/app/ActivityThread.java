@@ -143,7 +143,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
 import com.android.org.conscrypt.TrustedCertificateStore;
-import com.android.server.am.proto.MemInfoDumpProto;
+import com.android.server.am.MemInfoDumpProto;
 
 import dalvik.system.BaseDexClassLoader;
 import dalvik.system.CloseGuard;

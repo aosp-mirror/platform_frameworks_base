@@ -58,7 +58,6 @@ import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.ActivityManagerService.NeededUriGrants;
-import com.android.server.am.proto.ActiveServicesProto;
 
 import android.app.ActivityManager;
 import android.app.AppGlobals;
