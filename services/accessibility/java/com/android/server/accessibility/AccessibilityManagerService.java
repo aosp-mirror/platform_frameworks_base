@@ -621,7 +621,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             for (int i = 0; i < serviceCount; ++i) {
                 final AccessibilityServiceConnection service = services.get(i);
                 if ((service.mFeedbackType & feedbackType) != 0) {
-                    result.add(service.mAccessibilityServiceInfo);
+                    result.add(service.getServiceInfo());
                 }
             }
             return result;
@@ -1874,7 +1874,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         final int serviceCount = userState.mBoundServices.size();
         for (int i = 0; i < serviceCount; i++) {
             AccessibilityServiceConnection service = userState.mBoundServices.get(i);
-            if ((service.mAccessibilityServiceInfo.getCapabilities()
+            if ((service.getCapabilities()
                     & AccessibilityServiceInfo.CAPABILITY_CAN_PERFORM_GESTURES) != 0) {
                 userState.mIsPerformGesturesEnabled = true;
                 return;
@@ -1888,7 +1888,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         for (int i = 0; i < serviceCount; i++) {
             AccessibilityServiceConnection service = userState.mBoundServices.get(i);
             if (service.mRequestFilterKeyEvents
-                    && (service.mAccessibilityServiceInfo.getCapabilities()
+                    && (service.getCapabilities()
                             & AccessibilityServiceInfo
                             .CAPABILITY_CAN_REQUEST_FILTER_KEY_EVENTS) != 0) {
                 userState.mIsFilterKeyEventsEnabled = true;
@@ -2124,7 +2124,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             // Starting in JB-MR2 we request an accessibility service to declare
             // certain capabilities in its meta-data to allow it to enable the
             // corresponding features.
-            if ((service.mAccessibilityServiceInfo.getCapabilities()
+            if ((service.getCapabilities()
                     & AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_TOUCH_EXPLORATION) != 0) {
                 return true;
             }
@@ -3446,22 +3446,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         public boolean canRetrieveWindowContentLocked(AbstractAccessibilityServiceConnection service) {
-            return (service.mAccessibilityServiceInfo.getCapabilities()
+            return (service.getCapabilities()
                     & AccessibilityServiceInfo.CAPABILITY_CAN_RETRIEVE_WINDOW_CONTENT) != 0;
         }
 
         public boolean canControlMagnification(AbstractAccessibilityServiceConnection service) {
-            return (service.mAccessibilityServiceInfo.getCapabilities()
+            return (service.getCapabilities()
                     & AccessibilityServiceInfo.CAPABILITY_CAN_CONTROL_MAGNIFICATION) != 0;
         }
 
         public boolean canPerformGestures(AccessibilityServiceConnection service) {
-            return (service.mAccessibilityServiceInfo.getCapabilities()
+            return (service.getCapabilities()
                     & AccessibilityServiceInfo.CAPABILITY_CAN_PERFORM_GESTURES) != 0;
         }
 
         public boolean canCaptureFingerprintGestures(AccessibilityServiceConnection service) {
-            return (service.mAccessibilityServiceInfo.getCapabilities()
+            return (service.getCapabilities()
                     & AccessibilityServiceInfo.CAPABILITY_CAN_REQUEST_FINGERPRINT_GESTURES) != 0;
         }
 
