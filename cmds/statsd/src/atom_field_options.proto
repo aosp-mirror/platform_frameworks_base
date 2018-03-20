@@ -67,4 +67,7 @@ message StateAtomFieldOption {
 extend google.protobuf.FieldOptions {
     // Flags to decorate an atom that presents a state change.
     optional StateAtomFieldOption stateFieldOption = 50000;
+
+    // Flags to decorate the uid fields in an atom.
+    optional bool is_uid = 50001 [default = false];
 }

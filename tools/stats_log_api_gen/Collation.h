@@ -84,6 +84,8 @@ struct AtomDecl {
     vector<int> primaryFields;
     int exclusiveField = 0;
 
+    int uidField = 0;
+
     AtomDecl();
     AtomDecl(const AtomDecl& that);
     AtomDecl(int code, const string& name, const string& message);
