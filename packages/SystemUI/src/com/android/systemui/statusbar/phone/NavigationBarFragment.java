@@ -464,7 +464,10 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     private void onRotationSuggestionsDisabled() {
         // Immediately hide the rotate button and clear any planned removal
         setRotateSuggestionButtonState(false, true);
-        getView().removeCallbacks(mRemoveRotationProposal);
+
+        // This method can be called before view setup is done, ensure getView isn't null
+        final View v = getView();
+        if (v != null) v.removeCallbacks(mRemoveRotationProposal);
     }
 
     private void showAndLogRotationSuggestion() {
