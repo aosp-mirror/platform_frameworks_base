@@ -2791,8 +2791,10 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *   <li>{@link #STATISTICS_OIS_DATA_MODE_ON ON}</li>
      * </ul></p>
      * <p><b>Available values for this device:</b><br>
-     * android.Statistics.info.availableOisDataModes</p>
+     * {@link CameraCharacteristics#STATISTICS_INFO_AVAILABLE_OIS_DATA_MODES android.statistics.info.availableOisDataModes}</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#STATISTICS_INFO_AVAILABLE_OIS_DATA_MODES
      * @see #STATISTICS_OIS_DATA_MODE_OFF
      * @see #STATISTICS_OIS_DATA_MODE_ON
      */
