@@ -193,7 +193,8 @@ public class KeyguardClockPositionAlgorithm {
         float clockYTarget = mCurrentlySecure ? mMinTopMargin : -mKeyguardStatusHeight;
 
         // Move clock up while collapsing the shade
-        final float shadeExpansion = mExpandedHeight / mMaxPanelHeight;
+        float shadeExpansion = mExpandedHeight / mMaxPanelHeight;
+        shadeExpansion = Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(shadeExpansion);
         final float clockY = MathUtils.lerp(clockYTarget, clockYRegular, shadeExpansion);
 
         return (int) MathUtils.lerp(clockY, clockYDark, mDarkAmount);
