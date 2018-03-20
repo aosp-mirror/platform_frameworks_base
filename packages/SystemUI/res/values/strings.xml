@@ -365,9 +365,6 @@
     <!-- Content description of the data connection type GPRS. [CHAR LIMIT=NONE] -->
     <string name="data_connection_gprs">GPRS</string>
 
-    <!-- Content description of the data connection type 1x. [CHAR LIMIT=NONE] -->
-    <string name="data_connection_1x">1 X</string>
-
     <!-- Content description of the data connection type HSPA and its variants. [CHAR LIMIT=NONE] -->
     <string name="data_connection_hspa">HSPA</string>
 
