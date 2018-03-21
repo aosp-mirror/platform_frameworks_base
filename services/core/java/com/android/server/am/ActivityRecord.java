@@ -2738,11 +2738,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         } else {
             service.mHandler.removeMessages(PAUSE_TIMEOUT_MSG, this);
             setState(PAUSED, "relaunchActivityLocked");
-            // if the app is relaunched when it's stopped, and we're not resuming,
-            // put it back into stopped state.
-            if (stopped) {
-                getStack().addToStopping(this, true /* scheduleIdle */, false /* idleDelayed */);
-            }
         }
 
         configChangeFlags = 0;
