@@ -49,6 +49,7 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.android.systemui.RegionInterceptingFrameLayout.RegionInterceptableView;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.plugins.qs.QS;
@@ -232,8 +233,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                         | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
                         | WindowManager.LayoutParams.FLAG_SLIPPERY
@@ -317,7 +317,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         }
     }
 
-    public static class DisplayCutoutView extends View implements DisplayManager.DisplayListener {
+    public static class DisplayCutoutView extends View implements DisplayManager.DisplayListener,
+            RegionInterceptableView {
 
         private final DisplayInfo mInfo = new DisplayInfo();
         private final Paint mPaint = new Paint();
@@ -467,6 +468,20 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                     boundsFromDirection(displayCutout, Gravity.BOTTOM, out);
                 }
             }
+        }
+
+        @Override
+        public boolean shouldInterceptTouch() {
+            return mInfo.displayCutout != null && getVisibility() == VISIBLE;
+        }
+
+        @Override
+        public Region getInterceptRegion() {
+            if (mInfo.displayCutout == null) {
+                return null;
+            }
+
+            return mInfo.displayCutout.getBounds();
         }
     }
 }
