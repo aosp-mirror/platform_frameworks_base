@@ -27,6 +27,7 @@ import android.net.RssiCurve;
 import android.net.ScoredNetwork;
 import android.net.WifiKey;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiNetworkScoreCache;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -61,6 +62,8 @@ public class WifiUtilsTest {
     private WifiNetworkScoreCache mockWifiNetworkScoreCache;
     @Mock
     private AccessPoint mAccessPoint;
+    @Mock
+    WifiConfiguration mWifiConfig;
 
     @Before
     public void setUp() {
@@ -96,6 +99,52 @@ public class WifiUtilsTest {
         set.add(null);
         doReturn(set).when(mAccessPoint).getScanResults();
         WifiUtils.getVisibilityStatus(mAccessPoint);
+    }
+
+    @Test
+    public void testGetMeteredLabel_returnsCorrectValues() {
+        mWifiConfig.meteredHint = true;
+        mWifiConfig.meteredOverride = WifiConfiguration.METERED_OVERRIDE_NONE;
+        assertThat(WifiUtils.getMeteredLabel(mContext, mWifiConfig)).isEqualTo("Metered");
+
+        mWifiConfig.meteredHint = false;
+        mWifiConfig.meteredOverride = WifiConfiguration.METERED_OVERRIDE_METERED;
+        assertThat(WifiUtils.getMeteredLabel(mContext, mWifiConfig)).isEqualTo("Metered");
+
+        mWifiConfig.meteredHint = true;
+        mWifiConfig.meteredOverride = WifiConfiguration.METERED_OVERRIDE_METERED;
+        assertThat(WifiUtils.getMeteredLabel(mContext, mWifiConfig)).isEqualTo("Metered");
+
+        mWifiConfig.meteredHint = false;
+        mWifiConfig.meteredOverride = WifiConfiguration.METERED_OVERRIDE_NOT_METERED;
+        assertThat(WifiUtils.getMeteredLabel(mContext, mWifiConfig)).isEqualTo("Unmetered");
+
+        mWifiConfig.meteredHint = true;
+        mWifiConfig.meteredOverride = WifiConfiguration.METERED_OVERRIDE_NOT_METERED;
+        assertThat(WifiUtils.getMeteredLabel(mContext, mWifiConfig)).isEqualTo("Unmetered");
+    }
+
+    @Test
+    public void testIsMeteredOverridden_returnsCorrectValues() {
+        mWifiConfig.meteredHint = true;
+        mWifiConfig.meteredOverride = WifiConfiguration.METERED_OVERRIDE_NONE;
+        assertThat(WifiUtils.isMeteredOverridden(mWifiConfig)).isFalse();
+
+        mWifiConfig.meteredHint = false;
+        mWifiConfig.meteredOverride = WifiConfiguration.METERED_OVERRIDE_METERED;
+        assertThat(WifiUtils.isMeteredOverridden(mWifiConfig)).isTrue();
+
+        mWifiConfig.meteredHint = true;
+        mWifiConfig.meteredOverride = WifiConfiguration.METERED_OVERRIDE_METERED;
+        assertThat(WifiUtils.isMeteredOverridden(mWifiConfig)).isTrue();
+
+        mWifiConfig.meteredHint = false;
+        mWifiConfig.meteredOverride = WifiConfiguration.METERED_OVERRIDE_NOT_METERED;
+        assertThat(WifiUtils.isMeteredOverridden(mWifiConfig)).isTrue();
+
+        mWifiConfig.meteredHint = true;
+        mWifiConfig.meteredOverride = WifiConfiguration.METERED_OVERRIDE_NOT_METERED;
+        assertThat(WifiUtils.isMeteredOverridden(mWifiConfig)).isTrue();
     }
 
     private static ArrayList<ScanResult> buildScanResultCache() {

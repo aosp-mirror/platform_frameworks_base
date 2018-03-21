@@ -16,11 +16,14 @@
 
 package com.android.settingslib.wifi;
 
+import android.content.Context;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.os.SystemClock;
 import android.support.annotation.VisibleForTesting;
+
+import com.android.settingslib.R;
 
 import java.util.Map;
 
@@ -197,5 +200,19 @@ public class WifiUtils {
         // For debugging purposes we may want to use mRssi rather than result.level as the average
         // speed wil be determined by mRssi
         return timedScore.getScore().calculateBadge(result.level);
+    }
+
+    public static String getMeteredLabel(Context context, WifiConfiguration config) {
+        // meteredOverride is whether the user manually set the metered setting or not.
+        // meteredHint is whether the network itself is telling us that it is metered
+        if (config.meteredOverride == WifiConfiguration.METERED_OVERRIDE_METERED
+                || (config.meteredHint && !isMeteredOverridden(config))) {
+            return context.getString(R.string.wifi_metered_label);
+        }
+        return context.getString(R.string.wifi_unmetered_label);
+    }
+
+    public static boolean isMeteredOverridden(WifiConfiguration config) {
+        return config.meteredOverride != WifiConfiguration.METERED_OVERRIDE_NONE;
     }
 }

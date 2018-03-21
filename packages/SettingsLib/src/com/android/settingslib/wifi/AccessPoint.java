@@ -43,8 +43,6 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -894,6 +892,13 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
         if (isVerboseLoggingEnabled()) {
             summary.append(WifiUtils.buildLoggingSummary(this, config));
+        }
+
+        if (config != null && (WifiUtils.isMeteredOverridden(config) || config.meteredHint)) {
+            return mContext.getResources().getString(
+                    R.string.preference_summary_default_combination,
+                    WifiUtils.getMeteredLabel(mContext, config),
+                    summary.toString());
         }
 
         // If Speed label and summary are both present, use the preference combination to combine
