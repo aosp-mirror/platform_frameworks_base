@@ -16,7 +16,6 @@
 
 package android.telephony;
 
-import android.annotation.Nullable;
 import android.os.Parcel;
 import android.text.TextUtils;
 
@@ -37,10 +36,6 @@ public final class CellIdentityLte extends CellIdentity {
     private final int mTac;
     // 18-bit Absolute RF Channel Number
     private final int mEarfcn;
-    // long alpha Operator Name String or Enhanced Operator Name String
-    private final String mAlphaLong;
-    // short alpha Operator Name String or Enhanced Operator Name String
-    private final String mAlphaShort;
     // cell bandwidth, in kHz
     private final int mBandwidth;
 
@@ -48,14 +43,12 @@ public final class CellIdentityLte extends CellIdentity {
      * @hide
      */
     public CellIdentityLte() {
-        super(TAG, TYPE_LTE, null, null);
+        super(TAG, TYPE_LTE, null, null, null, null);
         mCi = Integer.MAX_VALUE;
         mPci = Integer.MAX_VALUE;
         mTac = Integer.MAX_VALUE;
         mEarfcn = Integer.MAX_VALUE;
         mBandwidth = Integer.MAX_VALUE;
-        mAlphaLong = null;
-        mAlphaShort = null;
     }
 
     /**
@@ -105,14 +98,12 @@ public final class CellIdentityLte extends CellIdentity {
      */
     public CellIdentityLte(int ci, int pci, int tac, int earfcn, int bandwidth, String mccStr,
             String mncStr, String alphal, String alphas) {
-        super(TAG, TYPE_LTE, mccStr, mncStr);
+        super(TAG, TYPE_LTE, mccStr, mncStr, alphal, alphas);
         mCi = ci;
         mPci = pci;
         mTac = tac;
         mEarfcn = earfcn;
         mBandwidth = bandwidth;
-        mAlphaLong = alphal;
-        mAlphaShort = alphas;
     }
 
     private CellIdentityLte(CellIdentityLte cid) {
@@ -198,24 +189,6 @@ public final class CellIdentityLte extends CellIdentity {
         return (mMccStr == null || mMncStr == null) ? null : mMccStr + mMncStr;
     }
 
-    /**
-     * @return The long alpha tag associated with the current scan result (may be the operator
-     * name string or extended operator name string). May be null if unknown.
-     */
-    @Nullable
-    public CharSequence getOperatorAlphaLong() {
-        return mAlphaLong;
-    }
-
-    /**
-     * @return The short alpha tag associated with the current scan result (may be the operator
-     * name string or extended operator name string).  May be null if unknown.
-     */
-    @Nullable
-    public CharSequence getOperatorAlphaShort() {
-        return mAlphaShort;
-    }
-
     /** @hide */
     @Override
     public int getChannelNumber() {
@@ -224,7 +197,7 @@ public final class CellIdentityLte extends CellIdentity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mMccStr, mMncStr, mCi, mPci, mTac, mAlphaLong, mAlphaShort);
+        return Objects.hash(mCi, mPci, mTac, super.hashCode());
     }
 
     @Override
@@ -245,8 +218,7 @@ public final class CellIdentityLte extends CellIdentity {
                 && mBandwidth == o.mBandwidth
                 && TextUtils.equals(mMccStr, o.mMccStr)
                 && TextUtils.equals(mMncStr, o.mMncStr)
-                && TextUtils.equals(mAlphaLong, o.mAlphaLong)
-                && TextUtils.equals(mAlphaShort, o.mAlphaShort);
+                && super.equals(other);
     }
 
     @Override
@@ -274,8 +246,6 @@ public final class CellIdentityLte extends CellIdentity {
         dest.writeInt(mTac);
         dest.writeInt(mEarfcn);
         dest.writeInt(mBandwidth);
-        dest.writeString(mAlphaLong);
-        dest.writeString(mAlphaShort);
     }
 
     /** Construct from Parcel, type has already been processed */
@@ -286,8 +256,6 @@ public final class CellIdentityLte extends CellIdentity {
         mTac = in.readInt();
         mEarfcn = in.readInt();
         mBandwidth = in.readInt();
-        mAlphaLong = in.readString();
-        mAlphaShort = in.readString();
 
         if (DBG) log(toString());
     }
