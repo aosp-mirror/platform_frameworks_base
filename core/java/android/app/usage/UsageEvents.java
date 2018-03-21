@@ -125,6 +125,20 @@ public final class UsageEvents implements Parcelable {
         @SystemApi
         public static final int NOTIFICATION_INTERRUPTION = 12;
 
+        /**
+         * A Slice was pinned by the default launcher or the default assistant.
+         * @hide
+         */
+        @SystemApi
+        public static final int SLICE_PINNED_PRIV = 13;
+
+        /**
+         * A Slice was pinned by an app.
+         * @hide
+         */
+        @SystemApi
+        public static final int SLICE_PINNED = 14;
+
         /** @hide */
         public static final int FLAG_IS_PACKAGE_INSTANT_APP = 1 << 0;
 

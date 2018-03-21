@@ -761,6 +761,10 @@ class UserUsageStatsService {
                 return "STANDBY_BUCKET_CHANGED";
             case UsageEvents.Event.NOTIFICATION_INTERRUPTION:
                 return "NOTIFICATION_INTERRUPTION";
+            case UsageEvents.Event.SLICE_PINNED:
+                return "SLICE_PINNED";
+            case UsageEvents.Event.SLICE_PINNED_PRIV:
+                return "SLICE_PINNED_PRIV";
             default:
                 return "UNKNOWN";
         }
