@@ -116,9 +116,13 @@ static jlong nativeCreate(JNIEnv* env, jclass clazz, jobject sessionObj,
     ScopedUtfChars name(env, nameStr);
     sp<SurfaceComposerClient> client(android_view_SurfaceSession_getClient(env, sessionObj));
     SurfaceControl *parent = reinterpret_cast<SurfaceControl*>(parentObject);
-    sp<SurfaceControl> surface = client->createSurface(
-            String8(name.c_str()), w, h, format, flags, parent, windowType, ownerUid);
-    if (surface == NULL) {
+    sp<SurfaceControl> surface;
+    status_t err = client->createSurfaceChecked(
+            String8(name.c_str()), w, h, format, &surface, flags, parent, windowType, ownerUid);
+    if (err == NAME_NOT_FOUND) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return 0;
+    } else if (err != NO_ERROR) {
         jniThrowException(env, OutOfResourcesException, NULL);
         return 0;
     }
