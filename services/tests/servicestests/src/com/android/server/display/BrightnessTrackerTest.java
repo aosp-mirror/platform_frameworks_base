@@ -30,6 +30,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.ContentObserver;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.display.BrightnessChangeEvent;
@@ -101,25 +102,60 @@ public class BrightnessTrackerTest {
         assertNull(mInjector.mSensorListener);
         assertNotNull(mInjector.mBroadcastReceiver);
         assertTrue(mInjector.mIdleScheduled);
-        Intent onIntent = new Intent();
-        onIntent.setAction(Intent.ACTION_SCREEN_ON);
-        mInjector.mBroadcastReceiver.onReceive(InstrumentationRegistry.getContext(),
-                onIntent);
+        mInjector.sendScreenChange(/*screen on */ true);
         assertNotNull(mInjector.mSensorListener);
 
-        Intent offIntent = new Intent();
-        offIntent.setAction(Intent.ACTION_SCREEN_OFF);
-        mInjector.mBroadcastReceiver.onReceive(InstrumentationRegistry.getContext(),
-                offIntent);
+        mInjector.sendScreenChange(/*screen on */ false);
         assertNull(mInjector.mSensorListener);
 
-        mInjector.mBroadcastReceiver.onReceive(InstrumentationRegistry.getContext(),
-                onIntent);
+        // Turn screen on while brightness mode is manual
+        mInjector.setBrightnessMode(/* isBrightnessModeAutomatic */ false);
+        mInjector.sendScreenChange(/*screen on */ true);
+        assertNull(mInjector.mSensorListener);
+
+        // Set brightness mode to automatic while screen is off.
+        mInjector.sendScreenChange(/*screen on */ false);
+        mInjector.setBrightnessMode(/* isBrightnessModeAutomatic */ true);
+        assertNull(mInjector.mSensorListener);
+
+        // Turn on screen while brightness mode is automatic.
+        mInjector.sendScreenChange(/*screen on */ true);
         assertNotNull(mInjector.mSensorListener);
 
         mTracker.stop();
         assertNull(mInjector.mSensorListener);
         assertNull(mInjector.mBroadcastReceiver);
+        assertFalse(mInjector.mIdleScheduled);
+    }
+
+    @Test
+    public void testAdaptiveOnOff() {
+        mInjector.mInteractive = true;
+        mInjector.mIsBrightnessModeAutomatic = false;
+        startTracker(mTracker);
+        assertNull(mInjector.mSensorListener);
+        assertNotNull(mInjector.mBroadcastReceiver);
+        assertNotNull(mInjector.mContentObserver);
+        assertTrue(mInjector.mIdleScheduled);
+
+        mInjector.setBrightnessMode(/*isBrightnessModeAutomatic*/ true);
+        assertNotNull(mInjector.mSensorListener);
+
+        SensorEventListener listener = mInjector.mSensorListener;
+        mInjector.mSensorListener = null;
+        // Duplicate notification
+        mInjector.setBrightnessMode(/*isBrightnessModeAutomatic*/ true);
+        // Sensor shouldn't have been registered as it was already registered.
+        assertNull(mInjector.mSensorListener);
+        mInjector.mSensorListener = listener;
+
+        mInjector.setBrightnessMode(/*isBrightnessModeAutomatic*/ false);
+        assertNull(mInjector.mSensorListener);
+
+        mTracker.stop();
+        assertNull(mInjector.mSensorListener);
+        assertNull(mInjector.mBroadcastReceiver);
+        assertNull(mInjector.mContentObserver);
         assertFalse(mInjector.mIdleScheduled);
     }
 
@@ -618,14 +654,37 @@ public class BrightnessTrackerTest {
         boolean mIdleScheduled;
         boolean mInteractive = true;
         int[] mProfiles;
+        ContentObserver mContentObserver;
+        boolean mIsBrightnessModeAutomatic = true;
 
         public TestInjector(Handler handler) {
             mHandler = handler;
         }
 
-        public void incrementTime(long timeMillis) {
+        void incrementTime(long timeMillis) {
             mCurrentTimeMillis += timeMillis;
             mElapsedRealtimeNanos += TimeUnit.MILLISECONDS.toNanos(timeMillis);
+        }
+
+        void setBrightnessMode(boolean isBrightnessModeAutomatic) {
+          mIsBrightnessModeAutomatic = isBrightnessModeAutomatic;
+          mContentObserver.dispatchChange(false, null);
+          waitForHandler();
+        }
+
+        void sendScreenChange(boolean screenOn) {
+            mInteractive = screenOn;
+            Intent intent = new Intent();
+            intent.setAction(screenOn ? Intent.ACTION_SCREEN_ON : Intent.ACTION_SCREEN_OFF);
+            mBroadcastReceiver.onReceive(InstrumentationRegistry.getContext(), intent);
+            waitForHandler();
+        }
+
+        void waitForHandler() {
+            Idle idle = new Idle();
+            mHandler.getLooper().getQueue().addIdleHandler(idle);
+            mHandler.post(() -> {});
+            idle.waitForIdle();
         }
 
         @Override
@@ -638,6 +697,18 @@ public class BrightnessTrackerTest {
         public void unregisterSensorListener(Context context,
                 SensorEventListener sensorListener) {
             mSensorListener = null;
+        }
+
+        @Override
+        public void registerBrightnessModeObserver(ContentResolver resolver,
+                ContentObserver settingsObserver) {
+            mContentObserver = settingsObserver;
+        }
+
+        @Override
+        public void unregisterBrightnessModeObserver(Context context,
+                ContentObserver settingsObserver) {
+            mContentObserver = null;
         }
 
         @Override
@@ -658,11 +729,9 @@ public class BrightnessTrackerTest {
             return mHandler;
         }
 
-        public void waitForHandler() {
-            Idle idle = new Idle();
-            mHandler.getLooper().getQueue().addIdleHandler(idle);
-            mHandler.post(() -> {});
-            idle.waitForIdle();
+        @Override
+        public boolean isBrightnessModeAutomatic(ContentResolver resolver) {
+            return mIsBrightnessModeAutomatic;
         }
 
         @Override
