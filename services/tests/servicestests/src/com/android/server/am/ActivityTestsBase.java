@@ -353,19 +353,26 @@ public class ActivityTestsBase {
      */
     protected static class TestActivityStackSupervisor extends ActivityStackSupervisor {
         private ActivityDisplay mDisplay;
+        private KeyguardController mKeyguardController;
 
         public TestActivityStackSupervisor(ActivityManagerService service, Looper looper) {
             super(service, looper);
             mDisplayManager =
                     (DisplayManager) mService.mContext.getSystemService(Context.DISPLAY_SERVICE);
             mWindowManager = prepareMockWindowManager();
+            mKeyguardController = mock(KeyguardController.class);
         }
 
         @Override
         public void initialize() {
             super.initialize();
-            mDisplay = new TestActivityDisplay(this, DEFAULT_DISPLAY);
+            mDisplay = spy(new TestActivityDisplay(this, DEFAULT_DISPLAY));
             attachDisplay(mDisplay);
+        }
+
+        @Override
+        public KeyguardController getKeyguardController() {
+            return mKeyguardController;
         }
 
         @Override
