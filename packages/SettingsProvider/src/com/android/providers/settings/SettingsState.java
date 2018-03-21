@@ -42,6 +42,7 @@ import android.util.AtomicFile;
 import android.util.Base64;
 import android.util.Slog;
 import android.util.SparseIntArray;
+import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
@@ -386,6 +387,9 @@ final class SettingsState {
             mSettings.put(name, newState);
         }
 
+        StatsLog.write(StatsLog.SETTING_CHANGED, name, value, newState.value, oldValue, tag,
+            makeDefault, getUserIdFromKey(mKey), StatsLog.SETTING_CHANGED__REASON__UPDATED);
+
         addHistoricalOperationLocked(HISTORICAL_OPERATION_UPDATE, newState);
 
         updateMemoryUsagePerPackageLocked(packageName, oldValue, value,
@@ -409,6 +413,10 @@ final class SettingsState {
         }
 
         Setting oldState = mSettings.remove(name);
+
+        StatsLog.write(StatsLog.SETTING_CHANGED, name, /* value= */ "", /* newValue= */ "",
+            oldState.value, /* tag */ "", false, getUserIdFromKey(mKey),
+            StatsLog.SETTING_CHANGED__REASON__DELETED);
 
         updateMemoryUsagePerPackageLocked(oldState.packageName, oldState.value,
                 null, oldState.defaultValue, null);
