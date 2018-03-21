@@ -1341,6 +1341,13 @@
         android:label="@string/permlab_changeWifiState"
         android:protectionLevel="normal" />
 
+    <!-- @SystemApi @hide Allows apps to create and manage IPsec tunnels.
+         <p>Only granted to applications that are currently bound by the
+         system for creating and managing IPsec-based interfaces.
+    -->
+    <permission android:name="android.permission.MANAGE_IPSEC_TUNNELS"
+        android:protectionLevel="signature|appop" />
+
     <!-- @SystemApi @hide Allows applications to read Wi-Fi credential.
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.READ_WIFI_CREDENTIAL"
