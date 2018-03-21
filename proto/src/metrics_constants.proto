@@ -5541,6 +5541,11 @@ message MetricsEvent {
     // OS: P
     FIELD_ANOMALY_TYPE = 1366;
 
+    // ACTION: Settings > Anomaly receiver > Anomaly received
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ANOMALY_TRIGGERED = 1367;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
