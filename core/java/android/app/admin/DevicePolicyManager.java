@@ -9418,7 +9418,21 @@ public class DevicePolicyManager {
      * <p>This method may returns {@code -1} if {@code apnSetting} conflicts with an existing
      * override APN. Update the existing conflicted APN with
      * {@link #updateOverrideApn(ComponentName, int, ApnSetting)} instead of adding a new entry.
-     * <p>See {@link ApnSetting} for the definition of conflict.
+     * <p>Two override APNs are considered to conflict when all the following APIs return
+     * the same values on both override APNs:
+     * <ul>
+     *   <li>{@link ApnSetting#getOperatorNumeric()}</li>
+     *   <li>{@link ApnSetting#getApnName()}</li>
+     *   <li>{@link ApnSetting#getProxyAddress()}</li>
+     *   <li>{@link ApnSetting#getProxyPort()}</li>
+     *   <li>{@link ApnSetting#getMmsProxyAddress()}</li>
+     *   <li>{@link ApnSetting#getMmsProxyPort()}</li>
+     *   <li>{@link ApnSetting#getMmsc()}</li>
+     *   <li>{@link ApnSetting#isEnabled()}</li>
+     *   <li>{@link ApnSetting#getMvnoType()}</li>
+     *   <li>{@link ApnSetting#getProtocol()}</li>
+     *   <li>{@link ApnSetting#getRoamingProtocol()}</li>
+     * </ul>
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param apnSetting the override APN to insert
@@ -9447,7 +9461,7 @@ public class DevicePolicyManager {
      * {@code apnId}.
      * <p>This method may also returns {@code false} if {@code apnSetting} conflicts with an
      * existing override APN. Update the existing conflicted APN instead.
-     * <p>See {@link ApnSetting} for the definition of conflict.
+     * <p>See {@link #addOverrideApn} for the definition of conflict.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param apnId the {@code id} of the override APN to update
