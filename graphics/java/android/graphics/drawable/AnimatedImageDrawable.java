@@ -261,6 +261,12 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
         if (repeatCount != REPEAT_UNDEFINED) {
             this.setRepeatCount(repeatCount);
         }
+
+        boolean autoStart = a.getBoolean(
+                R.styleable.AnimatedImageDrawable_autoStart, false);
+        if (autoStart && mState.mNativePtr != 0) {
+            this.start();
+        }
     }
 
     /**
