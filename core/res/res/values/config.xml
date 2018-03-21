@@ -3364,4 +3364,8 @@
 
     <!-- Package name for ManagedProvisioning which is responsible for provisioning work profiles. -->
     <string name="config_managed_provisioning_package" translatable="false">com.android.managedprovisioning</string>
+
+    <!-- When device is in power save mode, whether we should disable signal strength update from
+         modem.-->
+    <bool name="config_disable_signal_strength_update_in_powersave_mode">false</bool>
 </resources>
