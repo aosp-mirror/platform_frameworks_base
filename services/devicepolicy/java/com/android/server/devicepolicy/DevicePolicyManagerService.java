@@ -107,7 +107,9 @@ import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
+import android.app.backup.BackupManager;
 import android.app.backup.IBackupManager;
+import android.app.backup.ISelectBackupTransportCallback;
 import android.app.trust.TrustManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
@@ -252,6 +254,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
@@ -11997,20 +12000,32 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void setMandatoryBackupTransport(
-            ComponentName admin, ComponentName backupTransportComponent) {
+    public boolean setMandatoryBackupTransport(
+            ComponentName admin,
+            ComponentName backupTransportComponent) {
         if (!mHasFeature) {
-            return;
+            return false;
         }
         Preconditions.checkNotNull(admin);
         synchronized (this) {
-            ActiveAdmin activeAdmin =
-                    getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
-            if (!Objects.equals(backupTransportComponent, activeAdmin.mandatoryBackupTransport)) {
-                activeAdmin.mandatoryBackupTransport = backupTransportComponent;
-                saveSettingsLocked(UserHandle.USER_SYSTEM);
-            }
+            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
         }
+
+        final int callingUid = mInjector.binderGetCallingUid();
+        final AtomicBoolean success = new AtomicBoolean(false);
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        final ISelectBackupTransportCallback selectBackupTransportCallbackInternal =
+                new ISelectBackupTransportCallback.Stub() {
+                    public void onSuccess(String transportName) {
+                        saveMandatoryBackupTransport(admin, callingUid, backupTransportComponent);
+                        success.set(true);
+                        countDownLatch.countDown();
+                    }
+
+                    public void onFailure(int reason) {
+                        countDownLatch.countDown();
+                    }
+                };
         final long identity = mInjector.binderClearCallingIdentity();
         try {
             IBackupManager ibm = mInjector.getIBackupManager();
@@ -12018,13 +12033,38 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (!ibm.isBackupServiceActive(UserHandle.USER_SYSTEM)) {
                     ibm.setBackupServiceActive(UserHandle.USER_SYSTEM, true);
                 }
-                ibm.selectBackupTransportAsync(backupTransportComponent, null);
-                ibm.setBackupEnabled(true);
+                ibm.selectBackupTransportAsync(
+                        backupTransportComponent, selectBackupTransportCallbackInternal);
+                countDownLatch.await();
+                if (success.get()) {
+                    ibm.setBackupEnabled(true);
+                }
+            } else if (backupTransportComponent == null) {
+                saveMandatoryBackupTransport(admin, callingUid, backupTransportComponent);
+                success.set(true);
             }
         } catch (RemoteException e) {
             throw new IllegalStateException("Failed to set mandatory backup transport.", e);
+        } catch (InterruptedException e) {
+            throw new IllegalStateException("Failed to set mandatory backup transport.", e);
         } finally {
             mInjector.binderRestoreCallingIdentity(identity);
+        }
+        return success.get();
+    }
+
+    synchronized private void saveMandatoryBackupTransport(
+            ComponentName admin, int callingUid, ComponentName backupTransportComponent) {
+        ActiveAdmin activeAdmin =
+                getActiveAdminWithPolicyForUidLocked(
+                        admin,
+                        DeviceAdminInfo.USES_POLICY_DEVICE_OWNER,
+                        callingUid);
+        if (!Objects.equals(backupTransportComponent,
+                activeAdmin.mandatoryBackupTransport)) {
+            activeAdmin.mandatoryBackupTransport =
+                    backupTransportComponent;
+            saveSettingsLocked(UserHandle.USER_SYSTEM);
         }
     }
 
