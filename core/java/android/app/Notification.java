@@ -89,6 +89,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -2599,6 +2600,80 @@ public class Notification implements Parcelable
     };
 
     /**
+     * @hide
+     */
+    public static boolean areActionsVisiblyDifferent(Notification first, Notification second) {
+        Notification.Action[] firstAs = first.actions;
+        Notification.Action[] secondAs = second.actions;
+        if (firstAs == null && secondAs != null || firstAs != null && secondAs == null) {
+            return true;
+        }
+        if (firstAs != null && secondAs != null) {
+            if (firstAs.length != secondAs.length) {
+                return true;
+            }
+            for (int i = 0; i < firstAs.length; i++) {
+                if (!Objects.equals(firstAs[i].title, secondAs[i].title)) {
+                    return true;
+                }
+                RemoteInput[] firstRs = firstAs[i].getRemoteInputs();
+                RemoteInput[] secondRs = secondAs[i].getRemoteInputs();
+                if (firstRs == null) {
+                    firstRs = new RemoteInput[0];
+                }
+                if (secondRs == null) {
+                    secondRs = new RemoteInput[0];
+                }
+                if (firstRs.length != secondRs.length) {
+                    return true;
+                }
+                for (int j = 0; j < firstRs.length; j++) {
+                    if (!Objects.equals(firstRs[j].getLabel(), secondRs[j].getLabel())) {
+                        return true;
+                    }
+                    CharSequence[] firstCs = firstRs[i].getChoices();
+                    CharSequence[] secondCs = secondRs[i].getChoices();
+                    if (firstCs == null) {
+                        firstCs = new CharSequence[0];
+                    }
+                    if (secondCs == null) {
+                        secondCs = new CharSequence[0];
+                    }
+                    if (firstCs.length != secondCs.length) {
+                        return true;
+                    }
+                    for (int k = 0; k < firstCs.length; k++) {
+                        if (!Objects.equals(firstCs[k], secondCs[k])) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean areStyledNotificationsVisiblyDifferent(Builder first, Builder second) {
+        if (first.getStyle() == null) {
+            return second.getStyle() != null;
+        }
+        if (second.getStyle() == null) {
+            return true;
+        }
+        return first.getStyle().areNotificationsVisiblyDifferent(second.getStyle());
+    }
+
+    /**
+     * @hide
+     */
+    public static boolean areRemoteViewsChanged(Builder first, Builder second) {
+        return !first.usesStandardHeader() || !second.usesStandardHeader();
+    }
+
+    /**
      * Parcelling creates multiple copies of objects in {@code extras}. Fix them.
      * <p>
      * For backwards compatibility {@code extras} holds some references to "real" member data such
@@ -4036,6 +4111,13 @@ public class Notification implements Parcelable
                 }
             }
             return this;
+        }
+
+        /**
+         * Returns the style set by {@link #setStyle(Style)}.
+         */
+        public Style getStyle() {
+            return mStyle;
         }
 
         /**
@@ -5867,6 +5949,11 @@ public class Notification implements Parcelable
          */
         public void validate(Context context) {
         }
+
+        /**
+         * @hide
+         */
+        public abstract boolean areNotificationsVisiblyDifferent(Style other);
     }
 
     /**
@@ -5917,6 +6004,13 @@ public class Notification implements Parcelable
         public BigPictureStyle setSummaryText(CharSequence cs) {
             internalSetSummaryText(safeCharSequence(cs));
             return this;
+        }
+
+        /**
+         * @hide
+         */
+        public Bitmap getBigPicture() {
+            return mPicture;
         }
 
         /**
@@ -6059,6 +6153,18 @@ public class Notification implements Parcelable
         public boolean hasSummaryInHeader() {
             return false;
         }
+
+        /**
+         * @hide
+         */
+        @Override
+        public boolean areNotificationsVisiblyDifferent(Style other) {
+            if (other == null || getClass() != other.getClass()) {
+                return true;
+            }
+            BigPictureStyle otherS = (BigPictureStyle) other;
+            return !Objects.equals(getBigPicture(), otherS.getBigPicture());
+        }
     }
 
     /**
@@ -6117,6 +6223,13 @@ public class Notification implements Parcelable
         public BigTextStyle bigText(CharSequence cs) {
             mBigText = safeCharSequence(cs);
             return this;
+        }
+
+        /**
+         * @hide
+         */
+        public CharSequence getBigText() {
+            return mBigText;
         }
 
         /**
@@ -6189,6 +6302,18 @@ public class Notification implements Parcelable
             applyBigTextContentView(mBuilder, contentView, bigTextText);
 
             return contentView;
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public boolean areNotificationsVisiblyDifferent(Style other) {
+            if (other == null || getClass() != other.getClass()) {
+                return true;
+            }
+            BigTextStyle newS = (BigTextStyle) other;
+            return !Objects.equals(getBigText(), newS.getBigText());
         }
 
         static void applyBigTextContentView(Builder builder,
@@ -6531,6 +6656,58 @@ public class Notification implements Parcelable
             mBuilder.mActions = mBuilder.mOriginalActions;
             mBuilder.mOriginalActions = null;
             return remoteViews;
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public boolean areNotificationsVisiblyDifferent(Style other) {
+            if (other == null || getClass() != other.getClass()) {
+                return true;
+            }
+            MessagingStyle newS = (MessagingStyle) other;
+            List<MessagingStyle.Message> oldMs = getMessages();
+            List<MessagingStyle.Message> newMs = newS.getMessages();
+
+            if (oldMs == null) {
+                oldMs = new ArrayList<>();
+            }
+            if (newMs == null) {
+                newMs = new ArrayList<>();
+            }
+
+            int n = oldMs.size();
+            if (n != newMs.size()) {
+                return true;
+            }
+            for (int i = 0; i < n; i++) {
+                MessagingStyle.Message oldM = oldMs.get(i);
+                MessagingStyle.Message newM = newMs.get(i);
+                if (!Objects.equals(oldM.getText(), newM.getText())) {
+                    return true;
+                }
+                if (!Objects.equals(oldM.getDataUri(), newM.getDataUri())) {
+                    return true;
+                }
+                CharSequence oldSender = oldM.getSenderPerson() == null ? oldM.getSender()
+                        : oldM.getSenderPerson().getName();
+                CharSequence newSender = newM.getSenderPerson() == null ? newM.getSender()
+                        : newM.getSenderPerson().getName();
+                if (!Objects.equals(oldSender, newSender)) {
+                    return true;
+                }
+
+                String oldKey = oldM.getSenderPerson() == null
+                        ? null : oldM.getSenderPerson().getKey();
+                String newKey = newM.getSenderPerson() == null
+                        ? null : newM.getSenderPerson().getKey();
+                if (!Objects.equals(oldKey, newKey)) {
+                    return true;
+                }
+                // Other fields (like timestamp) intentionally excluded
+            }
+            return false;
         }
 
         private Message findLatestIncomingMessage() {
@@ -6964,6 +7141,13 @@ public class Notification implements Parcelable
         /**
          * @hide
          */
+        public ArrayList<CharSequence> getLines() {
+            return mTexts;
+        }
+
+        /**
+         * @hide
+         */
         public void addExtras(Bundle extras) {
             super.addExtras(extras);
 
@@ -7040,6 +7224,18 @@ public class Notification implements Parcelable
             }
 
             return contentView;
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public boolean areNotificationsVisiblyDifferent(Style other) {
+            if (other == null || getClass() != other.getClass()) {
+                return true;
+            }
+            InboxStyle newS = (InboxStyle) other;
+            return !Objects.equals(getLines(), newS.getLines());
         }
 
         private void handleInboxImageMargin(RemoteViews contentView, int id, boolean first) {
@@ -7203,6 +7399,18 @@ public class Notification implements Parcelable
             if (extras.containsKey(EXTRA_COMPACT_ACTIONS)) {
                 mActionsToShowInCompact = extras.getIntArray(EXTRA_COMPACT_ACTIONS);
             }
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public boolean areNotificationsVisiblyDifferent(Style other) {
+            if (other == null || getClass() != other.getClass()) {
+                return true;
+            }
+            // All fields to compare are on the Notification object
+            return false;
         }
 
         private RemoteViews generateMediaActionButton(Action action, int color) {
@@ -7414,6 +7622,18 @@ public class Notification implements Parcelable
             }
             remoteViews.setViewLayoutMarginEndDimen(R.id.notification_main_column, endMargin);
         }
+
+        /**
+         * @hide
+         */
+        @Override
+        public boolean areNotificationsVisiblyDifferent(Style other) {
+            if (other == null || getClass() != other.getClass()) {
+                return true;
+            }
+            // Comparison done for all custom RemoteViews, independent of style
+            return false;
+        }
     }
 
     /**
@@ -7502,6 +7722,18 @@ public class Notification implements Parcelable
                     ? mBuilder.mN.headsUpContentView
                     : mBuilder.mN.contentView;
             return makeBigContentViewWithCustomContent(customRemoteView);
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public boolean areNotificationsVisiblyDifferent(Style other) {
+            if (other == null || getClass() != other.getClass()) {
+                return true;
+            }
+            // Comparison done for all custom RemoteViews, independent of style
+            return false;
         }
 
         private RemoteViews buildIntoRemoteView(RemoteViews remoteViews, int id,

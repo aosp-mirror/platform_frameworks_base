@@ -68,6 +68,7 @@ import android.app.Notification.MessagingStyle.Message;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
+import android.app.usage.UsageStatsManagerInternal;
 import android.companion.ICompanionDeviceManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -264,7 +265,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                     mPackageManager, mPackageManagerClient, mockLightsManager,
                     mListeners, mAssistants, mConditionProviders,
                     mCompanionMgr, mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager,
-                    mGroupHelper, mAm);
+                    mGroupHelper, mAm, mock(UsageStatsManagerInternal.class));
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
                 throw e;
@@ -2661,5 +2662,81 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         actual = mService.calculateSuppressedVisualEffects(appPolicy, userPolicy, P);
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testVisualDifference_diffTitle() {
+        Notification.Builder nb1 = new Notification.Builder(mContext, "")
+                .setContentTitle("foo");
+        StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb1.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r1 =
+                new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
+
+        Notification.Builder nb2 = new Notification.Builder(mContext, "")
+                .setContentTitle("bar");
+        StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb2.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r2 =
+                new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
+
+        assertTrue(mService.isVisuallyInterruptive(r1, r2));
+    }
+
+    @Test
+    public void testVisualDifference_diffText() {
+        Notification.Builder nb1 = new Notification.Builder(mContext, "")
+                .setContentText("foo");
+        StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb1.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r1 =
+                new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
+
+        Notification.Builder nb2 = new Notification.Builder(mContext, "")
+                .setContentText("bar");
+        StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb2.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r2 =
+                new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
+
+        assertTrue(mService.isVisuallyInterruptive(r1, r2));
+    }
+
+    @Test
+    public void testVisualDifference_diffProgress() {
+        Notification.Builder nb1 = new Notification.Builder(mContext, "")
+                .setProgress(100, 90, false);
+        StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb1.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r1 =
+                new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
+
+        Notification.Builder nb2 = new Notification.Builder(mContext, "")
+                .setProgress(100, 100, false);
+        StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb2.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r2 =
+                new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
+
+        assertTrue(mService.isVisuallyInterruptive(r1, r2));
+    }
+
+    @Test
+    public void testVisualDifference_diffProgressNotDone() {
+        Notification.Builder nb1 = new Notification.Builder(mContext, "")
+                .setProgress(100, 90, false);
+        StatusBarNotification sbn1 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb1.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r1 =
+                new NotificationRecord(mContext, sbn1, mock(NotificationChannel.class));
+
+        Notification.Builder nb2 = new Notification.Builder(mContext, "")
+                .setProgress(100, 91, false);
+        StatusBarNotification sbn2 = new StatusBarNotification(PKG, PKG, 0, "tag", mUid, 0,
+                nb2.build(), new UserHandle(mUid), null, 0);
+        NotificationRecord r2 =
+                new NotificationRecord(mContext, sbn2, mock(NotificationChannel.class));
+
+        assertFalse(mService.isVisuallyInterruptive(r1, r2));
     }
 }
