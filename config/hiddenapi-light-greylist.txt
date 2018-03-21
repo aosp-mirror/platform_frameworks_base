@@ -26,6 +26,7 @@ Landroid/app/ActivityManager$RecentTaskInfo;->supportsSplitScreenMultiWindow:Z
 Landroid/app/ActivityManager$RecentTaskInfo;->userId:I
 Landroid/app/ActivityManager$RunningAppProcessInfo;->flags:I
 Landroid/app/ActivityManager$RunningAppProcessInfo;->processState:I
+Landroid/app/ActivityManager;->setPersistentVrThread(I)V
 Landroid/app/ActivityManager$TaskDescription;->getBackgroundColor()I
 Landroid/app/ActivityManager$TaskDescription;->getInMemoryIcon()Landroid/graphics/Bitmap;
 Landroid/app/ActivityManager$TaskSnapshot;->getContentInsets()Landroid/graphics/Rect;
@@ -329,6 +330,13 @@ Landroid/app/trust/ITrustManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/app/usage/UsageStatsManager;->mService:Landroid/app/usage/IUsageStatsManager;
 Landroid/app/usage/UsageStats;->mLastEvent:I
 Landroid/app/usage/UsageStats;->mTotalTimeInForeground:J
+Landroid/app/Vr2dDisplayProperties$Builder;->build()Landroid/app/Vr2dDisplayProperties;
+Landroid/app/Vr2dDisplayProperties$Builder;-><init>()V
+Landroid/app/Vr2dDisplayProperties$Builder;->setEnabled(Z)Landroid/app/Vr2dDisplayProperties$Builder;
+Landroid/app/Vr2dDisplayProperties;-><init>(III)V
+Landroid/app/VrManager;->getPersistentVrModeEnabled()Z
+Landroid/app/VrManager;->registerVrStateCallback(Landroid/app/VrStateCallback;Landroid/os/Handler;)V
+Landroid/app/VrManager;->setVr2dDisplayProperties(Landroid/app/Vr2dDisplayProperties;)V
 Landroid/app/WallpaperColors;->getColorHints()I
 Landroid/app/WallpaperManager;->getBitmap()Landroid/graphics/Bitmap;
 Landroid/app/WallpaperManager;->getBitmap(Z)Landroid/graphics/Bitmap;
@@ -686,8 +694,13 @@ Landroid/graphics/Typeface;->sDefaults:[Landroid/graphics/Typeface;
 Landroid/graphics/Typeface;->setDefault(Landroid/graphics/Typeface;)V
 Landroid/graphics/Typeface;->sSystemFontMap:Ljava/util/Map;
 Landroid/hardware/camera2/CameraCharacteristics$Key;-><init>(Ljava/lang/String;Ljava/lang/Class;J)V
+Landroid/hardware/camera2/CameraCharacteristics$Key;-><init>(Ljava/lang/String;Ljava/lang/Class;)V
 Landroid/hardware/camera2/CaptureRequest$Key;-><init>(Ljava/lang/String;Ljava/lang/Class;J)V
 Landroid/hardware/camera2/CaptureResult$Key;-><init>(Ljava/lang/String;Ljava/lang/Class;J)V
+Landroid/hardware/camera2/CaptureResult$Key;-><init>(Ljava/lang/String;Ljava/lang/Class;)V
+Landroid/hardware/camera2/CaptureResult;->STATISTICS_OIS_TIMESTAMPS:Landroid/hardware/camera2/CaptureResult$Key;
+Landroid/hardware/camera2/CaptureResult;->STATISTICS_OIS_X_SHIFTS:Landroid/hardware/camera2/CaptureResult$Key;
+Landroid/hardware/camera2/CaptureResult;->STATISTICS_OIS_Y_SHIFTS:Landroid/hardware/camera2/CaptureResult$Key;
 Landroid/hardware/camera2/impl/CameraMetadataNative;->mMetadataPtr:J
 Landroid/hardware/Camera;->addCallbackBuffer([BI)V
 Landroid/hardware/Camera;->mNativeContext:J
@@ -1695,6 +1708,7 @@ Landroid/service/notification/NotificationListenerService;->registerAsSystemServ
 Landroid/service/notification/NotificationListenerService;->unregisterAsSystemService()V
 Landroid/service/voice/AlwaysOnHotwordDetector$EventPayload;->getCaptureSession()Ljava/lang/Integer;
 Landroid/service/voice/VoiceInteractionService;->isKeyphraseAndLocaleSupportedForHotword(Ljava/lang/String;Ljava/util/Locale;)Z
+Landroid/service/vr/IVrManager;->getVr2dDisplayId()I
 Landroid/service/wallpaper/WallpaperService$Engine;->setFixedSizeAllowed(Z)V
 Landroid/speech/tts/TextToSpeech;->getCurrentEngine()Ljava/lang/String;
 Landroid/system/Int32Ref;->value:I
