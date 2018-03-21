@@ -177,6 +177,7 @@ LOCAL_SRC_FILES := \
     tests/LogEvent_test.cpp \
     tests/MetricsManager_test.cpp \
     tests/StatsLogProcessor_test.cpp \
+    tests/StatsService_test.cpp \
     tests/UidMap_test.cpp \
     tests/FieldValue_test.cpp \
     tests/condition/CombinationConditionTracker_test.cpp \

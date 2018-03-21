@@ -867,19 +867,28 @@ Status StatsService::addConfiguration(int64_t key,
                                       bool* success) {
     IPCThreadState* ipc = IPCThreadState::self();
     if (checkCallingPermission(String16(kPermissionDump))) {
-        ConfigKey configKey(ipc->getCallingUid(), key);
-        StatsdConfig cfg;
-        if (config.empty() || !cfg.ParseFromArray(&config[0], config.size())) {
+        if (addConfigurationChecked(ipc->getCallingUid(), key, config)) {
+            *success = true;
+        } else {
             *success = false;
-            return Status::ok();
         }
-        mConfigManager->UpdateConfig(configKey, cfg);
-        *success = true;
         return Status::ok();
     } else {
         *success = false;
         return Status::fromExceptionCode(binder::Status::EX_SECURITY);
     }
+}
+
+bool StatsService::addConfigurationChecked(int uid, int64_t key, const vector<uint8_t>& config) {
+    ConfigKey configKey(uid, key);
+    StatsdConfig cfg;
+    if (config.size() > 0) {  // If the config is empty, skip parsing.
+        if (!cfg.ParseFromArray(&config[0], config.size())) {
+            return false;
+        }
+    }
+    mConfigManager->UpdateConfig(configKey, cfg);
+    return true;
 }
 
 Status StatsService::removeDataFetchOperation(int64_t key, bool* success) {
