@@ -14,7 +14,7 @@
 ** See the License for the specific language governing permissions and
 ** limitations under the License.
 -->
-<FrameLayout
+<com.android.systemui.RegionInterceptingFrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -32,4 +32,4 @@
         android:tint="#ff000000"
         android:layout_gravity="right|bottom"
         android:src="@drawable/rounded" />
-</FrameLayout>
+</com.android.systemui.RegionInterceptingFrameLayout>
