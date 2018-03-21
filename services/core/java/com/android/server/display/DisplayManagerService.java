@@ -1878,6 +1878,48 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override // Binder call
+        public BrightnessConfiguration getBrightnessConfigurationForUser(int userId) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS,
+                    "Permission required to read the display's brightness configuration");
+            if (userId != UserHandle.getCallingUserId()) {
+                mContext.enforceCallingOrSelfPermission(
+                        Manifest.permission.INTERACT_ACROSS_USERS,
+                        "Permission required to read the display brightness"
+                                + " configuration of another user");
+            }
+            final long token = Binder.clearCallingIdentity();
+            try {
+                final int userSerial = getUserManager().getUserSerialNumber(userId);
+                synchronized (mSyncRoot) {
+                    BrightnessConfiguration config =
+                            mPersistentDataStore.getBrightnessConfiguration(userSerial);
+                    if (config == null) {
+                        config = mDisplayPowerController.getDefaultBrightnessConfiguration();
+                    }
+                    return config;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public BrightnessConfiguration getDefaultBrightnessConfiguration() {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS,
+                    "Permission required to read the display's default brightness configuration");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mSyncRoot) {
+                    return mDisplayPowerController.getDefaultBrightnessConfiguration();
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
         public void setTemporaryBrightness(int brightness) {
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS,

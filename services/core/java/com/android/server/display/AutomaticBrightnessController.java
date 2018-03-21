@@ -282,6 +282,10 @@ class AutomaticBrightnessController {
         return mBrightnessMapper.isDefaultConfig();
     }
 
+    public BrightnessConfiguration getDefaultConfig() {
+        return mBrightnessMapper.getDefaultConfig();
+    }
+
     private boolean setDisplayPolicy(int policy) {
         if (mDisplayPolicy == policy) {
             return false;

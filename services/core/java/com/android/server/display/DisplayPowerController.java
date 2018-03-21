@@ -567,6 +567,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     }
 
+    public BrightnessConfiguration getDefaultBrightnessConfiguration() {
+        return mAutomaticBrightnessController.getDefaultConfig();
+    }
+
     private void sendUpdatePowerState() {
         synchronized (mLock) {
             sendUpdatePowerStateLocked();
