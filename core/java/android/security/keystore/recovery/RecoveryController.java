@@ -547,10 +547,7 @@ public class RecoveryController {
             if (grantAlias == null) {
                 throw new InternalRecoveryServiceException("null grant alias");
             }
-            return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(
-                    mKeyStore,
-                    grantAlias,
-                    KeyStore.UID_SELF);
+            return getKeyFromGrant(grantAlias);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (UnrecoverableKeyException e) {
@@ -581,10 +578,7 @@ public class RecoveryController {
             if (grantAlias == null) {
                 throw new InternalRecoveryServiceException("Null grant alias");
             }
-            return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(
-                    mKeyStore,
-                    grantAlias,
-                    KeyStore.UID_SELF);
+            return getKeyFromGrant(alias);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (UnrecoverableKeyException e) {
@@ -614,15 +608,22 @@ public class RecoveryController {
             if (grantAlias == null) {
                 return null;
             }
-            return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(
-                    mKeyStore,
-                    grantAlias,
-                    KeyStore.UID_SELF);
+            return getKeyFromGrant(grantAlias);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
             throw wrapUnexpectedServiceSpecificException(e);
         }
+    }
+
+    /**
+     * Returns the key with the given {@code grantAlias}.
+     */
+    Key getKeyFromGrant(String grantAlias) throws UnrecoverableKeyException {
+        return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(
+                mKeyStore,
+                grantAlias,
+                KeyStore.UID_SELF);
     }
 
     /**
