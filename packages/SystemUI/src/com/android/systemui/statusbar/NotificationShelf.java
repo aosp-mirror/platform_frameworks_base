@@ -252,7 +252,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
             }
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
             float notificationClipEnd;
-            boolean aboveShelf = ViewState.getFinalTranslationZ(row) > baseZHeight;
+            boolean aboveShelf = ViewState.getFinalTranslationZ(row) > baseZHeight
+                    || row.isPinned();
             boolean isLastChild = child == lastChild;
             float rowTranslationY = row.getTranslationY();
             if ((isLastChild && !child.isInShelf()) || aboveShelf || backgroundForceHidden) {

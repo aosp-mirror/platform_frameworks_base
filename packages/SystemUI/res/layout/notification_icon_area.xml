@@ -18,12 +18,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/notification_icon_area_inner"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:clipChildren="false">
     <com.android.systemui.statusbar.phone.NotificationIconContainer
         android:id="@+id/notificationIcons"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
         android:gravity="center_vertical"
-        android:orientation="horizontal"/>
+        android:orientation="horizontal"
+        android:clipChildren="false"/>
 </com.android.keyguard.AlphaOptimizedLinearLayout>

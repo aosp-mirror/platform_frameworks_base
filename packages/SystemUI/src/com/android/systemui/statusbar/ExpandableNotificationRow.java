@@ -139,6 +139,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mSensitiveHiddenInGeneral;
     private boolean mShowingPublicInitialized;
     private boolean mHideSensitiveForIntrinsicHeight;
+    private float mHeaderVisibleAmount = 1.0f;
 
     /**
      * Is this notification expanded by the system. The expansion state can be overridden by the
@@ -156,8 +157,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private NotificationContentView mPublicLayout;
     private NotificationContentView mPrivateLayout;
     private NotificationContentView[] mLayouts;
-    private int mMaxExpandHeight;
-    private int mHeadsUpHeight;
     private int mNotificationColor;
     private ExpansionLogger mLogger;
     private String mLoggingKey;
@@ -534,6 +533,30 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         addChildNotification(row, -1);
     }
 
+    /**
+     * Set the how much the header should be visible. A value of 0 will make the header fully gone
+     * and a value of 1 will make the notification look just like normal.
+     * This is being used for heads up notifications, when they are pinned to the top of the screen
+     * and the header content is extracted to the statusbar.
+     *
+     * @param headerVisibleAmount the amount the header should be visible.
+     */
+    public void setHeaderVisibleAmount(float headerVisibleAmount) {
+        if (mHeaderVisibleAmount != headerVisibleAmount) {
+            mHeaderVisibleAmount = headerVisibleAmount;
+            mPrivateLayout.setHeaderVisibleAmount(headerVisibleAmount);
+            if (mChildrenContainer != null) {
+                mChildrenContainer.setHeaderVisibleAmount(headerVisibleAmount);
+            }
+            notifyHeightChanged(false /* needsAnimation */);
+        }
+    }
+
+    @Override
+    public float getHeaderVisibleAmount() {
+        return mHeaderVisibleAmount;
+    }
+
     @Override
     public void setHeadsUpIsVisible() {
         super.setHeadsUpIsVisible();
@@ -722,6 +745,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
+    @Override
     public boolean isPinned() {
         return mIsPinned;
     }
@@ -741,11 +765,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             return mChildrenContainer.getIntrinsicHeight();
         }
         if(mExpandedWhenPinned) {
-            return Math.max(getMaxExpandHeight(), mHeadsUpHeight);
+            return Math.max(getMaxExpandHeight(), getHeadsUpHeight());
         } else if (atLeastMinHeight) {
-            return Math.max(getCollapsedHeight(), mHeadsUpHeight);
+            return Math.max(getCollapsedHeight(), getHeadsUpHeight());
         } else {
-            return mHeadsUpHeight;
+            return getHeadsUpHeight();
         }
     }
 
@@ -1034,11 +1058,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
-    public void setDismissed(boolean dismissed, boolean fromAccessibility) {
-        mDismissed = dismissed;
+    public void setDismissed(boolean fromAccessibility) {
+        mDismissed = true;
         mGroupParentWhenDismissed = mNotificationParent;
         mRefocusOnDismiss = fromAccessibility;
         mChildAfterViewWhenDismissed = null;
+        mEntry.icon.setDismissed();
         if (isChildInGroup()) {
             List<ExpandableNotificationRow> notificationChildren =
                     mNotificationParent.getNotificationChildren();
@@ -1101,6 +1126,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * @return if the view was just heads upped and is now animating away. During such a time the
      * layout needs to be kept consistent
      */
+    @Override
     public boolean isHeadsUpAnimatingAway() {
         return mHeadsupDisappearRunning;
     }
@@ -1121,7 +1147,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 groupSummary.performDismiss(fromAccessibility);
             }
         }
-        setDismissed(true, fromAccessibility);
+        setDismissed(fromAccessibility);
         if (isClearable()) {
             if (mOnDismissRunnable != null) {
                 mOnDismissRunnable.run();
@@ -1921,9 +1947,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             if (isPinned() || mHeadsupDisappearRunning) {
                 return getPinnedHeadsUpHeight(true /* atLeastMinHeight */);
             } else if (isExpanded()) {
-                return Math.max(getMaxExpandHeight(), mHeadsUpHeight);
+                return Math.max(getMaxExpandHeight(), getHeadsUpHeight());
             } else {
-                return Math.max(getCollapsedHeight(), mHeadsUpHeight);
+                return Math.max(getCollapsedHeight(), getHeadsUpHeight());
             }
         } else if (isExpanded()) {
             return getMaxExpandHeight();
@@ -1997,8 +2023,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        int intrinsicBefore = getIntrinsicHeight();
         super.onLayout(changed, left, top, right, bottom);
-        updateMaxHeights();
+        if (intrinsicBefore != getIntrinsicHeight()) {
+            notifyHeightChanged(true  /* needsAnimation */);
+        }
         if (mMenuRow.getMenuView() != null) {
             mMenuRow.onHeightUpdate();
         }
@@ -2019,15 +2048,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mIconTransformContentShift = getRelativeTopPadding(icon) + icon.getHeight();
         } else {
             mIconTransformContentShift = mIconTransformContentShiftNoIcon;
-        }
-    }
-
-    public void updateMaxHeights() {
-        int intrinsicBefore = getIntrinsicHeight();
-        mMaxExpandHeight = mPrivateLayout.getExpandHeight();
-        mHeadsUpHeight = mPrivateLayout.getHeadsUpHeight();
-        if (intrinsicBefore != getIntrinsicHeight()) {
-            notifyHeightChanged(true  /* needsAnimation */);
         }
     }
 
@@ -2173,7 +2193,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public int getMaxExpandHeight() {
-        return mMaxExpandHeight;
+        return mPrivateLayout.getExpandHeight();
+    }
+
+
+    private int getHeadsUpHeight() {
+        return mPrivateLayout.getHeadsUpHeight();
     }
 
     public boolean areGutsExposed() {
@@ -2273,7 +2298,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         } else if (mIsSummaryWithChildren && !isGroupExpanded() && !shouldShowPublic()) {
             return mChildrenContainer.getMinHeight();
         } else if (!ignoreTemporaryStates && isHeadsUpAllowed() && mIsHeadsUp) {
-            return mHeadsUpHeight;
+            return getHeadsUpHeight();
         }
         NotificationContentView showingLayout = getShowingLayout();
         return showingLayout.getMinHeight();
@@ -2317,10 +2342,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             // have changed
             mChildrenContainer.setClipBottomAmount(clipBottomAmount);
         }
-    }
-
-    public boolean isMaxExpandHeightInitialized() {
-        return mMaxExpandHeight != 0;
     }
 
     public NotificationContentView getShowingLayout() {
