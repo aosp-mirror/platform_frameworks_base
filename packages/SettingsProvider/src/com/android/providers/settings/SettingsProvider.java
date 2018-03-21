@@ -2774,9 +2774,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private void notifyForSettingsChange(int key, String name) {
-            final int userId = isGlobalSettingsKey(key)
-                    ? UserHandle.USER_ALL : getUserIdFromKey(key);
-
+            final int userId = getUserIdFromKey(key);
             Uri uri = getNotificationUriFor(key, name);
 
             mGenerationRegistry.incrementGeneration(key);
