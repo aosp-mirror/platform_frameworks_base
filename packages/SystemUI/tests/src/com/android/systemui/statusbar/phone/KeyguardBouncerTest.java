@@ -22,8 +22,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.calls;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
@@ -276,6 +274,25 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         mBouncer.isFullscreenBouncer();
         verify(mKeyguardHostView).getCurrentSecurityMode();
         verify(mKeyguardHostView, never()).getSecurityMode();
+    }
+
+    @Test
+    public void testIsHiding_preHideOrHide() {
+        Assert.assertFalse("Should not be hiding on initial state", mBouncer.isAnimatingAway());
+        mBouncer.startPreHideAnimation(null /* runnable */);
+        Assert.assertTrue("Should be hiding during pre-hide", mBouncer.isAnimatingAway());
+        mBouncer.hide(false /* destroyView */);
+        Assert.assertFalse("Should be hidden after hide()", mBouncer.isAnimatingAway());
+    }
+
+    @Test
+    public void testIsHiding_skipsTranslation() {
+        mBouncer.show(false /* reset */);
+        reset(mKeyguardHostView);
+        mBouncer.startPreHideAnimation(null /* runnable */);
+        mBouncer.setExpansion(0.5f);
+        verify(mKeyguardHostView, never()).setTranslationY(anyFloat());
+        verify(mKeyguardHostView, never()).setAlpha(anyFloat());
     }
 
     @Test

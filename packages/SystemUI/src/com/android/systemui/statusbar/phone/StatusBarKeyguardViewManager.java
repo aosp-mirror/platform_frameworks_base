@@ -150,7 +150,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mBouncer.setExpansion(expansion);
             if (expansion == 1) {
                 mBouncer.onFullyHidden();
-            } else if (!mBouncer.isShowing()) {
+            } else if (!mBouncer.isShowing() && !mBouncer.isAnimatingAway()) {
                 mBouncer.show(true /* resetSecuritySelection */, false /* notifyFalsing */);
             } else if (noLongerTracking) {
                 // Notify that falsing manager should stop its session when user stops touching,

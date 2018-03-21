@@ -75,6 +75,7 @@ public class KeyguardBouncer {
     protected ViewGroup mRoot;
     private boolean mShowingSoon;
     private int mBouncerPromptReason;
+    private boolean mIsAnimatingAway;
 
     public KeyguardBouncer(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils, ViewGroup container,
@@ -254,6 +255,7 @@ public class KeyguardBouncer {
             mKeyguardView.cancelDismissAction();
             mKeyguardView.cleanUp();
         }
+        mIsAnimatingAway = false;
         if (mRoot != null) {
             mRoot.setVisibility(View.INVISIBLE);
             if (destroyView) {
@@ -269,6 +271,7 @@ public class KeyguardBouncer {
      * See {@link StatusBarKeyguardViewManager#startPreHideAnimation}.
      */
     public void startPreHideAnimation(Runnable runnable) {
+        mIsAnimatingAway = true;
         if (mKeyguardView != null) {
             mKeyguardView.startDisappearAnimation(runnable);
         } else if (runnable != null) {
@@ -296,6 +299,14 @@ public class KeyguardBouncer {
                 && mExpansion == 0;
     }
 
+    /**
+     * @return {@code true} when bouncer's pre-hide animation already started but isn't completely
+     *         hidden yet, {@code false} otherwise.
+     */
+    public boolean isAnimatingAway() {
+        return mIsAnimatingAway;
+    }
+
     public void prepare() {
         boolean wasInitialized = mRoot != null;
         ensureView();
@@ -312,7 +323,7 @@ public class KeyguardBouncer {
      */
     public void setExpansion(float fraction) {
         mExpansion = fraction;
-        if (mKeyguardView != null) {
+        if (mKeyguardView != null && !mIsAnimatingAway) {
             float alpha = MathUtils.map(ALPHA_EXPANSION_THRESHOLD, 1, 1, 0, fraction);
             mKeyguardView.setAlpha(MathUtils.constrain(alpha, 0f, 1f));
             mKeyguardView.setTranslationY(fraction * mKeyguardView.getHeight());
