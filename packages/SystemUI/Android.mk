@@ -37,6 +37,7 @@ LOCAL_SRC_FILES := \
 LOCAL_STATIC_ANDROID_LIBRARIES := \
     SystemUIPluginLib \
     SystemUISharedLib \
+    android-support-car \
     android-support-v4 \
     android-support-v7-recyclerview \
     android-support-v7-preference \

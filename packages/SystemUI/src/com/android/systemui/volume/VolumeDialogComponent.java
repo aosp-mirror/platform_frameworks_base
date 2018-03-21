@@ -19,6 +19,7 @@ package com.android.systemui.volume;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.media.VolumePolicy;
@@ -80,6 +81,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
         Dependency.get(ExtensionController.class).newExtension(VolumeDialog.class)
                 .withPlugin(VolumeDialog.class)
                 .withDefault(this::createDefault)
+                .withFeature(PackageManager.FEATURE_AUTOMOTIVE, this::createCarDefault)
                 .withCallback(dialog -> {
                     if (mDialog != null) {
                         mDialog.destroy();
@@ -94,6 +96,14 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
 
     private VolumeDialog createDefault() {
         VolumeDialogImpl impl = new VolumeDialogImpl(mContext);
+        impl.setStreamImportant(AudioManager.STREAM_SYSTEM, false);
+        impl.setAutomute(true);
+        impl.setSilentMode(false);
+        return impl;
+    }
+
+    private VolumeDialog createCarDefault() {
+        CarVolumeDialogImpl impl = new CarVolumeDialogImpl(mContext);
         impl.setStreamImportant(AudioManager.STREAM_SYSTEM, false);
         impl.setAutomute(true);
         impl.setSilentMode(false);
