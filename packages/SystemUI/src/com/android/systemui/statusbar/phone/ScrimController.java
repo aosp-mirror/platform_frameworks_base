@@ -278,10 +278,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             // with too many things at this case, in order to not skip the initial frames.
             mScrimInFront.postOnAnimationDelayed(this::scheduleUpdate, 16);
             mAnimationDelay = StatusBar.FADE_KEYGUARD_START_DELAY;
-        } else if (!mDozeParameters.getAlwaysOn() && oldState == ScrimState.AOD) {
-            // Execute first frame immediately when display was completely off.
-            // Scheduling a frame isn't enough because the system may aggressively enter doze,
-            // delaying callbacks or never triggering them until the power button is pressed.
+        } else if (!mDozeParameters.getAlwaysOn() && oldState == ScrimState.AOD
+                || (mState == ScrimState.AOD && !mDozeParameters.getDisplayNeedsBlanking())) {
+            // Scheduling a frame isn't enough when:
+            //  • Leaving doze and we need to modify scrim color immediately
+            //  • ColorFade will not kick-in and scrim cannot wait for pre-draw.
             onPreDraw();
         } else {
             scheduleUpdate();

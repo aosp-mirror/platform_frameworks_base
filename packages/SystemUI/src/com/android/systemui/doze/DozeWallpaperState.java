@@ -26,7 +26,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.statusbar.phone.DozeParameters;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 
 import java.io.PrintWriter;
 
@@ -43,10 +42,10 @@ public class DozeWallpaperState implements DozeMachine.Part {
     private boolean mIsAmbientMode;
     private final DozeParameters mDozeParameters;
 
-    public DozeWallpaperState(Context context) {
+    public DozeWallpaperState(Context context, DozeParameters dozeParameters) {
         this(IWallpaperManager.Stub.asInterface(
                 ServiceManager.getService(Context.WALLPAPER_SERVICE)),
-                new DozeParameters(context), KeyguardUpdateMonitor.getInstance(context));
+                dozeParameters, KeyguardUpdateMonitor.getInstance(context));
     }
 
     @VisibleForTesting
@@ -80,7 +79,7 @@ public class DozeWallpaperState implements DozeMachine.Part {
 
         final boolean animated;
         if (isAmbientMode) {
-            animated = mDozeParameters.getCanControlScreenOffAnimation() && !mKeyguardVisible;
+            animated = mDozeParameters.shouldControlScreenOff();
         } else {
             animated = !mDozeParameters.getDisplayNeedsBlanking();
         }
@@ -88,8 +87,10 @@ public class DozeWallpaperState implements DozeMachine.Part {
         if (isAmbientMode != mIsAmbientMode) {
             mIsAmbientMode = isAmbientMode;
             try {
-                Log.i(TAG, "AoD wallpaper state changed to: " + mIsAmbientMode
-                        + ", animated: " + animated);
+                if (DEBUG) {
+                    Log.i(TAG, "AOD wallpaper state changed to: " + mIsAmbientMode
+                            + ", animated: " + animated);
+                }
                 mWallpaperManagerService.setInAmbientMode(mIsAmbientMode, animated);
             } catch (RemoteException e) {
                 // Cannot notify wallpaper manager service, but it's fine, let's just skip it.

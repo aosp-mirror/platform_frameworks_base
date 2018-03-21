@@ -22,8 +22,10 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.os.Handler;
+import android.os.PowerManager;
 
 import com.android.internal.hardware.AmbientDisplayConfiguration;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
@@ -46,7 +48,7 @@ public class DozeFactory {
 
         DozeHost host = getHost(dozeService);
         AmbientDisplayConfiguration config = new AmbientDisplayConfiguration(context);
-        DozeParameters params = new DozeParameters(context);
+        DozeParameters params = DozeParameters.getInstance(context);
         Handler handler = new Handler();
         WakeLock wakeLock = new DelayedWakeLock(handler,
                 WakeLock.createPartial(context, "Doze"));
@@ -64,9 +66,9 @@ public class DozeFactory {
                 createDozeTriggers(context, sensorManager, host, alarmManager, config, params,
                         handler, wakeLock, machine),
                 createDozeUi(context, host, wakeLock, machine, handler, alarmManager, params),
-                new DozeScreenState(wrappedService, handler, params),
+                new DozeScreenState(wrappedService, handler, params, wakeLock),
                 createDozeScreenBrightness(context, wrappedService, sensorManager, host, handler),
-                new DozeWallpaperState(context)
+                new DozeWallpaperState(context, params)
         });
 
         return machine;
@@ -92,7 +94,8 @@ public class DozeFactory {
     private DozeMachine.Part createDozeUi(Context context, DozeHost host, WakeLock wakeLock,
             DozeMachine machine, Handler handler, AlarmManager alarmManager,
             DozeParameters params) {
-        return new DozeUi(context, alarmManager, machine, wakeLock, host, handler, params);
+        return new DozeUi(context, alarmManager, machine, wakeLock, host, handler, params,
+                KeyguardUpdateMonitor.getInstance(context));
     }
 
     public static DozeHost getHost(DozeService service) {

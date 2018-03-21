@@ -24,7 +24,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.IWallpaperManager;
-import android.os.Handler;
 import android.os.RemoteException;
 import android.support.test.filters.SmallTest;
 
@@ -37,7 +36,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(JUnit4.class)
@@ -77,7 +75,7 @@ public class DozeWallpaperStateTest extends SysuiTestCase {
     public void testAnimates_whenSupported() throws RemoteException {
         // Pre-conditions
         when(mDozeParameters.getDisplayNeedsBlanking()).thenReturn(false);
-        when(mDozeParameters.getCanControlScreenOffAnimation()).thenReturn(true);
+        when(mDozeParameters.shouldControlScreenOff()).thenReturn(true);
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
 
         mDozeWallpaperState.transitionTo(DozeMachine.State.UNINITIALIZED,
@@ -92,8 +90,8 @@ public class DozeWallpaperStateTest extends SysuiTestCase {
     public void testDoesNotAnimate_whenNotSupported() throws RemoteException {
         // Pre-conditions
         when(mDozeParameters.getDisplayNeedsBlanking()).thenReturn(true);
-        when(mDozeParameters.getCanControlScreenOffAnimation()).thenReturn(false);
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
+        when(mDozeParameters.shouldControlScreenOff()).thenReturn(false);
 
         mDozeWallpaperState.transitionTo(DozeMachine.State.UNINITIALIZED,
                 DozeMachine.State.DOZE_AOD);

@@ -2212,14 +2212,6 @@ public class NotificationPanelView extends PanelView implements
         return (1 - t) * start + t * end;
     }
 
-    public void setDozing(boolean dozing, boolean animate) {
-        if (dozing == mDozing) return;
-        mDozing = dozing;
-        if (mStatusBarState == StatusBarState.KEYGUARD) {
-            updateDozingVisibilities(animate);
-        }
-    }
-
     private void updateDozingVisibilities(boolean animate) {
         if (mDozing) {
             mKeyguardStatusBar.setVisibility(View.INVISIBLE);
@@ -2622,11 +2614,16 @@ public class NotificationPanelView extends PanelView implements
         }
     }
 
-    public void setDark(boolean dark, boolean animate) {
-        float darkAmount = dark ? 1 : 0;
-        if (mDarkAmount == darkAmount) {
-            return;
+    public void setDozing(boolean dozing, boolean animate) {
+        if (dozing == mDozing) return;
+        mDozing = dozing;
+
+        if (mStatusBarState == StatusBarState.KEYGUARD
+                || mStatusBarState == StatusBarState.SHADE_LOCKED) {
+            updateDozingVisibilities(animate);
         }
+
+        final float darkAmount = dozing ? 1 : 0;
         if (mDarkAnimator != null && mDarkAnimator.isRunning()) {
             if (animate && mDarkAmountTarget == darkAmount) {
                 return;

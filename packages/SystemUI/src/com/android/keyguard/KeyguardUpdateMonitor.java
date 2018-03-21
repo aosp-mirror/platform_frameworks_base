@@ -1726,6 +1726,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         callback.onPhoneStateChanged(mPhoneState);
         callback.onRefreshCarrierInfo();
         callback.onClockVisibilityChanged();
+        callback.onKeyguardVisibilityChangedRaw(mKeyguardIsVisible);
         for (Entry<Integer, SimData> data : mSimDatas.entrySet()) {
             final SimData state = data.getValue();
             callback.onSimStateChanged(state.subId, state.slotId, state.simState);

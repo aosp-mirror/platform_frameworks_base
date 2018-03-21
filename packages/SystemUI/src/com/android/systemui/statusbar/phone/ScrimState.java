@@ -105,8 +105,7 @@ public enum ScrimState {
         @Override
         public void prepare(ScrimState previousState) {
             final boolean alwaysOnEnabled = mDozeParameters.getAlwaysOn();
-            final boolean wasPulsing = previousState == ScrimState.PULSING;
-            mBlankScreen = wasPulsing && !mCanControlScreenOff;
+            mBlankScreen = mDisplayRequiresBlanking;
             mCurrentBehindAlpha = mWallpaperSupportsAmbientMode
                     && !mKeyguardUpdateMonitor.hasLockscreenWallpaper() ? 0f : 1f;
             mCurrentInFrontAlpha = alwaysOnEnabled ? mAodFrontScrimAlpha : 1f;
@@ -114,7 +113,7 @@ public enum ScrimState {
             mCurrentBehindTint = Color.BLACK;
             // DisplayPowerManager will blank the screen for us, we just need
             // to set our state.
-            mAnimateChange = mCanControlScreenOff;
+            mAnimateChange = !mDisplayRequiresBlanking;
         }
 
         @Override
@@ -178,7 +177,6 @@ public enum ScrimState {
     ScrimView mScrimBehind;
     DozeParameters mDozeParameters;
     boolean mDisplayRequiresBlanking;
-    boolean mCanControlScreenOff;
     boolean mWallpaperSupportsAmbientMode;
     KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     int mIndex;
@@ -192,7 +190,6 @@ public enum ScrimState {
         mScrimBehind = scrimBehind;
         mDozeParameters = dozeParameters;
         mDisplayRequiresBlanking = dozeParameters.getDisplayNeedsBlanking();
-        mCanControlScreenOff = dozeParameters.getCanControlScreenOffAnimation();
         mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(scrimInFront.getContext());
     }
 
