@@ -305,6 +305,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     int pendingLayoutChanges;
     // TODO(multi-display): remove some of the usages.
     boolean isDefaultDisplay;
+    /**
+     * Flag indicating whether WindowManager should override info for this display in
+     * DisplayManager.
+     */
+    boolean mShouldOverrideDisplayConfiguration = true;
 
     /** Window tokens that are in the process of exiting, but still on screen for animations. */
     final ArrayList<WindowToken> mExitingTokens = new ArrayList<>();
@@ -1177,8 +1182,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mDisplayInfo.flags &= ~Display.FLAG_SCALING_DISABLED;
         }
 
+        // We usually set the override info in DisplayManager so that we get consistent display
+        // metrics values when displays are changing and don't send out new values until WM is aware
+        // of them. However, we don't do this for displays that serve as containers for ActivityView
+        // because we don't want letter-/pillar-boxing during resize.
+        final DisplayInfo overrideDisplayInfo = mShouldOverrideDisplayConfiguration
+                ? mDisplayInfo : null;
         mService.mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(mDisplayId,
-                mDisplayInfo);
+                overrideDisplayInfo);
 
         mBaseDisplayRect.set(0, 0, dw, dh);
 
