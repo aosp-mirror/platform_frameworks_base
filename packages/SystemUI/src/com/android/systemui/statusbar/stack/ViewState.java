@@ -641,6 +641,22 @@ public class ViewState {
     }
 
     /**
+     * Get the end value of the xTranslation animation running on a view or the xTranslation
+     * if no animation is running.
+     */
+    public static float getFinalTranslationX(View view) {
+        if (view == null) {
+            return 0;
+        }
+        ValueAnimator xAnimator = getChildTag(view, TAG_ANIMATOR_TRANSLATION_X);
+        if (xAnimator == null) {
+            return view.getTranslationX();
+        } else {
+            return getChildTag(view, TAG_END_TRANSLATION_X);
+        }
+    }
+
+    /**
      * Get the end value of the yTranslation animation running on a view or the yTranslation
      * if no animation is running.
      */

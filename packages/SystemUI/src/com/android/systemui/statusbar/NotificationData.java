@@ -107,6 +107,8 @@ public class NotificationData {
         public CharSequence remoteInputTextWhenReset;
         public long lastRemoteInputSent = NOT_LAUNCHED_YET;
         public ArraySet<Integer> mActiveAppOps = new ArraySet<>(3);
+        public CharSequence headsUpStatusBarText;
+        public CharSequence headsUpStatusBarTextPublic;
 
         public Entry(StatusBarNotification n) {
             this.key = n.getKey();

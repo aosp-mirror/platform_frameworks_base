@@ -490,6 +490,10 @@
         <item name="android:paddingEnd">8dp</item>
     </style>
 
+    <style name="TextAppearance.HeadsUpStatusBarText"
+           parent="@*android:style/TextAppearance.Material.Notification.Info">
+    </style>
+
     <style name="edit_theme" parent="qs_base">
         <item name="android:colorBackground">?android:attr/colorSecondary</item>
     </style>

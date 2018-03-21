@@ -16,17 +16,17 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.phone.HeadsUpAppearanceController.CONTENT_FADE_DURATION;
+import static com.android.systemui.statusbar.phone.HeadsUpAppearanceController.CONTENT_FADE_DELAY;
+
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.drawable.Icon;
-import android.os.AsyncTask;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.support.v4.util.ArrayMap;
-import android.support.v4.util.ArraySet;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -100,6 +100,33 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         }
     }.setDuration(200).setDelay(50);
 
+    /**
+     * The animation property used for all icons that were not isolated, when the isolation ends.
+     * This just fades the alpha and doesn't affect the movement and has a delay.
+     */
+    private static final AnimationProperties UNISOLATION_PROPERTY_OTHERS
+            = new AnimationProperties() {
+        private AnimationFilter mAnimationFilter = new AnimationFilter().animateAlpha();
+
+        @Override
+        public AnimationFilter getAnimationFilter() {
+            return mAnimationFilter;
+        }
+    }.setDuration(CONTENT_FADE_DURATION);
+
+    /**
+     * The animation property used for the icon when its isolation ends.
+     * This animates the translation back to the right position.
+     */
+    private static final AnimationProperties UNISOLATION_PROPERTY = new AnimationProperties() {
+        private AnimationFilter mAnimationFilter = new AnimationFilter().animateX();
+
+        @Override
+        public AnimationFilter getAnimationFilter() {
+            return mAnimationFilter;
+        }
+    }.setDuration(CONTENT_FADE_DURATION);
+
     public static final int MAX_VISIBLE_ICONS_WHEN_DARK = 5;
     public static final int MAX_STATIC_ICONS = 4;
     private static final int MAX_DOTS = 3;
@@ -127,6 +154,10 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private float mVisualOverflowStart;
     // Keep track of overflow in range [0, 3]
     private int mNumDots;
+    private StatusBarIconView mIsolatedIcon;
+    private Rect mIsolatedIconLocation;
+    private int[] mAbsolutePosition = new int[2];
+    private View mIsolatedIconForAnimation;
 
 
     public NotificationIconContainer(Context context, AttributeSet attrs) {
@@ -196,11 +227,16 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 mIconSize = child.getWidth();
             }
         }
+        getLocationOnScreen(mAbsolutePosition);
         if (mIsStaticLayout) {
-            resetViewStates();
-            calculateIconTranslations();
-            applyIconStates();
+            updateState();
         }
+    }
+
+    private void updateState() {
+        resetViewStates();
+        calculateIconTranslations();
+        applyIconStates();
     }
 
     public void applyIconStates() {
@@ -214,6 +250,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         mAddAnimationStartIndex = -1;
         mCannedAnimationStartIndex = -1;
         mDisallowNextAnimation = false;
+        mIsolatedIconForAnimation = null;
     }
 
     @Override
@@ -281,8 +318,10 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 mIconStates.remove(child);
                 if (!isReplacingIcon) {
                     addTransientView(icon, 0);
+                    boolean isIsolatedIcon = child == mIsolatedIcon;
                     icon.setVisibleState(StatusBarIconView.STATE_HIDDEN, true /* animate */,
-                            () -> removeTransientView(icon));
+                            () -> removeTransientView(icon),
+                            isIsolatedIcon ? CONTENT_FADE_DURATION : 0);
                 }
             }
         }
@@ -306,7 +345,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             View view = getChildAt(i);
             ViewState iconState = mIconStates.get(view);
             iconState.initFrom(view);
-            iconState.alpha = 1.0f;
+            iconState.alpha = mIsolatedIcon == null || view == mIsolatedIcon ? 1.0f : 0.0f;
             iconState.hidden = false;
         }
     }
@@ -400,6 +439,16 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 View view = getChildAt(i);
                 IconState iconState = mIconStates.get(view);
                 iconState.xTranslation = getWidth() - iconState.xTranslation - view.getWidth();
+            }
+        }
+        if (mIsolatedIcon != null) {
+            IconState iconState = mIconStates.get(mIsolatedIcon);
+            if (iconState != null) {
+                // Most of the time the icon isn't yet added when this is called but only happening
+                // later
+                iconState.xTranslation = mIsolatedIconLocation.left - mAbsolutePosition[0]
+                        - (1 - mIsolatedIcon.getIconScale()) * mIsolatedIcon.getWidth() / 2.0f;
+                iconState.visibleState = StatusBarIconView.STATE_ICON;
             }
         }
     }
@@ -573,6 +622,21 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         mReplacingIcons = replacingIcons;
     }
 
+    public void showIconIsolated(StatusBarIconView icon, boolean animated) {
+        if (animated) {
+            mIsolatedIconForAnimation = icon != null ? icon : mIsolatedIcon;
+        }
+        mIsolatedIcon = icon;
+        updateState();
+    }
+
+    public void setIsolatedIconLocation(Rect isolatedIconLocation, boolean requireUpdate) {
+        mIsolatedIconLocation = isolatedIconLocation;
+        if (requireUpdate) {
+            updateState();
+        }
+    }
+
     public class IconState extends ViewState {
         public static final int NO_VALUE = NotificationIconContainer.NO_VALUE;
         public float iconAppearAmount = 1.0f;
@@ -644,6 +708,18 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                         sTempProperties.resetCustomInterpolators();
                         animationProperties = sTempProperties;
                         animationProperties.setDuration(CANNED_ANIMATION_DURATION);
+                        animate = true;
+                    }
+                    if (mIsolatedIconForAnimation != null) {
+                        if (view == mIsolatedIconForAnimation) {
+                            animationProperties = UNISOLATION_PROPERTY;
+                            animationProperties.setDelay(
+                                    mIsolatedIcon != null ? CONTENT_FADE_DELAY : 0);
+                        } else {
+                            animationProperties = UNISOLATION_PROPERTY_OTHERS;
+                            animationProperties.setDelay(
+                                    mIsolatedIcon == null ? CONTENT_FADE_DELAY : 0);
+                        }
                         animate = true;
                     }
                 }

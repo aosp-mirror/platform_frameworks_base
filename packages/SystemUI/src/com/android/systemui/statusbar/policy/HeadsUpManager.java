@@ -443,6 +443,9 @@ public class HeadsUpManager {
         entry.reset();
     }
 
+    public void onDensityOrFontScaleChanged() {
+    }
+
     /**
      * This represents a notification and how long it is in a heads up mode. It also manages its
      * lifecycle automatically when created.

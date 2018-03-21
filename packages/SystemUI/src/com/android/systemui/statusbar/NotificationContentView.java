@@ -602,14 +602,15 @@ public class NotificationContentView extends FrameLayout {
                     && (mIsHeadsUp || mHeadsUpAnimatingAway)
                     && !mContainingNotification.isOnKeyguard();
             if (transitioningBetweenHunAndExpanded || pinned) {
-                return Math.min(mHeadsUpChild.getHeight(), mExpandedChild.getHeight());
+                return Math.min(getViewHeight(VISIBLE_TYPE_HEADSUP),
+                        getViewHeight(VISIBLE_TYPE_EXPANDED));
             }
         }
 
         // Size change of the expanded version
         if ((mVisibleType == VISIBLE_TYPE_EXPANDED) && mContentHeightAtAnimationStart >= 0
                 && mExpandedChild != null) {
-            return Math.min(mContentHeightAtAnimationStart, mExpandedChild.getHeight());
+            return Math.min(mContentHeightAtAnimationStart, getViewHeight(VISIBLE_TYPE_EXPANDED));
         }
 
         int hint;
@@ -619,16 +620,17 @@ public class NotificationContentView extends FrameLayout {
                 VISIBLE_TYPE_AMBIENT_SINGLELINE)) {
             hint = mAmbientSingleLineChild.getHeight();
         } else if (mHeadsUpChild != null && isVisibleOrTransitioning(VISIBLE_TYPE_HEADSUP)) {
-            hint = mHeadsUpChild.getHeight();
+            hint = getViewHeight(VISIBLE_TYPE_HEADSUP);
         } else if (mExpandedChild != null) {
-            hint = mExpandedChild.getHeight();
+            hint = getViewHeight(VISIBLE_TYPE_EXPANDED);
         } else {
-            hint = mContractedChild.getHeight() + mContext.getResources().getDimensionPixelSize(
-                    com.android.internal.R.dimen.notification_action_list_height);
+            hint = getViewHeight(VISIBLE_TYPE_CONTRACTED)
+                    + mContext.getResources().getDimensionPixelSize(
+                            com.android.internal.R.dimen.notification_action_list_height);
         }
 
         if (mExpandedChild != null && isVisibleOrTransitioning(VISIBLE_TYPE_EXPANDED)) {
-            hint = Math.min(hint, mExpandedChild.getHeight());
+            hint = Math.min(hint, getViewHeight(VISIBLE_TYPE_EXPANDED));
         }
         return hint;
     }
@@ -694,8 +696,8 @@ public class NotificationContentView extends FrameLayout {
     }
 
     private float calculateTransformationAmount() {
-        int startHeight = getViewForVisibleType(mTransformationStartVisibleType).getHeight();
-        int endHeight = getViewForVisibleType(mVisibleType).getHeight();
+        int startHeight = getViewHeight(mTransformationStartVisibleType);
+        int endHeight = getViewHeight(mVisibleType);
         int progress = Math.abs(mContentHeight - startHeight);
         int totalDistance = Math.abs(endHeight - startHeight);
         if (totalDistance == 0) {
@@ -717,11 +719,23 @@ public class NotificationContentView extends FrameLayout {
         if (mContainingNotification.isShowingAmbient()) {
             return getShowingAmbientView().getHeight();
         } else if (mExpandedChild != null) {
-            return mExpandedChild.getHeight() + getExtraRemoteInputHeight(mExpandedRemoteInput);
+            return getViewHeight(VISIBLE_TYPE_EXPANDED)
+                    + getExtraRemoteInputHeight(mExpandedRemoteInput);
         } else if (mIsHeadsUp && mHeadsUpChild != null && !mContainingNotification.isOnKeyguard()) {
-            return mHeadsUpChild.getHeight() + getExtraRemoteInputHeight(mHeadsUpRemoteInput);
+            return getViewHeight(VISIBLE_TYPE_HEADSUP)
+                    + getExtraRemoteInputHeight(mHeadsUpRemoteInput);
         }
-        return mContractedChild.getHeight();
+        return getViewHeight(VISIBLE_TYPE_CONTRACTED);
+    }
+
+    private int getViewHeight(int visibleType) {
+        View view = getViewForVisibleType(visibleType);
+        int height = view.getHeight();
+        NotificationViewWrapper viewWrapper = getWrapperForView(view);
+        if (viewWrapper != null) {
+            height += viewWrapper.getHeaderTranslation();
+        }
+        return height;
     }
 
     public int getMinHeight() {
@@ -732,7 +746,7 @@ public class NotificationContentView extends FrameLayout {
         if (mContainingNotification.isShowingAmbient()) {
             return getShowingAmbientView().getHeight();
         } else if (likeGroupExpanded || !mIsChildInGroup || isGroupExpanded()) {
-            return mContractedChild.getHeight();
+            return getViewHeight(VISIBLE_TYPE_CONTRACTED);
         } else {
             return mSingleLineView.getHeight();
         }
@@ -1046,7 +1060,7 @@ public class NotificationContentView extends FrameLayout {
 
     private int getVisualTypeForHeight(float viewHeight) {
         boolean noExpandedChild = mExpandedChild == null;
-        if (!noExpandedChild && viewHeight == mExpandedChild.getHeight()) {
+        if (!noExpandedChild && viewHeight == getViewHeight(VISIBLE_TYPE_EXPANDED)) {
             return VISIBLE_TYPE_EXPANDED;
         }
         if (!mUserExpanding && mIsChildInGroup && !isGroupExpanded()) {
@@ -1055,13 +1069,13 @@ public class NotificationContentView extends FrameLayout {
 
         if ((mIsHeadsUp || mHeadsUpAnimatingAway) && mHeadsUpChild != null
                 && !mContainingNotification.isOnKeyguard()) {
-            if (viewHeight <= mHeadsUpChild.getHeight() || noExpandedChild) {
+            if (viewHeight <= getViewHeight(VISIBLE_TYPE_HEADSUP) || noExpandedChild) {
                 return VISIBLE_TYPE_HEADSUP;
             } else {
                 return VISIBLE_TYPE_EXPANDED;
             }
         } else {
-            if (noExpandedChild || (viewHeight <= mContractedChild.getHeight()
+            if (noExpandedChild || (viewHeight <= getViewHeight(VISIBLE_TYPE_CONTRACTED)
                     && (!mIsChildInGroup || isGroupExpanded()
                             || !mContainingNotification.isExpanded(true /* allowOnKeyguard */)))) {
                 return VISIBLE_TYPE_CONTRACTED;
@@ -1616,19 +1630,19 @@ public class NotificationContentView extends FrameLayout {
     }
 
     public int getExpandHeight() {
-        View expandedChild = mExpandedChild;
-        if (expandedChild == null) {
-            expandedChild = mContractedChild;
+        int viewType = VISIBLE_TYPE_EXPANDED;
+        if (mExpandedChild == null) {
+            viewType = VISIBLE_TYPE_CONTRACTED;
         }
-        return expandedChild.getHeight() + getExtraRemoteInputHeight(mExpandedRemoteInput);
+        return getViewHeight(viewType) + getExtraRemoteInputHeight(mExpandedRemoteInput);
     }
 
     public int getHeadsUpHeight() {
-        View headsUpChild = mHeadsUpChild;
-        if (headsUpChild == null) {
-            headsUpChild = mContractedChild;
+        int viewType = VISIBLE_TYPE_HEADSUP;
+        if (mHeadsUpChild == null) {
+            viewType = VISIBLE_TYPE_CONTRACTED;
         }
-        return headsUpChild.getHeight()+ getExtraRemoteInputHeight(mHeadsUpRemoteInput);
+        return getViewHeight(viewType) + getExtraRemoteInputHeight(mHeadsUpRemoteInput);
     }
 
     public void setRemoteInputVisible(boolean remoteInputVisible) {
@@ -1640,5 +1654,17 @@ public class NotificationContentView extends FrameLayout {
     public void setClipChildren(boolean clipChildren) {
         clipChildren = clipChildren && !mRemoteInputVisible;
         super.setClipChildren(clipChildren);
+    }
+
+    public void setHeaderVisibleAmount(float headerVisibleAmount) {
+        if (mContractedWrapper != null) {
+            mContractedWrapper.setHeaderVisibleAmount(headerVisibleAmount);
+        }
+        if (mHeadsUpWrapper != null) {
+            mHeadsUpWrapper.setHeaderVisibleAmount(headerVisibleAmount);
+        }
+        if (mExpandedWrapper != null) {
+            mExpandedWrapper.setHeaderVisibleAmount(headerVisibleAmount);
+        }
     }
 }
