@@ -47,6 +47,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.HexDump;
+import com.android.internal.util.Preconditions;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertUtils;
 import com.android.server.locksettings.recoverablekeystore.certificate.SigXml;
 import com.android.server.locksettings.recoverablekeystore.storage.ApplicationKeyStorage;
@@ -244,11 +245,11 @@ public class RecoverableKeyStoreManager {
             @NonNull String rootCertificateAlias, @NonNull byte[] recoveryServiceCertFile,
             @NonNull byte[] recoveryServiceSigFile)
             throws RemoteException {
-        if (recoveryServiceCertFile == null || recoveryServiceSigFile == null) {
-            Log.d(TAG, "The given cert or sig file is null");
-            throw new ServiceSpecificException(
-                    ERROR_BAD_CERTIFICATE_FORMAT, "The given cert or sig file is null.");
+        if (rootCertificateAlias == null) {
+            Log.e(TAG, "rootCertificateAlias is null");
         }
+        Preconditions.checkNotNull(recoveryServiceCertFile, "recoveryServiceCertFile is null");
+        Preconditions.checkNotNull(recoveryServiceSigFile, "recoveryServiceSigFile is null");
 
         SigXml sigXml;
         try {
@@ -291,11 +292,11 @@ public class RecoverableKeyStoreManager {
     /**
      * Gets all data necessary to recover application keys on new device.
      *
-     * @return recovery data
+     * @return KeyChain Snapshot.
+     * @throws ServiceSpecificException if no snapshot is pending.
      * @hide
      */
-    public @NonNull
-    KeyChainSnapshot getKeyChainSnapshot()
+    public @NonNull KeyChainSnapshot getKeyChainSnapshot()
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int uid = Binder.getCallingUid();
@@ -325,7 +326,7 @@ public class RecoverableKeyStoreManager {
         throw new UnsupportedOperationException();
     }
 
-    public void setServerParams(byte[] serverParams) throws RemoteException {
+    public void setServerParams(@NonNull byte[] serverParams) throws RemoteException {
         checkRecoverKeyStorePermission();
         int userId = UserHandle.getCallingUserId();
         int uid = Binder.getCallingUid();
@@ -338,8 +339,9 @@ public class RecoverableKeyStoreManager {
     /**
      * Sets the recovery status of key with {@code alias} to {@code status}.
      */
-    public void setRecoveryStatus(String alias, int status) throws RemoteException {
+    public void setRecoveryStatus(@NonNull String alias, int status) throws RemoteException {
         checkRecoverKeyStorePermission();
+        Preconditions.checkNotNull(alias, "alias is null");
         mDatabase.setRecoveryStatus(Binder.getCallingUid(), alias, status);
     }
 
@@ -364,6 +366,7 @@ public class RecoverableKeyStoreManager {
             @NonNull @KeyChainProtectionParams.UserSecretType int[] secretTypes)
             throws RemoteException {
         checkRecoverKeyStorePermission();
+        Preconditions.checkNotNull(secretTypes, "secretTypes is null");
         int userId = UserHandle.getCallingUserId();
         int uid = Binder.getCallingUid();
         long updatedRows = mDatabase.setRecoverySecretTypes(userId, uid, secretTypes);
@@ -495,7 +498,14 @@ public class RecoverableKeyStoreManager {
             @NonNull List<KeyChainProtectionParams> secrets)
             throws RemoteException {
         checkRecoverKeyStorePermission();
-
+        if (rootCertificateAlias == null) {
+            Log.e(TAG, "rootCertificateAlias is null");
+        }
+        Preconditions.checkNotNull(sessionId, "invalid session");
+        Preconditions.checkNotNull(verifierCertPath, "verifierCertPath is null");
+        Preconditions.checkNotNull(vaultParams, "vaultParams is null");
+        Preconditions.checkNotNull(vaultChallenge, "vaultChallenge is null");
+        Preconditions.checkNotNull(secrets, "secrets is null");
         CertPath certPath;
         try {
             certPath = verifierCertPath.getCertPath();
@@ -541,6 +551,9 @@ public class RecoverableKeyStoreManager {
             @NonNull List<WrappedApplicationKey> applicationKeys)
             throws RemoteException {
         checkRecoverKeyStorePermission();
+        Preconditions.checkNotNull(sessionId, "invalid session");
+        Preconditions.checkNotNull(encryptedRecoveryKey, "encryptedRecoveryKey is null");
+        Preconditions.checkNotNull(applicationKeys, "encryptedRecoveryKey is null");
         int uid = Binder.getCallingUid();
         RecoverySessionStorage.Entry sessionEntry = mRecoverySessionStorage.get(uid, sessionId);
         if (sessionEntry == null) {
@@ -667,10 +680,13 @@ public class RecoverableKeyStoreManager {
      * Destroys the session with the given {@code sessionId}.
      */
     public void closeSession(@NonNull String sessionId) throws RemoteException {
+        checkRecoverKeyStorePermission();
+        Preconditions.checkNotNull(sessionId, "invalid session");
         mRecoverySessionStorage.remove(Binder.getCallingUid(), sessionId);
     }
 
     public void removeKey(@NonNull String alias) throws RemoteException {
+        Preconditions.checkNotNull(alias, "alias is null");
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
 
@@ -688,6 +704,7 @@ public class RecoverableKeyStoreManager {
      * @return grant alias, which caller can use to access the key.
      */
     public String generateKey(@NonNull String alias) throws RemoteException {
+        Preconditions.checkNotNull(alias, "alias is null");
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
 
@@ -726,8 +743,9 @@ public class RecoverableKeyStoreManager {
      */
     public String importKey(@NonNull String alias, @NonNull byte[] keyBytes)
             throws RemoteException {
-        if (keyBytes == null ||
-                keyBytes.length != RecoverableKeyGenerator.KEY_SIZE_BITS / Byte.SIZE) {
+        Preconditions.checkNotNull(alias, "alias is null");
+        Preconditions.checkNotNull(keyBytes, "keyBytes is null");
+        if (keyBytes.length != RecoverableKeyGenerator.KEY_SIZE_BITS / Byte.SIZE) {
             Log.e(TAG, "The given key for import doesn't have the required length "
                     + RecoverableKeyGenerator.KEY_SIZE_BITS);
             throw new ServiceSpecificException(ERROR_INVALID_KEY_FORMAT,
@@ -770,6 +788,7 @@ public class RecoverableKeyStoreManager {
      * @return grant alias, which caller can use to access the key.
      */
     public String getKey(@NonNull String alias) throws RemoteException {
+        Preconditions.checkNotNull(alias, "alias is null");
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
         return getAlias(userId, uid, alias);
