@@ -3305,5 +3305,4 @@
   <java-symbol type="string" name="notification_app_name_system" />
   <java-symbol type="string" name="notification_app_name_settings" />
 
-  <java-symbol type="bool" name="config_disable_signal_strength_update_in_powersave_mode" />
 </resources>
