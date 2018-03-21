@@ -77,10 +77,27 @@ public class TrustedRootCertificates {
 
     private static final int NUMBER_OF_ROOT_CERTIFICATES = 1;
 
+    private static final ArrayMap<String, X509Certificate> ALL_ROOT_CERTIFICATES =
+            constructRootCertificateMap();
+
     /**
      * Returns all available root certificates, keyed by alias.
      */
     public static Map<String, X509Certificate> listRootCertificates() {
+        return new ArrayMap(ALL_ROOT_CERTIFICATES);
+    }
+
+    /**
+     * Gets a root certificate referenced by the given {@code alias}.
+     *
+     * @param alias the alias of the certificate
+     * @return the certificate referenced by the alias, or null if such a certificate doesn't exist.
+     */
+    public static X509Certificate getRootCertificate(String alias) {
+        return ALL_ROOT_CERTIFICATES.get(alias);
+    }
+
+    private static ArrayMap<String, X509Certificate> constructRootCertificateMap() {
         ArrayMap<String, X509Certificate> certificates =
                 new ArrayMap<>(NUMBER_OF_ROOT_CERTIFICATES);
         certificates.put(

@@ -85,7 +85,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class RecoverableKeyStoreManagerTest {
     private static final String DATABASE_FILE_NAME = "recoverablekeystore.db";
 
-    private static final String ROOT_CERTIFICATE_ALIAS = "put_default_alias_here";
+    private static final String ROOT_CERTIFICATE_ALIAS = "";
     private static final String TEST_SESSION_ID = "karlin";
     private static final byte[] TEST_PUBLIC_KEY = new byte[] {
         (byte) 0x30, (byte) 0x59, (byte) 0x30, (byte) 0x13, (byte) 0x06, (byte) 0x07, (byte) 0x2a,
@@ -139,6 +139,7 @@ public class RecoverableKeyStoreManagerTest {
     private static final String KEY_ALGORITHM = "AES";
     private static final String ANDROID_KEY_STORE_PROVIDER = "AndroidKeyStore";
     private static final String WRAPPING_KEY_ALIAS = "RecoverableKeyStoreManagerTest/WrappingKey";
+    private static final String TEST_ROOT_CERT_ALIAS = "";
 
     @Mock private Context mMockContext;
     @Mock private RecoverySnapshotListenersStorage mMockListenersStorage;
@@ -449,10 +450,13 @@ public class RecoverableKeyStoreManagerTest {
                         eq(Manifest.permission.RECOVER_KEYSTORE), any());
     }
 
+    // TODO: Add tests for non-existing cert alias
+
     @Test
     public void startRecoverySessionWithCertPath_storesTheSessionInfo() throws Exception {
         mRecoverableKeyStoreManager.startRecoverySessionWithCertPath(
                 TEST_SESSION_ID,
+                TEST_ROOT_CERT_ALIAS,
                 RecoveryCertPath.createRecoveryCertPath(TestData.CERT_PATH_1),
                 TEST_VAULT_PARAMS,
                 TEST_VAULT_CHALLENGE,
@@ -474,6 +478,7 @@ public class RecoverableKeyStoreManagerTest {
     public void startRecoverySessionWithCertPath_checksPermissionFirst() throws Exception {
         mRecoverableKeyStoreManager.startRecoverySessionWithCertPath(
                 TEST_SESSION_ID,
+                TEST_ROOT_CERT_ALIAS,
                 RecoveryCertPath.createRecoveryCertPath(TestData.CERT_PATH_1),
                 TEST_VAULT_PARAMS,
                 TEST_VAULT_CHALLENGE,
@@ -591,6 +596,7 @@ public class RecoverableKeyStoreManagerTest {
         try {
             mRecoverableKeyStoreManager.startRecoverySessionWithCertPath(
                     TEST_SESSION_ID,
+                    TEST_ROOT_CERT_ALIAS,
                     RecoveryCertPath.createRecoveryCertPath(TestData.CERT_PATH_1),
                     TEST_VAULT_PARAMS,
                     TEST_VAULT_CHALLENGE,
@@ -609,6 +615,7 @@ public class RecoverableKeyStoreManagerTest {
         try {
             mRecoverableKeyStoreManager.startRecoverySessionWithCertPath(
                     TEST_SESSION_ID,
+                    TEST_ROOT_CERT_ALIAS,
                     RecoveryCertPath.createRecoveryCertPath(TestData.CERT_PATH_1),
                     vaultParams,
                     TEST_VAULT_CHALLENGE,
@@ -631,6 +638,7 @@ public class RecoverableKeyStoreManagerTest {
         try {
             mRecoverableKeyStoreManager.startRecoverySessionWithCertPath(
                     TEST_SESSION_ID,
+                    TEST_ROOT_CERT_ALIAS,
                     RecoveryCertPath.createRecoveryCertPath(emptyCertPath),
                     TEST_VAULT_PARAMS,
                     TEST_VAULT_CHALLENGE,
@@ -655,6 +663,7 @@ public class RecoverableKeyStoreManagerTest {
         try {
             mRecoverableKeyStoreManager.startRecoverySessionWithCertPath(
                     TEST_SESSION_ID,
+                    TEST_ROOT_CERT_ALIAS,
                     RecoveryCertPath.createRecoveryCertPath(shortCertPath),
                     TEST_VAULT_PARAMS,
                     TEST_VAULT_CHALLENGE,
