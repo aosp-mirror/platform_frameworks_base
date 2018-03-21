@@ -1258,7 +1258,7 @@ public final class BroadcastQueue {
             if (!skip) {
                 final int allowed = mService.getAppStartModeLocked(
                         info.activityInfo.applicationInfo.uid, info.activityInfo.packageName,
-                        info.activityInfo.applicationInfo.targetSdkVersion, -1, true, false);
+                        info.activityInfo.applicationInfo.targetSdkVersion, -1, true, false, false);
                 if (allowed != ActivityManager.APP_START_MODE_NORMAL) {
                     // We won't allow this receiver to be launched if the app has been
                     // completely disabled from launches, or it was not explicitly sent
