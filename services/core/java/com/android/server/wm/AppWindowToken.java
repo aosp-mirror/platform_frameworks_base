@@ -1471,11 +1471,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     void layoutLetterbox(WindowState winHint) {
         final WindowState w = findMainWindow();
-        if (w != winHint && winHint != null && w != null) {
+        if (w == null || winHint != null && w != winHint) {
             return;
         }
-        final boolean needsLetterbox = w != null && w.isLetterboxedAppWindow()
-                && fillsParent() && w.hasDrawnLw();
+        final boolean surfaceReady = w.hasDrawnLw()  // Regular case
+                || w.mWinAnimator.mSurfaceDestroyDeferred  // The preserved surface is still ready.
+                || w.isDragResizeChanged();  // Waiting for relayoutWindow to call preserveSurface.
+        final boolean needsLetterbox = w.isLetterboxedAppWindow() && fillsParent() && surfaceReady;
         if (needsLetterbox) {
             if (mLetterbox == null) {
                 mLetterbox = new Letterbox(() -> makeChildSurface(null));
