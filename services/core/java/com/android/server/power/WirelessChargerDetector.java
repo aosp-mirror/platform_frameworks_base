@@ -84,10 +84,6 @@ final class WirelessChargerDetector {
     // The minimum number of samples that must be collected.
     private static final int MIN_SAMPLES = 3;
 
-    // Upper bound on the battery charge percentage in order to consider turning
-    // the screen on when the device starts charging wirelessly.
-    private static final int WIRELESS_CHARGER_TURN_ON_BATTERY_LEVEL_LIMIT = 95;
-
     // To detect movement, we compute the angle between the gravity vector
     // at rest and the current gravity vector.  This field specifies the
     // cosine of the maximum angle variance that we tolerate while at rest.
@@ -214,11 +210,10 @@ final class WirelessChargerDetector {
      *
      * @param isPowered True if the device is powered.
      * @param plugType The current plug type.
-     * @param batteryLevel The current battery level.
      * @return True if the device is determined to have just been docked on a wireless
      * charger, after suppressing spurious docking or undocking signals.
      */
-    public boolean update(boolean isPowered, int plugType, int batteryLevel) {
+    public boolean update(boolean isPowered, int plugType) {
         synchronized (mLock) {
             final boolean wasPoweredWirelessly = mPoweredWirelessly;
 
@@ -249,13 +244,9 @@ final class WirelessChargerDetector {
             }
 
             // Report that the device has been docked only if the device just started
-            // receiving power wirelessly, has a high enough battery level that we
-            // can be assured that charging was not delayed due to the battery previously
-            // having been full, and the device is not known to already be at rest
+            // receiving power wirelessly and the device is not known to already be at rest
             // on the wireless charger from earlier.
-            return mPoweredWirelessly && !wasPoweredWirelessly
-                    && batteryLevel < WIRELESS_CHARGER_TURN_ON_BATTERY_LEVEL_LIMIT
-                    && !mAtRest;
+            return mPoweredWirelessly && !wasPoweredWirelessly && !mAtRest;
         }
     }
 
