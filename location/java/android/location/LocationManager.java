@@ -42,12 +42,14 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Log;
 import com.android.internal.location.ProviderProperties;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This class provides access to the system location services.  These
@@ -1252,12 +1254,40 @@ public class LocationManager {
     @SystemApi
     @RequiresPermission(WRITE_SECURE_SETTINGS)
     public void setLocationEnabledForUser(boolean enabled, UserHandle userHandle) {
-        for (String provider : getAllProviders()) {
+        final List<String> allProvidersList = getAllProviders();
+        // Update all providers on device plus gps and network provider when disabling location.
+        Set<String> allProvidersSet = new ArraySet<>(allProvidersList.size() + 2);
+        allProvidersSet.addAll(allProvidersList);
+        // When disabling location, disable gps and network provider that could have been enabled by
+        // location mode api.
+        if (enabled == false) {
+            allProvidersSet.add(GPS_PROVIDER);
+            allProvidersSet.add(NETWORK_PROVIDER);
+        }
+        if (allProvidersSet.isEmpty()) {
+            return;
+        }
+        // to ensure thread safety, we write the provider name with a '+' or '-'
+        // and let the SettingsProvider handle it rather than reading and modifying
+        // the list of enabled providers.
+        final String prefix = enabled ? "+" : "-";
+        StringBuilder locationProvidersAllowed = new StringBuilder();
+        for (String provider : allProvidersSet) {
+            checkProvider(provider);
             if (provider.equals(PASSIVE_PROVIDER)) {
                 continue;
             }
-            setProviderEnabledForUser(provider, enabled, userHandle);
+            locationProvidersAllowed.append(prefix);
+            locationProvidersAllowed.append(provider);
+            locationProvidersAllowed.append(",");
         }
+        // Remove the trailing comma
+        locationProvidersAllowed.setLength(locationProvidersAllowed.length() - 1);
+        Settings.Secure.putStringForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                locationProvidersAllowed.toString(),
+                userHandle.getIdentifier());
     }
 
     /**
