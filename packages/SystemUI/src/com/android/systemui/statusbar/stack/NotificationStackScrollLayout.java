@@ -16,7 +16,8 @@
 
 package com.android.systemui.statusbar.stack;
 
-import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
+import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator
+        .ExpandAnimationParameters;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -43,6 +44,7 @@ import android.os.Handler;
 import android.service.notification.StatusBarNotification;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
+import android.support.v4.graphics.ColorUtils;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.Log;
@@ -77,10 +79,10 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.ActivatableNotificationView;
-import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
+import com.android.systemui.statusbar.FooterView;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationGuts;
 import com.android.systemui.statusbar.NotificationListContainer;
@@ -99,8 +101,6 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 
-import android.support.v4.graphics.ColorUtils;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -109,7 +109,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 /**
  * A layout which handles a dynamic amount of notifications and presents them in a scrollable stack.
@@ -226,7 +225,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mExpandingNotification;
     private boolean mExpandedInThisMotion;
     protected boolean mScrollingEnabled;
-    protected DismissView mDismissView;
+    protected FooterView mFooterView;
     protected EmptyShadeView mEmptyShadeView;
     private boolean mDismissAllInProgress;
     private boolean mFadeNotificationsOnDismiss;
@@ -3838,13 +3837,13 @@ public class NotificationStackScrollLayout extends ViewGroup
         Context context = new ContextThemeWrapper(mContext,
                 lightTheme ? R.style.Theme_SystemUI_Light : R.style.Theme_SystemUI);
         final int textColor = Utils.getColorAttr(context, R.attr.wallpaperTextColor);
-        mDismissView.setTextColor(textColor);
+        mFooterView.setTextColor(textColor);
         mEmptyShadeView.setTextColor(textColor);
     }
 
     public void goToFullShade(long delay) {
-        if (mDismissView != null) {
-            mDismissView.setInvisible();
+        if (mFooterView != null) {
+            mFooterView.setInvisible();
         }
         mEmptyShadeView.setInvisible();
         mGoToFullShadeNeedsAnimation = true;
@@ -3967,14 +3966,14 @@ public class NotificationStackScrollLayout extends ViewGroup
         return -1;
     }
 
-    public void setDismissView(@NonNull DismissView dismissView) {
+    public void setFooterView(@NonNull FooterView footerView) {
         int index = -1;
-        if (mDismissView != null) {
-            index = indexOfChild(mDismissView);
-            removeView(mDismissView);
+        if (mFooterView != null) {
+            index = indexOfChild(mFooterView);
+            removeView(mFooterView);
         }
-        mDismissView = dismissView;
-        addView(mDismissView, index);
+        mFooterView = footerView;
+        addView(mFooterView, index);
     }
 
     public void setEmptyShadeView(EmptyShadeView emptyShadeView) {
@@ -3992,76 +3991,63 @@ public class NotificationStackScrollLayout extends ViewGroup
         int newVisibility = visible ? VISIBLE : GONE;
         if (oldVisibility != newVisibility) {
             if (newVisibility != GONE) {
-                if (mEmptyShadeView.willBeGone()) {
-                    mEmptyShadeView.cancelAnimation();
-                } else {
-                    mEmptyShadeView.setInvisible();
-                }
                 if (mStatusBar.areNotificationsHidden()) {
                     mEmptyShadeView.setText(R.string.dnd_suppressing_shade_text);
                 } else {
                     mEmptyShadeView.setText(R.string.empty_shade_text);
                 }
-                mEmptyShadeView.setVisibility(newVisibility);
-                mEmptyShadeView.setWillBeGone(false);
-                updateContentHeight();
-                notifyHeightChangeListener(mEmptyShadeView);
+                showFooterView(mEmptyShadeView);
             } else {
-                Runnable onFinishedRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        mEmptyShadeView.setVisibility(GONE);
-                        mEmptyShadeView.setWillBeGone(false);
-                        updateContentHeight();
-                        notifyHeightChangeListener(mEmptyShadeView);
-                    }
-                };
-                if (mAnimationsEnabled && mIsExpanded) {
-                    mEmptyShadeView.setWillBeGone(true);
-                    mEmptyShadeView.performVisibilityAnimation(false, onFinishedRunnable);
-                } else {
-                    mEmptyShadeView.setInvisible();
-                    onFinishedRunnable.run();
-                }
+                hideFooterView(mEmptyShadeView, true);
             }
         }
     }
 
-    public void updateDismissView(boolean visible) {
-        if (mDismissView == null) {
+    public void updateFooterView(boolean visible, boolean showDismissView) {
+        if (mFooterView == null) {
             return;
         }
-
-        int oldVisibility = mDismissView.willBeGone() ? GONE : mDismissView.getVisibility();
+        int oldVisibility = mFooterView.willBeGone() ? GONE : mFooterView.getVisibility();
         int newVisibility = visible ? VISIBLE : GONE;
         if (oldVisibility != newVisibility) {
             if (newVisibility != GONE) {
-                if (mDismissView.willBeGone()) {
-                    mDismissView.cancelAnimation();
-                } else {
-                    mDismissView.setInvisible();
-                }
-                mDismissView.setVisibility(newVisibility);
-                mDismissView.setWillBeGone(false);
-                updateContentHeight();
-                notifyHeightChangeListener(mDismissView);
+                showFooterView(mFooterView);
             } else {
-                Runnable dimissHideFinishRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        mDismissView.setVisibility(GONE);
-                        mDismissView.setWillBeGone(false);
-                        updateContentHeight();
-                        notifyHeightChangeListener(mDismissView);
-                    }
-                };
-                if (mDismissView.isButtonVisible() && mIsExpanded && mAnimationsEnabled) {
-                    mDismissView.setWillBeGone(true);
-                    mDismissView.performVisibilityAnimation(false, dimissHideFinishRunnable);
-                } else {
-                    dimissHideFinishRunnable.run();
-                }
+                hideFooterView(mFooterView, mFooterView.isButtonVisible());
             }
+        }
+        if (mFooterView.isSecondaryVisible() != showDismissView) {
+            mFooterView.performSecondaryVisibilityAnimation(showDismissView);
+        }
+    }
+
+    private void showFooterView(StackScrollerDecorView footerView) {
+        if (footerView.willBeGone()) {
+            footerView.cancelAnimation();
+        } else {
+            footerView.setInvisible();
+        }
+        footerView.setVisibility(VISIBLE);
+        footerView.setWillBeGone(false);
+        updateContentHeight();
+        notifyHeightChangeListener(footerView);
+    }
+
+    private void hideFooterView(StackScrollerDecorView footerView, boolean isButtonVisible) {
+        Runnable onHideFinishRunnable = new Runnable() {
+            @Override
+            public void run() {
+                footerView.setVisibility(GONE);
+                footerView.setWillBeGone(false);
+                updateContentHeight();
+                notifyHeightChangeListener(footerView);
+            }
+        };
+        if (isButtonVisible && mIsExpanded && mAnimationsEnabled) {
+            footerView.setWillBeGone(true);
+            footerView.performVisibilityAnimation(false, onHideFinishRunnable);
+        } else {
+            onHideFinishRunnable.run();
         }
     }
 
@@ -4088,18 +4074,18 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     }
 
-    public boolean isDismissViewNotGone() {
-        return mDismissView != null
-                && mDismissView.getVisibility() != View.GONE
-                && !mDismissView.willBeGone();
+    public boolean isFooterViewNotGone() {
+        return mFooterView != null
+                && mFooterView.getVisibility() != View.GONE
+                && !mFooterView.willBeGone();
     }
 
-    public boolean isDismissViewVisible() {
-        return mDismissView != null && mDismissView.isVisible();
+    public boolean isFooterViewVisible() {
+        return mFooterView != null && mFooterView.isVisible();
     }
 
-    public int getDismissViewHeight() {
-        return mDismissView == null ? 0 : mDismissView.getHeight() + mPaddingBetweenElements;
+    public int getFooterViewHeight() {
+        return mFooterView == null ? 0 : mFooterView.getHeight() + mPaddingBetweenElements;
     }
 
     public int getEmptyShadeViewHeight() {
@@ -4155,8 +4141,8 @@ public class NotificationStackScrollLayout extends ViewGroup
                 }
                 boolean belowChild = touchY > childTop + child.getActualHeight()
                         - child.getClipBottomAmount();
-                if (child == mDismissView) {
-                    if(!belowChild && !mDismissView.isOnEmptySpace(touchX - mDismissView.getX(),
+                if (child == mFooterView) {
+                    if(!belowChild && !mFooterView.isOnEmptySpace(touchX - mFooterView.getX(),
                                     touchY - childTop)) {
                         // We clicked on the dismiss button
                         return false;

@@ -15,13 +15,27 @@
   -->
 
 <!-- Extends Framelayout -->
-<com.android.systemui.statusbar.DismissView
+<com.android.systemui.statusbar.FooterView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingEnd="8dp"
         android:visibility="gone">
-    <com.android.systemui.statusbar.DismissViewButton
+    <FrameLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+        <com.android.systemui.statusbar.FooterViewButton
+            style="@android:style/Widget.Material.Button.Borderless"
+            android:id="@+id/manage_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:focusable="true"
+            android:text="@string/manage_notifications_text"
+            android:textColor="?attr/wallpaperTextColor"
+            android:textAllCaps="false"/>
+        <com.android.systemui.statusbar.FooterViewButton
             style="@android:style/Widget.Material.Button.Borderless"
             android:id="@+id/dismiss_text"
             android:layout_width="wrap_content"
@@ -32,4 +46,5 @@
             android:text="@string/clear_all_notifications_text"
             android:textColor="?attr/wallpaperTextColor"
             android:textAllCaps="true"/>
-</com.android.systemui.statusbar.DismissView>
+    </FrameLayout>
+</com.android.systemui.statusbar.FooterView>

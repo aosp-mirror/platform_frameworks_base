@@ -1055,6 +1055,9 @@
     <!-- The text to clear all notifications. [CHAR LIMIT=60] -->
     <string name="clear_all_notifications_text">Clear all</string>
 
+    <!-- The text for the manage notifications link. [CHAR LIMIT=40] -->
+    <string name="manage_notifications_text">Manage notifications</string>
+
     <!-- The text to show in the notifications shade when dnd is suppressing notifications. [CHAR LIMIT=100] -->
     <string name="dnd_suppressing_shade_text">Do Not disturb is hiding notifications</string>
 

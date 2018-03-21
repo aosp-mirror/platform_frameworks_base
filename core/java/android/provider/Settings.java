@@ -1348,10 +1348,18 @@ public final class Settings {
             = "android.settings.NOTIFICATION_SETTINGS";
 
     /**
+     * Activity Action: Show app listing settings, filtered by those that send notifications.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_ALL_APPS_NOTIFICATION_SETTINGS =
+            "android.settings.ALL_APPS_NOTIFICATION_SETTINGS";
+
+    /**
      * Activity Action: Show notification settings for a single app.
      * <p>
-     *     Input: {@link #EXTRA_APP_PACKAGE}, the package containing the channel to display.
-     *     Input: Optionally, {@link #EXTRA_CHANNEL_ID}, to highlight that channel.
+     *     Input: {@link #EXTRA_APP_PACKAGE}, the package to display.
      * <p>
      * Output: Nothing.
      */
