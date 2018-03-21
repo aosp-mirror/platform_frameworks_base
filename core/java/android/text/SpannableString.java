@@ -16,7 +16,6 @@
 
 package android.text;
 
-
 /**
  * This is the class for text whose content is immutable but to which
  * markup objects can be attached and detached.
@@ -26,12 +25,27 @@ public class SpannableString
 extends SpannableStringInternal
 implements CharSequence, GetChars, Spannable
 {
+    /**
+     * @param source source object to copy from
+     * @param ignoreNoCopySpan whether to copy NoCopySpans in the {@code source}
+     * @hide
+     */
+    public SpannableString(CharSequence source, boolean ignoreNoCopySpan) {
+        super(source, 0, source.length(), ignoreNoCopySpan);
+    }
+
+    /**
+     * For the backward compatibility reasons, this constructor copies all spans including {@link
+     * android.text.NoCopySpan}.
+     * @param source source text
+     */
     public SpannableString(CharSequence source) {
-        super(source, 0, source.length());
+        this(source, false /* ignoreNoCopySpan */);  // preserve existing NoCopySpan behavior
     }
 
     private SpannableString(CharSequence source, int start, int end) {
-        super(source, start, end);
+        // preserve existing NoCopySpan behavior
+        super(source, start, end, false /* ignoreNoCopySpan */);
     }
 
     public static SpannableString valueOf(CharSequence source) {

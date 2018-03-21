@@ -186,6 +186,13 @@ public abstract class Image implements AutoCloseable {
     public abstract long getTimestamp();
 
     /**
+     * Get the transformation associated with this frame.
+     * @return The window transformation that needs to be applied for this frame.
+     * @hide
+     */
+    public abstract int getTransform();
+
+    /**
      * Get the {@link android.hardware.HardwareBuffer HardwareBuffer} handle of the input image
      * intended for GPU and/or hardware access.
      * <p>

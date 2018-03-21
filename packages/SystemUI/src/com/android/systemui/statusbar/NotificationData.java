@@ -107,6 +107,8 @@ public class NotificationData {
         public CharSequence remoteInputTextWhenReset;
         public long lastRemoteInputSent = NOT_LAUNCHED_YET;
         public ArraySet<Integer> mActiveAppOps = new ArraySet<>(3);
+        public CharSequence headsUpStatusBarText;
+        public CharSequence headsUpStatusBarTextPublic;
 
         public Entry(StatusBarNotification n) {
             this.key = n.getKey();
@@ -529,6 +531,14 @@ public class NotificationData {
         return null;
     }
 
+    public boolean shouldHide(String key) {
+        if (mRankingMap != null) {
+            getRanking(key, mTmpRanking);
+            return mTmpRanking.isSuspended();
+        }
+        return false;
+    }
+
     private void updateRankingAndSort(RankingMap ranking) {
         if (ranking != null) {
             mRankingMap = ranking;
@@ -615,6 +625,10 @@ public class NotificationData {
         }
 
         if (!mEnvironment.isDozing() && shouldSuppressNotificationList(sbn.getKey())) {
+            return true;
+        }
+
+        if (shouldHide(sbn.getKey())) {
             return true;
         }
 

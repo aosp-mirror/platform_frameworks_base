@@ -29,6 +29,8 @@ public class RecentsAnimationControllerCompat {
 
     private IRecentsAnimationController mAnimationController;
 
+    public RecentsAnimationControllerCompat() { }
+
     public RecentsAnimationControllerCompat(IRecentsAnimationController animationController) {
         mAnimationController = animationController;
     }

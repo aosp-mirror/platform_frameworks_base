@@ -2783,7 +2783,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * from the main sensor along the +X axis (to the right from the user's perspective) will
      * report <code>(0.03, 0, 0)</code>.</p>
      * <p>To transform a pixel coordinates between two cameras facing the same direction, first
-     * the source camera {@link CameraCharacteristics#LENS_RADIAL_DISTORTION android.lens.radialDistortion} must be corrected for.  Then the source
+     * the source camera {@link CameraCharacteristics#LENS_DISTORTION android.lens.distortion} must be corrected for.  Then the source
      * camera {@link CameraCharacteristics#LENS_INTRINSIC_CALIBRATION android.lens.intrinsicCalibration} needs to be applied, followed by the
      * {@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation} of the source camera, the translation of the source camera
      * relative to the destination camera, the {@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation} of the destination
@@ -2797,10 +2797,10 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p><b>Units</b>: Meters</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
+     * @see CameraCharacteristics#LENS_DISTORTION
      * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
      * @see CameraCharacteristics#LENS_POSE_REFERENCE
      * @see CameraCharacteristics#LENS_POSE_ROTATION
-     * @see CameraCharacteristics#LENS_RADIAL_DISTORTION
      */
     @PublicKey
     public static final Key<float[]> LENS_POSE_TRANSLATION =
@@ -2846,7 +2846,7 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * where <code>(0,0)</code> is the top-left of the
      * preCorrectionActiveArraySize rectangle. Once the pose and
      * intrinsic calibration transforms have been applied to a
-     * world point, then the {@link CameraCharacteristics#LENS_RADIAL_DISTORTION android.lens.radialDistortion}
+     * world point, then the {@link CameraCharacteristics#LENS_DISTORTION android.lens.distortion}
      * transform needs to be applied, and the result adjusted to
      * be in the {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} coordinate
      * system (where <code>(0, 0)</code> is the top-left of the
@@ -2859,9 +2859,9 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * coordinate system.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
+     * @see CameraCharacteristics#LENS_DISTORTION
      * @see CameraCharacteristics#LENS_POSE_ROTATION
      * @see CameraCharacteristics#LENS_POSE_TRANSLATION
-     * @see CameraCharacteristics#LENS_RADIAL_DISTORTION
      * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      * @see CameraCharacteristics#SENSOR_INFO_PRE_CORRECTION_ACTIVE_ARRAY_SIZE
      */
@@ -2903,10 +2903,57 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
+     * @deprecated
+     * <p>This field was inconsistently defined in terms of its
+     * normalization. Use {@link CameraCharacteristics#LENS_DISTORTION android.lens.distortion} instead.</p>
+     *
+     * @see CameraCharacteristics#LENS_DISTORTION
+
      */
+    @Deprecated
     @PublicKey
     public static final Key<float[]> LENS_RADIAL_DISTORTION =
             new Key<float[]>("android.lens.radialDistortion", float[].class);
+
+    /**
+     * <p>The correction coefficients to correct for this camera device's
+     * radial and tangential lens distortion.</p>
+     * <p>Replaces the deprecated {@link CameraCharacteristics#LENS_RADIAL_DISTORTION android.lens.radialDistortion} field, which was
+     * inconsistently defined.</p>
+     * <p>Three radial distortion coefficients <code>[kappa_1, kappa_2,
+     * kappa_3]</code> and two tangential distortion coefficients
+     * <code>[kappa_4, kappa_5]</code> that can be used to correct the
+     * lens's geometric distortion with the mapping equations:</p>
+     * <pre><code> x_c = x_i * ( 1 + kappa_1 * r^2 + kappa_2 * r^4 + kappa_3 * r^6 ) +
+     *        kappa_4 * (2 * x_i * y_i) + kappa_5 * ( r^2 + 2 * x_i^2 )
+     *  y_c = y_i * ( 1 + kappa_1 * r^2 + kappa_2 * r^4 + kappa_3 * r^6 ) +
+     *        kappa_5 * (2 * x_i * y_i) + kappa_4 * ( r^2 + 2 * y_i^2 )
+     * </code></pre>
+     * <p>Here, <code>[x_c, y_c]</code> are the coordinates to sample in the
+     * input image that correspond to the pixel values in the
+     * corrected image at the coordinate <code>[x_i, y_i]</code>:</p>
+     * <pre><code> correctedImage(x_i, y_i) = sample_at(x_c, y_c, inputImage)
+     * </code></pre>
+     * <p>The pixel coordinates are defined in a coordinate system
+     * related to the {@link CameraCharacteristics#LENS_INTRINSIC_CALIBRATION android.lens.intrinsicCalibration}
+     * calibration fields; see that entry for details of the mapping stages.
+     * Both <code>[x_i, y_i]</code> and <code>[x_c, y_c]</code>
+     * have <code>(0,0)</code> at the lens optical center <code>[c_x, c_y]</code>, and
+     * the range of the coordinates depends on the focal length
+     * terms of the intrinsic calibration.</p>
+     * <p>Finally, <code>r</code> represents the radial distance from the
+     * optical center, <code>r^2 = x_i^2 + y_i^2</code>.</p>
+     * <p>The distortion model used is the Brown-Conrady model.</p>
+     * <p><b>Units</b>:
+     * Unitless coefficients.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
+     * @see CameraCharacteristics#LENS_RADIAL_DISTORTION
+     */
+    @PublicKey
+    public static final Key<float[]> LENS_DISTORTION =
+            new Key<float[]>("android.lens.distortion", float[].class);
 
     /**
      * <p>Mode of operation for the noise reduction algorithm.</p>
@@ -2981,6 +3028,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * Optional. Default value is FINAL.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * @deprecated
+     * <p>Not used in HALv3 or newer</p>
+
      * @hide
      */
     @Deprecated
@@ -2997,6 +3046,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * &gt; 0</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * @deprecated
+     * <p>Not used in HALv3 or newer</p>
+
      * @hide
      */
     @Deprecated
@@ -3777,6 +3828,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *
      * @see CaptureRequest#COLOR_CORRECTION_GAINS
      * @deprecated
+     * <p>Never fully implemented or specified; do not use</p>
+
      * @hide
      */
     @Deprecated
@@ -3801,6 +3854,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * regardless of the android.control.* current values.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * @deprecated
+     * <p>Never fully implemented or specified; do not use</p>
+
      * @hide
      */
     @Deprecated
@@ -3919,8 +3974,10 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *   <li>{@link #STATISTICS_OIS_DATA_MODE_ON ON}</li>
      * </ul></p>
      * <p><b>Available values for this device:</b><br>
-     * android.Statistics.info.availableOisDataModes</p>
+     * {@link CameraCharacteristics#STATISTICS_INFO_AVAILABLE_OIS_DATA_MODES android.statistics.info.availableOisDataModes}</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#STATISTICS_INFO_AVAILABLE_OIS_DATA_MODES
      * @see #STATISTICS_OIS_DATA_MODE_OFF
      * @see #STATISTICS_OIS_DATA_MODE_ON
      */

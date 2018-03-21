@@ -24,7 +24,6 @@ import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.SurfaceControl.Transaction;
-import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
@@ -35,7 +34,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCRE
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
-import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
@@ -46,7 +44,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FORMAT_CHANGED;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
 import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
@@ -409,6 +406,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     final Rect mContainingFrame = new Rect();
 
     private final Rect mParentFrame = new Rect();
+
+    /** Whether the parent frame would have been different if there was no display cutout. */
+    private boolean mParentFrameWasClippedByDisplayCutout;
 
     // The entire screen area of the {@link TaskStack} this window is in. Usually equal to the
     // screen area of the device.
@@ -839,7 +839,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public void computeFrameLw(Rect parentFrame, Rect displayFrame, Rect overscanFrame,
             Rect contentFrame, Rect visibleFrame, Rect decorFrame, Rect stableFrame,
-            Rect outsetFrame, WmDisplayCutout displayCutout) {
+            Rect outsetFrame, WmDisplayCutout displayCutout,
+            boolean parentFrameWasClippedByDisplayCutout) {
         if (mWillReplaceWindow && (mAnimatingExit || !mReplacingRemoveRequested)) {
             // This window is being replaced and either already got information that it's being
             // removed or we are still waiting for some information. Because of this we don't
@@ -848,6 +849,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
         mHaveFrame = true;
+        mParentFrameWasClippedByDisplayCutout = parentFrameWasClippedByDisplayCutout;
 
         final Task task = getTask();
         final boolean inFullscreenContainer = inFullscreenContainer();
@@ -3055,23 +3057,31 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Only windows with an AppWindowToken are letterboxed.
             return false;
         }
-        if (getDisplayContent().getDisplayInfo().displayCutout == null) {
-            // No cutout, no letterbox.
+        if (!mParentFrameWasClippedByDisplayCutout) {
+            // Cutout didn't make a difference, no letterbox
             return false;
         }
         if (mAttrs.layoutInDisplayCutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
             // Layout in cutout, no letterbox.
             return false;
         }
-        // TODO: handle dialogs and other non-filling windows
-        if (mAttrs.layoutInDisplayCutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER) {
-            // Never layout in cutout, always letterbox.
-            return true;
+        if (!mAttrs.isFullscreen()) {
+            // Not filling the parent frame, no letterbox
+            return false;
         }
-        // Letterbox if any fullscreen mode is set.
-        final int fl = mAttrs.flags;
-        final int sysui = mSystemUiVisibility;
-        return (fl & FLAG_FULLSCREEN) != 0 || (sysui & (SYSTEM_UI_FLAG_FULLSCREEN)) != 0;
+        // Otherwise we need a letterbox if the layout was smaller than the app window token allowed
+        // it to be.
+        return !frameCoversEntireAppTokenBounds();
+    }
+
+    /**
+     * @return true if this window covers the entire bounds of its app window token
+     * @throws NullPointerException if there is no app window token for this window
+     */
+    private boolean frameCoversEntireAppTokenBounds() {
+        mTmpRect.set(mAppToken.getBounds());
+        mTmpRect.intersectUnchecked(mFrame);
+        return mAppToken.getBounds().equals(mTmpRect);
     }
 
     @Override
@@ -4515,8 +4525,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 mAttrs.type == TYPE_NAVIGATION_BAR ||
                 // It's tempting to wonder: Have we forgotten the rounded corners overlay?
                 // worry not: it's a fake TYPE_NAVIGATION_BAR_PANEL
-                mAttrs.type == TYPE_NAVIGATION_BAR_PANEL ||
-                mAttrs.type == TYPE_STATUS_BAR) {
+                mAttrs.type == TYPE_NAVIGATION_BAR_PANEL) {
             return false;
         }
         return true;

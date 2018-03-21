@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.content.res.AssetManager.AssetInputStream;
 import android.content.res.Resources;
 import android.graphics.drawable.AnimatedImageDrawable;
@@ -33,6 +34,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.util.DisplayMetrics;
@@ -57,6 +59,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *  Class for decoding images as {@link Bitmap}s or {@link Drawable}s.
  */
 public final class ImageDecoder implements AutoCloseable {
+    /** @hide **/
+    public static int sApiLevel;
+
     /**
      *  Source of the encoded image data.
      */
@@ -294,25 +299,13 @@ public final class ImageDecoder implements AutoCloseable {
 
         @Override
         public ImageDecoder createImageDecoder() throws IOException {
-            ImageDecoder decoder = null;
             synchronized (this) {
                 if (mAssetInputStream == null) {
                     throw new IOException("Cannot reuse AssetInputStreamSource");
                 }
                 AssetInputStream ais = mAssetInputStream;
                 mAssetInputStream = null;
-                try {
-                    long asset = ais.getNativeAsset();
-                    decoder = nCreate(asset);
-                } finally {
-                    if (decoder == null) {
-                        IoUtils.closeQuietly(ais);
-                    } else {
-                        decoder.mInputStream = ais;
-                        decoder.mOwnsInputStream = true;
-                    }
-                }
-                return decoder;
+                return createFromAsset(ais);
             }
         }
     }
@@ -336,31 +329,53 @@ public final class ImageDecoder implements AutoCloseable {
 
         @Override
         public ImageDecoder createImageDecoder() throws IOException {
-            // This is just used in order to access the underlying Asset and
-            // keep it alive. FIXME: Can we skip creating this object?
-            InputStream is = null;
-            ImageDecoder decoder = null;
             TypedValue value = new TypedValue();
-            try {
-                is = mResources.openRawResource(mResId, value);
+            // This is just used in order to access the underlying Asset and
+            // keep it alive.
+            InputStream is = mResources.openRawResource(mResId, value);
 
-                if (value.density == TypedValue.DENSITY_DEFAULT) {
-                    mResDensity = DisplayMetrics.DENSITY_DEFAULT;
-                } else if (value.density != TypedValue.DENSITY_NONE) {
-                    mResDensity = value.density;
-                }
-
-                long asset = ((AssetInputStream) is).getNativeAsset();
-                decoder = nCreate(asset);
-            } finally {
-                if (decoder == null) {
-                    IoUtils.closeQuietly(is);
-                } else {
-                    decoder.mInputStream = is;
-                    decoder.mOwnsInputStream = true;
-                }
+            if (value.density == TypedValue.DENSITY_DEFAULT) {
+                mResDensity = DisplayMetrics.DENSITY_DEFAULT;
+            } else if (value.density != TypedValue.DENSITY_NONE) {
+                mResDensity = value.density;
             }
-            return decoder;
+
+            return createFromAsset((AssetInputStream) is);
+        }
+    }
+
+    /**
+     *  ImageDecoder will own the AssetInputStream.
+     */
+    private static ImageDecoder createFromAsset(AssetInputStream ais) throws IOException {
+        ImageDecoder decoder = null;
+        try {
+            long asset = ais.getNativeAsset();
+            decoder = nCreate(asset);
+        } finally {
+            if (decoder == null) {
+                IoUtils.closeQuietly(ais);
+            } else {
+                decoder.mInputStream = ais;
+                decoder.mOwnsInputStream = true;
+            }
+        }
+        return decoder;
+    }
+
+    private static class AssetSource extends Source {
+        AssetSource(@NonNull AssetManager assets, @NonNull String fileName) {
+            mAssets = assets;
+            mFileName = fileName;
+        }
+
+        private final AssetManager mAssets;
+        private final String mFileName;
+
+        @Override
+        public ImageDecoder createImageDecoder() throws IOException {
+            InputStream is = mAssets.open(mFileName);
+            return createFromAsset((AssetInputStream) is);
         }
     }
 
@@ -578,6 +593,14 @@ public final class ImageDecoder implements AutoCloseable {
     public static Source createSource(@NonNull ContentResolver cr,
             @NonNull Uri uri, @Nullable Resources res) {
         return new ContentResolverSource(cr, uri, res);
+    }
+
+    /**
+     * Create a new {@link Source} from a file in the "assets" directory.
+     */
+    @NonNull
+    public static Source createSource(@NonNull AssetManager assets, @NonNull String fileName) {
+        return new AssetSource(assets, fileName);
     }
 
     /**
@@ -1243,17 +1266,19 @@ public final class ImageDecoder implements AutoCloseable {
             return srcDensity;
         }
 
-        // downscale the bitmap if the asset has a higher density than the default
+        // For P and above, only resize if it would be a downscale. Scale up prior
+        // to P in case the app relies on the Bitmap's size without considering density.
         final int dstDensity = src.computeDstDensity();
-        if (srcDensity != Bitmap.DENSITY_NONE && srcDensity > dstDensity) {
-            float scale = (float) dstDensity / srcDensity;
-            int scaledWidth = (int) (decoder.mWidth * scale + 0.5f);
-            int scaledHeight = (int) (decoder.mHeight * scale + 0.5f);
-            decoder.setResize(scaledWidth, scaledHeight);
-            return dstDensity;
+        if (srcDensity == Bitmap.DENSITY_NONE || srcDensity == dstDensity
+                || (srcDensity < dstDensity && sApiLevel >= Build.VERSION_CODES.P)) {
+            return srcDensity;
         }
 
-        return srcDensity;
+        float scale = (float) dstDensity / srcDensity;
+        int scaledWidth = (int) (decoder.mWidth * scale + 0.5f);
+        int scaledHeight = (int) (decoder.mHeight * scale + 0.5f);
+        decoder.setResize(scaledWidth, scaledHeight);
+        return dstDensity;
     }
 
     @NonNull

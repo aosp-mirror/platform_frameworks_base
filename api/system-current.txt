@@ -32,6 +32,7 @@ package android {
     field public static final java.lang.String BIND_RESOLVER_RANKER_SERVICE = "android.permission.BIND_RESOLVER_RANKER_SERVICE";
     field public static final java.lang.String BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE = "android.permission.BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE";
     field public static final java.lang.String BIND_SETTINGS_SUGGESTIONS_SERVICE = "android.permission.BIND_SETTINGS_SUGGESTIONS_SERVICE";
+    field public static final java.lang.String BIND_SOUND_TRIGGER_DETECTION_SERVICE = "android.permission.BIND_SOUND_TRIGGER_DETECTION_SERVICE";
     field public static final java.lang.String BIND_TELEPHONY_DATA_SERVICE = "android.permission.BIND_TELEPHONY_DATA_SERVICE";
     field public static final java.lang.String BIND_TELEPHONY_NETWORK_SERVICE = "android.permission.BIND_TELEPHONY_NETWORK_SERVICE";
     field public static final java.lang.String BIND_TEXTCLASSIFIER_SERVICE = "android.permission.BIND_TEXTCLASSIFIER_SERVICE";
@@ -99,6 +100,7 @@ package android {
     field public static final java.lang.String MANAGE_CARRIER_OEM_UNLOCK_STATE = "android.permission.MANAGE_CARRIER_OEM_UNLOCK_STATE";
     field public static final java.lang.String MANAGE_CA_CERTIFICATES = "android.permission.MANAGE_CA_CERTIFICATES";
     field public static final java.lang.String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
+    field public static final java.lang.String MANAGE_SOUND_TRIGGER = "android.permission.MANAGE_SOUND_TRIGGER";
     field public static final java.lang.String MANAGE_SUBSCRIPTION_PLANS = "android.permission.MANAGE_SUBSCRIPTION_PLANS";
     field public static final java.lang.String MANAGE_USB = "android.permission.MANAGE_USB";
     field public static final java.lang.String MANAGE_USERS = "android.permission.MANAGE_USERS";
@@ -276,8 +278,8 @@ package android.app {
     field public static final java.lang.String OPSTR_AUDIO_NOTIFICATION_VOLUME = "android:audio_notification_volume";
     field public static final java.lang.String OPSTR_AUDIO_RING_VOLUME = "android:audio_ring_volume";
     field public static final java.lang.String OPSTR_AUDIO_VOICE_VOLUME = "android:audio_voice_volume";
-    field public static final java.lang.String OPSTR_BIND_ACCESSIBILITY_SERVICE = "bind_accessibility_service";
-    field public static final java.lang.String OPSTR_CHANGE_WIFI_STATE = "change_wifi_state";
+    field public static final java.lang.String OPSTR_BIND_ACCESSIBILITY_SERVICE = "android:bind_accessibility_service";
+    field public static final java.lang.String OPSTR_CHANGE_WIFI_STATE = "android:change_wifi_state";
     field public static final java.lang.String OPSTR_GET_ACCOUNTS = "android:get_accounts";
     field public static final java.lang.String OPSTR_GPS = "android:gps";
     field public static final java.lang.String OPSTR_INSTANT_APP_START_FOREGROUND = "android:instant_app_start_foreground";
@@ -289,7 +291,7 @@ package android.app {
     field public static final java.lang.String OPSTR_READ_CLIPBOARD = "android:read_clipboard";
     field public static final java.lang.String OPSTR_READ_ICC_SMS = "android:read_icc_sms";
     field public static final java.lang.String OPSTR_RECEIVE_EMERGENCY_BROADCAST = "android:receive_emergency_broadcast";
-    field public static final java.lang.String OPSTR_REQUEST_DELETE_PACKAGES = "request_delete_packages";
+    field public static final java.lang.String OPSTR_REQUEST_DELETE_PACKAGES = "android:request_delete_packages";
     field public static final java.lang.String OPSTR_REQUEST_INSTALL_PACKAGES = "android:request_install_packages";
     field public static final java.lang.String OPSTR_RUN_ANY_IN_BACKGROUND = "android:run_any_in_background";
     field public static final java.lang.String OPSTR_RUN_IN_BACKGROUND = "android:run_in_background";
@@ -723,6 +725,7 @@ package android.app.usage {
     method public java.lang.String getNotificationChannelId();
     field public static final int NOTIFICATION_INTERRUPTION = 12; // 0xc
     field public static final int NOTIFICATION_SEEN = 10; // 0xa
+    field public static final int SYSTEM_INTERACTION = 6; // 0x6
   }
 
   public final class UsageStatsManager {
@@ -1232,7 +1235,9 @@ package android.hardware.display {
 
   public final class DisplayManager {
     method public java.util.List<android.hardware.display.AmbientBrightnessDayStats> getAmbientBrightnessStats();
+    method public android.hardware.display.BrightnessConfiguration getBrightnessConfiguration();
     method public java.util.List<android.hardware.display.BrightnessChangeEvent> getBrightnessEvents();
+    method public android.hardware.display.BrightnessConfiguration getDefaultBrightnessConfiguration();
     method public android.graphics.Point getStableDisplaySize();
     method public void setBrightnessConfiguration(android.hardware.display.BrightnessConfiguration);
   }
@@ -2219,6 +2224,21 @@ package android.hardware.radio {
 
 }
 
+package android.hardware.soundtrigger {
+
+  public class SoundTrigger {
+    field public static final int STATUS_OK = 0; // 0x0
+  }
+
+  public static class SoundTrigger.RecognitionEvent {
+    method public android.media.AudioFormat getCaptureFormat();
+    method public int getCaptureSession();
+    method public byte[] getData();
+    method public boolean isCaptureAvailable();
+  }
+
+}
+
 package android.hardware.usb {
 
   public class UsbDeviceConnection {
@@ -2734,6 +2754,16 @@ package android.media.session {
 
 package android.media.soundtrigger {
 
+  public abstract class SoundTriggerDetectionService extends android.app.Service {
+    ctor public SoundTriggerDetectionService();
+    method public void onConnected(java.util.UUID, android.os.Bundle);
+    method public void onDisconnected(java.util.UUID, android.os.Bundle);
+    method public void onError(java.util.UUID, android.os.Bundle, int, int);
+    method public void onGenericRecognitionEvent(java.util.UUID, android.os.Bundle, int, android.hardware.soundtrigger.SoundTrigger.RecognitionEvent);
+    method public abstract void onStopOperation(java.util.UUID, android.os.Bundle, int);
+    method public final void operationFinished(java.util.UUID, int);
+  }
+
   public final class SoundTriggerDetector {
     method public boolean startRecognition(int);
     method public boolean stopRecognition();
@@ -2758,6 +2788,7 @@ package android.media.soundtrigger {
   public final class SoundTriggerManager {
     method public android.media.soundtrigger.SoundTriggerDetector createSoundTriggerDetector(java.util.UUID, android.media.soundtrigger.SoundTriggerDetector.Callback, android.os.Handler);
     method public void deleteModel(java.util.UUID);
+    method public int getDetectionServiceOperationsTimeout();
     method public android.media.soundtrigger.SoundTriggerManager.Model getModel(java.util.UUID);
     method public void updateModel(android.media.soundtrigger.SoundTriggerManager.Model);
   }
@@ -5442,6 +5473,7 @@ package android.telephony.euicc {
 
   public class EuiccManager {
     method public void continueOperation(android.content.Intent, android.os.Bundle);
+    method public void eraseSubscriptions(android.app.PendingIntent);
     method public void getDefaultDownloadableSubscriptionList(android.app.PendingIntent);
     method public void getDownloadableSubscriptionMetadata(android.telephony.euicc.DownloadableSubscription, android.app.PendingIntent);
     method public int getOtaStatus();

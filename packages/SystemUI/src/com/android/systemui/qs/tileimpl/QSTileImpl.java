@@ -103,7 +103,6 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     protected QSTileImpl(QSHost host) {
         mHost = host;
         mContext = host.getContext();
-        handleStale(); // Tile was just created, must be stale.
     }
 
     /**

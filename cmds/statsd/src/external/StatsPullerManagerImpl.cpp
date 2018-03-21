@@ -166,6 +166,11 @@ void StatsPullerManagerImpl::RegisterReceiver(int tagId, wp<PullDataReceiver> re
     // Round it to the nearest minutes. This is the limit of alarm manager.
     // In practice, we should limit it higher.
     long roundedIntervalMs = intervalMs/1000/60 * 1000 * 60;
+    // Scheduled pulling should be at least 1 min apart.
+    // This can be lower in cts tests, in which case we round it to 1 min.
+    if (roundedIntervalMs < 60 * 1000) {
+        roundedIntervalMs = 60 * 1000;
+    }
     // There is only one alarm for all pulled events. So only set it to the smallest denom.
     if (roundedIntervalMs < mCurrentPullingInterval) {
         VLOG("Updating pulling interval %ld", intervalMs);

@@ -566,7 +566,7 @@ public class SurfaceControl implements Parcelable {
      */
     private SurfaceControl(SurfaceSession session, String name, int w, int h, int format, int flags,
             SurfaceControl parent, int windowType, int ownerUid)
-                    throws OutOfResourcesException {
+                    throws OutOfResourcesException, IllegalArgumentException {
         if (session == null) {
             throw new IllegalArgumentException("session must not be null");
         }

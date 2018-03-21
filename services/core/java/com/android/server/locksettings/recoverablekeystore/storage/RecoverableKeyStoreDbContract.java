@@ -175,7 +175,7 @@ class RecoverableKeyStoreDbContract {
         /**
          * The algorithm used to derive cryptographic material from the key and salt. One of
          * {@link android.security.keystore.recovery.KeyDerivationParams#ALGORITHM_SHA256} or
-         * {@link android.security.keystore.recovery.KeyDerivationParams#ALGORITHM_ARGON2ID}.
+         * {@link android.security.keystore.recovery.KeyDerivationParams#ALGORITHM_SCRYPT}.
          */
         static final String COLUMN_NAME_KEY_DERIVATION_ALGORITHM = "key_derivation_algorithm";
 

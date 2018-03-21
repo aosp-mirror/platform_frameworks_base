@@ -651,31 +651,29 @@ public class StaticLayout extends Layout {
                 b.mJustificationMode != Layout.JUSTIFICATION_MODE_NONE,
                 indents, mLeftPaddings, mRightPaddings);
 
-        PrecomputedText measured = null;
-        final Spanned spanned;
+        PrecomputedText.ParagraphInfo[] paragraphInfo = null;
+        final Spanned spanned = (source instanceof Spanned) ? (Spanned) source : null;
         if (source instanceof PrecomputedText) {
-            measured = (PrecomputedText) source;
-            if (!measured.canUseMeasuredResult(bufStart, bufEnd, textDir, paint, b.mBreakStrategy,
-                      b.mHyphenationFrequency)) {
+            PrecomputedText precomputed = (PrecomputedText) source;
+            if (precomputed.canUseMeasuredResult(bufStart, bufEnd, textDir, paint,
+                      b.mBreakStrategy, b.mHyphenationFrequency)) {
                 // Some parameters are different from the ones when measured text is created.
-                measured = null;
+                paragraphInfo = precomputed.getParagraphInfo();
             }
         }
 
-        if (measured == null) {
+        if (paragraphInfo == null) {
             final PrecomputedText.Params param = new PrecomputedText.Params(paint, textDir,
                     b.mBreakStrategy, b.mHyphenationFrequency);
-            measured = PrecomputedText.createWidthOnly(source, param, bufStart, bufEnd);
-            spanned = (source instanceof Spanned) ? (Spanned) source : null;
-        } else {
-            final CharSequence original = measured.getText();
-            spanned = (original instanceof Spanned) ? (Spanned) original : null;
+            paragraphInfo = PrecomputedText.createMeasuredParagraphs(source, param, bufStart,
+                    bufEnd, false /* computeLayout */);
         }
 
         try {
-            for (int paraIndex = 0; paraIndex < measured.getParagraphCount(); paraIndex++) {
-                final int paraStart = measured.getParagraphStart(paraIndex);
-                final int paraEnd = measured.getParagraphEnd(paraIndex);
+            for (int paraIndex = 0; paraIndex < paragraphInfo.length; paraIndex++) {
+                final int paraStart = paraIndex == 0
+                        ? bufStart : paragraphInfo[paraIndex - 1].paragraphEnd;
+                final int paraEnd = paragraphInfo[paraIndex].paragraphEnd;
 
                 int firstWidthLineCount = 1;
                 int firstWidth = outerWidth;
@@ -741,7 +739,7 @@ public class StaticLayout extends Layout {
                     }
                 }
 
-                final MeasuredParagraph measuredPara = measured.getMeasuredParagraph(paraIndex);
+                final MeasuredParagraph measuredPara = paragraphInfo[paraIndex].measured;
                 final char[] chs = measuredPara.getChars();
                 final int[] spanEndCache = measuredPara.getSpanEndCache().getRawArray();
                 final int[] fmCache = measuredPara.getFontMetrics().getRawArray();

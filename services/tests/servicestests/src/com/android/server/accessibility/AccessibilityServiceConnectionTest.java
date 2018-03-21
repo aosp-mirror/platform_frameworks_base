@@ -16,6 +16,9 @@
 
 package com.android.server.accessibility;
 
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -57,6 +60,7 @@ public class AccessibilityServiceConnectionTest {
     static final int SERVICE_ID = 42;
 
     AccessibilityServiceConnection mConnection;
+
     @Mock AccessibilityManagerService.UserState mMockUserState;
     @Mock Context mMockContext;
     @Mock AccessibilityServiceInfo mMockServiceInfo;
@@ -66,7 +70,9 @@ public class AccessibilityServiceConnectionTest {
     @Mock WindowManagerInternal mMockWindowManagerInternal;
     @Mock GlobalActionPerformer mMockGlobalActionPerformer;
     @Mock KeyEventDispatcher mMockKeyEventDispatcher;
+    @Mock MagnificationController mMockMagnificationController;
 
+    MessageCapturingHandler mHandler = new MessageCapturingHandler(null);
 
     @BeforeClass
     public static void oneTimeInitialization() {
@@ -79,12 +85,15 @@ public class AccessibilityServiceConnectionTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         when(mMockSystemSupport.getKeyEventDispatcher()).thenReturn(mMockKeyEventDispatcher);
+        when(mMockSystemSupport.getMagnificationController())
+                .thenReturn(mMockMagnificationController);
+
         when(mMockServiceInfo.getResolveInfo()).thenReturn(mMockResolveInfo);
         mMockResolveInfo.serviceInfo = mock(ServiceInfo.class);
         mMockResolveInfo.serviceInfo.applicationInfo = mock(ApplicationInfo.class);
 
         mConnection = new AccessibilityServiceConnection(mMockUserState, mMockContext,
-                COMPONENT_NAME, mMockServiceInfo, SERVICE_ID, new Handler(), new Object(),
+                COMPONENT_NAME, mMockServiceInfo, SERVICE_ID, mHandler, new Object(),
                 mMockSecurityPolicy, mMockSystemSupport, mMockWindowManagerInternal,
                 mMockGlobalActionPerformer);
     }
@@ -106,12 +115,30 @@ public class AccessibilityServiceConnectionTest {
     @Test
     public void bindConnectUnbind_linksAndUnlinksToServiceDeath() throws RemoteException {
         IBinder mockBinder = mock(IBinder.class);
-        when(mMockUserState.getBindingServicesLocked())
-                .thenReturn(new HashSet<>(Arrays.asList(COMPONENT_NAME)));
+        setServiceBinding(COMPONENT_NAME);
         mConnection.bindLocked();
         mConnection.onServiceConnected(COMPONENT_NAME, mockBinder);
         verify(mockBinder).linkToDeath(eq(mConnection), anyInt());
         mConnection.unbindLocked();
         verify(mockBinder).unlinkToDeath(eq(mConnection), anyInt());
+    }
+
+    @Test
+    public void connectedServiceCrashedAndRestarted_crashReportedInServiceInfo() {
+        IBinder mockBinder = mock(IBinder.class);
+        setServiceBinding(COMPONENT_NAME);
+        mConnection.bindLocked();
+        mConnection.onServiceConnected(COMPONENT_NAME, mockBinder);
+        assertFalse(mConnection.getServiceInfo().crashed);
+        mConnection.binderDied();
+        assertTrue(mConnection.getServiceInfo().crashed);
+        mConnection.onServiceConnected(COMPONENT_NAME, mockBinder);
+        mHandler.sendAllMessages();
+        assertFalse(mConnection.getServiceInfo().crashed);
+    }
+
+    private void setServiceBinding(ComponentName componentName) {
+        when(mMockUserState.getBindingServicesLocked())
+                .thenReturn(new HashSet<>(Arrays.asList(componentName)));
     }
 }

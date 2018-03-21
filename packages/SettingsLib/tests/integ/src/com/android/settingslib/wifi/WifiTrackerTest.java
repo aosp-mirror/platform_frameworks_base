@@ -58,6 +58,8 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.android.settingslib.utils.ThreadUtils;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -135,7 +137,7 @@ public class WifiTrackerTest {
     @Mock private RssiCurve mockBadgeCurve1;
     @Mock private RssiCurve mockBadgeCurve2;
     @Mock private WifiManager mockWifiManager;
-    @Mock private WifiTracker.WifiListenerExecutor mockWifiListenerExecutor;
+    @Mock private WifiTracker.WifiListener mockWifiListener;
 
     private final List<NetworkKey> mRequestedKeys = new ArrayList<>();
 
@@ -205,7 +207,7 @@ public class WifiTrackerTest {
                       mAccessPointsChangedLatch.countDown();
                     }
                     return null;
-                }).when(mockWifiListenerExecutor).onAccessPointsChanged();
+                }).when(mockWifiListener).onAccessPointsChanged();
 
         // Turn on Scoring UI features
         mOriginalScoringUiSettingValue = Settings.Global.getInt(
@@ -271,7 +273,7 @@ public class WifiTrackerTest {
     private WifiTracker createMockedWifiTracker() {
         final WifiTracker wifiTracker = new WifiTracker(
                 mContext,
-                mockWifiListenerExecutor,
+                mockWifiListener,
                 mockWifiManager,
                 mockConnectivityManager,
                 mockNetworkScoreManager,
@@ -690,7 +692,7 @@ public class WifiTrackerTest {
         verify(mockConnectivityManager).getNetworkInfo(any(Network.class));
 
         // mStaleAccessPoints is true
-        verify(mockWifiListenerExecutor, never()).onAccessPointsChanged();
+        verify(mockWifiListener, never()).onAccessPointsChanged();
         assertThat(tracker.getAccessPoints().size()).isEqualTo(2);
         assertThat(tracker.getAccessPoints().get(0).isActive()).isTrue();
     }
@@ -719,7 +721,7 @@ public class WifiTrackerTest {
         verify(mockConnectivityManager).getNetworkInfo(any(Network.class));
 
         // mStaleAccessPoints is true
-        verify(mockWifiListenerExecutor, never()).onAccessPointsChanged();
+        verify(mockWifiListener, never()).onAccessPointsChanged();
 
         assertThat(tracker.getAccessPoints()).hasSize(1);
         assertThat(tracker.getAccessPoints().get(0).isActive()).isTrue();
@@ -762,6 +764,41 @@ public class WifiTrackerTest {
     }
 
     @Test
+    public void stopTrackingShouldPreventCallbacksFromOngoingWork() throws Exception {
+        WifiTracker tracker = createMockedWifiTracker();
+        startTracking(tracker);
+
+        final CountDownLatch ready = new CountDownLatch(1);
+        final CountDownLatch latch = new CountDownLatch(1);
+        final CountDownLatch lock = new CountDownLatch(1);
+        tracker.mWorkHandler.post(() -> {
+            try {
+                ready.countDown();
+                lock.await();
+
+                tracker.mReceiver.onReceive(
+                        mContext, new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION));
+
+                latch.countDown();
+            } catch (InterruptedException e) {
+                fail("Interrupted Exception while awaiting lock release: " + e);
+            }
+        });
+
+        ready.await(); // Make sure we have entered the first message handler
+        tracker.onStop();
+        lock.countDown();
+        assertTrue("Latch timed out", latch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
+
+        // Wait for main thread
+        final CountDownLatch latch2 = new CountDownLatch(1);
+        ThreadUtils.postOnMainThread(latch2::countDown);
+        latch2.await();
+
+        verify(mockWifiListener, never()).onWifiStateChanged(anyInt());
+    }
+
+    @Test
     public void stopTrackingShouldSetStaleBitWhichPreventsCallbacksUntilNextScanResult()
             throws Exception {
         WifiTracker tracker = createMockedWifiTracker();
@@ -778,7 +815,7 @@ public class WifiTrackerTest {
                 mContext, new Intent(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION));
 
 
-        verify(mockWifiListenerExecutor, never()).onAccessPointsChanged();
+        verify(mockWifiListener, never()).onAccessPointsChanged();
 
         sendScanResults(tracker); // verifies onAccessPointsChanged is invoked
     }
@@ -795,7 +832,7 @@ public class WifiTrackerTest {
         tracker.mReceiver.onReceive(
                 mContext, new Intent(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION));
 
-        verify(mockWifiListenerExecutor, never()).onAccessPointsChanged();
+        verify(mockWifiListener, never()).onAccessPointsChanged();
 
         sendScanResults(tracker); // verifies onAccessPointsChanged is invoked
     }
@@ -816,7 +853,7 @@ public class WifiTrackerTest {
     @Test
     public void onConnectedChangedCallback_shouldNotBeInvokedWhenNoStateChange() throws Exception {
         WifiTracker tracker = createTrackerWithScanResultsAndAccessPoint1Connected();
-        verify(mockWifiListenerExecutor, times(1)).onConnectedChanged();
+        verify(mockWifiListener, times(1)).onConnectedChanged();
 
         NetworkInfo networkInfo = new NetworkInfo(
                 ConnectivityManager.TYPE_WIFI, 0, "Type Wifi", "subtype");
@@ -826,13 +863,13 @@ public class WifiTrackerTest {
         intent.putExtra(WifiManager.EXTRA_NETWORK_INFO, networkInfo);
         tracker.mReceiver.onReceive(mContext, intent);
 
-        verify(mockWifiListenerExecutor, times(1)).onConnectedChanged();
+        verify(mockWifiListener, times(1)).onConnectedChanged();
     }
 
     @Test
     public void onConnectedChangedCallback_shouldBeInvokedWhenStateChanges() throws Exception {
         WifiTracker tracker = createTrackerWithScanResultsAndAccessPoint1Connected();
-        verify(mockWifiListenerExecutor, times(1)).onConnectedChanged();
+        verify(mockWifiListener, times(1)).onConnectedChanged();
 
         NetworkInfo networkInfo = new NetworkInfo(
                 ConnectivityManager.TYPE_WIFI, 0, "Type Wifi", "subtype");
@@ -844,7 +881,7 @@ public class WifiTrackerTest {
         tracker.mReceiver.onReceive(mContext, intent);
 
         assertThat(tracker.isConnected()).isFalse();
-        verify(mockWifiListenerExecutor, times(2)).onConnectedChanged();
+        verify(mockWifiListener, times(2)).onConnectedChanged();
     }
 
     @Test

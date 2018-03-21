@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
@@ -112,14 +113,16 @@ public abstract class StackScrollerDecorView extends ExpandableView {
     }
 
     @Override
-    public void performRemoveAnimation(long duration, float translationDirection,
-            Runnable onFinishedRunnable) {
+    public void performRemoveAnimation(long duration, long delay,
+            float translationDirection, boolean isHeadsUpAnimation, float endLocation,
+            Runnable onFinishedRunnable,
+            AnimatorListenerAdapter animationListener) {
         // TODO: Use duration
         performVisibilityAnimation(false);
     }
 
     @Override
-    public void performAddAnimation(long delay, long duration) {
+    public void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear) {
         // TODO: use delay and duration
         performVisibilityAnimation(true);
     }

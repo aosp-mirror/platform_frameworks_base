@@ -133,6 +133,10 @@ public abstract class NotificationViewWrapper implements TransformableView {
         return null;
     }
 
+    public int getHeaderTranslation() {
+        return 0;
+    }
+
     @Override
     public TransformState getCurrentState(int fadingView) {
         return null;
@@ -197,5 +201,8 @@ public abstract class NotificationViewWrapper implements TransformableView {
 
     public boolean shouldClipToRounding(boolean topRounded, boolean bottomRounded) {
         return false;
+    }
+
+    public void setHeaderVisibleAmount(float headerVisibleAmount) {
     }
 }

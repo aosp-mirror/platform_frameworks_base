@@ -74,7 +74,9 @@ import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class NotificationPanelView extends PanelView implements
         ExpandableView.OnHeightChangedListener,
@@ -243,6 +245,10 @@ public class NotificationPanelView extends PanelView implements
     private float mExpandOffset;
     private boolean mHideIconsDuringNotificationLaunch = true;
     private int mStackScrollerMeasuringPass;
+    private ArrayList<Consumer<ExpandableNotificationRow>> mTrackingHeadsUpListeners
+            = new ArrayList<>();
+    private Runnable mVerticalTranslationListener;
+    private HeadsUpAppearanceController mHeadsUpAppearanceController;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -269,6 +275,7 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller.setOnHeightChangedListener(this);
         mNotificationStackScroller.setOverscrollTopChangedListener(this);
         mNotificationStackScroller.setOnEmptySpaceClickListener(this);
+        addTrackingHeadsUpListener(mNotificationStackScroller::setTrackingHeadsUp);
         mKeyguardBottomArea = findViewById(R.id.keyguard_bottom_area);
         mQsNavbarScrim = findViewById(R.id.qs_navbar_scrim);
         mLastOrientation = getResources().getConfiguration().orientation;
@@ -1780,9 +1787,17 @@ public class NotificationPanelView extends PanelView implements
         mQsExpandImmediate = false;
         mTwoFingerQsExpandPossible = false;
         mIsExpansionFromHeadsUp = false;
-        mNotificationStackScroller.setTrackingHeadsUp(false);
+        notifyListenersTrackingHeadsUp(null);
         mExpandingFromHeadsUp = false;
         setPanelScrimMinFraction(0.0f);
+    }
+
+    private void notifyListenersTrackingHeadsUp(ExpandableNotificationRow pickedChild) {
+        for (int i = 0; i < mTrackingHeadsUpListeners.size(); i++) {
+            Consumer<ExpandableNotificationRow> listener
+                    = mTrackingHeadsUpListeners.get(i);
+            listener.accept(pickedChild);
+        }
     }
 
     private void setListening(boolean listening) {
@@ -2197,14 +2212,6 @@ public class NotificationPanelView extends PanelView implements
         return (1 - t) * start + t * end;
     }
 
-    public void setDozing(boolean dozing, boolean animate) {
-        if (dozing == mDozing) return;
-        mDozing = dozing;
-        if (mStatusBarState == StatusBarState.KEYGUARD) {
-            updateDozingVisibilities(animate);
-        }
-    }
-
     private void updateDozingVisibilities(boolean animate) {
         if (mDozing) {
             mKeyguardStatusBar.setVisibility(View.INVISIBLE);
@@ -2351,9 +2358,9 @@ public class NotificationPanelView extends PanelView implements
                 this);
     }
 
-    public void setTrackingHeadsUp(boolean tracking) {
-        if (tracking) {
-            mNotificationStackScroller.setTrackingHeadsUp(true);
+    public void setTrackedHeadsUp(ExpandableNotificationRow pickedChild) {
+        if (pickedChild != null) {
+            notifyListenersTrackingHeadsUp(pickedChild);
             mExpandingFromHeadsUp = true;
         }
         // otherwise we update the state when the expansion is finished
@@ -2400,6 +2407,9 @@ public class NotificationPanelView extends PanelView implements
     protected void setVerticalPanelTranslation(float translation) {
         mNotificationStackScroller.setTranslationX(translation);
         mQsFrame.setTranslationX(translation);
+        if (mVerticalTranslationListener != null) {
+            mVerticalTranslationListener.run();
+        }
     }
 
     protected void updateExpandedHeight(float expandedHeight) {
@@ -2555,6 +2565,10 @@ public class NotificationPanelView extends PanelView implements
         if (mLaunchingNotification) {
             return mHideIconsDuringNotificationLaunch;
         }
+        if (mHeadsUpAppearanceController != null
+                && mHeadsUpAppearanceController.shouldBeVisible()) {
+            return false;
+        }
         return !isFullWidth() || !mShowIconsWhenExpanded;
     }
 
@@ -2600,11 +2614,16 @@ public class NotificationPanelView extends PanelView implements
         }
     }
 
-    public void setDark(boolean dark, boolean animate) {
-        float darkAmount = dark ? 1 : 0;
-        if (mDarkAmount == darkAmount) {
-            return;
+    public void setDozing(boolean dozing, boolean animate) {
+        if (dozing == mDozing) return;
+        mDozing = dozing;
+
+        if (mStatusBarState == StatusBarState.KEYGUARD
+                || mStatusBarState == StatusBarState.SHADE_LOCKED) {
+            updateDozingVisibilities(animate);
         }
+
+        final float darkAmount = dozing ? 1 : 0;
         if (mDarkAnimator != null && mDarkAnimator.isRunning()) {
             if (animate && mDarkAmountTarget == darkAmount) {
                 return;
@@ -2695,5 +2714,18 @@ public class NotificationPanelView extends PanelView implements
                 }
             }
         }
+    }
+
+    public void addTrackingHeadsUpListener(Consumer<ExpandableNotificationRow> listener) {
+        mTrackingHeadsUpListeners.add(listener);
+    }
+
+    public void setVerticalTranslationListener(Runnable verticalTranslationListener) {
+        mVerticalTranslationListener = verticalTranslationListener;
+    }
+
+    public void setHeadsUpAppearanceController(
+            HeadsUpAppearanceController headsUpAppearanceController) {
+        mHeadsUpAppearanceController = headsUpAppearanceController;
     }
 }

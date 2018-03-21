@@ -365,9 +365,6 @@
     <!-- Content description of the data connection type GPRS. [CHAR LIMIT=NONE] -->
     <string name="data_connection_gprs">GPRS</string>
 
-    <!-- Content description of the data connection type 1x. [CHAR LIMIT=NONE] -->
-    <string name="data_connection_1x">1 X</string>
-
     <!-- Content description of the data connection type HSPA and its variants. [CHAR LIMIT=NONE] -->
     <string name="data_connection_hspa">HSPA</string>
 
@@ -1852,6 +1849,9 @@
 
     <!-- Label for area where tiles can be dragged in to [CHAR LIMIT=60] -->
     <string name="drag_to_remove_tiles">Drag here to remove</string>
+
+    <!-- Label to indicate to users that additional tiles cannot be removed. [CHAR LIMIT=60] -->
+    <string name="drag_to_remove_disabled">You need at least 6 tiles</string>
 
     <!-- Button to edit the tile ordering of quick settings [CHAR LIMIT=60] -->
     <string name="qs_edit">Edit</string>

@@ -14,28 +14,24 @@
  * limitations under the License.
  */
 
-package android.security.backup;
+package android.security.keystore.recovery;
 
-import static android.security.backup.X509CertificateParsingUtils.decodeBase64Cert;
+import static android.security.keystore.recovery.X509CertificateParsingUtils.decodeBase64Cert;
 
-import android.util.ArrayMap;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.Map;
 
-/**
- * Trusted root certificates for use by the
- * {@link android.security.keystore.recovery.RecoveryController}. These certificates are used to
- * verify the public keys of remote secure hardware modules. This is to prevent AOSP backing up keys
- * to untrusted devices.
- *
- * @hide
- */
-public class TrustedRootCertificates {
-
-    public static final String GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_ALIAS =
-            "GoogleCloudKeyVaultServiceV1";
+@RunWith(AndroidJUnit4.class)
+@SmallTest
+public class X509CertificateParsingUtilsTest {
 
     private static final String GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_BASE64 = ""
             + "MIIFJjCCAw6gAwIBAgIJAIobXsJlzhNdMA0GCSqGSIb3DQEBDQUAMCAxHjAcBgNV"
@@ -67,34 +63,20 @@ public class TrustedRootCertificates {
             + "/oM58v0orUWINtIc2hBlka36PhATYQiLf+AiWKnwhCaaHExoYKfQlMtXBodNvOK8"
             + "xqx69x05q/qbHKEcTHrsss630vxrp1niXvA=";
 
-    /**
-     * The X509 certificate of the trusted root CA cert for the recoverable key store service.
-     *
-     * TODO: Change it to the production certificate root CA before the final launch.
-     */
-    private static final X509Certificate GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_CERTIFICATE =
-            parseGoogleCloudKeyVaultServiceV1Certificate();
+    private static final String INVALID_BASE64 = "EVTVA==";
 
-    private static final int NUMBER_OF_ROOT_CERTIFICATES = 1;
-
-    /**
-     * Returns all available root certificates, keyed by alias.
-     */
-    public static Map<String, X509Certificate> listRootCertificates() {
-        ArrayMap<String, X509Certificate> certificates =
-                new ArrayMap<>(NUMBER_OF_ROOT_CERTIFICATES);
-        certificates.put(
-                GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_ALIAS,
-                GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_CERTIFICATE);
-        return certificates;
+    @Test
+    public void decodeBase64Cert_decodesValidCertificate() throws Exception {
+        assertNotNull(decodeBase64Cert(GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_BASE64));
     }
 
-    private static X509Certificate parseGoogleCloudKeyVaultServiceV1Certificate() {
+    @Test
+    public void decodeBase64Cert_throwsCertificateExceptionForInvalidBase64() {
         try {
-            return decodeBase64Cert(GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_BASE64);
+            decodeBase64Cert(INVALID_BASE64);
+            fail("Did not throw when attempting to decode invalid base-64");
         } catch (CertificateException e) {
-            // Should not happen
-            throw new RuntimeException(e);
+            // expected
         }
     }
 }

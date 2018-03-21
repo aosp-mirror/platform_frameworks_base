@@ -187,6 +187,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_URI_PERMI
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILITY;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_ONLY;
 import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
@@ -753,21 +754,6 @@ public class ActivityManagerService extends IActivityManager.Stub
      * List of intents that were used to start the most recent tasks.
      */
     private final RecentTasks mRecentTasks;
-
-    /**
-     * For addAppTask: cached of the last activity component that was added.
-     */
-    ComponentName mLastAddedTaskComponent;
-
-    /**
-     * For addAppTask: cached of the last activity uid that was added.
-     */
-    int mLastAddedTaskUid;
-
-    /**
-     * For addAppTask: cached of the last ActivityInfo that was added.
-     */
-    ActivityInfo mLastAddedTaskActivity;
 
     /**
      * The package name of the DeviceOwner. This package is not permitted to have its data cleared.
@@ -10611,27 +10597,24 @@ public class ActivityManagerService extends IActivityManager.Stub
                         intent.addFlags(Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS);
                     }
                 }
-                if (!comp.equals(mLastAddedTaskComponent) || callingUid != mLastAddedTaskUid) {
-                    mLastAddedTaskActivity = null;
-                }
-                ActivityInfo ainfo = mLastAddedTaskActivity;
-                if (ainfo == null) {
-                    ainfo = mLastAddedTaskActivity = AppGlobals.getPackageManager().getActivityInfo(
-                            comp, 0, UserHandle.getUserId(callingUid));
-                    if (ainfo.applicationInfo.uid != callingUid) {
-                        throw new SecurityException(
-                                "Can't add task for another application: target uid="
-                                + ainfo.applicationInfo.uid + ", calling uid=" + callingUid);
-                    }
+                final ActivityInfo ainfo = AppGlobals.getPackageManager().getActivityInfo(comp, 0,
+                        UserHandle.getUserId(callingUid));
+                if (ainfo.applicationInfo.uid != callingUid) {
+                    throw new SecurityException(
+                            "Can't add task for another application: target uid="
+                            + ainfo.applicationInfo.uid + ", calling uid=" + callingUid);
                 }
 
-                TaskRecord task = TaskRecord.create(this,
-                        mStackSupervisor.getNextTaskIdForUserLocked(r.userId),
-                        ainfo, intent, description);
+                final ActivityStack stack = r.getStack();
+                final TaskRecord task = stack.createTaskRecord(
+                        mStackSupervisor.getNextTaskIdForUserLocked(r.userId), ainfo, intent,
+                        null /* voiceSession */, null /* voiceInteractor */, !ON_TOP);
                 if (!mRecentTasks.addToBottom(task)) {
+                    // The app has too many tasks already and we can't add any more
+                    stack.removeTask(task, "addAppTask", REMOVE_TASK_MODE_DESTROYING);
                     return INVALID_TASK_ID;
                 }
-                r.getStack().addTask(task, !ON_TOP, "addAppTask");
+                task.lastTaskDescription.copyFrom(description);
 
                 // TODO: Send the thumbnail to WM to store it.
 

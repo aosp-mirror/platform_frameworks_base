@@ -83,7 +83,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.MemoryIntArray;
-import android.util.StatsLog;
 import android.view.textservice.TextServicesManager;
 
 import com.android.internal.annotations.GuardedBy;
@@ -1942,11 +1941,7 @@ public final class Settings {
                     arg.putBoolean(CALL_METHOD_MAKE_DEFAULT_KEY, true);
                 }
                 IContentProvider cp = mProviderHolder.getProvider(cr);
-                String prevValue = getStringForUser(cr, name, userHandle);
                 cp.call(cr.getPackageName(), mCallSetCommand, name, arg);
-                String newValue = getStringForUser(cr, name, userHandle);
-                StatsLog.write(StatsLog.SETTING_CHANGED, name, value, newValue, prevValue, tag,
-                        makeDefault, userHandle);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't set key " + name + " in " + mUri, e);
                 return false;
@@ -9541,6 +9536,12 @@ public final class Settings {
         public static final String BLE_SCAN_LOW_LATENCY_INTERVAL_MS =
                 "ble_scan_low_latency_interval_ms";
 
+        /**
+         * The mode that BLE scanning clients will be moved to when in the background.
+         * @hide
+         */
+        public static final String BLE_SCAN_BACKGROUND_MODE = "ble_scan_background_mode";
+
        /**
         * Used to save the Wifi_ON state prior to tethering.
         * This state will be checked to restore Wifi after
@@ -11591,6 +11592,24 @@ public final class Settings {
                 "hidden_api_blacklist_exemptions";
 
         /**
+         * Timeout for a single {@link android.media.soundtrigger.SoundTriggerDetectionService}
+         * operation (in ms).
+         *
+         * @hide
+         */
+        public static final String SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT =
+                "sound_trigger_detection_service_op_timeout";
+
+        /**
+         * Maximum number of {@link android.media.soundtrigger.SoundTriggerDetectionService}
+         * operations per day.
+         *
+         * @hide
+         */
+        public static final String MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY =
+                "max_sound_trigger_detection_service_ops_per_day";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -12324,6 +12343,16 @@ public final class Settings {
          */
         public static final String ZRAM_ENABLED =
                 "zram_enabled";
+
+        /**
+         * Whether we have enable CPU frequency scaling for this device.
+         * For Wear, default is disable.
+         *
+         * The value is "1" for enable, "0" for disable.
+         * @hide
+         */
+        public static final String CPU_SCALING_ENABLED =
+                "cpu_frequency_scaling_enabled";
 
         /**
          * Configuration flags for smart replies in notifications.

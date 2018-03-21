@@ -70,6 +70,8 @@ public class AmbientState {
     private int mIntrinsicPadding;
     private int mExpandAnimationTopChange;
     private ExpandableNotificationRow mExpandingNotification;
+    private boolean mFullyDark;
+    private int mDarkTopPadding;
 
     public AmbientState(Context context) {
         reload(context);
@@ -408,5 +410,27 @@ public class AmbientState {
 
     public int getExpandAnimationTopChange() {
         return mExpandAnimationTopChange;
+    }
+
+    /**
+     * {@see isFullyDark}
+     */
+    public void setFullyDark(boolean fullyDark) {
+        mFullyDark = fullyDark;
+    }
+
+    /**
+     * @return {@code true } when shade is completely dark: in AOD or ambient display.
+     */
+    public boolean isFullyDark() {
+        return mFullyDark;
+    }
+
+    public void setDarkTopPadding(int darkTopPadding) {
+        mDarkTopPadding = darkTopPadding;
+    }
+
+    public int getDarkTopPadding() {
+        return mDarkTopPadding;
     }
 }

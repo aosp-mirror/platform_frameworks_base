@@ -23,7 +23,6 @@ import android.view.ViewConfiguration;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 /**
@@ -102,10 +101,11 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
                     mCollapseSnoozes = h < 0;
                     mInitialTouchX = x;
                     mInitialTouchY = y;
-                    int expandedHeight = mPickedChild.getActualHeight();
-                    mPanel.setPanelScrimMinFraction((float) expandedHeight
+                    int startHeight = (int) (mPickedChild.getActualHeight()
+                                                + mPickedChild.getTranslationY());
+                    mPanel.setPanelScrimMinFraction((float) startHeight
                             / mPanel.getMaxPanelHeight());
-                    mPanel.startExpandMotion(x, y, true /* startTracking */, expandedHeight);
+                    mPanel.startExpandMotion(x, y, true /* startTracking */, startHeight);
                     mPanel.startExpandingFromPeek();
                     // This call needs to be after the expansion start otherwise we will get a
                     // flicker of one frame as it's not expanded yet.
@@ -135,7 +135,7 @@ public class HeadsUpTouchHelper implements Gefingerpoken {
     private void setTrackingHeadsUp(boolean tracking) {
         mTrackingHeadsUp = tracking;
         mHeadsUpManager.setTrackingHeadsUp(tracking);
-        mPanel.setTrackingHeadsUp(tracking);
+        mPanel.setTrackedHeadsUp(tracking ? mPickedChild : null);
     }
 
     public void notifyFling(boolean collapse) {

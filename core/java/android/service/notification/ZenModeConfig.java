@@ -97,7 +97,7 @@ public class ZenModeConfig implements Parcelable {
     private static final int DEFAULT_SUPPRESSED_VISUAL_EFFECTS =
             Policy.getAllSuppressedVisualEffects();
 
-    public static final int XML_VERSION = 5;
+    public static final int XML_VERSION = 6;
     public static final String ZEN_TAG = "zen";
     private static final String ZEN_ATT_VERSION = "version";
     private static final String ZEN_ATT_USER = "user";
@@ -516,11 +516,17 @@ public class ZenModeConfig implements Parcelable {
         throw new IllegalStateException("Failed to reach END_DOCUMENT");
     }
 
-    public void writeXml(XmlSerializer out) throws IOException {
+    /**
+     * Writes XML of current ZenModeConfig
+     * @param out serializer
+     * @param version uses XML_VERSION if version is null
+     * @throws IOException
+     */
+    public void writeXml(XmlSerializer out, Integer version) throws IOException {
         out.startTag(null, ZEN_TAG);
-        out.attribute(null, ZEN_ATT_VERSION, Integer.toString(XML_VERSION));
+        out.attribute(null, ZEN_ATT_VERSION, version == null
+                ? Integer.toString(XML_VERSION) : Integer.toString(version));
         out.attribute(null, ZEN_ATT_USER, Integer.toString(user));
-
         out.startTag(null, ALLOW_TAG);
         out.attribute(null, ALLOW_ATT_CALLS, Boolean.toString(allowCalls));
         out.attribute(null, ALLOW_ATT_REPEAT_CALLERS, Boolean.toString(allowRepeatCallers));

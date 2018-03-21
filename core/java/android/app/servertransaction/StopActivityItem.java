@@ -39,7 +39,7 @@ public class StopActivityItem extends ActivityLifecycleItem {
             PendingTransactionActions pendingActions) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "activityStop");
         client.handleStopActivity(token, mShowWindow, mConfigChanges, pendingActions,
-                "STOP_ACTIVITY_ITEM");
+                true /* finalStateRequest */, "STOP_ACTIVITY_ITEM");
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 

@@ -105,7 +105,6 @@ public class SignalClusterView extends LinearLayout implements NetworkController
 
     private final int mMobileSignalGroupEndPadding;
     private final int mMobileDataIconStartPadding;
-    private final int mWideTypeIconStartPadding;
     private final int mSecondaryTelephonyPadding;
     private final int mEndPadding;
     private final int mEndPaddingNothingVisible;
@@ -136,7 +135,6 @@ public class SignalClusterView extends LinearLayout implements NetworkController
                 res.getDimensionPixelSize(R.dimen.mobile_signal_group_end_padding);
         mMobileDataIconStartPadding =
                 res.getDimensionPixelSize(R.dimen.mobile_data_icon_start_padding);
-        mWideTypeIconStartPadding = res.getDimensionPixelSize(R.dimen.wide_type_icon_start_padding);
         mSecondaryTelephonyPadding = res.getDimensionPixelSize(R.dimen.secondary_telephony_padding);
         mEndPadding = res.getDimensionPixelSize(R.dimen.signal_cluster_battery_padding);
         mEndPaddingNothingVisible = res.getDimensionPixelSize(
@@ -302,7 +300,6 @@ public class SignalClusterView extends LinearLayout implements NetworkController
         state.mMobileTypeId = statusType;
         state.mMobileDescription = statusIcon.contentDescription;
         state.mMobileTypeDescription = typeContentDescription;
-        state.mIsMobileTypeIconWide = statusType != 0 && isWide;
         state.mRoaming = roaming;
         state.mActivityIn = activityIn && mActivityEnabled;
         state.mActivityOut = activityOut && mActivityEnabled;
@@ -607,7 +604,6 @@ public class SignalClusterView extends LinearLayout implements NetworkController
         private int mMobileStrengthId = 0, mMobileTypeId = 0;
         private int mLastMobileStrengthId = -1;
         private int mLastMobileTypeId = -1;
-        private boolean mIsMobileTypeIconWide;
         private String mMobileDescription, mMobileTypeDescription;
 
         private ViewGroup mMobileGroup;
@@ -661,9 +657,7 @@ public class SignalClusterView extends LinearLayout implements NetworkController
             // When this isn't next to wifi, give it some extra padding between the signals.
             mMobileGroup.setPaddingRelative(isSecondaryIcon ? mSecondaryTelephonyPadding : 0,
                     0, 0, 0);
-            mMobile.setPaddingRelative(
-                    mIsMobileTypeIconWide ? mWideTypeIconStartPadding : mMobileDataIconStartPadding,
-                    0, 0, 0);
+            mMobile.setPaddingRelative(mMobileDataIconStartPadding, 0, 0, 0);
 
             if (DEBUG) Log.d(TAG, String.format("mobile: %s sig=%d typ=%d",
                         (mMobileVisible ? "VISIBLE" : "GONE"), mMobileStrengthId, mMobileTypeId));

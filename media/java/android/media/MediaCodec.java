@@ -3528,6 +3528,8 @@ final public class MediaCodec {
 
         private final static int TYPE_YUV = 1;
 
+        private final int mTransform = 0; //Default no transform
+
         @Override
         public int getFormat() {
             throwISEIfImageIsInvalid();
@@ -3544,6 +3546,12 @@ final public class MediaCodec {
         public int getWidth() {
             throwISEIfImageIsInvalid();
             return mWidth;
+        }
+
+        @Override
+        public int getTransform() {
+            throwISEIfImageIsInvalid();
+            return mTransform;
         }
 
         @Override

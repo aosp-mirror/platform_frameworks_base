@@ -64,7 +64,6 @@ public class ScrimControllerTest extends SysuiTestCase {
     private SynchronousScrimController mScrimController;
     private ScrimView mScrimBehind;
     private ScrimView mScrimInFront;
-    private View mHeadsUpScrim;
     private Consumer<Integer> mScrimVisibilityCallback;
     private int mScrimVisibility;
     private LightBarController mLightBarController;
@@ -78,7 +77,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         mLightBarController = mock(LightBarController.class);
         mScrimBehind = new ScrimView(getContext());
         mScrimInFront = new ScrimView(getContext());
-        mHeadsUpScrim = new View(getContext());
         mWakeLock = mock(WakeLock.class);
         mAlarmManager = mock(AlarmManager.class);
         mAlwaysOnEnabled = true;
@@ -87,7 +85,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         when(mDozeParamenters.getAlwaysOn()).thenAnswer(invocation -> mAlwaysOnEnabled);
         when(mDozeParamenters.getDisplayNeedsBlanking()).thenReturn(true);
         mScrimController = new SynchronousScrimController(mLightBarController, mScrimBehind,
-                mScrimInFront, mHeadsUpScrim, mScrimVisibilityCallback, mDozeParamenters,
+                mScrimInFront, mScrimVisibilityCallback, mDozeParamenters,
                 mAlarmManager);
     }
 
@@ -349,7 +347,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testWillHideAoDWallpaper() {
+    public void testWillHideAodWallpaper() {
         mScrimController.setWallpaperSupportsAmbientMode(true);
         mScrimController.transitionTo(ScrimState.AOD);
         verify(mAlarmManager).setExact(anyInt(), anyLong(), any(), any(), any());
@@ -415,56 +413,6 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testHeadsUpScrimOpacity() {
-        mScrimController.setPanelExpansion(0f);
-        mScrimController.onHeadsUpPinned(null /* row */);
-        mScrimController.finishAnimationsImmediately();
-
-        Assert.assertNotEquals("Heads-up scrim should be visible", 0f,
-                mHeadsUpScrim.getAlpha(), 0.01f);
-
-        mScrimController.onHeadsUpUnPinned(null /* row */);
-        mScrimController.finishAnimationsImmediately();
-
-        Assert.assertEquals("Heads-up scrim should have disappeared", 0f,
-                mHeadsUpScrim.getAlpha(), 0.01f);
-    }
-
-    @Test
-    public void testHeadsUpScrimCounting() {
-        mScrimController.setPanelExpansion(0f);
-        mScrimController.onHeadsUpPinned(null /* row */);
-        mScrimController.onHeadsUpPinned(null /* row */);
-        mScrimController.onHeadsUpPinned(null /* row */);
-        mScrimController.finishAnimationsImmediately();
-
-        Assert.assertNotEquals("Heads-up scrim should be visible", 0f,
-                mHeadsUpScrim.getAlpha(), 0.01f);
-
-        mScrimController.onHeadsUpUnPinned(null /* row */);
-        mScrimController.finishAnimationsImmediately();
-
-        Assert.assertEquals("Heads-up scrim should only disappear when counter reaches 0", 1f,
-                mHeadsUpScrim.getAlpha(), 0.01f);
-
-        mScrimController.onHeadsUpUnPinned(null /* row */);
-        mScrimController.onHeadsUpUnPinned(null /* row */);
-        mScrimController.finishAnimationsImmediately();
-        Assert.assertEquals("Heads-up scrim should have disappeared", 0f,
-                mHeadsUpScrim.getAlpha(), 0.01f);
-    }
-
-    @Test
-    public void testNoHeadsUpScrimExpanded() {
-        mScrimController.setPanelExpansion(1f);
-        mScrimController.onHeadsUpPinned(null /* row */);
-        mScrimController.finishAnimationsImmediately();
-
-        Assert.assertEquals("Heads-up scrim should not be visible when shade is expanded", 0f,
-                mHeadsUpScrim.getAlpha(), 0.01f);
-    }
-
-    @Test
     public void testScrimFocus() {
         mScrimController.transitionTo(ScrimState.AOD);
         Assert.assertFalse("Should not be focusable on AOD", mScrimBehind.isFocusable());
@@ -473,6 +421,19 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         Assert.assertTrue("Should be focusable on keyguard", mScrimBehind.isFocusable());
         Assert.assertTrue("Should be focusable on keyguard", mScrimInFront.isFocusable());
+    }
+
+    @Test
+    public void testHidesShowWhenLockedActivity() {
+        mScrimController.setWallpaperSupportsAmbientMode(true);
+        mScrimController.setKeyguardOccluded(true);
+        mScrimController.transitionTo(ScrimState.AOD);
+        mScrimController.finishAnimationsImmediately();
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
+
+        mScrimController.transitionTo(ScrimState.PULSING);
+        mScrimController.finishAnimationsImmediately();
+        assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
     }
 
     /**
@@ -527,14 +488,21 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         private FakeHandler mHandler;
         private boolean mAnimationCancelled;
+        boolean mOnPreDrawCalled;
 
         SynchronousScrimController(LightBarController lightBarController,
-                ScrimView scrimBehind, ScrimView scrimInFront, View headsUpScrim,
+                ScrimView scrimBehind, ScrimView scrimInFront,
                 Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
                 AlarmManager alarmManager) {
-            super(lightBarController, scrimBehind, scrimInFront, headsUpScrim,
+            super(lightBarController, scrimBehind, scrimInFront,
                     scrimVisibleListener, dozeParameters, alarmManager);
             mHandler = new FakeHandler(Looper.myLooper());
+        }
+
+        @Override
+        public boolean onPreDraw() {
+            mOnPreDrawCalled = true;
+            return super.onPreDraw();
         }
 
         void finishAnimationsImmediately() {
@@ -549,7 +517,6 @@ public class ScrimControllerTest extends SysuiTestCase {
             // Force finish all animations.
             endAnimation(mScrimBehind, TAG_KEY_ANIM);
             endAnimation(mScrimInFront, TAG_KEY_ANIM);
-            endAnimation(mHeadsUpScrim, TAG_KEY_ANIM);
 
             if (!animationFinished[0]) {
                 throw new IllegalStateException("Animation never finished");

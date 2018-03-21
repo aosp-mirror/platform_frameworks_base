@@ -92,6 +92,7 @@ public class KeyguardIndicationController {
     private boolean mVisible;
 
     private boolean mPowerPluggedIn;
+    private boolean mPowerPluggedInWired;
     private boolean mPowerCharged;
     private int mChargingSpeed;
     private int mChargingWattage;
@@ -476,6 +477,7 @@ public class KeyguardIndicationController {
         pw.println("KeyguardIndicationController:");
         pw.println("  mTransientTextColor: " + Integer.toHexString(mTransientTextColor));
         pw.println("  mInitialTextColor: " + Integer.toHexString(mInitialTextColor));
+        pw.println("  mPowerPluggedInWired: " + mPowerPluggedInWired);
         pw.println("  mPowerPluggedIn: " + mPowerPluggedIn);
         pw.println("  mPowerCharged: " + mPowerCharged);
         pw.println("  mChargingSpeed: " + mChargingSpeed);
@@ -496,12 +498,13 @@ public class KeyguardIndicationController {
             boolean isChargingOrFull = status.status == BatteryManager.BATTERY_STATUS_CHARGING
                     || status.status == BatteryManager.BATTERY_STATUS_FULL;
             boolean wasPluggedIn = mPowerPluggedIn;
+            mPowerPluggedInWired = status.isPluggedInWired() && isChargingOrFull;
             mPowerPluggedIn = status.isPluggedIn() && isChargingOrFull;
             mPowerCharged = status.isCharged();
             mChargingWattage = status.maxChargingWattage;
             mChargingSpeed = status.getChargingSpeed(mSlowThreshold, mFastThreshold);
             mBatteryLevel = status.level;
-            updateIndication(!wasPluggedIn && mPowerPluggedIn);
+            updateIndication(!wasPluggedIn && mPowerPluggedInWired);
             if (mDozing) {
                 if (!wasPluggedIn && mPowerPluggedIn) {
                     showTransientIndication(computePowerIndication());

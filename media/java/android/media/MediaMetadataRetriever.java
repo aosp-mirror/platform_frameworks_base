@@ -427,20 +427,40 @@ public class MediaMetadataRetriever
      *        a valid frame. The total number of frames available for retrieval can be queried
      *        via the {@link #METADATA_KEY_VIDEO_FRAME_COUNT} key.
      * @param params BitmapParams that controls the returned bitmap config (such as pixel formats).
-     *        If null, default config will be chosen.
      *
      * @throws IllegalStateException if the container doesn't contain video or image sequences.
      * @throws IllegalArgumentException if the requested frame index does not exist.
      *
      * @return A Bitmap containing the requested video frame, or null if the retrieval fails.
      *
+     * @see #getFrameAtIndex(int)
      * @see #getFramesAtIndex(int, int, BitmapParams)
+     * @see #getFramesAtIndex(int, int)
      */
-    public Bitmap getFrameAtIndex(int frameIndex, @Nullable BitmapParams params) {
+    public Bitmap getFrameAtIndex(int frameIndex, @NonNull BitmapParams params) {
         List<Bitmap> bitmaps = getFramesAtIndex(frameIndex, 1, params);
-        if (bitmaps == null || bitmaps.size() < 1) {
-            return null;
-        }
+        return bitmaps.get(0);
+    }
+
+    /**
+     * This method is similar to {@link #getFrameAtIndex(int, BitmapParams)} except that
+     * the default for {@link BitmapParams} will be used.
+     *
+     * @param frameIndex 0-based index of the video frame. The frame index must be that of
+     *        a valid frame. The total number of frames available for retrieval can be queried
+     *        via the {@link #METADATA_KEY_VIDEO_FRAME_COUNT} key.
+     *
+     * @throws IllegalStateException if the container doesn't contain video or image sequences.
+     * @throws IllegalArgumentException if the requested frame index does not exist.
+     *
+     * @return A Bitmap containing the requested video frame, or null if the retrieval fails.
+     *
+     * @see #getFrameAtIndex(int, BitmapParams)
+     * @see #getFramesAtIndex(int, int, BitmapParams)
+     * @see #getFramesAtIndex(int, int)
+     */
+    public Bitmap getFrameAtIndex(int frameIndex) {
+        List<Bitmap> bitmaps = getFramesAtIndex(frameIndex, 1);
         return bitmaps.get(0);
     }
 
@@ -461,7 +481,6 @@ public class MediaMetadataRetriever
      * @param numFrames number of consecutive video frames to retrieve. Must be a positive
      *        value. The stream must contain at least numFrames frames starting at frameIndex.
      * @param params BitmapParams that controls the returned bitmap config (such as pixel formats).
-     *        If null, default config will be chosen.
      *
      * @throws IllegalStateException if the container doesn't contain video or image sequences.
      * @throws IllegalArgumentException if the frameIndex or numFrames is invalid, or the
@@ -471,8 +490,40 @@ public class MediaMetadataRetriever
      *         array could contain less frames than requested if the retrieval fails.
      *
      * @see #getFrameAtIndex(int, BitmapParams)
+     * @see #getFrameAtIndex(int)
+     * @see #getFramesAtIndex(int, int)
      */
-    public List<Bitmap> getFramesAtIndex(
+    public @NonNull List<Bitmap> getFramesAtIndex(
+            int frameIndex, int numFrames, @NonNull BitmapParams params) {
+        return getFramesAtIndexInternal(frameIndex, numFrames, params);
+    }
+
+    /**
+     * This method is similar to {@link #getFramesAtIndex(int, int, BitmapParams)} except that
+     * the default for {@link BitmapParams} will be used.
+     *
+     * @param frameIndex 0-based index of the first video frame to retrieve. The frame index
+     *        must be that of a valid frame. The total number of frames available for retrieval
+     *        can be queried via the {@link #METADATA_KEY_VIDEO_FRAME_COUNT} key.
+     * @param numFrames number of consecutive video frames to retrieve. Must be a positive
+     *        value. The stream must contain at least numFrames frames starting at frameIndex.
+     *
+     * @throws IllegalStateException if the container doesn't contain video or image sequences.
+     * @throws IllegalArgumentException if the frameIndex or numFrames is invalid, or the
+     *         stream doesn't contain at least numFrames starting at frameIndex.
+
+     * @return An list of Bitmaps containing the requested video frames. The returned
+     *         array could contain less frames than requested if the retrieval fails.
+     *
+     * @see #getFrameAtIndex(int, BitmapParams)
+     * @see #getFrameAtIndex(int)
+     * @see #getFramesAtIndex(int, int, BitmapParams)
+     */
+    public @NonNull List<Bitmap> getFramesAtIndex(int frameIndex, int numFrames) {
+        return getFramesAtIndexInternal(frameIndex, numFrames, null);
+    }
+
+    private @NonNull List<Bitmap> getFramesAtIndexInternal(
             int frameIndex, int numFrames, @Nullable BitmapParams params) {
         if (!"yes".equals(extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_VIDEO))) {
             throw new IllegalStateException("Does not contail video or image sequences");
@@ -487,7 +538,8 @@ public class MediaMetadataRetriever
         }
         return _getFrameAtIndex(frameIndex, numFrames, params);
     }
-    private native List<Bitmap> _getFrameAtIndex(
+
+    private native @NonNull List<Bitmap> _getFrameAtIndex(
             int frameIndex, int numFrames, @Nullable BitmapParams params);
 
     /**
@@ -498,29 +550,39 @@ public class MediaMetadataRetriever
      * used to create the bitmap from the {@code BitmapParams} argument, for instance
      * to query the bitmap config used for the bitmap with {@link BitmapParams#getActualConfig}.
      *
-     * @param imageIndex 0-based index of the image, with negative value indicating
-     *        the primary image.
+     * @param imageIndex 0-based index of the image.
      * @param params BitmapParams that controls the returned bitmap config (such as pixel formats).
-     *        If null, default config will be chosen.
      *
      * @throws IllegalStateException if the container doesn't contain still images.
      * @throws IllegalArgumentException if the requested image does not exist.
      *
      * @return the requested still image, or null if the image cannot be retrieved.
      *
+     * @see #getImageAtIndex(int)
      * @see #getPrimaryImage(BitmapParams)
+     * @see #getPrimaryImage()
      */
-    public Bitmap getImageAtIndex(int imageIndex, @Nullable BitmapParams params) {
-        if (!"yes".equals(extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_IMAGE))) {
-            throw new IllegalStateException("Does not contail still images");
-        }
+    public Bitmap getImageAtIndex(int imageIndex, @NonNull BitmapParams params) {
+        return getImageAtIndexInternal(imageIndex, params);
+    }
 
-        String imageCount = extractMetadata(MediaMetadataRetriever.METADATA_KEY_IMAGE_COUNT);
-        if (imageIndex >= Integer.parseInt(imageCount)) {
-            throw new IllegalArgumentException("Invalid image index: " + imageCount);
-        }
-
-        return _getImageAtIndex(imageIndex, params);
+    /**
+     * This method is similar to {@link #getImageAtIndex(int, BitmapParams)} except that
+     * the default for {@link BitmapParams} will be used.
+     *
+     * @param imageIndex 0-based index of the image.
+     *
+     * @throws IllegalStateException if the container doesn't contain still images.
+     * @throws IllegalArgumentException if the requested image does not exist.
+     *
+     * @return the requested still image, or null if the image cannot be retrieved.
+     *
+     * @see #getImageAtIndex(int, BitmapParams)
+     * @see #getPrimaryImage(BitmapParams)
+     * @see #getPrimaryImage()
+     */
+    public Bitmap getImageAtIndex(int imageIndex) {
+        return getImageAtIndexInternal(imageIndex, null);
     }
 
     /**
@@ -532,16 +594,46 @@ public class MediaMetadataRetriever
      * to query the bitmap config used for the bitmap with {@link BitmapParams#getActualConfig}.
      *
      * @param params BitmapParams that controls the returned bitmap config (such as pixel formats).
-     *        If null, default config will be chosen.
      *
      * @return the primary image, or null if it cannot be retrieved.
      *
      * @throws IllegalStateException if the container doesn't contain still images.
      *
      * @see #getImageAtIndex(int, BitmapParams)
+     * @see #getImageAtIndex(int)
+     * @see #getPrimaryImage()
      */
-    public Bitmap getPrimaryImage(@Nullable BitmapParams params) {
-        return getImageAtIndex(-1, params);
+    public Bitmap getPrimaryImage(@NonNull BitmapParams params) {
+        return getImageAtIndexInternal(-1, params);
+    }
+
+    /**
+     * This method is similar to {@link #getPrimaryImage(BitmapParams)} except that
+     * the default for {@link BitmapParams} will be used.
+     *
+     * @return the primary image, or null if it cannot be retrieved.
+     *
+     * @throws IllegalStateException if the container doesn't contain still images.
+     *
+     * @see #getImageAtIndex(int, BitmapParams)
+     * @see #getImageAtIndex(int)
+     * @see #getPrimaryImage(BitmapParams)
+     */
+    public Bitmap getPrimaryImage() {
+        return getImageAtIndexInternal(-1, null);
+    }
+
+    private Bitmap getImageAtIndexInternal(int imageIndex, @Nullable BitmapParams params) {
+        if (!"yes".equals(extractMetadata(MediaMetadataRetriever.METADATA_KEY_HAS_IMAGE))) {
+            throw new IllegalStateException("Does not contail still images");
+        }
+
+        String imageCount = extractMetadata(MediaMetadataRetriever.METADATA_KEY_IMAGE_COUNT);
+        if (imageIndex >= Integer.parseInt(imageCount)) {
+            throw new IllegalArgumentException("Invalid image index: " + imageCount);
+        }
+
+        return _getImageAtIndex(imageIndex, params);
     }
 
     private native Bitmap _getImageAtIndex(int imageIndex, @Nullable BitmapParams params);
@@ -788,7 +880,8 @@ public class MediaMetadataRetriever
     public static final int METADATA_KEY_IMAGE_HEIGHT    = 30;
     /**
      * If the media contains still images, this key retrieves the rotation
-     * of the primary image.
+     * angle (in degrees clockwise) of the primary image. The image rotation
+     * angle must be one of 0, 90, 180, or 270 degrees.
      */
     public static final int METADATA_KEY_IMAGE_ROTATION  = 31;
     /**

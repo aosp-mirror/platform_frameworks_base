@@ -23,8 +23,7 @@ namespace uirenderer {
 
 static const char* JANK_TYPE_NAMES[] = {
         "Missed Vsync",        "High input latency",       "Slow UI thread",
-        "Slow bitmap uploads", "Slow issue draw commands",
-};
+        "Slow bitmap uploads", "Slow issue draw commands", "Frame deadline missed"};
 
 // The bucketing algorithm controls so to speak
 // If a frame is <= to this it goes in bucket 0

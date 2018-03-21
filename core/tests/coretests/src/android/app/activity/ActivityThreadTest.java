@@ -22,6 +22,7 @@ import android.app.servertransaction.ActivityRelaunchItem;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.ClientTransactionItem;
 import android.app.servertransaction.ResumeActivityItem;
+import android.app.servertransaction.StopActivityItem;
 import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.MediumTest;
@@ -34,6 +35,8 @@ import org.junit.runner.RunWith;
 
 /**
  * Test for verifying {@link android.app.ActivityThread} class.
+ * Build/Install/Run:
+ *  atest FrameworksCoreTests:android.app.activity.ActivityThreadTest
  */
 @RunWith(AndroidJUnit4.class)
 @MediumTest
@@ -63,15 +66,23 @@ public class ActivityThreadTest {
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }
 
+    @Test
+    public void testSleepAndStop() throws Exception {
+        final Activity activity = mActivityTestRule.launchActivity(new Intent());
+        final IApplicationThread appThread = activity.getActivityThread().getApplicationThread();
+
+        appThread.scheduleSleeping(activity.getActivityToken(), true /* sleeping */);
+        appThread.scheduleTransaction(newStopTransaction(activity));
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
     private static ClientTransaction newRelaunchResumeTransaction(Activity activity) {
         final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(null,
-                null, 0, new MergedConfiguration(),
-                false /* preserveWindow */);
+                null, 0, new MergedConfiguration(), false /* preserveWindow */);
         final ResumeActivityItem resumeStateRequest =
                 ResumeActivityItem.obtain(true /* isForward */);
-        final IApplicationThread appThread = activity.getActivityThread().getApplicationThread();
-        final ClientTransaction transaction =
-                ClientTransaction.obtain(appThread, activity.getActivityToken());
+
+        final ClientTransaction transaction = newTransaction(activity);
         transaction.addCallback(callbackItem);
         transaction.setLifecycleStateRequest(resumeStateRequest);
 
@@ -81,12 +92,26 @@ public class ActivityThreadTest {
     private static ClientTransaction newResumeTransaction(Activity activity) {
         final ResumeActivityItem resumeStateRequest =
                 ResumeActivityItem.obtain(true /* isForward */);
-        final IApplicationThread appThread = activity.getActivityThread().getApplicationThread();
-        final ClientTransaction transaction =
-                ClientTransaction.obtain(appThread, activity.getActivityToken());
+
+        final ClientTransaction transaction = newTransaction(activity);
         transaction.setLifecycleStateRequest(resumeStateRequest);
 
         return transaction;
+    }
+
+    private static ClientTransaction newStopTransaction(Activity activity) {
+        final StopActivityItem stopStateRequest =
+                StopActivityItem.obtain(false /* showWindow */, 0 /* configChanges */);
+
+        final ClientTransaction transaction = newTransaction(activity);
+        transaction.setLifecycleStateRequest(stopStateRequest);
+
+        return transaction;
+    }
+
+    private static ClientTransaction newTransaction(Activity activity) {
+        final IApplicationThread appThread = activity.getActivityThread().getApplicationThread();
+        return ClientTransaction.obtain(appThread, activity.getActivityToken());
     }
 
     // Test activity

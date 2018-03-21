@@ -4738,7 +4738,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     public void testOverrideApnAPIsFailWithPO() throws Exception {
         setupProfileOwner();
-        ApnSetting apn = (new ApnSetting.Builder()).build();
+        ApnSetting apn = (new ApnSetting.Builder())
+            .setApnName("test")
+            .setEntryName("test")
+            .setApnTypeBitmask(ApnSetting.TYPE_DEFAULT)
+            .build();
         assertExpectException(SecurityException.class, null, () ->
                 dpm.addOverrideApn(admin1, apn));
         assertExpectException(SecurityException.class, null, () ->

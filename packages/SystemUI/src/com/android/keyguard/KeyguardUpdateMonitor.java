@@ -68,6 +68,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
@@ -78,7 +79,6 @@ import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
-import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 
 import com.google.android.collect.Lists;
@@ -985,6 +985,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
 
         /**
+         * Determine whether the device is plugged in (USB, power).
+         * @return true if the device is plugged in wired (as opposed to wireless)
+         */
+        public boolean isPluggedInWired() {
+            return plugged == BatteryManager.BATTERY_PLUGGED_AC
+                    || plugged == BatteryManager.BATTERY_PLUGGED_USB;
+        }
+
+        /**
          * Whether or not the device is charged. Note that some devices never return 100% for
          * battery level, so this allows either battery level or status to determine if the
          * battery is charged.
@@ -1717,6 +1726,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         callback.onPhoneStateChanged(mPhoneState);
         callback.onRefreshCarrierInfo();
         callback.onClockVisibilityChanged();
+        callback.onKeyguardVisibilityChangedRaw(mKeyguardIsVisible);
         for (Entry<Integer, SimData> data : mSimDatas.entrySet()) {
             final SimData state = data.getValue();
             callback.onSimStateChanged(state.subId, state.slotId, state.simState);

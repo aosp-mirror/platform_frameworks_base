@@ -112,7 +112,8 @@ void mergeIsolatedUidsToHostUid(vector<shared_ptr<LogEvent>>& data, const sp<Uid
         VLOG("Unknown pull atom id %d", tagId);
         return;
     }
-    if (android::util::kAtomsWithUidField.find(tagId) == android::util::kAtomsWithUidField.end()) {
+    if (android::util::AtomsInfo::kAtomsWithUidField.find(tagId) ==
+        android::util::AtomsInfo::kAtomsWithUidField.end()) {
         VLOG("No uid to merge for atom %d", tagId);
         return;
     }

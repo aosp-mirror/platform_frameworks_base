@@ -46,7 +46,8 @@ AtomDecl::AtomDecl(const AtomDecl& that)
       message(that.message),
       fields(that.fields),
       primaryFields(that.primaryFields),
-      exclusiveField(that.exclusiveField) {}
+      exclusiveField(that.exclusiveField),
+      uidField(that.uidField) {}
 
 AtomDecl::AtomDecl(int c, const string& n, const string& m)
     :code(c),
@@ -258,6 +259,18 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
 
         if (atomDecl->exclusiveField == 0) {
             atomDecl->exclusiveField = it->first;
+        } else {
+            errorCount++;
+        }
+    }
+
+    if (field->options().GetExtension(os::statsd::is_uid) == true) {
+        if (javaType != JAVA_TYPE_INT) {
+            errorCount++;
+        }
+
+        if (atomDecl->uidField == 0) {
+            atomDecl->uidField = it->first;
         } else {
             errorCount++;
         }

@@ -339,7 +339,8 @@ public final class LocationRequest implements Parcelable {
      * substantially restrict power.
      *
      * <p>In this mode, the GNSS chipset will not, on average, run power hungry operations like RF &
-     * signal searches for more than one second per interval {@link #mInterval}
+     * signal searches for more than one second per interval (specified by
+     * {@link #setInterval(long)}).
      *
      * @param enabled Enable or disable low power mode
      * @return the same object, so that setters can be chained
