@@ -61,6 +61,51 @@ import java.util.StringJoiner;
  * This class it NOT designed for concurrent access. Furthermore, all non-static
  * methods MUST be called from ConnectivityService's thread.
  *
+ * [ Private DNS ]
+ * The code handling Private DNS is spread across several components, but this
+ * seems like the least bad place to collect all the observations.
+ *
+ * Private DNS handling and updating occurs in response to several different
+ * events. Each is described here with its corresponding intended handling.
+ *
+ * [A] Event: A new network comes up.
+ * Mechanics:
+ *     [1] ConnectivityService gets notifications from NetworkAgents.
+ *     [2] in updateNetworkInfo(), the first time the NetworkAgent goes into
+ *         into CONNECTED state, the Private DNS configuration is retrieved,
+ *         programmed, and strict mode hostname resolution (if applicable) is
+ *         enqueued in NetworkAgent's NetworkMonitor, via a call to
+ *         handlePerNetworkPrivateDnsConfig().
+ *     [3] Re-resolution of strict mode hostnames that fail to return any
+ *         IP addresses happens inside NetworkMonitor; it sends itself a
+ *         delayed CMD_EVALUATE_PRIVATE_DNS message in a simple backoff
+ *         schedule.
+ *     [4] Successfully resolved hostnames are sent to ConnectivityService
+ *         inside an EVENT_PRIVATE_DNS_CONFIG_RESOLVED message. The resolved
+ *         IP addresses are programmed into netd via:
+ *
+ *             updatePrivateDns() -> updateDnses()
+ *
+ *         both of which make calls into DnsManager.
+ *     [5] Upon a successful hostname resolution NetworkMonitor initiates a
+ *         validation attempt in the form of a lookup for a one-time hostname
+ *         that uses Private DNS.
+ *
+ * [B] Event: Private DNS settings are changed.
+ * Mechanics:
+ *     [1] ConnectivityService gets notifications from its SettingsObserver.
+ *     [2] handlePrivateDnsSettingsChanged() is called, which calls
+ *         handlePerNetworkPrivateDnsConfig() and the process proceeds
+ *         as if from A.3 above.
+ *
+ * [C] Event: An application calls ConnectivityManager#reportBadNetwork().
+ * Mechanics:
+ *     [1] NetworkMonitor is notified and initiates a reevaluation, which
+ *         always bypasses Private DNS.
+ *     [2] Once completed, NetworkMonitor checks if strict mode is in operation
+ *         and if so enqueues another evaluation of Private DNS, as if from
+ *         step A.5 above.
+ *
  * @hide
  */
 public class DnsManager {
