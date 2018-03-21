@@ -226,11 +226,10 @@ public final class AudioDeviceInfo {
     }
 
     /**
-     * @hide
      * @return The "address" string of the device. This generally contains device-specific
      * parameters.
      */
-    public String getAddress() {
+    public @NonNull String getAddress() {
         return mPort.address();
     }
 

@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.util.Pair;
 
 import java.lang.annotation.Retention;
@@ -224,12 +225,11 @@ public final class MicrophoneInfo {
     }
 
     /**
-     * @hide
      * Returns The "address" string of the microphone that corresponds to the
      * address returned by {@link AudioDeviceInfo#getAddress()}
      * @return the address of the microphone
      */
-    public String getAddress() {
+    public @NonNull String getAddress() {
         return mAddress;
     }
 
