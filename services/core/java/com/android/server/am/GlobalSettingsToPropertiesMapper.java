@@ -43,7 +43,7 @@ class GlobalSettingsToPropertiesMapper {
         {Settings.Global.FPS_DEVISOR, ThreadedRenderer.DEBUG_FPS_DIVISOR},
         {Settings.Global.DISPLAY_PANEL_LPM, "sys.display_panel_lpm"},
         {Settings.Global.SYS_UIDCPUPOWER, "sys.uidcpupower"},
-        {Settings.Global.SYS_TRACED, "persist.traced.enable"},
+        {Settings.Global.SYS_TRACED, "sys.traced.enable_override"},
     };
 
 
