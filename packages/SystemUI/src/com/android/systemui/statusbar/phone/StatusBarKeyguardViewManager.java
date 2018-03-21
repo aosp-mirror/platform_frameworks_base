@@ -377,6 +377,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void startPreHideAnimation(Runnable finishRunnable) {
         if (mBouncer.isShowing()) {
             mBouncer.startPreHideAnimation(finishRunnable);
+            mNotificationPanelView.onBouncerPreHideAnimation();
         } else if (finishRunnable != null) {
             finishRunnable.run();
         }
