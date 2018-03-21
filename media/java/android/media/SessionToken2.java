@@ -28,6 +28,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
+ * @hide
  * Represents an ongoing {@link MediaSession2} or a {@link MediaSessionService2}.
  * If it's representing a session service, it may not be ongoing.
  * <p>

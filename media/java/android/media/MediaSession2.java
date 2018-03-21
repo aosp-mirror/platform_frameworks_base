@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
+ * @hide
  * Allows a media app to expose its transport controls and playback information in a process to
  * other processes including the Android framework and other apps. Common use cases are as follows.
  * <ul>

@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
+ * @hide
  * Browses media content offered by a {@link MediaLibraryService2}.
  */
 public class MediaBrowser2 extends MediaController2 {

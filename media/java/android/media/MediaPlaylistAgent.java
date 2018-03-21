@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
+ * @hide
  * MediaPlaylistAgent is the abstract class an application needs to derive from to pass an object
  * to a MediaSession2 that will override default playlist handling behaviors. It contains a set of
  * notify methods to signal MediaSession2 that playlist-related state has changed.

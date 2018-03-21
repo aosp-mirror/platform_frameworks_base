@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
+ * @hide
  * Allows an app to interact with an active {@link MediaSession2} or a
  * {@link MediaSessionService2} in any status. Media buttons and other commands can be sent to
  * the session.

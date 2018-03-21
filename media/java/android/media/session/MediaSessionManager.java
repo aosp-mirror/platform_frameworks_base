@@ -390,6 +390,7 @@ public final class MediaSessionManager {
     }
 
     /**
+     * @hide
      * Get {@link List} of {@link SessionToken2} whose sessions are active now. This list represents
      * active sessions regardless of whether they're {@link MediaSession2} or
      * {@link MediaSessionService2}.
@@ -412,6 +413,7 @@ public final class MediaSessionManager {
     }
 
     /**
+     * @hide
      * Get {@link List} of {@link SessionToken2} for {@link MediaSessionService2} regardless of their
      * activeness. This list represents media apps that support background playback.
      * <p>
@@ -433,6 +435,7 @@ public final class MediaSessionManager {
     }
 
     /**
+     * @hide
      * Get all {@link SessionToken2}s. This is the combined list of {@link #getActiveSessionTokens()}
      * and {@link #getSessionServiceTokens}.
      * <p>
@@ -456,6 +459,7 @@ public final class MediaSessionManager {
     }
 
     /**
+     * @hide
      * Add a listener to be notified when the {@link #getAllSessionTokens()} changes.
      * <p>
      * This requires the android.Manifest.permission.MEDIA_CONTENT_CONTROL permission be held by the
@@ -508,6 +512,7 @@ public final class MediaSessionManager {
     }
 
     /**
+     * @hide
      * Stop receiving session token updates on the specified listener.
      *
      * @param listener The listener to remove.
@@ -666,6 +671,7 @@ public final class MediaSessionManager {
     }
 
     /**
+     * @hide
      * Listens for changes to the {@link #getAllSessionTokens()}. This can be added
      * using {@link #addOnActiveSessionsChangedListener}.
      */

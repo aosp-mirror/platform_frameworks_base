@@ -31,6 +31,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Set;
 
 /**
+ * @hide
  * Contains metadata about an item, such as the title, artist, etc.
  */
 // New version of MediaMetadata with following changes

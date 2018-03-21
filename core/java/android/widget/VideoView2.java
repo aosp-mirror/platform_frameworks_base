@@ -47,6 +47,7 @@ import java.util.concurrent.Executor;
 
 // TODO: Replace MediaSession wtih MediaSession2 once MediaSession2 is submitted.
 /**
+ * @hide
  * Displays a video file.  VideoView2 class is a View class which is wrapping {@link MediaPlayer2}
  * so that developers can easily implement a video rendering application.
  *
