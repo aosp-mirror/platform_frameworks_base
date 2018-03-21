@@ -5458,7 +5458,10 @@ public class TelephonyManager {
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param request Contains all the RAT with bands/channels that need to be scanned.
-     * @param executor The executor through which the callback should be invoked.
+     * @param executor The executor through which the callback should be invoked. Since the scan
+     *        request may trigger multiple callbacks and they must be invoked in the same order as
+     *        they are received by the platform, the user should provide an executor which executes
+     *        tasks one at a time in serial order. For example AsyncTask.SERIAL_EXECUTOR.
      * @param callback Returns network scan results or errors.
      * @return A NetworkScan obj which contains a callback which can be used to stop the scan.
      */
@@ -5484,7 +5487,7 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public NetworkScan requestNetworkScan(
         NetworkScanRequest request, TelephonyScanManager.NetworkScanCallback callback) {
-        return requestNetworkScan(request, AsyncTask.THREAD_POOL_EXECUTOR, callback);
+        return requestNetworkScan(request, AsyncTask.SERIAL_EXECUTOR, callback);
     }
 
     /**
