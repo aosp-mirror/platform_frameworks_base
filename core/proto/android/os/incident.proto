@@ -118,17 +118,17 @@ message IncidentProto {
 
     // Stack dumps
     optional android.os.BackTraceProto native_traces = 1200 [
-        (section).type = SECTION_TOMBSTONE,
+        (section).type = SECTION_NONE,
         (section).args = "native"
     ];
 
     optional android.os.BackTraceProto hal_traces = 1201 [
-        (section).type = SECTION_TOMBSTONE,
+        (section).type = SECTION_NONE,
         (section).args = "hal"
     ];
 
     optional android.os.BackTraceProto java_traces = 1202 [
-        (section).type = SECTION_TOMBSTONE,
+        (section).type = SECTION_NONE,
         (section).args = "java"
     ];
 
@@ -169,7 +169,7 @@ message IncidentProto {
     ];
 
     optional GZippedFileProto last_kmsg = 2007 [
-        (section).type = SECTION_GZIP,
+        (section).type = SECTION_NONE, // disable until selinux permission is gained
         (section).args = "/sys/fs/pstore/console-ramoops /sys/fs/pstore/console-ramoops-0 /proc/last_kmsg",
         (privacy).dest = DEST_AUTOMATIC
     ];
