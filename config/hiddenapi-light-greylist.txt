@@ -497,6 +497,7 @@ Landroid/content/res/AssetManager;->openNonAsset(Ljava/lang/String;)Ljava/io/Inp
 Landroid/content/res/AssetManager;->resolveAttrs(JII[I[I[I[I)Z
 Landroid/content/res/AssetManager;->setConfiguration(IILjava/lang/String;IIIIIIIIIIIIIII)V
 Landroid/content/res/ColorStateList$ColorStateListFactory;-><init>(Landroid/content/res/ColorStateList;)V
+Landroid/content/res/ColorStateList;->getColors()[I
 Landroid/content/res/ColorStateList;->mColors:[I
 Landroid/content/res/ColorStateList;->mDefaultColor:I
 Landroid/content/res/ColorStateList;->mFactory:Landroid/content/res/ColorStateList$ColorStateListFactory;
@@ -829,6 +830,7 @@ Landroid/media/AudioHandle;->mId:I
 Landroid/media/AudioManager;->forceVolumeControlStream(I)V
 Landroid/media/AudioManager;->getOutputLatency(I)I
 Landroid/media/AudioManager;->getService()Landroid/media/IAudioService;
+Landroid/media/AudioManager;-><init>(Landroid/content/Context;)V
 Landroid/media/AudioManager;->mAudioFocusIdListenerMap:Ljava/util/concurrent/ConcurrentHashMap;
 Landroid/media/AudioManager;->setMasterMute(ZI)V
 Landroid/media/AudioManager;->startBluetoothScoVirtualCall()V
@@ -1584,6 +1586,8 @@ Landroid/R$styleable;->View_filterTouchesWhenObscured:I
 Landroid/R$styleable;->View_fitsSystemWindows:I
 Landroid/R$styleable;->View_focusable:I
 Landroid/R$styleable;->View_focusableInTouchMode:I
+Landroid/R$styleable;->ViewGroup_Layout:[I
+Landroid/R$styleable;->ViewGroup_MarginLayout:[I
 Landroid/R$styleable;->View_hapticFeedbackEnabled:I
 Landroid/R$styleable;->View:[I
 Landroid/R$styleable;->View_id:I
@@ -1814,6 +1818,7 @@ Landroid/text/DynamicLayout;-><init>(Ljava/lang/CharSequence;Ljava/lang/CharSequ
 Landroid/text/DynamicLayout;->sStaticLayout:Landroid/text/StaticLayout;
 Landroid/text/Html;->withinStyle(Ljava/lang/StringBuilder;Ljava/lang/CharSequence;II)V
 Landroid/text/Layout;->DIRS_ALL_LEFT_TO_RIGHT:Landroid/text/Layout$Directions;
+Landroid/text/Layout;->getPrimaryHorizontal(IZ)F
 Landroid/text/method/LinkMovementMethod;->sInstance:Landroid/text/method/LinkMovementMethod;
 Landroid/text/SpannableStringBuilder;->mGapLength:I
 Landroid/text/SpannableStringBuilder;->mGapStart:I
@@ -2035,6 +2040,7 @@ Landroid/view/SurfaceView;->mRequestedFormat:I
 Landroid/view/SurfaceView;->mSurfaceHolder:Landroid/view/SurfaceHolder;
 Landroid/view/SurfaceView;->surfacePositionLost_uiRtSync(J)V
 Landroid/view/SurfaceView;->updateSurfacePosition_renderWorker(JIIII)V
+Landroid/view/textclassifier/Logger;->DISABLED:Landroid/view/textclassifier/Logger;
 Landroid/view/textclassifier/logging/SmartSelectionEventTracker;-><init>(Landroid/content/Context;I)V
 Landroid/view/textclassifier/logging/SmartSelectionEventTracker;->logEvent(Landroid/view/textclassifier/logging/SmartSelectionEventTracker$SelectionEvent;)V
 Landroid/view/textclassifier/logging/SmartSelectionEventTracker$SelectionEvent;->selectionAction(III)Landroid/view/textclassifier/logging/SmartSelectionEventTracker$SelectionEvent;
@@ -2061,6 +2067,7 @@ Landroid/view/View$AttachInfo;->mStableInsets:Landroid/graphics/Rect;
 Landroid/view/View;->clearAccessibilityFocus()V
 Landroid/view/View;->computeFitSystemWindows(Landroid/graphics/Rect;Landroid/graphics/Rect;)Z
 Landroid/view/View;->computeOpaqueFlags()V
+Landroid/view/ViewConfiguration;->getDeviceGlobalActionKeyTimeout()J
 Landroid/view/ViewConfiguration;->getDoubleTapMinTime()I
 Landroid/view/ViewConfiguration;->mFadingMarqueeEnabled:Z
 Landroid/view/ViewConfiguration;->sHasPermanentMenuKeySet:Z
@@ -2072,11 +2079,15 @@ Landroid/view/View;->dispatchAttachedToWindow(Landroid/view/View$AttachInfo;I)V
 Landroid/view/View;->dispatchDetachedFromWindow()V
 Landroid/view/View;->fitsSystemWindows()Z
 Landroid/view/View;->getAccessibilityDelegate()Landroid/view/View$AccessibilityDelegate;
+Landroid/view/View;->getBoundsOnScreen(Landroid/graphics/Rect;)V
 Landroid/view/View;->getInverseMatrix()Landroid/graphics/Matrix;
 Landroid/view/View;->getListenerInfo()Landroid/view/View$ListenerInfo;
 Landroid/view/View;->getLocationOnScreen()[I
+Landroid/view/View;->getRawTextAlignment()I
+Landroid/view/View;->getRawTextDirection()I
 Landroid/view/View;->getTransitionAlpha()F
 Landroid/view/View;->getViewRootImpl()Landroid/view/ViewRootImpl;
+Landroid/view/View;->getWindowDisplayFrame(Landroid/graphics/Rect;)V
 Landroid/view/ViewGroup;->dispatchViewAdded(Landroid/view/View;)V
 Landroid/view/ViewGroup;->dispatchViewRemoved(Landroid/view/View;)V
 Landroid/view/ViewGroup;->FLAG_SUPPORT_STATIC_TRANSFORMATIONS:I
@@ -2089,6 +2100,11 @@ Landroid/view/ViewGroup;->mChildren:[Landroid/view/View;
 Landroid/view/ViewGroup;->mFirstTouchTarget:Landroid/view/ViewGroup$TouchTarget;
 Landroid/view/ViewGroup;->mGroupFlags:I
 Landroid/view/ViewGroup;->mOnHierarchyChangeListener:Landroid/view/ViewGroup$OnHierarchyChangeListener;
+Landroid/view/ViewGroup;->resetResolvedDrawables()V
+Landroid/view/ViewGroup;->resetResolvedLayoutDirection()V
+Landroid/view/ViewGroup;->resetResolvedPadding()V
+Landroid/view/ViewGroup;->resetResolvedTextAlignment()V
+Landroid/view/ViewGroup;->resetResolvedTextDirection()V
 Landroid/view/ViewGroup;->suppressLayout(Z)V
 Landroid/view/View;->initializeScrollbars(Landroid/content/res/TypedArray;)V
 Landroid/view/View;->internalSetPadding(IIII)V
@@ -2128,6 +2144,12 @@ Landroid/view/View;->recomputePadding()V
 Landroid/view/View;->requestAccessibilityFocus()Z
 Landroid/view/View;->resetDisplayList()V
 Landroid/view/View;->resetPaddingToInitialValues()V
+Landroid/view/View;->resetResolvedDrawables()V
+Landroid/view/View;->resetResolvedLayoutDirection()V
+Landroid/view/View;->resetResolvedPadding()V
+Landroid/view/View;->resetResolvedTextAlignment()V
+Landroid/view/View;->resetResolvedTextDirection()V
+Landroid/view/View;->resetRtlProperties()V
 Landroid/view/ViewRootImpl;->detachFunctor(J)V
 Landroid/view/ViewRootImpl;->enqueueInputEvent(Landroid/view/InputEvent;)V
 Landroid/view/ViewRootImpl;->invokeFunctor(JZ)V
@@ -2241,6 +2263,10 @@ Landroid/widget/AutoCompleteTextView;->ensureImeVisible(Z)V
 Landroid/widget/AutoCompleteTextView;->mPopup:Landroid/widget/ListPopupWindow;
 Landroid/widget/AutoCompleteTextView;->setDropDownAlwaysVisible(Z)V
 Landroid/widget/CompoundButton;->mButtonDrawable:Landroid/graphics/drawable/Drawable;
+Landroid/widget/CursorAdapter;->mChangeObserver:Landroid/widget/CursorAdapter$ChangeObserver;
+Landroid/widget/CursorAdapter;->mDataSetObserver:Landroid/database/DataSetObserver;
+Landroid/widget/CursorAdapter;->mDataValid:Z
+Landroid/widget/CursorAdapter;->mRowIDColumn:I
 Landroid/widget/DatePicker;->mDelegate:Landroid/widget/DatePicker$DatePickerDelegate;
 Landroid/widget/EdgeEffect;->mPaint:Landroid/graphics/Paint;
 Landroid/widget/Editor;->invalidateTextDisplayList()V
@@ -2290,6 +2316,8 @@ Landroid/widget/ListPopupWindow;->setForceIgnoreOutsideTouch(Z)V
 Landroid/widget/ListView;->fillDown(II)Landroid/view/View;
 Landroid/widget/ListView;->fillSpecific(II)Landroid/view/View;
 Landroid/widget/ListView;->fillUp(II)Landroid/view/View;
+Landroid/widget/ListView;->findViewTraversal(I)Landroid/view/View;
+Landroid/widget/ListView;->findViewWithTagTraversal(Ljava/lang/Object;)Landroid/view/View;
 Landroid/widget/ListView;->mAreAllItemsSelectable:Z
 Landroid/widget/ListView;->setSelectionInt(I)V
 Landroid/widget/MediaController;->mAnchor:Landroid/view/View;
@@ -2375,6 +2403,8 @@ Landroid/widget/TabHost$TabSpec;->mContentStrategy:Landroid/widget/TabHost$Conte
 Landroid/widget/TabWidget;->setTabSelectionListener(Landroid/widget/TabWidget$OnTabSelectionChanged;)V
 Landroid/widget/TextView;->assumeLayout()V
 Landroid/widget/TextView;->createEditorIfNeeded()V
+Landroid/widget/TextView;->getHorizontallyScrolling()Z
+Landroid/widget/TextView;->getTextColor(Landroid/content/Context;Landroid/content/res/TypedArray;I)I
 Landroid/widget/TextView;->isSingleLine()Z
 Landroid/widget/TextView;->mCursorDrawableRes:I
 Landroid/widget/TextView;->mCurTextColor:I
@@ -2388,6 +2418,10 @@ Landroid/widget/TextView;->mTextPaint:Landroid/text/TextPaint;
 Landroid/widget/TextView;->setText(Ljava/lang/CharSequence;Landroid/widget/TextView$BufferType;ZI)V
 Landroid/widget/Toast;->getService()Landroid/app/INotificationManager;
 Landroid/widget/Toast;->sService:Landroid/app/INotificationManager;
+Landroid/widget/VideoView2;->getMediaController()Landroid/media/session/MediaController;
+Landroid/widget/VideoView2$OnViewTypeChangedListener;->onViewTypeChanged(Landroid/view/View;I)V
+Landroid/widget/VideoView2;->setOnViewTypeChangedListener(Landroid/widget/VideoView2$OnViewTypeChangedListener;)V
+Landroid/widget/VideoView2;->setVideoPath(Ljava/lang/String;)V
 Landroid/widget/VideoView;->mCurrentBufferPercentage:I
 Landroid/widget/VideoView;->mMediaController:Landroid/widget/MediaController;
 Landroid/widget/VideoView;->mSHCallback:Landroid/view/SurfaceHolder$Callback;
