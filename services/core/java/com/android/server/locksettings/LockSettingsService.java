@@ -2065,11 +2065,19 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
+    public Map<String, String> recoverKeyChainSnapshot(
+            @NonNull String sessionId,
+            @NonNull byte[] recoveryKeyBlob,
+            @NonNull List<WrappedApplicationKey> applicationKeys) throws RemoteException {
+        return mRecoverableKeyStoreManager.recoverKeyChainSnapshot(
+                sessionId, recoveryKeyBlob, applicationKeys);
+    }
+
+    @Override
     public Map<String, byte[]> recoverKeys(@NonNull String sessionId,
             @NonNull byte[] recoveryKeyBlob, @NonNull List<WrappedApplicationKey> applicationKeys)
             throws RemoteException {
-        return mRecoverableKeyStoreManager.recoverKeys(
-                sessionId, recoveryKeyBlob, applicationKeys);
+        return mRecoverableKeyStoreManager.recoverKeys(sessionId, recoveryKeyBlob, applicationKeys);
     }
 
     @Override
