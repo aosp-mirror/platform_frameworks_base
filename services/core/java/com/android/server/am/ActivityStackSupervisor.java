@@ -606,7 +606,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     public ActivityStackSupervisor(ActivityManagerService service, Looper looper) {
         mService = service;
         mHandler = new ActivityStackSupervisorHandler(looper);
-        mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext);
+        mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext, looper);
         mKeyguardController = new KeyguardController(service, this);
     }
 
@@ -4836,9 +4836,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 mService.mActivityStarter.sendPowerHintForLaunchStartIfNeeded(true /* forceSend */,
                         targetActivity);
                 mActivityMetricsLogger.notifyActivityLaunching();
-                mService.moveTaskToFrontLocked(task.taskId, 0, bOptions, true /* fromRecents */);
-                mActivityMetricsLogger.notifyActivityLaunched(ActivityManager.START_TASK_TO_FRONT,
-                        targetActivity);
+                try {
+                    mService.moveTaskToFrontLocked(task.taskId, 0, bOptions,
+                            true /* fromRecents */);
+                } finally {
+                    mActivityMetricsLogger.notifyActivityLaunched(START_TASK_TO_FRONT,
+                            targetActivity);
+                }
 
                 // If we are launching the task in the docked stack, put it into resizing mode so
                 // the window renders full-screen with the background filling the void. Also only

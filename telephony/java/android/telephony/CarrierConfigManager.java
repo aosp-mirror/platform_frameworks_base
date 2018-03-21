@@ -331,6 +331,19 @@ public class CarrierConfigManager {
             "notify_handover_video_from_wifi_to_lte_bool";
 
     /**
+     * Flag specifying whether the carrier wants to notify the user when a VT call has been handed
+     * over from LTE to WIFI.
+     * <p>
+     * The handover notification is sent as a
+     * {@link TelephonyManager#EVENT_HANDOVER_VIDEO_FROM_LTE_TO_WIFI}
+     * {@link android.telecom.Connection} event, which an {@link android.telecom.InCallService}
+     * should use to trigger the display of a user-facing message.
+     * @hide
+     */
+    public static final String KEY_NOTIFY_HANDOVER_VIDEO_FROM_LTE_TO_WIFI_BOOL =
+            "notify_handover_video_from_lte_to_wifi_bool";
+
+    /**
      * Flag specifying whether the carrier supports downgrading a video call (tx, rx or tx/rx)
      * directly to an audio call.
      * @hide
@@ -1594,6 +1607,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VT_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_NOTIFY_HANDOVER_VIDEO_FROM_WIFI_TO_LTE_BOOL, false);
+        sDefaults.putBoolean(KEY_NOTIFY_HANDOVER_VIDEO_FROM_LTE_TO_WIFI_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_DOWNGRADE_VT_TO_AUDIO_BOOL, true);
         sDefaults.putString(KEY_DEFAULT_VM_NUMBER_STRING, "");
         sDefaults.putBoolean(KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS, true);

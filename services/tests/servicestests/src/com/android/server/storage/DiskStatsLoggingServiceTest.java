@@ -149,11 +149,13 @@ public class DiskStatsLoggingServiceTest extends AndroidTestCase {
         assertThat(json.getLong(DiskStatsFileLogger.DOWNLOADS_KEY)).isEqualTo(3L);
         assertThat(json.getLong(DiskStatsFileLogger.SYSTEM_KEY)).isEqualTo(10L);
         assertThat(json.getLong(DiskStatsFileLogger.MISC_KEY)).isEqualTo(7L);
-        assertThat(json.getLong(DiskStatsFileLogger.APP_SIZE_AGG_KEY)).isEqualTo(15L);
+        assertThat(json.getLong(DiskStatsFileLogger.APP_SIZE_AGG_KEY)).isEqualTo(10L);
+        assertThat(json.getLong(DiskStatsFileLogger.APP_DATA_SIZE_AGG_KEY)).isEqualTo(5L);
         assertThat(json.getLong(DiskStatsFileLogger.APP_CACHE_AGG_KEY)).isEqualTo(55L);
         assertThat(
                 json.getJSONArray(DiskStatsFileLogger.PACKAGE_NAMES_KEY).length()).isEqualTo(1L);
         assertThat(json.getJSONArray(DiskStatsFileLogger.APP_SIZES_KEY).length()).isEqualTo(1L);
+        assertThat(json.getJSONArray(DiskStatsFileLogger.APP_DATA_KEY).length()).isEqualTo(1L);
         assertThat(json.getJSONArray(DiskStatsFileLogger.APP_CACHES_KEY).length()).isEqualTo(1L);
     }
 

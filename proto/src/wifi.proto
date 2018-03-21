@@ -336,6 +336,34 @@ message WifiLog {
 
   // Count of connection attempts that were initiated unsuccessfully
   optional int32 num_open_network_connect_message_failed_to_send = 82;
+
+  // Histogram counting instances of scans with N many HotSpot 2.0 R1 APs
+  repeated NumConnectableNetworksBucket observed_hotspot_r1_aps_in_scan_histogram = 83;
+
+  // Histogram counting instances of scans with N many HotSpot 2.0 R2 APs
+  repeated NumConnectableNetworksBucket observed_hotspot_r2_aps_in_scan_histogram = 84;
+
+  // Histogram counting instances of scans with N many unique HotSpot 2.0 R1 ESS.
+  // Where ESS is defined as the (HESSID, ANQP Domain ID), (SSID, ANQP Domain ID) or
+  // (SSID, BSSID) tuple depending on AP configuration (in the above priority
+  // order).
+  repeated NumConnectableNetworksBucket observed_hotspot_r1_ess_in_scan_histogram = 85;
+
+  // Histogram counting instances of scans with N many unique HotSpot 2.0 R2 ESS.
+  // Where ESS is defined as the (HESSID, ANQP Domain ID), (SSID, ANQP Domain ID) or
+  // (SSID, BSSID) tuple depending on AP configuration (in the above priority
+  // order).
+  repeated NumConnectableNetworksBucket observed_hotspot_r2_ess_in_scan_histogram = 86;
+
+  // Histogram counting number of HotSpot 2.0 R1 APs per observed ESS in a scan
+  // (one value added per unique ESS - potentially multiple counts per single
+  // scan!)
+  repeated NumConnectableNetworksBucket observed_hotspot_r1_aps_per_ess_in_scan_histogram = 87;
+
+  // Histogram counting number of HotSpot 2.0 R2 APs per observed ESS in a scan
+  // (one value added per unique ESS - potentially multiple counts per single
+  // scan!)
+  repeated NumConnectableNetworksBucket observed_hotspot_r2_aps_per_ess_in_scan_histogram = 88;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -645,6 +673,10 @@ message StaEvent {
     // Framework initiated disconnect. Sometimes generated to give an extra reason for a disconnect
     // Should typically be followed by a NETWORK_DISCONNECTION_EVENT with a local_gen = true
     TYPE_FRAMEWORK_DISCONNECT = 15;
+
+    // The NetworkAgent score for wifi has changed in a way that may impact
+    // connectivity
+    TYPE_SCORE_BREACH = 16;
   }
 
   enum FrameworkDisconnectReason {
@@ -756,6 +788,9 @@ message StaEvent {
 
   // Authentication failure reason, as reported by WifiManager (calculated from state & deauth code)
   optional AuthFailureReason auth_failure_reason = 13 [default = AUTH_FAILURE_UNKNOWN];
+
+  // NetworkAgent score of connected wifi
+  optional int32 last_score = 14 [default = -1];
 }
 
 // Wi-Fi Aware metrics

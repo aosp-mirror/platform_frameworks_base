@@ -202,6 +202,8 @@ public class DiskStatsService extends Binder {
             JSONObject json = new JSONObject(jsonString);
             pw.print("App Size: ");
             pw.println(json.getLong(DiskStatsFileLogger.APP_SIZE_AGG_KEY));
+            pw.print("App Data Size: ");
+            pw.println(json.getLong(DiskStatsFileLogger.APP_DATA_SIZE_AGG_KEY));
             pw.print("App Cache Size: ");
             pw.println(json.getLong(DiskStatsFileLogger.APP_CACHE_AGG_KEY));
             pw.print("Photos Size: ");
@@ -220,6 +222,8 @@ public class DiskStatsService extends Binder {
             pw.println(json.getJSONArray(DiskStatsFileLogger.PACKAGE_NAMES_KEY));
             pw.print("App Sizes: ");
             pw.println(json.getJSONArray(DiskStatsFileLogger.APP_SIZES_KEY));
+            pw.print("App Data Sizes: ");
+            pw.println(json.getJSONArray(DiskStatsFileLogger.APP_DATA_KEY));
             pw.print("Cache Sizes: ");
             pw.println(json.getJSONArray(DiskStatsFileLogger.APP_CACHES_KEY));
         } catch (IOException | JSONException e) {
@@ -235,6 +239,8 @@ public class DiskStatsService extends Binder {
 
             proto.write(DiskStatsCachedValuesProto.AGG_APPS_SIZE,
                     json.getLong(DiskStatsFileLogger.APP_SIZE_AGG_KEY));
+            proto.write(DiskStatsCachedValuesProto.AGG_APPS_DATA_SIZE,
+                    json.getLong(DiskStatsFileLogger.APP_DATA_SIZE_AGG_KEY));
             proto.write(DiskStatsCachedValuesProto.AGG_APPS_CACHE_SIZE,
                     json.getLong(DiskStatsFileLogger.APP_CACHE_AGG_KEY));
             proto.write(DiskStatsCachedValuesProto.PHOTOS_SIZE,
@@ -252,22 +258,26 @@ public class DiskStatsService extends Binder {
 
             JSONArray packageNamesArray = json.getJSONArray(DiskStatsFileLogger.PACKAGE_NAMES_KEY);
             JSONArray appSizesArray = json.getJSONArray(DiskStatsFileLogger.APP_SIZES_KEY);
+            JSONArray appDataSizesArray = json.getJSONArray(DiskStatsFileLogger.APP_DATA_KEY);
             JSONArray cacheSizesArray = json.getJSONArray(DiskStatsFileLogger.APP_CACHES_KEY);
             final int len = packageNamesArray.length();
-            if (len == appSizesArray.length() && len == cacheSizesArray.length()) {
+            if (len == appSizesArray.length()
+                    && len == appDataSizesArray.length()
+                    && len == cacheSizesArray.length()) {
                 for (int i = 0; i < len; i++) {
                     long packageToken = proto.start(DiskStatsCachedValuesProto.APP_SIZES);
 
                     proto.write(DiskStatsAppSizesProto.PACKAGE_NAME,
                             packageNamesArray.getString(i));
                     proto.write(DiskStatsAppSizesProto.APP_SIZE, appSizesArray.getLong(i));
+                    proto.write(DiskStatsAppSizesProto.APP_DATA_SIZE, appDataSizesArray.getLong(i));
                     proto.write(DiskStatsAppSizesProto.CACHE_SIZE, cacheSizesArray.getLong(i));
 
                     proto.end(packageToken);
                 }
             } else {
-                Slog.wtf(TAG, "Sizes of packageNamesArray, appSizesArray and cacheSizesArray "
-                        + "are not the same");
+                Slog.wtf(TAG, "Sizes of packageNamesArray, appSizesArray, appDataSizesArray "
+                        + " and cacheSizesArray are not the same");
             }
 
             proto.end(cachedValuesToken);
