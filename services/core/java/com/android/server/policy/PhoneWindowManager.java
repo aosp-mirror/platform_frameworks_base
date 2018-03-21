@@ -7175,7 +7175,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public int rotationForOrientationLw(int orientation, int lastRotation) {
+    public int rotationForOrientationLw(int orientation, int lastRotation, boolean defaultDisplay) {
         if (false) {
             Slog.v(TAG, "rotationForOrientationLw(orient="
                         + orientation + ", last=" + lastRotation
@@ -7196,7 +7196,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
 
             final int preferredRotation;
-            if (mLidState == LID_OPEN && mLidOpenRotation >= 0) {
+            if (!defaultDisplay) {
+                // For secondary displays we ignore things like displays sensors, docking mode and
+                // rotation lock, and always prefer a default rotation.
+                preferredRotation = Surface.ROTATION_0;
+            } else if (mLidState == LID_OPEN && mLidOpenRotation >= 0) {
                 // Ignore sensor when lid switch is open and rotation is forced.
                 preferredRotation = mLidOpenRotation;
             } else if (mDockMode == Intent.EXTRA_DOCK_STATE_CAR
