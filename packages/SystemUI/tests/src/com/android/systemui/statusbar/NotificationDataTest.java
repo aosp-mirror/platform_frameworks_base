@@ -60,6 +60,7 @@ public class NotificationDataTest extends SysuiTestCase {
 
     private static final int UID_NORMAL = 123;
     private static final int UID_ALLOW_DURING_SETUP = 456;
+    private static final String TEST_HIDDEN_NOTIFICATION_KEY = "testHiddenNotificationKey";
 
     private final StatusBarNotification mMockStatusBarNotification =
             mock(StatusBarNotification.class);
@@ -247,6 +248,22 @@ public class NotificationDataTest extends SysuiTestCase {
         assertFalse(mNotificationData.shouldFilterOut(mRow.getEntry().notification));
     }
 
+    @Test
+    public void testShouldFilterHiddenNotifications() {
+        // setup
+        when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(false);
+        when(mFsc.isSystemAlertNotification(any())).thenReturn(false);
+
+        // test should filter out hidden notifications:
+        // hidden
+        when(mMockStatusBarNotification.getKey()).thenReturn(TEST_HIDDEN_NOTIFICATION_KEY);
+        assertTrue(mNotificationData.shouldFilterOut(mMockStatusBarNotification));
+
+        // not hidden
+        when(mMockStatusBarNotification.getKey()).thenReturn("not hidden");
+        assertFalse(mNotificationData.shouldFilterOut(mMockStatusBarNotification));
+    }
+
     private void initStatusBarNotification(boolean allowDuringSetup) {
         Bundle bundle = new Bundle();
         bundle.putBoolean(Notification.EXTRA_ALLOW_DURING_SETUP, allowDuringSetup);
@@ -269,6 +286,21 @@ public class NotificationDataTest extends SysuiTestCase {
         @Override
         protected boolean getRanking(String key, NotificationListenerService.Ranking outRanking) {
             super.getRanking(key, outRanking);
+            if (key.equals(TEST_HIDDEN_NOTIFICATION_KEY)) {
+                outRanking.populate(key, outRanking.getRank(),
+                        outRanking.matchesInterruptionFilter(),
+                        outRanking.getVisibilityOverride(), outRanking.getSuppressedVisualEffects(),
+                        outRanking.getImportance(), outRanking.getImportanceExplanation(),
+                        outRanking.getOverrideGroupKey(), outRanking.getChannel(), null, null,
+                        outRanking.canShowBadge(), outRanking.getUserSentiment(), true);
+            } else {
+                outRanking.populate(key, outRanking.getRank(),
+                        outRanking.matchesInterruptionFilter(),
+                        outRanking.getVisibilityOverride(), outRanking.getSuppressedVisualEffects(),
+                        outRanking.getImportance(), outRanking.getImportanceExplanation(),
+                        outRanking.getOverrideGroupKey(), outRanking.getChannel(), null, null,
+                        outRanking.canShowBadge(), outRanking.getUserSentiment(), false);
+            }
             return true;
         }
     }
