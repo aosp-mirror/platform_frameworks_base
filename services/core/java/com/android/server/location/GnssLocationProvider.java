@@ -1721,7 +1721,9 @@ public class GnssLocationProvider implements LocationProviderInterface {
         if (mItarSpeedLimitExceeded) {
             Log.i(TAG, "Hal reported a speed in excess of ITAR limit." +
                     "  GPS/GNSS Navigation output blocked.");
-            mGnssMetrics.logReceivedLocationStatus(false);
+            if (mStarted) {
+                mGnssMetrics.logReceivedLocationStatus(false);
+            }
             return;  // No output of location allowed
         }
 
@@ -1738,14 +1740,16 @@ public class GnssLocationProvider implements LocationProviderInterface {
             Log.e(TAG, "RemoteException calling reportLocation");
         }
 
-        mGnssMetrics.logReceivedLocationStatus(hasLatLong);
-        if (hasLatLong) {
-            if (location.hasAccuracy()) {
-                mGnssMetrics.logPositionAccuracyMeters(location.getAccuracy());
-            }
-            if (mTimeToFirstFix > 0) {
-                int timeBetweenFixes = (int) (SystemClock.elapsedRealtime() - mLastFixTime);
-                mGnssMetrics.logMissedReports(mFixInterval, timeBetweenFixes);
+        if (mStarted) {
+            mGnssMetrics.logReceivedLocationStatus(hasLatLong);
+            if (hasLatLong) {
+                if (location.hasAccuracy()) {
+                    mGnssMetrics.logPositionAccuracyMeters(location.getAccuracy());
+                }
+                if (mTimeToFirstFix > 0) {
+                    int timeBetweenFixes = (int) (SystemClock.elapsedRealtime() - mLastFixTime);
+                    mGnssMetrics.logMissedReports(mFixInterval, timeBetweenFixes);
+                }
             }
         }
 
@@ -1754,7 +1758,9 @@ public class GnssLocationProvider implements LocationProviderInterface {
         if (mTimeToFirstFix == 0 && hasLatLong) {
             mTimeToFirstFix = (int) (mLastFixTime - mFixRequestTime);
             if (DEBUG) Log.d(TAG, "TTFF: " + mTimeToFirstFix);
-            mGnssMetrics.logTimeToFirstFixMilliSecs(mTimeToFirstFix);
+            if (mStarted) {
+                mGnssMetrics.logTimeToFirstFixMilliSecs(mTimeToFirstFix);
+            }
 
             // notify status listeners
             mListenerHelper.onFirstFix(mTimeToFirstFix);
