@@ -637,28 +637,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 IBinder token = entry.getKey();
                 ClientDeathRecipient deathRec = entry.getValue();
                 if (deathRec.equals(this)) {
-                    mBleApps.remove(token);
+                    updateBleAppCount(token, false, mPackageName);
                     break;
                 }
-            }
-
-            if (isBleAppPresent()) {
-                // Nothing to do, another app is here.
-                return;
-            }
-            if (DBG) {
-                Slog.d(TAG, "Disabling LE only mode after application crash");
-            }
-            try {
-                mBluetoothLock.readLock().lock();
-                if (mBluetooth != null && mBluetooth.getState() == BluetoothAdapter.STATE_BLE_ON) {
-                    mEnable = false;
-                    mBluetooth.onBrEdrDown();
-                }
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Unable to call onBrEdrDown", e);
-            } finally {
-                mBluetoothLock.readLock().unlock();
             }
         }
 
