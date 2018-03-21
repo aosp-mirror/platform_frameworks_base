@@ -105,10 +105,10 @@ import java.util.Map;
  * <tr><td>{@link #KEY_HEIGHT}</td><td>Integer</td><td></td></tr>
  * <tr><td>{@link #KEY_COLOR_FORMAT}</td><td>Integer</td><td>set by the user
  *         for encoders, readable in the output format of decoders</b></td></tr>
- * <tr><td>{@link #KEY_GRID_WIDTH}</td><td>Integer</td><td>required if the image has grid</td></tr>
- * <tr><td>{@link #KEY_GRID_HEIGHT}</td><td>Integer</td><td>required if the image has grid</td></tr>
+ * <tr><td>{@link #KEY_TILE_WIDTH}</td><td>Integer</td><td>required if the image has grid</td></tr>
+ * <tr><td>{@link #KEY_TILE_HEIGHT}</td><td>Integer</td><td>required if the image has grid</td></tr>
  * <tr><td>{@link #KEY_GRID_ROWS}</td><td>Integer</td><td>required if the image has grid</td></tr>
- * <tr><td>{@link #KEY_GRID_COLS}</td><td>Integer</td><td>required if the image has grid</td></tr>
+ * <tr><td>{@link #KEY_GRID_COLUMNS}</td><td>Integer</td><td>required if the image has grid</td></tr>
  * </table>
  */
 public final class MediaFormat {
@@ -150,17 +150,17 @@ public final class MediaFormat {
      * The track's MediaFormat will come with {@link #KEY_WIDTH} and
      * {@link #KEY_HEIGHT} keys, which describes the width and height
      * of the image. If the image doesn't contain grid (i.e. none of
-     * {@link #KEY_GRID_WIDTH}, {@link #KEY_GRID_HEIGHT},
-     * {@link #KEY_GRID_ROWS}, {@link #KEY_GRID_COLS} are present}), the
+     * {@link #KEY_TILE_WIDTH}, {@link #KEY_TILE_HEIGHT},
+     * {@link #KEY_GRID_ROWS}, {@link #KEY_GRID_COLUMNS} are present}), the
      * track will contain a single sample of coded data for the entire image,
      * and the image width and height should be used to set up the decoder.
      *
      * If the image does come with grid, each sample from the track will
      * contain one tile in the grid, of which the size is described by
-     * {@link #KEY_GRID_WIDTH} and {@link #KEY_GRID_HEIGHT}. This size
+     * {@link #KEY_TILE_WIDTH} and {@link #KEY_TILE_HEIGHT}. This size
      * (instead of {@link #KEY_WIDTH} and {@link #KEY_HEIGHT}) should be
      * used to set up the decoder. The track contains {@link #KEY_GRID_ROWS}
-     * by {@link #KEY_GRID_COLS} samples in row-major, top-row first,
+     * by {@link #KEY_GRID_COLUMNS} samples in row-major, top-row first,
      * left-to-right order. The output image should be reconstructed by
      * first tiling the decoding results of the tiles in the correct order,
      * then trimming (before rotation is applied) on the bottom and right
@@ -275,28 +275,28 @@ public final class MediaFormat {
     public static final String KEY_FRAME_RATE = "frame-rate";
 
     /**
-     * A key describing the grid width of the content in a {@link #MIMETYPE_IMAGE_ANDROID_HEIC}
-     * track. The associated value is an integer.
+     * A key describing the width (in pixels) of each tile of the content in a
+     * {@link #MIMETYPE_IMAGE_ANDROID_HEIC} track. The associated value is an integer.
      *
      * Refer to {@link #MIMETYPE_IMAGE_ANDROID_HEIC} on decoding instructions of such tracks.
      *
-     * @see #KEY_GRID_HEIGHT
+     * @see #KEY_TILE_HEIGHT
      * @see #KEY_GRID_ROWS
-     * @see #KEY_GRID_COLS
+     * @see #KEY_GRID_COLUMNS
      */
-    public static final String KEY_GRID_WIDTH = "grid-width";
+    public static final String KEY_TILE_WIDTH = "tile-width";
 
     /**
-     * A key describing the grid height of the content in a {@link #MIMETYPE_IMAGE_ANDROID_HEIC}
-     * track. The associated value is an integer.
+     * A key describing the height (in pixels) of each tile of the content in a
+     * {@link #MIMETYPE_IMAGE_ANDROID_HEIC} track. The associated value is an integer.
      *
      * Refer to {@link #MIMETYPE_IMAGE_ANDROID_HEIC} on decoding instructions of such tracks.
      *
-     * @see #KEY_GRID_WIDTH
+     * @see #KEY_TILE_WIDTH
      * @see #KEY_GRID_ROWS
-     * @see #KEY_GRID_COLS
+     * @see #KEY_GRID_COLUMNS
      */
-    public static final String KEY_GRID_HEIGHT = "grid-height";
+    public static final String KEY_TILE_HEIGHT = "tile-height";
 
     /**
      * A key describing the number of grid rows in the content in a
@@ -304,9 +304,9 @@ public final class MediaFormat {
      *
      * Refer to {@link #MIMETYPE_IMAGE_ANDROID_HEIC} on decoding instructions of such tracks.
      *
-     * @see #KEY_GRID_WIDTH
-     * @see #KEY_GRID_HEIGHT
-     * @see #KEY_GRID_COLS
+     * @see #KEY_TILE_WIDTH
+     * @see #KEY_TILE_HEIGHT
+     * @see #KEY_GRID_COLUMNS
      */
     public static final String KEY_GRID_ROWS = "grid-rows";
 
@@ -316,11 +316,11 @@ public final class MediaFormat {
      *
      * Refer to {@link #MIMETYPE_IMAGE_ANDROID_HEIC} on decoding instructions of such tracks.
      *
-     * @see #KEY_GRID_WIDTH
-     * @see #KEY_GRID_HEIGHT
+     * @see #KEY_TILE_WIDTH
+     * @see #KEY_TILE_HEIGHT
      * @see #KEY_GRID_ROWS
      */
-    public static final String KEY_GRID_COLS = "grid-cols";
+    public static final String KEY_GRID_COLUMNS = "grid-cols";
 
     /**
      * A key describing the raw audio sample encoding/format.
