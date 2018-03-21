@@ -71,7 +71,7 @@ public final class SelectionActionModeHelper {
     private final TextClassificationHelper mTextClassificationHelper;
     private final TextClassificationConstants mTextClassificationSettings;
 
-    private TextClassification mTextClassification;
+    @Nullable private TextClassification mTextClassification;
     private AsyncTask mTextClassificationAsyncTask;
 
     private final SelectionTracker mSelectionTracker;
@@ -124,7 +124,8 @@ public final class SelectionActionModeHelper {
                             : mTextClassificationHelper::classifyText,
                     mSmartSelectSprite != null
                             ? this::startSelectionActionModeWithSmartSelectAnimation
-                            : this::startSelectionActionMode)
+                            : this::startSelectionActionMode,
+                    mTextClassificationHelper::getOriginalSelection)
                     .execute();
         }
     }
@@ -143,7 +144,8 @@ public final class SelectionActionModeHelper {
                     mTextView,
                     mTextClassificationHelper.getTimeoutDuration(),
                     mTextClassificationHelper::classifyText,
-                    this::startLinkActionMode)
+                    this::startLinkActionMode,
+                    mTextClassificationHelper::getOriginalSelection)
                     .execute();
         }
     }
@@ -158,7 +160,8 @@ public final class SelectionActionModeHelper {
                     mTextView,
                     mTextClassificationHelper.getTimeoutDuration(),
                     mTextClassificationHelper::classifyText,
-                    this::invalidateActionMode)
+                    this::invalidateActionMode,
+                    mTextClassificationHelper::getOriginalSelection)
                     .execute();
         }
     }
@@ -246,7 +249,7 @@ public final class SelectionActionModeHelper {
                 mTextView.invalidate();
             }
             mTextClassification = result.mClassification;
-        } else if (actionMode == Editor.TextActionMode.TEXT_LINK) {
+        } else if (result != null && actionMode == Editor.TextActionMode.TEXT_LINK) {
             mTextClassification = result.mClassification;
         } else {
             mTextClassification = null;
@@ -822,6 +825,7 @@ public final class SelectionActionModeHelper {
         private final int mTimeOutDuration;
         private final Supplier<SelectionResult> mSelectionResultSupplier;
         private final Consumer<SelectionResult> mSelectionResultCallback;
+        private final Supplier<SelectionResult> mTimeOutResultSupplier;
         private final TextView mTextView;
         private final String mOriginalText;
 
@@ -830,16 +834,19 @@ public final class SelectionActionModeHelper {
          * @param timeOut time in milliseconds to timeout the query if it has not completed
          * @param selectionResultSupplier fetches the selection results. Runs on a background thread
          * @param selectionResultCallback receives the selection results. Runs on the UiThread
+         * @param timeOutResultSupplier default result if the task times out
          */
         TextClassificationAsyncTask(
                 @NonNull TextView textView, int timeOut,
                 @NonNull Supplier<SelectionResult> selectionResultSupplier,
-                @NonNull Consumer<SelectionResult> selectionResultCallback) {
+                @NonNull Consumer<SelectionResult> selectionResultCallback,
+                @NonNull Supplier<SelectionResult> timeOutResultSupplier) {
             super(textView != null ? textView.getHandler() : null);
             mTextView = Preconditions.checkNotNull(textView);
             mTimeOutDuration = timeOut;
             mSelectionResultSupplier = Preconditions.checkNotNull(selectionResultSupplier);
             mSelectionResultCallback = Preconditions.checkNotNull(selectionResultCallback);
+            mTimeOutResultSupplier = Preconditions.checkNotNull(timeOutResultSupplier);
             // Make a copy of the original text.
             mOriginalText = getText(mTextView).toString();
         }
@@ -863,7 +870,7 @@ public final class SelectionActionModeHelper {
 
         private void onTimeOut() {
             if (getStatus() == Status.RUNNING) {
-                onPostExecute(null);
+                onPostExecute(mTimeOutResultSupplier.get());
             }
             cancel(true);
         }
@@ -963,6 +970,10 @@ public final class SelectionActionModeHelper {
             return performClassification(selection);
         }
 
+        public SelectionResult getOriginalSelection() {
+            return new SelectionResult(mSelectionStart, mSelectionEnd, null, null);
+        }
+
         /**
          * Maximum time (in milliseconds) to wait for a textclassifier result before timing out.
          */
@@ -1025,14 +1036,14 @@ public final class SelectionActionModeHelper {
     private static final class SelectionResult {
         private final int mStart;
         private final int mEnd;
-        private final TextClassification mClassification;
+        @Nullable private final TextClassification mClassification;
         @Nullable private final TextSelection mSelection;
 
         SelectionResult(int start, int end,
-                TextClassification classification, @Nullable TextSelection selection) {
+                @Nullable TextClassification classification, @Nullable TextSelection selection) {
             mStart = start;
             mEnd = end;
-            mClassification = Preconditions.checkNotNull(classification);
+            mClassification = classification;
             mSelection = selection;
         }
     }
