@@ -190,7 +190,7 @@ public class StackScrollAlgorithm {
     private void updateDimmedActivatedHideSensitive(AmbientState ambientState,
             StackScrollState resultState, StackScrollAlgorithmState algorithmState) {
         boolean dimmed = ambientState.isDimmed();
-        boolean dark = ambientState.isDark();
+        boolean dark = ambientState.isFullyDark();
         boolean hideSensitive = ambientState.isHideSensitive();
         View activatedChild = ambientState.getActivatedChild();
         int childCount = algorithmState.visibleChildren.size();

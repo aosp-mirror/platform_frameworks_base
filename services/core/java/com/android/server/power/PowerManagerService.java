@@ -69,7 +69,6 @@ import android.service.dreams.DreamManagerInternal;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.util.KeyValueListParser;
-import android.util.MathUtils;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -408,7 +407,7 @@ public final class PowerManagerService extends SystemService
     private boolean mDreamsActivateOnDockSetting;
 
     // True if doze should not be started until after the screen off transition.
-    private boolean mDozeAfterScreenOffConfig;
+    private boolean mDozeAfterScreenOff;
 
     // The minimum screen off timeout, in milliseconds.
     private long mMinimumScreenOffTimeoutConfig;
@@ -896,7 +895,7 @@ public final class PowerManagerService extends SystemService
                 com.android.internal.R.integer.config_dreamsBatteryLevelMinimumWhenNotPowered);
         mDreamsBatteryLevelDrainCutoffConfig = resources.getInteger(
                 com.android.internal.R.integer.config_dreamsBatteryLevelDrainCutoff);
-        mDozeAfterScreenOffConfig = resources.getBoolean(
+        mDozeAfterScreenOff = resources.getBoolean(
                 com.android.internal.R.bool.config_dozeAfterScreenOff);
         mMinimumScreenOffTimeoutConfig = resources.getInteger(
                 com.android.internal.R.integer.config_minimumScreenOffTimeout);
@@ -2507,7 +2506,7 @@ public final class PowerManagerService extends SystemService
             if ((mWakeLockSummary & WAKE_LOCK_DOZE) != 0) {
                 return DisplayPowerRequest.POLICY_DOZE;
             }
-            if (mDozeAfterScreenOffConfig) {
+            if (mDozeAfterScreenOff) {
                 return DisplayPowerRequest.POLICY_OFF;
             }
             // Fall through and preserve the current screen policy if not configured to
@@ -3094,6 +3093,12 @@ public final class PowerManagerService extends SystemService
         light.setFlashing(color, Light.LIGHT_FLASH_HARDWARE, (on ? 3 : 0), 0);
     }
 
+    private void setDozeAfterScreenOffInternal(boolean on) {
+        synchronized (mLock) {
+            mDozeAfterScreenOff = on;
+        }
+    }
+
     private void boostScreenBrightnessInternal(long eventTime, int uid) {
         synchronized (mLock) {
             if (!mSystemReady || mWakefulness == WAKEFULNESS_ASLEEP
@@ -3372,7 +3377,7 @@ public final class PowerManagerService extends SystemService
             pw.println("  mDreamsEnabledSetting=" + mDreamsEnabledSetting);
             pw.println("  mDreamsActivateOnSleepSetting=" + mDreamsActivateOnSleepSetting);
             pw.println("  mDreamsActivateOnDockSetting=" + mDreamsActivateOnDockSetting);
-            pw.println("  mDozeAfterScreenOffConfig=" + mDozeAfterScreenOffConfig);
+            pw.println("  mDozeAfterScreenOff=" + mDozeAfterScreenOff);
             pw.println("  mLowPowerModeSetting=" + mLowPowerModeSetting);
             pw.println("  mAutoLowPowerModeConfigured=" + mAutoLowPowerModeConfigured);
             pw.println("  mAutoLowPowerModeSnoozing=" + mAutoLowPowerModeSnoozing);
@@ -3656,7 +3661,7 @@ public final class PowerManagerService extends SystemService
                     mDreamsActivateOnDockSetting);
             proto.write(
                     PowerServiceSettingsAndConfigurationDumpProto.IS_DOZE_AFTER_SCREEN_OFF_CONFIG,
-                    mDozeAfterScreenOffConfig);
+                    mDozeAfterScreenOff);
             proto.write(
                     PowerServiceSettingsAndConfigurationDumpProto.IS_LOW_POWER_MODE_SETTING,
                     mLowPowerModeSetting);
@@ -4597,6 +4602,19 @@ public final class PowerManagerService extends SystemService
             final long ident = Binder.clearCallingIdentity();
             try {
                 setAttentionLightInternal(on, color);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public void setDozeAfterScreenOff(boolean on) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.DEVICE_POWER, null);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                setDozeAfterScreenOffInternal(on);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

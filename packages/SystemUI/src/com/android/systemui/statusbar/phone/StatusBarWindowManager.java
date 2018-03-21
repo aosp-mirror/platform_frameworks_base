@@ -73,7 +73,7 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mActivityManager = ActivityManager.getService();
         mKeyguardScreenRotation = shouldEnableKeyguardScreenRotation();
-        mDozeParameters = new DozeParameters(mContext);
+        mDozeParameters = DozeParameters.getInstance(mContext);
         mScreenBrightnessDoze = mDozeParameters.getScreenBrightnessDoze();
     }
 
@@ -141,11 +141,9 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
             mLpChanged.privateFlags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
         }
 
-        final boolean showWallpaperOnAod = mDozeParameters.getAlwaysOn() &&
-                state.wallpaperSupportsAmbientMode &&
-                state.scrimsVisibility != ScrimController.VISIBILITY_FULLY_OPAQUE;
-        if (state.keyguardShowing && !state.backdropShowing &&
-                (!state.dozing || showWallpaperOnAod)) {
+        final boolean scrimsOccludingWallpaper =
+                state.scrimsVisibility == ScrimController.VISIBILITY_FULLY_OPAQUE;
+        if (state.keyguardShowing && !state.backdropShowing && !scrimsOccludingWallpaper) {
             mLpChanged.flags |= WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
         } else {
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;

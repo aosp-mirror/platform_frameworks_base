@@ -34,18 +34,23 @@ import com.android.systemui.doze.DozeHost;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
 public class DozeScrimControllerTest extends SysuiTestCase {
 
+    @Mock
     private ScrimController mScrimController;
+    @Mock
+    private DozeParameters mDozeParameters;
     private DozeScrimController mDozeScrimController;
 
     @Before
     public void setup() {
-        mScrimController = mock(ScrimController.class);
+        MockitoAnnotations.initMocks(this);
         // Make sure callbacks will be invoked to complete the lifecycle.
         doAnswer(invocationOnMock -> {
             ScrimController.Callback callback = invocationOnMock.getArgument(1);
@@ -56,7 +61,8 @@ public class DozeScrimControllerTest extends SysuiTestCase {
         }).when(mScrimController).transitionTo(any(ScrimState.class),
                 any(ScrimController.Callback.class));
 
-        mDozeScrimController = new DozeScrimController(mScrimController, getContext());
+        mDozeScrimController = new DozeScrimController(mScrimController, getContext(),
+                mDozeParameters);
         mDozeScrimController.setDozing(true);
     }
 
