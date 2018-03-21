@@ -60,9 +60,8 @@ public abstract class TracingController {
      * Starts tracing all webviews. Depending on the trace mode in traceConfig
      * specifies how the trace events are recorded.
      *
-     * For tracing modes {@link TracingConfig#RECORD_UNTIL_FULL},
-     * {@link TracingConfig#RECORD_CONTINUOUSLY} and
-     * {@link TracingConfig#RECORD_UNTIL_FULL_LARGE_BUFFER} the events are recorded
+     * For tracing modes {@link TracingConfig#RECORD_UNTIL_FULL} and
+     * {@link TracingConfig#RECORD_CONTINUOUSLY} the events are recorded
      * using an internal buffer and flushed to the outputStream when
      * {@link #stop(OutputStream, Executor)} is called.
      *
