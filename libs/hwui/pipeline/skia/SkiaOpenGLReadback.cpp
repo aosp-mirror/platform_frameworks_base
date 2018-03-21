@@ -50,32 +50,31 @@ CopyResult SkiaOpenGLReadback::copyImageInto(EGLImageKHR eglImage, const Matrix4
         grContext->resetContext();
     }
 
-    GrGLTextureInfo externalTexture;
-    externalTexture.fTarget = GL_TEXTURE_EXTERNAL_OES;
-    externalTexture.fID = sourceTexId;
-
-    GrPixelConfig pixelConfig;
-    switch (bitmap->colorType()) {
-        case kRGBA_F16_SkColorType:
-            pixelConfig = kRGBA_half_GrPixelConfig;
-            break;
-        case kN32_SkColorType:
-        default:
-            pixelConfig = kRGBA_8888_GrPixelConfig;
-            break;
-    }
-
-    if (pixelConfig == kRGBA_half_GrPixelConfig &&
-            !grContext->caps()->isConfigRenderable(kRGBA_half_GrPixelConfig, false)) {
+    if (bitmap->colorType() == kRGBA_F16_SkColorType &&
+            !grContext->colorTypeSupportedAsSurface(bitmap->colorType())) {
         ALOGW("Can't copy surface into bitmap, RGBA_F16 config is not supported");
         return CopyResult::DestinationInvalid;
     }
 
-    GrBackendTexture backendTexture(imgWidth, imgHeight, pixelConfig, externalTexture);
+    GrGLTextureInfo externalTexture;
+    externalTexture.fTarget = GL_TEXTURE_EXTERNAL_OES;
+    externalTexture.fID = sourceTexId;
+    switch (bitmap->colorType()) {
+        case kRGBA_F16_SkColorType:
+            externalTexture.fFormat = GL_RGBA16F;
+            break;
+        case kN32_SkColorType:
+        default:
+            externalTexture.fFormat = GL_RGBA8;
+            break;
+    }
+
+    GrBackendTexture backendTexture(imgWidth, imgHeight, GrMipMapped::kNo, externalTexture);
 
     CopyResult copyResult = CopyResult::UnknownError;
     sk_sp<SkImage> image(SkImage::MakeFromAdoptedTexture(grContext.get(), backendTexture,
-                                                         kTopLeft_GrSurfaceOrigin));
+                                                         kTopLeft_GrSurfaceOrigin,
+                                                         bitmap->colorType()));
     if (image) {
         int displayedWidth = imgWidth, displayedHeight = imgHeight;
         // If this is a 90 or 270 degree rotation we need to swap width/height to get the device
