@@ -4525,8 +4525,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 mAttrs.type == TYPE_NAVIGATION_BAR ||
                 // It's tempting to wonder: Have we forgotten the rounded corners overlay?
                 // worry not: it's a fake TYPE_NAVIGATION_BAR_PANEL
-                mAttrs.type == TYPE_NAVIGATION_BAR_PANEL ||
-                mAttrs.type == TYPE_STATUS_BAR) {
+                mAttrs.type == TYPE_NAVIGATION_BAR_PANEL) {
             return false;
         }
         return true;
