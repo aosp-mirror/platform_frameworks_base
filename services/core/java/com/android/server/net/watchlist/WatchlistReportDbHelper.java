@@ -141,11 +141,10 @@ class WatchlistReportDbHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Aggregate all records before most recent local midnight in database, and return a
+     * Aggregate all records in database before input timestamp, and return a
      * rappor encoded result.
      */
-    public AggregatedResult getAggregatedRecords() {
-        final long lastMidnightTime = getLastMidnightTime();
+    public AggregatedResult getAggregatedRecords(long untilTimestamp) {
         final String selectStatement = WhiteListReportContract.TIMESTAMP + " < ?";
 
         final SQLiteDatabase db = getReadableDatabase();
@@ -153,7 +152,7 @@ class WatchlistReportDbHelper extends SQLiteOpenHelper {
         try {
             c = db.query(true /* distinct */,
                     WhiteListReportContract.TABLE, DIGEST_DOMAIN_PROJECTION, selectStatement,
-                    new String[]{"" + lastMidnightTime}, null, null,
+                    new String[]{Long.toString(untilTimestamp)}, null, null,
                     null, null);
             if (c == null) {
                 return null;
@@ -181,29 +180,13 @@ class WatchlistReportDbHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Remove all the records before most recent local midnight.
+     * Remove all the records before input timestamp.
      *
      * @return True if success.
      */
-    public boolean cleanup() {
+    public boolean cleanup(long untilTimestamp) {
         final SQLiteDatabase db = getWritableDatabase();
-        final long midnightTime = getLastMidnightTime();
-        final String clause = WhiteListReportContract.TIMESTAMP + "< " + midnightTime;
+        final String clause = WhiteListReportContract.TIMESTAMP + "< " + untilTimestamp;
         return db.delete(WhiteListReportContract.TABLE, clause, null) != 0;
-    }
-
-    static long getLastMidnightTime() {
-        return getMidnightTimestamp(0);
-    }
-
-    static long getMidnightTimestamp(int daysBefore) {
-        java.util.Calendar date = new GregorianCalendar();
-        // reset hour, minutes, seconds and millis
-        date.set(java.util.Calendar.HOUR_OF_DAY, 0);
-        date.set(java.util.Calendar.MINUTE, 0);
-        date.set(java.util.Calendar.SECOND, 0);
-        date.set(java.util.Calendar.MILLISECOND, 0);
-        date.add(java.util.Calendar.DAY_OF_MONTH, -daysBefore);
-        return date.getTimeInMillis();
     }
 }

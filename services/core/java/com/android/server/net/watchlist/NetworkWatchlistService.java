@@ -171,7 +171,7 @@ public class NetworkWatchlistService extends INetworkWatchlistManager.Stub {
             Slog.w(TAG, "Only shell is allowed to call network watchlist shell commands");
             return;
         }
-        (new NetworkWatchlistShellCommand(mContext)).exec(this, in, out, err, args, callback,
+        (new NetworkWatchlistShellCommand(this, mContext)).exec(this, in, out, err, args, callback,
                 resultReceiver);
     }
 
@@ -260,6 +260,21 @@ public class NetworkWatchlistService extends INetworkWatchlistManager.Stub {
     public void reportWatchlistIfNecessary() {
         // Allow any apps to trigger report event, as we won't run it if it's too early.
         mNetworkWatchlistHandler.reportWatchlistIfNecessary();
+    }
+
+    /**
+     * Force generate watchlist report for testing.
+     *
+     * @param lastReportTime Watchlist report will cotain all records before this time.
+     * @return True if operation success.
+     */
+    public boolean forceReportWatchlistForTest(long lastReportTime) {
+        if (mConfig.isConfigSecure()) {
+            // Should not force generate report under production config.
+            return false;
+        }
+        mNetworkWatchlistHandler.forceReportWatchlistForTest(lastReportTime);
+        return true;
     }
 
     @Override

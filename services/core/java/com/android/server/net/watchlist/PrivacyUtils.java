@@ -19,6 +19,7 @@ package com.android.server.net.watchlist;
 import android.privacy.DifferentialPrivacyEncoder;
 import android.privacy.internal.longitudinalreporting.LongitudinalReportingConfig;
 import android.privacy.internal.longitudinalreporting.LongitudinalReportingEncoder;
+import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -32,6 +33,7 @@ import java.util.Map;
 class PrivacyUtils {
 
     private static final String TAG = "PrivacyUtils";
+    private static final boolean DEBUG = NetworkWatchlistService.DEBUG;
 
     /**
      * Parameters used for encoding watchlist reports.
@@ -84,6 +86,7 @@ class PrivacyUtils {
     @VisibleForTesting
     static Map<String, Boolean> createDpEncodedReportMap(boolean isSecure, byte[] userSecret,
             List<String> appDigestList, WatchlistReportDbHelper.AggregatedResult aggregatedResult) {
+        if (DEBUG) Slog.i(TAG, "createDpEncodedReportMap start");
         final int appDigestListSize = appDigestList.size();
         final HashMap<String, Boolean> resultMap = new HashMap<>(appDigestListSize);
         for (int i = 0; i < appDigestListSize; i++) {
@@ -93,6 +96,7 @@ class PrivacyUtils {
                     ? createSecureDPEncoder(userSecret, appDigest)
                     : createInsecureDPEncoderForTest(appDigest);
             final boolean visitedWatchlist = aggregatedResult.appDigestList.contains(appDigest);
+            if (DEBUG) Slog.i(TAG, appDigest + ": " + visitedWatchlist);
             // Get the least significant bit of first byte, and set result to True if it is 1
             boolean encodedVisitedWatchlist = ((int) encoder.encodeBoolean(visitedWatchlist)[0]
                     & 0x1) == 0x1;

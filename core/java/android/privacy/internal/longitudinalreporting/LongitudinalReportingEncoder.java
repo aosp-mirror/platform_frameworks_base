@@ -19,6 +19,7 @@ package android.privacy.internal.longitudinalreporting;
 import android.privacy.DifferentialPrivacyEncoder;
 import android.privacy.internal.rappor.RapporConfig;
 import android.privacy.internal.rappor.RapporEncoder;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -47,6 +48,9 @@ import com.android.internal.annotations.VisibleForTesting;
  * @hide
  */
 public class LongitudinalReportingEncoder implements DifferentialPrivacyEncoder {
+
+    private static final String TAG = "LongitudinalEncoder";
+    private static final boolean DEBUG = false;
 
     // Suffix that will be added to Rappor's encoder id. There's a (relatively) small risk some
     // other Rappor encoder may re-use the same encoder id.
@@ -121,11 +125,18 @@ public class LongitudinalReportingEncoder implements DifferentialPrivacyEncoder 
 
     @Override
     public byte[] encodeBoolean(boolean original) {
+        if (DEBUG) {
+            Log.d(TAG, "encodeBoolean, encoderId:" + mConfig.getEncoderId() + ", original: "
+                    + original);
+        }
         if (mFakeValue != null) {
             // Use the fake value generated in PRR.
             original = mFakeValue.booleanValue();
+            if (DEBUG) Log.d(TAG, "Use fake value: " + original);
         }
-        return mIRREncoder.encodeBoolean(original);
+        byte[] result = mIRREncoder.encodeBoolean(original);
+        if (DEBUG) Log.d(TAG, "result: " + ((result[0] & 0x1) != 0));
+        return result;
     }
 
     @Override

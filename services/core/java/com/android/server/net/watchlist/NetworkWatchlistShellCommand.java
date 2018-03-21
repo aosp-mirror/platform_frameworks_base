@@ -19,9 +19,11 @@ package com.android.server.net.watchlist;
 import android.content.Context;
 import android.content.Intent;
 import android.net.NetworkWatchlistManager;
+import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ShellCommand;
+import android.provider.Settings;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -34,10 +36,12 @@ import java.io.PrintWriter;
  */
 class NetworkWatchlistShellCommand extends ShellCommand {
 
-    final NetworkWatchlistManager mNetworkWatchlistManager;
+    final Context mContext;
+    final NetworkWatchlistService mService;
 
-    NetworkWatchlistShellCommand(Context context) {
-        mNetworkWatchlistManager = new NetworkWatchlistManager(context);
+    NetworkWatchlistShellCommand(NetworkWatchlistService service, Context context) {
+        mContext = context;
+        mService = service;
     }
 
     @Override
@@ -51,11 +55,13 @@ class NetworkWatchlistShellCommand extends ShellCommand {
             switch(cmd) {
                 case "set-test-config":
                     return runSetTestConfig();
+                case "force-generate-report":
+                    return runForceGenerateReport();
                 default:
                     return handleDefaultCommands(cmd);
             }
-        } catch (RemoteException e) {
-            pw.println("Remote exception: " + e);
+        } catch (Exception e) {
+            pw.println("Exception: " + e);
         }
         return -1;
     }
@@ -73,9 +79,31 @@ class NetworkWatchlistShellCommand extends ShellCommand {
                 WatchlistConfig.getInstance().setTestMode(fileStream);
             }
             pw.println("Success!");
-        } catch (RuntimeException | IOException ex) {
+        } catch (Exception ex) {
             pw.println("Error: " + ex.toString());
             return -1;
+        }
+        return 0;
+    }
+
+    private int runForceGenerateReport() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            // Reset last report time
+            if (!WatchlistConfig.getInstance().isConfigSecure()) {
+                pw.println("Error: Cannot force generate report under production config");
+                return -1;
+            }
+            Settings.Global.putLong(mContext.getContentResolver(),
+                    Settings.Global.NETWORK_WATCHLIST_LAST_REPORT_TIME, 0L);
+            mService.forceReportWatchlistForTest(System.currentTimeMillis());
+            pw.println("Success!");
+        } catch (Exception ex) {
+            pw.println("Error: " + ex);
+            return -1;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
         return 0;
     }
@@ -86,9 +114,9 @@ class NetworkWatchlistShellCommand extends ShellCommand {
         pw.println("Network watchlist manager commands:");
         pw.println("  help");
         pw.println("    Print this help text.");
-        pw.println("");
         pw.println("  set-test-config your_watchlist_config.xml");
-        pw.println();
-        Intent.printIntentArgsHelp(pw , "");
+        pw.println("    Set network watchlist test config file.");
+        pw.println("  force-generate-report");
+        pw.println("    Force generate watchlist test report.");
     }
 }
