@@ -31,7 +31,10 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -455,6 +458,18 @@ public class DisplayContentTests extends WindowTestsBase {
         sWm.setKeyguardGoingAway(true);
         assertEquals("Keyguard that is going away must not influence device orientation",
                 SCREEN_ORIENTATION_LANDSCAPE, dc.getOrientation());
+    }
+
+    @Test
+    public void testDisableDisplayInfoOverrideFromWindowManager() {
+        final DisplayContent dc = createNewDisplay();
+
+        assertTrue(dc.mShouldOverrideDisplayConfiguration);
+        sWm.dontOverrideDisplayInfo(dc.getDisplayId());
+
+        assertFalse(dc.mShouldOverrideDisplayConfiguration);
+        verify(sWm.mDisplayManagerInternal, times(1))
+                .setDisplayInfoOverrideFromWindowManager(dc.getDisplayId(), null);
     }
 
     private static void verifySizes(DisplayContent displayContent, int expectedBaseWidth,

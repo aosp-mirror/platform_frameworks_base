@@ -1117,17 +1117,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 throw new IllegalStateException("Display has not been initialialized");
             }
 
-            DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-
-            // Adding a window is an exception where the WindowManagerService can create the
-            // display instead of waiting for the ActivityManagerService to drive creation.
-            if (displayContent == null) {
-                final Display display = mDisplayManager.getDisplay(displayId);
-
-                if (display != null) {
-                    displayContent = mRoot.createDisplayContent(display, null /* controller */);
-                }
-            }
+            final DisplayContent displayContent = getDisplayContentOrCreate(displayId);
 
             if (displayContent == null) {
                 Slog.w(TAG_WM, "Attempted to add window to a display that does not exist: "
@@ -1491,6 +1481,32 @@ public class WindowManagerService extends IWindowManager.Stub
         Binder.restoreCallingIdentity(origId);
 
         return res;
+    }
+
+    /**
+     * Get existing {@link DisplayContent} or create a new one if the display is registered in
+     * DisplayManager.
+     *
+     * NOTE: This should only be used in cases when there is a chance that a {@link DisplayContent}
+     * that corresponds to a display just added to DisplayManager has not yet been created. This
+     * usually means that the call of this method was initiated from outside of Activity or Window
+     * Manager. In most cases the regular getter should be used.
+     * @see RootWindowContainer#getDisplayContent(int)
+     */
+    private DisplayContent getDisplayContentOrCreate(int displayId) {
+        DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+
+        // Create an instance if possible instead of waiting for the ActivityManagerService to drive
+        // the creation.
+        if (displayContent == null) {
+            final Display display = mDisplayManager.getDisplay(displayId);
+
+            if (display != null) {
+                displayContent = mRoot.createDisplayContent(display, null /* controller */);
+            }
+        }
+
+        return displayContent;
     }
 
     private boolean doesAddToastWindowRequireToken(String packageName, int callingUid,
@@ -6983,6 +6999,24 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             callingWin.updateTapExcludeRegion(regionId, left, top, width, height);
+        }
+    }
+
+    @Override
+    public void dontOverrideDisplayInfo(int displayId) {
+        synchronized (mWindowMap) {
+            final DisplayContent dc = getDisplayContentOrCreate(displayId);
+            if (dc == null) {
+                throw new IllegalArgumentException(
+                        "Trying to register a non existent display.");
+            }
+            // We usually set the override info in DisplayManager so that we get consistent
+            // values when displays are changing. However, we don't do this for displays that
+            // serve as containers for ActivityViews because we don't want letter-/pillar-boxing
+            // during resize.
+            dc.mShouldOverrideDisplayConfiguration = false;
+            mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(displayId,
+                    null /* info */);
         }
     }
 

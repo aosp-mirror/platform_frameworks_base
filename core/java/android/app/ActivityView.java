@@ -27,6 +27,7 @@ import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.IWindowManager;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.MotionEvent;
@@ -308,8 +309,14 @@ public class ActivityView extends ViewGroup {
             return;
         }
 
-        mInputForwarder = InputManager.getInstance().createInputForwarder(
-                mVirtualDisplay.getDisplay().getDisplayId());
+        final int displayId = mVirtualDisplay.getDisplay().getDisplayId();
+        final IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+        try {
+            wm.dontOverrideDisplayInfo(displayId);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+        mInputForwarder = InputManager.getInstance().createInputForwarder(displayId);
         mTaskStackListener = new TaskBackgroundChangeListener();
         try {
             mActivityManager.registerTaskStackListener(mTaskStackListener);
