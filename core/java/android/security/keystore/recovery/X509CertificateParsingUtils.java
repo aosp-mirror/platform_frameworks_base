@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.security.backup;
+package android.security.keystore.recovery;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package android.security.backup;
+package android.security.keystore.recovery;
 
-import static android.security.backup.TrustedRootCertificates.listRootCertificates;
+import static android.security.keystore.recovery.TrustedRootCertificates.listRootCertificates;
 
 import static org.junit.Assert.assertTrue;
 
