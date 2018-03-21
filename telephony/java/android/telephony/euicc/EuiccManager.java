@@ -15,11 +15,12 @@
  */
 package android.telephony.euicc;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -73,6 +74,7 @@ public class EuiccManager {
      */
     @SystemApi
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public static final String ACTION_OTA_STATUS_CHANGED =
             "android.telephony.euicc.action.OTA_STATUS_CHANGED";
 
@@ -301,6 +303,7 @@ public class EuiccManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public int getOtaStatus() {
         if (!isEnabled()) {
             return EUICC_OTA_STATUS_UNAVAILABLE;
@@ -325,6 +328,7 @@ public class EuiccManager {
      * @param switchAfterDownload if true, the profile will be activated upon successful download.
      * @param callbackIntent a PendingIntent to launch when the operation completes.
      */
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void downloadSubscription(DownloadableSubscription subscription,
             boolean switchAfterDownload, PendingIntent callbackIntent) {
         if (!isEnabled()) {
@@ -387,6 +391,7 @@ public class EuiccManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void continueOperation(Intent resolutionIntent, Bundle resolutionExtras) {
         if (!isEnabled()) {
             PendingIntent callbackIntent =
@@ -422,6 +427,7 @@ public class EuiccManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void getDownloadableSubscriptionMetadata(
             DownloadableSubscription subscription, PendingIntent callbackIntent) {
         if (!isEnabled()) {
@@ -452,6 +458,7 @@ public class EuiccManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void getDefaultDownloadableSubscriptionList(PendingIntent callbackIntent) {
         if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
@@ -496,6 +503,7 @@ public class EuiccManager {
      * @param subscriptionId the ID of the subscription to delete.
      * @param callbackIntent a PendingIntent to launch when the operation completes.
      */
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void deleteSubscription(int subscriptionId, PendingIntent callbackIntent) {
         if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
@@ -523,6 +531,7 @@ public class EuiccManager {
      *     current profile without activating another profile to replace it.
      * @param callbackIntent a PendingIntent to launch when the operation completes.
      */
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void switchToSubscription(int subscriptionId, PendingIntent callbackIntent) {
         if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
@@ -548,6 +557,7 @@ public class EuiccManager {
      * @param callbackIntent a PendingIntent to launch when the operation completes.
      * @hide
      */
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void updateSubscriptionNickname(
             int subscriptionId, String nickname, PendingIntent callbackIntent) {
         if (!isEnabled()) {
@@ -566,12 +576,13 @@ public class EuiccManager {
      * Erase all subscriptions and reset the eUICC.
      *
      * <p>Requires that the calling app has the
-     * {@link android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission. This is for
-     * internal system use only.
+     * {@code android.Manifest.permission#WRITE_EMBEDDED_SUBSCRIPTIONS} permission.
      *
      * @param callbackIntent a PendingIntent to launch when the operation completes.
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS)
     public void eraseSubscriptions(PendingIntent callbackIntent) {
         if (!isEnabled()) {
             sendUnavailableError(callbackIntent);
