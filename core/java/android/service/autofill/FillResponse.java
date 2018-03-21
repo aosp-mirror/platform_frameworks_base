@@ -16,6 +16,7 @@
 
 package android.service.autofill;
 
+import static android.service.autofill.AutofillServiceHelper.assertValid;
 import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;
 import static android.view.autofill.Helper.sDebug;
 
@@ -245,10 +246,15 @@ public final class FillResponse implements Parcelable {
          * @param ids id of Views that when focused will display the authentication UI.
          *
          * @return This builder.
-
-         * @throws IllegalArgumentException if {@code ids} is {@code null} or empty, or if
-         * both {@code authentication} and {@code presentation} are {@code null}, or if
-         * both {@code authentication} and {@code presentation} are non-{@code null}
+         *
+         * @throws IllegalArgumentException if any of the following occurs:
+         * <ul>
+         *   <li>{@code ids} is {@code null}</li>
+         *   <li>{@code ids} is empty</li>
+         *   <li>{@code ids} contains a {@code null} element</li>
+         *   <li>both {@code authentication} and {@code presentation} are {@code null}</li>
+         *   <li>both {@code authentication} and {@code presentation} are non-{@code null}</li>
+         * </ul>
          *
          * @throws IllegalStateException if a {@link #setHeader(RemoteViews) header} or a
          * {@link #setFooter(RemoteViews) footer} are already set for this builder.
@@ -263,16 +269,13 @@ public final class FillResponse implements Parcelable {
                 throw new IllegalStateException("Already called #setHeader() or #setFooter()");
             }
 
-            if (ids == null || ids.length == 0) {
-                throw new IllegalArgumentException("ids cannot be null or empry");
-            }
             if (authentication == null ^ presentation == null) {
                 throw new IllegalArgumentException("authentication and presentation"
                         + " must be both non-null or null");
             }
             mAuthentication = authentication;
             mPresentation = presentation;
-            mAuthenticationIds = ids;
+            mAuthenticationIds = assertValid(ids);
             return this;
         }
 
