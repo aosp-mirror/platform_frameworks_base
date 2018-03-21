@@ -175,9 +175,6 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
                 mRotatedBackground = true;
                 mBackground.setRotatedBackground(true);
                 LinearLayout linearLayout = (LinearLayout) mChild;
-                if (to == ROTATION_SEASCAPE) {
-                    swapOrder(linearLayout);
-                }
                 if (mSwapOrientation) {
                     linearLayout.setOrientation(LinearLayout.HORIZONTAL);
                 }
@@ -188,24 +185,12 @@ public class HardwareUiLayout extends FrameLayout implements Tunable {
                 mRotatedBackground = false;
                 mBackground.setRotatedBackground(false);
                 LinearLayout linearLayout = (LinearLayout) mChild;
-                if (from == ROTATION_SEASCAPE) {
-                    swapOrder(linearLayout);
-                }
                 if (mSwapOrientation) {
                     linearLayout.setOrientation(LinearLayout.VERTICAL);
                 }
                 swapDimens(mChild);
             }
         }
-    }
-
-    private void swapOrder(LinearLayout linearLayout) {
-        ArrayList<View> children = new ArrayList<>();
-        for (int i = 0; i < linearLayout.getChildCount(); i++) {
-            children.add(0, linearLayout.getChildAt(0));
-            linearLayout.removeViewAt(0);
-        }
-        children.forEach(v -> linearLayout.addView(v));
     }
 
     private void rotateRight() {
