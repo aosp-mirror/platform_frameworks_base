@@ -19,6 +19,7 @@
 #include "config/ConfigKey.h"
 #include "config/ConfigListener.h"
 #include "packages/PackageInfoListener.h"
+#include "stats_util.h"
 
 #include <binder/IResultReceiver.h>
 #include <binder/IShellCallback.h>
@@ -32,7 +33,10 @@
 #include <string>
 #include <unordered_map>
 
+using namespace android;
 using namespace std;
+
+using android::util::ProtoOutputStream;
 
 namespace android {
 namespace os {
@@ -45,8 +49,8 @@ struct AppData {
     AppData(const string& a, const int64_t v) : packageName(a), versionCode(v){};
 };
 
-// When calling getOutput, we retrieve all the ChangeRecords since the last
-// timestamp we called getOutput for this configuration key.
+// When calling appendUidMap, we retrieve all the ChangeRecords since the last
+// timestamp we called appendUidMap for this configuration key.
 struct ChangeRecord {
     const bool deletion;
     const int64_t timestampNs;
@@ -70,8 +74,8 @@ const unsigned int kBytesChangeRecord = sizeof(struct ChangeRecord);
 // less because of varint encoding).
 const unsigned int kBytesTimestampField = 10;
 
-// When calling getOutput, we retrieve all the snapshots since the last
-// timestamp we called getOutput for this configuration key.
+// When calling appendUidMap, we retrieve all the snapshots since the last
+// timestamp we called appendUidMap for this configuration key.
 struct SnapshotRecord {
     const int64_t timestampNs;
 
@@ -135,7 +139,7 @@ public:
     // Gets all snapshots and changes that have occurred since the last output.
     // If every config key has received a change or snapshot record, then this
     // record is deleted.
-    void getOutput(const ConfigKey& key, vector<uint8_t>* outData);
+    void appendUidMap(const ConfigKey& key, util::ProtoOutputStream* proto);
 
     // Forces the output to be cleared. We still generate a snapshot based on the current state.
     // This results in extra data uploaded but helps us reconstruct the uid mapping on the server
@@ -158,7 +162,8 @@ private:
                    const int64_t& versionCode);
     void removeApp(const int64_t& timestamp, const String16& packageName, const int32_t& uid);
 
-    void getOutput(const int64_t& timestamp, const ConfigKey& key, vector<uint8_t>* outData);
+    void appendUidMap(const int64_t& timestamp, const ConfigKey& key,
+                      util::ProtoOutputStream* proto);
 
     void getListenerListCopyLocked(std::vector<wp<PackageInfoListener>>* output);
 
