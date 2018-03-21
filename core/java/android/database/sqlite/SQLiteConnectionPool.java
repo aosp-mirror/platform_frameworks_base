@@ -23,6 +23,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.OperationCanceledException;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.PrefixPrinter;
 import android.util.Printer;
@@ -1111,6 +1112,11 @@ public final class SQLiteConnectionPool implements Closeable {
             printer.println("  Open: " + mIsOpen);
             printer.println("  Max connections: " + mMaxConnectionPoolSize);
             printer.println("  Total execution time: " + mTotalExecutionTimeCounter);
+            printer.println("  Configuration: openFlags=" + mConfiguration.openFlags
+                    + ", useCompatibilityWal=" + mConfiguration.useCompatibilityWal()
+                    + ", journalMode=" + TextUtils.emptyIfNull(mConfiguration.journalMode)
+                    + ", syncMode=" + TextUtils.emptyIfNull(mConfiguration.syncMode));
+
             if (SQLiteCompatibilityWalFlags.areFlagsSet()) {
                 printer.println("  Compatibility WAL settings: compatibility_wal_supported="
                         + SQLiteCompatibilityWalFlags

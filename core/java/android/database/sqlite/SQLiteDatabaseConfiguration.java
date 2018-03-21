@@ -194,6 +194,11 @@ public final class SQLiteDatabaseConfiguration {
         return path.equalsIgnoreCase(MEMORY_DB_PATH);
     }
 
+    boolean useCompatibilityWal() {
+        return journalMode == null && syncMode == null
+                && (openFlags & SQLiteDatabase.DISABLE_COMPATIBILITY_WAL) == 0;
+    }
+
     private static String stripPathForLogs(String path) {
         if (path.indexOf('@') == -1) {
             return path;
