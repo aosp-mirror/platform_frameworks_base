@@ -26,6 +26,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.MathUtils;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -178,6 +179,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private boolean mNeedsDimming;
     private int mDimmedAlpha;
     private boolean mBlockNextTouch;
+    private boolean mIsHeadsUpAnimation;
+    private int mHeadsUpAddStartLocation;
+    private float mHeadsUpLocation;
+    private boolean mIsAppearing;
 
     public ActivatableNotificationView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -204,6 +209,18 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 makeInactive(true /* animate */);
             }
         }, super::performClick, this::handleSlideBack, mFalsingManager::onNotificationDoubleTap);
+        initDimens();
+    }
+
+    private void initDimens() {
+        mHeadsUpAddStartLocation = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_content_margin_start);
+    }
+
+    @Override
+    public void onDensityOrFontScaleChanged() {
+        super.onDensityOrFontScaleChanged();
+        initDimens();
     }
 
     @Override
@@ -745,27 +762,34 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     @Override
-    public void performRemoveAnimation(long duration, float translationDirection,
-            Runnable onFinishedRunnable) {
+    public void performRemoveAnimation(long duration, long delay,
+            float translationDirection, boolean isHeadsUpAnimation, float endLocation,
+            Runnable onFinishedRunnable, AnimatorListenerAdapter animationListener) {
         enableAppearDrawing(true);
+        mIsHeadsUpAnimation = isHeadsUpAnimation;
+        mHeadsUpLocation = endLocation;
         if (mDrawingAppearAnimation) {
             startAppearAnimation(false /* isAppearing */, translationDirection,
-                    0, duration, onFinishedRunnable);
+                    delay, duration, onFinishedRunnable, animationListener);
         } else if (onFinishedRunnable != null) {
             onFinishedRunnable.run();
         }
     }
 
     @Override
-    public void performAddAnimation(long delay, long duration) {
+    public void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear) {
         enableAppearDrawing(true);
+        mIsHeadsUpAnimation = isHeadsUpAppear;
+        mHeadsUpLocation = mHeadsUpAddStartLocation;
         if (mDrawingAppearAnimation) {
-            startAppearAnimation(true /* isAppearing */, -1.0f, delay, duration, null);
+            startAppearAnimation(true /* isAppearing */, isHeadsUpAppear ? 0.0f : -1.0f, delay,
+                    duration, null, null);
         }
     }
 
     private void startAppearAnimation(boolean isAppearing, float translationDirection, long delay,
-            long duration, final Runnable onFinishedRunnable) {
+            long duration, final Runnable onFinishedRunnable,
+            AnimatorListenerAdapter animationListener) {
         cancelAppearAnimation();
         mAnimationTranslationY = translationDirection * getActualHeight();
         if (mAppearAnimationFraction == -1.0f) {
@@ -778,6 +802,7 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 mAppearAnimationTranslation = 0;
             }
         }
+        mIsAppearing = isAppearing;
 
         float targetValue;
         if (isAppearing) {
@@ -803,6 +828,9 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 invalidate();
             }
         });
+        if (animationListener != null) {
+            mAppearAnimator.addListener(animationListener);
+        }
         if (delay > 0) {
             // we need to apply the initial state already to avoid drawn frames in the wrong state
             updateAppearAnimationAlpha();
@@ -862,9 +890,21 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
                 / (HORIZONTAL_ANIMATION_START - HORIZONTAL_ANIMATION_END);
         widthFraction = Math.min(1.0f, Math.max(0.0f, widthFraction));
         widthFraction = mCurrentAppearInterpolator.getInterpolation(widthFraction);
-        float left = (getWidth() * (0.5f - HORIZONTAL_COLLAPSED_REST_PARTIAL / 2.0f) *
-                widthFraction);
-        float right = getWidth() - left;
+        float startWidthFraction = HORIZONTAL_COLLAPSED_REST_PARTIAL;
+        if (mIsHeadsUpAnimation && !mIsAppearing) {
+            startWidthFraction = 0;
+        }
+        float width = MathUtils.lerp(startWidthFraction, 1.0f, 1.0f - widthFraction)
+                        * getWidth();
+        float left;
+        float right;
+        if (mIsHeadsUpAnimation) {
+            left = MathUtils.lerp(mHeadsUpLocation, 0, 1.0f - widthFraction);
+            right = left + width;
+        } else {
+            left = getWidth() * 0.5f - width / 2.0f;
+            right = getWidth() - left;
+        }
 
         // handle top animation
         float heightFraction = (inverseFraction - (1.0f - VERTICAL_ANIMATION_START)) /
@@ -1044,6 +1084,14 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
 
     public int getBackgroundColorWithoutTint() {
         return calculateBgColor(false /* withTint */, false /* withOverride */);
+    }
+
+    public boolean isPinned() {
+        return false;
+    }
+
+    public boolean isHeadsUpAnimatingAway() {
+        return false;
     }
 
     public interface OnActivatedListener {

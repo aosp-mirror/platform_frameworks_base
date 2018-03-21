@@ -278,7 +278,10 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
         if (mActionsContainer != null) {
             // We should never push the actions higher than they are in the headsup view.
             int constrainedContentHeight = Math.max(mContentHeight, mMinHeightHint);
-            mActionsContainer.setTranslationY(constrainedContentHeight - mView.getHeight());
+
+            // We also need to compensate for any header translation, since we're always at the end.
+            mActionsContainer.setTranslationY(constrainedContentHeight - mView.getHeight()
+                    - getHeaderTranslation());
         }
     }
 }

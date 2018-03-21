@@ -100,10 +100,10 @@ public class SystemUIFactory {
     }
 
     public ScrimController createScrimController(LightBarController lightBarController,
-            ScrimView scrimBehind, ScrimView scrimInFront, View headsUpScrim,
-            LockscreenWallpaper lockscreenWallpaper, Consumer<Integer> scrimVisibleListener,
-            DozeParameters dozeParameters, AlarmManager alarmManager) {
-        return new ScrimController(lightBarController, scrimBehind, scrimInFront, headsUpScrim,
+            ScrimView scrimBehind, ScrimView scrimInFront, LockscreenWallpaper lockscreenWallpaper,
+            Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
+            AlarmManager alarmManager) {
+        return new ScrimController(lightBarController, scrimBehind, scrimInFront,
                 scrimVisibleListener, dozeParameters, alarmManager);
     }
 

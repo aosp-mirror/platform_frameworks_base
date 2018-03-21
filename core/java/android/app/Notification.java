@@ -5577,6 +5577,24 @@ public class Notification implements Parcelable
         public void setRebuildStyledRemoteViews(boolean rebuild) {
             mRebuildStyledRemoteViews = rebuild;
         }
+
+        /**
+         * Get the text that should be displayed in the statusBar when heads upped. This is
+         * usually just the app name, but may be different depending on the style.
+         *
+         * @param publicMode If true, return a text that is safe to display in public.
+         *
+         * @hide
+         */
+        public CharSequence getHeadsUpStatusBarText(boolean publicMode) {
+            if (mStyle != null && !publicMode) {
+                CharSequence text = mStyle.getHeadsUpStatusBarText();
+                if (!TextUtils.isEmpty(text)) {
+                    return text;
+                }
+            }
+            return loadHeaderAppName();
+        }
     }
 
     /**
@@ -5954,6 +5972,16 @@ public class Notification implements Parcelable
          * @hide
          */
         public abstract boolean areNotificationsVisiblyDifferent(Style other);
+        
+        /**
+         * @return the the text that should be displayed in the statusBar when heads-upped.
+         * If {@code null} is returned, the default implementation will be used.
+         *
+         * @hide
+         */
+        public CharSequence getHeadsUpStatusBarText() {
+            return null;
+        }
     }
 
     /**
@@ -6400,6 +6428,23 @@ public class Notification implements Parcelable
                     >= Build.VERSION_CODES.P && (mUser == null || mUser.getName() == null)) {
                 throw new RuntimeException("User must be valid and have a name.");
             }
+        }
+
+        /**
+         * @return the the text that should be displayed in the statusBar when heads upped.
+         * If {@code null} is returned, the default implementation will be used.
+         *
+         * @hide
+         */
+        @Override
+        public CharSequence getHeadsUpStatusBarText() {
+            CharSequence conversationTitle = !TextUtils.isEmpty(super.mBigContentTitle)
+                    ? super.mBigContentTitle
+                    : mConversationTitle;
+            if (!TextUtils.isEmpty(conversationTitle) && !hasOnlyWhiteSpaceSenders()) {
+                return conversationTitle;
+            }
+            return null;
         }
 
         /**

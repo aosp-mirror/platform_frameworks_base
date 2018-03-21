@@ -3231,6 +3231,7 @@
   <java-symbol type="id" name="remote_input_progress" />
   <java-symbol type="id" name="remote_input_send" />
   <java-symbol type="id" name="remote_input" />
+  <java-symbol type="dimen" name="notification_content_margin" />
   <java-symbol type="dimen" name="slice_shortcut_size" />
   <java-symbol type="dimen" name="slice_icon_size" />
   <java-symbol type="dimen" name="slice_padding" />

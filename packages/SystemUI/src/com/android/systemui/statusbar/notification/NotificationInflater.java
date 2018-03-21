@@ -179,6 +179,9 @@ public class NotificationInflater {
                     : builder.makeAmbientNotification();
         }
         result.packageContext = packageContext;
+        result.headsUpStatusBarText = builder.getHeadsUpStatusBarText(false /* showingPublic */);
+        result.headsUpStatusBarTextPublic = builder.getHeadsUpStatusBarText(
+                true /* showingPublic */);
         return result;
     }
 
@@ -456,6 +459,8 @@ public class NotificationInflater {
                 }
                 entry.cachedAmbientContentView = result.newAmbientView;
             }
+            entry.headsUpStatusBarText = result.headsUpStatusBarText;
+            entry.headsUpStatusBarTextPublic = result.headsUpStatusBarTextPublic;
             if (endListener != null) {
                 endListener.onAsyncInflationFinished(row.getEntry());
             }
@@ -665,6 +670,8 @@ public class NotificationInflater {
         private View inflatedExpandedView;
         private View inflatedAmbientView;
         private View inflatedPublicView;
+        private CharSequence headsUpStatusBarText;
+        private CharSequence headsUpStatusBarTextPublic;
     }
 
     @VisibleForTesting

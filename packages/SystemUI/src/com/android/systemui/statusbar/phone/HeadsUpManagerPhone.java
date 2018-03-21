@@ -29,6 +29,7 @@ import android.view.ViewTreeObserver;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
+import com.android.systemui.R;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.StatusBarState;
@@ -52,12 +53,13 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     private static final boolean DEBUG = false;
 
     private final View mStatusBarWindowView;
-    private int mStatusBarHeight;
     private final NotificationGroupManager mGroupManager;
     private final StatusBar mBar;
     private final VisualStabilityManager mVisualStabilityManager;
-
     private boolean mReleaseOnExpandFinish;
+
+    private int mStatusBarHeight;
+    private int mHeadsUpInset;
     private boolean mTrackingHeadsUp;
     private HashSet<String> mSwipedOutKeys = new HashSet<>();
     private HashSet<NotificationData.Entry> mEntriesToRemoveAfterExpand = new HashSet<>();
@@ -101,9 +103,7 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         mBar = bar;
         mVisualStabilityManager = visualStabilityManager;
 
-        Resources resources = mContext.getResources();
-        mStatusBarHeight = resources.getDimensionPixelSize(
-                com.android.internal.R.dimen.status_bar_height);
+        initResources();
 
         addListener(new OnHeadsUpChangedListener() {
             @Override
@@ -112,6 +112,20 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
                 updateTouchableRegionListener();
             }
         });
+    }
+
+    private void initResources() {
+        Resources resources = mContext.getResources();
+        mStatusBarHeight = resources.getDimensionPixelSize(
+                com.android.internal.R.dimen.status_bar_height);
+        mHeadsUpInset = mStatusBarHeight + resources.getDimensionPixelSize(
+                R.dimen.heads_up_status_bar_padding);
+    }
+
+    @Override
+    public void onDensityOrFontScaleChanged() {
+        super.onDensityOrFontScaleChanged();
+        initResources();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -283,10 +297,10 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             topEntry.getLocationOnScreen(mTmpTwoArray);
             int minX = mTmpTwoArray[0];
             int maxX = mTmpTwoArray[0] + topEntry.getWidth();
-            int maxY = topEntry.getIntrinsicHeight();
+            int height = topEntry.getIntrinsicHeight();
 
             info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
-            info.touchableRegion.set(minX, 0, maxX, maxY);
+            info.touchableRegion.set(minX, 0, maxX, mHeadsUpInset + height);
         } else if (mHeadsUpGoingAway || mWaitingOnCollapseWhenGoingAway) {
             info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
             info.touchableRegion.set(0, 0, mStatusBarWindowView.getWidth(), mStatusBarHeight);
