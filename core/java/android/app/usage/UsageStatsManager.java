@@ -107,25 +107,35 @@ public final class UsageStatsManager {
     public static final int STANDBY_BUCKET_EXEMPTED = 5;
 
     /**
-     * The app was used very recently, currently in use or likely to be used very soon.
+     * The app was used very recently, currently in use or likely to be used very soon. Standby
+     * bucket values that are &le; {@link #STANDBY_BUCKET_ACTIVE} will not be throttled by the
+     * system while they are in this bucket. Buckets &gt; {@link #STANDBY_BUCKET_ACTIVE} will most
+     * likely be restricted in some way. For instance, jobs and alarms may be deferred.
      * @see #getAppStandbyBucket()
      */
     public static final int STANDBY_BUCKET_ACTIVE = 10;
 
     /**
-     * The app was used recently and/or likely to be used in the next few hours.
+     * The app was used recently and/or likely to be used in the next few hours. Restrictions will
+     * apply to these apps, such as deferral of jobs and alarms.
      * @see #getAppStandbyBucket()
      */
     public static final int STANDBY_BUCKET_WORKING_SET = 20;
 
     /**
      * The app was used in the last few days and/or likely to be used in the next few days.
+     * Restrictions will apply to these apps, such as deferral of jobs and alarms. The delays may be
+     * greater than for apps in higher buckets (lower bucket value). Bucket values &gt;
+     * {@link #STANDBY_BUCKET_FREQUENT} may additionally have network access limited.
      * @see #getAppStandbyBucket()
      */
     public static final int STANDBY_BUCKET_FREQUENT = 30;
 
     /**
      * The app has not be used for several days and/or is unlikely to be used for several days.
+     * Apps in this bucket will have the most restrictions, including network restrictions, except
+     * during certain short periods (at a minimum, once a day) when they are allowed to execute
+     * jobs, access the network, etc.
      * @see #getAppStandbyBucket()
      */
     public static final int STANDBY_BUCKET_RARE = 40;
@@ -393,11 +403,19 @@ public final class UsageStatsManager {
     /**
      * Returns the current standby bucket of the calling app. The system determines the standby
      * state of the app based on app usage patterns. Standby buckets determine how much an app will
-     * be restricted from running background tasks such as jobs, alarms and certain PendingIntent
-     * callbacks.
+     * be restricted from running background tasks such as jobs and alarms.
      * <p>Restrictions increase progressively from {@link #STANDBY_BUCKET_ACTIVE} to
      * {@link #STANDBY_BUCKET_RARE}, with {@link #STANDBY_BUCKET_ACTIVE} being the least
      * restrictive. The battery level of the device might also affect the restrictions.
+     * <p>Apps in buckets &le; {@link #STANDBY_BUCKET_ACTIVE} have no standby restrictions imposed.
+     * Apps in buckets &gt; {@link #STANDBY_BUCKET_FREQUENT} may have network access restricted when
+     * running in the background.
+     * <p>The standby state of an app can change at any time either due to a user interaction or a
+     * system interaction or some algorithm determining that the app can be restricted for a period
+     * of time before the user has a need for it.
+     * <p>You can also query the recent history of standby bucket changes by calling
+     * {@link #queryEventsForSelf(long, long)} and searching for
+     * {@link UsageEvents.Event#STANDBY_BUCKET_CHANGED}.
      *
      * @return the current standby bucket of the calling app. One of STANDBY_BUCKET_* constants.
      */
