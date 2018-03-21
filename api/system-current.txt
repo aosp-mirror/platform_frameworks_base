@@ -32,6 +32,7 @@ package android {
     field public static final java.lang.String BIND_RESOLVER_RANKER_SERVICE = "android.permission.BIND_RESOLVER_RANKER_SERVICE";
     field public static final java.lang.String BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE = "android.permission.BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE";
     field public static final java.lang.String BIND_SETTINGS_SUGGESTIONS_SERVICE = "android.permission.BIND_SETTINGS_SUGGESTIONS_SERVICE";
+    field public static final java.lang.String BIND_SOUND_TRIGGER_DETECTION_SERVICE = "android.permission.BIND_SOUND_TRIGGER_DETECTION_SERVICE";
     field public static final java.lang.String BIND_TELEPHONY_DATA_SERVICE = "android.permission.BIND_TELEPHONY_DATA_SERVICE";
     field public static final java.lang.String BIND_TELEPHONY_NETWORK_SERVICE = "android.permission.BIND_TELEPHONY_NETWORK_SERVICE";
     field public static final java.lang.String BIND_TEXTCLASSIFIER_SERVICE = "android.permission.BIND_TEXTCLASSIFIER_SERVICE";
@@ -2753,6 +2754,16 @@ package android.media.session {
 
 package android.media.soundtrigger {
 
+  public abstract class SoundTriggerDetectionService extends android.app.Service {
+    ctor public SoundTriggerDetectionService();
+    method public void onConnected(java.util.UUID, android.os.Bundle);
+    method public void onDisconnected(java.util.UUID, android.os.Bundle);
+    method public void onError(java.util.UUID, android.os.Bundle, int, int);
+    method public void onGenericRecognitionEvent(java.util.UUID, android.os.Bundle, int, android.hardware.soundtrigger.SoundTrigger.RecognitionEvent);
+    method public abstract void onStopOperation(java.util.UUID, android.os.Bundle, int);
+    method public final void operationFinished(java.util.UUID, int);
+  }
+
   public final class SoundTriggerDetector {
     method public boolean startRecognition(int);
     method public boolean stopRecognition();
@@ -2777,6 +2788,7 @@ package android.media.soundtrigger {
   public final class SoundTriggerManager {
     method public android.media.soundtrigger.SoundTriggerDetector createSoundTriggerDetector(java.util.UUID, android.media.soundtrigger.SoundTriggerDetector.Callback, android.os.Handler);
     method public void deleteModel(java.util.UUID);
+    method public int getDetectionServiceOperationsTimeout();
     method public android.media.soundtrigger.SoundTriggerManager.Model getModel(java.util.UUID);
     method public void updateModel(android.media.soundtrigger.SoundTriggerManager.Model);
   }

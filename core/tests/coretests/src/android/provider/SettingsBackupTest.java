@@ -371,6 +371,7 @@ public class SettingsBackupTest {
                     Settings.Global.SMS_SHORT_CODE_RULE,
                     Settings.Global.SMS_SHORT_CODES_UPDATE_CONTENT_URL,
                     Settings.Global.SMS_SHORT_CODES_UPDATE_METADATA_URL,
+                    Settings.Global.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT,
                     Settings.Global.SPEED_LABEL_CACHE_EVICTION_AGE_MILLIS,
                     Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS,
                     Settings.Global.STORAGE_BENCHMARK_INTERVAL,
