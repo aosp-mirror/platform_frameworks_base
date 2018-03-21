@@ -578,7 +578,7 @@ public class RecoveryController {
             if (grantAlias == null) {
                 throw new InternalRecoveryServiceException("Null grant alias");
             }
-            return getKeyFromGrant(alias);
+            return getKeyFromGrant(grantAlias);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (UnrecoverableKeyException e) {
