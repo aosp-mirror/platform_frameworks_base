@@ -41,6 +41,7 @@ import android.os.UserHandle;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -430,9 +431,11 @@ public abstract class SliceProvider extends ContentProvider {
         return new Slice.Builder(sliceUri)
                 .addAction(createPermissionIntent(context, sliceUri, callingPackage),
                         new Slice.Builder(sliceUri.buildUpon().appendPath("permission").build())
-                                .addText(getPermissionString(context, callingPackage), null)
-                                .build())
-                .addHints(Slice.HINT_LIST_ITEM)
+                                .addText(getPermissionString(context, callingPackage), null,
+                                        Collections.emptyList())
+                                .build(),
+                        null)
+                .addHints(Arrays.asList(Slice.HINT_LIST_ITEM))
                 .build();
     }
 
