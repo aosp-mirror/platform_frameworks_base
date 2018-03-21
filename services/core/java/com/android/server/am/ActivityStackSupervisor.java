@@ -90,12 +90,12 @@ import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
 import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.am.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
 import static com.android.server.am.TaskRecord.REPARENT_MOVE_STACK_TO_FRONT;
-import static com.android.server.am.proto.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
-import static com.android.server.am.proto.ActivityStackSupervisorProto.DISPLAYS;
-import static com.android.server.am.proto.ActivityStackSupervisorProto.FOCUSED_STACK_ID;
-import static com.android.server.am.proto.ActivityStackSupervisorProto.IS_HOME_RECENTS_COMPONENT;
-import static com.android.server.am.proto.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
-import static com.android.server.am.proto.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
+import static com.android.server.am.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
+import static com.android.server.am.ActivityStackSupervisorProto.DISPLAYS;
+import static com.android.server.am.ActivityStackSupervisorProto.FOCUSED_STACK_ID;
+import static com.android.server.am.ActivityStackSupervisorProto.IS_HOME_RECENTS_COMPONENT;
+import static com.android.server.am.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
+import static com.android.server.am.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 
 import static java.lang.Integer.MAX_VALUE;

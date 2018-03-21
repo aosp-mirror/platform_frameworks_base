@@ -16,8 +16,8 @@
 
 package com.android.server.policy;
 
-import static com.android.server.wm.proto.WindowOrientationListenerProto.ENABLED;
-import static com.android.server.wm.proto.WindowOrientationListenerProto.ROTATION;
+import static com.android.server.wm.WindowOrientationListenerProto.ENABLED;
+import static com.android.server.wm.WindowOrientationListenerProto.ROTATION;
 
 import android.content.Context;
 import android.hardware.Sensor;

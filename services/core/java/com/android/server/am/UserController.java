@@ -95,7 +95,6 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemServiceManager;
-import com.android.server.am.proto.UserControllerProto;
 import com.android.server.pm.UserManagerService;
 import com.android.server.wm.WindowManagerService;
 

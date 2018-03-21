@@ -32,8 +32,6 @@ import android.util.PrintWriterPrinter;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.server.am.proto.BroadcastRecordProto;
-
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;

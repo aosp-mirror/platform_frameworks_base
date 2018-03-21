@@ -84,9 +84,9 @@ import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_C
 import static com.android.server.wm.WindowSurfacePlacer.SET_UPDATE_ROTATION;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_ACTION_PENDING;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE;
-import static com.android.server.wm.proto.RootWindowContainerProto.DISPLAYS;
-import static com.android.server.wm.proto.RootWindowContainerProto.WINDOWS;
-import static com.android.server.wm.proto.RootWindowContainerProto.WINDOW_CONTAINER;
+import static com.android.server.wm.RootWindowContainerProto.DISPLAYS;
+import static com.android.server.wm.RootWindowContainerProto.WINDOWS;
+import static com.android.server.wm.RootWindowContainerProto.WINDOW_CONTAINER;
 
 /** Root {@link WindowContainer} for the device. */
 class RootWindowContainer extends WindowContainer<DisplayContent> {

@@ -26,8 +26,8 @@ import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_W
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_APP_TRANSITION_STARTING;
-import static com.android.server.wm.proto.RemoteAnimationAdapterWrapperProto.TARGET;
-import static com.android.server.wm.proto.AnimationAdapterProto.REMOTE;
+import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
+import static com.android.server.wm.AnimationAdapterProto.REMOTE;
 
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.WindowConfiguration;
