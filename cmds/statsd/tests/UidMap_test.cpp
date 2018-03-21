@@ -20,6 +20,7 @@
 #include "statslog.h"
 #include "statsd_test_util.h"
 
+#include <android/util/ProtoOutputStream.h>
 #include <gtest/gtest.h>
 
 #include <stdio.h>
@@ -29,6 +30,8 @@ using namespace android;
 namespace android {
 namespace os {
 namespace statsd {
+
+using android::util::ProtoOutputStream;
 
 #ifdef __ANDROID__
 const string kApp1 = "app1.sharing.1";
@@ -156,6 +159,20 @@ TEST(UidMapTest, TestUpdateApp) {
     EXPECT_TRUE(name_set.find("new_app1_name") != name_set.end());
 }
 
+static void protoOutputStreamToUidMapping(ProtoOutputStream* proto, UidMapping* results) {
+    vector<uint8_t> bytes;
+    bytes.resize(proto->size());
+    size_t pos = 0;
+    auto iter = proto->data();
+    while (iter.readBuffer() != NULL) {
+        size_t toRead = iter.currentToRead();
+        std::memcpy(&((bytes)[pos]), iter.readBuffer(), toRead);
+        pos += toRead;
+        iter.rp()->move(toRead);
+    }
+    results->ParseFromArray(bytes.data(), bytes.size());
+}
+
 TEST(UidMapTest, TestClearingOutput) {
     UidMap m;
 
@@ -176,26 +193,26 @@ TEST(UidMapTest, TestClearingOutput) {
     m.updateMap(1, uids, versions, apps);
     EXPECT_EQ(1U, m.mSnapshots.size());
 
-    vector<uint8_t> bytes;
-    m.getOutput(2, config1, &bytes);
+    ProtoOutputStream proto;
+    m.appendUidMap(2, config1, &proto);
     UidMapping results;
-    results.ParseFromArray(bytes.data(), bytes.size());
+    protoOutputStreamToUidMapping(&proto, &results);
     EXPECT_EQ(1, results.snapshots_size());
 
     // It should be cleared now
     EXPECT_EQ(1U, m.mSnapshots.size());
-    bytes.clear();
-    m.getOutput(2, config1, &bytes);
-    results.ParseFromArray(bytes.data(), bytes.size());
+    proto.clear();
+    m.appendUidMap(2, config1, &proto);
+    protoOutputStreamToUidMapping(&proto, &results);
     EXPECT_EQ(1, results.snapshots_size());
 
     // Now add another configuration.
     m.OnConfigUpdated(config2);
     m.updateApp(5, String16(kApp1.c_str()), 1000, 40);
     EXPECT_EQ(1U, m.mChanges.size());
-    bytes.clear();
-    m.getOutput(6, config1, &bytes);
-    results.ParseFromArray(bytes.data(), bytes.size());
+    proto.clear();
+    m.appendUidMap(6, config1, &proto);
+    protoOutputStreamToUidMapping(&proto, &results);
     EXPECT_EQ(1, results.snapshots_size());
     EXPECT_EQ(1, results.changes_size());
     EXPECT_EQ(1U, m.mChanges.size());
@@ -205,16 +222,16 @@ TEST(UidMapTest, TestClearingOutput) {
     EXPECT_EQ(2U, m.mChanges.size());
 
     // We still can't remove anything.
-    bytes.clear();
-    m.getOutput(8, config1, &bytes);
-    results.ParseFromArray(bytes.data(), bytes.size());
+    proto.clear();
+    m.appendUidMap(8, config1, &proto);
+    protoOutputStreamToUidMapping(&proto, &results);
     EXPECT_EQ(1, results.snapshots_size());
     EXPECT_EQ(1, results.changes_size());
     EXPECT_EQ(2U, m.mChanges.size());
 
-    bytes.clear();
-    m.getOutput(9, config2, &bytes);
-    results.ParseFromArray(bytes.data(), bytes.size());
+    proto.clear();
+    m.appendUidMap(9, config2, &proto);
+    protoOutputStreamToUidMapping(&proto, &results);
     EXPECT_EQ(1, results.snapshots_size());
     EXPECT_EQ(2, results.changes_size());
     // At this point both should be cleared.
@@ -242,11 +259,12 @@ TEST(UidMapTest, TestMemoryComputed) {
     m.updateApp(3, String16(kApp1.c_str()), 1000, 40);
     EXPECT_TRUE(m.mBytesUsed > snapshot_bytes);
 
+    ProtoOutputStream proto;
     vector<uint8_t> bytes;
-    m.getOutput(2, config1, &bytes);
+    m.appendUidMap(2, config1, &proto);
     size_t prevBytes = m.mBytesUsed;
 
-    m.getOutput(4, config1, &bytes);
+    m.appendUidMap(4, config1, &proto);
     EXPECT_TRUE(m.mBytesUsed < prevBytes);
 }
 
