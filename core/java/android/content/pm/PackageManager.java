@@ -4183,6 +4183,12 @@ public abstract class PackageManager {
     public abstract ResolveInfo resolveService(Intent intent, @ResolveInfoFlags int flags);
 
     /**
+     * @hide
+     */
+    public abstract ResolveInfo resolveServiceAsUser(Intent intent, @ResolveInfoFlags int flags,
+            @UserIdInt int userId);
+
+    /**
      * Retrieve all services that can match the given intent.
      *
      * @param intent The desired intent as per resolveService().

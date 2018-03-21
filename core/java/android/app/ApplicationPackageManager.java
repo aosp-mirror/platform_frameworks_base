@@ -20,6 +20,7 @@ import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
+import android.annotation.UserIdInt;
 import android.annotation.XmlRes;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -1031,16 +1032,22 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public ResolveInfo resolveService(Intent intent, int flags) {
+    public ResolveInfo resolveServiceAsUser(Intent intent, @ResolveInfoFlags int flags,
+            @UserIdInt int userId) {
         try {
             return mPM.resolveService(
                 intent,
                 intent.resolveTypeIfNeeded(mContext.getContentResolver()),
                 flags,
-                mContext.getUserId());
+                userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    @Override
+    public ResolveInfo resolveService(Intent intent, int flags) {
+        return resolveServiceAsUser(intent, flags, mContext.getUserId());
     }
 
     @Override

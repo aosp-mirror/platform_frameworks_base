@@ -3759,6 +3759,12 @@
     <permission android:name="android.permission.MANAGE_SOUND_TRIGGER"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Must be required by system/priv apps implementing sound trigger detection services
+         @hide
+         @SystemApi -->
+    <permission android:name="android.permission.BIND_SOUND_TRIGGER_DETECTION_SERVICE"
+        android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows trusted applications to dispatch managed provisioning message to Managed
          Provisioning app. If requesting app does not have permission, it will be ignored.
          @hide -->
