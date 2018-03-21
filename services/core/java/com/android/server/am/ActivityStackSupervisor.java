@@ -643,7 +643,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     void setWindowManager(WindowManagerService wm) {
         synchronized (mService) {
             mWindowManager = wm;
-            mKeyguardController.setWindowManager(wm);
+            getKeyguardController().setWindowManager(wm);
 
             mDisplayManager =
                     (DisplayManager)mService.mContext.getSystemService(Context.DISPLAY_SERVICE);
@@ -1312,7 +1312,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             r.setProcess(app);
 
-            if (mKeyguardController.isKeyguardLocked()) {
+            if (getKeyguardController().isKeyguardLocked()) {
                 r.notifyUnknownVisibilityLaunched();
             }
 
@@ -3377,7 +3377,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 } else {
                     stack.awakeFromSleepingLocked();
                     if (isFocusedStack(stack)
-                            && !mKeyguardController.isKeyguardShowing(display.mDisplayId)) {
+                            && !getKeyguardController().isKeyguardShowing(display.mDisplayId)) {
                         // If the keyguard is unlocked - resume immediately.
                         // It is possible that the display will not be awake at the time we
                         // process the keyguard going away, which can happen before the sleep token
@@ -3501,7 +3501,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     void ensureActivitiesVisibleLocked(ActivityRecord starting, int configChanges,
             boolean preserveWindows) {
-        mKeyguardController.beginActivityVisibilityUpdate();
+        getKeyguardController().beginActivityVisibilityUpdate();
         try {
             // First the front stacks. In case any are not fullscreen and are in front of home.
             for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
@@ -3512,7 +3512,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 }
             }
         } finally {
-            mKeyguardController.endActivityVisibilityUpdate();
+            getKeyguardController().endActivityVisibilityUpdate();
         }
     }
 
@@ -3799,7 +3799,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         pw.print(prefix); pw.print("isHomeRecentsComponent=");
         pw.print(mRecentTasks.isRecentsComponentHomeActivity(mCurrentUser));
 
-        mKeyguardController.dump(pw, prefix);
+        getKeyguardController().dump(pw, prefix);
         mService.mLockTaskController.dump(pw, prefix);
     }
 
@@ -3810,7 +3810,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             ActivityDisplay activityDisplay = mActivityDisplays.valueAt(displayNdx);
             activityDisplay.writeToProto(proto, DISPLAYS);
         }
-        mKeyguardController.writeToProto(proto, KEYGUARD_CONTROLLER);
+        getKeyguardController().writeToProto(proto, KEYGUARD_CONTROLLER);
         if (mFocusedStack != null) {
             proto.write(FOCUSED_STACK_ID, mFocusedStack.mStackId);
             ActivityRecord focusedActivity = getResumedActivityLocked();
