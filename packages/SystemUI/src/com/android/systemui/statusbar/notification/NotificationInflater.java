@@ -584,15 +584,9 @@ public class NotificationInflater {
                         mSbn.getNotification());
                 Context packageContext = mSbn.getPackageContext(mContext);
                 Notification notification = mSbn.getNotification();
-                if (mIsLowPriority) {
-                    int backgroundColor = mContext.getColor(
-                            R.color.notification_material_background_low_priority_color);
-                    recoveredBuilder.setBackgroundColorHint(backgroundColor);
-                }
                 if (notification.isMediaNotification()) {
                     MediaNotificationProcessor processor = new MediaNotificationProcessor(mContext,
                             packageContext);
-                    processor.setIsLowPriority(mIsLowPriority);
                     processor.processNotification(notification, recoveredBuilder);
                 }
                 return createRemoteViews(mReInflateFlags,

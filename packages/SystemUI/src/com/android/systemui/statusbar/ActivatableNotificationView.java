@@ -99,7 +99,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private static final Interpolator ACTIVATE_INVERSE_ALPHA_INTERPOLATOR
             = new PathInterpolator(0, 0, 0.5f, 1);
     private final int mTintedRippleColor;
-    private final int mLowPriorityRippleColor;
     protected final int mNormalRippleColor;
     private final AccessibilityManager mAccessibilityManager;
     private final DoubleTapHelper mDoubleTapHelper;
@@ -134,7 +133,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private float mAppearAnimationFraction = -1.0f;
     private float mAppearAnimationTranslation;
     private final int mNormalColor;
-    private final int mLowPriorityColor;
     private boolean mIsBelowSpeedBump;
     private FalsingManager mFalsingManager;
 
@@ -191,12 +189,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         setClipChildren(false);
         setClipToPadding(false);
         mNormalColor = context.getColor(R.color.notification_material_background_color);
-        mLowPriorityColor = context.getColor(
-                R.color.notification_material_background_low_priority_color);
         mTintedRippleColor = context.getColor(
                 R.color.notification_ripple_tinted_color);
-        mLowPriorityRippleColor = context.getColor(
-                R.color.notification_ripple_color_low_priority);
         mNormalRippleColor = context.getColor(
                 R.color.notification_ripple_untinted_color);
         mFalsingManager = FalsingManager.getInstance(context);
@@ -997,8 +991,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         }
         if (withTint && mBgTint != NO_COLOR) {
             return mBgTint;
-        } else if (mIsBelowSpeedBump) {
-            return mLowPriorityColor;
         } else {
             return mNormalColor;
         }
@@ -1007,8 +999,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     protected int getRippleColor() {
         if (mBgTint != 0) {
             return mTintedRippleColor;
-        } else if (mIsBelowSpeedBump) {
-            return mLowPriorityRippleColor;
         } else {
             return mNormalRippleColor;
         }

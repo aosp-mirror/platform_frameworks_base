@@ -2115,7 +2115,6 @@
   <java-symbol type="layout" name="notification_template_material_big_text" />
   <java-symbol type="layout" name="notification_template_header" />
   <java-symbol type="layout" name="notification_material_media_action" />
-  <java-symbol type="color" name="notification_icon_default_color" />
   <java-symbol type="color" name="notification_progress_background_color" />
   <java-symbol type="id" name="media_actions" />
 
@@ -2965,6 +2964,8 @@
   <java-symbol type="color" name="notification_primary_text_color_dark" />
   <java-symbol type="color" name="notification_secondary_text_color_light" />
   <java-symbol type="color" name="notification_secondary_text_color_dark" />
+  <java-symbol type="color" name="notification_default_color_light" />
+  <java-symbol type="color" name="notification_default_color_dark" />
 
   <java-symbol type="string" name="app_category_game" />
   <java-symbol type="string" name="app_category_audio" />
