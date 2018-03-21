@@ -705,6 +705,11 @@ public final class SystemServer {
             mWebViewUpdateService = mSystemServiceManager.startService(WebViewUpdateService.class);
             traceEnd();
         }
+
+        // Tracks cpu time spent in binder calls
+        traceBeginAndSlog("StartBinderCallsStatsService");
+        BinderCallsStatsService.start();
+        traceEnd();
     }
 
     /**

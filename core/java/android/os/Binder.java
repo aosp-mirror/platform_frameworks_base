@@ -23,6 +23,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseIntArray;
 
+import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
@@ -712,6 +713,8 @@ public class Binder implements IBinder {
     // Entry point from android_util_Binder.cpp's onTransact
     private boolean execTransact(int code, long dataObj, long replyObj,
             int flags) {
+        BinderCallsStats binderCallsStats = BinderCallsStats.getInstance();
+        BinderCallsStats.CallSession callSession = binderCallsStats.callStarted(this, code);
         Parcel data = Parcel.obtain(dataObj);
         Parcel reply = Parcel.obtain(replyObj);
         // theoretically, we should call transact, which will call onTransact,
@@ -756,6 +759,7 @@ public class Binder implements IBinder {
         // to the main transaction loop to wait for another incoming transaction.  Either
         // way, strict mode begone!
         StrictMode.clearGatheredViolations();
+        binderCallsStats.callEnded(callSession);
 
         return res;
     }
