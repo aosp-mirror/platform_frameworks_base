@@ -1723,7 +1723,7 @@ public final class PowerManagerService extends SystemService
 
                 // Update wireless dock detection state.
                 final boolean dockedOnWirelessCharger = mWirelessChargerDetector.update(
-                        mIsPowered, mPlugType, mBatteryLevel);
+                        mIsPowered, mPlugType);
 
                 // Treat plugging and unplugging the devices as a user activity.
                 // Users find it disconcerting when they plug or unplug the device
