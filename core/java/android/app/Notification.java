@@ -2631,8 +2631,8 @@ public class Notification implements Parcelable
                     if (!Objects.equals(firstRs[j].getLabel(), secondRs[j].getLabel())) {
                         return true;
                     }
-                    CharSequence[] firstCs = firstRs[i].getChoices();
-                    CharSequence[] secondCs = secondRs[i].getChoices();
+                    CharSequence[] firstCs = firstRs[j].getChoices();
+                    CharSequence[] secondCs = secondRs[j].getChoices();
                     if (firstCs == null) {
                         firstCs = new CharSequence[0];
                     }
