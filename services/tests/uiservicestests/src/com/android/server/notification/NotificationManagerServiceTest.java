@@ -2739,4 +2739,44 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         assertFalse(mService.isVisuallyInterruptive(r1, r2));
     }
+
+    @Test
+    public void testHideAndUnhideNotificationsOnSuspendedPackageBroadcast() {
+        // post 2 notification from this package
+        final NotificationRecord notif1 = generateNotificationRecord(
+                mTestNotificationChannel, 1, null, true);
+        final NotificationRecord notif2 = generateNotificationRecord(
+                mTestNotificationChannel, 2, null, false);
+        mService.addNotification(notif1);
+        mService.addNotification(notif2);
+
+        // on broadcast, hide the 2 notifications
+        mService.simulatePackageSuspendBroadcast(true, PKG);
+        ArgumentCaptor<List> captorHide = ArgumentCaptor.forClass(List.class);
+        verify(mListeners, times(1)).notifyHiddenLocked(captorHide.capture());
+        assertEquals(2, captorHide.getValue().size());
+
+        // on broadcast, unhide the 2 notifications
+        mService.simulatePackageSuspendBroadcast(false, PKG);
+        ArgumentCaptor<List> captorUnhide = ArgumentCaptor.forClass(List.class);
+        verify(mListeners, times(1)).notifyUnhiddenLocked(captorUnhide.capture());
+        assertEquals(2, captorUnhide.getValue().size());
+    }
+
+    @Test
+    public void testNoNotificationsHiddenOnSuspendedPackageBroadcast() {
+        // post 2 notification from this package
+        final NotificationRecord notif1 = generateNotificationRecord(
+                mTestNotificationChannel, 1, null, true);
+        final NotificationRecord notif2 = generateNotificationRecord(
+                mTestNotificationChannel, 2, null, false);
+        mService.addNotification(notif1);
+        mService.addNotification(notif2);
+
+        // on broadcast, nothing is hidden since no notifications are of package "test_package"
+        mService.simulatePackageSuspendBroadcast(true, "test_package");
+        ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
+        verify(mListeners, times(1)).notifyHiddenLocked(captor.capture());
+        assertEquals(0, captor.getValue().size());
+    }
 }
