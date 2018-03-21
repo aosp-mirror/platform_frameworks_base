@@ -462,6 +462,8 @@ java_library {
         "media/java/android/media/session/ISessionController.aidl",
         "media/java/android/media/session/ISessionControllerCallback.aidl",
         "media/java/android/media/session/ISessionManager.aidl",
+        "media/java/android/media/soundtrigger/ISoundTriggerDetectionService.aidl",
+        "media/java/android/media/soundtrigger/ISoundTriggerDetectionServiceClient.aidl",
         "media/java/android/media/tv/ITvInputClient.aidl",
         "media/java/android/media/tv/ITvInputHardware.aidl",
         "media/java/android/media/tv/ITvInputHardwareCallback.aidl",

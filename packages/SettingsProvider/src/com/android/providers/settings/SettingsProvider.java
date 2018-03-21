@@ -2938,7 +2938,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 160;
+            private static final int SETTINGS_VERSION = 161;
 
             private final int mUserId;
 
@@ -3668,6 +3668,35 @@ public class SettingsProvider extends ContentProvider {
                     }
                     currentVersion = 160;
                 }
+
+                if (currentVersion == 160) {
+                    // Version 161: Set the default value for
+                    // MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY and
+                    // SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT
+                    final SettingsState globalSettings = getGlobalSettingsLocked();
+
+                    String oldValue = globalSettings.getSettingLocked(
+                            Global.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY).getValue();
+                    if (TextUtils.equals(null, oldValue)) {
+                        globalSettings.insertSettingLocked(
+                                Settings.Global.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY,
+                                Integer.toString(getContext().getResources().getInteger(
+                                        R.integer.def_max_sound_trigger_detection_service_ops_per_day)),
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    oldValue = globalSettings.getSettingLocked(
+                            Global.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT).getValue();
+                    if (TextUtils.equals(null, oldValue)) {
+                        globalSettings.insertSettingLocked(
+                                Settings.Global.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT,
+                                Integer.toString(getContext().getResources().getInteger(
+                                        R.integer.def_sound_trigger_detection_service_op_timeout)),
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 161;
+                }
+
                 // vXXX: Add new settings above this point.
 
                 if (currentVersion != newVersion) {

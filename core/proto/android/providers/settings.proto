@@ -468,6 +468,8 @@ message GlobalSettingsProto {
     optional SettingProto chained_battery_attribution_enabled = 356 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto autofill_compat_allowed_packages = 357 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto hidden_api_blacklist_exemptions = 358 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto sound_trigger_detection_service_op_timeout = 387  [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto max_sound_trigger_detection_service_ops_per_day = 388  [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Subscription to be used for voice call on a multi sim device. The
     // supported values are 0 = SUB1, 1 = SUB2 and etc.
     optional SettingProto multi_sim_voice_call_subscription = 359 [ (android.privacy).dest = DEST_AUTOMATIC ];
@@ -505,7 +507,7 @@ message GlobalSettingsProto {
     optional SettingsProto backup_agent_timeout_parameters = 386;
     // Please insert fields in the same order as in
     // frameworks/base/core/java/android/provider/Settings.java.
-    // Next tag = 387;
+    // Next tag = 389;
 }
 
 message SecureSettingsProto {

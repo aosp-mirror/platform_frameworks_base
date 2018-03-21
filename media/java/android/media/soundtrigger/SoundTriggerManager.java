@@ -15,26 +15,31 @@
  */
 
 package android.media.soundtrigger;
+
 import static android.hardware.soundtrigger.SoundTrigger.STATUS_ERROR;
 
-import android.app.PendingIntent;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.hardware.soundtrigger.SoundTrigger;
-import android.hardware.soundtrigger.SoundTrigger.SoundModel;
 import android.hardware.soundtrigger.SoundTrigger.GenericSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
+import android.hardware.soundtrigger.SoundTrigger.SoundModel;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.app.ISoundTriggerService;
+import com.android.internal.util.Preconditions;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -276,6 +281,40 @@ public final class SoundTriggerManager {
     }
 
     /**
+     * Starts recognition for the given model id. All events from the model will be sent to the
+     * service.
+     *
+     * <p>This only supports generic sound trigger events. For keyphrase events, please use
+     * {@link android.service.voice.VoiceInteractionService}.
+     *
+     * @param soundModelId Id of the sound model
+     * @param params Opaque data sent to each service call of the service as the {@code params}
+     *               argument
+     * @param detectionService The component name of the service that should receive the events.
+     *                         Needs to subclass {@link SoundTriggerDetectionService}
+     * @param config Configures the recognition
+     *
+     * @return {@link SoundTrigger#STATUS_OK} if the recognition could be started, error code
+     *         otherwise
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER)
+    public int startRecognition(@NonNull UUID soundModelId, @Nullable Bundle params,
+        @NonNull ComponentName detectionService, @NonNull RecognitionConfig config) {
+        Preconditions.checkNotNull(soundModelId);
+        Preconditions.checkNotNull(detectionService);
+        Preconditions.checkNotNull(config);
+
+        try {
+            return mSoundTriggerService.startRecognitionForService(new ParcelUuid(soundModelId),
+                params, detectionService, config);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Stops the given model's recognition.
      * @hide
      */
@@ -322,6 +361,21 @@ public final class SoundTriggerManager {
                     new ParcelUuid(soundModelId));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the amount of time (in milliseconds) an operation of the
+     * {@link ISoundTriggerDetectionService} is allowed to ask.
+     *
+     * @return The amount of time an sound trigger detection service operation is allowed to last
+     */
+    public int getDetectionServiceOperationsTimeout() {
+        try {
+            return Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT);
+        } catch (Settings.SettingNotFoundException e) {
+            return Integer.MAX_VALUE;
         }
     }
 }
