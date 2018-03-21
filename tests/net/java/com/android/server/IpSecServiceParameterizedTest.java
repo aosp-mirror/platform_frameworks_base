@@ -17,6 +17,7 @@
 package com.android.server;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -32,6 +33,9 @@ import android.net.IpSecConfig;
 import android.net.IpSecManager;
 import android.net.IpSecSpiResponse;
 import android.net.IpSecTransformResponse;
+import android.net.IpSecTunnelInterfaceResponse;
+import android.net.LinkAddress;
+import android.net.Network;
 import android.net.NetworkUtils;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
@@ -56,10 +60,15 @@ public class IpSecServiceParameterizedTest {
 
     private final String mDestinationAddr;
     private final String mSourceAddr;
+    private final LinkAddress mLocalInnerAddress;
 
     @Parameterized.Parameters
     public static Collection ipSecConfigs() {
-        return Arrays.asList(new Object[][] {{"1.2.3.4", "8.8.4.4"}, {"2601::2", "2601::10"}});
+        return Arrays.asList(
+                new Object[][] {
+                {"1.2.3.4", "8.8.4.4", "10.0.1.1/24"},
+                {"2601::2", "2601::10", "2001:db8::1/64"}
+        });
     }
 
     private static final byte[] AEAD_KEY = {
@@ -86,6 +95,7 @@ public class IpSecServiceParameterizedTest {
     INetd mMockNetd;
     IpSecService.IpSecServiceConfiguration mMockIpSecSrvConfig;
     IpSecService mIpSecService;
+    Network fakeNetwork = new Network(0xAB);
 
     private static final IpSecAlgorithm AUTH_ALGO =
             new IpSecAlgorithm(IpSecAlgorithm.AUTH_HMAC_SHA256, AUTH_KEY, AUTH_KEY.length * 4);
@@ -94,9 +104,11 @@ public class IpSecServiceParameterizedTest {
     private static final IpSecAlgorithm AEAD_ALGO =
             new IpSecAlgorithm(IpSecAlgorithm.AUTH_CRYPT_AES_GCM, AEAD_KEY, 128);
 
-    public IpSecServiceParameterizedTest(String sourceAddr, String destAddr) {
+    public IpSecServiceParameterizedTest(
+            String sourceAddr, String destAddr, String localInnerAddr) {
         mSourceAddr = sourceAddr;
         mDestinationAddr = destAddr;
+        mLocalInnerAddress = new LinkAddress(localInnerAddr);
     }
 
     @Before
@@ -405,5 +417,104 @@ public class IpSecServiceParameterizedTest {
         mIpSecService.removeTransportModeTransforms(pfd);
 
         verify(mMockNetd).ipSecRemoveTransportModeTransform(pfd.getFileDescriptor());
+    }
+
+    private IpSecTunnelInterfaceResponse createAndValidateTunnel(
+            String localAddr, String remoteAddr) {
+        IpSecTunnelInterfaceResponse createTunnelResp =
+                mIpSecService.createTunnelInterface(
+                        mSourceAddr, mDestinationAddr, fakeNetwork, new Binder());
+
+        assertNotNull(createTunnelResp);
+        assertEquals(IpSecManager.Status.OK, createTunnelResp.status);
+        return createTunnelResp;
+    }
+
+    @Test
+    public void testCreateTunnelInterface() throws Exception {
+        IpSecTunnelInterfaceResponse createTunnelResp =
+                createAndValidateTunnel(mSourceAddr, mDestinationAddr);
+
+        // Check that we have stored the tracking object, and retrieve it
+        IpSecService.UserRecord userRecord =
+                mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
+        IpSecService.RefcountedResource refcountedRecord =
+                userRecord.mTunnelInterfaceRecords.getRefcountedResourceOrThrow(
+                        createTunnelResp.resourceId);
+
+        assertEquals(1, userRecord.mTunnelQuotaTracker.mCurrent);
+        verify(mMockNetd)
+                .addVirtualTunnelInterface(
+                        eq(createTunnelResp.interfaceName),
+                        eq(mSourceAddr),
+                        eq(mDestinationAddr),
+                        anyInt(),
+                        anyInt());
+    }
+
+    @Test
+    public void testDeleteTunnelInterface() throws Exception {
+        IpSecTunnelInterfaceResponse createTunnelResp =
+                createAndValidateTunnel(mSourceAddr, mDestinationAddr);
+
+        IpSecService.UserRecord userRecord =
+                mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
+
+        mIpSecService.deleteTunnelInterface(createTunnelResp.resourceId);
+
+        // Verify quota and RefcountedResource objects cleaned up
+        assertEquals(0, userRecord.mTunnelQuotaTracker.mCurrent);
+        verify(mMockNetd).removeVirtualTunnelInterface(eq(createTunnelResp.interfaceName));
+        try {
+            userRecord.mTunnelInterfaceRecords.getRefcountedResourceOrThrow(
+                    createTunnelResp.resourceId);
+            fail("Expected IllegalArgumentException on attempt to access deleted resource");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testTunnelInterfaceBinderDeath() throws Exception {
+        IpSecTunnelInterfaceResponse createTunnelResp =
+                createAndValidateTunnel(mSourceAddr, mDestinationAddr);
+
+        IpSecService.UserRecord userRecord =
+                mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
+        IpSecService.RefcountedResource refcountedRecord =
+                userRecord.mTunnelInterfaceRecords.getRefcountedResourceOrThrow(
+                        createTunnelResp.resourceId);
+
+        refcountedRecord.binderDied();
+
+        // Verify quota and RefcountedResource objects cleaned up
+        assertEquals(0, userRecord.mTunnelQuotaTracker.mCurrent);
+        verify(mMockNetd).removeVirtualTunnelInterface(eq(createTunnelResp.interfaceName));
+        try {
+            userRecord.mTunnelInterfaceRecords.getRefcountedResourceOrThrow(
+                    createTunnelResp.resourceId);
+            fail("Expected IllegalArgumentException on attempt to access deleted resource");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testAddRemoveAddressFromTunnelInterface() throws Exception {
+        IpSecTunnelInterfaceResponse createTunnelResp =
+                createAndValidateTunnel(mSourceAddr, mDestinationAddr);
+
+        mIpSecService.addAddressToTunnelInterface(createTunnelResp.resourceId, mLocalInnerAddress);
+        verify(mMockNetd)
+                .interfaceAddAddress(
+                        eq(createTunnelResp.interfaceName),
+                        eq(mLocalInnerAddress.getAddress().getHostAddress()),
+                        eq(mLocalInnerAddress.getPrefixLength()));
+
+        mIpSecService.removeAddressFromTunnelInterface(
+                createTunnelResp.resourceId, mLocalInnerAddress);
+        verify(mMockNetd)
+                .interfaceDelAddress(
+                        eq(createTunnelResp.interfaceName),
+                        eq(mLocalInnerAddress.getAddress().getHostAddress()),
+                        eq(mLocalInnerAddress.getPrefixLength()));
     }
 }
