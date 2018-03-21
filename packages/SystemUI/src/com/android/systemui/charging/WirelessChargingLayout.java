@@ -20,6 +20,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
@@ -38,24 +39,24 @@ public class WirelessChargingLayout extends FrameLayout {
 
     public WirelessChargingLayout(Context context) {
         super(context);
-        init(context, null);
+        init(context, null, false);
     }
 
-    public WirelessChargingLayout(Context context, int batterylLevel) {
+    public WirelessChargingLayout(Context context, int batteryLevel, boolean isDozing) {
         super(context);
-        init(context, null, batterylLevel);
+        init(context, null, batteryLevel, isDozing);
     }
 
     public WirelessChargingLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context, attrs);
+        init(context, attrs, false);
     }
 
-    private void init(Context c, AttributeSet attrs) {
-        init(c, attrs, -1);
+    private void init(Context c, AttributeSet attrs, boolean isDozing) {
+        init(c, attrs, -1, false);
     }
 
-    private void init(Context context, AttributeSet attrs, int batteryLevel) {
+    private void init(Context context, AttributeSet attrs, int batteryLevel, boolean isDozing) {
         final int mBatteryLevel = batteryLevel;
         inflate(context, R.layout.wireless_charging_layout, this);
 
@@ -64,6 +65,11 @@ public class WirelessChargingLayout extends FrameLayout {
 
         // amount of battery:
         final TextView mPercentage = findViewById(R.id.wireless_charging_percentage);
+
+        if (isDozing) {
+            mChargingView.setPaintColor(Color.WHITE);
+            mPercentage.setTextColor(Color.WHITE);
+        }
 
         if (batteryLevel != UNKNOWN_BATTERY_LEVEL) {
             mPercentage.setText(NumberFormat.getPercentInstance().format(mBatteryLevel / 100f));
@@ -74,9 +80,9 @@ public class WirelessChargingLayout extends FrameLayout {
                 R.integer.wireless_charging_fade_offset);
         final long chargingAnimationFadeDuration = (long) context.getResources().getInteger(
                 R.integer.wireless_charging_fade_duration);
-        final int batteryLevelTextSizeStart = context.getResources().getDimensionPixelSize(
+        final float batteryLevelTextSizeStart = context.getResources().getFloat(
                 R.dimen.wireless_charging_anim_battery_level_text_size_start);
-        final int batteryLevelTextSizeEnd = context.getResources().getDimensionPixelSize(
+        final float batteryLevelTextSizeEnd = context.getResources().getFloat(
                 R.dimen.wireless_charging_anim_battery_level_text_size_end);
 
         // Animation Scale: battery percentage text scales from 0% to 100%

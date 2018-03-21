@@ -55,9 +55,9 @@ public class WirelessChargingAnimation {
      * @hide
      */
     public WirelessChargingAnimation(@NonNull Context context, @Nullable Looper looper, int
-            batteryLevel, Callback callback) {
+            batteryLevel, Callback callback, boolean isDozing) {
         mCurrentWirelessChargingView = new WirelessChargingView(context, looper,
-                batteryLevel, callback);
+                batteryLevel, callback, isDozing);
     }
 
     /**
@@ -65,8 +65,8 @@ public class WirelessChargingAnimation {
      * @hide
      */
     public static WirelessChargingAnimation makeWirelessChargingAnimation(@NonNull Context context,
-            @Nullable Looper looper, int batteryLevel, Callback callback) {
-        return new WirelessChargingAnimation(context, looper, batteryLevel, callback);
+            @Nullable Looper looper, int batteryLevel, Callback callback, boolean isDozing) {
+        return new WirelessChargingAnimation(context, looper, batteryLevel, callback, isDozing);
     }
 
     /**
@@ -102,14 +102,14 @@ public class WirelessChargingAnimation {
         private Callback mCallback;
 
         public WirelessChargingView(Context context, @Nullable Looper looper, int batteryLevel,
-                Callback callback) {
+                Callback callback, boolean isDozing) {
             mCallback = callback;
-            mNextView = new WirelessChargingLayout(context, batteryLevel);
+            mNextView = new WirelessChargingLayout(context, batteryLevel, isDozing);
             mGravity = Gravity.CENTER_HORIZONTAL | Gravity.CENTER;
 
             final WindowManager.LayoutParams params = mParams;
             params.height = WindowManager.LayoutParams.WRAP_CONTENT;
-            params.width = WindowManager.LayoutParams.WRAP_CONTENT;
+            params.width = WindowManager.LayoutParams.MATCH_PARENT;
             params.format = PixelFormat.TRANSLUCENT;
 
             params.type = WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
