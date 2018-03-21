@@ -21,15 +21,15 @@
 #include <cutils/log.h>
 #include <algorithm>
 #include <climits>
+#include "../logd/LogEvent.h"
+#include "../stats_log_util.h"
+#include "../statscompanion_util.h"
 #include "ResourceHealthManagerPuller.h"
 #include "ResourceThermalManagerPuller.h"
 #include "StatsCompanionServicePuller.h"
-#include "StatsPullerManagerImpl.h"
 #include "StatsService.h"
 #include "SubsystemSleepStatePuller.h"
-#include "logd/LogEvent.h"
 #include "statslog.h"
-#include "stats_log_util.h"
 
 #include <iostream>
 
@@ -123,7 +123,6 @@ const std::map<int, PullAtomInfo> StatsPullerManagerImpl::kAllPullAtomInfo = {
 
 StatsPullerManagerImpl::StatsPullerManagerImpl()
     : mCurrentPullingInterval(LONG_MAX) {
-    mStatsCompanionService = StatsService::getStatsCompanionService();
 }
 
 bool StatsPullerManagerImpl::Pull(int tagId, vector<shared_ptr<LogEvent>>* data) {
@@ -148,9 +147,35 @@ bool StatsPullerManagerImpl::PullerForMatcherExists(int tagId) const {
     return kAllPullAtomInfo.find(tagId) != kAllPullAtomInfo.end();
 }
 
+void StatsPullerManagerImpl::updateAlarmLocked() {
+    long currentTimeMs = getElapsedRealtimeMillis();
+    long nextAlarmTimeMs = currentTimeMs + mCurrentPullingInterval -
+        (currentTimeMs - mTimeBaseSec * 1000) % mCurrentPullingInterval;
+    sp<IStatsCompanionService> statsCompanionServiceCopy = mStatsCompanionService;
+    if (statsCompanionServiceCopy != nullptr) {
+        statsCompanionServiceCopy->setPullingAlarms(nextAlarmTimeMs, mCurrentPullingInterval);
+    } else {
+        VLOG("StatsCompanionService not available. Alarm not set.");
+    }
+    return;
+}
+
+void StatsPullerManagerImpl::SetStatsCompanionService(
+        sp<IStatsCompanionService> statsCompanionService) {
+    AutoMutex _l(mLock);
+    sp<IStatsCompanionService> tmpForLock = mStatsCompanionService;
+    mStatsCompanionService = statsCompanionService;
+    for (const auto& pulledAtom : kAllPullAtomInfo) {
+        pulledAtom.second.puller->SetStatsCompanionService(statsCompanionService);
+    }
+    if (mStatsCompanionService != nullptr) {
+        updateAlarmLocked();
+    }
+}
+
 void StatsPullerManagerImpl::RegisterReceiver(int tagId, wp<PullDataReceiver> receiver,
                                               long intervalMs) {
-    AutoMutex _l(mReceiversLock);
+    AutoMutex _l(mLock);
     auto& receivers = mReceivers[tagId];
     for (auto it = receivers.begin(); it != receivers.end(); it++) {
         if (it->receiver == receiver) {
@@ -175,20 +200,13 @@ void StatsPullerManagerImpl::RegisterReceiver(int tagId, wp<PullDataReceiver> re
     if (roundedIntervalMs < mCurrentPullingInterval) {
         VLOG("Updating pulling interval %ld", intervalMs);
         mCurrentPullingInterval = roundedIntervalMs;
-        long currentTimeMs = getElapsedRealtimeMillis();
-        long nextAlarmTimeMs = currentTimeMs + mCurrentPullingInterval -
-            (currentTimeMs - mTimeBaseSec * 1000) % mCurrentPullingInterval;
-        if (mStatsCompanionService != nullptr) {
-            mStatsCompanionService->setPullingAlarms(nextAlarmTimeMs, mCurrentPullingInterval);
-        } else {
-            VLOG("Failed to update pulling interval");
-        }
+        updateAlarmLocked();
     }
     VLOG("Puller for tagId %d registered of %d", tagId, (int)receivers.size());
 }
 
 void StatsPullerManagerImpl::UnRegisterReceiver(int tagId, wp<PullDataReceiver> receiver) {
-    AutoMutex _l(mReceiversLock);
+    AutoMutex _l(mLock);
     if (mReceivers.find(tagId) == mReceivers.end()) {
         VLOG("Unknown pull code or no receivers: %d", tagId);
         return;
@@ -204,7 +222,7 @@ void StatsPullerManagerImpl::UnRegisterReceiver(int tagId, wp<PullDataReceiver> 
 }
 
 void StatsPullerManagerImpl::OnAlarmFired() {
-    AutoMutex _l(mReceiversLock);
+    AutoMutex _l(mLock);
 
     uint64_t currentTimeMs = getElapsedRealtimeMillis();
 
