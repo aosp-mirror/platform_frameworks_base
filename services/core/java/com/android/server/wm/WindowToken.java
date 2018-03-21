@@ -23,12 +23,12 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
-import static com.android.server.wm.proto.WindowTokenProto.HASH_CODE;
-import static com.android.server.wm.proto.WindowTokenProto.HIDDEN;
-import static com.android.server.wm.proto.WindowTokenProto.PAUSED;
-import static com.android.server.wm.proto.WindowTokenProto.WAITING_TO_SHOW;
-import static com.android.server.wm.proto.WindowTokenProto.WINDOWS;
-import static com.android.server.wm.proto.WindowTokenProto.WINDOW_CONTAINER;
+import static com.android.server.wm.WindowTokenProto.HASH_CODE;
+import static com.android.server.wm.WindowTokenProto.HIDDEN;
+import static com.android.server.wm.WindowTokenProto.PAUSED;
+import static com.android.server.wm.WindowTokenProto.WAITING_TO_SHOW;
+import static com.android.server.wm.WindowTokenProto.WINDOWS;
+import static com.android.server.wm.WindowTokenProto.WINDOW_CONTAINER;
 
 import android.annotation.CallSuper;
 import android.os.Debug;

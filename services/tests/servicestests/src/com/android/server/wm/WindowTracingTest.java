@@ -36,7 +36,7 @@ import android.support.test.runner.AndroidJUnit4;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.Preconditions;
-import com.android.server.wm.proto.WindowManagerTraceProto;
+import com.android.server.wm.WindowManagerTraceProto;
 
 import org.junit.After;
 import org.junit.Before;

@@ -25,7 +25,6 @@ import android.util.Printer;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.server.IntentResolver;
-import com.android.server.am.proto.ReceiverListProto;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;

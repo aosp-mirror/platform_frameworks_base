@@ -21,8 +21,6 @@ import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.server.am.proto.BroadcastFilterProto;
-
 import java.io.PrintWriter;
 
 final class BroadcastFilter extends IntentFilter {

@@ -27,7 +27,6 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.ProgressReporter;
-import com.android.server.am.proto.UserStateProto;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
