@@ -347,7 +347,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testWillHideAoDWallpaper() {
+    public void testWillHideAodWallpaper() {
         mScrimController.setWallpaperSupportsAmbientMode(true);
         mScrimController.transitionTo(ScrimState.AOD);
         verify(mAlarmManager).setExact(anyInt(), anyLong(), any(), any(), any());
@@ -488,6 +488,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         private FakeHandler mHandler;
         private boolean mAnimationCancelled;
+        boolean mOnPreDrawCalled;
 
         SynchronousScrimController(LightBarController lightBarController,
                 ScrimView scrimBehind, ScrimView scrimInFront,
@@ -496,6 +497,12 @@ public class ScrimControllerTest extends SysuiTestCase {
             super(lightBarController, scrimBehind, scrimInFront,
                     scrimVisibleListener, dozeParameters, alarmManager);
             mHandler = new FakeHandler(Looper.myLooper());
+        }
+
+        @Override
+        public boolean onPreDraw() {
+            mOnPreDrawCalled = true;
+            return super.onPreDraw();
         }
 
         void finishAnimationsImmediately() {

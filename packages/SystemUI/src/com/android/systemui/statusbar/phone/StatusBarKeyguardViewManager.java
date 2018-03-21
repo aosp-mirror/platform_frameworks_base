@@ -95,6 +95,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     protected boolean mLastRemoteInputActive;
     private boolean mLastDozing;
     private int mLastFpMode;
+    private boolean mGoingToSleepVisibleNotOccluded;
 
     private OnDismissAction mAfterKeyguardGoneAction;
     private final ArrayList<Runnable> mAfterKeyguardGoneRunnables = new ArrayList<>();
@@ -262,11 +263,16 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
     }
 
+    public boolean isGoingToSleepVisibleNotOccluded() {
+        return mGoingToSleepVisibleNotOccluded;
+    }
+
     public void onStartedGoingToSleep() {
-        // TODO: remove
+        mGoingToSleepVisibleNotOccluded = isShowing() && !isOccluded();
     }
 
     public void onFinishedGoingToSleep() {
+        mGoingToSleepVisibleNotOccluded = false;
         mBouncer.onScreenTurnedOff();
     }
 

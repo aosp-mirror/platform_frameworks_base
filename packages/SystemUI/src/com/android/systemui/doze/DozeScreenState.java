@@ -21,6 +21,7 @@ import android.util.Log;
 import android.view.Display;
 
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.util.wakelock.WakeLock;
 
 /**
  * Controls the screen when dozing.
@@ -30,18 +31,27 @@ public class DozeScreenState implements DozeMachine.Part {
     private static final boolean DEBUG = DozeService.DEBUG;
     private static final String TAG = "DozeScreenState";
 
+    /**
+     * Delay entering low power mode when animating to make sure that we'll have
+     * time to move all elements into their final positions while still at 60 fps.
+     */
+    private static final int ENTER_DOZE_DELAY = 3000;
+
     private final DozeMachine.Service mDozeService;
     private final Handler mHandler;
     private final Runnable mApplyPendingScreenState = this::applyPendingScreenState;
     private final DozeParameters mParameters;
 
     private int mPendingScreenState = Display.STATE_UNKNOWN;
+    private boolean mWakeLockHeld;
+    private WakeLock mWakeLock;
 
     public DozeScreenState(DozeMachine.Service service, Handler handler,
-            DozeParameters parameters) {
+            DozeParameters parameters, WakeLock wakeLock) {
         mDozeService = service;
         mHandler = handler;
         mParameters = parameters;
+        mWakeLock = wakeLock;
     }
 
     @Override
@@ -69,12 +79,33 @@ public class DozeScreenState implements DozeMachine.Part {
             // that the screen turns on again before the navigation bar is hidden. To work around
             // that, wait for a traversal to happen before applying the initial screen state.
             mPendingScreenState = screenState;
-            if (!messagePending) {
-                mHandler.post(mApplyPendingScreenState);
+
+            // Delay screen state transitions even longer while animations are running.
+            boolean shouldDelayTransition = newState == DozeMachine.State.DOZE_AOD
+                    && mParameters.shouldControlScreenOff();
+
+            if (!mWakeLockHeld && shouldDelayTransition) {
+                mWakeLockHeld = true;
+                mWakeLock.acquire();
             }
-            return;
+
+            if (!messagePending) {
+                if (DEBUG) {
+                    Log.d(TAG, "Display state changed to " + screenState + " delayed by "
+                            + (shouldDelayTransition ? ENTER_DOZE_DELAY : 1));
+                }
+
+                if (shouldDelayTransition) {
+                    mHandler.postDelayed(mApplyPendingScreenState, ENTER_DOZE_DELAY);
+                } else {
+                    mHandler.post(mApplyPendingScreenState);
+                }
+            } else if (DEBUG) {
+                Log.d(TAG, "Pending display state change to " + screenState);
+            }
+        } else {
+            applyScreenState(screenState);
         }
-        applyScreenState(screenState);
     }
 
     private void applyPendingScreenState() {
@@ -87,6 +118,10 @@ public class DozeScreenState implements DozeMachine.Part {
             if (DEBUG) Log.d(TAG, "setDozeScreenState(" + screenState + ")");
             mDozeService.setDozeScreenState(screenState);
             mPendingScreenState = Display.STATE_UNKNOWN;
+            if (mWakeLockHeld) {
+                mWakeLockHeld = false;
+                mWakeLock.release();
+            }
         }
     }
 }
