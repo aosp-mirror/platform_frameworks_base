@@ -675,7 +675,7 @@ public class MeasuredParagraph {
     /**
      * This only works if the MeasuredParagraph is computed with buildForStaticLayout.
      */
-    @IntRange(from = 0) int getMemoryUsage() {
+    public @IntRange(from = 0) int getMemoryUsage() {
         return nGetMemoryUsage(mNativePtr);
     }
 
