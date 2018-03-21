@@ -75,7 +75,6 @@ Landroid/app/ActivityManager;->isUserRunning(I)Z
 Landroid/app/ActivityManager;->mContext:Landroid/content/Context;
 Landroid/app/ActivityManager;->PROCESS_STATE_IMPORTANT_BACKGROUND:I
 Landroid/app/ActivityManager;->PROCESS_STATE_TOP:I
-Landroid/app/ActivityManager;->setPersistentVrThread(I)V
 Landroid/app/ActivityManagerNative;->asInterface(Landroid/os/IBinder;)Landroid/app/IActivityManager;
 Landroid/app/ActivityManagerNative;->getDefault()Landroid/app/IActivityManager;
 Landroid/app/ActivityOptions;->makeMultiThumbFutureAspectScaleAnimation(Landroid/content/Context;Landroid/os/Handler;Landroid/view/IAppTransitionAnimationSpecsFuture;Landroid/app/ActivityOptions$OnAnimationStartedListener;Z)Landroid/app/ActivityOptions;
@@ -459,15 +458,6 @@ Landroid/app/usage/UsageStats;->mLastEvent:I
 Landroid/app/usage/UsageStats;->mLaunchCount:I
 Landroid/app/usage/UsageStats;->mTotalTimeInForeground:J
 Landroid/app/usage/UsageStatsManager;->mService:Landroid/app/usage/IUsageStatsManager;
-Landroid/app/Vr2dDisplayProperties$Builder;-><init>()V
-Landroid/app/Vr2dDisplayProperties$Builder;->build()Landroid/app/Vr2dDisplayProperties;
-Landroid/app/Vr2dDisplayProperties$Builder;->setEnabled(Z)Landroid/app/Vr2dDisplayProperties$Builder;
-Landroid/app/Vr2dDisplayProperties;-><init>(III)V
-Landroid/app/VrManager;->getPersistentVrModeEnabled()Z
-Landroid/app/VrManager;->mService:Landroid/service/vr/IVrManager;
-Landroid/app/VrManager;->registerVrStateCallback(Landroid/app/VrStateCallback;Landroid/os/Handler;)V
-Landroid/app/VrManager;->setVr2dDisplayProperties(Landroid/app/Vr2dDisplayProperties;)V
-Landroid/app/VrManager;->unregisterVrStateCallback(Landroid/app/VrStateCallback;)V
 Landroid/app/WallpaperColors;->getColorHints()I
 Landroid/app/WallpaperManager;->getBitmap()Landroid/graphics/Bitmap;
 Landroid/app/WallpaperManager;->getBitmap(Z)Landroid/graphics/Bitmap;
@@ -2265,7 +2255,6 @@ Landroid/service/notification/StatusBarNotification;->getUid()I
 Landroid/service/persistentdata/IPersistentDataBlockService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/service/persistentdata/IPersistentDataBlockService;
 Landroid/service/voice/AlwaysOnHotwordDetector$EventPayload;->getCaptureSession()Ljava/lang/Integer;
 Landroid/service/voice/VoiceInteractionService;->isKeyphraseAndLocaleSupportedForHotword(Ljava/lang/String;Ljava/util/Locale;)Z
-Landroid/service/vr/IVrManager;->getVr2dDisplayId()I
 Landroid/service/wallpaper/WallpaperService$Engine;->setFixedSizeAllowed(Z)V
 Landroid/speech/tts/TextToSpeech;->getCurrentEngine()Ljava/lang/String;
 Landroid/system/Int32Ref;->value:I

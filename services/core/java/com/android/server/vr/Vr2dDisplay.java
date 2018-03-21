@@ -230,7 +230,8 @@ class Vr2dDisplay {
                 resized = true;
             }
 
-            if ((displayProperties.getFlags() & Vr2dDisplayProperties.FLAG_VIRTUAL_DISPLAY_ENABLED)
+            if ((displayProperties.getAddedFlags() &
+                    Vr2dDisplayProperties.FLAG_VIRTUAL_DISPLAY_ENABLED)
                     == Vr2dDisplayProperties.FLAG_VIRTUAL_DISPLAY_ENABLED) {
                 mIsVirtualDisplayAllowed = true;
             } else if ((displayProperties.getRemovedFlags() &
