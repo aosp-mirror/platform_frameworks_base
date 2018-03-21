@@ -87,7 +87,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     final int mId;
 
-    final AccessibilityServiceInfo mAccessibilityServiceInfo;
+    protected final AccessibilityServiceInfo mAccessibilityServiceInfo;
 
     // Lock must match the one used by AccessibilityManagerService
     protected final Object mLock;
@@ -337,6 +337,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         synchronized (mLock) {
             return mAccessibilityServiceInfo;
         }
+    }
+
+    public int getCapabilities() {
+        return mAccessibilityServiceInfo.getCapabilities();
     }
 
     int getRelevantEventTypes() {
