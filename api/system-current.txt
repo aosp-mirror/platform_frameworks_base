@@ -723,6 +723,7 @@ package android.app.usage {
     method public java.lang.String getNotificationChannelId();
     field public static final int NOTIFICATION_INTERRUPTION = 12; // 0xc
     field public static final int NOTIFICATION_SEEN = 10; // 0xa
+    field public static final int SYSTEM_INTERACTION = 6; // 0x6
   }
 
   public final class UsageStatsManager {
