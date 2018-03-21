@@ -17,6 +17,8 @@
 package com.android.server.usage;
 
 import static android.app.usage.UsageEvents.Event.NOTIFICATION_SEEN;
+import static android.app.usage.UsageEvents.Event.SLICE_PINNED;
+import static android.app.usage.UsageEvents.Event.SLICE_PINNED_PRIV;
 import static android.app.usage.UsageEvents.Event.USER_INTERACTION;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_DEFAULT;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED;
@@ -403,6 +405,30 @@ public class AppStandbyControllerTests {
         mController.forceIdleState(PACKAGE_1, USER_ID, true);
         reportEvent(mController, NOTIFICATION_SEEN, mInjector.mElapsedRealtime);
         assertEquals(STANDBY_BUCKET_WORKING_SET, getStandbyBucket(mController));
+    }
+
+    @Test
+    public void testSlicePinnedEvent() throws Exception {
+        setChargingState(mController, false);
+
+        reportEvent(mController, USER_INTERACTION, 0);
+        assertEquals(STANDBY_BUCKET_ACTIVE, getStandbyBucket(mController));
+        mInjector.mElapsedRealtime = 1;
+        reportEvent(mController, SLICE_PINNED, mInjector.mElapsedRealtime);
+        assertEquals(STANDBY_BUCKET_ACTIVE, getStandbyBucket(mController));
+
+        mController.forceIdleState(PACKAGE_1, USER_ID, true);
+        reportEvent(mController, SLICE_PINNED, mInjector.mElapsedRealtime);
+        assertEquals(STANDBY_BUCKET_WORKING_SET, getStandbyBucket(mController));
+    }
+
+    @Test
+    public void testSlicePinnedPrivEvent() throws Exception {
+        setChargingState(mController, false);
+
+        mController.forceIdleState(PACKAGE_1, USER_ID, true);
+        reportEvent(mController, SLICE_PINNED_PRIV, mInjector.mElapsedRealtime);
+        assertEquals(STANDBY_BUCKET_ACTIVE, getStandbyBucket(mController));
     }
 
     @Test
