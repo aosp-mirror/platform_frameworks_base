@@ -2151,6 +2151,9 @@
             @see android.view.WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
             -->
             <enum name="shortEdges" value="1" />
+            <!-- Use {@code shortEdges} instead. This is temporarily here to unblock pushing the SDK
+                 until all usages have been migrated to {@code shortEdges} -->
+            <enum name="always" value="1" />
             <!-- The window is never allowed to overlap with the DisplayCutout area.
             <p>
             This should be used with windows that transiently set {@code SYSTEM_UI_FLAG_FULLSCREEN}
