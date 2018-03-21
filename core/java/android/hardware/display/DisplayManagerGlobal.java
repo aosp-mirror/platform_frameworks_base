@@ -490,6 +490,32 @@ public final class DisplayManagerGlobal {
     }
 
     /**
+     * Gets the global brightness configuration for a given user or null if one hasn't been set.
+     *
+     * @hide
+     */
+    public BrightnessConfiguration getBrightnessConfigurationForUser(int userId) {
+        try {
+            return mDm.getBrightnessConfigurationForUser(userId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the default brightness configuration or null if one hasn't been configured.
+     *
+     * @hide
+     */
+    public BrightnessConfiguration getDefaultBrightnessConfiguration() {
+        try {
+            return mDm.getDefaultBrightnessConfiguration();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Temporarily sets the brightness of the display.
      * <p>
      * Requires the {@link android.Manifest.permission#CONTROL_DISPLAY_BRIGHTNESS} permission.
