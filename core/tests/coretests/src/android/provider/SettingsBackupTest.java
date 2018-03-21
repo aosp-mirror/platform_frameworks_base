@@ -268,6 +268,7 @@ public class SettingsBackupTest {
                     Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL_MAX,
                     Settings.Global.LTE_SERVICE_FORCED,
                     Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
+                    Settings.Global.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY,
                     Settings.Global.MDC_INITIAL_MAX_RETRY,
                     Settings.Global.MHL_INPUT_SWITCHING_ENABLED,
                     Settings.Global.MHL_POWER_CHARGE_ENABLED,

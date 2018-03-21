@@ -24,6 +24,7 @@ import static android.content.pm.PackageManager.GET_SERVICES;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.hardware.soundtrigger.SoundTrigger.STATUS_ERROR;
 import static android.hardware.soundtrigger.SoundTrigger.STATUS_OK;
+import static android.provider.Settings.Global.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY;
 import static android.provider.Settings.Global.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
@@ -60,6 +61,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
@@ -72,9 +74,9 @@ import com.android.server.SystemService;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A single SystemService to manage all sound/voice-based sound models on the DSP.
@@ -99,6 +101,10 @@ public class SoundTriggerService extends SystemService {
     private Object mCallbacksLock;
     private final TreeMap<UUID, IRecognitionStatusCallback> mCallbacks;
     private PowerManager.WakeLock mWakelock;
+
+    /** Number of ops run by the {@link RemoteSoundTriggerDetectionService} per package name */
+    @GuardedBy("mLock")
+    private final ArrayMap<String, NumOps> mNumOpsPerPackage = new ArrayMap<>();
 
     public SoundTriggerService(Context context) {
         super(context);
@@ -583,6 +589,71 @@ public class SoundTriggerService extends SystemService {
         }
     }
 
+    /**
+     * Counts the number of operations added in the last 24 hours.
+     */
+    private static class NumOps {
+        private final Object mLock = new Object();
+
+        @GuardedBy("mLock")
+        private int[] mNumOps = new int[24];
+        @GuardedBy("mLock")
+        private long mLastOpsHourSinceBoot;
+
+        /**
+         * Clear buckets of new hours that have elapsed since last operation.
+         *
+         * <p>I.e. when the last operation was triggered at 1:40 and the current operation was
+         * triggered at 4:03, the buckets "2, 3, and 4" are cleared.
+         *
+         * @param currentTime Current elapsed time since boot in ns
+         */
+        void clearOldOps(long currentTime) {
+            synchronized (mLock) {
+                long numHoursSinceBoot = TimeUnit.HOURS.convert(currentTime, TimeUnit.NANOSECONDS);
+
+                // Clear buckets of new hours that have elapsed since last operation
+                // I.e. when the last operation was triggered at 1:40 and the current
+                // operation was triggered at 4:03, the bucket "2, 3, and 4" is cleared
+                if (mLastOpsHourSinceBoot != 0) {
+                    for (long hour = mLastOpsHourSinceBoot + 1; hour <= numHoursSinceBoot; hour++) {
+                        mNumOps[(int) (hour % 24)] = 0;
+                    }
+                }
+            }
+        }
+
+        /**
+         * Add a new operation.
+         *
+         * @param currentTime Current elapsed time since boot in ns
+         */
+        void addOp(long currentTime) {
+            synchronized (mLock) {
+                long numHoursSinceBoot = TimeUnit.HOURS.convert(currentTime, TimeUnit.NANOSECONDS);
+
+                mNumOps[(int) (numHoursSinceBoot % 24)]++;
+                mLastOpsHourSinceBoot = numHoursSinceBoot;
+            }
+        }
+
+        /**
+         * Get the total operations added in the last 24 hours.
+         *
+         * @return The total number of operations added in the last 24 hours
+         */
+        int getOpsAdded() {
+            synchronized (mLock) {
+                int totalOperationsInLastDay = 0;
+                for (int i = 0; i < 24; i++) {
+                    totalOperationsInLastDay += mNumOps[i];
+                }
+
+                return totalOperationsInLastDay;
+            }
+        }
+    }
+
     private interface Operation {
         void run(int opId, ISoundTriggerDetectionService service) throws RemoteException;
     }
@@ -625,6 +696,8 @@ public class SoundTriggerService extends SystemService {
         /** Operations that have been send to the service but have no yet finished */
         @GuardedBy("mRemoteServiceLock")
         private final ArraySet<Integer> mRunningOpIds = new ArraySet<>();
+        /** The number of operations executed in each of the last 24 hours */
+        private final NumOps mNumOps;
 
         /** The service binder if connected */
         @GuardedBy("mRemoteServiceLock")
@@ -672,6 +745,15 @@ public class SoundTriggerService extends SystemService {
             mRemoteServiceWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                     "RemoteSoundTriggerDetectionService " + mServiceName.getPackageName() + ":"
                             + mServiceName.getClassName());
+
+            synchronized (mLock) {
+                NumOps numOps = mNumOpsPerPackage.get(mServiceName.getPackageName());
+                if (numOps == null) {
+                    numOps = new NumOps();
+                    mNumOpsPerPackage.put(mServiceName.getPackageName(), numOps);
+                }
+                mNumOps = numOps;
+            }
 
             mClient = new ISoundTriggerDetectionServiceClient.Stub() {
                 @Override
@@ -830,6 +912,25 @@ public class SoundTriggerService extends SystemService {
                         bind();
                     }
                 } else {
+                    long currentTime = System.nanoTime();
+                    mNumOps.clearOldOps(currentTime);
+
+                    // Drop operation if too many were executed in the last 24 hours.
+                    int opsAllowed = Settings.Global.getInt(mContext.getContentResolver(),
+                            MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY,
+                            Integer.MAX_VALUE);
+
+                    int opsAdded = mNumOps.getOpsAdded();
+                    if (mNumOps.getOpsAdded() >= opsAllowed) {
+                        if (DEBUG || opsAllowed + 10 > opsAdded) {
+                            Slog.w(TAG, mPuuid + ": Dropped operation as too many operations were "
+                                    + "run in last 24 hours");
+                        }
+                        return;
+                    }
+
+                    mNumOps.addOp(currentTime);
+
                     // Find a free opID
                     int opId = mNumTotalOpsPerformed;
                     do {

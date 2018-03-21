@@ -1167,6 +1167,9 @@ class SettingsProtoDumpUtil {
                 Global.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT,
                 GlobalSettingsProto.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT);
         dumpSetting(s, p,
+                Global.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY,
+                GlobalSettingsProto.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY);
+        dumpSetting(s, p,
                 Settings.Global.MULTI_SIM_VOICE_CALL_SUBSCRIPTION,
                 GlobalSettingsProto.MULTI_SIM_VOICE_CALL_SUBSCRIPTION);
         dumpSetting(s, p,
