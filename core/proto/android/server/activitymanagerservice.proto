@@ -16,7 +16,7 @@
 
 syntax = "proto2";
 
-package com.android.server.am.proto;
+package com.android.server.am;
 
 import "frameworks/base/core/proto/android/app/activitymanager.proto";
 import "frameworks/base/core/proto/android/app/enums.proto";
@@ -59,11 +59,11 @@ message ActivityManagerServiceDumpActivitiesProto {
 message ActivityStackSupervisorProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional .com.android.server.wm.proto.ConfigurationContainerProto configuration_container = 1;
+  optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
   repeated ActivityDisplayProto displays = 2;
   optional KeyguardControllerProto keyguard_controller = 3;
   optional int32 focused_stack_id = 4;
-  optional .com.android.server.wm.proto.IdentifierProto resumed_activity = 5;
+  optional .com.android.server.wm.IdentifierProto resumed_activity = 5;
   // Whether or not the home activity is the recents activity. This is needed for the CTS tests to
   // know what activity types to check for when invoking splitscreen multi-window.
   optional bool is_home_recents_component = 6;
@@ -73,7 +73,7 @@ message ActivityStackSupervisorProto {
 message ActivityDisplayProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional .com.android.server.wm.proto.ConfigurationContainerProto configuration_container = 1;
+  optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
   optional int32 id = 2;
   repeated ActivityStackProto stacks = 3;
 }
@@ -81,10 +81,10 @@ message ActivityDisplayProto {
 message ActivityStackProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional .com.android.server.wm.proto.ConfigurationContainerProto configuration_container = 1;
+  optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
   optional int32 id = 2;
   repeated TaskRecordProto tasks = 3;
-  optional .com.android.server.wm.proto.IdentifierProto resumed_activity = 4;
+  optional .com.android.server.wm.IdentifierProto resumed_activity = 4;
   optional int32 display_id = 5;
   optional bool fullscreen = 6;
   optional .android.graphics.RectProto bounds = 7;
@@ -93,7 +93,7 @@ message ActivityStackProto {
 message TaskRecordProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional .com.android.server.wm.proto.ConfigurationContainerProto configuration_container = 1;
+  optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
   optional int32 id = 2;
   repeated ActivityRecordProto activities = 3;
   optional int32 stack_id = 4;
@@ -111,8 +111,8 @@ message TaskRecordProto {
 message ActivityRecordProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional .com.android.server.wm.proto.ConfigurationContainerProto configuration_container = 1;
-  optional .com.android.server.wm.proto.IdentifierProto identifier = 2;
+  optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
+  optional .com.android.server.wm.IdentifierProto identifier = 2;
   optional string state = 3;
   optional bool visible = 4;
   optional bool front_of_task = 5;
@@ -689,25 +689,14 @@ message ActivityManagerServiceDumpProcessesProto {
   }
   optional SleepStatus sleep_status = 27;
 
-  message VoiceProto {
+  message Voice {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional string session = 1;
     optional .android.os.PowerManagerProto.WakeLock wakelock = 2;
   }
-  optional VoiceProto running_voice = 28;
+  optional Voice running_voice = 28;
 
-  message VrControllerProto {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    enum VrMode {
-      FLAG_NON_VR_MODE = 0;
-      FLAG_VR_MODE = 1;
-      FLAG_PERSISTENT_VR_MODE = 2;
-    }
-    repeated VrMode vr_mode = 1;
-    optional int32 render_thread_id = 2;
-  }
   optional VrControllerProto vr_controller = 29;
 
   message DebugApp {
@@ -852,6 +841,19 @@ message ImportanceTokenProto {
   optional int32 pid = 1;
   optional string token = 2;
   optional string reason = 3;
+}
+
+// proto of class VrController.java
+message VrControllerProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+  enum VrMode {
+    FLAG_NON_VR_MODE = 0;
+    FLAG_VR_MODE = 1;
+    FLAG_PERSISTENT_VR_MODE = 2;
+  }
+  repeated VrMode vr_mode = 1;
+  optional int32 render_thread_id = 2;
 }
 
 message ProcessOomProto {

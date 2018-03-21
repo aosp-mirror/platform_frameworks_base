@@ -17,13 +17,13 @@
 package com.android.server.wm;
 
 import static android.os.Build.IS_USER;
-import static com.android.server.wm.proto.WindowManagerTraceFileProto.ENTRY;
-import static com.android.server.wm.proto.WindowManagerTraceFileProto.MAGIC_NUMBER;
-import static com.android.server.wm.proto.WindowManagerTraceFileProto.MAGIC_NUMBER_H;
-import static com.android.server.wm.proto.WindowManagerTraceFileProto.MAGIC_NUMBER_L;
-import static com.android.server.wm.proto.WindowManagerTraceProto.ELAPSED_REALTIME_NANOS;
-import static com.android.server.wm.proto.WindowManagerTraceProto.WHERE;
-import static com.android.server.wm.proto.WindowManagerTraceProto.WINDOW_MANAGER_SERVICE;
+import static com.android.server.wm.WindowManagerTraceFileProto.ENTRY;
+import static com.android.server.wm.WindowManagerTraceFileProto.MAGIC_NUMBER;
+import static com.android.server.wm.WindowManagerTraceFileProto.MAGIC_NUMBER_H;
+import static com.android.server.wm.WindowManagerTraceFileProto.MAGIC_NUMBER_L;
+import static com.android.server.wm.WindowManagerTraceProto.ELAPSED_REALTIME_NANOS;
+import static com.android.server.wm.WindowManagerTraceProto.WHERE;
+import static com.android.server.wm.WindowManagerTraceProto.WINDOW_MANAGER_SERVICE;
 
 import android.content.Context;
 import android.os.ShellCommand;

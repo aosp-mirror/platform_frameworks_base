@@ -19,8 +19,6 @@ package com.android.server.am;
 import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.server.am.proto.AppBindRecordProto;
-
 import java.io.PrintWriter;
 
 /**

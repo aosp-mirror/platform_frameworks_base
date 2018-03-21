@@ -19,7 +19,7 @@ syntax = "proto2";
 import "frameworks/base/core/proto/android/server/surfaceanimator.proto";
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
-package com.android.server.wm.proto;
+package com.android.server.wm;
 option java_multiple_files = true;
 
 /**

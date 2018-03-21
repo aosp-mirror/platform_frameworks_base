@@ -441,19 +441,19 @@ import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
-import com.android.server.am.proto.ActivityManagerServiceProto;
-import com.android.server.am.proto.ActivityManagerServiceDumpActivitiesProto;
-import com.android.server.am.proto.ActivityManagerServiceDumpBroadcastsProto;
-import com.android.server.am.proto.ActivityManagerServiceDumpProcessesProto;
-import com.android.server.am.proto.ActivityManagerServiceDumpProcessesProto.UidObserverRegistrationProto;
-import com.android.server.am.proto.ActivityManagerServiceDumpServicesProto;
-import com.android.server.am.proto.GrantUriProto;
-import com.android.server.am.proto.ImportanceTokenProto;
-import com.android.server.am.proto.MemInfoDumpProto;
-import com.android.server.am.proto.NeededUriGrantsProto;
-import com.android.server.am.proto.ProcessOomProto;
-import com.android.server.am.proto.ProcessToGcProto;
-import com.android.server.am.proto.StickyBroadcastProto;
+import com.android.server.am.ActivityManagerServiceProto;
+import com.android.server.am.ActivityManagerServiceDumpActivitiesProto;
+import com.android.server.am.ActivityManagerServiceDumpBroadcastsProto;
+import com.android.server.am.ActivityManagerServiceDumpProcessesProto;
+import com.android.server.am.ActivityManagerServiceDumpProcessesProto.UidObserverRegistrationProto;
+import com.android.server.am.ActivityManagerServiceDumpServicesProto;
+import com.android.server.am.GrantUriProto;
+import com.android.server.am.ImportanceTokenProto;
+import com.android.server.am.MemInfoDumpProto;
+import com.android.server.am.NeededUriGrantsProto;
+import com.android.server.am.ProcessOomProto;
+import com.android.server.am.ProcessToGcProto;
+import com.android.server.am.StickyBroadcastProto;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.pm.Installer;
@@ -17092,8 +17092,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             if (mRunningVoice != null) {
                 final long vrToken = proto.start(ActivityManagerServiceDumpProcessesProto.RUNNING_VOICE);
-                proto.write(ActivityManagerServiceDumpProcessesProto.VoiceProto.SESSION, mRunningVoice.toString());
-                mVoiceWakeLock.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.VoiceProto.WAKELOCK);
+                proto.write(ActivityManagerServiceDumpProcessesProto.Voice.SESSION, mRunningVoice.toString());
+                mVoiceWakeLock.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.Voice.WAKELOCK);
                 proto.end(vrToken);
             }
 

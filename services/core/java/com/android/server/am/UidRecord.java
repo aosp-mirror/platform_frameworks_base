@@ -28,7 +28,6 @@ import android.util.proto.ProtoUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.am.proto.UidRecordProto;
 
 /**
  * Overall information about a uid that has actively running processes.

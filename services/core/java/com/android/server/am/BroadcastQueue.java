@@ -55,8 +55,6 @@ import android.util.proto.ProtoOutputStream;
 
 import static com.android.server.am.ActivityManagerDebugConfig.*;
 
-import com.android.server.am.proto.BroadcastQueueProto;
-
 /**
  * BROADCASTS
  *

@@ -22,8 +22,6 @@ import android.os.IBinder;
 import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.server.am.proto.UriPermissionOwnerProto;
-
 import com.google.android.collect.Sets;
 
 import java.io.PrintWriter;

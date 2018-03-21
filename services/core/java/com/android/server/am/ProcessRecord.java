@@ -27,7 +27,6 @@ import android.util.Slog;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.os.BatteryStatsImpl;
-import com.android.server.am.proto.ProcessRecordProto;
 
 import android.app.ActivityManager;
 import android.app.Dialog;
