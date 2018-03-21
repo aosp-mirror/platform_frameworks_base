@@ -197,17 +197,9 @@ public class RecoverySession implements AutoCloseable {
     }
 
     /**
-     * Imports keys.
-     *
-     * @param recoveryKeyBlob Recovery blob encrypted by symmetric key generated for this session.
-     * @param applicationKeys Application keys. Key material can be decrypted using recoveryKeyBlob
-     *     and session. KeyStore only uses package names from the application info in {@link
-     *     WrappedApplicationKey}. Caller is responsibility to perform certificates check.
-     * @return Map from alias to raw key material.
-     * @throws SessionExpiredException if {@code session} has since been closed.
-     * @throws DecryptionFailedException if unable to decrypt the snapshot.
-     * @throws InternalRecoveryServiceException if an error occurs internal to the recovery service.
+     * @deprecated Use {@link #recoverKeyChainSnapshot(byte[], List)} instead.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     public Map<String, byte[]> recoverKeys(
             @NonNull byte[] recoveryKeyBlob,
@@ -239,8 +231,6 @@ public class RecoverySession implements AutoCloseable {
      * @throws SessionExpiredException if {@code session} has since been closed.
      * @throws DecryptionFailedException if unable to decrypt the snapshot.
      * @throws InternalRecoveryServiceException if an error occurs internal to the recovery service.
-     *
-     * @hide
      */
     @RequiresPermission(Manifest.permission.RECOVER_KEYSTORE)
     public Map<String, Key> recoverKeyChainSnapshot(
