@@ -364,7 +364,7 @@ interface IDevicePolicyManager {
 
     void setBackupServiceEnabled(in ComponentName admin, boolean enabled);
     boolean isBackupServiceEnabled(in ComponentName admin);
-    void setMandatoryBackupTransport(in ComponentName admin, in ComponentName backupTransportComponent);
+    boolean setMandatoryBackupTransport(in ComponentName admin, in ComponentName backupTransportComponent);
     ComponentName getMandatoryBackupTransport();
 
     void setNetworkLoggingEnabled(in ComponentName admin, boolean enabled);

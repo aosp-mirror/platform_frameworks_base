@@ -8877,15 +8877,20 @@ public class DevicePolicyManager {
      * <p>If backups were disabled and a non-null backup transport {@link ComponentName} is
      * specified, backups will be enabled.
      *
+     * <p>NOTE: The method shouldn't be called on the main thread.
+     *
      * @param admin admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param backupTransportComponent The backup transport layer to be used for mandatory backups.
+     * @return {@code true} if the backup transport was successfully set; {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not a device owner.
      */
-    public void setMandatoryBackupTransport(
-            @NonNull ComponentName admin, @Nullable ComponentName backupTransportComponent) {
+    @WorkerThread
+    public boolean setMandatoryBackupTransport(
+            @NonNull ComponentName admin,
+            @Nullable ComponentName backupTransportComponent) {
         throwIfParentInstance("setMandatoryBackupTransport");
         try {
-            mService.setMandatoryBackupTransport(admin, backupTransportComponent);
+            return mService.setMandatoryBackupTransport(admin, backupTransportComponent);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
