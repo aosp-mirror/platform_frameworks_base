@@ -7762,6 +7762,22 @@ public final class Settings {
         public static final String BLUETOOTH_ON_WHILE_DRIVING = "bluetooth_on_while_driving";
 
         /**
+         * The number of times (integer) the user has manually enabled battery saver.
+         * @hide
+         */
+        public static final String LOW_POWER_MANUAL_ACTIVATION_COUNT =
+                "low_power_manual_activation_count";
+
+        /**
+         * Whether the "first time battery saver warning" dialog needs to be shown (0: default)
+         * or not (1).
+         *
+         * @hide
+         */
+        public static final String LOW_POWER_WARNING_ACKNOWLEDGED =
+                "low_power_warning_acknowledged";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
