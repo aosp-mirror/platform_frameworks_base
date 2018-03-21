@@ -48,4 +48,8 @@
 
     <attr name="footerPreferenceStyle" format="reference" />
 
+    <!-- Workaround for b/74248169. These are duplicates of attrs in AndroidX preferences. -->
+    <attr name="preferenceStyle" format="reference" />
+    <attr name="switchPreferenceStyle" format="reference" />
+
 </resources>
