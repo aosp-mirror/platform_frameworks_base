@@ -1438,11 +1438,25 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 final AutofillValue filledValue = viewState.getAutofilledValue();
 
                 if (!value.equals(filledValue)) {
-                    if (sDebug) {
-                        Slog.d(TAG, "found a change on required " + id + ": " + filledValue
-                                + " => " + value);
+                    boolean changed = true;
+                    if (filledValue == null) {
+                        // Dataset was not autofilled, make sure initial value didn't change.
+                        final AutofillValue initialValue = getValueFromContextsLocked(id);
+                        if (initialValue != null && initialValue.equals(value)) {
+                            if (sDebug) {
+                                Slog.d(TAG, "id " + id + " is part of dataset but initial value "
+                                        + "didn't change: " + value);
+                            }
+                            changed = false;
+                        }
                     }
-                    atLeastOneChanged = true;
+                    if (changed) {
+                        if (sDebug) {
+                            Slog.d(TAG, "found a change on required " + id + ": " + filledValue
+                                    + " => " + value);
+                        }
+                        atLeastOneChanged = true;
+                    }
                 }
             }
         }
