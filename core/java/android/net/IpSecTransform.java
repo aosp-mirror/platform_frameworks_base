@@ -282,7 +282,7 @@ public final class IpSecTransform implements AutoCloseable {
      */
     @SystemApi
     @RequiresPermission(anyOf = {
-            android.Manifest.permission.NETWORK_STACK,
+            android.Manifest.permission.MANAGE_IPSEC_TUNNELS,
             android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD
     })
     public void startNattKeepalive(@NonNull NattKeepaliveCallback userCallback,
@@ -325,7 +325,7 @@ public final class IpSecTransform implements AutoCloseable {
      */
     @SystemApi
     @RequiresPermission(anyOf = {
-            android.Manifest.permission.NETWORK_STACK,
+            android.Manifest.permission.MANAGE_IPSEC_TUNNELS,
             android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD
     })
     public void stopNattKeepalive() {
@@ -478,7 +478,7 @@ public final class IpSecTransform implements AutoCloseable {
          */
         @SystemApi
         @NonNull
-        @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
+        @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
         public IpSecTransform buildTunnelModeTransform(
                 @NonNull InetAddress sourceAddress,
                 @NonNull IpSecManager.SecurityParameterIndex spi)
