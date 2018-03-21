@@ -36,6 +36,7 @@ import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_NEVER;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
+
 import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 
@@ -43,8 +44,8 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.usage.AppStandbyInfo;
-import android.app.usage.UsageStatsManager.StandbyBuckets;
 import android.app.usage.UsageEvents;
+import android.app.usage.UsageStatsManager.StandbyBuckets;
 import android.app.usage.UsageStatsManagerInternal.AppIdleStateChangeListener;
 import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
@@ -100,7 +101,6 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
@@ -690,7 +690,9 @@ public class AppStandbyController {
                     || event.mEventType == UsageEvents.Event.MOVE_TO_BACKGROUND
                     || event.mEventType == UsageEvents.Event.SYSTEM_INTERACTION
                     || event.mEventType == UsageEvents.Event.USER_INTERACTION
-                    || event.mEventType == UsageEvents.Event.NOTIFICATION_SEEN)) {
+                    || event.mEventType == UsageEvents.Event.NOTIFICATION_SEEN
+                    || event.mEventType == UsageEvents.Event.SLICE_PINNED
+                    || event.mEventType == UsageEvents.Event.SLICE_PINNED_PRIV)) {
 
                 final AppUsageHistory appHistory = mAppIdleHistory.getAppUsageHistory(
                         event.mPackage, userId, elapsedRealtime);
@@ -699,7 +701,8 @@ public class AppStandbyController {
                 final long nextCheckTime;
                 final int subReason = usageEventToSubReason(event.mEventType);
                 final int reason = REASON_MAIN_USAGE | subReason;
-                if (event.mEventType == UsageEvents.Event.NOTIFICATION_SEEN) {
+                if (event.mEventType == UsageEvents.Event.NOTIFICATION_SEEN
+                        || event.mEventType == UsageEvents.Event.SLICE_PINNED) {
                     // Mild usage elevates to WORKING_SET but doesn't change usage time.
                     mAppIdleHistory.reportUsage(appHistory, event.mPackage,
                             STANDBY_BUCKET_WORKING_SET, subReason,
