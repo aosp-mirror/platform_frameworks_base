@@ -22,19 +22,19 @@ package android.content.pm.dex;
  * @hide
  */
 public class PackageOptimizationInfo {
-    private final String mCompilationFilter;
-    private final String mCompilationReason;
+    private final int mCompilationFilter;
+    private final int mCompilationReason;
 
-    public PackageOptimizationInfo(String compilerFilter, String compilationReason) {
+    public PackageOptimizationInfo(int compilerFilter, int compilationReason) {
         this.mCompilationReason = compilationReason;
         this.mCompilationFilter = compilerFilter;
     }
 
-    public String getCompilationReason() {
+    public int getCompilationReason() {
         return mCompilationReason;
     }
 
-    public String getCompilationFilter() {
+    public int getCompilationFilter() {
         return mCompilationFilter;
     }
 
@@ -42,6 +42,6 @@ public class PackageOptimizationInfo {
      * Create a default optimization info object for the case when we have no information.
      */
     public static PackageOptimizationInfo createWithNoInfo() {
-        return new PackageOptimizationInfo("no-info", "no-info");
+        return new PackageOptimizationInfo(-1, -1);
     }
 }
