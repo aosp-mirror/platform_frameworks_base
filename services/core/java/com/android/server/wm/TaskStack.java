@@ -155,6 +155,9 @@ public class TaskStack extends WindowContainer<Task> implements
     final Rect mTmpDimBoundsRect = new Rect();
     private final Point mLastSurfaceSize = new Point();
 
+    private final AnimatingAppWindowTokenRegistry mAnimatingAppWindowTokenRegistry =
+            new AnimatingAppWindowTokenRegistry();
+
     TaskStack(WindowManagerService service, int stackId, StackWindowController controller) {
         super(service);
         mStackId = stackId;
@@ -1781,5 +1784,9 @@ public class TaskStack extends WindowContainer<Task> implements
         final int outset = getStackOutset();
         outPos.x -= outset;
         outPos.y -= outset;
+    }
+
+    AnimatingAppWindowTokenRegistry getAnimatingAppWindowTokenRegistry() {
+        return mAnimatingAppWindowTokenRegistry;
     }
 }

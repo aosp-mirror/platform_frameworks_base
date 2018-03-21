@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.SurfaceControl;
@@ -64,6 +65,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
     private SurfaceSession mSession = new SurfaceSession();
     private MyAnimatable mAnimatable;
     private MyAnimatable mAnimatable2;
+    private DeferFinishAnimatable mDeferFinishAnimatable;
 
     @Before
     public void setUp() throws Exception {
@@ -71,6 +73,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         MockitoAnnotations.initMocks(this);
         mAnimatable = new MyAnimatable();
         mAnimatable2 = new MyAnimatable();
+        mDeferFinishAnimatable = new DeferFinishAnimatable();
     }
 
     @Test
@@ -166,6 +169,29 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         verify(mTransaction).destroy(eq(leash));
     }
 
+    @Test
+    @FlakyTest(detail = "Promote once confirmed non-flaky")
+    public void testDeferFinish() throws Exception {
+
+        // Start animation
+        mDeferFinishAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec,
+                true /* hidden */);
+        final ArgumentCaptor<OnAnimationFinishedCallback> callbackCaptor = ArgumentCaptor.forClass(
+                OnAnimationFinishedCallback.class);
+        assertAnimating(mDeferFinishAnimatable);
+        verify(mSpec).startAnimation(any(), any(), callbackCaptor.capture());
+
+        // Finish the animation but then make sure we are deferring.
+        callbackCaptor.getValue().onAnimationFinished(mSpec);
+        assertAnimating(mDeferFinishAnimatable);
+
+        // Now end defer finishing.
+        mDeferFinishAnimatable.endDeferFinishCallback.run();
+        assertNotAnimating(mAnimatable2);
+        assertTrue(mDeferFinishAnimatable.mFinishedCallbackCalled);
+        verify(mTransaction).destroy(eq(mDeferFinishAnimatable.mLeash));
+    }
+
     private void assertAnimating(MyAnimatable animatable) {
         assertTrue(animatable.mSurfaceAnimator.isAnimating());
         assertNotNull(animatable.mSurfaceAnimator.getAnimation());
@@ -253,5 +279,16 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         }
 
         private final Runnable mFinishedCallback = () -> mFinishedCallbackCalled = true;
+    }
+
+    private class DeferFinishAnimatable extends MyAnimatable {
+
+        Runnable endDeferFinishCallback;
+
+        @Override
+        public boolean shouldDeferAnimationFinish(Runnable endDeferFinishCallback) {
+            this.endDeferFinishCallback = endDeferFinishCallback;
+            return true;
+        }
     }
 }
