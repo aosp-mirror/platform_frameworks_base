@@ -14843,6 +14843,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Returns whether or not a pivot has been set by a call to {@link #setPivotX(float)} or
+     * {@link #setPivotY(float)}. If no pivot has been set then the pivot will be the center
+     * of the view.
+     *
+     * @return True if a pivot has been set, false if the default pivot is being used
+     */
+    public boolean isPivotSet() {
+        return mRenderNode.isPivotExplicitlySet();
+    }
+
+    /**
+     * Clears any pivot previously set by a call to  {@link #setPivotX(float)} or
+     * {@link #setPivotY(float)}. After calling this {@link #isPivotSet()} will be false
+     * and the pivot used for rotation will return to default of being centered on the view.
+     */
+    public void resetPivot() {
+        if (mRenderNode.resetPivot()) {
+            invalidateViewProperty(false, false);
+        }
+    }
+
+    /**
      * The opacity of the view. This is a value from 0 to 1, where 0 means the view is
      * completely transparent and 1 means the view is completely opaque.
      *
