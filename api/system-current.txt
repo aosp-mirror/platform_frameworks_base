@@ -400,10 +400,8 @@ package android.app {
   }
 
   public class WallpaperManager {
-    method public void clearWallpaper();
     method public void clearWallpaper(int, int);
     method public void setDisplayOffset(android.os.IBinder, int, int);
-    method public void setDisplayPadding(android.graphics.Rect);
     method public boolean setWallpaperComponent(android.content.ComponentName);
   }
 
