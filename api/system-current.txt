@@ -57,6 +57,7 @@ package android {
     field public static final java.lang.String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
     field public static final java.lang.String CONNECTIVITY_INTERNAL = "android.permission.CONNECTIVITY_INTERNAL";
     field public static final java.lang.String CONNECTIVITY_USE_RESTRICTED_NETWORKS = "android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS";
+    field public static final java.lang.String CONTROL_DISPLAY_SATURATION = "android.permission.CONTROL_DISPLAY_SATURATION";
     field public static final java.lang.String CONTROL_INCALL_EXPERIENCE = "android.permission.CONTROL_INCALL_EXPERIENCE";
     field public static final java.lang.String CONTROL_LOCATION_UPDATES = "android.permission.CONTROL_LOCATION_UPDATES";
     field public static final java.lang.String CONTROL_VPN = "android.permission.CONTROL_VPN";
@@ -1252,6 +1253,7 @@ package android.hardware.display {
     method public android.hardware.display.BrightnessConfiguration getDefaultBrightnessConfiguration();
     method public android.graphics.Point getStableDisplaySize();
     method public void setBrightnessConfiguration(android.hardware.display.BrightnessConfiguration);
+    method public void setSaturationLevel(float);
   }
 
 }
