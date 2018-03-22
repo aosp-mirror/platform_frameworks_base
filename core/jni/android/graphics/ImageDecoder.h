@@ -35,9 +35,9 @@ struct ImageDecoder {
 
     // These need to stay in sync with ImageDecoder.java's Error constants.
     enum Error {
-        kSourceException  = 1,
-        kSourceIncomplete = 2,
-        kSourceError      = 3,
+        kSourceException     = 1,
+        kSourceIncomplete    = 2,
+        kSourceMalformedData = 3,
     };
 
     // These need to stay in sync with PixelFormat.java's Format constants.

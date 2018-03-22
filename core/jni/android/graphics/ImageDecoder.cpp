@@ -79,7 +79,7 @@ static jobject throw_exception(JNIEnv* env, ImageDecoder::Error error, const cha
 
 static jobject native_create(JNIEnv* env, std::unique_ptr<SkStream> stream, jobject source) {
     if (!stream.get()) {
-        return throw_exception(env, ImageDecoder::kSourceError, "Failed to create a stream",
+        return throw_exception(env, ImageDecoder::kSourceMalformedData, "Failed to create a stream",
                                nullptr, source);
     }
     std::unique_ptr<ImageDecoder> decoder(new ImageDecoder);
@@ -96,8 +96,8 @@ static jobject native_create(JNIEnv* env, std::unique_ptr<SkStream> stream, jobj
                 SkString msg;
                 msg.printf("Failed to create image decoder with message '%s'",
                            SkCodec::ResultToString(result));
-                return throw_exception(env, ImageDecoder::kSourceError,  msg.c_str(), nullptr,
-                                       source);
+                return throw_exception(env, ImageDecoder::kSourceMalformedData,  msg.c_str(),
+                                       nullptr, source);
 
         }
     }
@@ -110,7 +110,7 @@ static jobject native_create(JNIEnv* env, std::unique_ptr<SkStream> stream, jobj
     decoder->mCodec = SkAndroidCodec::MakeFromCodec(std::move(codec),
             SkAndroidCodec::ExifOrientationBehavior::kRespect);
     if (!decoder->mCodec.get()) {
-        return throw_exception(env, ImageDecoder::kSourceError, "", nullptr, source);
+        return throw_exception(env, ImageDecoder::kSourceMalformedData, "", nullptr, source);
     }
 
     const auto& info = decoder->mCodec->getInfo();
@@ -127,7 +127,7 @@ static jobject ImageDecoder_nCreateFd(JNIEnv* env, jobject /*clazz*/,
 
     struct stat fdStat;
     if (fstat(descriptor, &fdStat) == -1) {
-        return throw_exception(env, ImageDecoder::kSourceError,
+        return throw_exception(env, ImageDecoder::kSourceMalformedData,
                                "broken file descriptor; fstat returned -1", nullptr, source);
     }
 
@@ -135,8 +135,8 @@ static jobject ImageDecoder_nCreateFd(JNIEnv* env, jobject /*clazz*/,
     FILE* file = fdopen(dupDescriptor, "r");
     if (file == NULL) {
         close(dupDescriptor);
-        return throw_exception(env, ImageDecoder::kSourceError, "Could not open file", nullptr,
-                               source);
+        return throw_exception(env, ImageDecoder::kSourceMalformedData, "Could not open file",
+                               nullptr, source);
     }
     std::unique_ptr<SkFILEStream> fileStream(new SkFILEStream(file));
 
@@ -157,7 +157,7 @@ static jobject ImageDecoder_nCreateInputStream(JNIEnv* env, jobject /*clazz*/,
     std::unique_ptr<SkStream> stream(CreateJavaInputStreamAdaptor(env, is, storage, false));
 
     if (!stream.get()) {
-        return throw_exception(env, ImageDecoder::kSourceError, "Failed to create a stream",
+        return throw_exception(env, ImageDecoder::kSourceMalformedData, "Failed to create a stream",
                                nullptr, source);
     }
 
@@ -179,7 +179,7 @@ static jobject ImageDecoder_nCreateByteBuffer(JNIEnv* env, jobject /*clazz*/, jo
     std::unique_ptr<SkStream> stream = CreateByteBufferStreamAdaptor(env, jbyteBuffer,
                                                                      initialPosition, limit);
     if (!stream) {
-        return throw_exception(env, ImageDecoder::kSourceError, "Failed to read ByteBuffer",
+        return throw_exception(env, ImageDecoder::kSourceMalformedData, "Failed to read ByteBuffer",
                                nullptr, source);
     }
     return native_create(env, std::move(stream), source);
@@ -313,7 +313,7 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
             break;
         case SkCodec::kErrorInInput:
             if (!jexception) {
-                onPartialImageError = ImageDecoder::kSourceError;
+                onPartialImageError = ImageDecoder::kSourceMalformedData;
             }
             break;
         default:
