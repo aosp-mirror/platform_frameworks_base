@@ -85,6 +85,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
     private String mTileSpec;
     private EnforcedAdmin mEnforcedAdmin;
     private boolean mShowingDetail;
+    private int mIsFullQs;
 
     public abstract TState newTileState();
 
@@ -110,18 +111,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
      * listening client it will go into the listening state.
      */
     public void setListening(Object listener, boolean listening) {
-        if (listening) {
-            if (mListeners.add(listener) && mListeners.size() == 1) {
-                if (DEBUG) Log.d(TAG, "setListening " + true);
-                mHandler.obtainMessage(H.SET_LISTENING, 1, 0).sendToTarget();
-                refreshState(); // Ensure we get at least one refresh after listening.
-            }
-        } else {
-            if (mListeners.remove(listener) && mListeners.size() == 0) {
-                if (DEBUG) Log.d(TAG, "setListening " + false);
-                mHandler.obtainMessage(H.SET_LISTENING, 0, 0).sendToTarget();
-            }
-        }
+        mHandler.obtainMessage(H.SET_LISTENING, listening ? 1 : 0, 0, listener).sendToTarget();
     }
 
     protected long getStaleTimeout() {
@@ -205,17 +195,8 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
             logMaker.addTaggedData(FIELD_QS_VALUE, ((BooleanState) mState).value ? 1 : 0);
         }
         return logMaker.setSubtype(getMetricsCategory())
-                .addTaggedData(FIELD_CONTEXT, isFullQs())
+                .addTaggedData(FIELD_CONTEXT, mIsFullQs)
                 .addTaggedData(FIELD_QS_POSITION, mHost.indexOf(mTileSpec));
-    }
-
-    private int isFullQs() {
-        for (Object listener : mListeners) {
-            if (TilePage.class.equals(listener.getClass())) {
-                return 1;
-            }
-        }
-        return 0;
     }
 
     public void showDetail(boolean show) {
@@ -352,6 +333,32 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
         handleRefreshState(null);
     }
 
+    private void handleSetListeningInternal(Object listener, boolean listening) {
+        if (listening) {
+            if (mListeners.add(listener) && mListeners.size() == 1) {
+                if (DEBUG) Log.d(TAG, "handleSetListening true");
+                handleSetListening(listening);
+                refreshState(); // Ensure we get at least one refresh after listening.
+            }
+        } else {
+            if (mListeners.remove(listener) && mListeners.size() == 0) {
+                if (DEBUG) Log.d(TAG, "handleSetListening false");
+                handleSetListening(listening);
+            }
+        }
+        updateIsFullQs();
+    }
+
+    private void updateIsFullQs() {
+        for (Object listener : mListeners) {
+            if (TilePage.class.equals(listener.getClass())) {
+                mIsFullQs = 1;
+                return;
+            }
+        }
+        mIsFullQs = 0;
+    }
+
     protected abstract void handleSetListening(boolean listening);
 
     protected void handleDestroy() {
@@ -464,8 +471,8 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
                     name = "handleClearState";
                     handleClearState();
                 } else if (msg.what == SET_LISTENING) {
-                    name = "handleSetListening";
-                    handleSetListening(msg.arg1 != 0);
+                    name = "handleSetListeningInternal";
+                    handleSetListeningInternal(msg.obj, msg.arg1 != 0);
                 } else if (msg.what == STALE) {
                     name = "handleStale";
                     handleStale();
