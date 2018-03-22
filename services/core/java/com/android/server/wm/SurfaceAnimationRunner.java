@@ -220,6 +220,9 @@ class SurfaceAnimationRunner {
     }
 
     private void applyTransformation(RunningAnimation a, Transaction t, long currentPlayTime) {
+        if (a.mAnimSpec.needsEarlyWakeup()) {
+            t.setEarlyWakeup();
+        }
         a.mAnimSpec.apply(t, a.mLeash, currentPlayTime);
     }
 
