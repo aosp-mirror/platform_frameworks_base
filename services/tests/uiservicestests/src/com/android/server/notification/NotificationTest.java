@@ -367,6 +367,28 @@ public class NotificationTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testActionsMoreOptionsThanChoices() {
+        PendingIntent intent1 = mock(PendingIntent.class);
+        PendingIntent intent2 = mock(PendingIntent.class);
+        Icon icon = mock(Icon.class);
+
+        Notification n1 = new Notification.Builder(mContext, "test")
+                .addAction(new Notification.Action.Builder(icon, "TEXT 1", intent1).build())
+                .addAction(new Notification.Action.Builder(icon, "TEXT 2", intent1)
+                        .addRemoteInput(new RemoteInput.Builder("a")
+                                .setChoices(new CharSequence[] {"i", "m"})
+                                .build())
+                        .build())
+                .build();
+        Notification n2 = new Notification.Builder(mContext, "test")
+                .addAction(new Notification.Action.Builder(icon, "TEXT 1", intent2).build())
+                .addAction(new Notification.Action.Builder(icon, "TEXT 2", intent1).build())
+                .build();
+
+        assertTrue(Notification.areActionsVisiblyDifferent(n1, n2));
+    }
+
+    @Test
     public void testActionsDifferentRemoteInputs() {
         PendingIntent intent = mock(PendingIntent.class);
         Icon icon = mock(Icon.class);
