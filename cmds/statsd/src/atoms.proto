@@ -23,6 +23,7 @@ option java_outer_classname = "AtomsProto";
 
 import "frameworks/base/cmds/statsd/src/atom_field_options.proto";
 import "frameworks/base/core/proto/android/app/enums.proto";
+import "frameworks/base/core/proto/android/app/job/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/enums.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/core/proto/android/server/enums.proto";
@@ -362,7 +363,10 @@ message ScheduledJobStateChanged {
     }
     optional State state = 3;
 
-    // TODO: Consider adding the stopReason (int)
+    // The reason a job has stopped.
+    // This is only applicable when the state is FINISHED.
+    // The default value is CANCELED.
+    optional android.app.job.StopReasonEnum stop_reason = 4;
 }
 
 /**
