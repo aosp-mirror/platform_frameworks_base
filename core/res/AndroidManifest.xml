@@ -3310,8 +3310,9 @@
     <permission android:name="android.permission.BACKUP"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @SystemApi Allows application to manage RecoverableKeyStoreLoader.
-    <p>Not for use by third-party applications.
+    <!-- @SystemApi Allows application to manage
+         {@link android.security.keystore.recovery.RecoveryController}.
+         <p>Not for use by third-party applications.
          @hide -->
     <permission android:name="android.permission.RECOVER_KEYSTORE"
         android:protectionLevel="signature|privileged" />
