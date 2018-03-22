@@ -596,6 +596,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             if (response == null) {
                 processNullResponseLocked(requestFlags);
+                mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_REQUEST, servicePackageName)
+                        .setType(MetricsEvent.TYPE_SUCCESS)
+                        .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_DATASETS, -1));
                 return;
             }
 
