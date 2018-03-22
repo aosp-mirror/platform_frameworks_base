@@ -658,6 +658,7 @@ public final class IpSecManager {
          * @hide
          */
         @SystemApi
+        @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
         public void addAddress(@NonNull LinkAddress address) throws IOException {
             try {
                 mService.addAddressToTunnelInterface(mResourceId, address);
@@ -675,6 +676,7 @@ public final class IpSecManager {
          * @hide
          */
         @SystemApi
+        @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
         public void removeAddress(@NonNull LinkAddress address) throws IOException {
             try {
                 mService.removeAddressFromTunnelInterface(mResourceId, address);
@@ -768,7 +770,7 @@ public final class IpSecManager {
      */
     @SystemApi
     @NonNull
-    @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
+    @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
     public IpSecTunnelInterface createIpSecTunnelInterface(@NonNull InetAddress localAddress,
             @NonNull InetAddress remoteAddress, @NonNull Network underlyingNetwork)
             throws ResourceUnavailableException, IOException {
@@ -793,7 +795,7 @@ public final class IpSecManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
+    @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
     public void applyTunnelModeTransform(@NonNull IpSecTunnelInterface tunnel,
             @PolicyDirection int direction, @NonNull IpSecTransform transform) throws IOException {
         try {
