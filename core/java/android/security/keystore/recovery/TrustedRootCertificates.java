@@ -32,7 +32,7 @@ import java.util.Map;
  *
  * @hide
  */
-public class TrustedRootCertificates {
+public final class TrustedRootCertificates {
 
     public static final String GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_ALIAS =
             "GoogleCloudKeyVaultServiceV1";
@@ -83,7 +83,7 @@ public class TrustedRootCertificates {
     /**
      * Returns all available root certificates, keyed by alias.
      */
-    public static Map<String, X509Certificate> listRootCertificates() {
+    public static Map<String, X509Certificate> getRootCertificates() {
         return new ArrayMap(ALL_ROOT_CERTIFICATES);
     }
 
@@ -114,4 +114,7 @@ public class TrustedRootCertificates {
             throw new RuntimeException(e);
         }
     }
+
+    // Statics only
+    private TrustedRootCertificates() {}
 }
