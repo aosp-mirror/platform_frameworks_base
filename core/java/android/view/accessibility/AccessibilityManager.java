@@ -16,6 +16,8 @@
 
 package android.view.accessibility;
 
+import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_ENABLE_ACCESSIBILITY_VOLUME;
+
 import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityServiceInfo.FeedbackType;
@@ -44,14 +46,13 @@ import android.util.SparseArray;
 import android.view.IWindow;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent.EventType;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IntPair;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_ENABLE_ACCESSIBILITY_VOLUME;
 
 /**
  * System level service that serves as an event dispatch for {@link AccessibilityEvent}s,
