@@ -52,6 +52,8 @@ public class KeySyncUtilsTest {
     private static final int KEY_CLAIMANT_LENGTH_BYTES = 16;
     private static final byte[] TEST_VAULT_HANDLE =
             new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
+    private static final int VAULT_PARAMS_LENGTH_BYTES = 94;
+    private static final int VAULT_HANDLE_LENGTH_BYTES = 17;
     private static final String SHA_256_ALGORITHM = "SHA-256";
     private static final String APPLICATION_KEY_ALGORITHM = "AES";
     private static final byte[] LOCK_SCREEN_HASH_1 =
@@ -63,8 +65,7 @@ public class KeySyncUtilsTest {
     private static final byte[] RECOVERY_RESPONSE_HEADER =
             "V1 reencrypted_recovery_key".getBytes(StandardCharsets.UTF_8);
     private static final int PUBLIC_KEY_LENGTH_BYTES = 65;
-    private static final int VAULT_PARAMS_LENGTH_BYTES = 94;
-    private static final int VAULT_HANDLE_LENGTH_BYTES = 17;
+
 
     @Test
     public void calculateThmKfHash_isShaOfLockScreenHashWithPrefix() throws Exception {
@@ -345,7 +346,7 @@ public class KeySyncUtilsTest {
     }
 
     @Test
-    public void packVaultParams_returns94Bytes() throws Exception {
+    public void packVaultParams_returnsCorrectSize() throws Exception {
         PublicKey thmPublicKey = SecureBox.genKeyPair().getPublic();
 
         byte[] packedForm = KeySyncUtils.packVaultParams(
@@ -418,6 +419,24 @@ public class KeySyncUtilsTest {
         byte[] vaultHandle = new byte[VAULT_HANDLE_LENGTH_BYTES];
         byteBuffer.get(vaultHandle);
         assertArrayEquals(TEST_VAULT_HANDLE, vaultHandle);
+    }
+
+    @Test
+    public void packVaultParams_encodesVaultHandleWithLength8AsLastParam() throws Exception {
+        byte[] vaultHandleWithLenght8 = new byte[] {1, 2, 3, 4, 1, 2, 3, 4};
+        byte[] packedForm = KeySyncUtils.packVaultParams(
+                SecureBox.genKeyPair().getPublic(),
+                /*counterId=*/ 10021L,
+                /*maxAttempts=*/ 10,
+                vaultHandleWithLenght8);
+
+        ByteBuffer byteBuffer = ByteBuffer.wrap(packedForm)
+                .order(ByteOrder.LITTLE_ENDIAN);
+        assertEquals(PUBLIC_KEY_LENGTH_BYTES + Long.BYTES + Integer.BYTES + 8, packedForm.length);
+        byteBuffer.position(PUBLIC_KEY_LENGTH_BYTES + Long.BYTES + Integer.BYTES);
+        byte[] vaultHandle = new byte[8];
+        byteBuffer.get(vaultHandle);
+        assertArrayEquals(vaultHandleWithLenght8, vaultHandle);
     }
 
     private static byte[] randomBytes(int n) {
