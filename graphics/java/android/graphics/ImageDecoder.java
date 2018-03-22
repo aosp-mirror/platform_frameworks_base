@@ -457,31 +457,49 @@ public final class ImageDecoder implements AutoCloseable {
 
     };
 
-    /**
-     *  An Exception was thrown reading the {@link Source}.
+    /** @removed
+     * @deprecated Replaced by {@link #DecodeException#SOURCE_EXCEPTION}.
      */
+    @java.lang.Deprecated
     public static final int ERROR_SOURCE_EXCEPTION  = 1;
 
-    /**
-     *  The encoded data was incomplete.
+    /** @removed
+     * @deprecated Replaced by {@link #DecodeException#SOURCE_INCOMPLETE}.
      */
+    @java.lang.Deprecated
     public static final int ERROR_SOURCE_INCOMPLETE = 2;
 
-    /**
-     *  The encoded data contained an error.
+    /** @removed
+     * @deprecated Replaced by {@link #DecodeException#SOURCE_MALFORMED_DATA}.
      */
+    @java.lang.Deprecated
     public static final int ERROR_SOURCE_ERROR      = 3;
-
-    /** @hide **/
-    @Retention(SOURCE)
-    @IntDef(value = { ERROR_SOURCE_EXCEPTION, ERROR_SOURCE_INCOMPLETE, ERROR_SOURCE_ERROR },
-            prefix = {"ERROR_"})
-    public @interface Error {};
 
     /**
      *  Information about an interrupted decode.
      */
     public static final class DecodeException extends IOException {
+        /**
+         *  An Exception was thrown reading the {@link Source}.
+         */
+        public static final int SOURCE_EXCEPTION  = 1;
+
+        /**
+         *  The encoded data was incomplete.
+         */
+        public static final int SOURCE_INCOMPLETE = 2;
+
+        /**
+         *  The encoded data contained an error.
+         */
+        public static final int SOURCE_MALFORMED_DATA      = 3;
+
+        /** @hide **/
+        @Retention(SOURCE)
+        @IntDef(value = { SOURCE_EXCEPTION, SOURCE_INCOMPLETE, SOURCE_MALFORMED_DATA },
+                prefix = {"SOURCE_"})
+        public @interface Error {};
+
         @Error final int mError;
         @NonNull final Source mSource;
 
@@ -505,7 +523,7 @@ public final class ImageDecoder implements AutoCloseable {
         /**
          *  Retrieve the reason that decoding was interrupted.
          *
-         *  <p>If the error is {@link #ERROR_SOURCE_EXCEPTION}, the underlying
+         *  <p>If the error is {@link #SOURCE_EXCEPTION}, the underlying
          *  {@link java.lang.Throwable} can be retrieved with
          *  {@link java.lang.Throwable#getCause}.</p>
          */
@@ -524,11 +542,11 @@ public final class ImageDecoder implements AutoCloseable {
 
         private static String errorMessage(@Error int error, @Nullable Throwable cause) {
             switch (error) {
-                case ERROR_SOURCE_EXCEPTION:
+                case SOURCE_EXCEPTION:
                     return "Exception in input: " + cause;
-                case ERROR_SOURCE_INCOMPLETE:
+                case SOURCE_INCOMPLETE:
                     return "Input was incomplete.";
-                case ERROR_SOURCE_ERROR:
+                case SOURCE_MALFORMED_DATA:
                     return "Input contained an error.";
                 default:
                     return "";
@@ -1368,7 +1386,7 @@ public final class ImageDecoder implements AutoCloseable {
      * Private method called by JNI.
      */
     @SuppressWarnings("unused")
-    private void onPartialImage(@Error int error, @Nullable Throwable cause)
+    private void onPartialImage(@DecodeException.Error int error, @Nullable Throwable cause)
             throws DecodeException {
         DecodeException exception = new DecodeException(error, cause, mSource);
         if (mOnPartialImageListener == null
