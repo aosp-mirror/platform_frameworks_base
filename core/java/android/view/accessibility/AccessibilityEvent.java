@@ -388,6 +388,8 @@ import java.util.List;
  */
 public final class AccessibilityEvent extends AccessibilityRecord implements Parcelable {
     private static final boolean DEBUG = false;
+    /** @hide */
+    public static final boolean DEBUG_ORIGIN = false;
 
     /**
      * Invalid selection/focus position.
@@ -748,7 +750,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
 
     private static final int MAX_POOL_SIZE = 10;
     private static final SynchronizedPool<AccessibilityEvent> sPool =
-            new SynchronizedPool<AccessibilityEvent>(MAX_POOL_SIZE);
+            new SynchronizedPool<>(MAX_POOL_SIZE);
 
     private @EventType int mEventType;
     private CharSequence mPackageName;
@@ -757,6 +759,17 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     int mAction;
     int mContentChangeTypes;
     int mWindowChangeTypes;
+
+    /**
+     * The stack trace describing where this event originated from on the app side.
+     * Only populated if {@link #DEBUG_ORIGIN} is enabled
+     * Can be inspected(e.g. printed) from an
+     * {@link android.accessibilityservice.AccessibilityService} to trace where particular events
+     * are being dispatched from.
+     *
+     * @hide
+     */
+    public StackTraceElement[] originStackTrace = null;
 
     private ArrayList<AccessibilityRecord> mRecords;
 
@@ -780,6 +793,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mWindowChangeTypes = event.mWindowChangeTypes;
         mEventTime = event.mEventTime;
         mPackageName = event.mPackageName;
+        if (DEBUG_ORIGIN) originStackTrace = event.originStackTrace;
     }
 
     /**
@@ -1104,7 +1118,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      */
     public static AccessibilityEvent obtain() {
         AccessibilityEvent event = sPool.acquire();
-        return (event != null) ? event : new AccessibilityEvent();
+        if (event == null) event = new AccessibilityEvent();
+        if (DEBUG_ORIGIN) event.originStackTrace = Thread.currentThread().getStackTrace();
+        return event;
     }
 
     /**
@@ -1142,6 +1158,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                 record.recycle();
             }
         }
+        if (DEBUG_ORIGIN) originStackTrace = null;
     }
 
     /**
@@ -1164,12 +1181,23 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         // Read the records.
         final int recordCount = parcel.readInt();
         if (recordCount > 0) {
-            mRecords = new ArrayList<AccessibilityRecord>(recordCount);
+            mRecords = new ArrayList<>(recordCount);
             for (int i = 0; i < recordCount; i++) {
                 AccessibilityRecord record = AccessibilityRecord.obtain();
                 readAccessibilityRecordFromParcel(record, parcel);
                 record.mConnectionId = mConnectionId;
                 mRecords.add(record);
+            }
+        }
+
+        if (DEBUG_ORIGIN) {
+            originStackTrace = new StackTraceElement[parcel.readInt()];
+            for (int i = 0; i < originStackTrace.length; i++) {
+                originStackTrace[i] = new StackTraceElement(
+                        parcel.readString(),
+                        parcel.readString(),
+                        parcel.readString(),
+                        parcel.readInt());
             }
         }
     }
@@ -1226,6 +1254,17 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         for (int i = 0; i < recordCount; i++) {
             AccessibilityRecord record = mRecords.get(i);
             writeAccessibilityRecordToParcel(record, parcel, flags);
+        }
+
+        if (DEBUG_ORIGIN) {
+            if (originStackTrace == null) originStackTrace = Thread.currentThread().getStackTrace();
+            parcel.writeInt(originStackTrace.length);
+            for (StackTraceElement element : originStackTrace) {
+                parcel.writeString(element.getClassName());
+                parcel.writeString(element.getMethodName());
+                parcel.writeString(element.getFileName());
+                parcel.writeInt(element.getLineNumber());
+            }
         }
     }
 
