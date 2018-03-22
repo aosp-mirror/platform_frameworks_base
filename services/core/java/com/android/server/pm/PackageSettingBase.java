@@ -20,12 +20,16 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.Signature;
+import android.os.BaseBundle;
+import android.os.PersistableBundle;
 import android.service.pm.PackageProto;
 import android.util.ArraySet;
 import android.util.SparseArray;
@@ -394,8 +398,13 @@ public abstract class PackageSettingBase extends SettingBase {
         return readUserState(userId).suspended;
     }
 
-    void setSuspended(boolean suspended, int userId) {
-        modifyUserState(userId).suspended = suspended;
+    void setSuspended(boolean suspended, String suspendingPackage, PersistableBundle appExtras,
+            PersistableBundle launcherExtras, int userId) {
+        final PackageUserState existingUserState = modifyUserState(userId);
+        existingUserState.suspended = suspended;
+        existingUserState.suspendingPackage = suspended ? suspendingPackage : null;
+        existingUserState.suspendedAppExtras = suspended ? appExtras : null;
+        existingUserState.suspendedLauncherExtras = suspended ? launcherExtras : null;
     }
 
     public boolean getInstantApp(int userId) {
@@ -415,7 +424,9 @@ public abstract class PackageSettingBase extends SettingBase {
     }
 
     void setUserState(int userId, long ceDataInode, int enabled, boolean installed, boolean stopped,
-            boolean notLaunched, boolean hidden, boolean suspended, boolean instantApp,
+            boolean notLaunched, boolean hidden, boolean suspended, String suspendingPackage,
+            PersistableBundle suspendedAppExtras, PersistableBundle suspendedLauncherExtras,
+            boolean instantApp,
             boolean virtualPreload, String lastDisableAppCaller,
             ArraySet<String> enabledComponents, ArraySet<String> disabledComponents,
             int domainVerifState, int linkGeneration, int installReason,
@@ -428,6 +439,9 @@ public abstract class PackageSettingBase extends SettingBase {
         state.notLaunched = notLaunched;
         state.hidden = hidden;
         state.suspended = suspended;
+        state.suspendingPackage = suspendingPackage;
+        state.suspendedAppExtras = suspendedAppExtras;
+        state.suspendedLauncherExtras = suspendedLauncherExtras;
         state.lastDisableAppCaller = lastDisableAppCaller;
         state.enabledComponents = enabledComponents;
         state.disabledComponents = disabledComponents;
@@ -594,6 +608,9 @@ public abstract class PackageSettingBase extends SettingBase {
             proto.write(PackageProto.UserInfoProto.INSTALL_TYPE, installType);
             proto.write(PackageProto.UserInfoProto.IS_HIDDEN, state.hidden);
             proto.write(PackageProto.UserInfoProto.IS_SUSPENDED, state.suspended);
+            if (state.suspended) {
+                proto.write(PackageProto.UserInfoProto.SUSPENDING_PACKAGE, state.suspendingPackage);
+            }
             proto.write(PackageProto.UserInfoProto.IS_STOPPED, state.stopped);
             proto.write(PackageProto.UserInfoProto.IS_LAUNCHED, !state.notLaunched);
             proto.write(PackageProto.UserInfoProto.ENABLED_STATE, state.enabled);

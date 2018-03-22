@@ -9252,7 +9252,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             long id = mInjector.binderClearCallingIdentity();
             try {
                 return mIPackageManager.setPackagesSuspendedAsUser(
-                        packageNames, suspended, callingUserId);
+                        packageNames, suspended, null, null, "android", callingUserId);
             } catch (RemoteException re) {
                 // Shouldn't happen.
                 Slog.e(LOG_TAG, "Failed talking to the package manager", re);

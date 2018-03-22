@@ -357,6 +357,23 @@ public class BaseBundle {
     }
 
     /**
+     * Does a loose equality check between two given {@link BaseBundle} objects.
+     * Returns {@code true} if both are {@code null}, or if both are equal as per
+     * {@link #kindofEquals(BaseBundle)}
+     *
+     * @param a A {@link BaseBundle} object
+     * @param b Another {@link BaseBundle} to compare with a
+     * @return {@code true} if both are the same, {@code false} otherwise
+     *
+     * @see #kindofEquals(BaseBundle)
+     *
+     * @hide
+     */
+    public static boolean kindofEquals(BaseBundle a, BaseBundle b) {
+        return (a == b) || (a != null && a.kindofEquals(b));
+    }
+
+    /**
      * @hide This kind-of does an equality comparison.  Kind-of.
      */
     public boolean kindofEquals(BaseBundle other) {
