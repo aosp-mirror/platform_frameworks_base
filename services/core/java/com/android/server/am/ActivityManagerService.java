@@ -6082,15 +6082,16 @@ public class ActivityManagerService extends IActivityManager.Stub
      * since it's the system_server that creates trace files for most ANRs.
      */
     private static void maybePruneOldTraces(File tracesDir) {
-        final long now = System.currentTimeMillis();
-        final File[] traceFiles = tracesDir.listFiles();
+        final File[] files = tracesDir.listFiles();
+        if (files == null) return;
 
-        if (traceFiles != null) {
-            for (File file : traceFiles) {
-                if ((now - file.lastModified()) > DAY_IN_MILLIS)  {
-                    if (!file.delete()) {
-                        Slog.w(TAG, "Unable to prune stale trace file: " + file);
-                    }
+        final int max = SystemProperties.getInt("tombstoned.max_anr_count", 64);
+        final long now = System.currentTimeMillis();
+        Arrays.sort(files, Comparator.comparingLong(File::lastModified).reversed());
+        for (int i = 0; i < files.length; ++i) {
+            if (i > max || (now - files[i].lastModified()) > DAY_IN_MILLIS) {
+                if (!files[i].delete()) {
+                    Slog.w(TAG, "Unable to prune stale trace file: " + files[i]);
                 }
             }
         }
