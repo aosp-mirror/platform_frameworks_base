@@ -34,7 +34,7 @@ enum Color {
     LightBlue_300 = 0xFF4FC3F7,
     LightBlue_500 = 0xFF03A9F4,
     Cyan_500 = 0xFF00BCD4,
-    Teal_500 = 0xFF009688,
+    Teal_500 = 0xFF008577,
     Teal_700 = 0xFF00796B,
     Green_500 = 0xFF4CAF50,
     Green_700 = 0xFF388E3C,
