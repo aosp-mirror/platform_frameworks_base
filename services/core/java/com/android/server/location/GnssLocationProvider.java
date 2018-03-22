@@ -470,7 +470,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
     // Volatile for simple inter-thread sync on these values.
     private volatile int mHardwareYear = 0;
-    private volatile String mHardwareModelName = LocationManager.GNSS_HARDWARE_MODEL_NAME_UNKNOWN;
+    private volatile String mHardwareModelName;
 
     // Set lower than the current ITAR limit of 600m/s to allow this to trigger even if GPS HAL
     // stops output right at 600m/s, depriving this of the information of a device that reaches

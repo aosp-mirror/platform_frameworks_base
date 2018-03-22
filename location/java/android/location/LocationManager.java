@@ -23,6 +23,7 @@ import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
@@ -234,12 +235,6 @@ public class LocationManager {
      */
     public static final String HIGH_POWER_REQUEST_CHANGE_ACTION =
         "android.location.HIGH_POWER_REQUEST_CHANGE";
-
-    /**
-     * The value returned by {@link LocationManager#getGnssHardwareModelName()} when the hardware
-     * does not support providing the actual value.
-     */
-    public static final String GNSS_HARDWARE_MODEL_NAME_UNKNOWN = "Model Name Unknown";
 
     /**
      * Broadcast intent action for Settings app to inject a footer at the bottom of location
@@ -2206,7 +2201,9 @@ public class LocationManager {
     /**
      * Returns the model year of the GNSS hardware and software build.
      *
-     * May return 0 if the model year is less than 2016.
+     * <p> More details, such as build date, may be available in {@link #getGnssHardwareModelName()}.
+     *
+     * <p> May return 0 if the model year is less than 2016.
      */
     public int getGnssYearOfHardware() {
         try {
@@ -2220,10 +2217,12 @@ public class LocationManager {
      * Returns the Model Name (including Vendor and Hardware/Software Version) of the GNSS hardware
      * driver.
      *
-     * Will return {@link LocationManager#GNSS_HARDWARE_MODEL_NAME_UNKNOWN} when the GNSS hardware
-     * abstraction layer does not support providing this value.
+     * <p> No device-specific serial number or ID is returned from this API.
+     *
+     * <p> Will return null when the GNSS hardware abstraction layer does not support providing
+     * this value.
      */
-    @NonNull
+    @Nullable
     public String getGnssHardwareModelName() {
         try {
             return mService.getGnssHardwareModelName();
