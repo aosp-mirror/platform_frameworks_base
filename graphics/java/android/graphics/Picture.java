@@ -209,6 +209,8 @@ public class Picture {
         public PictureCanvas(Picture pict, long nativeCanvas) {
             super(nativeCanvas);
             mPicture = pict;
+            // Disable bitmap density scaling. This matches DisplayListCanvas.
+            mDensity = 0;
         }
 
         @Override
