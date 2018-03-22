@@ -215,6 +215,13 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     // Timeout interval for deciding that a bind or clear-data has taken too long
     private static final long TIMEOUT_INTERVAL = 10 * 1000;
 
+    // Timeout intervals for agent backup & restore operations
+    public static final long TIMEOUT_BACKUP_INTERVAL = 30 * 1000;
+    public static final long TIMEOUT_FULL_BACKUP_INTERVAL = 5 * 60 * 1000;
+    public static final long TIMEOUT_SHARED_BACKUP_INTERVAL = 30 * 60 * 1000;
+    public static final long TIMEOUT_RESTORE_INTERVAL = 60 * 1000;
+    public static final long TIMEOUT_RESTORE_FINISHED_INTERVAL = 30 * 1000;
+
     // User confirmation timeout for a full backup/restore operation.  It's this long in
     // order to give them time to enter the backup password.
     private static final long TIMEOUT_FULL_CONFIRMATION = 60 * 1000;
@@ -225,7 +232,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     private static final int BUSY_BACKOFF_FUZZ = 1000 * 60 * 60 * 2;  // two hours
 
     private BackupManagerConstants mConstants;
-    private BackupAgentTimeoutParameters mAgentTimeoutParameters;
     private Context mContext;
     private PackageManager mPackageManager;
     private IPackageManager mPackageManagerBinder;
@@ -307,10 +313,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
 
     public BackupManagerConstants getConstants() {
         return mConstants;
-    }
-
-    public BackupAgentTimeoutParameters getAgentTimeoutParameters() {
-        return mAgentTimeoutParameters;
     }
 
     public Context getContext() {
@@ -853,10 +855,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         // because we reference the constants in multiple areas of BMS, which otherwise would
         // require frequent starting and stopping.
         mConstants.start();
-
-        mAgentTimeoutParameters = new
-                BackupAgentTimeoutParameters(mBackupHandler, mContext.getContentResolver());
-        mAgentTimeoutParameters.start();
 
         // Set up the various sorts of package tracking we do
         mFullBackupScheduleFile = new File(mBaseStateDir, "fb-schedule");
@@ -3409,7 +3407,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
             }
             mActiveRestoreSession = new ActiveRestoreSession(this, packageName, transport);
             mBackupHandler.sendEmptyMessageDelayed(MSG_RESTORE_SESSION_TIMEOUT,
-                    mAgentTimeoutParameters.getRestoreAgentTimeoutMillis());
+                    TIMEOUT_RESTORE_INTERVAL);
         }
         return mActiveRestoreSession;
     }

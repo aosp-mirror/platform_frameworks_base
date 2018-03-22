@@ -22,6 +22,7 @@ import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.OP_PENDING;
 import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP;
 import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP_WAIT;
+import static com.android.server.backup.BackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL;
 
 import android.annotation.Nullable;
 import android.app.IBackupAgent;
@@ -43,7 +44,6 @@ import android.util.Slog;
 
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.EventLogTags;
-import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.FullBackupJob;
 import com.android.server.backup.BackupManagerService;
@@ -146,7 +146,6 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
     private volatile boolean mIsDoingBackup;
     private volatile boolean mCancelAll;
     private final int mCurrentOpToken;
-    private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
     public PerformFullTransportBackupTask(BackupManagerService backupManagerService,
             TransportClient transportClient,
@@ -168,7 +167,6 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         mUserInitiated = userInitiated;
         mCurrentOpToken = backupManagerService.generateRandomIntegerToken();
         mBackupRunnerOpToken = backupManagerService.generateRandomIntegerToken();
-        mAgentTimeoutParameters = backupManagerService.getAgentTimeoutParameters();
 
         if (backupManagerService.isBackupOperationInProgress()) {
             if (DEBUG) {
@@ -700,11 +698,9 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         @Override
         public int preflightFullBackup(PackageInfo pkg, IBackupAgent agent) {
             int result;
-            long fullBackupAgentTimeoutMillis =
-                    mAgentTimeoutParameters.getFullBackupAgentTimeoutMillis();
             try {
                 backupManagerService.prepareOperationTimeout(
-                        mCurrentOpToken, fullBackupAgentTimeoutMillis, this, OP_TYPE_BACKUP_WAIT);
+                        mCurrentOpToken, TIMEOUT_FULL_BACKUP_INTERVAL, this, OP_TYPE_BACKUP_WAIT);
                 backupManagerService.addBackupTrace("preflighting");
                 if (MORE_DEBUG) {
                     Slog.d(TAG, "Preflighting full payload of " + pkg.packageName);
@@ -717,7 +713,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                 // timeout had been produced.  In case of a real backstop timeout, mResult
                 // will still contain the value it was constructed with, AGENT_ERROR, which
                 // intentionaly falls into the "just report failure" code.
-                mLatch.await(fullBackupAgentTimeoutMillis, TimeUnit.MILLISECONDS);
+                mLatch.await(TIMEOUT_FULL_BACKUP_INTERVAL, TimeUnit.MILLISECONDS);
 
                 long totalSize = mResult.get();
                 // If preflight timed out, mResult will contain error code as int.
@@ -773,10 +769,8 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
 
         @Override
         public long getExpectedSizeOrErrorCode() {
-            long fullBackupAgentTimeoutMillis =
-                    mAgentTimeoutParameters.getFullBackupAgentTimeoutMillis();
             try {
-                mLatch.await(fullBackupAgentTimeoutMillis, TimeUnit.MILLISECONDS);
+                mLatch.await(TIMEOUT_FULL_BACKUP_INTERVAL, TimeUnit.MILLISECONDS);
                 return mResult.get();
             } catch (InterruptedException e) {
                 return BackupTransport.NO_MORE_DATA;
@@ -869,10 +863,8 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         // If preflight succeeded, returns positive number - preflight size,
         // otherwise return negative error code.
         long getPreflightResultBlocking() {
-            long fullBackupAgentTimeoutMillis =
-                    mAgentTimeoutParameters.getFullBackupAgentTimeoutMillis();
             try {
-                mPreflightLatch.await(fullBackupAgentTimeoutMillis, TimeUnit.MILLISECONDS);
+                mPreflightLatch.await(TIMEOUT_FULL_BACKUP_INTERVAL, TimeUnit.MILLISECONDS);
                 if (mIsCancelled) {
                     return BackupManager.ERROR_BACKUP_CANCELLED;
                 }
@@ -887,10 +879,8 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         }
 
         int getBackupResultBlocking() {
-            long fullBackupAgentTimeoutMillis =
-                    mAgentTimeoutParameters.getFullBackupAgentTimeoutMillis();
             try {
-                mBackupLatch.await(fullBackupAgentTimeoutMillis, TimeUnit.MILLISECONDS);
+                mBackupLatch.await(TIMEOUT_FULL_BACKUP_INTERVAL, TimeUnit.MILLISECONDS);
                 if (mIsCancelled) {
                     return BackupManager.ERROR_BACKUP_CANCELLED;
                 }

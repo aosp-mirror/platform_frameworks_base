@@ -162,18 +162,13 @@ public class PerformBackupTaskTest {
                 new BackupManagerConstants(mainHandler, mApplication.getContentResolver());
         constants.start();
 
-        BackupAgentTimeoutParameters agentTimeoutParameters =
-                new BackupAgentTimeoutParameters(mainHandler, mApplication.getContentResolver());
-        agentTimeoutParameters.start();
-
         setUpBackupManagerServiceBasics(
                 mBackupManagerService,
                 mApplication,
                 mTransportManager,
                 packageManager,
                 mBackupHandler,
-                mWakeLock,
-                agentTimeoutParameters);
+                mWakeLock);
         when(mBackupManagerService.getBaseStateDir()).thenReturn(mBaseStateDir);
         when(mBackupManagerService.getDataDir()).thenReturn(dataDir);
         when(mBackupManagerService.getBackupManagerBinder()).thenReturn(mBackupManager);
