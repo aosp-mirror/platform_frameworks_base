@@ -1660,7 +1660,7 @@ public class AudioService extends IAudioService.Stub
 
             // Check if volume update should be send to Hearing Aid
             if ((device & AudioSystem.DEVICE_OUT_HEARING_AID) != 0) {
-                setHearingAidVolume(newIndex);
+                setHearingAidVolume(newIndex, streamType);
             }
 
             // Check if volume update should be sent to Hdmi system audio.
@@ -1909,7 +1909,7 @@ public class AudioService extends IAudioService.Stub
             }
 
             if ((device & AudioSystem.DEVICE_OUT_HEARING_AID) != 0) {
-                setHearingAidVolume(index);
+                setHearingAidVolume(index, streamType);
             }
 
             if (streamTypeAlias == AudioSystem.STREAM_MUSIC) {
@@ -5665,11 +5665,11 @@ public class AudioService extends IAudioService.Stub
                 makeDeviceListKey(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, address));
     }
 
-    private void setHearingAidVolume(int index) {
+    private void setHearingAidVolume(int index, int streamType) {
         synchronized (mHearingAidLock) {
             if (mHearingAid != null) {
                 //hearing aid expect volume value in range -128dB to 0dB
-                int gainDB = (int)AudioSystem.getStreamVolumeDB(AudioSystem.STREAM_MUSIC, index/10,
+                int gainDB = (int)AudioSystem.getStreamVolumeDB(streamType, index/10,
                         AudioSystem.DEVICE_OUT_HEARING_AID);
                 if (gainDB < BT_HEARING_AID_GAIN_MIN)
                     gainDB = BT_HEARING_AID_GAIN_MIN;
@@ -5681,7 +5681,7 @@ public class AudioService extends IAudioService.Stub
     // must be called synchronized on mConnectedDevices
     private void makeHearingAidDeviceAvailable(String address, String name, String eventSource) {
         int index = mStreamStates[AudioSystem.STREAM_MUSIC].getIndex(AudioSystem.DEVICE_OUT_HEARING_AID);
-        setHearingAidVolume(index);
+        setHearingAidVolume(index, AudioSystem.STREAM_MUSIC);
 
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_HEARING_AID,
                 AudioSystem.DEVICE_STATE_AVAILABLE, address, name);
