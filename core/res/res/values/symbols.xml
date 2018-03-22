@@ -2778,7 +2778,6 @@
   <java-symbol type="drawable" name="ic_user_secure" />
 
   <java-symbol type="string" name="android_upgrading_notification_title" />
-  <java-symbol type="string" name="android_upgrading_notification_body" />
 
   <java-symbol type="string" name="usb_mtp_launch_notification_title" />
   <java-symbol type="string" name="usb_mtp_launch_notification_description" />
