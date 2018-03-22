@@ -138,7 +138,7 @@ LOCAL_MODULE_CLASS := EXECUTABLES
 # Enable sanitizer on eng builds
 ifeq ($(TARGET_BUILD_VARIANT),eng)
     LOCAL_CLANG := true
-    LOCAL_SANITIZE := address unsigned-integer-overflow signed-integer-overflow
+    LOCAL_SANITIZE := address
 endif
 
 LOCAL_INIT_RC := statsd.rc
