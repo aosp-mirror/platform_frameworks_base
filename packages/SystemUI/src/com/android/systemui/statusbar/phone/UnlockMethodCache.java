@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.hardware.biometrics.BiometricSourceType;
 import android.content.Context;
 import android.os.Trace;
 
@@ -135,9 +136,9 @@ public class UnlockMethodCache {
         }
 
         @Override
-        public void onFingerprintAuthenticated(int userId) {
-            Trace.beginSection("KeyguardUpdateMonitorCallback#onFingerprintAuthenticated");
-            if (!mKeyguardUpdateMonitor.isUnlockingWithFingerprintAllowed()) {
+        public void onBiometricAuthenticated(int userId, BiometricSourceType biometricSourceType) {
+            Trace.beginSection("KeyguardUpdateMonitorCallback#onBiometricAuthenticated");
+            if (!mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed()) {
                 Trace.endSection();
                 return;
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,21 +11,23 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
+package android.hardware.face;
 
-package com.android.keyguard;
+import android.hardware.face.Face;
+import android.os.Bundle;
+import android.os.IRemoteCallback;
+import android.os.UserHandle;
 
 /**
- * Defines constants for the Keyguard.
+ * Callback when lockout period expired and clients are allowed to authenticate again.
+ * @hide
  */
-public class KeyguardConstants {
+oneway interface IFaceServiceLockoutResetCallback {
 
     /**
-     * Turns on debugging information for the whole Keyguard. This is very verbose and should only
-     * be used temporarily for debugging.
+     * A wakelock will be held until the reciever calls back into {@param callback}
      */
-    public static final boolean DEBUG = false;
-    public static final boolean DEBUG_SIM_STATES = true;
-    public static final boolean DEBUG_BIOMETRIC_WAKELOCK = true;
+    void onLockoutReset(long deviceId, IRemoteCallback callback);
 }

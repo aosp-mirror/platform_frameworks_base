@@ -556,6 +556,7 @@
     <protected-broadcast android:name="android.intent.action.TWILIGHT_CHANGED" />
 
     <protected-broadcast android:name="com.android.server.fingerprint.ACTION_LOCKOUT_RESET" />
+    <protected-broadcast android:name="com.android.server.face.ACTION_LOCKOUT_RESET" />
     <protected-broadcast android:name="android.net.wifi.PASSPOINT_ICON_RECEIVED" />
     <protected-broadcast android:name="com.android.server.notification.CountdownConditionProvider" />
 
@@ -3628,6 +3629,14 @@
 
     <!-- Allows an app to reset fingerprint attempt counter. Reserved for the system. @hide -->
     <permission android:name="android.permission.RESET_FINGERPRINT_LOCKOUT"
+        android:protectionLevel="signature" />
+
+    <!-- Allows managing (adding, removing) facial templates. Reserved for the system. @hide -->
+    <permission android:name="android.permission.MANAGE_FACE"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- Allows an app to reset face authentication attempt counter. Reserved for the system. @hide -->
+    <permission android:name="android.permission.RESET_FACE_LOCKOUT"
         android:protectionLevel="signature" />
 
     <!-- Allows an application to control keyguard.  Only allowed for system processes.

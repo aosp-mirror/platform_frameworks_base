@@ -2412,6 +2412,30 @@
   <java-symbol type="integer" name="config_fingerprintMaxTemplatesPerUser"/>
   <java-symbol type="bool" name="config_fingerprintSupportsGestures"/>
 
+  <!-- Face authentication messages -->
+  <java-symbol type="string" name="face_error_unable_to_process" />
+  <java-symbol type="string" name="face_error_hw_not_available" />
+  <java-symbol type="string" name="face_error_no_space" />
+  <java-symbol type="string" name="face_error_timeout" />
+  <java-symbol type="array" name="face_error_vendor" />
+  <java-symbol type="string" name="face_error_canceled" />
+  <java-symbol type="string" name="face_error_lockout" />
+  <java-symbol type="string" name="face_error_lockout_permanent" />
+  <java-symbol type="string" name="face_error_not_enrolled" />
+  <java-symbol type="string" name="face_error_hw_not_present" />
+  <java-symbol type="string" name="face_acquired_insufficient" />
+  <java-symbol type="string" name="face_acquired_too_bright" />
+  <java-symbol type="string" name="face_acquired_too_dark" />
+  <java-symbol type="string" name="face_acquired_too_close" />
+  <java-symbol type="string" name="face_acquired_too_far" />
+  <java-symbol type="string" name="face_acquired_too_high" />
+  <java-symbol type="string" name="face_acquired_too_low" />
+  <java-symbol type="string" name="face_acquired_too_right" />
+  <java-symbol type="string" name="face_acquired_too_left" />
+  <java-symbol type="string" name="face_acquired_poor_gaze" />
+  <java-symbol type="string" name="face_acquired_not_detected" />
+  <java-symbol type="array" name="face_acquired_vendor" />
+
   <!-- From various Material changes -->
   <java-symbol type="attr" name="titleTextAppearance" />
   <java-symbol type="attr" name="subtitleTextAppearance" />

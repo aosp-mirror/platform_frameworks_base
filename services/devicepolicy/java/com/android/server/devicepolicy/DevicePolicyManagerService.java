@@ -6259,7 +6259,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void reportFailedFingerprintAttempt(int userHandle) {
+    public void reportFailedBiometricAttempt(int userHandle) {
         enforceFullCrossUsersPermission(userHandle);
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);
@@ -6270,7 +6270,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void reportSuccessfulFingerprintAttempt(int userHandle) {
+    public void reportSuccessfulBiometricAttempt(int userHandle) {
         enforceFullCrossUsersPermission(userHandle);
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BIND_DEVICE_ADMIN, null);

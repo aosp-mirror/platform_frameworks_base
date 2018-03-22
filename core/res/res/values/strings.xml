@@ -1401,6 +1401,74 @@
     <!-- Content description which should be used for the fingerprint icon. -->
     <string name="fingerprint_icon_content_description">Fingerprint icon</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=50] -->
+    <string name="permlab_manageFace">manage face authentication hardware</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=90] -->
+    <string name="permdesc_manageFace">Allows the app to invoke methods to add and delete facial templates for use.</string>
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=50] -->
+    <string name="permlab_useFaceAuthentication">use face authentication hardware</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=90] -->
+    <string name="permdesc_useFaceAuthentication">Allows the app to use face authentication hardware for authentication</string>
+
+    <!-- Message shown during face acquisition when the face cannot be recognized [CHAR LIMIT=50] -->
+    <string name="face_acquired_insufficient">Couldn\u2019t process face. Please try again.</string>
+    <!-- Message shown during face acquisition when the image is too bright [CHAR LIMIT=50] -->
+    <string name="face_acquired_too_bright">Face is too bright. Please try in lower light.</string>
+    <!-- Message shown during face acquisition when the image is too dark [CHAR LIMIT=50] -->
+    <string name="face_acquired_too_dark">Face is too dark. Please uncover light source.</string>
+    <!-- Message shown during face acquisition when the user is too close to sensor [CHAR LIMIT=50] -->
+    <string name="face_acquired_too_close">Please move sensor farther from face.</string>
+    <!-- Message shown during face acquisition when the user is too far from sensor [CHAR LIMIT=50] -->
+    <string name="face_acquired_too_far">Please bring sensor closer to face.</string>
+    <!-- Message shown during face acquisition when the user is too high relatively to sensor [CHAR LIMIT=50] -->
+    <string name="face_acquired_too_high">Please move sensor higher.</string>
+    <!-- Message shown during face acquisition when the user is too low relatively to sensor [CHAR LIMIT=50] -->
+    <string name="face_acquired_too_low">Please move sensor lower.</string>
+    <!-- Message shown during face acquisition when the user is too right relatively to sensor [CHAR LIMIT=50] -->
+    <string name="face_acquired_too_right">Please move sensor to the right.</string>
+    <!-- Message shown during face acquisition when the user is too left relatively to sensor [CHAR LIMIT=50] -->
+    <string name="face_acquired_too_left">Please move sensor to the left.</string>
+    <!-- Message shown during face acquisition when the user is not front facing the sensor [CHAR LIMIT=50] -->
+    <string name="face_acquired_poor_gaze">Please look at the sensor.</string>
+    <!-- Message shown during face acquisition when the user is not detected [CHAR LIMIT=50] -->
+    <string name="face_acquired_not_detected">No face detected.</string>
+
+
+    <!-- Message shown during face acquisition when the face is not kept steady infront of device [CHAR LIMIT=50] -->
+    <string name="face_acquired_not_steady">Keep face steady infront of device.</string>
+    <!-- Array containing custom messages shown during face acquisition from vendor.  Vendor is expected to add and translate these strings -->
+    <string-array name="face_acquired_vendor">
+    </string-array>
+
+    <!-- Error message shown when the face hardware can't be accessed. [CHAR LIMIT=50] -->
+    <string name="face_error_hw_not_available">Face hardware not available.</string>
+    <!-- Error message shown when the face hardware timer has expired and the user needs to restart the operation. [CHAR LIMIT=50] -->
+    <string name="face_error_timeout">Face time out reached. Try again.</string>
+    <!-- Error message shown when the face hardware has run out of room for storing faces. [CHAR LIMIT=50] -->
+    <string name="face_error_no_space">Face can\u2019t be stored.</string>
+    <!-- Generic error message shown when the face operation (e.g. enrollment or authentication) is canceled. Generally not shown to the user. [CHAR LIMIT=50] -->
+    <string name="face_error_canceled">Face operation canceled.</string>
+    <!-- Generic error message shown when the face operation fails because too many attempts have been made. [CHAR LIMIT=50] -->
+    <string name="face_error_lockout">Too many attempts. Try again later.</string>
+    <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=50] -->
+    <string name="face_error_lockout_permanent">Too many attempts. Facial authentication disabled.</string>
+    <!-- Generic error message shown when the face hardware can't recognize the face. [CHAR LIMIT=50] -->
+    <string name="face_error_unable_to_process">Try again.</string>
+    <!-- Generic error message shown when the user has no enrolled face. [CHAR LIMIT=50] -->
+    <string name="face_error_not_enrolled">No face enrolled.</string>
+    <!-- Generic error message shown when the app requests face authentication on a device without a sensor. [CHAR LIMIT=60] -->
+    <string name="face_error_hw_not_present">This device does not have a face authentication sensor</string>
+
+    <!-- Template to be used to name enrolled faces by default. [CHAR LIMIT=10] -->
+    <string name="face_name_template">Face <xliff:g id="faceId" example="1">%d</xliff:g></string>
+
+    <!-- Array containing custom error messages from vendor.  Vendor is expected to add and translate these strings -->
+    <string-array name="face_error_vendor">
+    </string-array>
+
+    <!-- Content description which should be used for the face icon. [CHAR LIMIT=10] -->
+    <string name="face_icon_content_description">Face icon</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readSyncSettings">read sync settings</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

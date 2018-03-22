@@ -381,7 +381,10 @@
     </plurals>
 
     <!-- Fingerprint hint message when finger was not recognized.-->
-    <string name="fingerprint_not_recognized">Not recognized</string>
+    <string name="kg_fingerprint_not_recognized">Not recognized</string>
+
+    <!-- Face hint message when finger was not recognized. [CHAR LIMIT=20] -->
+    <string name="kg_face_not_recognized">Not recognized</string>
 
     <!-- Instructions telling the user remaining times when enter SIM PIN view.  -->
     <plurals name="kg_password_default_pin_message">
