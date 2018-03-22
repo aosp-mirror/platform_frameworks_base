@@ -1227,6 +1227,7 @@ public class AudioManager {
      *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void forceVolumeControlStream(int streamType) {
         final IAudioService service = getService();
         try {
