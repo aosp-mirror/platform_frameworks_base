@@ -130,6 +130,11 @@ public final class UserHandle implements Parcelable {
     }
 
     /** @hide */
+    public static final int getCallingAppId() {
+        return getAppId(Binder.getCallingUid());
+    }
+
+    /** @hide */
     public static final UserHandle getCallingUserHandle() {
         int userId = getUserId(Binder.getCallingUid());
         UserHandle userHandle = userHandles.get(userId);
