@@ -55,8 +55,9 @@ void triggerSubscribers(const int64_t rule_id,
                 }
                 break;
             case Subscription::SubscriberInformationCase::kPerfettoDetails:
-                if (!CollectPerfettoTraceAndUploadToDropbox(subscription.perfetto_details())) {
-                    ALOGW("Failed to generate prefetto traces.");
+                if (!CollectPerfettoTraceAndUploadToDropbox(subscription.perfetto_details(),
+                                                            rule_id, configKey)) {
+                    ALOGW("Failed to generate perfetto traces.");
                 }
                 break;
             case Subscription::SubscriberInformationCase::kBroadcastSubscriberDetails:
