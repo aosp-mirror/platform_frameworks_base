@@ -27,6 +27,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.service.quicksettings.TileService;
+import android.text.TextUtils;
 import android.widget.Button;
 
 import com.android.systemui.Dependency;
@@ -169,7 +170,8 @@ public class TileQueryHelper {
         info.state.expandedAccessibilityClassName =
                 Button.class.getName();
         info.spec = spec;
-        info.appLabel = appLabel;
+        info.state.secondaryLabel = (isSystem || TextUtils.equals(state.label, appLabel))
+                ? null : appLabel;
         info.isSystem = isSystem;
         mTiles.add(info);
         mSpecs.add(spec);
@@ -186,7 +188,6 @@ public class TileQueryHelper {
 
     public static class TileInfo {
         public String spec;
-        public CharSequence appLabel;
         public QSTile.State state;
         public boolean isSystem;
     }
