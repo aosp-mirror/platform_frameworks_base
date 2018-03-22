@@ -9650,6 +9650,21 @@ public final class Settings {
         public static final String WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED =
                 "wifi_connected_mac_randomization_enabled";
 
+        /**
+         * Parameters to adjust the performance of framework wifi scoring methods.
+         * <p>
+         * Encoded as a comma-separated key=value list, for example:
+         *   "rssi5=-80:-77:-70:-57,rssi2=-83:-80:-73:-60,horizon=15"
+         * This is intended for experimenting with new parameter values,
+         * and is normally unset or empty. The example does not include all
+         * parameters that may be honored.
+         * Default values are provided by code or device configurations.
+         * Errors in the parameters will cause the entire setting to be ignored.
+         * @hide
+         */
+        public static final String WIFI_SCORE_PARAMS =
+                "wifi_score_params";
+
        /**
         * The maximum number of times we will retry a connection to an access
         * point for which we have failed in acquiring an IP address from DHCP.
