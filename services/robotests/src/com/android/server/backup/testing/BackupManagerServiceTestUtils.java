@@ -28,7 +28,6 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.util.SparseArray;
 
-import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.internal.BackupHandler;
@@ -44,8 +43,7 @@ public class BackupManagerServiceTestUtils {
             TransportManager transportManager,
             PackageManager packageManager,
             BackupHandler backupHandler,
-            PowerManager.WakeLock wakeLock,
-            BackupAgentTimeoutParameters agentTimeoutParameters) {
+            PowerManager.WakeLock wakeLock) {
         when(backupManagerService.getContext()).thenReturn(context);
         when(backupManagerService.getTransportManager()).thenReturn(transportManager);
         when(backupManagerService.getPackageManager()).thenReturn(packageManager);
@@ -55,7 +53,6 @@ public class BackupManagerServiceTestUtils {
         when(backupManagerService.getCurrentOperations()).thenReturn(new SparseArray<>());
         when(backupManagerService.getActivityManager()).thenReturn(mock(IActivityManager.class));
         when(backupManagerService.getWakelock()).thenReturn(wakeLock);
-        when(backupManagerService.getAgentTimeoutParameters()).thenReturn(agentTimeoutParameters);
     }
 
     public static PowerManager.WakeLock createBackupWakeLock(Application application) {
