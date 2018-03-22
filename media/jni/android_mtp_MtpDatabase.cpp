@@ -39,6 +39,7 @@ extern "C" {
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
 #include <jni.h>
+#include <media/stagefright/NuMediaExtractor.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
 
@@ -788,6 +789,41 @@ static long getLongFromExifEntry(ExifEntry *e) {
     return exif_get_long(e->data, o);
 }
 
+static ExifData *getExifFromExtractor(const char *path) {
+    std::unique_ptr<uint8_t[]> exifBuf;
+    ExifData *exifdata = NULL;
+
+    FILE *fp = fopen (path, "rb");
+    if (!fp) {
+        ALOGE("failed to open file");
+        return NULL;
+    }
+
+    sp<NuMediaExtractor> extractor = new NuMediaExtractor();
+    fseek(fp, 0L, SEEK_END);
+    if (extractor->setDataSource(fileno(fp), 0, ftell(fp)) != OK) {
+        ALOGE("failed to setDataSource");
+        fclose(fp);
+        return NULL;
+    }
+
+    off64_t offset;
+    size_t size;
+    if (extractor->getExifOffsetSize(&offset, &size) != OK) {
+        fclose(fp);
+        return NULL;
+    }
+
+    exifBuf.reset(new uint8_t[size]);
+    fseek(fp, offset, SEEK_SET);
+    if (fread(exifBuf.get(), 1, size, fp) == size) {
+        exifdata = exif_data_new_from_data(exifBuf.get(), size);
+    }
+
+    fclose(fp);
+    return exifdata;
+}
+
 MtpResponseCode MtpDatabase::getObjectInfo(MtpObjectHandle handle,
                                              MtpObjectInfo& info) {
     MtpString       path;
@@ -834,7 +870,12 @@ MtpResponseCode MtpDatabase::getObjectInfo(MtpObjectHandle handle,
         case MTP_FORMAT_EXIF_JPEG:
         case MTP_FORMAT_HEIF:
         case MTP_FORMAT_JFIF: {
-            ExifData *exifdata = exif_data_new_from_file(path);
+            ExifData *exifdata;
+            if (info.mFormat == MTP_FORMAT_HEIF) {
+                exifdata = getExifFromExtractor(path);
+            } else {
+                exifdata = exif_data_new_from_file(path);
+            }
             if (exifdata) {
                 if ((false)) {
                     exif_data_foreach_content(exifdata, foreachcontent, NULL);
@@ -892,7 +933,12 @@ void* MtpDatabase::getThumbnail(MtpObjectHandle handle, size_t& outThumbSize) {
             case MTP_FORMAT_EXIF_JPEG:
             case MTP_FORMAT_HEIF:
             case MTP_FORMAT_JFIF: {
-                ExifData *exifdata = exif_data_new_from_file(path);
+                ExifData *exifdata;
+                if (format == MTP_FORMAT_HEIF) {
+                    exifdata = getExifFromExtractor(path);
+                } else {
+                    exifdata = exif_data_new_from_file(path);
+                }
                 if (exifdata) {
                     if (exifdata->data) {
                         result = malloc(exifdata->size);
