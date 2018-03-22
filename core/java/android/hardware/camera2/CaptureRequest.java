@@ -2853,6 +2853,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * of points can be less than max (that is, the request doesn't have to
      * always provide a curve with number of points equivalent to
      * {@link CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS android.tonemap.maxCurvePoints}).</p>
+     * <p>For devices with MONOCHROME capability, only red channel is used. Green and blue channels
+     * are ignored.</p>
      * <p>A few examples, and their corresponding graphical mappings; these
      * only specify the red channel and the precision is limited to 4
      * digits, for conciseness.</p>
@@ -2915,6 +2917,8 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * of points can be less than max (that is, the request doesn't have to
      * always provide a curve with number of points equivalent to
      * {@link CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS android.tonemap.maxCurvePoints}).</p>
+     * <p>For devices with MONOCHROME capability, only red channel is used. Green and blue channels
+     * are ignored.</p>
      * <p>A few examples, and their corresponding graphical mappings; these
      * only specify the red channel and the precision is limited to 4
      * digits, for conciseness.</p>
