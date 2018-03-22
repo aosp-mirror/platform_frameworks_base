@@ -68,10 +68,10 @@ void DurationAnomalyTracker::stopAlarm(const MetricDimensionKey& dimensionKey,
     if (itr->second != nullptr && timestampNs >= NS_PER_SEC * itr->second->timestampSec) {
         declareAnomaly(timestampNs, dimensionKey);
     }
-    mAlarms.erase(dimensionKey);
     if (mAlarmMonitor != nullptr) {
         mAlarmMonitor->remove(itr->second);
     }
+    mAlarms.erase(dimensionKey);
 }
 
 void DurationAnomalyTracker::cancelAllAlarms() {
