@@ -100,7 +100,7 @@ private:
     void onConditionChangedLocked(const bool conditionMet, const uint64_t eventTime) override;
 
     // Internal interface to handle sliced condition change.
-    void onSlicedConditionMayChangeLocked(const uint64_t eventTime) override;
+    void onSlicedConditionMayChangeLocked(bool overallCondition, const uint64_t eventTime) override;
 
     // Internal function to calculate the current used bytes.
     size_t byteSizeLocked() const override;
@@ -151,6 +151,7 @@ private:
     static const size_t kBucketSize = sizeof(GaugeBucket{});
 
     FRIEND_TEST(GaugeMetricProducerTest, TestWithCondition);
+    FRIEND_TEST(GaugeMetricProducerTest, TestWithSlicedCondition);
     FRIEND_TEST(GaugeMetricProducerTest, TestNoCondition);
     FRIEND_TEST(GaugeMetricProducerTest, TestPushedEventsWithUpgrade);
     FRIEND_TEST(GaugeMetricProducerTest, TestPulledWithUpgrade);

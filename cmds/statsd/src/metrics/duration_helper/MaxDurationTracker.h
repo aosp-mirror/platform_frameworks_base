@@ -53,7 +53,7 @@ public:
             const uint64_t& eventTimeNs,
             std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>>*) override;
 
-    void onSlicedConditionMayChange(const uint64_t timestamp) override;
+    void onSlicedConditionMayChange(bool overallCondition, const uint64_t timestamp) override;
     void onConditionChanged(bool condition, const uint64_t timestamp) override;
 
     int64_t predictAnomalyTimestampNs(const DurationAnomalyTracker& anomalyTracker,

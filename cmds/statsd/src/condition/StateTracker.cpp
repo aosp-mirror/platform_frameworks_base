@@ -141,7 +141,7 @@ void StateTracker::evaluateCondition(const LogEvent& event,
     // one keys matched.
     HashableDimensionKey primaryKey;
     HashableDimensionKey state;
-    if (!filterValues(mPrimaryKeys, event.getValues(), &primaryKey) ||
+    if ((mPrimaryKeys.size() > 0 && !filterValues(mPrimaryKeys, event.getValues(), &primaryKey)) ||
         !filterValues(mOutputDimensions, event.getValues(), &state)) {
         ALOGE("Failed to filter fields in the event?? panic now!");
         conditionCache[mIndex] =
