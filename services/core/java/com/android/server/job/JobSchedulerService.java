@@ -29,6 +29,7 @@ import android.app.IUidObserver;
 import android.app.job.IJobScheduler;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
+import android.app.job.JobProtoEnums;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.app.job.JobWorkItem;
@@ -880,7 +881,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
             startTrackingJobLocked(jobStatus, toCancel);
             StatsLog.write_non_chained(StatsLog.SCHEDULED_JOB_STATE_CHANGED,
                     uId, null, jobStatus.getBatteryName(),
-                    StatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__SCHEDULED);
+                    StatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__SCHEDULED,
+                    JobProtoEnums.STOP_REASON_CANCELLED);
 
             // If the job is immediately ready to run, then we can just immediately
             // put it in the pending list and try to schedule it.  This is especially
