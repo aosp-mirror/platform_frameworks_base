@@ -1189,7 +1189,7 @@ final class AutofillManagerServiceImpl {
     boolean isFieldClassificationEnabledLocked() {
         return Settings.Secure.getIntForUser(
                 mContext.getContentResolver(),
-                Settings.Secure.AUTOFILL_FEATURE_FIELD_CLASSIFICATION, 0,
+                Settings.Secure.AUTOFILL_FEATURE_FIELD_CLASSIFICATION, 1,
                 mUserId) == 1;
     }
 
