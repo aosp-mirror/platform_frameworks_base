@@ -191,7 +191,4 @@ public interface BackupManagerServiceInterface {
   void dump(FileDescriptor fd, PrintWriter pw, String[] args);
 
   IBackupManager getBackupManagerBinder();
-
-  // Gets access to the backup/restore agent timeout parameters.
-  BackupAgentTimeoutParameters getAgentTimeoutParameters();
 }
