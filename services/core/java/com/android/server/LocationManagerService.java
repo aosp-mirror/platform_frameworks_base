@@ -19,6 +19,7 @@ package com.android.server;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
@@ -1131,11 +1132,12 @@ public class LocationManagerService extends ILocationManager.Stub {
      * Returns the model name of the GNSS hardware.
      */
     @Override
+    @Nullable
     public String getGnssHardwareModelName() {
         if (mGnssSystemInfoProvider != null) {
             return mGnssSystemInfoProvider.getGnssHardwareModelName();
         } else {
-            return LocationManager.GNSS_HARDWARE_MODEL_NAME_UNKNOWN;
+            return null;
         }
     }
 
