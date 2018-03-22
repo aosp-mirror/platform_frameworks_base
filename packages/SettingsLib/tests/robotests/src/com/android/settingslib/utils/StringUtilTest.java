@@ -114,7 +114,7 @@ public class StringUtilTest {
     @Test
     public void testFormatRelativeTime_WithSeconds_ShowSeconds() {
         final double testMillis = 40 * DateUtils.SECOND_IN_MILLIS;
-        final String expectedTime = "40 sec. ago";
+        final String expectedTime = "Just now";
 
         assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true).toString()).isEqualTo(
                 expectedTime);
@@ -123,7 +123,7 @@ public class StringUtilTest {
     @Test
     public void testFormatRelativeTime_NoSeconds_DoNotShowSeconds() {
         final double testMillis = 40 * DateUtils.SECOND_IN_MILLIS;
-        final String expectedTime = "1 min. ago";
+        final String expectedTime = "1 minute ago";
 
         assertThat(StringUtil.formatRelativeTime(mContext, testMillis, false).toString()).isEqualTo(
                 expectedTime);
@@ -132,7 +132,7 @@ public class StringUtilTest {
     @Test
     public void testFormatRelativeTime_LessThanTwoMinutes_withSeconds() {
         final double testMillis = 119 * DateUtils.SECOND_IN_MILLIS;
-        final String expectedTime = "119 sec. ago";
+        final String expectedTime = "Just now";
 
         assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true).toString()).isEqualTo(
                 expectedTime);
@@ -141,7 +141,7 @@ public class StringUtilTest {
     @Test
     public void testFormatRelativeTime_LessThanTwoMinutes_NoSeconds() {
         final double testMillis = 119 * DateUtils.SECOND_IN_MILLIS;
-        final String expectedTime = "2 min. ago";
+        final String expectedTime = "2 minutes ago";
 
         assertThat(StringUtil.formatRelativeTime(mContext, testMillis, false).toString()).isEqualTo(
                 expectedTime);
@@ -150,7 +150,7 @@ public class StringUtilTest {
     @Test
     public void testFormatRelativeTime_TwoMinutes_withSeconds() {
         final double testMillis = 2 * DateUtils.MINUTE_IN_MILLIS;
-        final String expectedTime = "2 min. ago";
+        final String expectedTime = "2 minutes ago";
 
         assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true).toString()).isEqualTo(
                 expectedTime);
@@ -159,7 +159,7 @@ public class StringUtilTest {
     @Test
     public void testFormatRelativeTime_LessThanTwoHours_withSeconds() {
         final double testMillis = 119 * DateUtils.MINUTE_IN_MILLIS;
-        final String expectedTime = "119 min. ago";
+        final String expectedTime = "119 minutes ago";
 
         assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true).toString()).isEqualTo(
                 expectedTime);
@@ -168,7 +168,7 @@ public class StringUtilTest {
     @Test
     public void testFormatRelativeTime_TwoHours_withSeconds() {
         final double testMillis = 2 * DateUtils.HOUR_IN_MILLIS;
-        final String expectedTime = "2 hr. ago";
+        final String expectedTime = "2 hours ago";
 
         assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true).toString()).isEqualTo(
                 expectedTime);
@@ -177,7 +177,7 @@ public class StringUtilTest {
     @Test
     public void testFormatRelativeTime_LessThanTwoDays_withSeconds() {
         final double testMillis = 47 * DateUtils.HOUR_IN_MILLIS;
-        final String expectedTime = "47 hr. ago";
+        final String expectedTime = "47 hours ago";
 
         assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true).toString()).isEqualTo(
                 expectedTime);
@@ -195,7 +195,7 @@ public class StringUtilTest {
     @Test
     public void testFormatRelativeTime_FormatZero_WithSeconds() {
         final double testMillis = 0;
-        final String expectedTime = "0 sec. ago";
+        final String expectedTime = "Just now";
 
         assertThat(StringUtil.formatRelativeTime(mContext, testMillis, true).toString()).isEqualTo(
                 expectedTime);
@@ -204,7 +204,7 @@ public class StringUtilTest {
     @Test
     public void testFormatRelativeTime_FormatZero_NoSeconds() {
         final double testMillis = 0;
-        final String expectedTime = "0 min. ago";
+        final String expectedTime = "0 minutes ago";
 
         assertThat(StringUtil.formatRelativeTime(mContext, testMillis, false).toString()).isEqualTo(
                 expectedTime);

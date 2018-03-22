@@ -1093,4 +1093,7 @@
     <string name="zen_mode_duration_settings_title">Duration</string>
     <!-- Do not disturb: Duration option to always prompt for the duration of dnd -->
     <string name="zen_mode_duration_always_prompt_title">Ask every time</string>
+
+    <!-- time label for event have that happened very recently [CHAR LIMIT=60] -->
+    <string name="time_unit_just_now">Just now</string>
 </resources>
