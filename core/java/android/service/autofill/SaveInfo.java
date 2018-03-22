@@ -16,6 +16,7 @@
 
 package android.service.autofill;
 
+import static android.service.autofill.AutofillServiceHelper.assertValid;
 import static android.view.autofill.Helper.sDebug;
 
 import android.annotation.IntDef;
@@ -403,17 +404,6 @@ public final class SaveInfo implements Parcelable {
         public Builder(@SaveDataType int type) {
             mType = type;
             mRequiredIds = null;
-        }
-
-        private AutofillId[] assertValid(AutofillId[] ids) {
-            Preconditions.checkArgument(ids != null && ids.length > 0,
-                    "must have at least one id: " + Arrays.toString(ids));
-            for (int i = 0; i < ids.length; i++) {
-                final AutofillId id = ids[i];
-                Preconditions.checkArgument(id != null,
-                        "cannot have null id: " + Arrays.toString(ids));
-            }
-            return ids;
         }
 
         /**
