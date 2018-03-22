@@ -977,6 +977,7 @@ Landroid/media/soundtrigger/SoundTriggerDetector$EventPayload;->getCaptureSessio
 Landroid/media/soundtrigger/SoundTriggerDetector$EventPayload;->getData()[B
 Landroid/media/soundtrigger/SoundTriggerManager;->loadSoundModel(Landroid/hardware/soundtrigger/SoundTrigger$SoundModel;)I
 Landroid/media/soundtrigger/SoundTriggerManager;->startRecognition(Ljava/util/UUID;Landroid/app/PendingIntent;Landroid/hardware/soundtrigger/SoundTrigger$RecognitionConfig;)I
+Landroid/media/soundtrigger/SoundTriggerManager;->startRecognition(Ljava/util/UUID;Landroid/os/Bundle;Landroid/content/ComponentName;Landroid/hardware/soundtrigger/SoundTrigger$RecognitionConfig;)I
 Landroid/media/soundtrigger/SoundTriggerManager;->stopRecognition(Ljava/util/UUID;)I
 Landroid/media/soundtrigger/SoundTriggerManager;->unloadSoundModel(Ljava/util/UUID;)I
 Landroid/media/SubtitleController;->mHandler:Landroid/os/Handler;
