@@ -1158,8 +1158,8 @@ class SettingsProtoDumpUtil {
                 Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED,
                 GlobalSettingsProto.CHAINED_BATTERY_ATTRIBUTION_ENABLED);
         dumpSetting(s, p,
-                Settings.Global.AUTOFILL_COMPAT_ALLOWED_PACKAGES,
-                GlobalSettingsProto.AUTOFILL_COMPAT_ALLOWED_PACKAGES);
+                Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES,
+                GlobalSettingsProto.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES);
         dumpSetting(s, p,
                 Global.HIDDEN_API_BLACKLIST_EXEMPTIONS,
                 GlobalSettingsProto.HIDDEN_API_BLACKLIST_EXEMPTIONS);

@@ -575,7 +575,7 @@ public final class AutofillManagerService extends SystemService {
     private String getWhitelistedCompatModePackagesFromSettings() {
         return Settings.Global.getString(
                 mContext.getContentResolver(),
-                Settings.Global.AUTOFILL_COMPAT_ALLOWED_PACKAGES);
+                Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES);
     }
 
     @Nullable
@@ -1179,7 +1179,7 @@ public final class AutofillManagerService extends SystemService {
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.USER_SETUP_COMPLETE), false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Global.getUriFor(
-                    Settings.Global.AUTOFILL_COMPAT_ALLOWED_PACKAGES), false, this,
+                    Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES), false, this,
                     UserHandle.USER_ALL);
         }
 
