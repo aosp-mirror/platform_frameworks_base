@@ -35,6 +35,7 @@ import java.security.Key;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertPath;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -652,6 +653,11 @@ public class RecoveryController {
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     public RecoverySession createRecoverySession() {
         return RecoverySession.newInstance(this);
+    }
+
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
+    public Map<String, X509Certificate> getRootCertificates() {
+        return TrustedRootCertificates.getRootCertificates();
     }
 
     InternalRecoveryServiceException wrapUnexpectedServiceSpecificException(
