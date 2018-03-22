@@ -23,6 +23,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_HOME_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_HOME_TO_ORIGINAL_POSITION;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_HOME_TO_TOP;
 
@@ -87,6 +88,13 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
             }
         }
 
+        // Send launch hint if we are actually launching home. If it's already visible (shouldn't
+        // happen in general) we don't need to send it.
+        if (homeActivity == null || !homeActivity.visible) {
+            mStackSupervisor.sendPowerHintForLaunchStartIfNeeded(true /* forceSend */,
+                    homeActivity);
+        }
+
         mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunching();
 
         mService.setRunningRemoteAnimation(mCallingPid, true);
@@ -146,6 +154,12 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
     public void onAnimationFinished(@RecentsAnimationController.ReorderMode int reorderMode) {
         synchronized (mService) {
             if (mWindowManager.getRecentsAnimationController() == null) return;
+
+            // Just to be sure end the launch hint in case home was never launched. However, if
+            // we're keeping home and making it visible, we can leave it on.
+            if (reorderMode != REORDER_KEEP_HOME_IN_PLACE) {
+                mStackSupervisor.sendPowerHintForLaunchEndIfNeeded();
+            }
 
             mService.setRunningRemoteAnimation(mCallingPid, false);
 
