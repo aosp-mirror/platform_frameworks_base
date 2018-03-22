@@ -578,6 +578,12 @@ message JobStatusDumpProto {
 
         optional .android.os.PersistableBundleProto extras = 14;
         optional .android.os.BundleProto transient_extras = 15;
+        // ClipData of information that is returned to the application at
+        // execution time, but not persisted by the system. This is provided by
+        // the app and the main purpose of providing a ClipData is to allow
+        // granting of URI permissions for data associated with the clip.  The
+        // exact kind of permission grant to perform is specified in the flags
+        // field.
         optional .android.content.ClipDataProto clip_data = 16;
 
         optional GrantedUriPermissionsDumpProto granted_uri_permissions = 17;
