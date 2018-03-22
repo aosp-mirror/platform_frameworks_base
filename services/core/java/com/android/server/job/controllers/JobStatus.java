@@ -95,11 +95,18 @@ public final class JobStatus {
     public static final long MIN_TRIGGER_MAX_DELAY = 1000;
 
     final JobInfo job;
-    /** Uid of the package requesting this job. */
+    /**
+     * Uid of the package requesting this job.  This can differ from the "source"
+     * uid when the job was scheduled on the app's behalf, such as with the jobs
+     * that underly Sync Manager operation.
+     */
     final int callingUid;
     final int targetSdkVersion;
     final String batteryName;
 
+    /**
+     * Identity of the app in which the job is hosted.
+     */
     final String sourcePackageName;
     final int sourceUserId;
     final int sourceUid;
@@ -263,6 +270,31 @@ public final class JobStatus {
         return callingUid;
     }
 
+    /**
+     * Core constructor for JobStatus instances.  All other ctors funnel down to this one.
+     *
+     * @param job The actual requested parameters for the job
+     * @param callingUid Identity of the app that is scheduling the job.  This may not be the
+     *     app in which the job is implemented; such as with sync jobs.
+     * @param targetSdkVersion The targetSdkVersion of the app in which the job will run.
+     * @param sourcePackageName The package name of the app in which the job will run.
+     * @param sourceUserId The user in which the job will run
+     * @param standbyBucket The standby bucket that the source package is currently assigned to,
+     *     cached here for speed of handling during runnability evaluations (and updated when bucket
+     *     assignments are changed)
+     * @param heartbeat Timestamp of when the job was created, in the standby-related
+     *     timebase.
+     * @param tag A string associated with the job for debugging/logging purposes.
+     * @param numFailures Count of how many times this job has requested a reschedule because
+     *     its work was not yet finished.
+     * @param earliestRunTimeElapsedMillis Milestone: earliest point in time at which the job
+     *     is to be considered runnable
+     * @param latestRunTimeElapsedMillis Milestone: point in time at which the job will be
+     *     considered overdue
+     * @param lastSuccessfulRunTime When did we last run this job to completion?
+     * @param lastFailedRunTime When did we last run this job only to have it stop incomplete?
+     * @param internalFlags Non-API property flags about this job
+     */
     private JobStatus(JobInfo job, int callingUid, int targetSdkVersion, String sourcePackageName,
             int sourceUserId, int standbyBucket, long heartbeat, String tag, int numFailures,
             long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
@@ -399,8 +431,8 @@ public final class JobStatus {
     /**
      * Create a newly scheduled job.
      * @param callingUid Uid of the package that scheduled this job.
-     * @param sourcePkg Package name on whose behalf this job is scheduled. Null indicates
-     *                          the calling package is the source.
+     * @param sourcePkg Package name of the app that will actually run the job.  Null indicates
+     *     that the calling package is the source.
      * @param sourceUserId User id for whom this job is scheduled. -1 indicates this is same as the
      *     caller.
      */

@@ -669,7 +669,7 @@
     <string name="ethernet_label">Ethernet</string>
 
     <!-- QuickSettings: Onboarding text that introduces users to long press on an option in order to view the option's menu in Settings [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_header_onboarding_text">Press &amp; hold on the icons for more options</string>
+    <string name="quick_settings_header_onboarding_text">Touch &amp; hold icons for more options</string>
     <!-- QuickSettings: Do not disturb [CHAR LIMIT=NONE] -->
     <string name="quick_settings_dnd_label">Do not disturb</string>
     <!-- QuickSettings: Do not disturb - Priority only [CHAR LIMIT=NONE] -->
@@ -1845,7 +1845,7 @@
     <string name="right_icon">Right icon</string>
 
     <!-- Label for area where tiles can be dragged out of [CHAR LIMIT=60] -->
-    <string name="drag_to_add_tiles">Drag to add tiles</string>
+    <string name="drag_to_add_tiles">Hold and drag to add tiles</string>
 
     <!-- Label for area where tiles can be dragged in to [CHAR LIMIT=60] -->
     <string name="drag_to_remove_tiles">Drag here to remove</string>

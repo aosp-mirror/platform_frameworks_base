@@ -1146,6 +1146,14 @@ public class NotificationPanelView extends PanelView implements
         @Override
         public void run() {
             mKeyguardStatusViewAnimating = false;
+            mKeyguardStatusView.setVisibility(View.INVISIBLE);
+        }
+    };
+
+    private final Runnable mAnimateKeyguardStatusViewGoneEndRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mKeyguardStatusViewAnimating = false;
             mKeyguardStatusView.setVisibility(View.GONE);
         }
     };
@@ -1234,16 +1242,17 @@ public class NotificationPanelView extends PanelView implements
 
     private void setKeyguardStatusViewVisibility(int statusBarState, boolean keyguardFadingAway,
             boolean goingToFullShade) {
+        mKeyguardStatusView.animate().cancel();
+        mKeyguardStatusViewAnimating = false;
         if ((!keyguardFadingAway && mStatusBarState == StatusBarState.KEYGUARD
                 && statusBarState != StatusBarState.KEYGUARD) || goingToFullShade) {
-            mKeyguardStatusView.animate().cancel();
             mKeyguardStatusViewAnimating = true;
             mKeyguardStatusView.animate()
                     .alpha(0f)
                     .setStartDelay(0)
                     .setDuration(160)
                     .setInterpolator(Interpolators.ALPHA_OUT)
-                    .withEndAction(mAnimateKeyguardStatusViewInvisibleEndRunnable);
+                    .withEndAction(mAnimateKeyguardStatusViewGoneEndRunnable);
             if (keyguardFadingAway) {
                 mKeyguardStatusView.animate()
                         .setStartDelay(mStatusBar.getKeyguardFadingAwayDelay())
@@ -1252,7 +1261,6 @@ public class NotificationPanelView extends PanelView implements
             }
         } else if (mStatusBarState == StatusBarState.SHADE_LOCKED
                 && statusBarState == StatusBarState.KEYGUARD) {
-            mKeyguardStatusView.animate().cancel();
             mKeyguardStatusView.setVisibility(View.VISIBLE);
             mKeyguardStatusViewAnimating = true;
             mKeyguardStatusView.setAlpha(0f);
@@ -1263,13 +1271,21 @@ public class NotificationPanelView extends PanelView implements
                     .setInterpolator(Interpolators.ALPHA_IN)
                     .withEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable);
         } else if (statusBarState == StatusBarState.KEYGUARD) {
-            mKeyguardStatusView.animate().cancel();
-            mKeyguardStatusViewAnimating = false;
-            mKeyguardStatusView.setVisibility(View.VISIBLE);
-            mKeyguardStatusView.setAlpha(1f);
+            if (keyguardFadingAway) {
+                mKeyguardStatusViewAnimating = true;
+                mKeyguardStatusView.animate()
+                        .alpha(0)
+                        .translationYBy(-getHeight() * 0.05f)
+                        .setInterpolator(Interpolators.FAST_OUT_LINEAR_IN)
+                        .setDuration(125)
+                        .setStartDelay(0)
+                        .withEndAction(mAnimateKeyguardStatusViewInvisibleEndRunnable)
+                        .start();
+            } else {
+                mKeyguardStatusView.setVisibility(View.VISIBLE);
+                mKeyguardStatusView.setAlpha(1f);
+            }
         } else {
-            mKeyguardStatusView.animate().cancel();
-            mKeyguardStatusViewAnimating = false;
             mKeyguardStatusView.setVisibility(View.GONE);
             mKeyguardStatusView.setAlpha(1f);
         }
@@ -2727,5 +2743,14 @@ public class NotificationPanelView extends PanelView implements
     public void setHeadsUpAppearanceController(
             HeadsUpAppearanceController headsUpAppearanceController) {
         mHeadsUpAppearanceController = headsUpAppearanceController;
+    }
+
+    /**
+     * Starts the animation before we dismiss Keyguard, i.e. an disappearing animation on the
+     * security view of the bouncer.
+     */
+    public void onBouncerPreHideAnimation() {
+        setKeyguardStatusViewVisibility(mStatusBarState, true /* keyguardFadingAway */,
+                false /* goingToFullShade */);
     }
 }

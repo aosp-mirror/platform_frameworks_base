@@ -656,10 +656,15 @@ public final class IpSecManager {
          * tunneled traffic.
          *
          * @param address the local address for traffic inside the tunnel
-         * @throws IOException if the address could not be added
          * @hide
          */
+        @SystemApi
         public void addAddress(LinkAddress address) throws IOException {
+            try {
+                mService.addAddressToTunnelInterface(mResourceId, address);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
 
         /**
@@ -668,10 +673,15 @@ public final class IpSecManager {
          * <p>Remove an address which was previously added to the IpSecTunnelInterface
          *
          * @param address to be removed
-         * @throws IOException if the address could not be removed
          * @hide
          */
+        @SystemApi
         public void removeAddress(LinkAddress address) throws IOException {
+            try {
+                mService.removeAddressFromTunnelInterface(mResourceId, address);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
 
         private IpSecTunnelInterface(@NonNull IIpSecService service,

@@ -38,6 +38,13 @@ public final class IpSecAlgorithm implements Parcelable {
     private static final String TAG = "IpSecAlgorithm";
 
     /**
+     * Null cipher.
+     *
+     * @hide
+     */
+    public static final String CRYPT_NULL = "ecb(cipher_null)";
+
+    /**
      * AES-CBC Encryption/Ciphering Algorithm.
      *
      * <p>Valid lengths for this key are {128, 192, 256}.

@@ -16,10 +16,10 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.proto.AlphaAnimationSpecProto.DURATION;
-import static com.android.server.wm.proto.AlphaAnimationSpecProto.FROM;
-import static com.android.server.wm.proto.AlphaAnimationSpecProto.TO;
-import static com.android.server.wm.proto.AnimationSpecProto.ALPHA;
+import static com.android.server.wm.AlphaAnimationSpecProto.DURATION;
+import static com.android.server.wm.AlphaAnimationSpecProto.FROM;
+import static com.android.server.wm.AlphaAnimationSpecProto.TO;
+import static com.android.server.wm.AnimationSpecProto.ALPHA;
 
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;

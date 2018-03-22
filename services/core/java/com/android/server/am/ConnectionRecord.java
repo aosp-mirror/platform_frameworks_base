@@ -22,8 +22,6 @@ import android.content.Context;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
 
-import com.android.server.am.proto.ConnectionRecordProto;
-
 import java.io.PrintWriter;
 
 /**

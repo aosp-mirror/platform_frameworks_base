@@ -725,6 +725,8 @@ package android.app.usage {
     method public java.lang.String getNotificationChannelId();
     field public static final int NOTIFICATION_INTERRUPTION = 12; // 0xc
     field public static final int NOTIFICATION_SEEN = 10; // 0xa
+    field public static final int SLICE_PINNED = 14; // 0xe
+    field public static final int SLICE_PINNED_PRIV = 13; // 0xd
     field public static final int SYSTEM_INTERACTION = 6; // 0x6
   }
 
@@ -3065,8 +3067,10 @@ package android.net {
   }
 
   public static final class IpSecManager.IpSecTunnelInterface implements java.lang.AutoCloseable {
+    method public void addAddress(android.net.LinkAddress) throws java.io.IOException;
     method public void close();
     method public java.lang.String getInterfaceName();
+    method public void removeAddress(android.net.LinkAddress) throws java.io.IOException;
   }
 
   public final class IpSecTransform implements java.lang.AutoCloseable {

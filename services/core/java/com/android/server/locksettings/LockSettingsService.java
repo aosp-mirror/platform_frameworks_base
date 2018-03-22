@@ -2051,11 +2051,13 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public byte[] startRecoverySessionWithCertPath(@NonNull String sessionId,
-            @NonNull RecoveryCertPath verifierCertPath, @NonNull byte[] vaultParams,
-            @NonNull byte[] vaultChallenge, @NonNull List<KeyChainProtectionParams> secrets)
+            @NonNull String rootCertificateAlias, @NonNull RecoveryCertPath verifierCertPath,
+            @NonNull byte[] vaultParams, @NonNull byte[] vaultChallenge,
+            @NonNull List<KeyChainProtectionParams> secrets)
             throws RemoteException {
         return mRecoverableKeyStoreManager.startRecoverySessionWithCertPath(
-                sessionId, verifierCertPath, vaultParams, vaultChallenge, secrets);
+                sessionId, rootCertificateAlias, verifierCertPath, vaultParams, vaultChallenge,
+                secrets);
     }
 
     public void closeSession(@NonNull String sessionId) throws RemoteException {
@@ -2063,11 +2065,19 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
+    public Map<String, String> recoverKeyChainSnapshot(
+            @NonNull String sessionId,
+            @NonNull byte[] recoveryKeyBlob,
+            @NonNull List<WrappedApplicationKey> applicationKeys) throws RemoteException {
+        return mRecoverableKeyStoreManager.recoverKeyChainSnapshot(
+                sessionId, recoveryKeyBlob, applicationKeys);
+    }
+
+    @Override
     public Map<String, byte[]> recoverKeys(@NonNull String sessionId,
             @NonNull byte[] recoveryKeyBlob, @NonNull List<WrappedApplicationKey> applicationKeys)
             throws RemoteException {
-        return mRecoverableKeyStoreManager.recoverKeys(
-                sessionId, recoveryKeyBlob, applicationKeys);
+        return mRecoverableKeyStoreManager.recoverKeys(sessionId, recoveryKeyBlob, applicationKeys);
     }
 
     @Override

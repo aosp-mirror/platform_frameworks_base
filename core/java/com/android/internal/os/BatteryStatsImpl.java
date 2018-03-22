@@ -19,6 +19,7 @@ package com.android.internal.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.job.JobProtoEnums;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.UidTraffic;
 import android.content.ContentResolver;
@@ -10045,7 +10046,8 @@ public class BatteryStatsImpl extends BatteryStats {
             if (t != null) {
                 t.startRunningLocked(elapsedRealtimeMs);
                 StatsLog.write_non_chained(StatsLog.SCHEDULED_JOB_STATE_CHANGED, getUid(), null,
-                        name, StatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__STARTED);
+                        name, StatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__STARTED,
+                        JobProtoEnums.STOP_REASON_CANCELLED);
             }
         }
 
@@ -10055,7 +10057,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 t.stopRunningLocked(elapsedRealtimeMs);
                 if (!t.isRunningLocked()) { // only tell statsd if truly stopped
                     StatsLog.write_non_chained(StatsLog.SCHEDULED_JOB_STATE_CHANGED, getUid(), null,
-                            name, StatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__FINISHED);
+                            name, StatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__FINISHED,
+                            stopReason);
                 }
             }
             if (mBsi.mOnBatteryTimeBase.isRunning()) {

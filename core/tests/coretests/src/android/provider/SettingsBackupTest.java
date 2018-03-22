@@ -581,7 +581,9 @@ public class SettingsBackupTest {
                  Settings.Secure.KEYGUARD_SLICE_URI,
                  Settings.Secure.PARENTAL_CONTROL_ENABLED,
                  Settings.Secure.PARENTAL_CONTROL_REDIRECT_URL,
-                 Settings.Secure.BLUETOOTH_ON_WHILE_DRIVING);
+                 Settings.Secure.BLUETOOTH_ON_WHILE_DRIVING,
+                 Settings.Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT,
+                 Settings.Secure.LOW_POWER_WARNING_ACKNOWLEDGED);
 
     @Test
     public void systemSettingsBackedUpOrBlacklisted() {

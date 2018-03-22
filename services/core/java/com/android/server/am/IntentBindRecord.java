@@ -23,9 +23,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.server.am.proto.AppBindRecordProto;
-import com.android.server.am.proto.IntentBindRecordProto;
-
 import java.io.PrintWriter;
 
 /**

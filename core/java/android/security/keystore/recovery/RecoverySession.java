@@ -16,17 +16,22 @@
 
 package android.security.keystore.recovery;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
+import android.util.ArrayMap;
 import android.util.Log;
 
+import java.security.Key;
 import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertPath;
 import java.security.cert.CertificateException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -136,6 +141,63 @@ public class RecoverySession implements AutoCloseable {
             byte[] recoveryClaim =
                     mRecoveryController.getBinder().startRecoverySessionWithCertPath(
                             mSessionId,
+                            /*rootCertificateAlias=*/ "",  // Use the default root cert
+                            recoveryCertPath,
+                            vaultParams,
+                            vaultChallenge,
+                            secrets);
+            return recoveryClaim;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == RecoveryController.ERROR_BAD_CERTIFICATE_FORMAT
+                    || e.errorCode == RecoveryController.ERROR_INVALID_CERTIFICATE) {
+                throw new CertificateException(e.getMessage());
+            }
+            throw mRecoveryController.wrapUnexpectedServiceSpecificException(e);
+        }
+    }
+
+    /**
+     * Starts a recovery session and returns a blob with proof of recovery secret possession.
+     * The method generates a symmetric key for a session, which trusted remote device can use to
+     * return recovery key.
+     *
+     * @param rootCertificateAlias The alias of the root certificate that is already in the Android
+     *     OS. The root certificate will be used for validating {@code verifierCertPath}.
+     * @param verifierCertPath The certificate path used to create the recovery blob on the source
+     *     device. Keystore will verify the certificate path by using the root of trust.
+     * @param vaultParams Must match the parameters in the corresponding field in the recovery blob.
+     *     Used to limit number of guesses.
+     * @param vaultChallenge Data passed from server for this recovery session and used to prevent
+     *     replay attacks.
+     * @param secrets Secrets provided by user, the method only uses type and secret fields.
+     * @return The recovery claim. Claim provides a b binary blob with recovery claim. It is
+     *     encrypted with verifierPublicKey and contains a proof of user secrets, session symmetric
+     *     key and parameters necessary to identify the counter with the number of failed recovery
+     *     attempts.
+     * @throws CertificateException if the {@code verifierCertPath} is invalid.
+     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
+     *     service.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
+    @NonNull public byte[] start(
+            @NonNull String rootCertificateAlias,
+            @NonNull CertPath verifierCertPath,
+            @NonNull byte[] vaultParams,
+            @NonNull byte[] vaultChallenge,
+            @NonNull List<KeyChainProtectionParams> secrets)
+            throws CertificateException, InternalRecoveryServiceException {
+        // Wrap the CertPath in a Parcelable so it can be passed via Binder calls.
+        RecoveryCertPath recoveryCertPath =
+                RecoveryCertPath.createRecoveryCertPath(verifierCertPath);
+        try {
+            byte[] recoveryClaim =
+                    mRecoveryController.getBinder().startRecoverySessionWithCertPath(
+                            mSessionId,
+                            rootCertificateAlias,
                             recoveryCertPath,
                             vaultParams,
                             vaultChallenge,
@@ -184,6 +246,63 @@ public class RecoverySession implements AutoCloseable {
             }
             throw mRecoveryController.wrapUnexpectedServiceSpecificException(e);
         }
+    }
+
+    /**
+     * Imports key chain snapshot recovered from a remote vault.
+     *
+     * @param recoveryKeyBlob Recovery blob encrypted by symmetric key generated for this session.
+     * @param applicationKeys Application keys. Key material can be decrypted using recoveryKeyBlob
+     *     and session.
+     * @throws SessionExpiredException if {@code session} has since been closed.
+     * @throws DecryptionFailedException if unable to decrypt the snapshot.
+     * @throws InternalRecoveryServiceException if an error occurs internal to the recovery service.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.RECOVER_KEYSTORE)
+    public Map<String, Key> recoverKeyChainSnapshot(
+            @NonNull byte[] recoveryKeyBlob,
+            @NonNull List<WrappedApplicationKey> applicationKeys
+    ) throws SessionExpiredException, DecryptionFailedException, InternalRecoveryServiceException {
+        try {
+            Map<String, String> grantAliases = mRecoveryController
+                    .getBinder()
+                    .recoverKeyChainSnapshot(mSessionId, recoveryKeyBlob, applicationKeys);
+            return getKeysFromGrants(grantAliases);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == RecoveryController.ERROR_DECRYPTION_FAILED) {
+                throw new DecryptionFailedException(e.getMessage());
+            }
+            if (e.errorCode == RecoveryController.ERROR_SESSION_EXPIRED) {
+                throw new SessionExpiredException(e.getMessage());
+            }
+            throw mRecoveryController.wrapUnexpectedServiceSpecificException(e);
+        }
+    }
+
+    /** Given a map from alias to grant alias, returns a map from alias to a {@link Key} handle. */
+    private Map<String, Key> getKeysFromGrants(Map<String, String> grantAliases)
+            throws InternalRecoveryServiceException {
+        ArrayMap<String, Key> keysByAlias = new ArrayMap<>(grantAliases.size());
+        for (String alias : grantAliases.keySet()) {
+            String grantAlias = grantAliases.get(alias);
+            Key key;
+            try {
+                key = mRecoveryController.getKeyFromGrant(grantAlias);
+            } catch (UnrecoverableKeyException e) {
+                throw new InternalRecoveryServiceException(
+                        String.format(
+                                Locale.US,
+                                "Failed to get key '%s' from grant '%s'",
+                                alias,
+                                grantAlias), e);
+            }
+            keysByAlias.put(alias, key);
+        }
+        return keysByAlias;
     }
 
     /**

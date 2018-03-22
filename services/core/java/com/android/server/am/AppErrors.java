@@ -22,7 +22,6 @@ import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.server.RescueParty;
 import com.android.server.Watchdog;
-import com.android.server.am.proto.AppErrorsProto;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;

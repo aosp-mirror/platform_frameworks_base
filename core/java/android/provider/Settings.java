@@ -783,6 +783,21 @@ public final class Settings {
             "android.settings.APPLICATION_DETAILS_SETTINGS";
 
     /**
+     * Activity Action: Show the "Open by Default" page in a particular application's details page.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
+     * <p>
+     * Input: The Intent's data URI specifies the application package name
+     * to be shown, with the "package" scheme. That is "package:com.my.app".
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_APPLICATION_DETAILS_SETTINGS_OPEN_BY_DEFAULT_PAGE =
+            "android.settings.APPLICATION_DETAILS_SETTINGS_OPEN_BY_DEFAULT_PAGE";
+
+    /**
      * Activity Action: Show list of applications that have been running
      * foreground services (to the user "running in the background").
      * <p>
@@ -7745,6 +7760,22 @@ public final class Settings {
          * @hide
          */
         public static final String BLUETOOTH_ON_WHILE_DRIVING = "bluetooth_on_while_driving";
+
+        /**
+         * The number of times (integer) the user has manually enabled battery saver.
+         * @hide
+         */
+        public static final String LOW_POWER_MANUAL_ACTIVATION_COUNT =
+                "low_power_manual_activation_count";
+
+        /**
+         * Whether the "first time battery saver warning" dialog needs to be shown (0: default)
+         * or not (1).
+         *
+         * @hide
+         */
+        public static final String LOW_POWER_WARNING_ACKNOWLEDGED =
+                "low_power_warning_acknowledged";
 
         /**
          * This are the settings to be backed up.

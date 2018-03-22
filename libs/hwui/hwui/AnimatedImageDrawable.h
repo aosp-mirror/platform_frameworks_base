@@ -45,7 +45,9 @@ public:
  */
 class ANDROID_API AnimatedImageDrawable : public SkDrawable {
 public:
-    AnimatedImageDrawable(sk_sp<SkAnimatedImage> animatedImage);
+    // bytesUsed includes the approximate sizes of the SkAnimatedImage and the SkPictures in the
+    // Snapshots.
+    AnimatedImageDrawable(sk_sp<SkAnimatedImage> animatedImage, size_t bytesUsed);
 
     /**
      * This updates the internal time and returns true if the animation needs
@@ -100,11 +102,17 @@ public:
     Snapshot decodeNextFrame();
     Snapshot reset();
 
+    size_t byteSize() const {
+        return sizeof(this) + mBytesUsed;
+    }
+
 protected:
     virtual void onDraw(SkCanvas* canvas) override;
 
 private:
     sk_sp<SkAnimatedImage> mSkAnimatedImage;
+    const size_t mBytesUsed;
+
     bool mRunning = false;
     bool mStarting = false;
 

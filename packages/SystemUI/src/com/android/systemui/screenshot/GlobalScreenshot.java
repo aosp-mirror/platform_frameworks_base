@@ -16,6 +16,8 @@
 
 package com.android.systemui.screenshot;
 
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+
 import static com.android.systemui.screenshot.GlobalScreenshot.SHARING_INTENT;
 import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_SCREENSHOT;
 
@@ -26,11 +28,11 @@ import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.admin.DevicePolicyManager;
 import android.app.Notification;
 import android.app.Notification.BigPictureStyle;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -58,7 +60,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -517,6 +518,7 @@ class GlobalScreenshot {
                     | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
                 PixelFormat.TRANSLUCENT);
         mWindowLayoutParams.setTitle("ScreenshotAnimation");
+        mWindowLayoutParams.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mNotificationManager =
             (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

@@ -20,9 +20,9 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.MAX_ANIMATION_DURATION;
-import static com.android.server.wm.proto.AppWindowThumbnailProto.HEIGHT;
-import static com.android.server.wm.proto.AppWindowThumbnailProto.SURFACE_ANIMATOR;
-import static com.android.server.wm.proto.AppWindowThumbnailProto.WIDTH;
+import static com.android.server.wm.AppWindowThumbnailProto.HEIGHT;
+import static com.android.server.wm.AppWindowThumbnailProto.SURFACE_ANIMATOR;
+import static com.android.server.wm.AppWindowThumbnailProto.WIDTH;
 
 import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
@@ -119,7 +119,7 @@ class AppWindowThumbnail implements Animatable {
 
     /**
      * Write to a protocol buffer output stream. Protocol buffer message definition is at {@link
-     * com.android.server.wm.proto.AppWindowThumbnailProto}.
+     * com.android.server.wm.AppWindowThumbnailProto}.
      *
      * @param proto Stream to write the AppWindowThumbnail object to.
      * @param fieldId Field Id of the AppWindowThumbnail as defined in the parent message.

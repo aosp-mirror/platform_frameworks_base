@@ -123,7 +123,6 @@ import static android.service.voice.VoiceInteractionSession.SHOW_SOURCE_APPLICAT
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-
 import static com.android.internal.util.XmlUtils.readBooleanAttribute;
 import static com.android.internal.util.XmlUtils.readIntAttribute;
 import static com.android.internal.util.XmlUtils.readLongAttribute;
@@ -205,7 +204,6 @@ import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
-
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
@@ -390,8 +388,8 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.View;
 import android.view.WindowManager;
-
 import android.view.autofill.AutofillManagerInternal;
+
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -443,19 +441,19 @@ import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
-import com.android.server.am.proto.ActivityManagerServiceProto;
-import com.android.server.am.proto.ActivityManagerServiceDumpActivitiesProto;
-import com.android.server.am.proto.ActivityManagerServiceDumpBroadcastsProto;
-import com.android.server.am.proto.ActivityManagerServiceDumpProcessesProto;
-import com.android.server.am.proto.ActivityManagerServiceDumpProcessesProto.UidObserverRegistrationProto;
-import com.android.server.am.proto.ActivityManagerServiceDumpServicesProto;
-import com.android.server.am.proto.GrantUriProto;
-import com.android.server.am.proto.ImportanceTokenProto;
-import com.android.server.am.proto.MemInfoDumpProto;
-import com.android.server.am.proto.NeededUriGrantsProto;
-import com.android.server.am.proto.ProcessOomProto;
-import com.android.server.am.proto.ProcessToGcProto;
-import com.android.server.am.proto.StickyBroadcastProto;
+import com.android.server.am.ActivityManagerServiceProto;
+import com.android.server.am.ActivityManagerServiceDumpActivitiesProto;
+import com.android.server.am.ActivityManagerServiceDumpBroadcastsProto;
+import com.android.server.am.ActivityManagerServiceDumpProcessesProto;
+import com.android.server.am.ActivityManagerServiceDumpProcessesProto.UidObserverRegistrationProto;
+import com.android.server.am.ActivityManagerServiceDumpServicesProto;
+import com.android.server.am.GrantUriProto;
+import com.android.server.am.ImportanceTokenProto;
+import com.android.server.am.MemInfoDumpProto;
+import com.android.server.am.NeededUriGrantsProto;
+import com.android.server.am.ProcessOomProto;
+import com.android.server.am.ProcessToGcProto;
+import com.android.server.am.StickyBroadcastProto;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.pm.Installer;
@@ -2853,6 +2851,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void onBootPhase(int phase) {
             if (phase == PHASE_SYSTEM_SERVICES_READY) {
                 mService.mBatteryStatsService.systemServicesReady();
+                mService.mServices.systemServicesReady();
             }
         }
 
@@ -9118,7 +9117,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public boolean isAppStartModeDisabled(int uid, String packageName) {
         synchronized (this) {
-            return getAppStartModeLocked(uid, packageName, 0, -1, false, true)
+            return getAppStartModeLocked(uid, packageName, 0, -1, false, true, false)
                     == ActivityManager.APP_START_MODE_DISABLED;
         }
     }
@@ -9194,12 +9193,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     int getAppStartModeLocked(int uid, String packageName, int packageTargetSdk,
-            int callingPid, boolean alwaysRestrict, boolean disabledOnly) {
+            int callingPid, boolean alwaysRestrict, boolean disabledOnly, boolean forcedStandby) {
         UidRecord uidRec = mActiveUids.get(uid);
         if (DEBUG_BACKGROUND_CHECK) Slog.d(TAG, "checkAllowBackground: uid=" + uid + " pkg="
                 + packageName + " rec=" + uidRec + " always=" + alwaysRestrict + " idle="
                 + (uidRec != null ? uidRec.idle : false));
-        if (uidRec == null || alwaysRestrict || uidRec.idle) {
+        if (uidRec == null || alwaysRestrict || forcedStandby || uidRec.idle) {
             boolean ephemeral;
             if (uidRec == null) {
                 ephemeral = getPackageManagerInternalLocked().isPackageEphemeral(
@@ -17093,8 +17092,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             if (mRunningVoice != null) {
                 final long vrToken = proto.start(ActivityManagerServiceDumpProcessesProto.RUNNING_VOICE);
-                proto.write(ActivityManagerServiceDumpProcessesProto.VoiceProto.SESSION, mRunningVoice.toString());
-                mVoiceWakeLock.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.VoiceProto.WAKELOCK);
+                proto.write(ActivityManagerServiceDumpProcessesProto.Voice.SESSION, mRunningVoice.toString());
+                mVoiceWakeLock.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.Voice.WAKELOCK);
                 proto.end(vrToken);
             }
 
@@ -21753,6 +21752,54 @@ public class ActivityManagerService extends IActivityManager.Stub
     // INSTRUMENTATION
     // =========================================================
 
+    private static String[] HIDDENAPI_EXEMPT_PACKAGES = {
+        "com.android.bluetooth.tests",
+        "com.android.managedprovisioning.tests",
+        "com.android.frameworks.coretests",
+        "com.android.frameworks.coretests.binderproxycountingtestapp",
+        "com.android.frameworks.coretests.binderproxycountingtestservice",
+        "com.android.frameworks.tests.net",
+        "com.android.frameworks.tests.uiservices",
+        "com.android.coretests.apps.bstatstestapp",
+        "com.android.servicestests.apps.conntestapp",
+        "com.android.frameworks.servicestests",
+        "com.android.frameworks.utiltests",
+        "com.android.mtp.tests",
+        "android.mtp",
+        "com.android.documentsui.tests",
+        "com.android.shell.tests",
+        "com.android.systemui.tests",
+        "com.android.testables",
+        "android.net.wifi.test",
+        "com.android.server.wifi.test",
+        "com.android.frameworks.telephonytests",
+        "com.android.providers.contacts.tests",
+        "com.android.providers.contacts.tests2",
+        "com.android.settings.tests.unit",
+        "com.android.server.telecom.tests",
+        "com.android.vcard.tests",
+        "com.android.providers.blockednumber.tests",
+        "android.settings.functional",
+        "com.android.notification.functional",
+        "com.android.frameworks.dexloggertest",
+        "com.android.server.usb",
+        "com.android.providers.downloads.tests",
+        "com.android.emergency.tests.unit",
+        "com.android.providers.calendar.tests",
+        "com.android.settingslib",
+        "com.android.rs.test",
+        "com.android.printspooler.outofprocess.tests",
+        "com.android.cellbroadcastreceiver.tests.unit",
+        "com.android.providers.telephony.tests",
+        "com.android.carrierconfig.tests",
+        "com.android.phone.tests",
+        "com.android.service.ims.presence.tests",
+        "com.android.providers.setting.test",
+        "com.android.frameworks.locationtests",
+        "com.android.frameworks.coretests.privacy",
+        "com.android.settings.ui",
+    };
+
     public boolean startInstrumentation(ComponentName className,
             String profileFile, int flags, Bundle arguments,
             IInstrumentationWatcher watcher, IUiAutomationConnection uiAutomationConnection,
@@ -21835,6 +21882,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             boolean disableHiddenApiChecks =
                     (flags & INSTRUMENTATION_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
+
+            // TODO: Temporary whitelist of packages which need to be exempt from hidden API
+            //       checks. Remove this as soon as the testing infrastructure allows to set
+            //       the flag in AndroidTest.xml.
+            if (Arrays.asList(HIDDENAPI_EXEMPT_PACKAGES).contains(ai.packageName)) {
+                disableHiddenApiChecks = true;
+            }
+
             ProcessRecord app = addAppLocked(ai, defProcess, false, disableHiddenApiChecks,
                     abiOverride);
             app.instr = activeInstr;

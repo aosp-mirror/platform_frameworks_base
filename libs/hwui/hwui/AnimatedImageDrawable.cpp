@@ -26,8 +26,8 @@
 
 namespace android {
 
-AnimatedImageDrawable::AnimatedImageDrawable(sk_sp<SkAnimatedImage> animatedImage)
-        : mSkAnimatedImage(std::move(animatedImage)) {
+AnimatedImageDrawable::AnimatedImageDrawable(sk_sp<SkAnimatedImage> animatedImage, size_t bytesUsed)
+        : mSkAnimatedImage(std::move(animatedImage)), mBytesUsed(bytesUsed) {
     mTimeToShowNextSnapshot = mSkAnimatedImage->currentFrameDuration();
 }
 

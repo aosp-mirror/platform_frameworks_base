@@ -28,8 +28,6 @@ import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
 
-import com.android.server.am.proto.AppTimeTrackerProto;
-
 import java.io.PrintWriter;
 
 /**

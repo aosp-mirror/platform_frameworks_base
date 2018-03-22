@@ -25,12 +25,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ParceledListSlice;
+import android.database.ContentObserver;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
+import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Environment;
 import android.os.Handler;
@@ -110,6 +112,8 @@ public class BrightnessTracker {
 
     private static final int MSG_BACKGROUND_START = 0;
     private static final int MSG_BRIGHTNESS_CHANGED = 1;
+    private static final int MSG_STOP_SENSOR_LISTENER = 2;
+    private static final int MSG_START_SENSOR_LISTENER = 3;
 
     // Lock held while accessing mEvents, is held while writing events to flash.
     private final Object mEventsLock = new Object();
@@ -127,9 +131,14 @@ public class BrightnessTracker {
     private final Context mContext;
     private final ContentResolver mContentResolver;
     private Handler mBgHandler;
-    // mBroadcastReceiver and mSensorListener should only be used on the mBgHandler thread.
+
+    // mBroadcastReceiver,  mSensorListener, mSettingsObserver and mSensorRegistered
+    // should only be used on the mBgHandler thread.
     private BroadcastReceiver mBroadcastReceiver;
     private SensorListener mSensorListener;
+    private SettingsObserver mSettingsObserver;
+    private boolean mSensorRegistered;
+
     private @UserIdInt int mCurrentUserId = UserHandle.USER_NULL;
 
     // Lock held while collecting data related to brightness changes.
@@ -178,10 +187,9 @@ public class BrightnessTracker {
 
         mSensorListener = new SensorListener();
 
-
-        if (mInjector.isInteractive(mContext)) {
-            mInjector.registerSensorListener(mContext, mSensorListener, mBgHandler);
-        }
+        mSettingsObserver = new SettingsObserver(mBgHandler);
+        mInjector.registerBrightnessModeObserver(mContentResolver, mSettingsObserver);
+        startSensorListener();
 
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_SHUTDOWN);
@@ -205,10 +213,11 @@ public class BrightnessTracker {
             Slog.d(TAG, "Stop");
         }
         mBgHandler.removeMessages(MSG_BACKGROUND_START);
+        stopSensorListener();
         mInjector.unregisterSensorListener(mContext, mSensorListener);
+        mInjector.unregisterBrightnessModeObserver(mContext, mSettingsObserver);
         mInjector.unregisterReceiver(mContext, mBroadcastReceiver);
         mInjector.cancelIdleJob(mContext);
-        mAmbientBrightnessStatsTracker.stop();
 
         synchronized (mDataCollectionLock) {
             mStarted = false;
@@ -363,6 +372,25 @@ public class BrightnessTracker {
         synchronized (mEventsLock) {
             mEventsDirty = true;
             mEvents.append(event);
+        }
+    }
+
+    private void startSensorListener() {
+        if (!mSensorRegistered
+                && mInjector.isInteractive(mContext)
+                && mInjector.isBrightnessModeAutomatic(mContentResolver)) {
+            mAmbientBrightnessStatsTracker.start();
+            mSensorRegistered = true;
+            mInjector.registerSensorListener(mContext, mSensorListener,
+                    mInjector.getBackgroundHandler());
+        }
+    }
+
+    private void stopSensorListener() {
+        if (mSensorRegistered) {
+            mAmbientBrightnessStatsTracker.stop();
+            mInjector.unregisterSensorListener(mContext, mSensorListener);
+            mSensorRegistered = false;
         }
     }
 
@@ -724,6 +752,24 @@ public class BrightnessTracker {
         }
     }
 
+    private final class SettingsObserver extends ContentObserver {
+        public SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            if (DEBUG) {
+                Slog.v(TAG, "settings change " + uri);
+            }
+            if (mInjector.isBrightnessModeAutomatic(mContentResolver)) {
+                mBgHandler.obtainMessage(MSG_START_SENSOR_LISTENER).sendToTarget();
+            } else {
+                mBgHandler.obtainMessage(MSG_STOP_SENSOR_LISTENER).sendToTarget();
+            }
+        }
+    }
+
     private final class Receiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -741,12 +787,9 @@ public class BrightnessTracker {
                     batteryLevelChanged(level, scale);
                 }
             } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-                mAmbientBrightnessStatsTracker.stop();
-                mInjector.unregisterSensorListener(mContext, mSensorListener);
+                mBgHandler.obtainMessage(MSG_STOP_SENSOR_LISTENER).sendToTarget();
             } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
-                mAmbientBrightnessStatsTracker.start();
-                mInjector.registerSensorListener(mContext, mSensorListener,
-                        mInjector.getBackgroundHandler());
+                mBgHandler.obtainMessage(MSG_START_SENSOR_LISTENER).sendToTarget();
             }
         }
     }
@@ -766,6 +809,12 @@ public class BrightnessTracker {
                     handleBrightnessChanged(values.brightness, userInitiatedChange,
                             values.powerBrightnessFactor, values.isUserSetBrightness,
                             values.isDefaultBrightnessConfig);
+                    break;
+                case MSG_START_SENSOR_LISTENER:
+                    startSensorListener();
+                    break;
+                case MSG_STOP_SENSOR_LISTENER:
+                    stopSensorListener();
                     break;
             }
         }
@@ -801,6 +850,18 @@ public class BrightnessTracker {
             sensorManager.unregisterListener(sensorListener);
         }
 
+        public void registerBrightnessModeObserver(ContentResolver resolver,
+                ContentObserver settingsObserver) {
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SCREEN_BRIGHTNESS_MODE),
+                    false, settingsObserver, UserHandle.USER_ALL);
+        }
+
+        public void unregisterBrightnessModeObserver(Context context,
+                ContentObserver settingsObserver) {
+            context.getContentResolver().unregisterContentObserver(settingsObserver);
+        }
+
         public void registerReceiver(Context context,
                 BroadcastReceiver receiver, IntentFilter filter) {
             context.registerReceiver(receiver, filter);
@@ -813,6 +874,12 @@ public class BrightnessTracker {
 
         public Handler getBackgroundHandler() {
             return BackgroundThread.getHandler();
+        }
+
+        public boolean isBrightnessModeAutomatic(ContentResolver resolver) {
+            return Settings.System.getIntForUser(resolver, Settings.System.SCREEN_BRIGHTNESS_MODE,
+                    Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, UserHandle.USER_CURRENT)
+                    == Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC;
         }
 
         public int getSecureIntForUser(ContentResolver resolver, String setting, int defaultValue,

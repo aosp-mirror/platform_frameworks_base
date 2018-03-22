@@ -19,7 +19,6 @@ package com.android.server.am;
 import com.android.internal.app.procstats.ServiceState;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.LocalServices;
-import com.android.server.am.proto.ServiceRecordProto;
 import com.android.server.notification.NotificationManagerInternal;
 
 import android.app.INotificationManager;

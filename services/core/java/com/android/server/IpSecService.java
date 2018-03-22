@@ -36,6 +36,7 @@ import android.net.IpSecTransform;
 import android.net.IpSecTransformResponse;
 import android.net.IpSecTunnelInterfaceResponse;
 import android.net.IpSecUdpEncapResponse;
+import android.net.LinkAddress;
 import android.net.Network;
 import android.net.NetworkUtils;
 import android.net.TrafficStats;
@@ -618,10 +619,8 @@ public class IpSecService extends IIpSecService.Stub {
                                 spi,
                                 mConfig.getMarkValue(),
                                 mConfig.getMarkMask());
-            } catch (ServiceSpecificException e) {
-                // FIXME: get the error code and throw is at an IOException from Errno Exception
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to delete SA with ID: " + mResourceId);
+            } catch (RemoteException | ServiceSpecificException e) {
+                Log.e(TAG, "Failed to delete SA with ID: " + mResourceId, e);
             }
 
             getResourceTracker().give();
@@ -677,14 +676,14 @@ public class IpSecService extends IIpSecService.Stub {
         @Override
         public void freeUnderlyingResources() {
             try {
-                mSrvConfig
-                        .getNetdInstance()
-                        .ipSecDeleteSecurityAssociation(
-                                mResourceId, mSourceAddress, mDestinationAddress, mSpi, 0, 0);
-            } catch (ServiceSpecificException e) {
-                // FIXME: get the error code and throw is at an IOException from Errno Exception
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to delete SPI reservation with ID: " + mResourceId);
+                if (!mOwnedByTransform) {
+                    mSrvConfig
+                            .getNetdInstance()
+                            .ipSecDeleteSecurityAssociation(
+                                    mResourceId, mSourceAddress, mDestinationAddress, mSpi, 0, 0);
+                }
+            } catch (ServiceSpecificException | RemoteException e) {
+                Log.e(TAG, "Failed to delete SPI reservation with ID: " + mResourceId, e);
             }
 
             mSpi = IpSecManager.INVALID_SECURITY_PARAMETER_INDEX;
@@ -829,15 +828,13 @@ public class IpSecService extends IIpSecService.Stub {
                                         0, direction, wildcardAddr, wildcardAddr, mark, 0xffffffff);
                     }
                 }
-            } catch (ServiceSpecificException e) {
-                // FIXME: get the error code and throw is at an IOException from Errno Exception
-            } catch (RemoteException e) {
+            } catch (ServiceSpecificException | RemoteException e) {
                 Log.e(
                         TAG,
                         "Failed to delete VTI with interface name: "
                                 + mInterfaceName
                                 + " and id: "
-                                + mResourceId);
+                                + mResourceId, e);
             }
 
             getResourceTracker().give();
@@ -1319,7 +1316,9 @@ public class IpSecService extends IIpSecService.Stub {
      * from multiple local IP addresses over the same tunnel.
      */
     @Override
-    public synchronized void addAddressToTunnelInterface(int tunnelResourceId, String localAddr) {
+    public synchronized void addAddressToTunnelInterface(
+            int tunnelResourceId, LinkAddress localAddr) {
+        enforceNetworkStackPermission();
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
 
         // Get tunnelInterface record; if no such interface is found, will throw
@@ -1327,8 +1326,21 @@ public class IpSecService extends IIpSecService.Stub {
         TunnelInterfaceRecord tunnelInterfaceInfo =
                 userRecord.mTunnelInterfaceRecords.getResourceOrThrow(tunnelResourceId);
 
-        // TODO: Add calls to netd:
-        //       Add address to TunnelInterface
+        try {
+            // We can assume general validity of the IP address, since we get them as a
+            // LinkAddress, which does some validation.
+            mSrvConfig
+                    .getNetdInstance()
+                    .interfaceAddAddress(
+                            tunnelInterfaceInfo.mInterfaceName,
+                            localAddr.getAddress().getHostAddress(),
+                            localAddr.getPrefixLength());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
+            // If we get here, one of the arguments provided was invalid. Wrap the SSE, and throw.
+            throw new IllegalArgumentException(e);
+        }
     }
 
     /**
@@ -1337,7 +1349,8 @@ public class IpSecService extends IIpSecService.Stub {
      */
     @Override
     public synchronized void removeAddressFromTunnelInterface(
-            int tunnelResourceId, String localAddr) {
+            int tunnelResourceId, LinkAddress localAddr) {
+        enforceNetworkStackPermission();
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
 
         // Get tunnelInterface record; if no such interface is found, will throw
@@ -1345,8 +1358,21 @@ public class IpSecService extends IIpSecService.Stub {
         TunnelInterfaceRecord tunnelInterfaceInfo =
                 userRecord.mTunnelInterfaceRecords.getResourceOrThrow(tunnelResourceId);
 
-        // TODO: Add calls to netd:
-        //       Remove address from TunnelInterface
+        try {
+            // We can assume general validity of the IP address, since we get them as a
+            // LinkAddress, which does some validation.
+            mSrvConfig
+                    .getNetdInstance()
+                    .interfaceDelAddress(
+                            tunnelInterfaceInfo.mInterfaceName,
+                            localAddr.getAddress().getHostAddress(),
+                            localAddr.getPrefixLength());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
+            // If we get here, one of the arguments provided was invalid. Wrap the SSE, and throw.
+            throw new IllegalArgumentException(e);
+        }
     }
 
     /**
@@ -1467,6 +1493,13 @@ public class IpSecService extends IIpSecService.Stub {
         IpSecAlgorithm crypt = c.getEncryption();
         IpSecAlgorithm authCrypt = c.getAuthenticatedEncryption();
 
+        String cryptName;
+        if (crypt == null) {
+            cryptName = (authCrypt == null) ? IpSecAlgorithm.CRYPT_NULL : "";
+        } else {
+            cryptName = crypt.getName();
+        }
+
         mSrvConfig
                 .getNetdInstance()
                 .ipSecAddSecurityAssociation(
@@ -1481,7 +1514,7 @@ public class IpSecService extends IIpSecService.Stub {
                         (auth != null) ? auth.getName() : "",
                         (auth != null) ? auth.getKey() : new byte[] {},
                         (auth != null) ? auth.getTruncationLengthBits() : 0,
-                        (crypt != null) ? crypt.getName() : "",
+                        cryptName,
                         (crypt != null) ? crypt.getKey() : new byte[] {},
                         (crypt != null) ? crypt.getTruncationLengthBits() : 0,
                         (authCrypt != null) ? authCrypt.getName() : "",

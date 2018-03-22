@@ -488,7 +488,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         boolean canAcquireSleepToken();
 
         /**
-         * Writes {@link com.android.server.wm.proto.IdentifierProto} to stream.
+         * Writes {@link com.android.server.wm.IdentifierProto} to stream.
          */
         void writeIdentifierToProto(ProtoOutputStream proto, long fieldId);
     }
@@ -1626,7 +1626,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
 
     /**
      * Write the WindowManagerPolicy's state into the protocol buffer.
-     * The message is described in {@link com.android.server.wm.proto.WindowManagerPolicyProto}
+     * The message is described in {@link com.android.server.wm.WindowManagerPolicyProto}
      *
      * @param proto The protocol buffer output stream to write to.
      */

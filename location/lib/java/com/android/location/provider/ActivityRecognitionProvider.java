@@ -28,6 +28,7 @@ import java.util.HashSet;
 
 /**
  * A class that exposes {@link IActivityRecognitionHardware} functionality to unbundled services.
+ * @hide
  */
 public final class ActivityRecognitionProvider {
     private final IActivityRecognitionHardware mService;

@@ -51,29 +51,29 @@ import static com.android.server.wm.WindowManagerService.H.NOTIFY_ACTIVITY_DRAWN
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.logWithStack;
-import static com.android.server.wm.proto.AppWindowTokenProto.ALL_DRAWN;
-import static com.android.server.wm.proto.AppWindowTokenProto.APP_STOPPED;
-import static com.android.server.wm.proto.AppWindowTokenProto.CLIENT_HIDDEN;
-import static com.android.server.wm.proto.AppWindowTokenProto.DEFER_HIDING_CLIENT;
-import static com.android.server.wm.proto.AppWindowTokenProto.FILLS_PARENT;
-import static com.android.server.wm.proto.AppWindowTokenProto.FROZEN_BOUNDS;
-import static com.android.server.wm.proto.AppWindowTokenProto.HIDDEN_REQUESTED;
-import static com.android.server.wm.proto.AppWindowTokenProto.HIDDEN_SET_FROM_TRANSFERRED_STARTING_WINDOW;
-import static com.android.server.wm.proto.AppWindowTokenProto.IS_REALLY_ANIMATING;
-import static com.android.server.wm.proto.AppWindowTokenProto.IS_WAITING_FOR_TRANSITION_START;
-import static com.android.server.wm.proto.AppWindowTokenProto.LAST_ALL_DRAWN;
-import static com.android.server.wm.proto.AppWindowTokenProto.LAST_SURFACE_SHOWING;
-import static com.android.server.wm.proto.AppWindowTokenProto.NAME;
-import static com.android.server.wm.proto.AppWindowTokenProto.NUM_DRAWN_WINDOWS;
-import static com.android.server.wm.proto.AppWindowTokenProto.NUM_INTERESTING_WINDOWS;
-import static com.android.server.wm.proto.AppWindowTokenProto.REMOVED;
-import static com.android.server.wm.proto.AppWindowTokenProto.REPORTED_DRAWN;
-import static com.android.server.wm.proto.AppWindowTokenProto.REPORTED_VISIBLE;
-import static com.android.server.wm.proto.AppWindowTokenProto.STARTING_DISPLAYED;
-import static com.android.server.wm.proto.AppWindowTokenProto.STARTING_MOVED;
-import static com.android.server.wm.proto.AppWindowTokenProto.STARTING_WINDOW;
-import static com.android.server.wm.proto.AppWindowTokenProto.THUMBNAIL;
-import static com.android.server.wm.proto.AppWindowTokenProto.WINDOW_TOKEN;
+import static com.android.server.wm.AppWindowTokenProto.ALL_DRAWN;
+import static com.android.server.wm.AppWindowTokenProto.APP_STOPPED;
+import static com.android.server.wm.AppWindowTokenProto.CLIENT_HIDDEN;
+import static com.android.server.wm.AppWindowTokenProto.DEFER_HIDING_CLIENT;
+import static com.android.server.wm.AppWindowTokenProto.FILLS_PARENT;
+import static com.android.server.wm.AppWindowTokenProto.FROZEN_BOUNDS;
+import static com.android.server.wm.AppWindowTokenProto.HIDDEN_REQUESTED;
+import static com.android.server.wm.AppWindowTokenProto.HIDDEN_SET_FROM_TRANSFERRED_STARTING_WINDOW;
+import static com.android.server.wm.AppWindowTokenProto.IS_REALLY_ANIMATING;
+import static com.android.server.wm.AppWindowTokenProto.IS_WAITING_FOR_TRANSITION_START;
+import static com.android.server.wm.AppWindowTokenProto.LAST_ALL_DRAWN;
+import static com.android.server.wm.AppWindowTokenProto.LAST_SURFACE_SHOWING;
+import static com.android.server.wm.AppWindowTokenProto.NAME;
+import static com.android.server.wm.AppWindowTokenProto.NUM_DRAWN_WINDOWS;
+import static com.android.server.wm.AppWindowTokenProto.NUM_INTERESTING_WINDOWS;
+import static com.android.server.wm.AppWindowTokenProto.REMOVED;
+import static com.android.server.wm.AppWindowTokenProto.REPORTED_DRAWN;
+import static com.android.server.wm.AppWindowTokenProto.REPORTED_VISIBLE;
+import static com.android.server.wm.AppWindowTokenProto.STARTING_DISPLAYED;
+import static com.android.server.wm.AppWindowTokenProto.STARTING_MOVED;
+import static com.android.server.wm.AppWindowTokenProto.STARTING_WINDOW;
+import static com.android.server.wm.AppWindowTokenProto.THUMBNAIL;
+import static com.android.server.wm.AppWindowTokenProto.WINDOW_TOKEN;
 
 import android.annotation.CallSuper;
 import android.app.Activity;
@@ -1482,11 +1482,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     void layoutLetterbox(WindowState winHint) {
         final WindowState w = findMainWindow();
-        if (w != winHint && winHint != null && w != null) {
+        if (w == null || winHint != null && w != winHint) {
             return;
         }
-        final boolean needsLetterbox = w != null && w.isLetterboxedAppWindow()
-                && fillsParent() && w.hasDrawnLw();
+        final boolean surfaceReady = w.hasDrawnLw()  // Regular case
+                || w.mWinAnimator.mSurfaceDestroyDeferred  // The preserved surface is still ready.
+                || w.isDragResizeChanged();  // Waiting for relayoutWindow to call preserveSurface.
+        final boolean needsLetterbox = w.isLetterboxedAppWindow() && fillsParent() && surfaceReady;
         if (needsLetterbox) {
             if (mLetterbox == null) {
                 mLetterbox = new Letterbox(() -> makeChildSurface(null));

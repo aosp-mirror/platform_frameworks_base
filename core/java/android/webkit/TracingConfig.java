@@ -35,9 +35,9 @@ public class TracingConfig {
     private @TracingMode int mTracingMode;
 
     /** @hide */
-    @IntDef(flag = true, value = {CATEGORIES_NONE, CATEGORIES_WEB_DEVELOPER,
-            CATEGORIES_INPUT_LATENCY, CATEGORIES_RENDERING, CATEGORIES_JAVASCRIPT_AND_RENDERING,
-            CATEGORIES_FRAME_VIEWER})
+    @IntDef(flag = true, value = {CATEGORIES_NONE, CATEGORIES_ALL, CATEGORIES_ANDROID_WEBVIEW,
+            CATEGORIES_WEB_DEVELOPER, CATEGORIES_INPUT_LATENCY, CATEGORIES_RENDERING,
+            CATEGORIES_JAVASCRIPT_AND_RENDERING, CATEGORIES_FRAME_VIEWER})
     @Retention(RetentionPolicy.SOURCE)
     public @interface PredefinedCategories {}
 
@@ -90,32 +90,26 @@ public class TracingConfig {
     public static final int CATEGORIES_FRAME_VIEWER = 1 << 6;
 
     /** @hide */
-    @IntDef({RECORD_UNTIL_FULL, RECORD_CONTINUOUSLY, RECORD_UNTIL_FULL_LARGE_BUFFER})
+    @IntDef({RECORD_UNTIL_FULL, RECORD_CONTINUOUSLY})
     @Retention(RetentionPolicy.SOURCE)
     public @interface TracingMode {}
 
     /**
-     * Record trace events until the internal tracing buffer is full. Default tracing mode.
-     * Typically the buffer memory usage is between {@link #RECORD_CONTINUOUSLY} and the
-     * {@link #RECORD_UNTIL_FULL_LARGE_BUFFER}. Depending on the implementation typically allows
-     * up to 256k events to be stored.
+     * Record trace events until the internal tracing buffer is full.
+     *
+     * Typically the buffer memory usage is larger than {@link #RECORD_CONTINUOUSLY}.
+     * Depending on the implementation typically allows up to 256k events to be stored.
      */
     public static final int RECORD_UNTIL_FULL = 0;
 
     /**
-     * Record trace events continuously using an internal ring buffer. Overwrites
-     * old events if they exceed buffer capacity. Uses less memory than both
-     * {@link #RECORD_UNTIL_FULL} and {@link #RECORD_UNTIL_FULL_LARGE_BUFFER} modes.
-     * Depending on the implementation typically allows up to 64k events to be stored.
+     * Record trace events continuously using an internal ring buffer. Default tracing mode.
+     *
+     * Overwrites old events if they exceed buffer capacity. Uses less memory than the
+     * {@link #RECORD_UNTIL_FULL} mode. Depending on the implementation typically allows
+     * up to 64k events to be stored.
      */
     public static final int RECORD_CONTINUOUSLY = 1;
-
-    /**
-     * Record trace events using a larger internal tracing buffer until it is full.
-     * Uses significantly more memory than {@link #RECORD_UNTIL_FULL} and may not be
-     * suitable on devices with smaller RAM.
-     */
-    public static final int RECORD_UNTIL_FULL_LARGE_BUFFER = 2;
 
     /**
      * @hide
@@ -182,7 +176,7 @@ public class TracingConfig {
     public static class Builder {
         private @PredefinedCategories int mPredefinedCategories = CATEGORIES_NONE;
         private final List<String> mCustomIncludedCategories = new ArrayList<String>();
-        private @TracingMode int mTracingMode = RECORD_UNTIL_FULL;
+        private @TracingMode int mTracingMode = RECORD_CONTINUOUSLY;
 
         /**
          * Default constructor for Builder.
@@ -202,7 +196,9 @@ public class TracingConfig {
          *
          * @param predefinedCategories list or bitmask of predefined category sets to use:
          *                    {@link #CATEGORIES_NONE}, {@link #CATEGORIES_ALL},
-         *                    {@link #CATEGORIES_WEB_DEVELOPER}, {@link #CATEGORIES_INPUT_LATENCY},
+         *                    {@link #CATEGORIES_ANDROID_WEBVIEW},
+         *                    {@link #CATEGORIES_WEB_DEVELOPER},
+         *                    {@link #CATEGORIES_INPUT_LATENCY},
          *                    {@link #CATEGORIES_RENDERING},
          *                    {@link #CATEGORIES_JAVASCRIPT_AND_RENDERING} or
          *                    {@link #CATEGORIES_FRAME_VIEWER}.
@@ -250,9 +246,8 @@ public class TracingConfig {
         /**
          * Sets the tracing mode for this configuration.
          *
-         * @param tracingMode tracing mode to use, one of {@link #RECORD_UNTIL_FULL},
-         *                    {@link #RECORD_CONTINUOUSLY} or
-         *                    {@link #RECORD_UNTIL_FULL_LARGE_BUFFER}.
+         * @param tracingMode tracing mode to use, one of {@link #RECORD_UNTIL_FULL} or
+         *                    {@link #RECORD_CONTINUOUSLY}.
          * @return The builder to facilitate chaining.
          */
         public Builder setTracingMode(@TracingMode int tracingMode) {

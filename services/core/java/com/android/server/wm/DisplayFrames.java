@@ -19,7 +19,7 @@ package com.android.server.wm;
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
-import static com.android.server.wm.proto.DisplayFramesProto.STABLE_BOUNDS;
+import static com.android.server.wm.DisplayFramesProto.STABLE_BOUNDS;
 
 import android.annotation.NonNull;
 import android.graphics.Rect;

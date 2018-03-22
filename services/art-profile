@@ -10677,7 +10677,6 @@ PLcom/android/server/location/ContextHubService;->sendMessage(IILandroid/hardwar
 PLcom/android/server/location/CountryDetectorBase;-><init>(Landroid/content/Context;)V
 PLcom/android/server/location/CountryDetectorBase;->notifyListener(Landroid/location/Country;)V
 PLcom/android/server/location/CountryDetectorBase;->setCountryListener(Landroid/location/CountryListener;)V
-PLcom/android/server/location/FlpHardwareProvider;->isSupported()Z
 PLcom/android/server/location/GeocoderProxy;-><init>(Landroid/content/Context;IIILandroid/os/Handler;)V
 PLcom/android/server/location/GeocoderProxy;->bind()Z
 PLcom/android/server/location/GeocoderProxy;->createAndBind(Landroid/content/Context;IIILandroid/os/Handler;)Lcom/android/server/location/GeocoderProxy;
