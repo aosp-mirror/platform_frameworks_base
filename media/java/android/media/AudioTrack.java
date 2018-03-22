@@ -2012,9 +2012,10 @@ public class AudioTrack extends PlayerBase
      * If the audio presentation is invalid then {@link #ERROR_BAD_VALUE} will be returned.
      * If a multi-stream decoder (MSD) is not present, or the format does not support
      * multiple presentations, then {@link #ERROR_INVALID_OPERATION} will be returned.
+     * {@link #ERROR} is returned in case of any other error.
      * @param presentation see {@link AudioPresentation}. In particular, id should be set.
-     * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
-     *    {@link #ERROR_INVALID_OPERATION}
+     * @return error code or success, see {@link #SUCCESS}, {@link #ERROR},
+     *    {@link #ERROR_BAD_VALUE}, {@link #ERROR_INVALID_OPERATION}
      * @throws IllegalArgumentException if the audio presentation is null.
      * @throws IllegalStateException if track is not initialized.
      */
