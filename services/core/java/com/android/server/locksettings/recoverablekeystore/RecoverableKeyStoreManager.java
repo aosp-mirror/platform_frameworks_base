@@ -416,8 +416,8 @@ public class RecoverableKeyStoreManager {
      * @param vaultChallenge Challenge issued by vault service.
      * @param secrets Lock-screen hashes. For now only a single secret is supported.
      * @return Encrypted bytes of recovery claim. This can then be issued to the vault service.
-     * @deprecated Use {@link #startRecoverySessionWithCertPath(String, RecoveryCertPath, byte[],
-     *         byte[], List)} instead.
+     * @deprecated Use {@link #startRecoverySessionWithCertPath(String, String, RecoveryCertPath,
+     *         byte[], byte[], List)} instead.
      *
      * @hide
      */
@@ -457,6 +457,7 @@ public class RecoverableKeyStoreManager {
                 uid,
                 new RecoverySessionStorage.Entry(sessionId, kfHash, keyClaimant, vaultParams));
 
+        Log.i(TAG, "Received VaultParams for recovery: " + HexDump.toHexString(vaultParams));
         try {
             byte[] thmKfHash = KeySyncUtils.calculateThmKfHash(kfHash);
             return KeySyncUtils.encryptRecoveryClaim(
