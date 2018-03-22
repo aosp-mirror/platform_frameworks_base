@@ -43,6 +43,7 @@ import org.junit.runners.Suite;
         KernelUidCpuActiveTimeReaderTest.class,
         KernelUidCpuClusterTimeReaderTest.class,
         KernelWakelockReaderTest.class,
+        LongSamplingCounterTest.class,
         LongSamplingCounterArrayTest.class,
         PowerCalculatorTest.class,
         PowerProfileTest.class

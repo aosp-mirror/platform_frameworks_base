@@ -283,30 +283,34 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 mUseLatestStates = true;
             }
 
-            synchronized (mWorkerLock) {
-                if (DEBUG) {
-                    Slog.d(TAG, "begin updateExternalStatsSync reason=" + reason);
-                }
-                try {
-                    updateExternalStatsLocked(reason, updateFlags, onBattery,
-                            onBatteryScreenOff, useLatestStates);
-                } finally {
+            try {
+                synchronized (mWorkerLock) {
                     if (DEBUG) {
-                        Slog.d(TAG, "end updateExternalStatsSync");
+                        Slog.d(TAG, "begin updateExternalStatsSync reason=" + reason);
+                    }
+                    try {
+                        updateExternalStatsLocked(reason, updateFlags, onBattery,
+                                onBatteryScreenOff, useLatestStates);
+                    } finally {
+                        if (DEBUG) {
+                            Slog.d(TAG, "end updateExternalStatsSync");
+                        }
                     }
                 }
-            }
 
-            if ((updateFlags & UPDATE_CPU) != 0) {
-                mStats.copyFromAllUidsCpuTimes();
-            }
-
-            // Clean up any UIDs if necessary.
-            synchronized (mStats) {
-                for (int uid : uidsToRemove) {
-                    mStats.removeIsolatedUidLocked(uid);
+                if ((updateFlags & UPDATE_CPU) != 0) {
+                    mStats.copyFromAllUidsCpuTimes();
                 }
-                mStats.clearPendingRemovedUids();
+
+                // Clean up any UIDs if necessary.
+                synchronized (mStats) {
+                    for (int uid : uidsToRemove) {
+                        mStats.removeIsolatedUidLocked(uid);
+                    }
+                    mStats.clearPendingRemovedUids();
+                }
+            } catch (Exception e) {
+                Slog.wtf(TAG, "Error updating external stats: ", e);
             }
         }
     };
@@ -398,7 +402,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 if (bluetoothInfo.isValid()) {
                     mStats.updateBluetoothStateLocked(bluetoothInfo);
                 } else {
-                    Slog.e(TAG, "bluetooth info is invalid: " + bluetoothInfo);
+                    Slog.w(TAG, "bluetooth info is invalid: " + bluetoothInfo);
                 }
             }
         }
@@ -410,7 +414,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             if (wifiInfo.isValid()) {
                 mStats.updateWifiState(extractDeltaLocked(wifiInfo));
             } else {
-                Slog.e(TAG, "wifi info is invalid: " + wifiInfo);
+                Slog.w(TAG, "wifi info is invalid: " + wifiInfo);
             }
         }
 
@@ -418,7 +422,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             if (modemInfo.isValid()) {
                 mStats.updateMobileRadioState(modemInfo);
             } else {
-                Slog.e(TAG, "modem info is invalid: " + modemInfo);
+                Slog.w(TAG, "modem info is invalid: " + modemInfo);
             }
         }
     }
