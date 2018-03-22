@@ -96,9 +96,13 @@ public:
 
     const static int kMaxLogSourceCount = 50;
 
-    // Max memory allowed for storing metrics per configuration. When this limit is approached,
-    // statsd will send a broadcast so that the client can fetch the data and clear this memory.
-    static const size_t kMaxMetricsBytesPerConfig = 128 * 1024;
+    // Max memory allowed for storing metrics per configuration. If this limit is exceeded, statsd
+    // drops the metrics data in memory.
+    static const size_t kMaxMetricsBytesPerConfig = 256 * 1024;
+
+    // Soft memory limit per configuration. Once this limit is exceeded, we begin notifying the
+    // data subscriber that it's time to call getData.
+    static const size_t kBytesPerConfigTriggerGetData = 128 * 1024;
 
     // Cap the UID map's memory usage to this. This should be fairly high since the UID information
     // is critical for understanding the metrics.
