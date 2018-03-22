@@ -11633,8 +11633,8 @@ public final class Settings {
          */
         @SystemApi
         @TestApi
-        public static final String AUTOFILL_COMPAT_ALLOWED_PACKAGES =
-                "autofill_compat_allowed_packages";
+        public static final String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES =
+                "autofill_compat_mode_allowed_packages";
 
         /**
          * Exemptions to the hidden API blacklist.
