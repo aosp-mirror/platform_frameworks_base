@@ -5512,7 +5512,7 @@ public abstract class PackageManager {
      * Puts the package in a suspended state, where attempts at starting activities are denied.
      *
      * <p>It doesn't remove the data or the actual package file. The application's notifications
-     * will be hidden, any of the it's started activities will be stopped and it will not be able to
+     * will be hidden, any of its started activities will be stopped and it will not be able to
      * show toasts or dialogs or ring the device. When the user tries to launch a suspended app, a
      * system dialog with the given {@code dialogMessage} will be shown instead.</p>
      *
@@ -5576,11 +5576,26 @@ public abstract class PackageManager {
     }
 
     /**
-     * Apps can query this to know if they have been suspended.
+     * Apps can query this to know if they have been suspended. A system app with the permission
+     * {@code android.permission.SUSPEND_APPS} can put any app on the device into a suspended state.
+     *
+     * <p>While in this state, the application's notifications will be hidden, any of its started
+     * activities will be stopped and it will not be able to show toasts or dialogs or ring the
+     * device. When the user tries to launch a suspended app, the system will, instead, show a
+     * dialog to the user informing them that they cannot use this app while it is suspended.
+     *
+     * <p>When an app is put into this state, the broadcast action
+     * {@link Intent#ACTION_MY_PACKAGE_SUSPENDED} will be delivered to any of its broadcast
+     * receivers that included this action in their intent-filters, <em>including manifest
+     * receivers.</em> Similarly, a broadcast action {@link Intent#ACTION_MY_PACKAGE_UNSUSPENDED}
+     * is delivered when a previously suspended app is taken out of this state.
+     * </p>
      *
      * @return {@code true} if the calling package has been suspended, {@code false} otherwise.
      *
      * @see #getSuspendedPackageAppExtras()
+     * @see Intent#ACTION_MY_PACKAGE_SUSPENDED
+     * @see Intent#ACTION_MY_PACKAGE_UNSUSPENDED
      */
     public boolean isPackageSuspended() {
         throw new UnsupportedOperationException("isPackageSuspended not implemented");
@@ -5601,7 +5616,7 @@ public abstract class PackageManager {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.SUSPEND_APPS)
-    public PersistableBundle getSuspendedPackageAppExtras(String packageName) {
+    public @Nullable PersistableBundle getSuspendedPackageAppExtras(String packageName) {
         throw new UnsupportedOperationException("getSuspendedPackageAppExtras not implemented");
     }
 
@@ -5630,15 +5645,17 @@ public abstract class PackageManager {
      * Returns any extra information supplied as {@code appExtras} to the system when the calling
      * app was suspended.
      *
-     * <p> Note: This just returns whatever {@link PersistableBundle} was passed to the system via
-     * {@code setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle,
-     * String)} when suspending the package, <em> which might be {@code null}. </em></p>
+     * <p>Note: If no extras were supplied to the system, this method will return {@code null}, even
+     * when the calling app has been suspended.</p>
      *
-     * @return A {@link PersistableBundle} containing the extras for the app, or {@code null} if the
+     * @return A {@link Bundle} containing the extras for the app, or {@code null} if the
      * package is not currently suspended.
+     *
      * @see #isPackageSuspended()
+     * @see Intent#ACTION_MY_PACKAGE_UNSUSPENDED
+     * @see Intent#ACTION_MY_PACKAGE_SUSPENDED
      */
-    public @Nullable PersistableBundle getSuspendedPackageAppExtras() {
+    public @Nullable Bundle getSuspendedPackageAppExtras() {
         throw new UnsupportedOperationException("getSuspendedPackageAppExtras not implemented");
     }
 
