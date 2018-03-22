@@ -20,7 +20,7 @@ package com.android.server.job;
 
 option java_multiple_files = true;
 
-import "frameworks/base/core/proto/android/app/jobparameters.proto";
+import "frameworks/base/core/proto/android/app/job/enums.proto";
 import "frameworks/base/core/proto/android/content/clipdata.proto";
 import "frameworks/base/core/proto/android/content/component_name.proto";
 import "frameworks/base/core/proto/android/content/intent.proto";
@@ -465,7 +465,7 @@ message DataSetProto {
         message StopReasonCount {
             option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-            optional .android.app.JobParametersProto.CancelReason reason = 1;
+            optional .android.app.job.StopReasonEnum reason = 1;
             optional int32 count = 2;
         }
         repeated StopReasonCount stop_reasons = 9;
@@ -516,7 +516,7 @@ message JobPackageHistoryProto {
         optional int32 job_id = 4;
         optional string tag = 5 [ (.android.privacy).dest = DEST_EXPLICIT ];
         // Only valid for STOP_JOB or STOP_PERIODIC_JOB Events.
-        optional .android.app.JobParametersProto.CancelReason stop_reason = 6;
+        optional .android.app.job.StopReasonEnum stop_reason = 6;
     }
     repeated HistoryEvent history_event = 1;
 }

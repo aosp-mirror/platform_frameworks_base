@@ -15,19 +15,18 @@
  */
 
 syntax = "proto2";
+
+package android.app.job;
+
+option java_outer_classname = "JobProtoEnums";
 option java_multiple_files = true;
 
-package android.app;
-
-/**
- * An android.app.JobParameters object.
- */
-message JobParametersProto {
-    enum CancelReason {
-        REASON_CANCELLED = 0;
-        REASON_CONSTRAINTS_NOT_SATISFIED = 1;
-        REASON_PREEMPT = 2;
-        REASON_TIMEOUT = 3;
-        REASON_DEVICE_IDLE = 4;
-    }
+// Reasons a job is stopped.
+// Primarily used in android.app.job.JobParameters.java.
+enum StopReasonEnum {
+  STOP_REASON_CANCELLED = 0;
+  STOP_REASON_CONSTRAINTS_NOT_SATISFIED = 1;
+  STOP_REASON_PREEMPT = 2;
+  STOP_REASON_TIMEOUT = 3;
+  STOP_REASON_DEVICE_IDLE = 4;
 }

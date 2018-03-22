@@ -36,15 +36,16 @@ import android.os.RemoteException;
 public class JobParameters implements Parcelable {
 
     /** @hide */
-    public static final int REASON_CANCELED = 0;
+    public static final int REASON_CANCELED = JobProtoEnums.STOP_REASON_CANCELLED; // 0.
     /** @hide */
-    public static final int REASON_CONSTRAINTS_NOT_SATISFIED = 1;
+    public static final int REASON_CONSTRAINTS_NOT_SATISFIED =
+            JobProtoEnums.STOP_REASON_CONSTRAINTS_NOT_SATISFIED; //1.
     /** @hide */
-    public static final int REASON_PREEMPT = 2;
+    public static final int REASON_PREEMPT = JobProtoEnums.STOP_REASON_PREEMPT; // 2.
     /** @hide */
-    public static final int REASON_TIMEOUT = 3;
+    public static final int REASON_TIMEOUT = JobProtoEnums.STOP_REASON_TIMEOUT; // 3.
     /** @hide */
-    public static final int REASON_DEVICE_IDLE = 4;
+    public static final int REASON_DEVICE_IDLE = JobProtoEnums.STOP_REASON_DEVICE_IDLE; // 4.
 
     /** @hide */
     public static String getReasonName(int reason) {
