@@ -270,8 +270,10 @@ public class AppOpsManager {
     public static final int OP_BIND_ACCESSIBILITY_SERVICE = 73;
     /** @hide Continue handover of a call from another app */
     public static final int OP_ACCEPT_HANDOVER = 74;
+    /** @hide Create and Manage IPsec Tunnels */
+    public static final int OP_MANAGE_IPSEC_TUNNELS = 75;
     /** @hide */
-    public static final int _NUM_OP = 75;
+    public static final int _NUM_OP = 76;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -507,6 +509,9 @@ public class AppOpsManager {
     @SystemApi @TestApi
     public static final String OPSTR_BIND_ACCESSIBILITY_SERVICE =
             "android:bind_accessibility_service";
+    /** @hide */
+    @SystemApi @TestApi
+    public static final String OPSTR_MANAGE_IPSEC_TUNNELS = "android:manage_ipsec_tunnels";
 
     // Warning: If an permission is added here it also has to be added to
     // com.android.packageinstaller.permission.utils.EventLogger
@@ -641,6 +646,7 @@ public class AppOpsManager {
             OP_REQUEST_DELETE_PACKAGES,
             OP_BIND_ACCESSIBILITY_SERVICE,
             OP_ACCEPT_HANDOVER,
+            OP_MANAGE_IPSEC_TUNNELS,
     };
 
     /**
@@ -722,6 +728,7 @@ public class AppOpsManager {
             OPSTR_REQUEST_DELETE_PACKAGES,
             OPSTR_BIND_ACCESSIBILITY_SERVICE,
             OPSTR_ACCEPT_HANDOVER,
+            OPSTR_MANAGE_IPSEC_TUNNELS,
     };
 
     /**
@@ -804,6 +811,7 @@ public class AppOpsManager {
             "REQUEST_DELETE_PACKAGES",
             "BIND_ACCESSIBILITY_SERVICE",
             "ACCEPT_HANDOVER",
+            "MANAGE_IPSEC_TUNNELS",
     };
 
     /**
@@ -886,6 +894,7 @@ public class AppOpsManager {
             Manifest.permission.REQUEST_DELETE_PACKAGES,
             Manifest.permission.BIND_ACCESSIBILITY_SERVICE,
             Manifest.permission.ACCEPT_HANDOVER,
+            null, // no permission for OP_MANAGE_IPSEC_TUNNELS
     };
 
     /**
@@ -969,6 +978,7 @@ public class AppOpsManager {
             null, // REQUEST_DELETE_PACKAGES
             null, // OP_BIND_ACCESSIBILITY_SERVICE
             null, // ACCEPT_HANDOVER
+            null, // MANAGE_IPSEC_TUNNELS
     };
 
     /**
@@ -1051,6 +1061,7 @@ public class AppOpsManager {
             false, // OP_REQUEST_DELETE_PACKAGES
             false, // OP_BIND_ACCESSIBILITY_SERVICE
             false, // ACCEPT_HANDOVER
+            false, // MANAGE_IPSEC_HANDOVERS
     };
 
     /**
@@ -1132,6 +1143,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,  // REQUEST_DELETE_PACKAGES
             AppOpsManager.MODE_ALLOWED,  // OP_BIND_ACCESSIBILITY_SERVICE
             AppOpsManager.MODE_ALLOWED,  // ACCEPT_HANDOVER
+            AppOpsManager.MODE_ERRORED,  // MANAGE_IPSEC_TUNNELS
     };
 
     /**
@@ -1217,6 +1229,7 @@ public class AppOpsManager {
             false, // OP_REQUEST_DELETE_PACKAGES
             false, // OP_BIND_ACCESSIBILITY_SERVICE
             false, // ACCEPT_HANDOVER
+            false, // MANAGE_IPSEC_TUNNELS
     };
 
     /**

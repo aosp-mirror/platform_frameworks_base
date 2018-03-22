@@ -79,6 +79,7 @@ package android.app {
     field public static final java.lang.String OPSTR_GET_ACCOUNTS = "android:get_accounts";
     field public static final java.lang.String OPSTR_GPS = "android:gps";
     field public static final java.lang.String OPSTR_INSTANT_APP_START_FOREGROUND = "android:instant_app_start_foreground";
+    field public static final java.lang.String OPSTR_MANAGE_IPSEC_TUNNELS = "android:manage_ipsec_tunnels";
     field public static final java.lang.String OPSTR_MUTE_MICROPHONE = "android:mute_microphone";
     field public static final java.lang.String OPSTR_NEIGHBORING_CELLS = "android:neighboring_cells";
     field public static final java.lang.String OPSTR_PLAY_AUDIO = "android:play_audio";
