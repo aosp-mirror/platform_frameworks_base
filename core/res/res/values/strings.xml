@@ -4578,14 +4578,14 @@
 
     <!-- Displayed when the USSD/SS request is modified by STK CC to a
     different request. This will be displayed in a toast. -->
-    <string name="stk_cc_ussd_to_dial">USSD request is modified to DIAL request.</string>
-    <string name="stk_cc_ussd_to_ss">USSD request is modified to SS request.</string>
-    <string name="stk_cc_ussd_to_ussd">USSD request is modified to new USSD request.</string>
-    <string name="stk_cc_ussd_to_dial_video">USSD request is modified to Video DIAL request.</string>
-    <string name="stk_cc_ss_to_dial">SS request is modified to DIAL request.</string>
-    <string name="stk_cc_ss_to_dial_video">SS request is modified to Video DIAL request.</string>
-    <string name="stk_cc_ss_to_ussd">SS request is modified to USSD request.</string>
-    <string name="stk_cc_ss_to_ss">SS request is modified to new SS request.</string>
+    <string name="stk_cc_ussd_to_dial">USSD request changed to regular call</string>
+    <string name="stk_cc_ussd_to_ss">USSD request changed to SS request</string>
+    <string name="stk_cc_ussd_to_ussd">Changed to new USSD request</string>
+    <string name="stk_cc_ussd_to_dial_video">USSD request changed to video call</string>
+    <string name="stk_cc_ss_to_dial">SS request changed to regular call</string>
+    <string name="stk_cc_ss_to_dial_video">SS request changed to video call</string>
+    <string name="stk_cc_ss_to_ussd">SS request changed to USSD request</string>
+    <string name="stk_cc_ss_to_ss">Changed to new SS request</string>
 
     <!-- Content description of the work profile icon in the notification. -->
     <string name="notification_work_profile_content_description">Work profile</string>
