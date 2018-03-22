@@ -129,7 +129,7 @@ public final class IpSecAlgorithm implements Parcelable {
      * @param algorithm name of the algorithm.
      * @param key key padded to a multiple of 8 bits.
      */
-    public IpSecAlgorithm(@AlgorithmName String algorithm, @NonNull byte[] key) {
+    public IpSecAlgorithm(@NonNull @AlgorithmName String algorithm, @NonNull byte[] key) {
         this(algorithm, key, key.length * 8);
     }
 
@@ -144,7 +144,8 @@ public final class IpSecAlgorithm implements Parcelable {
      * @param key key padded to a multiple of 8 bits.
      * @param truncLenBits number of bits of output hash to use.
      */
-    public IpSecAlgorithm(@AlgorithmName String algorithm, @NonNull byte[] key, int truncLenBits) {
+    public IpSecAlgorithm(
+            @NonNull @AlgorithmName String algorithm, @NonNull byte[] key, int truncLenBits) {
         mName = algorithm;
         mKey = key.clone();
         mTruncLenBits = truncLenBits;
@@ -152,11 +153,13 @@ public final class IpSecAlgorithm implements Parcelable {
     }
 
     /** Get the algorithm name */
+    @NonNull
     public String getName() {
         return mName;
     }
 
     /** Get the key for this algorithm */
+    @NonNull
     public byte[] getKey() {
         return mKey.clone();
     }
@@ -270,6 +273,7 @@ public final class IpSecAlgorithm implements Parcelable {
     }
 
     @Override
+    @NonNull
     public String toString() {
         return new StringBuilder()
                 .append("{mName=")
