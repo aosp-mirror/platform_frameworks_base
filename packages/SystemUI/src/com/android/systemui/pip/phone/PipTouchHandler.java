@@ -284,14 +284,19 @@ public class PipTouchHandler {
                 // Defer the update of the current movement bounds until after the user finishes
                 // touching the screen
             } else {
-                final Rect toMovementBounds = mMenuState == MENU_STATE_FULL
-                        ? expandedMovementBounds
-                        : normalMovementBounds;
-                animateToOffset(animatingBounds, toMovementBounds,
-                        fromImeAdjustment,
-                        fromImeAdjustment ? mIsImeShowing : mIsShelfShowing,
-                        // Shelf height serves as an offset, but does not change movement bounds.
-                        fromImeAdjustment ? mImeOffset : mShelfHeight);
+                final int adjustedOffset = Math.max(mIsImeShowing ? mImeHeight + mImeOffset : 0,
+                        mIsShelfShowing ? mShelfHeight : 0);
+                Rect normalAdjustedBounds = new Rect();
+                mSnapAlgorithm.getMovementBounds(mNormalBounds, insetBounds, normalAdjustedBounds,
+                        adjustedOffset);
+                Rect expandedAdjustedBounds = new Rect();
+                mSnapAlgorithm.getMovementBounds(mExpandedBounds, insetBounds,
+                        expandedAdjustedBounds, adjustedOffset);
+                final Rect toAdjustedBounds = mMenuState == MENU_STATE_FULL
+                        ? expandedAdjustedBounds
+                        : normalAdjustedBounds;
+
+                animateToOffset(animatingBounds, toAdjustedBounds);
             }
         }
 
@@ -313,23 +318,13 @@ public class PipTouchHandler {
         }
     }
 
-    private void animateToOffset(Rect animatingBounds, Rect toMovementBounds,
-            boolean fromImeAdjustment, boolean showing, int offset) {
+    private void animateToOffset(Rect animatingBounds, Rect toAdjustedBounds) {
         final Rect bounds = new Rect(animatingBounds);
-        if (showing) {
-            // IME/shelf visible, apply the IME/shelf offset if the space allows for it
-            final int calculatedOffset = toMovementBounds.bottom - Math.max(toMovementBounds.top,
-                    toMovementBounds.bottom - offset);
-            bounds.offset(0,
-                    Math.min(0, toMovementBounds.bottom - calculatedOffset - bounds.top));
-        } else {
-            // IME/shelf hidden
-            if (bounds.top >= (mMovementBounds.bottom - offset)) {
-                bounds.offset(0, toMovementBounds.bottom - bounds.top -
-                        // Counter going back home from search where keyboard is up.
-                        (fromImeAdjustment ? mShelfHeight : 0));
-            }
+        if (toAdjustedBounds.bottom < mMovementBounds.bottom
+                && bounds.top < toAdjustedBounds.bottom) {
+            return;
         }
+        bounds.offset(0, toAdjustedBounds.bottom - bounds.top);
         mMotionHelper.animateToOffset(bounds);
     }
 
