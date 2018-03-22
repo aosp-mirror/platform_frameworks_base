@@ -71,6 +71,7 @@ public class SettingsBackupTest {
                     Settings.System.NOTIFICATION_LIGHT_PULSE, // candidate for backup?
                     Settings.System.NOTIFICATION_SOUND_CACHE, // internal cache
                     Settings.System.POINTER_LOCATION, // backup candidate?
+                    Settings.System.DEBUG_ENABLE_ENHANCED_CALL_BLOCKING, // used for testing only
                     Settings.System.RINGTONE_CACHE, // internal cache
                     Settings.System.SETUP_WIZARD_HAS_RUN, // Only used by SuW
                     Settings.System.SHOW_GTALK_SERVICE_STATUS, // candidate for backup?

@@ -3700,6 +3700,14 @@ public final class Settings {
         public static final Validator VIBRATE_WHEN_RINGING_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * When {@code 1}, Telecom enhanced call blocking functionality is enabled.  When
+         * {@code 0}, enhanced call blocking functionality is disabled.
+         * @hide
+         */
+        public static final String DEBUG_ENABLE_ENHANCED_CALL_BLOCKING =
+                "debug.enable_enhanced_calling";
+
+        /**
          * Whether the audible DTMF tones are played by the dialer when dialing. The value is
          * boolean (1 or 0).
          */
