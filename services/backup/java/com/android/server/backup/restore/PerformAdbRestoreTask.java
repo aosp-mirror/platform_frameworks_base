@@ -16,6 +16,8 @@
 
 package com.android.server.backup.restore;
 
+import static com.android.server.backup.BackupPasswordManager.PBKDF_CURRENT;
+import static com.android.server.backup.BackupPasswordManager.PBKDF_FALLBACK;
 import static com.android.server.backup.BackupManagerService.BACKUP_FILE_HEADER_MAGIC;
 import static com.android.server.backup.BackupManagerService.BACKUP_FILE_VERSION;
 import static com.android.server.backup.BackupManagerService.BACKUP_MANIFEST_FILENAME;
@@ -26,8 +28,8 @@ import static com.android.server.backup.BackupManagerService.OP_TYPE_RESTORE_WAI
 import static com.android.server.backup.BackupManagerService.SETTINGS_PACKAGE;
 import static com.android.server.backup.BackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 import static com.android.server.backup.BackupManagerService.TAG;
-import static com.android.server.backup.BackupPasswordManager.PBKDF_CURRENT;
-import static com.android.server.backup.BackupPasswordManager.PBKDF_FALLBACK;
+import static com.android.server.backup.BackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL;
+import static com.android.server.backup.BackupManagerService.TIMEOUT_RESTORE_INTERVAL;
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_OPERATION_TIMEOUT;
 
 import android.app.ApplicationThreadConstants;
@@ -47,7 +49,6 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
-import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.FileMetadata;
 import com.android.server.backup.KeyValueAdbRestoreEngine;
@@ -100,7 +101,6 @@ public class PerformAdbRestoreTask implements Runnable {
     private byte[] mWidgetData = null;
 
     private long mBytes;
-    private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
     // Runner that can be placed on a separate thread to do in-process invocation
     // of the "restore finished" API asynchronously.  Used by adb restore.
@@ -155,7 +155,6 @@ public class PerformAdbRestoreTask implements Runnable {
         mAgentPackage = null;
         mTargetApp = null;
         mObbConnection = new FullBackupObbConnection(backupManagerService);
-        mAgentTimeoutParameters = backupManagerService.getAgentTimeoutParameters();
 
         // Which packages we've already wiped data on.  We prepopulate this
         // with a whitelist of packages known to be unclearable.
@@ -644,11 +643,9 @@ public class PerformAdbRestoreTask implements Runnable {
                     if (okay) {
                         boolean agentSuccess = true;
                         long toCopy = info.size;
-                        long restoreAgentTimeoutMillis =
-                                mAgentTimeoutParameters.getRestoreAgentTimeoutMillis();
                         try {
                             mBackupManagerService.prepareOperationTimeout(
-                                    token, restoreAgentTimeoutMillis, null, OP_TYPE_RESTORE_WAIT);
+                                    token, TIMEOUT_RESTORE_INTERVAL, null, OP_TYPE_RESTORE_WAIT);
 
                             if (FullBackup.OBB_TREE_TOKEN.equals(info.domain)) {
                                 if (DEBUG) {
@@ -823,12 +820,10 @@ public class PerformAdbRestoreTask implements Runnable {
                 // In the adb restore case, we do restore-finished here
                 if (doRestoreFinished) {
                     final int token = mBackupManagerService.generateRandomIntegerToken();
-                    long fullBackupAgentTimeoutMillis =
-                            mAgentTimeoutParameters.getFullBackupAgentTimeoutMillis();
                     final AdbRestoreFinishedLatch latch = new AdbRestoreFinishedLatch(
                             mBackupManagerService, token);
                     mBackupManagerService.prepareOperationTimeout(
-                            token, fullBackupAgentTimeoutMillis, latch, OP_TYPE_RESTORE_WAIT);
+                            token, TIMEOUT_FULL_BACKUP_INTERVAL, latch, OP_TYPE_RESTORE_WAIT);
                     if (mTargetApp.processName.equals("system")) {
                         if (MORE_DEBUG) {
                             Slog.d(TAG, "system agent - restoreFinished on thread");
