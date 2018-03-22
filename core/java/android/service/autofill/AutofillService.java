@@ -518,7 +518,7 @@ import android.view.autofill.AutofillValue;
  *     &lt;intent-filter&gt;
  *         &lt;action android:name="android.service.autofill.AutofillService" /&gt;
  *     &lt;/intent-filter&gt;
- *     &lt;meta-data android:name="android.autofillservice" android:resource="@xml/autofillservice" /&gt;
+ *     &lt;meta-data android:name="android.autofill" android:resource="@xml/autofillservice" /&gt;
  * &lt;/service&gt;</pre>
  *
  * <P>In the XML file you can specify one or more packages for which to enable compatibility
