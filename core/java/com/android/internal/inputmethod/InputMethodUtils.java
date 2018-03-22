@@ -320,8 +320,8 @@ public class InputMethodUtils {
         return builder;
     }
 
-    public static ArrayList<InputMethodInfo> getDefaultEnabledImes(final Context context,
-            final ArrayList<InputMethodInfo> imis) {
+    public static ArrayList<InputMethodInfo> getDefaultEnabledImes(
+            Context context, ArrayList<InputMethodInfo> imis, boolean onlyMinimum) {
         final Locale fallbackLocale = getFallbackLocaleForDefaultIme(imis, context);
         // We will primarily rely on the system locale, but also keep relying on the fallback locale
         // as a last resort.
@@ -329,11 +329,19 @@ public class InputMethodUtils {
         // then pick up suitable auxiliary IMEs when necessary (e.g. Voice IMEs with "automatic"
         // subtype)
         final Locale systemLocale = getSystemLocaleFromContext(context);
-        return getMinimumKeyboardSetWithSystemLocale(imis, context, systemLocale, fallbackLocale)
-                .fillImes(imis, context, true /* checkDefaultAttribute */, systemLocale,
-                        true /* checkCountry */, SUBTYPE_MODE_ANY)
-                .fillAuxiliaryImes(imis, context)
-                .build();
+        final InputMethodListBuilder builder =
+                getMinimumKeyboardSetWithSystemLocale(imis, context, systemLocale, fallbackLocale);
+        if (!onlyMinimum) {
+            builder.fillImes(imis, context, true /* checkDefaultAttribute */, systemLocale,
+                    true /* checkCountry */, SUBTYPE_MODE_ANY)
+                    .fillAuxiliaryImes(imis, context);
+        }
+        return builder.build();
+    }
+
+    public static ArrayList<InputMethodInfo> getDefaultEnabledImes(
+            Context context, ArrayList<InputMethodInfo> imis) {
+        return getDefaultEnabledImes(context, imis, false /* onlyMinimum */);
     }
 
     public static Locale constructLocaleFromString(String localeStr) {

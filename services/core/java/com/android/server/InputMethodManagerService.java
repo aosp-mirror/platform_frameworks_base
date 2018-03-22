@@ -3663,16 +3663,21 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
 
+        boolean reenableMinimumNonAuxSystemImes = false;
         // TODO: The following code should find better place to live.
         if (!resetDefaultEnabledIme) {
             boolean enabledImeFound = false;
+            boolean enabledNonAuxImeFound = false;
             final List<InputMethodInfo> enabledImes = mSettings.getEnabledInputMethodListLocked();
             final int N = enabledImes.size();
             for (int i = 0; i < N; ++i) {
                 final InputMethodInfo imi = enabledImes.get(i);
                 if (mMethodList.contains(imi)) {
                     enabledImeFound = true;
-                    break;
+                    if (!imi.isAuxiliaryIme()) {
+                        enabledNonAuxImeFound = true;
+                        break;
+                    }
                 }
             }
             if (!enabledImeFound) {
@@ -3681,12 +3686,18 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 resetDefaultEnabledIme = true;
                 resetSelectedInputMethodAndSubtypeLocked("");
+            } else if (!enabledNonAuxImeFound) {
+                if (DEBUG) {
+                    Slog.i(TAG, "All the enabled non-Aux IMEs are gone. Do partial reset.");
+                }
+                reenableMinimumNonAuxSystemImes = true;
             }
         }
 
-        if (resetDefaultEnabledIme) {
+        if (resetDefaultEnabledIme || reenableMinimumNonAuxSystemImes) {
             final ArrayList<InputMethodInfo> defaultEnabledIme =
-                    InputMethodUtils.getDefaultEnabledImes(mContext, mMethodList);
+                    InputMethodUtils.getDefaultEnabledImes(mContext, mMethodList,
+                            reenableMinimumNonAuxSystemImes);
             final int N = defaultEnabledIme.size();
             for (int i = 0; i < N; ++i) {
                 final InputMethodInfo imi =  defaultEnabledIme.get(i);
