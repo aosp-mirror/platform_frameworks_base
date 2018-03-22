@@ -1928,6 +1928,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.BLUETOOTH_ON_WHILE_DRIVING,
                 SecureSettingsProto.BLUETOOTH_ON_WHILE_DRIVING);
+        dumpSetting(s, p,
+                Settings.Secure.VOLUME_HUSH_GESTURE,
+                SecureSettingsProto.VOLUME_HUSH_GESTURE);
         // Please insert new settings using the same order as in Settings.Secure.
 
         p.end(token);

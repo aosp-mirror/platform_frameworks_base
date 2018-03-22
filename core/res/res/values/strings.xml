@@ -4888,6 +4888,9 @@
     <!-- Notification action for editing a screenshot (drawing on it, cropping it, etc) -->
     <string name="screenshot_edit">Edit</string>
 
+    <string name="volume_dialog_ringer_guidance_vibrate">Calls and notifications will vibrate</string>
+    <string name="volume_dialog_ringer_guidance_silent">Calls and notifications will be muted</string>
+
     <!-- Title for the notification channel notifying user of settings system changes. [CHAR LIMIT=NONE] -->
     <string name="notification_channel_system_changes">System changes</string>
     <!-- Title for the notification channel notifying user of do not disturb system changes (i.e. Do Not Disturb has changed). [CHAR LIMIT=NONE] -->
