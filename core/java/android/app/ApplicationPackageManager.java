@@ -2810,4 +2810,13 @@ public class ApplicationPackageManager extends PackageManager {
             throw e.rethrowAsRuntimeException();
         }
     }
+
+    @Override
+    public boolean isPackageStateProtected(String packageName, int userId) {
+        try {
+            return mPM.isPackageStateProtected(packageName, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
 }
