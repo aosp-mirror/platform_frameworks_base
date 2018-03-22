@@ -77,7 +77,7 @@ public class RecoverySession implements AutoCloseable {
     }
 
     /**
-     * @deprecated Use {@link #start(CertPath, byte[], byte[], List)} instead.
+     * @deprecated Use {@link #start(String, CertPath, byte[], byte[], List)} instead.
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -108,25 +108,9 @@ public class RecoverySession implements AutoCloseable {
     }
 
     /**
-     * Starts a recovery session and returns a blob with proof of recovery secret possession.
-     * The method generates a symmetric key for a session, which trusted remote device can use to
-     * return recovery key.
-     *
-     * @param verifierCertPath The certificate path used to create the recovery blob on the source
-     *     device. Keystore will verify the certificate path by using the root of trust.
-     * @param vaultParams Must match the parameters in the corresponding field in the recovery blob.
-     *     Used to limit number of guesses.
-     * @param vaultChallenge Data passed from server for this recovery session and used to prevent
-     *     replay attacks.
-     * @param secrets Secrets provided by user, the method only uses type and secret fields.
-     * @return The recovery claim. Claim provides a b binary blob with recovery claim. It is
-     *     encrypted with verifierPublicKey and contains a proof of user secrets, session symmetric
-     *     key and parameters necessary to identify the counter with the number of failed recovery
-     *     attempts.
-     * @throws CertificateException if the {@code verifierCertPath} is invalid.
-     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
-     *     service.
+     * @deprecated Use {@link #start(String, CertPath, byte[], byte[], List)} instead.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     @NonNull public byte[] start(
             @NonNull CertPath verifierCertPath,
@@ -179,8 +163,6 @@ public class RecoverySession implements AutoCloseable {
      * @throws CertificateException if the {@code verifierCertPath} is invalid.
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     @NonNull public byte[] start(
