@@ -4525,6 +4525,13 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     /**
+     * Stop a listener from listening to the expandedHeight.
+     */
+    public void removeOnExpandedHeightListener(BiConsumer<Float, Float> listener) {
+        mExpandedHeightListeners.remove(listener);
+    }
+
+    /**
      * A listener that is notified when the empty space below the notifications is clicked on
      */
     public interface OnEmptySpaceClickListener {
