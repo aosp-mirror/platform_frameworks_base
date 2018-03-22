@@ -407,7 +407,7 @@ public final class MediaSessionManager {
             List<Bundle> bundles = mService.getSessionTokens(
                     /* activeSessionOnly */ true, /* sessionServiceOnly */ false,
                     mContext.getPackageName());
-            return toTokenList(mContext, bundles);
+            return toTokenList(bundles);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Cannot communicate with the service.", e);
             return Collections.emptyList();
@@ -430,7 +430,7 @@ public final class MediaSessionManager {
             List<Bundle> bundles = mService.getSessionTokens(
                     /* activeSessionOnly */ false, /* sessionServiceOnly */ true,
                     mContext.getPackageName());
-            return toTokenList(mContext, bundles);
+            return toTokenList(bundles);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Cannot communicate with the service.", e);
             return Collections.emptyList();
@@ -455,7 +455,7 @@ public final class MediaSessionManager {
             List<Bundle> bundles = mService.getSessionTokens(
                     /* activeSessionOnly */ false, /* sessionServiceOnly */ false,
                     mContext.getPackageName());
-            return toTokenList(mContext, bundles);
+            return toTokenList(bundles);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Cannot communicate with the service.", e);
             return Collections.emptyList();
@@ -540,11 +540,11 @@ public final class MediaSessionManager {
         }
     }
 
-    private static List<SessionToken2> toTokenList(Context context, List<Bundle> bundles) {
+    private static List<SessionToken2> toTokenList(List<Bundle> bundles) {
         List<SessionToken2> tokens = new ArrayList<>();
         if (bundles != null) {
             for (int i = 0; i < bundles.size(); i++) {
-                SessionToken2 token = SessionToken2.fromBundle(context, bundles.get(i));
+                SessionToken2 token = SessionToken2.fromBundle(bundles.get(i));
                 if (token != null) {
                     tokens.add(token);
                 }
@@ -829,7 +829,7 @@ public final class MediaSessionManager {
                         final Context context = mContext;
                         final OnSessionTokensChangedListener listener = mListener;
                         if (context != null && listener != null) {
-                            listener.onSessionTokensChanged(toTokenList(context, bundles));
+                            listener.onSessionTokensChanged(toTokenList(bundles));
                         }
                     });
                 }

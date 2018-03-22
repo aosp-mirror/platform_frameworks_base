@@ -20,7 +20,6 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.media.MediaLibraryService2.MediaLibrarySession.Builder;
 import android.media.MediaLibraryService2.MediaLibrarySession.MediaLibrarySessionCallback;
 import android.media.MediaSession2.ControllerInfo;
@@ -74,8 +73,8 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          * Callback for the {@link MediaLibrarySession}.
          */
         public static class MediaLibrarySessionCallback extends MediaSession2.SessionCallback {
-            public MediaLibrarySessionCallback(@NonNull Context context) {
-                super(context);
+            public MediaLibrarySessionCallback() {
+                super();
             }
 
             /**
@@ -401,10 +400,9 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          * @param rootId The root id for browsing.
          * @param extras Any extras about the library service.
          */
-        public LibraryRoot(@NonNull Context context,
-                @NonNull String rootId, @Nullable Bundle extras) {
+        public LibraryRoot(@NonNull String rootId, @Nullable Bundle extras) {
             mProvider = ApiLoader.getProvider().createMediaLibraryService2LibraryRoot(
-                    context, this, rootId, extras);
+                    this, rootId, extras);
         }
 
         /**

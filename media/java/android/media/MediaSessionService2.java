@@ -21,7 +21,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.media.MediaSession2.ControllerInfo;
 import android.media.update.ApiLoader;
@@ -213,16 +212,14 @@ public abstract class MediaSessionService2 extends Service {
         /**
          * Default constructor
          *
-         * @param context context
          * @param notificationId notification id to be used for
          *      {@link android.app.NotificationManager#notify(int, Notification)}.
          * @param notification a notification to make session service foreground service. Media
          *      style notification is recommended here.
          */
-        public MediaNotification(@NonNull Context context,
-                int notificationId, @NonNull Notification notification) {
+        public MediaNotification(int notificationId, @NonNull Notification notification) {
             mProvider = ApiLoader.getProvider().createMediaSessionService2MediaNotification(
-                    context, this, notificationId, notification);
+                    this, notificationId, notification);
         }
 
         public int getNotificationId() {
