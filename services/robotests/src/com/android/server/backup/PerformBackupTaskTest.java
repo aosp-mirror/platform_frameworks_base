@@ -148,13 +148,8 @@ public class PerformBackupTaskTest {
         Looper backupLooper = startBackupThreadAndGetLooper();
         mShadowBackupLooper = shadowOf(backupLooper);
         mBackupHandler = new BackupHandler(mBackupManagerService, backupLooper);
-        Handler mainHandler = new Handler(Looper.getMainLooper());
 
         mBackupManager = spy(FakeIBackupManager.class);
-
-        BackupAgentTimeoutParameters agentTimeoutParameters =
-                new BackupAgentTimeoutParameters(mainHandler, application.getContentResolver());
-        agentTimeoutParameters.start();
 
         setUpBackupManagerServiceBasics(
                 mBackupManagerService,
@@ -162,8 +157,7 @@ public class PerformBackupTaskTest {
                 mTransportManager,
                 packageManager,
                 mBackupHandler,
-                mWakeLock,
-                agentTimeoutParameters);
+                mWakeLock);
         when(mBackupManagerService.getBaseStateDir()).thenReturn(mBaseStateDir);
         when(mBackupManagerService.getDataDir()).thenReturn(dataDir);
         when(mBackupManagerService.getBackupManagerBinder()).thenReturn(mBackupManager);

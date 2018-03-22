@@ -24,6 +24,7 @@ import static com.android.server.backup.BackupManagerService.OP_PENDING;
 import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP;
 import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP_WAIT;
 import static com.android.server.backup.BackupManagerService.PACKAGE_MANAGER_SENTINEL;
+import static com.android.server.backup.BackupManagerService.TIMEOUT_BACKUP_INTERVAL;
 import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_OPERATION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_RESTORE_STEP;
 
@@ -56,7 +57,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.AppWidgetBackupBridge;
 import com.android.server.EventLogTags;
-import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.DataChangedJournal;
 import com.android.server.backup.KeyValueBackupJob;
@@ -142,7 +142,6 @@ public class PerformBackupTask implements BackupRestoreTask {
     private boolean mFinished;
     private final boolean mUserInitiated;
     private final boolean mNonIncremental;
-    private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
     private volatile boolean mCancelAll;
 
@@ -163,7 +162,6 @@ public class PerformBackupTask implements BackupRestoreTask {
         mPendingFullBackups = pendingFullBackups;
         mUserInitiated = userInitiated;
         mNonIncremental = nonIncremental;
-        mAgentTimeoutParameters = backupManagerService.getAgentTimeoutParameters();
 
         mStateDir = new File(backupManagerService.getBaseStateDir(), dirName);
         mCurrentOpToken = backupManagerService.generateRandomIntegerToken();
@@ -713,10 +711,8 @@ public class PerformBackupTask implements BackupRestoreTask {
 
             // Initiate the target's backup pass
             backupManagerService.addBackupTrace("setting timeout");
-            long kvBackupAgentTimeoutMillis =
-                    mAgentTimeoutParameters.getKvBackupAgentTimeoutMillis();
             backupManagerService.prepareOperationTimeout(
-                    mEphemeralOpToken, kvBackupAgentTimeoutMillis, this, OP_TYPE_BACKUP_WAIT);
+                    mEphemeralOpToken, TIMEOUT_BACKUP_INTERVAL, this, OP_TYPE_BACKUP_WAIT);
             backupManagerService.addBackupTrace("calling agent doBackup()");
 
             agent.doBackup(
