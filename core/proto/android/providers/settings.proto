@@ -466,7 +466,7 @@ message GlobalSettingsProto {
     // skipped.
     optional SettingProto override_settings_provider_restore_any_version = 355 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto chained_battery_attribution_enabled = 356 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto autofill_compat_allowed_packages = 357 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto autofill_compat_mode_allowed_packages = 357 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto hidden_api_blacklist_exemptions = 358 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto sound_trigger_detection_service_op_timeout = 387  [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto max_sound_trigger_detection_service_ops_per_day = 388  [ (android.privacy).dest = DEST_AUTOMATIC ];
