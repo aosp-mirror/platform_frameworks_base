@@ -17,7 +17,6 @@
 package android.telephony;
 
 import android.annotation.IntDef;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -495,9 +494,8 @@ public class ServiceState implements Parcelable {
      *
      * @return Current serving cell bandwidths
      */
-    @Nullable
     public int[] getCellBandwidths() {
-        return mCellBandwidths;
+        return mCellBandwidths == null ? new int[0] : mCellBandwidths;
     }
 
     /**
