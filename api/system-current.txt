@@ -3102,6 +3102,10 @@ package android.net {
     field public static final int ERROR_INVALID_NETWORK = 1; // 0x1
   }
 
+  public final class NetworkCapabilities implements android.os.Parcelable {
+    field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
+  }
+
   public class NetworkKey implements android.os.Parcelable {
     ctor public NetworkKey(android.net.WifiKey);
     method public int describeContents();
