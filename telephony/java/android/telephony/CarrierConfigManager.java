@@ -2227,7 +2227,9 @@ public class CarrierConfigManager {
     /**
      * Gets the configuration values for a particular subscription, which is associated with a
      * specific SIM card. If an invalid subId is used, the returned config will contain default
-     * values.
+     * values. After using this method to get the configuration bundle,
+     * {@link #isConfigForIdentifiedCarrier(PersistableBundle)} should be called to confirm whether
+     * any carrier specific configuration has been applied.
      *
      * <p>Requires Permission:
      * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
@@ -2254,7 +2256,9 @@ public class CarrierConfigManager {
     }
 
     /**
-     * Gets the configuration values for the default subscription.
+     * Gets the configuration values for the default subscription. After using this method to get
+     * the configuration bundle, {@link #isConfigForIdentifiedCarrier(PersistableBundle)} should be
+     * called to confirm whether any carrier specific configuration has been applied.
      *
      * <p>Requires Permission:
      * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
@@ -2283,6 +2287,9 @@ public class CarrierConfigManager {
      * <p>
      * After using {@link #getConfig()} or {@link #getConfigForSubId(int)} an app should always
      * use this method to confirm whether any carrier specific configuration has been applied.
+     * Especially when an app misses the broadcast {@link #ACTION_CARRIER_CONFIG_CHANGED} but it
+     * still needs to get the current configuration, it must use this method to verify whether the
+     * configuration is default or carrier overridden.
      * </p>
      *
      * @param bundle the configuration bundle to be checked.
