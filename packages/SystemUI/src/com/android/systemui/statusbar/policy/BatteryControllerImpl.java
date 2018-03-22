@@ -28,6 +28,7 @@ import android.os.PowerSaveState;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.settingslib.fuelgauge.BatterySaverUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -93,7 +94,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
 
     @Override
     public void setPowerSaveMode(boolean powerSave) {
-        mPowerManager.setPowerSaveMode(powerSave);
+        BatterySaverUtils.setPowerSaveMode(mContext, powerSave, /*needFirstTimeWarning*/ true);
     }
 
     @Override
