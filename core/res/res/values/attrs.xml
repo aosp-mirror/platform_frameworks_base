@@ -7984,8 +7984,6 @@
              android.content.pm.PackageInfo#getLongVersionCode()} for the target package.
         -->
         <attr name="maxLongVersionCode" format="string" />
-        <!-- TODO(b/74445943): STOPSHIP (urlBarResourceId should be removed after P DP2 is branched)-->
-        <attr name="urlBarResourceId" format="string" />
     </declare-styleable>
 
     <!-- =============================== -->

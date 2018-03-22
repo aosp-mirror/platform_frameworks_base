@@ -108,10 +108,6 @@ public final class AutofillManagerService extends SystemService {
     private static final char COMPAT_PACKAGE_URL_IDS_BLOCK_BEGIN = '[';
     private static final char COMPAT_PACKAGE_URL_IDS_BLOCK_END = ']';
 
-    // TODO(b/74445943): temporary work around until P Development Preview 3 is branched
-    private static final List<String> DEFAULT_BUTTONS = Arrays.asList("url_bar",
-            "location_bar_edit_text");
-
     private final Context mContext;
     private final AutoFillUI mUi;
 
@@ -600,7 +596,7 @@ public final class AutofillManagerService extends SystemService {
             final List<String> urlBarIds;
             if (urlBlockIndex == -1) {
                 packageName = packageBlock;
-                urlBarIds = DEFAULT_BUTTONS; // TODO(b/74445943): back to null
+                urlBarIds = null;
             } else {
                 if (packageBlock.charAt(packageBlock.length() - 1)
                         != COMPAT_PACKAGE_URL_IDS_BLOCK_END) {
