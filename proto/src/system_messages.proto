@@ -208,6 +208,10 @@ message SystemMessage {
     // Package: android
     NOTE_ZEN_UPGRADE = 48;
 
+    // Notification to suggest automatic battery saver.
+    // Package: android
+    NOTE_AUTO_SAVER_SUGGESTION = 49;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release

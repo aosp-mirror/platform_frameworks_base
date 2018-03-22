@@ -3312,4 +3312,6 @@
   <java-symbol type="string" name="notification_app_name_system" />
   <java-symbol type="string" name="notification_app_name_settings" />
 
+  <java-symbol type="integer" name="config_lowBatteryAutoTriggerDefaultLevel" />
+
 </resources>

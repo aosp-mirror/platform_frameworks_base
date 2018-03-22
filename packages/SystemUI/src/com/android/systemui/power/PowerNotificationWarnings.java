@@ -21,9 +21,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
-import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioAttributes;
@@ -52,15 +49,18 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
     private static final String TAG_BATTERY = "low_battery";
     private static final String TAG_TEMPERATURE = "high_temp";
+    private static final String TAG_AUTO_SAVER = "auto_saver";
 
     private static final int SHOWING_NOTHING = 0;
     private static final int SHOWING_WARNING = 1;
     private static final int SHOWING_INVALID_CHARGER = 3;
+    private static final int SHOWING_AUTO_SAVER_SUGGESTION = 4;
     private static final String[] SHOWING_STRINGS = {
         "SHOWING_NOTHING",
         "SHOWING_WARNING",
         "SHOWING_SAVER",
         "SHOWING_INVALID_CHARGER",
+        "SHOWING_AUTO_SAVER_SUGGESTION",
     };
 
     private static final String ACTION_SHOW_BATTERY_SETTINGS = "PNW.batterySettings";
@@ -74,6 +74,18 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             "PNW.dismissedThermalShutdownWarning";
     private static final String ACTION_SHOW_START_SAVER_CONFIRMATION =
             BatterySaverUtils.ACTION_SHOW_START_SAVER_CONFIRMATION;
+    private static final String ACTION_SHOW_AUTO_SAVER_SUGGESTION =
+            BatterySaverUtils.ACTION_SHOW_AUTO_SAVER_SUGGESTION;
+    private static final String ACTION_DISMISS_AUTO_SAVER_SUGGESTION =
+            "PNW.dismissAutoSaverSuggestion";
+
+    private static final String ACTION_ENABLE_AUTO_SAVER =
+            "PNW.enableAutoSaver";
+    private static final String ACTION_AUTO_SAVER_NO_THANKS =
+            "PNW.autoSaverNoThanks";
+
+    private static final String SETTINGS_ACTION_OPEN_BATTERY_SAVER_SETTING =
+            "android.settings.BATTERY_SAVER_SETTINGS";
 
     private static final AudioAttributes AUDIO_ATTRIBUTES = new AudioAttributes.Builder()
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -98,9 +110,11 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private long mLowWarningThreshold;
     private long mSevereWarningThreshold;
     private boolean mWarning;
+    private boolean mShowAutoSaverSuggestion;
     private boolean mPlaySound;
     private boolean mInvalidCharger;
     private SystemUIDialog mSaverConfirmation;
+    private SystemUIDialog mSaverEnabledConfirmation;
     private boolean mHighTempWarning;
     private SystemUIDialog mHighTempDialog;
     private SystemUIDialog mThermalShutdownDialog;
@@ -119,10 +133,17 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         pw.print("mInvalidCharger="); pw.println(mInvalidCharger);
         pw.print("mShowing="); pw.println(SHOWING_STRINGS[mShowing]);
         pw.print("mSaverConfirmation="); pw.println(mSaverConfirmation != null ? "not null" : null);
+        pw.print("mSaverEnabledConfirmation=");
+        pw.println(mSaverEnabledConfirmation != null ? "not null" : null);
         pw.print("mHighTempWarning="); pw.println(mHighTempWarning);
         pw.print("mHighTempDialog="); pw.println(mHighTempDialog != null ? "not null" : null);
         pw.print("mThermalShutdownDialog=");
         pw.println(mThermalShutdownDialog != null ? "not null" : null);
+    }
+
+    private int getLowBatteryAutoTriggerDefaultLevel() {
+        return mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_lowBatteryAutoTriggerDefaultLevel);
     }
 
     @Override
@@ -151,7 +172,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         mSevereWarningThreshold = severeThreshold;
     }
 
-
     private void updateNotification() {
         if (DEBUG) Slog.d(TAG, "updateNotification mWarning=" + mWarning + " mPlaySound="
                 + mPlaySound + " mInvalidCharger=" + mInvalidCharger);
@@ -161,9 +181,14 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         } else if (mWarning) {
             showWarningNotification();
             mShowing = SHOWING_WARNING;
+        } else if (mShowAutoSaverSuggestion) {
+            showAutoSaverSuggestionNotification();
+            mShowing = SHOWING_AUTO_SAVER_SUGGESTION;
         } else {
             mNoMan.cancelAsUser(TAG_BATTERY, SystemMessage.NOTE_BAD_CHARGER, UserHandle.ALL);
             mNoMan.cancelAsUser(TAG_BATTERY, SystemMessage.NOTE_POWER_LOW, UserHandle.ALL);
+            mNoMan.cancelAsUser(TAG_AUTO_SAVER,
+                    SystemMessage.NOTE_AUTO_SAVER_SUGGESTION, UserHandle.ALL);
             mShowing = SHOWING_NOTHING;
         }
     }
@@ -229,6 +254,28 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         mNoMan.notifyAsUser(TAG_BATTERY, SystemMessage.NOTE_POWER_LOW, n, UserHandle.ALL);
     }
 
+    private void showAutoSaverSuggestionNotification() {
+        final Notification.Builder nb =
+                new Notification.Builder(mContext, NotificationChannels.HINTS)
+                        .setSmallIcon(R.drawable.ic_power_saver)
+                        .setWhen(0)
+                        .setShowWhen(false)
+                        .setContentTitle(mContext.getString(R.string.auto_saver_title))
+                        .setContentText(mContext.getString(R.string.auto_saver_text,
+                                getLowBatteryAutoTriggerDefaultLevel()));
+        nb.setContentIntent(pendingBroadcast(ACTION_ENABLE_AUTO_SAVER));
+        nb.setDeleteIntent(pendingBroadcast(ACTION_DISMISS_AUTO_SAVER_SUGGESTION));
+        nb.addAction(0,
+                mContext.getString(R.string.no_auto_saver_action),
+                pendingBroadcast(ACTION_AUTO_SAVER_NO_THANKS));
+
+        SystemUI.overrideNotificationAppName(mContext, nb, false);
+
+        final Notification n = nb.build();
+        mNoMan.notifyAsUser(
+                TAG_AUTO_SAVER, SystemMessage.NOTE_AUTO_SAVER_SUGGESTION, n, UserHandle.ALL);
+    }
+
     private String getHybridContentString(String percentage) {
         return PowerUtil.getBatteryRemainingStringFormatted(
             mContext,
@@ -238,8 +285,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     }
 
     private PendingIntent pendingBroadcast(String action) {
-        return PendingIntent.getBroadcastAsUser(mContext,
-                0, new Intent(action), 0, UserHandle.CURRENT);
+        return PendingIntent.getBroadcastAsUser(mContext, 0,
+                new Intent(action).setPackage(mContext.getPackageName()), 0, UserHandle.CURRENT);
     }
 
     private static Intent settings(String action) {
@@ -394,6 +441,16 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         updateNotification();
     }
 
+    private void showAutoSaverSuggestion() {
+        mShowAutoSaverSuggestion = true;
+        updateNotification();
+    }
+
+    private void dismissAutoSaverSuggestion() {
+        mShowAutoSaverSuggestion = false;
+        updateNotification();
+    }
+
     @Override
     public void userSwitched() {
         updateNotification();
@@ -405,20 +462,51 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         d.setTitle(R.string.battery_saver_confirmation_title);
         d.setMessage(com.android.internal.R.string.battery_saver_description);
         d.setNegativeButton(android.R.string.cancel, null);
-        d.setPositiveButton(R.string.battery_saver_confirmation_ok, mStartSaverModeNoConfirmation);
+        d.setPositiveButton(R.string.battery_saver_confirmation_ok,
+                (dialog, which) -> setSaverMode(true, false));
         d.setShowForAllUsers(true);
-        d.setOnDismissListener(new OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                mSaverConfirmation = null;
-            }
-        });
+        d.setOnDismissListener((dialog) -> mSaverConfirmation = null);
         d.show();
         mSaverConfirmation = d;
     }
 
+    private void showAutoSaverEnabledConfirmation() {
+        if (mSaverEnabledConfirmation != null) return;
+
+        // Open the Battery Saver setting page.
+        final Intent actionBatterySaverSetting =
+                new Intent(SETTINGS_ACTION_OPEN_BATTERY_SAVER_SETTING)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        final SystemUIDialog d = new SystemUIDialog(mContext);
+        d.setTitle(R.string.auto_saver_enabled_title);
+        d.setMessage(mContext.getString(R.string.auto_saver_enabled_text,
+                getLowBatteryAutoTriggerDefaultLevel()));
+
+        // Negative == "got it". Just close the dialog. Battery saver has already been enabled.
+        d.setNegativeButton(R.string.auto_saver_okay_action, null);
+        d.setPositiveButton(R.string.open_saver_setting_action, (dialog, which) ->
+                mContext.startActivity(actionBatterySaverSetting));
+        d.setShowForAllUsers(true);
+        d.setOnDismissListener((dialog) -> mSaverEnabledConfirmation = null);
+        d.show();
+        mSaverEnabledConfirmation = d;
+    }
+
+
     private void setSaverMode(boolean mode, boolean needFirstTimeWarning) {
         BatterySaverUtils.setPowerSaveMode(mContext, mode, needFirstTimeWarning);
+    }
+
+    private void scheduleAutoBatterySaver() {
+        int autoTriggerThreshold = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_lowBatteryWarningLevel);
+        if (autoTriggerThreshold == 0) {
+            autoTriggerThreshold = 15;
+        }
+
+        BatterySaverUtils.scheduleAutoBatterySaver(mContext, autoTriggerThreshold);
+        showAutoSaverEnabledConfirmation();
     }
 
     private final class Receiver extends BroadcastReceiver {
@@ -433,6 +521,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             filter.addAction(ACTION_CLICKED_THERMAL_SHUTDOWN_WARNING);
             filter.addAction(ACTION_DISMISSED_THERMAL_SHUTDOWN_WARNING);
             filter.addAction(ACTION_SHOW_START_SAVER_CONFIRMATION);
+            filter.addAction(ACTION_SHOW_AUTO_SAVER_SUGGESTION);
+            filter.addAction(ACTION_ENABLE_AUTO_SAVER);
+            filter.addAction(ACTION_AUTO_SAVER_NO_THANKS);
             mContext.registerReceiverAsUser(this, UserHandle.ALL, filter,
                     android.Manifest.permission.DEVICE_POWER, mHandler);
         }
@@ -462,10 +553,17 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                 showThermalShutdownDialog();
             } else if (ACTION_DISMISSED_THERMAL_SHUTDOWN_WARNING.equals(action)) {
                 dismissThermalShutdownWarning();
+            } else if (ACTION_SHOW_AUTO_SAVER_SUGGESTION.equals(action)) {
+                showAutoSaverSuggestion();
+            } else if (ACTION_DISMISS_AUTO_SAVER_SUGGESTION.equals(action)) {
+                dismissAutoSaverSuggestion();
+            } else if (ACTION_ENABLE_AUTO_SAVER.equals(action)) {
+                dismissAutoSaverSuggestion();
+                scheduleAutoBatterySaver();
+            } else if (ACTION_AUTO_SAVER_NO_THANKS.equals(action)) {
+                dismissAutoSaverSuggestion();
+                BatterySaverUtils.suppressAutoBatterySaver(context);
             }
         }
     }
-
-    private final OnClickListener mStartSaverModeNoConfirmation =
-            (dialog, which) -> setSaverMode(true, false);
 }
