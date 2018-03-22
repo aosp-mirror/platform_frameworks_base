@@ -34,8 +34,10 @@ import android.net.IpSecAlgorithm;
 import android.net.IpSecConfig;
 import android.net.IpSecManager;
 import android.net.IpSecSpiResponse;
+import android.net.IpSecTransform;
 import android.net.IpSecTransformResponse;
 import android.net.IpSecTunnelInterfaceResponse;
+import android.net.IpSecUdpEncapResponse;
 import android.net.LinkAddress;
 import android.net.Network;
 import android.net.NetworkUtils;
@@ -129,6 +131,7 @@ public class IpSecServiceParameterizedTest {
             new IpSecAlgorithm(IpSecAlgorithm.CRYPT_AES_CBC, CRYPT_KEY);
     private static final IpSecAlgorithm AEAD_ALGO =
             new IpSecAlgorithm(IpSecAlgorithm.AUTH_CRYPT_AES_GCM, AEAD_KEY, 128);
+    private static final int REMOTE_ENCAP_PORT = 4500;
 
     public IpSecServiceParameterizedTest(
             String sourceAddr, String destAddr, String localInnerAddr) {
@@ -156,6 +159,8 @@ public class IpSecServiceParameterizedTest {
         when(mMockAppOps.noteOp(anyInt(), anyInt(), eq("badPackage")))
             .thenReturn(AppOpsManager.MODE_IGNORED);
     }
+
+    //TODO: Add a test to verify SPI.
 
     @Test
     public void testIpSecServiceReserveSpi() throws Exception {
@@ -257,6 +262,47 @@ public class IpSecServiceParameterizedTest {
         config.setAuthentication(AUTH_ALGO);
     }
 
+    private void addEncapSocketToIpSecConfig(int resourceId, IpSecConfig config) throws Exception {
+        config.setEncapType(IpSecTransform.ENCAP_ESPINUDP);
+        config.setEncapSocketResourceId(resourceId);
+        config.setEncapRemotePort(REMOTE_ENCAP_PORT);
+    }
+
+    private void verifyTransformNetdCalledForCreatingSA(
+            IpSecConfig config, IpSecTransformResponse resp) throws Exception {
+        verifyTransformNetdCalledForCreatingSA(config, resp, 0);
+    }
+
+    private void verifyTransformNetdCalledForCreatingSA(
+            IpSecConfig config, IpSecTransformResponse resp, int encapSocketPort) throws Exception {
+        IpSecAlgorithm auth = config.getAuthentication();
+        IpSecAlgorithm crypt = config.getEncryption();
+        IpSecAlgorithm authCrypt = config.getAuthenticatedEncryption();
+
+        verify(mMockNetd, times(1))
+                .ipSecAddSecurityAssociation(
+                        eq(mUid),
+                        eq(config.getMode()),
+                        eq(config.getSourceAddress()),
+                        eq(config.getDestinationAddress()),
+                        eq((config.getNetwork() != null) ? config.getNetwork().netId : 0),
+                        eq(TEST_SPI),
+                        eq(0),
+                        eq(0),
+                        eq((auth != null) ? auth.getName() : ""),
+                        eq((auth != null) ? auth.getKey() : new byte[] {}),
+                        eq((auth != null) ? auth.getTruncationLengthBits() : 0),
+                        eq((crypt != null) ? crypt.getName() : ""),
+                        eq((crypt != null) ? crypt.getKey() : new byte[] {}),
+                        eq((crypt != null) ? crypt.getTruncationLengthBits() : 0),
+                        eq((authCrypt != null) ? authCrypt.getName() : ""),
+                        eq((authCrypt != null) ? authCrypt.getKey() : new byte[] {}),
+                        eq((authCrypt != null) ? authCrypt.getTruncationLengthBits() : 0),
+                        eq(config.getEncapType()),
+                        eq(encapSocketPort),
+                        eq(config.getEncapRemotePort()));
+    }
+
     @Test
     public void testCreateTransform() throws Exception {
         IpSecConfig ipSecConfig = new IpSecConfig();
@@ -267,28 +313,7 @@ public class IpSecServiceParameterizedTest {
                 mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
         assertEquals(IpSecManager.Status.OK, createTransformResp.status);
 
-        verify(mMockNetd)
-                .ipSecAddSecurityAssociation(
-                        eq(mUid),
-                        anyInt(),
-                        anyString(),
-                        anyString(),
-                        anyInt(),
-                        eq(TEST_SPI),
-                        anyInt(),
-                        anyInt(),
-                        eq(IpSecAlgorithm.AUTH_HMAC_SHA256),
-                        eq(AUTH_KEY),
-                        anyInt(),
-                        eq(IpSecAlgorithm.CRYPT_AES_CBC),
-                        eq(CRYPT_KEY),
-                        anyInt(),
-                        eq(""),
-                        eq(new byte[] {}),
-                        eq(0),
-                        anyInt(),
-                        anyInt(),
-                        anyInt());
+        verifyTransformNetdCalledForCreatingSA(ipSecConfig, createTransformResp);
     }
 
     @Test
@@ -302,28 +327,41 @@ public class IpSecServiceParameterizedTest {
                 mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
         assertEquals(IpSecManager.Status.OK, createTransformResp.status);
 
-        verify(mMockNetd)
-                .ipSecAddSecurityAssociation(
-                        eq(mUid),
-                        anyInt(),
-                        anyString(),
-                        anyString(),
-                        anyInt(),
-                        eq(TEST_SPI),
-                        anyInt(),
-                        anyInt(),
-                        eq(""),
-                        eq(new byte[] {}),
-                        eq(0),
-                        eq(""),
-                        eq(new byte[] {}),
-                        eq(0),
-                        eq(IpSecAlgorithm.AUTH_CRYPT_AES_GCM),
-                        eq(AEAD_KEY),
-                        anyInt(),
-                        anyInt(),
-                        anyInt(),
-                        anyInt());
+        verifyTransformNetdCalledForCreatingSA(ipSecConfig, createTransformResp);
+    }
+
+    @Test
+    public void testCreateTransportModeTransformWithEncap() throws Exception {
+        IpSecUdpEncapResponse udpSock = mIpSecService.openUdpEncapsulationSocket(0, new Binder());
+
+        IpSecConfig ipSecConfig = new IpSecConfig();
+        ipSecConfig.setMode(IpSecTransform.MODE_TRANSPORT);
+        addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
+        addAuthAndCryptToIpSecConfig(ipSecConfig);
+        addEncapSocketToIpSecConfig(udpSock.resourceId, ipSecConfig);
+
+        IpSecTransformResponse createTransformResp =
+                mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
+        assertEquals(IpSecManager.Status.OK, createTransformResp.status);
+
+        verifyTransformNetdCalledForCreatingSA(ipSecConfig, createTransformResp, udpSock.port);
+    }
+
+    @Test
+    public void testCreateTunnelModeTransformWithEncap() throws Exception {
+        IpSecUdpEncapResponse udpSock = mIpSecService.openUdpEncapsulationSocket(0, new Binder());
+
+        IpSecConfig ipSecConfig = new IpSecConfig();
+        ipSecConfig.setMode(IpSecTransform.MODE_TUNNEL);
+        addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
+        addAuthAndCryptToIpSecConfig(ipSecConfig);
+        addEncapSocketToIpSecConfig(udpSock.resourceId, ipSecConfig);
+
+        IpSecTransformResponse createTransformResp =
+                mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
+        assertEquals(IpSecManager.Status.OK, createTransformResp.status);
+
+        verifyTransformNetdCalledForCreatingSA(ipSecConfig, createTransformResp, udpSock.port);
     }
 
     @Test
