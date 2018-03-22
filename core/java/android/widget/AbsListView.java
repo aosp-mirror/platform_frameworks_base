@@ -89,7 +89,7 @@ import java.util.List;
 
 /**
  * Base class that can be used to implement virtualized lists of items. A list does
- * not have a spatial definition here. For instance, subclases of this class can
+ * not have a spatial definition here. For instance, subclasses of this class can
  * display the content of the list in a grid, in a carousel, as stack, etc.
  *
  * @attr ref android.R.styleable#AbsListView_listSelector
