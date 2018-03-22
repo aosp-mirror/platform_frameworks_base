@@ -76,7 +76,7 @@ public abstract class VolumeProvider2 {
      */
     public VolumeProvider2(@NonNull Context context, @ControlType int controlType,
             int maxVolume, int currentVolume) {
-        mProvider = ApiLoader.getProvider(context).createVolumeProvider2(
+        mProvider = ApiLoader.getProvider().createVolumeProvider2(
                 context, this, controlType, maxVolume, currentVolume);
     }
 
