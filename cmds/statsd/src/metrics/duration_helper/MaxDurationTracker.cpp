@@ -205,11 +205,12 @@ bool MaxDurationTracker::flushCurrentBucket(
     bool hasPendingEvent =
             false;  // has either a kStarted or kPaused event across bucket boundaries
     // meaning we need to carry them over to the new bucket.
-    for (auto it = mInfos.begin(); it != mInfos.end(); ++it) {
+    for (auto it = mInfos.begin(); it != mInfos.end();) {
         if (it->second.state == DurationState::kStopped) {
             // No need to keep buckets for events that were stopped before.
-            mInfos.erase(it);
+            it = mInfos.erase(it);
         } else {
+            ++it;
             hasPendingEvent = true;
         }
     }
