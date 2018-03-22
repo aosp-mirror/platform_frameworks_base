@@ -148,7 +148,7 @@ public abstract class MediaPlaylistAgent {
     }
 
     public MediaPlaylistAgent(@NonNull Context context) {
-        mProvider = ApiLoader.getProvider(context).createMediaPlaylistAgent(context, this);
+        mProvider = ApiLoader.getProvider().createMediaPlaylistAgent(context, this);
     }
 
     /**

@@ -81,7 +81,7 @@ public class MediaItem2 {
     }
 
     public static MediaItem2 fromBundle(Context context, Bundle bundle) {
-        return ApiLoader.getProvider(context).fromBundle_MediaItem2(context, bundle);
+        return ApiLoader.getProvider().fromBundle_MediaItem2(context, bundle);
     }
 
     public String toString() {
@@ -164,8 +164,7 @@ public class MediaItem2 {
          * @param flags
          */
         public Builder(@NonNull Context context, @Flags int flags) {
-            mProvider = ApiLoader.getProvider(context).createMediaItem2Builder(
-                    context, this, flags);
+            mProvider = ApiLoader.getProvider().createMediaItem2Builder(context, this, flags);
         }
 
         /**

@@ -131,7 +131,7 @@ public final class Rating2 {
      * @return new Rating2 instance or {@code null} for error
      */
     public static Rating2 fromBundle(@NonNull Context context, @Nullable Bundle bundle) {
-        return ApiLoader.getProvider(context).fromBundle_Rating2(context, bundle);
+        return ApiLoader.getProvider().fromBundle_Rating2(context, bundle);
     }
 
     /**
@@ -154,7 +154,7 @@ public final class Rating2 {
      */
     public static @Nullable Rating2 newUnratedRating(@NonNull Context context,
             @Style int ratingStyle) {
-        return ApiLoader.getProvider(context).newUnratedRating_Rating2(context, ratingStyle);
+        return ApiLoader.getProvider().newUnratedRating_Rating2(context, ratingStyle);
     }
 
     /**
@@ -166,7 +166,7 @@ public final class Rating2 {
      * @return a new Rating2 instance.
      */
     public static @Nullable Rating2 newHeartRating(@NonNull Context context, boolean hasHeart) {
-        return ApiLoader.getProvider(context).newHeartRating_Rating2(context, hasHeart);
+        return ApiLoader.getProvider().newHeartRating_Rating2(context, hasHeart);
     }
 
     /**
@@ -178,7 +178,7 @@ public final class Rating2 {
      * @return a new Rating2 instance.
      */
     public static @Nullable Rating2 newThumbRating(@NonNull Context context, boolean thumbIsUp) {
-        return ApiLoader.getProvider(context).newThumbRating_Rating2(context, thumbIsUp);
+        return ApiLoader.getProvider().newThumbRating_Rating2(context, thumbIsUp);
     }
 
     /**
@@ -196,8 +196,7 @@ public final class Rating2 {
      */
     public static @Nullable Rating2 newStarRating(@NonNull Context context,
             @StarStyle int starRatingStyle, float starRating) {
-        return ApiLoader.getProvider(context).newStarRating_Rating2(
-                context, starRatingStyle, starRating);
+        return ApiLoader.getProvider().newStarRating_Rating2(context, starRatingStyle, starRating);
     }
 
     /**
@@ -209,7 +208,7 @@ public final class Rating2 {
      * @return null if the rating is out of range, a new Rating2 instance otherwise.
      */
     public static @Nullable Rating2 newPercentageRating(@NonNull Context context, float percent) {
-        return ApiLoader.getProvider(context).newPercentageRating_Rating2(context, percent);
+        return ApiLoader.getProvider().newPercentageRating_Rating2(context, percent);
     }
 
     /**

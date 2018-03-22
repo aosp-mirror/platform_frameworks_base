@@ -143,7 +143,7 @@ public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
             @NonNull Context context, @Nullable AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
         super((instance, superProvider, privateProvider) ->
-                ApiLoader.getProvider(context).createVideoView2(
+                ApiLoader.getProvider().createVideoView2(
                         (VideoView2) instance, superProvider, privateProvider,
                         attrs, defStyleAttr, defStyleRes),
                 context, attrs, defStyleAttr, defStyleRes);
