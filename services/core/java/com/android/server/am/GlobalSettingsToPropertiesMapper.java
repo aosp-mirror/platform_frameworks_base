@@ -36,9 +36,11 @@ class GlobalSettingsToPropertiesMapper {
 
     private static final String TAG = "GlobalSettingsToPropertiesMapper";
 
+    // List mapping entries in the following format:
+    // {Settings.Global.SETTING_NAME, "system_property_name"}
+    // Important: Property being added should be whitelisted by SELinux policy or have one of the
+    // already whitelisted prefixes in system_server.te, e.g. sys.
     private static final String[][] sGlobalSettingsMapping = new String[][] {
-    //  List mapping entries in the following format:
-    //  {Settings.Global.SETTING_NAME, "system_property_name"},
         {Settings.Global.SYS_VDSO, "sys.vdso"},
         {Settings.Global.FPS_DEVISOR, ThreadedRenderer.DEBUG_FPS_DIVISOR},
         {Settings.Global.DISPLAY_PANEL_LPM, "sys.display_panel_lpm"},
