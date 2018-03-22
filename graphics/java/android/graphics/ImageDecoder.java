@@ -24,6 +24,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.ContentResolver;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
@@ -102,7 +103,7 @@ public final class ImageDecoder implements AutoCloseable {
 
         @Override
         public ImageDecoder createImageDecoder() throws IOException {
-            return nCreate(mData, mOffset, mLength);
+            return nCreate(mData, mOffset, mLength, this);
         }
     }
 
@@ -117,9 +118,9 @@ public final class ImageDecoder implements AutoCloseable {
             if (!mBuffer.isDirect() && mBuffer.hasArray()) {
                 int offset = mBuffer.arrayOffset() + mBuffer.position();
                 int length = mBuffer.limit() - mBuffer.position();
-                return nCreate(mBuffer.array(), offset, length);
+                return nCreate(mBuffer.array(), offset, length, this);
             }
-            return nCreate(mBuffer, mBuffer.position(), mBuffer.limit());
+            return nCreate(mBuffer, mBuffer.position(), mBuffer.limit(), this);
         }
     }
 
@@ -156,7 +157,7 @@ public final class ImageDecoder implements AutoCloseable {
                     throw new FileNotFoundException(mUri.toString());
                 }
 
-                return createFromStream(is, true);
+                return createFromStream(is, true, this);
             }
 
             final FileDescriptor fd = assetFd.getFileDescriptor();
@@ -166,9 +167,9 @@ public final class ImageDecoder implements AutoCloseable {
             try {
                 try {
                     Os.lseek(fd, offset, SEEK_SET);
-                    decoder = nCreate(fd);
+                    decoder = nCreate(fd, this);
                 } catch (ErrnoException e) {
-                    decoder = createFromStream(new FileInputStream(fd), true);
+                    decoder = createFromStream(new FileInputStream(fd), true, this);
                 }
             } finally {
                 if (decoder == null) {
@@ -182,18 +183,19 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     @NonNull
-    private static ImageDecoder createFromFile(@NonNull File file) throws IOException {
+    private static ImageDecoder createFromFile(@NonNull File file,
+            @NonNull Source source) throws IOException {
         FileInputStream stream = new FileInputStream(file);
         FileDescriptor fd = stream.getFD();
         try {
             Os.lseek(fd, 0, SEEK_CUR);
         } catch (ErrnoException e) {
-            return createFromStream(stream, true);
+            return createFromStream(stream, true, source);
         }
 
         ImageDecoder decoder = null;
         try {
-            decoder = nCreate(fd);
+            decoder = nCreate(fd, source);
         } finally {
             if (decoder == null) {
                 IoUtils.closeQuietly(stream);
@@ -207,12 +209,12 @@ public final class ImageDecoder implements AutoCloseable {
 
     @NonNull
     private static ImageDecoder createFromStream(@NonNull InputStream is,
-            boolean closeInputStream) throws IOException {
+            boolean closeInputStream, Source source) throws IOException {
         // Arbitrary size matches BitmapFactory.
         byte[] storage = new byte[16 * 1024];
         ImageDecoder decoder = null;
         try {
-            decoder = nCreate(is, storage);
+            decoder = nCreate(is, storage, source);
         } finally {
             if (decoder == null) {
                 if (closeInputStream) {
@@ -260,7 +262,7 @@ public final class ImageDecoder implements AutoCloseable {
                 }
                 InputStream is = mInputStream;
                 mInputStream = null;
-                return createFromStream(is, false);
+                return createFromStream(is, false, this);
             }
         }
     }
@@ -305,7 +307,7 @@ public final class ImageDecoder implements AutoCloseable {
                 }
                 AssetInputStream ais = mAssetInputStream;
                 mAssetInputStream = null;
-                return createFromAsset(ais);
+                return createFromAsset(ais, this);
             }
         }
     }
@@ -340,18 +342,19 @@ public final class ImageDecoder implements AutoCloseable {
                 mResDensity = value.density;
             }
 
-            return createFromAsset((AssetInputStream) is);
+            return createFromAsset((AssetInputStream) is, this);
         }
     }
 
     /**
      *  ImageDecoder will own the AssetInputStream.
      */
-    private static ImageDecoder createFromAsset(AssetInputStream ais) throws IOException {
+    private static ImageDecoder createFromAsset(AssetInputStream ais,
+            Source source) throws IOException {
         ImageDecoder decoder = null;
         try {
             long asset = ais.getNativeAsset();
-            decoder = nCreate(asset);
+            decoder = nCreate(asset, source);
         } finally {
             if (decoder == null) {
                 IoUtils.closeQuietly(ais);
@@ -375,7 +378,7 @@ public final class ImageDecoder implements AutoCloseable {
         @Override
         public ImageDecoder createImageDecoder() throws IOException {
             InputStream is = mAssets.open(mFileName);
-            return createFromAsset((AssetInputStream) is);
+            return createFromAsset((AssetInputStream) is, this);
         }
     }
 
@@ -388,7 +391,7 @@ public final class ImageDecoder implements AutoCloseable {
 
         @Override
         public ImageDecoder createImageDecoder() throws IOException {
-            return createFromFile(mFile);
+            return createFromFile(mFile, this);
         }
     }
 
@@ -431,9 +434,10 @@ public final class ImageDecoder implements AutoCloseable {
         }
     };
 
-    /**
-     *  Thrown if the provided data is incomplete.
+    /** @removed
+     * @deprecated Subsumed by {@link #DecodeException}.
      */
+    @java.lang.Deprecated
     public static class IncompleteException extends IOException {};
 
     /**
@@ -453,24 +457,102 @@ public final class ImageDecoder implements AutoCloseable {
 
     };
 
-    /**
-     *  An Exception was thrown reading the {@link Source}.
+    /** @removed
+     * @deprecated Replaced by {@link #DecodeException#SOURCE_EXCEPTION}.
      */
+    @java.lang.Deprecated
     public static final int ERROR_SOURCE_EXCEPTION  = 1;
 
-    /**
-     *  The encoded data was incomplete.
+    /** @removed
+     * @deprecated Replaced by {@link #DecodeException#SOURCE_INCOMPLETE}.
      */
+    @java.lang.Deprecated
     public static final int ERROR_SOURCE_INCOMPLETE = 2;
 
-    /**
-     *  The encoded data contained an error.
+    /** @removed
+     * @deprecated Replaced by {@link #DecodeException#SOURCE_MALFORMED_DATA}.
      */
+    @java.lang.Deprecated
     public static final int ERROR_SOURCE_ERROR      = 3;
 
-    @Retention(SOURCE)
-    @IntDef({ ERROR_SOURCE_EXCEPTION, ERROR_SOURCE_INCOMPLETE, ERROR_SOURCE_ERROR })
-    public @interface Error {};
+    /**
+     *  Information about an interrupted decode.
+     */
+    public static final class DecodeException extends IOException {
+        /**
+         *  An Exception was thrown reading the {@link Source}.
+         */
+        public static final int SOURCE_EXCEPTION  = 1;
+
+        /**
+         *  The encoded data was incomplete.
+         */
+        public static final int SOURCE_INCOMPLETE = 2;
+
+        /**
+         *  The encoded data contained an error.
+         */
+        public static final int SOURCE_MALFORMED_DATA      = 3;
+
+        /** @hide **/
+        @Retention(SOURCE)
+        @IntDef(value = { SOURCE_EXCEPTION, SOURCE_INCOMPLETE, SOURCE_MALFORMED_DATA },
+                prefix = {"SOURCE_"})
+        public @interface Error {};
+
+        @Error final int mError;
+        @NonNull final Source mSource;
+
+        DecodeException(@Error int error, @Nullable Throwable cause, @NonNull Source source) {
+            super(errorMessage(error, cause), cause);
+            mError = error;
+            mSource = source;
+        }
+
+        /**
+         * Private method called by JNI.
+         */
+        @SuppressWarnings("unused")
+        DecodeException(@Error int error, @Nullable String msg, @Nullable Throwable cause,
+                @NonNull Source source) {
+            super(msg + errorMessage(error, cause), cause);
+            mError = error;
+            mSource = source;
+        }
+
+        /**
+         *  Retrieve the reason that decoding was interrupted.
+         *
+         *  <p>If the error is {@link #SOURCE_EXCEPTION}, the underlying
+         *  {@link java.lang.Throwable} can be retrieved with
+         *  {@link java.lang.Throwable#getCause}.</p>
+         */
+        @Error
+        public int getError() {
+            return mError;
+        }
+
+        /**
+         *  Retrieve the {@link Source} that was interrupted.
+         */
+        @NonNull
+        public Source getSource() {
+            return mSource;
+        }
+
+        private static String errorMessage(@Error int error, @Nullable Throwable cause) {
+            switch (error) {
+                case SOURCE_EXCEPTION:
+                    return "Exception in input: " + cause;
+                case SOURCE_INCOMPLETE:
+                    return "Input was incomplete.";
+                case SOURCE_MALFORMED_DATA:
+                    return "Input contained an error.";
+                default:
+                    return "";
+            }
+        }
+    }
 
     /**
      *  Optional listener supplied to the ImageDecoder.
@@ -486,13 +568,12 @@ public final class ImageDecoder implements AutoCloseable {
          *  optionally finish the rest of the decode/creation process to create
          *  a partial {@link Drawable}/{@link Bitmap}.
          *
-         *  @param error indicating what interrupted the decode.
-         *  @param source that had the error.
+         *  @param e containing information about the decode interruption.
          *  @return True to create and return a {@link Drawable}/{@link Bitmap}
          *      with partial data. False (which is the default) to abort the
-         *      decode and throw {@link java.io.IOException}.
+         *      decode and throw {@code e}.
          */
-        public boolean onPartialImage(@Error int error, @NonNull Source source);
+        boolean onPartialImage(@NonNull DecodeException e);
     };
 
     // Fields
@@ -667,6 +748,7 @@ public final class ImageDecoder implements AutoCloseable {
      * Internal API used to generate bitmaps for use by Drawables (i.e. BitmapDrawable)
      * @hide
      */
+    @TestApi
     public static Source createSource(Resources res, InputStream is, int density) {
         return new InputStreamSource(res, is, density);
     }
@@ -1087,14 +1169,8 @@ public final class ImageDecoder implements AutoCloseable {
     @NonNull
     private Bitmap decodeBitmapInternal() throws IOException {
         checkState();
-        // nDecodeBitmap calls onPartialImage only if mOnPartialImageListener
-        // exists
-        ImageDecoder partialImagePtr = mOnPartialImageListener == null ? null : this;
-        // nDecodeBitmap calls postProcessAndRelease only if mPostProcessor
-        // exists.
-        ImageDecoder postProcessPtr = mPostProcessor == null ? null : this;
-        return nDecodeBitmap(mNativePtr, partialImagePtr,
-                postProcessPtr, mDesiredWidth, mDesiredHeight, mCropRect,
+        return nDecodeBitmap(mNativePtr, this, mPostProcessor != null,
+                mDesiredWidth, mDesiredHeight, mCropRect,
                 mMutable, mAllocator, mRequireUnpremultiplied,
                 mConserveMemory, mDecodeAsAlphaMask);
     }
@@ -1310,23 +1386,28 @@ public final class ImageDecoder implements AutoCloseable {
      * Private method called by JNI.
      */
     @SuppressWarnings("unused")
-    private boolean onPartialImage(@Error int error) {
-        return mOnPartialImageListener.onPartialImage(error, mSource);
+    private void onPartialImage(@DecodeException.Error int error, @Nullable Throwable cause)
+            throws DecodeException {
+        DecodeException exception = new DecodeException(error, cause, mSource);
+        if (mOnPartialImageListener == null
+                || !mOnPartialImageListener.onPartialImage(exception)) {
+            throw exception;
+        }
     }
 
-    private static native ImageDecoder nCreate(long asset) throws IOException;
-    private static native ImageDecoder nCreate(ByteBuffer buffer,
-                                               int position,
-                                               int limit) throws IOException;
-    private static native ImageDecoder nCreate(byte[] data, int offset,
-                                               int length) throws IOException;
-    private static native ImageDecoder nCreate(InputStream is, byte[] storage);
+    private static native ImageDecoder nCreate(long asset, Source src) throws IOException;
+    private static native ImageDecoder nCreate(ByteBuffer buffer, int position,
+                                               int limit, Source src) throws IOException;
+    private static native ImageDecoder nCreate(byte[] data, int offset, int length,
+                                               Source src) throws IOException;
+    private static native ImageDecoder nCreate(InputStream is, byte[] storage,
+                                               Source src) throws IOException;
     // The fd must be seekable.
-    private static native ImageDecoder nCreate(FileDescriptor fd) throws IOException;
+    private static native ImageDecoder nCreate(FileDescriptor fd, Source src) throws IOException;
     @NonNull
     private static native Bitmap nDecodeBitmap(long nativePtr,
-            @Nullable ImageDecoder partialImageListener,
-            @Nullable ImageDecoder postProcessor,
+            @NonNull ImageDecoder decoder,
+            boolean doPostProcess,
             int width, int height,
             @Nullable Rect cropRect, boolean mutable,
             int allocator, boolean requireUnpremul,
