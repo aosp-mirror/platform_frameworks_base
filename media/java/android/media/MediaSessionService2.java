@@ -123,7 +123,7 @@ public abstract class MediaSessionService2 extends Service {
     }
 
     MediaSessionService2Provider createProvider() {
-        return ApiLoader.getProvider(this).createMediaSessionService2(this);
+        return ApiLoader.getProvider().createMediaSessionService2(this);
     }
 
     /**
@@ -220,9 +220,8 @@ public abstract class MediaSessionService2 extends Service {
          */
         public MediaNotification(@NonNull Context context,
                 int notificationId, @NonNull Notification notification) {
-            mProvider = ApiLoader.getProvider(context)
-                    .createMediaSessionService2MediaNotification(
-                            context, this, notificationId, notification);
+            mProvider = ApiLoader.getProvider().createMediaSessionService2MediaNotification(
+                    context, this, notificationId, notification);
         }
 
         public int getNotificationId() {

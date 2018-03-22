@@ -366,8 +366,8 @@ public class MediaController2 implements AutoCloseable {
     MediaController2Provider createProvider(@NonNull Context context,
             @NonNull SessionToken2 token, @NonNull Executor executor,
             @NonNull ControllerCallback callback) {
-        return ApiLoader.getProvider(context)
-                .createMediaController2(context, this, token, executor, callback);
+        return ApiLoader.getProvider().createMediaController2(
+                context, this, token, executor, callback);
     }
 
     /**
