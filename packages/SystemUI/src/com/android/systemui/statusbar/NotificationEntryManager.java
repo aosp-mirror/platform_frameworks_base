@@ -332,6 +332,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         row.setOnExpandClickListener(mPresenter);
         row.setInflationCallback(this);
         row.setLongPressListener(getNotificationLongClicker());
+        mListContainer.bindRow(row);
         mRemoteInputManager.bindRow(row);
 
         // Get the app name.
