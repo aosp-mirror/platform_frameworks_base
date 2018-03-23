@@ -809,6 +809,10 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mStatusBarView.setPanel(mNotificationPanel);
                     mStatusBarView.setScrimController(mScrimController);
                     mStatusBarView.setBouncerShowing(mBouncerShowing);
+                    if (mHeadsUpAppearanceController != null) {
+                        // This view is being recreated, let's destroy the old one
+                        mHeadsUpAppearanceController.destroy();
+                    }
                     mHeadsUpAppearanceController = new HeadsUpAppearanceController(
                             mNotificationIconAreaController, mHeadsUpManager, mStatusBarWindow);
                     setAreThereNotifications();

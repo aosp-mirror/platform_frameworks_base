@@ -30,6 +30,9 @@ import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
 /**
  * Controls the appearance of heads up notifications in the icon area and the header itself.
  */
@@ -43,11 +46,19 @@ class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
     private final HeadsUpStatusBarView mHeadsUpStatusBarView;
     private final View mClockView;
     private final DarkIconDispatcher mDarkIconDispatcher;
+    private final NotificationPanelView mPanelView;
+    private final Consumer<ExpandableNotificationRow>
+            mSetTrackingHeadsUp = this::setTrackingHeadsUp;
+    private final Runnable mUpdatePanelTranslation = this::updatePanelTranslation;
+    private final BiConsumer<Float, Float> mSetExpandedHeight = this::setExpandedHeight;
     private float mExpandedHeight;
     private boolean mIsExpanded;
     private float mExpandFraction;
     private ExpandableNotificationRow mTrackedChild;
     private boolean mShown;
+    private final View.OnLayoutChangeListener mStackScrollLayoutChangeListener =
+            (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom)
+                    -> updatePanelTranslation();
 
     public HeadsUpAppearanceController(
             NotificationIconAreaController notificationIconAreaController,
@@ -75,16 +86,27 @@ class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
         headsUpStatusBarView.setOnDrawingRectChangedListener(
                 () -> updateIsolatedIconLocation(true /* requireUpdate */));
         mStackScroller = stackScroller;
-        panelView.addTrackingHeadsUpListener(this::setTrackingHeadsUp);
-        panelView.setVerticalTranslationListener(this::updatePanelTranslation);
+        mPanelView = panelView;
+        panelView.addTrackingHeadsUpListener(mSetTrackingHeadsUp);
+        panelView.addVerticalTranslationListener(mUpdatePanelTranslation);
         panelView.setHeadsUpAppearanceController(this);
-        mStackScroller.addOnExpandedHeightListener(this::setExpandedHeight);
-        mStackScroller.addOnLayoutChangeListener(
-                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom)
-                        -> updatePanelTranslation());
+        mStackScroller.addOnExpandedHeightListener(mSetExpandedHeight);
+        mStackScroller.addOnLayoutChangeListener(mStackScrollLayoutChangeListener);
         mClockView = clockView;
         mDarkIconDispatcher = Dependency.get(DarkIconDispatcher.class);
         mDarkIconDispatcher.addDarkReceiver(this);
+    }
+
+
+    public void destroy() {
+        mHeadsUpManager.removeListener(this);
+        mHeadsUpStatusBarView.setOnDrawingRectChangedListener(null);
+        mPanelView.removeTrackingHeadsUpListener(mSetTrackingHeadsUp);
+        mPanelView.removeVerticalTranslationListener(mUpdatePanelTranslation);
+        mPanelView.setHeadsUpAppearanceController(null);
+        mStackScroller.removeOnExpandedHeightListener(mSetExpandedHeight);
+        mStackScroller.removeOnLayoutChangeListener(mStackScrollLayoutChangeListener);
+        mDarkIconDispatcher.removeDarkReceiver(this);
     }
 
     private void updateIsolatedIconLocation(boolean requireStateUpdate) {
