@@ -247,6 +247,7 @@ public class RecoverableKeyStoreManager {
             @NonNull String rootCertificateAlias, @NonNull byte[] recoveryServiceCertFile,
             @NonNull byte[] recoveryServiceSigFile)
             throws RemoteException {
+        checkRecoverKeyStorePermission();
         if (rootCertificateAlias == null) {
             Log.e(TAG, "rootCertificateAlias is null");
         }
@@ -356,6 +357,7 @@ public class RecoverableKeyStoreManager {
      *     {@link RecoveryController#RECOVERY_STATUS_PERMANENT_FAILURE}.
      */
     public @NonNull Map<String, Integer> getRecoveryStatus() throws RemoteException {
+        checkRecoverKeyStorePermission();
         return mDatabase.getStatusForAllKeys(Binder.getCallingUid());
     }
 
@@ -656,6 +658,7 @@ public class RecoverableKeyStoreManager {
      * @hide
      */
     public byte[] generateAndStoreKey(@NonNull String alias) throws RemoteException {
+        checkRecoverKeyStorePermission();
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
 
@@ -688,6 +691,7 @@ public class RecoverableKeyStoreManager {
     }
 
     public void removeKey(@NonNull String alias) throws RemoteException {
+        checkRecoverKeyStorePermission();
         Preconditions.checkNotNull(alias, "alias is null");
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
@@ -706,6 +710,7 @@ public class RecoverableKeyStoreManager {
      * @return grant alias, which caller can use to access the key.
      */
     public String generateKey(@NonNull String alias) throws RemoteException {
+        checkRecoverKeyStorePermission();
         Preconditions.checkNotNull(alias, "alias is null");
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
@@ -745,6 +750,7 @@ public class RecoverableKeyStoreManager {
      */
     public String importKey(@NonNull String alias, @NonNull byte[] keyBytes)
             throws RemoteException {
+        checkRecoverKeyStorePermission();
         Preconditions.checkNotNull(alias, "alias is null");
         Preconditions.checkNotNull(keyBytes, "keyBytes is null");
         if (keyBytes.length != RecoverableKeyGenerator.KEY_SIZE_BITS / Byte.SIZE) {
@@ -790,6 +796,7 @@ public class RecoverableKeyStoreManager {
      * @return grant alias, which caller can use to access the key.
      */
     public String getKey(@NonNull String alias) throws RemoteException {
+        checkRecoverKeyStorePermission();
         Preconditions.checkNotNull(alias, "alias is null");
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
