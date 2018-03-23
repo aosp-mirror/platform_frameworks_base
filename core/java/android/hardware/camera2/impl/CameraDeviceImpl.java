@@ -18,6 +18,7 @@ package android.hardware.camera2.impl;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
 
+import android.annotation.NonNull;
 import android.hardware.ICameraService;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -38,7 +39,6 @@ import android.hardware.camera2.utils.SurfaceUtils;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -48,6 +48,8 @@ import android.util.Range;
 import android.util.Size;
 import android.util.SparseArray;
 import android.view.Surface;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -2293,6 +2295,27 @@ public class CameraDeviceImpl extends CameraDevice
     } // public class CameraDeviceCallbacks
 
     /**
+     * A camera specific adapter {@link Executor} that posts all executed tasks onto the given
+     * {@link Handler}.
+     *
+     * @hide
+     */
+    private static class CameraHandlerExecutor implements Executor {
+        private final Handler mHandler;
+
+        public CameraHandlerExecutor(@NonNull Handler handler) {
+            mHandler = Preconditions.checkNotNull(handler);
+        }
+
+        @Override
+        public void execute(Runnable command) {
+            // Return value of 'post()' will be ignored in order to keep the
+            // same camera behavior. For further details see b/74605221 .
+            mHandler.post(command);
+        }
+    }
+
+    /**
      * Instantiate a new Executor.
      *
      * <p>If the callback isn't null, check the handler and instantiate a new executor,
@@ -2304,7 +2327,7 @@ public class CameraDeviceImpl extends CameraDevice
         }
 
         if (handler != null) {
-            return new HandlerExecutor(handler);
+            return new CameraHandlerExecutor(handler);
         }
 
         return null;
@@ -2320,7 +2343,7 @@ public class CameraDeviceImpl extends CameraDevice
      * </p>
      */
     static Executor checkAndWrapHandler(Handler handler) {
-        return new HandlerExecutor(checkHandler(handler));
+        return new CameraHandlerExecutor(checkHandler(handler));
     }
 
     /**
