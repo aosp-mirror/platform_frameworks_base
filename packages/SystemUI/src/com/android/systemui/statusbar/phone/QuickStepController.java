@@ -352,7 +352,7 @@ public class QuickStepController extends GestureDetector.SimpleOnGestureListener
 
     @Override
     public void onDraw(Canvas canvas) {
-        if (mNavigationBarView.isQuickScrubEnabled()) {
+        if (!mNavigationBarView.isQuickScrubEnabled()) {
             return;
         }
         int color = (int) mTrackColorEvaluator.evaluate(mDarkIntensity, mLightTrackColor,
