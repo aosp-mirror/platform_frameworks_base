@@ -2360,6 +2360,14 @@ public class NotificationPanelView extends PanelView implements
 
     @Override
     public void onHeadsUpUnPinned(ExpandableNotificationRow headsUp) {
+
+        // When we're unpinning the notification via active edge they remain heads-upped,
+        // we need to make sure that an animation happens in this case, otherwise the notification
+        // will stick to the top without any interaction.
+        if (isFullyCollapsed() && headsUp.isHeadsUp()) {
+            mNotificationStackScroller.generateHeadsUpAnimation(headsUp, false);
+            headsUp.setHeadsUpIsVisible();
+        }
     }
 
     @Override
