@@ -3807,9 +3807,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // we use relative layering of the IME targets child windows, and place the
         // IME in the non-app layer (see {@link AboveAppWindowContainers#assignChildLayers}).
         //
+        // In the case the IME target is animating, the animation Z order may be different
+        // than the WindowContainer Z order, so it's difficult to be sure we have the correct
+        // IME target. In this case we just layer the IME over all transitions by placing it in the
+        // above applications layer.
+        //
         // In the case where we have no IME target we assign it where it's base layer would
         // place it in the AboveAppWindowContainers.
-        if (imeTarget != null && !imeTarget.inSplitScreenWindowingMode()
+        if (imeTarget != null && !(imeTarget.inSplitScreenWindowingMode()
+                || imeTarget.mToken.isAppAnimating())
                 && (imeTarget.getSurfaceControl() != null)) {
             mImeWindowsContainers.assignRelativeLayer(t, imeTarget.getSurfaceControl(),
                     // TODO: We need to use an extra level on the app surface to ensure
