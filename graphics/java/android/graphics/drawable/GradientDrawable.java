@@ -2093,6 +2093,7 @@ public class GradientDrawable extends Drawable {
             }
             mRadius = radius;
             mRadiusArray = null;
+            computeOpacity();
         }
 
         public void setCornerRadii(float[] radii) {
@@ -2100,6 +2101,7 @@ public class GradientDrawable extends Drawable {
             if (radii == null) {
                 mRadius = 0;
             }
+            computeOpacity();
         }
 
         public void setSize(int width, int height) {
