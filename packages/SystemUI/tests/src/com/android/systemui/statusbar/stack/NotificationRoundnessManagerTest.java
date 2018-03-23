@@ -46,6 +46,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.HashSet;
+import java.util.function.Consumer;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -61,7 +62,11 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
     public void setUp() throws Exception {
         NotificationTestHelper testHelper = new NotificationTestHelper(getContext());
         mFirst = testHelper.createRow();
+        mFirst.setHeadsUpAnimatingAwayListener(animatingAway
+                -> mRoundnessManager.onHeadsupAnimatingAwayChanged(mFirst, animatingAway));
         mSecond = testHelper.createRow();
+        mSecond.setHeadsUpAnimatingAwayListener(animatingAway
+                -> mRoundnessManager.onHeadsupAnimatingAwayChanged(mSecond, animatingAway));
         mRoundnessManager.setOnRoundingChangedCallback(mRoundnessCallback);
         mRoundnessManager.setAnimatedChildren(mAnimatedChildren);
         mRoundnessManager.setFirstAndLastBackgroundChild(mFirst, mFirst);
@@ -150,6 +155,26 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
         mRoundnessManager.setExpanded(1.0f /* expandedHeight */, 0.5f /* appearFraction */);
         mRoundnessManager.setTrackingHeadsUp(mFirst);
         mRoundnessManager.setFirstAndLastBackgroundChild(mSecond, mSecond);
+        Assert.assertEquals(0.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
+        Assert.assertEquals(0.0f, mFirst.getCurrentTopRoundness(), 0.0f);
+    }
+
+    @Test
+    public void testRoundingUpdatedWhenAnimatingAwayTrue() {
+        mRoundnessManager.setExpanded(0.0f, 0.0f);
+        mRoundnessManager.setFirstAndLastBackgroundChild(mSecond, mSecond);
+        mFirst.setHeadsUpAnimatingAway(true);
+        Assert.assertEquals(1.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
+        Assert.assertEquals(1.0f, mFirst.getCurrentTopRoundness(), 0.0f);
+    }
+
+
+    @Test
+    public void testRoundingUpdatedWhenAnimatingAwayFalse() {
+        mRoundnessManager.setExpanded(0.0f, 0.0f);
+        mRoundnessManager.setFirstAndLastBackgroundChild(mSecond, mSecond);
+        mFirst.setHeadsUpAnimatingAway(true);
+        mFirst.setHeadsUpAnimatingAway(false);
         Assert.assertEquals(0.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(0.0f, mFirst.getCurrentTopRoundness(), 0.0f);
     }

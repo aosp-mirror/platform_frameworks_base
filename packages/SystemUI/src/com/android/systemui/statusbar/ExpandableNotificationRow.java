@@ -88,6 +88,7 @@ import com.android.systemui.statusbar.stack.StackScrollState;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 public class ExpandableNotificationRow extends ActivatableNotificationView
         implements PluginListener<NotificationMenuRowPlugin> {
@@ -179,6 +180,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mExpandAnimationRunning;
     private AboveShelfChangedListener mAboveShelfChangedListener;
     private HeadsUpManager mHeadsUpManager;
+    private Consumer<Boolean> mHeadsUpAnimatingAwayListener;
     private View mHelperButton;
     private boolean mChildIsExpanding;
 
@@ -1115,11 +1117,19 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public void setHeadsUpAnimatingAway(boolean headsUpAnimatingAway) {
         boolean wasAboveShelf = isAboveShelf();
+        boolean changed = headsUpAnimatingAway != mHeadsupDisappearRunning;
         mHeadsupDisappearRunning = headsUpAnimatingAway;
         mPrivateLayout.setHeadsUpAnimatingAway(headsUpAnimatingAway);
+        if (changed && mHeadsUpAnimatingAwayListener != null) {
+            mHeadsUpAnimatingAwayListener.accept(headsUpAnimatingAway);
+        }
         if (isAboveShelf() != wasAboveShelf) {
             mAboveShelfChangedListener.onAboveShelfStateChanged(!wasAboveShelf);
         }
+    }
+
+    public void setHeadsUpAnimatingAwayListener(Consumer<Boolean> listener) {
+        mHeadsUpAnimatingAwayListener = listener;
     }
 
     /**
