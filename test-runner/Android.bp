@@ -30,7 +30,7 @@ java_library {
     sdk_version: "current",
     libs: [
         "android.test.base",
-        "android.test.mock",
+        "android.test.mock.stubs",
     ],
 }
 
@@ -46,7 +46,7 @@ java_library {
     sdk_version: "current",
     libs: [
         "android.test.base",
-        "android.test.mock",
+        "android.test.mock.stubs",
         "junit",
     ],
 }
