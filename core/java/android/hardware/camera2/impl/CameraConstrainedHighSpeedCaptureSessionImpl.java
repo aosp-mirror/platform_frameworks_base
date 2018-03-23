@@ -62,12 +62,12 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
     CameraConstrainedHighSpeedCaptureSessionImpl(int id,
             CameraCaptureSession.StateCallback callback, Executor stateExecutor,
             android.hardware.camera2.impl.CameraDeviceImpl deviceImpl,
-            Handler deviceStateHandler, boolean configureSuccess,
+            Executor deviceStateExecutor, boolean configureSuccess,
             CameraCharacteristics characteristics) {
         mCharacteristics = characteristics;
         CameraCaptureSession.StateCallback wrapperCallback = new WrapperCallback(callback);
         mSessionImpl = new CameraCaptureSessionImpl(id, /*input*/null, wrapperCallback,
-                stateExecutor, deviceImpl, deviceStateHandler, configureSuccess);
+                stateExecutor, deviceImpl, deviceStateExecutor, configureSuccess);
     }
 
     @Override

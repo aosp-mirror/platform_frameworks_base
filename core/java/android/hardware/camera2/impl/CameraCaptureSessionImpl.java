@@ -25,7 +25,6 @@ import android.hardware.camera2.utils.TaskDrainer;
 import android.hardware.camera2.utils.TaskSingleDrainer;
 import android.os.Binder;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.util.Log;
 import android.view.Surface;
 
@@ -57,8 +56,8 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
 
     /** Internal camera device; used to translate calls into existing deprecated API */
     private final android.hardware.camera2.impl.CameraDeviceImpl mDeviceImpl;
-    /** Internal handler; used for all incoming events to preserve total order */
-    private final Handler mDeviceHandler;
+    /** Internal executor; used for all incoming events to preserve total order */
+    private final Executor mDeviceExecutor;
 
     /** Drain Sequence IDs which have been queued but not yet finished with aborted/completed */
     private final TaskDrainer<Integer> mSequenceDrainer;
@@ -87,7 +86,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
     CameraCaptureSessionImpl(int id, Surface input,
             CameraCaptureSession.StateCallback callback, Executor stateExecutor,
             android.hardware.camera2.impl.CameraDeviceImpl deviceImpl,
-            Handler deviceStateHandler, boolean configureSuccess) {
+            Executor deviceStateExecutor, boolean configureSuccess) {
         if (callback == null) {
             throw new IllegalArgumentException("callback must not be null");
         }
@@ -99,7 +98,8 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
         mStateExecutor = checkNotNull(stateExecutor, "stateExecutor must not be null");
         mStateCallback = createUserStateCallbackProxy(mStateExecutor, callback);
 
-        mDeviceHandler = checkNotNull(deviceStateHandler, "deviceStateHandler must not be null");
+        mDeviceExecutor = checkNotNull(deviceStateExecutor,
+                "deviceStateExecutor must not be null");
         mDeviceImpl = checkNotNull(deviceImpl, "deviceImpl must not be null");
 
         /*
@@ -108,12 +108,12 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
          * This ensures total ordering between CameraDevice.StateCallback and
          * CameraDeviceImpl.CaptureCallback events.
          */
-        mSequenceDrainer = new TaskDrainer<>(new HandlerExecutor(mDeviceHandler),
-                new SequenceDrainListener(), /*name*/"seq");
-        mIdleDrainer = new TaskSingleDrainer(new HandlerExecutor(mDeviceHandler),
-                new IdleDrainListener(), /*name*/"idle");
-        mAbortDrainer = new TaskSingleDrainer(new HandlerExecutor(mDeviceHandler),
-                new AbortDrainListener(), /*name*/"abort");
+        mSequenceDrainer = new TaskDrainer<>(mDeviceExecutor, new SequenceDrainListener(),
+                /*name*/"seq");
+        mIdleDrainer = new TaskSingleDrainer(mDeviceExecutor, new IdleDrainListener(),
+                /*name*/"idle");
+        mAbortDrainer = new TaskSingleDrainer(mDeviceExecutor, new AbortDrainListener(),
+                /*name*/"abort");
 
         // CameraDevice should call configureOutputs and have it finish before constructing us
 
@@ -178,7 +178,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
             }
 
             return addPendingSequence(mDeviceImpl.capture(request,
-                    createCaptureCallbackProxy(handler, callback), mDeviceHandler));
+                    createCaptureCallbackProxy(handler, callback), mDeviceExecutor));
         }
     }
 
@@ -215,7 +215,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
             }
 
             return addPendingSequence(mDeviceImpl.captureBurst(requests,
-                    createCaptureCallbackProxy(handler, callback), mDeviceHandler));
+                    createCaptureCallbackProxy(handler, callback), mDeviceExecutor));
         }
     }
 
@@ -239,7 +239,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
             }
 
             return addPendingSequence(mDeviceImpl.setRepeatingRequest(request,
-                    createCaptureCallbackProxy(handler, callback), mDeviceHandler));
+                    createCaptureCallbackProxy(handler, callback), mDeviceExecutor));
         }
     }
 
@@ -272,7 +272,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
             }
 
             return addPendingSequence(mDeviceImpl.setRepeatingBurst(requests,
-                    createCaptureCallbackProxy(handler, callback), mDeviceHandler));
+                    createCaptureCallbackProxy(handler, callback), mDeviceExecutor));
         }
     }
 
@@ -582,7 +582,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
 
     /**
      *
-     * Create an internal state callback, to be invoked on the mDeviceHandler
+     * Create an internal state callback, to be invoked on the mDeviceExecutor
      *
      * <p>It has a few behaviors:
      * <ul>
