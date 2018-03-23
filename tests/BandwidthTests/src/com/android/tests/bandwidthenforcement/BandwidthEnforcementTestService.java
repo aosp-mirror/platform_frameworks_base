@@ -16,7 +16,10 @@
 package com.android.tests.bandwidthenforcement;
 
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.Network;
 import android.net.SntpClient;
 import android.os.Environment;
 import android.util.Log;
@@ -55,7 +58,7 @@ public class BandwidthEnforcementTestService extends IntentService {
         String outputFile = intent.getStringExtra(OUTPUT_FILE);
         dumpResult("testUrlConnection", testUrlConnection(), outputFile);
         dumpResult("testUrlConnectionv6", testUrlConnectionv6(), outputFile);
-        dumpResult("testSntp", testSntp(), outputFile);
+        dumpResult("testSntp", testSntp(getApplicationContext()), outputFile);
         dumpResult("testDns", testDns(), outputFile);
     }
 
@@ -138,9 +141,12 @@ public class BandwidthEnforcementTestService extends IntentService {
      * Tests to connect via sntp.
      * @return true if it was able to connect, false otherwise.
      */
-    public static boolean testSntp() {
+    public static boolean testSntp(Context context) {
         final SntpClient client = new SntpClient();
-        if (client.requestTime("0.pool.ntp.org", 10000)) {
+        final ConnectivityManager mCM = context.getSystemService(ConnectivityManager.class);
+        final Network network = mCM.getActiveNetwork();
+
+        if (client.requestTime("0.pool.ntp.org", 10000, network)) {
             return true;
         }
         return false;

@@ -308,7 +308,6 @@ Landroid/net/RouteInfo;->selectBestRoute(Ljava/util/Collection;Ljava/net/InetAdd
 Landroid/net/SntpClient;->getNtpTime()J
 Landroid/net/SntpClient;->getNtpTimeReference()J
 Landroid/net/SntpClient;->getRoundTripTime()J
-Landroid/net/SntpClient;->requestTime(Ljava/lang/String;I)Z
 Landroid/net/StaticIpConfiguration;->dnsServers:Ljava/util/ArrayList;
 Landroid/net/StaticIpConfiguration;->domains:Ljava/lang/String;
 Landroid/net/StaticIpConfiguration;->gateway:Ljava/net/InetAddress;
