@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
+ * @hide
  * Base class for media library services.
  * <p>
  * Media library services enable applications to browse media content provided by an application
