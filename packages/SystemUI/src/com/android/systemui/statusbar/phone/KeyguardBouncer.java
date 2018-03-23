@@ -60,10 +60,6 @@ public class KeyguardBouncer {
     private final FalsingManager mFalsingManager;
     private final DismissCallbackRegistry mDismissCallbackRegistry;
     private final Handler mHandler;
-    protected KeyguardHostView mKeyguardView;
-    protected ViewGroup mRoot;
-    private boolean mShowingSoon;
-    private int mBouncerPromptReason;
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
                 @Override
@@ -72,7 +68,14 @@ public class KeyguardBouncer {
                 }
             };
     private final Runnable mRemoveViewRunnable = this::removeView;
+
     private int mStatusBarHeight;
+    private float mExpansion;
+    protected KeyguardHostView mKeyguardView;
+    protected ViewGroup mRoot;
+    private boolean mShowingSoon;
+    private int mBouncerPromptReason;
+    private boolean mIsAnimatingAway;
 
     public KeyguardBouncer(Context context, ViewMediatorCallback callback,
             LockPatternUtils lockPatternUtils, ViewGroup container,
@@ -252,6 +255,7 @@ public class KeyguardBouncer {
             mKeyguardView.cancelDismissAction();
             mKeyguardView.cleanUp();
         }
+        mIsAnimatingAway = false;
         if (mRoot != null) {
             mRoot.setVisibility(View.INVISIBLE);
             if (destroyView) {
@@ -267,6 +271,7 @@ public class KeyguardBouncer {
      * See {@link StatusBarKeyguardViewManager#startPreHideAnimation}.
      */
     public void startPreHideAnimation(Runnable runnable) {
+        mIsAnimatingAway = true;
         if (mKeyguardView != null) {
             mKeyguardView.startDisappearAnimation(runnable);
         } else if (runnable != null) {
@@ -290,7 +295,16 @@ public class KeyguardBouncer {
     }
 
     public boolean isShowing() {
-        return mShowingSoon || (mRoot != null && mRoot.getVisibility() == View.VISIBLE);
+        return (mShowingSoon || (mRoot != null && mRoot.getVisibility() == View.VISIBLE))
+                && mExpansion == 0;
+    }
+
+    /**
+     * @return {@code true} when bouncer's pre-hide animation already started but isn't completely
+     *         hidden yet, {@code false} otherwise.
+     */
+    public boolean isAnimatingAway() {
+        return mIsAnimatingAway;
     }
 
     public void prepare() {
@@ -308,7 +322,8 @@ public class KeyguardBouncer {
      * @see StatusBarKeyguardViewManager#onPanelExpansionChanged
      */
     public void setExpansion(float fraction) {
-        if (mKeyguardView != null) {
+        mExpansion = fraction;
+        if (mKeyguardView != null && !mIsAnimatingAway) {
             float alpha = MathUtils.map(ALPHA_EXPANSION_THRESHOLD, 1, 1, 0, fraction);
             mKeyguardView.setAlpha(MathUtils.constrain(alpha, 0f, 1f));
             mKeyguardView.setTranslationY(fraction * mKeyguardView.getHeight());
