@@ -67,6 +67,8 @@ final class ViewState {
     public static final int STATE_IGNORED = 0x080;
     /** User manually request autofill in this view, after it was already autofilled. */
     public static final int STATE_RESTARTED_SESSION = 0x100;
+    /** View is the URL bar of a package on compat mode. */
+    public  static final int STATE_URL_BAR = 0x200;
 
     public final AutofillId id;
 
