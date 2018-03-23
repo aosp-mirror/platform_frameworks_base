@@ -15,6 +15,7 @@
  */
 package com.android.server.autofill.ui;
 
+import static com.android.server.autofill.Helper.paramsToString;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
 
@@ -37,7 +38,6 @@ import android.util.Slog;
 import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
@@ -568,12 +568,24 @@ final class FillUi {
 
         @Override
         public String toString() {
-            return "ViewItem: [dataset=" + (dataset == null ? "null" : dataset.getId())
-                    + ", value=" + (value == null ? "null" : value.length() + "_chars")
-                    + ", filterable=" + filterable
-                    + ", filter=" + (filter == null ? "null" : filter.pattern().length() + "_chars")
-                    + ", view=" + view.getAutofillId()
-                    + "]";
+            final StringBuilder builder = new StringBuilder("ViewItem:[view=")
+                    .append(view.getAutofillId());
+            final String datasetId = dataset == null ? null : dataset.getId();
+            if (datasetId != null) {
+                builder.append(", dataset=").append(datasetId);
+            }
+            if (value != null) {
+                // Cannot print value because it could contain PII
+                builder.append(", value=").append(value.length()).append("_chars");
+            }
+            if (filterable) {
+                builder.append(", filterable");
+            }
+            if (filter != null) {
+                // Filter should not have PII, but it could be a huge regexp
+                builder.append(", filter=").append(filter.pattern().length()).append("_chars");
+            }
+            return builder.append(']').toString();
         }
     }
 
@@ -583,8 +595,7 @@ final class FillUi {
                 boolean fitsSystemWindows, int layoutDirection) {
             if (sVerbose) {
                 Slog.v(TAG, "AutofillWindowPresenter.show(): fit=" + fitsSystemWindows
-                        + ", epicenter="+ transitionEpicenter + ", dir=" + layoutDirection
-                        + ", params=" + p);
+                        + ", params=" + paramsToString(p));
             }
             UiThread.getHandler().post(() -> mWindow.show(p));
         }
@@ -616,7 +627,9 @@ final class FillUi {
          * Shows the window.
          */
         public void show(WindowManager.LayoutParams params) {
-            if (sVerbose) Slog.v(TAG, "show(): showing=" + mShowing + ", params="+  params);
+            if (sVerbose) {
+                Slog.v(TAG, "show(): showing=" + mShowing + ", params=" + paramsToString(params));
+            }
             try {
                 // Okay here is a bit of voodoo - we want to show the window as system
                 // controlled one so it covers app windows - adjust the params accordingly.

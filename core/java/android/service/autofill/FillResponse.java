@@ -557,23 +557,40 @@ public final class FillResponse implements Parcelable {
         if (!sDebug) return super.toString();
 
         // TODO: create a dump() method instead
-        return new StringBuilder(
-                "FillResponse : [mRequestId=" + mRequestId)
-                .append(", datasets=").append(mDatasets == null ? "N/A" : mDatasets.getList())
-                .append(", saveInfo=").append(mSaveInfo)
-                .append(", clientState=").append(mClientState != null)
-                .append(", hasPresentation=").append(mPresentation != null)
-                .append(", hasHeader=").append(mHeader != null)
-                .append(", hasFooter=").append(mFooter != null)
-                .append(", hasAuthentication=").append(mAuthentication != null)
-                .append(", authenticationIds=").append(Arrays.toString(mAuthenticationIds))
-                .append(", ignoredIds=").append(Arrays.toString(mIgnoredIds))
-                .append(", disableDuration=").append(mDisableDuration)
-                .append(", flags=").append(mFlags)
-                .append(", fieldClassificationIds=")
-                    .append(Arrays.toString(mFieldClassificationIds))
-                .append("]")
-                .toString();
+        final StringBuilder builder = new StringBuilder(
+                "FillResponse : [mRequestId=" + mRequestId);
+        if (mDatasets != null) {
+            builder.append(", datasets=").append(mDatasets.getList());
+        }
+        if (mSaveInfo != null) {
+            builder.append(", saveInfo=").append(mSaveInfo);
+        }
+        if (mClientState != null) {
+            builder.append(", hasClientState");
+        }
+        if (mPresentation != null) {
+            builder.append(", hasPresentation");
+        }
+        if (mHeader != null) {
+            builder.append(", hasHeader");
+        }
+        if (mFooter != null) {
+            builder.append(", hasFooter");
+        }
+        if (mAuthentication != null) {
+            builder.append(", hasAuthentication");
+        }
+        if (mAuthenticationIds != null) {
+            builder.append(", authenticationIds=").append(Arrays.toString(mAuthenticationIds));
+        }
+        builder.append(", disableDuration=").append(mDisableDuration);
+        if (mFlags != 0) {
+            builder.append(", flags=").append(mFlags);
+        }
+        if (mFieldClassificationIds != null) {
+            builder.append(Arrays.toString(mFieldClassificationIds));
+        }
+        return builder.append("]").toString();
     }
 
     /////////////////////////////////////
