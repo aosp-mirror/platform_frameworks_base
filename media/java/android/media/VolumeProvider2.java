@@ -26,6 +26,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
+ * @hide
  * Handles requests to adjust or set the volume on a session. This is also used
  * to push volume updates back to the session. The provider must call
  * {@link #setCurrentVolume(int)} each time the volume being provided changes.

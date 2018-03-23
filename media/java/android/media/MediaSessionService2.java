@@ -30,6 +30,7 @@ import android.media.update.MediaSessionService2Provider.MediaNotificationProvid
 import android.os.IBinder;
 
 /**
+ * @hide
  * Base class for media session services, which is the service version of the {@link MediaSession2}.
  * <p>
  * It's highly recommended for an app to use this instead of {@link MediaSession2} if it wants

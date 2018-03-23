@@ -43,6 +43,7 @@ import java.util.concurrent.Executor;
 
 
 /**
+ * @hide
  * MediaPlayer2 class can be used to control playback
  * of audio/video files and streams. An example on how to use the methods in
  * this class can be found in {@link android.widget.VideoView}.
