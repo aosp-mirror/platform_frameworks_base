@@ -27592,6 +27592,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * @return {@code true} if the default focus highlight is enabled, {@code false} otherwies.
+     * @hide
+     */
+    @TestApi
+    public static boolean isDefaultFocusHighlightEnabled() {
+        return sUseDefaultFocusHighlight;
+    }
+
+  /**
      * Allows this view to handle {@link KeyEvent}s which weren't handled by normal dispatch. This
      * occurs after the normal view hierarchy dispatch, but before the window callback. By default,
      * this will dispatch into all the listeners registered via
