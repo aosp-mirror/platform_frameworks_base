@@ -20,6 +20,7 @@ import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.UserInfo;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.PorterDuff.Mode;
@@ -49,7 +50,6 @@ import com.android.systemui.R.dimen;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.TouchAnimator.Builder;
-import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.MultiUserSwitch;
 import com.android.systemui.statusbar.phone.SettingsButton;
@@ -257,15 +257,29 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         mSettingsContainer.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
         mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
                 TunerService.isTunerEnabled(mContext) ? View.VISIBLE : View.INVISIBLE);
-
         final boolean isDemo = UserManager.isDeviceInDemoMode(mContext);
-
-
-        mMultiUserSwitch.setVisibility(mExpanded
-                && UserManager.get(mContext).isUserSwitcherEnabled()
-                ? View.VISIBLE : View.INVISIBLE);
-
+        mMultiUserSwitch.setVisibility(showUserSwitcher(isDemo) ? View.VISIBLE : View.INVISIBLE);
         mEdit.setVisibility(isDemo || !mExpanded ? View.INVISIBLE : View.VISIBLE);
+    }
+
+    private boolean showUserSwitcher(boolean isDemo) {
+        if (!mExpanded || isDemo || !UserManager.supportsMultipleUsers()) {
+            return false;
+        }
+        UserManager userManager = UserManager.get(mContext);
+        if (userManager.hasUserRestriction(UserManager.DISALLOW_USER_SWITCH)) {
+            return false;
+        }
+        int switchableUserCount = 0;
+        for (UserInfo user : userManager.getUsers(true)) {
+            if (user.supportsSwitchToByUser()) {
+                ++switchableUserCount;
+                if (switchableUserCount > 1) {
+                    return true;
+                }
+            }
+        }
+        return getResources().getBoolean(R.bool.qs_show_user_switcher_for_single_user);
     }
 
     private void updateListeners() {
