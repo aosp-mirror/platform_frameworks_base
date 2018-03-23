@@ -7640,6 +7640,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return DevicePolicyManager.STATE_USER_UNMANAGED;
         }
+        enforceManageUsers();
         int userHandle = mInjector.userHandleGetCallingUserId();
         return getUserProvisioningState(userHandle);
     }
