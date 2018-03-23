@@ -3085,13 +3085,13 @@
     <string name="wifi_available_title">Connect to open Wi\u2011Fi network</string>
     <!-- Notification title for a nearby carrier wireless network.-->
     <string name="wifi_available_carrier_network_title">Connect to carrier Wi\u2011Fi network</string>
-    <!-- Notification title when the system is connecting to the specified open network. The network name is specified in the notification content. -->
-    <string name="wifi_available_title_connecting">Connecting to open Wi\u2011Fi network</string>
-    <!-- Notification title when the system has connected to the open network. The network name is specified in the notification content. -->
+    <!-- Notification title when the system is connecting to the specified network. The network name is specified in the notification content. -->
+    <string name="wifi_available_title_connecting">Connecting to Wi\u2011Fi network</string>
+    <!-- Notification title when the system has connected to the network. The network name is specified in the notification content. -->
     <string name="wifi_available_title_connected">Connected to Wi\u2011Fi network</string>
-    <!-- Notification title when the system failed to connect to the specified open network. -->
+    <!-- Notification title when the system failed to connect to the specified network. -->
     <string name="wifi_available_title_failed_to_connect">Could not connect to Wi\u2011Fi network</string>
-    <!-- Notification content when the system failed to connect to the specified open network. This informs the user that tapping on this notification will open the wifi picker. -->
+    <!-- Notification content when the system failed to connect to the specified network. This informs the user that tapping on this notification will open the wifi picker. -->
     <string name="wifi_available_content_failed_to_connect">Tap to see all networks</string>
     <!-- Notification action name for connecting to the network specified in the notification body. -->
     <string name="wifi_available_action_connect">Connect</string>
