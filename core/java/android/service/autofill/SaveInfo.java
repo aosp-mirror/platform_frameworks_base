@@ -689,22 +689,37 @@ public final class SaveInfo implements Parcelable {
     public String toString() {
         if (!sDebug) return super.toString();
 
-        return new StringBuilder("SaveInfo: [type=")
+        final StringBuilder builder = new StringBuilder("SaveInfo: [type=")
                 .append(DebugUtils.flagsToString(SaveInfo.class, "SAVE_DATA_TYPE_", mType))
                 .append(", requiredIds=").append(Arrays.toString(mRequiredIds))
-                .append(", optionalIds=").append(Arrays.toString(mOptionalIds))
-                .append(", description=").append(mDescription)
-                .append(DebugUtils.flagsToString(SaveInfo.class, "NEGATIVE_BUTTON_STYLE_",
-                        mNegativeButtonStyle))
-                .append(", flags=").append(mFlags)
-                .append(", customDescription=").append(mCustomDescription)
-                .append(", validator=").append(mValidator)
-                .append(", sanitizerKeys=")
-                    .append(mSanitizerKeys == null ? "N/A:" : mSanitizerKeys.length)
-                .append(", sanitizerValues=")
-                    .append(mSanitizerValues == null ? "N/A:" : mSanitizerValues.length)
-                .append(", triggerId=").append(mTriggerId)
-                .append("]").toString();
+                .append(", style=").append(DebugUtils.flagsToString(SaveInfo.class,
+                        "NEGATIVE_BUTTON_STYLE_", mNegativeButtonStyle));
+        if (mOptionalIds != null) {
+            builder.append(", optionalIds=").append(Arrays.toString(mOptionalIds));
+        }
+        if (mDescription != null) {
+            builder.append(", description=").append(mDescription);
+        }
+        if (mFlags != 0) {
+            builder.append(", flags=").append(mFlags);
+        }
+        if (mCustomDescription != null) {
+            builder.append(", customDescription=").append(mCustomDescription);
+        }
+        if (mValidator != null) {
+            builder.append(", validator=").append(mValidator);
+        }
+        if (mSanitizerKeys != null) {
+            builder.append(", sanitizerKeys=").append(mSanitizerKeys.length);
+        }
+        if (mSanitizerValues != null) {
+            builder.append(", sanitizerValues=").append(mSanitizerValues.length);
+        }
+        if (mTriggerId != null) {
+            builder.append(", triggerId=").append(mTriggerId);
+        }
+
+        return builder.append("]").toString();
     }
 
     /////////////////////////////////////

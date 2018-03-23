@@ -80,6 +80,7 @@ import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.autofill.AutofillManagerService.PackageCompatState;
 import com.android.server.autofill.ui.AutoFillUI;
 
 import java.io.FileDescriptor;
@@ -651,7 +652,7 @@ public final class AutofillManagerService extends SystemService {
     /**
      * Compatibility mode metadata per package.
      */
-    private static final class PackageCompatState {
+    static final class PackageCompatState {
         private final long maxVersionCode;
         private final String[] urlBarResourceIds;
 
@@ -662,8 +663,8 @@ public final class AutofillManagerService extends SystemService {
 
         @Override
         public String toString() {
-            return "PackageCompatState: [maxVersionCode=" + maxVersionCode
-                    + ", urlBarResourceIds=" + Arrays.toString(urlBarResourceIds) + "]";
+            return "maxVersionCode=" + maxVersionCode
+                    + ", urlBarResourceIds=" + Arrays.toString(urlBarResourceIds);
         }
     }
 
@@ -749,6 +750,25 @@ public final class AutofillManagerService extends SystemService {
                 if (mUserSpecs != null) {
                     mUserSpecs.clear();
                     mUserSpecs = null;
+                }
+            }
+        }
+
+        private void dump(String prefix, PrintWriter pw) {
+             if (mUserSpecs == null) {
+                 pw.println("N/A");
+                 return;
+             }
+             pw.println();
+             final String prefix2 = prefix + "  ";
+             for (int i = 0; i < mUserSpecs.size(); i++) {
+                 final int user = mUserSpecs.keyAt(i);
+                 pw.print(prefix); pw.print("User: "); pw.println(user);
+                 final ArrayMap<String,PackageCompatState> perUser = mUserSpecs.get(i);
+                 for (int j = 0; j < perUser.size(); j++) {
+                     final String packageName = perUser.keyAt(j);
+                     final PackageCompatState state = perUser.valueAt(j);
+                     pw.print(prefix2); pw.print(packageName); pw.print(": "); pw.println(state);
                 }
             }
         }
@@ -1117,6 +1137,7 @@ public final class AutofillManagerService extends SystemService {
 
             boolean oldDebug = sDebug;
             final String prefix = "  ";
+            final String prefix2 = "    ";
             try {
                 synchronized (mLock) {
                     oldDebug = sDebug;
@@ -1141,8 +1162,8 @@ public final class AutofillManagerService extends SystemService {
                     }
                     mUi.dump(pw);
                     pw.print("Autofill Compat State: ");
-                    pw.println(mAutofillCompatState.mUserSpecs);
-                    pw.print(prefix); pw.print("from settings: ");
+                    mAutofillCompatState.dump(prefix2, pw);
+                    pw.print(prefix2); pw.print("from settings: ");
                     pw.println(getWhitelistedCompatModePackagesFromSettings());
                 }
                 if (showHistory) {
