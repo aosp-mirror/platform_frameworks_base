@@ -20,7 +20,7 @@ import android.annotation.AttrRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
-import android.app.Notification;
+import android.app.Person;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -63,7 +63,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
     private boolean mFirstLayout;
     private boolean mIsHidingAnimated;
     private boolean mNeedsGeneratedAvatar;
-    private Notification.Person mSender;
+    private Person mSender;
     private boolean mImagesAtEnd;
     private ViewGroup mImageContainer;
     private MessagingImageMessage mIsolatedMessage;
@@ -126,7 +126,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         return position;
     }
 
-    public void setSender(Notification.Person sender, CharSequence nameOverride) {
+    public void setSender(Person sender, CharSequence nameOverride) {
         mSender = sender;
         if (nameOverride == null) {
             nameOverride = sender.getName();
@@ -466,7 +466,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         return mNeedsGeneratedAvatar;
     }
 
-    public Notification.Person getSender() {
+    public Person getSender() {
         return mSender;
     }
 

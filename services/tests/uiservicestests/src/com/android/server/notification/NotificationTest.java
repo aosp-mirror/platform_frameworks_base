@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.app.Notification;
-import android.app.Notification.Person;
+import android.app.Person;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.content.Context;
@@ -193,13 +193,13 @@ public class NotificationTest extends UiServiceTestCase {
         Notification.Builder nM1 = new Notification.Builder(mContext, "test")
                 .setStyle(new Notification.MessagingStyle("")
                         .addMessage(new Notification.MessagingStyle.Message(
-                                "a", 100, mock(Notification.Person.class))));
+                                "a", 100, mock(Person.class))));
         Notification.Builder nM2 = new Notification.Builder(mContext, "test")
                 .setStyle(new Notification.MessagingStyle("")
                         .addMessage(new Notification.MessagingStyle.Message(
-                                "a", 100, mock(Notification.Person.class)))
+                                "a", 100, mock(Person.class)))
                         .addMessage(new Notification.MessagingStyle.Message(
-                                "b", 100, mock(Notification.Person.class)))
+                                "b", 100, mock(Person.class)))
                 );
 
         assertTrue(Notification.areStyledNotificationsVisiblyDifferent(nM1, nM2));
@@ -257,11 +257,11 @@ public class NotificationTest extends UiServiceTestCase {
         Notification.Builder nM1 = new Notification.Builder(mContext, "test")
                 .setStyle(new Notification.MessagingStyle("")
                         .addMessage(new Notification.MessagingStyle.Message(
-                                "a", 100, mock(Notification.Person.class))));
+                                "a", 100, mock(Person.class))));
         Notification.Builder nM2 = new Notification.Builder(mContext, "test")
                 .setStyle(new Notification.MessagingStyle("")
                         .addMessage(new Notification.MessagingStyle.Message(
-                                "a", 1000, mock(Notification.Person.class)))
+                                "a", 1000, mock(Person.class)))
                 );
 
         assertFalse(Notification.areStyledNotificationsVisiblyDifferent(nM1, nM2));
