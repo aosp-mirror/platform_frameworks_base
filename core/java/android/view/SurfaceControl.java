@@ -353,8 +353,8 @@ public class SurfaceControl implements Parcelable {
         private int mFormat = PixelFormat.OPAQUE;
         private String mName;
         private SurfaceControl mParent;
-        private int mWindowType;
-        private int mOwnerUid;
+        private int mWindowType = -1;
+        private int mOwnerUid = -1;
 
         /**
          * Begin building a SurfaceControl with a given {@link SurfaceSession}.
@@ -566,7 +566,7 @@ public class SurfaceControl implements Parcelable {
      */
     private SurfaceControl(SurfaceSession session, String name, int w, int h, int format, int flags,
             SurfaceControl parent, int windowType, int ownerUid)
-                    throws OutOfResourcesException {
+                    throws OutOfResourcesException, IllegalArgumentException {
         if (session == null) {
             throw new IllegalArgumentException("session must not be null");
         }

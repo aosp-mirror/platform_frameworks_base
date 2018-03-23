@@ -18,6 +18,7 @@ package android.test.mock;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.PackageInstallObserver;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -53,6 +54,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.os.storage.VolumeInfo;
 
@@ -460,6 +462,11 @@ public class MockPackageManager extends PackageManager {
 
     @Override
     public ResolveInfo resolveService(Intent intent, int flags) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ResolveInfo resolveServiceAsUser(Intent intent, int flags, int userId) {
         throw new UnsupportedOperationException();
     }
 
@@ -945,7 +952,8 @@ public class MockPackageManager extends PackageManager {
 
     /** @hide */
     @Override
-    public String[] setPackagesSuspendedAsUser(String[] packageNames, boolean hidden, int userId) {
+    public String[] setPackagesSuspended(String[] packageNames, boolean hidden,
+            PersistableBundle appExtras, PersistableBundle launcherExtras, String dialogMessage) {
         throw new UnsupportedOperationException();
     }
 

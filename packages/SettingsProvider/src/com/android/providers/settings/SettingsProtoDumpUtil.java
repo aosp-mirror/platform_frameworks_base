@@ -1158,11 +1158,17 @@ class SettingsProtoDumpUtil {
                 Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED,
                 GlobalSettingsProto.CHAINED_BATTERY_ATTRIBUTION_ENABLED);
         dumpSetting(s, p,
-                Settings.Global.AUTOFILL_COMPAT_ALLOWED_PACKAGES,
-                GlobalSettingsProto.AUTOFILL_COMPAT_ALLOWED_PACKAGES);
+                Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES,
+                GlobalSettingsProto.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES);
         dumpSetting(s, p,
                 Global.HIDDEN_API_BLACKLIST_EXEMPTIONS,
                 GlobalSettingsProto.HIDDEN_API_BLACKLIST_EXEMPTIONS);
+        dumpSetting(s, p,
+                Global.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT,
+                GlobalSettingsProto.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT);
+        dumpSetting(s, p,
+                Global.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY,
+                GlobalSettingsProto.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY);
         dumpSetting(s, p,
                 Settings.Global.MULTI_SIM_VOICE_CALL_SUBSCRIPTION,
                 GlobalSettingsProto.MULTI_SIM_VOICE_CALL_SUBSCRIPTION);
@@ -1922,6 +1928,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.BLUETOOTH_ON_WHILE_DRIVING,
                 SecureSettingsProto.BLUETOOTH_ON_WHILE_DRIVING);
+        dumpSetting(s, p,
+                Settings.Secure.VOLUME_HUSH_GESTURE,
+                SecureSettingsProto.VOLUME_HUSH_GESTURE);
         // Please insert new settings using the same order as in Settings.Secure.
 
         p.end(token);

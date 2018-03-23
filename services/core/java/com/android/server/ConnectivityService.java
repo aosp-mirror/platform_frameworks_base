@@ -1386,6 +1386,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    private void restrictBackgroundRequestForCaller(NetworkCapabilities nc) {
+        if (!mPermissionMonitor.hasUseBackgroundNetworksPermission(Binder.getCallingUid())) {
+            nc.addCapability(NET_CAPABILITY_FOREGROUND);
+        }
+    }
+
     @Override
     public NetworkState[] getAllNetworkState() {
         // Require internal since we're handing out IMSI details
@@ -4411,15 +4417,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         NetworkCapabilities nc = new NetworkCapabilities(networkCapabilities);
         restrictRequestUidsForCaller(nc);
-        if (!ConnectivityManager.checkChangePermission(mContext)) {
-            // Apps without the CHANGE_NETWORK_STATE permission can't use background networks, so
-            // make all their listens include NET_CAPABILITY_FOREGROUND. That way, they will get
-            // onLost and onAvailable callbacks when networks move in and out of the background.
-            // There is no need to do this for requests because an app without CHANGE_NETWORK_STATE
-            // can't request networks.
-            nc.addCapability(NET_CAPABILITY_FOREGROUND);
-        }
-        ensureValidNetworkSpecifier(networkCapabilities);
+        // Apps without the CHANGE_NETWORK_STATE permission can't use background networks, so
+        // make all their listens include NET_CAPABILITY_FOREGROUND. That way, they will get
+        // onLost and onAvailable callbacks when networks move in and out of the background.
+        // There is no need to do this for requests because an app without CHANGE_NETWORK_STATE
+        // can't request networks.
+        restrictBackgroundRequestForCaller(nc);
+        ensureValidNetworkSpecifier(nc);
 
         NetworkRequest networkRequest = new NetworkRequest(nc, TYPE_NONE, nextNetworkRequestId(),
                 NetworkRequest.Type.LISTEN);
@@ -5314,7 +5318,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 for (LinkProperties stacked : newNetwork.linkProperties.getStackedLinks()) {
                     final String stackedIface = stacked.getInterfaceName();
                     bs.noteNetworkInterfaceType(stackedIface, type);
-                    NetworkStatsFactory.noteStackedIface(stackedIface, baseIface);
                 }
             } catch (RemoteException ignored) {
             }

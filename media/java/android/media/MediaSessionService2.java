@@ -30,6 +30,7 @@ import android.media.update.MediaSessionService2Provider.MediaNotificationProvid
 import android.os.IBinder;
 
 /**
+ * @hide
  * Base class for media session services, which is the service version of the {@link MediaSession2}.
  * <p>
  * It's highly recommended for an app to use this instead of {@link MediaSession2} if it wants
@@ -123,7 +124,7 @@ public abstract class MediaSessionService2 extends Service {
     }
 
     MediaSessionService2Provider createProvider() {
-        return ApiLoader.getProvider(this).createMediaSessionService2(this);
+        return ApiLoader.getProvider().createMediaSessionService2(this);
     }
 
     /**
@@ -220,9 +221,8 @@ public abstract class MediaSessionService2 extends Service {
          */
         public MediaNotification(@NonNull Context context,
                 int notificationId, @NonNull Notification notification) {
-            mProvider = ApiLoader.getProvider(context)
-                    .createMediaSessionService2MediaNotification(
-                            context, this, notificationId, notification);
+            mProvider = ApiLoader.getProvider().createMediaSessionService2MediaNotification(
+                    context, this, notificationId, notification);
         }
 
         public int getNotificationId() {

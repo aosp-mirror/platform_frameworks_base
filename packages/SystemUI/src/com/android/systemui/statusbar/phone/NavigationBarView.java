@@ -679,11 +679,12 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     public void updateStates() {
         updateSlippery();
+        reloadNavIcons();
         updateNavButtonIcons();
     }
 
     private void updateSlippery() {
-        setSlippery(mOverviewProxyService.getProxy() != null && mPanelView.isFullyExpanded());
+        setSlippery(!isQuickStepSwipeUpEnabled() || mPanelView.isFullyExpanded());
     }
 
     private void setSlippery(boolean slippery) {
@@ -818,8 +819,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     public void onOverviewProxyConnectionChanged(boolean isConnected) {
         updateStates();
         setUpSwipeUpOnboarding(isQuickStepSwipeUpEnabled());
-        reloadNavIcons();
-        updateNavButtonIcons();
     }
 
     @Override

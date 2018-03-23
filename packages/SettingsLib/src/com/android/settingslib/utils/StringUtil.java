@@ -27,6 +27,9 @@ import android.icu.util.ULocale;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.TtsSpan;
+
+import com.android.settingslib.R;
+
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -121,8 +124,7 @@ public class StringUtil {
         final RelativeUnit unit;
         final int value;
         if (withSeconds && seconds < 2 * SECONDS_PER_MINUTE) {
-            unit = RelativeUnit.SECONDS;
-            value = seconds;
+            return context.getResources().getString(R.string.time_unit_just_now);
         } else if (seconds < 2 * SECONDS_PER_HOUR) {
             unit = RelativeUnit.MINUTES;
             value = (seconds + SECONDS_PER_MINUTE / 2)
@@ -141,7 +143,7 @@ public class StringUtil {
         final RelativeDateTimeFormatter formatter = RelativeDateTimeFormatter.getInstance(
                 ULocale.forLocale(locale),
                 null /* default NumberFormat */,
-                RelativeDateTimeFormatter.Style.SHORT,
+                RelativeDateTimeFormatter.Style.LONG,
                 android.icu.text.DisplayContext.CAPITALIZATION_FOR_MIDDLE_OF_SENTENCE);
 
         return formatter.format(value, RelativeDateTimeFormatter.Direction.LAST, unit);

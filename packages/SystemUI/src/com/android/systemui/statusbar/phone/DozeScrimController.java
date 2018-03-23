@@ -78,9 +78,10 @@ public class DozeScrimController {
         }
     };
 
-    public DozeScrimController(ScrimController scrimController, Context context) {
+    public DozeScrimController(ScrimController scrimController, Context context,
+            DozeParameters dozeParameters) {
         mScrimController = scrimController;
-        mDozeParameters = new DozeParameters(context);
+        mDozeParameters = dozeParameters;
     }
 
     public void setDozing(boolean dozing) {

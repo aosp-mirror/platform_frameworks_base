@@ -196,6 +196,8 @@ public final class SystemServer {
             "com.android.server.search.SearchManagerService$Lifecycle";
     private static final String THERMAL_OBSERVER_CLASS =
             "com.google.android.clockwork.ThermalObserver";
+    private static final String WEAR_CONFIG_SERVICE_CLASS =
+            "com.google.android.clockwork.WearConfigManagerService";
     private static final String WEAR_CONNECTIVITY_SERVICE_CLASS =
             "com.android.clockwork.connectivity.WearConnectivityService";
     private static final String WEAR_SIDEKICK_SERVICE_CLASS =
@@ -703,6 +705,11 @@ public final class SystemServer {
             mWebViewUpdateService = mSystemServiceManager.startService(WebViewUpdateService.class);
             traceEnd();
         }
+
+        // Tracks cpu time spent in binder calls
+        traceBeginAndSlog("StartBinderCallsStatsService");
+        BinderCallsStatsService.start();
+        traceEnd();
     }
 
     /**
@@ -1543,6 +1550,10 @@ public final class SystemServer {
         }
 
         if (isWatch) {
+            traceBeginAndSlog("StartWearConfigService");
+            mSystemServiceManager.startService(WEAR_CONFIG_SERVICE_CLASS);
+            traceEnd();
+
             traceBeginAndSlog("StartWearConnectivityService");
             mSystemServiceManager.startService(WEAR_CONNECTIVITY_SERVICE_CLASS);
             traceEnd();

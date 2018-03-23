@@ -27,7 +27,6 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -43,7 +42,6 @@ import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Property;
 import android.util.TypedValue;
-import android.view.View;
 import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Interpolator;
@@ -144,6 +142,8 @@ public class StatusBarIconView extends AnimatedImageView {
     private ColorMatrixColorFilter mMatrixColorFilter;
     private boolean mIsInShelf;
     private Runnable mLayoutRunnable;
+    private boolean mDismissed;
+    private Runnable mOnDismissListener;
 
     public StatusBarIconView(Context context, String slot, StatusBarNotification sbn) {
         this(context, slot, sbn, false);
@@ -165,7 +165,7 @@ public class StatusBarIconView extends AnimatedImageView {
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
         if (mNotification != null) {
             setDecorColor(getContext().getColor(
-                    com.android.internal.R.color.notification_icon_default_color));
+                    com.android.internal.R.color.notification_default_color_light));
         }
         reloadDimens();
     }
@@ -668,6 +668,19 @@ public class StatusBarIconView extends AnimatedImageView {
     }
 
     public void setVisibleState(int visibleState, boolean animate, Runnable endRunnable) {
+        setVisibleState(visibleState, animate, endRunnable, 0);
+    }
+
+    /**
+     * Set the visibleState of this view.
+     *
+     * @param visibleState The new state.
+     * @param animate Should we animate?
+     * @param endRunnable The runnable to run at the end.
+     * @param duration The duration of an animation or 0 if the default should be taken.
+     */
+    public void setVisibleState(int visibleState, boolean animate, Runnable endRunnable,
+            long duration) {
         boolean runnableAdded = false;
         if (visibleState != mVisibleState) {
             mVisibleState = visibleState;
@@ -689,7 +702,8 @@ public class StatusBarIconView extends AnimatedImageView {
                     mIconAppearAnimator = ObjectAnimator.ofFloat(this, ICON_APPEAR_AMOUNT,
                             currentAmount, targetAmount);
                     mIconAppearAnimator.setInterpolator(interpolator);
-                    mIconAppearAnimator.setDuration(ANIMATION_DURATION_FAST);
+                    mIconAppearAnimator.setDuration(duration == 0 ? ANIMATION_DURATION_FAST
+                            : duration);
                     mIconAppearAnimator.addListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
@@ -711,8 +725,9 @@ public class StatusBarIconView extends AnimatedImageView {
                 if (targetAmount != currentAmount) {
                     mDotAnimator = ObjectAnimator.ofFloat(this, DOT_APPEAR_AMOUNT,
                             currentAmount, targetAmount);
-                    mDotAnimator.setInterpolator(interpolator);
-                    mDotAnimator.setDuration(ANIMATION_DURATION_FAST);
+                    mDotAnimator.setInterpolator(interpolator);;
+                    mDotAnimator.setDuration(duration == 0 ? ANIMATION_DURATION_FAST
+                            : duration);
                     final boolean runRunnable = !runnableAdded;
                     mDotAnimator.addListener(new AnimatorListenerAdapter() {
                         @Override
@@ -835,6 +850,21 @@ public class StatusBarIconView extends AnimatedImageView {
 
     public void executeOnLayout(Runnable runnable) {
         mLayoutRunnable = runnable;
+    }
+
+    public void setDismissed() {
+        mDismissed = true;
+        if (mOnDismissListener != null) {
+            mOnDismissListener.run();
+        }
+    }
+
+    public boolean isDismissed() {
+        return mDismissed;
+    }
+
+    public void setOnDismissListener(Runnable onDismissListener) {
+        mOnDismissListener = onDismissListener;
     }
 
     public interface OnVisibilityChangedListener {

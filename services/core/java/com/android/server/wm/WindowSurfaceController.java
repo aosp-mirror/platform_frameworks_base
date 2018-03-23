@@ -25,8 +25,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACT
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.proto.WindowSurfaceControllerProto.LAYER;
-import static com.android.server.wm.proto.WindowSurfaceControllerProto.SHOWN;
+import static com.android.server.wm.WindowSurfaceControllerProto.LAYER;
+import static com.android.server.wm.WindowSurfaceControllerProto.SHOWN;
 
 import android.graphics.Point;
 import android.graphics.PointF;

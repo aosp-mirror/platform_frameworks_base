@@ -71,6 +71,7 @@ public class SettingsBackupTest {
                     Settings.System.NOTIFICATION_LIGHT_PULSE, // candidate for backup?
                     Settings.System.NOTIFICATION_SOUND_CACHE, // internal cache
                     Settings.System.POINTER_LOCATION, // backup candidate?
+                    Settings.System.DEBUG_ENABLE_ENHANCED_CALL_BLOCKING, // used for testing only
                     Settings.System.RINGTONE_CACHE, // internal cache
                     Settings.System.SETUP_WIZARD_HAS_RUN, // Only used by SuW
                     Settings.System.SHOW_GTALK_SERVICE_STATUS, // candidate for backup?
@@ -117,7 +118,7 @@ public class SettingsBackupTest {
                     Settings.Global.APP_STANDBY_ENABLED,
                     Settings.Global.ASSISTED_GPS_ENABLED,
                     Settings.Global.AUDIO_SAFE_VOLUME_STATE,
-                    Settings.Global.AUTOFILL_COMPAT_ALLOWED_PACKAGES,
+                    Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES,
                     Settings.Global.BATTERY_DISCHARGE_DURATION_THRESHOLD,
                     Settings.Global.BATTERY_DISCHARGE_THRESHOLD,
                     Settings.Global.BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS,
@@ -170,6 +171,7 @@ public class SettingsBackupTest {
                     Settings.Global.CONNECTIVITY_SAMPLING_INTERVAL_IN_SECONDS,
                     Settings.Global.CONTACT_METADATA_SYNC_ENABLED,
                     Settings.Global.CONTACTS_DATABASE_WAL_ENABLED,
+                    Settings.Global.CPU_SCALING_ENABLED,
                     Settings.Global.DATA_ACTIVITY_TIMEOUT_MOBILE,
                     Settings.Global.DATA_ACTIVITY_TIMEOUT_WIFI,
                     Settings.Global.DATABASE_CREATION_BUILDID,
@@ -267,6 +269,7 @@ public class SettingsBackupTest {
                     Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL_MAX,
                     Settings.Global.LTE_SERVICE_FORCED,
                     Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
+                    Settings.Global.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY,
                     Settings.Global.MDC_INITIAL_MAX_RETRY,
                     Settings.Global.MHL_INPUT_SWITCHING_ENABLED,
                     Settings.Global.MHL_POWER_CHARGE_ENABLED,
@@ -370,6 +373,7 @@ public class SettingsBackupTest {
                     Settings.Global.SMS_SHORT_CODE_RULE,
                     Settings.Global.SMS_SHORT_CODES_UPDATE_CONTENT_URL,
                     Settings.Global.SMS_SHORT_CODES_UPDATE_METADATA_URL,
+                    Settings.Global.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT,
                     Settings.Global.SPEED_LABEL_CACHE_EVICTION_AGE_MILLIS,
                     Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS,
                     Settings.Global.STORAGE_BENCHMARK_INTERVAL,
@@ -447,6 +451,7 @@ public class SettingsBackupTest {
                     Settings.Global.WIFI_SAVED_STATE,
                     Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE,
                     Settings.Global.WIFI_SCAN_INTERVAL_WHEN_P2P_CONNECTED_MS,
+                    Settings.Global.WIFI_SCORE_PARAMS,
                     Settings.Global.WIFI_SLEEP_POLICY,
                     Settings.Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS,
                     Settings.Global.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED,
@@ -578,7 +583,9 @@ public class SettingsBackupTest {
                  Settings.Secure.KEYGUARD_SLICE_URI,
                  Settings.Secure.PARENTAL_CONTROL_ENABLED,
                  Settings.Secure.PARENTAL_CONTROL_REDIRECT_URL,
-                 Settings.Secure.BLUETOOTH_ON_WHILE_DRIVING);
+                 Settings.Secure.BLUETOOTH_ON_WHILE_DRIVING,
+                 Settings.Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT,
+                 Settings.Secure.LOW_POWER_WARNING_ACKNOWLEDGED);
 
     @Test
     public void systemSettingsBackedUpOrBlacklisted() {

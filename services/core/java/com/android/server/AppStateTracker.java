@@ -261,6 +261,12 @@ public class AppStateTracker {
                 // we need to deliver the allow-while-idle alarms for this uid, package
                 unblockAllUnrestrictedAlarms();
             }
+
+            if (!sender.isRunAnyInBackgroundAppOpsAllowed(uid, packageName)) {
+                Slog.v(TAG, "Package " + packageName + "/" + uid
+                        + " toggled into fg service restriction");
+                stopForegroundServicesForUidPackage(uid, packageName);
+            }
         }
 
         /**
@@ -351,6 +357,13 @@ public class AppStateTracker {
          * scheduler should re-evaluate all restrictions for all jobs.
          */
         public void updateJobsForUidPackage(int uid, String packageName, boolean isNowActive) {
+        }
+
+        /**
+         * Called when an app goes into forced app standby and its foreground
+         * services need to be removed from that state.
+         */
+        public void stopForegroundServicesForUidPackage(int uid, String packageName) {
         }
 
         /**
@@ -1054,6 +1067,16 @@ public class AppStateTracker {
             boolean hasForegroundExemption) {
         return isRestricted(uid, packageName, /*useTempWhitelistToo=*/ true,
                 hasForegroundExemption);
+    }
+
+    /**
+     * @return whether foreground services should be suppressed in the background
+     * due to forced app standby for the given app
+     */
+    public boolean areForegroundServicesRestricted(int uid, @NonNull String packageName) {
+        synchronized (mLock) {
+            return isRunAnyRestrictedLocked(uid, packageName);
+        }
     }
 
     /**

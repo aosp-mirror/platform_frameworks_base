@@ -18,6 +18,7 @@ package com.android.settingslib.wifi;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -31,6 +32,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
+import android.util.ArraySet;
 
 import com.android.settingslib.R;
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
@@ -43,6 +45,7 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
 public class WifiUtilsTest {
@@ -56,6 +59,8 @@ public class WifiUtilsTest {
     private RssiCurve mockBadgeCurve;
     @Mock
     private WifiNetworkScoreCache mockWifiNetworkScoreCache;
+    @Mock
+    private AccessPoint mAccessPoint;
 
     @Before
     public void setUp() {
@@ -82,6 +87,15 @@ public class WifiUtilsTest {
         String summary = WifiUtils.verboseScanResultSummary(ap, scanResults.get(0), null, 0);
 
         assertThat(summary.contains(mContext.getString(R.string.speed_label_very_fast))).isTrue();
+    }
+
+    @Test
+    public void testGetVisibilityStatus_nullResultDoesNotCrash() {
+        doReturn(null).when(mAccessPoint).getInfo();
+        Set<ScanResult> set = new ArraySet<>();
+        set.add(null);
+        doReturn(set).when(mAccessPoint).getScanResults();
+        WifiUtils.getVisibilityStatus(mAccessPoint);
     }
 
     private static ArrayList<ScanResult> buildScanResultCache() {

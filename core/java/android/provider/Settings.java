@@ -83,7 +83,6 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.MemoryIntArray;
-import android.util.StatsLog;
 import android.view.textservice.TextServicesManager;
 
 import com.android.internal.annotations.GuardedBy;
@@ -1957,11 +1956,7 @@ public final class Settings {
                     arg.putBoolean(CALL_METHOD_MAKE_DEFAULT_KEY, true);
                 }
                 IContentProvider cp = mProviderHolder.getProvider(cr);
-                String prevValue = getStringForUser(cr, name, userHandle);
                 cp.call(cr.getPackageName(), mCallSetCommand, name, arg);
-                String newValue = getStringForUser(cr, name, userHandle);
-                StatsLog.write(StatsLog.SETTING_CHANGED, name, value, newValue, prevValue, tag,
-                        makeDefault, userHandle);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't set key " + name + " in " + mUri, e);
                 return false;
@@ -3703,6 +3698,14 @@ public final class Settings {
 
         /** @hide */
         public static final Validator VIBRATE_WHEN_RINGING_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
+         * When {@code 1}, Telecom enhanced call blocking functionality is enabled.  When
+         * {@code 0}, enhanced call blocking functionality is disabled.
+         * @hide
+         */
+        public static final String DEBUG_ENABLE_ENHANCED_CALL_BLOCKING =
+                "debug.enable_enhanced_calling";
 
         /**
          * Whether the audible DTMF tones are played by the dialer when dialing. The value is
@@ -7767,6 +7770,37 @@ public final class Settings {
         public static final String BLUETOOTH_ON_WHILE_DRIVING = "bluetooth_on_while_driving";
 
         /**
+         * What behavior should be invoked when the volume hush gesture is triggered
+         * One of VOLUME_HUSH_OFF, VOLUME_HUSH_VIBRATE, VOLUME_HUSH_MUTE.
+         *
+         * @hide
+         */
+        public static final String VOLUME_HUSH_GESTURE = "volume_hush_gesture";
+
+        /** @hide */ public static final int VOLUME_HUSH_OFF = 0;
+        /** @hide */ public static final int VOLUME_HUSH_VIBRATE = 1;
+        /** @hide */ public static final int VOLUME_HUSH_MUTE = 2;
+
+        private static final Validator VOLUME_HUSH_GESTURE_VALIDATOR =
+                NON_NEGATIVE_INTEGER_VALIDATOR;
+
+        /**
+         * The number of times (integer) the user has manually enabled battery saver.
+         * @hide
+         */
+        public static final String LOW_POWER_MANUAL_ACTIVATION_COUNT =
+                "low_power_manual_activation_count";
+
+        /**
+         * Whether the "first time battery saver warning" dialog needs to be shown (0: default)
+         * or not (1).
+         *
+         * @hide
+         */
+        public static final String LOW_POWER_WARNING_ACKNOWLEDGED =
+                "low_power_warning_acknowledged";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -7864,6 +7898,7 @@ public final class Settings {
             SCREENSAVER_ACTIVATE_ON_SLEEP,
             LOCKDOWN_IN_POWER_MENU,
             SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
+            VOLUME_HUSH_GESTURE
         };
 
         /**
@@ -8000,6 +8035,7 @@ public final class Settings {
             VALIDATORS.put(LOCKDOWN_IN_POWER_MENU, LOCKDOWN_IN_POWER_MENU_VALIDATOR);
             VALIDATORS.put(SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
                     SHOW_FIRST_CRASH_DIALOG_DEV_OPTION_VALIDATOR);
+            VALIDATORS.put(VOLUME_HUSH_GESTURE, VOLUME_HUSH_GESTURE_VALIDATOR);
             VALIDATORS.put(ENABLED_NOTIFICATION_LISTENERS,
                     ENABLED_NOTIFICATION_LISTENERS_VALIDATOR); //legacy restore setting
             VALIDATORS.put(ENABLED_NOTIFICATION_ASSISTANT,
@@ -9638,6 +9674,21 @@ public final class Settings {
          */
         public static final String WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED =
                 "wifi_connected_mac_randomization_enabled";
+
+        /**
+         * Parameters to adjust the performance of framework wifi scoring methods.
+         * <p>
+         * Encoded as a comma-separated key=value list, for example:
+         *   "rssi5=-80:-77:-70:-57,rssi2=-83:-80:-73:-60,horizon=15"
+         * This is intended for experimenting with new parameter values,
+         * and is normally unset or empty. The example does not include all
+         * parameters that may be honored.
+         * Default values are provided by code or device configurations.
+         * Errors in the parameters will cause the entire setting to be ignored.
+         * @hide
+         */
+        public static final String WIFI_SCORE_PARAMS =
+                "wifi_score_params";
 
        /**
         * The maximum number of times we will retry a connection to an access
@@ -11599,8 +11650,8 @@ public final class Settings {
          */
         @SystemApi
         @TestApi
-        public static final String AUTOFILL_COMPAT_ALLOWED_PACKAGES =
-                "autofill_compat_allowed_packages";
+        public static final String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES =
+                "autofill_compat_mode_allowed_packages";
 
         /**
          * Exemptions to the hidden API blacklist.
@@ -11610,6 +11661,24 @@ public final class Settings {
         @TestApi
         public static final String HIDDEN_API_BLACKLIST_EXEMPTIONS =
                 "hidden_api_blacklist_exemptions";
+
+        /**
+         * Timeout for a single {@link android.media.soundtrigger.SoundTriggerDetectionService}
+         * operation (in ms).
+         *
+         * @hide
+         */
+        public static final String SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT =
+                "sound_trigger_detection_service_op_timeout";
+
+        /**
+         * Maximum number of {@link android.media.soundtrigger.SoundTriggerDetectionService}
+         * operations per day.
+         *
+         * @hide
+         */
+        public static final String MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY =
+                "max_sound_trigger_detection_service_ops_per_day";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -12345,6 +12414,16 @@ public final class Settings {
          */
         public static final String ZRAM_ENABLED =
                 "zram_enabled";
+
+        /**
+         * Whether we have enable CPU frequency scaling for this device.
+         * For Wear, default is disable.
+         *
+         * The value is "1" for enable, "0" for disable.
+         * @hide
+         */
+        public static final String CPU_SCALING_ENABLED =
+                "cpu_frequency_scaling_enabled";
 
         /**
          * Configuration flags for smart replies in notifications.

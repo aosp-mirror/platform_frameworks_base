@@ -22,22 +22,38 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.any;
 
 import android.app.ActivityManager;
 import android.app.WaitResult;
 import android.content.ComponentName;
+import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.SparseIntArray;
 
 import org.junit.runner.RunWith;
 import org.junit.Before;
 import org.junit.Test;
+
+import org.mockito.invocation.InvocationOnMock;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -179,5 +195,74 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
             assertEquals(deliverToTopWait.result, START_DELIVERED_TO_TOP);
             assertEquals(deliverToTopWait.who, firstActivity.realActivity);
         }
+    }
+
+    @Test
+    public void testApplySleepTokensLocked() throws Exception {
+        final ActivityDisplay display = mSupervisor.getDefaultDisplay();
+        final KeyguardController keyguard = mSupervisor.getKeyguardController();
+        final ActivityStack stack = mock(ActivityStack.class);
+        display.addChild(stack, 0 /* position */);
+
+        // Make sure we wake and resume in the case the display is turning on and the keyguard is
+        // not showing.
+        verifySleepTokenBehavior(display, keyguard, stack, true /*displaySleeping*/,
+                false /* displayShouldSleep */, true /* isFocusedStack */,
+                false /* keyguardShowing */, true /* expectWakeFromSleep */,
+                true /* expectResumeTopActivity */);
+
+        // Make sure we wake and don't resume when the display is turning on and the keyguard is
+        // showing.
+        verifySleepTokenBehavior(display, keyguard, stack, true /*displaySleeping*/,
+                false /* displayShouldSleep */, true /* isFocusedStack */,
+                true /* keyguardShowing */, true /* expectWakeFromSleep */,
+                false /* expectResumeTopActivity */);
+
+        // Make sure we wake and don't resume when the display is turning on and the keyguard is
+        // not showing as unfocused.
+        verifySleepTokenBehavior(display, keyguard, stack, true /*displaySleeping*/,
+                false /* displayShouldSleep */, false /* isFocusedStack */,
+                false /* keyguardShowing */, true /* expectWakeFromSleep */,
+                false /* expectResumeTopActivity */);
+
+        // Should not do anything if the display state hasn't changed.
+        verifySleepTokenBehavior(display, keyguard, stack, false /*displaySleeping*/,
+                false /* displayShouldSleep */, true /* isFocusedStack */,
+                false /* keyguardShowing */, false /* expectWakeFromSleep */,
+                false /* expectResumeTopActivity */);
+    }
+
+    private void verifySleepTokenBehavior(ActivityDisplay display, KeyguardController keyguard,
+            ActivityStack stack, boolean displaySleeping, boolean displayShouldSleep,
+            boolean isFocusedStack, boolean keyguardShowing, boolean expectWakeFromSleep,
+            boolean expectResumeTopActivity) {
+        reset(stack);
+
+        doReturn(displayShouldSleep).when(display).shouldSleep();
+        doReturn(displaySleeping).when(display).isSleeping();
+        doReturn(keyguardShowing).when(keyguard).isKeyguardShowing(anyInt());
+
+        mSupervisor.mFocusedStack = isFocusedStack ? stack : null;
+        mSupervisor.applySleepTokensLocked(true);
+        verify(stack, times(expectWakeFromSleep ? 1 : 0)).awakeFromSleepingLocked();
+        verify(stack, times(expectResumeTopActivity ? 1 : 0)).resumeTopActivityUncheckedLocked(
+                null /* target */, null /* targetOptions */);
+    }
+
+    @Test
+    public void testTopRunningActivityLockedWithNonExistentDisplay() throws Exception {
+        // Create display that ActivityManagerService does not know about
+        final int unknownDisplayId = 100;
+
+        doAnswer((InvocationOnMock invocationOnMock) -> {
+            final SparseIntArray displayIds = invocationOnMock.<SparseIntArray>getArgument(0);
+            displayIds.put(0, unknownDisplayId);
+            return null;
+        }).when(mSupervisor.mWindowManager).getDisplaysInFocusOrder(any());
+
+        mSupervisor.mFocusedStack = mock(ActivityStack.class);
+
+        // Supervisor should skip over the non-existent display.
+        assertEquals(null, mSupervisor.topRunningActivityLocked());
     }
 }

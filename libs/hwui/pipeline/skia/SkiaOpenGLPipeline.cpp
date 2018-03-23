@@ -66,20 +66,26 @@ bool SkiaOpenGLPipeline::draw(const Frame& frame, const SkRect& screenDirty, con
                               FrameInfoVisualizer* profiler) {
     mEglManager.damageFrame(frame, dirty);
 
+    SkColorType colorType;
     // setup surface for fbo0
     GrGLFramebufferInfo fboInfo;
     fboInfo.fFBOID = 0;
-    GrPixelConfig pixelConfig =
-            wideColorGamut ? kRGBA_half_GrPixelConfig : kRGBA_8888_GrPixelConfig;
+    if (wideColorGamut) {
+        fboInfo.fFormat = GL_RGBA16F;
+        colorType = kRGBA_F16_SkColorType;
+    } else {
+        fboInfo.fFormat = GL_RGBA8;
+        colorType = kN32_SkColorType;
+    }
 
-    GrBackendRenderTarget backendRT(frame.width(), frame.height(), 0, STENCIL_BUFFER_SIZE,
-                                    pixelConfig, fboInfo);
+    GrBackendRenderTarget backendRT(frame.width(), frame.height(), 0, STENCIL_BUFFER_SIZE, fboInfo);
 
     SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
 
     SkASSERT(mRenderThread.getGrContext() != nullptr);
     sk_sp<SkSurface> surface(SkSurface::MakeFromBackendRenderTarget(
-            mRenderThread.getGrContext(), backendRT, kBottomLeft_GrSurfaceOrigin, nullptr, &props));
+            mRenderThread.getGrContext(), backendRT, kBottomLeft_GrSurfaceOrigin, colorType,
+            nullptr, &props));
 
     SkiaPipeline::updateLighting(lightGeometry, lightInfo);
     renderFrame(*layerUpdateQueue, dirty, renderNodes, opaque, wideColorGamut, contentDrawBounds,
@@ -285,7 +291,7 @@ sk_sp<Bitmap> SkiaOpenGLPipeline::allocateHardwareBitmap(renderthread::RenderThr
             type = GL_UNSIGNED_BYTE;
             break;
         case kRGBA_F16_SkColorType:
-            isSupported = grContext->caps()->isConfigTexturable(kRGBA_half_GrPixelConfig);
+            isSupported = grContext->colorTypeSupportedAsImage(kRGBA_F16_SkColorType);
             if (isSupported) {
                 type = GL_HALF_FLOAT;
                 pixelFormat = PIXEL_FORMAT_RGBA_FP16;

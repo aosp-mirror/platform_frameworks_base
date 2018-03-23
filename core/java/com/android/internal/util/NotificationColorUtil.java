@@ -443,7 +443,7 @@ public class NotificationColorUtil {
      */
     public static int resolveColor(Context context, int color) {
         if (color == Notification.COLOR_DEFAULT) {
-            return context.getColor(com.android.internal.R.color.notification_icon_default_color);
+            return context.getColor(com.android.internal.R.color.notification_default_color_light);
         }
         return color;
     }
@@ -475,20 +475,15 @@ public class NotificationColorUtil {
             int backgroundColor, boolean isDark) {
         final int resolvedColor = resolveColor(context, notificationColor);
 
-        final int actionBg = context.getColor(
-                com.android.internal.R.color.notification_action_list);
-
         int color = resolvedColor;
-        color = NotificationColorUtil.ensureLargeTextContrast(color, actionBg, isDark);
         color = NotificationColorUtil.ensureTextContrast(color, backgroundColor, isDark);
 
         if (color != resolvedColor) {
             if (DEBUG){
                 Log.w(TAG, String.format(
-                        "Enhanced contrast of notification for %s %s (over action)"
+                        "Enhanced contrast of notification for %s"
                                 + " and %s (over background) by changing #%s to %s",
                         context.getPackageName(),
-                        NotificationColorUtil.contrastChange(resolvedColor, color, actionBg),
                         NotificationColorUtil.contrastChange(resolvedColor, color, backgroundColor),
                         Integer.toHexString(resolvedColor), Integer.toHexString(color)));
             }
@@ -549,6 +544,17 @@ public class NotificationColorUtil {
         } else {
             return context.getColor(
                     com.android.internal.R.color.notification_secondary_text_color_dark);
+        }
+    }
+
+    public static int resolveDefaultColor(Context context, int backgroundColor) {
+        boolean useDark = shouldUseDark(backgroundColor);
+        if (useDark) {
+            return context.getColor(
+                    com.android.internal.R.color.notification_default_color_light);
+        } else {
+            return context.getColor(
+                    com.android.internal.R.color.notification_default_color_dark);
         }
     }
 

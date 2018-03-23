@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
+ * @hide
  * Base class for media library services.
  * <p>
  * Media library services enable applications to browse media content provided by an application
@@ -210,9 +211,8 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
             public Builder(@NonNull MediaLibraryService2 service,
                     @NonNull @CallbackExecutor Executor callbackExecutor,
                     @NonNull MediaLibrarySessionCallback callback) {
-                super((instance) -> ApiLoader.getProvider(service)
-                        .createMediaLibraryService2Builder(service, (Builder) instance,
-                                callbackExecutor, callback));
+                super((instance) -> ApiLoader.getProvider().createMediaLibraryService2Builder(
+                        service, (Builder) instance, callbackExecutor, callback));
             }
 
             @Override
@@ -309,7 +309,7 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
 
     @Override
     MediaSessionService2Provider createProvider() {
-        return ApiLoader.getProvider(this).createMediaLibraryService2(this);
+        return ApiLoader.getProvider().createMediaLibraryService2(this);
     }
 
     /**
@@ -403,7 +403,7 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          */
         public LibraryRoot(@NonNull Context context,
                 @NonNull String rootId, @Nullable Bundle extras) {
-            mProvider = ApiLoader.getProvider(context).createMediaLibraryService2LibraryRoot(
+            mProvider = ApiLoader.getProvider().createMediaLibraryService2LibraryRoot(
                     context, this, rootId, extras);
         }
 

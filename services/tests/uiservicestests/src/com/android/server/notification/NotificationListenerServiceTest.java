@@ -70,6 +70,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             assertEquals(getSnoozeCriteria(key, i), ranking.getSnoozeCriteria());
             assertEquals(getShowBadge(i), ranking.canShowBadge());
             assertEquals(getUserSentiment(i), ranking.getUserSentiment());
+            assertEquals(getHidden(i), ranking.isSuspended());
         }
     }
 
@@ -85,6 +86,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         Bundle showBadge = new Bundle();
         int[] importance = new int[mKeys.length];
         Bundle userSentiment = new Bundle();
+        Bundle mHidden = new Bundle();
 
         for (int i = 0; i < mKeys.length; i++) {
             String key = mKeys[i];
@@ -101,11 +103,12 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             snoozeCriteria.putParcelableArrayList(key, getSnoozeCriteria(key, i));
             showBadge.putBoolean(key, getShowBadge(i));
             userSentiment.putInt(key, getUserSentiment(i));
+            mHidden.putBoolean(key, getHidden(i));
         }
         NotificationRankingUpdate update = new NotificationRankingUpdate(mKeys,
                 interceptedKeys.toArray(new String[0]), visibilityOverrides,
                 suppressedVisualEffects, importance, explanation, overrideGroupKeys,
-                channels, overridePeople, snoozeCriteria, showBadge, userSentiment);
+                channels, overridePeople, snoozeCriteria, showBadge, userSentiment, mHidden);
         return update;
     }
 
@@ -151,6 +154,10 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                 return USER_SENTIMENT_POSITIVE;
         }
         return USER_SENTIMENT_NEUTRAL;
+    }
+
+    private boolean getHidden(int index) {
+        return index % 2 == 0;
     }
 
     private ArrayList<String> getPeople(String key, int index) {

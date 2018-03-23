@@ -160,38 +160,45 @@ void StorageManager::sendBroadcast(const char* path,
     }
 }
 
-void StorageManager::appendConfigMetricsReport(ProtoOutputStream& proto) {
+void StorageManager::appendConfigMetricsReport(const ConfigKey& key, ProtoOutputStream* proto) {
     unique_ptr<DIR, decltype(&closedir)> dir(opendir(STATS_DATA_DIR), closedir);
     if (dir == NULL) {
         VLOG("Path %s does not exist", STATS_DATA_DIR);
         return;
     }
 
+    string suffix = StringPrintf("%d_%lld", key.GetUid(), (long long)key.GetId());
+
     dirent* de;
     while ((de = readdir(dir.get()))) {
         char* name = de->d_name;
         if (name[0] == '.') continue;
-        VLOG("file %s", name);
 
-        int64_t result[3];
-        parseFileName(name, result);
-        if (result[0] == -1) continue;
-        int64_t timestamp = result[0];
-        int64_t uid = result[1];
-        int64_t configID = result[2];
-        string file_name = getFilePath(STATS_DATA_DIR, timestamp, uid, configID);
-        int fd = open(file_name.c_str(), O_RDONLY | O_CLOEXEC);
-        if (fd != -1) {
-            string content;
-            if (android::base::ReadFdToString(fd, &content)) {
-                proto.write(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_REPORTS,
-                            content.c_str());
+        size_t nameLen = strlen(name);
+        size_t suffixLen = suffix.length();
+        if (suffixLen <= nameLen &&
+            strncmp(name + nameLen - suffixLen, suffix.c_str(), suffixLen) == 0) {
+            int64_t result[3];
+            parseFileName(name, result);
+            if (result[0] == -1) continue;
+            int64_t timestamp = result[0];
+            int64_t uid = result[1];
+            int64_t configID = result[2];
+
+            string file_name = getFilePath(STATS_DATA_DIR, timestamp, uid, configID);
+            int fd = open(file_name.c_str(), O_RDONLY | O_CLOEXEC);
+            if (fd != -1) {
+                string content;
+                if (android::base::ReadFdToString(fd, &content)) {
+                    proto->write(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_REPORTS,
+                                content.c_str(), content.size());
+                }
+                close(fd);
             }
-            close(fd);
-        }
 
-        // Remove file from disk after reading.
-        remove(file_name.c_str());
+            // Remove file from disk after reading.
+            remove(file_name.c_str());
+        }
     }
 }
 
@@ -254,8 +261,7 @@ bool StorageManager::hasIdenticalConfig(const ConfigKey& key,
         return false;
     }
 
-    const char* suffix =
-            StringPrintf("%d_%lld", key.GetUid(), (long long)key.GetId()).c_str();
+    string suffix = StringPrintf("%d_%lld", key.GetUid(), (long long)key.GetId());
 
     dirent* de;
     while ((de = readdir(dir.get()))) {
@@ -264,10 +270,10 @@ bool StorageManager::hasIdenticalConfig(const ConfigKey& key,
             continue;
         }
         size_t nameLen = strlen(name);
-        size_t suffixLen = strlen(suffix);
+        size_t suffixLen = suffix.length();
         // There can be at most one file that matches this suffix (config key).
         if (suffixLen <= nameLen &&
-                strncmp(name + nameLen - suffixLen, suffix, suffixLen) == 0) {
+            strncmp(name + nameLen - suffixLen, suffix.c_str(), suffixLen) == 0) {
             int fd = open(StringPrintf("%s/%s", STATS_SERVICE_DIR, name).c_str(),
                                   O_RDONLY | O_CLOEXEC);
             if (fd != -1) {
@@ -275,9 +281,11 @@ bool StorageManager::hasIdenticalConfig(const ConfigKey& key,
                 if (android::base::ReadFdToString(fd, &content)) {
                     vector<uint8_t> vec(content.begin(), content.end());
                     if (vec == config) {
+                        close(fd);
                         return true;
                     }
                 }
+                close(fd);
             }
         }
     }

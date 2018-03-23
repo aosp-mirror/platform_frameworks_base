@@ -19,8 +19,8 @@ package com.android.server.wm;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.proto.AnimationAdapterProto.REMOTE;
-import static com.android.server.wm.proto.RemoteAnimationAdapterWrapperProto.TARGET;
+import static com.android.server.wm.AnimationAdapterProto.REMOTE;
+import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
 
 import android.graphics.Point;
 import android.graphics.Rect;

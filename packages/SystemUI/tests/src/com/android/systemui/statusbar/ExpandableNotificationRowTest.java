@@ -40,17 +40,22 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.function.Consumer;
+
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ExpandableNotificationRowTest extends SysuiTestCase {
 
     private ExpandableNotificationRow mGroup;
     private NotificationTestHelper mNotificationTestHelper;
+    boolean mHeadsUpAnimatingAway = false;
 
     @Before
     public void setUp() throws Exception {
         mNotificationTestHelper = new NotificationTestHelper(mContext);
         mGroup = mNotificationTestHelper.createGroup();
+        mGroup.setHeadsUpAnimatingAwayListener(
+                animatingAway -> mHeadsUpAnimatingAway = animatingAway);
     }
 
     @Test
@@ -194,5 +199,13 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
         mGroup.getAppOpsOnClickListener().onClick(view);
         verify(l, times(1)).onClick(any(), anyInt(), anyInt(), any());
+    }
+
+    @Test
+    public void testHeadsUpAnimatingAwayListener() {
+        mGroup.setHeadsUpAnimatingAway(true);
+        Assert.assertEquals(true, mHeadsUpAnimatingAway);
+        mGroup.setHeadsUpAnimatingAway(false);
+        Assert.assertEquals(false, mHeadsUpAnimatingAway);
     }
 }

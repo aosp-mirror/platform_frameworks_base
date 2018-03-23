@@ -365,9 +365,6 @@
     <!-- Content description of the data connection type GPRS. [CHAR LIMIT=NONE] -->
     <string name="data_connection_gprs">GPRS</string>
 
-    <!-- Content description of the data connection type 1x. [CHAR LIMIT=NONE] -->
-    <string name="data_connection_1x">1 X</string>
-
     <!-- Content description of the data connection type HSPA and its variants. [CHAR LIMIT=NONE] -->
     <string name="data_connection_hspa">HSPA</string>
 
@@ -672,7 +669,7 @@
     <string name="ethernet_label">Ethernet</string>
 
     <!-- QuickSettings: Onboarding text that introduces users to long press on an option in order to view the option's menu in Settings [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_header_onboarding_text">Press &amp; hold on the icons for more options</string>
+    <string name="quick_settings_header_onboarding_text">Touch &amp; hold icons for more options</string>
     <!-- QuickSettings: Do not disturb [CHAR LIMIT=NONE] -->
     <string name="quick_settings_dnd_label">Do not disturb</string>
     <!-- QuickSettings: Do not disturb - Priority only [CHAR LIMIT=NONE] -->
@@ -1356,8 +1353,6 @@
 
     <string name="volume_dialog_title">%s volume controls</string>
 
-    <string name="volume_dialog_ringer_guidance_vibrate">Calls and notifications will vibrate</string>
-    <string name="volume_dialog_ringer_guidance_silent">Calls and notifications will be muted</string>
     <string name="volume_dialog_ringer_guidance_ring">Calls and notifications will ring</string>
 
     <string name="output_title">Media output</string>
@@ -1848,10 +1843,13 @@
     <string name="right_icon">Right icon</string>
 
     <!-- Label for area where tiles can be dragged out of [CHAR LIMIT=60] -->
-    <string name="drag_to_add_tiles">Drag to add tiles</string>
+    <string name="drag_to_add_tiles">Hold and drag to add tiles</string>
 
     <!-- Label for area where tiles can be dragged in to [CHAR LIMIT=60] -->
     <string name="drag_to_remove_tiles">Drag here to remove</string>
+
+    <!-- Label to indicate to users that additional tiles cannot be removed. [CHAR LIMIT=60] -->
+    <string name="drag_to_remove_disabled">You need at least 6 tiles</string>
 
     <!-- Button to edit the tile ordering of quick settings [CHAR LIMIT=60] -->
     <string name="qs_edit">Edit</string>

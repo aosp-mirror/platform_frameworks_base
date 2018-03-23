@@ -24,7 +24,6 @@ import static android.os.PowerManager.DRAW_WAKE_LOCK;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.SurfaceControl.Transaction;
-import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
@@ -35,7 +34,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCRE
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
-import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
@@ -46,7 +44,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FORMAT_CHANGED;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
 import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
@@ -110,50 +107,50 @@ import static com.android.server.wm.WindowStateAnimator.COMMIT_DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
-import static com.android.server.wm.proto.IdentifierProto.HASH_CODE;
-import static com.android.server.wm.proto.IdentifierProto.TITLE;
-import static com.android.server.wm.proto.IdentifierProto.USER_ID;
-import static com.android.server.wm.proto.AnimationSpecProto.MOVE;
-import static com.android.server.wm.proto.MoveAnimationSpecProto.DURATION;
-import static com.android.server.wm.proto.MoveAnimationSpecProto.FROM;
-import static com.android.server.wm.proto.MoveAnimationSpecProto.TO;
-import static com.android.server.wm.proto.WindowStateProto.ANIMATING_EXIT;
-import static com.android.server.wm.proto.WindowStateProto.ANIMATOR;
-import static com.android.server.wm.proto.WindowStateProto.ATTRIBUTES;
-import static com.android.server.wm.proto.WindowStateProto.CHILD_WINDOWS;
-import static com.android.server.wm.proto.WindowStateProto.CONTAINING_FRAME;
-import static com.android.server.wm.proto.WindowStateProto.CONTENT_FRAME;
-import static com.android.server.wm.proto.WindowStateProto.CONTENT_INSETS;
-import static com.android.server.wm.proto.WindowStateProto.CUTOUT;
-import static com.android.server.wm.proto.WindowStateProto.DECOR_FRAME;
-import static com.android.server.wm.proto.WindowStateProto.DESTROYING;
-import static com.android.server.wm.proto.WindowStateProto.DISPLAY_FRAME;
-import static com.android.server.wm.proto.WindowStateProto.DISPLAY_ID;
-import static com.android.server.wm.proto.WindowStateProto.FRAME;
-import static com.android.server.wm.proto.WindowStateProto.GIVEN_CONTENT_INSETS;
-import static com.android.server.wm.proto.WindowStateProto.HAS_SURFACE;
-import static com.android.server.wm.proto.WindowStateProto.IDENTIFIER;
-import static com.android.server.wm.proto.WindowStateProto.IS_ON_SCREEN;
-import static com.android.server.wm.proto.WindowStateProto.IS_READY_FOR_DISPLAY;
-import static com.android.server.wm.proto.WindowStateProto.IS_VISIBLE;
-import static com.android.server.wm.proto.WindowStateProto.OUTSETS;
-import static com.android.server.wm.proto.WindowStateProto.OUTSET_FRAME;
-import static com.android.server.wm.proto.WindowStateProto.OVERSCAN_FRAME;
-import static com.android.server.wm.proto.WindowStateProto.OVERSCAN_INSETS;
-import static com.android.server.wm.proto.WindowStateProto.PARENT_FRAME;
-import static com.android.server.wm.proto.WindowStateProto.REMOVED;
-import static com.android.server.wm.proto.WindowStateProto.REMOVE_ON_EXIT;
-import static com.android.server.wm.proto.WindowStateProto.REQUESTED_HEIGHT;
-import static com.android.server.wm.proto.WindowStateProto.REQUESTED_WIDTH;
-import static com.android.server.wm.proto.WindowStateProto.STABLE_INSETS;
-import static com.android.server.wm.proto.WindowStateProto.STACK_ID;
-import static com.android.server.wm.proto.WindowStateProto.SURFACE_INSETS;
-import static com.android.server.wm.proto.WindowStateProto.SURFACE_POSITION;
-import static com.android.server.wm.proto.WindowStateProto.SYSTEM_UI_VISIBILITY;
-import static com.android.server.wm.proto.WindowStateProto.VIEW_VISIBILITY;
-import static com.android.server.wm.proto.WindowStateProto.VISIBLE_FRAME;
-import static com.android.server.wm.proto.WindowStateProto.VISIBLE_INSETS;
-import static com.android.server.wm.proto.WindowStateProto.WINDOW_CONTAINER;
+import static com.android.server.wm.IdentifierProto.HASH_CODE;
+import static com.android.server.wm.IdentifierProto.TITLE;
+import static com.android.server.wm.IdentifierProto.USER_ID;
+import static com.android.server.wm.AnimationSpecProto.MOVE;
+import static com.android.server.wm.MoveAnimationSpecProto.DURATION;
+import static com.android.server.wm.MoveAnimationSpecProto.FROM;
+import static com.android.server.wm.MoveAnimationSpecProto.TO;
+import static com.android.server.wm.WindowStateProto.ANIMATING_EXIT;
+import static com.android.server.wm.WindowStateProto.ANIMATOR;
+import static com.android.server.wm.WindowStateProto.ATTRIBUTES;
+import static com.android.server.wm.WindowStateProto.CHILD_WINDOWS;
+import static com.android.server.wm.WindowStateProto.CONTAINING_FRAME;
+import static com.android.server.wm.WindowStateProto.CONTENT_FRAME;
+import static com.android.server.wm.WindowStateProto.CONTENT_INSETS;
+import static com.android.server.wm.WindowStateProto.CUTOUT;
+import static com.android.server.wm.WindowStateProto.DECOR_FRAME;
+import static com.android.server.wm.WindowStateProto.DESTROYING;
+import static com.android.server.wm.WindowStateProto.DISPLAY_FRAME;
+import static com.android.server.wm.WindowStateProto.DISPLAY_ID;
+import static com.android.server.wm.WindowStateProto.FRAME;
+import static com.android.server.wm.WindowStateProto.GIVEN_CONTENT_INSETS;
+import static com.android.server.wm.WindowStateProto.HAS_SURFACE;
+import static com.android.server.wm.WindowStateProto.IDENTIFIER;
+import static com.android.server.wm.WindowStateProto.IS_ON_SCREEN;
+import static com.android.server.wm.WindowStateProto.IS_READY_FOR_DISPLAY;
+import static com.android.server.wm.WindowStateProto.IS_VISIBLE;
+import static com.android.server.wm.WindowStateProto.OUTSETS;
+import static com.android.server.wm.WindowStateProto.OUTSET_FRAME;
+import static com.android.server.wm.WindowStateProto.OVERSCAN_FRAME;
+import static com.android.server.wm.WindowStateProto.OVERSCAN_INSETS;
+import static com.android.server.wm.WindowStateProto.PARENT_FRAME;
+import static com.android.server.wm.WindowStateProto.REMOVED;
+import static com.android.server.wm.WindowStateProto.REMOVE_ON_EXIT;
+import static com.android.server.wm.WindowStateProto.REQUESTED_HEIGHT;
+import static com.android.server.wm.WindowStateProto.REQUESTED_WIDTH;
+import static com.android.server.wm.WindowStateProto.STABLE_INSETS;
+import static com.android.server.wm.WindowStateProto.STACK_ID;
+import static com.android.server.wm.WindowStateProto.SURFACE_INSETS;
+import static com.android.server.wm.WindowStateProto.SURFACE_POSITION;
+import static com.android.server.wm.WindowStateProto.SYSTEM_UI_VISIBILITY;
+import static com.android.server.wm.WindowStateProto.VIEW_VISIBILITY;
+import static com.android.server.wm.WindowStateProto.VISIBLE_FRAME;
+import static com.android.server.wm.WindowStateProto.VISIBLE_INSETS;
+import static com.android.server.wm.WindowStateProto.WINDOW_CONTAINER;
 
 import android.annotation.CallSuper;
 import android.app.AppOpsManager;
@@ -409,6 +406,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     final Rect mContainingFrame = new Rect();
 
     private final Rect mParentFrame = new Rect();
+
+    /** Whether the parent frame would have been different if there was no display cutout. */
+    private boolean mParentFrameWasClippedByDisplayCutout;
 
     // The entire screen area of the {@link TaskStack} this window is in. Usually equal to the
     // screen area of the device.
@@ -839,7 +839,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public void computeFrameLw(Rect parentFrame, Rect displayFrame, Rect overscanFrame,
             Rect contentFrame, Rect visibleFrame, Rect decorFrame, Rect stableFrame,
-            Rect outsetFrame, WmDisplayCutout displayCutout) {
+            Rect outsetFrame, WmDisplayCutout displayCutout,
+            boolean parentFrameWasClippedByDisplayCutout) {
         if (mWillReplaceWindow && (mAnimatingExit || !mReplacingRemoveRequested)) {
             // This window is being replaced and either already got information that it's being
             // removed or we are still waiting for some information. Because of this we don't
@@ -848,6 +849,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
         mHaveFrame = true;
+        mParentFrameWasClippedByDisplayCutout = parentFrameWasClippedByDisplayCutout;
 
         final Task task = getTask();
         final boolean inFullscreenContainer = inFullscreenContainer();
@@ -857,10 +859,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // If the task has temp inset bounds set, we have to make sure all its windows uses
         // the temp inset frame. Otherwise different display frames get applied to the main
         // window and the child window, making them misaligned.
-        if (inFullscreenContainer || isLetterboxedAppWindow()) {
-            mInsetFrame.setEmpty();
-        } else if (task != null && isInMultiWindowMode()) {
+        // Otherwise we need to clear the inset frame, to avoid using a stale frame after leaving
+        // multi window mode.
+        if (task != null && isInMultiWindowMode()) {
             task.getTempInsetBounds(mInsetFrame);
+        } else {
+            mInsetFrame.setEmpty();
         }
 
         // Denotes the actual frame used to calculate the insets and to perform the layout. When
@@ -1030,15 +1034,21 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mAttrs.type == TYPE_DOCK_DIVIDER) {
             // For the docked divider, we calculate the stable insets like a full-screen window
             // so it can use it to calculate the snap positions.
-            mStableInsets.set(Math.max(mStableFrame.left - mDisplayFrame.left, 0),
-                    Math.max(mStableFrame.top - mDisplayFrame.top, 0),
-                    Math.max(mDisplayFrame.right - mStableFrame.right, 0),
-                    Math.max(mDisplayFrame.bottom - mStableFrame.bottom, 0));
+            final WmDisplayCutout c = displayCutout.calculateRelativeTo(mDisplayFrame);
+            mTmpRect.set(mDisplayFrame);
+            mTmpRect.inset(c.getDisplayCutout().getSafeInsets());
+            mTmpRect.intersectUnchecked(mStableFrame);
+
+            mStableInsets.set(Math.max(mTmpRect.left - mDisplayFrame.left, 0),
+                    Math.max(mTmpRect.top - mDisplayFrame.top, 0),
+                    Math.max(mDisplayFrame.right - mTmpRect.right, 0),
+                    Math.max(mDisplayFrame.bottom - mTmpRect.bottom, 0));
 
             // The divider doesn't care about insets in any case, so set it to empty so we don't
             // trigger a relayout when moving it.
             mContentInsets.setEmpty();
             mVisibleInsets.setEmpty();
+            displayCutout = WmDisplayCutout.NO_CUTOUT;
         } else {
             getDisplayContent().getBounds(mTmpRect);
             // Override right and/or bottom insets in case if the frame doesn't fit the screen in
@@ -3055,23 +3065,31 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Only windows with an AppWindowToken are letterboxed.
             return false;
         }
-        if (getDisplayContent().getDisplayInfo().displayCutout == null) {
-            // No cutout, no letterbox.
+        if (!mParentFrameWasClippedByDisplayCutout) {
+            // Cutout didn't make a difference, no letterbox
             return false;
         }
         if (mAttrs.layoutInDisplayCutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
             // Layout in cutout, no letterbox.
             return false;
         }
-        // TODO: handle dialogs and other non-filling windows
-        if (mAttrs.layoutInDisplayCutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER) {
-            // Never layout in cutout, always letterbox.
-            return true;
+        if (!mAttrs.isFullscreen()) {
+            // Not filling the parent frame, no letterbox
+            return false;
         }
-        // Letterbox if any fullscreen mode is set.
-        final int fl = mAttrs.flags;
-        final int sysui = mSystemUiVisibility;
-        return (fl & FLAG_FULLSCREEN) != 0 || (sysui & (SYSTEM_UI_FLAG_FULLSCREEN)) != 0;
+        // Otherwise we need a letterbox if the layout was smaller than the app window token allowed
+        // it to be.
+        return !frameCoversEntireAppTokenBounds();
+    }
+
+    /**
+     * @return true if this window covers the entire bounds of its app window token
+     * @throws NullPointerException if there is no app window token for this window
+     */
+    private boolean frameCoversEntireAppTokenBounds() {
+        mTmpRect.set(mAppToken.getBounds());
+        mTmpRect.intersectUnchecked(mFrame);
+        return mAppToken.getBounds().equals(mTmpRect);
     }
 
     @Override

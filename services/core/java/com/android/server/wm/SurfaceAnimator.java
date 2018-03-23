@@ -19,9 +19,9 @@ package com.android.server.wm;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.proto.SurfaceAnimatorProto.ANIMATION_ADAPTER;
-import static com.android.server.wm.proto.SurfaceAnimatorProto.ANIMATION_START_DELAYED;
-import static com.android.server.wm.proto.SurfaceAnimatorProto.LEASH;
+import static com.android.server.wm.SurfaceAnimatorProto.ANIMATION_ADAPTER;
+import static com.android.server.wm.SurfaceAnimatorProto.ANIMATION_START_DELAYED;
+import static com.android.server.wm.SurfaceAnimatorProto.LEASH;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -81,9 +81,14 @@ class SurfaceAnimator {
                 if (anim != mAnimation) {
                     return;
                 }
-                reset(mAnimatable.getPendingTransaction(), true /* destroyLeash */);
-                if (animationFinishedCallback != null) {
-                    animationFinishedCallback.run();
+                final Runnable resetAndInvokeFinish = () -> {
+                    reset(mAnimatable.getPendingTransaction(), true /* destroyLeash */);
+                    if (animationFinishedCallback != null) {
+                        animationFinishedCallback.run();
+                    }
+                };
+                if (!mAnimatable.shouldDeferAnimationFinish(resetAndInvokeFinish)) {
+                    resetAndInvokeFinish.run();
                 }
             }
         };
@@ -305,7 +310,7 @@ class SurfaceAnimator {
 
     /**
      * Write to a protocol buffer output stream. Protocol buffer message definition is at {@link
-     * com.android.server.wm.proto.SurfaceAnimatorProto}.
+     * com.android.server.wm.SurfaceAnimatorProto}.
      *
      * @param proto Stream to write the SurfaceAnimator object to.
      * @param fieldId Field Id of the SurfaceAnimator as defined in the parent message.
@@ -407,5 +412,17 @@ class SurfaceAnimator {
          * @return The height of the surface to be animated.
          */
         int getSurfaceHeight();
+
+        /**
+         * Gets called when the animation is about to finish and gives the client the opportunity to
+         * defer finishing the animation, i.e. it keeps the leash around until the client calls
+         * {@link #cancelAnimation}.
+         *
+         * @param endDeferFinishCallback The callback to call when defer finishing should be ended.
+         * @return Whether the client would like to defer the animation finish.
+         */
+        default boolean shouldDeferAnimationFinish(Runnable endDeferFinishCallback) {
+            return false;
+        }
     }
 }

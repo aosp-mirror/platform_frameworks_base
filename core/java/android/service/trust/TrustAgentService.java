@@ -545,7 +545,7 @@ public class TrustAgentService extends Service {
      */
     public final void unlockUserWithToken(long handle, byte[] token, UserHandle user) {
         UserManager um = (UserManager) getSystemService(Context.USER_SERVICE);
-        if (um.isUserUnlocked()) {
+        if (um.isUserUnlocked(user)) {
             Slog.i(TAG, "User already unlocked");
             return;
         }

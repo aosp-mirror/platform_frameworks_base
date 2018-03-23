@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
+ * @hide
  * Base class for all media players that want media session.
  */
 public abstract class MediaPlayerBase implements AutoCloseable {
@@ -306,8 +307,9 @@ public abstract class MediaPlayerBase implements AutoCloseable {
     public static abstract class PlayerEventCallback {
         /**
          * Called when the player's current data source has changed.
+         *
          * @param mpb the player whose data source changed.
-         * @param dsd the new current data source.
+         * @param dsd the new current data source. null, if no more data sources available.
          */
         public void onCurrentDataSourceChanged(@NonNull MediaPlayerBase mpb,
                 @Nullable DataSourceDesc dsd) { }

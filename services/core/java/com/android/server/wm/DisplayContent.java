@@ -101,19 +101,19 @@ import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE;
-import static com.android.server.wm.proto.DisplayProto.ABOVE_APP_WINDOWS;
-import static com.android.server.wm.proto.DisplayProto.BELOW_APP_WINDOWS;
-import static com.android.server.wm.proto.DisplayProto.DISPLAY_FRAMES;
-import static com.android.server.wm.proto.DisplayProto.DISPLAY_INFO;
-import static com.android.server.wm.proto.DisplayProto.DOCKED_STACK_DIVIDER_CONTROLLER;
-import static com.android.server.wm.proto.DisplayProto.DPI;
-import static com.android.server.wm.proto.DisplayProto.ID;
-import static com.android.server.wm.proto.DisplayProto.IME_WINDOWS;
-import static com.android.server.wm.proto.DisplayProto.PINNED_STACK_CONTROLLER;
-import static com.android.server.wm.proto.DisplayProto.ROTATION;
-import static com.android.server.wm.proto.DisplayProto.SCREEN_ROTATION_ANIMATION;
-import static com.android.server.wm.proto.DisplayProto.STACKS;
-import static com.android.server.wm.proto.DisplayProto.WINDOW_CONTAINER;
+import static com.android.server.wm.DisplayProto.ABOVE_APP_WINDOWS;
+import static com.android.server.wm.DisplayProto.BELOW_APP_WINDOWS;
+import static com.android.server.wm.DisplayProto.DISPLAY_FRAMES;
+import static com.android.server.wm.DisplayProto.DISPLAY_INFO;
+import static com.android.server.wm.DisplayProto.DOCKED_STACK_DIVIDER_CONTROLLER;
+import static com.android.server.wm.DisplayProto.DPI;
+import static com.android.server.wm.DisplayProto.ID;
+import static com.android.server.wm.DisplayProto.IME_WINDOWS;
+import static com.android.server.wm.DisplayProto.PINNED_STACK_CONTROLLER;
+import static com.android.server.wm.DisplayProto.ROTATION;
+import static com.android.server.wm.DisplayProto.SCREEN_ROTATION_ANIMATION;
+import static com.android.server.wm.DisplayProto.STACKS;
+import static com.android.server.wm.DisplayProto.WINDOW_CONTAINER;
 
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
@@ -305,6 +305,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     int pendingLayoutChanges;
     // TODO(multi-display): remove some of the usages.
     boolean isDefaultDisplay;
+    /**
+     * Flag indicating whether WindowManager should override info for this display in
+     * DisplayManager.
+     */
+    boolean mShouldOverrideDisplayConfiguration = true;
 
     /** Window tokens that are in the process of exiting, but still on screen for animations. */
     final ArrayList<WindowToken> mExitingTokens = new ArrayList<>();
@@ -1177,8 +1182,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mDisplayInfo.flags &= ~Display.FLAG_SCALING_DISABLED;
         }
 
+        // We usually set the override info in DisplayManager so that we get consistent display
+        // metrics values when displays are changing and don't send out new values until WM is aware
+        // of them. However, we don't do this for displays that serve as containers for ActivityView
+        // because we don't want letter-/pillar-boxing during resize.
+        final DisplayInfo overrideDisplayInfo = mShouldOverrideDisplayConfiguration
+                ? mDisplayInfo : null;
         mService.mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(mDisplayId,
-                mDisplayInfo);
+                overrideDisplayInfo);
 
         mBaseDisplayRect.set(0, 0, dw, dh);
 

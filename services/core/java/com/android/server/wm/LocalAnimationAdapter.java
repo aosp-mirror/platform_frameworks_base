@@ -16,8 +16,8 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.proto.AnimationAdapterProto.LOCAL;
-import static com.android.server.wm.proto.LocalAnimationAdapterProto.ANIMATION_SPEC;
+import static com.android.server.wm.AnimationAdapterProto.LOCAL;
+import static com.android.server.wm.LocalAnimationAdapterProto.ANIMATION_SPEC;
 
 import android.os.SystemClock;
 import android.util.proto.ProtoOutputStream;

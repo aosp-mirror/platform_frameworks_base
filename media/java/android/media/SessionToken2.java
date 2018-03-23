@@ -28,6 +28,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
+ * @hide
  * Represents an ongoing {@link MediaSession2} or a {@link MediaSessionService2}.
  * If it's representing a session service, it may not be ongoing.
  * <p>
@@ -80,7 +81,7 @@ public final class SessionToken2 {
      */
     public SessionToken2(@NonNull Context context, @NonNull String packageName,
             @NonNull String serviceName, int uid) {
-        mProvider = ApiLoader.getProvider(context).createSessionToken2(
+        mProvider = ApiLoader.getProvider().createSessionToken2(
                 context, this, packageName, serviceName, uid);
     }
 
@@ -150,7 +151,7 @@ public final class SessionToken2 {
      * @return
      */
     public static SessionToken2 fromBundle(@NonNull Context context, @NonNull Bundle bundle) {
-        return ApiLoader.getProvider(context).fromBundle_SessionToken2(context, bundle);
+        return ApiLoader.getProvider().fromBundle_SessionToken2(context, bundle);
     }
 
     /**

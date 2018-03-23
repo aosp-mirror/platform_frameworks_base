@@ -17,6 +17,7 @@
 #ifndef STATS_SERVICE_H
 #define STATS_SERVICE_H
 
+#include <gtest/gtest_prod.h>
 #include "StatsLogProcessor.h"
 #include "anomaly/AlarmMonitor.h"
 #include "config/ConfigManager.h"
@@ -216,6 +217,11 @@ private:
     status_t cmd_clear_puller_cache(FILE* out);
 
     /**
+     * Adds a configuration after checking permissions and obtaining UID from binder call.
+     */
+    bool addConfigurationChecked(int uid, int64_t key, const vector<uint8_t>& config);
+
+    /**
      * Update a configuration.
      */
     void set_config(int uid, const string& name, const StatsdConfig& config);
@@ -254,6 +260,10 @@ private:
      * Whether this is an eng build.
      */
     bool mEngBuild;
+
+    FRIEND_TEST(StatsServiceTest, TestAddConfig_simple);
+    FRIEND_TEST(StatsServiceTest, TestAddConfig_empty);
+    FRIEND_TEST(StatsServiceTest, TestAddConfig_invalid);
 };
 
 }  // namespace statsd

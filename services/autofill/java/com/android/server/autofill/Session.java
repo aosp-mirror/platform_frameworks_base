@@ -596,6 +596,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             if (response == null) {
                 processNullResponseLocked(requestFlags);
+                mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_REQUEST, servicePackageName)
+                        .setType(MetricsEvent.TYPE_SUCCESS)
+                        .addTaggedData(MetricsEvent.FIELD_AUTOFILL_NUM_DATASETS, -1));
                 return;
             }
 
@@ -1438,11 +1441,25 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 final AutofillValue filledValue = viewState.getAutofilledValue();
 
                 if (!value.equals(filledValue)) {
-                    if (sDebug) {
-                        Slog.d(TAG, "found a change on required " + id + ": " + filledValue
-                                + " => " + value);
+                    boolean changed = true;
+                    if (filledValue == null) {
+                        // Dataset was not autofilled, make sure initial value didn't change.
+                        final AutofillValue initialValue = getValueFromContextsLocked(id);
+                        if (initialValue != null && initialValue.equals(value)) {
+                            if (sDebug) {
+                                Slog.d(TAG, "id " + id + " is part of dataset but initial value "
+                                        + "didn't change: " + value);
+                            }
+                            changed = false;
+                        }
                     }
-                    atLeastOneChanged = true;
+                    if (changed) {
+                        if (sDebug) {
+                            Slog.d(TAG, "found a change on required " + id + ": " + filledValue
+                                    + " => " + value);
+                        }
+                        atLeastOneChanged = true;
+                    }
                 }
             }
         }
@@ -2060,8 +2077,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if (saveTriggerId != null) {
                 writeLog(MetricsEvent.AUTOFILL_EXPLICIT_SAVE_TRIGGER_DEFINITION);
             }
-            saveOnAllViewsInvisible =
-                    (saveInfo.getFlags() & SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE) != 0;
+            int flags = saveInfo.getFlags();
+            if (mCompatMode) {
+                flags |= SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE;
+            }
+            saveOnAllViewsInvisible = (flags & SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE) != 0;
 
             // We only need to track views if we want to save once they become invisible.
             if (saveOnAllViewsInvisible) {

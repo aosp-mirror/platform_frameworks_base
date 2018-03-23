@@ -31,6 +31,7 @@ import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.pm.PackageManagerService.DEBUG_DOMAIN_VERIFICATION;
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -58,6 +59,7 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PatternMatcher;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -199,6 +201,8 @@ public final class Settings {
     private static final String TAG_DEFAULT_BROWSER = "default-browser";
     private static final String TAG_DEFAULT_DIALER = "default-dialer";
     private static final String TAG_VERSION = "version";
+    private static final String TAG_SUSPENDED_APP_EXTRAS = "suspended-app-extras";
+    private static final String TAG_SUSPENDED_LAUNCHER_EXTRAS = "suspended-launcher-extras";
 
     public static final String ATTR_NAME = "name";
     public static final String ATTR_PACKAGE = "package";
@@ -217,6 +221,7 @@ public final class Settings {
     // New name for the above attribute.
     private static final String ATTR_HIDDEN = "hidden";
     private static final String ATTR_SUSPENDED = "suspended";
+    private static final String ATTR_SUSPENDING_PACKAGE = "suspending-package";
     // Legacy, uninstall blocks are stored separately.
     @Deprecated
     private static final String ATTR_BLOCK_UNINSTALL = "blockUninstall";
@@ -728,6 +733,9 @@ public final class Settings {
                                 true /*notLaunched*/,
                                 false /*hidden*/,
                                 false /*suspended*/,
+                                null, /*suspendingPackage*/
+                                null, /*suspendedAppExtras*/
+                                null, /*suspendedLauncherExtras*/
                                 instantApp,
                                 virtualPreload,
                                 null /*lastDisableAppCaller*/,
@@ -1619,6 +1627,9 @@ public final class Settings {
                                 false /*notLaunched*/,
                                 false /*hidden*/,
                                 false /*suspended*/,
+                                null, /*suspendingPackage*/
+                                null, /*suspendedAppExtras*/
+                                null, /*suspendedLauncherExtras*/
                                 false /*instantApp*/,
                                 false /*virtualPreload*/,
                                 null /*lastDisableAppCaller*/,
@@ -1691,6 +1702,12 @@ public final class Settings {
 
                     final boolean suspended = XmlUtils.readBooleanAttribute(parser, ATTR_SUSPENDED,
                             false);
+                    String suspendingPackage = parser.getAttributeValue(null,
+                            ATTR_SUSPENDING_PACKAGE);
+                    if (suspended && suspendingPackage == null) {
+                        suspendingPackage = PLATFORM_PACKAGE_NAME;
+                    }
+
                     final boolean blockUninstall = XmlUtils.readBooleanAttribute(parser,
                             ATTR_BLOCK_UNINSTALL, false);
                     final boolean instantApp = XmlUtils.readBooleanAttribute(parser,
@@ -1716,6 +1733,8 @@ public final class Settings {
 
                     ArraySet<String> enabledComponents = null;
                     ArraySet<String> disabledComponents = null;
+                    PersistableBundle suspendedAppExtras = null;
+                    PersistableBundle suspendedLauncherExtras = null;
 
                     int packageDepth = parser.getDepth();
                     while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
@@ -1725,11 +1744,22 @@ public final class Settings {
                                 || type == XmlPullParser.TEXT) {
                             continue;
                         }
-                        tagName = parser.getName();
-                        if (tagName.equals(TAG_ENABLED_COMPONENTS)) {
-                            enabledComponents = readComponentsLPr(parser);
-                        } else if (tagName.equals(TAG_DISABLED_COMPONENTS)) {
-                            disabledComponents = readComponentsLPr(parser);
+                        switch (parser.getName()) {
+                            case TAG_ENABLED_COMPONENTS:
+                                enabledComponents = readComponentsLPr(parser);
+                                break;
+                            case TAG_DISABLED_COMPONENTS:
+                                disabledComponents = readComponentsLPr(parser);
+                                break;
+                            case TAG_SUSPENDED_APP_EXTRAS:
+                                suspendedAppExtras = PersistableBundle.restoreFromXml(parser);
+                                break;
+                            case TAG_SUSPENDED_LAUNCHER_EXTRAS:
+                                suspendedLauncherExtras = PersistableBundle.restoreFromXml(parser);
+                                break;
+                            default:
+                                Slog.wtf(TAG, "Unknown tag " + parser.getName() + " under tag "
+                                        + TAG_PACKAGE);
                         }
                     }
 
@@ -1737,7 +1767,8 @@ public final class Settings {
                         setBlockUninstallLPw(userId, name, true);
                     }
                     ps.setUserState(userId, ceDataInode, enabled, installed, stopped, notLaunched,
-                            hidden, suspended, instantApp, virtualPreload, enabledCaller,
+                            hidden, suspended, suspendingPackage, suspendedAppExtras,
+                            suspendedLauncherExtras, instantApp, virtualPreload, enabledCaller,
                             enabledComponents, disabledComponents, verifState, linkGeneration,
                             installReason, harmfulAppWarning);
                 } else if (tagName.equals("preferred-activities")) {
@@ -2046,6 +2077,27 @@ public final class Settings {
                 }
                 if (ustate.suspended) {
                     serializer.attribute(null, ATTR_SUSPENDED, "true");
+                    serializer.attribute(null, ATTR_SUSPENDING_PACKAGE, ustate.suspendingPackage);
+                    if (ustate.suspendedAppExtras != null) {
+                        serializer.startTag(null, TAG_SUSPENDED_APP_EXTRAS);
+                        try {
+                            ustate.suspendedAppExtras.saveToXml(serializer);
+                        } catch (XmlPullParserException xmle) {
+                            Slog.wtf(TAG, "Exception while trying to write suspendedAppExtras for "
+                                    + pkg + ". Will be lost on reboot", xmle);
+                        }
+                        serializer.endTag(null, TAG_SUSPENDED_APP_EXTRAS);
+                    }
+                    if (ustate.suspendedLauncherExtras != null) {
+                        serializer.startTag(null, TAG_SUSPENDED_LAUNCHER_EXTRAS);
+                        try {
+                            ustate.suspendedLauncherExtras.saveToXml(serializer);
+                        } catch (XmlPullParserException xmle) {
+                            Slog.wtf(TAG, "Exception while trying to write suspendedLauncherExtras"
+                                    + " for " + pkg + ". Will be lost on reboot", xmle);
+                        }
+                        serializer.endTag(null, TAG_SUSPENDED_LAUNCHER_EXTRAS);
+                    }
                 }
                 if (ustate.instantApp) {
                     serializer.attribute(null, ATTR_INSTANT_APP, "true");
@@ -4697,6 +4749,10 @@ public final class Settings {
             pw.print(ps.getHidden(user.id));
             pw.print(" suspended=");
             pw.print(ps.getSuspended(user.id));
+            if (ps.getSuspended(user.id)) {
+                pw.print(" suspendingPackage=");
+                pw.print(ps.readUserState(user.id).suspendingPackage);
+            }
             pw.print(" stopped=");
             pw.print(ps.getStopped(user.id));
             pw.print(" notLaunched=");

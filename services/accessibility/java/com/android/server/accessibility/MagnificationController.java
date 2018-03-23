@@ -55,7 +55,7 @@ import java.util.Locale;
  * magnification region. If a value is out of bounds, it will be adjusted to guarantee these
  * constraints.
  */
-class MagnificationController implements Handler.Callback {
+public class MagnificationController implements Handler.Callback {
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "MagnificationController";
 

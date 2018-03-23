@@ -233,7 +233,8 @@ public class ExpandableViewState extends ViewState {
         expandableView.setDark(this.dark, animationFilter.animateDark, properties.delay);
 
         if (properties.wasAdded(child) && !hidden) {
-            expandableView.performAddAnimation(properties.delay, properties.duration);
+            expandableView.performAddAnimation(properties.delay, properties.duration,
+                    false /* isHeadsUpAppear */);
         }
 
         if (!expandableView.isInShelf() && this.inShelf) {

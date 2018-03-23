@@ -31,6 +31,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Set;
 
 /**
+ * @hide
  * Contains metadata about an item, such as the title, artist, etc.
  */
 // New version of MediaMetadata with following changes
@@ -684,7 +685,7 @@ public final class MediaMetadata2 {
      */
     public static @NonNull MediaMetadata2 fromBundle(@NonNull Context context,
             @Nullable Bundle bundle) {
-        return ApiLoader.getProvider(context).fromBundle_MediaMetadata2(context, bundle);
+        return ApiLoader.getProvider().fromBundle_MediaMetadata2(context, bundle);
     }
 
     /**
@@ -699,8 +700,7 @@ public final class MediaMetadata2 {
          * {@link MediaMetadata2} must be added.
          */
         public Builder(@NonNull Context context) {
-            mProvider = ApiLoader.getProvider(context).createMediaMetadata2Builder(
-                    context, this);
+            mProvider = ApiLoader.getProvider().createMediaMetadata2Builder(context, this);
         }
 
         /**
@@ -711,8 +711,7 @@ public final class MediaMetadata2 {
          * @param source
          */
         public Builder(@NonNull Context context, @NonNull MediaMetadata2 source) {
-            mProvider = ApiLoader.getProvider(context).createMediaMetadata2Builder(
-                    context, this, source);
+            mProvider = ApiLoader.getProvider().createMediaMetadata2Builder(context, this, source);
         }
 
         /**

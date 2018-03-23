@@ -24,6 +24,7 @@ import android.security.Credentials;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
 import android.security.KeyStore;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.locksettings.recoverablekeystore.KeyStoreProxy;
@@ -31,6 +32,8 @@ import com.android.server.locksettings.recoverablekeystore.KeyStoreProxyImpl;
 
 import java.security.KeyStore.SecretKeyEntry;
 import java.security.KeyStoreException;
+import java.util.Locale;
+
 import javax.crypto.spec.SecretKeySpec;
 
 /**
@@ -40,11 +43,13 @@ import javax.crypto.spec.SecretKeySpec;
  * revealing key material
  */
 public class ApplicationKeyStorage {
+    private static final String TAG = "RecoverableAppKeyStore";
+
     private static final String APPLICATION_KEY_ALIAS_PREFIX =
             "com.android.server.locksettings.recoverablekeystore/application/";
 
-    KeyStoreProxy mKeyStore;
-    KeyStore mKeystoreService;
+    private final KeyStoreProxy mKeyStore;
+    private final KeyStore mKeystoreService;
 
     public static ApplicationKeyStorage getInstance(KeyStore keystoreService)
             throws KeyStoreException {
@@ -65,12 +70,15 @@ public class ApplicationKeyStorage {
     public @Nullable String getGrantAlias(int userId, int uid, String alias) {
         // Aliases used by {@link KeyStore} are different than used by public API.
         // {@code USER_PRIVATE_KEY} prefix is used secret keys.
+        Log.i(TAG, String.format(Locale.US, "Get %d/%d/%s", userId, uid, alias));
         String keystoreAlias = Credentials.USER_PRIVATE_KEY + getInternalAlias(userId, uid, alias);
         return mKeystoreService.grant(keystoreAlias, uid);
     }
 
     public void setSymmetricKeyEntry(int userId, int uid, String alias, byte[] secretKey)
             throws KeyStoreException {
+        Log.i(TAG, String.format(Locale.US, "Set %d/%d/%s: %d bytes of key material",
+                userId, uid, alias, secretKey.length));
         try {
             mKeyStore.setEntry(
                 getInternalAlias(userId, uid, alias),
@@ -87,6 +95,7 @@ public class ApplicationKeyStorage {
     }
 
     public void deleteEntry(int userId, int uid, String alias) {
+        Log.i(TAG, String.format(Locale.US, "Del %d/%d/%s", userId, uid, alias));
         try {
             mKeyStore.deleteEntry(getInternalAlias(userId, uid, alias));
         } catch (KeyStoreException e) {

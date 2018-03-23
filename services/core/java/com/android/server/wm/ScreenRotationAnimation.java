@@ -23,12 +23,13 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowStateAnimator.WINDOW_FREEZE_LAYER;
-import static com.android.server.wm.proto.ScreenRotationAnimationProto.ANIMATION_RUNNING;
-import static com.android.server.wm.proto.ScreenRotationAnimationProto.STARTED;
+import static com.android.server.wm.ScreenRotationAnimationProto.ANIMATION_RUNNING;
+import static com.android.server.wm.ScreenRotationAnimationProto.STARTED;
 
 import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.os.IBinder;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -268,15 +269,23 @@ class ScreenRotationAnimation {
                     .build();
 
             // capture a screenshot into the surface we just created
-            Surface sur = new Surface();
-            sur.copyFrom(mSurfaceControl);
             // TODO(multidisplay): we should use the proper display
-            SurfaceControl.screenshot(SurfaceControl.getBuiltInDisplay(
-                            SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN), sur);
-            t.setLayer(mSurfaceControl, SCREEN_FREEZE_LAYER_SCREENSHOT);
-            t.setAlpha(mSurfaceControl, 0);
-            t.show(mSurfaceControl);
-            sur.destroy();
+            final int displayId = SurfaceControl.BUILT_IN_DISPLAY_ID_MAIN;
+            final IBinder displayHandle = SurfaceControl.getBuiltInDisplay(displayId);
+            // This null check below is to guard a race condition where WMS didn't have a chance to
+            // respond to display disconnection before handling rotation , that surfaceflinger may
+            // return a null handle here because it doesn't think that display is valid anymore.
+            if (displayHandle != null) {
+                Surface sur = new Surface();
+                sur.copyFrom(mSurfaceControl);
+                SurfaceControl.screenshot(displayHandle, sur);
+                t.setLayer(mSurfaceControl, SCREEN_FREEZE_LAYER_SCREENSHOT);
+                t.setAlpha(mSurfaceControl, 0);
+                t.show(mSurfaceControl);
+                sur.destroy();
+            } else {
+                Slog.w(TAG, "Built-in display " + displayId + " is null.");
+            }
         } catch (OutOfResourcesException e) {
             Slog.w(TAG, "Unable to allocate freeze surface", e);
         }

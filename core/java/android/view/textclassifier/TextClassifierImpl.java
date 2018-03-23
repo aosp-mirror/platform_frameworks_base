@@ -209,12 +209,14 @@ public final class TextClassifierImpl implements TextClassifier {
     public TextLinks generateLinks(
             @NonNull CharSequence text, @Nullable TextLinks.Options options) {
         Utils.validate(text, getMaxGenerateLinksTextLength(), false /* allowInMainThread */);
+
+        final boolean legacyFallback = options != null && options.isLegacyFallback();
+        if (!mSettings.isSmartLinkifyEnabled() && legacyFallback) {
+            return Utils.generateLegacyLinks(text, options);
+        }
+
         final String textString = text.toString();
         final TextLinks.Builder builder = new TextLinks.Builder(textString);
-
-        if (!mSettings.isSmartLinkifyEnabled()) {
-            return builder.build();
-        }
 
         try {
             final long startTimeMs = System.currentTimeMillis();
@@ -355,12 +357,10 @@ public final class TextClassifierImpl implements TextClassifier {
         final List<Locale.LanguageRange> languageRangeList = Locale.LanguageRange.parse(languages);
 
         ModelFile bestModel = null;
-        int bestModelVersion = -1;
         for (ModelFile model : listAllModelsLocked()) {
             if (model.isAnyLanguageSupported(languageRangeList)) {
-                if (model.getVersion() >= bestModelVersion) {
+                if (model.isPreferredTo(bestModel)) {
                     bestModel = model;
-                    bestModelVersion = model.getVersion();
                 }
             }
         }
@@ -482,6 +482,7 @@ public final class TextClassifierImpl implements TextClassifier {
         private final String mName;
         private final int mVersion;
         private final List<Locale> mSupportedLocales;
+        private final boolean mLanguageIndependent;
 
         /** Returns null if the path did not point to a compatible model. */
         static @Nullable ModelFile fromPath(String path) {
@@ -496,12 +497,14 @@ public final class TextClassifierImpl implements TextClassifier {
                     Log.d(DEFAULT_LOG_TAG, "Ignoring " + file.getAbsolutePath());
                     return null;
                 }
+                final boolean languageIndependent = supportedLocalesStr.equals("*");
                 final List<Locale> supportedLocales = new ArrayList<>();
                 for (String langTag : supportedLocalesStr.split(",")) {
                     supportedLocales.add(Locale.forLanguageTag(langTag));
                 }
                 closeAndLogError(modelFd);
-                return new ModelFile(path, file.getName(), version, supportedLocales);
+                return new ModelFile(path, file.getName(), version, supportedLocales,
+                                     languageIndependent);
             } catch (FileNotFoundException e) {
                 Log.e(DEFAULT_LOG_TAG, "Failed to peek " + file.getAbsolutePath(), e);
                 return null;
@@ -525,12 +528,31 @@ public final class TextClassifierImpl implements TextClassifier {
 
         /** Returns whether the language supports any language in the given ranges. */
         boolean isAnyLanguageSupported(List<Locale.LanguageRange> languageRanges) {
-            return Locale.lookup(languageRanges, mSupportedLocales) != null;
+            return mLanguageIndependent || Locale.lookup(languageRanges, mSupportedLocales) != null;
         }
 
         /** All locales supported by the model. */
         List<Locale> getSupportedLocales() {
             return Collections.unmodifiableList(mSupportedLocales);
+        }
+
+        public boolean isPreferredTo(ModelFile model) {
+            // A model is preferred to no model.
+            if (model == null) {
+                return true;
+            }
+
+            // A language-specific model is preferred to a language independent
+            // model.
+            if (!mLanguageIndependent && model.mLanguageIndependent) {
+                return true;
+            }
+
+            // A higher-version model is preferred.
+            if (getVersion() > model.getVersion()) {
+                return true;
+            }
+            return false;
         }
 
         @Override
@@ -555,11 +577,13 @@ public final class TextClassifierImpl implements TextClassifier {
                     mPath, mName, mVersion, localesJoiner.toString());
         }
 
-        private ModelFile(String path, String name, int version, List<Locale> supportedLocales) {
+        private ModelFile(String path, String name, int version, List<Locale> supportedLocales,
+                          boolean languageIndependent) {
             mPath = path;
             mName = name;
             mVersion = version;
             mSupportedLocales = supportedLocales;
+            mLanguageIndependent = languageIndependent;
         }
     }
 

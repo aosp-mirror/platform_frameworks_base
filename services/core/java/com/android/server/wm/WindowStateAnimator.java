@@ -41,10 +41,10 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowManagerService.logWithStack;
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
-import static com.android.server.wm.proto.WindowStateAnimatorProto.DRAW_STATE;
-import static com.android.server.wm.proto.WindowStateAnimatorProto.LAST_CLIP_RECT;
-import static com.android.server.wm.proto.WindowStateAnimatorProto.SURFACE;
-import static com.android.server.wm.proto.WindowStateAnimatorProto.SYSTEM_DECOR_RECT;
+import static com.android.server.wm.WindowStateAnimatorProto.DRAW_STATE;
+import static com.android.server.wm.WindowStateAnimatorProto.LAST_CLIP_RECT;
+import static com.android.server.wm.WindowStateAnimatorProto.SURFACE;
+import static com.android.server.wm.WindowStateAnimatorProto.SYSTEM_DECOR_RECT;
 
 import android.content.Context;
 import android.graphics.Matrix;
@@ -224,6 +224,11 @@ class WindowStateAnimator {
     // Used to track whether we have called detach children on the way to invisibility, in which
     // case we need to give the client a new Surface if it lays back out to a visible state.
     boolean mChildrenDetached = false;
+
+    // Set to true after the first frame of the Pinned stack animation
+    // and reset after the last to ensure we only reset mForceScaleUntilResize
+    // once per animation.
+    boolean mPipAnimationStarted = false;
 
     WindowStateAnimator(final WindowState win) {
         final WindowManagerService service = win.mService;
@@ -512,7 +517,7 @@ class WindowStateAnimator {
             mDrawState = NO_SURFACE;
             return null;
         } catch (Exception e) {
-            Slog.e(TAG, "Exception creating surface", e);
+            Slog.e(TAG, "Exception creating surface (parent dead?)", e);
             mDrawState = NO_SURFACE;
             return null;
         }
@@ -983,8 +988,13 @@ class WindowStateAnimator {
             // As we are in SCALING_MODE_SCALE_TO_WINDOW, SurfaceFlinger will
             // then take over the scaling until the new buffer arrives, and things
             // will be seamless.
-            mForceScaleUntilResize = true;
+            if (mPipAnimationStarted == false) {
+                mForceScaleUntilResize = true;
+                mPipAnimationStarted = true;
+            }
         } else {
+            mPipAnimationStarted = false;
+
             if (!w.mSeamlesslyRotated) {
                 mSurfaceController.setPositionInTransaction(mXOffset, mYOffset, recoveringMemory);
             }

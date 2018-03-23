@@ -16,8 +16,8 @@
 
 package com.android.server.policy;
 
-import static com.android.server.wm.proto.BarControllerProto.STATE;
-import static com.android.server.wm.proto.BarControllerProto.TRANSIENT_STATE;
+import static com.android.server.wm.BarControllerProto.STATE;
+import static com.android.server.wm.BarControllerProto.TRANSIENT_STATE;
 
 import android.app.StatusBarManager;
 import android.graphics.Rect;

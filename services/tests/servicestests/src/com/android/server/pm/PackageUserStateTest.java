@@ -23,8 +23,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import android.content.pm.PackageUserState;
+import android.os.PersistableBundle;
+import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
 
 import org.junit.Test;
@@ -170,4 +171,44 @@ public class PackageUserStateTest {
         testUserState03.enabledComponents.add("com.android.unit_test_04");
         assertThat(testUserState03.equals(oldUserState), is(false));
     }
+
+    @Test
+    public void testPackageUserState05() {
+        PersistableBundle appExtras1 = new PersistableBundle();
+        PersistableBundle appExtras2 = new PersistableBundle();
+        appExtras1.putInt("appExtraId", 1);
+        appExtras2.putInt("appExtraId", 2);
+        PersistableBundle launcherExtras1 = new PersistableBundle();
+        PersistableBundle launcherExtras2 = new PersistableBundle();
+        launcherExtras1.putString("name", "launcherExtras1");
+        launcherExtras2.putString("name", "launcherExtras2");
+        final String suspendingPackage1 = "package1";
+        final String suspendingPackage2 = "package2";
+
+        final PackageUserState testUserState1 = new PackageUserState();
+        testUserState1.suspended = true;
+        testUserState1.suspendedAppExtras = appExtras1;
+        testUserState1.suspendedLauncherExtras = launcherExtras1;
+        testUserState1.suspendingPackage = suspendingPackage1;
+
+        final PackageUserState testUserState2 = new PackageUserState(testUserState1);
+        assertThat(testUserState1.equals(testUserState2), is(true));
+        testUserState2.suspendingPackage = suspendingPackage2;
+        assertThat(testUserState1.equals(testUserState2), is(false));
+
+        testUserState2.suspendingPackage = testUserState1.suspendingPackage;
+        testUserState2.suspendedAppExtras = appExtras2;
+        assertThat(testUserState1.equals(testUserState2), is(false));
+
+        testUserState2.suspendedAppExtras = testUserState1.suspendedAppExtras;
+        testUserState2.suspendedLauncherExtras = launcherExtras2;
+        assertThat(testUserState1.equals(testUserState2), is(false));
+
+        // Everything is different but irrelevant if suspended is false
+        testUserState2.suspended = testUserState1.suspended = false;
+        testUserState2.suspendedAppExtras = appExtras2;
+        testUserState2.suspendingPackage = suspendingPackage2;
+        assertThat(testUserState1.equals(testUserState2), is(true));
+    }
+
 }

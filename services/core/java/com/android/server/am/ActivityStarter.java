@@ -1834,7 +1834,8 @@ class ActivityStarter {
                                     mNoAnimation, mOptions, mStartActivity.appTimeTracker,
                                     "bringToFrontInsteadOfAdjacentLaunch");
                         }
-                        mMovedToFront = true;
+                        mMovedToFront = launchStack != launchStack.getDisplay()
+                                .getTopStackInWindowingMode(launchStack.getWindowingMode());
                     } else if (launchStack.mDisplayId != mTargetStack.mDisplayId) {
                         // Target and computed stacks are on different displays and we've
                         // found a matching task - move the existing instance to that display and
@@ -2391,6 +2392,11 @@ class ActivityStarter {
     ActivityStarter setIntent(Intent intent) {
         mRequest.intent = intent;
         return this;
+    }
+
+    @VisibleForTesting
+    Intent getIntent() {
+        return mRequest.intent;
     }
 
     ActivityStarter setReason(String reason) {

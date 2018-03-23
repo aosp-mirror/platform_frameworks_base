@@ -97,15 +97,15 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_VERBOSE_TRANSA
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.proto.WindowManagerServiceDumpProto.APP_TRANSITION;
-import static com.android.server.wm.proto.WindowManagerServiceDumpProto.DISPLAY_FROZEN;
-import static com.android.server.wm.proto.WindowManagerServiceDumpProto.FOCUSED_APP;
-import static com.android.server.wm.proto.WindowManagerServiceDumpProto.FOCUSED_WINDOW;
-import static com.android.server.wm.proto.WindowManagerServiceDumpProto.INPUT_METHOD_WINDOW;
-import static com.android.server.wm.proto.WindowManagerServiceDumpProto.LAST_ORIENTATION;
-import static com.android.server.wm.proto.WindowManagerServiceDumpProto.POLICY;
-import static com.android.server.wm.proto.WindowManagerServiceDumpProto.ROOT_WINDOW_CONTAINER;
-import static com.android.server.wm.proto.WindowManagerServiceDumpProto.ROTATION;
+import static com.android.server.wm.WindowManagerServiceDumpProto.APP_TRANSITION;
+import static com.android.server.wm.WindowManagerServiceDumpProto.DISPLAY_FROZEN;
+import static com.android.server.wm.WindowManagerServiceDumpProto.FOCUSED_APP;
+import static com.android.server.wm.WindowManagerServiceDumpProto.FOCUSED_WINDOW;
+import static com.android.server.wm.WindowManagerServiceDumpProto.INPUT_METHOD_WINDOW;
+import static com.android.server.wm.WindowManagerServiceDumpProto.LAST_ORIENTATION;
+import static com.android.server.wm.WindowManagerServiceDumpProto.POLICY;
+import static com.android.server.wm.WindowManagerServiceDumpProto.ROOT_WINDOW_CONTAINER;
+import static com.android.server.wm.WindowManagerServiceDumpProto.ROTATION;
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -1117,17 +1117,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 throw new IllegalStateException("Display has not been initialialized");
             }
 
-            DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-
-            // Adding a window is an exception where the WindowManagerService can create the
-            // display instead of waiting for the ActivityManagerService to drive creation.
-            if (displayContent == null) {
-                final Display display = mDisplayManager.getDisplay(displayId);
-
-                if (display != null) {
-                    displayContent = mRoot.createDisplayContent(display, null /* controller */);
-                }
-            }
+            final DisplayContent displayContent = getDisplayContentOrCreate(displayId);
 
             if (displayContent == null) {
                 Slog.w(TAG_WM, "Attempted to add window to a display that does not exist: "
@@ -1491,6 +1481,32 @@ public class WindowManagerService extends IWindowManager.Stub
         Binder.restoreCallingIdentity(origId);
 
         return res;
+    }
+
+    /**
+     * Get existing {@link DisplayContent} or create a new one if the display is registered in
+     * DisplayManager.
+     *
+     * NOTE: This should only be used in cases when there is a chance that a {@link DisplayContent}
+     * that corresponds to a display just added to DisplayManager has not yet been created. This
+     * usually means that the call of this method was initiated from outside of Activity or Window
+     * Manager. In most cases the regular getter should be used.
+     * @see RootWindowContainer#getDisplayContent(int)
+     */
+    private DisplayContent getDisplayContentOrCreate(int displayId) {
+        DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+
+        // Create an instance if possible instead of waiting for the ActivityManagerService to drive
+        // the creation.
+        if (displayContent == null) {
+            final Display display = mDisplayManager.getDisplay(displayId);
+
+            if (display != null) {
+                displayContent = mRoot.createDisplayContent(display, null /* controller */);
+            }
+        }
+
+        return displayContent;
     }
 
     private boolean doesAddToastWindowRequireToken(String packageName, int callingUid,
@@ -6163,7 +6179,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Write to a protocol buffer output stream. Protocol buffer message definition is at
-     * {@link com.android.server.wm.proto.WindowManagerServiceDumpProto}.
+     * {@link com.android.server.wm.WindowManagerServiceDumpProto}.
      *
      * @param proto     Stream to write the WindowContainer object to.
      * @param trim      If true, reduce the amount of data written.
@@ -6983,6 +6999,24 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             callingWin.updateTapExcludeRegion(regionId, left, top, width, height);
+        }
+    }
+
+    @Override
+    public void dontOverrideDisplayInfo(int displayId) {
+        synchronized (mWindowMap) {
+            final DisplayContent dc = getDisplayContentOrCreate(displayId);
+            if (dc == null) {
+                throw new IllegalArgumentException(
+                        "Trying to register a non existent display.");
+            }
+            // We usually set the override info in DisplayManager so that we get consistent
+            // values when displays are changing. However, we don't do this for displays that
+            // serve as containers for ActivityViews because we don't want letter-/pillar-boxing
+            // during resize.
+            dc.mShouldOverrideDisplayConfiguration = false;
+            mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(displayId,
+                    null /* info */);
         }
     }
 

@@ -3964,7 +3964,8 @@ message MetricsEvent {
     // Type TYPE_FAILURE: The request failed
     // Package: Package of app that is autofilled
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
-    // Tag FIELD_AUTOFILL_NUM_DATASETS: The number of datasets returned (only in success case)
+    // Tag FIELD_AUTOFILL_NUM_DATASETS: The number of datasets returned in the response, or -1 if
+    // the service returned a null response.
     // NOTE: starting on OS P, it also added:
     // Type TYPE_CLOSE: Service returned a null response.
     // Tag FIELD_AUTOFILL_NUM_FIELD_CLASSIFICATION_IDS: if service requested field classification,
@@ -5540,6 +5541,11 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: P
     FIELD_ANOMALY_TYPE = 1366;
+
+    // ACTION: Settings > Anomaly receiver > Anomaly received
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ANOMALY_TRIGGERED = 1367;
 
     // ---- End P Constants, all P constants go above this line ----
 

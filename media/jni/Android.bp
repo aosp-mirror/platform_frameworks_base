@@ -25,7 +25,6 @@ cc_library_shared {
         "android_mtp_MtpDatabase.cpp",
         "android_mtp_MtpDevice.cpp",
         "android_mtp_MtpServer.cpp",
-        "midi/android_media_midi_MidiDevice.cpp",
     ],
 
     shared_libs: [
@@ -39,7 +38,6 @@ cc_library_shared {
         "libmedia_omx",
         "libmediametrics",
         "libmediadrm",
-        "libmidi",
         "libhwui",
         "libui",
         "liblog",

@@ -112,16 +112,16 @@ import static com.android.server.am.EventLogTags.AM_RELAUNCH_RESUME_ACTIVITY;
 import static com.android.server.am.TaskPersister.DEBUG;
 import static com.android.server.am.TaskPersister.IMAGE_EXTENSION;
 import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
-import static com.android.server.am.proto.ActivityRecordProto.CONFIGURATION_CONTAINER;
-import static com.android.server.am.proto.ActivityRecordProto.FRONT_OF_TASK;
-import static com.android.server.am.proto.ActivityRecordProto.IDENTIFIER;
-import static com.android.server.am.proto.ActivityRecordProto.PROC_ID;
-import static com.android.server.am.proto.ActivityRecordProto.STATE;
-import static com.android.server.am.proto.ActivityRecordProto.VISIBLE;
+import static com.android.server.am.ActivityRecordProto.CONFIGURATION_CONTAINER;
+import static com.android.server.am.ActivityRecordProto.FRONT_OF_TASK;
+import static com.android.server.am.ActivityRecordProto.IDENTIFIER;
+import static com.android.server.am.ActivityRecordProto.PROC_ID;
+import static com.android.server.am.ActivityRecordProto.STATE;
+import static com.android.server.am.ActivityRecordProto.VISIBLE;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_LEFT;
-import static com.android.server.wm.proto.IdentifierProto.HASH_CODE;
-import static com.android.server.wm.proto.IdentifierProto.TITLE;
-import static com.android.server.wm.proto.IdentifierProto.USER_ID;
+import static com.android.server.wm.IdentifierProto.HASH_CODE;
+import static com.android.server.wm.IdentifierProto.TITLE;
+import static com.android.server.wm.IdentifierProto.USER_ID;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
@@ -2738,11 +2738,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         } else {
             service.mHandler.removeMessages(PAUSE_TIMEOUT_MSG, this);
             setState(PAUSED, "relaunchActivityLocked");
-            // if the app is relaunched when it's stopped, and we're not resuming,
-            // put it back into stopped state.
-            if (stopped) {
-                getStack().addToStopping(this, true /* scheduleIdle */, false /* idleDelayed */);
-            }
         }
 
         configChangeFlags = 0;

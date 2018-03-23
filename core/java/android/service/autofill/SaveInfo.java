@@ -16,6 +16,7 @@
 
 package android.service.autofill;
 
+import static android.service.autofill.AutofillServiceHelper.assertValid;
 import static android.view.autofill.Helper.sDebug;
 
 import android.annotation.IntDef;
@@ -405,17 +406,6 @@ public final class SaveInfo implements Parcelable {
             mRequiredIds = null;
         }
 
-        private AutofillId[] assertValid(AutofillId[] ids) {
-            Preconditions.checkArgument(ids != null && ids.length > 0,
-                    "must have at least one id: " + Arrays.toString(ids));
-            for (int i = 0; i < ids.length; i++) {
-                final AutofillId id = ids[i];
-                Preconditions.checkArgument(id != null,
-                        "cannot have null id: " + Arrays.toString(ids));
-            }
-            return ids;
-        }
-
         /**
          * Sets flags changing the save behavior.
          *
@@ -699,22 +689,37 @@ public final class SaveInfo implements Parcelable {
     public String toString() {
         if (!sDebug) return super.toString();
 
-        return new StringBuilder("SaveInfo: [type=")
+        final StringBuilder builder = new StringBuilder("SaveInfo: [type=")
                 .append(DebugUtils.flagsToString(SaveInfo.class, "SAVE_DATA_TYPE_", mType))
                 .append(", requiredIds=").append(Arrays.toString(mRequiredIds))
-                .append(", optionalIds=").append(Arrays.toString(mOptionalIds))
-                .append(", description=").append(mDescription)
-                .append(DebugUtils.flagsToString(SaveInfo.class, "NEGATIVE_BUTTON_STYLE_",
-                        mNegativeButtonStyle))
-                .append(", flags=").append(mFlags)
-                .append(", customDescription=").append(mCustomDescription)
-                .append(", validator=").append(mValidator)
-                .append(", sanitizerKeys=")
-                    .append(mSanitizerKeys == null ? "N/A:" : mSanitizerKeys.length)
-                .append(", sanitizerValues=")
-                    .append(mSanitizerValues == null ? "N/A:" : mSanitizerValues.length)
-                .append(", triggerId=").append(mTriggerId)
-                .append("]").toString();
+                .append(", style=").append(DebugUtils.flagsToString(SaveInfo.class,
+                        "NEGATIVE_BUTTON_STYLE_", mNegativeButtonStyle));
+        if (mOptionalIds != null) {
+            builder.append(", optionalIds=").append(Arrays.toString(mOptionalIds));
+        }
+        if (mDescription != null) {
+            builder.append(", description=").append(mDescription);
+        }
+        if (mFlags != 0) {
+            builder.append(", flags=").append(mFlags);
+        }
+        if (mCustomDescription != null) {
+            builder.append(", customDescription=").append(mCustomDescription);
+        }
+        if (mValidator != null) {
+            builder.append(", validator=").append(mValidator);
+        }
+        if (mSanitizerKeys != null) {
+            builder.append(", sanitizerKeys=").append(mSanitizerKeys.length);
+        }
+        if (mSanitizerValues != null) {
+            builder.append(", sanitizerValues=").append(mSanitizerValues.length);
+        }
+        if (mTriggerId != null) {
+            builder.append(", triggerId=").append(mTriggerId);
+        }
+
+        return builder.append("]").toString();
     }
 
     /////////////////////////////////////

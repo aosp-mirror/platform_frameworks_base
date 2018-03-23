@@ -16,6 +16,7 @@
 
 package android.service.autofill;
 
+import static android.service.autofill.AutofillServiceHelper.assertValid;
 import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;
 import static android.view.autofill.Helper.sDebug;
 
@@ -245,10 +246,15 @@ public final class FillResponse implements Parcelable {
          * @param ids id of Views that when focused will display the authentication UI.
          *
          * @return This builder.
-
-         * @throws IllegalArgumentException if {@code ids} is {@code null} or empty, or if
-         * both {@code authentication} and {@code presentation} are {@code null}, or if
-         * both {@code authentication} and {@code presentation} are non-{@code null}
+         *
+         * @throws IllegalArgumentException if any of the following occurs:
+         * <ul>
+         *   <li>{@code ids} is {@code null}</li>
+         *   <li>{@code ids} is empty</li>
+         *   <li>{@code ids} contains a {@code null} element</li>
+         *   <li>both {@code authentication} and {@code presentation} are {@code null}</li>
+         *   <li>both {@code authentication} and {@code presentation} are non-{@code null}</li>
+         * </ul>
          *
          * @throws IllegalStateException if a {@link #setHeader(RemoteViews) header} or a
          * {@link #setFooter(RemoteViews) footer} are already set for this builder.
@@ -263,16 +269,13 @@ public final class FillResponse implements Parcelable {
                 throw new IllegalStateException("Already called #setHeader() or #setFooter()");
             }
 
-            if (ids == null || ids.length == 0) {
-                throw new IllegalArgumentException("ids cannot be null or empry");
-            }
             if (authentication == null ^ presentation == null) {
                 throw new IllegalArgumentException("authentication and presentation"
                         + " must be both non-null or null");
             }
             mAuthentication = authentication;
             mPresentation = presentation;
-            mAuthenticationIds = ids;
+            mAuthenticationIds = assertValid(ids);
             return this;
         }
 
@@ -554,23 +557,40 @@ public final class FillResponse implements Parcelable {
         if (!sDebug) return super.toString();
 
         // TODO: create a dump() method instead
-        return new StringBuilder(
-                "FillResponse : [mRequestId=" + mRequestId)
-                .append(", datasets=").append(mDatasets == null ? "N/A" : mDatasets.getList())
-                .append(", saveInfo=").append(mSaveInfo)
-                .append(", clientState=").append(mClientState != null)
-                .append(", hasPresentation=").append(mPresentation != null)
-                .append(", hasHeader=").append(mHeader != null)
-                .append(", hasFooter=").append(mFooter != null)
-                .append(", hasAuthentication=").append(mAuthentication != null)
-                .append(", authenticationIds=").append(Arrays.toString(mAuthenticationIds))
-                .append(", ignoredIds=").append(Arrays.toString(mIgnoredIds))
-                .append(", disableDuration=").append(mDisableDuration)
-                .append(", flags=").append(mFlags)
-                .append(", fieldClassificationIds=")
-                    .append(Arrays.toString(mFieldClassificationIds))
-                .append("]")
-                .toString();
+        final StringBuilder builder = new StringBuilder(
+                "FillResponse : [mRequestId=" + mRequestId);
+        if (mDatasets != null) {
+            builder.append(", datasets=").append(mDatasets.getList());
+        }
+        if (mSaveInfo != null) {
+            builder.append(", saveInfo=").append(mSaveInfo);
+        }
+        if (mClientState != null) {
+            builder.append(", hasClientState");
+        }
+        if (mPresentation != null) {
+            builder.append(", hasPresentation");
+        }
+        if (mHeader != null) {
+            builder.append(", hasHeader");
+        }
+        if (mFooter != null) {
+            builder.append(", hasFooter");
+        }
+        if (mAuthentication != null) {
+            builder.append(", hasAuthentication");
+        }
+        if (mAuthenticationIds != null) {
+            builder.append(", authenticationIds=").append(Arrays.toString(mAuthenticationIds));
+        }
+        builder.append(", disableDuration=").append(mDisableDuration);
+        if (mFlags != 0) {
+            builder.append(", flags=").append(mFlags);
+        }
+        if (mFieldClassificationIds != null) {
+            builder.append(Arrays.toString(mFieldClassificationIds));
+        }
+        return builder.append("]").toString();
     }
 
     /////////////////////////////////////

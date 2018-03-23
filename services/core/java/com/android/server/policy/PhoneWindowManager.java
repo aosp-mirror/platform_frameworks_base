@@ -39,6 +39,7 @@ import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.O;
+import static android.provider.Settings.Secure.VOLUME_HUSH_OFF;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.STATE_OFF;
 import static android.view.WindowManager.DOCKED_LEFT;
@@ -128,26 +129,26 @@ import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.C
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
-import static com.android.server.wm.proto.WindowManagerPolicyProto.FOCUSED_APP_TOKEN;
-import static com.android.server.wm.proto.WindowManagerPolicyProto.FOCUSED_WINDOW;
-import static com.android.server.wm.proto.WindowManagerPolicyProto.FORCE_STATUS_BAR;
-import static com.android.server.wm.proto.WindowManagerPolicyProto.FORCE_STATUS_BAR_FROM_KEYGUARD;
-import static com.android.server.wm.proto.WindowManagerPolicyProto.KEYGUARD_DELEGATE;
-import static com.android.server.wm.proto.WindowManagerPolicyProto.KEYGUARD_DRAW_COMPLETE;
-import static com.android.server.wm.proto.WindowManagerPolicyProto.KEYGUARD_OCCLUDED;
-import static com.android.server.wm.proto.WindowManagerPolicyProto.KEYGUARD_OCCLUDED_CHANGED;
-import static com.android.server.wm.proto.WindowManagerPolicyProto.KEYGUARD_OCCLUDED_PENDING;
-import static com.android.server.wm.proto.WindowManagerPolicyProto.LAST_SYSTEM_UI_FLAGS;
-import static com.android.server.wm.proto.WindowManagerPolicyProto.NAVIGATION_BAR;
-import static com.android.server.wm.proto.WindowManagerPolicyProto.ORIENTATION;
-import static com.android.server.wm.proto.WindowManagerPolicyProto.ORIENTATION_LISTENER;
-import static com.android.server.wm.proto.WindowManagerPolicyProto.ROTATION;
-import static com.android.server.wm.proto.WindowManagerPolicyProto.ROTATION_MODE;
-import static com.android.server.wm.proto.WindowManagerPolicyProto.SCREEN_ON_FULLY;
-import static com.android.server.wm.proto.WindowManagerPolicyProto.STATUS_BAR;
-import static com.android.server.wm.proto.WindowManagerPolicyProto.TOP_FULLSCREEN_OPAQUE_OR_DIMMING_WINDOW;
-import static com.android.server.wm.proto.WindowManagerPolicyProto.TOP_FULLSCREEN_OPAQUE_WINDOW;
-import static com.android.server.wm.proto.WindowManagerPolicyProto.WINDOW_MANAGER_DRAW_COMPLETE;
+import static com.android.server.wm.WindowManagerPolicyProto.FOCUSED_APP_TOKEN;
+import static com.android.server.wm.WindowManagerPolicyProto.FOCUSED_WINDOW;
+import static com.android.server.wm.WindowManagerPolicyProto.FORCE_STATUS_BAR;
+import static com.android.server.wm.WindowManagerPolicyProto.FORCE_STATUS_BAR_FROM_KEYGUARD;
+import static com.android.server.wm.WindowManagerPolicyProto.KEYGUARD_DELEGATE;
+import static com.android.server.wm.WindowManagerPolicyProto.KEYGUARD_DRAW_COMPLETE;
+import static com.android.server.wm.WindowManagerPolicyProto.KEYGUARD_OCCLUDED;
+import static com.android.server.wm.WindowManagerPolicyProto.KEYGUARD_OCCLUDED_CHANGED;
+import static com.android.server.wm.WindowManagerPolicyProto.KEYGUARD_OCCLUDED_PENDING;
+import static com.android.server.wm.WindowManagerPolicyProto.LAST_SYSTEM_UI_FLAGS;
+import static com.android.server.wm.WindowManagerPolicyProto.NAVIGATION_BAR;
+import static com.android.server.wm.WindowManagerPolicyProto.ORIENTATION;
+import static com.android.server.wm.WindowManagerPolicyProto.ORIENTATION_LISTENER;
+import static com.android.server.wm.WindowManagerPolicyProto.ROTATION;
+import static com.android.server.wm.WindowManagerPolicyProto.ROTATION_MODE;
+import static com.android.server.wm.WindowManagerPolicyProto.SCREEN_ON_FULLY;
+import static com.android.server.wm.WindowManagerPolicyProto.STATUS_BAR;
+import static com.android.server.wm.WindowManagerPolicyProto.TOP_FULLSCREEN_OPAQUE_OR_DIMMING_WINDOW;
+import static com.android.server.wm.WindowManagerPolicyProto.TOP_FULLSCREEN_OPAQUE_WINDOW;
+import static com.android.server.wm.WindowManagerPolicyProto.WINDOW_MANAGER_DRAW_COMPLETE;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -187,6 +188,7 @@ import android.hardware.input.InputManagerInternal;
 import android.hardware.power.V1_0.PowerHint;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.media.AudioManagerInternal;
 import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.session.MediaSessionLegacyHelper;
@@ -455,6 +457,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     PowerManagerInternal mPowerManagerInternal;
     IStatusBarService mStatusBarService;
     StatusBarManagerInternal mStatusBarManagerInternal;
+    AudioManagerInternal mAudioManagerInternal;
     boolean mPreloadedRecentApps;
     final Object mServiceAquireLock = new Object();
     Vibrator mVibrator; // Vibrator for giving feedback of orientation changes
@@ -660,6 +663,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final Rect mTmpStableFrame = new Rect();
     static final Rect mTmpNavigationFrame = new Rect();
     static final Rect mTmpOutsetFrame = new Rect();
+    private static final Rect mTmpDisplayCutoutSafeExceptMaybeBarsRect = new Rect();
     private static final Rect mTmpRect = new Rect();
 
     WindowState mTopFullscreenOpaqueWindowState;
@@ -771,6 +775,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mScreenshotChordPowerKeyTriggered;
     private long mScreenshotChordPowerKeyTime;
 
+    // Ringer toggle should reuse timing and triggering from screenshot power and a11y vol up
+    private int mRingerToggleChord = VOLUME_HUSH_OFF;
+
     private static final long BUGREPORT_TV_GESTURE_TIMEOUT_MILLIS = 1000;
 
     private boolean mBugreportTvKey1Pressed;
@@ -835,6 +842,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_LAUNCH_ASSIST_LONG_PRESS = 27;
     private static final int MSG_POWER_VERY_LONG_PRESS = 28;
     private static final int MSG_NOTIFY_USER_ACTIVITY = 29;
+    private static final int MSG_RINGER_TOGGLE_CHORD = 30;
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
@@ -942,6 +950,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                     mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                             android.Manifest.permission.USER_ACTIVITY);
+                case MSG_RINGER_TOGGLE_CHORD:
+                    handleRingerChordGesture();
                     break;
             }
         }
@@ -995,10 +1005,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.SHOW_ROTATION_SUGGESTIONS), false, this,
                     UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.VOLUME_HUSH_GESTURE), false, this,
+                    UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.POLICY_CONTROL), false, this,
                     UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.Global.getUriFor(
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.SYSTEM_NAVIGATION_KEYS_ENABLED), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
@@ -1116,6 +1129,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @VisibleForTesting
     SystemGesturesPointerEventListener mSystemGestures;
 
+    private void handleRingerChordGesture() {
+        if (mRingerToggleChord == VOLUME_HUSH_OFF) {
+            return;
+        }
+        getAudioManagerInternal();
+        mAudioManagerInternal.silenceRingerModeInternal("volume_hush");
+    }
+
     IStatusBarService getStatusBarService() {
         synchronized (mServiceAquireLock) {
             if (mStatusBarService == null) {
@@ -1133,6 +1154,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         LocalServices.getService(StatusBarManagerInternal.class);
             }
             return mStatusBarManagerInternal;
+        }
+    }
+
+    AudioManagerInternal getAudioManagerInternal() {
+        synchronized (mServiceAquireLock) {
+            if (mAudioManagerInternal == null) {
+                mAudioManagerInternal = LocalServices.getService(AudioManagerInternal.class);
+            }
+            return mAudioManagerInternal;
         }
     }
 
@@ -1305,6 +1335,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mScreenshotChordPowerKeyTriggered = true;
             mScreenshotChordPowerKeyTime = event.getDownTime();
             interceptScreenshotChord();
+            interceptRingerToggleChord();
         }
 
         // Stop ringing or end call if configured to do so when power is pressed.
@@ -1700,6 +1731,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private void interceptRingerToggleChord() {
+        if (mRingerToggleChord != Settings.Secure.VOLUME_HUSH_OFF
+                && mScreenshotChordPowerKeyTriggered && mA11yShortcutChordVolumeUpKeyTriggered) {
+            final long now = SystemClock.uptimeMillis();
+            if (now <= mA11yShortcutChordVolumeUpKeyTime + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS
+                    && now <= mScreenshotChordPowerKeyTime
+                    + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS) {
+                mA11yShortcutChordVolumeUpKeyConsumed = true;
+                cancelPendingPowerKeyAction();
+
+                mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_RINGER_TOGGLE_CHORD),
+                        getRingerToggleChordDelay());
+            }
+        }
+    }
+
     private long getAccessibilityShortcutTimeout() {
         ViewConfiguration config = ViewConfiguration.get(mContext);
         return Settings.Secure.getIntForUser(mContext.getContentResolver(),
@@ -1717,12 +1764,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout();
     }
 
+    private long getRingerToggleChordDelay() {
+        // Always timeout like a tap
+        return ViewConfiguration.getTapTimeout();
+    }
+
     private void cancelPendingScreenshotChordAction() {
         mHandler.removeCallbacks(mScreenshotRunnable);
     }
 
     private void cancelPendingAccessibilityShortcutAction() {
         mHandler.removeMessages(MSG_ACCESSIBILITY_SHORTCUT);
+    }
+
+    private void cancelPendingRingerToggleChordAction() {
+        mHandler.removeMessages(MSG_RINGER_TOGGLE_CHORD);
     }
 
     private final Runnable mEndCallLongPress = new Runnable() {
@@ -2381,7 +2437,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mSystemNavigationKeysEnabled = Settings.Secure.getIntForUser(resolver,
                     Settings.Secure.SYSTEM_NAVIGATION_KEYS_ENABLED,
                     0, UserHandle.USER_CURRENT) == 1;
-
+            mRingerToggleChord = Settings.Secure.getIntForUser(resolver,
+                    Settings.Secure.VOLUME_HUSH_GESTURE, VOLUME_HUSH_OFF,
+                    UserHandle.USER_CURRENT);
+            if (!mContext.getResources()
+                    .getBoolean(com.android.internal.R.bool.config_volumeHushGestureEnabled)) {
+                mRingerToggleChord = Settings.Secure.VOLUME_HUSH_OFF;
+            }
             // Configure rotation suggestions.
             int showRotationSuggestions = Settings.Secure.getIntForUser(resolver,
                     Settings.Secure.SHOW_ROTATION_SUGGESTIONS,
@@ -3530,6 +3592,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
+        // If a ringer toggle chord could be on the way but we're not sure, then tell the dispatcher
+        // to wait a little while and try again later before dispatching.
+        if (mRingerToggleChord != VOLUME_HUSH_OFF && (flags & KeyEvent.FLAG_FALLBACK) == 0) {
+            if (mA11yShortcutChordVolumeUpKeyTriggered && !mScreenshotChordPowerKeyTriggered) {
+                final long now = SystemClock.uptimeMillis();
+                final long timeoutTime = mA11yShortcutChordVolumeUpKeyTime
+                        + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS;
+                if (now < timeoutTime) {
+                    return timeoutTime - now;
+                }
+            }
+            if (keyCode == KeyEvent.KEYCODE_VOLUME_UP && mA11yShortcutChordVolumeUpKeyConsumed) {
+                if (!down) {
+                    mA11yShortcutChordVolumeUpKeyConsumed = false;
+                }
+                return -1;
+            }
+        }
+
         // Cancel any pending meta actions if we see any other keys being pressed between the down
         // of the meta key and its corresponding up.
         if (mPendingMetaAction && !KeyEvent.isMetaKey(keyCode)) {
@@ -4636,7 +4717,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             w.computeFrameLw(pf /* parentFrame */, df /* displayFrame */, df /* overlayFrame */,
                     df /* contentFrame */, df /* visibleFrame */, dcf /* decorFrame */,
-                    df /* stableFrame */, df /* outsetFrame */, displayFrames.mDisplayCutout);
+                    df /* stableFrame */, df /* outsetFrame */, displayFrames.mDisplayCutout,
+                    false /* parentFrameWasClippedByDisplayCutout */);
             final Rect frame = w.getFrameLw();
 
             if (frame.left <= 0 && frame.top <= 0) {
@@ -4699,7 +4781,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mStatusBar.computeFrameLw(pf /* parentFrame */, df /* displayFrame */,
                 vf /* overlayFrame */, vf /* contentFrame */, vf /* visibleFrame */,
                 dcf /* decorFrame */, vf /* stableFrame */, vf /* outsetFrame */,
-                displayFrames.mDisplayCutout);
+                displayFrames.mDisplayCutout, false /* parentFrameWasClippedByDisplayCutout */);
 
         // For layout, the status bar is always at the top with our fixed height.
         displayFrames.mStable.top = displayFrames.mUnrestricted.top
@@ -4844,7 +4926,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mNavigationBar.computeFrameLw(mTmpNavigationFrame, mTmpNavigationFrame,
                 mTmpNavigationFrame, displayFrames.mDisplayCutoutSafe, mTmpNavigationFrame, dcf,
                 mTmpNavigationFrame, displayFrames.mDisplayCutoutSafe,
-                displayFrames.mDisplayCutout);
+                displayFrames.mDisplayCutout, false /* parentFrameWasClippedByDisplayCutout */);
         mNavigationBarController.setContentFrame(mNavigationBar.getContentFrameLw());
 
         if (DEBUG_LAYOUT) Slog.i(TAG, "mNavigationBar frame: " + mTmpNavigationFrame);
@@ -5299,10 +5381,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         vf.set(cf);
                     }
                 }
-                pf.intersectUnchecked(displayFrames.mDisplayCutoutSafe);
             }
         }
 
+        boolean parentFrameWasClippedByDisplayCutout = false;
         final int cutoutMode = attrs.layoutInDisplayCutoutMode;
         final boolean attachedInParent = attached != null && !layoutInScreen;
         final boolean requestedHideNavigation =
@@ -5310,7 +5392,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // Ensure that windows with a DEFAULT or NEVER display cutout mode are laid out in
         // the cutout safe zone.
         if (cutoutMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
-            final Rect displayCutoutSafeExceptMaybeBars = mTmpRect;
+            final Rect displayCutoutSafeExceptMaybeBars = mTmpDisplayCutoutSafeExceptMaybeBarsRect;
             displayCutoutSafeExceptMaybeBars.set(displayFrames.mDisplayCutoutSafe);
             if (layoutInScreen && layoutInsetDecor && !requestedFullscreen
                     && cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT) {
@@ -5339,10 +5421,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // The IME can always extend under the bottom cutout if the navbar is there.
                 displayCutoutSafeExceptMaybeBars.bottom = Integer.MAX_VALUE;
             }
-            // Windows that are attached to a parent and laid out in said parent are already
-            // avoidingthe cutout according to that parent and don't need to be further constrained.
+            // Windows that are attached to a parent and laid out in said parent already avoid
+            // the cutout according to that parent and don't need to be further constrained.
             if (!attachedInParent) {
+                mTmpRect.set(pf);
                 pf.intersectUnchecked(displayCutoutSafeExceptMaybeBars);
+                parentFrameWasClippedByDisplayCutout |= !mTmpRect.equals(pf);
             }
             // Make sure that NO_LIMITS windows clipped to the display don't extend under the
             // cutout.
@@ -5400,7 +5484,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 + " sf=" + sf.toShortString()
                 + " osf=" + (osf == null ? "null" : osf.toShortString()));
 
-        win.computeFrameLw(pf, df, of, cf, vf, dcf, sf, osf, displayFrames.mDisplayCutout);
+        win.computeFrameLw(pf, df, of, cf, vf, dcf, sf, osf, displayFrames.mDisplayCutout,
+                parentFrameWasClippedByDisplayCutout);
 
         // Dock windows carve out the bottom of the screen, so normal windows
         // can't appear underneath them.
@@ -5992,6 +6077,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
                 if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
                     if (down) {
+                        // Any activity on the vol down button stops the ringer toggle shortcut
+                        cancelPendingRingerToggleChordAction();
+
                         if (interactive && !mScreenshotChordVolumeDownKeyTriggered
                                 && (event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
                             mScreenshotChordVolumeDownKeyTriggered = true;
@@ -6015,12 +6103,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             mA11yShortcutChordVolumeUpKeyConsumed = false;
                             cancelPendingPowerKeyAction();
                             cancelPendingScreenshotChordAction();
+                            cancelPendingRingerToggleChordAction();
+
                             interceptAccessibilityShortcutChord();
+                            interceptRingerToggleChord();
                         }
                     } else {
                         mA11yShortcutChordVolumeUpKeyTriggered = false;
                         cancelPendingScreenshotChordAction();
                         cancelPendingAccessibilityShortcutAction();
+                        cancelPendingRingerToggleChordAction();
                     }
                 }
                 if (down) {

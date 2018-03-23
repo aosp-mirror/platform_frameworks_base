@@ -23,10 +23,10 @@ import static android.view.SurfaceControl.Transaction;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.proto.WindowContainerProto.CONFIGURATION_CONTAINER;
-import static com.android.server.wm.proto.WindowContainerProto.ORIENTATION;
-import static com.android.server.wm.proto.WindowContainerProto.SURFACE_ANIMATOR;
-import static com.android.server.wm.proto.WindowContainerProto.VISIBLE;
+import static com.android.server.wm.WindowContainerProto.CONFIGURATION_CONTAINER;
+import static com.android.server.wm.WindowContainerProto.ORIENTATION;
+import static com.android.server.wm.WindowContainerProto.SURFACE_ANIMATOR;
+import static com.android.server.wm.WindowContainerProto.VISIBLE;
 
 import android.annotation.CallSuper;
 import android.content.res.Configuration;
@@ -285,7 +285,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
 
         if (mSurfaceControl != null) {
-            getPendingTransaction().destroy(mSurfaceControl);
+            mPendingTransaction.destroy(mSurfaceControl);
+
+            // Merge to parent transaction to ensure the transactions on this WindowContainer are
+            // applied in native even if WindowContainer is removed.
+            if (mParent != null) {
+                mParent.getPendingTransaction().merge(mPendingTransaction);
+            }
+
             mSurfaceControl = null;
             scheduleAnimation();
         }
@@ -980,7 +987,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     /**
      * Write to a protocol buffer output stream. Protocol buffer message definition is at
-     * {@link com.android.server.wm.proto.WindowContainerProto}.
+     * {@link com.android.server.wm.WindowContainerProto}.
      *
      * @param proto     Stream to write the WindowContainer object to.
      * @param fieldId   Field Id of the WindowContainer as defined in the parent message.

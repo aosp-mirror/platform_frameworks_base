@@ -679,11 +679,13 @@ public class AppWidgetManager {
     }
 
     /**
-     * Updates the info for the supplied AppWidget provider.
+     * Updates the info for the supplied AppWidget provider. Apps can use this to change the default
+     * behavior of the widget based on the state of the app (for e.g., if the user is logged in
+     * or not). Calling this API completely replaces the previous definition.
      *
      * <p>
      * The manifest entry of the provider should contain an additional meta-data tag similar to
-     * {@link #META_DATA_APPWIDGET_PROVIDER} which should point to any additional definitions for
+     * {@link #META_DATA_APPWIDGET_PROVIDER} which should point to any alternative definitions for
      * the provider.
      *
      * <p>

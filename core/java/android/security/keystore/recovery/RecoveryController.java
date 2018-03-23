@@ -35,6 +35,7 @@ import java.security.Key;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertPath;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -547,10 +548,7 @@ public class RecoveryController {
             if (grantAlias == null) {
                 throw new InternalRecoveryServiceException("null grant alias");
             }
-            return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(
-                    mKeyStore,
-                    grantAlias,
-                    KeyStore.UID_SELF);
+            return getKeyFromGrant(grantAlias);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (UnrecoverableKeyException e) {
@@ -581,10 +579,7 @@ public class RecoveryController {
             if (grantAlias == null) {
                 throw new InternalRecoveryServiceException("Null grant alias");
             }
-            return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(
-                    mKeyStore,
-                    grantAlias,
-                    KeyStore.UID_SELF);
+            return getKeyFromGrant(grantAlias);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (UnrecoverableKeyException e) {
@@ -614,15 +609,22 @@ public class RecoveryController {
             if (grantAlias == null) {
                 return null;
             }
-            return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(
-                    mKeyStore,
-                    grantAlias,
-                    KeyStore.UID_SELF);
+            return getKeyFromGrant(grantAlias);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
             throw wrapUnexpectedServiceSpecificException(e);
         }
+    }
+
+    /**
+     * Returns the key with the given {@code grantAlias}.
+     */
+    Key getKeyFromGrant(String grantAlias) throws UnrecoverableKeyException {
+        return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(
+                mKeyStore,
+                grantAlias,
+                KeyStore.UID_SELF);
     }
 
     /**
@@ -651,6 +653,11 @@ public class RecoveryController {
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     public RecoverySession createRecoverySession() {
         return RecoverySession.newInstance(this);
+    }
+
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
+    public Map<String, X509Certificate> getRootCertificates() {
+        return TrustedRootCertificates.getRootCertificates();
     }
 
     InternalRecoveryServiceException wrapUnexpectedServiceSpecificException(

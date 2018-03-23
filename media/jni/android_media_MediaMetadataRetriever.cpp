@@ -449,13 +449,14 @@ static jobject android_media_MediaMetadataRetriever_getFrameAtIndex(
     std::vector<sp<IMemory> > frames;
     status_t err = retriever->getFrameAtIndex(&frames, frameIndex, numFrames, colorFormat);
     if (err != OK || frames.size() == 0) {
-        ALOGE("failed to get frames from retriever, err=%d, size=%zu",
-                err, frames.size());
+        jniThrowException(env,
+                "java/lang/IllegalStateException", "No frames from retriever");
         return NULL;
     }
     jobject arrayList = env->NewObject(fields.arrayListClazz, fields.arrayListInit);
     if (arrayList == NULL) {
-        ALOGE("can't create bitmap array list object");
+        jniThrowException(env,
+                "java/lang/IllegalStateException", "Can't create bitmap array");
         return NULL;
     }
 

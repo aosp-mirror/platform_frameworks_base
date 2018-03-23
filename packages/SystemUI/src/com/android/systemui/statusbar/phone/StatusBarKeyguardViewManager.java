@@ -95,6 +95,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     protected boolean mLastRemoteInputActive;
     private boolean mLastDozing;
     private int mLastFpMode;
+    private boolean mGoingToSleepVisibleNotOccluded;
 
     private OnDismissAction mAfterKeyguardGoneAction;
     private final ArrayList<Runnable> mAfterKeyguardGoneRunnables = new ArrayList<>();
@@ -149,14 +150,16 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mBouncer.setExpansion(expansion);
             if (expansion == 1) {
                 mBouncer.onFullyHidden();
-                updateStates();
-            } else if (!mBouncer.isShowing()) {
+            } else if (!mBouncer.isShowing() && !mBouncer.isAnimatingAway()) {
                 mBouncer.show(true /* resetSecuritySelection */, false /* notifyFalsing */);
             } else if (noLongerTracking) {
                 // Notify that falsing manager should stop its session when user stops touching,
                 // even before the animation ends, to guarantee that we're not recording sensitive
                 // data.
                 mBouncer.onFullyShown();
+            }
+            if (expansion == 0 || expansion == 1) {
+                updateStates();
             }
         }
         mLastTracking = tracking;
@@ -262,11 +265,16 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
     }
 
+    public boolean isGoingToSleepVisibleNotOccluded() {
+        return mGoingToSleepVisibleNotOccluded;
+    }
+
     public void onStartedGoingToSleep() {
-        // TODO: remove
+        mGoingToSleepVisibleNotOccluded = isShowing() && !isOccluded();
     }
 
     public void onFinishedGoingToSleep() {
+        mGoingToSleepVisibleNotOccluded = false;
         mBouncer.onScreenTurnedOff();
     }
 
@@ -371,6 +379,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void startPreHideAnimation(Runnable finishRunnable) {
         if (mBouncer.isShowing()) {
             mBouncer.startPreHideAnimation(finishRunnable);
+            mNotificationPanelView.onBouncerPreHideAnimation();
         } else if (finishRunnable != null) {
             finishRunnable.run();
         }

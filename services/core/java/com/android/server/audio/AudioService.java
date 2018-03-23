@@ -24,6 +24,9 @@ import static android.media.AudioManager.STREAM_ALARM;
 import static android.media.AudioManager.STREAM_MUSIC;
 import static android.media.AudioManager.STREAM_SYSTEM;
 import static android.os.Process.FIRST_APPLICATION_UID;
+import static android.provider.Settings.Secure.VOLUME_HUSH_MUTE;
+import static android.provider.Settings.Secure.VOLUME_HUSH_OFF;
+import static android.provider.Settings.Secure.VOLUME_HUSH_VIBRATE;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -108,6 +111,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.os.UserManagerInternal.UserRestrictionsListener;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.provider.Settings.System;
@@ -124,6 +128,7 @@ import android.util.Slog;
 import android.util.SparseIntArray;
 import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityManager;
+import android.widget.Toast;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
@@ -440,6 +445,12 @@ public class AudioService extends IAudioService.Stub
 
     // Is there a vibrator
     private final boolean mHasVibrator;
+    // Used to play vibrations
+    private Vibrator mVibrator;
+    private static final AudioAttributes VIBRATION_ATTRIBUTES = new AudioAttributes.Builder()
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+            .build();
 
     // Broadcast receiver for device connections intent broadcasts
     private final BroadcastReceiver mReceiver = new AudioServiceBroadcastReceiver();
@@ -697,8 +708,8 @@ public class AudioService extends IAudioService.Stub
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mAudioEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "handleAudioEvent");
 
-        Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-        mHasVibrator = vibrator == null ? false : vibrator.hasVibrator();
+        mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        mHasVibrator = mVibrator == null ? false : mVibrator.hasVibrator();
 
         // Initialize volume
         int maxCallVolume = SystemProperties.getInt("ro.config.vc_call_vol_steps", -1);
@@ -1649,16 +1660,7 @@ public class AudioService extends IAudioService.Stub
 
             // Check if volume update should be send to Hearing Aid
             if ((device & AudioSystem.DEVICE_OUT_HEARING_AID) != 0) {
-                synchronized (mHearingAidLock) {
-                    if (mHearingAid != null) {
-                        //hearing aid expect volume value in range -128dB to 0dB
-                        int gainDB = (int)AudioSystem.getStreamVolumeDB(streamType, newIndex/10,
-                                AudioSystem.DEVICE_OUT_HEARING_AID);
-                        if (gainDB < BT_HEARING_AID_GAIN_MIN)
-                            gainDB = BT_HEARING_AID_GAIN_MIN;
-                        mHearingAid.setVolume(gainDB);
-                    }
-                }
+                setHearingAidVolume(newIndex);
             }
 
             // Check if volume update should be sent to Hdmi system audio.
@@ -1907,16 +1909,7 @@ public class AudioService extends IAudioService.Stub
             }
 
             if ((device & AudioSystem.DEVICE_OUT_HEARING_AID) != 0) {
-                synchronized (mHearingAidLock) {
-                    if (mHearingAid != null) {
-                        //hearing aid expect volume value in range -128dB to 0dB
-                        int gainDB = (int)AudioSystem.getStreamVolumeDB(streamType, index/10, AudioSystem.DEVICE_OUT_HEARING_AID);
-                        if (gainDB < BT_HEARING_AID_GAIN_MIN)
-                            gainDB = BT_HEARING_AID_GAIN_MIN;
-                        mHearingAid.setVolume(gainDB);
-
-                    }
-                }
+                setHearingAidVolume(index);
             }
 
             if (streamTypeAlias == AudioSystem.STREAM_MUSIC) {
@@ -1969,6 +1962,10 @@ public class AudioService extends IAudioService.Stub
 
     /** @see AudioManager#forceVolumeControlStream(int) */
     public void forceVolumeControlStream(int streamType, IBinder cb) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
         if (DEBUG_VOL) { Log.d(TAG, String.format("forceVolumeControlStream(%d)", streamType)); }
         synchronized(mForceControlStreamLock) {
             if (mVolumeControlStream != -1 && streamType != -1) {
@@ -2439,6 +2436,54 @@ public class AudioService extends IAudioService.Stub
     public void setRingerModeInternal(int ringerMode, String caller) {
         enforceVolumeController("setRingerModeInternal");
         setRingerMode(ringerMode, caller, false /*external*/);
+    }
+
+    public void silenceRingerModeInternal(String reason) {
+        VibrationEffect effect = null;
+        int ringerMode = AudioManager.RINGER_MODE_SILENT;
+        int toastText = 0;
+
+        int silenceRingerSetting = Settings.Secure.VOLUME_HUSH_OFF;
+        if (mContext.getResources()
+                .getBoolean(com.android.internal.R.bool.config_volumeHushGestureEnabled)) {
+            silenceRingerSetting = Settings.Secure.getIntForUser(mContentResolver,
+                    Settings.Secure.VOLUME_HUSH_GESTURE, VOLUME_HUSH_OFF,
+                    UserHandle.USER_CURRENT);
+        }
+
+        switch(silenceRingerSetting) {
+            case VOLUME_HUSH_MUTE:
+                effect = VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
+                ringerMode = AudioManager.RINGER_MODE_SILENT;
+                toastText = com.android.internal.R.string.volume_dialog_ringer_guidance_silent;
+                break;
+            case VOLUME_HUSH_VIBRATE:
+                effect = VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK);
+                ringerMode = AudioManager.RINGER_MODE_VIBRATE;
+                toastText = com.android.internal.R.string.volume_dialog_ringer_guidance_vibrate;
+                break;
+        }
+        maybeVibrate(effect);
+        setRingerModeInternal(ringerMode, reason);
+        Toast.makeText(mContext, toastText, Toast.LENGTH_SHORT).show();
+    }
+
+    private boolean maybeVibrate(VibrationEffect effect) {
+        if (!mHasVibrator) {
+            return false;
+        }
+        final boolean hapticsDisabled = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.HAPTIC_FEEDBACK_ENABLED, 0, UserHandle.USER_CURRENT) == 0;
+        if (hapticsDisabled) {
+            return false;
+        }
+
+        if (effect == null) {
+            return false;
+        }
+        mVibrator.vibrate(
+                Binder.getCallingUid(), mContext.getOpPackageName(), effect, VIBRATION_ATTRIBUTES);
+        return true;
     }
 
     private void setRingerMode(int ringerMode, String caller, boolean external) {
@@ -5624,8 +5669,24 @@ public class AudioService extends IAudioService.Stub
                 makeDeviceListKey(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, address));
     }
 
+    private void setHearingAidVolume(int index) {
+        synchronized (mHearingAidLock) {
+            if (mHearingAid != null) {
+                //hearing aid expect volume value in range -128dB to 0dB
+                int gainDB = (int)AudioSystem.getStreamVolumeDB(AudioSystem.STREAM_MUSIC, index/10,
+                        AudioSystem.DEVICE_OUT_HEARING_AID);
+                if (gainDB < BT_HEARING_AID_GAIN_MIN)
+                    gainDB = BT_HEARING_AID_GAIN_MIN;
+                mHearingAid.setVolume(gainDB);
+            }
+        }
+    }
+
     // must be called synchronized on mConnectedDevices
     private void makeHearingAidDeviceAvailable(String address, String name, String eventSource) {
+        int index = mStreamStates[AudioSystem.STREAM_MUSIC].getIndex(AudioSystem.DEVICE_OUT_HEARING_AID);
+        setHearingAidVolume(index);
+
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_HEARING_AID,
                 AudioSystem.DEVICE_STATE_AVAILABLE, address, name);
         mConnectedDevices.put(
@@ -7245,6 +7306,11 @@ public class AudioService extends IAudioService.Stub
         @Override
         public void setRingerModeInternal(int ringerMode, String caller) {
             AudioService.this.setRingerModeInternal(ringerMode, caller);
+        }
+
+        @Override
+        public void silenceRingerModeInternal(String caller) {
+            AudioService.this.silenceRingerModeInternal(caller);
         }
 
         @Override

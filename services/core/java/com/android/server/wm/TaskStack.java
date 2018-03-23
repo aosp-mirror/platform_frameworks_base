@@ -35,18 +35,18 @@ import static android.view.WindowManager.DOCKED_TOP;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.proto.StackProto.ADJUSTED_BOUNDS;
-import static com.android.server.wm.proto.StackProto.ADJUSTED_FOR_IME;
-import static com.android.server.wm.proto.StackProto.ADJUST_DIVIDER_AMOUNT;
-import static com.android.server.wm.proto.StackProto.ADJUST_IME_AMOUNT;
-import static com.android.server.wm.proto.StackProto.ANIMATION_BACKGROUND_SURFACE_IS_DIMMING;
-import static com.android.server.wm.proto.StackProto.BOUNDS;
-import static com.android.server.wm.proto.StackProto.DEFER_REMOVAL;
-import static com.android.server.wm.proto.StackProto.FILLS_PARENT;
-import static com.android.server.wm.proto.StackProto.ID;
-import static com.android.server.wm.proto.StackProto.MINIMIZE_AMOUNT;
-import static com.android.server.wm.proto.StackProto.TASKS;
-import static com.android.server.wm.proto.StackProto.WINDOW_CONTAINER;
+import static com.android.server.wm.StackProto.ADJUSTED_BOUNDS;
+import static com.android.server.wm.StackProto.ADJUSTED_FOR_IME;
+import static com.android.server.wm.StackProto.ADJUST_DIVIDER_AMOUNT;
+import static com.android.server.wm.StackProto.ADJUST_IME_AMOUNT;
+import static com.android.server.wm.StackProto.ANIMATION_BACKGROUND_SURFACE_IS_DIMMING;
+import static com.android.server.wm.StackProto.BOUNDS;
+import static com.android.server.wm.StackProto.DEFER_REMOVAL;
+import static com.android.server.wm.StackProto.FILLS_PARENT;
+import static com.android.server.wm.StackProto.ID;
+import static com.android.server.wm.StackProto.MINIMIZE_AMOUNT;
+import static com.android.server.wm.StackProto.TASKS;
+import static com.android.server.wm.StackProto.WINDOW_CONTAINER;
 
 import android.annotation.CallSuper;
 import android.content.res.Configuration;
@@ -154,6 +154,9 @@ public class TaskStack extends WindowContainer<Task> implements
      */
     final Rect mTmpDimBoundsRect = new Rect();
     private final Point mLastSurfaceSize = new Point();
+
+    private final AnimatingAppWindowTokenRegistry mAnimatingAppWindowTokenRegistry =
+            new AnimatingAppWindowTokenRegistry();
 
     TaskStack(WindowManagerService service, int stackId, StackWindowController controller) {
         super(service);
@@ -1781,5 +1784,9 @@ public class TaskStack extends WindowContainer<Task> implements
         final int outset = getStackOutset();
         outPos.x -= outset;
         outPos.y -= outset;
+    }
+
+    AnimatingAppWindowTokenRegistry getAnimatingAppWindowTokenRegistry() {
+        return mAnimatingAppWindowTokenRegistry;
     }
 }

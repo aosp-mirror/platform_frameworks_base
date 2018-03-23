@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * @hide
  * Structure for data source descriptor.
  *
  * Used by {@link MediaPlayer2#setDataSource(DataSourceDesc)}

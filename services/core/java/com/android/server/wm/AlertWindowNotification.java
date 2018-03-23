@@ -159,6 +159,7 @@ class AlertWindowNotification {
         channel.enableVibration(false);
         channel.setBlockableSystem(true);
         channel.setGroup(sChannelGroup.getId());
+        channel.setBypassDnd(true);
         mNotificationManager.createNotificationChannel(channel);
     }
 

@@ -65,4 +65,7 @@ interface IPowerManager
 
     // sets the attention light (used by phone app only)
     void setAttentionLight(boolean on, int color);
+
+    // controls whether PowerManager should doze after the screen turns off or not
+    void setDozeAfterScreenOff(boolean on);
 }

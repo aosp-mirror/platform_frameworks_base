@@ -47,6 +47,7 @@ import java.util.concurrent.Executor;
 
 // TODO: Replace MediaSession wtih MediaSession2 once MediaSession2 is submitted.
 /**
+ * @hide
  * Displays a video file.  VideoView2 class is a View class which is wrapping {@link MediaPlayer2}
  * so that developers can easily implement a video rendering application.
  *
@@ -143,7 +144,7 @@ public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
             @NonNull Context context, @Nullable AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
         super((instance, superProvider, privateProvider) ->
-                ApiLoader.getProvider(context).createVideoView2(
+                ApiLoader.getProvider().createVideoView2(
                         (VideoView2) instance, superProvider, privateProvider,
                         attrs, defStyleAttr, defStyleRes),
                 context, attrs, defStyleAttr, defStyleRes);

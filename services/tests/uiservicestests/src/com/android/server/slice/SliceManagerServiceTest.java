@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
 import android.app.slice.SliceSpec;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.pm.PackageManagerInternal;
 import android.net.Uri;
 import android.os.Binder;
@@ -66,6 +67,8 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
     @Before
     public void setup() {
         LocalServices.addService(PackageManagerInternal.class, mock(PackageManagerInternal.class));
+        LocalServices.addService(UsageStatsManagerInternal.class,
+                mock(UsageStatsManagerInternal.class));
         mContext.addMockSystemService(AppOpsManager.class, mock(AppOpsManager.class));
         mContext.getTestablePermissions().setPermission(TEST_URI, PERMISSION_GRANTED);
 
@@ -77,6 +80,7 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
     @After
     public void teardown() {
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.removeServiceForTest(UsageStatsManagerInternal.class);
     }
 
     @Test

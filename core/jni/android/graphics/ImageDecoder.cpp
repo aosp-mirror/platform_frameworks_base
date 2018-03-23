@@ -38,48 +38,81 @@ using namespace android;
 
 static jclass    gImageDecoder_class;
 static jclass    gSize_class;
-static jclass    gIncomplete_class;
+static jclass    gDecodeException_class;
 static jclass    gCanvas_class;
 static jmethodID gImageDecoder_constructorMethodID;
 static jmethodID gImageDecoder_postProcessMethodID;
 static jmethodID gSize_constructorMethodID;
-static jmethodID gIncomplete_constructorMethodID;
+static jmethodID gDecodeException_constructorMethodID;
 static jmethodID gCallback_onPartialImageMethodID;
 static jmethodID gCanvas_constructorMethodID;
 static jmethodID gCanvas_releaseMethodID;
 
-static jobject native_create(JNIEnv* env, std::unique_ptr<SkStream> stream) {
+// Clear and return any pending exception for handling other than throwing directly.
+static jthrowable get_and_clear_exception(JNIEnv* env) {
+    jthrowable jexception = env->ExceptionOccurred();
+    if (jexception) {
+        env->ExceptionClear();
+    }
+    return jexception;
+}
+
+// Throw a new ImageDecoder.DecodeException. Returns null for convenience.
+static jobject throw_exception(JNIEnv* env, ImageDecoder::Error error, const char* msg,
+                               jthrowable cause, jobject source) {
+    jstring jstr = nullptr;
+    if (msg) {
+        jstr = env->NewStringUTF(msg);
+        if (!jstr) {
+            // Out of memory.
+            return nullptr;
+        }
+    }
+    jthrowable exception = (jthrowable) env->NewObject(gDecodeException_class,
+            gDecodeException_constructorMethodID, error, jstr, cause, source);
+    // Only throw if not out of memory.
+    if (exception) {
+        env->Throw(exception);
+    }
+    return nullptr;
+}
+
+static jobject native_create(JNIEnv* env, std::unique_ptr<SkStream> stream, jobject source) {
     if (!stream.get()) {
-        doThrowIOE(env, "Failed to create a stream");
-        return nullptr;
+        return throw_exception(env, ImageDecoder::kSourceMalformedData, "Failed to create a stream",
+                               nullptr, source);
     }
     std::unique_ptr<ImageDecoder> decoder(new ImageDecoder);
     SkCodec::Result result;
     auto codec = SkCodec::MakeFromStream(std::move(stream), &result, decoder->mPeeker.get());
+    if (jthrowable jexception = get_and_clear_exception(env)) {
+        return throw_exception(env, ImageDecoder::kSourceException, "", jexception, source);
+    }
     if (!codec) {
         switch (result) {
             case SkCodec::kIncompleteInput:
-                env->ThrowNew(gIncomplete_class, "Incomplete input");
-                break;
+                return throw_exception(env, ImageDecoder::kSourceIncomplete, "", nullptr, source);
             default:
                 SkString msg;
                 msg.printf("Failed to create image decoder with message '%s'",
                            SkCodec::ResultToString(result));
-                doThrowIOE(env, msg.c_str());
-                break;
+                return throw_exception(env, ImageDecoder::kSourceMalformedData,  msg.c_str(),
+                                       nullptr, source);
 
         }
-        return nullptr;
     }
 
-    // FIXME: Avoid parsing the whole image?
     const bool animated = codec->getFrameCount() > 1;
+    if (jthrowable jexception = get_and_clear_exception(env)) {
+        return throw_exception(env, ImageDecoder::kSourceException, "", jexception, source);
+    }
+
     decoder->mCodec = SkAndroidCodec::MakeFromCodec(std::move(codec),
             SkAndroidCodec::ExifOrientationBehavior::kRespect);
     if (!decoder->mCodec.get()) {
-        doThrowIOE(env, "Could not create AndroidCodec");
-        return nullptr;
+        return throw_exception(env, ImageDecoder::kSourceMalformedData, "", nullptr, source);
     }
+
     const auto& info = decoder->mCodec->getInfo();
     const int width = info.width();
     const int height = info.height();
@@ -89,26 +122,26 @@ static jobject native_create(JNIEnv* env, std::unique_ptr<SkStream> stream) {
 }
 
 static jobject ImageDecoder_nCreateFd(JNIEnv* env, jobject /*clazz*/,
-        jobject fileDescriptor) {
+        jobject fileDescriptor, jobject source) {
     int descriptor = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
     struct stat fdStat;
     if (fstat(descriptor, &fdStat) == -1) {
-        doThrowIOE(env, "broken file descriptor; fstat returned -1");
-        return nullptr;
+        return throw_exception(env, ImageDecoder::kSourceMalformedData,
+                               "broken file descriptor; fstat returned -1", nullptr, source);
     }
 
     int dupDescriptor = dup(descriptor);
     FILE* file = fdopen(dupDescriptor, "r");
     if (file == NULL) {
         close(dupDescriptor);
-        doThrowIOE(env, "Could not open file");
-        return nullptr;
+        return throw_exception(env, ImageDecoder::kSourceMalformedData, "Could not open file",
+                               nullptr, source);
     }
     std::unique_ptr<SkFILEStream> fileStream(new SkFILEStream(file));
 
     if (::lseek(descriptor, 0, SEEK_CUR) == 0) {
-        return native_create(env, std::move(fileStream));
+        return native_create(env, std::move(fileStream), source);
     }
 
     // FIXME: This allows us to pretend the current location is the beginning,
@@ -116,44 +149,46 @@ static jobject ImageDecoder_nCreateFd(JNIEnv* env, jobject /*clazz*/,
     // point as the beginning.
     std::unique_ptr<SkStream> stream(SkFrontBufferedStream::Make(std::move(fileStream),
                 SkCodec::MinBufferedBytesNeeded()));
-    return native_create(env, std::move(stream));
+    return native_create(env, std::move(stream), source);
 }
 
 static jobject ImageDecoder_nCreateInputStream(JNIEnv* env, jobject /*clazz*/,
-        jobject is, jbyteArray storage) {
+        jobject is, jbyteArray storage, jobject source) {
     std::unique_ptr<SkStream> stream(CreateJavaInputStreamAdaptor(env, is, storage, false));
 
     if (!stream.get()) {
-        doThrowIOE(env, "Failed to create stream!");
-        return nullptr;
+        return throw_exception(env, ImageDecoder::kSourceMalformedData, "Failed to create a stream",
+                               nullptr, source);
     }
+
     std::unique_ptr<SkStream> bufferedStream(
         SkFrontBufferedStream::Make(std::move(stream),
         SkCodec::MinBufferedBytesNeeded()));
-    return native_create(env, std::move(bufferedStream));
+    return native_create(env, std::move(bufferedStream), source);
 }
 
-static jobject ImageDecoder_nCreateAsset(JNIEnv* env, jobject /*clazz*/, jlong assetPtr) {
+static jobject ImageDecoder_nCreateAsset(JNIEnv* env, jobject /*clazz*/, jlong assetPtr,
+                                         jobject source) {
     Asset* asset = reinterpret_cast<Asset*>(assetPtr);
     std::unique_ptr<SkStream> stream(new AssetStreamAdaptor(asset));
-    return native_create(env, std::move(stream));
+    return native_create(env, std::move(stream), source);
 }
 
 static jobject ImageDecoder_nCreateByteBuffer(JNIEnv* env, jobject /*clazz*/, jobject jbyteBuffer,
-                                              jint initialPosition, jint limit) {
+                                              jint initialPosition, jint limit, jobject source) {
     std::unique_ptr<SkStream> stream = CreateByteBufferStreamAdaptor(env, jbyteBuffer,
                                                                      initialPosition, limit);
     if (!stream) {
-        doThrowIOE(env, "Failed to read ByteBuffer");
-        return nullptr;
+        return throw_exception(env, ImageDecoder::kSourceMalformedData, "Failed to read ByteBuffer",
+                               nullptr, source);
     }
-    return native_create(env, std::move(stream));
+    return native_create(env, std::move(stream), source);
 }
 
 static jobject ImageDecoder_nCreateByteArray(JNIEnv* env, jobject /*clazz*/, jbyteArray byteArray,
-                                             jint offset, jint length) {
+                                             jint offset, jint length, jobject source) {
     std::unique_ptr<SkStream> stream(CreateByteArrayStreamAdaptor(env, byteArray, offset, length));
-    return native_create(env, std::move(stream));
+    return native_create(env, std::move(stream), source);
 }
 
 jint postProcessAndRelease(JNIEnv* env, jobject jimageDecoder, std::unique_ptr<Canvas> canvas) {
@@ -170,10 +205,8 @@ jint postProcessAndRelease(JNIEnv* env, jobject jimageDecoder, std::unique_ptr<C
     return env->CallIntMethod(jimageDecoder, gImageDecoder_postProcessMethodID, jcanvas);
 }
 
-// Note: jpostProcess points to an ImageDecoder object if it has a PostProcess object, and nullptr
-// otherwise.
 static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong nativePtr,
-                                          jobject jcallback, jobject jpostProcess,
+                                          jobject jdecoder, jboolean jpostProcess,
                                           jint desiredWidth, jint desiredHeight, jobject jsubset,
                                           jboolean requireMutable, jint allocator,
                                           jboolean requireUnpremul, jboolean preferRamOverQuality,
@@ -264,11 +297,8 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
     SkAndroidCodec::AndroidOptions options;
     options.fSampleSize = sampleSize;
     auto result = codec->getAndroidPixels(decodeInfo, bm.getPixels(), bm.rowBytes(), &options);
-    jthrowable jexception = env->ExceptionOccurred();
-    if (jexception) {
-        env->ExceptionClear();
-    }
-    int onPartialImageError = jexception ? 1  // ImageDecoder.java's ERROR_SOURCE_EXCEPTION
+    jthrowable jexception = get_and_clear_exception(env);
+    int onPartialImageError = jexception ? ImageDecoder::kSourceException
                                          : 0; // No error.
     switch (result) {
         case SkCodec::kSuccess:
@@ -278,12 +308,12 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
             break;
         case SkCodec::kIncompleteInput:
             if (!jexception) {
-                onPartialImageError = 2; // ImageDecoder.java's ERROR_SOURCE_EXCEPTION
+                onPartialImageError = ImageDecoder::kSourceIncomplete;
             }
             break;
         case SkCodec::kErrorInInput:
             if (!jexception) {
-                onPartialImageError = 3; // ImageDecoder.java's ERROR_SOURCE_ERROR
+                onPartialImageError = ImageDecoder::kSourceMalformedData;
             }
             break;
         default:
@@ -293,22 +323,10 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
             return nullptr;
     }
 
-    if (jexception || onPartialImageError) {
-        bool throwException = !jcallback ||
-            !env->CallBooleanMethod(jcallback, gCallback_onPartialImageMethodID,
-                                    onPartialImageError);
+    if (onPartialImageError) {
+        env->CallVoidMethod(jdecoder, gCallback_onPartialImageMethodID, onPartialImageError,
+                jexception);
         if (env->ExceptionCheck()) {
-            return nullptr;
-        }
-
-        if (throwException) {
-            if (jexception) {
-                env->Throw(jexception);
-            } else if (onPartialImageError == 2) {
-                env->ThrowNew(gIncomplete_class, "Incomplete input");
-            } else {
-                doThrowIOE(env, "image has an error!");
-            }
             return nullptr;
         }
     }
@@ -357,11 +375,6 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
             SkIRect subset;
             GraphicsJNI::jrect_to_irect(env, jsubset, &subset);
 
-            // FIXME: If there is no scale, should this instead call
-            // SkBitmap::extractSubset? If we could upload a subset
-            // (b/70626068), this would save memory and time. Even for a
-            // software Bitmap, the extra speed might be worth the memory
-            // tradeoff if the subset is large?
             translateX    = -subset.fLeft;
             translateY    = -subset.fTop;
             desiredWidth  =  subset.width();
@@ -404,7 +417,7 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
     if (jpostProcess) {
         std::unique_ptr<Canvas> canvas(Canvas::create_canvas(bm));
 
-        jint pixelFormat = postProcessAndRelease(env, jpostProcess, std::move(canvas));
+        jint pixelFormat = postProcessAndRelease(env, jdecoder, std::move(canvas));
         if (env->ExceptionCheck()) {
             return nullptr;
         }
@@ -495,12 +508,12 @@ static jstring ImageDecoder_nGetMimeType(JNIEnv* env, jobject /*clazz*/, jlong n
 }
 
 static const JNINativeMethod gImageDecoderMethods[] = {
-    { "nCreate",        "(J)Landroid/graphics/ImageDecoder;",    (void*) ImageDecoder_nCreateAsset },
-    { "nCreate",        "(Ljava/nio/ByteBuffer;II)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateByteBuffer },
-    { "nCreate",        "([BII)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateByteArray },
-    { "nCreate",        "(Ljava/io/InputStream;[B)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateInputStream },
-    { "nCreate",        "(Ljava/io/FileDescriptor;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateFd },
-    { "nDecodeBitmap",  "(JLandroid/graphics/ImageDecoder;Landroid/graphics/ImageDecoder;IILandroid/graphics/Rect;ZIZZZ)Landroid/graphics/Bitmap;",
+    { "nCreate",        "(JLandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;",    (void*) ImageDecoder_nCreateAsset },
+    { "nCreate",        "(Ljava/nio/ByteBuffer;IILandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateByteBuffer },
+    { "nCreate",        "([BIILandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateByteArray },
+    { "nCreate",        "(Ljava/io/InputStream;[BLandroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateInputStream },
+    { "nCreate",        "(Ljava/io/FileDescriptor;Landroid/graphics/ImageDecoder$Source;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateFd },
+    { "nDecodeBitmap",  "(JLandroid/graphics/ImageDecoder;ZIILandroid/graphics/Rect;ZIZZZ)Landroid/graphics/Bitmap;",
                                                                  (void*) ImageDecoder_nDecodeBitmap },
     { "nGetSampledSize","(JI)Landroid/util/Size;",               (void*) ImageDecoder_nGetSampledSize },
     { "nGetPadding",    "(JLandroid/graphics/Rect;)V",           (void*) ImageDecoder_nGetPadding },
@@ -516,10 +529,10 @@ int register_android_graphics_ImageDecoder(JNIEnv* env) {
     gSize_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/util/Size"));
     gSize_constructorMethodID = GetMethodIDOrDie(env, gSize_class, "<init>", "(II)V");
 
-    gIncomplete_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/ImageDecoder$IncompleteException"));
-    gIncomplete_constructorMethodID = GetMethodIDOrDie(env, gIncomplete_class, "<init>", "()V");
+    gDecodeException_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/ImageDecoder$DecodeException"));
+    gDecodeException_constructorMethodID = GetMethodIDOrDie(env, gDecodeException_class, "<init>", "(ILjava/lang/String;Ljava/lang/Throwable;Landroid/graphics/ImageDecoder$Source;)V");
 
-    gCallback_onPartialImageMethodID = GetMethodIDOrDie(env, gImageDecoder_class, "onPartialImage", "(I)Z");
+    gCallback_onPartialImageMethodID = GetMethodIDOrDie(env, gImageDecoder_class, "onPartialImage", "(ILjava/lang/Throwable;)V");
 
     gCanvas_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/Canvas"));
     gCanvas_constructorMethodID = GetMethodIDOrDie(env, gCanvas_class, "<init>", "(J)V");

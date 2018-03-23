@@ -320,7 +320,8 @@ void VulkanManager::createBuffers(VulkanSurface* surface, VkFormat format, VkExt
 
         VulkanSurface::ImageInfo& imageInfo = surface->mImageInfos[i];
         imageInfo.mSurface = SkSurface::MakeFromBackendRenderTarget(
-                mRenderThread.getGrContext(), backendRT, kTopLeft_GrSurfaceOrigin, nullptr, &props);
+                mRenderThread.getGrContext(), backendRT, kTopLeft_GrSurfaceOrigin,
+                kRGBA_8888_SkColorType, nullptr, &props);
     }
 
     SkASSERT(mCommandPool != VK_NULL_HANDLE);

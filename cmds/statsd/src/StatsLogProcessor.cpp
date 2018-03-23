@@ -112,8 +112,8 @@ void updateUid(Value* value, int hostUid) {
 }
 
 void StatsLogProcessor::mapIsolatedUidToHostUidIfNecessaryLocked(LogEvent* event) const {
-    if (android::util::kAtomsWithAttributionChain.find(event->GetTagId()) !=
-        android::util::kAtomsWithAttributionChain.end()) {
+    if (android::util::AtomsInfo::kAtomsWithAttributionChain.find(event->GetTagId()) !=
+        android::util::AtomsInfo::kAtomsWithAttributionChain.end()) {
         for (auto& value : *(event->getMutableValues())) {
             if (value.mField.getPosAtDepth(0) > kAttributionField) {
                 break;
@@ -123,12 +123,20 @@ void StatsLogProcessor::mapIsolatedUidToHostUidIfNecessaryLocked(LogEvent* event
                 updateUid(&value.mValue, hostUid);
             }
         }
-    } else if (android::util::kAtomsWithUidField.find(event->GetTagId()) !=
-                       android::util::kAtomsWithUidField.end() &&
-               event->getValues().size() > 0 && (event->getValues())[0].mValue.getType() == INT) {
-        Value& value = (*event->getMutableValues())[0].mValue;
-        const int hostUid = mUidMap->getHostUidOrSelf(value.int_value);
-        updateUid(&value, hostUid);
+    } else {
+        auto it = android::util::AtomsInfo::kAtomsWithUidField.find(event->GetTagId());
+        if (it != android::util::AtomsInfo::kAtomsWithUidField.end()) {
+            int uidField = it->second;  // uidField is the field number in proto,
+                                        // starting from 1
+            if (uidField > 0 && (int)event->getValues().size() >= uidField &&
+                (event->getValues())[uidField - 1].mValue.getType() == INT) {
+                Value& value = (*event->getMutableValues())[uidField - 1].mValue;
+                const int hostUid = mUidMap->getHostUidOrSelf(value.int_value);
+                updateUid(&value, hostUid);
+            } else {
+                ALOGE("Malformed log, uid not found. %s", event->ToString().c_str());
+            }
+        }
     }
 }
 
@@ -231,14 +239,13 @@ void StatsLogProcessor::dumpStates(FILE* out, bool verbose) {
     }
 }
 
+/*
+ * onDumpReport dumps serialized ConfigMetricsReportList into outData.
+ */
 void StatsLogProcessor::onDumpReport(const ConfigKey& key, const uint64_t dumpTimeStampNs,
                                      vector<uint8_t>* outData) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
-    onDumpReportLocked(key, dumpTimeStampNs, outData);
-}
 
-void StatsLogProcessor::onDumpReportLocked(const ConfigKey& key, const uint64_t dumpTimeStampNs,
-                                           vector<uint8_t>* outData) {
     auto it = mMetricsManagers.find(key);
     if (it == mMetricsManagers.end()) {
         ALOGW("Config source %s does not exist", key.ToString().c_str());
@@ -261,35 +268,14 @@ void StatsLogProcessor::onDumpReportLocked(const ConfigKey& key, const uint64_t 
     // Start of ConfigMetricsReport (reports).
     uint64_t reportsToken =
             proto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_REPORTS);
-
-    int64_t lastReportTimeNs = it->second->getLastReportTimeNs();
-    int64_t lastReportWallClockNs = it->second->getLastReportWallClockNs();
-
-    // First, fill in ConfigMetricsReport using current data on memory, which
-    // starts from filling in StatsLogReport's.
-    it->second->onDumpReport(dumpTimeStampNs, &proto);
-
-    // Fill in UidMap.
-    vector<uint8_t> uidMap;
-    mUidMap->getOutput(key, &uidMap);
-    proto.write(FIELD_TYPE_MESSAGE | FIELD_ID_UID_MAP, uidMap.data());
-
-    // Fill in the timestamps.
-    proto.write(FIELD_TYPE_INT64 | FIELD_ID_LAST_REPORT_ELAPSED_NANOS,
-                (long long)lastReportTimeNs);
-    proto.write(FIELD_TYPE_INT64 | FIELD_ID_CURRENT_REPORT_ELAPSED_NANOS,
-                (long long)dumpTimeStampNs);
-    proto.write(FIELD_TYPE_INT64 | FIELD_ID_LAST_REPORT_WALL_CLOCK_NANOS,
-                (long long)lastReportWallClockNs);
-    proto.write(FIELD_TYPE_INT64 | FIELD_ID_CURRENT_REPORT_WALL_CLOCK_NANOS,
-                (long long)getWallClockNs());
-
-    // End of ConfigMetricsReport (reports).
+    onConfigMetricsReportLocked(key, dumpTimeStampNs, &proto);
     proto.end(reportsToken);
+    // End of ConfigMetricsReport (reports).
+
 
     // Then, check stats-data directory to see there's any file containing
     // ConfigMetricsReport from previous shutdowns to concatenate to reports.
-    StorageManager::appendConfigMetricsReport(proto);
+    StorageManager::appendConfigMetricsReport(key, &proto);
 
     if (outData != nullptr) {
         outData->clear();
@@ -305,6 +291,40 @@ void StatsLogProcessor::onDumpReportLocked(const ConfigKey& key, const uint64_t 
     }
 
     StatsdStats::getInstance().noteMetricsReportSent(key);
+}
+
+/*
+ * onConfigMetricsReportLocked dumps serialized ConfigMetricsReport into outData.
+ */
+void StatsLogProcessor::onConfigMetricsReportLocked(const ConfigKey& key,
+                                                    const uint64_t dumpTimeStampNs,
+                                                    ProtoOutputStream* proto) {
+    // We already checked whether key exists in mMetricsManagers in
+    // WriteDataToDisk.
+    auto it = mMetricsManagers.find(key);
+    int64_t lastReportTimeNs = it->second->getLastReportTimeNs();
+    int64_t lastReportWallClockNs = it->second->getLastReportWallClockNs();
+
+    // First, fill in ConfigMetricsReport using current data on memory, which
+    // starts from filling in StatsLogReport's.
+    it->second->onDumpReport(dumpTimeStampNs, proto);
+
+    // Fill in UidMap.
+    uint64_t uidMapToken = proto->start(FIELD_TYPE_MESSAGE | FIELD_ID_UID_MAP);
+    mUidMap->appendUidMap(key, proto);
+    proto->end(uidMapToken);
+
+    // Fill in the timestamps.
+    proto->write(FIELD_TYPE_INT64 | FIELD_ID_LAST_REPORT_ELAPSED_NANOS,
+                (long long)lastReportTimeNs);
+    proto->write(FIELD_TYPE_INT64 | FIELD_ID_CURRENT_REPORT_ELAPSED_NANOS,
+                (long long)dumpTimeStampNs);
+    proto->write(FIELD_TYPE_INT64 | FIELD_ID_LAST_REPORT_WALL_CLOCK_NANOS,
+                (long long)lastReportWallClockNs);
+    proto->write(FIELD_TYPE_INT64 | FIELD_ID_CURRENT_REPORT_WALL_CLOCK_NANOS,
+                (long long)getWallClockNs());
+
+
 }
 
 void StatsLogProcessor::OnConfigRemoved(const ConfigKey& key) {
@@ -360,11 +380,17 @@ void StatsLogProcessor::WriteDataToDisk() {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
     for (auto& pair : mMetricsManagers) {
         const ConfigKey& key = pair.first;
-        vector<uint8_t> data;
-        onDumpReportLocked(key, getElapsedRealtimeNs(), &data);
+        ProtoOutputStream proto;
+        onConfigMetricsReportLocked(key, getElapsedRealtimeNs(), &proto);
         string file_name = StringPrintf("%s/%ld_%d_%lld", STATS_DATA_DIR,
              (long)getWallClockSec(), key.GetUid(), (long long)key.GetId());
-        StorageManager::writeFile(file_name.c_str(), &data[0], data.size());
+        android::base::unique_fd fd(open(file_name.c_str(),
+                                    O_WRONLY | O_CREAT | O_CLOEXEC, S_IRUSR | S_IWUSR));
+        if (fd == -1) {
+            VLOG("Attempt to write %s but failed", file_name.c_str());
+            return;
+        }
+        proto.flush(fd.get());
     }
 }
 

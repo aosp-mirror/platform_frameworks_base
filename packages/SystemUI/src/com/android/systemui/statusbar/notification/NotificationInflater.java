@@ -179,6 +179,9 @@ public class NotificationInflater {
                     : builder.makeAmbientNotification();
         }
         result.packageContext = packageContext;
+        result.headsUpStatusBarText = builder.getHeadsUpStatusBarText(false /* showingPublic */);
+        result.headsUpStatusBarTextPublic = builder.getHeadsUpStatusBarText(
+                true /* showingPublic */);
         return result;
     }
 
@@ -456,6 +459,8 @@ public class NotificationInflater {
                 }
                 entry.cachedAmbientContentView = result.newAmbientView;
             }
+            entry.headsUpStatusBarText = result.headsUpStatusBarText;
+            entry.headsUpStatusBarTextPublic = result.headsUpStatusBarTextPublic;
             if (endListener != null) {
                 endListener.onAsyncInflationFinished(row.getEntry());
             }
@@ -579,15 +584,9 @@ public class NotificationInflater {
                         mSbn.getNotification());
                 Context packageContext = mSbn.getPackageContext(mContext);
                 Notification notification = mSbn.getNotification();
-                if (mIsLowPriority) {
-                    int backgroundColor = mContext.getColor(
-                            R.color.notification_material_background_low_priority_color);
-                    recoveredBuilder.setBackgroundColorHint(backgroundColor);
-                }
                 if (notification.isMediaNotification()) {
                     MediaNotificationProcessor processor = new MediaNotificationProcessor(mContext,
                             packageContext);
-                    processor.setIsLowPriority(mIsLowPriority);
                     processor.processNotification(notification, recoveredBuilder);
                 }
                 return createRemoteViews(mReInflateFlags,
@@ -665,6 +664,8 @@ public class NotificationInflater {
         private View inflatedExpandedView;
         private View inflatedAmbientView;
         private View inflatedPublicView;
+        private CharSequence headsUpStatusBarText;
+        private CharSequence headsUpStatusBarTextPublic;
     }
 
     @VisibleForTesting

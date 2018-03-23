@@ -25,8 +25,8 @@ import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
-import static com.android.server.am.proto.KeyguardControllerProto.KEYGUARD_OCCLUDED;
-import static com.android.server.am.proto.KeyguardControllerProto.KEYGUARD_SHOWING;
+import static com.android.server.am.KeyguardControllerProto.KEYGUARD_OCCLUDED;
+import static com.android.server.am.KeyguardControllerProto.KEYGUARD_SHOWING;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;

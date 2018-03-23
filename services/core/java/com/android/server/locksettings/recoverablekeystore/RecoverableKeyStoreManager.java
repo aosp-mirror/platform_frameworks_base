@@ -31,6 +31,7 @@ import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.os.Binder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
@@ -38,8 +39,10 @@ import android.security.keystore.recovery.KeyChainProtectionParams;
 import android.security.keystore.recovery.KeyChainSnapshot;
 import android.security.keystore.recovery.RecoveryCertPath;
 import android.security.keystore.recovery.RecoveryController;
+import android.security.keystore.recovery.TrustedRootCertificates;
 import android.security.keystore.recovery.WrappedApplicationKey;
 import android.security.KeyStore;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -50,7 +53,6 @@ import com.android.server.locksettings.recoverablekeystore.storage.ApplicationKe
 import com.android.server.locksettings.recoverablekeystore.certificate.CertParsingException;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertValidationException;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertXml;
-import com.android.server.locksettings.recoverablekeystore.certificate.TrustedRootCert;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySessionStorage;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
@@ -64,6 +66,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertPath;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
@@ -200,15 +203,19 @@ public class RecoverableKeyStoreManager {
         }
         Log.i(TAG, "Updating the certificate with the new serial number " + newSerial);
 
+        // Randomly choose and validate an endpoint certificate from the list
         CertPath certPath;
+        X509Certificate rootCert = getRootCertificate(rootCertificateAlias);
         try {
             Log.d(TAG, "Getting and validating a random endpoint certificate");
-            certPath = certXml.getRandomEndpointCert(TrustedRootCert.TRUSTED_ROOT_CERT);
+            certPath = certXml.getRandomEndpointCert(rootCert);
         } catch (CertValidationException e) {
             Log.e(TAG, "Invalid endpoint cert", e);
             throw new ServiceSpecificException(
                     ERROR_INVALID_CERTIFICATE, "Failed to validate certificate.");
         }
+
+        // Save the chosen and validated certificate into database
         try {
             Log.d(TAG, "Saving the randomly chosen endpoint certificate to database");
             if (mDatabase.setRecoveryServiceCertPath(userId, uid, certPath) > 0) {
@@ -253,8 +260,9 @@ public class RecoverableKeyStoreManager {
                     ERROR_BAD_CERTIFICATE_FORMAT, "Failed to parse the sig file.");
         }
 
+        X509Certificate rootCert = getRootCertificate(rootCertificateAlias);
         try {
-            sigXml.verifyFileSignature(TrustedRootCert.TRUSTED_ROOT_CERT, recoveryServiceCertFile);
+            sigXml.verifyFileSignature(rootCert, recoveryServiceCertFile);
         } catch (CertValidationException e) {
             Log.d(TAG, "The signature over the cert file is invalid."
                     + " Cert: " + HexDump.toHexString(recoveryServiceCertFile)
@@ -408,8 +416,8 @@ public class RecoverableKeyStoreManager {
      * @param vaultChallenge Challenge issued by vault service.
      * @param secrets Lock-screen hashes. For now only a single secret is supported.
      * @return Encrypted bytes of recovery claim. This can then be issued to the vault service.
-     * @deprecated Use {@link #startRecoverySessionWithCertPath(String, RecoveryCertPath, byte[],
-     *         byte[], List)} instead.
+     * @deprecated Use {@link #startRecoverySessionWithCertPath(String, String, RecoveryCertPath,
+     *         byte[], byte[], List)} instead.
      *
      * @hide
      */
@@ -449,6 +457,7 @@ public class RecoverableKeyStoreManager {
                 uid,
                 new RecoverySessionStorage.Entry(sessionId, kfHash, keyClaimant, vaultParams));
 
+        Log.i(TAG, "Received VaultParams for recovery: " + HexDump.toHexString(vaultParams));
         try {
             byte[] thmKfHash = KeySyncUtils.calculateThmKfHash(kfHash);
             return KeySyncUtils.encryptRecoveryClaim(
@@ -479,6 +488,7 @@ public class RecoverableKeyStoreManager {
      */
     public @NonNull byte[] startRecoverySessionWithCertPath(
             @NonNull String sessionId,
+            @NonNull String rootCertificateAlias,
             @NonNull RecoveryCertPath verifierCertPath,
             @NonNull byte[] vaultParams,
             @NonNull byte[] vaultChallenge,
@@ -495,11 +505,10 @@ public class RecoverableKeyStoreManager {
         }
 
         try {
-            CertUtils.validateCertPath(TrustedRootCert.TRUSTED_ROOT_CERT, certPath);
+            CertUtils.validateCertPath(getRootCertificate(rootCertificateAlias), certPath);
         } catch (CertValidationException e) {
             Log.e(TAG, "Failed to validate the given cert path", e);
-            // TODO: Change this to ERROR_INVALID_CERTIFICATE once ag/3666620 is submitted
-            throw new ServiceSpecificException(ERROR_BAD_CERTIFICATE_FORMAT, e.getMessage());
+            throw new ServiceSpecificException(ERROR_INVALID_CERTIFICATE, e.getMessage());
         }
 
         byte[] verifierPublicKey = certPath.getCertificates().get(0).getPublicKey().getEncoded();
@@ -547,6 +556,78 @@ public class RecoverableKeyStoreManager {
             sessionEntry.destroy();
             mRecoverySessionStorage.remove(uid);
         }
+    }
+
+    /**
+     * Invoked by a recovery agent after a successful recovery claim is sent to the remote vault
+     * service.
+     *
+     * @param sessionId The session ID used to generate the claim. See
+     *     {@link #startRecoverySession(String, byte[], byte[], byte[], List)}.
+     * @param encryptedRecoveryKey The encrypted recovery key blob returned by the remote vault
+     *     service.
+     * @param applicationKeys The encrypted key blobs returned by the remote vault service. These
+     *     were wrapped with the recovery key.
+     * @throws RemoteException if an error occurred recovering the keys.
+     */
+    public Map<String, String> recoverKeyChainSnapshot(
+            @NonNull String sessionId,
+            @NonNull byte[] encryptedRecoveryKey,
+            @NonNull List<WrappedApplicationKey> applicationKeys) throws RemoteException {
+        checkRecoverKeyStorePermission();
+        int userId = UserHandle.getCallingUserId();
+        int uid = Binder.getCallingUid();
+        RecoverySessionStorage.Entry sessionEntry = mRecoverySessionStorage.get(uid, sessionId);
+        if (sessionEntry == null) {
+            throw new ServiceSpecificException(ERROR_SESSION_EXPIRED,
+                    String.format(Locale.US,
+                            "Application uid=%d does not have pending session '%s'",
+                            uid,
+                            sessionId));
+        }
+
+        try {
+            byte[] recoveryKey = decryptRecoveryKey(sessionEntry, encryptedRecoveryKey);
+            Map<String, byte[]> keysByAlias = recoverApplicationKeys(recoveryKey, applicationKeys);
+            return importKeyMaterials(userId, uid, keysByAlias);
+        } catch (KeyStoreException e) {
+            throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
+        } finally {
+            sessionEntry.destroy();
+            mRecoverySessionStorage.remove(uid);
+        }
+    }
+
+    /**
+     * Imports the key materials, returning a map from alias to grant alias for the calling user.
+     *
+     * @param userId The calling user ID.
+     * @param uid The calling uid.
+     * @param keysByAlias The key materials, keyed by alias.
+     * @throws KeyStoreException if an error occurs importing the key or getting the grant.
+     */
+    private Map<String, String> importKeyMaterials(
+            int userId, int uid, Map<String, byte[]> keysByAlias) throws KeyStoreException {
+        ArrayMap<String, String> grantAliasesByAlias = new ArrayMap<>(keysByAlias.size());
+        for (String alias : keysByAlias.keySet()) {
+            mApplicationKeyStorage.setSymmetricKeyEntry(userId, uid, alias, keysByAlias.get(alias));
+            String grantAlias = getAlias(userId, uid, alias);
+            Log.i(TAG, String.format(Locale.US, "Import %s -> %s", alias, grantAlias));
+            grantAliasesByAlias.put(alias, grantAlias);
+        }
+        return grantAliasesByAlias;
+    }
+
+    /**
+     * Returns an alias for the key.
+     *
+     * @param userId The user ID of the calling process.
+     * @param uid The uid of the calling process.
+     * @param alias The alias of the key.
+     * @return The alias in the calling process's keystore.
+     */
+    private String getAlias(int userId, int uid, String alias) {
+        return mApplicationKeyStorage.getGrantAlias(userId, uid, alias);
     }
 
     /**
@@ -626,7 +707,7 @@ public class RecoverableKeyStoreManager {
             byte[] secretKey =
                     mRecoverableKeyGenerator.generateAndStoreKey(encryptionKey, userId, uid, alias);
             mApplicationKeyStorage.setSymmetricKeyEntry(userId, uid, alias, secretKey);
-            return mApplicationKeyStorage.getGrantAlias(userId, uid, alias);
+            return getAlias(userId, uid, alias);
         } catch (KeyStoreException | InvalidKeyException | RecoverableKeyStorageException e) {
             throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
         }
@@ -677,7 +758,7 @@ public class RecoverableKeyStoreManager {
 
             // Import the key to Android KeyStore and get grant
             mApplicationKeyStorage.setSymmetricKeyEntry(userId, uid, alias, keyBytes);
-            return mApplicationKeyStorage.getGrantAlias(userId, uid, alias);
+            return getAlias(userId, uid, alias);
         } catch (KeyStoreException | InvalidKeyException | RecoverableKeyStorageException e) {
             throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
         }
@@ -691,8 +772,7 @@ public class RecoverableKeyStoreManager {
     public String getKey(@NonNull String alias) throws RemoteException {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
-        String grantAlias = mApplicationKeyStorage.getGrantAlias(userId, uid, alias);
-        return grantAlias;
+        return getAlias(userId, uid, alias);
     }
 
     private byte[] decryptRecoveryKey(
@@ -835,6 +915,21 @@ public class RecoverableKeyStoreManager {
         } catch (InsecureUserException e) {
             Log.e(TAG, "InsecureUserException during lock screen secret update", e);
         }
+    }
+
+    private X509Certificate getRootCertificate(String rootCertificateAlias) throws RemoteException {
+        if (rootCertificateAlias == null || rootCertificateAlias.isEmpty()) {
+            // Use the default Google Key Vault Service CA certificate if the alias is not provided
+            rootCertificateAlias = TrustedRootCertificates.GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_ALIAS;
+        }
+
+        X509Certificate rootCertificate =
+                TrustedRootCertificates.getRootCertificate(rootCertificateAlias);
+        if (rootCertificate == null) {
+            throw new ServiceSpecificException(
+                    ERROR_INVALID_CERTIFICATE, "The provided root certificate alias is invalid");
+        }
+        return rootCertificate;
     }
 
     private void checkRecoverKeyStorePermission() {

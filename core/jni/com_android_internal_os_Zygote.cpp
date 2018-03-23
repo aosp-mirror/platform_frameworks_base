@@ -666,7 +666,9 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
       }
     }
 
-    if (!is_system_server) {
+    // If this zygote isn't root, it won't be able to create a process group,
+    // since the directory is owned by root.
+    if (!is_system_server && getuid() == 0) {
         int rc = createProcessGroup(uid, getpid());
         if (rc != 0) {
             if (rc == -EROFS) {

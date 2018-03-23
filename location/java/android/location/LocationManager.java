@@ -23,6 +23,7 @@ import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
@@ -42,12 +43,14 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Log;
 import com.android.internal.location.ProviderProperties;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This class provides access to the system location services.  These
@@ -232,12 +235,6 @@ public class LocationManager {
      */
     public static final String HIGH_POWER_REQUEST_CHANGE_ACTION =
         "android.location.HIGH_POWER_REQUEST_CHANGE";
-
-    /**
-     * The value returned by {@link LocationManager#getGnssHardwareModelName()} when the hardware
-     * does not support providing the actual value.
-     */
-    public static final String GNSS_HARDWARE_MODEL_NAME_UNKNOWN = "Model Name Unknown";
 
     /**
      * Broadcast intent action for Settings app to inject a footer at the bottom of location
@@ -1252,12 +1249,40 @@ public class LocationManager {
     @SystemApi
     @RequiresPermission(WRITE_SECURE_SETTINGS)
     public void setLocationEnabledForUser(boolean enabled, UserHandle userHandle) {
-        for (String provider : getAllProviders()) {
+        final List<String> allProvidersList = getAllProviders();
+        // Update all providers on device plus gps and network provider when disabling location.
+        Set<String> allProvidersSet = new ArraySet<>(allProvidersList.size() + 2);
+        allProvidersSet.addAll(allProvidersList);
+        // When disabling location, disable gps and network provider that could have been enabled by
+        // location mode api.
+        if (enabled == false) {
+            allProvidersSet.add(GPS_PROVIDER);
+            allProvidersSet.add(NETWORK_PROVIDER);
+        }
+        if (allProvidersSet.isEmpty()) {
+            return;
+        }
+        // to ensure thread safety, we write the provider name with a '+' or '-'
+        // and let the SettingsProvider handle it rather than reading and modifying
+        // the list of enabled providers.
+        final String prefix = enabled ? "+" : "-";
+        StringBuilder locationProvidersAllowed = new StringBuilder();
+        for (String provider : allProvidersSet) {
+            checkProvider(provider);
             if (provider.equals(PASSIVE_PROVIDER)) {
                 continue;
             }
-            setProviderEnabledForUser(provider, enabled, userHandle);
+            locationProvidersAllowed.append(prefix);
+            locationProvidersAllowed.append(provider);
+            locationProvidersAllowed.append(",");
         }
+        // Remove the trailing comma
+        locationProvidersAllowed.setLength(locationProvidersAllowed.length() - 1);
+        Settings.Secure.putStringForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                locationProvidersAllowed.toString(),
+                userHandle.getIdentifier());
     }
 
     /**
@@ -2176,7 +2201,9 @@ public class LocationManager {
     /**
      * Returns the model year of the GNSS hardware and software build.
      *
-     * May return 0 if the model year is less than 2016.
+     * <p> More details, such as build date, may be available in {@link #getGnssHardwareModelName()}.
+     *
+     * <p> May return 0 if the model year is less than 2016.
      */
     public int getGnssYearOfHardware() {
         try {
@@ -2190,10 +2217,12 @@ public class LocationManager {
      * Returns the Model Name (including Vendor and Hardware/Software Version) of the GNSS hardware
      * driver.
      *
-     * Will return {@link LocationManager#GNSS_HARDWARE_MODEL_NAME_UNKNOWN} when the GNSS hardware
-     * abstraction layer does not support providing this value.
+     * <p> No device-specific serial number or ID is returned from this API.
+     *
+     * <p> Will return null when the GNSS hardware abstraction layer does not support providing
+     * this value.
      */
-    @NonNull
+    @Nullable
     public String getGnssHardwareModelName() {
         try {
             return mService.getGnssHardwareModelName();

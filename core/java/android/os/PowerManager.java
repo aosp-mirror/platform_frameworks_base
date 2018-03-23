@@ -1280,6 +1280,19 @@ public final class PowerManager {
     }
 
     /**
+     * If true, the doze component is not started until after the screen has been
+     * turned off and the screen off animation has been performed.
+     * @hide
+     */
+    public void setDozeAfterScreenOff(boolean dozeAfterScreenOf) {
+        try {
+            mService.setDozeAfterScreenOff(dozeAfterScreenOf);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns the reason the phone was last shutdown. Calling app must have the
      * {@link android.Manifest.permission#DEVICE_POWER} permission to request this information.
      * @return Reason for shutdown as an int, {@link #SHUTDOWN_REASON_UNKNOWN} if the file could

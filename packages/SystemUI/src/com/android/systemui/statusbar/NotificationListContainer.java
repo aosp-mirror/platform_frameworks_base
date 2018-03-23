@@ -188,4 +188,11 @@ public interface NotificationListContainer {
     default void applyExpandAnimationParams(ExpandAnimationParameters params) {}
 
     default void setExpandingNotification(ExpandableNotificationRow row) {}
+
+    /**
+     * Bind a newly created row.
+     *
+     * @param row The notification to bind.
+     */
+    default void bindRow(ExpandableNotificationRow row) {}
 }

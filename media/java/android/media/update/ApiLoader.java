@@ -46,11 +46,6 @@ public final class ApiLoader {
 
     private ApiLoader() { }
 
-    @Deprecated
-    public static StaticProvider getProvider(Context context) {
-        return getProvider();
-    }
-
     public static StaticProvider getProvider() {
         if (sMediaUpdatable != null) return sMediaUpdatable;
 
@@ -79,7 +74,7 @@ public final class ApiLoader {
             ActivityManager.getService().addPackageDependency(ai.packageName);
         }
 
-        PathClassLoader classLoader = new PathClassLoader(ai.sourceDir,
+        ClassLoader classLoader = new PathClassLoader(ai.sourceDir,
                 ai.nativeLibraryDir + File.pathSeparator + System.getProperty("java.library.path"),
                 ClassLoader.getSystemClassLoader().getParent());
         return sMediaUpdatable = (StaticProvider) classLoader.loadClass(UPDATE_CLASS)

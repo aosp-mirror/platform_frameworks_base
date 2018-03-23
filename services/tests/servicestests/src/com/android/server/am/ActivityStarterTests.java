@@ -18,13 +18,19 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.START_ABORTED;
 import static android.app.ActivityManager.START_CLASS_NOT_FOUND;
+import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
 import static android.app.ActivityManager.START_FORWARD_AND_REQUEST_CONFLICT;
+import static android.app.ActivityManager.START_INTENT_NOT_RESOLVED;
 import static android.app.ActivityManager.START_NOT_VOICE_COMPATIBLE;
+import static android.app.ActivityManager.START_PERMISSION_DENIED;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_SWITCHES_CANCELED;
+import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 
 import android.app.ActivityOptions;
 import android.app.IApplicationThread;
@@ -45,6 +51,7 @@ import android.view.Gravity;
 import org.junit.runner.RunWith;
 import org.junit.Test;
 
+import static android.content.Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED;
 import static com.android.server.am.ActivityManagerService.ANIMATE;
 
 import static org.junit.Assert.assertEquals;
@@ -61,9 +68,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
-
-import static android.app.ActivityManager.START_PERMISSION_DENIED;
-import static android.app.ActivityManager.START_INTENT_NOT_RESOLVED;
 
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.am.ActivityStarter.Factory;
@@ -290,7 +294,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         }
     }
 
-    private ActivityStarter prepareStarter() {
+    private ActivityStarter prepareStarter(int launchFlags) {
         // always allow test to start activity.
         doReturn(true).when(mService.mStackSupervisor).checkStartAnyActivityPermission(
                 any(), any(), any(), anyInt(), anyInt(), anyInt(), any(),
@@ -325,8 +329,20 @@ public class ActivityStarterTests extends ActivityTestsBase {
         // ignore requests to create window container.
         doNothing().when(task).createWindowContainer(anyBoolean(), anyBoolean());
 
+
+        final Intent intent = new Intent();
+        intent.addFlags(launchFlags);
+        intent.setComponent(ActivityBuilder.getDefaultComponent());
+
+        final ActivityInfo info = new ActivityInfo();
+
+        info.applicationInfo = new ApplicationInfo();
+        info.applicationInfo.packageName = ActivityBuilder.getDefaultComponent().getPackageName();
+
         return new ActivityStarter(mController, mService,
-                mService.mStackSupervisor, mock(ActivityStartInterceptor.class));
+                mService.mStackSupervisor, mock(ActivityStartInterceptor.class))
+                .setIntent(intent)
+                .setActivityInfo(info);
     }
 
     /**
@@ -342,9 +358,6 @@ public class ActivityStarterTests extends ActivityTestsBase {
         // add custom values to activity info to make unique.
         final ActivityInfo info = new ActivityInfo();
         final Rect launchBounds = new Rect(0, 0, 20, 30);
-        final Intent intent = new Intent();
-
-        intent.setComponent(ActivityBuilder.getDefaultComponent());
 
         final WindowLayout windowLayout =
                 new WindowLayout(10, .5f, 20, 1.0f, Gravity.NO_GRAVITY, 1, 1);
@@ -354,14 +367,13 @@ public class ActivityStarterTests extends ActivityTestsBase {
         info.applicationInfo.packageName = ActivityBuilder.getDefaultComponent().getPackageName();
 
         // create starter.
-        final ActivityStarter optionStarter = prepareStarter();
+        final ActivityStarter optionStarter = prepareStarter(0 /* launchFlags */);
 
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchBounds(launchBounds);
 
         // run starter.
         optionStarter
-                .setIntent(intent)
                 .setReason("testCreateTaskLayout")
                 .setActivityInfo(info)
                 .setActivityOptions(new SafeActivityOptions(options))
@@ -370,5 +382,70 @@ public class ActivityStarterTests extends ActivityTestsBase {
         // verify that values are passed to the modifier.
         verify(modifier, times(1)).onCalculate(any(), eq(windowLayout), any(), any(), eq(options),
                 any(), any());
+    }
+
+    /**
+     * This test ensures that if the intent is being delivered to a
+     */
+    @Test
+    public void testSplitScreenDeliverToTop() {
+        final ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+
+        final ActivityRecord focusActivity = new ActivityBuilder(mService)
+                .setCreateTask(true)
+                .build();
+
+        focusActivity.getStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+
+        final ActivityRecord reusableActivity = new ActivityBuilder(mService)
+                .setCreateTask(true)
+                .build();
+
+        // Create reusable activity after entering split-screen so that it is the top secondary
+        // stack.
+        reusableActivity.getStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+
+        // Set focus back to primary.
+        mService.mStackSupervisor.setFocusStackUnchecked("testSplitScreenDeliverToTop",
+                focusActivity.getStack());
+
+        doReturn(reusableActivity).when(mService.mStackSupervisor).findTaskLocked(any(), anyInt());
+
+        final int result = starter.setReason("testSplitScreenDeliverToTop").execute();
+
+        // Ensure result is delivering intent to top.
+        assertEquals(result, START_DELIVERED_TO_TOP);
+    }
+
+    /**
+     * This test ensures that if the intent is being delivered to a split-screen unfocused task
+     * reports it is brought to front instead of delivering to top.
+     */
+    @Test
+    public void testSplitScreenTaskToFront() {
+        final ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+
+        // Create reusable activity here first. Setting the windowing mode of the primary stack
+        // will move the existing standard full screen stack to secondary, putting this one on the
+        // bottom.
+        final ActivityRecord reusableActivity = new ActivityBuilder(mService)
+                .setCreateTask(true)
+                .build();
+
+        reusableActivity.getStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+
+        final ActivityRecord focusActivity = new ActivityBuilder(mService)
+                .setCreateTask(true)
+                .build();
+
+        // Enter split-screen. Primary stack should have focus.
+        focusActivity.getStack().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+
+        doReturn(reusableActivity).when(mService.mStackSupervisor).findTaskLocked(any(), anyInt());
+
+        final int result = starter.setReason("testSplitScreenMoveToFront").execute();
+
+        // Ensure result is moving task to front.
+        assertEquals(result, START_TASK_TO_FRONT);
     }
 }

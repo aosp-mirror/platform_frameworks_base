@@ -220,10 +220,13 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * @param outsetFrame The frame that includes areas that aren't part of the surface but we
          * want to treat them as such.
          * @param displayCutout the display cutout
+         * @param parentFrameWasClippedByDisplayCutout true if the parent frame would have been
+         * different if there was no display cutout.
          */
         public void computeFrameLw(Rect parentFrame, Rect displayFrame,
                 Rect overlayFrame, Rect contentFrame, Rect visibleFrame, Rect decorFrame,
-                Rect stableFrame, @Nullable Rect outsetFrame, WmDisplayCutout displayCutout);
+                Rect stableFrame, @Nullable Rect outsetFrame, WmDisplayCutout displayCutout,
+                boolean parentFrameWasClippedByDisplayCutout);
 
         /**
          * Retrieve the current frame of the window that has been assigned by
@@ -485,7 +488,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         boolean canAcquireSleepToken();
 
         /**
-         * Writes {@link com.android.server.wm.proto.IdentifierProto} to stream.
+         * Writes {@link com.android.server.wm.IdentifierProto} to stream.
          */
         void writeIdentifierToProto(ProtoOutputStream proto, long fieldId);
     }
@@ -1623,7 +1626,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
 
     /**
      * Write the WindowManagerPolicy's state into the protocol buffer.
-     * The message is described in {@link com.android.server.wm.proto.WindowManagerPolicyProto}
+     * The message is described in {@link com.android.server.wm.WindowManagerPolicyProto}
      *
      * @param proto The protocol buffer output stream to write to.
      */

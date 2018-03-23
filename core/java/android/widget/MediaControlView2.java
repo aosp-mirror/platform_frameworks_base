@@ -33,6 +33,7 @@ import java.lang.annotation.RetentionPolicy;
 
 // TODO: Use link annotation to refer VideoView2 once VideoView2 became unhidden.
 /**
+ * @hide
  * A View that contains the controls for MediaPlayer2.
  * It provides a wide range of UI including buttons such as "Play/Pause", "Rewind", "Fast Forward",
  * "Subtitle", "Full Screen", and it is also possible to add multiple custom buttons.
@@ -150,7 +151,7 @@ public class MediaControlView2 extends ViewGroupHelper<MediaControlView2Provider
     public MediaControlView2(@NonNull Context context, @Nullable AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
         super((instance, superProvider, privateProvider) ->
-                ApiLoader.getProvider(context).createMediaControlView2(
+                ApiLoader.getProvider().createMediaControlView2(
                         (MediaControlView2) instance, superProvider, privateProvider,
                         attrs, defStyleAttr, defStyleRes),
                 context, attrs, defStyleAttr, defStyleRes);

@@ -66,7 +66,7 @@ public:
      * Appends ConfigMetricsReport found on disk to the specific proto and
      * delete it.
      */
-    static void appendConfigMetricsReport(ProtoOutputStream& proto);
+    static void appendConfigMetricsReport(const ConfigKey& key, ProtoOutputStream* proto);
 
     /**
      * Call to load the saved configs from disk.

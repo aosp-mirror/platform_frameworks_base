@@ -135,6 +135,12 @@ LOCAL_SHARED_LIBRARIES := $(statsd_common_shared_libraries) \
 
 LOCAL_MODULE_CLASS := EXECUTABLES
 
+# Enable sanitizer on eng builds
+ifeq ($(TARGET_BUILD_VARIANT),eng)
+    LOCAL_CLANG := true
+    LOCAL_SANITIZE := address
+endif
+
 LOCAL_INIT_RC := statsd.rc
 
 include $(BUILD_EXECUTABLE)
@@ -177,6 +183,7 @@ LOCAL_SRC_FILES := \
     tests/LogEvent_test.cpp \
     tests/MetricsManager_test.cpp \
     tests/StatsLogProcessor_test.cpp \
+    tests/StatsService_test.cpp \
     tests/UidMap_test.cpp \
     tests/FieldValue_test.cpp \
     tests/condition/CombinationConditionTracker_test.cpp \

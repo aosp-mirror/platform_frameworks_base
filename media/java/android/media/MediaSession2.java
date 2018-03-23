@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
+ * @hide
  * Allows a media app to expose its transport controls and playback information in a process to
  * other processes including the Android framework and other apps. Common use cases are as follows.
  * <ul>
@@ -431,16 +432,16 @@ public class MediaSession2 implements AutoCloseable {
         private final CommandProvider mProvider;
 
         public Command(@NonNull Context context, int commandCode) {
-            mProvider = ApiLoader.getProvider(context)
-                    .createMediaSession2Command(this, commandCode, null, null);
+            mProvider = ApiLoader.getProvider().createMediaSession2Command(
+                    this, commandCode, null, null);
         }
 
         public Command(@NonNull Context context, @NonNull String action, @Nullable Bundle extras) {
             if (action == null) {
                 throw new IllegalArgumentException("action shouldn't be null");
             }
-            mProvider = ApiLoader.getProvider(context)
-                    .createMediaSession2Command(this, COMMAND_CODE_CUSTOM, action, extras);
+            mProvider = ApiLoader.getProvider().createMediaSession2Command(
+                    this, COMMAND_CODE_CUSTOM, action, extras);
         }
 
         /**
@@ -488,7 +489,7 @@ public class MediaSession2 implements AutoCloseable {
          * @hide
          */
         public static Command fromBundle(@NonNull Context context, @NonNull Bundle command) {
-            return ApiLoader.getProvider(context).fromBundle_MediaSession2Command(context, command);
+            return ApiLoader.getProvider().fromBundle_MediaSession2Command(context, command);
         }
     }
 
@@ -499,13 +500,13 @@ public class MediaSession2 implements AutoCloseable {
         private final CommandGroupProvider mProvider;
 
         public CommandGroup(@NonNull Context context) {
-            mProvider = ApiLoader.getProvider(context)
-                    .createMediaSession2CommandGroup(context, this, null);
+            mProvider = ApiLoader.getProvider().createMediaSession2CommandGroup(
+                    context, this, null);
         }
 
         public CommandGroup(@NonNull Context context, @Nullable CommandGroup others) {
-            mProvider = ApiLoader.getProvider(context)
-                    .createMediaSession2CommandGroup(context, this, others);
+            mProvider = ApiLoader.getProvider().createMediaSession2CommandGroup(
+                    context, this, others);
         }
 
         /**
@@ -559,8 +560,7 @@ public class MediaSession2 implements AutoCloseable {
          * @hide
          */
         public static @Nullable CommandGroup fromBundle(Context context, Bundle commands) {
-            return ApiLoader.getProvider(context)
-                    .fromBundle_MediaSession2CommandGroup(context, commands);
+            return ApiLoader.getProvider().fromBundle_MediaSession2CommandGroup(context, commands);
         }
     }
 
@@ -1010,7 +1010,7 @@ public class MediaSession2 implements AutoCloseable {
     // This workarounds javadoc issue described in the MediaSession2.BuilderBase.
     public static final class Builder extends BuilderBase<MediaSession2, Builder, SessionCallback> {
         public Builder(Context context) {
-            super((instance) -> ApiLoader.getProvider(context).createMediaSession2Builder(
+            super((instance) -> ApiLoader.getProvider().createMediaSession2Builder(
                     context, (Builder) instance));
         }
 
@@ -1062,9 +1062,8 @@ public class MediaSession2 implements AutoCloseable {
          */
         public ControllerInfo(@NonNull Context context, int uid, int pid,
                 @NonNull String packageName, @NonNull IInterface callback) {
-            mProvider = ApiLoader.getProvider(context)
-                    .createMediaSession2ControllerInfo(
-                            context, this, uid, pid, packageName, callback);
+            mProvider = ApiLoader.getProvider().createMediaSession2ControllerInfo(
+                    context, this, uid, pid, packageName, callback);
         }
 
         /**
@@ -1192,8 +1191,8 @@ public class MediaSession2 implements AutoCloseable {
             private final CommandButtonProvider.BuilderProvider mProvider;
 
             public Builder(@NonNull Context context) {
-                mProvider = ApiLoader.getProvider(context)
-                        .createMediaSession2CommandButtonBuilder(context, this);
+                mProvider = ApiLoader.getProvider().createMediaSession2CommandButtonBuilder(
+                        context, this);
             }
 
             public @NonNull Builder setCommand(@Nullable Command command) {
@@ -1543,7 +1542,7 @@ public class MediaSession2 implements AutoCloseable {
      * @see #COMMAND_CODE_PLAYLIST_REPLACE_ITEM
      */
     public void setOnDataSourceMissingHelper(@NonNull OnDataSourceMissingHelper helper) {
-        // TODO(jaewan): Implement (b/74090741).
+        mProvider.setOnDataSourceMissingHelper_impl(helper);
     }
 
     /**
@@ -1552,7 +1551,7 @@ public class MediaSession2 implements AutoCloseable {
      * @see #setOnDataSourceMissingHelper(OnDataSourceMissingHelper)
      */
     public void clearOnDataSourceMissingHelper() {
-        // TODO(jaewan): Implement (b/74090741)
+        mProvider.clearOnDataSourceMissingHelper_impl();
     }
 
     /**
@@ -1648,7 +1647,8 @@ public class MediaSession2 implements AutoCloseable {
     }
 
     /**
-     * Adds the media item to the playlist at position index.
+     * Adds the media item to the playlist at position index. Index equals or greater than
+     * the current playlist size will add the item at the end of the playlist.
      * <p>
      * This will not change the currently playing media item.
      * If index is less than or equal to the current index of the play list,

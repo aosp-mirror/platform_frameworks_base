@@ -45,8 +45,7 @@ public class DevelopmentSettingsEnabler {
                 Build.TYPE.equals("eng") ? 1 : 0) != 0;
         final boolean hasRestriction = um.hasUserRestriction(
                 UserManager.DISALLOW_DEBUGGING_FEATURES);
-        final boolean isAdmin = um.isAdminUser();
-
-        return isAdmin && !hasRestriction && settingEnabled;
+        final boolean isAdminOrDemo = um.isAdminUser() || um.isDemoUser();
+        return isAdminOrDemo && !hasRestriction && settingEnabled;
     }
 }

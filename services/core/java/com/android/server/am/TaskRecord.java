@@ -62,19 +62,19 @@ import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING_TO_TOP
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 import static com.android.server.am.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
-import static com.android.server.am.proto.TaskRecordProto.ACTIVITIES;
-import static com.android.server.am.proto.TaskRecordProto.BOUNDS;
-import static com.android.server.am.proto.TaskRecordProto.CONFIGURATION_CONTAINER;
-import static com.android.server.am.proto.TaskRecordProto.FULLSCREEN;
-import static com.android.server.am.proto.TaskRecordProto.ID;
-import static com.android.server.am.proto.TaskRecordProto.LAST_NON_FULLSCREEN_BOUNDS;
-import static com.android.server.am.proto.TaskRecordProto.MIN_HEIGHT;
-import static com.android.server.am.proto.TaskRecordProto.MIN_WIDTH;
-import static com.android.server.am.proto.TaskRecordProto.ORIG_ACTIVITY;
-import static com.android.server.am.proto.TaskRecordProto.REAL_ACTIVITY;
-import static com.android.server.am.proto.TaskRecordProto.RESIZE_MODE;
-import static com.android.server.am.proto.TaskRecordProto.STACK_ID;
-import static com.android.server.am.proto.TaskRecordProto.ACTIVITY_TYPE;
+import static com.android.server.am.TaskRecordProto.ACTIVITIES;
+import static com.android.server.am.TaskRecordProto.BOUNDS;
+import static com.android.server.am.TaskRecordProto.CONFIGURATION_CONTAINER;
+import static com.android.server.am.TaskRecordProto.FULLSCREEN;
+import static com.android.server.am.TaskRecordProto.ID;
+import static com.android.server.am.TaskRecordProto.LAST_NON_FULLSCREEN_BOUNDS;
+import static com.android.server.am.TaskRecordProto.MIN_HEIGHT;
+import static com.android.server.am.TaskRecordProto.MIN_WIDTH;
+import static com.android.server.am.TaskRecordProto.ORIG_ACTIVITY;
+import static com.android.server.am.TaskRecordProto.REAL_ACTIVITY;
+import static com.android.server.am.TaskRecordProto.RESIZE_MODE;
+import static com.android.server.am.TaskRecordProto.STACK_ID;
+import static com.android.server.am.TaskRecordProto.ACTIVITY_TYPE;
 
 import static java.lang.Integer.MAX_VALUE;
 

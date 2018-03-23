@@ -52,6 +52,14 @@ public class QSFactoryImpl implements QSFactory {
     }
 
     public QSTile createTile(String tileSpec) {
+        QSTileImpl tile = createTileInternal(tileSpec);
+        if (tile != null) {
+            tile.handleStale(); // Tile was just created, must be stale.
+        }
+        return tile;
+    }
+
+    private QSTileImpl createTileInternal(String tileSpec) {
         if (tileSpec.equals("wifi")) return new WifiTile(mHost);
         else if (tileSpec.equals("bt")) return new BluetoothTile(mHost);
         else if (tileSpec.equals("cell")) return new CellularTile(mHost);

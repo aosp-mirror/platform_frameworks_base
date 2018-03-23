@@ -25,6 +25,7 @@ import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
 import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
 import static android.net.NetworkStats.DEFAULT_NETWORK_YES;
 import static android.net.NetworkStats.IFACE_ALL;
+import static android.net.NetworkStats.INTERFACES_ALL;
 import static android.net.NetworkStats.METERED_ALL;
 import static android.net.NetworkStats.METERED_NO;
 import static android.net.NetworkStats.METERED_YES;
@@ -58,6 +59,9 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -94,6 +98,7 @@ import android.support.test.runner.AndroidJUnit4;
 import android.telephony.TelephonyManager;
 
 import com.android.internal.net.VpnInfo;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.server.LocalServices;
 import com.android.server.net.NetworkStatsService.NetworkStatsSettings;
@@ -652,6 +657,94 @@ public class NetworkStatsServiceTest {
     }
 
     @Test
+    public void testDetailedUidStats() throws Exception {
+        // pretend that network comes online
+        expectDefaultSettings();
+        expectNetworkState(buildWifiState());
+        expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
+        expectBandwidthControlCheck();
+
+        mService.forceUpdateIfaces(NETWORKS_WIFI);
+
+        NetworkStats.Entry entry1 = new NetworkStats.Entry(
+                TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 50L, 5L, 50L, 5L, 0L);
+        NetworkStats.Entry entry2 = new NetworkStats.Entry(
+                TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 50L, 5L, 50L, 5L, 0L);
+        NetworkStats.Entry entry3 = new NetworkStats.Entry(
+                TEST_IFACE, UID_BLUE, SET_DEFAULT, 0xBEEF, 1024L, 8L, 512L, 4L, 0L);
+
+        incrementCurrentTime(HOUR_IN_MILLIS);
+        expectDefaultSettings();
+        expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 3)
+                .addValues(entry1)
+                .addValues(entry2)
+                .addValues(entry3));
+        mService.incrementOperationCount(UID_RED, 0xF00D, 1);
+
+        NetworkStats stats = mService.getDetailedUidStats(INTERFACES_ALL);
+
+        assertEquals(3, stats.size());
+        entry1.operations = 1;
+        assertEquals(entry1, stats.getValues(0, null));
+        entry2.operations = 1;
+        assertEquals(entry2, stats.getValues(1, null));
+        assertEquals(entry3, stats.getValues(2, null));
+    }
+
+    @Test
+    public void testDetailedUidStats_Filtered() throws Exception {
+        // pretend that network comes online
+        expectDefaultSettings();
+
+        final String stackedIface = "stacked-test0";
+        final LinkProperties stackedProp = new LinkProperties();
+        stackedProp.setInterfaceName(stackedIface);
+        final NetworkState wifiState = buildWifiState();
+        wifiState.linkProperties.addStackedLink(stackedProp);
+        expectNetworkState(wifiState);
+
+        expectNetworkStatsSummary(buildEmptyStats());
+        expectNetworkStatsUidDetail(buildEmptyStats());
+        expectBandwidthControlCheck();
+
+        mService.forceUpdateIfaces(NETWORKS_WIFI);
+
+        NetworkStats.Entry uidStats = new NetworkStats.Entry(
+                TEST_IFACE, UID_BLUE, SET_DEFAULT, 0xF00D, 1024L, 8L, 512L, 4L, 0L);
+        // Stacked on matching interface
+        NetworkStats.Entry tetheredStats1 = new NetworkStats.Entry(
+                stackedIface, UID_BLUE, SET_DEFAULT, 0xF00D, 1024L, 8L, 512L, 4L, 0L);
+        // Different interface
+        NetworkStats.Entry tetheredStats2 = new NetworkStats.Entry(
+                "otherif", UID_BLUE, SET_DEFAULT, 0xF00D, 1024L, 8L, 512L, 4L, 0L);
+
+        final String[] ifaceFilter = new String[] { TEST_IFACE };
+        incrementCurrentTime(HOUR_IN_MILLIS);
+        expectDefaultSettings();
+        expectNetworkStatsSummary(buildEmptyStats());
+        when(mNetManager.getNetworkStatsUidDetail(eq(UID_ALL), any()))
+                .thenReturn(new NetworkStats(getElapsedRealtime(), 1)
+                        .addValues(uidStats));
+        when(mNetManager.getNetworkStatsTethering(STATS_PER_UID))
+                .thenReturn(new NetworkStats(getElapsedRealtime(), 2)
+                        .addValues(tetheredStats1)
+                        .addValues(tetheredStats2));
+
+        NetworkStats stats = mService.getDetailedUidStats(ifaceFilter);
+
+        verify(mNetManager, times(1)).getNetworkStatsUidDetail(eq(UID_ALL), argThat(ifaces ->
+                ifaces != null && ifaces.length == 2
+                        && ArrayUtils.contains(ifaces, TEST_IFACE)
+                        && ArrayUtils.contains(ifaces, stackedIface)));
+
+        assertEquals(2, stats.size());
+        assertEquals(uidStats, stats.getValues(0, null));
+        assertEquals(tetheredStats1, stats.getValues(1, null));
+    }
+
+    @Test
     public void testForegroundBackground() throws Exception {
         // pretend that network comes online
         expectDefaultSettings();
@@ -1027,7 +1120,7 @@ public class NetworkStatsServiceTest {
 
     private void expectNetworkStatsUidDetail(NetworkStats detail, NetworkStats tetherStats)
             throws Exception {
-        when(mNetManager.getNetworkStatsUidDetail(UID_ALL)).thenReturn(detail);
+        when(mNetManager.getNetworkStatsUidDetail(UID_ALL, INTERFACES_ALL)).thenReturn(detail);
 
         // also include tethering details, since they are folded into UID
         when(mNetManager.getNetworkStatsTethering(STATS_PER_UID)).thenReturn(tetherStats);

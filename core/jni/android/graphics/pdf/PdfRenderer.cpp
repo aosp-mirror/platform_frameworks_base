@@ -92,20 +92,7 @@ static void nativeRenderPage(JNIEnv* env, jclass thiz, jlong documentPtr, jlong 
         renderFlags |= FPDF_PRINTING;
     }
 
-    // PDF's coordinate system origin is left-bottom while in graphics it
-    // is the top-left. So, translate the PDF coordinates to ours.
-    SkMatrix reflectOnX = SkMatrix::MakeScale(1, -1);
-    SkMatrix moveUp = SkMatrix::MakeTrans(0, FPDF_GetPageHeight(page));
-    SkMatrix coordinateChange = SkMatrix::Concat(moveUp, reflectOnX);
-
-    // Apply the transformation
-    SkMatrix matrix;
-    if (transformPtr == 0) {
-        matrix = coordinateChange;
-    } else {
-        matrix = SkMatrix::Concat(*reinterpret_cast<SkMatrix*>(transformPtr), coordinateChange);
-    }
-
+    SkMatrix matrix = *reinterpret_cast<SkMatrix*>(transformPtr);
     SkScalar transformValues[6];
     if (!matrix.asAffine(transformValues)) {
         jniThrowException(env, "java/lang/IllegalArgumentException",

@@ -676,10 +676,12 @@ public class IpSecService extends IIpSecService.Stub {
         @Override
         public void freeUnderlyingResources() {
             try {
-                mSrvConfig
-                        .getNetdInstance()
-                        .ipSecDeleteSecurityAssociation(
-                                mResourceId, mSourceAddress, mDestinationAddress, mSpi, 0, 0);
+                if (!mOwnedByTransform) {
+                    mSrvConfig
+                            .getNetdInstance()
+                            .ipSecDeleteSecurityAssociation(
+                                    mResourceId, mSourceAddress, mDestinationAddress, mSpi, 0, 0);
+                }
             } catch (ServiceSpecificException | RemoteException e) {
                 Log.e(TAG, "Failed to delete SPI reservation with ID: " + mResourceId, e);
             }
@@ -1491,6 +1493,13 @@ public class IpSecService extends IIpSecService.Stub {
         IpSecAlgorithm crypt = c.getEncryption();
         IpSecAlgorithm authCrypt = c.getAuthenticatedEncryption();
 
+        String cryptName;
+        if (crypt == null) {
+            cryptName = (authCrypt == null) ? IpSecAlgorithm.CRYPT_NULL : "";
+        } else {
+            cryptName = crypt.getName();
+        }
+
         mSrvConfig
                 .getNetdInstance()
                 .ipSecAddSecurityAssociation(
@@ -1505,7 +1514,7 @@ public class IpSecService extends IIpSecService.Stub {
                         (auth != null) ? auth.getName() : "",
                         (auth != null) ? auth.getKey() : new byte[] {},
                         (auth != null) ? auth.getTruncationLengthBits() : 0,
-                        (crypt != null) ? crypt.getName() : "",
+                        cryptName,
                         (crypt != null) ? crypt.getKey() : new byte[] {},
                         (crypt != null) ? crypt.getTruncationLengthBits() : 0,
                         (authCrypt != null) ? authCrypt.getName() : "",

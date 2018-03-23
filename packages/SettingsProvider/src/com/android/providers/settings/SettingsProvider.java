@@ -1798,76 +1798,52 @@ public class SettingsProvider extends ContentProvider {
         if (TextUtils.isEmpty(value)) {
             return false;
         }
-
-        final char prefix = value.charAt(0);
-        if (prefix != '+' && prefix != '-') {
-            if (forceNotify) {
-                final int key = makeKey(SETTINGS_TYPE_SECURE, owningUserId);
-                mSettingsRegistry.notifyForSettingsChange(key,
-                        Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-            }
+        Setting oldSetting = getSecureSetting(
+                Settings.Secure.LOCATION_PROVIDERS_ALLOWED, owningUserId);
+        if (oldSetting == null) {
             return false;
         }
+        String oldProviders = oldSetting.getValue();
+        List<String> oldProvidersList = TextUtils.isEmpty(oldProviders)
+                ? new ArrayList<>() : new ArrayList<>(Arrays.asList(oldProviders.split(",")));
+        Set<String> newProvidersSet = new ArraySet<>();
+        newProvidersSet.addAll(oldProvidersList);
 
-        // skip prefix
-        value = value.substring(1);
-
-        Setting settingValue = getSecureSetting(
-                    Settings.Secure.LOCATION_PROVIDERS_ALLOWED, owningUserId);
-        if (settingValue == null) {
-            return false;
-        }
-
-        String oldProviders = !settingValue.isNull() ? settingValue.getValue() : "";
-
-        int index = oldProviders.indexOf(value);
-        int end = index + value.length();
-
-        // check for commas to avoid matching on partial string
-        if (index > 0 && oldProviders.charAt(index - 1) != ',') {
-            index = -1;
-        }
-
-        // check for commas to avoid matching on partial string
-        if (end < oldProviders.length() && oldProviders.charAt(end) != ',') {
-            index = -1;
-        }
-
-        String newProviders;
-
-        if (prefix == '+' && index < 0) {
-            // append the provider to the list if not present
-            if (oldProviders.length() == 0) {
-                newProviders = value;
-            } else {
-                newProviders = oldProviders + ',' + value;
+        String[] providerUpdates = value.split(",");
+        boolean inputError = false;
+        for (String provider : providerUpdates) {
+            // do not update location_providers_allowed when input is invalid
+            if (TextUtils.isEmpty(provider)) {
+                inputError = true;
+                break;
             }
-        } else if (prefix == '-' && index >= 0) {
-            // remove the provider from the list if present
-            // remove leading or trailing comma
-            if (index > 0) {
-                index--;
-            } else if (end < oldProviders.length()) {
-                end++;
+            final char prefix = provider.charAt(0);
+            // do not update location_providers_allowed when input is invalid
+            if (prefix != '+' && prefix != '-') {
+                inputError = true;
+                break;
             }
-
-            newProviders = oldProviders.substring(0, index);
-            if (end < oldProviders.length()) {
-                newProviders += oldProviders.substring(end);
+            // skip prefix
+            provider = provider.substring(1);
+            if (prefix == '+') {
+                newProvidersSet.add(provider);
+            } else if (prefix == '-') {
+                newProvidersSet.remove(provider);
             }
-        } else {
+        }
+        String newProviders = TextUtils.join(",", newProvidersSet.toArray());
+        if (inputError == true || newProviders.equals(oldProviders)) {
             // nothing changed, so no need to update the database
             if (forceNotify) {
-                final int key = makeKey(SETTINGS_TYPE_SECURE, owningUserId);
-                mSettingsRegistry.notifyForSettingsChange(key,
+                mSettingsRegistry.notifyForSettingsChange(
+                        makeKey(SETTINGS_TYPE_SECURE, owningUserId),
                         Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
             }
             return false;
         }
-
         return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_SECURE,
-                owningUserId, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, newProviders,
-                tag, makeDefault, getCallingPackage(), forceNotify, CRITICAL_SECURE_SETTINGS);
+                owningUserId, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, newProviders, tag,
+                makeDefault, getCallingPackage(), forceNotify, CRITICAL_SECURE_SETTINGS);
     }
 
     private static void warnOrThrowForUndesiredSecureSettingsMutationForTargetSdk(
@@ -2938,7 +2914,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 159;
+            private static final int SETTINGS_VERSION = 162;
 
             private final int mUserId;
 
@@ -3644,6 +3620,72 @@ public class SettingsProvider extends ContentProvider {
                     getGlobalSettingsLocked().deleteSettingLocked(
                         "wifi_scan_background_throttle_package_whitelist");
                     currentVersion = 159;
+                }
+
+                if (currentVersion == 159) {
+                    // Version 160: Hiding notifications from the lockscreen is only available as
+                    // primary user option, profiles can only make them redacted. If a profile was
+                    // configured to not show lockscreen notifications, ensure that at the very
+                    // least these will be come hidden.
+                    if (mUserManager.isManagedProfile(userId)) {
+                        final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                        Setting showNotifications = secureSettings.getSettingLocked(
+                            Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS);
+                        // The default value is "1", check if user has turned it off.
+                        if ("0".equals(showNotifications.getValue())) {
+                            secureSettings.insertSettingLocked(
+                                Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, "0",
+                                null /* tag */, false /* makeDefault */,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                        }
+                        // The setting is no longer valid for managed profiles, it should be
+                        // treated as if it was set to "1".
+                        secureSettings.deleteSettingLocked(Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS);
+                    }
+                    currentVersion = 160;
+                }
+
+                if (currentVersion == 160) {
+                    // Version 161: Set the default value for
+                    // MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY and
+                    // SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT
+                    final SettingsState globalSettings = getGlobalSettingsLocked();
+
+                    String oldValue = globalSettings.getSettingLocked(
+                            Global.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY).getValue();
+                    if (TextUtils.equals(null, oldValue)) {
+                        globalSettings.insertSettingLocked(
+                                Settings.Global.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY,
+                                Integer.toString(getContext().getResources().getInteger(
+                                        R.integer.def_max_sound_trigger_detection_service_ops_per_day)),
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    oldValue = globalSettings.getSettingLocked(
+                            Global.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT).getValue();
+                    if (TextUtils.equals(null, oldValue)) {
+                        globalSettings.insertSettingLocked(
+                                Settings.Global.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT,
+                                Integer.toString(getContext().getResources().getInteger(
+                                        R.integer.def_sound_trigger_detection_service_op_timeout)),
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 161;
+                }
+
+                if (currentVersion == 161) {
+                    // Version 161: Add a gesture for silencing phones
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting currentSetting = secureSettings.getSettingLocked(
+                            Secure.VOLUME_HUSH_GESTURE);
+                    if (currentSetting.isNull()) {
+                        secureSettings.insertSettingLocked(
+                                Secure.VOLUME_HUSH_GESTURE,
+                                Integer.toString(Secure.VOLUME_HUSH_VIBRATE),
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    currentVersion = 162;
                 }
 
                 // vXXX: Add new settings above this point.

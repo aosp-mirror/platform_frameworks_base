@@ -331,25 +331,25 @@ size_t UidMap::getBytesUsed() const {
     return mBytesUsed;
 }
 
-void UidMap::getOutput(const ConfigKey& key, vector<uint8_t>* outData) {
-    getOutput(getElapsedRealtimeNs(), key, outData);
+void UidMap::appendUidMap(const ConfigKey& key, ProtoOutputStream* proto) {
+    appendUidMap(getElapsedRealtimeNs(), key, proto);
 }
 
-void UidMap::getOutput(const int64_t& timestamp, const ConfigKey& key, vector<uint8_t>* outData) {
+void UidMap::appendUidMap(const int64_t& timestamp, const ConfigKey& key,
+                          ProtoOutputStream* proto) {
     lock_guard<mutex> lock(mMutex);  // Lock for updates
 
-    ProtoOutputStream proto;
     for (const ChangeRecord& record : mChanges) {
         if (record.timestampNs > mLastUpdatePerConfigKey[key]) {
             uint64_t changesToken =
-                    proto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_CHANGES);
-            proto.write(FIELD_TYPE_BOOL | FIELD_ID_CHANGE_DELETION, (bool)record.deletion);
-            proto.write(FIELD_TYPE_INT64 | FIELD_ID_CHANGE_TIMESTAMP,
-                        (long long)record.timestampNs);
-            proto.write(FIELD_TYPE_STRING | FIELD_ID_CHANGE_PACKAGE, record.package);
-            proto.write(FIELD_TYPE_INT32 | FIELD_ID_CHANGE_UID, (int)record.uid);
-            proto.write(FIELD_TYPE_INT32 | FIELD_ID_CHANGE_VERSION, (int)record.version);
-            proto.end(changesToken);
+                    proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_CHANGES);
+            proto->write(FIELD_TYPE_BOOL | FIELD_ID_CHANGE_DELETION, (bool)record.deletion);
+            proto->write(FIELD_TYPE_INT64 | FIELD_ID_CHANGE_TIMESTAMP,
+                         (long long)record.timestampNs);
+            proto->write(FIELD_TYPE_STRING | FIELD_ID_CHANGE_PACKAGE, record.package);
+            proto->write(FIELD_TYPE_INT32 | FIELD_ID_CHANGE_UID, (int)record.uid);
+            proto->write(FIELD_TYPE_INT32 | FIELD_ID_CHANGE_VERSION, (int)record.version);
+            proto->end(changesToken);
         }
     }
 
@@ -360,13 +360,14 @@ void UidMap::getOutput(const int64_t& timestamp, const ConfigKey& key, vector<ui
         if ((count == mSnapshots.size() - 1 && !atLeastOneSnapshot) ||
             record.timestampNs > mLastUpdatePerConfigKey[key]) {
             uint64_t snapshotsToken =
-                    proto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_SNAPSHOTS);
+                    proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_SNAPSHOTS);
             atLeastOneSnapshot = true;
             count++;
-            proto.write(FIELD_TYPE_INT64 | FIELD_ID_SNAPSHOT_TIMESTAMP,
-                        (long long)record.timestampNs);
-            proto.write(FIELD_TYPE_MESSAGE | FIELD_ID_SNAPSHOT_PACKAGE_INFO, record.bytes.data());
-            proto.end(snapshotsToken);
+            proto->write(FIELD_TYPE_INT64 | FIELD_ID_SNAPSHOT_TIMESTAMP,
+                         (long long)record.timestampNs);
+            proto->write(FIELD_TYPE_MESSAGE | FIELD_ID_SNAPSHOT_PACKAGE_INFO, record.bytes.data(),
+                         record.bytes.size());
+            proto->end(snapshotsToken);
         }
     }
 
@@ -398,47 +399,36 @@ void UidMap::getOutput(const int64_t& timestamp, const ConfigKey& key, vector<ui
             // Produce another snapshot. This results in extra data being uploaded but
             // helps ensure we can re-construct the UID->app name, versionCode mapping
             // in server.
-            ProtoOutputStream proto;
-            uint64_t token = proto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
-                                          FIELD_ID_SNAPSHOT_PACKAGE_INFO);
+            ProtoOutputStream snapshotProto;
+            uint64_t token = snapshotProto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                                                 FIELD_ID_SNAPSHOT_PACKAGE_INFO);
             for (const auto& it : mMap) {
-                proto.write(FIELD_TYPE_STRING | FIELD_ID_SNAPSHOT_PACKAGE_NAME,
-                            it.second.packageName);
-                proto.write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_VERSION,
-                            (int)it.second.versionCode);
-                proto.write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_UID, (int)it.first);
+                snapshotProto.write(FIELD_TYPE_STRING | FIELD_ID_SNAPSHOT_PACKAGE_NAME,
+                                    it.second.packageName);
+                snapshotProto.write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_VERSION,
+                                    (int)it.second.versionCode);
+                snapshotProto.write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_UID,
+                                    (int)it.first);
             }
-            proto.end(token);
+            snapshotProto.end(token);
 
             // Copy ProtoOutputStream output to
-            auto iter = proto.data();
-            vector<char> outData(proto.size());
+            auto iter = snapshotProto.data();
+            vector<char> snapshotData(snapshotProto.size());
             size_t pos = 0;
             while (iter.readBuffer() != NULL) {
                 size_t toRead = iter.currentToRead();
-                std::memcpy(&(outData[pos]), iter.readBuffer(), toRead);
+                std::memcpy(&(snapshotData[pos]), iter.readBuffer(), toRead);
                 pos += toRead;
                 iter.rp()->move(toRead);
             }
-            mSnapshots.emplace_back(timestamp, outData);
-            mBytesUsed += kBytesTimestampField + outData.size();
+            mSnapshots.emplace_back(timestamp, snapshotData);
+            mBytesUsed += kBytesTimestampField + snapshotData.size();
         }
     }
     StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
     StatsdStats::getInstance().setUidMapChanges(mChanges.size());
     StatsdStats::getInstance().setUidMapSnapshots(mSnapshots.size());
-    if (outData != nullptr) {
-        outData->clear();
-        outData->resize(proto.size());
-        size_t pos = 0;
-        auto iter = proto.data();
-        while (iter.readBuffer() != NULL) {
-            size_t toRead = iter.currentToRead();
-            std::memcpy(&((*outData)[pos]), iter.readBuffer(), toRead);
-            pos += toRead;
-            iter.rp()->move(toRead);
-        }
-    }
 }
 
 void UidMap::printUidMap(FILE* out) const {

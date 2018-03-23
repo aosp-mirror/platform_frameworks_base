@@ -40,7 +40,7 @@ public class QSTileView extends QSTileBaseView {
     private static final boolean DUAL_TARGET_ALLOWED = false;
     private View mDivider;
     protected TextView mLabel;
-    private TextView mSecondLine;
+    protected TextView mSecondLine;
     private ImageView mPadLock;
     private int mState;
     private ViewGroup mLabelContainer;

@@ -261,6 +261,12 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
         if (repeatCount != REPEAT_UNDEFINED) {
             this.setRepeatCount(repeatCount);
         }
+
+        boolean autoStart = a.getBoolean(
+                R.styleable.AnimatedImageDrawable_autoStart, false);
+        if (autoStart && mState.mNativePtr != 0) {
+            this.start();
+        }
     }
 
     /**
@@ -292,8 +298,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
         mState = new State(nCreate(nativeImageDecoder, decoder, width, height, cropRect),
                 inputStream, afd);
 
-        // FIXME: Use the right size for the native allocation.
-        long nativeSize = 200;
+        final long nativeSize = nNativeByteSize(mState.mNativePtr);
         NativeAllocationRegistry registry = new NativeAllocationRegistry(
                 AnimatedImageDrawable.class.getClassLoader(), nGetNativeFinalizer(), nativeSize);
         registry.registerNativeAllocation(mState, mState.mNativePtr);

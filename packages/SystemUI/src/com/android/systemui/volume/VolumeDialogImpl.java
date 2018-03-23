@@ -451,11 +451,11 @@ public class VolumeDialogImpl implements VolumeDialog {
                 toastText = R.string.volume_dialog_ringer_guidance_ring;
                 break;
             case RINGER_MODE_SILENT:
-                toastText = R.string.volume_dialog_ringer_guidance_silent;
+                toastText = com.android.internal.R.string.volume_dialog_ringer_guidance_silent;
                 break;
             case RINGER_MODE_VIBRATE:
             default:
-                toastText = R.string.volume_dialog_ringer_guidance_vibrate;
+                toastText = com.android.internal.R.string.volume_dialog_ringer_guidance_vibrate;
         }
 
         Toast.makeText(mContext, toastText, Toast.LENGTH_SHORT).show();

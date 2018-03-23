@@ -137,24 +137,9 @@ public class PowerUI extends SystemUI {
     void updateBatteryWarningLevels() {
         int critLevel = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
-
-        final ContentResolver resolver = mContext.getContentResolver();
-        final int defWarnLevel = mContext.getResources().getInteger(
+        int warnLevel = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lowBatteryWarningLevel);
-        final int lowPowerModeTriggerLevel = Settings.Global.getInt(resolver,
-                Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL, defWarnLevel);
 
-        // Note LOW_POWER_MODE_TRIGGER_LEVEL can take any value between 0 and 100, but
-        // for the UI purposes, let's cap it at 15% -- i.e. even if the trigger level is higher
-        // like 50%, let's not show the "low battery" notification until it hits
-        // config_lowBatteryWarningLevel, which is 15% by default.
-        // LOW_POWER_MODE_TRIGGER_LEVEL is still used in other places as-is. For example, if it's
-        // 50, then battery saver kicks in when the battery level hits 50%.
-        int warnLevel =  Math.min(defWarnLevel, lowPowerModeTriggerLevel);
-
-        if (warnLevel == 0) {
-            warnLevel = defWarnLevel;
-        }
         if (warnLevel < critLevel) {
             warnLevel = critLevel;
         }

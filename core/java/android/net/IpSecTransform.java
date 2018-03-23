@@ -282,7 +282,7 @@ public final class IpSecTransform implements AutoCloseable {
      */
     @SystemApi
     @RequiresPermission(anyOf = {
-            android.Manifest.permission.NETWORK_STACK,
+            android.Manifest.permission.MANAGE_IPSEC_TUNNELS,
             android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD
     })
     public void startNattKeepalive(@NonNull NattKeepaliveCallback userCallback,
@@ -325,7 +325,7 @@ public final class IpSecTransform implements AutoCloseable {
      */
     @SystemApi
     @RequiresPermission(anyOf = {
-            android.Manifest.permission.NETWORK_STACK,
+            android.Manifest.permission.MANAGE_IPSEC_TUNNELS,
             android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD
     })
     public void stopNattKeepalive() {
@@ -350,6 +350,7 @@ public final class IpSecTransform implements AutoCloseable {
          *
          * @param algo {@link IpSecAlgorithm} specifying the encryption to be applied.
          */
+        @NonNull
         public IpSecTransform.Builder setEncryption(@NonNull IpSecAlgorithm algo) {
             // TODO: throw IllegalArgumentException if algo is not an encryption algorithm.
             Preconditions.checkNotNull(algo);
@@ -364,6 +365,7 @@ public final class IpSecTransform implements AutoCloseable {
          *
          * @param algo {@link IpSecAlgorithm} specifying the authentication to be applied.
          */
+        @NonNull
         public IpSecTransform.Builder setAuthentication(@NonNull IpSecAlgorithm algo) {
             // TODO: throw IllegalArgumentException if algo is not an authentication algorithm.
             Preconditions.checkNotNull(algo);
@@ -384,6 +386,7 @@ public final class IpSecTransform implements AutoCloseable {
          * @param algo {@link IpSecAlgorithm} specifying the authenticated encryption algorithm to
          *     be applied.
          */
+        @NonNull
         public IpSecTransform.Builder setAuthenticatedEncryption(@NonNull IpSecAlgorithm algo) {
             Preconditions.checkNotNull(algo);
             mConfig.setAuthenticatedEncryption(algo);
@@ -403,6 +406,7 @@ public final class IpSecTransform implements AutoCloseable {
          * @param remotePort the UDP port number of the remote host that will send and receive
          *     encapsulated traffic. In the case of IKEv2, this should be port 4500.
          */
+        @NonNull
         public IpSecTransform.Builder setIpv4Encapsulation(
                 @NonNull IpSecManager.UdpEncapsulationSocket localSocket, int remotePort) {
             Preconditions.checkNotNull(localSocket);
@@ -436,6 +440,7 @@ public final class IpSecTransform implements AutoCloseable {
          *     collides with an existing transform
          * @throws IOException indicating other errors
          */
+        @NonNull
         public IpSecTransform buildTransportModeTransform(
                 @NonNull InetAddress sourceAddress,
                 @NonNull IpSecManager.SecurityParameterIndex spi)
@@ -472,7 +477,8 @@ public final class IpSecTransform implements AutoCloseable {
          * @hide
          */
         @SystemApi
-        @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
+        @NonNull
+        @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
         public IpSecTransform buildTunnelModeTransform(
                 @NonNull InetAddress sourceAddress,
                 @NonNull IpSecManager.SecurityParameterIndex spi)

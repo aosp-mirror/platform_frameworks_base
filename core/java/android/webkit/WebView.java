@@ -2448,6 +2448,14 @@ public class WebView extends AbsoluteLayout
      * Returns the {@link Looper} corresponding to the thread on which WebView calls must be made.
      */
     @NonNull
+    public Looper getWebViewLooper() {
+        return mWebViewThread;
+    }
+
+    /**
+     * Returns the {@link Looper} corresponding to the thread on which WebView calls must be made.
+     */
+    @NonNull
     public Looper getLooper() {
         return mWebViewThread;
     }

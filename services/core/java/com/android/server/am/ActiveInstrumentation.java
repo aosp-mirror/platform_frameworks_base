@@ -24,8 +24,6 @@ import android.os.Bundle;
 import android.util.PrintWriterPrinter;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.server.am.proto.ActiveInstrumentationProto;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
