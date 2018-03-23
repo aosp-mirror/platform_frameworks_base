@@ -561,7 +561,7 @@ public class RecoveryController {
             throws InternalRecoveryServiceException, UnrecoverableKeyException {
         try {
             String grantAlias = mBinder.getKey(alias);
-            if (grantAlias == null) {
+            if (grantAlias == null || "".equals(grantAlias)) {
                 return null;
             }
             return getKeyFromGrant(grantAlias);
