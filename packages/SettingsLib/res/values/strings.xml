@@ -150,6 +150,13 @@
     <!-- Bluetooth settings.  Message when connected to a device, except for phone/media audio, showing remote device battery level. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level">Connected (no phone or media), battery <xliff:g id="battery_level_as_percentage">%1$s</xliff:g><xliff:g id="active_device">%2$s</xliff:g></string>
 
+    <!-- Connected devices settings. Message when Bluetooth is connected and active, showing remote device status and battery level. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_active_battery_level">Active, <xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_battery_level"><xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected and active but no battery information, showing remote device status. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_active_no_battery_level">Active</string>
+
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the A2DP profile. -->
     <string name="bluetooth_profile_a2dp">Media audio</string>
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the headset or handsfree profile. -->
