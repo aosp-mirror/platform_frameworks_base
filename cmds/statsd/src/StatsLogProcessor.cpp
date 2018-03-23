@@ -360,7 +360,7 @@ void StatsLogProcessor::flushIfNecessaryLocked(
         metricsManager.dropData(timestampNs);
         StatsdStats::getInstance().noteDataDropped(key);
         VLOG("StatsD had to toss out metrics for %s", key.ToString().c_str());
-    } else if (totalBytes > .9 * StatsdStats::kMaxMetricsBytesPerConfig) {
+    } else if (totalBytes > StatsdStats::kBytesPerConfigTriggerGetData) {
         // Send broadcast so that receivers can pull data.
         auto lastBroadcastTime = mLastBroadcastTimes.find(key);
         if (lastBroadcastTime != mLastBroadcastTimes.end()) {
