@@ -77,15 +77,15 @@
     <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Стандардно, повикувачот со овој ID не е ограничен. Следен повик: не е ограничен"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Услугата не е предвидена."</string>
     <string name="CLIRPermanent" msgid="3377371145926835671">"Не може да го промените поставувањето за ID на повикувач."</string>
-    <string name="RestrictedOnDataTitle" msgid="1322504692764166532">"Нема услуга за интернет"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="3646729271176394091">"Нема итни повици"</string>
+    <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"Нема услуга за мобилен интернет"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="6855466023161191166">"Итните повици се недостапни"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Нема услуга за говорни повици"</string>
-    <string name="RestrictedOnAllVoiceTitle" msgid="158800171499150681">"Нема услуга за говорни/итни повици"</string>
-    <string name="RestrictedStateContent" msgid="4278821484643362350">"Привремено не се нуди од мобилната мрежа на вашата локација"</string>
-    <string name="NetworkPreferenceSwitchTitle" msgid="4008877505368566980">"Не може да се дојде до мрежата"</string>
-    <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"За подобрување на приемот, обидете се да го промените избраниот тип во „Поставки &gt; Мрежа и интернет &gt; Мобилни мрежи &gt; Претпочитан тип мрежа“."</string>
-    <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"„Повикување преку Wi‑Fi“ е активна"</string>
-    <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"За итните повици е потребна мобилна мрежа."</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Нема говорна услуга или итни повици"</string>
+    <string name="RestrictedStateContent" msgid="6538703255570997248">"Вашиот оператор ја исклучил привремено"</string>
+    <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"Мобилната мрежа е недостапна"</string>
+    <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Сменете ја претпочитаната мрежа. Допрете за промена."</string>
+    <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Итните повици се недостапни"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"Не може да остваруваат итни повици преку Wi-Fi"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Предупредувања"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Проследување повик"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Режим на итен повратен повик"</string>
@@ -120,13 +120,12 @@
     <string name="roamingText11" msgid="4154476854426920970">"Банерот со роаминг е вклучен"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Банерот со роаминг е исклучен"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Пребарување за услуга"</string>
-    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Повикување преку Wi-Fi"</string>
+    <!-- no translation found for wfcRegErrorTitle (3855061241207182194) -->
+    <skip />
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"За да воспоставувате повици и да испраќате пораки преку Wi-Fi, прво побарајте од операторот да ја постави услугава. Потоа, вклучете ја повторно „Повикување преку Wi-Fi“ во „Поставки“. (Код за грешка: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-  <string-array name="wfcOperatorErrorNotificationMessages">
-    <item msgid="7472393097168811593">"Регистрирајте се кај операторот (Код на грешка: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
-  </string-array>
+    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7372514042696663278) -->
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"%s Повикување преку Wi-Fi"</item>
@@ -160,8 +159,10 @@
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Се обработуваат премногу барања. Обидете се повторно подоцна."</string>
     <string name="notification_title" msgid="8967710025036163822">"Грешка при пријавување за <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"Синхронизирај"</string>
-    <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"Синхронизирај"</string>
-    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Премногу бришења на <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
+    <!-- no translation found for contentServiceSyncNotificationTitle (7036196943673524858) -->
+    <skip />
+    <!-- no translation found for contentServiceTooManyDeletesNotificationDesc (4884451152168188763) -->
+    <skip />
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Меморијата на таблетот е полна. Избришете некои датотеки за да ослободите простор."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Складот за гледање е полн. Избришете некои датотеки за да ослободите простор."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Складот на телевизорот е полн. Избришете некои датотеки за да ослободите простор."</string>
@@ -174,14 +175,13 @@
     <string name="ssl_ca_cert_noti_by_administrator" msgid="3541729986326153557">"Од администраторот на вашиот работен профил"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"Од <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"Работниот профил е избришан"</string>
-    <string name="work_profile_deleted_description" msgid="1100529432509639864">"Работниот профил е избришан поради исчезнувањето на апликацијата на администратор"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"Апликацијата на администраторот за работниот профил или исчезна или е оштетена. Како резултат на тоа, вашиот работен профил и поврзаните податоци ќе се избришат. За помош, контактирајте со администраторот."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"Вашиот работен профил веќе не е достапен на уредов"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"Премногу обиди за внесување лозинка"</string>
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Некој управува со уредот"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Вашата организација управува со уредов и можно е да го следи сообраќајот на мрежата. Допрете за детали."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Уредот ќе се избрише"</string>
-    <string name="factory_reset_message" msgid="7972496262232832457">"Апликацијата на администраторот не може да се користи. Вашиот уред сега ќе се избрише.\n\nАко имате прашања, контактирајте со администраторот на вашата организација."</string>
+    <string name="factory_reset_message" msgid="9024647691106150160">"Апликацијата на администраторот не може да се користи. Уредот ќе се избрише сега.\n\nАко имате прашања, контактирајте со администраторот на организацијата."</string>
     <string name="printing_disabled_by" msgid="8936832919072486965">"Печатењето е оневозможено од <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="me" msgid="6545696007631404292">"Јас"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Опции на таблет"</string>
@@ -236,6 +236,9 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Режим на работа во авион"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Режимот на работа во авион е вклучен"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Режимот на работа во авион е исклучен"</string>
+    <string name="global_action_toggle_battery_saver" msgid="708515500418994208">"Штедач на батерија"</string>
+    <string name="global_action_battery_saver_on_status" msgid="484059130698197787">"Штедачот на батерија е ИСКЛУЧЕН"</string>
+    <string name="global_action_battery_saver_off_status" msgid="75550964969478405">"Штедачот на батерија е ВКЛУЧЕН"</string>
     <string name="global_action_settings" msgid="1756531602592545966">"Поставки"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Асистенција"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Гласовна помош"</string>
@@ -269,31 +272,40 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"Префрли се на работен профил"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Контакти"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"пристапува до контактите"</string>
-    <string name="permgrouprequest_contacts" msgid="1601591667800538208">"Дозволете &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да пристапува до контактите"</string>
+    <!-- no translation found for permgrouprequest_contacts (6032805601881764300) -->
+    <skip />
     <string name="permgrouplab_location" msgid="7275582855722310164">"Локација"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"пристапува до локацијата на овој уред"</string>
-    <string name="permgrouprequest_location" msgid="8903573681261610809">"Дозволете &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да пристапува до локацијата на уредот"</string>
+    <!-- no translation found for permgrouprequest_location (3788275734953323491) -->
+    <skip />
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Календар"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"пристапува до календарот"</string>
-    <string name="permgrouprequest_calendar" msgid="6704529828699071445">"Дозволете &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да пристапува до календарот"</string>
+    <!-- no translation found for permgrouprequest_calendar (289900767793189421) -->
+    <skip />
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"испраќа и прикажува SMS-пораки"</string>
-    <string name="permgrouprequest_sms" msgid="605618939583628306">"Дозволете &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да испраќа и прегледува SMS-пораки"</string>
+    <!-- no translation found for permgrouprequest_sms (7168124215838204719) -->
+    <skip />
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Капацитет"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"пристапува до фотографии, аудио-видео и датотеки на уредот"</string>
-    <string name="permgrouprequest_storage" msgid="7429669910547860218">"Дозволете &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да пристапува до фотографиите, аудио-визуелните содржини и датотеките на уредот"</string>
+    <!-- no translation found for permgrouprequest_storage (7885942926944299560) -->
+    <skip />
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"снима аудио"</string>
-    <string name="permgrouprequest_microphone" msgid="8065941268709600606">"Дозволете &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да снима аудио"</string>
+    <!-- no translation found for permgrouprequest_microphone (9167492350681916038) -->
+    <skip />
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"фотографира и снима видео"</string>
-    <string name="permgrouprequest_camera" msgid="810824326507258410">"Дозволете &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да фотографира и да снима видео"</string>
+    <!-- no translation found for permgrouprequest_camera (1299833592069671756) -->
+    <skip />
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Телефон"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"упатува и управува со телефонски повици"</string>
-    <string name="permgrouprequest_phone" msgid="7084161459732093690">"Дозволете &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да повикува и да управува со телефонските повици"</string>
+    <!-- no translation found for permgrouprequest_phone (9166979577750581037) -->
+    <skip />
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Телесни сензори"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"пристапува до податоците од сензорите за виталните знаци"</string>
-    <string name="permgrouprequest_sensors" msgid="8631146669524259656">"Дозволете &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да пристапува до податоците на сензорот за витални знаци"</string>
+    <!-- no translation found for permgrouprequest_sensors (6349806962814556786) -->
+    <skip />
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Преземе содржина на прозорец"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Ја следи содржината на прозорецот со кој се комуницира."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Вклучи „Истражувај со допир“"</string>
@@ -305,7 +317,7 @@
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Користете движења"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Може да допрете, повлечете, штипнете и да користите други движења."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Движења за отпечатоци"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="7102111919385702482">"Може да сними движења што се направени на сензорот за отпечатоци на уредите."</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Може да сними движења што се направени на сензорот за отпечатоци на уредот."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"оневозможи или измени статусна лента"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Дозволува апликацијата да ја оневозможи статусната лента или да додава или отстранува системски икони."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"да стане статусна лента"</string>
@@ -356,6 +368,8 @@
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Овозможува апликацијата да прави трајни делови од себеси во меморијата. Ова може да ја ограничи расположливата меморија на други апликации што го забавува таблетот."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="5086862529499103587">"Дозволува апликацијата да направи нејзини делови да бидат постојани во меморијата. Ова може да ја ограничи меморијата достапна на другите апликации и да го забави телевизорот."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="4384760047508278272">"Овозможува апликацијата да прави трајни делови од себеси во меморијата. Ова може да ја ограничи расположливата меморија на други апликации што го забавува телефонот."</string>
+    <string name="permlab_foregroundService" msgid="3310786367649133115">"извршување услуга во преден план"</string>
+    <string name="permdesc_foregroundService" msgid="6471634326171344622">"Дозволува апликацијата да ги користи услугите во преден план."</string>
     <string name="permlab_getPackageSize" msgid="7472921768357981986">"измери простор за складирање на апликацијата"</string>
     <string name="permdesc_getPackageSize" msgid="3921068154420738296">"Дозволува апликацијата да ги обнови кодот, податоците и величините на кеш."</string>
     <string name="permlab_writeSettings" msgid="2226195290955224730">"менува системски поставки"</string>
@@ -802,6 +816,8 @@
     <string name="keyguard_accessibility_pattern_unlock" msgid="1490840706075246612">"Отклучување со шема."</string>
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"Отклучување со лик."</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"Отклучување со пин."</string>
+    <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"Отклучување со PIN на SIM."</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"Отклучување со PUK на SIM."</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"Отклучување со лозинка."</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"Област за шема."</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"Област за лизгање."</string>
@@ -863,6 +879,12 @@
     <string name="text_copied" msgid="4985729524670131385">"Текстот е копиран на таблата со исечоци."</string>
     <string name="more_item_label" msgid="4650918923083320495">"Повеќе"</string>
     <string name="prepend_shortcut_label" msgid="2572214461676015642">"Мени+"</string>
+    <string name="menu_meta_shortcut_label" msgid="4647153495550313570">"копче Meta+"</string>
+    <string name="menu_ctrl_shortcut_label" msgid="3917070091228880941">"копче Ctrl+"</string>
+    <string name="menu_alt_shortcut_label" msgid="6249849492641218944">"копче Alt+"</string>
+    <string name="menu_shift_shortcut_label" msgid="6773890288720306380">"копче Shift+"</string>
+    <string name="menu_sym_shortcut_label" msgid="4019695553731017933">"копче Sym+"</string>
+    <string name="menu_function_shortcut_label" msgid="1984053777418162618">"копче Function+"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"празен простор"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"внеси"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"избриши"</string>
@@ -1074,31 +1096,29 @@
     <string name="unsupported_compile_sdk_check_update" msgid="3312723623323216101">"Провери за ажурирање"</string>
     <string name="smv_application" msgid="3307209192155442829">"Апликацијата <xliff:g id="APPLICATION">%1$s</xliff:g> (процес <xliff:g id="PROCESS">%2$s</xliff:g>) ја прекрши политиката StrictMode што си ја наметна врз себеси."</string>
     <string name="smv_process" msgid="5120397012047462446">"Процесот <xliff:g id="PROCESS">%1$s</xliff:g> ја прекрши својата самонаметната политика на строг режим."</string>
-    <string name="android_upgrading_title" msgid="1584192285441405746">"Android се ажурира…"</string>
-    <string name="android_start_title" msgid="8418054686415318207">"Android стартува…"</string>
+    <string name="android_upgrading_title" product="default" msgid="7513829952443484438">"Телефонот се ажурира…"</string>
+    <string name="android_upgrading_title" product="tablet" msgid="4503169817302593560">"Таблетот се ажурира…"</string>
+    <string name="android_upgrading_title" product="device" msgid="7009520271220804517">"Уредот се ажурира…"</string>
+    <string name="android_start_title" product="default" msgid="4536778526365907780">"Телефонот стартува…"</string>
+    <string name="android_start_title" product="tablet" msgid="4929837533850340472">"Таблетот стартува…"</string>
+    <string name="android_start_title" product="device" msgid="7467484093260449437">"Уредот стартува…"</string>
     <string name="android_upgrading_fstrim" msgid="8036718871534640010">"Оптимизирање на складирањето."</string>
-    <string name="android_upgrading_notification_title" msgid="8428357096969413169">"Се завршува ажурирањето на Android…"</string>
-    <string name="android_upgrading_notification_body" msgid="5761201379457064286">"Некои апликации може да не работат правилно додека не се заврши надградбата"</string>
+    <string name="android_upgrading_notification_title" product="default" msgid="1511552415039349062">"Завршува системската надградба…"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"<xliff:g id="APPLICATION">%1$s</xliff:g> се надградува…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Се оптимизира апликација <xliff:g id="NUMBER_0">%1$d</xliff:g> од <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"Се подготвува <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Се стартуваат апликациите."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Подигањето завршува."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> работи"</string>
-    <!-- no translation found for heavy_weight_notification_detail (2304833848484424985) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_title (387882830435195342) -->
-    <skip />
-    <!-- no translation found for heavy_weight_switcher_text (4176781660362912010) -->
-    <skip />
-    <!-- no translation found for old_app_action (3044685170829526403) -->
-    <skip />
-    <!-- no translation found for new_app_action (6694851182870774403) -->
-    <skip />
-    <!-- no translation found for new_app_description (5894852887817332322) -->
-    <skip />
+    <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"Допрете за да се вратите во играта"</string>
+    <string name="heavy_weight_switcher_title" msgid="387882830435195342">"Избор на игра"</string>
+    <string name="heavy_weight_switcher_text" msgid="4176781660362912010">"За подобра изведба, само една од игриве може да биде отворена."</string>
+    <string name="old_app_action" msgid="3044685170829526403">"Врати се назад во <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_action" msgid="6694851182870774403">"Отвори ја <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> ќе се затвори без да се зачува"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> го надмина ограничувањето на меморијата"</string>
-    <string name="dump_heap_notification_detail" msgid="6901391084243999274">"Сликата од меморијата е собрана. Допрете за споделување"</string>
+    <!-- no translation found for dump_heap_notification_detail (3993078784053054141) -->
+    <skip />
     <string name="dump_heap_title" msgid="5864292264307651673">"Сподели слика од меморија?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"Процесот <xliff:g id="PROC">%1$s</xliff:g> го надмина ограничувањето на меморијата на својот процес од <xliff:g id="SIZE">%2$s</xliff:g>. Достапна ви е слика од меморијата да ја споделите со неговиот програмер. Бидете внимателни: сликата од меморијата може да содржи кои било од вашите лични информации до кои апликацијата има пристап."</string>
     <string name="sendText" msgid="5209874571959469142">"Избери дејство за текст"</string>
@@ -1133,12 +1153,13 @@
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Поврзете се на отворена Wi‑Fi-мрежа"</string>
     <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Поврзете се на Wi‑Fi-мрежа на оператор"</string>
-    <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Поврзување на отворена Wi‑Fi-мрежа"</string>
+    <!-- no translation found for wifi_available_title_connecting (1139126673968899002) -->
+    <skip />
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Се поврзавте на Wi‑Fi-мрежа"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Не можеше да се поврзе на Wi‑Fi-мрежа"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Допрете за да ги видите сите мрежи"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Поврзете се"</string>
-    <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Сите мрежи"</string>
+    <string name="wifi_available_action_all_networks" msgid="4368435796357931006">"Сите мрежи"</string>
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi ќе се вклучи автоматски"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Кога сте во близина на зачувана мрежа со висок квалитет"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Не вклучувај повторно"</string>
@@ -1205,6 +1226,7 @@
     <string name="sim_restart_button" msgid="4722407842815232347">"Рестартирај"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Активирајте мобилна услуга"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Преземете ја апликацијата на операторот за да ја активирате новата SIM-картичка"</string>
+    <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Преземете ја апликацијата <xliff:g id="APP_NAME">%1$s</xliff:g> за да ја активирате новата SIM-картичка"</string>
     <string name="install_carrier_app_notification_button" msgid="3094206295081900849">"Преземете апликација"</string>
     <string name="carrier_app_notification_title" msgid="8921767385872554621">"Вметната е нова SIM-картичка"</string>
     <string name="carrier_app_notification_text" msgid="1132487343346050225">"Допрете за да поставите"</string>
@@ -1223,13 +1245,13 @@
     <string name="usb_ptp_notification_title" msgid="5425857879922006878">"Вклучен е PTP преку USB"</string>
     <string name="usb_tether_notification_title" msgid="3716143122035802501">"Вклучено е врзување преку USB"</string>
     <string name="usb_midi_notification_title" msgid="5356040379749154805">"Вклучен е MIDI преку USB"</string>
-    <string name="usb_accessory_notification_title" msgid="1899977434994900306">"Вклучен е режимот за USB-додаток"</string>
+    <string name="usb_accessory_notification_title" msgid="1785694450621427730">"Поврзан е USB-додаток"</string>
     <string name="usb_notification_message" msgid="3370903770828407960">"Допрете за повеќе опции."</string>
     <string name="usb_power_notification_message" msgid="4647527153291917218">"Се полни поврзаниот уред. Допрете за повеќе опции."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Откриен е аналоген аудиододаток"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Приложениот уред не е компатибилен со телефонов. Допрете за да дознаете повеќе."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Поврзано е отстранување грешки преку USB"</string>
-    <string name="adb_active_notification_message" msgid="4948470599328424059">"Допрете за да се оневозможи отстранувањето грешки преку USB."</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"Допрете за да го исклучите отстранувањето грешки преку USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Изберете за да се оневозможи отстранување грешки на USB."</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"Се зема извештајот за грешки…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Да се сподели извештајот за грешки?"</string>
@@ -1248,7 +1270,7 @@
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> се прикажува врз други апликации"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> се прикажува врз апликации"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Ако не сакате <xliff:g id="NAME">%s</xliff:g> да ја користи функцијава, допрете за да ги отворите поставките и исклучете ја."</string>
-    <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"ИСКЛУЧИ"</string>
+    <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Исклучи"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Се подготвува <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Се проверува за грешки"</string>
     <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Откриена е нова <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1334,14 +1356,17 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Поврзување со секогаш вклучена VPN..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Поврзани со секогаш вклучена VPN"</string>
     <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Исклучено од секогаш вклучената VPN"</string>
-    <string name="vpn_lockdown_error" msgid="6009249814034708175">"Грешка на секогаш вклучена VPN"</string>
+    <!-- no translation found for vpn_lockdown_error (3133844445659711681) -->
+    <skip />
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"Променете ја мрежата или поставките за VPN"</string>
     <string name="upload_file" msgid="2897957172366730416">"Избери датотека"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Не е избрана датотека"</string>
     <string name="reset" msgid="2448168080964209908">"Ресетирај"</string>
     <string name="submit" msgid="1602335572089911941">"Поднеси"</string>
-    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Овозможен е режим на автомобил"</string>
-    <string name="car_mode_disable_notification_message" msgid="6301524980144350051">"Допрете за да излезете од автомобилски режим."</string>
+    <!-- no translation found for car_mode_disable_notification_title (5704265646471239078) -->
+    <skip />
+    <!-- no translation found for car_mode_disable_notification_message (7647248420931129377) -->
+    <skip />
     <string name="tethered_notification_title" msgid="3146694234398202601">"Поврзувањето или точката на пристап се активни"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Допрете за поставување."</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"Врзувањето е оневозможено"</string>
@@ -1421,22 +1446,19 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB-меморија"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB меморија"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Измени"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Известување за потрошен сообраќај"</string>
-    <string name="data_usage_warning_body" msgid="6660692274311972007">"Допрете за употреба и поставки."</string>
-    <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"Постигна лимит за 2G-3G податоци"</string>
-    <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"Постигнат лимит за 4G податоци"</string>
+    <string name="data_usage_warning_title" msgid="6499834033204801605">"Предупредување за интернет"</string>
+    <string name="data_usage_warning_body" msgid="7340198905103751676">"Потрошивте <xliff:g id="APP">%s</xliff:g> интернет"</string>
     <string name="data_usage_mobile_limit_title" msgid="6561099244084267376">"Достигнат лимит за моб. интернет"</string>
     <string name="data_usage_wifi_limit_title" msgid="5803363779034792676">"Постигна лимит за Wi-Fi податоци"</string>
-    <string name="data_usage_limit_body" msgid="291731708279614081">"Паузирано до крај на циклус"</string>
-    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Надминат лимит од 2G-3G податоци"</string>
-    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Надминат лимит од 4G податоци"</string>
-    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Надминат лимит на подат. од моб."</string>
-    <string name="data_usage_wifi_limit_snoozed_title" msgid="8743856006384825974">"Надминат лимит на Wi-Fi податоци"</string>
-    <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> над назначената граница."</string>
+    <string name="data_usage_limit_body" msgid="2908179506560812973">"Интернетот е паузиран за остатокот од циклусот"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="3171402244827034372">"Надминат мобилен интернет"</string>
+    <string name="data_usage_wifi_limit_snoozed_title" msgid="3547771791046344188">"Надминат интернет преку Wi-Fi"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="1671222777207603301">"Потрошивте <xliff:g id="SIZE">%s</xliff:g> над поставеното ограничување"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Подат. од заднина се ограничени"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Допрете за да се отст. огранич."</string>
-    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Голема потрошувачка на сообраќај"</string>
-    <string name="data_usage_rapid_body" msgid="4899922842674185567">"Потрошениот сообраќај во изминативе неколку дена е поголем од нормално. Допрете за да ги видите сообраќајот и поставките."</string>
+    <string name="data_usage_rapid_title" msgid="1809795402975261331">"Големо трошење мобилен интернет"</string>
+    <string name="data_usage_rapid_body" msgid="6897825788682442715">"Апликациите потрошија повеќе интернет од вообичаено"</string>
+    <string name="data_usage_rapid_app_body" msgid="5396680996784142544">"<xliff:g id="APP">%s</xliff:g> потроши повеќе интернет од вообичаено"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Сертификат за безбедност"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Овој сертификат е важечки."</string>
     <string name="issued_to" msgid="454239480274921032">"Издадено на:"</string>
@@ -1672,7 +1694,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Инсталирано од администраторот"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ажурирано од администраторот"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Избришано од администраторот"</string>
-    <string name="battery_saver_description" msgid="5394663545060026162">"За да ви помогне да ја подобрите трајноста на батеријата, штедачот на батеријата ја намалува изведбата на уредот и ги ограничува вибрациите, услугите за локација и повеќето податоци од заднина. Е-пошта, Пораки и другите апликации што користат синхронизација можеби нема да се ажурираат ако не ги отворите.\n\nШтедачот на батеријата автоматски се исклучува кога уредот се полни."</string>
+    <!-- no translation found for battery_saver_description (4660824093877546730) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"За да се намали користењето интернет, Штедачот на интернет спречува дел од апликациите да испраќаат или да примаат податоци во заднина. Апликацијата што ја користите во моментов можеби ќе пристапува до интернет, но тоа ќе го прави поретко. Ова значи, на пример, дека сликите нема да се прикажат додека не ги допрете."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Вклучете Штедач на интернет?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Вклучи"</string>
@@ -1684,9 +1707,9 @@
       <item quantity="one">За %1$d мин. (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
       <item quantity="other">За %1$d мин. (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="8152974162096743862">
-      <item quantity="one">За %1$d час (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">За %1$d часа (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="736789408293052283">
+      <item quantity="one">%1$d час (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d часа (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="4787552595253082371">
       <item quantity="one">За %1$d ч. (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
@@ -1700,9 +1723,9 @@
       <item quantity="one">За %d мин.</item>
       <item quantity="other">За %d мин.</item>
     </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="3938821308277433854">
-      <item quantity="one">За % d час</item>
-      <item quantity="other">За % d часа</item>
+    <plurals name="zen_mode_duration_hours" formatted="false" msgid="6571961796799076730">
+      <item quantity="one">%d час</item>
+      <item quantity="other">%d часа</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="6748277774662434217">
       <item quantity="one">За %d ч.</item>
@@ -1723,14 +1746,22 @@
     <string name="muted_by" msgid="6147073845094180001">"Звукот го исклучи <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Настана внатрешен проблем со уредот и може да биде нестабилен сè додека не ресетирате на фабричките податоци."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Настана внатрешен проблем со уредот. Контактирајте го производителот за детали."</string>
-    <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"Барањето USSD е изменето во барање DIAL."</string>
-    <string name="stk_cc_ussd_to_ss" msgid="2345360594181405482">"Барањето USSD е изменето во барање SS."</string>
-    <string name="stk_cc_ussd_to_ussd" msgid="7466087659967191653">"Барањето USSD е изменето во ново барање USSD."</string>
-    <string name="stk_cc_ussd_to_dial_video" msgid="585340552561515305">"Барањето USSD е изменето во барање видео DIAL."</string>
-    <string name="stk_cc_ss_to_dial" msgid="2151304435775557162">"Барањето SS е изменето во барање DIAL."</string>
-    <string name="stk_cc_ss_to_dial_video" msgid="4306210904450719045">"Барањето SS е изменето во барање видео DIAL."</string>
-    <string name="stk_cc_ss_to_ussd" msgid="3951862188105305589">"Барањето SS е изменето во барање USSD."</string>
-    <string name="stk_cc_ss_to_ss" msgid="5470768854991452695">"Барањето SS е изменето во ново барање SS."</string>
+    <!-- no translation found for stk_cc_ussd_to_dial (5214333646366591205) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ss (4884994189414782605) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_ussd (5728637484565449312) -->
+    <skip />
+    <!-- no translation found for stk_cc_ussd_to_dial_video (4134455726513175559) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_dial (1360775164651754978) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_dial_video (6577956662913194947) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ussd (5614626512855868785) -->
+    <skip />
+    <!-- no translation found for stk_cc_ss_to_ss (7716729801537709054) -->
+    <skip />
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Работен профил"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Прошири"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Собери"</string>
@@ -1840,7 +1871,16 @@
     <string name="harmful_app_warning_title" msgid="8982527462829423432">"Откриена е штетна апликација"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> сака да прикажува делови од <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"Измени"</string>
+    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Повиците и известувањата ќе вибрираат"</string>
+    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Повиците и известувањата нема да имаат звук"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Системски промени"</string>
+    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Не вознемирувај"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"„Не вознемирувај“ ги крие известувањата за да ви помогне да се фокусирате"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Ова е ново однесување. Допрете за промена."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Поставките за „Не вознемирувај“ се изменија"</string>
-    <string name="zen_upgrade_notification_content" msgid="6603123479476554768">"Допрете за да ги проверите поставките за однесување при прекини"</string>
+    <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Допрете за да проверите што е блокирано."</string>
+    <!-- no translation found for notification_app_name_system (4205032194610042794) -->
+    <skip />
+    <!-- no translation found for notification_app_name_settings (7751445616365753381) -->
+    <skip />
 </resources>
