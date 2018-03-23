@@ -578,6 +578,9 @@ class SettingsProtoDumpUtil {
                 Settings.Global.BLE_SCAN_LOW_LATENCY_INTERVAL_MS,
                 GlobalSettingsProto.BLE_SCAN_LOW_LATENCY_INTERVAL_MS);
         dumpSetting(s, p,
+                Settings.Global.BLE_SCAN_BACKGROUND_MODE,
+                GlobalSettingsProto.BLE_SCAN_BACKGROUND_MODE);
+        dumpSetting(s, p,
                 Settings.Global.WIFI_SAVED_STATE,
                 GlobalSettingsProto.WIFI_SAVED_STATE);
         dumpSetting(s, p,
