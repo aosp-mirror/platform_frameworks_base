@@ -198,14 +198,6 @@ public final class AutofillServiceInfo {
                     } else {
                         maxVersionCode = Long.MAX_VALUE;
                     }
-                    if (true) { // TODO(b/74445943): remove block after P DP2 is branched
-                        final String urlBarResourceId = cpAttributes.getString(
-                                R.styleable.AutofillService_CompatibilityPackage_urlBarResourceId);
-                        if (urlBarResourceId != null) {
-                            Log.e(TAG, "Service is using deprecated attribute 'urlBarResourceId'");
-                        }
-                    }
-
                     if (compatibilityPackages == null) {
                         compatibilityPackages = new ArrayMap<>();
                     }

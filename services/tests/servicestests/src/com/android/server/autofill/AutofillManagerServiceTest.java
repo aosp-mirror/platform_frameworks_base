@@ -27,8 +27,6 @@ import java.util.Map;
 
 @RunWith(JUnit4.class)
 public class AutofillManagerServiceTest {
-    // TODO(b/74445943): temporary work around until P Development Preview 3 is branched
-    private static final boolean ADDS_DEFAULT_BUTTON = true;
 
     @Test
     public void testGetWhitelistedCompatModePackages_null() {
@@ -42,16 +40,8 @@ public class AutofillManagerServiceTest {
 
     @Test
     public void testGetWhitelistedCompatModePackages_onePackageNoUrls() {
-        if (ADDS_DEFAULT_BUTTON) {
-            final Map<String, String[]> result =
-                    getWhitelistedCompatModePackages("one_is_the_loniest_package");
-            assertThat(result).hasSize(1);
-            assertThat(result.get("one_is_the_loniest_package")).asList()
-                    .containsExactly("url_bar", "location_bar_edit_text");
-        } else {
-            assertThat(getWhitelistedCompatModePackages("one_is_the_loniest_package"))
-                    .containsExactly("one_is_the_loniest_package", null);
-        }
+        assertThat(getWhitelistedCompatModePackages("one_is_the_loniest_package"))
+                .containsExactly("one_is_the_loniest_package", null);
     }
 
     @Test
@@ -80,12 +70,7 @@ public class AutofillManagerServiceTest {
     public void testGetWhitelistedCompatModePackages_multiplePackagesOneInvalid() {
         final Map<String, String[]> result = getWhitelistedCompatModePackages("one:two[");
         assertThat(result).hasSize(1);
-        if (ADDS_DEFAULT_BUTTON) {
-            assertThat(result.get("one")).asList()
-                    .containsExactly("url_bar", "location_bar_edit_text");
-        } else {
-            assertThat(result.get("one")).isNull();
-        }
+        assertThat(result.get("one")).isNull();
     }
 
     @Test
@@ -94,12 +79,7 @@ public class AutofillManagerServiceTest {
                 getWhitelistedCompatModePackages("p1[p1u1]:p2:p3[p3u1,p3u2]");
         assertThat(result).hasSize(3);
         assertThat(result.get("p1")).asList().containsExactly("p1u1");
-        if (ADDS_DEFAULT_BUTTON) {
-            assertThat(result.get("p2")).asList()
-                    .containsExactly("url_bar", "location_bar_edit_text");
-        } else {
-            assertThat(result.get("p2")).isNull();
-        }
+        assertThat(result.get("p2")).isNull();
         assertThat(result.get("p3")).asList().containsExactly("p3u1", "p3u2");
     }
 
