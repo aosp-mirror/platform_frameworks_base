@@ -4349,11 +4349,14 @@ package android.security.keystore.recovery {
   }
 
   public final class KeyDerivationParams implements android.os.Parcelable {
+    method public static android.security.keystore.recovery.KeyDerivationParams createScryptParams(byte[], int);
     method public static android.security.keystore.recovery.KeyDerivationParams createSha256Params(byte[]);
     method public int describeContents();
     method public int getAlgorithm();
+    method public int getMemoryDifficulty();
     method public byte[] getSalt();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int ALGORITHM_SCRYPT = 2; // 0x2
     field public static final int ALGORITHM_SHA256 = 1; // 0x1
     field public static final android.os.Parcelable.Creator<android.security.keystore.recovery.KeyDerivationParams> CREATOR;
   }
