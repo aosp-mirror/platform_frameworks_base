@@ -687,6 +687,11 @@ public class RenderNode {
         return nIsPivotExplicitlySet(mNativeRenderNode);
     }
 
+    /** lint */
+    public boolean resetPivot() {
+        return nResetPivot(mNativeRenderNode);
+    }
+
     /**
      * Sets the camera distance for the display list. Refer to
      * {@link View#setCameraDistance(float)} for more information on how to
@@ -902,6 +907,8 @@ public class RenderNode {
     private static native boolean nSetPivotY(long renderNode, float pivotY);
     @CriticalNative
     private static native boolean nSetPivotX(long renderNode, float pivotX);
+    @CriticalNative
+    private static native boolean nResetPivot(long renderNode);
     @CriticalNative
     private static native boolean nSetLayerType(long renderNode, int layerType);
     @CriticalNative
