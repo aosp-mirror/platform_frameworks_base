@@ -1,11 +1,18 @@
 package com.android.server.locksettings.recoverablekeystore;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import com.android.server.locksettings.recoverablekeystore.certificate.CertUtils;
 
 import java.io.ByteArrayInputStream;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.cert.CertPath;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.cert.CertificateFactory;
+import java.security.cert.CertPath;
+import java.security.spec.ECPrivateKeySpec;
 
 public final class TestData {
 
@@ -213,6 +220,44 @@ public final class TestData {
             + "  </value>\n"
             + "</signature>\n";
 
+    public static final PublicKey CERT_1_PUBLIC_KEY;
+    public static final PrivateKey CERT_1_PRIVATE_KEY;
+
+    static {
+        try {
+            CERT_1_PUBLIC_KEY =
+                    SecureBox.decodePublicKey(
+                            new byte[] {
+                                (byte) 0x04, (byte) 0xb8, (byte) 0x00, (byte) 0x11, (byte) 0x18,
+                                (byte) 0x98, (byte) 0x1d, (byte) 0xf0, (byte) 0x6e, (byte) 0xb4,
+                                (byte) 0x94, (byte) 0xfe, (byte) 0x86, (byte) 0xda, (byte) 0x1c,
+                                (byte) 0x07, (byte) 0x8d, (byte) 0x01, (byte) 0xb4, (byte) 0x3a,
+                                (byte) 0xf6, (byte) 0x8d, (byte) 0xdc, (byte) 0x61, (byte) 0xd0,
+                                (byte) 0x46, (byte) 0x49, (byte) 0x95, (byte) 0x0f, (byte) 0x10,
+                                (byte) 0x86, (byte) 0x93, (byte) 0x24, (byte) 0x66, (byte) 0xe0,
+                                (byte) 0x3f, (byte) 0xd2, (byte) 0xdf, (byte) 0xf3, (byte) 0x79,
+                                (byte) 0x20, (byte) 0x1d, (byte) 0x91, (byte) 0x55, (byte) 0xb0,
+                                (byte) 0xe5, (byte) 0xbd, (byte) 0x7a, (byte) 0x8b, (byte) 0x32,
+                                (byte) 0x7d, (byte) 0x25, (byte) 0x53, (byte) 0xa2, (byte) 0xfc,
+                                (byte) 0xa5, (byte) 0x65, (byte) 0xe1, (byte) 0xbd, (byte) 0x21,
+                                (byte) 0x44, (byte) 0x7e, (byte) 0x78, (byte) 0x52, (byte) 0xfa
+                            });
+            CERT_1_PRIVATE_KEY =
+                    decodePrivateKey(
+                            new byte[] {
+                                (byte) 0x70, (byte) 0x01, (byte) 0xc7, (byte) 0x87, (byte) 0x32,
+                                (byte) 0x2f, (byte) 0x1c, (byte) 0x9a, (byte) 0x6e, (byte) 0xb1,
+                                (byte) 0x91, (byte) 0xca, (byte) 0x4e, (byte) 0xb5, (byte) 0x44,
+                                (byte) 0xba, (byte) 0xc8, (byte) 0x68, (byte) 0xc6, (byte) 0x0a,
+                                (byte) 0x76, (byte) 0xcb, (byte) 0xd3, (byte) 0x63, (byte) 0x67,
+                                (byte) 0x7c, (byte) 0xb0, (byte) 0x11, (byte) 0x82, (byte) 0x65,
+                                (byte) 0x77, (byte) 0x01
+                            });
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
     public static byte[] getCertPath1Bytes() {
         try {
             return CertUtils.decodeBase64(CERT_PATH_1_BASE64);
@@ -255,5 +300,12 @@ public final class TestData {
 
     public static byte[] getSigXml() {
         return THM_SIG_XML.getBytes(StandardCharsets.UTF_8);
+    }
+
+    private static PrivateKey decodePrivateKey(byte[] keyBytes) throws Exception {
+        assertThat(keyBytes.length).isEqualTo(32);
+        BigInteger priv = new BigInteger(/*signum=*/ 1, keyBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance("EC");
+        return keyFactory.generatePrivate(new ECPrivateKeySpec(priv, SecureBox.EC_PARAM_SPEC));
     }
 }
