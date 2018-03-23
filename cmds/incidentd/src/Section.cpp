@@ -374,9 +374,9 @@ status_t GZipSection::Execute(ReportRequestSet* requests) const {
     // ProtoOutputStream is to avoid allocation of another buffer inside ProtoOutputStream.
     EncodedBuffer* internalBuffer = buffer.getInternalBuffer();
     internalBuffer->writeHeader((uint32_t)GZippedFileProto::FILENAME, WIRE_TYPE_LENGTH_DELIMITED);
-    String8 usedFile(mFilenames[index]);
-    internalBuffer->writeRawVarint32(usedFile.size());
-    for (size_t i = 0; i < usedFile.size(); i++) {
+    size_t fileLen = strlen(mFilenames[index]);
+    internalBuffer->writeRawVarint32(fileLen);
+    for (size_t i = 0; i < fileLen; i++) {
         internalBuffer->writeRawByte(mFilenames[index][i]);
     }
     internalBuffer->writeHeader((uint32_t)GZippedFileProto::GZIPPED_DATA,
