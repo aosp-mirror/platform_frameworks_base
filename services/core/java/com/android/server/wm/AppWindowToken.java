@@ -1698,7 +1698,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 stack.getBounds(mTmpRect);
                 mTmpRect.offsetTo(0, 0);
             }
-            if (mService.mAppTransition.getRemoteAnimationController() != null) {
+
+            // Delaying animation start isn't compatible with remote animations at all.
+            if (mService.mAppTransition.getRemoteAnimationController() != null
+                    && !mSurfaceAnimator.isAnimationStartDelayed()) {
                 adapter = mService.mAppTransition.getRemoteAnimationController()
                         .createAnimationAdapter(this, mTmpPoint, mTmpRect);
             } else {

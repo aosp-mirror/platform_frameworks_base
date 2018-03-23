@@ -234,6 +234,10 @@ class SurfaceAnimator {
         mService.mAnimationTransferMap.put(mAnimation, this);
     }
 
+    boolean isAnimationStartDelayed() {
+        return mAnimationStartDelayed;
+    }
+
     /**
      * Cancels the animation, and resets the leash.
      *
