@@ -22,8 +22,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.calls;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
@@ -238,9 +236,19 @@ public class KeyguardBouncerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testIsShowing() {
+    public void testIsShowing_animated() {
         Assert.assertFalse("Show wasn't invoked yet", mBouncer.isShowing());
-        mBouncer.show(true);
+        mBouncer.show(true /* reset */);
+        Assert.assertTrue("Should be showing", mBouncer.isShowing());
+    }
+
+    @Test
+    public void testIsShowing_forSwipeUp() {
+        mBouncer.setExpansion(1f);
+        mBouncer.show(true /* reset */, false /* animated */);
+        Assert.assertFalse("Should only be showing after collapsing notification panel",
+                mBouncer.isShowing());
+        mBouncer.setExpansion(0f);
         Assert.assertTrue("Should be showing", mBouncer.isShowing());
     }
 
@@ -266,6 +274,25 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         mBouncer.isFullscreenBouncer();
         verify(mKeyguardHostView).getCurrentSecurityMode();
         verify(mKeyguardHostView, never()).getSecurityMode();
+    }
+
+    @Test
+    public void testIsHiding_preHideOrHide() {
+        Assert.assertFalse("Should not be hiding on initial state", mBouncer.isAnimatingAway());
+        mBouncer.startPreHideAnimation(null /* runnable */);
+        Assert.assertTrue("Should be hiding during pre-hide", mBouncer.isAnimatingAway());
+        mBouncer.hide(false /* destroyView */);
+        Assert.assertFalse("Should be hidden after hide()", mBouncer.isAnimatingAway());
+    }
+
+    @Test
+    public void testIsHiding_skipsTranslation() {
+        mBouncer.show(false /* reset */);
+        reset(mKeyguardHostView);
+        mBouncer.startPreHideAnimation(null /* runnable */);
+        mBouncer.setExpansion(0.5f);
+        verify(mKeyguardHostView, never()).setTranslationY(anyFloat());
+        verify(mKeyguardHostView, never()).setAlpha(anyFloat());
     }
 
     @Test
