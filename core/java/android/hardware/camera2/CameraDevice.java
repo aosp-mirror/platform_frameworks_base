@@ -819,7 +819,8 @@ public abstract class CameraDevice implements AutoCloseable {
      * @param config A session configuration (see {@link SessionConfiguration}).
      *
      * @throws IllegalArgumentException In case the session configuration is invalid; or the output
-     *                                  configurations are empty.
+     *                                  configurations are empty; or the session configuration
+     *                                  executor is invalid.
      * @throws CameraAccessException In case the camera device is no longer connected or has
      *                               encountered a fatal error.
      * @see #createCaptureSession(List, CameraCaptureSession.StateCallback, Handler)
