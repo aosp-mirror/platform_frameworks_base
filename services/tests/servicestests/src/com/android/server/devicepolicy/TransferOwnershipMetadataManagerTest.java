@@ -16,9 +16,8 @@
 
 package com.android.server.devicepolicy;
 
-import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_DEVICE_OWNER;
-
-
+import static com.android.server.devicepolicy.TransferOwnershipMetadataManager
+        .ADMIN_TYPE_DEVICE_OWNER;
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager
         .OWNER_TRANSFER_METADATA_XML;
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.TAG_ADMIN_TYPE;
@@ -32,6 +31,7 @@ import static org.junit.Assert.assertTrue;
 
 import android.os.Environment;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.Log;
 
 import com.android.server.devicepolicy.TransferOwnershipMetadataManager.Injector;
 import com.android.server.devicepolicy.TransferOwnershipMetadataManager.Metadata;
@@ -57,6 +57,7 @@ import java.nio.file.Paths;
 
 @RunWith(AndroidJUnit4.class)
 public class TransferOwnershipMetadataManagerTest {
+    private final static String TAG = TransferOwnershipMetadataManagerTest.class.getName();
     private final static String SOURCE_COMPONENT =
             "com.dummy.admin.package/com.dummy.admin.package.SourceClassName";
     private final static String TARGET_COMPONENT =
@@ -106,6 +107,22 @@ public class TransferOwnershipMetadataManagerTest {
     @Test
     public void testLoad() {
         TransferOwnershipMetadataManager paramsManager = getOwnerTransferParams();
+        final File transferOwnershipMetadataFile =
+                new File(mMockInjector.getOwnerTransferMetadataDir(), OWNER_TRANSFER_METADATA_XML);
+        Log.d(TAG, "testLoad: file path is " + transferOwnershipMetadataFile.getAbsolutePath());
+        Log.d(TAG, "testLoad: file exists? " + transferOwnershipMetadataFile.exists());
+        Log.d(TAG, "testLoad: file mkdir?" + transferOwnershipMetadataFile.mkdir());
+        try {
+            File canonicalFile = transferOwnershipMetadataFile.getCanonicalFile();
+            File parentFile = canonicalFile.getParentFile();
+            Log.d(TAG, "testLoad: file getCanonicalFile?" + canonicalFile);
+            Log.d(TAG, "testLoad: getCanonicalFile.getParentFile " + parentFile);
+            Log.d(TAG, "testLoad: parent mkdirs? " + parentFile.mkdirs());
+            Log.d(TAG, "testLoad: parent exists? " + parentFile.exists());
+            Log.d(TAG, "testLoad: canonical file.mkdir()? " + canonicalFile.mkdir());
+        } catch (IOException e) {
+            Log.d(TAG, "testLoad: failed to get canonical file");
+        }
         paramsManager.saveMetadataFile(TEST_PARAMS);
         assertEquals(TEST_PARAMS, paramsManager.loadMetadataFile());
     }
