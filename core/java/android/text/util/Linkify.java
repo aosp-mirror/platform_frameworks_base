@@ -650,7 +650,8 @@ public class Linkify {
         final CharSequence truncatedText = text.subSequence(
                 0, Math.min(text.length(), classifier.getMaxGenerateLinksTextLength()));
 
-        final Supplier<TextLinks> supplier = () -> classifier.generateLinks(truncatedText, options);
+        final Supplier<TextLinks> supplier = () ->
+                classifier.generateLinks(truncatedText, options.setLegacyFallback(true));
         final Consumer<TextLinks> consumer = links -> {
             if (links.getLinks().isEmpty()) {
                 if (callback != null) {

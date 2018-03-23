@@ -162,6 +162,7 @@ import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextLinks;
@@ -187,6 +188,10 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * A user interface element that displays text to the user.
@@ -11515,16 +11520,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Starts an ActionMode for the specified TextLink.
+     * Starts an ActionMode for the specified TextLinkSpan.
      *
      * @return Whether or not we're attempting to start the action mode.
      * @hide
      */
     public boolean requestActionMode(@NonNull TextLinks.TextLinkSpan clickedSpan) {
         Preconditions.checkNotNull(clickedSpan);
-        final TextLinks.TextLink link = clickedSpan.getTextLink();
-        Preconditions.checkNotNull(link);
-        createEditorIfNeeded();
 
         if (!(mText instanceof Spanned)) {
             return false;
@@ -11533,12 +11535,52 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final int start = ((Spanned) mText).getSpanStart(clickedSpan);
         final int end = ((Spanned) mText).getSpanEnd(clickedSpan);
 
-        if (start < 0 || end < 1) {
+        if (start < 0 || end > mText.length() || start >= end) {
             return false;
         }
 
+        createEditorIfNeeded();
         mEditor.startLinkActionModeAsync(start, end);
         return true;
+    }
+
+    /**
+     * Handles a click on the specified TextLinkSpan.
+     *
+     * @return Whether or not the click is being handled.
+     * @hide
+     */
+    public boolean handleClick(@NonNull TextLinks.TextLinkSpan clickedSpan) {
+        Preconditions.checkNotNull(clickedSpan);
+        if (mText instanceof Spanned) {
+            final Spanned spanned = (Spanned) mText;
+            final int start = spanned.getSpanStart(clickedSpan);
+            final int end = spanned.getSpanEnd(clickedSpan);
+            if (start >= 0 && end <= mText.length() && start < end) {
+                final TextClassification.Options options = new TextClassification.Options()
+                        .setDefaultLocales(getTextLocales());
+                final Supplier<TextClassification> supplier = () ->
+                        getTextClassifier().classifyText(mText, start, end, options);
+                final Consumer<TextClassification> consumer = classification -> {
+                    if (classification != null) {
+                        final Intent intent = classification.getIntent();
+                        if (intent != null) {
+                            TextClassification.fireIntent(mContext, intent);
+                        } else {
+                            Log.d(LOG_TAG, "No link action to perform");
+                        }
+                    } else {
+                        // classification == null
+                        Log.d(LOG_TAG, "Timeout while classifying text");
+                    }
+                };
+                CompletableFuture.supplyAsync(supplier)
+                        .completeOnTimeout(null, 1, TimeUnit.SECONDS)
+                        .thenAccept(consumer);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
