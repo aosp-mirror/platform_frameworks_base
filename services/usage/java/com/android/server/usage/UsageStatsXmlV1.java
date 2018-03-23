@@ -62,6 +62,7 @@ final class UsageStatsXmlV1 {
     private static final String TYPE_ATTR = "type";
     private static final String SHORTCUT_ID_ATTR = "shortcutId";
     private static final String STANDBY_BUCKET_ATTR = "standbyBucket";
+    private static final String APP_LAUNCH_COUNT_ATTR = "appLaunchCount";
 
     // Time attributes stored as an offset of the beginTime.
     private static final String LAST_TIME_ACTIVE_ATTR = "lastTimeActive";
@@ -81,6 +82,7 @@ final class UsageStatsXmlV1 {
                 parser, LAST_TIME_ACTIVE_ATTR);
         stats.mTotalTimeInForeground = XmlUtils.readLongAttribute(parser, TOTAL_TIME_ACTIVE_ATTR);
         stats.mLastEvent = XmlUtils.readIntAttribute(parser, LAST_EVENT_ATTR);
+        stats.mAppLaunchCount = XmlUtils.readIntAttribute(parser, APP_LAUNCH_COUNT_ATTR, 0);
         int eventCode;
         while ((eventCode = parser.next()) != XmlPullParser.END_DOCUMENT) {
             final String tag = parser.getName();
@@ -193,6 +195,9 @@ final class UsageStatsXmlV1 {
         XmlUtils.writeStringAttribute(xml, PACKAGE_ATTR, usageStats.mPackageName);
         XmlUtils.writeLongAttribute(xml, TOTAL_TIME_ACTIVE_ATTR, usageStats.mTotalTimeInForeground);
         XmlUtils.writeIntAttribute(xml, LAST_EVENT_ATTR, usageStats.mLastEvent);
+        if (usageStats.mAppLaunchCount > 0) {
+            XmlUtils.writeIntAttribute(xml, APP_LAUNCH_COUNT_ATTR, usageStats.mAppLaunchCount);
+        }
         writeChooserCounts(xml, usageStats);
         xml.endTag(null, PACKAGE_TAG);
     }
