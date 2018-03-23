@@ -93,6 +93,8 @@ public final class TextClassifierImpl implements TextClassifier {
     private Logger.Config mLoggerConfig;
     @GuardedBy("mLoggerLock") // Do not access outside this lock.
     private Logger mLogger;
+    @GuardedBy("mLoggerLock") // Do not access outside this lock.
+    private Logger mLogger2;  // This is the new logger. Will replace mLogger.
 
     private final TextClassificationConstants mSettings;
 
@@ -297,6 +299,18 @@ public final class TextClassifierImpl implements TextClassifier {
             }
         }
         return mLogger;
+    }
+
+    @Override
+    public void onSelectionEvent(SelectionEvent event) {
+        Preconditions.checkNotNull(event);
+        synchronized (mLoggerLock) {
+            if (mLogger2 == null) {
+                mLogger2 = new DefaultLogger(
+                        new Logger.Config(mContext, WIDGET_TYPE_UNKNOWN, null));
+            }
+            mLogger2.writeEvent(event);
+        }
     }
 
     private TextClassifierImplNative getNative(LocaleList localeList)

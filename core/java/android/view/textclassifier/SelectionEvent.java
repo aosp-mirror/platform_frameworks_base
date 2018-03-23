@@ -17,10 +17,12 @@
 package android.view.textclassifier;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.textclassifier.TextClassifier.EntityType;
+import android.view.textclassifier.TextClassifier.WidgetType;
 
 import com.android.internal.util.Preconditions;
 
@@ -103,30 +105,33 @@ public final class SelectionEvent implements Parcelable {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({INVOCATION_MANUAL, INVOCATION_LINK})
+    @IntDef({INVOCATION_MANUAL, INVOCATION_LINK, INVOCATION_UNKNOWN})
     public @interface InvocationMethod {}
 
     /** Selection was invoked by the user long pressing, double tapping, or dragging to select. */
     public static final int INVOCATION_MANUAL = 1;
     /** Selection was invoked by the user tapping on a link. */
     public static final int INVOCATION_LINK = 2;
+    /** Unknown invocation method */
+    public static final int INVOCATION_UNKNOWN = 0;
+
+    private static final String NO_SIGNATURE = "";
 
     private final int mAbsoluteStart;
     private final int mAbsoluteEnd;
-    private final @EventType int mEventType;
     private final @EntityType String mEntityType;
-    @Nullable private final String mWidgetVersion;
-    private final String mPackageName;
-    private final String mWidgetType;
-    private final @InvocationMethod int mInvocationMethod;
 
-    // These fields should only be set by creator of a SelectionEvent.
-    private String mSignature;
+    private @EventType int mEventType;
+    private String mPackageName = "";
+    private String mWidgetType = TextClassifier.WIDGET_TYPE_UNKNOWN;
+    private @InvocationMethod int mInvocationMethod;
+    @Nullable private String mWidgetVersion;
+    private String mSignature;  // TODO: Rename to resultId.
     private long mEventTime;
     private long mDurationSinceSessionStart;
     private long mDurationSincePreviousEvent;
     private int mEventIndex;
-    @Nullable private String mSessionId;
+    @Nullable private TextClassificationSessionId mSessionId;
     private int mStart;
     private int mEnd;
     private int mSmartStart;
@@ -135,18 +140,27 @@ public final class SelectionEvent implements Parcelable {
     SelectionEvent(
             int start, int end,
             @EventType int eventType, @EntityType String entityType,
-            @InvocationMethod int invocationMethod, String signature, Logger.Config config) {
+            @InvocationMethod int invocationMethod, String signature) {
         Preconditions.checkArgument(end >= start, "end cannot be less than start");
         mAbsoluteStart = start;
         mAbsoluteEnd = end;
         mEventType = eventType;
         mEntityType = Preconditions.checkNotNull(entityType);
         mSignature = Preconditions.checkNotNull(signature);
-        Preconditions.checkNotNull(config);
-        mWidgetVersion = config.getWidgetVersion();
-        mPackageName = Preconditions.checkNotNull(config.getPackageName());
-        mWidgetType = Preconditions.checkNotNull(config.getWidgetType());
         mInvocationMethod = invocationMethod;
+    }
+
+    SelectionEvent(
+            int start, int end,
+            @EventType int eventType, @EntityType String entityType,
+            @InvocationMethod int invocationMethod, String signature, Logger.Config config) {
+        this(start, end, eventType, entityType, invocationMethod, signature);
+        Preconditions.checkNotNull(config);
+        setTextClassificationSessionContext(
+                new TextClassificationContext.Builder(
+                        config.getPackageName(), config.getWidgetType())
+                        .setWidgetVersion(config.getWidgetVersion())
+                        .build());
     }
 
     private SelectionEvent(Parcel in) {
@@ -163,7 +177,8 @@ public final class SelectionEvent implements Parcelable {
         mDurationSinceSessionStart = in.readLong();
         mDurationSincePreviousEvent = in.readLong();
         mEventIndex = in.readInt();
-        mSessionId = in.readInt() > 0 ? in.readString() : null;
+        mSessionId = in.readInt() > 0
+                ? TextClassificationSessionId.CREATOR.createFromParcel(in) : null;
         mStart = in.readInt();
         mEnd = in.readInt();
         mSmartStart = in.readInt();
@@ -190,7 +205,7 @@ public final class SelectionEvent implements Parcelable {
         dest.writeInt(mEventIndex);
         dest.writeInt(mSessionId != null ? 1 : 0);
         if (mSessionId != null) {
-            dest.writeString(mSessionId);
+            mSessionId.writeToParcel(dest, flags);
         }
         dest.writeInt(mStart);
         dest.writeInt(mEnd);
@@ -201,6 +216,156 @@ public final class SelectionEvent implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    /**
+     * Creates a "selection started" event.
+     *
+     * @param invocationMethod  the way the selection was triggered
+     * @param start  the index of the selected text
+     */
+    @NonNull
+    public static SelectionEvent createSelectionStartedEvent(
+            @SelectionEvent.InvocationMethod int invocationMethod, int start) {
+        return new SelectionEvent(
+                start, start + 1, SelectionEvent.EVENT_SELECTION_STARTED,
+                TextClassifier.TYPE_UNKNOWN, invocationMethod, NO_SIGNATURE);
+    }
+
+    /**
+     * Creates a "selection modified" event.
+     * Use when the user modifies the selection.
+     *
+     * @param start  the start (inclusive) index of the selection
+     * @param end  the end (exclusive) index of the selection
+     *
+     * @throws IllegalArgumentException if end is less than start
+     */
+    @NonNull
+    public static SelectionEvent createSelectionModifiedEvent(int start, int end) {
+        Preconditions.checkArgument(end >= start, "end cannot be less than start");
+        return new SelectionEvent(
+                start, end, SelectionEvent.EVENT_SELECTION_MODIFIED,
+                TextClassifier.TYPE_UNKNOWN, INVOCATION_UNKNOWN, NO_SIGNATURE);
+    }
+
+    /**
+     * Creates a "selection modified" event.
+     * Use when the user modifies the selection and the selection's entity type is known.
+     *
+     * @param start  the start (inclusive) index of the selection
+     * @param end  the end (exclusive) index of the selection
+     * @param classification  the TextClassification object returned by the TextClassifier that
+     *      classified the selected text
+     *
+     * @throws IllegalArgumentException if end is less than start
+     */
+    @NonNull
+    public static SelectionEvent createSelectionModifiedEvent(
+            int start, int end, @NonNull TextClassification classification) {
+        Preconditions.checkArgument(end >= start, "end cannot be less than start");
+        Preconditions.checkNotNull(classification);
+        final String entityType = classification.getEntityCount() > 0
+                ? classification.getEntity(0)
+                : TextClassifier.TYPE_UNKNOWN;
+        return new SelectionEvent(
+                start, end, SelectionEvent.EVENT_SELECTION_MODIFIED,
+                entityType, INVOCATION_UNKNOWN, classification.getSignature());
+    }
+
+    /**
+     * Creates a "selection modified" event.
+     * Use when a TextClassifier modifies the selection.
+     *
+     * @param start  the start (inclusive) index of the selection
+     * @param end  the end (exclusive) index of the selection
+     * @param selection  the TextSelection object returned by the TextClassifier for the
+     *      specified selection
+     *
+     * @throws IllegalArgumentException if end is less than start
+     */
+    @NonNull
+    public static SelectionEvent createSelectionModifiedEvent(
+            int start, int end, @NonNull TextSelection selection) {
+        Preconditions.checkArgument(end >= start, "end cannot be less than start");
+        Preconditions.checkNotNull(selection);
+        final String entityType = selection.getEntityCount() > 0
+                ? selection.getEntity(0)
+                : TextClassifier.TYPE_UNKNOWN;
+        return new SelectionEvent(
+                start, end, SelectionEvent.EVENT_AUTO_SELECTION,
+                entityType, INVOCATION_UNKNOWN, selection.getSignature());
+    }
+
+    /**
+     * Creates an event specifying an action taken on a selection.
+     * Use when the user clicks on an action to act on the selected text.
+     *
+     * @param start  the start (inclusive) index of the selection
+     * @param end  the end (exclusive) index of the selection
+     * @param actionType  the action that was performed on the selection
+     *
+     * @throws IllegalArgumentException if end is less than start
+     */
+    @NonNull
+    public static SelectionEvent createSelectionActionEvent(
+            int start, int end, @SelectionEvent.ActionType int actionType) {
+        Preconditions.checkArgument(end >= start, "end cannot be less than start");
+        checkActionType(actionType);
+        return new SelectionEvent(
+                start, end, actionType, TextClassifier.TYPE_UNKNOWN, INVOCATION_UNKNOWN,
+                NO_SIGNATURE);
+    }
+
+    /**
+     * Creates an event specifying an action taken on a selection.
+     * Use when the user clicks on an action to act on the selected text and the selection's
+     * entity type is known.
+     *
+     * @param start  the start (inclusive) index of the selection
+     * @param end  the end (exclusive) index of the selection
+     * @param actionType  the action that was performed on the selection
+     * @param classification  the TextClassification object returned by the TextClassifier that
+     *      classified the selected text
+     *
+     * @throws IllegalArgumentException if end is less than start
+     * @throws IllegalArgumentException If actionType is not a valid SelectionEvent actionType
+     */
+    @NonNull
+    public static SelectionEvent createSelectionActionEvent(
+            int start, int end, @SelectionEvent.ActionType int actionType,
+            @NonNull TextClassification classification) {
+        Preconditions.checkArgument(end >= start, "end cannot be less than start");
+        Preconditions.checkNotNull(classification);
+        checkActionType(actionType);
+        final String entityType = classification.getEntityCount() > 0
+                ? classification.getEntity(0)
+                : TextClassifier.TYPE_UNKNOWN;
+        return new SelectionEvent(start, end, actionType, entityType, INVOCATION_UNKNOWN,
+                classification.getSignature());
+    }
+
+    /**
+     * @throws IllegalArgumentException If eventType is not an {@link SelectionEvent.ActionType}
+     */
+    private static void checkActionType(@SelectionEvent.EventType int eventType)
+            throws IllegalArgumentException {
+        switch (eventType) {
+            case SelectionEvent.ACTION_OVERTYPE:  // fall through
+            case SelectionEvent.ACTION_COPY:  // fall through
+            case SelectionEvent.ACTION_PASTE:  // fall through
+            case SelectionEvent.ACTION_CUT:  // fall through
+            case SelectionEvent.ACTION_SHARE:  // fall through
+            case SelectionEvent.ACTION_SMART_SHARE:  // fall through
+            case SelectionEvent.ACTION_DRAG:  // fall through
+            case SelectionEvent.ACTION_ABANDON:  // fall through
+            case SelectionEvent.ACTION_SELECT_ALL:  // fall through
+            case SelectionEvent.ACTION_RESET:  // fall through
+                return;
+            default:
+                throw new IllegalArgumentException(
+                        String.format(Locale.US, "%d is not an eventType", eventType));
+        }
     }
 
     int getAbsoluteStart() {
@@ -214,8 +379,16 @@ public final class SelectionEvent implements Parcelable {
     /**
      * Returns the type of event that was triggered. e.g. {@link #ACTION_COPY}.
      */
+    @EventType
     public int getEventType() {
         return mEventType;
+    }
+
+    /**
+     * Sets the event type.
+     */
+    void setEventType(@EventType int eventType) {
+        mEventType = eventType;
     }
 
     /**
@@ -223,6 +396,7 @@ public final class SelectionEvent implements Parcelable {
      * {@link android.view.textclassifier.TextClassifier#TYPE_EMAIL}.
      */
     @EntityType
+    @NonNull
     public String getEntityType() {
         return mEntityType;
     }
@@ -230,6 +404,7 @@ public final class SelectionEvent implements Parcelable {
     /**
      * Returns the package name of the app that this event originated in.
      */
+    @NonNull
     public String getPackageName() {
         return mPackageName;
     }
@@ -237,6 +412,8 @@ public final class SelectionEvent implements Parcelable {
     /**
      * Returns the type of widget that was involved in triggering this event.
      */
+    @WidgetType
+    @NonNull
     public String getWidgetType() {
         return mWidgetType;
     }
@@ -244,8 +421,18 @@ public final class SelectionEvent implements Parcelable {
     /**
      * Returns a string version info for the widget this event was triggered in.
      */
+    @Nullable
     public String getWidgetVersion() {
         return mWidgetVersion;
+    }
+
+    /**
+     * Sets the {@link TextClassificationContext} for this event.
+     */
+    void setTextClassificationSessionContext(TextClassificationContext context) {
+        mPackageName = context.getPackageName();
+        mWidgetType = context.getWidgetType();
+        mWidgetVersion = context.getWidgetVersion();
     }
 
     /**
@@ -253,6 +440,13 @@ public final class SelectionEvent implements Parcelable {
      */
     public @InvocationMethod int getInvocationMethod() {
         return mInvocationMethod;
+    }
+
+    /**
+     * Sets the invocationMethod for this event.
+     */
+    void setInvocationMethod(@InvocationMethod int invocationMethod) {
+        mInvocationMethod = invocationMethod;
     }
 
     /**
@@ -320,17 +514,18 @@ public final class SelectionEvent implements Parcelable {
     /**
      * Returns the selection session id.
      */
-    public String getSessionId() {
+    @Nullable
+    public TextClassificationSessionId getSessionId() {
         return mSessionId;
     }
 
-    SelectionEvent setSessionId(String id) {
+    SelectionEvent setSessionId(TextClassificationSessionId id) {
         mSessionId = id;
         return this;
     }
 
     /**
-     * Returns the start index of this events token relative to the index of the start selection
+     * Returns the start index of this events relative to the index of the start selection
      * event in the selection session.
      */
     public int getStart() {
@@ -343,7 +538,7 @@ public final class SelectionEvent implements Parcelable {
     }
 
     /**
-     * Returns the end index of this events token relative to the index of the start selection
+     * Returns the end index of this events relative to the index of the start selection
      * event in the selection session.
      */
     public int getEnd() {
@@ -356,7 +551,7 @@ public final class SelectionEvent implements Parcelable {
     }
 
     /**
-     * Returns the start index of this events token relative to the index of the smart selection
+     * Returns the start index of this events relative to the index of the smart selection
      * event in the selection session.
      */
     public int getSmartStart() {
@@ -369,7 +564,7 @@ public final class SelectionEvent implements Parcelable {
     }
 
     /**
-     * Returns the end index of this events token relative to the index of the smart selection
+     * Returns the end index of this events relative to the index of the smart selection
      * event in the selection session.
      */
     public int getSmartEnd() {
@@ -382,7 +577,15 @@ public final class SelectionEvent implements Parcelable {
     }
 
     boolean isTerminal() {
-        switch (mEventType) {
+        return isTerminal(mEventType);
+    }
+
+    /**
+     * Returns true if the eventType is a terminal event type. Otherwise returns false.
+     * A terminal event is an event that ends a selection interaction.
+     */
+    public static boolean isTerminal(@EventType int eventType) {
+        switch (eventType) {
             case ACTION_OVERTYPE:  // fall through
             case ACTION_COPY:  // fall through
             case ACTION_PASTE:  // fall through

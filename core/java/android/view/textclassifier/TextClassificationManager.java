@@ -16,6 +16,7 @@
 
 package android.view.textclassifier;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.content.Context;
@@ -36,6 +37,9 @@ public final class TextClassificationManager {
     private static final String LOG_TAG = "TextClassificationManager";
 
     private final Object mLock = new Object();
+    private final TextClassificationSessionFactory mDefaultSessionFactory =
+            classificationContext -> new TextClassificationSession(
+                    classificationContext, getTextClassifier());
 
     private final Context mContext;
     private final TextClassificationConstants mSettings;
@@ -46,12 +50,15 @@ public final class TextClassificationManager {
     private TextClassifier mLocalTextClassifier;
     @GuardedBy("mLock")
     private TextClassifier mSystemTextClassifier;
+    @GuardedBy("mLock")
+    private TextClassificationSessionFactory mSessionFactory;
 
     /** @hide */
     public TextClassificationManager(Context context) {
         mContext = Preconditions.checkNotNull(context);
         mSettings = TextClassificationConstants.loadFromString(Settings.Global.getString(
                 context.getContentResolver(), Settings.Global.TEXT_CLASSIFIER_CONSTANTS));
+        mSessionFactory = mDefaultSessionFactory;
     }
 
     /**
@@ -61,6 +68,7 @@ public final class TextClassificationManager {
      *
      * @see #setTextClassifier(TextClassifier)
      */
+    @NonNull
     public TextClassifier getTextClassifier() {
         synchronized (mLock) {
             if (mTextClassifier == null) {
@@ -93,7 +101,6 @@ public final class TextClassificationManager {
      * @see TextClassifier#SYSTEM
      * @hide
      */
-    // TODO: Expose as system API.
     public TextClassifier getTextClassifier(@TextClassifierType int type) {
         switch (type) {
             case TextClassifier.LOCAL:
@@ -106,6 +113,61 @@ public final class TextClassificationManager {
     /** @hide */
     public TextClassificationConstants getSettings() {
         return mSettings;
+    }
+
+    /**
+     * Call this method to start a text classification session with the given context.
+     * A session is created with a context helping the classifier better understand
+     * what the user needs and consists of queries and feedback events. The queries
+     * are directly related to providing useful functionality to the user and the events
+     * are a feedback loop back to the classifier helping it learn and better serve
+     * future queries.
+     *
+     * <p> All interactions with the returned classifier are considered part of a single
+     * session and are logically grouped. For example, when a text widget is focused
+     * all user interactions around text editing (selection, editing, etc) can be
+     * grouped together to allow the classifier get better.
+     *
+     * @param classificationContext The context in which classification would occur
+     *
+     * @return An instance to perform classification in the given context
+     */
+    @NonNull
+    public TextClassifier createTextClassificationSession(
+            @NonNull TextClassificationContext classificationContext) {
+        Preconditions.checkNotNull(classificationContext);
+        final TextClassifier textClassifier =
+                mSessionFactory.createTextClassificationSession(classificationContext);
+        Preconditions.checkNotNull(textClassifier, "Session Factory should never return null");
+        return textClassifier;
+    }
+
+    /**
+     * @see #createTextClassificationSession(TextClassificationContext, TextClassifier)
+     * @hide
+     */
+    public TextClassifier createTextClassificationSession(
+            TextClassificationContext classificationContext, TextClassifier textClassifier) {
+        Preconditions.checkNotNull(classificationContext);
+        Preconditions.checkNotNull(textClassifier);
+        return new TextClassificationSession(classificationContext, textClassifier);
+    }
+
+    /**
+     * Sets a TextClassificationSessionFactory to be used to create session-aware TextClassifiers.
+     *
+     * @param factory the textClassification session factory. If this is null, the default factory
+     *      will be used.
+     */
+    public void setTextClassificationSessionFactory(
+            @Nullable TextClassificationSessionFactory factory) {
+        synchronized (mLock) {
+            if (factory != null) {
+                mSessionFactory = factory;
+            } else {
+                mSessionFactory = mDefaultSessionFactory;
+            }
+        }
     }
 
     private TextClassifier getSystemTextClassifier() {
