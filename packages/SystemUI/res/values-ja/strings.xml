@@ -38,9 +38,9 @@
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"残量 <xliff:g id="PERCENTAGE">%s</xliff:g>、約 <xliff:g id="TIME">%s</xliff:g>（使用状況に基づく）"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"残量 <xliff:g id="PERCENTAGE">%s</xliff:g>、約 <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"残量が <xliff:g id="PERCENTAGE">%s</xliff:g> です。バッテリー セーバーは ON です。"</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"USB充電には対応していません。\n付属の充電器をお使いください。"</string>
-    <string name="invalid_charger_title" msgid="3515740382572798460">"USB充電には対応していません。"</string>
-    <string name="invalid_charger_text" msgid="5474997287953892710">"専用の充電器のみを使用してください。"</string>
+    <string name="invalid_charger" msgid="2741987096648693172">"USB 経由では充電できません。端末に付属の充電器を使用してください。"</string>
+    <string name="invalid_charger_title" msgid="2836102177577255404">"USB 経由では充電できません"</string>
+    <string name="invalid_charger_text" msgid="6480624964117840005">"端末に付属の充電器を使用してください"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"設定"</string>
     <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"バッテリー セーバーを ON にしますか？"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"ONにする"</string>
@@ -103,8 +103,7 @@
     <string name="camera_label" msgid="7261107956054836961">"カメラを起動"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"新しいタスクレイアウトの選択"</string>
     <string name="cancel" msgid="6442560571259935130">"キャンセル"</string>
-    <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
-    <skip />
+    <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"指紋認証センサーをタップしてください"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"指紋アイコン"</string>
     <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"アプリのアイコン"</string>
     <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"ヘルプ メッセージ領域"</string>
@@ -148,28 +147,28 @@
     <string name="accessibility_desc_off" msgid="6475508157786853157">"OFF"</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"接続済みです。"</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"接続しています。"</string>
-    <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
-    <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
-    <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
-    <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
-    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
-    <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
-    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
-    <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
-    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
-    <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
-    <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"ローミング中"</string>
-    <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
+    <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
+    <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
+    <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
+    <string name="data_connection_3_5g" msgid="5218328297191657602">"3.5G"</string>
+    <string name="data_connection_3_5g_plus" msgid="7570783890290275297">"3.5G+"</string>
+    <string name="data_connection_4g" msgid="9139963475267449144">"4G"</string>
+    <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
+    <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
+    <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
+    <string name="data_connection_cdma" msgid="4677985502159869585">"CDMA"</string>
+    <string name="data_connection_roaming" msgid="6037232010953697354">"ローミング"</string>
+    <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIMがありません。"</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"モバイルデータ"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"モバイルデータ ON"</string>
-    <string name="accessibility_cell_data_off" msgid="443267573897409704">"モバイルデータ OFF"</string>
+    <string name="cell_data_off" msgid="5287705247512911922">"モバイルデータ OFF"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetoothテザリング。"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"機内モード。"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN は ON です。"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"SIMカードが挿入されていません。"</string>
-    <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"携帯通信会社のネットワークを変更します。"</string>
+    <string name="carrier_network_change_mode" msgid="8149202439957837762">"携帯通信会社のネットワークを変更します"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"電池の詳細情報を開きます"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"電池残量: <xliff:g id="NUMBER">%d</xliff:g>パーセント"</string>
     <!-- String.format failed for translation -->
@@ -210,7 +209,7 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"機内モードがONです。"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"機内モードをOFFにしました。"</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"機内モードをONにしました。"</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"マナーモードは ON で、優先する通知のみ許可します。"</string>
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"マナーモードは ON です。"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"マナーモードは ON で、サイレント モードです。"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"マナーモードは ON で、アラームのみ許可します。"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"マナーモード"</string>
@@ -276,7 +275,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"デザートケース"</string>
     <string name="start_dreams" msgid="5640361424498338327">"スクリーン セーバー"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"イーサネット"</string>
-    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <!-- no translation found for quick_settings_header_onboarding_text (8030309023792936283) -->
     <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"マナーモード"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"優先する通知のみ"</string>
@@ -290,6 +289,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"オーディオ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"ヘッドセット"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"入力"</string>
+    <string name="quick_settings_bluetooth_secondary_label_transient" msgid="4551281899312150640">"ON にしています…"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"画面の明るさ"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"自動回転"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"画面を自動回転します"</string>
@@ -314,7 +314,7 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi OFF"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi: ON"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Wi-Fiネットワークを利用できません"</string>
-    <string name="quick_settings_alarm_title" msgid="2416759007342260676">"アラーム"</string>
+    <string name="quick_settings_wifi_secondary_label_transient" msgid="7748206246119760554">"ON にしています…"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"キャスト"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"キャストしています"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"名前のないデバイス"</string>
@@ -331,7 +331,8 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"接続しています..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"テザリング"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"アクセスポイント"</string>
-    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"ON にしています…"</string>
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="8010579363691405477">"ON にしています…"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="5672131949987422420">"データセーバー ON"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
       <item quantity="other">%d 台の端末</item>
       <item quantity="one">%d 台の端末</item>
@@ -345,8 +346,7 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g>使用中"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"上限: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"警告: 上限は<xliff:g id="DATA_LIMIT">%s</xliff:g>です"</string>
-    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"仕事用プロファイル"</string>
-    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"通知とアプリは OFF です"</string>
+    <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"仕事用プロファイル"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"読書灯"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"日の入りに ON"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"日の出まで"</string>
@@ -399,9 +399,9 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"サイレント\n"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"重要な\n通知のみ"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"アラーム\nのみ"</string>
-    <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"充電中（フル充電まで<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>）"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"急速充電中（完了まで<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>）"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="955252797961724952">"低速充電中（完了まで<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>）"</string>
+    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 充電中（完了まで <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>）"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 急速充電中（完了まで <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>）"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • 低速充電中（完了まで <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>）"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"ユーザーを切り替える"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"ユーザーを切り替える、現在のユーザーは<xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"現在のユーザー: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -435,6 +435,7 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>で、画面に表示されているコンテンツのキャプチャを開始します。"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"次回から表示しない"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"すべて消去"</string>
+    <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"マナーモードでは通知が非表示になります"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"今すぐ開始"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"通知はありません"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"プロファイルが監視されている可能性があります"</string>
@@ -502,6 +503,7 @@
     <string name="hidden_notifications_setup" msgid="41079514801976810">"設定"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>。<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="6930243045593601084">"OFF にする"</string>
+    <string name="accessibility_volume_settings" msgid="4915364006817819212">"音声の設定"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"展開"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"折りたたむ"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"出力デバイスを選択"</string>
@@ -539,6 +541,7 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s。タップしてバイブレーションに設定します。"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s。タップしてミュートします。"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s の音量調節"</string>
+    <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"着信音と通知音が鳴ります"</string>
     <string name="output_title" msgid="5355078100792942802">"メディア出力"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"通話の出力"</string>
     <string name="output_none_found" msgid="5544982839808921091">"デバイスが見つかりません"</string>
@@ -594,12 +597,27 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"電源通知管理では、アプリの通知の重要度をレベル 0～5 で設定できます。\n\n"<b>"レベル 5"</b>" \n- 通知リストの一番上に表示する \n- 全画面表示を許可する \n- 常にポップアップする \n\n"<b>"レベル 4"</b>" \n- 全画面表示しない \n- 常にポップアップする \n\n"<b>"レベル 3"</b>" \n- 全画面表示しない \n- ポップアップしない \n\n"<b>"レベル 2"</b>" \n- 全画面表示しない \n- ポップアップしない \n- 音やバイブレーションを使用しない \n\n"<b>"レベル 1"</b>" \n- 全画面表示しない \n- ポップアップしない \n- 音やバイブレーションを使用しない \n- ロック画面やステータスバーに表示しない \n- 通知リストの一番下に表示する \n\n"<b>"レベル 0"</b>" \n- アプリからのすべての通知をブロックする"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"通知"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"今後、この通知は表示されません"</string>
+    <string name="notification_channel_minimized" msgid="1664411570378910931">"通知を最小化します"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"通常、この通知は非表示にしています。\n引き続き、表示しますか？"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"この通知を今後も表示しますか？"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"通知を表示しない"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"今後も表示する"</string>
+    <string name="inline_minimize_button" msgid="966233327974702195">"最小化"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"このアプリからの通知を今後も表示しますか？"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"この通知を OFF にすることはできません"</string>
+    <string name="notification_appops_camera_active" msgid="730959943016785931">"カメラ"</string>
+    <string name="notification_appops_microphone_active" msgid="1546319728924580686">"マイク"</string>
+    <string name="notification_appops_overlay_active" msgid="633813008357934729">"画面の他のアプリの上に重ねて表示"</string>
+    <plurals name="notification_appops" formatted="false" msgid="1258122060887196817">
+      <item quantity="other">このアプリのアクティビティ: <xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g>、<xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>。</item>
+      <item quantity="one">このアプリのアクティビティ: <xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g>。</item>
+    </plurals>
+    <plurals name="notification_using" formatted="false" msgid="2211008461429037973">
+      <item quantity="other"><xliff:g id="PERFORMING_ACTIVITY_1">%1$s</xliff:g>、<xliff:g id="PERFORMING_ACTIVITY_2">%2$s</xliff:g>の使用</item>
+      <item quantity="one"><xliff:g id="PERFORMING_ACTIVITY_0">%1$s</xliff:g>の使用</item>
+    </plurals>
+    <string name="notification_appops_settings" msgid="1028328314935908050">"設定"</string>
+    <string name="notification_appops_ok" msgid="602562195588819631">"OK"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> の通知管理は開いています"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> の通知管理は閉じています"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"このチャンネルからの通知を許可する"</string>
@@ -707,8 +725,9 @@
     <string name="right_keycode" msgid="708447961000848163">"右キーコード"</string>
     <string name="left_icon" msgid="3096287125959387541">"左アイコン"</string>
     <string name="right_icon" msgid="3952104823293824311">"右アイコン"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"タイルを追加するにはドラッグしてください"</string>
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"タイルを追加するには押し続けながらドラッグ"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"削除するにはここにドラッグ"</string>
+    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"タイルは 6 個以上必要"</string>
     <string name="qs_edit" msgid="2232596095725105230">"編集"</string>
     <string name="tuner_time" msgid="6572217313285536011">"時間"</string>
   <string-array name="clock_options">
@@ -752,7 +771,7 @@
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"クイック設定を閉じます。"</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"アラームを設定しました。"</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> としてログインします"</string>
-    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"インターネットに接続されていません。"</string>
+    <string name="data_connection_no_internet" msgid="4503302451650972989">"インターネットに接続されていません"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"詳細情報を開きます。"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> の設定を開きます。"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"設定の順序を編集します。"</string>
@@ -800,6 +819,7 @@
     <string name="app_info" msgid="6856026610594615344">"アプリ情報"</string>
     <string name="go_to_web" msgid="2650669128861626071">"ブラウザに移動"</string>
     <string name="mobile_data" msgid="7094582042819250762">"モバイルデータ"</string>
+    <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%s</xliff:g> — <xliff:g id="ID_2">%s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi は OFF です"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth は OFF です"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"マナーモードは OFF です"</string>
@@ -811,7 +831,9 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"設定を変更"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"バックグラウンドで実行中のアプリ"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"タップして電池やデータの使用量を確認"</string>
-    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"モバイルデータを OFF にしますか？"</string>
+    <string name="mobile_data_disable_title" msgid="1068272097382942231">"モバイルデータを OFF にしますか？"</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"<xliff:g id="CARRIER">%s</xliff:g> でデータやインターネットにアクセスできなくなります。インターネットには Wi-Fi からのみ接続できます。"</string>
+    <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"携帯通信会社"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"アプリが許可リクエストを隠しているため、設定側でユーザーの応答を確認できません。"</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"「<xliff:g id="APP_2">%2$s</xliff:g>」のスライスの表示を「<xliff:g id="APP_0">%1$s</xliff:g>」に許可しますか？"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- 「<xliff:g id="APP">%1$s</xliff:g>」からの情報の読み取り"</string>

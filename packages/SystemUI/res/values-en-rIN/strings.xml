@@ -148,7 +148,6 @@
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Connected."</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Connecting."</string>
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
-    <string name="data_connection_1x" msgid="396105635197711584">"1 X"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
     <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
     <string name="data_connection_3_5g" msgid="5218328297191657602">"3.5G"</string>
@@ -274,7 +273,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"Dessert Case"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Screen saver"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
-    <string name="quick_settings_header_onboarding_text" msgid="7872508260264044734">"Press &amp; hold on the icons for more options"</string>
+    <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Touch &amp; hold icons for more options"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Do not disturb"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Priority only"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Alarms only"</string>
@@ -539,8 +538,6 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Tap to set to vibrate."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Tap to mute."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s volume controls"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Calls and notifications will vibrate"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Calls and notifications will be muted"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"Calls and notifications will ring"</string>
     <string name="output_title" msgid="5355078100792942802">"Media output"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Phone call output"</string>
@@ -725,8 +722,9 @@
     <string name="right_keycode" msgid="708447961000848163">"Right keycode"</string>
     <string name="left_icon" msgid="3096287125959387541">"Left icon"</string>
     <string name="right_icon" msgid="3952104823293824311">"Right icon"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Drag to add tiles"</string>
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"Hold and drag to add tiles"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Drag here to remove"</string>
+    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"You need at least 6 tiles"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Edit"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Time"</string>
   <string-array name="clock_options">
@@ -830,7 +828,9 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Replace"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Apps running in background"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tap for details on battery and data usage"</string>
-    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Turn off mobile data?"</string>
+    <string name="mobile_data_disable_title" msgid="1068272097382942231">"Turn off mobile data?"</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"You won\'t have access to data or the Internet through <xliff:g id="CARRIER">%s</xliff:g>. Internet will only be available via Wi-Fi."</string>
+    <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"your operator"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Because an app is obscuring a permission request, Settings can’t verify your response."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"Allow <xliff:g id="APP_0">%1$s</xliff:g> to show <xliff:g id="APP_2">%2$s</xliff:g> slices?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"– It can read information from <xliff:g id="APP">%1$s</xliff:g>"</string>

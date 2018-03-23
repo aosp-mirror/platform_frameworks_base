@@ -28,6 +28,9 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"터치하여 비밀번호 입력"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"잠금 해제하려면 비밀번호 입력"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"잠금 해제하려면 PIN 입력"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"PIN을 입력해 주세요."</string>
+    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"패턴을 입력해 주세요."</string>
+    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"비밀번호를 입력해 주세요."</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"잘못된 PIN 코드입니다."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"유효하지 않은 카드"</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"충전됨"</string>
