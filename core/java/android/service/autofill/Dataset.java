@@ -149,24 +149,33 @@ public final class Dataset implements Parcelable {
     public String toString() {
         if (!sDebug) return super.toString();
 
-        final StringBuilder builder = new StringBuilder("Dataset[id=");
+        final StringBuilder builder = new StringBuilder("Dataset[");
         if (mId == null) {
-            builder.append("null");
+            builder.append("noId");
         } else {
             // Cannot disclose id because it could contain PII.
-            builder.append(mId.length()).append("_chars");
+            builder.append("id=").append(mId.length()).append("_chars");
         }
+        if (mFieldIds != null) {
+            builder.append(", fieldIds=").append(mFieldIds);
+        }
+        if (mFieldValues != null) {
+            builder.append(", fieldValues=").append(mFieldValues);
+        }
+        if (mFieldPresentations != null) {
+            builder.append(", fieldPresentations=").append(mFieldPresentations.size());
 
-        return builder
-                .append(", fieldIds=").append(mFieldIds)
-                .append(", fieldValues=").append(mFieldValues)
-                .append(", fieldPresentations=")
-                .append(mFieldPresentations == null ? 0 : mFieldPresentations.size())
-                .append(", fieldFilters=")
-                .append(mFieldFilters == null ? 0 : mFieldFilters.size())
-                .append(", hasPresentation=").append(mPresentation != null)
-                .append(", hasAuthentication=").append(mAuthentication != null)
-                .append(']').toString();
+        }
+        if (mFieldFilters != null) {
+            builder.append(", fieldFilters=").append(mFieldFilters.size());
+        }
+        if (mPresentation != null) {
+            builder.append(", hasPresentation");
+        }
+        if (mAuthentication != null) {
+            builder.append(", hasAuthentication");
+        }
+        return builder.append(']').toString();
     }
 
     /**
