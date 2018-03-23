@@ -52,7 +52,7 @@ import java.util.Arrays;
 public final class KeyChainProtectionParams implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"TYPE_"}, value = {TYPE_LOCKSCREEN, TYPE_CUSTOM_PASSWORD})
+    @IntDef(prefix = {"TYPE_"}, value = {TYPE_LOCKSCREEN})
     public @interface UserSecretType {
     }
 
@@ -60,11 +60,6 @@ public final class KeyChainProtectionParams implements Parcelable {
      * Lockscreen secret is required to recover KeyStore.
      */
     public static final int TYPE_LOCKSCREEN = 100;
-
-    /**
-     * Custom passphrase, unrelated to lock screen, is required to recover KeyStore.
-     */
-    public static final int TYPE_CUSTOM_PASSWORD = 101;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -120,7 +115,6 @@ public final class KeyChainProtectionParams implements Parcelable {
 
     /**
      * @see TYPE_LOCKSCREEN
-     * @see TYPE_CUSTOM_PASSWORD
      */
     public @UserSecretType int getUserSecretType() {
         return mUserSecretType;
@@ -166,7 +160,6 @@ public final class KeyChainProtectionParams implements Parcelable {
          * Sets user secret type.
          *
          * @see TYPE_LOCKSCREEN
-         * @see TYPE_CUSTOM_PASSWORD
          * @param userSecretType The secret type
          * @return This builder.
          */
