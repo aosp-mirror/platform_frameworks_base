@@ -52,12 +52,13 @@ interface ISessionManager {
     void setOnMediaKeyListener(in IOnMediaKeyListener listener);
 
     // MediaSession2
-    boolean isTrusted(int uid, String packageName);
+    boolean isTrusted(String controllerPackageName, int controllerPid, int controllerUid);
     boolean createSession2(in Bundle sessionToken);
     void destroySession2(in Bundle sessionToken);
-    List<Bundle> getSessionTokens(boolean activeSessionOnly, boolean sessionServiceOnly);
+    List<Bundle> getSessionTokens(boolean activeSessionOnly, boolean sessionServiceOnly,
+            String packageName);
 
     void addSessionTokensListener(in ISessionTokensListener listener, int userId,
             String packageName);
-    void removeSessionTokensListener(in ISessionTokensListener listener);
+    void removeSessionTokensListener(in ISessionTokensListener listener, String packageName);
 }

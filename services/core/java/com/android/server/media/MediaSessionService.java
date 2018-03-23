@@ -608,7 +608,7 @@ public class MediaSessionService extends SystemService implements Monitor {
      */
     private void enforceMediaPermissions(ComponentName compName, int pid, int uid,
             int resolvedUserId) {
-        if (isCurrentVolumeController(uid, pid)) return;
+        if (isCurrentVolumeController(pid, uid)) return;
         if (getContext()
                 .checkPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL, pid, uid)
                     != PackageManager.PERMISSION_GRANTED
@@ -618,13 +618,13 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
     }
 
-    private boolean isCurrentVolumeController(int uid, int pid) {
+    private boolean isCurrentVolumeController(int pid, int uid) {
         return getContext().checkPermission(android.Manifest.permission.STATUS_BAR_SERVICE,
                 pid, uid) == PackageManager.PERMISSION_GRANTED;
     }
 
     private void enforceSystemUiPermission(String action, int pid, int uid) {
-        if (!isCurrentVolumeController(uid, pid)) {
+        if (!isCurrentVolumeController(pid, uid)) {
             throw new SecurityException("Only system ui may " + action);
         }
     }
@@ -1501,53 +1501,21 @@ public class MediaSessionService extends SystemService implements Monitor {
          * Returns if the controller's package is trusted (i.e. has either MEDIA_CONTENT_CONTROL
          * permission or an enabled notification listener)
          *
-         * @param uid uid of the controller app
-         * @param packageName package name of the controller app
+         * @param controllerPackageName package name of the controller app
+         * @param controllerPid pid of the controller app
+         * @param controllerUid uid of the controller app
          */
         @Override
-        public boolean isTrusted(int uid, String packageName) throws RemoteException {
+        public boolean isTrusted(String controllerPackageName, int controllerPid, int controllerUid)
+                throws RemoteException {
+            final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
-                int userId = UserHandle.getUserId(uid);
-                // Sanity check whether uid and packageName matches
-                if (uid != mPackageManager.getPackageUid(packageName, 0, userId)) {
-                    throw new IllegalArgumentException("uid=" + uid + " and packageName="
-                            + packageName + " doesn't match");
-                }
-
-                // Check if it's system server or has MEDIA_CONTENT_CONTROL.
-                // Note that system server doesn't have MEDIA_CONTENT_CONTROL, so we need extra
-                // check here.
-                if (uid == Process.SYSTEM_UID || mPackageManager.checkPermission(
-                        android.Manifest.permission.MEDIA_CONTENT_CONTROL, packageName, uid)
-                        == PackageManager.PERMISSION_GRANTED) {
-                    return true;
-                }
-                if (DEBUG) {
-                    Log.d(TAG, packageName + " (uid=" + uid + ") hasn't granted"
-                            + " MEDIA_CONTENT_CONTROL");
-                }
-
-                // TODO(jaewan): Add hasEnabledNotificationListener(String pkgName) for
-                //               optimization (Post-P)
-                final List<ComponentName> enabledNotificationListeners =
-                        mNotificationManager.getEnabledNotificationListeners(userId);
-                if (enabledNotificationListeners != null) {
-                    for (int i = 0; i < enabledNotificationListeners.size(); i++) {
-                        if (TextUtils.equals(packageName,
-                                enabledNotificationListeners.get(i).getPackageName())) {
-                            return true;
-                        }
-                    }
-                }
+                return hasMediaControlPermission(UserHandle.getUserId(uid), controllerPackageName,
+                        controllerPid, controllerUid);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
-            if (DEBUG) {
-                Log.d(TAG, packageName + " (uid=" + uid + ") doesn't have an enabled notification"
-                        + " listener");
-            }
-            return false;
         }
 
         /**
@@ -1614,60 +1582,85 @@ public class MediaSessionService extends SystemService implements Monitor {
             destroySession2Internal(token);
         }
 
-        // TODO(jaewan): Protect this API with permission (b/73226436)
+        // TODO(jaewan): Make this API take userId as an argument (b/73597722)
         @Override
         public List<Bundle> getSessionTokens(boolean activeSessionOnly,
-                boolean sessionServiceOnly) throws RemoteException {
+                boolean sessionServiceOnly, String packageName) throws RemoteException {
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            final long token = Binder.clearCallingIdentity();
+
             List<Bundle> tokens = new ArrayList<>();
-            synchronized (mLock) {
-                for (Map.Entry<SessionToken2, MediaController2> record
-                        : mSessionRecords.entrySet()) {
-                    boolean isSessionService = (record.getKey().getType() != TYPE_SESSION);
-                    boolean isActive = record.getValue() != null;
-                    if ((activeSessionOnly && !isActive)
-                            || (sessionServiceOnly && !isSessionService) ){
-                        continue;
+            try {
+                verifySessionsRequest2(UserHandle.getUserId(uid), packageName, pid, uid);
+                synchronized (mLock) {
+                    for (Map.Entry<SessionToken2, MediaController2> record
+                            : mSessionRecords.entrySet()) {
+                        boolean isSessionService = (record.getKey().getType() != TYPE_SESSION);
+                        boolean isActive = record.getValue() != null;
+                        if ((activeSessionOnly && !isActive)
+                                || (sessionServiceOnly && !isSessionService)) {
+                            continue;
+                        }
+                        tokens.add(record.getKey().toBundle());
                     }
-                    tokens.add(record.getKey().toBundle());
                 }
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
             return tokens;
         }
 
-        // TODO(jaewan): Protect this API with permission (b/73226436)
-        // TODO(jaewan): "userId != calling user" needs extra protection (b/73226436)
         @Override
         public void addSessionTokensListener(ISessionTokensListener listener, int userId,
-                String packageName) {
-            synchronized (mLock) {
-                final SessionTokensListenerRecord record =
-                        new SessionTokensListenerRecord(listener, userId);
-                try {
-                    listener.asBinder().linkToDeath(record, 0);
-                } catch (RemoteException e) {
+                String packageName) throws RemoteException {
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                int resolvedUserId = verifySessionsRequest2(userId, packageName, pid, uid);
+                synchronized (mLock) {
+                    final SessionTokensListenerRecord record =
+                            new SessionTokensListenerRecord(listener, resolvedUserId);
+                    try {
+                        listener.asBinder().linkToDeath(record, 0);
+                    } catch (RemoteException e) {
+                    }
+                    mSessionTokensListeners.add(record);
                 }
-                mSessionTokensListeners.add(record);
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
 
-        // TODO(jaewan): Protect this API with permission (b/73226436)
+        // TODO(jaewan): Make this API take userId as an argument (b/73597722)
         @Override
-        public void removeSessionTokensListener(ISessionTokensListener listener) {
-            synchronized (mLock) {
-                IBinder listenerBinder = listener.asBinder();
-                for (SessionTokensListenerRecord record : mSessionTokensListeners) {
-                    if (listenerBinder.equals(record.mListener.asBinder())) {
-                        try {
-                            listenerBinder.unlinkToDeath(record, 0);
-                        } catch (NoSuchElementException e) {
+        public void removeSessionTokensListener(ISessionTokensListener listener,
+                String packageName) throws RemoteException {
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                verifySessionsRequest2(UserHandle.getUserId(uid), packageName, pid, uid);
+                synchronized (mLock) {
+                    IBinder listenerBinder = listener.asBinder();
+                    for (SessionTokensListenerRecord record : mSessionTokensListeners) {
+                        if (listenerBinder.equals(record.mListener.asBinder())) {
+                            try {
+                                listenerBinder.unlinkToDeath(record, 0);
+                            } catch (NoSuchElementException e) {
+                            }
+                            mSessionTokensListeners.remove(record);
+                            break;
                         }
-                        mSessionTokensListeners.remove(record);
-                        break;
                     }
                 }
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
 
+        // For MediaSession
         private int verifySessionsRequest(ComponentName componentName, int userId, final int pid,
                 final int uid) {
             String packageName = null;
@@ -1685,6 +1678,66 @@ public class MediaSessionService extends SystemService implements Monitor {
             // enabled for the user they're calling from.
             enforceMediaPermissions(componentName, pid, uid, resolvedUserId);
             return resolvedUserId;
+        }
+
+        // For MediaSession2
+        private int verifySessionsRequest2(int targetUserId, String callerPackageName,
+                int callerPid, int callerUid) throws RemoteException {
+            // Check that they can make calls on behalf of the user and get the final user id.
+            int resolvedUserId = ActivityManager.handleIncomingUser(callerPid, callerUid,
+                    targetUserId, true /* allowAll */, true /* requireFull */, "getSessionTokens",
+                    callerPackageName);
+            // Check if they have the permissions or their component is
+            // enabled for the user they're calling from.
+            if (!hasMediaControlPermission(
+                    resolvedUserId, callerPackageName, callerPid, callerUid)) {
+                throw new SecurityException("Missing permission to control media.");
+            }
+            return resolvedUserId;
+        }
+
+        // For MediaSession2
+        private boolean hasMediaControlPermission(int resolvedUserId, String packageName,
+                int pid, int uid) throws RemoteException {
+            // Allow API calls from the System UI
+            if (isCurrentVolumeController(pid, uid)) {
+                return true;
+            }
+
+            // Check if it's system server or has MEDIA_CONTENT_CONTROL.
+            // Note that system server doesn't have MEDIA_CONTENT_CONTROL, so we need extra
+            // check here.
+            if (uid == Process.SYSTEM_UID || getContext().checkPermission(
+                    android.Manifest.permission.MEDIA_CONTENT_CONTROL, pid, uid)
+                    == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            } else if (DEBUG) {
+                Log.d(TAG, packageName + " (uid=" + uid + ") hasn't granted MEDIA_CONTENT_CONTROL");
+            }
+
+            // You may not access another user's content as an enabled listener.
+            final int userId = UserHandle.getUserId(uid);
+            if (resolvedUserId != userId) {
+                return false;
+            }
+
+            // TODO(jaewan): (Post-P) Propose NotificationManager#hasEnabledNotificationListener(
+            //               String pkgName) to notification team for optimization
+            final List<ComponentName> enabledNotificationListeners =
+                    mNotificationManager.getEnabledNotificationListeners(userId);
+            if (enabledNotificationListeners != null) {
+                for (int i = 0; i < enabledNotificationListeners.size(); i++) {
+                    if (TextUtils.equals(packageName,
+                            enabledNotificationListeners.get(i).getPackageName())) {
+                        return true;
+                    }
+                }
+            }
+            if (DEBUG) {
+                Log.d(TAG, packageName + " (uid=" + uid + ") doesn't have an enabled "
+                        + "notification listener");
+            }
+            return false;
         }
 
         private void dispatchAdjustVolumeLocked(int suggestedStream, int direction, int flags) {
