@@ -62,6 +62,7 @@ import java.security.KeyFactory;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertPath;
 import java.security.cert.CertificateEncodingException;
@@ -221,6 +222,7 @@ public class RecoverableKeyStoreManager {
             if (mDatabase.setRecoveryServiceCertPath(userId, uid, certPath) > 0) {
                 mDatabase.setRecoveryServiceCertSerial(userId, uid, newSerial);
                 mDatabase.setShouldCreateSnapshot(userId, uid, true);
+                mDatabase.setCounterId(userId, uid, new SecureRandom().nextLong());
             }
         } catch (CertificateEncodingException e) {
             Log.e(TAG, "Failed to encode CertPath", e);
