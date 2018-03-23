@@ -16,7 +16,6 @@
 
 package com.android.internal.policy;
 
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
@@ -27,7 +26,6 @@ import static org.junit.Assert.assertThat;
 import android.content.Context;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.ActionMode;
@@ -44,7 +42,6 @@ import org.junit.runner.RunWith;
  */
 @SmallTest
 @Presubmit
-@FlakyTest(detail = "Promote to presubmit once monitored to be stable.")
 @RunWith(AndroidJUnit4.class)
 public final class PhoneWindowTest {
 
