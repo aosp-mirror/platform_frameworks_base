@@ -266,8 +266,8 @@ public class RecoveryController {
 
     /**
      * Sets a listener which notifies recovery agent that new recovery snapshot is available. {@link
-     * #getRecoveryData} can be used to get the snapshot. Note that every recovery agent can have at
-     * most one registered listener at any time.
+     * #getKeyChainSnapshot} can be used to get the snapshot. Note that every recovery agent can
+     * have at most one registered listener at any time.
      *
      * @param intent triggered when new snapshot is available. Unregisters listener if the value is
      *     {@code null}.
@@ -292,12 +292,13 @@ public class RecoveryController {
      * in vaultParams {@link RecoverySession#start(CertPath, byte[], byte[], List)}.
      *
      * @param serverParams included in recovery key blob.
-     * @see #getRecoveryData
+     * @see #getKeyChainSnapshot
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public void setServerParams(byte[] serverParams) throws InternalRecoveryServiceException {
+    public void setServerParams(@NonNull byte[] serverParams)
+            throws InternalRecoveryServiceException {
         try {
             mBinder.setServerParams(serverParams);
         } catch (RemoteException e) {
@@ -321,7 +322,7 @@ public class RecoveryController {
      * Returns a list of aliases of keys belonging to the application.
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public List<String> getAliases() throws InternalRecoveryServiceException {
+    public @NonNull List<String> getAliases() throws InternalRecoveryServiceException {
         try {
             Map<String, Integer> allStatuses = mBinder.getRecoveryStatus();
             return new ArrayList<>(allStatuses.keySet());
@@ -355,7 +356,7 @@ public class RecoveryController {
      *     service.
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public void setRecoveryStatus(String alias, int status)
+    public void setRecoveryStatus(@NonNull String alias, int status)
             throws InternalRecoveryServiceException {
         try {
             mBinder.setRecoveryStatus(alias, status);
@@ -390,7 +391,7 @@ public class RecoveryController {
      *     service.
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public int getRecoveryStatus(String alias) throws InternalRecoveryServiceException {
+    public int getRecoveryStatus(@NonNull String alias) throws InternalRecoveryServiceException {
         try {
             Map<String, Integer> allStatuses = mBinder.getRecoveryStatus();
             Integer status = allStatuses.get(alias);
@@ -605,7 +606,7 @@ public class RecoveryController {
      * <p>A recovery session is required to restore keys from a remote store.
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public RecoverySession createRecoverySession() {
+    public @NonNull RecoverySession createRecoverySession() {
         return RecoverySession.newInstance(this);
     }
 
