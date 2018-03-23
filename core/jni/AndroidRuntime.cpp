@@ -20,6 +20,7 @@
 
 #include <android_runtime/AndroidRuntime.h>
 
+#include <android-base/macros.h>
 #include <android-base/properties.h>
 #include <binder/IBinder.h>
 #include <binder/IPCThreadState.h>
@@ -860,34 +861,18 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
 
     // The runtime will compile a boot image, when necessary, not using installd. Thus, we need to
     // pass the instruction-set-features/variant as an image-compiler-option.
-    // TODO: Find a better way for the instruction-set.
-#if defined(__arm__)
-    constexpr const char* instruction_set = "arm";
-#elif defined(__aarch64__)
-    constexpr const char* instruction_set = "arm64";
-#elif defined(__mips__) && !defined(__LP64__)
-    constexpr const char* instruction_set = "mips";
-#elif defined(__mips__) && defined(__LP64__)
-    constexpr const char* instruction_set = "mips64";
-#elif defined(__i386__)
-    constexpr const char* instruction_set = "x86";
-#elif defined(__x86_64__)
-    constexpr const char* instruction_set = "x86_64";
-#else
-    constexpr const char* instruction_set = "unknown";
-#endif
     // Note: it is OK to reuse the buffer, as the values are exactly the same between
     //       * compiler-option, used for runtime compilation (DexClassLoader)
     //       * image-compiler-option, used for boot-image compilation on device
 
     // Copy the variant.
-    sprintf(dex2oat_isa_variant_key, "dalvik.vm.isa.%s.variant", instruction_set);
+    sprintf(dex2oat_isa_variant_key, "dalvik.vm.isa.%s.variant", ABI_STRING);
     parseCompilerOption(dex2oat_isa_variant_key, dex2oat_isa_variant,
                         "--instruction-set-variant=", "-Ximage-compiler-option");
     parseCompilerOption(dex2oat_isa_variant_key, dex2oat_isa_variant,
                         "--instruction-set-variant=", "-Xcompiler-option");
     // Copy the features.
-    sprintf(dex2oat_isa_features_key, "dalvik.vm.isa.%s.features", instruction_set);
+    sprintf(dex2oat_isa_features_key, "dalvik.vm.isa.%s.features", ABI_STRING);
     parseCompilerOption(dex2oat_isa_features_key, dex2oat_isa_features,
                         "--instruction-set-features=", "-Ximage-compiler-option");
     parseCompilerOption(dex2oat_isa_features_key, dex2oat_isa_features,
