@@ -42,16 +42,14 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     };
 
 
-    private final ArrayList<TileRecord> mTiles = new ArrayList<TileRecord>();
-    private final ArrayList<TilePage> mPages = new ArrayList<TilePage>();
+    private final ArrayList<TileRecord> mTiles = new ArrayList<>();
+    private final ArrayList<TilePage> mPages = new ArrayList<>();
 
     private PageIndicator mPageIndicator;
 
     private int mNumPages;
     private PageListener mPageListener;
 
-    private int mPosition;
-    private boolean mOffPage;
     private boolean mListening;
     private Scroller mScroller;
 
@@ -85,16 +83,12 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     public void setListening(boolean listening) {
         if (mListening == listening) return;
         mListening = listening;
-        if (mListening) {
-            setPageListening(mPosition, true);
-            if (mOffPage) {
-                setPageListening(mPosition + 1, true);
-            }
-        } else {
-            // Make sure no pages are listening.
-            for (int i = 0; i < mPages.size(); i++) {
-                mPages.get(i).setListening(false);
-            }
+        updateListening();
+    }
+
+    private void updateListening() {
+        for (TilePage tilePage : mPages) {
+            tilePage.setListening(tilePage.getParent() == null ? false : mListening);
         }
     }
 
@@ -135,43 +129,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             mAnimatingToPage = -1;
         }
         super.computeScroll();
-    }
-
-    /**
-     * Sets individual pages to listening or not.  If offPage it will set
-     * the next page after position to listening as well since we are in between
-     * pages.
-     */
-    private void setCurrentPage(int position, boolean offPage) {
-        if (mPosition == position && mOffPage == offPage) return;
-        if (mListening) {
-            if (mPosition != position) {
-                // Clear out the last pages from listening.
-                setPageListening(mPosition, false);
-                if (mOffPage) {
-                    setPageListening(mPosition + 1, false);
-                }
-                // Set the new pages to listening
-                setPageListening(position, true);
-                if (offPage) {
-                    setPageListening(position + 1, true);
-                }
-            } else if (mOffPage != offPage) {
-                // Whether we are showing position + 1 has changed.
-                setPageListening(mPosition + 1, offPage);
-            }
-        }
-        // Save the current state.
-        mPosition = position;
-        mOffPage = offPage;
-    }
-
-    private void setPageListening(int position, boolean listening) {
-        if (position >= mPages.size()) return;
-        if (isLayoutRtl()) {
-            position = mPages.size() - 1 - position;
-        }
-        mPages.get(position).setListening(listening);
     }
 
     @Override
@@ -362,7 +319,6 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
                 public void onPageScrolled(int position, float positionOffset,
                         int positionOffsetPixels) {
                     if (mPageIndicator == null) return;
-                    setCurrentPage(position, positionOffset != 0);
                     mPageIndicator.setLocation(position + positionOffset);
                     if (mPageListener != null) {
                         mPageListener.onPageChanged(positionOffsetPixels == 0 &&
@@ -407,11 +363,14 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     private final PagerAdapter mAdapter = new PagerAdapter() {
+        @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
             if (DEBUG) Log.d(TAG, "Destantiating " + position);
             container.removeView((View) object);
+            updateListening();
         }
 
+        @Override
         public Object instantiateItem(ViewGroup container, int position) {
             if (DEBUG) Log.d(TAG, "Instantiating " + position);
             if (isLayoutRtl()) {
@@ -419,6 +378,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             }
             ViewGroup view = mPages.get(position);
             container.addView(view);
+            updateListening();
             return view;
         }
 
