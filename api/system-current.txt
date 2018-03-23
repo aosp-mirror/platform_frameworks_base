@@ -121,6 +121,7 @@ package android {
     field public static final java.lang.String MOVE_PACKAGE = "android.permission.MOVE_PACKAGE";
     field public static final java.lang.String NOTIFICATION_DURING_SETUP = "android.permission.NOTIFICATION_DURING_SETUP";
     field public static final java.lang.String NOTIFY_TV_INPUTS = "android.permission.NOTIFY_TV_INPUTS";
+    field public static final java.lang.String OBSERVE_APP_USAGE = "android.permission.OBSERVE_APP_USAGE";
     field public static final java.lang.String OVERRIDE_WIFI_CONFIG = "android.permission.OVERRIDE_WIFI_CONFIG";
     field public static final java.lang.String PACKAGE_USAGE_STATS = "android.permission.PACKAGE_USAGE_STATS";
     field public static final java.lang.String PACKAGE_VERIFICATION_AGENT = "android.permission.PACKAGE_VERIFICATION_AGENT";
@@ -731,6 +732,10 @@ package android.app.usage {
     field public static final int SLICE_PINNED = 14; // 0xe
     field public static final int SLICE_PINNED_PRIV = 13; // 0xd
     field public static final int SYSTEM_INTERACTION = 6; // 0x6
+  }
+
+  public final class UsageStats implements android.os.Parcelable {
+    method public int getAppLaunchCount();
   }
 
   public final class UsageStatsManager {

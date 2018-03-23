@@ -21,6 +21,8 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.IUidObserver;
 import android.app.PendingIntent;
+import android.app.admin.DeviceAdminInfo;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.ConfigurationStats;
 import android.app.usage.IUsageStatsManager;
@@ -110,6 +112,7 @@ public class UsageStatsService extends SystemService implements
     PackageManager mPackageManager;
     PackageManagerInternal mPackageManagerInternal;
     IDeviceIdleController mDeviceIdleController;
+    DevicePolicyManagerInternal mDpmInternal;
 
     private final SparseArray<UserUsageStatsService> mUserState = new SparseArray<>();
     private final SparseIntArray mUidToKernelCounter = new SparseIntArray();
@@ -117,8 +120,10 @@ public class UsageStatsService extends SystemService implements
     long mRealTimeSnapshot;
     long mSystemTimeSnapshot;
 
+    /** Manages the standby state of apps. */
     AppStandbyController mAppStandby;
 
+    /** Manages app time limit observers */
     AppTimeLimitController mAppTimeLimit;
 
     private UsageStatsManagerInternal.AppIdleStateChangeListener mStandbyChangeListener =
@@ -151,6 +156,7 @@ public class UsageStatsService extends SystemService implements
         mUserManager = (UserManager) getContext().getSystemService(Context.USER_SERVICE);
         mPackageManager = getContext().getPackageManager();
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+        mDpmInternal = LocalServices.getService(DevicePolicyManagerInternal.class);
         mHandler = new H(BackgroundThread.get().getLooper());
 
         mAppStandby = new AppStandbyController(getContext(), BackgroundThread.get().getLooper());
@@ -647,6 +653,19 @@ public class UsageStatsService extends SystemService implements
             return mode == AppOpsManager.MODE_ALLOWED;
         }
 
+        private boolean hasObserverPermission(String callingPackage) {
+            final int callingUid = Binder.getCallingUid();
+            if (callingUid == Process.SYSTEM_UID
+                    || (mDpmInternal != null
+                        && mDpmInternal.isActiveAdminWithPolicy(callingUid,
+                            DeviceAdminInfo.USES_POLICY_PROFILE_OWNER))) {
+                // Caller is the system or the profile owner, so proceed.
+                return true;
+            }
+            return getContext().checkCallingPermission(Manifest.permission.OBSERVE_APP_USAGE)
+                    == PackageManager.PERMISSION_GRANTED;
+        }
+
         @Override
         public ParceledListSlice<UsageStats> queryUsageStats(int bucketType, long beginTime,
                 long endTime, String callingPackage) {
@@ -821,8 +840,8 @@ public class UsageStatsService extends SystemService implements
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
-            final boolean shellCaller = callingUid == 0 || callingUid == Process.SHELL_UID;
-            final int reason = shellCaller
+            final boolean systemCaller = UserHandle.isCore(callingUid);
+            final int reason = systemCaller
                     ? UsageStatsManager.REASON_MAIN_FORCED
                     : UsageStatsManager.REASON_MAIN_PREDICTED;
             final long token = Binder.clearCallingIdentity();
@@ -963,8 +982,8 @@ public class UsageStatsService extends SystemService implements
         public void registerAppUsageObserver(int observerId,
                 String[] packages, long timeLimitMs, PendingIntent
                 callbackIntent, String callingPackage) {
-            if (!hasPermission(callingPackage)) {
-                throw new SecurityException("Caller doesn't have PACKAGE_USAGE_STATS permission");
+            if (!hasObserverPermission(callingPackage)) {
+                throw new SecurityException("Caller doesn't have OBSERVE_APP_USAGE permission");
             }
 
             if (packages == null || packages.length == 0) {
@@ -989,8 +1008,8 @@ public class UsageStatsService extends SystemService implements
 
         @Override
         public void unregisterAppUsageObserver(int observerId, String callingPackage) {
-            if (!hasPermission(callingPackage)) {
-                throw new SecurityException("Caller doesn't have PACKAGE_USAGE_STATS permission");
+            if (!hasObserverPermission(callingPackage)) {
+                throw new SecurityException("Caller doesn't have OBSERVE_APP_USAGE permission");
             }
 
             final int callingUid = Binder.getCallingUid();
