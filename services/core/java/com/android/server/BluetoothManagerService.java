@@ -60,6 +60,7 @@ import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Slog;
+import android.util.StatsLog;
 
 import com.android.internal.R;
 import com.android.internal.util.DumpUtils;
@@ -2145,6 +2146,11 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             mActiveLogs.add(
                     new ActiveLog(reason, packageName, enable, System.currentTimeMillis()));
         }
+
+        int state = enable ? StatsLog.BLUETOOTH_ENABLED_STATE_CHANGED__STATE__ENABLED :
+                             StatsLog.BLUETOOTH_ENABLED_STATE_CHANGED__STATE__DISABLED;
+        StatsLog.write_non_chained(StatsLog.BLUETOOTH_ENABLED_STATE_CHANGED,
+                Binder.getCallingUid(), null, state, reason, packageName);
     }
 
     private void addCrashLog() {
