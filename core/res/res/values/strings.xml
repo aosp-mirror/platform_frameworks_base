@@ -4877,12 +4877,6 @@
     -->
     <string name="shortcut_disabled_reason_unknown">Shortcut is disabled</string>
 
-    <!--Battery saver warning. STOPSHIP: Remove it eventually. -->
-    <string name="battery_saver_warning" translatable="false">\"Extreme\" battery saver activated.\n\nSee the details at: go/extreme-battery-saver\n\nEBS aggressively throttles background apps and changes screen-off behavior.\n</string>
-
-    <!--Battery saver warning. STOPSHIP: Remove it eventually. -->
-    <string name="battery_saver_warning_title" translatable="false">Extreme battery saver</string>
-
     <!-- Label for the uninstall button on the harmful app warning dialog. [CHAR LIMIT=20] -->
     <string name="harmful_app_warning_uninstall">UNINSTALL</string>
     <!-- Label for the open anyway button on the harmful app warning dialog. [CHAR LIMIT=20] -->
