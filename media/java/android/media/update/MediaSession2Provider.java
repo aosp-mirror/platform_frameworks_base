@@ -21,7 +21,6 @@ import android.media.AudioFocusRequest;
 import android.media.MediaItem2;
 import android.media.MediaMetadata2;
 import android.media.MediaPlayerBase;
-import android.media.MediaPlayerBase.PlayerEventCallback;
 import android.media.MediaPlaylistAgent;
 import android.media.MediaSession2;
 import android.media.MediaSession2.Command;
@@ -29,6 +28,7 @@ import android.media.MediaSession2.CommandButton;
 import android.media.MediaSession2.CommandButton.Builder;
 import android.media.MediaSession2.CommandGroup;
 import android.media.MediaSession2.ControllerInfo;
+import android.media.MediaSession2.OnDataSourceMissingHelper;
 import android.media.MediaSession2.SessionCallback;
 import android.media.SessionToken2;
 import android.media.VolumeProvider2;
@@ -68,6 +68,8 @@ public interface MediaSession2Provider extends TransportControlProvider {
     int getPlayerState_impl();
     long getPosition_impl();
     long getBufferedPosition_impl();
+    void setOnDataSourceMissingHelper_impl(OnDataSourceMissingHelper helper);
+    void clearOnDataSourceMissingHelper_impl();
 
     interface CommandProvider {
         int getCommandCode_impl();
