@@ -67,13 +67,11 @@ interface ILockSettings {
     String getKey(String alias);
     void removeKey(String alias);
     void setSnapshotCreatedPendingIntent(in PendingIntent intent);
-    Map getRecoverySnapshotVersions();
     void setServerParams(in byte[] serverParams);
     void setRecoveryStatus(in String alias, int status);
     Map getRecoveryStatus();
     void setRecoverySecretTypes(in int[] secretTypes);
     int[] getRecoverySecretTypes();
-    int[] getPendingRecoverySecretTypes();
     byte[] startRecoverySession(in String sessionId,
             in byte[] verifierPublicKey, in byte[] vaultParams, in byte[] vaultChallenge,
             in List<KeyChainProtectionParams> secrets);

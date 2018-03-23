@@ -317,18 +317,6 @@ public class RecoverableKeyStoreManager {
         mListenersStorage.setSnapshotListener(uid, intent);
     }
 
-    /**
-     * Gets recovery snapshot versions for all accounts. Note that snapshot may have 0 application
-     * keys, but it still needs to be synced, if previous versions were not empty.
-     *
-     * @return Map from Recovery agent account to snapshot version.
-     */
-    public @NonNull Map<byte[], Integer> getRecoverySnapshotVersions()
-            throws RemoteException {
-        checkRecoverKeyStorePermission();
-        throw new UnsupportedOperationException();
-    }
-
     public void setServerParams(@NonNull byte[] serverParams) throws RemoteException {
         checkRecoverKeyStorePermission();
         int userId = UserHandle.getCallingUserId();
@@ -389,29 +377,6 @@ public class RecoverableKeyStoreManager {
         checkRecoverKeyStorePermission();
         return mDatabase.getRecoverySecretTypes(UserHandle.getCallingUserId(),
             Binder.getCallingUid());
-    }
-
-    /**
-     * Gets secret types RecoveryManagers is waiting for to create new Recovery Data.
-     *
-     * @return secret types
-     * @hide
-     */
-    public @NonNull int[] getPendingRecoverySecretTypes() throws RemoteException {
-        checkRecoverKeyStorePermission();
-        throw new UnsupportedOperationException();
-    }
-
-    public void recoverySecretAvailable(
-            @NonNull KeyChainProtectionParams recoverySecret) throws RemoteException {
-        int uid = Binder.getCallingUid();
-        if (recoverySecret.getLockScreenUiFormat() == KeyChainProtectionParams.TYPE_LOCKSCREEN) {
-            throw new SecurityException(
-                    "Caller " + uid + " is not allowed to set lock screen secret");
-        }
-        checkRecoverKeyStorePermission();
-        // TODO: add hook from LockSettingsService to set lock screen secret.
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -549,7 +514,7 @@ public class RecoverableKeyStoreManager {
      * @return Map from alias to raw key material.
      * @throws RemoteException if an error occurred recovering the keys.
      */
-    public Map<String, byte[]> recoverKeys(
+    public @NonNull Map<String, byte[]> recoverKeys(
             @NonNull String sessionId,
             @NonNull byte[] encryptedRecoveryKey,
             @NonNull List<WrappedApplicationKey> applicationKeys)
@@ -643,7 +608,7 @@ public class RecoverableKeyStoreManager {
      * @param alias The alias of the key.
      * @return The alias in the calling process's keystore.
      */
-    private String getAlias(int userId, int uid, String alias) {
+    private @Nullable String getAlias(int userId, int uid, String alias) {
         return mApplicationKeyStorage.getGrantAlias(userId, uid, alias);
     }
 
@@ -748,7 +713,7 @@ public class RecoverableKeyStoreManager {
      *
      * @hide
      */
-    public String importKey(@NonNull String alias, @NonNull byte[] keyBytes)
+    public @Nullable String importKey(@NonNull String alias, @NonNull byte[] keyBytes)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         Preconditions.checkNotNull(alias, "alias is null");
@@ -795,7 +760,7 @@ public class RecoverableKeyStoreManager {
      *
      * @return grant alias, which caller can use to access the key.
      */
-    public String getKey(@NonNull String alias) throws RemoteException {
+    public @Nullable String getKey(@NonNull String alias) throws RemoteException {
         checkRecoverKeyStorePermission();
         Preconditions.checkNotNull(alias, "alias is null");
         int uid = Binder.getCallingUid();
@@ -847,7 +812,7 @@ public class RecoverableKeyStoreManager {
      * @return Map from alias to raw key material.
      * @throws RemoteException if an error occurred decrypting the keys.
      */
-    private Map<String, byte[]> recoverApplicationKeys(
+    private @NonNull Map<String, byte[]> recoverApplicationKeys(
             @NonNull byte[] recoveryKey,
             @NonNull List<WrappedApplicationKey> applicationKeys) throws RemoteException {
         HashMap<String, byte[]> keyMaterialByAlias = new HashMap<>();
