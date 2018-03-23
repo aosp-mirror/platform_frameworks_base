@@ -16,6 +16,7 @@
 
 package com.android.settingslib.applications;
 
+import android.annotation.IntDef;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.Application;
@@ -59,6 +60,8 @@ import com.android.internal.util.ArrayUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.text.Collator;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
@@ -134,6 +137,38 @@ public class ApplicationsState {
     final HandlerThread mThread;
     final BackgroundHandler mBackgroundHandler;
     final MainHandler mMainHandler = new MainHandler(Looper.getMainLooper());
+
+    /** Requests that the home app is loaded. */
+    public static final int FLAG_SESSION_REQUEST_HOME_APP = 1 << 0;
+
+    /** Requests that icons are loaded. */
+    public static final int FLAG_SESSION_REQUEST_ICONS = 1 << 1;
+
+    /** Requests that sizes are loaded. */
+    public static final int FLAG_SESSION_REQUEST_SIZES = 1 << 2;
+
+    /** Requests that launcher intents are resolved. */
+    public static final int FLAG_SESSION_REQUEST_LAUNCHER = 1 << 3;
+
+    /** Requests that leanback launcher intents are resolved. */
+    public static final int FLAG_SESSION_REQUEST_LEANBACK_LAUNCHER = 1 << 4;
+
+    /**
+     * Flags to configure the session to request various types of info.
+     */
+    @IntDef(prefix = { "FLAG_SESSION_" }, value = {
+            FLAG_SESSION_REQUEST_HOME_APP,
+            FLAG_SESSION_REQUEST_ICONS,
+            FLAG_SESSION_REQUEST_SIZES,
+            FLAG_SESSION_REQUEST_LAUNCHER,
+            FLAG_SESSION_REQUEST_LEANBACK_LAUNCHER
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SessionFlags {}
+
+    public static final @SessionFlags int DEFAULT_SESSION_FLAGS =
+            FLAG_SESSION_REQUEST_HOME_APP | FLAG_SESSION_REQUEST_ICONS |
+            FLAG_SESSION_REQUEST_SIZES | FLAG_SESSION_REQUEST_LAUNCHER;
 
     private ApplicationsState(Application app) {
         mContext = app;
@@ -265,7 +300,8 @@ public class ApplicationsState {
         }
     }
 
-    private void clearEntries() {
+    @VisibleForTesting
+    void clearEntries() {
         for (int i = 0; i < mEntriesMap.size(); i++) {
             mEntriesMap.valueAt(i).clear();
         }
@@ -346,7 +382,7 @@ public class ApplicationsState {
         if (DEBUG_LOCKING) Log.v(TAG, "requestSize about to acquire lock...");
         synchronized (mEntriesMap) {
             AppEntry entry = mEntriesMap.get(userId).get(packageName);
-            if (entry != null && (entry.info.flags & ApplicationInfo.FLAG_INSTALLED) != 0) {
+            if (entry != null && hasFlag(entry.info.flags, ApplicationInfo.FLAG_INSTALLED)) {
                 mBackgroundHandler.post(
                         () -> {
                             try {
@@ -595,6 +631,7 @@ public class ApplicationsState {
     }
 
     public class Session implements LifecycleObserver {
+
         final Callbacks mCallbacks;
         boolean mResumed;
 
@@ -609,6 +646,7 @@ public class ApplicationsState {
         boolean mRebuildForeground;
 
         private final boolean mHasLifecycle;
+        @SessionFlags private int mFlags = DEFAULT_SESSION_FLAGS;
 
         Session(Callbacks callbacks, Lifecycle lifecycle) {
             mCallbacks = callbacks;
@@ -618,6 +656,14 @@ public class ApplicationsState {
             } else {
                 mHasLifecycle = false;
             }
+        }
+
+        public @SessionFlags int getSessionFlags() {
+            return mFlags;
+        }
+
+        public void setSessionFlags(@SessionFlags int flags) {
+            mFlags = flags;
         }
 
         @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
@@ -833,10 +879,11 @@ public class ApplicationsState {
     private class BackgroundHandler extends Handler {
         static final int MSG_REBUILD_LIST = 1;
         static final int MSG_LOAD_ENTRIES = 2;
-        static final int MSG_LOAD_ICONS = 3;
-        static final int MSG_LOAD_SIZES = 4;
-        static final int MSG_LOAD_LAUNCHER = 5;
-        static final int MSG_LOAD_HOME_APP = 6;
+        static final int MSG_LOAD_HOME_APP = 3;
+        static final int MSG_LOAD_LAUNCHER = 4;
+        static final int MSG_LOAD_LEANBACK_LAUNCHER = 5;
+        static final int MSG_LOAD_ICONS = 6;
+        static final int MSG_LOAD_SIZES = 7;
 
         boolean mRunning;
 
@@ -859,6 +906,8 @@ public class ApplicationsState {
                     rebuildingSessions.get(i).handleRebuildList();
                 }
             }
+
+            int flags = getCombinedSessionFlags(mSessions);
 
             switch (msg.what) {
                 case MSG_REBUILD_LIST: {
@@ -889,8 +938,8 @@ public class ApplicationsState {
                                 // happens because of the way we generate the list in
                                 // doResumeIfNeededLocked.
                                 AppEntry entry = mEntriesMap.get(0).get(info.packageName);
-                                if (entry != null &&
-                                        (entry.info.flags & ApplicationInfo.FLAG_INSTALLED) == 0) {
+                                if (entry != null && !hasFlag(entry.info.flags,
+                                        ApplicationInfo.FLAG_INSTALLED)) {
                                     mEntriesMap.get(0).remove(info.packageName);
                                     mAppEntries.remove(entry);
                                 }
@@ -909,163 +958,203 @@ public class ApplicationsState {
                     }
                 } break;
                 case MSG_LOAD_HOME_APP: {
-                    final List<ResolveInfo> homeActivities = new ArrayList<>();
-                    mPm.getHomeActivities(homeActivities);
-                    synchronized (mEntriesMap) {
-                        final int entryCount = mEntriesMap.size();
-                        for (int i = 0; i < entryCount; i++) {
-                            if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_HOME_APP acquired lock");
-                            final HashMap<String, AppEntry> userEntries = mEntriesMap.valueAt(i);
-                            for (ResolveInfo activity : homeActivities) {
-                                String packageName = activity.activityInfo.packageName;
-                                AppEntry entry = userEntries.get(packageName);
-                                if (entry != null) {
-                                    entry.isHomeApp = true;
+                    if (hasFlag(flags, FLAG_SESSION_REQUEST_HOME_APP)) {
+                        final List<ResolveInfo> homeActivities = new ArrayList<>();
+                        mPm.getHomeActivities(homeActivities);
+                        synchronized (mEntriesMap) {
+                            final int entryCount = mEntriesMap.size();
+                            for (int i = 0; i < entryCount; i++) {
+                                if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_HOME_APP acquired lock");
+                                final HashMap<String, AppEntry> userEntries = mEntriesMap.valueAt(
+                                        i);
+                                for (ResolveInfo activity : homeActivities) {
+                                    String packageName = activity.activityInfo.packageName;
+                                    AppEntry entry = userEntries.get(packageName);
+                                    if (entry != null) {
+                                        entry.isHomeApp = true;
+                                    }
                                 }
+                                if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_HOME_APP releasing lock");
                             }
-                            if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_HOME_APP releasing lock");
                         }
                     }
                     sendEmptyMessage(MSG_LOAD_LAUNCHER);
-                }
-                break;
-                case MSG_LOAD_LAUNCHER: {
-                    Intent launchIntent = new Intent(Intent.ACTION_MAIN, null)
-                            .addCategory(Intent.CATEGORY_LAUNCHER);
-                    for (int i = 0; i < mEntriesMap.size(); i++) {
-                        int userId = mEntriesMap.keyAt(i);
-                        // If we do not specify MATCH_DIRECT_BOOT_AWARE or
-                        // MATCH_DIRECT_BOOT_UNAWARE, system will derive and update the flags
-                        // according to the user's lock state. When the user is locked, components
-                        // with ComponentInfo#directBootAware == false will be filtered. We should
-                        // explicitly include both direct boot aware and unaware components here.
-                        List<ResolveInfo> intents = mPm.queryIntentActivitiesAsUser(
-                                launchIntent,
-                                PackageManager.MATCH_DISABLED_COMPONENTS
-                                        | PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                                userId
-                        );
-                        synchronized (mEntriesMap) {
-                            if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_LAUNCHER acquired lock");
-                            HashMap<String, AppEntry> userEntries = mEntriesMap.valueAt(i);
-                            final int N = intents.size();
-                            for (int j = 0; j < N; j++) {
-                                String packageName = intents.get(j).activityInfo.packageName;
-                                AppEntry entry = userEntries.get(packageName);
-                                if (entry != null) {
-                                    entry.hasLauncherEntry = true;
-                                } else {
-                                    Log.w(TAG, "Cannot find pkg: " + packageName
-                                            + " on user " + userId);
+                } break;
+                case MSG_LOAD_LAUNCHER:
+                case MSG_LOAD_LEANBACK_LAUNCHER: {
+                    if ((msg.what == MSG_LOAD_LAUNCHER &&
+                            hasFlag(flags, FLAG_SESSION_REQUEST_LAUNCHER))
+                            || (msg.what == MSG_LOAD_LEANBACK_LAUNCHER &&
+                            hasFlag(flags, FLAG_SESSION_REQUEST_LEANBACK_LAUNCHER))) {
+
+                        Intent launchIntent = new Intent(Intent.ACTION_MAIN, null);
+                        launchIntent.addCategory(msg.what == MSG_LOAD_LAUNCHER
+                                ? Intent.CATEGORY_LAUNCHER : Intent.CATEGORY_LEANBACK_LAUNCHER);
+                        for (int i = 0; i < mEntriesMap.size(); i++) {
+                            int userId = mEntriesMap.keyAt(i);
+                            // If we do not specify MATCH_DIRECT_BOOT_AWARE or
+                            // MATCH_DIRECT_BOOT_UNAWARE, system will derive and update the flags
+                            // according to the user's lock state. When the user is locked,
+                            // components
+                            // with ComponentInfo#directBootAware == false will be filtered. We should
+                            // explicitly include both direct boot aware and unaware components here.
+                            List<ResolveInfo> intents = mPm.queryIntentActivitiesAsUser(
+                                    launchIntent,
+                                    PackageManager.MATCH_DISABLED_COMPONENTS
+                                            | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                                    userId
+                            );
+                            synchronized (mEntriesMap) {
+                                if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_LAUNCHER acquired lock");
+                                HashMap<String, AppEntry> userEntries = mEntriesMap.valueAt(i);
+                                final int N = intents.size();
+                                for (int j = 0; j < N; j++) {
+                                    ResolveInfo resolveInfo = intents.get(j);
+                                    String packageName = resolveInfo.activityInfo.packageName;
+                                    AppEntry entry = userEntries.get(packageName);
+                                    if (entry != null) {
+                                        entry.hasLauncherEntry = true;
+                                        entry.launcherEntryEnabled |=
+                                                resolveInfo.activityInfo.enabled;
+                                    } else {
+                                        Log.w(TAG, "Cannot find pkg: " + packageName
+                                                + " on user " + userId);
+                                    }
                                 }
+                                if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_LAUNCHER releasing lock");
                             }
-                            if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_LAUNCHER releasing lock");
+                        }
+
+                        if (!mMainHandler.hasMessages(MainHandler.MSG_LAUNCHER_INFO_CHANGED)) {
+                            mMainHandler.sendEmptyMessage(MainHandler.MSG_LAUNCHER_INFO_CHANGED);
                         }
                     }
-
-                    if (!mMainHandler.hasMessages(MainHandler.MSG_LAUNCHER_INFO_CHANGED)) {
-                        mMainHandler.sendEmptyMessage(MainHandler.MSG_LAUNCHER_INFO_CHANGED);
+                    if (msg.what == MSG_LOAD_LAUNCHER) {
+                        sendEmptyMessage(MSG_LOAD_LEANBACK_LAUNCHER);
+                    } else {
+                        sendEmptyMessage(MSG_LOAD_ICONS);
                     }
-                    sendEmptyMessage(MSG_LOAD_ICONS);
                 } break;
                 case MSG_LOAD_ICONS: {
-                    int numDone = 0;
-                    synchronized (mEntriesMap) {
-                        if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_ICONS acquired lock");
-                        for (int i=0; i<mAppEntries.size() && numDone<2; i++) {
-                            AppEntry entry = mAppEntries.get(i);
-                            if (entry.icon == null || !entry.mounted) {
-                                synchronized (entry) {
-                                    if (entry.ensureIconLocked(mContext, mDrawableFactory)) {
+                    if (hasFlag(flags, FLAG_SESSION_REQUEST_ICONS)) {
+                        int numDone = 0;
+                        synchronized (mEntriesMap) {
+                            if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_ICONS acquired lock");
+                            for (int i = 0; i < mAppEntries.size() && numDone < 2; i++) {
+                                AppEntry entry = mAppEntries.get(i);
+                                if (entry.icon == null || !entry.mounted) {
+                                    synchronized (entry) {
+                                        if (entry.ensureIconLocked(mContext, mDrawableFactory)) {
+                                            if (!mRunning) {
+                                                mRunning = true;
+                                                Message m = mMainHandler.obtainMessage(
+                                                        MainHandler.MSG_RUNNING_STATE_CHANGED, 1);
+                                                mMainHandler.sendMessage(m);
+                                            }
+                                            numDone++;
+                                        }
+                                    }
+                                }
+                            }
+                            if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_ICONS releasing lock");
+                        }
+                        if (numDone > 0) {
+                            if (!mMainHandler.hasMessages(MainHandler.MSG_PACKAGE_ICON_CHANGED)) {
+                                mMainHandler.sendEmptyMessage(MainHandler.MSG_PACKAGE_ICON_CHANGED);
+                            }
+                        }
+                        if (numDone >= 2) {
+                            sendEmptyMessage(MSG_LOAD_ICONS);
+                            break;
+                        }
+                    }
+                    sendEmptyMessage(MSG_LOAD_SIZES);
+                } break;
+                case MSG_LOAD_SIZES: {
+                    if (hasFlag(flags, FLAG_SESSION_REQUEST_SIZES)) {
+                        synchronized (mEntriesMap) {
+                            if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_SIZES acquired lock");
+                            if (mCurComputingSizePkg != null) {
+                                if (DEBUG_LOCKING) Log.v(TAG,
+                                        "MSG_LOAD_SIZES releasing: currently computing");
+                                return;
+                            }
+
+                            long now = SystemClock.uptimeMillis();
+                            for (int i = 0; i < mAppEntries.size(); i++) {
+                                AppEntry entry = mAppEntries.get(i);
+                                if (hasFlag(entry.info.flags, ApplicationInfo.FLAG_INSTALLED)
+                                        && (entry.size == SIZE_UNKNOWN || entry.sizeStale)) {
+                                    if (entry.sizeLoadStart == 0 ||
+                                            (entry.sizeLoadStart < (now - 20 * 1000))) {
                                         if (!mRunning) {
                                             mRunning = true;
                                             Message m = mMainHandler.obtainMessage(
                                                     MainHandler.MSG_RUNNING_STATE_CHANGED, 1);
                                             mMainHandler.sendMessage(m);
                                         }
-                                        numDone++;
+                                        entry.sizeLoadStart = now;
+                                        mCurComputingSizeUuid = entry.info.storageUuid;
+                                        mCurComputingSizePkg = entry.info.packageName;
+                                        mCurComputingSizeUserId = UserHandle.getUserId(
+                                                entry.info.uid);
+
+                                        mBackgroundHandler.post(() -> {
+                                            try {
+                                                final StorageStats stats =
+                                                        mStats.queryStatsForPackage(
+                                                                mCurComputingSizeUuid,
+                                                                mCurComputingSizePkg,
+                                                                UserHandle.of(
+                                                                        mCurComputingSizeUserId));
+                                                final PackageStats legacy = new PackageStats(
+                                                        mCurComputingSizePkg,
+                                                        mCurComputingSizeUserId);
+                                                legacy.codeSize = stats.getCodeBytes();
+                                                legacy.dataSize = stats.getDataBytes();
+                                                legacy.cacheSize = stats.getCacheBytes();
+                                                try {
+                                                    mStatsObserver.onGetStatsCompleted(legacy,
+                                                            true);
+                                                } catch (RemoteException ignored) {
+                                                }
+                                            } catch (NameNotFoundException | IOException e) {
+                                                Log.w(TAG, "Failed to query stats: " + e);
+                                                try {
+                                                    mStatsObserver.onGetStatsCompleted(null, false);
+                                                } catch (RemoteException ignored) {
+                                                }
+                                            }
+
+                                        });
                                     }
+                                    if (DEBUG_LOCKING) Log.v(TAG,
+                                            "MSG_LOAD_SIZES releasing: now computing");
+                                    return;
                                 }
                             }
-                        }
-                        if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_ICONS releasing lock");
-                    }
-                    if (numDone > 0) {
-                        if (!mMainHandler.hasMessages(MainHandler.MSG_PACKAGE_ICON_CHANGED)) {
-                            mMainHandler.sendEmptyMessage(MainHandler.MSG_PACKAGE_ICON_CHANGED);
-                        }
-                    }
-                    if (numDone >= 2) {
-                        sendEmptyMessage(MSG_LOAD_ICONS);
-                    } else {
-                        sendEmptyMessage(MSG_LOAD_SIZES);
-                    }
-                } break;
-                case MSG_LOAD_SIZES: {
-                    synchronized (mEntriesMap) {
-                        if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_SIZES acquired lock");
-                        if (mCurComputingSizePkg != null) {
-                            if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_SIZES releasing: currently computing");
-                            return;
-                        }
-
-                        long now = SystemClock.uptimeMillis();
-                        for (int i=0; i<mAppEntries.size(); i++) {
-                            AppEntry entry = mAppEntries.get(i);
-                            if ((entry.info.flags & ApplicationInfo.FLAG_INSTALLED) != 0
-                                    && (entry.size == SIZE_UNKNOWN || entry.sizeStale)) {
-                                if (entry.sizeLoadStart == 0 ||
-                                        (entry.sizeLoadStart < (now-20*1000))) {
-                                    if (!mRunning) {
-                                        mRunning = true;
-                                        Message m = mMainHandler.obtainMessage(
-                                                MainHandler.MSG_RUNNING_STATE_CHANGED, 1);
-                                        mMainHandler.sendMessage(m);
-                                    }
-                                    entry.sizeLoadStart = now;
-                                    mCurComputingSizeUuid = entry.info.storageUuid;
-                                    mCurComputingSizePkg = entry.info.packageName;
-                                    mCurComputingSizeUserId = UserHandle.getUserId(entry.info.uid);
-
-                                    mBackgroundHandler.post(() -> {
-                                        try {
-                                            final StorageStats stats = mStats.queryStatsForPackage(
-                                                    mCurComputingSizeUuid, mCurComputingSizePkg,
-                                                    UserHandle.of(mCurComputingSizeUserId));
-                                            final PackageStats legacy = new PackageStats(
-                                                    mCurComputingSizePkg, mCurComputingSizeUserId);
-                                            legacy.codeSize = stats.getCodeBytes();
-                                            legacy.dataSize = stats.getDataBytes();
-                                            legacy.cacheSize = stats.getCacheBytes();
-                                            try {
-                                                mStatsObserver.onGetStatsCompleted(legacy, true);
-                                            } catch (RemoteException ignored) {
-                                            }
-                                        } catch (NameNotFoundException | IOException e) {
-                                            Log.w(TAG, "Failed to query stats: " + e);
-                                            try {
-                                                mStatsObserver.onGetStatsCompleted(null, false);
-                                            } catch (RemoteException ignored) {
-                                            }
-                                        }
-
-                                    });
-                                }
-                                if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_SIZES releasing: now computing");
-                                return;
+                            if (!mMainHandler.hasMessages(MainHandler.MSG_ALL_SIZES_COMPUTED)) {
+                                mMainHandler.sendEmptyMessage(MainHandler.MSG_ALL_SIZES_COMPUTED);
+                                mRunning = false;
+                                Message m = mMainHandler.obtainMessage(
+                                        MainHandler.MSG_RUNNING_STATE_CHANGED, 0);
+                                mMainHandler.sendMessage(m);
                             }
+                            if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_SIZES releasing lock");
                         }
-                        if (!mMainHandler.hasMessages(MainHandler.MSG_ALL_SIZES_COMPUTED)) {
-                            mMainHandler.sendEmptyMessage(MainHandler.MSG_ALL_SIZES_COMPUTED);
-                            mRunning = false;
-                            Message m = mMainHandler.obtainMessage(
-                                    MainHandler.MSG_RUNNING_STATE_CHANGED, 0);
-                            mMainHandler.sendMessage(m);
-                        }
-                        if (DEBUG_LOCKING) Log.v(TAG, "MSG_LOAD_SIZES releasing lock");
                     }
                 } break;
+            }
+        }
+
+        private @SessionFlags int getCombinedSessionFlags(List<Session> sessions) {
+            synchronized (mEntriesMap) {
+                int flags = 0;
+                for (Session session : sessions) {
+                    flags |= session.mFlags;
+                }
+                return flags;
             }
         }
 
@@ -1257,6 +1346,11 @@ public class ApplicationsState {
         public boolean hasLauncherEntry;
 
         /**
+         * Whether the component that has a launcher intent filter is enabled.
+         */
+        public boolean launcherEntryEnabled;
+
+        /**
          * Whether or not it's a Home app.
          */
         public boolean isHomeApp;
@@ -1283,7 +1377,7 @@ public class ApplicationsState {
         // A location where extra info can be placed to be used by custom filters.
         public Object extraInfo;
 
-        @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+        @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
         public AppEntry(Context context, ApplicationInfo info, long id) {
             apkFile = new File(info.sourceDir);
             this.id = id;
@@ -1334,6 +1428,10 @@ public class ApplicationsState {
                 return "";
             }
         }
+    }
+
+    private static boolean hasFlag(int flags, int flag) {
+        return (flags & flag) != 0;
     }
 
     /**
@@ -1449,13 +1547,13 @@ public class ApplicationsState {
         public boolean filterApp(AppEntry entry) {
             if (AppUtils.isInstant(entry.info)) {
                 return false;
-            } else if ((entry.info.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
+            } else if (hasFlag(entry.info.flags, ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) {
                 return true;
-            } else if ((entry.info.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+            } else if (!hasFlag(entry.info.flags, ApplicationInfo.FLAG_SYSTEM)) {
                 return true;
             } else if (entry.hasLauncherEntry) {
                 return true;
-            } else if ((entry.info.flags & ApplicationInfo.FLAG_SYSTEM) != 0 && entry.isHomeApp) {
+            } else if (hasFlag(entry.info.flags, ApplicationInfo.FLAG_SYSTEM) && entry.isHomeApp) {
                 return true;
             }
             return false;
@@ -1486,9 +1584,9 @@ public class ApplicationsState {
 
         @Override
         public boolean filterApp(AppEntry entry) {
-            if ((entry.info.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
+            if (hasFlag(entry.info.flags, ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) {
                 return true;
-            } else if ((entry.info.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+            } else if (!hasFlag(entry.info.flags, ApplicationInfo.FLAG_SYSTEM)) {
                 return true;
             }
             return false;
@@ -1547,7 +1645,7 @@ public class ApplicationsState {
         @Override
         public boolean filterApp(AppEntry entry) {
             return !AppUtils.isInstant(entry.info)
-                && (entry.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS) != 0;
+                && hasFlag(entry.info.privateFlags, ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS);
         }
     };
 
@@ -1589,7 +1687,7 @@ public class ApplicationsState {
             // TODO: Update for the new game category.
             boolean isGame;
             synchronized (info.info) {
-                isGame = ((info.info.flags & ApplicationInfo.FLAG_IS_GAME) != 0)
+                isGame = hasFlag(info.info.flags, ApplicationInfo.FLAG_IS_GAME)
                         || info.info.category == ApplicationInfo.CATEGORY_GAME;
             }
             return isGame;
