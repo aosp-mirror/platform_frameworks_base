@@ -149,6 +149,9 @@
     <!-- Notification content to tell the user that voice/data/emergency service is blocked by access control. -->
     <string name="RestrictedStateContent">Temporarily turned off by your carrier</string>
 
+    <!-- Notification content to tell the user that voice/data/emergency service is blocked by access control when multiple SIMs are active. -->
+    <string name="RestrictedStateContentMsimTemplate">Temporarily turned off by your carrier for SIM <xliff:g id="simNumber" example="1">%d</xliff:g></string>
+
     <!-- Displayed to tell the user that they should switch their network preference. -->
     <string name="NetworkPreferenceSwitchTitle">Can\u2019t reach mobile network</string>
     <!-- Displayed to tell the user that they should switch their network preference. -->
@@ -4687,6 +4690,12 @@
     <string name="mmcc_imsi_unknown_in_hlr">SIM not provisioned for voice</string>
     <string name="mmcc_illegal_ms">SIM not allowed for voice</string>
     <string name="mmcc_illegal_me">Phone not allowed for voice</string>
+
+    <!-- Title of notification when UE fails to register network with MM reject cause code when multiple SIMs are active. -->
+    <string name="mmcc_authentication_reject_msim_template">SIM <xliff:g id="simNumber" example="1">%d</xliff:g> not allowed</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template">SIM <xliff:g id="simNumber" example="1">%d</xliff:g> not provisioned</string>
+    <string name="mmcc_illegal_ms_msim_template">SIM <xliff:g id="simNumber" example="1">%d</xliff:g> not allowed</string>
+    <string name="mmcc_illegal_me_msim_template">SIM <xliff:g id="simNumber" example="1">%d</xliff:g> not allowed</string>
 
     <!-- Popup window default title to be read by a screen reader-->
     <string name="popup_window_default_title">Popup Window</string>
