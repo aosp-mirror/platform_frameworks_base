@@ -416,20 +416,20 @@ package android.location {
     ctor public GnssMeasurement();
     method public void reset();
     method public void resetAutomaticGainControlLevel();
-    method public void resetCarrierCycles();
+    method public deprecated void resetCarrierCycles();
     method public void resetCarrierFrequencyHz();
-    method public void resetCarrierPhase();
-    method public void resetCarrierPhaseUncertainty();
+    method public deprecated void resetCarrierPhase();
+    method public deprecated void resetCarrierPhaseUncertainty();
     method public void resetSnrInDb();
     method public void set(android.location.GnssMeasurement);
     method public void setAccumulatedDeltaRangeMeters(double);
     method public void setAccumulatedDeltaRangeState(int);
     method public void setAccumulatedDeltaRangeUncertaintyMeters(double);
     method public void setAutomaticGainControlLevelInDb(double);
-    method public void setCarrierCycles(long);
+    method public deprecated void setCarrierCycles(long);
     method public void setCarrierFrequencyHz(float);
-    method public void setCarrierPhase(double);
-    method public void setCarrierPhaseUncertainty(double);
+    method public deprecated void setCarrierPhase(double);
+    method public deprecated void setCarrierPhaseUncertainty(double);
     method public void setCn0DbHz(double);
     method public void setConstellationType(int);
     method public void setMultipathIndicator(int);
@@ -441,6 +441,7 @@ package android.location {
     method public void setState(int);
     method public void setSvid(int);
     method public void setTimeOffsetNanos(double);
+    field public static final int ADR_STATE_ALL = 31; // 0x1f
   }
 
   public final class GnssMeasurementsEvent implements android.os.Parcelable {
