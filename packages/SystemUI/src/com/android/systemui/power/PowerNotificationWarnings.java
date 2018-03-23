@@ -193,7 +193,6 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
 
         // override notification copy if hybrid notification enabled
         if (mEstimate != null) {
-            title = mContext.getString(R.string.battery_low_title_hybrid);
             contentText = getHybridContentString(percentage);
         }
 
