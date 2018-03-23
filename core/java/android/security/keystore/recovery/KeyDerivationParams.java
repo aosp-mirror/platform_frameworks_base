@@ -22,7 +22,6 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -63,7 +62,7 @@ public final class KeyDerivationParams implements Parcelable {
      * salt + key_material_len + key_material, where salt_len and key_material_len are one-byte, and
      * denote the number of bytes for salt and key_material, respectively.
      */
-    public static KeyDerivationParams createSha256Params(@NonNull byte[] salt) {
+    public static @NonNull KeyDerivationParams createSha256Params(@NonNull byte[] salt) {
         return new KeyDerivationParams(ALGORITHM_SHA256, salt);
     }
 
@@ -76,7 +75,7 @@ public final class KeyDerivationParams implements Parcelable {
      * the parallelization parameter p is 1, the block size parameter r is 8, and the hashing output
      * length is 32-byte.
      */
-    public static KeyDerivationParams createScryptParams(
+    public static @NonNull KeyDerivationParams createScryptParams(
             @NonNull byte[] salt, int memoryDifficulty) {
         return new KeyDerivationParams(ALGORITHM_SCRYPT, salt, memoryDifficulty);
     }
@@ -84,8 +83,7 @@ public final class KeyDerivationParams implements Parcelable {
     /**
      * @hide
      */
-    // TODO: Make private once legacy API is removed
-    public KeyDerivationParams(@KeyDerivationAlgorithm int algorithm, @NonNull byte[] salt) {
+    private KeyDerivationParams(@KeyDerivationAlgorithm int algorithm, @NonNull byte[] salt) {
         this(algorithm, salt, /*memoryDifficulty=*/ -1);
     }
 

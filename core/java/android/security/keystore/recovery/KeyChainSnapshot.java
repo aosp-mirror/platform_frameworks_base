@@ -84,8 +84,8 @@ public final class KeyChainSnapshot implements Parcelable {
     }
 
     /**
-     * Snapshot version for given account. It is incremented when user secret or list of application
-     * keys changes.
+     * Snapshot version for given recovery agent. It is incremented when user secret or list of
+     * application keys changes.
      */
     public int getSnapshotVersion() {
         return mSnapshotVersion;
@@ -178,7 +178,7 @@ public final class KeyChainSnapshot implements Parcelable {
         private KeyChainSnapshot mInstance = new KeyChainSnapshot();
 
         /**
-         * Snapshot version for given account.
+         * Snapshot version for the recovery agent.
          *
          * @param snapshotVersion The snapshot version
          * @return This builder.

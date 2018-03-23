@@ -585,7 +585,7 @@ public class RecoverableKeyStoreManager {
      *     were wrapped with the recovery key.
      * @throws RemoteException if an error occurred recovering the keys.
      */
-    public Map<String, String> recoverKeyChainSnapshot(
+    public @NonNull Map<String, String> recoverKeyChainSnapshot(
             @NonNull String sessionId,
             @NonNull byte[] encryptedRecoveryKey,
             @NonNull List<WrappedApplicationKey> applicationKeys) throws RemoteException {
@@ -621,7 +621,7 @@ public class RecoverableKeyStoreManager {
      * @param keysByAlias The key materials, keyed by alias.
      * @throws KeyStoreException if an error occurs importing the key or getting the grant.
      */
-    private Map<String, String> importKeyMaterials(
+    private @NonNull Map<String, String> importKeyMaterials(
             int userId, int uid, Map<String, byte[]> keysByAlias) throws KeyStoreException {
         ArrayMap<String, String> grantAliasesByAlias = new ArrayMap<>(keysByAlias.size());
         for (String alias : keysByAlias.keySet()) {

@@ -45,7 +45,7 @@ public final class RecoveryCertPath implements Parcelable {
      * @param certPath The certificate path to be wrapped.
      * @throws CertificateException if the given certificate path cannot be encoded properly.
      */
-    public static RecoveryCertPath createRecoveryCertPath(@NonNull CertPath certPath)
+    public static @NonNull RecoveryCertPath createRecoveryCertPath(@NonNull CertPath certPath)
             throws CertificateException {
         // Perform the encoding here to avoid throwing exceptions in writeToParcel
         try {
@@ -61,7 +61,7 @@ public final class RecoveryCertPath implements Parcelable {
      * @return the wrapped certificate path.
      * @throws CertificateException if the wrapped certificate path cannot be decoded properly.
      */
-    public CertPath getCertPath() throws CertificateException {
+    public @NonNull CertPath getCertPath() throws CertificateException {
         // Perform the decoding here to avoid throwing exceptions in createFromParcel
         return decodeCertPath(mEncodedCertPath);
     }
