@@ -47,6 +47,11 @@ class NotificationRoundnessManager implements OnHeadsUpChangedListener {
         updateRounding(headsUp, true /* animate */);
     }
 
+    public void onHeadsupAnimatingAwayChanged(ExpandableNotificationRow row,
+            boolean isAnimatingAway) {
+        updateRounding(row, false /* animate */);
+    }
+
     private void updateRounding(ActivatableNotificationView view, boolean animate) {
         float topRoundness = getRoundness(view, true /* top */);
         float bottomRoundness = getRoundness(view, false /* top */);
