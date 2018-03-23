@@ -935,7 +935,11 @@ packages_to_document = [
 // Conscrypt (com.android.org.conscrypt) is an implementation detail and should
 // not be referenced in the documentation.
 framework_docs_args = "-android -manifest $(location core/res/AndroidManifest.xml) " +
-     "-hidePackage com.android.okhttp -hidePackage com.android.org.conscrypt -hidePackage com.android.server " +
+     "-hidePackage com.android.internal " +
+     "-hidePackage com.android.internal.util " +
+     "-hidePackage com.android.okhttp " +
+     "-hidePackage com.android.org.conscrypt " +
+     "-hidePackage com.android.server " +
      "-since $(location api/1.xml) 1 " +
      "-since $(location api/2.xml) 2 " +
      "-since $(location api/3.xml) 3 " +
@@ -963,6 +967,7 @@ framework_docs_args = "-android -manifest $(location core/res/AndroidManifest.xm
      "-since $(location api/25.txt) 25 " +
      "-since $(location api/26.txt) 26 " +
      "-since $(location api/27.txt) 27 " +
+     "-since $(location api/current.txt) P " +
      "-werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 " +
      "-overview $(location core/java/overview.html) " +
      // Federate Support Library references against local API file.
@@ -1026,6 +1031,7 @@ droiddoc {
         ":api-version-xml",
         "core/java/overview.html",
         ":current-support-api",
+        "api/current.txt",
     ],
     api_filename: "public_api.txt",
     removed_api_filename: "removed.txt",
@@ -1040,6 +1046,7 @@ droiddoc {
         ":api-version-xml",
         "core/java/overview.html",
         ":current-support-api",
+        "api/current.txt",
     ],
     api_tag_name: "SYSTEM",
     api_filename: "system-api.txt",
@@ -1056,6 +1063,7 @@ droiddoc {
         ":api-version-xml",
         "core/java/overview.html",
         ":current-support-api",
+        "api/current.txt",
     ],
     api_tag_name: "TEST",
     api_filename: "test-api.txt",
