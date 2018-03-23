@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
+ * @hide
  * Base class for all media players that want media session.
  */
 public abstract class MediaPlayerBase implements AutoCloseable {
