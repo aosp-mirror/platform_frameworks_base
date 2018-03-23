@@ -26,6 +26,12 @@ import android.os.LocaleList;
 import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.URLSpan;
+import android.text.util.Linkify;
+import android.text.util.Linkify.LinkifyMask;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
@@ -37,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Interface for providing text classification related features.
@@ -509,6 +516,65 @@ public interface TextClassifier {
                 boolean allowInMainThread) {
             validate(text, allowInMainThread);
             Preconditions.checkArgumentInRange(text.length(), 0, maxLength, "text.length()");
+        }
+
+        /**
+         * Generates links using legacy {@link Linkify}.
+         */
+        public static TextLinks generateLegacyLinks(
+                @NonNull CharSequence text, @NonNull TextLinks.Options options) {
+            final String string = Preconditions.checkNotNull(text).toString();
+            final TextLinks.Builder links = new TextLinks.Builder(string);
+
+            final List<String> entities = Preconditions.checkNotNull(options).getEntityConfig()
+                    .resolveEntityListModifications(Collections.emptyList());
+            if (entities.contains(TextClassifier.TYPE_URL)) {
+                addLinks(links, string, TextClassifier.TYPE_URL);
+            }
+            if (entities.contains(TextClassifier.TYPE_PHONE)) {
+                addLinks(links, string, TextClassifier.TYPE_PHONE);
+            }
+            if (entities.contains(TextClassifier.TYPE_EMAIL)) {
+                addLinks(links, string, TextClassifier.TYPE_EMAIL);
+            }
+            // NOTE: Do not support MAP_ADDRESSES. Legacy version does not work well.
+            return links.build();
+        }
+
+        private static void addLinks(
+                TextLinks.Builder links, String string, @EntityType String entityType) {
+            final Spannable spannable = new SpannableString(string);
+            if (Linkify.addLinks(spannable, linkMask(entityType))) {
+                final URLSpan[] spans = spannable.getSpans(0, spannable.length(), URLSpan.class);
+                for (URLSpan urlSpan : spans) {
+                    links.addLink(
+                            spannable.getSpanStart(urlSpan),
+                            spannable.getSpanEnd(urlSpan),
+                            entityScores(entityType),
+                            urlSpan);
+                }
+            }
+        }
+
+        @LinkifyMask
+        private static int linkMask(@EntityType String entityType) {
+            switch (entityType) {
+                case TextClassifier.TYPE_URL:
+                    return Linkify.WEB_URLS;
+                case TextClassifier.TYPE_PHONE:
+                    return Linkify.PHONE_NUMBERS;
+                case TextClassifier.TYPE_EMAIL:
+                    return Linkify.EMAIL_ADDRESSES;
+                default:
+                    // NOTE: Do not support MAP_ADDRESSES. Legacy version does not work well.
+                    return 0;
+            }
+        }
+
+        private static Map<String, Float> entityScores(@EntityType String entityType) {
+            final Map<String, Float> scores = new ArrayMap<>();
+            scores.put(entityType, 1f);
+            return scores;
         }
 
         private static void checkMainThread(boolean allowInMainThread) {

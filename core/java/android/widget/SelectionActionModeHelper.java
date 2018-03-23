@@ -246,7 +246,7 @@ public final class SelectionActionModeHelper {
                 mTextView.invalidate();
             }
             mTextClassification = result.mClassification;
-        } else if (actionMode == Editor.TextActionMode.TEXT_LINK) {
+        } else if (result != null && actionMode == Editor.TextActionMode.TEXT_LINK) {
             mTextClassification = result.mClassification;
         } else {
             mTextClassification = null;

@@ -20,17 +20,21 @@ import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.Spannable;
 import android.text.style.ClickableSpan;
+import android.text.style.URLSpan;
 import android.text.util.Linkify;
 import android.text.util.Linkify.LinkifyMask;
 import android.view.View;
 import android.view.textclassifier.TextClassifier.EntityType;
 import android.widget.TextView;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -197,6 +201,7 @@ public final class TextLinks implements Parcelable {
         private final EntityConfidence mEntityScores;
         private final int mStart;
         private final int mEnd;
+        @Nullable final URLSpan mUrlSpan;
 
         /**
          * Create a new TextLink.
@@ -204,16 +209,19 @@ public final class TextLinks implements Parcelable {
          * @param start The start index of the identified subsequence
          * @param end The end index of the identified subsequence
          * @param entityScores A mapping of entity type to confidence score
+         * @param urlSpan An optional URLSpan to delegate to. NOTE: Not parcelled
          *
          * @throws IllegalArgumentException if entityScores is null or empty
          */
-        TextLink(int start, int end, Map<String, Float> entityScores) {
+        TextLink(int start, int end, Map<String, Float> entityScores,
+                @Nullable URLSpan urlSpan) {
             Preconditions.checkNotNull(entityScores);
             Preconditions.checkArgument(!entityScores.isEmpty());
             Preconditions.checkArgument(start <= end);
             mStart = start;
             mEnd = end;
             mEntityScores = new EntityConfidence(entityScores);
+            mUrlSpan = urlSpan;
         }
 
         /**
@@ -291,6 +299,7 @@ public final class TextLinks implements Parcelable {
             mEntityScores = EntityConfidence.CREATOR.createFromParcel(in);
             mStart = in.readInt();
             mEnd = in.readInt();
+            mUrlSpan = null;
         }
     }
 
@@ -301,6 +310,7 @@ public final class TextLinks implements Parcelable {
 
         private LocaleList mDefaultLocales;
         private TextClassifier.EntityConfig mEntityConfig;
+        private boolean mLegacyFallback;
 
         private @ApplyStrategy int mApplyStrategy;
         private Function<TextLink, TextLinkSpan> mSpanFactory;
@@ -354,6 +364,17 @@ public final class TextLinks implements Parcelable {
         }
 
         /**
+         * Sets whether the TextClassifier can fallback to legacy links if smart linkify is
+         * disabled.
+         * <strong>Note: </strong>This is not parcelled.
+         * @hide
+         */
+        public Options setLegacyFallback(boolean legacyFallback) {
+            mLegacyFallback = legacyFallback;
+            return this;
+        }
+
+        /**
          * Sets a strategy for resolving conflicts when applying generated links to text that
          * already have links.
          *
@@ -403,6 +424,16 @@ public final class TextLinks implements Parcelable {
         @Nullable
         public TextClassifier.EntityConfig getEntityConfig() {
             return mEntityConfig;
+        }
+
+        /**
+         * Returns whether the TextClassifier can fallback to legacy links if smart linkify is
+         * disabled.
+         * <strong>Note: </strong>This is not parcelled.
+         * @hide
+         */
+        public boolean isLegacyFallback() {
+            return mLegacyFallback;
         }
 
         /**
@@ -497,7 +528,7 @@ public final class TextLinks implements Parcelable {
 
         private final TextLink mTextLink;
 
-        public TextLinkSpan(@Nullable TextLink textLink) {
+        public TextLinkSpan(@NonNull TextLink textLink) {
             mTextLink = textLink;
         }
 
@@ -505,12 +536,37 @@ public final class TextLinks implements Parcelable {
         public void onClick(View widget) {
             if (widget instanceof TextView) {
                 final TextView textView = (TextView) widget;
-                textView.requestActionMode(this);
+                final Context context = textView.getContext();
+                if (TextClassificationManager.getSettings(context).isSmartLinkifyEnabled()) {
+                    if (textView.requestFocus()) {
+                        textView.requestActionMode(this);
+                    } else {
+                        // If textView can not take focus, then simply handle the click as it will
+                        // be difficult to get rid of the floating action mode.
+                        textView.handleClick(this);
+                    }
+                } else {
+                    if (mTextLink.mUrlSpan != null) {
+                        mTextLink.mUrlSpan.onClick(textView);
+                    } else {
+                        textView.handleClick(this);
+                    }
+                }
             }
         }
 
         public final TextLink getTextLink() {
             return mTextLink;
+        }
+
+        /** @hide */
+        @VisibleForTesting(visibility = Visibility.PRIVATE)
+        @Nullable
+        public final String getUrl() {
+            if (mTextLink.mUrlSpan != null) {
+                return mTextLink.mUrlSpan.getURL();
+            }
+            return null;
         }
     }
 
@@ -534,12 +590,24 @@ public final class TextLinks implements Parcelable {
         /**
          * Adds a TextLink.
          *
-         * @return this instance
+         * @param start The start index of the identified subsequence
+         * @param end The end index of the identified subsequence
+         * @param entityScores A mapping of entity type to confidence score
          *
          * @throws IllegalArgumentException if entityScores is null or empty.
          */
         public Builder addLink(int start, int end, Map<String, Float> entityScores) {
-            mLinks.add(new TextLink(start, end, entityScores));
+            mLinks.add(new TextLink(start, end, entityScores, null));
+            return this;
+        }
+
+        /**
+         * @see #addLink(int, int, Map)
+         * @param urlSpan An optional URLSpan to delegate to. NOTE: Not parcelled.
+         */
+        Builder addLink(int start, int end, Map<String, Float> entityScores,
+                @Nullable URLSpan urlSpan) {
+            mLinks.add(new TextLink(start, end, entityScores, urlSpan));
             return this;
         }
 
