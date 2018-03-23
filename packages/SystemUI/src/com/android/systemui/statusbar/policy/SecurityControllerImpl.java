@@ -64,6 +64,7 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
             .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
             .removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
             .removeCapability(NetworkCapabilities.NET_CAPABILITY_TRUSTED)
+            .setUids(null)
             .build();
     private static final int NO_NETWORK = -1;
 
