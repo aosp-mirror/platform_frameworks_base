@@ -2227,4 +2227,9 @@
 
     <!-- URl of the webpage that explains battery saver. -->
     <string name="help_uri_battery_saver_learn_more_link_target" translatable="false"></string>
+
+    <!-- Name for a quick settings tile, used only by platform developers, to extract the SystemUI process memory and send it to another
+         app for debugging. Will not be seen by users. [CHAR LIMIT=20] -->
+    <string name="heap_dump_tile_name">Dump SysUI Heap</string>
+
 </resources>
