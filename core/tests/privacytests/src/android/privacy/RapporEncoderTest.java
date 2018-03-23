@@ -79,11 +79,11 @@ public class RapporEncoderTest {
     public void testRapporEncoder_IRRWithPRR() throws Exception {
         int numBits = 8;
         final long inputValue = 254L;
-        final long prrValue = 250L;
-        final long prrAndIrrValue = 244L;
+        final long expectedPrrValue = 126L;
+        final long expectedPrrAndIrrValue = 79L;
 
         final RapporConfig config1 = new RapporConfig(
-                "Foo", // encoderId
+                "Foo2", // encoderId
                 numBits, // numBits,
                 0.25, // probabilityF
                 0, // probabilityP
@@ -93,12 +93,12 @@ public class RapporEncoderTest {
         // Use insecure encoder here as we want to get the exact output.
         final RapporEncoder encoder1 = RapporEncoder.createInsecureEncoderForTest(config1);
         // Verify that PRR is working as expected.
-        assertEquals(prrValue, toLong(encoder1.encodeBits(toBytes(inputValue))));
+        assertEquals(expectedPrrValue, toLong(encoder1.encodeBits(toBytes(inputValue))));
         assertTrue(encoder1.isInsecureEncoderForTest());
 
         // Verify that IRR is working as expected.
         final RapporConfig config2 = new RapporConfig(
-                "Foo", // encoderId
+                "Foo2", // encoderId
                 numBits, // numBits,
                 0, // probabilityF
                 0.3, // probabilityP
@@ -107,11 +107,12 @@ public class RapporEncoderTest {
                 2); // numBloomHashes
         // Use insecure encoder here as we want to get the exact output.
         final RapporEncoder encoder2 = RapporEncoder.createInsecureEncoderForTest(config2);
-        assertEquals(prrAndIrrValue, toLong(encoder2.encodeBits(toBytes(prrValue))));
+        assertEquals(expectedPrrAndIrrValue,
+                toLong(encoder2.encodeBits(toBytes(expectedPrrValue))));
 
         // Test that end-to-end is the result of PRR + IRR.
         final RapporConfig config3 = new RapporConfig(
-                "Foo", // encoderId
+                "Foo2", // encoderId
                 numBits, // numBits,
                 0.25, // probabilityF
                 0.3, // probabilityP
@@ -120,7 +121,7 @@ public class RapporEncoderTest {
                 2); // numBloomHashes
         final RapporEncoder encoder3 = RapporEncoder.createInsecureEncoderForTest(config3);
         // Verify that PRR is working as expected.
-        assertEquals(prrAndIrrValue, toLong(encoder3.encodeBits(toBytes(inputValue))));
+        assertEquals(expectedPrrAndIrrValue, toLong(encoder3.encodeBits(toBytes(inputValue))));
     }
 
     @Test
