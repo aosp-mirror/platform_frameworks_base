@@ -1024,6 +1024,8 @@
   <java-symbol type="string" name="volume_icon_description_media" />
   <java-symbol type="string" name="volume_icon_description_notification" />
   <java-symbol type="string" name="volume_icon_description_ringer" />
+  <java-symbol type="string" name="volume_dialog_ringer_guidance_vibrate" />
+  <java-symbol type="string" name="volume_dialog_ringer_guidance_silent" />
   <java-symbol type="string" name="wait" />
   <java-symbol type="string" name="webpage_unresponsive" />
   <java-symbol type="string" name="whichApplication" />
@@ -2620,6 +2622,7 @@
   <java-symbol type="bool" name="config_cameraDoubleTapPowerGestureEnabled" />
   <java-symbol type="integer" name="config_cameraLiftTriggerSensorType" />
   <java-symbol type="string" name="config_cameraLiftTriggerSensorStringType" />
+  <java-symbol type="bool" name="config_volumeHushGestureEnabled" />
 
   <java-symbol type="drawable" name="platlogo_m" />
 

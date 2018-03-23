@@ -744,9 +744,10 @@ message SecureSettingsProto {
     optional SettingProto backup_manager_constants = 193;
     optional SettingProto backup_local_transport_parameters = 194;
     optional SettingProto bluetooth_on_while_driving = 195 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingsProto volume_hush_gesture = 196 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Please insert fields in the same order as in
     // frameworks/base/core/java/android/provider/Settings.java.
-    // Next tag = 196
+    // Next tag = 197
 }
 
 message SystemSettingsProto {
