@@ -83,6 +83,20 @@ public final class GnssMeasurement implements Parcelable {
      */
     public static final int MULTIPATH_INDICATOR_NOT_DETECTED = 2;
 
+    /**
+     * GNSS measurement tracking loop state
+     * @hide
+     */
+    @IntDef(flag = true, prefix = { "STATE_" }, value = {
+            STATE_CODE_LOCK, STATE_BIT_SYNC, STATE_SUBFRAME_SYNC,
+            STATE_TOW_DECODED, STATE_MSEC_AMBIGUOUS, STATE_SYMBOL_SYNC, STATE_GLO_STRING_SYNC,
+            STATE_GLO_TOD_DECODED, STATE_BDS_D2_BIT_SYNC, STATE_BDS_D2_SUBFRAME_SYNC,
+            STATE_GAL_E1BC_CODE_LOCK, STATE_GAL_E1C_2ND_CODE_LOCK, STATE_GAL_E1B_PAGE_SYNC,
+            STATE_SBAS_SYNC, STATE_TOW_KNOWN, STATE_GLO_TOD_KNOWN
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface State {}
+
     /** This GNSS measurement's tracking state is invalid or unknown. */
     public static final int STATE_UNKNOWN = 0;
     /** This GNSS measurement's tracking state has code lock. */
@@ -133,29 +147,68 @@ public final class GnssMeasurement implements Parcelable {
     private static final int STATE_ALL = 0x3fff;  // 2 bits + 4 bits + 4 bits + 4 bits = 14 bits
 
     /**
-     * The state of the 'Accumulated Delta Range' is invalid or unknown.
+     * GNSS measurement accumulated delta range state
+     * @hide
+     */
+    @IntDef(flag = true, prefix = { "ADR_STATE_" }, value = {
+            ADR_STATE_VALID, ADR_STATE_RESET, ADR_STATE_CYCLE_SLIP, ADR_STATE_HALF_CYCLE_RESOLVED,
+            ADR_STATE_HALF_CYCLE_REPORTED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AdrState {}
+
+    /**
+     * The state of the value {@link #getAccumulatedDeltaRangeMeters()} is invalid or unknown.
      */
     public static final int ADR_STATE_UNKNOWN = 0;
 
     /**
-     * The state of the 'Accumulated Delta Range' is valid.
+     * The state of the {@link #getAccumulatedDeltaRangeMeters()} is valid.
      */
     public static final int ADR_STATE_VALID = (1<<0);
 
     /**
-     * The state of the 'Accumulated Delta Range' has detected a reset.
+     * The state of the {@link #getAccumulatedDeltaRangeMeters()} has detected a reset.
      */
     public static final int ADR_STATE_RESET = (1<<1);
 
     /**
-     * The state of the 'Accumulated Delta Range' has a cycle slip detected.
+     * The state of the {@link #getAccumulatedDeltaRangeMeters()} has a cycle slip detected.
      */
     public static final int ADR_STATE_CYCLE_SLIP = (1<<2);
 
     /**
-     * All the 'Accumulated Delta Range' flags.
+     * Reports whether the value {@link #getAccumulatedDeltaRangeMeters()} has resolved the half
+     * cycle ambiguity.
+     *
+     * <p> When this bit is set, the {@link #getAccumulatedDeltaRangeMeters()} corresponds to the
+     * carrier phase measurement plus an accumulated integer number of carrier full cycles.
+     *
+     * <p> When this bit is unset, the {@link #getAccumulatedDeltaRangeMeters()} corresponds to the
+     * carrier phase measurement plus an accumulated integer number of carrier half cycles.
      */
-    private static final int ADR_ALL = ADR_STATE_VALID | ADR_STATE_RESET | ADR_STATE_CYCLE_SLIP;
+    public static final int ADR_STATE_HALF_CYCLE_RESOLVED = (1<<3);
+
+    /**
+     * Reports whether the flag {@link #ADR_STATE_HALF_CYCLE_RESOLVED} has been reported by the
+     * GNSS hardware.
+     *
+     * <p> When this bit is set, the value of {@link #getAccumulatedDeltaRangeUncertaintyMeters()}
+     * can be low (centimeter level) whether or not the half cycle ambiguity is resolved.
+     *
+     * <p> When this bit is unset, the value of {@link #getAccumulatedDeltaRangeUncertaintyMeters()}
+     * is larger, to cover the potential error due to half cycle ambiguity being unresolved.
+     */
+    public static final int ADR_STATE_HALF_CYCLE_REPORTED = (1<<4);
+
+    /**
+     * All the 'Accumulated Delta Range' flags.
+     * @hide
+     */
+    @TestApi
+    public static final int ADR_STATE_ALL =
+            ADR_STATE_VALID | ADR_STATE_RESET | ADR_STATE_CYCLE_SLIP |
+            ADR_STATE_HALF_CYCLE_RESOLVED | ADR_STATE_HALF_CYCLE_REPORTED;
 
     // End enumerations in sync with gps.h
 
@@ -278,6 +331,7 @@ public final class GnssMeasurement implements Parcelable {
      *
      * <p>This value helps interpret {@link #getReceivedSvTimeNanos()}.
      */
+    @State
     public int getState() {
         return mState;
     }
@@ -287,7 +341,7 @@ public final class GnssMeasurement implements Parcelable {
      * @hide
      */
     @TestApi
-    public void setState(int value) {
+    public void setState(@State int value) {
         mState = value;
     }
 
@@ -557,6 +611,7 @@ public final class GnssMeasurement implements Parcelable {
      * <p>It indicates whether {@link #getAccumulatedDeltaRangeMeters()} is reset or there is a
      * cycle slip (indicating 'loss of lock').
      */
+    @AdrState
     public int getAccumulatedDeltaRangeState() {
         return mAccumulatedDeltaRangeState;
     }
@@ -566,7 +621,7 @@ public final class GnssMeasurement implements Parcelable {
      * @hide
      */
     @TestApi
-    public void setAccumulatedDeltaRangeState(int value) {
+    public void setAccumulatedDeltaRangeState(@AdrState int value) {
         mAccumulatedDeltaRangeState = value;
     }
 
@@ -589,7 +644,15 @@ public final class GnssMeasurement implements Parcelable {
         if ((mAccumulatedDeltaRangeState & ADR_STATE_CYCLE_SLIP) == ADR_STATE_CYCLE_SLIP) {
             builder.append("CycleSlip|");
         }
-        int remainingStates = mAccumulatedDeltaRangeState & ~ADR_ALL;
+        if ((mAccumulatedDeltaRangeState & ADR_STATE_HALF_CYCLE_RESOLVED) ==
+                ADR_STATE_HALF_CYCLE_RESOLVED) {
+            builder.append("HalfCycleResolved|");
+        }
+        if ((mAccumulatedDeltaRangeState & ADR_STATE_HALF_CYCLE_REPORTED)
+                == ADR_STATE_HALF_CYCLE_REPORTED) {
+            builder.append("HalfCycleReported|");
+        }
+        int remainingStates = mAccumulatedDeltaRangeState & ~ADR_STATE_ALL;
         if (remainingStates > 0) {
             builder.append("Other(");
             builder.append(Integer.toBinaryString(remainingStates));
@@ -674,7 +737,7 @@ public final class GnssMeasurement implements Parcelable {
      * L5 = 1176.45 MHz, varying GLO channels, etc. If the field is not set, it is the primary
      * common use central frequency, e.g. L1 = 1575.45 MHz for GPS.
      *
-     * For an L1, L5 receiver tracking a satellite on L1 and L5 at the same time, two raw
+     * <p> For an L1, L5 receiver tracking a satellite on L1 and L5 at the same time, two raw
      * measurement objects will be reported for this same satellite, in one of the measurement
      * objects, all the values related to L1 will be filled, and in the other all of the values
      * related to L5 will be filled.
@@ -709,7 +772,10 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Returns {@code true} if {@link #getCarrierCycles()} is available, {@code false} otherwise.
+     * 
+     * @deprecated use {@link #getAccumulatedDeltaRangeState()} instead.
      */
+    @Deprecated
     public boolean hasCarrierCycles() {
         return isFlagSet(HAS_CARRIER_CYCLES);
     }
@@ -720,16 +786,24 @@ public final class GnssMeasurement implements Parcelable {
      * <p>The reference frequency is given by the value of {@link #getCarrierFrequencyHz()}.
      *
      * <p>The value is only available if {@link #hasCarrierCycles()} is {@code true}.
+     *
+     * @deprecated use {@link #getAccumulatedDeltaRangeMeters()} instead.
      */
+    @Deprecated
     public long getCarrierCycles() {
         return mCarrierCycles;
     }
 
     /**
      * Sets the number of full carrier cycles between the satellite and the receiver.
+     *
+     * @deprecated use {@link #setAccumulatedDeltaRangeMeters(double)}
+     * and {@link #setAccumulatedDeltaRangeState(int)} instead.
+     * 
      * @hide
      */
     @TestApi
+    @Deprecated
     public void setCarrierCycles(long value) {
         setFlag(HAS_CARRIER_CYCLES);
         mCarrierCycles = value;
@@ -737,9 +811,13 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Resets the number of full carrier cycles between the satellite and the receiver.
+     * 
+     * @deprecated use {@link #setAccumulatedDeltaRangeMeters(double)}
+     * and {@link #setAccumulatedDeltaRangeState(int)} instead.
      * @hide
      */
     @TestApi
+    @Deprecated
     public void resetCarrierCycles() {
         resetFlag(HAS_CARRIER_CYCLES);
         mCarrierCycles = Long.MIN_VALUE;
@@ -747,7 +825,10 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Returns {@code true} if {@link #getCarrierPhase()} is available, {@code false} otherwise.
+     * 
+     * @deprecated use {@link #getAccumulatedDeltaRangeState()} instead.
      */
+    @Deprecated
     public boolean hasCarrierPhase() {
         return isFlagSet(HAS_CARRIER_PHASE);
     }
@@ -764,16 +845,24 @@ public final class GnssMeasurement implements Parcelable {
      * <p>The error estimate for this value is {@link #getCarrierPhaseUncertainty()}.
      *
      * <p>The value is only available if {@link #hasCarrierPhase()} is {@code true}.
+     *
+     * @deprecated use {@link #getAccumulatedDeltaRangeMeters()} instead.
      */
+    @Deprecated
     public double getCarrierPhase() {
         return mCarrierPhase;
     }
 
     /**
      * Sets the RF phase detected by the receiver.
+     * 
+     * @deprecated use {@link #setAccumulatedDeltaRangeMeters(double)}
+     * and {@link #setAccumulatedDeltaRangeState(int)} instead.
+     * 
      * @hide
      */
     @TestApi
+    @Deprecated
     public void setCarrierPhase(double value) {
         setFlag(HAS_CARRIER_PHASE);
         mCarrierPhase = value;
@@ -781,9 +870,14 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Resets the RF phase detected by the receiver.
+     * 
+     * @deprecated use {@link #setAccumulatedDeltaRangeMeters(double)}
+     * and {@link #setAccumulatedDeltaRangeState(int)} instead.
+     * 
      * @hide
      */
     @TestApi
+    @Deprecated
     public void resetCarrierPhase() {
         resetFlag(HAS_CARRIER_PHASE);
         mCarrierPhase = Double.NaN;
@@ -792,7 +886,10 @@ public final class GnssMeasurement implements Parcelable {
     /**
      * Returns {@code true} if {@link #getCarrierPhaseUncertainty()} is available, {@code false}
      * otherwise.
+     * 
+     * @deprecated use {@link #getAccumulatedDeltaRangeState()} instead.
      */
+    @Deprecated
     public boolean hasCarrierPhaseUncertainty() {
         return isFlagSet(HAS_CARRIER_PHASE_UNCERTAINTY);
     }
@@ -803,16 +900,24 @@ public final class GnssMeasurement implements Parcelable {
      * <p>The uncertainty is represented as an absolute (single sided) value.
      *
      * <p>The value is only available if {@link #hasCarrierPhaseUncertainty()} is {@code true}.
+     *
+     * @deprecated use {@link #getAccumulatedDeltaRangeUncertaintyMeters()} instead.
      */
+    @Deprecated
     public double getCarrierPhaseUncertainty() {
         return mCarrierPhaseUncertainty;
     }
 
     /**
      * Sets the Carrier-phase's uncertainty (1-Sigma) in cycles.
+     * 
+     * @deprecated use {@link #setAccumulatedDeltaRangeUncertaintyMeters(double)}
+     * and {@link #setAccumulatedDeltaRangeState(int)} instead.
+     * 
      * @hide
      */
     @TestApi
+    @Deprecated
     public void setCarrierPhaseUncertainty(double value) {
         setFlag(HAS_CARRIER_PHASE_UNCERTAINTY);
         mCarrierPhaseUncertainty = value;
@@ -820,9 +925,14 @@ public final class GnssMeasurement implements Parcelable {
 
     /**
      * Resets the Carrier-phase's uncertainty (1-Sigma) in cycles.
+     * 
+     * @deprecated use {@link #setAccumulatedDeltaRangeUncertaintyMeters(double)}
+     * and {@link #setAccumulatedDeltaRangeState(int)} instead.
+     * 
      * @hide
      */
     @TestApi
+    @Deprecated
     public void resetCarrierPhaseUncertainty() {
         resetFlag(HAS_CARRIER_PHASE_UNCERTAINTY);
         mCarrierPhaseUncertainty = Double.NaN;
@@ -859,7 +969,7 @@ public final class GnssMeasurement implements Parcelable {
             case MULTIPATH_INDICATOR_NOT_DETECTED:
                 return "NotDetected";
             default:
-                return "<Invalid:" + mMultipathIndicator + ">";
+                return "<Invalid: " + mMultipathIndicator + ">";
         }
     }
 
@@ -916,11 +1026,12 @@ public final class GnssMeasurement implements Parcelable {
      * number. Hence in cases of strong jamming, in the band of this signal, this value will go more
      * negative.
      *
-     * <p>Note: Different hardware designs (e.g. antenna, pre-amplification, or other RF HW
+     * <p> Note: Different hardware designs (e.g. antenna, pre-amplification, or other RF HW
      * components) may also affect the typical output of of this value on any given hardware design
      * in an open sky test - the important aspect of this output is that changes in this value are
      * indicative of changes on input signal power in the frequency band for this measurement.
-     * <p>The value is only available if {@link #hasAutomaticGainControlLevelDb()} is {@code true}
+     *
+     * <p> The value is only available if {@link #hasAutomaticGainControlLevelDb()} is {@code true}
      */
     public double getAutomaticGainControlLevelDb() {
         return mAutomaticGainControlLevelInDb;

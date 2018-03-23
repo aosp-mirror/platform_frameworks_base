@@ -125,6 +125,9 @@ struct GnssDeathRecipient : virtual public hidl_death_recipient
     }
 };
 
+// Must match the value from GnssMeasurement.java
+static const uint32_t ADR_STATE_HALF_CYCLE_REPORTED = (1<<4);
+
 sp<GnssDeathRecipient> gnssHalDeathRecipient = nullptr;
 sp<IGnss_V1_0> gnssHal = nullptr;
 sp<IGnss_V1_1> gnssHal_V1_1 = nullptr;
@@ -807,7 +810,8 @@ void GnssMeasurementCallback::translateGnssMeasurement_V1_0(
     SET(PseudorangeRateUncertaintyMetersPerSecond,
         measurement->pseudorangeRateUncertaintyMps);
     SET(AccumulatedDeltaRangeState,
-        (static_cast<int32_t>(measurement->accumulatedDeltaRangeState)));
+        (static_cast<int32_t>(measurement->accumulatedDeltaRangeState) &
+        !ADR_STATE_HALF_CYCLE_REPORTED)); // Half Cycle state not reported from Hardware in V1_0
     SET(AccumulatedDeltaRangeMeters, measurement->accumulatedDeltaRangeM);
     SET(AccumulatedDeltaRangeUncertaintyMeters,
         measurement->accumulatedDeltaRangeUncertaintyM);
@@ -888,9 +892,10 @@ jobjectArray GnssMeasurementCallback::translateGnssMeasurements(JNIEnv* env,
         if (measurements_v1_1 != NULL) {
             translateGnssMeasurement_V1_0(env, &(measurements_v1_1[i].v1_0), object);
 
-            // Set the V1_1 flag
+            // Set the V1_1 flag, and mark that new field has valid information for Java Layer
             SET(AccumulatedDeltaRangeState,
-                    static_cast<int32_t>(measurements_v1_1[i].accumulatedDeltaRangeState));
+                    (static_cast<int32_t>(measurements_v1_1[i].accumulatedDeltaRangeState) |
+                    ADR_STATE_HALF_CYCLE_REPORTED));
         } else {
             translateGnssMeasurement_V1_0(env, &(measurements_v1_0[i]), object);
         }
