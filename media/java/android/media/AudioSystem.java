@@ -747,7 +747,8 @@ public class AudioSystem
     public static final int FOR_SYSTEM = 4;
     public static final int FOR_HDMI_SYSTEM_AUDIO = 5;
     public static final int FOR_ENCODED_SURROUND = 6;
-    private static final int NUM_FORCE_USE = 7;
+    public static final int FOR_VIBRATE_RINGING = 7;
+    private static final int NUM_FORCE_USE = 8;
 
     public static String forceUseUsageToString(int usage) {
         switch (usage) {
