@@ -5995,57 +5995,20 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        boolean useTombstonedForJavaTraces = false;
-        File tracesFile;
+        final File tracesDir = new File("/data/anr");
+        // Each set of ANR traces is written to a separate file and dumpstate will process
+        // all such files and add them to a captured bug report if they're recent enough.
+        maybePruneOldTraces(tracesDir);
 
-        final String tracesDirProp = SystemProperties.get("dalvik.vm.stack-trace-dir", "");
-        if (tracesDirProp.isEmpty()) {
-            // When dalvik.vm.stack-trace-dir is not set, we are using the "old" trace
-            // dumping scheme. All traces are written to a global trace file (usually
-            // "/data/anr/traces.txt") so the code below must take care to unlink and recreate
-            // the file if requested.
-            //
-            // This mode of operation will be removed in the near future.
-
-
-            String globalTracesPath = SystemProperties.get("dalvik.vm.stack-trace-file", null);
-            if (globalTracesPath.isEmpty()) {
-                Slog.w(TAG, "dumpStackTraces: no trace path configured");
-                return null;
-            }
-
-            tracesFile = new File(globalTracesPath);
-            try {
-                if (clearTraces && tracesFile.exists()) {
-                    tracesFile.delete();
-                }
-
-                tracesFile.createNewFile();
-                FileUtils.setPermissions(globalTracesPath, 0666, -1, -1); // -rw-rw-rw-
-            } catch (IOException e) {
-                Slog.w(TAG, "Unable to prepare ANR traces file: " + tracesFile, e);
-                return null;
-            }
-        } else {
-            File tracesDir = new File(tracesDirProp);
-            // When dalvik.vm.stack-trace-dir is set, we use the "new" trace dumping scheme.
-            // Each set of ANR traces is written to a separate file and dumpstate will process
-            // all such files and add them to a captured bug report if they're recent enough.
-            maybePruneOldTraces(tracesDir);
-
-            // NOTE: We should consider creating the file in native code atomically once we've
-            // gotten rid of the old scheme of dumping and lot of the code that deals with paths
-            // can be removed.
-            tracesFile = createAnrDumpFile(tracesDir);
-            if (tracesFile == null) {
-                return null;
-            }
-
-            useTombstonedForJavaTraces = true;
+        // NOTE: We should consider creating the file in native code atomically once we've
+        // gotten rid of the old scheme of dumping and lot of the code that deals with paths
+        // can be removed.
+        File tracesFile = createAnrDumpFile(tracesDir);
+        if (tracesFile == null) {
+            return null;
         }
 
-        dumpStackTraces(tracesFile.getAbsolutePath(), firstPids, nativePids, extraPids,
-                useTombstonedForJavaTraces);
+        dumpStackTraces(tracesFile.getAbsolutePath(), firstPids, nativePids, extraPids);
         return tracesFile;
     }
 
@@ -6098,68 +6061,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * Legacy code, do not use. Existing users will be deleted.
-     *
-     * @deprecated
-     */
-    @Deprecated
-    public static class DumpStackFileObserver extends FileObserver {
-        // Keep in sync with frameworks/native/cmds/dumpstate/utils.cpp
-        private static final int TRACE_DUMP_TIMEOUT_MS = 10000; // 10 seconds
-
-        private final String mTracesPath;
-        private boolean mClosed;
-
-        public DumpStackFileObserver(String tracesPath) {
-            super(tracesPath, FileObserver.CLOSE_WRITE);
-            mTracesPath = tracesPath;
-        }
-
-        @Override
-        public synchronized void onEvent(int event, String path) {
-            mClosed = true;
-            notify();
-        }
-
-        public long dumpWithTimeout(int pid, long timeout) {
-            sendSignal(pid, SIGNAL_QUIT);
-            final long start = SystemClock.elapsedRealtime();
-
-            final long waitTime = Math.min(timeout, TRACE_DUMP_TIMEOUT_MS);
-            synchronized (this) {
-                try {
-                    wait(waitTime); // Wait for traces file to be closed.
-                } catch (InterruptedException e) {
-                    Slog.wtf(TAG, e);
-                }
-            }
-
-            // This avoids a corner case of passing a negative time to the native
-            // trace in case we've already hit the overall timeout.
-            final long timeWaited = SystemClock.elapsedRealtime() - start;
-            if (timeWaited >= timeout) {
-                return timeWaited;
-            }
-
-            if (!mClosed) {
-                Slog.w(TAG, "Didn't see close of " + mTracesPath + " for pid " + pid +
-                       ". Attempting native stack collection.");
-
-                final long nativeDumpTimeoutMs = Math.min(
-                        NATIVE_DUMP_TIMEOUT_MS, timeout - timeWaited);
-
-                Debug.dumpNativeBacktraceToFileTimeout(pid, mTracesPath,
-                        (int) (nativeDumpTimeoutMs / 1000));
-            }
-
-            final long end = SystemClock.elapsedRealtime();
-            mClosed = false;
-
-            return (end - start);
-        }
-    }
-
-    /**
      * Dump java traces for process {@code pid} to the specified file. If java trace dumping
      * fails, a native backtrace is attempted. Note that the timeout {@code timeoutMs} only applies
      * to the java section of the trace, a further {@code NATIVE_DUMP_TIMEOUT_MS} might be spent
@@ -6177,105 +6078,77 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private static void dumpStackTraces(String tracesFile, ArrayList<Integer> firstPids,
-            ArrayList<Integer> nativePids, ArrayList<Integer> extraPids,
-            boolean useTombstonedForJavaTraces) {
+            ArrayList<Integer> nativePids, ArrayList<Integer> extraPids) {
 
         // We don't need any sort of inotify based monitoring when we're dumping traces via
         // tombstoned. Data is piped to an "intercept" FD installed in tombstoned so we're in full
         // control of all writes to the file in question.
-        final DumpStackFileObserver observer;
-        if (useTombstonedForJavaTraces) {
-            observer = null;
-        } else {
-            // Use a FileObserver to detect when traces finish writing.
-            // The order of traces is considered important to maintain for legibility.
-            observer = new DumpStackFileObserver(tracesFile);
-        }
 
         // We must complete all stack dumps within 20 seconds.
         long remainingTime = 20 * 1000;
-        try {
-            if (observer != null) {
-                observer.startWatching();
+
+        // First collect all of the stacks of the most important pids.
+        if (firstPids != null) {
+            int num = firstPids.size();
+            for (int i = 0; i < num; i++) {
+                if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for pid " + firstPids.get(i));
+                final long timeTaken = dumpJavaTracesTombstoned(firstPids.get(i), tracesFile,
+                                                                remainingTime);
+
+                remainingTime -= timeTaken;
+                if (remainingTime <= 0) {
+                    Slog.e(TAG, "Aborting stack trace dump (current firstPid=" + firstPids.get(i) +
+                           "); deadline exceeded.");
+                    return;
+                }
+
+                if (DEBUG_ANR) {
+                    Slog.d(TAG, "Done with pid " + firstPids.get(i) + " in " + timeTaken + "ms");
+                }
             }
+        }
 
-            // First collect all of the stacks of the most important pids.
-            if (firstPids != null) {
-                int num = firstPids.size();
-                for (int i = 0; i < num; i++) {
-                    if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for pid "
-                            + firstPids.get(i));
-                    final long timeTaken;
-                    if (useTombstonedForJavaTraces) {
-                        timeTaken = dumpJavaTracesTombstoned(firstPids.get(i), tracesFile, remainingTime);
-                    } else {
-                        timeTaken = observer.dumpWithTimeout(firstPids.get(i), remainingTime);
-                    }
+        // Next collect the stacks of the native pids
+        if (nativePids != null) {
+            for (int pid : nativePids) {
+                if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for native pid " + pid);
+                final long nativeDumpTimeoutMs = Math.min(NATIVE_DUMP_TIMEOUT_MS, remainingTime);
 
-                    remainingTime -= timeTaken;
-                    if (remainingTime <= 0) {
-                        Slog.e(TAG, "Aborting stack trace dump (current firstPid=" + firstPids.get(i) +
+                final long start = SystemClock.elapsedRealtime();
+                Debug.dumpNativeBacktraceToFileTimeout(
+                        pid, tracesFile, (int) (nativeDumpTimeoutMs / 1000));
+                final long timeTaken = SystemClock.elapsedRealtime() - start;
+
+                remainingTime -= timeTaken;
+                if (remainingTime <= 0) {
+                    Slog.e(TAG, "Aborting stack trace dump (current native pid=" + pid +
+                        "); deadline exceeded.");
+                    return;
+                }
+
+                if (DEBUG_ANR) {
+                    Slog.d(TAG, "Done with native pid " + pid + " in " + timeTaken + "ms");
+                }
+            }
+        }
+
+        // Lastly, dump stacks for all extra PIDs from the CPU tracker.
+        if (extraPids != null) {
+            for (int pid : extraPids) {
+                if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for extra pid " + pid);
+
+                final long timeTaken = dumpJavaTracesTombstoned(pid, tracesFile, remainingTime);
+
+                remainingTime -= timeTaken;
+                if (remainingTime <= 0) {
+                    Slog.e(TAG, "Aborting stack trace dump (current extra pid=" + pid +
                             "); deadline exceeded.");
-                        return;
-                    }
-
-                    if (DEBUG_ANR) {
-                        Slog.d(TAG, "Done with pid " + firstPids.get(i) + " in " + timeTaken + "ms");
-                    }
+                    return;
                 }
-            }
 
-            // Next collect the stacks of the native pids
-            if (nativePids != null) {
-                for (int pid : nativePids) {
-                    if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for native pid " + pid);
-                    final long nativeDumpTimeoutMs = Math.min(NATIVE_DUMP_TIMEOUT_MS, remainingTime);
-
-                    final long start = SystemClock.elapsedRealtime();
-                    Debug.dumpNativeBacktraceToFileTimeout(
-                            pid, tracesFile, (int) (nativeDumpTimeoutMs / 1000));
-                    final long timeTaken = SystemClock.elapsedRealtime() - start;
-
-                    remainingTime -= timeTaken;
-                    if (remainingTime <= 0) {
-                        Slog.e(TAG, "Aborting stack trace dump (current native pid=" + pid +
-                            "); deadline exceeded.");
-                        return;
-                    }
-
-                    if (DEBUG_ANR) {
-                        Slog.d(TAG, "Done with native pid " + pid + " in " + timeTaken + "ms");
-                    }
+                if (DEBUG_ANR) {
+                    Slog.d(TAG, "Done with extra pid " + pid + " in " + timeTaken + "ms");
                 }
-            }
-
-            // Lastly, dump stacks for all extra PIDs from the CPU tracker.
-            if (extraPids != null) {
-                for (int pid : extraPids) {
-                    if (DEBUG_ANR) Slog.d(TAG, "Collecting stacks for extra pid " + pid);
-
-                    final long timeTaken;
-                    if (useTombstonedForJavaTraces) {
-                        timeTaken = dumpJavaTracesTombstoned(pid, tracesFile, remainingTime);
-                    } else {
-                        timeTaken = observer.dumpWithTimeout(pid, remainingTime);
-                    }
-
-                    remainingTime -= timeTaken;
-                    if (remainingTime <= 0) {
-                        Slog.e(TAG, "Aborting stack trace dump (current extra pid=" + pid +
-                                "); deadline exceeded.");
-                        return;
-                    }
-
-                    if (DEBUG_ANR) {
-                        Slog.d(TAG, "Done with extra pid " + pid + " in " + timeTaken + "ms");
-                    }
-                }
-            }
-        } finally {
-            if (observer != null) {
-                observer.stopWatching();
             }
         }
     }
@@ -6323,7 +6196,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (app != null && app.pid > 0) {
                 ArrayList<Integer> firstPids = new ArrayList<Integer>();
                 firstPids.add(app.pid);
-                dumpStackTraces(tracesPath, firstPids, null, null, true /* useTombstoned */);
+                dumpStackTraces(tracesPath, firstPids, null, null);
             }
 
             File lastTracesFile = null;
