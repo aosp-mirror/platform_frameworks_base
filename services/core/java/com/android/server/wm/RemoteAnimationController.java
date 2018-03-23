@@ -99,6 +99,10 @@ class RemoteAnimationController {
         mFinishedCallback = new FinishedCallback(this);
 
         final RemoteAnimationTarget[] animations = createAnimations();
+        if (animations.length == 0) {
+            onAnimationFinished();
+            return;
+        }
         mService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
             try {
                 mRemoteAnimationAdapter.getRunner().onAnimationStart(animations,
@@ -132,6 +136,8 @@ class RemoteAnimationController {
                     mPendingAnimations.get(i).createRemoteAppAnimation();
             if (target != null) {
                 targets.add(target);
+            } else {
+                mPendingAnimations.remove(i);
             }
         }
         return targets.toArray(new RemoteAnimationTarget[targets.size()]);
@@ -225,10 +231,8 @@ class RemoteAnimationController {
         RemoteAnimationTarget createRemoteAppAnimation() {
             final Task task = mAppWindowToken.getTask();
             final WindowState mainWindow = mAppWindowToken.findMainWindow();
-            if (task == null) {
-                return null;
-            }
-            if (mainWindow == null) {
+            if (task == null || mainWindow == null || mCapturedFinishCallback == null
+                    || mCapturedLeash == null) {
                 return null;
             }
             mTarget = new RemoteAnimationTarget(task.mTaskId, getMode(),
