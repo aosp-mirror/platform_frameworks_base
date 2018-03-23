@@ -1134,14 +1134,38 @@ message SoftApConnectedClientsEvent {
     NUM_CLIENTS_CHANGED = 2;
   }
 
+  // Soft AP channel bandwidth types
+  enum ChannelBandwidth {
+
+    BANDWIDTH_INVALID = 0;
+
+    BANDWIDTH_20_NOHT = 1;
+
+    BANDWIDTH_20 = 2;
+
+    BANDWIDTH_40 = 3;
+
+    BANDWIDTH_80 = 4;
+
+    BANDWIDTH_80P80 = 5;
+
+    BANDWIDTH_160 = 6;
+  }
+
   // Type of event being recorded
   optional SoftApEventType event_type = 1;
 
-  // Absolute time when event happened
+  // Time passed since last boot in milliseconds
   optional int64 time_stamp_millis = 2;
 
   // Number of connected clients if event_type is NUM_CLIENTS_CHANGED, otherwise zero.
   optional int32 num_connected_clients = 3;
+
+  // Channel frequency used for Soft AP
+  optional int32 channel_frequency = 4;
+
+  // Channel bandwidth used for Soft AP
+  optional ChannelBandwidth channel_bandwidth = 5;
 }
 
 // Wps connection metrics
