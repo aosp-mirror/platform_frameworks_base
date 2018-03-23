@@ -16,6 +16,7 @@
 
 package android.privacy;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -72,27 +73,27 @@ public class LongitudinalReportingEncoderTest {
         final LongitudinalReportingEncoder encoder =
                 LongitudinalReportingEncoder.createInsecureEncoderForTest(
                         config);
+        assertEquals(1, encoder.encodeBoolean(true)[0]);
+        assertEquals(1, encoder.encodeBoolean(true)[0]);
+        assertEquals(1, encoder.encodeBoolean(true)[0]);
+        assertEquals(0, encoder.encodeBoolean(true)[0]);
+        assertEquals(1, encoder.encodeBoolean(true)[0]);
+        assertEquals(1, encoder.encodeBoolean(true)[0]);
+        assertEquals(1, encoder.encodeBoolean(true)[0]);
+        assertEquals(1, encoder.encodeBoolean(true)[0]);
         assertEquals(0, encoder.encodeBoolean(true)[0]);
         assertEquals(0, encoder.encodeBoolean(true)[0]);
-        assertEquals(1, encoder.encodeBoolean(true)[0]);
-        assertEquals(0, encoder.encodeBoolean(true)[0]);
-        assertEquals(1, encoder.encodeBoolean(true)[0]);
-        assertEquals(1, encoder.encodeBoolean(true)[0]);
-        assertEquals(1, encoder.encodeBoolean(true)[0]);
-        assertEquals(1, encoder.encodeBoolean(true)[0]);
-        assertEquals(1, encoder.encodeBoolean(true)[0]);
-        assertEquals(1, encoder.encodeBoolean(true)[0]);
 
         assertEquals(0, encoder.encodeBoolean(false)[0]);
         assertEquals(1, encoder.encodeBoolean(false)[0]);
         assertEquals(1, encoder.encodeBoolean(false)[0]);
-        assertEquals(1, encoder.encodeBoolean(false)[0]);
         assertEquals(0, encoder.encodeBoolean(false)[0]);
         assertEquals(0, encoder.encodeBoolean(false)[0]);
-        assertEquals(1, encoder.encodeBoolean(false)[0]);
         assertEquals(0, encoder.encodeBoolean(false)[0]);
-        assertEquals(1, encoder.encodeBoolean(false)[0]);
-        assertEquals(1, encoder.encodeBoolean(false)[0]);
+        assertEquals(0, encoder.encodeBoolean(false)[0]);
+        assertEquals(0, encoder.encodeBoolean(false)[0]);
+        assertEquals(0, encoder.encodeBoolean(false)[0]);
+        assertEquals(0, encoder.encodeBoolean(false)[0]);
 
         // Test if IRR returns original result when f = 0
         final LongitudinalReportingConfig config2 = new LongitudinalReportingConfig(
@@ -125,6 +126,31 @@ public class LongitudinalReportingEncoderTest {
         for (int i = 0; i < 10; i++) {
             assertEquals(0, encoder3.encodeBoolean(true)[0]);
         }
+    }
+
+    @Test
+    public void testLongitudinalReportingInsecureEncoder_setSeedCorrectly() throws Exception {
+        final int n = 10000;
+        final double f = 0.35;
+        final double expectedTrueSum = n * f;
+        final double valueRange = 5 * Math.sqrt(n * f * (1 - f));
+        int trueSum = 0;
+        for (int i = 0; i < n; i++) {
+            final LongitudinalReportingConfig config = new LongitudinalReportingConfig(
+                    "encoder" + i,  // encoderId
+                    f,  // probabilityF
+                    0,  // probabilityP
+                    1);  // probabilityQ
+            final LongitudinalReportingEncoder encoder
+                    = LongitudinalReportingEncoder.createInsecureEncoderForTest(config);
+            boolean encodedFalse = encoder.encodeBoolean(false)[0] > 0;
+            if (encodedFalse) {
+                trueSum += 1;
+            }
+        }
+        // Total number of true(s) should be around the mean (10000 * 0.35)
+        assertThat((double) trueSum).isLessThan(expectedTrueSum + valueRange);
+        assertThat((double) trueSum).isAtLeast(expectedTrueSum - valueRange);
     }
 
     @Test
@@ -290,8 +316,8 @@ public class LongitudinalReportingEncoderTest {
             }
         }
         // Total number of true(s) should be around the mean (1000 * 0.8)
-        assertTrue(trueSum1 < expectedTrueSum1 + valueRange1);
-        assertTrue(trueSum1 > expectedTrueSum1 - valueRange1);
+        assertThat((double) trueSum1).isLessThan(expectedTrueSum1 + valueRange1);
+        assertThat((double) trueSum1).isAtLeast(expectedTrueSum1 - valueRange1);
 
         // Confirm if PRR randomizer is working correctly
         final int n2 = 1000;
@@ -314,8 +340,8 @@ public class LongitudinalReportingEncoderTest {
             }
         }
         // Total number of true(s) should be around the mean (1000 * 0.2)
-        assertTrue(trueSum2 < expectedTrueSum2 + valueRange2);
-        assertTrue(trueSum2 > expectedTrueSum2 - valueRange2);
+        assertThat((double) trueSum2).isLessThan(expectedTrueSum2 + valueRange2);
+        assertThat((double) trueSum2).isAtLeast(expectedTrueSum2 - valueRange2);
     }
 
     @Test
