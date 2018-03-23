@@ -410,8 +410,7 @@ public class RecoveryController {
      * Specifies a set of secret types used for end-to-end keystore encryption. Knowing all of them
      * is necessary to recover data.
      *
-     * @param secretTypes {@link KeyChainProtectionParams#TYPE_LOCKSCREEN} or {@link
-     *     KeyChainProtectionParams#TYPE_CUSTOM_PASSWORD}
+     * @param secretTypes {@link KeyChainProtectionParams#TYPE_LOCKSCREEN}
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      */
@@ -442,51 +441,6 @@ public class RecoveryController {
             throws InternalRecoveryServiceException {
         try {
             return mBinder.getRecoverySecretTypes();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } catch (ServiceSpecificException e) {
-            throw wrapUnexpectedServiceSpecificException(e);
-        }
-    }
-
-    /**
-     * Returns a list of recovery secret types, necessary to create a pending recovery snapshot.
-     * When user enters a secret of a pending type {@link #recoverySecretAvailable} should be
-     * called.
-     *
-     * @return list of recovery secret types
-     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
-     *     service.
-     */
-    @NonNull
-    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public @KeyChainProtectionParams.UserSecretType int[] getPendingRecoverySecretTypes()
-            throws InternalRecoveryServiceException {
-        try {
-            return mBinder.getPendingRecoverySecretTypes();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } catch (ServiceSpecificException e) {
-            throw wrapUnexpectedServiceSpecificException(e);
-        }
-    }
-
-    /**
-     * Method notifies KeyStore that a user-generated secret is available. This method generates a
-     * symmetric session key which a trusted remote device can use to return a recovery key. Caller
-     * should use {@link KeyChainProtectionParams#clearSecret} to override the secret value in
-     * memory.
-     *
-     * @param recoverySecret user generated secret together with parameters necessary to regenerate
-     *     it on a new device.
-     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
-     *     service.
-     */
-    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public void recoverySecretAvailable(@NonNull KeyChainProtectionParams recoverySecret)
-            throws InternalRecoveryServiceException {
-        try {
-            mBinder.recoverySecretAvailable(recoverySecret);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {

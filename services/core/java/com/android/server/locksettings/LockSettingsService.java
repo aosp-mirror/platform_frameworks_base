@@ -2033,13 +2033,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     public int[] getPendingRecoverySecretTypes() throws RemoteException {
         throw new SecurityException("Not implemented");
     }
-
-    @Override
-    public void recoverySecretAvailable(@NonNull KeyChainProtectionParams recoverySecret)
-            throws RemoteException {
-        mRecoverableKeyStoreManager.recoverySecretAvailable(recoverySecret);
-    }
-
+    
     @Override
     public byte[] startRecoverySession(@NonNull String sessionId,
             @NonNull byte[] verifierPublicKey, @NonNull byte[] vaultParams,
