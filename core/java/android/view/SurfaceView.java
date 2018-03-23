@@ -787,18 +787,26 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
             Surface viewRootSurface, long nextViewRootFrameNumber) {
     }
 
-    private void setParentSpaceRectangle(Rect position, long frameNumber) {
-        ViewRootImpl viewRoot = getViewRootImpl();
-
+    private void applySurfaceTransforms(SurfaceControl surface, Rect position, long frameNumber) {
         if (frameNumber > 0) {
-            mRtTransaction.deferTransactionUntilSurface(mSurfaceControl, viewRoot.mSurface,
+            final ViewRootImpl viewRoot = getViewRootImpl();
+
+            mRtTransaction.deferTransactionUntilSurface(surface, viewRoot.mSurface,
                     frameNumber);
         }
-        mRtTransaction.setPosition(mSurfaceControl,position.left, position.top);
-        mRtTransaction.setMatrix(mSurfaceControl,
+
+        mRtTransaction.setPosition(surface, position.left, position.top);
+        mRtTransaction.setMatrix(surface,
                 position.width() / (float) mSurfaceWidth,
                 0.0f, 0.0f,
                 position.height() / (float) mSurfaceHeight);
+    }
+
+    private void setParentSpaceRectangle(Rect position, long frameNumber) {
+        final ViewRootImpl viewRoot = getViewRootImpl();
+
+        applySurfaceTransforms(mSurfaceControl, position, frameNumber);
+        applySurfaceTransforms(mSurfaceControl.mBackgroundControl, position, frameNumber);
 
         applyChildSurfaceTransaction_renderWorker(mRtTransaction, viewRoot.mSurface,
                 frameNumber);
@@ -1100,7 +1108,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     };
 
     class SurfaceControlWithBackground extends SurfaceControl {
-        private SurfaceControl mBackgroundControl;
+        SurfaceControl mBackgroundControl;
         private boolean mOpaque = true;
         public boolean mVisible = false;
 
