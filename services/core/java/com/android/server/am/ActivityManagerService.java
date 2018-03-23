@@ -26704,4 +26704,17 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
     }
+
+    /** @see android.app.ActivityManager#alwaysShowUnsupportedCompileSdkWarning */
+    @Override
+    public void alwaysShowUnsupportedCompileSdkWarning(ComponentName activity) {
+        synchronized (this) {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                mAppWarnings.alwaysShowUnsupportedCompileSdkWarning(activity);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+    }
 }

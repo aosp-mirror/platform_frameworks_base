@@ -3745,6 +3745,24 @@ public class ActivityManager {
     }
 
     /**
+     * Unsupported compiled sdk warning should always be shown for the intput activity
+     * even in cases where the system would normally not show the warning. E.g. when running in a
+     * test harness.
+     *
+     * @param activity The component name of the activity to always show the warning for.
+     *
+     * @hide
+     */
+    @TestApi
+    public void alwaysShowUnsupportedCompileSdkWarning(ComponentName activity) {
+        try {
+            getService().alwaysShowUnsupportedCompileSdkWarning(activity);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns the launch count of each installed package.
      *
      * @hide
