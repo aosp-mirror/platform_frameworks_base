@@ -62,6 +62,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
@@ -730,7 +731,29 @@ public class LockTaskController {
             if (isKeyguardAllowed(userId)) {
                 mWindowManager.reenableKeyguard(mToken);
             } else {
-                mWindowManager.disableKeyguard(mToken, LOCK_TASK_TAG);
+                // If keyguard is not secure and it is locked, dismiss the keyguard before
+                // disabling it, which avoids the platform to think the keyguard is still on.
+                if (mWindowManager.isKeyguardLocked() && !mWindowManager.isKeyguardSecure()) {
+                    mWindowManager.dismissKeyguard(new IKeyguardDismissCallback.Stub() {
+                        @Override
+                        public void onDismissError() throws RemoteException {
+                            Slog.i(TAG, "setKeyguardState: failed to dismiss keyguard");
+                        }
+
+                        @Override
+                        public void onDismissSucceeded() throws RemoteException {
+                            mHandler.post(
+                                    () -> mWindowManager.disableKeyguard(mToken, LOCK_TASK_TAG));
+                        }
+
+                        @Override
+                        public void onDismissCancelled() throws RemoteException {
+                            Slog.i(TAG, "setKeyguardState: dismiss cancelled");
+                        }
+                    }, null);
+                } else {
+                    mWindowManager.disableKeyguard(mToken, LOCK_TASK_TAG);
+                }
             }
 
         } else { // lockTaskModeState == LOCK_TASK_MODE_PINNED
