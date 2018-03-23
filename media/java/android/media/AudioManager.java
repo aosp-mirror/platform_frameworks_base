@@ -1352,6 +1352,7 @@ public class AudioManager {
     //====================================================================
     // Offload query
     /**
+     * @hide
      * Returns whether offloaded playback of an audio format is supported on the device.
      * Offloaded playback is where the decoding of an audio stream is not competing with other
      * software resources. In general, it is supported by dedicated hardware, such as audio DSPs.

@@ -896,6 +896,7 @@ public class AudioTrack extends PlayerBase
         }
 
         /**
+         * @hide
          * Sets whether this track will play through the offloaded audio path.
          * When set to true, at build time, the audio format will be checked against
          * {@link AudioManager#isOffloadedPlaybackSupported(AudioFormat)} to verify the audio format
@@ -2979,6 +2980,7 @@ public class AudioTrack extends PlayerBase
     }
 
     /**
+     * @hide
      * Abstract class to receive event notification about the stream playback.
      * See {@link AudioTrack#setStreamEventCallback(Executor, StreamEventCallback)} to register
      * the callback on the given {@link AudioTrack} instance.
@@ -3012,6 +3014,7 @@ public class AudioTrack extends PlayerBase
     private final Object mStreamEventCbLock = new Object();
 
     /**
+     * @hide
      * Sets the callback for the notification of stream events.
      * @param executor {@link Executor} to handle the callbacks
      * @param eventCallback the callback to receive the stream event notifications
@@ -3031,6 +3034,7 @@ public class AudioTrack extends PlayerBase
     }
 
     /**
+     * @hide
      * Unregisters the callback for notification of stream events, previously set
      * by {@link #setStreamEventCallback(Executor, StreamEventCallback)}.
      */

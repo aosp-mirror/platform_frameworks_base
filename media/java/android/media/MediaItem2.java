@@ -28,6 +28,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
+ * @hide
  * A class with information on a single media item with the metadata information.
  * Media item are application dependent so we cannot guarantee that they contain the right values.
  * <p>
