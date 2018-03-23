@@ -1490,6 +1490,10 @@ public class Canvas extends BaseCanvas {
      * across the top of the bitmap from left to right. A more general version of this method is
      * drawVertices().
      *
+     * Prior to API level {@value Build.VERSION_CODES#P} vertOffset and colorOffset were ignored,
+     * effectively treating them as zeros. In API level {@value Build.VERSION_CODES#P} and above
+     * these parameters will be respected.
+     *
      * @param bitmap The bitmap to draw using the mesh
      * @param meshWidth The number of columns in the mesh. Nothing is drawn if this is 0
      * @param meshHeight The number of rows in the mesh. Nothing is drawn if this is 0
