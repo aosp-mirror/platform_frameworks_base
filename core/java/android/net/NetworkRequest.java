@@ -24,6 +24,7 @@ import android.text.TextUtils;
 import android.util.proto.ProtoOutputStream;
 
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Defines a request for a network, made through {@link NetworkRequest.Builder} and used
@@ -201,6 +202,19 @@ public class NetworkRequest implements Parcelable {
         public Builder setCapabilities(NetworkCapabilities nc) {
             mNetworkCapabilities.clearAll();
             mNetworkCapabilities.combineCapabilities(nc);
+            return this;
+        }
+
+        /**
+         * Set the watched UIDs for this request. This will be reset and wiped out unless
+         * the calling app holds the CHANGE_NETWORK_STATE permission.
+         *
+         * @param uids The watched UIDs as a set of UidRanges, or null for everything.
+         * @return The builder to facilitate chaining.
+         * @hide
+         */
+        public Builder setUids(Set<UidRange> uids) {
+            mNetworkCapabilities.setUids(uids);
             return this;
         }
 
