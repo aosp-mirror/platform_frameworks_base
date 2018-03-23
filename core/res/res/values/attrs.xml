@@ -5968,6 +5968,9 @@
              in the encoded data. Setting this to infinite (-1) will result in the
              animation repeating as long as it is displayed (once start() is called). -->
         <attr name="repeatCount"/>
+        <!-- When true, automatically start animating. The default is false, meaning
+             that the animation will not start until start() is called. -->
+        <attr name="autoStart" />
     </declare-styleable>
 
     <!-- Drawable used to draw bitmaps. -->
