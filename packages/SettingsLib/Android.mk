@@ -13,7 +13,6 @@ LOCAL_SHARED_ANDROID_LIBRARIES := \
     android-support-v7-recyclerview \
     android-support-v7-preference \
     android-support-v7-appcompat \
-    android-support-v14-preference \
     android-arch-lifecycle-runtime
 
 LOCAL_SHARED_JAVA_LIBRARIES := \
