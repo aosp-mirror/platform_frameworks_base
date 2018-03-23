@@ -13649,7 +13649,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Return the width of the your view.
+     * Return the width of your view.
      *
      * @return The width of your view, in pixels.
      */
