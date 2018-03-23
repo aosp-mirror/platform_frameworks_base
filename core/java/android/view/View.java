@@ -8536,22 +8536,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             structure.setHint(info.getHintText());
         }
-        if ((info.getText() != null || info.getError() != null)) {
-            structure.setText(info.getText(), info.getTextSelectionStart(),
-                    info.getTextSelectionEnd());
-            if (forAutofill) {
-                if (info.isEditable()) {
-                    structure.setDataIsSensitive(true);
+        CharSequence text = info.getText();
+        boolean hasText = text != null || info.getError() != null;
+        if (hasText) {
+            structure.setText(text, info.getTextSelectionStart(), info.getTextSelectionEnd());
+        }
+        if (forAutofill) {
+            if (info.isEditable()) {
+                structure.setDataIsSensitive(true);
+                if (hasText) {
                     structure.setAutofillType(AUTOFILL_TYPE_TEXT);
-                    final AutofillValue autofillValue = AutofillValue.forText(structure.getText());
-                    structure.setAutofillValue(autofillValue);
-                    if (info.isPassword()) {
-                        structure.setInputType(InputType.TYPE_CLASS_TEXT
-                                | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                    }
-                } else {
-                    structure.setDataIsSensitive(false);
+                    structure.setAutofillValue(AutofillValue.forText(text));
                 }
+                int inputType = info.getInputType();
+                if (inputType == 0 && info.isPassword()) {
+                    inputType = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD;
+                }
+                structure.setInputType(inputType);
+            } else {
+                structure.setDataIsSensitive(false);
             }
         }
         final int NCHILDREN = info.getChildCount();
