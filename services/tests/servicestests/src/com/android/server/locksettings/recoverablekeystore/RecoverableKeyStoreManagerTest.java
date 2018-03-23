@@ -300,6 +300,23 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
+    public void initRecoveryService_regeneratesCounterId() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        long certSerial = 1000L;
+
+        Long counterId0 = mRecoverableKeyStoreDb.getCounterId(userId, uid);
+        mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
+                TestData.getCertXmlWithSerial(certSerial));
+        Long counterId1 = mRecoverableKeyStoreDb.getCounterId(userId, uid);
+        mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
+                TestData.getCertXmlWithSerial(certSerial + 1));
+        Long counterId2 = mRecoverableKeyStoreDb.getCounterId(userId, uid);
+
+        assertThat(!counterId1.equals(counterId0) || !counterId2.equals(counterId1)).isTrue();
+    }
+
+    @Test
     public void initRecoveryService_throwsIfInvalidCert() throws Exception {
         byte[] modifiedCertXml = TestData.getCertXml();
         modifiedCertXml[modifiedCertXml.length - 50] ^= 1;  // Flip a bit in the certificate
