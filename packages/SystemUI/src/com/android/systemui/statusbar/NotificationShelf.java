@@ -177,7 +177,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             mShelfState.yTranslation = Math.max(Math.min(viewEnd, maxShelfEnd) - mShelfState.height,
                     getFullyClosedTranslation());
             mShelfState.zTranslation = ambientState.getBaseZHeight();
-            if (mAmbientState.isDark()) {
+            if (mAmbientState.isDark() && !mAmbientState.hasPulsingNotifications()) {
                 mShelfState.yTranslation = mAmbientState.getDarkTopPadding();
             }
             float openedAmount = (mShelfState.yTranslation - getFullyClosedTranslation())
