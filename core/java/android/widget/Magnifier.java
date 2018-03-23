@@ -215,6 +215,10 @@ public final class Magnifier {
                 mWindow.destroy();
                 mWindow = null;
             }
+            mPrevPosInView.x = NONEXISTENT_PREVIOUS_CONFIG_VALUE;
+            mPrevPosInView.y = NONEXISTENT_PREVIOUS_CONFIG_VALUE;
+            mPrevStartCoordsInSurface.x = NONEXISTENT_PREVIOUS_CONFIG_VALUE;
+            mPrevStartCoordsInSurface.y = NONEXISTENT_PREVIOUS_CONFIG_VALUE;
         }
     }
 
@@ -321,19 +325,24 @@ public final class Magnifier {
 
         // Clamp copy coordinates inside the surface to avoid displaying distorted content.
         final int clampedStartXInSurface = Math.max(0,
-                Math.min(startXInSurface, surfaceWidth - mWindowWidth));
+                Math.min(startXInSurface, surfaceWidth - mBitmapWidth));
         final int clampedStartYInSurface = Math.max(0,
-                Math.min(startYInSurface, surfaceHeight - mWindowHeight));
+                Math.min(startYInSurface, surfaceHeight - mBitmapHeight));
+
+        // Clamp window coordinates inside the parent surface, to avoid displaying
+        // the magnifier out of screen or overlapping with system insets.
+        final Rect insets = mView.getRootWindowInsets().getSystemWindowInsets();
+        final int windowCoordsX = Math.max(insets.left,
+                Math.min(surfaceWidth - mWindowWidth - insets.right, mWindowCoords.x));
+        final int windowCoordsY = Math.max(insets.top,
+                Math.min(surfaceHeight - mWindowHeight - insets.bottom, mWindowCoords.y));
 
         // Perform the pixel copy.
         mPixelCopyRequestRect.set(clampedStartXInSurface,
                 clampedStartYInSurface,
                 clampedStartXInSurface + mBitmapWidth,
                 clampedStartYInSurface + mBitmapHeight);
-        final int windowCoordsX = mWindowCoords.x;
-        final int windowCoordsY = mWindowCoords.y;
         final InternalPopupWindow currentWindowInstance = mWindow;
-
         final Bitmap bitmap =
                 Bitmap.createBitmap(mBitmapWidth, mBitmapHeight, Bitmap.Config.ARGB_8888);
         PixelCopy.request(surface, mPixelCopyRequestRect, bitmap,
