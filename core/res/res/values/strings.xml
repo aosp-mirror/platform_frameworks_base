@@ -2752,29 +2752,56 @@
     <!-- Label for item in the text selection menu to trigger an Email app [CHAR LIMIT=20] -->
     <string name="email">Email</string>
 
+    <!-- Accessibility description for an item in the text selection menu to trigger an Email app [CHAR LIMIT=NONE] -->
+    <string name="email_desc">Email selected address</string>
+
     <!-- Label for item in the text selection menu to trigger a Dialer app [CHAR LIMIT=20] -->
     <string name="dial">Call</string>
+
+    <!-- Accessibility description for an item in the text selection menu to call a phone number [CHAR LIMIT=NONE] -->
+    <string name="dial_desc">Call selected phone number</string>
 
     <!-- Label for item in the text selection menu to trigger a Map app [CHAR LIMIT=20] -->
     <string name="map">Locate</string>
 
+    <!-- Accessibility description for an item in the text selection menu to open maps for an address [CHAR LIMIT=NONE] -->
+    <string name="map_desc">Locale selected address</string>
+
     <!-- Label for item in the text selection menu to trigger a Browser app [CHAR LIMIT=20] -->
     <string name="browse">Open</string>
+
+    <!-- Accessibility description for an item in the text selection menu to open a URL in a browser [CHAR LIMIT=NONE] -->
+    <string name="browse_desc">Open selected URL</string>
 
     <!-- Label for item in the text selection menu to trigger an SMS app [CHAR LIMIT=20] -->
     <string name="sms">Message</string>
 
+    <!-- Accessibility description for an item in the text selection menu to send an SMS to a phone number [CHAR LIMIT=NONE] -->
+    <string name="sms_desc">Message selected phone number</string>
+
     <!-- Label for item in the text selection menu to trigger adding a contact [CHAR LIMIT=20] -->
     <string name="add_contact">Add</string>
+
+    <!-- Accessibility description for an item in the text selection menu to add the selected detail to contacts [CHAR LIMIT=NONE] -->
+    <string name="add_contact_desc">Add to contacts</string>
 
     <!-- Label for item in the text selection menu to view the calendar for the selected time/date [CHAR LIMIT=20] -->
     <string name="view_calendar">View</string>
 
+    <!-- Accessibility description for an item in the text selection menu to view the calendar for a date [CHAR LIMIT=NONE]-->
+    <string name="view_calendar_desc">View selected time in calendar</string>
+
     <!-- Label for item in the text selection menu to create a calendar event at the selected time/date [CHAR LIMIT=20] -->
     <string name="add_calendar_event">Schedule</string>
 
+    <!-- Accessibility description for an item in the text selection menu to schedule an event for a date [CHAR LIMIT=NONE] -->
+    <string name="add_calendar_event_desc">Schedule event for selected time</string>
+
     <!-- Label for item in the text selection menu to track a selected flight number [CHAR LIMIT=20] -->
     <string name="view_flight">Track</string>
+
+    <!-- Accessibility description for an item in the text selection menu to track a flight [CHAR LIMIT=NONE] -->
+    <string name="view_flight_desc">Track selected flight</string>
 
     <!-- If the device is getting low on internal storage, a notification is shown to the user.  This is the title of that notification. -->
     <string name="low_internal_storage_view_title">Storage space running out</string>
