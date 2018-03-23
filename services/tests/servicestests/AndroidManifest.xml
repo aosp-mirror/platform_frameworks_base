@@ -62,6 +62,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WATCH_APPOPS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.SUSPEND_APPS"/>
 
     <!-- Uses API introduced in O (26) -->
     <uses-sdk android:minSdkVersion="1"

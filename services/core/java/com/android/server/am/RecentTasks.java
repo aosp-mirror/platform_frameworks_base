@@ -508,6 +508,10 @@ class RecentTasks {
                     && tr.userId == userId
                     && tr.realActivitySuspended != suspended) {
                tr.realActivitySuspended = suspended;
+               if (suspended) {
+                   mService.mStackSupervisor.removeTaskByIdLocked(tr.taskId, false,
+                           REMOVE_FROM_RECENTS, "suspended-package");
+               }
                notifyTaskPersisterLocked(tr, false);
             }
         }

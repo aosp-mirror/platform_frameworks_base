@@ -70,6 +70,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -2151,12 +2152,38 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public String[] setPackagesSuspendedAsUser(String[] packageNames, boolean suspended,
-            int userId) {
+    public String[] setPackagesSuspended(String[] packageNames, boolean suspended,
+            PersistableBundle appExtras, PersistableBundle launcherExtras,
+            String dialogMessage) {
+        // TODO (b/75332201): Pass in the dialogMessage and use it in the interceptor dialog
         try {
-            return mPM.setPackagesSuspendedAsUser(packageNames, suspended, userId);
+            return mPM.setPackagesSuspendedAsUser(packageNames, suspended, appExtras,
+                    launcherExtras, mContext.getOpPackageName(), mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public PersistableBundle getSuspendedPackageAppExtras(String packageName) {
+        try {
+            return mPM.getPackageSuspendedAppExtras(packageName, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public PersistableBundle getSuspendedPackageAppExtras() {
+        return getSuspendedPackageAppExtras(mContext.getOpPackageName());
+    }
+
+    @Override
+    public void setSuspendedPackageAppExtras(String packageName, PersistableBundle appExtras) {
+        try {
+            mPM.setSuspendedPackageAppExtras(packageName, appExtras, mContext.getUserId());
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -2167,6 +2194,17 @@ public class ApplicationPackageManager extends PackageManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /** @hide */
+    @Override
+    public boolean isPackageSuspended(String packageName) {
+        return isPackageSuspendedForUser(packageName, mContext.getUserId());
+    }
+
+    @Override
+    public boolean isPackageSuspended() {
+        return isPackageSuspendedForUser(mContext.getOpPackageName(), mContext.getUserId());
     }
 
     /** @hide */

@@ -27,6 +27,8 @@ import static android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS;
 import static android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 
+import android.os.BaseBundle;
+import android.os.PersistableBundle;
 import android.util.ArraySet;
 
 import com.android.internal.util.ArrayUtils;
@@ -44,6 +46,9 @@ public class PackageUserState {
     public boolean notLaunched;
     public boolean hidden; // Is the app restricted by owner / admin
     public boolean suspended;
+    public String suspendingPackage;
+    public PersistableBundle suspendedAppExtras;
+    public PersistableBundle suspendedLauncherExtras;
     public boolean instantApp;
     public boolean virtualPreload;
     public int enabled;
@@ -76,6 +81,9 @@ public class PackageUserState {
         notLaunched = o.notLaunched;
         hidden = o.hidden;
         suspended = o.suspended;
+        suspendingPackage = o.suspendingPackage;
+        suspendedAppExtras = o.suspendedAppExtras;
+        suspendedLauncherExtras = o.suspendedLauncherExtras;
         instantApp = o.instantApp;
         virtualPreload = o.virtualPreload;
         enabled = o.enabled;
@@ -194,6 +202,20 @@ public class PackageUserState {
         }
         if (suspended != oldState.suspended) {
             return false;
+        }
+        if (suspended) {
+            if (suspendingPackage == null
+                    || !suspendingPackage.equals(oldState.suspendingPackage)) {
+                return false;
+            }
+            if (!BaseBundle.kindofEquals(suspendedAppExtras,
+                    oldState.suspendedAppExtras)) {
+                return false;
+            }
+            if (!BaseBundle.kindofEquals(suspendedLauncherExtras,
+                    oldState.suspendedLauncherExtras)) {
+                return false;
+            }
         }
         if (instantApp != oldState.instantApp) {
             return false;
