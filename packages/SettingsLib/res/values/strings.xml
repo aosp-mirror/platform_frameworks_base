@@ -563,6 +563,10 @@
     <string name="wifi_verbose_logging_summary">Increase Wi\u2011Fi logging level, show per SSID RSSI in Wi\u2011Fi Picker</string>
     <!-- Setting Checkbox title whether to enable connected MAC randomization -->
     <string name="wifi_connected_mac_randomization_summary">Randomize MAC address when connecting to Wi\u2011Fi networks</string>
+    <!-- Label indicating network has been manually marked as metered -->
+    <string name="wifi_metered_label">Metered</string>
+    <!-- Label indicating network has been manually marked as unmetered -->
+    <string name="wifi_unmetered_label">Unmetered</string>
     <!-- UI debug setting: limit size of Android logger buffers -->
     <string name="select_logd_size_title">Logger buffer sizes</string>
     <!-- UI debug setting: limit size of Android logger buffers [CHAR LIMIT=59] -->
