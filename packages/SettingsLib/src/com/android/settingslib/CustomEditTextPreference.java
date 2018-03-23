@@ -15,6 +15,9 @@
  */
 package com.android.settingslib;
 
+import static android.text.InputType.TYPE_CLASS_TEXT;
+import static android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -80,6 +83,7 @@ public class CustomEditTextPreference extends EditTextPreference {
     protected void onBindDialogView(View view) {
         final EditText editText = view.findViewById(android.R.id.edit);
         if (editText != null) {
+            editText.setInputType(TYPE_CLASS_TEXT | TYPE_TEXT_FLAG_CAP_SENTENCES);
             editText.requestFocus();
         }
     }
