@@ -41,5 +41,7 @@ LOCAL_JAVA_LIBRARIES := android.test.runner android.test.base android.test.mock
 
 LOCAL_CERTIFICATE := platform
 
+LOCAL_COMPATIBILITY_SUITE := device-tests
+
 include $(BUILD_PACKAGE)
 
