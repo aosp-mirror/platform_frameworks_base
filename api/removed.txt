@@ -157,6 +157,10 @@ package android.graphics {
     method public deprecated android.graphics.ImageDecoder setAsAlphaMask(boolean);
   }
 
+  public static deprecated class ImageDecoder.IncompleteException extends java.io.IOException {
+    ctor public ImageDecoder.IncompleteException();
+  }
+
   public deprecated class LayerRasterizer extends android.graphics.Rasterizer {
     ctor public LayerRasterizer();
     method public void addLayer(android.graphics.Paint, float, float);
