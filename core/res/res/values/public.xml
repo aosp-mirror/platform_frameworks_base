@@ -2869,8 +2869,6 @@
       <public name="outlineSpotShadowColor" />
       <public name="outlineAmbientShadowColor" />
       <public name="maxLongVersionCode" />
-      <!-- TODO(b/74445943): STOPSHIP (urlBarResourceId should be removed after P DP2 is branched)-->
-      <public name="urlBarResourceId" />
       <!-- @hide @SystemApi -->
       <public name="userRestriction" />
       <public name="textFontWeight" />
