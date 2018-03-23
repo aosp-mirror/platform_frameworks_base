@@ -134,6 +134,17 @@ public class HearingAidProfile implements LocalBluetoothProfile {
         return mService.getConnectionState(device);
     }
 
+    public boolean setActiveDevice(BluetoothDevice device) {
+        if (mService == null) return false;
+        mService.setActiveDevice(device);
+        return true;
+    }
+
+    public boolean isActiveDevice(BluetoothDevice device) {
+        if (mService == null) return false;
+        return mService.isActiveDevice(device);
+    }
+
     public boolean isPreferred(BluetoothDevice device) {
         if (mService == null) return false;
         return mService.getPriority(device) > BluetoothProfile.PRIORITY_OFF;
