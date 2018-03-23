@@ -140,7 +140,6 @@ public class QSContainerImpl extends FrameLayout {
         setMargins(mQSFooter);
         setMargins(mQSPanel);
         setMargins(mHeader);
-        setMargins(mQSCustomizer);
     }
 
     private void setMargins(View view) {
