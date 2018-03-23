@@ -100,7 +100,7 @@
                 android:id="@+id/autofill_save_yes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/Widget.Material.Button.Colored"
+                style="@style/Widget.DeviceDefault.Button.Colored"
                 android:text="@string/autofill_save_yes">
             </Button>
 
