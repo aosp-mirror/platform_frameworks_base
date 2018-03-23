@@ -12490,6 +12490,16 @@ public final class Settings {
          */
         public static final String BACKUP_AGENT_TIMEOUT_PARAMETERS =
                 "backup_agent_timeout_parameters";
+
+        /**
+         * Whether we have enabled swapping on this device. For Wear, default is
+         * enabled.
+         *
+         * The value is "1" for enable, "0" for disable.
+         * @hide
+         */
+         public static final String SWAP_ENABLED = "swap_enabled";
+
     }
 
     /**
