@@ -18703,9 +18703,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 return true;
             }
         }
-        if (ps.getPermissionsState().hasPermission(
-                Manifest.permission.SUSPEND_APPS, user.getIdentifier())) {
-            onSuspendingPackageRemoved(packageName, user.getIdentifier());
+
+        final int userId = user == null ? UserHandle.USER_ALL : user.getIdentifier();
+        if (ps.getPermissionsState().hasPermission(Manifest.permission.SUSPEND_APPS, userId)) {
+            onSuspendingPackageRemoved(packageName, userId);
         }
 
 
