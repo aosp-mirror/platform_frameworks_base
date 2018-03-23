@@ -133,7 +133,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
 
                 if (isNightLightActivated) {
                     toggleTime = mController.getCustomEndTime();
-                    toggleTimeStringRes = R.string.quick_settings_night_secondary_label_until;
+                    toggleTimeStringRes = R.string.quick_settings_secondary_label_until;
                 } else {
                     toggleTime = mController.getCustomStartTime();
                     toggleTimeStringRes = R.string.quick_settings_night_secondary_label_on_at;
