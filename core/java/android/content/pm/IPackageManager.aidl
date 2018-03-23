@@ -50,8 +50,8 @@ import android.content.pm.VersionedPackage;
 import android.content.pm.dex.IArtManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.content.IntentSender;
 
 /**
@@ -272,8 +272,16 @@ interface IPackageManager {
 
     void clearCrossProfileIntentFilters(int sourceUserId, String ownerPackage);
 
-    String[] setPackagesSuspendedAsUser(in String[] packageNames, boolean suspended, int userId);
+    String[] setPackagesSuspendedAsUser(in String[] packageNames, boolean suspended,
+            in PersistableBundle launcherExtras, in PersistableBundle appExtras,
+            String callingPackage, int userId);
+
     boolean isPackageSuspendedForUser(String packageName, int userId);
+
+    PersistableBundle getPackageSuspendedAppExtras(String pacakgeName, int userId);
+
+    void setSuspendedPackageAppExtras(String packageName, in PersistableBundle appExtras,
+            int userId);
 
     /**
      * Backup/restore support - only the system uid may use these.
