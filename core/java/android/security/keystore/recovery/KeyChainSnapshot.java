@@ -127,18 +127,13 @@ public final class KeyChainSnapshot implements Parcelable {
     /**
      * CertPath containing the public key used to encrypt {@code encryptedRecoveryKeyBlob}.
      */
-    // TODO: Change to @NonNull
-    public CertPath getTrustedHardwareCertPath() {
-        if (mCertPath == null) {
-            return null;
-        } else {
-            try {
-                return mCertPath.getCertPath();
-            } catch (CertificateException e) {
-                // Rethrow an unchecked exception as it should not happen. If such an issue exists,
-                // an exception should have been thrown during service initialization.
-                throw new BadParcelableException(e);
-            }
+    public @NonNull CertPath getTrustedHardwareCertPath() {
+        try {
+            return mCertPath.getCertPath();
+        } catch (CertificateException e) {
+            // Rethrow an unchecked exception as it should not happen. If such an issue exists,
+            // an exception should have been thrown during service initialization.
+            throw new BadParcelableException(e);
         }
     }
 
@@ -248,13 +243,9 @@ public final class KeyChainSnapshot implements Parcelable {
          * @throws CertificateException if the given certificate path cannot be encoded properly
          * @return This builder.
          */
-        public Builder setTrustedHardwareCertPath(CertPath certPath) throws CertificateException {
-            // TODO: Make it NonNull when the caller code is all updated
-            if (certPath == null) {
-                mInstance.mCertPath = null;
-            } else {
-                mInstance.mCertPath = RecoveryCertPath.createRecoveryCertPath(certPath);
-            }
+        public Builder setTrustedHardwareCertPath(@NonNull CertPath certPath)
+                throws CertificateException {
+            mInstance.mCertPath = RecoveryCertPath.createRecoveryCertPath(certPath);
             return this;
         }
 
@@ -282,7 +273,7 @@ public final class KeyChainSnapshot implements Parcelable {
         }
 
         /**
-         * Sets recovery key blob
+         * Sets recovery key blob.
          *
          * @param encryptedRecoveryKeyBlob The recovery key blob.
          * @return This builder.
@@ -297,7 +288,7 @@ public final class KeyChainSnapshot implements Parcelable {
          * Creates a new {@link KeyChainSnapshot} instance.
          *
          * @return new instance
-         * @throws NullPointerException if some required fields were not set.
+         * @throws NullPointerException if some of the required fields were not set.
          */
         @NonNull public KeyChainSnapshot build() {
             Preconditions.checkCollectionElementsNotNull(mInstance.mKeyChainProtectionParams,
@@ -306,6 +297,7 @@ public final class KeyChainSnapshot implements Parcelable {
                     "entryRecoveryData");
             Preconditions.checkNotNull(mInstance.mEncryptedRecoveryKeyBlob);
             Preconditions.checkNotNull(mInstance.mServerParams);
+            Preconditions.checkNotNull(mInstance.mCertPath);
             return mInstance;
         }
     }
