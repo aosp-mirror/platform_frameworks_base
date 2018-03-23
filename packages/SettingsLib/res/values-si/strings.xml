@@ -358,10 +358,10 @@
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"ඔබගේ භාවිතය මත පදනම්ව <xliff:g id="TIME">%1$s</xliff:g> පමණ ඉතිරිව ඇත"</string>
     <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"ඔබේ භාවිතය මත පදනම්ව <xliff:g id="TIME">%1$s</xliff:g> පමණ ඉතිරිව ඇත <xliff:g id="LEVEL">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"ඉතිරි <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_enhanced" msgid="8305422490607220844">"ඔබේ භාවිතය මත පදනම්ව <xliff:g id="TIME">%1$s</xliff:g> පමණ තෙක් පවතිනු ඇත <xliff:g id="LEVEL">%2$s</xliff:g>"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="896515698736070025">"ඔබේ භාවිතය මත පදනම්ව <xliff:g id="TIME">%1$s</xliff:g> පමණ තෙක් පවතිනු ඇත"</string>
-    <string name="power_discharge_by" msgid="6052127431194780229">"<xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>) පමණ තෙක් පවතිනු ඇත"</string>
-    <string name="power_discharge_by_only" msgid="4850425421176271395">"<xliff:g id="TIME">%1$s</xliff:g> පමණ තෙක් පවතිනු ඇත"</string>
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"<xliff:g id="TIME">%1$s</xliff:g> පමණ වන තෙක් (<xliff:g id="LEVEL">%2$s</xliff:g>) ඔබේ භාවිතය මත පදනම්ව තිබිය යුුතුය"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"ඔබේ භාවිතය මත පදනම්ව <xliff:g id="TIME">%1$s</xliff:g> පමන වන තෙක් තිබිය යුතුය"</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"<xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>) පමණ වන තෙක් තිබිය යුතුය"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"<xliff:g id="TIME">%1$s</xliff:g> පමණ වන තෙක් තිබිය යුතුය"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g>ට වඩා අඩුවෙන් ඉතිරිව ඇත"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"<xliff:g id="THRESHOLD">%1$s</xliff:g>ට වඩා අඩුවෙන් ඉතිරිය (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>ට වඩා වැඩියෙන් ඉතිරිය (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -416,6 +416,7 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"ලියාපදිංචි වී ඇත"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"ලියාපදිංචි වී නැත"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"ලබාගත නොහැක"</string>
+    <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"MAC සසම්භාවී වේ"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
       <item quantity="one">උපාංග %1$dක් සම්බන්ධ කරන ලදී</item>
       <item quantity="other">උපාංග %1$dක් සම්බන්ධ කරන ලදී</item>
@@ -435,4 +436,6 @@
     <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g>හිදී"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"කාල සීමාව"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"සෑම විටම ඉල්ලන්න"</string>
+    <!-- no translation found for time_unit_just_now (6363336622778342422) -->
+    <skip />
 </resources>

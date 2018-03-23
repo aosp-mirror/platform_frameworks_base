@@ -358,10 +358,14 @@
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"În baza utilizării, timpul aproximativ rămas este: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"În baza utilizării, timpul rămas este de aproximativ <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Timp rămas: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_enhanced" msgid="8305422490607220844">"În baza utilizării, va rezista până la aproximativ <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="896515698736070025">"În baza utilizării, va rezista până la aproximativ <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by" msgid="6052127431194780229">"Va rezista până la aproximativ <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="4850425421176271395">"Va rezista până la aproximativ <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_discharge_by_enhanced (2095821536747992464) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only_enhanced (2175151772952365149) -->
+    <skip />
+    <!-- no translation found for power_discharge_by (6453537733650125582) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only (107616694963545745) -->
+    <skip />
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"a mai rămas mai puțin de <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"A mai rămas mai puțin de <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"A mai rămas mai mult de <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -416,6 +420,8 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Înregistrat"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Neînregistrat"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Indisponibilă"</string>
+    <!-- no translation found for wifi_status_mac_randomized (5589328382467438245) -->
+    <skip />
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
       <item quantity="few">%1$d dispozitive conectate</item>
       <item quantity="other">%1$d de dispozitive conectate</item>
@@ -436,4 +442,6 @@
     <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Durată"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Întreabă de fiecare dată"</string>
+    <!-- no translation found for time_unit_just_now (6363336622778342422) -->
+    <skip />
 </resources>
