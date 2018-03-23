@@ -1158,6 +1158,7 @@ Landroid/os/Binder;->execTransact(IJJI)Z
 Landroid/os/Binder;->mObject:J
 Landroid/os/Build;->getString(Ljava/lang/String;)Ljava/lang/String;
 Landroid/os/Build;->IS_DEBUGGABLE:Z
+Landroid/os/Build;->IS_EMULATOR:Z
 Landroid/os/Build$VERSION;->ACTIVE_CODENAMES:[Ljava/lang/String;
 Landroid/os/Bundle;->getIBinder(Ljava/lang/String;)Landroid/os/IBinder;
 Landroid/os/Bundle;->putIBinder(Ljava/lang/String;Landroid/os/IBinder;)V
