@@ -49,7 +49,8 @@ public class RecoverySession implements AutoCloseable {
     private final String mSessionId;
     private final RecoveryController mRecoveryController;
 
-    private RecoverySession(RecoveryController recoveryController, String sessionId) {
+    private RecoverySession(@NonNull RecoveryController recoveryController,
+            @NonNull String sessionId) {
         mRecoveryController = recoveryController;
         mSessionId = sessionId;
     }
@@ -58,14 +59,14 @@ public class RecoverySession implements AutoCloseable {
      * A new session, started by the {@link RecoveryController}.
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    static RecoverySession newInstance(RecoveryController recoveryController) {
+    static @NonNull RecoverySession newInstance(RecoveryController recoveryController) {
         return new RecoverySession(recoveryController, newSessionId());
     }
 
     /**
      * Returns a new random session ID.
      */
-    private static String newSessionId() {
+    private static @NonNull String newSessionId() {
         SecureRandom secureRandom = new SecureRandom();
         byte[] sessionId = new byte[SESSION_ID_LENGTH_BYTES];
         secureRandom.nextBytes(sessionId);
