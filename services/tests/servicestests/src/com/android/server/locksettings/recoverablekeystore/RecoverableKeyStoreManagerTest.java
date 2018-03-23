@@ -242,8 +242,8 @@ public class RecoverableKeyStoreManagerTest {
         try {
             mRecoverableKeyStoreManager.importKey(TEST_ALIAS, /*keyBytes=*/ null);
             fail("should have thrown");
-        } catch (ServiceSpecificException e) {
-            assertThat(e.getMessage()).contains("not contain 256 bits");
+        } catch (NullPointerException e) {
+            assertThat(e.getMessage()).contains("is null");
         }
     }
 
@@ -410,7 +410,7 @@ public class RecoverableKeyStoreManagerTest {
                     ROOT_CERTIFICATE_ALIAS, /*recoveryServiceCertFile=*/ null,
                     TestData.getSigXml());
             fail("should have thrown");
-        } catch (ServiceSpecificException e) {
+        } catch (NullPointerException e) {
             assertThat(e.getMessage()).contains("is null");
         }
     }
@@ -422,7 +422,7 @@ public class RecoverableKeyStoreManagerTest {
                     ROOT_CERTIFICATE_ALIAS, TestData.getCertXml(),
                     /*recoveryServiceSigFile=*/ null);
             fail("should have thrown");
-        } catch (ServiceSpecificException e) {
+        } catch (NullPointerException e) {
             assertThat(e.getMessage()).contains("is null");
         }
     }
@@ -572,6 +572,16 @@ public class RecoverableKeyStoreManagerTest {
         mRecoverableKeyStoreManager.closeSession("some random session");
 
         assertEquals(1, mRecoverySessionStorage.size());
+    }
+
+    @Test
+    public void closeSession_throwsIfNullSession() throws Exception {
+        try {
+            mRecoverableKeyStoreManager.closeSession(/*sessionId=*/ null);
+            fail("should have thrown");
+        } catch (NullPointerException e) {
+            assertThat(e.getMessage()).contains("invalid");
+        }
     }
 
     @Test
@@ -897,6 +907,16 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
+    public void setRecoverySecretTypes_throwsIfNullTypes() throws Exception {
+        try {
+            mRecoverableKeyStoreManager.setRecoverySecretTypes(/*types=*/ null);
+            fail("should have thrown");
+        } catch (NullPointerException e) {
+            assertThat(e.getMessage()).contains("is null");
+        }
+    }
+
+    @Test
     public void setRecoverySecretTypes_updatesShouldCreateSnapshot() throws Exception {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
@@ -928,6 +948,16 @@ public class RecoverableKeyStoreManagerTest {
         statuses = mRecoverableKeyStoreManager.getRecoveryStatus();
         assertThat(statuses).hasSize(1);
         assertThat(statuses).containsEntry(alias, status2); // updated
+    }
+
+    @Test
+    public void setRecoveryStatus_throwsIfNullAlias() throws Exception {
+        try {
+            mRecoverableKeyStoreManager.setRecoveryStatus(/*alias=*/ null, /*status=*/ 100);
+            fail("should have thrown");
+        } catch (NullPointerException e) {
+            assertThat(e.getMessage()).contains("is null");
+        }
     }
 
     private static byte[] encryptedApplicationKey(
