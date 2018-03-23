@@ -473,7 +473,7 @@ please see styles_device_defaults.xml.
     <style name="TextAppearance.Material.Notification.Reply" />
 
     <style name="TextAppearance.Material.Notification.Title">
-        <item name="textColor">@color/notification_primary_text_color_light</item>
+        <item name="fontFamily">sans-serif-medium</item>
         <item name="textSize">@dimen/notification_title_text_size</item>
     </style>
 
@@ -482,7 +482,6 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="TextAppearance.Material.Notification.Info">
-        <item name="textColor">@color/notification_secondary_text_color_light</item>
         <item name="textSize">@dimen/notification_subtext_size</item>
     </style>
 
