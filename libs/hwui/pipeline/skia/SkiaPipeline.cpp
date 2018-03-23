@@ -342,7 +342,8 @@ void SkiaPipeline::renderFrameImpl(const LayerUpdateQueue& layers, const SkRect&
     SkAutoCanvasRestore saver(canvas, true);
     canvas->androidFramework_setDeviceClipRestriction(clip.roundOut());
 
-    if (!opaque) {
+    // STOPSHIP: Revert, temporary workaround to clear always F16 frame buffer for b/74976293
+    if (!opaque || wideColorGamut) {
         canvas->clear(SK_ColorTRANSPARENT);
     }
 
