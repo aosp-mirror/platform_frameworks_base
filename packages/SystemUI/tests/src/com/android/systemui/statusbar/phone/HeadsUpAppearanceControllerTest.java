@@ -16,8 +16,11 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +29,7 @@ import android.support.test.runner.AndroidJUnit4;
 import android.view.View;
 import android.widget.TextView;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.TestableDependency;
 import com.android.systemui.statusbar.CommandQueue;
@@ -46,6 +50,10 @@ import java.util.HashSet;
 @RunWith(AndroidJUnit4.class)
 public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
 
+    private final NotificationStackScrollLayout mStackScroller =
+            mock(NotificationStackScrollLayout.class);
+    private final NotificationPanelView mPanelView = mock(NotificationPanelView.class);
+    private final DarkIconDispatcher mDarkIconDispatcher = mock(DarkIconDispatcher.class);
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private ExpandableNotificationRow mFirst;
     private HeadsUpStatusBarView mHeadsUpStatusBarView;
@@ -55,7 +63,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
     public void setUp() throws Exception {
         NotificationTestHelper testHelper = new NotificationTestHelper(getContext());
         mFirst = testHelper.createRow();
-        mDependency.injectMockDependency(DarkIconDispatcher.class);
+        mDependency.injectTestDependency(DarkIconDispatcher.class, mDarkIconDispatcher);
         mHeadsUpStatusBarView = new HeadsUpStatusBarView(mContext, mock(View.class),
                 mock(TextView.class));
         mHeadsUpManager = mock(HeadsUpManagerPhone.class);
@@ -63,8 +71,8 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
                 mock(NotificationIconAreaController.class),
                 mHeadsUpManager,
                 mHeadsUpStatusBarView,
-                mock(NotificationStackScrollLayout.class),
-                mock(NotificationPanelView.class),
+                mStackScroller,
+                mPanelView,
                 new View(mContext));
         mHeadsUpAppearanceController.setExpandedHeight(0.0f, 0.0f);
     }
@@ -109,5 +117,21 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
         when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(false);
         mHeadsUpAppearanceController.onHeadsUpUnPinned(mFirst);
         Assert.assertEquals(mFirst.getHeaderVisibleAmount(), 1.0f, 0.0f);
+    }
+
+    @Test
+    public void testDestroy() {
+        reset(mHeadsUpManager);
+        reset(mDarkIconDispatcher);
+        reset(mPanelView);
+        reset(mStackScroller);
+        mHeadsUpAppearanceController.destroy();
+        verify(mHeadsUpManager).removeListener(any());
+        verify(mDarkIconDispatcher).removeDarkReceiver((DarkIconDispatcher.DarkReceiver) any());
+        verify(mPanelView).removeVerticalTranslationListener(any());
+        verify(mPanelView).removeTrackingHeadsUpListener(any());
+        verify(mPanelView).setHeadsUpAppearanceController(any());
+        verify(mStackScroller).removeOnExpandedHeightListener(any());
+        verify(mStackScroller).removeOnLayoutChangeListener(any());
     }
 }

@@ -247,7 +247,7 @@ public class NotificationPanelView extends PanelView implements
     private int mStackScrollerMeasuringPass;
     private ArrayList<Consumer<ExpandableNotificationRow>> mTrackingHeadsUpListeners
             = new ArrayList<>();
-    private Runnable mVerticalTranslationListener;
+    private ArrayList<Runnable> mVerticalTranslationListener = new ArrayList<>();
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
@@ -2431,8 +2431,9 @@ public class NotificationPanelView extends PanelView implements
     protected void setVerticalPanelTranslation(float translation) {
         mNotificationStackScroller.setTranslationX(translation);
         mQsFrame.setTranslationX(translation);
-        if (mVerticalTranslationListener != null) {
-            mVerticalTranslationListener.run();
+        int size = mVerticalTranslationListener.size();
+        for (int i = 0; i < size; i++) {
+            mVerticalTranslationListener.get(i).run();
         }
     }
 
@@ -2744,8 +2745,16 @@ public class NotificationPanelView extends PanelView implements
         mTrackingHeadsUpListeners.add(listener);
     }
 
-    public void setVerticalTranslationListener(Runnable verticalTranslationListener) {
-        mVerticalTranslationListener = verticalTranslationListener;
+    public void removeTrackingHeadsUpListener(Consumer<ExpandableNotificationRow> listener) {
+        mTrackingHeadsUpListeners.remove(listener);
+    }
+
+    public void addVerticalTranslationListener(Runnable verticalTranslationListener) {
+        mVerticalTranslationListener.add(verticalTranslationListener);
+    }
+
+    public void removeVerticalTranslationListener(Runnable verticalTranslationListener) {
+        mVerticalTranslationListener.remove(verticalTranslationListener);
     }
 
     public void setHeadsUpAppearanceController(
