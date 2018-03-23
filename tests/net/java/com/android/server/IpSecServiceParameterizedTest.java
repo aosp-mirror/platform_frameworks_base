@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.system.OsConstants.AF_INET;
+import static android.system.OsConstants.AF_INET6;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
@@ -64,16 +66,17 @@ public class IpSecServiceParameterizedTest {
 
     private static final int TEST_SPI = 0xD1201D;
 
-    private final String mDestinationAddr;
     private final String mSourceAddr;
+    private final String mDestinationAddr;
     private final LinkAddress mLocalInnerAddress;
+    private final int mFamily;
 
     @Parameterized.Parameters
     public static Collection ipSecConfigs() {
         return Arrays.asList(
                 new Object[][] {
-                {"1.2.3.4", "8.8.4.4", "10.0.1.1/24"},
-                {"2601::2", "2601::10", "2001:db8::1/64"}
+                {"1.2.3.4", "8.8.4.4", "10.0.1.1/24", AF_INET},
+                {"2601::2", "2601::10", "2001:db8::1/64", AF_INET6}
         });
     }
 
@@ -134,10 +137,11 @@ public class IpSecServiceParameterizedTest {
     private static final int REMOTE_ENCAP_PORT = 4500;
 
     public IpSecServiceParameterizedTest(
-            String sourceAddr, String destAddr, String localInnerAddr) {
+            String sourceAddr, String destAddr, String localInnerAddr, int family) {
         mSourceAddr = sourceAddr;
         mDestinationAddr = destAddr;
         mLocalInnerAddress = new LinkAddress(localInnerAddr);
+        mFamily = family;
     }
 
     @Before
@@ -340,11 +344,20 @@ public class IpSecServiceParameterizedTest {
         addAuthAndCryptToIpSecConfig(ipSecConfig);
         addEncapSocketToIpSecConfig(udpSock.resourceId, ipSecConfig);
 
-        IpSecTransformResponse createTransformResp =
-                mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
-        assertEquals(IpSecManager.Status.OK, createTransformResp.status);
+        if (mFamily == AF_INET) {
+            IpSecTransformResponse createTransformResp =
+                    mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
+            assertEquals(IpSecManager.Status.OK, createTransformResp.status);
 
-        verifyTransformNetdCalledForCreatingSA(ipSecConfig, createTransformResp, udpSock.port);
+            verifyTransformNetdCalledForCreatingSA(ipSecConfig, createTransformResp, udpSock.port);
+        } else {
+            try {
+                IpSecTransformResponse createTransformResp =
+                        mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
+                fail("Expected IllegalArgumentException on attempt to use UDP Encap in IPv6");
+            } catch (IllegalArgumentException expected) {
+            }
+        }
     }
 
     @Test
@@ -357,11 +370,20 @@ public class IpSecServiceParameterizedTest {
         addAuthAndCryptToIpSecConfig(ipSecConfig);
         addEncapSocketToIpSecConfig(udpSock.resourceId, ipSecConfig);
 
-        IpSecTransformResponse createTransformResp =
-                mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
-        assertEquals(IpSecManager.Status.OK, createTransformResp.status);
+        if (mFamily == AF_INET) {
+            IpSecTransformResponse createTransformResp =
+                    mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
+            assertEquals(IpSecManager.Status.OK, createTransformResp.status);
 
-        verifyTransformNetdCalledForCreatingSA(ipSecConfig, createTransformResp, udpSock.port);
+            verifyTransformNetdCalledForCreatingSA(ipSecConfig, createTransformResp, udpSock.port);
+        } else {
+            try {
+                IpSecTransformResponse createTransformResp =
+                        mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
+                fail("Expected IllegalArgumentException on attempt to use UDP Encap in IPv6");
+            } catch (IllegalArgumentException expected) {
+            }
+        }
     }
 
     @Test
