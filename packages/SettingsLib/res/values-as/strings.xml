@@ -381,13 +381,13 @@
     <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
     <skip />
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> বাকী"</string>
-    <!-- no translation found for power_discharge_by_enhanced (8305422490607220844) -->
+    <!-- no translation found for power_discharge_by_enhanced (2095821536747992464) -->
     <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (896515698736070025) -->
+    <!-- no translation found for power_discharge_by_only_enhanced (2175151772952365149) -->
     <skip />
-    <!-- no translation found for power_discharge_by (6052127431194780229) -->
+    <!-- no translation found for power_discharge_by (6453537733650125582) -->
     <skip />
-    <!-- no translation found for power_discharge_by_only (4850425421176271395) -->
+    <!-- no translation found for power_discharge_by_only (107616694963545745) -->
     <skip />
     <!-- no translation found for power_remaining_less_than_duration_only (5996752448813295329) -->
     <skip />
@@ -453,6 +453,8 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"পঞ্জীকৃত"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"পঞ্জীকৃত নহয়"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"উপলব্ধ নহয়"</string>
+    <!-- no translation found for wifi_status_mac_randomized (5589328382467438245) -->
+    <skip />
     <!-- no translation found for wifi_tether_connected_summary (3871603864314407780) -->
     <!-- no translation found for accessibility_manual_zen_more_time (1636187409258564291) -->
     <skip />
@@ -480,5 +482,7 @@
     <!-- no translation found for zen_mode_duration_settings_title (229547412251222757) -->
     <skip />
     <!-- no translation found for zen_mode_duration_always_prompt_title (6478923750878945501) -->
+    <skip />
+    <!-- no translation found for time_unit_just_now (6363336622778342422) -->
     <skip />
 </resources>

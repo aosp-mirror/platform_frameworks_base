@@ -53,25 +53,16 @@
     <string name="bluetooth_disconnected" msgid="6557104142667339895">"ବିଛିନ୍ନ ହେଲା"</string>
     <string name="bluetooth_disconnecting" msgid="8913264760027764974">"ବିଚ୍ଛିନ୍ନ କରୁଛି…"</string>
     <string name="bluetooth_connecting" msgid="8555009514614320497">"ସଂଯୋଗ କରାଯାଉଛି…"</string>
-    <!-- no translation found for bluetooth_connected (5427152882755735944) -->
-    <skip />
+    <string name="bluetooth_connected" msgid="5427152882755735944">"ସଂଯୁକ୍ତ ହେଲା<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_pairing" msgid="1426882272690346242">"ପେୟାର୍‌ କରୁଛି…"</string>
-    <!-- no translation found for bluetooth_connected_no_headset (616068069034994802) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_a2dp (3736431800395923868) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_map (3200033913678466453) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_no_a2dp (2047403011284187056) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_battery_level (5162924691231307748) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_battery_level (1610296229139400266) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_a2dp_battery_level (3908466636369853652) -->
-    <skip />
-    <!-- no translation found for bluetooth_connected_no_headset_no_a2dp_battery_level (1163440823807659316) -->
-    <skip />
+    <string name="bluetooth_connected_no_headset" msgid="616068069034994802">"ସଂଯୁକ୍ତ ହେଲା (ଫୋନ୍ ନୁହେଁ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp" msgid="3736431800395923868">"ସଂଯୁକ୍ତ ହେଲା (ମିଡିଆ ନୁହେଁ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_map" msgid="3200033913678466453">"ସଂଯୁକ୍ତ ହେଲା (ମେସେଜ୍ ଆକ୍ସେସ୍ ନାହିଁ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp" msgid="2047403011284187056">"ସଂଯୁକ୍ତ ହେଲା (ଫୋନ୍ କିମ୍ବା ମେଡିଆ ନୁହେଁ)<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected_battery_level" msgid="5162924691231307748">"ସଂଯୁକ୍ତ ହେଲା, ବ୍ୟାଟେରୀ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"ସଂଯୁକ୍ତ ନାହିଁ (ଫୋନ୍ ନୁହେଁ), ବ୍ୟାଟେରୀ<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"ସଂଯୁକ୍ତ ହେଲା (ମିଡିଆ ନୁହେଁ), ବ୍ୟାଟେରୀ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"ସଂଯୁକ୍ତ ହେଲା (ଫୋନ୍ କିମ୍ବା ମେଡିଆ ନୁହେଁ), ବ୍ୟାଟେରୀ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"ମିଡିଆ ଅଡିଓ"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"ଫୋନ୍‌ କଲ୍‌‌ଗୁଡ଼ିକ"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ଫାଇଲ୍‌ ଟ୍ରାନ୍ସଫର୍‌"</string>
@@ -84,10 +75,8 @@
     <string name="bluetooth_profile_sap" msgid="5764222021851283125">"ସିମ୍‌ ଆକ୍ସେସ୍‌"</string>
     <string name="bluetooth_profile_a2dp_high_quality" msgid="5444517801472820055">"HD ଅଡିଓ: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="8510588052415438887">"HD ଅଡିଓ"</string>
-    <!-- no translation found for bluetooth_profile_hearing_aid (7999237886427812595) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearing_aid_profile_summary_connected (7188282786730266159) -->
-    <skip />
+    <string name="bluetooth_profile_hearing_aid" msgid="7999237886427812595">"ଶ୍ରବଣ ଯନ୍ତ୍ର"</string>
+    <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="7188282786730266159">"ଶ୍ରବଣ ଯନ୍ତ୍ର ସହିତ ସଂଯୁକ୍ତ ହେଲା"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="963376081347721598">"ମିଡିଆ ଅଡିଓ ସହ ସଂଯୁକ୍ତ"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="7661070206715520671">"ଫୋନ୍‌ ଅଡିଓ ସହିତ ସଂଯୁକ୍ତ"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2611913495968309066">"ଫାଇଲ୍‌ ଟ୍ରାନ୍ସଫର୍‌ ସର୍ଭର୍‌ ସହ ସଂଯୁକ୍ତ"</string>
@@ -104,8 +93,7 @@
     <string name="bluetooth_headset_profile_summary_use_for" msgid="8705753622443862627">"ଫୋନ୍‌ ଅଡିଓ ପାଇଁ ବ୍ୟବହାର କର"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="1255674547144769756">"ଫାଇଲ୍‌ ଟ୍ରାନ୍ସଫର୍‌ ପାଇଁ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="232727040453645139">"ଇନ୍‌ପୁଟ୍‌ ପାଇଁ ବ୍ୟବହାର କରନ୍ତୁ"</string>
-    <!-- no translation found for bluetooth_hearing_aid_profile_summary_use_for (908775281788309484) -->
-    <skip />
+    <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="908775281788309484">"ଶ୍ରବଣ ଯନ୍ତ୍ର ପାଇଁ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"ପେୟାର୍‌"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"ପେୟାର୍‌"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"କ୍ୟାନ୍ସଲ୍‌ କରନ୍ତୁ"</string>
@@ -211,8 +199,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"ନେଟ୍‌ୱର୍କିଙ୍ଗ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ୱାୟର୍‌ଲେସ୍‌ ଡିସ୍‌ପ୍ଲେ ସର୍ଟିଫିକେଶନ୍‌"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi ଭରବୋସ୍‌ ଲଗିଙ୍ଗ ସକ୍ଷମ କରନ୍ତୁ"</string>
-    <!-- no translation found for wifi_connected_mac_randomization (3168165236877957767) -->
-    <skip />
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"କନେକ୍ଟ ହୋଇଥିବା MACର ରେଣ୍ଡୋମାଇଜେଶନ୍"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ମୋବାଇଲ୍‌ ଡାଟା ସର୍ବଦା ସକ୍ରିୟ"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ଟିଥରିଙ୍ଗ ହାର୍ଡୱେର ବେଗ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"ବ୍ଲୁଟୂଥ୍‌ ଡିଭାଇସ୍‌ଗୁଡ଼ିକୁ ନାମ ବିନା ଦେଖନ୍ତୁ"</string>
@@ -233,14 +220,12 @@
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"ବ୍ୟକ୍ତିଗତ DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"ବ୍ୟକ୍ତିଗତ DNS ମୋଡ୍‌ ବାଛନ୍ତୁ"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"ଅଫ୍"</string>
-    <!-- no translation found for private_dns_mode_opportunistic (8314986739896927399) -->
-    <skip />
+    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"ସ୍ଵଚାଳିତ"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"ବ୍ୟକ୍ତିଗତ DNS ପ୍ରଦାତା ହୋଷ୍ଟନାମ"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS ପ୍ରଦାନକାରୀଙ୍କ ହୋଷ୍ଟନାମ ପ୍ରବେଶ କରନ୍ତୁ"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ୱେୟାରଲେସ୍‌ ପ୍ରଦର୍ଶନ ସାର୍ଟିଫିକେସନ୍‌ ପାଇଁ ବିକଳ୍ପଗୁଡିକ ଦେଖାନ୍ତୁ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ୱାଇ-ଫାଇ ଲଗିଙ୍ଗ ସ୍ତର ବଢ଼ାନ୍ତୁ, ୱାଇ-ଫାଇ ପିକର୍‌ରେ ପ୍ରତି SSID RSSI ଦେଖାନ୍ତୁ"</string>
-    <!-- no translation found for wifi_connected_mac_randomization_summary (1743059848752201485) -->
-    <skip />
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"ୱାଇ-ଫାଇ ନେଟ୍‌ୱର୍କଗୁଡ଼ିକ ସହିତ କନେକ୍ଟ କରିବାବେଳେ MAC ଠିକଣାକୁ ରେଣ୍ଡୋମାଇଜ୍ କରନ୍ତୁ"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ଲଗର୍‌ ବଫର୍‌ ଆକାରଗୁଡ଼ିକ"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ଲଗ୍‌ ବଫର୍‌ ପିଛା ଲଗର୍‌ ଆକାରଗୁଡିକର ଚୟନ କରନ୍ତୁ"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"ଲଗର୍‌ ରୋଧି ଷ୍ଟୋରେଜ୍‌ ଖାଲି କରିବେ?"</string>
@@ -319,10 +304,8 @@
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"କାର୍ଯ୍ୟକଳାପଗୁଡ଼ିକୁ ରଖନ୍ତୁ ନାହିଁ"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"ଉପଯୋଗକର୍ତ୍ତା ଏହାକୁ ଛାଡ଼ିବା କ୍ଷଣି ସମସ୍ତ କାର୍ଯ୍ୟକଳାପକୁ ନଷ୍ଟ କରିଦିଅନ୍ତୁ"</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"ପୃଷ୍ଠପଟ ପ୍ରକ୍ରିୟା ସୀମା"</string>
-    <!-- no translation found for show_all_anrs (4924885492787069007) -->
-    <skip />
-    <!-- no translation found for show_all_anrs_summary (6636514318275139826) -->
-    <skip />
+    <string name="show_all_anrs" msgid="4924885492787069007">"ବ୍ୟାକଗ୍ରାଉଣ୍ଡରେ ଥିବା ANRଗୁଡ଼ିକୁ ଦେଖାନ୍ତୁ"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡ ଆପ୍‌ଗୁଡ଼ିକ ପାଇଁ \"ଆପ୍‌ ଉତ୍ତର ଦେଉନାହିଁ\" ଡାୟଲଗ୍‌ ଦେଖାନ୍ତୁ"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"ବିଜ୍ଞପ୍ତି ଚାନେଲ୍‌ ଚେତାବନୀ ଦେଖାଦେଉ"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"ଏକ ବୈଧ ଚ୍ୟାନେଲ୍‌ ବିନା ଏକ ଆପ୍‌ ଗୋଟିଏ ବିଜ୍ଞପ୍ତି ପୋଷ୍ଠ କରିବା ବେଳେ ଅନ୍‌-ସ୍କ୍ରୀନ୍‌ ସତର୍କତା ଦେଖାଏ"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"ଏକ୍ସଟର୍ନଲ୍ ଆପ୍‌ଗୁଡ଼ିକୁ ଜବରଦସ୍ତି ଅନୁମତି ଦିଅନ୍ତୁ"</string>
@@ -347,12 +330,10 @@
     <item msgid="8280754435979370728">"ଆଖି ଦ୍ୱାରା ଦେଖାଯାଇଥିବା ପରି ପ୍ରାକୃତିକ ରଙ୍ଗ"</item>
     <item msgid="5363960654009010371">"ଡିଜିଟାଲ୍‌ କଣ୍ଟେଣ୍ଟ ପାଇଁ ରଙ୍ଗଗୁଡ଼ିକ ଅନୁକୂଳିତ ହୋଇଛି"</item>
   </string-array>
-    <!-- no translation found for inactive_apps_title (9042996804461901648) -->
-    <skip />
+    <string name="inactive_apps_title" msgid="9042996804461901648">"ଷ୍ଟାଣ୍ଡବାଏ ଆପ୍"</string>
     <string name="inactive_app_inactive_summary" msgid="5091363706699855725">"ନିଷ୍କ୍ରିୟ। ଟୋଗଲ୍‌ କରିବାକୁ ଟାପ୍‌ କରନ୍ତୁ।"</string>
     <string name="inactive_app_active_summary" msgid="4174921824958516106">"ସକ୍ରିୟ। ବଦଳାଇବା ପାଇଁ ଟାପ୍‌ କରନ୍ତୁ"</string>
-    <!-- no translation found for standby_bucket_summary (6567835350910684727) -->
-    <skip />
+    <string name="standby_bucket_summary" msgid="6567835350910684727">"ଆପ୍ ଷ୍ଟାଣ୍ଡବାଏ ଅବସ୍ଥା:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="8097287939865165213">"ଚାଲୁଥିବା ସେବାଗୁଡ଼ିକ"</string>
     <string name="runningservices_settings_summary" msgid="854608995821032748">"ଏବେ ଚାଲୁଥିବା ସେବାଗୁଡ଼ିକୁ ଦେଖନ୍ତୁ ଓ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ"</string>
     <string name="select_webview_provider_title" msgid="4628592979751918907">"ୱେବ୍‌ଦୃଶ୍ୟ ପ୍ରୟୋଗ"</string>
@@ -375,40 +356,28 @@
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"ଏହି ପରୀକ୍ଷାମୂଳକ ବୈଶିଷ୍ଟ୍ୟ ପର୍ଫର୍ମେନ୍ସକୁ ପ୍ରଭାବିତ କରିପାରେ।"</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> ଦ୍ୱାରା ଓଭର୍‌ରାଇଡ୍‌ କରାଯାଇଛି"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"ପ୍ରାୟ <xliff:g id="TIME">%1$s</xliff:g> ଅବଶିଷ୍ଟ ରହିଛି"</string>
-    <!-- no translation found for power_discharging_duration (6655472132189365839) -->
-    <skip />
+    <string name="power_discharging_duration" msgid="6655472132189365839">"ପାଖାପାଖି <xliff:g id="TIME">%1$s</xliff:g> ବାକି ଅଛି(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"ଆପଣଙ୍କ ବ୍ୟବହାରକୁ ଆଧାର କରି ପ୍ରାୟ <xliff:g id="TIME">%1$s</xliff:g> ଅବଶିଷ୍ଟ"</string>
-    <!-- no translation found for power_discharging_duration_enhanced (5726302316642148671) -->
-    <skip />
+    <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"ଆପଣଙ୍କ ବ୍ୟବହାରକୁ ଭିତ୍ତି କରି ପାଖାପାଖି <xliff:g id="TIME">%1$s</xliff:g> ବାକି ଅଛି(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> ଅବଶିଷ୍ଟ"</string>
-    <!-- no translation found for power_discharge_by_enhanced (8305422490607220844) -->
+    <!-- no translation found for power_discharge_by_enhanced (2095821536747992464) -->
     <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (896515698736070025) -->
+    <!-- no translation found for power_discharge_by_only_enhanced (2175151772952365149) -->
     <skip />
-    <!-- no translation found for power_discharge_by (6052127431194780229) -->
+    <!-- no translation found for power_discharge_by (6453537733650125582) -->
     <skip />
-    <!-- no translation found for power_discharge_by_only (4850425421176271395) -->
+    <!-- no translation found for power_discharge_by_only (107616694963545745) -->
     <skip />
-    <!-- no translation found for power_remaining_less_than_duration_only (5996752448813295329) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (5751885147712659423) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (3176771815132876675) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (8931654680569617380) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (1181059207608751924) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2606370266981054691) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_only_shutdown_imminent (2918084807716859985) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (3090926004324573908) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (7466484148515796216) -->
-    <skip />
-    <!-- no translation found for power_remaining_duration_shutdown_imminent (603933521600231649) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g>ରୁ କମ୍ ସମୟ ବଳକା ଅଛି"</string>
+    <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ରୁ କମ୍ ସମୟ ବଳକା ଅଛି (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>ରୁ ଅଧିକ ସମୟ ବଳକା ଅଛି(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="8931654680569617380">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>ରୁ ଅଧିକ ବଳକା ଅଛି"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="1181059207608751924">"ଖୁବ୍ ଶୀଘ୍ର ଫୋନ୍‌ଟି ବନ୍ଦ ହୋଇଯାଇପାରେ"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="2606370266981054691">"ଖୁବ୍ ଶୀଘ୍ର ଟାବଲେଟ୍‌ଟି ବନ୍ଦ ହୋଇଯାଇପାରେ"</string>
+    <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="2918084807716859985">"ଡିଭାଇସ୍ ଶୀଘ୍ର ବନ୍ଦ ହୋଇଯାଇପାରେ"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="default" msgid="3090926004324573908">"ଖୁବ୍ ଶୀଘ୍ର ଫୋନ୍‌ଟି ବନ୍ଦ ହୋଇଯାଇପାରେ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7466484148515796216">"ଖୁବ୍ ଶୀଘ୍ର ଟାବଲେଟ୍‌ଟି ବନ୍ଦ ହୋଇଯାଇପାରେ (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="603933521600231649">"ଖୁବ୍ ଶୀଘ୍ର ଡିଭାଇସ୍‌ଟି ବନ୍ଦ ହୋଇଯାଇପାରେ(<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="1779532561355864267">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="1421102457410268886">"ସମ୍ପୂର୍ଣ୍ଣ ଚାର୍ଜ ହେବାପାଇଁ <xliff:g id="TIME">%1$s</xliff:g> ଅବଶିଷ୍ଟ ଅଛି"</string>
     <string name="power_charging_duration" msgid="4676999980973411875">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ପୂର୍ଣ୍ଣ ଚାର୍ଜ ହେବା ପର୍ଯ୍ୟନ୍ତ"</string>
@@ -453,30 +422,27 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"ପଞ୍ଜିକୃତ"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"ପଞ୍ଜିକୃତ ହୋଇନାହିଁ"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"ଉପଲବ୍ଧ ନାହିଁ"</string>
-    <!-- no translation found for wifi_tether_connected_summary (3871603864314407780) -->
-    <!-- no translation found for accessibility_manual_zen_more_time (1636187409258564291) -->
+    <!-- no translation found for wifi_status_mac_randomized (5589328382467438245) -->
     <skip />
-    <!-- no translation found for accessibility_manual_zen_less_time (6590887204171164991) -->
-    <skip />
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="other">%1$dଟି ଡିଭାଇସ୍‌ ସଂଯୁକ୍ତ ହୋଇଛି</item>
+      <item quantity="one">%1$dଟି ଡିଭାଇସ୍ ସଂଯୁକ୍ତ ହୋଇଛି</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"ଅଧିକ ସମୟ।"</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"କମ୍ ସମୟ।"</string>
     <string name="cancel" msgid="6859253417269739139">"କ୍ୟାନ୍ସଲ୍"</string>
     <string name="okay" msgid="1997666393121016642">"ଠିକ୍‌ ଅଛି"</string>
-    <!-- no translation found for zen_mode_enable_dialog_turn_on (8287824809739581837) -->
-    <skip />
-    <!-- no translation found for zen_mode_settings_turn_on_dialog_title (2297134204747331078) -->
-    <skip />
+    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"ଅନ୍ କରନ୍ତୁ"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ଅନ୍ କରନ୍ତୁ"</string>
     <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"କଦାପି ନୁହେଁ"</string>
-    <!-- no translation found for zen_interruption_level_priority (2078370238113347720) -->
-    <skip />
-    <!-- no translation found for zen_mode_and_condition (4927230238450354412) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning_indef (3007988140196673193) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (6236690803924413088) -->
-    <skip />
-    <!-- no translation found for alarm_template (4996153414057676512) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (3779172822607461675) -->
-    <skip />
+    <string name="zen_interruption_level_priority" msgid="2078370238113347720">"କେବଳ ପ୍ରାଥମିକତା"</string>
+    <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
+    <string name="zen_alarm_warning_indef" msgid="3007988140196673193">"ଆପଣ <xliff:g id="WHEN">%1$s</xliff:g> ପୂର୍ବରୁ ଏହାକୁ ଅଫ୍‍ ନକଲେ ନିଜର ପରବର୍ତ୍ତୀ ଆଲାର୍ମ ଶୁଣିପାରିବେ ନାହିଁ"</string>
+    <string name="zen_alarm_warning" msgid="6236690803924413088">"<xliff:g id="WHEN">%1$s</xliff:g>ବେଳେ ଆପଣ ନିଜର ପରବର୍ତ୍ତୀ ଆଲାର୍ମ ଶୁଣିପାରିବେ ନାହିଁ"</string>
+    <string name="alarm_template" msgid="4996153414057676512">"<xliff:g id="WHEN">%1$s</xliff:g>ରେ"</string>
+    <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g> ବେଳେ"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"ଅବଧି"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"ପ୍ରତ୍ୟେକ ଥର ପଚାରନ୍ତୁ"</string>
+    <!-- no translation found for time_unit_just_now (6363336622778342422) -->
+    <skip />
 </resources>

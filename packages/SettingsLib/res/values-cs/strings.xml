@@ -360,10 +360,14 @@
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Při vašem obvyklém využití zbývá asi <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"Při vašem obvyklém využití (<xliff:g id="LEVEL">%2$s</xliff:g>) zbývá asi <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Zbývající čas: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_enhanced" msgid="8305422490607220844">"Při vašem obvyklém využití (<xliff:g id="LEVEL">%2$s</xliff:g>) vydrží asi do <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="896515698736070025">"Při vašem obvyklém využití vydrží asi do <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_discharge_by" msgid="6052127431194780229">"Vydrží asi do <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="4850425421176271395">"Vydrží asi do <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_discharge_by_enhanced (2095821536747992464) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only_enhanced (2175151772952365149) -->
+    <skip />
+    <!-- no translation found for power_discharge_by (6453537733650125582) -->
+    <skip />
+    <!-- no translation found for power_discharge_by_only (107616694963545745) -->
+    <skip />
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Zbývá méně než <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Zbývá méně než <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Zbývá více než <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -418,6 +422,8 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Registrováno"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Neregistrováno"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Není k dispozici"</string>
+    <!-- no translation found for wifi_status_mac_randomized (5589328382467438245) -->
+    <skip />
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
       <item quantity="few">Připojena %1$d zařízení</item>
       <item quantity="many">Připojeno %1$d zařízení</item>
@@ -439,4 +445,6 @@
     <string name="alarm_template_far" msgid="3779172822607461675">"v <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Trvání"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Pokaždé se zeptat"</string>
+    <!-- no translation found for time_unit_just_now (6363336622778342422) -->
+    <skip />
 </resources>
