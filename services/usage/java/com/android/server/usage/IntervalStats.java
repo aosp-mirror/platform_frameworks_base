@@ -166,6 +166,11 @@ class IntervalStats {
         endTime = timeStamp;
     }
 
+    void incrementAppLaunchCount(String packageName) {
+        UsageStats usageStats = getOrCreateUsageStats(packageName);
+        usageStats.mAppLaunchCount += 1;
+    }
+
     private String getCachedStringRef(String str) {
         final int index = mStringCache.indexOf(str);
         if (index < 0) {
