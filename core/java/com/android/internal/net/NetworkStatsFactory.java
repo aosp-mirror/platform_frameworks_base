@@ -22,16 +22,14 @@ import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
 
+import android.annotation.Nullable;
 import android.net.NetworkStats;
 import android.os.StrictMode;
 import android.os.SystemClock;
-import android.util.ArrayMap;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ProcFileReader;
-import com.google.android.collect.Lists;
 
 import libcore.io.IoUtils;
 
@@ -41,8 +39,10 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.ProtocolException;
-import java.util.ArrayList;
-import java.util.Objects;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Creates {@link NetworkStats} instances by parsing various {@code /proc/}
@@ -72,18 +72,55 @@ public class NetworkStatsFactory {
 
     private boolean mUseBpfStats;
 
-    // TODO: to improve testability and avoid global state, do not use a static variable.
-    @GuardedBy("sStackedIfaces")
-    private static final ArrayMap<String, String> sStackedIfaces = new ArrayMap<>();
+    // TODO: only do adjustments in NetworkStatsService and remove this.
+    /**
+     * (Stacked interface) -> (base interface) association for all connected ifaces since boot.
+     *
+     * Because counters must never roll backwards, once a given interface is stacked on top of an
+     * underlying interface, the stacked interface can never be stacked on top of
+     * another interface. */
+    private static final ConcurrentHashMap<String, String> sStackedIfaces
+            = new ConcurrentHashMap<>();
 
     public static void noteStackedIface(String stackedIface, String baseIface) {
-        synchronized (sStackedIfaces) {
-            if (baseIface != null) {
-                sStackedIfaces.put(stackedIface, baseIface);
-            } else {
-                sStackedIfaces.remove(stackedIface);
+        if (stackedIface != null && baseIface != null) {
+            sStackedIfaces.put(stackedIface, baseIface);
+        }
+    }
+
+    /**
+     * Get a set of interfaces containing specified ifaces and stacked interfaces.
+     *
+     * <p>The added stacked interfaces are ifaces stacked on top of the specified ones, or ifaces
+     * on which the specified ones are stacked. Stacked interfaces are those noted with
+     * {@link #noteStackedIface(String, String)}, but only interfaces noted before this method
+     * is called are guaranteed to be included.
+     */
+    public static String[] augmentWithStackedInterfacesLocked(@Nullable String[] requiredIfaces) {
+        if (requiredIfaces == NetworkStats.INTERFACES_ALL) {
+            return null;
+        }
+
+        HashSet<String> relatedIfaces = new HashSet<>(Arrays.asList(requiredIfaces));
+        // ConcurrentHashMap's EntrySet iterators are "guaranteed to traverse
+        // elements as they existed upon construction exactly once, and may
+        // (but are not guaranteed to) reflect any modifications subsequent to construction".
+        // This is enough here.
+        for (Map.Entry<String, String> entry : sStackedIfaces.entrySet()) {
+            if (relatedIfaces.contains(entry.getKey())) {
+                relatedIfaces.add(entry.getValue());
+            } else if (relatedIfaces.contains(entry.getValue())) {
+                relatedIfaces.add(entry.getKey());
             }
         }
+
+        String[] outArray = new String[relatedIfaces.size()];
+        return relatedIfaces.toArray(outArray);
+    }
+
+    @VisibleForTesting
+    public static void clearStackedIfaces() {
+        sStackedIfaces.clear();
     }
 
     public NetworkStatsFactory() {
@@ -252,12 +289,9 @@ public class NetworkStatsFactory {
             NetworkStats lastStats) throws IOException {
         final NetworkStats stats =
               readNetworkStatsDetailInternal(limitUid, limitIfaces, limitTag, lastStats);
-        final ArrayMap<String, String> stackedIfaces;
-        synchronized (sStackedIfaces) {
-            stackedIfaces = new ArrayMap<>(sStackedIfaces);
-        }
         // Total 464xlat traffic to subtract from uid 0 on all base interfaces.
-        final NetworkStats adjustments = new NetworkStats(0, stackedIfaces.size());
+        // sStackedIfaces may grow afterwards, but NetworkStats will just be resized automatically.
+        final NetworkStats adjustments = new NetworkStats(0, sStackedIfaces.size());
 
         NetworkStats.Entry entry = null; // For recycling
 
@@ -271,7 +305,7 @@ public class NetworkStatsFactory {
             if (entry.iface == null || !entry.iface.startsWith(CLATD_INTERFACE_PREFIX)) {
                 continue;
             }
-            final String baseIface = stackedIfaces.get(entry.iface);
+            final String baseIface = sStackedIfaces.get(entry.iface);
             if (baseIface == null) {
                 continue;
             }
