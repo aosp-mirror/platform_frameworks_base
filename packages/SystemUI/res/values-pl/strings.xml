@@ -40,12 +40,9 @@
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Pozostało <xliff:g id="PERCENTAGE">%s</xliff:g>, jeszcze około <xliff:g id="TIME">%s</xliff:g> (na podstawie Twojego sposobu korzystania)"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Pozostało <xliff:g id="PERCENTAGE">%s</xliff:g>, jeszcze około <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Pozostało <xliff:g id="PERCENTAGE">%s</xliff:g>. Oszczędzanie baterii jest włączone."</string>
-    <!-- no translation found for invalid_charger (2741987096648693172) -->
-    <skip />
-    <!-- no translation found for invalid_charger_title (2836102177577255404) -->
-    <skip />
-    <!-- no translation found for invalid_charger_text (6480624964117840005) -->
-    <skip />
+    <string name="invalid_charger" msgid="2741987096648693172">"Nie można naładować przez USB. Użyj ładowarki dostarczonej z urządzeniem."</string>
+    <string name="invalid_charger_title" msgid="2836102177577255404">"Nie można naładować przez USB"</string>
+    <string name="invalid_charger_text" msgid="6480624964117840005">"Użyj ładowarki dostarczonej z urządzeniem"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Ustawienia"</string>
     <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Włączyć Oszczędzanie baterii?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Włącz"</string>
@@ -153,7 +150,6 @@
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Połączono."</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Łączę..."</string>
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
-    <string name="data_connection_1x" msgid="396105635197711584">"1 X"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
     <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
     <string name="data_connection_3_5g" msgid="5218328297191657602">"3.5G"</string>
@@ -213,8 +209,7 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Tryb samolotowy jest włączony."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Tryb samolotowy został wyłączony."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Tryb samolotowy został włączony."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_priority_on (5836205286254617194) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"Tryb Nie przeszkadzać jest włączony."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Nie przeszkadzać (włączone, całkowita cisza)."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Nie przeszkadzać (włączone, tylko alarmy)."</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Nie przeszkadzać."</string>
@@ -282,7 +277,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"Półka ze słodkościami"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Wygaszacz ekranu"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
-    <string name="quick_settings_header_onboarding_text" msgid="7872508260264044734">"Naciśnij i przytrzymaj ikony, by wyświetlić więcej opcji"</string>
+    <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Kliknij i przytrzymaj ikony, by wyświetlić więcej opcji"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Nie przeszkadzać"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Tylko priorytetowe"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Tylko alarmy"</string>
@@ -443,8 +438,7 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> będzie zapisywać wszystko, co wyświetli się na ekranie."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Nie pokazuj ponownie"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Ukryj wszystkie"</string>
-    <!-- no translation found for dnd_suppressing_shade_text (7986451830430707907) -->
-    <skip />
+    <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"W trybie Nie przeszkadzać powiadomienia są ukrywane"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Rozpocznij teraz"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Brak powiadomień"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Profil może być monitorowany"</string>
@@ -550,8 +544,6 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Kliknij, by włączyć wibracje."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Kliknij, by wyciszyć."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"Sterowanie głośnością: %s"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Wibracje przy połączeniach i powiadomieniach"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Wyciszenie połączeń i powiadomień"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"Dzwonek przy połączeniach i powiadomieniach"</string>
     <string name="output_title" msgid="5355078100792942802">"Wyjście multimediów"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Wyjście dla połączeń telefonicznych"</string>
@@ -744,8 +736,11 @@
     <string name="right_keycode" msgid="708447961000848163">"Prawy klawisz"</string>
     <string name="left_icon" msgid="3096287125959387541">"Lewa ikona"</string>
     <string name="right_icon" msgid="3952104823293824311">"Prawa ikona"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Przeciągnij, aby dodać kafelki"</string>
+    <!-- no translation found for drag_to_add_tiles (230586591689084925) -->
+    <skip />
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Przeciągnij tutaj, by usunąć"</string>
+    <!-- no translation found for drag_to_remove_disabled (2390968976638993382) -->
+    <skip />
     <string name="qs_edit" msgid="2232596095725105230">"Edytuj"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Godzina"</string>
   <string-array name="clock_options">
@@ -849,7 +844,12 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Zastąp"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikacje działające w tle"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Kliknij, by wyświetlić szczegóły wykorzystania baterii i użycia danych"</string>
-    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Wyłączyć mobilną transmisję danych?"</string>
+    <!-- no translation found for mobile_data_disable_title (1068272097382942231) -->
+    <skip />
+    <!-- no translation found for mobile_data_disable_message (4756541658791493506) -->
+    <skip />
+    <!-- no translation found for mobile_data_disable_message_default_carrier (6078110473451946831) -->
+    <skip />
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Aplikacja Ustawienia nie może zweryfikować Twojej odpowiedzi, ponieważ inna aplikacja zasłania prośbę o udzielenie uprawnień."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"Zezwolić aplikacji <xliff:g id="APP_0">%1$s</xliff:g> na pokazywanie wycinków z aplikacji <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- Może odczytywać informacje z aplikacji <xliff:g id="APP">%1$s</xliff:g>"</string>

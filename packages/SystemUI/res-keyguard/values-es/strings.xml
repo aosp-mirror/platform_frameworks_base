@@ -28,12 +28,15 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Toca para escribir contraseña"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Escribe la contraseña para desbloquear"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Escribe el código PIN para desbloquear"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Introduce tu PIN"</string>
+    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"Introduce tu patrón"</string>
+    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"Introduce tu contraseña"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"El código PIN es incorrecto."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Tarjeta no válida."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"Cargada"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"Cargando"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"Cargando rápidamente"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"Cargando lentamente"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando rápidamente"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Cargando lentamente"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Conecta el cargador."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Pulsa el menú para desbloquear la pantalla."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Bloqueada para la red"</string>
