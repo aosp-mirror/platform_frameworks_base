@@ -3118,7 +3118,6 @@ public class Notification implements Parcelable
         private int mActionBarColor = COLOR_INVALID;
         private int mBackgroundColor = COLOR_INVALID;
         private int mForegroundColor = COLOR_INVALID;
-        private int mBackgroundColorHint = COLOR_INVALID;
         /**
          * A temporary location where actions are stored. If != null the view originally has action
          * but doesn't have any for this inflation.
@@ -4387,8 +4386,7 @@ public class Notification implements Parcelable
                             backgroundColor);
                     mSecondaryTextColor = NotificationColorUtil.resolveSecondaryColor(mContext,
                             backgroundColor);
-                    if (backgroundColor != COLOR_DEFAULT
-                            && (mBackgroundColorHint != COLOR_INVALID || isColorized())) {
+                    if (backgroundColor != COLOR_DEFAULT && isColorized()) {
                         mPrimaryTextColor = NotificationColorUtil.findAlphaToMeetContrast(
                                 mPrimaryTextColor, backgroundColor, 4.5);
                         mSecondaryTextColor = NotificationColorUtil.findAlphaToMeetContrast(
@@ -4595,19 +4593,11 @@ public class Notification implements Parcelable
         }
 
         private void bindExpandButton(RemoteViews contentView) {
-            int color = getPrimaryHighlightColor();
+            int color = isColorized() ? getPrimaryTextColor() : getSecondaryTextColor();
             contentView.setDrawableTint(R.id.expand_button, false, color,
                     PorterDuff.Mode.SRC_ATOP);
             contentView.setInt(R.id.notification_header, "setOriginalNotificationColor",
                     color);
-        }
-
-        /**
-         * @return the color that is used as the first primary highlight color. This is applied
-         * in several places like the action buttons or the app name in the header.
-         */
-        private int getPrimaryHighlightColor() {
-            return isColorized() ? getPrimaryTextColor() : resolveContrastColor();
         }
 
         private void bindHeaderChronometerAndTime(RemoteViews contentView) {
@@ -4706,7 +4696,7 @@ public class Notification implements Parcelable
                 setTextViewColorPrimary(contentView, R.id.app_name_text);
             } else {
                 contentView.setTextColor(R.id.app_name_text,
-                        ambient ? resolveAmbientColor() : resolveContrastColor());
+                        ambient ? resolveAmbientColor() : getSecondaryTextColor());
             }
         }
 
@@ -5234,7 +5224,14 @@ public class Notification implements Parcelable
         private void processSmallIconColor(Icon smallIcon, RemoteViews contentView,
                 boolean ambient) {
             boolean colorable = !isLegacy() || getColorUtil().isGrayscaleIcon(mContext, smallIcon);
-            int color = ambient ? resolveAmbientColor() : getPrimaryHighlightColor();
+            int color;
+            if (ambient) {
+                color = resolveAmbientColor();
+            } else if (isColorized()) {
+                color = getPrimaryTextColor();
+            } else {
+                color = resolveContrastColor();
+            }
             if (colorable) {
                 contentView.setDrawableTint(R.id.icon, false, color,
                         PorterDuff.Mode.SRC_ATOP);
@@ -5270,14 +5267,11 @@ public class Notification implements Parcelable
             }
 
             int color;
-            int background = mBackgroundColorHint;
-            if (mBackgroundColorHint == COLOR_INVALID) {
-                background = mContext.getColor(
-                        com.android.internal.R.color.notification_material_background_color);
-            }
+            int background = mContext.getColor(
+                    com.android.internal.R.color.notification_material_background_color);
             if (mN.color == COLOR_DEFAULT) {
                 ensureColors();
-                color = mSecondaryTextColor;
+                color = NotificationColorUtil.resolveDefaultColor(mContext, background);
             } else {
                 color = NotificationColorUtil.resolveContrastColor(mContext, mN.color,
                         background, mInNightMode);
@@ -5517,8 +5511,7 @@ public class Notification implements Parcelable
             if (isColorized()) {
                 return mBackgroundColor != COLOR_INVALID ? mBackgroundColor : mN.color;
             } else {
-                return mBackgroundColorHint != COLOR_INVALID ? mBackgroundColorHint
-                        : COLOR_DEFAULT;
+                return COLOR_DEFAULT;
             }
         }
 
@@ -5553,18 +5546,6 @@ public class Notification implements Parcelable
             mTextColorsAreForBackground = COLOR_INVALID;
             ensureColors();
         }
-
-        /**
-         * Sets the background color for this notification to be a different one then the default.
-         * This is mainly used to calculate contrast and won't necessarily be applied to the
-         * background.
-         *
-         * @hide
-         */
-        public void setBackgroundColorHint(int backgroundColor) {
-            mBackgroundColorHint = backgroundColor;
-        }
-
 
         /**
          * Forces all styled remoteViews to be built from scratch and not use any cached
@@ -5972,7 +5953,7 @@ public class Notification implements Parcelable
          * @hide
          */
         public abstract boolean areNotificationsVisiblyDifferent(Style other);
-        
+
         /**
          * @return the the text that should be displayed in the statusBar when heads-upped.
          * If {@code null} is returned, the default implementation will be used.
@@ -7498,8 +7479,7 @@ public class Notification implements Parcelable
                     }
 
                     final Action action = mBuilder.mActions.get(mActionsToShowInCompact[i]);
-                    final RemoteViews button = generateMediaActionButton(action,
-                            getPrimaryHighlightColor());
+                    final RemoteViews button = generateMediaActionButton(action, getActionColor());
                     view.addView(com.android.internal.R.id.media_actions, button);
                 }
             }
@@ -7513,8 +7493,9 @@ public class Notification implements Parcelable
             return view;
         }
 
-        private int getPrimaryHighlightColor() {
-            return mBuilder.getPrimaryHighlightColor();
+        private int getActionColor() {
+            return mBuilder.isColorized() ? mBuilder.getPrimaryTextColor()
+                    : mBuilder.resolveContrastColor();
         }
 
         private RemoteViews makeMediaBigContentView() {
@@ -7534,7 +7515,7 @@ public class Notification implements Parcelable
                 big.removeAllViews(com.android.internal.R.id.media_actions);
                 for (int i = 0; i < actionCount; i++) {
                     final RemoteViews button = generateMediaActionButton(mBuilder.mActions.get(i),
-                            getPrimaryHighlightColor());
+                            getActionColor());
                     big.addView(com.android.internal.R.id.media_actions, button);
                 }
             }
