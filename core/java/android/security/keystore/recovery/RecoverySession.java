@@ -234,7 +234,7 @@ public class RecoverySession implements AutoCloseable {
      * @throws InternalRecoveryServiceException if an error occurs internal to the recovery service.
      */
     @RequiresPermission(Manifest.permission.RECOVER_KEYSTORE)
-    public Map<String, Key> recoverKeyChainSnapshot(
+    @NonNull public Map<String, Key> recoverKeyChainSnapshot(
             @NonNull byte[] recoveryKeyBlob,
             @NonNull List<WrappedApplicationKey> applicationKeys
     ) throws SessionExpiredException, DecryptionFailedException, InternalRecoveryServiceException {
@@ -257,7 +257,7 @@ public class RecoverySession implements AutoCloseable {
     }
 
     /** Given a map from alias to grant alias, returns a map from alias to a {@link Key} handle. */
-    private Map<String, Key> getKeysFromGrants(Map<String, String> grantAliases)
+    private @NonNull Map<String, Key> getKeysFromGrants(Map<String, String> grantAliases)
             throws InternalRecoveryServiceException {
         ArrayMap<String, Key> keysByAlias = new ArrayMap<>(grantAliases.size());
         for (String alias : grantAliases.keySet()) {
