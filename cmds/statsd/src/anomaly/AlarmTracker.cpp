@@ -39,12 +39,14 @@ AlarmTracker::AlarmTracker(uint64_t startMillis,
     VLOG("AlarmTracker() called");
     mAlarmSec = (startMillis + mAlarmConfig.offset_millis()) / MS_PER_SEC;
     mInternalAlarm = new InternalAlarm{static_cast<uint32_t>(mAlarmSec)};
-    mAlarmMonitor->add(mInternalAlarm);
+    if (mAlarmMonitor != nullptr) {
+        mAlarmMonitor->add(mInternalAlarm);
+    }
 }
 
 AlarmTracker::~AlarmTracker() {
     VLOG("~AlarmTracker() called");
-    if (mInternalAlarm != nullptr) {
+    if (mInternalAlarm != nullptr && mAlarmMonitor != nullptr) {
         mAlarmMonitor->remove(mInternalAlarm);
     }
 }
@@ -61,7 +63,8 @@ uint64_t AlarmTracker::findNextAlarmSec(uint64_t currentTimeSec) {
 void AlarmTracker::informAlarmsFired(
         const uint64_t& timestampNs,
         unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& firedAlarms) {
-    if (firedAlarms.empty() || firedAlarms.find(mInternalAlarm) == firedAlarms.end()) {
+    if (firedAlarms.empty() || mInternalAlarm == nullptr ||
+        firedAlarms.find(mInternalAlarm) == firedAlarms.end()) {
         return;
     }
     if (!mSubscriptions.empty()) {
@@ -69,9 +72,11 @@ void AlarmTracker::informAlarmsFired(
                            mSubscriptions);
     }
     firedAlarms.erase(mInternalAlarm);
-    mAlarmSec = findNextAlarmSec(timestampNs / NS_PER_SEC);
+    mAlarmSec = findNextAlarmSec((timestampNs-1) / NS_PER_SEC + 1); // round up
     mInternalAlarm = new InternalAlarm{static_cast<uint32_t>(mAlarmSec)};
-    mAlarmMonitor->add(mInternalAlarm);
+    if (mAlarmMonitor != nullptr) {
+        mAlarmMonitor->add(mInternalAlarm);
+    }
 }
 
 }  // namespace statsd

@@ -87,7 +87,7 @@ StatsLogProcessor::~StatsLogProcessor() {
 }
 
 void StatsLogProcessor::onAnomalyAlarmFired(
-        const uint64_t timestampNs,
+        const uint64_t& timestampNs,
         unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
     for (const auto& itr : mMetricsManagers) {
@@ -95,7 +95,7 @@ void StatsLogProcessor::onAnomalyAlarmFired(
     }
 }
 void StatsLogProcessor::onPeriodicAlarmFired(
-        const uint64_t timestampNs,
+        const uint64_t& timestampNs,
         unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet) {
 
     std::lock_guard<std::mutex> lock(mMetricsMutex);

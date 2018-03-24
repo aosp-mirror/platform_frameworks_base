@@ -698,7 +698,7 @@ Status StatsService::informAlarmForSubscriberTriggeringFired() {
                 "Only system uid can call informAlarmForSubscriberTriggeringFired");
     }
 
-    uint64_t currentTimeSec = time(nullptr);
+    uint64_t currentTimeSec = getElapsedRealtimeSec();
     std::unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet =
             mPeriodicAlarmMonitor->popSoonerThan(static_cast<uint32_t>(currentTimeSec));
     if (alarmSet.size() > 0) {

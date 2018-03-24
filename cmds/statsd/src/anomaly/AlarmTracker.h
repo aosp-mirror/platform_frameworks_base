@@ -48,6 +48,11 @@ public:
             unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& firedAlarms);
 
 protected:
+    // For test only. Returns the alarm timestamp in seconds. Otherwise returns 0.
+    inline uint32_t getAlarmTimestampSec() const {
+        return mInternalAlarm == nullptr ? 0 : mInternalAlarm->timestampSec;
+    }
+
     uint64_t findNextAlarmSec(uint64_t currentTimeMillis);
 
     // statsd_config.proto Alarm message that defines this tracker.
@@ -69,6 +74,7 @@ protected:
     sp<const InternalAlarm> mInternalAlarm;
 
     FRIEND_TEST(AlarmTrackerTest, TestTriggerTimestamp);
+    FRIEND_TEST(AlarmE2eTest, TestMultipleAlarms);
 };
 
 }  // namespace statsd
