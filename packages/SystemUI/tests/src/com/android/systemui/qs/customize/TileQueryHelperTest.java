@@ -15,71 +15,87 @@
 package com.android.systemui.qs.customize;
 
 import static junit.framework.Assert.assertEquals;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static junit.framework.Assert.assertTrue;
 
-import com.android.systemui.Dependency;
+import static org.junit.Assert.assertFalse;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
-import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.qs.QSTile;
-import com.android.systemui.plugins.qs.QSTile.State;
-import com.android.systemui.qs.QSTileHost;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+
+import com.android.systemui.Dependency;
+import com.android.systemui.SysuiTestCase;
+import com.android.systemui.qs.QSTileHost;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import android.os.Message;
-import android.test.suitebuilder.annotation.SmallTest;
+import java.util.ArrayList;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 public class TileQueryHelperTest extends SysuiTestCase {
+    @Mock private TileQueryHelper.TileStateListener mListener;
+    @Mock private QSTileHost mQSTileHost;
+
     private TestableLooper mBGLooper;
-    private Runnable mLastCallback;
+
+    private TileQueryHelper mTileQueryHelper;
 
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
         mBGLooper = TestableLooper.get(this);
         mDependency.injectTestDependency(Dependency.BG_LOOPER, mBGLooper.getLooper());
+        mTileQueryHelper = new TileQueryHelper(mContext, mListener);
     }
 
     @Test
-    public void testCompletionCalled() {
-        QSTileHost mockHost = mock(QSTileHost.class);
-        TileAdapter mockAdapter = mock(TileAdapter.class);
-        Runnable mockCompletion = mock(Runnable.class);
-        new TileQueryHelper(mContext, mockHost, mockAdapter, mockCompletion);
-        mBGLooper.processAllMessages();
-        verify(mockCompletion).run();
+    public void testIsFinished_falseBeforeQuerying() {
+        assertFalse(mTileQueryHelper.isFinished());
     }
 
     @Test
-    public void testCompletionCalledAfterTilesFetched() {
-        QSTile mockTile = mock(QSTile.class);
-        State mockState = mock(State.class);
-        when(mockState.copy()).thenReturn(mockState);
-        when(mockTile.getState()).thenReturn(mockState);
-        when(mockTile.isAvailable()).thenReturn(true);
+    public void testIsFinished_trueAfterQuerying() {
+        mTileQueryHelper.queryTiles(mQSTileHost);
 
-        QSTileHost mockHost = mock(QSTileHost.class);
-        when(mockHost.createTile(any())).thenReturn(mockTile);
-
-        mBGLooper.setMessageHandler((Message m) -> {
-            mLastCallback = m.getCallback();
-            return true;
-        });
-        TileAdapter mockAdapter = mock(TileAdapter.class);
-        Runnable mockCompletion = mock(Runnable.class);
-        new TileQueryHelper(mContext, mockHost, mockAdapter, mockCompletion);
-
-        // Verify that the last thing in the queue was our callback
         mBGLooper.processAllMessages();
-        assertEquals(mockCompletion, mLastCallback);
+        waitForIdleSync(Dependency.get(Dependency.MAIN_HANDLER));
+
+        assertTrue(mTileQueryHelper.isFinished());
+    }
+
+    @Test
+    public void testQueryTiles_callsListenerTwice() {
+        mTileQueryHelper.queryTiles(mQSTileHost);
+
+        mBGLooper.processAllMessages();
+        waitForIdleSync(Dependency.get(Dependency.MAIN_HANDLER));
+
+        verify(mListener, times(2)).onTilesChanged(any());
+    }
+
+    @Test
+    public void testQueryTiles_isFinishedFalseOnListenerCalls_thenTrueAfterCompletion() {
+        doAnswer(invocation -> {
+            assertFalse(mTileQueryHelper.isFinished());
+            return null;
+        }).when(mListener).onTilesChanged(any());
+
+        mTileQueryHelper.queryTiles(mQSTileHost);
+
+        mBGLooper.processAllMessages();
+        waitForIdleSync(Dependency.get(Dependency.MAIN_HANDLER));
+
+        assertTrue(mTileQueryHelper.isFinished());
     }
 }
