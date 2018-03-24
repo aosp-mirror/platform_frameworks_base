@@ -58,6 +58,10 @@ class StatsPullerManager {
         return mPullerManager.ForceClearPullerCache();
     }
 
+    void SetStatsCompanionService(sp<IStatsCompanionService> statsCompanionService) {
+        mPullerManager.SetStatsCompanionService(statsCompanionService);
+    }
+
     int ClearPullerCacheIfNecessary(long timestampSec) {
         return mPullerManager.ClearPullerCacheIfNecessary(timestampSec);
     }

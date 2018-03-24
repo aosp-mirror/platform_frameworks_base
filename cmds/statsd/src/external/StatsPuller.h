@@ -16,9 +16,9 @@
 
 #pragma once
 
-#include <android/os/StatsLogEventWrapper.h>
-#include <utils/String16.h>
+#include <android/os/IStatsCompanionService.h>
 #include <utils/RefBase.h>
+#include <utils/String16.h>
 #include <mutex>
 #include <vector>
 #include "packages/UidMap.h"
@@ -26,8 +26,6 @@
 #include "guardrail/StatsdStats.h"
 #include "logd/LogEvent.h"
 #include "puller_util.h"
-
-using android::os::StatsLogEventWrapper;
 
 namespace android {
 namespace os {
@@ -49,7 +47,9 @@ public:
 
     static void SetUidMap(const sp<UidMap>& uidMap);
 
-   protected:
+    virtual void SetStatsCompanionService(sp<IStatsCompanionService> statsCompanionService){};
+
+protected:
     // The atom tag id this puller pulls
     const int mTagId;
 
