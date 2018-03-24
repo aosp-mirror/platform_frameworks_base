@@ -1061,6 +1061,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public void setDismissed(boolean fromAccessibility) {
+        setLongPressListener(null);
         mDismissed = true;
         mGroupParentWhenDismissed = mNotificationParent;
         mRefocusOnDismiss = fromAccessibility;
