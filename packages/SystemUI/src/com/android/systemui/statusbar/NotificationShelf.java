@@ -85,6 +85,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private boolean mAnimationsEnabled = true;
     private boolean mShowNotificationShelf;
     private float mFirstElementRoundness;
+    private Rect mClipRect = new Rect();
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -672,6 +673,11 @@ public class NotificationShelf extends ActivatableNotificationView implements
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         updateRelativeOffset();
+
+        // we always want to clip to our sides, such that nothing can draw outside of these bounds
+        int height = getResources().getDisplayMetrics().heightPixels;
+        mClipRect.set(0, -height, getWidth(), height);
+        mShelfIcons.setClipBounds(mClipRect);
     }
 
     private void updateRelativeOffset() {
