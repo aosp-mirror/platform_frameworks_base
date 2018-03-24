@@ -20,10 +20,9 @@
 #include <android/os/IStatsCompanionService.h>
 #include <binder/IPCThreadState.h>
 #include <private/android_filesystem_config.h>
+#include "../stats_log_util.h"
+#include "../statscompanion_util.h"
 #include "StatsCompanionServicePuller.h"
-#include "StatsService.h"
-#include "stats_log_util.h"
-#include "guardrail/StatsdStats.h"
 
 using namespace android;
 using namespace android::base;
@@ -44,11 +43,18 @@ const int kLogMsgHeaderSize = 28;
 StatsCompanionServicePuller::StatsCompanionServicePuller(int tagId) : StatsPuller(tagId) {
 }
 
+void StatsCompanionServicePuller::SetStatsCompanionService(
+        sp<IStatsCompanionService> statsCompanionService) {
+    AutoMutex _l(mStatsCompanionServiceLock);
+    sp<IStatsCompanionService> tmpForLock = mStatsCompanionService;
+    mStatsCompanionService = statsCompanionService;
+}
+
 bool StatsCompanionServicePuller::PullInternal(vector<shared_ptr<LogEvent> >* data) {
-    sp<IStatsCompanionService> statsCompanion = StatsService::getStatsCompanionService();
-    vector<StatsLogEventWrapper> returned_value;
-    if (statsCompanion != NULL) {
-        Status status = statsCompanion->pullData(mTagId, &returned_value);
+    sp<IStatsCompanionService> statsCompanionServiceCopy = mStatsCompanionService;
+    if (statsCompanionServiceCopy != nullptr) {
+        vector<StatsLogEventWrapper> returned_value;
+        Status status = statsCompanionServiceCopy->pullData(mTagId, &returned_value);
         if (!status.isOk()) {
             ALOGW("error pulling for %d", mTagId);
             return false;

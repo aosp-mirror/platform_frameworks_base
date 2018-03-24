@@ -23,6 +23,7 @@
 #include "config/ConfigManager.h"
 #include "external/StatsPullerManager.h"
 #include "packages/UidMap.h"
+#include "statscompanion_util.h"
 
 #include <android/os/BnStatsManager.h>
 #include <android/os/IStatsCompanionService.h>
@@ -131,9 +132,6 @@ public:
     // later.
     /** Inform statsCompanion that statsd is ready. */
     virtual void sayHiToStatsCompanion();
-
-    /** Fetches and returns the StatsCompanionService. */
-    static sp<IStatsCompanionService> getStatsCompanionService();
 
     /** IBinder::DeathRecipient */
     virtual void binderDied(const wp<IBinder>& who) override;

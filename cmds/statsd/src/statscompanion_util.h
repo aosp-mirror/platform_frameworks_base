@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,20 @@
 
 #pragma once
 
-#include <utils/String16.h>
-#include "StatsPuller.h"
+#include "StatsLogProcessor.h"
+
+using namespace android;
+using namespace android::base;
+using namespace android::binder;
+using namespace android::os;
+using namespace std;
 
 namespace android {
 namespace os {
 namespace statsd {
 
-class StatsCompanionServicePuller : public StatsPuller {
-public:
-    StatsCompanionServicePuller(int tagId);
-    bool PullInternal(vector<std::shared_ptr<LogEvent> >* data) override;
-
-    void SetStatsCompanionService(sp<IStatsCompanionService> statsCompanionService) override;
-
-private:
-    Mutex mStatsCompanionServiceLock;
-    sp<IStatsCompanionService> mStatsCompanionService = nullptr;
-};
+/** Fetches and returns the StatsCompanionService. */
+sp<IStatsCompanionService> getStatsCompanionService();
 
 }  // namespace statsd
 }  // namespace os
