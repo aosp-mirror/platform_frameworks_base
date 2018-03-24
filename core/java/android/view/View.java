@@ -13914,11 +13914,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mAttachInfo.mUnbufferedDispatchRequested = true;
     }
 
+    private boolean hasSize() {
+        return (mBottom > mTop) && (mRight > mLeft);
+    }
+
     private boolean canTakeFocus() {
         return ((mViewFlags & VISIBILITY_MASK) == VISIBLE)
                 && ((mViewFlags & FOCUSABLE) == FOCUSABLE)
                 && ((mViewFlags & ENABLED_MASK) == ENABLED)
-                && (sCanFocusZeroSized || !isLayoutValid() || (mBottom > mTop) && (mRight > mLeft));
+                && (sCanFocusZeroSized || !isLayoutValid() || hasSize());
     }
 
     /**
@@ -13979,7 +13983,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             || focusableChangedByAuto == 0
                             || viewRootImpl == null
                             || viewRootImpl.mThread == Thread.currentThread()) {
-                        shouldNotifyFocusableAvailable = true;
+                        shouldNotifyFocusableAvailable = canTakeFocus();
                     }
                 }
             }
@@ -13998,11 +14002,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
                 needGlobalAttributesUpdate(true);
 
-                // a view becoming visible is worth notifying the parent
-                // about in case nothing has focus.  even if this specific view
-                // isn't focusable, it may contain something that is, so let
-                // the root view try to give this focus if nothing else does.
-                shouldNotifyFocusableAvailable = true;
+                // a view becoming visible is worth notifying the parent about in case nothing has
+                // focus. Even if this specific view isn't focusable, it may contain something that
+                // is, so let the root view try to give this focus if nothing else does.
+                shouldNotifyFocusableAvailable = hasSize();
             }
         }
 
@@ -14011,16 +14014,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 // a view becoming enabled should notify the parent as long as the view is also
                 // visible and the parent wasn't already notified by becoming visible during this
                 // setFlags invocation.
-                shouldNotifyFocusableAvailable = true;
+                shouldNotifyFocusableAvailable = canTakeFocus();
             } else {
                 if (isFocused()) clearFocus();
             }
         }
 
-        if (shouldNotifyFocusableAvailable) {
-            if (mParent != null && canTakeFocus()) {
-                mParent.focusableViewAvailable(this);
-            }
+        if (shouldNotifyFocusableAvailable && mParent != null) {
+            mParent.focusableViewAvailable(this);
         }
 
         /* Check if the GONE bit has changed */
