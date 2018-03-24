@@ -976,6 +976,40 @@ public final class DefaultPermissionGrantPolicy {
         }
     }
 
+    public void grantDefaultPermissionsToEnabledTelephonyDataServices(
+            String[] packageNames, int userId) {
+        Log.i(TAG, "Granting permissions to enabled data services for user:" + userId);
+        if (packageNames == null) {
+            return;
+        }
+        for (String packageName : packageNames) {
+            PackageParser.Package dataServicePackage = getSystemPackage(packageName);
+            if (dataServicePackage != null
+                    && doesPackageSupportRuntimePermissions(dataServicePackage)) {
+                // Grant these permissions as system-fixed, so that nobody can accidentally
+                // break cellular data.
+                grantRuntimePermissions(dataServicePackage, PHONE_PERMISSIONS, true, userId);
+                grantRuntimePermissions(dataServicePackage, LOCATION_PERMISSIONS, true, userId);
+            }
+        }
+    }
+
+    public void revokeDefaultPermissionsFromDisabledTelephonyDataServices(
+            String[] packageNames, int userId) {
+        Log.i(TAG, "Revoking permissions from disabled data services for user:" + userId);
+        if (packageNames == null) {
+            return;
+        }
+        for (String packageName : packageNames) {
+            PackageParser.Package dataServicePackage = getSystemPackage(packageName);
+            if (dataServicePackage != null
+                    && doesPackageSupportRuntimePermissions(dataServicePackage)) {
+                revokeRuntimePermissions(dataServicePackage, PHONE_PERMISSIONS, true, userId);
+                revokeRuntimePermissions(dataServicePackage, LOCATION_PERMISSIONS, true, userId);
+            }
+        }
+    }
+
     public void grantDefaultPermissionsToDefaultBrowser(String packageName, int userId) {
         Log.i(TAG, "Granting permissions to default browser for user:" + userId);
         if (packageName == null) {
@@ -1078,6 +1112,51 @@ public final class DefaultPermissionGrantPolicy {
         grantRuntimePermissions(pkg, permissions, systemFixed, false, userId);
     }
 
+    private void revokeRuntimePermissions(PackageParser.Package pkg, Set<String> permissions,
+            boolean systemFixed, int userId) {
+        if (pkg.requestedPermissions.isEmpty()) {
+            return;
+        }
+        Set<String> revokablePermissions = new ArraySet<>(pkg.requestedPermissions);
+
+        for (String permission : permissions) {
+            // We can't revoke what wasn't requested.
+            if (!revokablePermissions.contains(permission)) {
+                continue;
+            }
+
+            final int flags = mServiceInternal.getPermissionFlagsTEMP(
+                    permission, pkg.packageName, userId);
+
+            // We didn't get this through the default grant policy. Move along.
+            if ((flags & PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT) == 0) {
+                continue;
+            }
+            // We aren't going to clobber device policy with a DefaultGrant.
+            if ((flags & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0) {
+                continue;
+            }
+            // Do not revoke system fixed permissions unless caller set them that way;
+            // there is no refcount for the number of sources of this, so there
+            // should be at most one grantor doing SYSTEM_FIXED for any given package.
+            if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0 && !systemFixed) {
+                continue;
+            }
+            mServiceInternal.revokeRuntimePermission(pkg.packageName, permission, userId, false);
+
+            if (DEBUG) {
+                Log.i(TAG, "revoked " + (systemFixed ? "fixed " : "not fixed ")
+                        + permission + " to " + pkg.packageName);
+            }
+
+            // Remove the GRANTED_BY_DEFAULT flag without touching the others.
+            // Note that we do not revoke FLAG_PERMISSION_SYSTEM_FIXED. That bit remains
+            // sticky once set.
+            mServiceInternal.updatePermissionFlagsTEMP(permission, pkg.packageName,
+                    PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT, 0, userId);
+        }
+    }
+
     private void grantRuntimePermissions(PackageParser.Package pkg, Set<String> permissions,
             boolean systemFixed, boolean ignoreSystemPackage, int userId) {
         if (pkg.requestedPermissions.isEmpty()) {
@@ -1128,10 +1207,10 @@ public final class DefaultPermissionGrantPolicy {
                 // to make sure we can grant the needed permission to the default
                 // sms and phone apps after the user chooses this in the UI.
                 if (flags == 0 || ignoreSystemPackage) {
-                    // Never clobber policy or system.
-                    final int fixedFlags = PackageManager.FLAG_PERMISSION_SYSTEM_FIXED
-                            | PackageManager.FLAG_PERMISSION_POLICY_FIXED;
-                    if ((flags & fixedFlags) != 0) {
+                    // Never clobber policy fixed permissions.
+                    // We must allow the grant of a system-fixed permission because
+                    // system-fixed is sticky, but the permission itself may be revoked.
+                    if ((flags & PackageManager.FLAG_PERMISSION_POLICY_FIXED) != 0) {
                         continue;
                     }
 
