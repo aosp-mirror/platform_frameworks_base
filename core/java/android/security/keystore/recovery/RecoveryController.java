@@ -496,7 +496,7 @@ public class RecoveryController {
      *     screen is required to generate recoverable keys.
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public Key generateKey(@NonNull String alias) throws InternalRecoveryServiceException,
+    public @NonNull Key generateKey(@NonNull String alias) throws InternalRecoveryServiceException,
             LockScreenRequiredException {
         try {
             String grantAlias = mBinder.generateKey(alias);
@@ -527,7 +527,7 @@ public class RecoveryController {
      *
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public Key importKey(@NonNull String alias, byte[] keyBytes)
+    public @NonNull Key importKey(@NonNull String alias, @NonNull byte[] keyBytes)
             throws InternalRecoveryServiceException, LockScreenRequiredException {
         try {
             String grantAlias = mBinder.importKey(alias, keyBytes);
@@ -575,7 +575,7 @@ public class RecoveryController {
     /**
      * Returns the key with the given {@code grantAlias}.
      */
-    Key getKeyFromGrant(String grantAlias) throws UnrecoverableKeyException {
+    @NonNull Key getKeyFromGrant(@NonNull String grantAlias) throws UnrecoverableKeyException {
         return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(
                 mKeyStore,
                 grantAlias,
@@ -611,7 +611,7 @@ public class RecoveryController {
     }
 
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public Map<String, X509Certificate> getRootCertificates() {
+    public @NonNull Map<String, X509Certificate> getRootCertificates() {
         return TrustedRootCertificates.getRootCertificates();
     }
 
