@@ -82,8 +82,7 @@ public class RestrictedSwitchPreference extends SwitchPreference {
     }
 
     public RestrictedSwitchPreference(Context context, AttributeSet attrs) {
-        this(context, attrs, TypedArrayUtils.getAttr(context,
-                android.support.v7.preference.R.attr.switchPreferenceStyle,
+        this(context, attrs, TypedArrayUtils.getAttr(context, R.attr.switchPreferenceStyle,
                 android.R.attr.switchPreferenceStyle));
     }
 
