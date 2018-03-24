@@ -759,6 +759,7 @@ public class AudioSystem
             case FOR_SYSTEM: return "FOR_SYSTEM";
             case FOR_HDMI_SYSTEM_AUDIO: return "FOR_HDMI_SYSTEM_AUDIO";
             case FOR_ENCODED_SURROUND: return "FOR_ENCODED_SURROUND";
+            case FOR_VIBRATE_RINGING: return "FOR_VIBRATE_RINGING";
             default: return "unknown usage (" + usage + ")" ;
         }
     }
