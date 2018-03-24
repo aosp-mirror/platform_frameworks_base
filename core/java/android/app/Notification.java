@@ -6678,7 +6678,8 @@ public class Notification implements Parcelable
         public RemoteViews makeContentView(boolean increasedHeight) {
             mBuilder.mOriginalActions = mBuilder.mActions;
             mBuilder.mActions = new ArrayList<>();
-            RemoteViews remoteViews = makeMessagingView(true /* isCollapsed */);
+            RemoteViews remoteViews = makeMessagingView(true /* displayImagesAtEnd */,
+                    true /* showReplyIcon */);
             mBuilder.mActions = mBuilder.mOriginalActions;
             mBuilder.mOriginalActions = null;
             return remoteViews;
@@ -6765,11 +6766,19 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeBigContentView() {
-            return makeMessagingView(false /* isCollapsed */);
+            return makeMessagingView(false /* displayImagesAtEnd */, false /* showReplyIcon */);
         }
 
+        /**
+         * Create a messaging layout.
+         *
+         * @param displayImagesAtEnd should images be displayed at the end of the content instead
+         *                           of inline.
+         * @param showReplyIcon Should the reply affordance be shown at the end of the notification
+         * @return the created remoteView.
+         */
         @NonNull
-        private RemoteViews makeMessagingView(boolean isCollapsed) {
+        private RemoteViews makeMessagingView(boolean displayImagesAtEnd, boolean showReplyIcon) {
             CharSequence conversationTitle = !TextUtils.isEmpty(super.mBigContentTitle)
                     ? super.mBigContentTitle
                     : mConversationTitle;
@@ -6780,24 +6789,24 @@ public class Notification implements Parcelable
                 nameReplacement = conversationTitle;
                 conversationTitle = null;
             }
-            boolean hideLargeIcon = !isCollapsed || isOneToOne;
+            boolean hideLargeIcon = !showReplyIcon || isOneToOne;
             RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(
                     mBuilder.getMessagingLayoutResource(),
                     mBuilder.mParams.reset().hasProgress(false).title(conversationTitle).text(null)
                             .hideLargeIcon(hideLargeIcon)
                             .headerTextSecondary(conversationTitle)
-                            .alwaysShowReply(isCollapsed));
+                            .alwaysShowReply(showReplyIcon));
             addExtras(mBuilder.mN.extras);
             // also update the end margin if there is an image
             int endMargin = R.dimen.notification_content_margin_end;
-            if (isCollapsed) {
+            if (showReplyIcon) {
                 endMargin = R.dimen.notification_content_plus_picture_margin_end;
             }
             contentView.setViewLayoutMarginEndDimen(R.id.notification_main_column, endMargin);
             contentView.setInt(R.id.status_bar_latest_event_content, "setLayoutColor",
                     mBuilder.resolveContrastColor());
-            contentView.setBoolean(R.id.status_bar_latest_event_content, "setIsCollapsed",
-                    isCollapsed);
+            contentView.setBoolean(R.id.status_bar_latest_event_content, "setDisplayImagesAtEnd",
+                    displayImagesAtEnd);
             contentView.setIcon(R.id.status_bar_latest_event_content, "setLargeIcon",
                     mBuilder.mN.mLargeIcon);
             contentView.setCharSequence(R.id.status_bar_latest_event_content, "setNameReplacement",
@@ -6864,7 +6873,8 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
-            RemoteViews remoteViews = makeMessagingView(true /* isCollapsed */);
+            RemoteViews remoteViews = makeMessagingView(true /* displayImagesAtEnd */,
+                    false /* showReplyIcon */);
             remoteViews.setInt(R.id.notification_messaging, "setMaxDisplayedLines", 1);
             return remoteViews;
         }
