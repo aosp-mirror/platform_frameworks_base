@@ -703,4 +703,7 @@ interface IActivityManager {
      */
     void registerRemoteAnimationForNextActivityStart(in String packageName,
            in RemoteAnimationAdapter adapter);
+
+    /** @see android.app.ActivityManager#alwaysShowUnsupportedCompileSdkWarning */
+    void alwaysShowUnsupportedCompileSdkWarning(in ComponentName activity);
 }
