@@ -339,7 +339,7 @@ TEST(AtomMatcherTest, TestNeqAnyStringMatcher) {
             ATTRIBUTION_UID_FIELD_ID);
     auto neqStringList = attributionMatcher->mutable_matches_tuple()
                                  ->mutable_field_value_matcher(0)
-                                 ->mutable_neq_all_string();
+                                 ->mutable_neq_any_string();
     neqStringList->add_str_value("pkg2");
     neqStringList->add_str_value("pkg3");
 

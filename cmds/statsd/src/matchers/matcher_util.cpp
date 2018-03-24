@@ -236,8 +236,8 @@ bool matchesSimple(const UidMap& uidMap, const FieldValueMatcher& matcher,
             }
             return false;
         }
-        case FieldValueMatcher::ValueMatcherCase::kNeqAllString: {
-            const auto& str_list = matcher.neq_all_string();
+        case FieldValueMatcher::ValueMatcherCase::kNeqAnyString: {
+            const auto& str_list = matcher.neq_any_string();
             for (int i = start; i < end; i++) {
                 bool notEqAll = true;
                 for (const auto& str : str_list.str_value()) {
