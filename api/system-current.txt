@@ -5710,6 +5710,7 @@ package android.telephony.ims {
   }
 
   public final class ImsReasonInfo implements android.os.Parcelable {
+    ctor public ImsReasonInfo(int, int, java.lang.String);
     method public int describeContents();
     method public int getCode();
     method public int getExtraCode();

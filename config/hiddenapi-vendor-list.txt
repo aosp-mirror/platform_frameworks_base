@@ -426,7 +426,6 @@ Landroid/telephony/ims/compat/stub/ImsUtListenerImplBase;-><init>()V
 Landroid/telephony/ims/ImsCallForwardInfo;-><init>()V
 Landroid/telephony/ims/ImsCallProfile;->presentationToOIR(I)I
 Landroid/telephony/ims/ImsExternalCallState;-><init>(ILandroid/net/Uri;ZIIZ)V
-Landroid/telephony/ims/ImsReasonInfo;-><init>(IILjava/lang/String;)V
 Landroid/telephony/ims/ImsReasonInfo;-><init>(II)V
 Landroid/telephony/ims/ImsStreamMediaProfile;-><init>()V
 Landroid/telephony/mbms/IMbmsStreamingSessionCallback$Stub;-><init>()V
