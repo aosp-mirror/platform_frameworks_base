@@ -24040,6 +24040,32 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
     }
 
+    @Override
+    public void grantDefaultPermissionsToEnabledTelephonyDataServices(
+            String[] packageNames, int userId) {
+        enforceSystemOrPhoneCaller("grantDefaultPermissionsToEnabledTelephonyDataServices");
+        synchronized (mPackages) {
+            Binder.withCleanCallingIdentity( () -> {
+                mDefaultPermissionPolicy.
+                        grantDefaultPermissionsToEnabledTelephonyDataServices(
+                                packageNames, userId);
+            });
+        }
+    }
+
+    @Override
+    public void revokeDefaultPermissionsFromDisabledTelephonyDataServices(
+            String[] packageNames, int userId) {
+        enforceSystemOrPhoneCaller("revokeDefaultPermissionsFromDisabledTelephonyDataServices");
+        synchronized (mPackages) {
+            Binder.withCleanCallingIdentity( () -> {
+                mDefaultPermissionPolicy.
+                        revokeDefaultPermissionsFromDisabledTelephonyDataServices(
+                                packageNames, userId);
+            });
+        }
+    }
+
     private static void enforceSystemOrPhoneCaller(String tag) {
         int callingUid = Binder.getCallingUid();
         if (callingUid != Process.PHONE_UID && callingUid != Process.SYSTEM_UID) {

@@ -615,6 +615,10 @@ interface IPackageManager {
     void removeOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
     void grantDefaultPermissionsToEnabledCarrierApps(in String[] packageNames, int userId);
     void grantDefaultPermissionsToEnabledImsServices(in String[] packageNames, int userId);
+    void grantDefaultPermissionsToEnabledTelephonyDataServices(
+            in String[] packageNames, int userId);
+    void revokeDefaultPermissionsFromDisabledTelephonyDataServices(
+            in String[] packageNames, int userId);
 
     boolean isPermissionRevokedByPolicy(String permission, String packageName, int userId);
 
