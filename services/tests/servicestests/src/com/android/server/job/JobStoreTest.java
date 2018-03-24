@@ -1,6 +1,7 @@
 package com.android.server.job;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_IMS;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_OEM_PAID;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
 import static org.junit.Assert.assertEquals;
@@ -374,7 +375,9 @@ public class JobStoreTest {
         assertPersistedEquals(new JobInfo.Builder(0, mComponent)
                 .setPersisted(true)
                 .setRequiredNetwork(new NetworkRequest.Builder()
-                        .addCapability(NET_CAPABILITY_IMS).build())
+                        .addCapability(NET_CAPABILITY_IMS)
+                        .addUnwantedCapability(NET_CAPABILITY_OEM_PAID)
+                        .build())
                 .build());
     }
 
