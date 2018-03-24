@@ -63,6 +63,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -133,6 +134,7 @@ import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.connectivity.ConnectivityConstants;
 import com.android.server.connectivity.DefaultNetworkMetrics;
+import com.android.server.connectivity.DnsManager;
 import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.connectivity.MockableSystemProperties;
 import com.android.server.connectivity.NetworkAgentInfo;
@@ -749,6 +751,7 @@ public class ConnectivityServiceTest {
 
     // NetworkMonitor implementation allowing overriding of Internet connectivity probe result.
     private class WrappedNetworkMonitor extends NetworkMonitor {
+        public Handler connectivityHandler;
         // HTTP response code fed back to NetworkMonitor for Internet connectivity probe.
         public int gen204ProbeResult = 500;
         public String gen204ProbeRedirectUrl = null;
@@ -758,6 +761,7 @@ public class ConnectivityServiceTest {
                 IpConnectivityLog log) {
             super(context, handler, networkAgentInfo, defaultRequest, log,
                     NetworkMonitor.NetworkMonitorSettings.DEFAULT);
+            connectivityHandler = handler;
         }
 
         @Override
@@ -3664,18 +3668,29 @@ public class ConnectivityServiceTest {
 
     @Test
     public void testBasicDnsConfigurationPushed() throws Exception {
+        final String IFNAME = "test_rmnet_data0";
+        final String[] EMPTY_TLS_SERVERS = new String[0];
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
         waitForIdle();
         verify(mNetworkManagementService, never()).setDnsConfigurationForNetwork(
-                anyInt(), any(), any(), any(), anyBoolean(), anyString());
+                anyInt(), any(), any(), any(), anyString(), eq(EMPTY_TLS_SERVERS));
 
         final LinkProperties cellLp = new LinkProperties();
-        cellLp.setInterfaceName("test_rmnet_data0");
+        cellLp.setInterfaceName(IFNAME);
+        // Add IPv4 and IPv6 default routes, because DNS-over-TLS code does
+        // "is-reachable" testing in order to not program netd with unreachable
+        // nameservers that it might try repeated to validate.
+        cellLp.addLinkAddress(new LinkAddress("192.0.2.4/24"));
+        cellLp.addRoute(new RouteInfo((IpPrefix) null, InetAddress.getByName("192.0.2.4"), IFNAME));
+        cellLp.addLinkAddress(new LinkAddress("2001:db8:1::1/64"));
+        cellLp.addRoute(
+                new RouteInfo((IpPrefix) null, InetAddress.getByName("2001:db8:1::1"), IFNAME));
         mCellNetworkAgent.sendLinkProperties(cellLp);
         mCellNetworkAgent.connect(false);
         waitForIdle();
         verify(mNetworkManagementService, times(1)).setDnsConfigurationForNetwork(
-                anyInt(), mStringArrayCaptor.capture(), any(), any(), anyBoolean(), anyString());
+                anyInt(), mStringArrayCaptor.capture(), any(), any(),
+                anyString(), eq(EMPTY_TLS_SERVERS));
         // CS tells netd about the empty DNS config for this network.
         assertEmpty(mStringArrayCaptor.getValue());
         reset(mNetworkManagementService);
@@ -3684,7 +3699,8 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.sendLinkProperties(cellLp);
         waitForIdle();
         verify(mNetworkManagementService, times(1)).setDnsConfigurationForNetwork(
-                anyInt(), mStringArrayCaptor.capture(), any(), any(), anyBoolean(), anyString());
+                anyInt(), mStringArrayCaptor.capture(), any(), any(),
+                anyString(), eq(EMPTY_TLS_SERVERS));
         assertEquals(1, mStringArrayCaptor.getValue().length);
         assertTrue(ArrayUtils.contains(mStringArrayCaptor.getValue(), "2001:db8::1"));
         reset(mNetworkManagementService);
@@ -3693,7 +3709,26 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.sendLinkProperties(cellLp);
         waitForIdle();
         verify(mNetworkManagementService, times(1)).setDnsConfigurationForNetwork(
-                anyInt(), mStringArrayCaptor.capture(), any(), any(), anyBoolean(), anyString());
+                anyInt(), mStringArrayCaptor.capture(), any(), any(),
+                anyString(), eq(EMPTY_TLS_SERVERS));
+        assertEquals(2, mStringArrayCaptor.getValue().length);
+        assertTrue(ArrayUtils.containsAll(mStringArrayCaptor.getValue(),
+                new String[]{"2001:db8::1", "192.0.2.1"}));
+        reset(mNetworkManagementService);
+
+        final String TLS_SPECIFIER = "tls.example.com";
+        final String TLS_SERVER6 = "2001:db8:53::53";
+        final InetAddress[] TLS_IPS = new InetAddress[]{ InetAddress.getByName(TLS_SERVER6) };
+        final String[] TLS_SERVERS = new String[]{ TLS_SERVER6 };
+        final Handler h = mCellNetworkAgent.getWrappedNetworkMonitor().connectivityHandler;
+        h.sendMessage(h.obtainMessage(
+                NetworkMonitor.EVENT_PRIVATE_DNS_CONFIG_RESOLVED, 0,
+                mCellNetworkAgent.getNetwork().netId,
+                new DnsManager.PrivateDnsConfig(TLS_SPECIFIER, TLS_IPS)));
+        waitForIdle();
+        verify(mNetworkManagementService, times(1)).setDnsConfigurationForNetwork(
+                anyInt(), mStringArrayCaptor.capture(), any(), any(),
+                eq(TLS_SPECIFIER), eq(TLS_SERVERS));
         assertEquals(2, mStringArrayCaptor.getValue().length);
         assertTrue(ArrayUtils.containsAll(mStringArrayCaptor.getValue(),
                 new String[]{"2001:db8::1", "192.0.2.1"}));
