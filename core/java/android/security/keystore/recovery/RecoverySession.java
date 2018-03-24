@@ -257,7 +257,7 @@ public class RecoverySession implements AutoCloseable {
     }
 
     /** Given a map from alias to grant alias, returns a map from alias to a {@link Key} handle. */
-    private @NonNull Map<String, Key> getKeysFromGrants(Map<String, String> grantAliases)
+    private @NonNull Map<String, Key> getKeysFromGrants(@NonNull Map<String, String> grantAliases)
             throws InternalRecoveryServiceException {
         ArrayMap<String, Key> keysByAlias = new ArrayMap<>(grantAliases.size());
         for (String alias : grantAliases.keySet()) {
