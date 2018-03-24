@@ -339,6 +339,7 @@ public class AndroidKeyStoreProvider extends Provider {
         return new AndroidKeyStoreSecretKey(secretKeyAlias, uid, keyAlgorithmString);
     }
 
+    @NonNull
     public static AndroidKeyStoreKey loadAndroidKeyStoreKeyFromKeystore(
             @NonNull KeyStore keyStore, @NonNull String userKeyAlias, int uid)
             throws UnrecoverableKeyException  {
