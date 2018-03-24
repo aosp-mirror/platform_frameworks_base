@@ -57,6 +57,12 @@ struct ConfigStats {
     // it means some data has been dropped. The map size is capped by kMaxConfigCount.
     std::map<const int64_t, int> metric_stats;
 
+    // Stores the max number of output tuple of dimensions in condition across dimensions in what
+    // when it's bigger than kDimensionKeySizeSoftLimit. When you see the number is
+    // kDimensionKeySizeHardLimit +1, it means some data has been dropped. The map size is capped by
+    // kMaxConfigCount.
+    std::map<const int64_t, int> metric_dimension_in_condition_stats;
+
     // Stores the number of times an anomaly detection alert has been declared.
     // The map size is capped by kMaxConfigCount.
     std::map<const int64_t, int> alert_stats;
@@ -182,6 +188,19 @@ public:
      * [size]: The output tuple size.
      */
     void noteMetricDimensionSize(const ConfigKey& key, const int64_t& id, int size);
+
+
+    /**
+     * Report the max size of output tuple of dimension in condition across dimensions in what.
+     *
+     * Note: only report when the metric has an output dimension in condition, and the max tuple
+     * count > kDimensionKeySizeSoftLimit.
+     *
+     * [key]: The config key that this metric belongs to.
+     * [id]: The id of the metric.
+     * [size]: The output tuple size.
+     */
+    void noteMetricDimensionInConditionSize(const ConfigKey& key, const int64_t& id, int size);
 
     /**
      * Report a matcher has been matched.
