@@ -222,7 +222,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         assertFalse(splitScreenSecondary.shouldBeVisible(null /* starting */));
         assertTrue(splitScreenSecondary2.shouldBeVisible(null /* starting */));
 
-        // First split-screen secondary should be visible behind another translucent split-split
+        // First split-screen secondary should be visible behind another translucent split-screen
         // secondary.
         splitScreenSecondary2.setIsTranslucent(true);
         assertTrue(splitScreenSecondary.shouldBeVisible(null /* starting */));
@@ -243,6 +243,16 @@ public class ActivityStackTests extends ActivityTestsBase {
         assertTrue(assistantStack.shouldBeVisible(null /* starting */));
         assertTrue(splitScreenPrimary.shouldBeVisible(null /* starting */));
         assertTrue(splitScreenSecondary.shouldBeVisible(null /* starting */));
+        assertTrue(splitScreenSecondary2.shouldBeVisible(null /* starting */));
+
+        // Assistant stack shouldn't be visible behind translucent split-screen stack
+        assistantStack.setIsTranslucent(false);
+        splitScreenPrimary.setIsTranslucent(true);
+        splitScreenSecondary2.setIsTranslucent(true);
+        splitScreenSecondary2.moveToFront("testShouldBeVisible_SplitScreen");
+        splitScreenPrimary.moveToFront("testShouldBeVisible_SplitScreen");
+        assertFalse(assistantStack.shouldBeVisible(null /* starting */));
+        assertTrue(splitScreenPrimary.shouldBeVisible(null /* starting */));
         assertTrue(splitScreenSecondary2.shouldBeVisible(null /* starting */));
     }
 

@@ -1769,9 +1769,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
 
         final ActivityDisplay display = getDisplay();
+        boolean gotSplitScreenStack = false;
         boolean gotOpaqueSplitScreenPrimary = false;
         boolean gotOpaqueSplitScreenSecondary = false;
         final int windowingMode = getWindowingMode();
+        final boolean isAssistantType = isActivityTypeAssistant();
         for (int i = display.getChildCount() - 1; i >= 0; --i) {
             final ActivityStack other = display.getChildAt(i);
             if (other == this) {
@@ -1789,6 +1791,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 return false;
             } else if (otherWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                     && !gotOpaqueSplitScreenPrimary) {
+                gotSplitScreenStack = true;
                 gotOpaqueSplitScreenPrimary =
                         !other.isStackTranslucent(starting);
                 if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
@@ -1798,6 +1801,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 }
             } else if (otherWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                     && !gotOpaqueSplitScreenSecondary) {
+                gotSplitScreenStack = true;
                 gotOpaqueSplitScreenSecondary =
                         !other.isStackTranslucent(starting);
                 if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
@@ -1809,6 +1813,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (gotOpaqueSplitScreenPrimary && gotOpaqueSplitScreenSecondary) {
                 // Can not be visible if we are in split-screen windowing mode and both halves of
                 // the screen are opaque.
+                return false;
+            }
+            if (isAssistantType && gotSplitScreenStack) {
+                // Assistant stack can't be visible behind split-screen. In addition to this not
+                // making sense, it also works around an issue here we boost the z-order of the
+                // assistant window surfaces in window manager whenever it is visible.
                 return false;
             }
         }
@@ -5259,7 +5269,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return "ActivityStack{" + Integer.toHexString(System.identityHashCode(this))
                 + " stackId=" + mStackId + " type=" + activityTypeToString(getActivityType())
                 + " mode=" + windowingModeToString(getWindowingMode())
-                + " visible=" + shouldBeVisible(null /* starting */) + ", "
+                + " visible=" + shouldBeVisible(null /* starting */)
+                + " translucent=" + isStackTranslucent(null /* starting */)
+                + ", "
                 + mTaskHistory.size() + " tasks}";
     }
 
