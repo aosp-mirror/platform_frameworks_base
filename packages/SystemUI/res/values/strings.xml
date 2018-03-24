@@ -1602,6 +1602,9 @@
     <!-- Notification: Menu row: Content description for the snooze icon. [CHAR LIMIT=NONE] -->
     <string name="notification_menu_snooze_description">notification snooze options</string>
 
+    <!-- Notification: Menu row: Content description for the snooze action shown in local context menu. [CHAR LIMIT=NONE] -->
+    <string name="notification_menu_snooze_action">Snooze</string>
+
     <!-- Notification: Snooze panel: Snooze undo button label. [CHAR LIMIT=50]-->
     <string name="snooze_undo">UNDO</string>
 
