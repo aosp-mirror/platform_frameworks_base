@@ -1944,13 +1944,13 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void setDnsConfigurationForNetwork(int netId, String[] servers, String[] domains,
-                    int[] params, boolean useTls, String tlsHostname) {
+                    int[] params, String tlsHostname, String[] tlsServers) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
 
         final String[] tlsFingerprints = new String[0];
         try {
             mNetdService.setResolverConfiguration(
-                    netId, servers, domains, params, useTls, tlsHostname, tlsFingerprints);
+                    netId, servers, domains, params, tlsHostname, tlsServers, tlsFingerprints);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
