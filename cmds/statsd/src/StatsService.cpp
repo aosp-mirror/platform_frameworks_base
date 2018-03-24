@@ -49,33 +49,6 @@ namespace statsd {
 constexpr const char* kPermissionDump = "android.permission.DUMP";
 #define STATS_SERVICE_DIR "/data/misc/stats-service"
 
-/**
- * Watches for the death of the stats companion (system process).
- */
-class CompanionDeathRecipient : public IBinder::DeathRecipient {
-public:
-    CompanionDeathRecipient(const sp<AlarmMonitor>& anomalyAlarmMonitor,
-                            const sp<AlarmMonitor>& periodicAlarmMonitor,
-                            const sp<StatsLogProcessor>& processor)
-        : mAnomalyAlarmMonitor(anomalyAlarmMonitor),
-          mPeriodicAlarmMonitor(periodicAlarmMonitor),
-          mProcessor(processor) {}
-    virtual void binderDied(const wp<IBinder>& who);
-
-private:
-    sp<AlarmMonitor> mAnomalyAlarmMonitor;
-    sp<AlarmMonitor> mPeriodicAlarmMonitor;
-    sp<StatsLogProcessor> mProcessor;
-};
-
-void CompanionDeathRecipient::binderDied(const wp<IBinder>& who) {
-    ALOGW("statscompanion service died");
-    mProcessor->WriteDataToDisk();
-    mAnomalyAlarmMonitor->setStatsCompanionService(nullptr);
-    mPeriodicAlarmMonitor->setStatsCompanionService(nullptr);
-    SubscriberReporter::getInstance().setStatsCompanionService(nullptr);
-}
-
 StatsService::StatsService(const sp<Looper>& handlerLooper)
     : mAnomalyAlarmMonitor(new AlarmMonitor(MIN_DIFF_TO_UPDATE_REGISTERED_ALARM_SECS,
        [](const sp<IStatsCompanionService>& sc, int64_t timeMillis) {
@@ -791,21 +764,6 @@ void StatsService::sayHiToStatsCompanion() {
     }
 }
 
-sp<IStatsCompanionService> StatsService::getStatsCompanionService() {
-    sp<IStatsCompanionService> statsCompanion = nullptr;
-    // Get statscompanion service from service manager
-    const sp<IServiceManager> sm(defaultServiceManager());
-    if (sm != nullptr) {
-        const String16 name("statscompanion");
-        statsCompanion = interface_cast<IStatsCompanionService>(sm->checkService(name));
-        if (statsCompanion == nullptr) {
-            ALOGW("statscompanion service unavailable!");
-            return nullptr;
-        }
-    }
-    return statsCompanion;
-}
-
 Status StatsService::statsCompanionReady() {
     VLOG("StatsService::statsCompanionReady was called");
 
@@ -821,9 +779,8 @@ Status StatsService::statsCompanionReady() {
                 "statscompanion unavailable despite it contacting statsd!");
     }
     VLOG("StatsService::statsCompanionReady linking to statsCompanion.");
-    IInterface::asBinder(statsCompanion)
-        ->linkToDeath(new CompanionDeathRecipient(
-            mAnomalyAlarmMonitor, mPeriodicAlarmMonitor, mProcessor));
+    IInterface::asBinder(statsCompanion)->linkToDeath(this);
+    mStatsPullerManager.SetStatsCompanionService(statsCompanion);
     mAnomalyAlarmMonitor->setStatsCompanionService(statsCompanion);
     mPeriodicAlarmMonitor->setStatsCompanionService(statsCompanion);
     SubscriberReporter::getInstance().setStatsCompanionService(statsCompanion);
@@ -969,6 +926,12 @@ Status StatsService::unsetBroadcastSubscriber(int64_t configId,
 
 
 void StatsService::binderDied(const wp <IBinder>& who) {
+    ALOGW("statscompanion service died");
+    mProcessor->WriteDataToDisk();
+    mAnomalyAlarmMonitor->setStatsCompanionService(nullptr);
+    mPeriodicAlarmMonitor->setStatsCompanionService(nullptr);
+    SubscriberReporter::getInstance().setStatsCompanionService(nullptr);
+    mStatsPullerManager.SetStatsCompanionService(nullptr);
 }
 
 }  // namespace statsd
