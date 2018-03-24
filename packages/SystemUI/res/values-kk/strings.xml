@@ -38,12 +38,9 @@
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Пайдалану барысына байланысты <xliff:g id="PERCENTAGE">%s</xliff:g> заряд, шамамен <xliff:g id="TIME">%s</xliff:g> қалды"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> заряд, шамамен <xliff:g id="TIME">%s</xliff:g> қалды"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> қалды. Battery Saver қосулы."</string>
-    <!-- no translation found for invalid_charger (2741987096648693172) -->
-    <skip />
-    <!-- no translation found for invalid_charger_title (2836102177577255404) -->
-    <skip />
-    <!-- no translation found for invalid_charger_text (6480624964117840005) -->
-    <skip />
+    <string name="invalid_charger" msgid="2741987096648693172">"USB арқылы зарядтау мүмкін емес. Құрылғымен бірге берілген зарядтау құралын пайдаланыңыз."</string>
+    <string name="invalid_charger_title" msgid="2836102177577255404">"USB арқылы зарядтау мүмкін емес"</string>
+    <string name="invalid_charger_text" msgid="6480624964117840005">"Құрылғымен бірге берілген зарядтау құралын пайдаланыңыз"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Параметрлер"</string>
     <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Battery Saver функциясы қосылсын ба?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Қосу"</string>
@@ -151,7 +148,6 @@
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Жалғанған."</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Қосылуда."</string>
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
-    <string name="data_connection_1x" msgid="396105635197711584">"1 X"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
     <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
     <string name="data_connection_3_5g" msgid="5218328297191657602">"3,5Г"</string>
@@ -211,8 +207,7 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Ұшақ режимі қосулы."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Ұшақ режимі өшірілді."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Ұшақ режимі қосылды."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_priority_on (5836205286254617194) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"\"Мазаламау\" режимі қосулы."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Мазаламау режимі қосулы, толық тыныштық."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Кедергі жасамаңыз, тек дабылдар."</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Мазаламау."</string>
@@ -278,7 +273,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"Десерт жағдайы"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Экранды сақтау режимі"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Этернет"</string>
-    <string name="quick_settings_header_onboarding_text" msgid="7872508260264044734">"Басқа опцияларды көру үшін белгішелерді басып, ұстап тұрыңыз"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (8030309023792936283) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Мазаламау"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Маңыздылары ғана"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Тек дабылдар"</string>
@@ -437,8 +433,7 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> экранда көрсетілгеннің барлығын түсіре бастайды."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Қайта көрсетпеу"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Барлығын тазалау"</string>
-    <!-- no translation found for dnd_suppressing_shade_text (7986451830430707907) -->
-    <skip />
+    <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"\"Мазаламау\" режимі хабарландыруларды жасырады"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Қазір бастау"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Хабарландырулар жоқ"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Профиль бақылануы мүмкін"</string>
@@ -544,8 +539,6 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Діріл режимін орнату үшін түртіңіз."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Дыбысын өшіру үшін түртіңіз."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"Дыбысты басқару элементтері: %s"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Қоңыраулар мен хабарландырулардың вибрациясы болады"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Қоңыраулар мен хабарландырулардың дыбыстық сигналы өшіріледі"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"Қоңыраулар мен хабарландырулардың дыбыстық сигналы болады"</string>
     <string name="output_title" msgid="5355078100792942802">"Meдиа шығысы"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Телефон қоңырау шығысы"</string>
@@ -730,8 +723,9 @@
     <string name="right_keycode" msgid="708447961000848163">"Оң жақ кілт коды"</string>
     <string name="left_icon" msgid="3096287125959387541">"Сол жақ белгіше"</string>
     <string name="right_icon" msgid="3952104823293824311">"Оң жақ белгіше"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Қажеттерін сүйреп қойыңыз"</string>
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"Бөлшектер қосу үшін ұстап тұрып сүйреңіз"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Керексіздерін осы жерге сүйреңіз"</string>
+    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Кемінде 6 бөлшек қажет"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Өңдеу"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Уақыт"</string>
   <string-array name="clock_options">
@@ -835,7 +829,9 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Ауыстыру"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Фонда жұмыс істеп тұрған қолданбалар"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Батарея мен деректер трафигі туралы білу үшін түртіңіз"</string>
-    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Мобильдік деректер өшірілсін бе?"</string>
+    <string name="mobile_data_disable_title" msgid="1068272097382942231">"Мобильдік деректер өшірілсін бе?"</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"<xliff:g id="CARRIER">%s</xliff:g> операторы арқылы деректерге немесе интернетке кіре алмайсыз. Интернетке тек Wi-Fi арқылы кіресіз."</string>
+    <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"операторыңыз"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Басқа қолданба рұқсат сұрауын жасырып тұрғандықтан, параметрлер жауабыңызды растай алмайды."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g> қолданбасына <xliff:g id="APP_2">%2$s</xliff:g> қолданбасының үзінділерін көрсетуге рұқсат берілсін бе?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- Бұл <xliff:g id="APP">%1$s</xliff:g> қолданбасындағы ақпаратты оқи алады"</string>

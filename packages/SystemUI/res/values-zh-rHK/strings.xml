@@ -38,12 +38,9 @@
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"電量剩餘 <xliff:g id="PERCENTAGE">%s</xliff:g>，根據您的使用情況，剩餘時間大約 <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"電量剩餘 <xliff:g id="PERCENTAGE">%s</xliff:g>，剩餘時間大約 <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"剩餘 <xliff:g id="PERCENTAGE">%s</xliff:g>。省電模式已開啟。"</string>
-    <!-- no translation found for invalid_charger (2741987096648693172) -->
-    <skip />
-    <!-- no translation found for invalid_charger_title (2836102177577255404) -->
-    <skip />
-    <!-- no translation found for invalid_charger_text (6480624964117840005) -->
-    <skip />
+    <string name="invalid_charger" msgid="2741987096648693172">"無法透過 USB 充電，請使用裝置隨附的充電器。"</string>
+    <string name="invalid_charger_title" msgid="2836102177577255404">"無法透過 USB 充電"</string>
+    <string name="invalid_charger_text" msgid="6480624964117840005">"使用裝置隨附的充電器"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"設定"</string>
     <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"要開啟省電模式嗎？"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"開啟"</string>
@@ -151,7 +148,6 @@
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"已連線。"</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"連線中。"</string>
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
-    <string name="data_connection_1x" msgid="396105635197711584">"1 X"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
     <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
     <string name="data_connection_3_5g" msgid="5218328297191657602">"3.5G"</string>
@@ -213,8 +209,7 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"飛行模式已開啟。"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"飛行模式已關閉。"</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"飛行模式已開啟。"</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_priority_on (5836205286254617194) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"「請勿騷擾」模式已開啟。"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"開啟「請勿騷擾」，完全靜音。"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"開啟「請勿騷擾」，只限鬧鐘。"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"請勿騷擾。"</string>
@@ -280,7 +275,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"Dessert Case"</string>
     <string name="start_dreams" msgid="5640361424498338327">"螢幕保護程式"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"以太網"</string>
-    <string name="quick_settings_header_onboarding_text" msgid="7872508260264044734">"按住圖示即可查看更多選項"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (8030309023792936283) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"請勿騷擾"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"只限優先"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"只限鬧鐘"</string>
@@ -439,8 +435,7 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 將開始擷取您的螢幕上顯示的內容。"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"不用再顯示"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"全部清除"</string>
-    <!-- no translation found for dnd_suppressing_shade_text (7986451830430707907) -->
-    <skip />
+    <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"「請勿騷擾」模式目前隱藏通知"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"立即開始"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"沒有通知"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"個人檔案可能受到監控"</string>
@@ -546,8 +541,6 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s。輕按即可設為震動。"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s。輕按即可設為靜音。"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s音量控制項"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"有來電和通知時會震動"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"有來電和通知時會靜音"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"有來電和通知時會發出鈴聲"</string>
     <string name="output_title" msgid="5355078100792942802">"媒體輸出"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"通話輸出"</string>
@@ -604,7 +597,7 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"通知控制項讓您設定應用程式通知的重要性 (0 至 5 級)。\n\n"<b>"第 5 級"</b>" \n- 在通知清單頂部顯示 \n- 允許全螢幕騷擾 \n- 一律顯示通知 \n\n"<b>"第 4 級"</b>" \n- 阻止全螢幕騷擾 \n- 一律顯示通知 \n\n"<b>"第 3 級"</b>" \n- 阻止全螢幕騷擾 \n- 永不顯示通知 \n\n"<b>"第 2 級"</b>" \n- 阻止全螢幕騷擾 \n- 永不顯示通知 \n- 永不發出聲響和震動 \n\n"<b>"第 1 級"</b>" \n- 阻止全螢幕騷擾 \n- 永不顯示通知 \n- 永不發出聲響和震動 \n- 從上鎖畫面和狀態列中隱藏 \n- 在通知清單底部顯示 \n\n"<b>"第 0 級"</b>" \n- 封鎖所有應用程式通知"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"通知"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"您不會再看到這些通知"</string>
-    <string name="notification_channel_minimized" msgid="1664411570378910931">"系統將會最小化這些通知"</string>
+    <string name="notification_channel_minimized" msgid="1664411570378910931">"這些通知將會縮到最小"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"您通常會關閉這些通知。\n要繼續顯示通知嗎？"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"要繼續顯示這些通知嗎？"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"停止通知"</string>
@@ -732,8 +725,9 @@
     <string name="right_keycode" msgid="708447961000848163">"向右按鍵碼"</string>
     <string name="left_icon" msgid="3096287125959387541">"向左圖示"</string>
     <string name="right_icon" msgid="3952104823293824311">"向右圖示"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"拖曳即可新增圖塊"</string>
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"按住並拖曳即可新增圖塊"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"拖曳這裡即可移除"</string>
+    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"您必須至少有 6 個圖塊"</string>
     <string name="qs_edit" msgid="2232596095725105230">"編輯"</string>
     <string name="tuner_time" msgid="6572217313285536011">"時間"</string>
   <string-array name="clock_options">
@@ -837,7 +831,9 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"取代"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"正在背景中執行的應用程式"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"輕按即可查看電池和數據用量詳情"</string>
-    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"要關閉流動數據嗎？"</string>
+    <string name="mobile_data_disable_title" msgid="1068272097382942231">"要關閉流動數據嗎？"</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"您將無法透過 <xliff:g id="CARRIER">%s</xliff:g> 存取流動數據或互聯網。您必須連接 Wi-Fi 才能使用互聯網。"</string>
+    <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"您的流動網絡供應商"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"由於某個應用程式已阻擋權限要求畫面，因此「設定」應用程式無法驗證您的回應。"</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"要允許「<xliff:g id="APP_0">%1$s</xliff:g>」顯示「<xliff:g id="APP_2">%2$s</xliff:g>」的快訊嗎？"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- 可以讀取「<xliff:g id="APP">%1$s</xliff:g>」中的資料"</string>

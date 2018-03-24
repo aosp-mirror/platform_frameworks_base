@@ -38,12 +38,9 @@
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"เหลือ <xliff:g id="PERCENTAGE">%s</xliff:g> หรืออีกราว <xliff:g id="TIME">%s</xliff:g> ขึ้นอยู่กับการใช้งานของคุณ"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"เหลือ <xliff:g id="PERCENTAGE">%s</xliff:g> หรืออีกราว <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"แบตเตอรี่เหลือ <xliff:g id="PERCENTAGE">%s</xliff:g> เปิดโหมดประหยัดแบตเตอรี่อยู่"</string>
-    <!-- no translation found for invalid_charger (2741987096648693172) -->
-    <skip />
-    <!-- no translation found for invalid_charger_title (2836102177577255404) -->
-    <skip />
-    <!-- no translation found for invalid_charger_text (6480624964117840005) -->
-    <skip />
+    <string name="invalid_charger" msgid="2741987096648693172">"ชาร์จผ่าน USB ไม่ได้ โปรดใช้ที่ชาร์จที่ให้มาพร้อมกับอุปกรณ์"</string>
+    <string name="invalid_charger_title" msgid="2836102177577255404">"ชาร์จผ่าน USB ไม่ได้"</string>
+    <string name="invalid_charger_text" msgid="6480624964117840005">"ใช้ที่ชาร์จที่ให้มาพร้อมกับอุปกรณ์"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"การตั้งค่า"</string>
     <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"เปิดโหมดประหยัดแบตเตอรี่ใช่ไหม"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"เปิด"</string>
@@ -151,7 +148,6 @@
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"เชื่อมต่อแล้ว"</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"กำลังเชื่อมต่อ"</string>
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
-    <string name="data_connection_1x" msgid="396105635197711584">"1 X"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
     <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
     <string name="data_connection_3_5g" msgid="5218328297191657602">"3.5G"</string>
@@ -211,8 +207,7 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"โหมดบนเครื่องบินเปิดอยู่"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"ปิดโหมดบนเครื่องบินแล้ว"</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"เปิดโหมดบนเครื่องบินแล้ว"</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_priority_on (5836205286254617194) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"โหมดห้ามรบกวนเปิดอยู่"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"เปิดการห้ามรบกวนอยู่ ปิดเสียงทั้งหมด"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"เปิดการห้ามรบกวนอยู่ ปลุกได้เท่านั้น"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"ห้ามรบกวน"</string>
@@ -278,7 +273,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"ชั้นแสดงของหวาน"</string>
     <string name="start_dreams" msgid="5640361424498338327">"โปรแกรมรักษาหน้าจอ"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"อีเทอร์เน็ต"</string>
-    <string name="quick_settings_header_onboarding_text" msgid="7872508260264044734">"กดไอคอนค้างไว้เพื่อดูตัวเลือกอื่นๆ"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (8030309023792936283) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"ห้ามรบกวน"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"เฉพาะเรื่องสำคัญ"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"เฉพาะปลุกเท่านั้น"</string>
@@ -437,8 +433,7 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> จะเริ่มจับภาพทุกอย่างที่แสดงบนหน้าจอ"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ไม่ต้องแสดงข้อความนี้อีก"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ล้างทั้งหมด"</string>
-    <!-- no translation found for dnd_suppressing_shade_text (7986451830430707907) -->
-    <skip />
+    <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"โหมดห้ามรบกวนซ่อนการแจ้งเตือนอยู่"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"เริ่มเลย"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"ไม่มีการแจ้งเตือน"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"อาจมีการตรวจสอบโปรไฟล์"</string>
@@ -544,8 +539,6 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s แตะเพื่อตั้งค่าให้สั่น"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s แตะเพื่อปิดเสียง"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"ตัวควบคุมระดับเสียง %s"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"สายเรียกเข้าและการแจ้งเตือนจะสั่น"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"สายเรียกเข้าและการแจ้งเตือนจะไม่ส่งเสียง"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"สายเรียกเข้าและการแจ้งเตือนจะส่งเสียง"</string>
     <string name="output_title" msgid="5355078100792942802">"เอาต์พุตสื่อ"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"เอาต์พุตการโทรออก"</string>
@@ -730,8 +723,9 @@
     <string name="right_keycode" msgid="708447961000848163">"Keycode ทางขวา"</string>
     <string name="left_icon" msgid="3096287125959387541">"ไอคอนทางซ้าย"</string>
     <string name="right_icon" msgid="3952104823293824311">"ไอคอนทางขวา"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"ลากเพื่อเพิ่มชิ้นส่วน"</string>
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"กดชิ้นส่วนค้างไว้แล้วลากไปเพื่อเพิ่ม"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ลากมาที่นี่เพื่อนำออก"</string>
+    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"คุณต้องมีชิ้นส่วนอย่างน้อย 6 ชิ้น"</string>
     <string name="qs_edit" msgid="2232596095725105230">"แก้ไข"</string>
     <string name="tuner_time" msgid="6572217313285536011">"เวลา"</string>
   <string-array name="clock_options">
@@ -835,7 +829,9 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"แทนที่"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"แอปที่กำลังทำงานในเบื้องหลัง"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"แตะเพื่อดูรายละเอียดเกี่ยวกับแบตเตอรี่และปริมาณการใช้อินเทอร์เน็ต"</string>
-    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"ปิดอินเทอร์เน็ตมือถือไหม"</string>
+    <string name="mobile_data_disable_title" msgid="1068272097382942231">"ปิดเน็ตมือถือไหม"</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"คุณจะใช้เน็ตมือถือหรืออินเทอร์เน็ตผ่าน <xliff:g id="CARRIER">%s</xliff:g> ไม่ได้ และจะใช้อินเทอร์เน็ตได้ผ่าน Wi-Fi เท่านั้น"</string>
+    <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"ผู้ให้บริการของคุณ"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"เนื่องจากแอปหนึ่งได้บดบังคำขอสิทธิ์ ระบบจึงไม่สามารถยืนยันคำตอบของคุณสำหรับการตั้งค่าได้"</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"อนุญาตให้ <xliff:g id="APP_0">%1$s</xliff:g> แสดงส่วนต่างๆ ของ <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- อ่านข้อมูลจาก <xliff:g id="APP">%1$s</xliff:g> ได้"</string>
