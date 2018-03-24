@@ -1350,6 +1350,8 @@
 
     <!-- Message shown by the fingerprint dialog when fingerprint is not recognized -->
     <string name="fingerprint_not_recognized">Not recognized</string>
+    <!-- Accessibility message announced when a fingerprint has been authenticated [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_authenticated">Fingerprint authenticated</string>
 
     <!-- Error message shown when the fingerprint hardware can't be accessed -->
     <string name="fingerprint_error_hw_not_available">Fingerprint hardware not available.</string>
