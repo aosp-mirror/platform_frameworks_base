@@ -17,6 +17,8 @@
 package com.android.server.am;
 
 import android.annotation.UiThread;
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -39,6 +41,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -63,6 +66,15 @@ class AppWarnings {
     private UnsupportedDisplaySizeDialog mUnsupportedDisplaySizeDialog;
     private UnsupportedCompileSdkDialog mUnsupportedCompileSdkDialog;
     private DeprecatedTargetSdkVersionDialog mDeprecatedTargetSdkVersionDialog;
+
+    /** @see android.app.ActivityManager#alwaysShowUnsupportedCompileSdkWarning */
+    private HashSet<ComponentName> mAlwaysShowUnsupportedCompileSdkWarningActivities =
+            new HashSet<>();
+
+    /** @see android.app.ActivityManager#alwaysShowUnsupportedCompileSdkWarning */
+    void alwaysShowUnsupportedCompileSdkWarning(ComponentName activity) {
+        mAlwaysShowUnsupportedCompileSdkWarningActivities.add(activity);
+    }
 
     /**
      * Creates a new warning dialog manager.
@@ -107,6 +119,13 @@ class AppWarnings {
     public void showUnsupportedCompileSdkDialogIfNeeded(ActivityRecord r) {
         if (r.appInfo.compileSdkVersion == 0 || r.appInfo.compileSdkVersionCodename == null) {
             // We don't know enough about this package. Abort!
+            return;
+        }
+
+        if (ActivityManager.isRunningInTestHarness()
+                && !mAlwaysShowUnsupportedCompileSdkWarningActivities.contains(r.realActivity)) {
+            // Don't show warning if we are running in a test harness and we don't have to always
+            // show for this activity.
             return;
         }
 

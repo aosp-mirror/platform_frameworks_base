@@ -20,6 +20,7 @@ package android.app {
 
   public class ActivityManager {
     method public void addOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener, int);
+    method public void alwaysShowUnsupportedCompileSdkWarning(android.content.ComponentName);
     method public int getPackageImportance(java.lang.String);
     method public long getTotalRam();
     method public int getUidImportance(int);
