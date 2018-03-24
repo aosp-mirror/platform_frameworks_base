@@ -137,6 +137,10 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
         mCancelAction = cancelAction;
     }
 
+    public boolean hasDismissActions() {
+        return mDismissAction != null || mCancelAction != null;
+    }
+
     public void cancelDismissAction() {
         setOnDismissAction(null, null);
     }
