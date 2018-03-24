@@ -134,6 +134,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
         verifyZeroInteractions(mSpec);
         assertAnimating(mAnimatable);
+        assertTrue(mAnimatable.mSurfaceAnimator.isAnimationStartDelayed());
         mAnimatable.mSurfaceAnimator.endDelayingAnimationStart();
         verify(mSpec).startAnimation(any(), any(), any());
     }

@@ -20,6 +20,7 @@ package android.app {
 
   public class ActivityManager {
     method public void addOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener, int);
+    method public void alwaysShowUnsupportedCompileSdkWarning(android.content.ComponentName);
     method public int getPackageImportance(java.lang.String);
     method public long getTotalRam();
     method public int getUidImportance(int);
@@ -416,20 +417,20 @@ package android.location {
     ctor public GnssMeasurement();
     method public void reset();
     method public void resetAutomaticGainControlLevel();
-    method public void resetCarrierCycles();
+    method public deprecated void resetCarrierCycles();
     method public void resetCarrierFrequencyHz();
-    method public void resetCarrierPhase();
-    method public void resetCarrierPhaseUncertainty();
+    method public deprecated void resetCarrierPhase();
+    method public deprecated void resetCarrierPhaseUncertainty();
     method public void resetSnrInDb();
     method public void set(android.location.GnssMeasurement);
     method public void setAccumulatedDeltaRangeMeters(double);
     method public void setAccumulatedDeltaRangeState(int);
     method public void setAccumulatedDeltaRangeUncertaintyMeters(double);
     method public void setAutomaticGainControlLevelInDb(double);
-    method public void setCarrierCycles(long);
+    method public deprecated void setCarrierCycles(long);
     method public void setCarrierFrequencyHz(float);
-    method public void setCarrierPhase(double);
-    method public void setCarrierPhaseUncertainty(double);
+    method public deprecated void setCarrierPhase(double);
+    method public deprecated void setCarrierPhaseUncertainty(double);
     method public void setCn0DbHz(double);
     method public void setConstellationType(int);
     method public void setMultipathIndicator(int);
@@ -441,6 +442,7 @@ package android.location {
     method public void setState(int);
     method public void setSvid(int);
     method public void setTimeOffsetNanos(double);
+    field public static final int ADR_STATE_ALL = 31; // 0x1f
   }
 
   public final class GnssMeasurementsEvent implements android.os.Parcelable {
@@ -801,18 +803,20 @@ package android.telephony.mbms.vendor {
 
   public class MbmsDownloadServiceBase extends android.os.Binder {
     ctor public MbmsDownloadServiceBase();
+    method public int addProgressListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadProgressListener) throws android.os.RemoteException;
+    method public int addStatusListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStatusListener) throws android.os.RemoteException;
     method public int cancelDownload(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
     method public void dispose(int) throws android.os.RemoteException;
     method public int download(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
     method public int initialize(int, android.telephony.mbms.MbmsDownloadSessionCallback) throws android.os.RemoteException;
     method public java.util.List<android.telephony.mbms.DownloadRequest> listPendingDownloads(int) throws android.os.RemoteException;
     method public void onAppCallbackDied(int, int);
-    method public int registerStateCallback(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStateCallback) throws android.os.RemoteException;
+    method public int removeProgressListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadProgressListener) throws android.os.RemoteException;
+    method public int removeStatusListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStatusListener) throws android.os.RemoteException;
     method public int requestDownloadState(android.telephony.mbms.DownloadRequest, android.telephony.mbms.FileInfo) throws android.os.RemoteException;
     method public int requestUpdateFileServices(int, java.util.List<java.lang.String>) throws android.os.RemoteException;
     method public int resetDownloadKnowledge(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
     method public int setTempFileRootDirectory(int, java.lang.String) throws android.os.RemoteException;
-    method public int unregisterStateCallback(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStateCallback) throws android.os.RemoteException;
   }
 
   public class MbmsStreamingServiceBase extends android.os.Binder {
@@ -1065,6 +1069,7 @@ package android.view {
 
   public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
     method public android.view.View getTooltipView();
+    method public static boolean isDefaultFocusHighlightEnabled();
     method public boolean isDefaultFocusHighlightNeeded(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
     method public boolean restoreFocusInCluster(int);
     method public boolean restoreFocusNotInCluster();

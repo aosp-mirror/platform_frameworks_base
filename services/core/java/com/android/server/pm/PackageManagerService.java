@@ -18703,9 +18703,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 return true;
             }
         }
-        if (ps.getPermissionsState().hasPermission(
-                Manifest.permission.SUSPEND_APPS, user.getIdentifier())) {
-            onSuspendingPackageRemoved(packageName, user.getIdentifier());
+
+        final int userId = user == null ? UserHandle.USER_ALL : user.getIdentifier();
+        if (ps.getPermissionsState().hasPermission(Manifest.permission.SUSPEND_APPS, userId)) {
+            onSuspendingPackageRemoved(packageName, userId);
         }
 
 
@@ -24036,6 +24037,32 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
+    }
+
+    @Override
+    public void grantDefaultPermissionsToEnabledTelephonyDataServices(
+            String[] packageNames, int userId) {
+        enforceSystemOrPhoneCaller("grantDefaultPermissionsToEnabledTelephonyDataServices");
+        synchronized (mPackages) {
+            Binder.withCleanCallingIdentity( () -> {
+                mDefaultPermissionPolicy.
+                        grantDefaultPermissionsToEnabledTelephonyDataServices(
+                                packageNames, userId);
+            });
+        }
+    }
+
+    @Override
+    public void revokeDefaultPermissionsFromDisabledTelephonyDataServices(
+            String[] packageNames, int userId) {
+        enforceSystemOrPhoneCaller("revokeDefaultPermissionsFromDisabledTelephonyDataServices");
+        synchronized (mPackages) {
+            Binder.withCleanCallingIdentity( () -> {
+                mDefaultPermissionPolicy.
+                        revokeDefaultPermissionsFromDisabledTelephonyDataServices(
+                                packageNames, userId);
+            });
         }
     }
 

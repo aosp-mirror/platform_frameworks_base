@@ -61,6 +61,7 @@ class UserUsageStatsService {
     private final UnixCalendar mDailyExpiryDate;
     private final StatsUpdatedListener mListener;
     private final String mLogPrefix;
+    private String mLastBackgroundedPackage;
     private final int mUserId;
 
     private static final long[] INTERVAL_LENGTH = new long[] {
@@ -178,6 +179,17 @@ class UserUsageStatsService {
             currentDailyStats.events.put(event.mTimeStamp, event);
         }
 
+        boolean incrementAppLaunch = false;
+        if (event.mEventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+            if (event.mPackage != null && !event.mPackage.equals(mLastBackgroundedPackage)) {
+                incrementAppLaunch = true;
+            }
+        } else if (event.mEventType == UsageEvents.Event.MOVE_TO_BACKGROUND) {
+            if (event.mPackage != null) {
+                mLastBackgroundedPackage = event.mPackage;
+            }
+        }
+
         for (IntervalStats stats : mCurrentStats) {
             if (event.mEventType == UsageEvents.Event.CONFIGURATION_CHANGE) {
                 stats.updateConfigurationStats(newFullConfig, event.mTimeStamp);
@@ -191,6 +203,9 @@ class UserUsageStatsService {
                 }
             } else {
                 stats.update(event.mPackage, event.mTimeStamp, event.mEventType);
+                if (incrementAppLaunch) {
+                    stats.incrementAppLaunchCount(event.mPackage);
+                }
             }
         }
 
@@ -649,6 +664,7 @@ class UserUsageStatsService {
             pw.printPair("totalTime",
                     formatElapsedTime(usageStats.mTotalTimeInForeground, prettyDates));
             pw.printPair("lastTime", formatDateTime(usageStats.mLastTimeUsed, prettyDates));
+            pw.printPair("appLaunchCount", usageStats.mAppLaunchCount);
             pw.println();
         }
         pw.decreaseIndent();

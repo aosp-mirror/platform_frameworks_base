@@ -61,8 +61,6 @@ public class KeySyncUtils {
     private static final byte[] THM_KF_HASH_PREFIX = "THM_KF_hash".getBytes(StandardCharsets.UTF_8);
 
     private static final int KEY_CLAIMANT_LENGTH_BYTES = 16;
-    private static final int VAULT_PARAMS_LENGTH_BYTES = 94;
-    private static final int VAULT_HANDLE_LENGTH_BYTES = 17;
 
     /**
      * Encrypts the recovery key using both the lock screen hash and the remote storage's public
@@ -298,8 +296,12 @@ public class KeySyncUtils {
      */
     public static byte[] packVaultParams(
             PublicKey thmPublicKey, long counterId, int maxAttempts, byte[] vaultHandle) {
-        // TODO: Check if vaultHandle has exactly the length of VAULT_HANDLE_LENGTH_BYTES somewhere
-        return ByteBuffer.allocate(VAULT_PARAMS_LENGTH_BYTES)
+        int vaultParamsLength
+                = 65 // public key
+                + 8 // counterId
+                + 4 // maxAttempts
+                + vaultHandle.length;
+        return ByteBuffer.allocate(vaultParamsLength)
                 .order(ByteOrder.LITTLE_ENDIAN)
                 .put(SecureBox.encodePublicKey(thmPublicKey))
                 .putLong(counterId)

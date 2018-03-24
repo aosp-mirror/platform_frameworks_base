@@ -18,14 +18,9 @@ package com.android.systemui.qs.customize;
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -36,8 +31,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
-import android.view.WindowManager.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.Toolbar;
 import android.widget.Toolbar.OnMenuItemClickListener;
@@ -48,12 +41,10 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.qs.QSTile;
-import com.android.systemui.qs.QSContainerImpl;
 import com.android.systemui.qs.QSDetailClipper;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer;
-import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.KeyguardMonitor.Callback;
 
@@ -73,6 +64,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
 
     private final QSDetailClipper mClipper;
     private final LightBarController mLightBarController;
+    private final TileQueryHelper mTileQueryHelper;
 
     private boolean isShown;
     private QSTileHost mHost;
@@ -82,7 +74,6 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     private boolean mCustomizing;
     private NotificationsQuickSettingsContainer mNotifQsContainer;
     private QS mQs;
-    private boolean mFinishedFetchingTiles = false;
     private int mX;
     private int mY;
     private boolean mOpening;
@@ -112,6 +103,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
 
         mRecyclerView = findViewById(android.R.id.list);
         mTileAdapter = new TileAdapter(getContext());
+        mTileQueryHelper = new TileQueryHelper(context, mTileAdapter);
         mRecyclerView.setAdapter(mTileAdapter);
         mTileAdapter.getItemTouchHelper().attachToRecyclerView(mRecyclerView);
         GridLayoutManager layout = new GridLayoutManager(getContext(), 3);
@@ -193,12 +185,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     }
 
     private void queryTiles() {
-        mFinishedFetchingTiles = false;
-        Runnable tileQueryFetchCompletion = () -> {
-            Handler mainHandler = new Handler(Looper.getMainLooper());
-            mainHandler.post(() -> mFinishedFetchingTiles = true);
-        };
-        new TileQueryHelper(mContext, mHost, mTileAdapter, tileQueryFetchCompletion);
+        mTileQueryHelper.queryTiles(mHost);
     }
 
     public void hide(int x, int y) {
@@ -259,7 +246,7 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
     }
 
     private void save() {
-        if (mFinishedFetchingTiles) {
+        if (mTileQueryHelper.isFinished()) {
             mTileAdapter.saveSpecs(mHost);
         }
     }

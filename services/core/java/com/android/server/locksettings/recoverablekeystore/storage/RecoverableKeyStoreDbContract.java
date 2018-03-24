@@ -160,7 +160,6 @@ class RecoverableKeyStoreDbContract {
         /**
          * Type of secret used to generate recovery key. One of
          * {@link android.security.keystore.recovery.KeyChainProtectionParams#TYPE_LOCKSCREEN} or
-         * {@link android.security.keystore.recovery.KeyChainProtectionParams#TYPE_CUSTOM_PASSWORD}.
          */
         static final String COLUMN_NAME_SECRET_TYPE = "secret_type";
 

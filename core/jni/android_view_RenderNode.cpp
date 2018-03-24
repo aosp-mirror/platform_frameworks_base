@@ -266,6 +266,10 @@ static jboolean android_view_RenderNode_setPivotY(jlong renderNodePtr, float py)
     return SET_AND_DIRTY(setPivotY, py, RenderNode::GENERIC);
 }
 
+static jboolean android_view_RenderNode_resetPivot(jlong renderNodePtr) {
+    return SET_AND_DIRTY(resetPivot, /* void */, RenderNode::GENERIC);
+}
+
 static jboolean android_view_RenderNode_setCameraDistance(jlong renderNodePtr, float distance) {
     return SET_AND_DIRTY(setCameraDistance, distance, RenderNode::GENERIC);
 }
@@ -613,6 +617,7 @@ static const JNINativeMethod gMethods[] = {
     { "nSetScaleY",            "(JF)Z",  (void*) android_view_RenderNode_setScaleY },
     { "nSetPivotX",            "(JF)Z",  (void*) android_view_RenderNode_setPivotX },
     { "nSetPivotY",            "(JF)Z",  (void*) android_view_RenderNode_setPivotY },
+    { "nResetPivot",           "(J)Z",   (void*) android_view_RenderNode_resetPivot },
     { "nSetCameraDistance",    "(JF)Z",  (void*) android_view_RenderNode_setCameraDistance },
     { "nSetLeft",              "(JI)Z",  (void*) android_view_RenderNode_setLeft },
     { "nSetTop",               "(JI)Z",  (void*) android_view_RenderNode_setTop },

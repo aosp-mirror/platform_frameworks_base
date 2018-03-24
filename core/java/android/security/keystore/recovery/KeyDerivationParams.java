@@ -22,7 +22,6 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -38,7 +37,7 @@ import java.lang.annotation.RetentionPolicy;
 public final class KeyDerivationParams implements Parcelable {
     private final int mAlgorithm;
     private final byte[] mSalt;
-    private final int mDifficulty;
+    private final int mMemoryDifficulty;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -53,43 +52,49 @@ public final class KeyDerivationParams implements Parcelable {
 
     /**
      * SCRYPT.
-     *
-     * @hide
      */
     public static final int ALGORITHM_SCRYPT = 2;
 
     /**
-     * Creates instance of the class to to derive key using salted SHA256 hash.
+     * Creates instance of the class to to derive keys using salted SHA256 hash.
+     *
+     * <p>The salted SHA256 hash is computed over the concatenation of four byte strings, salt_len +
+     * salt + key_material_len + key_material, where salt_len and key_material_len are one-byte, and
+     * denote the number of bytes for salt and key_material, respectively.
      */
-    public static KeyDerivationParams createSha256Params(@NonNull byte[] salt) {
+    public static @NonNull KeyDerivationParams createSha256Params(@NonNull byte[] salt) {
         return new KeyDerivationParams(ALGORITHM_SHA256, salt);
     }
 
     /**
-     * Creates instance of the class to to derive key using the password hashing algorithm SCRYPT.
+     * Creates instance of the class to to derive keys using the password hashing algorithm SCRYPT.
      *
-     * @hide
+     * <p>We expose only one tuning parameter of SCRYPT, which is the memory cost parameter (i.e. N
+     * in <a href="https://www.tarsnap.com/scrypt/scrypt.pdf">the SCRYPT paper</a>). Regular/default
+     * values are used for the other parameters, to keep the overall running time low. Specifically,
+     * the parallelization parameter p is 1, the block size parameter r is 8, and the hashing output
+     * length is 32-byte.
      */
-    public static KeyDerivationParams createScryptParams(@NonNull byte[] salt, int difficulty) {
-        return new KeyDerivationParams(ALGORITHM_SCRYPT, salt, difficulty);
+    public static @NonNull KeyDerivationParams createScryptParams(
+            @NonNull byte[] salt, int memoryDifficulty) {
+        return new KeyDerivationParams(ALGORITHM_SCRYPT, salt, memoryDifficulty);
     }
 
     /**
      * @hide
      */
-    // TODO: Make private once legacy API is removed
-    public KeyDerivationParams(@KeyDerivationAlgorithm int algorithm, @NonNull byte[] salt) {
-        this(algorithm, salt, /*difficulty=*/ 0);
+    private KeyDerivationParams(@KeyDerivationAlgorithm int algorithm, @NonNull byte[] salt) {
+        this(algorithm, salt, /*memoryDifficulty=*/ -1);
     }
 
     /**
      * @hide
      */
     KeyDerivationParams(@KeyDerivationAlgorithm int algorithm, @NonNull byte[] salt,
-            int difficulty) {
+            int memoryDifficulty) {
         mAlgorithm = algorithm;
         mSalt = Preconditions.checkNotNull(salt);
-        mDifficulty = difficulty;
+        mMemoryDifficulty = memoryDifficulty;
     }
 
     /**
@@ -107,12 +112,16 @@ public final class KeyDerivationParams implements Parcelable {
     }
 
     /**
-     * Gets hashing difficulty.
+     * Gets the memory difficulty parameter for the hashing algorithm.
      *
-     * @hide
+     * <p>The effect of this parameter depends on the algorithm in use. For example, please see
+     * {@link #createScryptParams(byte[], int)} for choosing the parameter for SCRYPT.
+     *
+     * <p>If the specific algorithm does not support such a memory difficulty parameter, its value
+     * should be -1.
      */
-    public int getDifficulty() {
-        return mDifficulty;
+    public int getMemoryDifficulty() {
+        return mMemoryDifficulty;
     }
 
     public static final Parcelable.Creator<KeyDerivationParams> CREATOR =
@@ -130,7 +139,7 @@ public final class KeyDerivationParams implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mAlgorithm);
         out.writeByteArray(mSalt);
-        out.writeInt(mDifficulty);
+        out.writeInt(mMemoryDifficulty);
     }
 
     /**
@@ -139,7 +148,7 @@ public final class KeyDerivationParams implements Parcelable {
     protected KeyDerivationParams(Parcel in) {
         mAlgorithm = in.readInt();
         mSalt = in.createByteArray();
-        mDifficulty = in.readInt();
+        mMemoryDifficulty = in.readInt();
     }
 
     @Override

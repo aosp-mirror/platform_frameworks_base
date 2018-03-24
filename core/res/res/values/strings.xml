@@ -1350,6 +1350,8 @@
 
     <!-- Message shown by the fingerprint dialog when fingerprint is not recognized -->
     <string name="fingerprint_not_recognized">Not recognized</string>
+    <!-- Accessibility message announced when a fingerprint has been authenticated [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_authenticated">Fingerprint authenticated</string>
 
     <!-- Error message shown when the fingerprint hardware can't be accessed -->
     <string name="fingerprint_error_hw_not_available">Fingerprint hardware not available.</string>
@@ -4876,12 +4878,6 @@
     A toast message shown when an app shortcut is disabled for an unknown rason.
     -->
     <string name="shortcut_disabled_reason_unknown">Shortcut is disabled</string>
-
-    <!--Battery saver warning. STOPSHIP: Remove it eventually. -->
-    <string name="battery_saver_warning" translatable="false">\"Extreme\" battery saver activated.\n\nSee the details at: go/extreme-battery-saver\n\nEBS aggressively throttles background apps and changes screen-off behavior.\n</string>
-
-    <!--Battery saver warning. STOPSHIP: Remove it eventually. -->
-    <string name="battery_saver_warning_title" translatable="false">Extreme battery saver</string>
 
     <!-- Label for the uninstall button on the harmful app warning dialog. [CHAR LIMIT=20] -->
     <string name="harmful_app_warning_uninstall">UNINSTALL</string>

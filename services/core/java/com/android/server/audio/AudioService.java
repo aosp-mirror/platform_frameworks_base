@@ -715,6 +715,14 @@ public class AudioService extends IAudioService.Stub
         int maxCallVolume = SystemProperties.getInt("ro.config.vc_call_vol_steps", -1);
         if (maxCallVolume != -1) {
             MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] = maxCallVolume;
+        }
+
+        int defaultCallVolume = SystemProperties.getInt("ro.config.vc_call_vol_default", -1);
+        if (defaultCallVolume != -1 &&
+                defaultCallVolume <= MAX_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] &&
+                defaultCallVolume >= MIN_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL]) {
+            AudioSystem.DEFAULT_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] = defaultCallVolume;
+        } else {
             AudioSystem.DEFAULT_STREAM_VOLUME[AudioSystem.STREAM_VOICE_CALL] =
                     (maxCallVolume * 3) / 4;
         }
@@ -726,7 +734,8 @@ public class AudioService extends IAudioService.Stub
 
         int defaultMusicVolume = SystemProperties.getInt("ro.config.media_vol_default", -1);
         if (defaultMusicVolume != -1 &&
-                defaultMusicVolume <= MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC]) {
+                defaultMusicVolume <= MAX_STREAM_VOLUME[AudioSystem.STREAM_MUSIC] &&
+                defaultMusicVolume >= MIN_STREAM_VOLUME[AudioSystem.STREAM_MUSIC]) {
             AudioSystem.DEFAULT_STREAM_VOLUME[AudioSystem.STREAM_MUSIC] = defaultMusicVolume;
         } else {
             if (isPlatformTelevision()) {
@@ -1660,7 +1669,7 @@ public class AudioService extends IAudioService.Stub
 
             // Check if volume update should be send to Hearing Aid
             if ((device & AudioSystem.DEVICE_OUT_HEARING_AID) != 0) {
-                setHearingAidVolume(newIndex);
+                setHearingAidVolume(newIndex, streamType);
             }
 
             // Check if volume update should be sent to Hdmi system audio.
@@ -1909,7 +1918,7 @@ public class AudioService extends IAudioService.Stub
             }
 
             if ((device & AudioSystem.DEVICE_OUT_HEARING_AID) != 0) {
-                setHearingAidVolume(index);
+                setHearingAidVolume(index, streamType);
             }
 
             if (streamTypeAlias == AudioSystem.STREAM_MUSIC) {
@@ -2547,14 +2556,24 @@ public class AudioService extends IAudioService.Stub
             mNm = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         }
 
-        final boolean ringerModeMute = mRingerMode == AudioManager.RINGER_MODE_VIBRATE
-                || mRingerMode == AudioManager.RINGER_MODE_SILENT;
+        final int ringerMode = mRingerMode; // Read ringer mode as reading primitives is atomic
+        final boolean ringerModeMute = ringerMode == AudioManager.RINGER_MODE_VIBRATE
+                || ringerMode == AudioManager.RINGER_MODE_SILENT;
+        final boolean shouldRingSco = ringerMode == AudioManager.RINGER_MODE_VIBRATE
+                && isBluetoothScoOn();
+        // Ask audio policy engine to force use Bluetooth SCO channel if needed
+        final String eventSource = "muteRingerModeStreams() from u/pid:" + Binder.getCallingUid()
+                + "/" + Binder.getCallingPid();
+        sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE, AudioSystem.FOR_VIBRATE_RINGING,
+                shouldRingSco ? AudioSystem.FORCE_BT_SCO : AudioSystem.FORCE_NONE, eventSource, 0);
 
         for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
             final boolean isMuted = isStreamMutedByRingerOrZenMode(streamType);
+            final boolean muteAllowedBySco =
+                    !(shouldRingSco && streamType == AudioSystem.STREAM_RING);
             final boolean shouldZenMute = shouldZenMuteStream(streamType);
             final boolean shouldMute = shouldZenMute || (ringerModeMute
-                    && isStreamAffectedByRingerMode(streamType));
+                    && isStreamAffectedByRingerMode(streamType) && muteAllowedBySco);
             if (isMuted == shouldMute) continue;
             if (!shouldMute) {
                 // unmute
@@ -3195,6 +3214,8 @@ public class AudioService extends IAudioService.Stub
                 AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, eventSource, 0);
         sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
                 AudioSystem.FOR_RECORD, mForcedUseForComm, eventSource, 0);
+        // Un-mute ringtone stream volume
+        setRingerModeInt(getRingerModeInternal(), false);
     }
 
     /** @see AudioManager#isBluetoothScoOn() */
@@ -4787,7 +4808,7 @@ public class AudioService extends IAudioService.Stub
         }
 
         public boolean setIndex(int index, int device, String caller) {
-            boolean changed = false;
+            boolean changed;
             int oldIndex;
             synchronized (mSettingsLock) {
                 synchronized (VolumeStreamState.class) {
@@ -4804,7 +4825,7 @@ public class AudioService extends IAudioService.Stub
                     // - there is no volume index stored for this device on alias stream.
                     // If changing volume of current device, also change volume of current
                     // device on aliased stream
-                    final boolean currentDevice = (device == getDeviceForStream(mStreamType));
+                    final boolean isCurrentDevice = (device == getDeviceForStream(mStreamType));
                     final int numStreamTypes = AudioSystem.getNumStreamTypes();
                     for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
                         final VolumeStreamState aliasStreamState = mStreamStates[streamType];
@@ -4813,9 +4834,19 @@ public class AudioService extends IAudioService.Stub
                                 (changed || !aliasStreamState.hasIndexForDevice(device))) {
                             final int scaledIndex = rescaleIndex(index, mStreamType, streamType);
                             aliasStreamState.setIndex(scaledIndex, device, caller);
-                            if (currentDevice) {
+                            if (isCurrentDevice) {
                                 aliasStreamState.setIndex(scaledIndex,
                                         getDeviceForStream(streamType), caller);
+                            }
+                        }
+                    }
+                    // Mirror changes in SPEAKER ringtone volume on SCO when
+                    if (changed && mStreamType == AudioSystem.STREAM_RING
+                            && device == AudioSystem.DEVICE_OUT_SPEAKER) {
+                        for (int i = 0; i < mIndexMap.size(); i++) {
+                            int otherDevice = mIndexMap.keyAt(i);
+                            if ((otherDevice & AudioSystem.DEVICE_OUT_ALL_SCO) != 0) {
+                                mIndexMap.put(otherDevice, index);
                             }
                         }
                     }
@@ -5669,11 +5700,11 @@ public class AudioService extends IAudioService.Stub
                 makeDeviceListKey(AudioSystem.DEVICE_IN_BLUETOOTH_A2DP, address));
     }
 
-    private void setHearingAidVolume(int index) {
+    private void setHearingAidVolume(int index, int streamType) {
         synchronized (mHearingAidLock) {
             if (mHearingAid != null) {
                 //hearing aid expect volume value in range -128dB to 0dB
-                int gainDB = (int)AudioSystem.getStreamVolumeDB(AudioSystem.STREAM_MUSIC, index/10,
+                int gainDB = (int)AudioSystem.getStreamVolumeDB(streamType, index/10,
                         AudioSystem.DEVICE_OUT_HEARING_AID);
                 if (gainDB < BT_HEARING_AID_GAIN_MIN)
                     gainDB = BT_HEARING_AID_GAIN_MIN;
@@ -5685,7 +5716,7 @@ public class AudioService extends IAudioService.Stub
     // must be called synchronized on mConnectedDevices
     private void makeHearingAidDeviceAvailable(String address, String name, String eventSource) {
         int index = mStreamStates[AudioSystem.STREAM_MUSIC].getIndex(AudioSystem.DEVICE_OUT_HEARING_AID);
-        setHearingAidVolume(index);
+        setHearingAidVolume(index, AudioSystem.STREAM_MUSIC);
 
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_HEARING_AID,
                 AudioSystem.DEVICE_STATE_AVAILABLE, address, name);
@@ -5931,7 +5962,8 @@ public class AudioService extends IAudioService.Stub
             AudioSystem.DEVICE_OUT_WIRED_HEADSET | AudioSystem.DEVICE_OUT_WIRED_HEADPHONE |
             AudioSystem.DEVICE_OUT_ALL_A2DP | AudioSystem.DEVICE_OUT_HDMI |
             AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET | AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET |
-            AudioSystem.DEVICE_OUT_ALL_USB | AudioSystem.DEVICE_OUT_LINE;
+            AudioSystem.DEVICE_OUT_ALL_USB | AudioSystem.DEVICE_OUT_LINE |
+            AudioSystem.DEVICE_OUT_HEARING_AID;
 
     // must be called before removing the device from mConnectedDevices
     // Called synchronized on mConnectedDevices

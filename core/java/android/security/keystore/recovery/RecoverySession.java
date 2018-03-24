@@ -49,7 +49,8 @@ public class RecoverySession implements AutoCloseable {
     private final String mSessionId;
     private final RecoveryController mRecoveryController;
 
-    private RecoverySession(RecoveryController recoveryController, String sessionId) {
+    private RecoverySession(@NonNull RecoveryController recoveryController,
+            @NonNull String sessionId) {
         mRecoveryController = recoveryController;
         mSessionId = sessionId;
     }
@@ -58,14 +59,14 @@ public class RecoverySession implements AutoCloseable {
      * A new session, started by the {@link RecoveryController}.
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    static RecoverySession newInstance(RecoveryController recoveryController) {
+    static @NonNull RecoverySession newInstance(RecoveryController recoveryController) {
         return new RecoverySession(recoveryController, newSessionId());
     }
 
     /**
      * Returns a new random session ID.
      */
-    private static String newSessionId() {
+    private static @NonNull String newSessionId() {
         SecureRandom secureRandom = new SecureRandom();
         byte[] sessionId = new byte[SESSION_ID_LENGTH_BYTES];
         secureRandom.nextBytes(sessionId);
@@ -233,7 +234,7 @@ public class RecoverySession implements AutoCloseable {
      * @throws InternalRecoveryServiceException if an error occurs internal to the recovery service.
      */
     @RequiresPermission(Manifest.permission.RECOVER_KEYSTORE)
-    public Map<String, Key> recoverKeyChainSnapshot(
+    @NonNull public Map<String, Key> recoverKeyChainSnapshot(
             @NonNull byte[] recoveryKeyBlob,
             @NonNull List<WrappedApplicationKey> applicationKeys
     ) throws SessionExpiredException, DecryptionFailedException, InternalRecoveryServiceException {
@@ -256,7 +257,7 @@ public class RecoverySession implements AutoCloseable {
     }
 
     /** Given a map from alias to grant alias, returns a map from alias to a {@link Key} handle. */
-    private Map<String, Key> getKeysFromGrants(Map<String, String> grantAliases)
+    private @NonNull Map<String, Key> getKeysFromGrants(@NonNull Map<String, String> grantAliases)
             throws InternalRecoveryServiceException {
         ArrayMap<String, Key> keysByAlias = new ArrayMap<>(grantAliases.size());
         for (String alias : grantAliases.keySet()) {

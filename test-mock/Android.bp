@@ -84,10 +84,24 @@ java_library_static {
     name: "android.test.mock.stubs",
     srcs: [":android.test.mock.docs"],
     sdk_version: "current",
+    product_variables: {
+        unbundled_build: {
+            // Unbundled apps will use the prebuilt one
+            // prebuilts/sdk/current
+            enabled: false,
+        },
+    },
 }
 
 java_library_static {
     name: "android.test.mock.stubs-system",
     srcs: [":android.test.mock.docs-system"],
     sdk_version: "system_current",
+    product_variables: {
+        unbundled_build: {
+            // Unbundled apps will use the prebuilt one
+            // prebuilts/sdk/system_current
+            enabled: false,
+        },
+    },
 }

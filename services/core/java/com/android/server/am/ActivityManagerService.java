@@ -281,6 +281,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ApplicationInfo.HiddenApiEnforcementPolicy;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageManager;
@@ -4183,12 +4184,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
             }
 
-            if (!app.info.isAllowedToUseHiddenApi() &&
-                    !disableHiddenApiChecks &&
-                    !mHiddenApiBlacklist.isDisabled()) {
-                // This app is not allowed to use undocumented and private APIs, or blacklisting is
-                // enabled. Set up its runtime with the appropriate flag.
-                runtimeFlags |= Zygote.ENABLE_HIDDEN_API_CHECKS;
+            if (!disableHiddenApiChecks && !mHiddenApiBlacklist.isDisabled()) {
+                @HiddenApiEnforcementPolicy int policy =
+                        app.info.getHiddenApiEnforcementPolicy();
+                int policyBits = (policy << Zygote.API_ENFORCEMENT_POLICY_SHIFT);
+                if ((policyBits & Zygote.API_ENFORCEMENT_POLICY_MASK) != policyBits) {
+                    throw new IllegalStateException("Invalid API policy: " + policy);
+                }
+                runtimeFlags |= policyBits;
             }
 
             String invokeWith = null;
@@ -6079,15 +6082,16 @@ public class ActivityManagerService extends IActivityManager.Stub
      * since it's the system_server that creates trace files for most ANRs.
      */
     private static void maybePruneOldTraces(File tracesDir) {
-        final long now = System.currentTimeMillis();
-        final File[] traceFiles = tracesDir.listFiles();
+        final File[] files = tracesDir.listFiles();
+        if (files == null) return;
 
-        if (traceFiles != null) {
-            for (File file : traceFiles) {
-                if ((now - file.lastModified()) > DAY_IN_MILLIS)  {
-                    if (!file.delete()) {
-                        Slog.w(TAG, "Unable to prune stale trace file: " + file);
-                    }
+        final int max = SystemProperties.getInt("tombstoned.max_anr_count", 64);
+        final long now = System.currentTimeMillis();
+        Arrays.sort(files, Comparator.comparingLong(File::lastModified).reversed());
+        for (int i = 0; i < files.length; ++i) {
+            if (i > max || (now - files[i].lastModified()) > DAY_IN_MILLIS) {
+                if (!files[i].delete()) {
+                    Slog.w(TAG, "Unable to prune stale trace file: " + files[i]);
                 }
             }
         }
@@ -21798,6 +21802,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         "com.android.frameworks.locationtests",
         "com.android.frameworks.coretests.privacy",
         "com.android.settings.ui",
+        "com.android.perftests.core",
+        "com.android.perftests.multiuser",
     };
 
     public boolean startInstrumentation(ComponentName className,
@@ -26697,6 +26703,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             try {
                 mActivityStartController.registerRemoteAnimationForNextActivityStart(packageName,
                         adapter);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+    }
+
+    /** @see android.app.ActivityManager#alwaysShowUnsupportedCompileSdkWarning */
+    @Override
+    public void alwaysShowUnsupportedCompileSdkWarning(ComponentName activity) {
+        synchronized (this) {
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                mAppWarnings.alwaysShowUnsupportedCompileSdkWarning(activity);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }

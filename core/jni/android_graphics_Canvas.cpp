@@ -18,6 +18,7 @@
 #include "GraphicsJNI.h"
 #include "core_jni_helpers.h"
 
+#include <android/api-level.h>
 #include <androidfw/ResourceTypes.h>
 #include <hwui/Canvas.h>
 #include <hwui/Paint.h>
@@ -467,6 +468,13 @@ static void drawBitmapArray(JNIEnv* env, jobject, jlong canvasHandle,
 static void drawBitmapMesh(JNIEnv* env, jobject, jlong canvasHandle, jobject jbitmap,
                            jint meshWidth, jint meshHeight, jfloatArray jverts,
                            jint vertIndex, jintArray jcolors, jint colorIndex, jlong paintHandle) {
+    if (Canvas::GetApiLevel() < __ANDROID_API_P__) {
+        // Before P we forgot to respect these. Now that we do respect them, explicitly
+        // zero them for backward compatibility.
+        vertIndex = 0;
+        colorIndex = 0;
+    }
+
     const int ptCount = (meshWidth + 1) * (meshHeight + 1);
     AutoJavaFloatArray vertA(env, jverts, vertIndex + (ptCount << 1));
     AutoJavaIntArray colorA(env, jcolors, colorIndex + ptCount);
@@ -474,7 +482,8 @@ static void drawBitmapMesh(JNIEnv* env, jobject, jlong canvasHandle, jobject jbi
     const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
     Bitmap& bitmap = android::bitmap::toBitmap(env, jbitmap);
     get_canvas(canvasHandle)->drawBitmapMesh(bitmap, meshWidth, meshHeight,
-                                             vertA.ptr(), colorA.ptr(), paint);
+                                             vertA.ptr() + vertIndex*2,
+                                             colorA.ptr() + colorIndex, paint);
 }
 
 static void drawTextChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray text,

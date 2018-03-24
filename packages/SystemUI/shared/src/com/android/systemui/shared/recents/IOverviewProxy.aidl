@@ -35,19 +35,11 @@ oneway interface IOverviewProxy {
      * guarantees the following order of events:
      *
      * Normal gesture: DOWN, (MOVE/POINTER_DOWN/POINTER_UP)*, UP
-     * Quick switch: DOWN, (MOVE/POINTER_DOWN/POINTER_UP)*, SWITCH
      * Quick scrub: DOWN, (MOVE/POINTER_DOWN/POINTER_UP)*, SCRUB_START, SCRUB_PROGRESS*, SCRUB_END
      *
-     * Once quick switch/scrub is sent, then no further motion events will be provided.
+     * Once quick scrub is sent, then no further motion events will be provided.
      */
     void onMotionEvent(in MotionEvent event);
-
-    /**
-     * Sent when a user has quickly flinged on the nav bar to switch tasks. Once this event is sent
-     * the caller will stop sending any motion events and will no longer preemptively cancel any
-     * recents animations started as a part of the motion event handling.
-     */
-    void onQuickSwitch();
 
     /**
      * Sent when the user starts to actively scrub the nav bar to switch tasks. Once this event is
@@ -89,8 +81,8 @@ oneway interface IOverviewProxy {
      * {@link onMotionEvent}. Since motion events will be sent, motion up or cancel can still be
      * sent to cancel overview regardless the current state of launcher (eg. if overview is already
      * visible, this event will still be sent if user swipes up). When this signal is sent,
-     * navigation bar will not handle any gestures such as quick scrub or switch and the home button
-     * will cancel (long) press.
+     * navigation bar will not handle any gestures such as quick scrub and the home button will
+     * cancel (long) press.
      */
     void onQuickStep(in MotionEvent event);
 }

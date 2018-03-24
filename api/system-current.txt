@@ -121,6 +121,7 @@ package android {
     field public static final java.lang.String MOVE_PACKAGE = "android.permission.MOVE_PACKAGE";
     field public static final java.lang.String NOTIFICATION_DURING_SETUP = "android.permission.NOTIFICATION_DURING_SETUP";
     field public static final java.lang.String NOTIFY_TV_INPUTS = "android.permission.NOTIFY_TV_INPUTS";
+    field public static final java.lang.String OBSERVE_APP_USAGE = "android.permission.OBSERVE_APP_USAGE";
     field public static final java.lang.String OVERRIDE_WIFI_CONFIG = "android.permission.OVERRIDE_WIFI_CONFIG";
     field public static final java.lang.String PACKAGE_USAGE_STATS = "android.permission.PACKAGE_USAGE_STATS";
     field public static final java.lang.String PACKAGE_VERIFICATION_AGENT = "android.permission.PACKAGE_VERIFICATION_AGENT";
@@ -731,6 +732,10 @@ package android.app.usage {
     field public static final int SLICE_PINNED = 14; // 0xe
     field public static final int SLICE_PINNED_PRIV = 13; // 0xd
     field public static final int SYSTEM_INTERACTION = 6; // 0x6
+  }
+
+  public final class UsageStats implements android.os.Parcelable {
+    method public int getAppLaunchCount();
   }
 
   public final class UsageStatsManager {
@@ -4318,7 +4323,6 @@ package android.security.keystore.recovery {
     method public int getUserSecretType();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.security.keystore.recovery.KeyChainProtectionParams> CREATOR;
-    field public static final int TYPE_CUSTOM_PASSWORD = 101; // 0x65
     field public static final int TYPE_LOCKSCREEN = 100; // 0x64
     field public static final int UI_FORMAT_PASSWORD = 2; // 0x2
     field public static final int UI_FORMAT_PATTERN = 3; // 0x3
@@ -4350,11 +4354,14 @@ package android.security.keystore.recovery {
   }
 
   public final class KeyDerivationParams implements android.os.Parcelable {
+    method public static android.security.keystore.recovery.KeyDerivationParams createScryptParams(byte[], int);
     method public static android.security.keystore.recovery.KeyDerivationParams createSha256Params(byte[]);
     method public int describeContents();
     method public int getAlgorithm();
+    method public int getMemoryDifficulty();
     method public byte[] getSalt();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int ALGORITHM_SCRYPT = 2; // 0x2
     field public static final int ALGORITHM_SHA256 = 1; // 0x1
     field public static final android.os.Parcelable.Creator<android.security.keystore.recovery.KeyDerivationParams> CREATOR;
   }
@@ -4373,7 +4380,6 @@ package android.security.keystore.recovery {
     method public static android.security.keystore.recovery.RecoveryController getInstance(android.content.Context);
     method public java.security.Key getKey(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException, java.security.UnrecoverableKeyException;
     method public android.security.keystore.recovery.KeyChainSnapshot getKeyChainSnapshot() throws android.security.keystore.recovery.InternalRecoveryServiceException;
-    method public int[] getPendingRecoverySecretTypes() throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public deprecated android.security.keystore.recovery.KeyChainSnapshot getRecoveryData() throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public int[] getRecoverySecretTypes() throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public deprecated int getRecoveryStatus(java.lang.String, java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
@@ -4382,7 +4388,6 @@ package android.security.keystore.recovery {
     method public java.security.Key importKey(java.lang.String, byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
     method public deprecated void initRecoveryService(java.lang.String, byte[]) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void initRecoveryService(java.lang.String, byte[], byte[]) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
-    method public void recoverySecretAvailable(android.security.keystore.recovery.KeyChainProtectionParams) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void removeKey(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void setRecoverySecretTypes(int[]) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public deprecated void setRecoveryStatus(java.lang.String, java.lang.String, int) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.content.pm.PackageManager.NameNotFoundException;
@@ -5705,6 +5710,7 @@ package android.telephony.ims {
   }
 
   public final class ImsReasonInfo implements android.os.Parcelable {
+    ctor public ImsReasonInfo(int, int, java.lang.String);
     method public int describeContents();
     method public int getCode();
     method public int getExtraCode();
@@ -6306,18 +6312,20 @@ package android.telephony.mbms.vendor {
 
   public class MbmsDownloadServiceBase extends android.os.Binder {
     ctor public MbmsDownloadServiceBase();
+    method public int addProgressListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadProgressListener) throws android.os.RemoteException;
+    method public int addStatusListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStatusListener) throws android.os.RemoteException;
     method public int cancelDownload(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
     method public void dispose(int) throws android.os.RemoteException;
     method public int download(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
     method public int initialize(int, android.telephony.mbms.MbmsDownloadSessionCallback) throws android.os.RemoteException;
     method public java.util.List<android.telephony.mbms.DownloadRequest> listPendingDownloads(int) throws android.os.RemoteException;
     method public void onAppCallbackDied(int, int);
-    method public int registerStateCallback(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStateCallback) throws android.os.RemoteException;
+    method public int removeProgressListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadProgressListener) throws android.os.RemoteException;
+    method public int removeStatusListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStatusListener) throws android.os.RemoteException;
     method public int requestDownloadState(android.telephony.mbms.DownloadRequest, android.telephony.mbms.FileInfo) throws android.os.RemoteException;
     method public int requestUpdateFileServices(int, java.util.List<java.lang.String>) throws android.os.RemoteException;
     method public int resetDownloadKnowledge(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
     method public int setTempFileRootDirectory(int, java.lang.String) throws android.os.RemoteException;
-    method public int unregisterStateCallback(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStateCallback) throws android.os.RemoteException;
   }
 
   public class MbmsStreamingServiceBase extends android.os.Binder {

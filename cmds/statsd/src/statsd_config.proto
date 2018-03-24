@@ -78,7 +78,7 @@ message FieldValueMatcher {
     MessageMatcher matches_tuple = 12;
 
     StringListMatcher eq_any_string = 13;
-    StringListMatcher neq_all_string = 14;
+    StringListMatcher neq_any_string = 14;
   }
 }
 

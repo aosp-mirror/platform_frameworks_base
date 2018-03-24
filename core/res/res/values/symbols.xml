@@ -2381,6 +2381,7 @@
   <java-symbol type="string" name="fingerprint_error_lockout_permanent" />
   <java-symbol type="string" name="fingerprint_name_template" />
   <java-symbol type="string" name="fingerprint_not_recognized" />
+  <java-symbol type="string" name="fingerprint_authenticated" />
   <java-symbol type="string" name="fingerprint_error_no_fingerprints" />
   <java-symbol type="string" name="fingerprint_error_hw_not_present" />
 
@@ -3249,7 +3250,6 @@
   <java-symbol type="string" name="shortcut_restore_not_supported" />
   <java-symbol type="string" name="shortcut_restore_signature_mismatch" />
   <java-symbol type="string" name="shortcut_restore_unknown_issue" />
-  <java-symbol type="string" name="battery_saver_warning" />
 
   <!-- From media projection -->
   <java-symbol type="string" name="config_mediaProjectionPermissionDialogComponent" />
@@ -3260,7 +3260,6 @@
   <java-symbol type="string" name="unsupported_compile_sdk_message" />
   <java-symbol type="string" name="unsupported_compile_sdk_check_update" />
 
-  <java-symbol type="string" name="battery_saver_warning_title" />
   <java-symbol type="string" name="keyguard_accessibility_pattern_unlock" />
   <java-symbol type="string" name="keyguard_accessibility_pin_unlock" />
   <java-symbol type="string" name="keyguard_accessibility_sim_pin_unlock" />

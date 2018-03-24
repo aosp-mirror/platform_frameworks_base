@@ -61,8 +61,8 @@ class BackwardsCompat {
     static android.security.keystore.recovery.KeyDerivationParams fromLegacyKeyDerivationParams(
             KeyDerivationParams keyDerivationParams
     ) {
-        return new android.security.keystore.recovery.KeyDerivationParams(
-                keyDerivationParams.getAlgorithm(), keyDerivationParams.getSalt());
+        return android.security.keystore.recovery.KeyDerivationParams.createSha256Params(
+                keyDerivationParams.getSalt());
     }
 
     static android.security.keystore.recovery.WrappedApplicationKey fromLegacyWrappedApplicationKey(

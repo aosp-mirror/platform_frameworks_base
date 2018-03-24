@@ -378,6 +378,7 @@ public class SettingsBackupTest {
                     Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS,
                     Settings.Global.STORAGE_BENCHMARK_INTERVAL,
                     Settings.Global.STORAGE_SETTINGS_CLOBBER_THRESHOLD,
+                    Settings.Global.SWAP_ENABLED,
                     Settings.Global.SYNC_MANAGER_CONSTANTS,
                     Settings.Global.SYNC_MAX_RETRY_DELAY_IN_SECONDS,
                     Settings.Global.SYS_FREE_STORAGE_LOG_INTERVAL,
