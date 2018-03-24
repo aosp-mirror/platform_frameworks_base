@@ -47,10 +47,10 @@ import java.util.Objects;
 public abstract class PlayerBase {
 
     private static final String TAG = "PlayerBase";
-    private static final boolean DEBUG = false;
-    private static IAudioService sService; //lazy initialization, use getService()
     /** Debug app ops */
     private static final boolean DEBUG_APP_OPS = false;
+    private static final boolean DEBUG = DEBUG_APP_OPS || false;
+    private static IAudioService sService; //lazy initialization, use getService()
 
     // parameters of the player that affect AppOps
     protected AudioAttributes mAttributes;
@@ -102,6 +102,7 @@ public abstract class PlayerBase {
             mAppOps.startWatchingMode(AppOpsManager.OP_PLAY_AUDIO,
                     ActivityThread.currentPackageName(), mAppOpsCallback);
         } catch (RemoteException e) {
+            Log.e(TAG, "Error registering appOps callback", e);
             mHasAppOpsPlayAudio = false;
         }
         try {
