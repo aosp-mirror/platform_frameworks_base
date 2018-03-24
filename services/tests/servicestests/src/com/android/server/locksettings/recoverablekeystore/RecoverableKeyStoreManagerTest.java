@@ -713,12 +713,14 @@ public class RecoverableKeyStoreManagerTest {
     @Test
     public void recoverKeyChainSnapshot_throwsIfNoSessionIsPresent() throws Exception {
         try {
+            WrappedApplicationKey applicationKey = new WrappedApplicationKey.Builder()
+                .setAlias(TEST_ALIAS)
+                .setEncryptedKeyMaterial(randomBytes(32))
+                .build();
             mRecoverableKeyStoreManager.recoverKeyChainSnapshot(
                     TEST_SESSION_ID,
                     /*recoveryKeyBlob=*/ randomBytes(32),
-                    /*applicationKeys=*/ ImmutableList.of(
-                            new WrappedApplicationKey("alias", randomBytes(32))
-                    ));
+                    /*applicationKeys=*/ ImmutableList.of(applicationKey));
             fail("should have thrown");
         } catch (ServiceSpecificException e) {
             // expected
@@ -766,10 +768,11 @@ public class RecoverableKeyStoreManagerTest {
         SecretKey recoveryKey = randomRecoveryKey();
         byte[] encryptedClaimResponse = encryptClaimResponse(
                 keyClaimant, TEST_SECRET, TEST_VAULT_PARAMS, recoveryKey);
-        WrappedApplicationKey badApplicationKey = new WrappedApplicationKey(
-                TEST_ALIAS,
-                encryptedApplicationKey(randomRecoveryKey(), randomBytes(32)));
-
+        WrappedApplicationKey badApplicationKey = new WrappedApplicationKey.Builder()
+                .setAlias(TEST_ALIAS)
+                .setEncryptedKeyMaterial(
+                            encryptedApplicationKey(randomRecoveryKey(), randomBytes(32)))
+                .build();
         try {
             mRecoverableKeyStoreManager.recoverKeyChainSnapshot(
                     TEST_SESSION_ID,
@@ -824,9 +827,11 @@ public class RecoverableKeyStoreManagerTest {
         byte[] encryptedClaimResponse = encryptClaimResponse(
                 keyClaimant, TEST_SECRET, TEST_VAULT_PARAMS, recoveryKey);
         byte[] applicationKeyBytes = randomBytes(32);
-        WrappedApplicationKey applicationKey = new WrappedApplicationKey(
-                TEST_ALIAS,
-                encryptedApplicationKey(recoveryKey, applicationKeyBytes));
+        WrappedApplicationKey applicationKey = new WrappedApplicationKey.Builder()
+                    .setAlias(TEST_ALIAS)
+                    .setEncryptedKeyMaterial(
+                            encryptedApplicationKey(recoveryKey, applicationKeyBytes))
+                    .build();
 
         Map<String, String> recoveredKeys = mRecoverableKeyStoreManager.recoverKeyChainSnapshot(
                 TEST_SESSION_ID,
@@ -858,14 +863,17 @@ public class RecoverableKeyStoreManagerTest {
 
         byte[] applicationKeyBytes1 = randomBytes(32);
         byte[] applicationKeyBytes2 = randomBytes(32);
-
-        WrappedApplicationKey applicationKey1 = new WrappedApplicationKey(
-                TEST_ALIAS,
-                // Use a different recovery key here, so the decryption will fail
-                encryptedApplicationKey(randomRecoveryKey(), applicationKeyBytes1));
-        WrappedApplicationKey applicationKey2 = new WrappedApplicationKey(
-                TEST_ALIAS2,
-                encryptedApplicationKey(recoveryKey, applicationKeyBytes2));
+        WrappedApplicationKey applicationKey1 = new WrappedApplicationKey.Builder()
+                    .setAlias(TEST_ALIAS)
+                     // Use a different recovery key here, so the decryption will fail
+                    .setEncryptedKeyMaterial(
+                            encryptedApplicationKey(randomRecoveryKey(), applicationKeyBytes1))
+                    .build();
+        WrappedApplicationKey applicationKey2 = new WrappedApplicationKey.Builder()
+                    .setAlias(TEST_ALIAS2)
+                    .setEncryptedKeyMaterial(
+                            encryptedApplicationKey(recoveryKey, applicationKeyBytes2))
+                    .build();
 
         Map<String, String> recoveredKeys = mRecoverableKeyStoreManager.recoverKeyChainSnapshot(
                 TEST_SESSION_ID,
@@ -963,8 +971,8 @@ public class RecoverableKeyStoreManagerTest {
     private static byte[] encryptedApplicationKey(
             SecretKey recoveryKey, byte[] applicationKey) throws Exception {
         return KeySyncUtils.encryptKeysWithRecoveryKey(recoveryKey, ImmutableMap.of(
-                "alias", new SecretKeySpec(applicationKey, "AES")
-        )).get("alias");
+                TEST_ALIAS, new SecretKeySpec(applicationKey, "AES")
+        )).get(TEST_ALIAS);
     }
 
     private static byte[] encryptClaimResponse(
