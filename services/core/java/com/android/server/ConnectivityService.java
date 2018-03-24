@@ -4581,17 +4581,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return nai.network.netId;
     }
 
-    private void handleRegisterNetworkAgent(NetworkAgentInfo na) {
+    private void handleRegisterNetworkAgent(NetworkAgentInfo nai) {
         if (VDBG) log("Got NetworkAgent Messenger");
-        mNetworkAgentInfos.put(na.messenger, na);
+        mNetworkAgentInfos.put(nai.messenger, nai);
         synchronized (mNetworkForNetId) {
-            mNetworkForNetId.put(na.network.netId, na);
+            mNetworkForNetId.put(nai.network.netId, nai);
         }
-        na.asyncChannel.connect(mContext, mTrackerHandler, na.messenger);
-        NetworkInfo networkInfo = na.networkInfo;
-        na.networkInfo = null;
-        updateNetworkInfo(na, networkInfo);
-        updateUids(na, null, na.networkCapabilities);
+        nai.asyncChannel.connect(mContext, mTrackerHandler, nai.messenger);
+        NetworkInfo networkInfo = nai.networkInfo;
+        nai.networkInfo = null;
+        updateNetworkInfo(nai, networkInfo);
+        updateUids(nai, null, nai.networkCapabilities);
     }
 
     private void updateLinkProperties(NetworkAgentInfo networkAgent, LinkProperties oldLp) {
