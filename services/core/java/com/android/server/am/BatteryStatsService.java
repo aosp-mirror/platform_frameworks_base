@@ -18,9 +18,13 @@ package com.android.server.am;
 
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.hardware.usb.UsbManager;
 import android.net.wifi.WifiActivityEnergyInfo;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerSaveState;
@@ -34,6 +38,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.ParcelFormatException;
 import android.os.PowerManagerInternal;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -70,7 +75,6 @@ import java.nio.CharBuffer;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -684,6 +688,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
+    public void noteUsbConnectionState(boolean connected) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteUsbConnectionStateLocked(connected);
+        }
+    }
+
     public void notePhoneSignalStrength(SignalStrength signalStrength) {
         enforceCallingPermission();
         synchronized (mStats) {
@@ -1114,6 +1125,35 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
         mContext.enforcePermission(android.Manifest.permission.UPDATE_DEVICE_STATS,
                 Binder.getCallingPid(), Binder.getCallingUid(), null);
+    }
+
+    public final static class UsbConnectionReceiver extends BroadcastReceiver {
+        private static final String TAG = UsbConnectionReceiver.class.getSimpleName();
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
+                final Intent usbState = context.registerReceiver(null, new IntentFilter(UsbManager.ACTION_USB_STATE));
+                if (usbState != null) {
+                    handleUsbState(usbState);
+                }
+            } else if (UsbManager.ACTION_USB_STATE.equals(action)) {
+                handleUsbState(intent);
+            }
+        }
+        private void handleUsbState(Intent intent) {
+            IBatteryStats bs = getService();
+            if (bs == null) {
+                Slog.w(TAG, "Could not access batterystats");
+                return;
+            }
+            boolean connected = intent.getExtras().getBoolean(UsbManager.USB_CONNECTED);
+            try {
+                bs.noteUsbConnectionState(connected);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Could not access batterystats: ", e);
+            }
+        }
     }
 
     final class WakeupReasonThread extends Thread {
