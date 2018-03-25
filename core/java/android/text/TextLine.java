@@ -172,7 +172,12 @@ public class TextLine {
 
         mComputed = null;
         if (text instanceof PrecomputedText) {
+            // Here, no need to check line break strategy or hyphenation frequency since there is no
+            // line break concept here.
             mComputed = (PrecomputedText) text;
+            if (!mComputed.getParams().getTextPaint().equalsForTextMeasurement(paint)) {
+                mComputed = null;
+            }
         }
 
         mCharsValid = hasReplacement || hasTabs || directions != Layout.DIRS_ALL_LEFT_TO_RIGHT;
