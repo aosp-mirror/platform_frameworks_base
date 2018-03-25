@@ -41,6 +41,7 @@ import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.CookieManager;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -145,6 +146,7 @@ public class CaptivePortalLoginActivity extends Activity {
 
         final WebView webview = getWebview();
         webview.clearCache(true);
+        CookieManager.getInstance().setAcceptThirdPartyCookies(webview, true);
         WebSettings webSettings = webview.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
