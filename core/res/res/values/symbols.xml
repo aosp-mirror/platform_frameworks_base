@@ -579,6 +579,7 @@
   <java-symbol type="string" name="RestrictedOnEmergencyTitle" />
   <java-symbol type="string" name="RestrictedOnNormalTitle" />
   <java-symbol type="string" name="RestrictedStateContent" />
+  <java-symbol type="string" name="RestrictedStateContentMsimTemplate" />
   <java-symbol type="string" name="notification_channel_network_alert" />
   <java-symbol type="string" name="notification_channel_call_forward" />
   <java-symbol type="string" name="notification_channel_emergency_callback" />
@@ -1024,6 +1025,8 @@
   <java-symbol type="string" name="volume_icon_description_media" />
   <java-symbol type="string" name="volume_icon_description_notification" />
   <java-symbol type="string" name="volume_icon_description_ringer" />
+  <java-symbol type="string" name="volume_dialog_ringer_guidance_vibrate" />
+  <java-symbol type="string" name="volume_dialog_ringer_guidance_silent" />
   <java-symbol type="string" name="wait" />
   <java-symbol type="string" name="webpage_unresponsive" />
   <java-symbol type="string" name="whichApplication" />
@@ -2029,6 +2032,10 @@
   <java-symbol type="string" name="mmcc_imsi_unknown_in_hlr" />
   <java-symbol type="string" name="mmcc_illegal_ms" />
   <java-symbol type="string" name="mmcc_illegal_me" />
+  <java-symbol type="string" name="mmcc_authentication_reject_msim_template" />
+  <java-symbol type="string" name="mmcc_imsi_unknown_in_hlr_msim_template" />
+  <java-symbol type="string" name="mmcc_illegal_ms_msim_template" />
+  <java-symbol type="string" name="mmcc_illegal_me_msim_template" />
   <java-symbol type="string" name="notification_listener_binding_label" />
   <java-symbol type="string" name="vr_listener_binding_label" />
   <java-symbol type="string" name="condition_provider_service_binding_label" />
@@ -2115,7 +2122,6 @@
   <java-symbol type="layout" name="notification_template_material_big_text" />
   <java-symbol type="layout" name="notification_template_header" />
   <java-symbol type="layout" name="notification_material_media_action" />
-  <java-symbol type="color" name="notification_icon_default_color" />
   <java-symbol type="color" name="notification_progress_background_color" />
   <java-symbol type="id" name="media_actions" />
 
@@ -2376,6 +2382,7 @@
   <java-symbol type="string" name="fingerprint_error_lockout_permanent" />
   <java-symbol type="string" name="fingerprint_name_template" />
   <java-symbol type="string" name="fingerprint_not_recognized" />
+  <java-symbol type="string" name="fingerprint_authenticated" />
   <java-symbol type="string" name="fingerprint_error_no_fingerprints" />
   <java-symbol type="string" name="fingerprint_error_hw_not_present" />
 
@@ -2621,6 +2628,7 @@
   <java-symbol type="bool" name="config_cameraDoubleTapPowerGestureEnabled" />
   <java-symbol type="integer" name="config_cameraLiftTriggerSensorType" />
   <java-symbol type="string" name="config_cameraLiftTriggerSensorStringType" />
+  <java-symbol type="bool" name="config_volumeHushGestureEnabled" />
 
   <java-symbol type="drawable" name="platlogo_m" />
 
@@ -2779,7 +2787,6 @@
   <java-symbol type="drawable" name="ic_user_secure" />
 
   <java-symbol type="string" name="android_upgrading_notification_title" />
-  <java-symbol type="string" name="android_upgrading_notification_body" />
 
   <java-symbol type="string" name="usb_mtp_launch_notification_title" />
   <java-symbol type="string" name="usb_mtp_launch_notification_description" />
@@ -2965,6 +2972,8 @@
   <java-symbol type="color" name="notification_primary_text_color_dark" />
   <java-symbol type="color" name="notification_secondary_text_color_light" />
   <java-symbol type="color" name="notification_secondary_text_color_dark" />
+  <java-symbol type="color" name="notification_default_color_light" />
+  <java-symbol type="color" name="notification_default_color_dark" />
 
   <java-symbol type="string" name="app_category_game" />
   <java-symbol type="string" name="app_category_audio" />
@@ -3242,7 +3251,6 @@
   <java-symbol type="string" name="shortcut_restore_not_supported" />
   <java-symbol type="string" name="shortcut_restore_signature_mismatch" />
   <java-symbol type="string" name="shortcut_restore_unknown_issue" />
-  <java-symbol type="string" name="battery_saver_warning" />
 
   <!-- From media projection -->
   <java-symbol type="string" name="config_mediaProjectionPermissionDialogComponent" />
@@ -3253,7 +3261,6 @@
   <java-symbol type="string" name="unsupported_compile_sdk_message" />
   <java-symbol type="string" name="unsupported_compile_sdk_check_update" />
 
-  <java-symbol type="string" name="battery_saver_warning_title" />
   <java-symbol type="string" name="keyguard_accessibility_pattern_unlock" />
   <java-symbol type="string" name="keyguard_accessibility_pin_unlock" />
   <java-symbol type="string" name="keyguard_accessibility_sim_pin_unlock" />

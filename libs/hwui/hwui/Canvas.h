@@ -276,6 +276,8 @@ public:
                         const SkPath& path, float hOffset, float vOffset, const Paint& paint,
                         const Typeface* typeface);
 
+    static int GetApiLevel() { return sApiLevel; }
+
 protected:
     void drawTextDecorations(float x, float y, float length, const SkPaint& paint);
 

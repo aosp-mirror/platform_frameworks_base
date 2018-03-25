@@ -2882,9 +2882,8 @@ public interface WindowManager extends ViewManager {
         /**
          * @hide
          */
-        public String toString(String prefix) {
-            StringBuilder sb = new StringBuilder(256);
-            sb.append("{(");
+        public void dumpDimensions(StringBuilder sb) {
+            sb.append('(');
             sb.append(x);
             sb.append(',');
             sb.append(y);
@@ -2895,6 +2894,15 @@ public interface WindowManager extends ViewManager {
             sb.append((height == MATCH_PARENT ? "fill" : (height == WRAP_CONTENT
                     ? "wrap" : String.valueOf(height))));
             sb.append(")");
+        }
+
+        /**
+         * @hide
+         */
+        public String toString(String prefix) {
+            StringBuilder sb = new StringBuilder(256);
+            sb.append('{');
+            dumpDimensions(sb);
             if (horizontalMargin != 0) {
                 sb.append(" hm=");
                 sb.append(horizontalMargin);

@@ -71,16 +71,13 @@ public class AppTimeLimitController {
         /** The time when the current app came to the foreground */
         private long currentForegroundedTime;
 
-        /** The last app that was in the background */
-        private String lastBackgroundedPackage;
-
         /** Map from package name for quick lookup */
         private ArrayMap<String, ArrayList<TimeLimitGroup>> packageMap = new ArrayMap<>();
 
         /** Map of observerId to details of the time limit group */
         private SparseArray<TimeLimitGroup> groups = new SparseArray<>();
 
-        UserData(@UserIdInt int userId) {
+        private UserData(@UserIdInt int userId) {
             this.userId = userId;
         }
     }
@@ -114,7 +111,7 @@ public class AppTimeLimitController {
         int userId;
     }
 
-    class MyHandler extends Handler {
+    private class MyHandler extends Handler {
 
         static final int MSG_CHECK_TIMEOUT = 1;
         static final int MSG_INFORM_LISTENER = 2;
@@ -151,7 +148,7 @@ public class AppTimeLimitController {
     }
 
     /** Returns an existing UserData object for the given userId, or creates one */
-    UserData getOrCreateUserDataLocked(int userId) {
+    private UserData getOrCreateUserDataLocked(int userId) {
         UserData userData = mUsers.get(userId);
         if (userData == null) {
             userData = new UserData(userId);
@@ -258,12 +255,6 @@ public class AppTimeLimitController {
             user.currentForegroundedPackage = packageName;
             user.currentForegroundedTime = getUptimeMillis();
 
-            // Check if the last package that was backgrounded is the same as this one
-            if (!TextUtils.equals(packageName, user.lastBackgroundedPackage)) {
-                // TODO: Move this logic up to usage stats to persist there.
-                incTotalLaunchesLocked(user, packageName);
-            }
-
             // Check if any of the groups need to watch for this package
             maybeWatchForPackageLocked(user, packageName, user.currentForegroundedTime);
         }
@@ -279,7 +270,6 @@ public class AppTimeLimitController {
     public void moveToBackground(String packageName, String className, int userId) {
         synchronized (mLock) {
             UserData user = getOrCreateUserDataLocked(userId);
-            user.lastBackgroundedPackage = packageName;
             if (!TextUtils.equals(user.currentForegroundedPackage, packageName)) {
                 Slog.w(TAG, "Eh? Last foregrounded package = " + user.currentForegroundedPackage
                         + " and now backgrounded = " + packageName);
@@ -433,10 +423,6 @@ public class AppTimeLimitController {
         }
     }
 
-    private void incTotalLaunchesLocked(UserData user, String packageName) {
-        // TODO: Inform UsageStatsService and aggregate the counter per app
-    }
-
     void dump(PrintWriter pw) {
         synchronized (mLock) {
             pw.println("\n  App Time Limits");
@@ -457,7 +443,6 @@ public class AppTimeLimitController {
                 pw.println();
                 pw.print("    currentForegroundedPackage=");
                 pw.println(user.currentForegroundedPackage);
-                pw.print("    lastBackgroundedPackage="); pw.println(user.lastBackgroundedPackage);
             }
         }
     }

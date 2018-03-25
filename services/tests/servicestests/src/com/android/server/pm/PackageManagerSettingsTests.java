@@ -21,13 +21,12 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -39,12 +38,13 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.UserInfo;
+import android.os.BaseBundle;
+import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
-import android.security.keystore.ArrayUtils;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -54,8 +54,8 @@ import com.android.internal.os.AtomicFile;
 import com.android.server.LocalServices;
 import com.android.server.pm.permission.PermissionManagerInternal;
 import com.android.server.pm.permission.PermissionManagerService;
-import com.android.server.pm.permission.DefaultPermissionGrantPolicy.DefaultPermissionGrantedCallback;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -71,9 +71,9 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class PackageManagerSettingsTests {
-    private static final String PACKAGE_NAME_2 = "com.google.app2";
+    private static final String PACKAGE_NAME_2 = "com.android.app2";
     private static final String PACKAGE_NAME_3 = "com.android.app3";
-    private static final String PACKAGE_NAME_1 = "com.google.app1";
+    private static final String PACKAGE_NAME_1 = "com.android.app1";
     public static final String TAG = "PackageManagerSettingsTests";
     protected final String PREFIX = "android.content.pm";
 
@@ -154,6 +154,92 @@ public class PackageManagerSettingsTests {
         PackageSetting ps = settings.getPackageLPr(PACKAGE_NAME_2);
         assertThat(ps.getEnabled(0), is(COMPONENT_ENABLED_STATE_DISABLED_USER));
         assertThat(ps.getEnabled(1), is(COMPONENT_ENABLED_STATE_DEFAULT));
+    }
+
+    private PersistableBundle getPersistableBundle(String packageName, long longVal,
+            double doubleVal, boolean boolVal, String textVal) {
+        final PersistableBundle bundle = new PersistableBundle();
+        bundle.putString(packageName + ".TEXT_VALUE", textVal);
+        bundle.putLong(packageName + ".LONG_VALUE", longVal);
+        bundle.putBoolean(packageName + ".BOOL_VALUE", boolVal);
+        bundle.putDouble(packageName + ".DOUBLE_VALUE", doubleVal);
+        return bundle;
+    }
+
+    @Test
+    public void testReadPackageRestrictions_oldSuspendInfo() {
+        writePackageRestrictions_oldSuspendInfoXml(0);
+        final Object lock = new Object();
+        final Context context = InstrumentationRegistry.getTargetContext();
+        final Settings settingsUnderTest = new Settings(context.getFilesDir(), null, lock);
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_1, createPackageSetting(PACKAGE_NAME_1));
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_2, createPackageSetting(PACKAGE_NAME_2));
+        settingsUnderTest.readPackageRestrictionsLPr(0);
+
+        final PackageSetting ps1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1);
+        final PackageUserState packageUserState1 = ps1.readUserState(0);
+        assertThat(packageUserState1.suspended, is(true));
+        assertThat("android".equals(packageUserState1.suspendingPackage), is(true));
+
+        final PackageSetting ps2 = settingsUnderTest.mPackages.get(PACKAGE_NAME_2);
+        final PackageUserState packageUserState2 = ps2.readUserState(0);
+        assertThat(packageUserState2.suspended, is(false));
+        assertThat(packageUserState2.suspendingPackage, is(nullValue()));
+    }
+
+    @Test
+    public void testReadWritePackageRestrictions_newSuspendInfo() {
+        final Context context = InstrumentationRegistry.getTargetContext();
+        final Settings settingsUnderTest = new Settings(context.getFilesDir(), null, new Object());
+        final PackageSetting ps1 = createPackageSetting(PACKAGE_NAME_1);
+        final PackageSetting ps2 = createPackageSetting(PACKAGE_NAME_2);
+        final PackageSetting ps3 = createPackageSetting(PACKAGE_NAME_3);
+
+        final PersistableBundle appExtras1 = getPersistableBundle(
+                PACKAGE_NAME_1, 1L, 0.01, true, "appString1");
+        final PersistableBundle launcherExtras1 = getPersistableBundle(
+                PACKAGE_NAME_1, 10L, 0.1, false, "launcherString1");
+        ps1.setSuspended(true, "suspendingPackage1", appExtras1, launcherExtras1, 0);
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_1, ps1);
+
+        ps2.setSuspended(true, "suspendingPackage2", null, null, 0);
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
+
+        ps3.setSuspended(false, "irrelevant", null, null, 0);
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_3, ps3);
+
+        settingsUnderTest.writePackageRestrictionsLPr(0);
+
+        settingsUnderTest.mPackages.clear();
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_1, createPackageSetting(PACKAGE_NAME_1));
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_2, createPackageSetting(PACKAGE_NAME_2));
+        settingsUnderTest.mPackages.put(PACKAGE_NAME_3, createPackageSetting(PACKAGE_NAME_3));
+        // now read and verify
+        settingsUnderTest.readPackageRestrictionsLPr(0);
+        final PackageUserState readPus1 = settingsUnderTest.mPackages.get(PACKAGE_NAME_1).
+                readUserState(0);
+        assertThat(readPus1.suspended, is(true));
+        assertThat(readPus1.suspendingPackage, equalTo("suspendingPackage1"));
+        assertThat(BaseBundle.kindofEquals(readPus1.suspendedAppExtras, appExtras1), is(true));
+        assertThat(BaseBundle.kindofEquals(readPus1.suspendedLauncherExtras, launcherExtras1),
+                is(true));
+
+        final PackageUserState readPus2 = settingsUnderTest.mPackages.get(PACKAGE_NAME_2).
+                readUserState(0);
+        assertThat(readPus2.suspended, is(true));
+        assertThat(readPus2.suspendingPackage, equalTo("suspendingPackage2"));
+        assertThat(readPus2.suspendedAppExtras, is(nullValue()));
+        assertThat(readPus2.suspendedLauncherExtras, is(nullValue()));
+
+        final PackageUserState readPus3 = settingsUnderTest.mPackages.get(PACKAGE_NAME_3).
+                readUserState(0);
+        assertThat(readPus3.suspended, is(false));
+    }
+
+    @Test
+    public void testPackageRestrictionsSuspendedDefault() {
+        final PackageSetting defaultSetting =  createPackageSetting(PACKAGE_NAME_1);
+        assertThat(defaultSetting.getSuspended(0), is(false));
     }
 
     @Test
@@ -686,6 +772,26 @@ public class PackageManagerSettingsTests {
                 null /*usesStaticLibrariesVersions*/);
     }
 
+    private PackageSetting createPackageSetting(String packageName) {
+        return new PackageSetting(
+                packageName,
+                packageName,
+                INITIAL_CODE_PATH /*codePath*/,
+                INITIAL_CODE_PATH /*resourcePath*/,
+                null /*legacyNativeLibraryPathString*/,
+                "x86_64" /*primaryCpuAbiString*/,
+                "x86" /*secondaryCpuAbiString*/,
+                null /*cpuAbiOverrideString*/,
+                INITIAL_VERSION_CODE,
+                0,
+                0 /*privateFlags*/,
+                null /*parentPackageName*/,
+                null /*childPackageNames*/,
+                0,
+                null /*usesStaticLibraries*/,
+                null /*usesStaticLibrariesVersions*/);
+    }
+
     private @NonNull List<UserInfo> createFakeUsers() {
         ArrayList<UserInfo> users = new ArrayList<>();
         users.add(new UserInfo(UserHandle.USER_SYSTEM, "test user", UserInfo.FLAG_INITIALIZED));
@@ -718,13 +824,13 @@ public class PackageManagerSettingsTests {
                 + "<item name=\"android.permission.ACCESS_WIMAX_STATE\" package=\"android\" />"
                 + "<item name=\"android.permission.REBOOT\" package=\"android\" protection=\"18\" />"
                 + "</permissions>"
-                + "<package name=\"com.google.app1\" codePath=\"/system/app/app1.apk\" nativeLibraryPath=\"/data/data/com.google.app1/lib\" flags=\"1\" ft=\"1360e2caa70\" it=\"135f2f80d08\" ut=\"1360e2caa70\" version=\"1109\" sharedUserId=\"11000\">"
+                + "<package name=\"com.android.app1\" codePath=\"/system/app/app1.apk\" nativeLibraryPath=\"/data/data/com.android.app1/lib\" flags=\"1\" ft=\"1360e2caa70\" it=\"135f2f80d08\" ut=\"1360e2caa70\" version=\"1109\" sharedUserId=\"11000\">"
                 + "<sigs count=\"1\">"
                 + "<cert index=\"0\" key=\"" + KeySetStrings.ctsKeySetCertA + "\" />"
                 + "</sigs>"
                 + "<proper-signing-keyset identifier=\"1\" />"
                 + "</package>"
-                + "<package name=\"com.google.app2\" codePath=\"/system/app/app2.apk\" nativeLibraryPath=\"/data/data/com.google.app2/lib\" flags=\"1\" ft=\"1360e578718\" it=\"135f2f80d08\" ut=\"1360e578718\" version=\"15\" enabled=\"3\" userId=\"11001\">"
+                + "<package name=\"com.android.app2\" codePath=\"/system/app/app2.apk\" nativeLibraryPath=\"/data/data/com.android.app2/lib\" flags=\"1\" ft=\"1360e578718\" it=\"135f2f80d08\" ut=\"1360e578718\" version=\"15\" enabled=\"3\" userId=\"11001\">"
                 + "<sigs count=\"1\">"
                 + "<cert index=\"0\" />"
                 + "</sigs>"
@@ -774,11 +880,26 @@ public class PackageManagerSettingsTests {
                 + "</packages>").getBytes());
     }
 
+    private void writePackageRestrictions_oldSuspendInfoXml(final int userId) {
+        writeFile(new File(InstrumentationRegistry.getContext().getFilesDir(), "system/users/"
+                        + userId + "/package-restrictions.xml"),
+                ( "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+                        + "<package-restrictions>\n"
+                        + "    <pkg name=\"" + PACKAGE_NAME_1 + "\" suspended=\"true\" />"
+                        + "    <pkg name=\"" + PACKAGE_NAME_2 + "\" suspended=\"false\" />"
+                        + "    <preferred-activities />\n"
+                        + "    <persistent-preferred-activities />\n"
+                        + "    <crossProfile-intent-filters />\n"
+                        + "    <default-apps />\n"
+                        + "</package-restrictions>\n")
+                        .getBytes());
+    }
+
     private void writeStoppedPackagesXml() {
         writeFile(new File(InstrumentationRegistry.getContext().getFilesDir(), "system/packages-stopped.xml"),
                 ( "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
                 + "<stopped-packages>"
-                + "<pkg name=\"com.google.app1\" nl=\"1\" />"
+                + "<pkg name=\"com.android.app1\" nl=\"1\" />"
                 + "<pkg name=\"com.android.app3\" nl=\"1\" />"
                 + "</stopped-packages>")
                 .getBytes());
@@ -786,8 +907,8 @@ public class PackageManagerSettingsTests {
 
     private void writePackagesList() {
         writeFile(new File(InstrumentationRegistry.getContext().getFilesDir(), "system/packages.list"),
-                ( "com.google.app1 11000 0 /data/data/com.google.app1 seinfo1"
-                + "com.google.app2 11001 0 /data/data/com.google.app2 seinfo2"
+                ( "com.android.app1 11000 0 /data/data/com.android.app1 seinfo1"
+                + "com.android.app2 11001 0 /data/data/com.android.app2 seinfo2"
                 + "com.android.app3 11030 0 /data/data/com.android.app3 seinfo3")
                 .getBytes());
     }
@@ -826,6 +947,11 @@ public class PackageManagerSettingsTests {
                 fail("Could not create user manager service; " + e);
             }
         });
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        deleteFolder(InstrumentationRegistry.getTargetContext().getFilesDir());
     }
 
     private void verifyKeySetMetaData(Settings settings)
@@ -871,9 +997,9 @@ public class PackageManagerSettingsTests {
         assertThat(KeySetUtils.getLastIssuedKeySetId(ksms), is(4L));
 
         /* verify packages have been given the appropriate information */
-        PackageSetting ps = packages.get("com.google.app1");
+        PackageSetting ps = packages.get("com.android.app1");
         assertThat(ps.keySetData.getProperSigningKeySet(), is(1L));
-        ps = packages.get("com.google.app2");
+        ps = packages.get("com.android.app2");
         assertThat(ps.keySetData.getProperSigningKeySet(), is(1L));
         assertThat(ps.keySetData.getAliases().get("AB"), is(4L));
         ps = packages.get("com.android.app3");

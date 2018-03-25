@@ -33,7 +33,6 @@ import android.service.quicksettings.TileService;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
-import com.android.systemui.qs.customize.TileQueryHelper.TileStateListener;
 import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
 
 import java.util.List;

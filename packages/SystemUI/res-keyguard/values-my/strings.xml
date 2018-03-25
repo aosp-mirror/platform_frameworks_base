@@ -28,6 +28,9 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"စကားဝှက် ရိုက်ရန် ထိပါ"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"လော့ခ်ဖွင့်ရန် စကားဝှက်ကို ထည့်ပါ"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"လော့ခ်ဖွင့်ရန် ပင်နံပါတ်ထည့်ပါ"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"သင့်ပင်နံပါတ် ထည့်ပါ"</string>
+    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"သင့်လော့ခ်ဖွင့်ပုံစံ ထည့်ပါ"</string>
+    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"သင့်စကားဝှက် ထည့်ပါ"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ပင်နံပါတ် မှားနေသည်။"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"ကဒ် မမှန်ကန်ပါ။"</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"အားသွင်းပြီးပါပြီ"</string>

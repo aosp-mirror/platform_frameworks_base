@@ -40,12 +40,9 @@
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Засталося <xliff:g id="PERCENTAGE">%s</xliff:g>, у вас ёсць каля <xliff:g id="TIME">%s</xliff:g> на аснове даных аб выкарыстанні вашай прылады"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Засталося <xliff:g id="PERCENTAGE">%s</xliff:g>, у вас ёсць каля <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Засталося <xliff:g id="PERCENTAGE">%s</xliff:g>. Уключана эканомія зараду."</string>
-    <!-- no translation found for invalid_charger (2741987096648693172) -->
-    <skip />
-    <!-- no translation found for invalid_charger_title (2836102177577255404) -->
-    <skip />
-    <!-- no translation found for invalid_charger_text (6480624964117840005) -->
-    <skip />
+    <string name="invalid_charger" msgid="2741987096648693172">"Не ўдалося выканаць зарадку праз USB. Выкарыстоўвайце зараднае прыстасаванне з камплекта прылады."</string>
+    <string name="invalid_charger_title" msgid="2836102177577255404">"Не ўдалося выканаць зарадку праз USB"</string>
+    <string name="invalid_charger_text" msgid="6480624964117840005">"Выкарыстоўвайце зараднае прыстасаванне з камплекта прылады"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Налады"</string>
     <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Уключыць рэжым эканоміі зараду?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Уключыць"</string>
@@ -153,7 +150,6 @@
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Падключана."</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Падлучэнне."</string>
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
-    <string name="data_connection_1x" msgid="396105635197711584">"1 X"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
     <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
     <string name="data_connection_3_5g" msgid="5218328297191657602">"3.5G"</string>
@@ -215,8 +211,7 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Рэжым палёту ўключаны."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Рэжым палёту выключаецца."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Рэжым палёту ўключаецца."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_priority_on (5836205286254617194) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"Рэжым \"Не турбаваць\" уключаны."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Рэжым «Не турбаваць» укл., поўная цішыня."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Рэжым «Не турбаваць» укл., толькі будзільнікі."</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Не турбаваць."</string>
@@ -284,7 +279,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"Вітрына з дэсертамі"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Экранная застаўка"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
-    <string name="quick_settings_header_onboarding_text" msgid="7872508260264044734">"Націскайце і ўтрымлівайце значкі, каб убачыць іншыя параметры"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (8030309023792936283) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Не турбаваць"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Толькі прыярытэтныя"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Толькі будзільнікі"</string>
@@ -445,8 +441,7 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> атрымае доступ да ўсяго, што адлюстроўваецца на вашым экране."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Не паказваць зноў"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Ачысціць усё"</string>
-    <!-- no translation found for dnd_suppressing_shade_text (7986451830430707907) -->
-    <skip />
+    <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"У рэжыме \"Не турбаваць\" адключаны апавяшчэнні"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Пачаць зараз"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Апавяшчэнняў няма"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"За профілем могуць назіраць"</string>
@@ -552,8 +547,6 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Дакраніцеся, каб уключыць вібрацыю."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Дакраніцеся, каб адключыць гук"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"Рэгулятар гучнасці %s"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Для выклікаў і апавяшчэнняў уключаны вібрасігнал"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Для выклікаў і апавяшчэнняў гук выключаны"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"Для выклікаў і апавяшчэнняў уключаны гук"</string>
     <string name="output_title" msgid="5355078100792942802">"Вывад мультымедыя"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Прылада вываду тэлефонных выклікаў"</string>
@@ -746,8 +739,11 @@
     <string name="right_keycode" msgid="708447961000848163">"Код клавішы \"управа\""</string>
     <string name="left_icon" msgid="3096287125959387541">"Значок \"улева\""</string>
     <string name="right_icon" msgid="3952104823293824311">"Значок \"управа\""</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Перацягніце, каб дадаць пліткі"</string>
+    <!-- no translation found for drag_to_add_tiles (230586591689084925) -->
+    <skip />
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Перацягніце сюды, каб выдаліць"</string>
+    <!-- no translation found for drag_to_remove_disabled (2390968976638993382) -->
+    <skip />
     <string name="qs_edit" msgid="2232596095725105230">"Рэдагаваць"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Час"</string>
   <string-array name="clock_options">
@@ -851,7 +847,12 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Замяніць"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Праграмы, якія працуюць у фонавым рэжыме"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Дакраніцеся, каб даведацца пра выкарыстанне трафіка і акумулятара"</string>
-    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Выключыць мабільную перадачу даных?"</string>
+    <!-- no translation found for mobile_data_disable_title (1068272097382942231) -->
+    <skip />
+    <!-- no translation found for mobile_data_disable_message (4756541658791493506) -->
+    <skip />
+    <!-- no translation found for mobile_data_disable_message_default_carrier (6078110473451946831) -->
+    <skip />
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Праграма хавае запыт на дазвол, таму ваш адказ немагчыма спраўдзіць у Наладах."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"Дазволіць праграме <xliff:g id="APP_0">%1$s</xliff:g> паказваць зрэзы праграмы <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- Можа счытваць інфармацыю з праграмы <xliff:g id="APP">%1$s</xliff:g>"</string>

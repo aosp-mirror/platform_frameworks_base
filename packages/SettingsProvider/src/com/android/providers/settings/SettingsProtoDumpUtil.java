@@ -578,6 +578,9 @@ class SettingsProtoDumpUtil {
                 Settings.Global.BLE_SCAN_LOW_LATENCY_INTERVAL_MS,
                 GlobalSettingsProto.BLE_SCAN_LOW_LATENCY_INTERVAL_MS);
         dumpSetting(s, p,
+                Settings.Global.BLE_SCAN_BACKGROUND_MODE,
+                GlobalSettingsProto.BLE_SCAN_BACKGROUND_MODE);
+        dumpSetting(s, p,
                 Settings.Global.WIFI_SAVED_STATE,
                 GlobalSettingsProto.WIFI_SAVED_STATE);
         dumpSetting(s, p,
@@ -1158,8 +1161,8 @@ class SettingsProtoDumpUtil {
                 Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED,
                 GlobalSettingsProto.CHAINED_BATTERY_ATTRIBUTION_ENABLED);
         dumpSetting(s, p,
-                Settings.Global.AUTOFILL_COMPAT_ALLOWED_PACKAGES,
-                GlobalSettingsProto.AUTOFILL_COMPAT_ALLOWED_PACKAGES);
+                Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES,
+                GlobalSettingsProto.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES);
         dumpSetting(s, p,
                 Global.HIDDEN_API_BLACKLIST_EXEMPTIONS,
                 GlobalSettingsProto.HIDDEN_API_BLACKLIST_EXEMPTIONS);
@@ -1928,6 +1931,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.BLUETOOTH_ON_WHILE_DRIVING,
                 SecureSettingsProto.BLUETOOTH_ON_WHILE_DRIVING);
+        dumpSetting(s, p,
+                Settings.Secure.VOLUME_HUSH_GESTURE,
+                SecureSettingsProto.VOLUME_HUSH_GESTURE);
         // Please insert new settings using the same order as in Settings.Secure.
 
         p.end(token);

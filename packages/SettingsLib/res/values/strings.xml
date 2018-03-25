@@ -150,6 +150,13 @@
     <!-- Bluetooth settings.  Message when connected to a device, except for phone/media audio, showing remote device battery level. [CHAR LIMIT=NONE] -->
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level">Connected (no phone or media), battery <xliff:g id="battery_level_as_percentage">%1$s</xliff:g><xliff:g id="active_device">%2$s</xliff:g></string>
 
+    <!-- Connected devices settings. Message when Bluetooth is connected and active, showing remote device status and battery level. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_active_battery_level">Active, <xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected but not in use, showing remote device battery level. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_battery_level"><xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
+    <!-- Connected devices settings. Message when Bluetooth is connected and active but no battery information, showing remote device status. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_active_no_battery_level">Active</string>
+
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the A2DP profile. -->
     <string name="bluetooth_profile_a2dp">Media audio</string>
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the headset or handsfree profile. -->
@@ -262,6 +269,15 @@
 
     <!-- Message for telling the user the kind of BT device being displayed in list. [CHAR LIMIT=30 BACKUP_MESSAGE_ID=5615463912185280812] -->
     <string name="bluetooth_talkback_bluetooth">Bluetooth</string>
+
+    <!-- Message for telling the user the left-side hearing aid device is doing its pairing operation [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearingaid_left_pairing_message">Pairing left hearing aid\u2026</string>
+    <!-- Message for telling the user the right-side hearing aid device is doing its pairing operation [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearingaid_right_pairing_message">Pairing right hearing aid\u2026</string>
+    <!-- Bluetooth settings.  Message when connected to a left-side Hearing Aid device, showing remote device battery level. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearingaid_left_battery_level">Left - <xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
+    <!-- Bluetooth settings.  Message when connected to a right-side Hearing Aid device, showing remote device battery level. [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_hearingaid_right_battery_level">Right - <xliff:g id="battery_level_as_percentage">%1$s</xliff:g> battery</string>
 
     <!-- Content description of the WIFI signal when WIFI is disabled for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_wifi_off">Wifi off.</string>
@@ -556,6 +572,7 @@
     <string name="private_dns_mode_opportunistic">Automatic</string>
     <string name="private_dns_mode_provider">Private DNS provider hostname</string>
     <string name="private_dns_mode_provider_hostname_hint">Enter hostname of DNS provider</string>
+    <string name="private_dns_mode_provider_failure">Couldn\'t connect</string>
 
     <!-- setting Checkbox summary whether to show options for wireless display certification  -->
     <string name="wifi_display_certification_summary">Show options for wireless display certification</string>
@@ -563,6 +580,10 @@
     <string name="wifi_verbose_logging_summary">Increase Wi\u2011Fi logging level, show per SSID RSSI in Wi\u2011Fi Picker</string>
     <!-- Setting Checkbox title whether to enable connected MAC randomization -->
     <string name="wifi_connected_mac_randomization_summary">Randomize MAC address when connecting to Wi\u2011Fi networks</string>
+    <!-- Label indicating network has been manually marked as metered -->
+    <string name="wifi_metered_label">Metered</string>
+    <!-- Label indicating network has been manually marked as unmetered -->
+    <string name="wifi_unmetered_label">Unmetered</string>
     <!-- UI debug setting: limit size of Android logger buffers -->
     <string name="select_logd_size_title">Logger buffer sizes</string>
     <!-- UI debug setting: limit size of Android logger buffers [CHAR LIMIT=59] -->
@@ -1093,4 +1114,7 @@
     <string name="zen_mode_duration_settings_title">Duration</string>
     <!-- Do not disturb: Duration option to always prompt for the duration of dnd -->
     <string name="zen_mode_duration_always_prompt_title">Ask every time</string>
+
+    <!-- time label for event have that happened very recently [CHAR LIMIT=60] -->
+    <string name="time_unit_just_now">Just now</string>
 </resources>

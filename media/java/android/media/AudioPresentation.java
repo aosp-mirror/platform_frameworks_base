@@ -17,6 +17,9 @@
 package android.media;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -88,10 +91,14 @@ public final class AudioPresentation {
      */
     public static final int MASTERED_FOR_HEADPHONE          = 4;
 
-    AudioPresentation(int presentationId,
+    /**
+     * @hide
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    public AudioPresentation(int presentationId,
                         int programId,
-                        Map<String, String> labels,
-                        String language,
+                        @NonNull Map<String, String> labels,
+                        @NonNull String language,
                         @MasteringIndicationType int masteringIndication,
                         boolean audioDescriptionAvailable,
                         boolean spokenSubtitlesAvailable,
@@ -112,6 +119,7 @@ public final class AudioPresentation {
      * decoder. Presentation id is typically sequential, but does not have to be.
      * @hide
      */
+    @VisibleForTesting
     public int getPresentationId() {
         return mPresentationId;
     }
@@ -121,13 +129,14 @@ public final class AudioPresentation {
      * Program id can be used to further uniquely identify the presentation to a decoder.
      * @hide
      */
+    @VisibleForTesting
     public int getProgramId() {
         return mProgramId;
     }
 
     /**
      * @return a map of available text labels for this presentation. Each label is indexed by its
-     * locale corresponding to the language code as specified by ISO 639-2 [42]. Either ISO 639-2/B
+     * locale corresponding to the language code as specified by ISO 639-2. Either ISO 639-2/B
      * or ISO 639-2/T could be used.
      */
     public Map<Locale, String> getLabels() {

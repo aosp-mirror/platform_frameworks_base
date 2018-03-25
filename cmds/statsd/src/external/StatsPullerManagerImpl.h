@@ -67,15 +67,14 @@ public:
 
     int ClearPullerCacheIfNecessary(long timestampSec);
 
+    void SetStatsCompanionService(sp<IStatsCompanionService> statsCompanionService);
+
     const static std::map<int, PullAtomInfo> kAllPullAtomInfo;
 
    private:
     StatsPullerManagerImpl();
 
-    // use this to update alarm
     sp<IStatsCompanionService> mStatsCompanionService = nullptr;
-
-    sp<IStatsCompanionService> get_stats_companion_service();
 
     typedef struct {
         // pull_interval_sec : last_pull_time_sec
@@ -86,7 +85,10 @@ public:
     // mapping from simple matcher tagId to receivers
     std::map<int, std::list<ReceiverInfo>> mReceivers;
 
-    Mutex mReceiversLock;
+    // locks for data receiver and StatsCompanionService changes
+    Mutex mLock;
+
+    void updateAlarmLocked();
 
     long mCurrentPullingInterval;
 

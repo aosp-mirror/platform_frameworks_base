@@ -2750,31 +2750,34 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private void notifyForSettingsChange(int key, String name) {
-            final int userId = getUserIdFromKey(key);
-            Uri uri = getNotificationUriFor(key, name);
-
+            // Increment the generation first, so observers always see the new value
             mGenerationRegistry.incrementGeneration(key);
 
-            mHandler.obtainMessage(MyHandler.MSG_NOTIFY_URI_CHANGED,
-                    userId, 0, uri).sendToTarget();
-
-            if (isSecureSettingsKey(key)) {
-                maybeNotifyProfiles(getTypeFromKey(key), userId, uri, name,
-                        sSecureCloneToManagedSettings);
-                maybeNotifyProfiles(SETTINGS_TYPE_SYSTEM, userId, uri, name,
-                        sSystemCloneFromParentOnDependency.values());
-            } else if (isSystemSettingsKey(key)) {
-                maybeNotifyProfiles(getTypeFromKey(key), userId, uri, name,
-                        sSystemCloneToManagedSettings);
+            if (isGlobalSettingsKey(key)) {
+                if (Global.LOCATION_GLOBAL_KILL_SWITCH.equals(name)) {
+                    // When the global kill switch is updated, send the
+                    // change notification for the location setting.
+                    notifyLocationChangeForRunningUsers();
+                }
+                notifyGlobalSettingChangeForRunningUsers(key, name);
+            } else {
+                final int userId = getUserIdFromKey(key);
+                final Uri uri = getNotificationUriFor(key, name);
+                mHandler.obtainMessage(MyHandler.MSG_NOTIFY_URI_CHANGED,
+                        userId, 0, uri).sendToTarget();
+                if (isSecureSettingsKey(key)) {
+                    maybeNotifyProfiles(getTypeFromKey(key), userId, uri, name,
+                            sSecureCloneToManagedSettings);
+                    maybeNotifyProfiles(SETTINGS_TYPE_SYSTEM, userId, uri, name,
+                            sSystemCloneFromParentOnDependency.values());
+                } else if (isSystemSettingsKey(key)) {
+                    maybeNotifyProfiles(getTypeFromKey(key), userId, uri, name,
+                            sSystemCloneToManagedSettings);
+                }
             }
 
+            // Always notify that our data changed
             mHandler.obtainMessage(MyHandler.MSG_NOTIFY_DATA_CHANGED).sendToTarget();
-
-            // When the global kill switch is updated, send the change notification for
-            // the location setting.
-            if (isGlobalSettingsKey(key) && Global.LOCATION_GLOBAL_KILL_SWITCH.equals(name)) {
-                notifyLocationChangeForRunningUsers();
-            }
         }
 
         private void maybeNotifyProfiles(int type, int userId, Uri uri, String name,
@@ -2783,13 +2786,27 @@ public class SettingsProvider extends ContentProvider {
                 for (int profileId : mUserManager.getProfileIdsWithDisabled(userId)) {
                     // the notification for userId has already been sent.
                     if (profileId != userId) {
+                        final int key = makeKey(type, profileId);
+                        // Increment the generation first, so observers always see the new value
+                        mGenerationRegistry.incrementGeneration(key);
                         mHandler.obtainMessage(MyHandler.MSG_NOTIFY_URI_CHANGED,
                                 profileId, 0, uri).sendToTarget();
-                        final int key = makeKey(type, profileId);
-                        mGenerationRegistry.incrementGeneration(key);
-
-                        mHandler.obtainMessage(MyHandler.MSG_NOTIFY_DATA_CHANGED).sendToTarget();
                     }
+                }
+            }
+        }
+
+        private void notifyGlobalSettingChangeForRunningUsers(int key, String name) {
+            // Important: No need to update generation for each user as there
+            // is a singleton generation entry for the global settings which
+            // is already incremented be the caller.
+            final Uri uri = getNotificationUriFor(key, name);
+            final List<UserInfo> users = mUserManager.getUsers(/*excludeDying*/ true);
+            for (int i = 0; i < users.size(); i++) {
+                final int userId = users.get(i).id;
+                if (mUserManager.isUserRunning(UserHandle.of(userId))) {
+                    mHandler.obtainMessage(MyHandler.MSG_NOTIFY_URI_CHANGED,
+                            userId, 0, uri).sendToTarget();
                 }
             }
         }
@@ -2800,16 +2817,15 @@ public class SettingsProvider extends ContentProvider {
             for (int i = 0; i < users.size(); i++) {
                 final int userId = users.get(i).id;
 
-                // Do we have to increment the generation for users that are not running?
-                // Yeah let's assume so...
-                final int key = makeKey(SETTINGS_TYPE_SECURE, userId);
-                mGenerationRegistry.incrementGeneration(key);
-
                 if (!mUserManager.isUserRunning(UserHandle.of(userId))) {
                     continue;
                 }
-                final Uri uri = getNotificationUriFor(key, Secure.LOCATION_PROVIDERS_ALLOWED);
 
+                // Increment the generation first, so observers always see the new value
+                final int key = makeKey(SETTINGS_TYPE_SECURE, userId);
+                mGenerationRegistry.incrementGeneration(key);
+
+                final Uri uri = getNotificationUriFor(key, Secure.LOCATION_PROVIDERS_ALLOWED);
                 mHandler.obtainMessage(MyHandler.MSG_NOTIFY_URI_CHANGED,
                         userId, 0, uri).sendToTarget();
             }
@@ -2914,7 +2930,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 161;
+            private static final int SETTINGS_VERSION = 162;
 
             private final int mUserId;
 
@@ -3671,6 +3687,21 @@ public class SettingsProvider extends ContentProvider {
                                 null, true, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 161;
+                }
+
+                if (currentVersion == 161) {
+                    // Version 161: Add a gesture for silencing phones
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting currentSetting = secureSettings.getSettingLocked(
+                            Secure.VOLUME_HUSH_GESTURE);
+                    if (currentSetting.isNull()) {
+                        secureSettings.insertSettingLocked(
+                                Secure.VOLUME_HUSH_GESTURE,
+                                Integer.toString(Secure.VOLUME_HUSH_VIBRATE),
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    currentVersion = 162;
                 }
 
                 // vXXX: Add new settings above this point.

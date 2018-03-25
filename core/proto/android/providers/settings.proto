@@ -228,6 +228,7 @@ message GlobalSettingsProto {
     optional SettingProto ble_scan_low_power_interval_ms = 161 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto ble_scan_balanced_interval_ms = 162 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto ble_scan_low_latency_interval_ms = 163 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto ble_scan_background_mode = 389 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto wifi_saved_state = 164 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto wifi_supplicant_scan_interval_ms = 165 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto wifi_enhanced_auto_join = 166 [ (android.privacy).dest = DEST_AUTOMATIC ];
@@ -466,7 +467,7 @@ message GlobalSettingsProto {
     // skipped.
     optional SettingProto override_settings_provider_restore_any_version = 355 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto chained_battery_attribution_enabled = 356 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto autofill_compat_allowed_packages = 357 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto autofill_compat_mode_allowed_packages = 357 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto hidden_api_blacklist_exemptions = 358 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto sound_trigger_detection_service_op_timeout = 387  [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto max_sound_trigger_detection_service_ops_per_day = 388  [ (android.privacy).dest = DEST_AUTOMATIC ];
@@ -507,7 +508,7 @@ message GlobalSettingsProto {
     optional SettingsProto backup_agent_timeout_parameters = 386;
     // Please insert fields in the same order as in
     // frameworks/base/core/java/android/provider/Settings.java.
-    // Next tag = 389;
+    // Next tag = 390;
 }
 
 message SecureSettingsProto {
@@ -744,9 +745,10 @@ message SecureSettingsProto {
     optional SettingProto backup_manager_constants = 193;
     optional SettingProto backup_local_transport_parameters = 194;
     optional SettingProto bluetooth_on_while_driving = 195 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingsProto volume_hush_gesture = 196 [ (android.privacy).dest = DEST_AUTOMATIC ];
     // Please insert fields in the same order as in
     // frameworks/base/core/java/android/provider/Settings.java.
-    // Next tag = 196
+    // Next tag = 197
 }
 
 message SystemSettingsProto {

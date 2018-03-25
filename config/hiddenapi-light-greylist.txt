@@ -669,7 +669,6 @@ Landroid/graphics/GraphicBuffer;->CREATOR:Landroid/os/Parcelable$Creator;
 Landroid/graphics/GraphicBuffer;-><init>(IIIIJ)V
 Landroid/graphics/GraphicBuffer;->mNativeObject:J
 Landroid/graphics/ImageDecoder;-><init>(JIIZ)V
-Landroid/graphics/ImageDecoder;->onPartialImage(I)Z
 Landroid/graphics/ImageDecoder;->postProcessAndRelease(Landroid/graphics/Canvas;)I
 Landroid/graphics/LinearGradient;->mColors:[I
 Landroid/graphics/Matrix;->native_instance:J
@@ -977,6 +976,7 @@ Landroid/media/soundtrigger/SoundTriggerDetector$EventPayload;->getCaptureSessio
 Landroid/media/soundtrigger/SoundTriggerDetector$EventPayload;->getData()[B
 Landroid/media/soundtrigger/SoundTriggerManager;->loadSoundModel(Landroid/hardware/soundtrigger/SoundTrigger$SoundModel;)I
 Landroid/media/soundtrigger/SoundTriggerManager;->startRecognition(Ljava/util/UUID;Landroid/app/PendingIntent;Landroid/hardware/soundtrigger/SoundTrigger$RecognitionConfig;)I
+Landroid/media/soundtrigger/SoundTriggerManager;->startRecognition(Ljava/util/UUID;Landroid/os/Bundle;Landroid/content/ComponentName;Landroid/hardware/soundtrigger/SoundTrigger$RecognitionConfig;)I
 Landroid/media/soundtrigger/SoundTriggerManager;->stopRecognition(Ljava/util/UUID;)I
 Landroid/media/soundtrigger/SoundTriggerManager;->unloadSoundModel(Ljava/util/UUID;)I
 Landroid/media/SubtitleController;->mHandler:Landroid/os/Handler;
@@ -1158,6 +1158,7 @@ Landroid/os/Binder;->execTransact(IJJI)Z
 Landroid/os/Binder;->mObject:J
 Landroid/os/Build;->getString(Ljava/lang/String;)Ljava/lang/String;
 Landroid/os/Build;->IS_DEBUGGABLE:Z
+Landroid/os/Build;->IS_EMULATOR:Z
 Landroid/os/Build$VERSION;->ACTIVE_CODENAMES:[Ljava/lang/String;
 Landroid/os/Bundle;->getIBinder(Ljava/lang/String;)Landroid/os/IBinder;
 Landroid/os/Bundle;->putIBinder(Ljava/lang/String;Landroid/os/IBinder;)V

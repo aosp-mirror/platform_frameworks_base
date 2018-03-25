@@ -20,6 +20,10 @@ import android.privacy.DifferentialPrivacyEncoder;
 
 import com.google.android.rappor.Encoder;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Random;
 
@@ -66,13 +70,24 @@ public class RapporEncoder implements DifferentialPrivacyEncoder {
             random = sSecureRandom;
         } else {
             // To have deterministic result by hard coding encoder id as seed.
-            random = new Random((long) config.mEncoderId.hashCode());
+            random = new Random(getInsecureSeed(config.mEncoderId));
             userSecret = INSECURE_SECRET;
         }
         mEncoder = new Encoder(random, null, null,
                 userSecret, config.mEncoderId, config.mNumBits,
                 config.mProbabilityF, config.mProbabilityP, config.mProbabilityQ,
                 config.mNumCohorts, config.mNumBloomHashes);
+    }
+
+    private long getInsecureSeed(String input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] bytes = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+            return ByteBuffer.wrap(bytes).getLong();
+        } catch (NoSuchAlgorithmException e) {
+            // Should not happen
+            throw new AssertionError("Unable generate insecure seed");
+        }
     }
 
     /**

@@ -109,6 +109,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * A layout which handles a dynamic amount of notifications and presents them in a scrollable stack.
@@ -3022,6 +3023,12 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     @Override
+    public void bindRow(ExpandableNotificationRow row) {
+        row.setHeadsUpAnimatingAwayListener(animatingAway
+                -> mRoundnessManager.onHeadsupAnimatingAwayChanged(row, animatingAway));
+    }
+
+    @Override
     public void applyExpandAnimationParams(ExpandAnimationParameters params) {
         mAmbientState.setExpandAnimationTopChange(params == null ? 0 : params.getTopChange());
         requestChildrenUpdate();
@@ -4522,6 +4529,13 @@ public class NotificationStackScrollLayout extends ViewGroup
      */
     public void addOnExpandedHeightListener(BiConsumer<Float, Float> listener) {
         mExpandedHeightListeners.add(listener);
+    }
+
+    /**
+     * Stop a listener from listening to the expandedHeight.
+     */
+    public void removeOnExpandedHeightListener(BiConsumer<Float, Float> listener) {
+        mExpandedHeightListeners.remove(listener);
     }
 
     /**

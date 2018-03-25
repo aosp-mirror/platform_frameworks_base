@@ -28,6 +28,9 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"แตะเพื่อพิมพ์รหัสผ่าน"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"พิมพ์รหัสผ่านเพื่อปลดล็อก"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"พิมพ์ PIN เพื่อปลดล็อก"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"ป้อน PIN"</string>
+    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"ป้อนรูปแบบ"</string>
+    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"ป้อนรหัสผ่าน"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"รหัส PIN ไม่ถูกต้อง"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"การ์ดไม่ถูกต้อง"</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"ชาร์จแล้ว"</string>

@@ -35,6 +35,7 @@ import java.security.Key;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertPath;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -265,8 +266,8 @@ public class RecoveryController {
 
     /**
      * Sets a listener which notifies recovery agent that new recovery snapshot is available. {@link
-     * #getRecoveryData} can be used to get the snapshot. Note that every recovery agent can have at
-     * most one registered listener at any time.
+     * #getKeyChainSnapshot} can be used to get the snapshot. Note that every recovery agent can
+     * have at most one registered listener at any time.
      *
      * @param intent triggered when new snapshot is available. Unregisters listener if the value is
      *     {@code null}.
@@ -291,12 +292,13 @@ public class RecoveryController {
      * in vaultParams {@link RecoverySession#start(CertPath, byte[], byte[], List)}.
      *
      * @param serverParams included in recovery key blob.
-     * @see #getRecoveryData
+     * @see #getKeyChainSnapshot
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public void setServerParams(byte[] serverParams) throws InternalRecoveryServiceException {
+    public void setServerParams(@NonNull byte[] serverParams)
+            throws InternalRecoveryServiceException {
         try {
             mBinder.setServerParams(serverParams);
         } catch (RemoteException e) {
@@ -320,7 +322,7 @@ public class RecoveryController {
      * Returns a list of aliases of keys belonging to the application.
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public List<String> getAliases() throws InternalRecoveryServiceException {
+    public @NonNull List<String> getAliases() throws InternalRecoveryServiceException {
         try {
             Map<String, Integer> allStatuses = mBinder.getRecoveryStatus();
             return new ArrayList<>(allStatuses.keySet());
@@ -354,7 +356,7 @@ public class RecoveryController {
      *     service.
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public void setRecoveryStatus(String alias, int status)
+    public void setRecoveryStatus(@NonNull String alias, int status)
             throws InternalRecoveryServiceException {
         try {
             mBinder.setRecoveryStatus(alias, status);
@@ -389,7 +391,7 @@ public class RecoveryController {
      *     service.
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public int getRecoveryStatus(String alias) throws InternalRecoveryServiceException {
+    public int getRecoveryStatus(@NonNull String alias) throws InternalRecoveryServiceException {
         try {
             Map<String, Integer> allStatuses = mBinder.getRecoveryStatus();
             Integer status = allStatuses.get(alias);
@@ -409,8 +411,7 @@ public class RecoveryController {
      * Specifies a set of secret types used for end-to-end keystore encryption. Knowing all of them
      * is necessary to recover data.
      *
-     * @param secretTypes {@link KeyChainProtectionParams#TYPE_LOCKSCREEN} or {@link
-     *     KeyChainProtectionParams#TYPE_CUSTOM_PASSWORD}
+     * @param secretTypes {@link KeyChainProtectionParams#TYPE_LOCKSCREEN}
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      */
@@ -441,51 +442,6 @@ public class RecoveryController {
             throws InternalRecoveryServiceException {
         try {
             return mBinder.getRecoverySecretTypes();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } catch (ServiceSpecificException e) {
-            throw wrapUnexpectedServiceSpecificException(e);
-        }
-    }
-
-    /**
-     * Returns a list of recovery secret types, necessary to create a pending recovery snapshot.
-     * When user enters a secret of a pending type {@link #recoverySecretAvailable} should be
-     * called.
-     *
-     * @return list of recovery secret types
-     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
-     *     service.
-     */
-    @NonNull
-    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public @KeyChainProtectionParams.UserSecretType int[] getPendingRecoverySecretTypes()
-            throws InternalRecoveryServiceException {
-        try {
-            return mBinder.getPendingRecoverySecretTypes();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } catch (ServiceSpecificException e) {
-            throw wrapUnexpectedServiceSpecificException(e);
-        }
-    }
-
-    /**
-     * Method notifies KeyStore that a user-generated secret is available. This method generates a
-     * symmetric session key which a trusted remote device can use to return a recovery key. Caller
-     * should use {@link KeyChainProtectionParams#clearSecret} to override the secret value in
-     * memory.
-     *
-     * @param recoverySecret user generated secret together with parameters necessary to regenerate
-     *     it on a new device.
-     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
-     *     service.
-     */
-    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public void recoverySecretAvailable(@NonNull KeyChainProtectionParams recoverySecret)
-            throws InternalRecoveryServiceException {
-        try {
-            mBinder.recoverySecretAvailable(recoverySecret);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
@@ -540,7 +496,7 @@ public class RecoveryController {
      *     screen is required to generate recoverable keys.
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public Key generateKey(@NonNull String alias) throws InternalRecoveryServiceException,
+    public @NonNull Key generateKey(@NonNull String alias) throws InternalRecoveryServiceException,
             LockScreenRequiredException {
         try {
             String grantAlias = mBinder.generateKey(alias);
@@ -571,14 +527,14 @@ public class RecoveryController {
      *
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public Key importKey(@NonNull String alias, byte[] keyBytes)
+    public @NonNull Key importKey(@NonNull String alias, @NonNull byte[] keyBytes)
             throws InternalRecoveryServiceException, LockScreenRequiredException {
         try {
             String grantAlias = mBinder.importKey(alias, keyBytes);
             if (grantAlias == null) {
                 throw new InternalRecoveryServiceException("Null grant alias");
             }
-            return getKeyFromGrant(alias);
+            return getKeyFromGrant(grantAlias);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (UnrecoverableKeyException e) {
@@ -605,7 +561,7 @@ public class RecoveryController {
             throws InternalRecoveryServiceException, UnrecoverableKeyException {
         try {
             String grantAlias = mBinder.getKey(alias);
-            if (grantAlias == null) {
+            if (grantAlias == null || "".equals(grantAlias)) {
                 return null;
             }
             return getKeyFromGrant(grantAlias);
@@ -619,7 +575,7 @@ public class RecoveryController {
     /**
      * Returns the key with the given {@code grantAlias}.
      */
-    Key getKeyFromGrant(String grantAlias) throws UnrecoverableKeyException {
+    @NonNull Key getKeyFromGrant(@NonNull String grantAlias) throws UnrecoverableKeyException {
         return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(
                 mKeyStore,
                 grantAlias,
@@ -650,8 +606,13 @@ public class RecoveryController {
      * <p>A recovery session is required to restore keys from a remote store.
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public RecoverySession createRecoverySession() {
+    public @NonNull RecoverySession createRecoverySession() {
         return RecoverySession.newInstance(this);
+    }
+
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
+    public @NonNull Map<String, X509Certificate> getRootCertificates() {
+        return TrustedRootCertificates.getRootCertificates();
     }
 
     InternalRecoveryServiceException wrapUnexpectedServiceSpecificException(

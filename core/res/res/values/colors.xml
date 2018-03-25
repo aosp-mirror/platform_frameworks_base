@@ -130,13 +130,14 @@
     <drawable name="notification_template_divider_media">#29ffffff</drawable>
     <color name="notification_primary_text_color_light">@color/primary_text_default_material_light</color>
     <color name="notification_primary_text_color_dark">@color/primary_text_default_material_dark</color>
-    <color name="notification_secondary_text_color_light">@color/secondary_text_material_light</color>
-    <color name="notification_secondary_text_color_dark">@color/secondary_text_material_dark</color>
+    <color name="notification_secondary_text_color_light">@color/primary_text_default_material_light</color>
+    <color name="notification_secondary_text_color_dark">@color/primary_text_default_material_dark</color>
+    <color name="notification_default_color_dark">@color/primary_text_default_material_light</color>
+    <color name="notification_default_color_light">#a3202124</color>
 
     <color name="notification_material_background_color">#ffffffff</color>
 
     <color name="notification_default_color">#757575</color> <!-- Gray 600 -->
-    <color name="notification_icon_default_color">@color/notification_default_color</color>
 
     <color name="notification_progress_background_color">@color/secondary_text_material_light</color>
 

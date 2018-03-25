@@ -49,7 +49,8 @@ public class RecoverySession implements AutoCloseable {
     private final String mSessionId;
     private final RecoveryController mRecoveryController;
 
-    private RecoverySession(RecoveryController recoveryController, String sessionId) {
+    private RecoverySession(@NonNull RecoveryController recoveryController,
+            @NonNull String sessionId) {
         mRecoveryController = recoveryController;
         mSessionId = sessionId;
     }
@@ -58,14 +59,14 @@ public class RecoverySession implements AutoCloseable {
      * A new session, started by the {@link RecoveryController}.
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    static RecoverySession newInstance(RecoveryController recoveryController) {
+    static @NonNull RecoverySession newInstance(RecoveryController recoveryController) {
         return new RecoverySession(recoveryController, newSessionId());
     }
 
     /**
      * Returns a new random session ID.
      */
-    private static String newSessionId() {
+    private static @NonNull String newSessionId() {
         SecureRandom secureRandom = new SecureRandom();
         byte[] sessionId = new byte[SESSION_ID_LENGTH_BYTES];
         secureRandom.nextBytes(sessionId);
@@ -77,7 +78,7 @@ public class RecoverySession implements AutoCloseable {
     }
 
     /**
-     * @deprecated Use {@link #start(CertPath, byte[], byte[], List)} instead.
+     * @deprecated Use {@link #start(String, CertPath, byte[], byte[], List)} instead.
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -108,25 +109,9 @@ public class RecoverySession implements AutoCloseable {
     }
 
     /**
-     * Starts a recovery session and returns a blob with proof of recovery secret possession.
-     * The method generates a symmetric key for a session, which trusted remote device can use to
-     * return recovery key.
-     *
-     * @param verifierCertPath The certificate path used to create the recovery blob on the source
-     *     device. Keystore will verify the certificate path by using the root of trust.
-     * @param vaultParams Must match the parameters in the corresponding field in the recovery blob.
-     *     Used to limit number of guesses.
-     * @param vaultChallenge Data passed from server for this recovery session and used to prevent
-     *     replay attacks.
-     * @param secrets Secrets provided by user, the method only uses type and secret fields.
-     * @return The recovery claim. Claim provides a b binary blob with recovery claim. It is
-     *     encrypted with verifierPublicKey and contains a proof of user secrets, session symmetric
-     *     key and parameters necessary to identify the counter with the number of failed recovery
-     *     attempts.
-     * @throws CertificateException if the {@code verifierCertPath} is invalid.
-     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
-     *     service.
+     * @deprecated Use {@link #start(String, CertPath, byte[], byte[], List)} instead.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     @NonNull public byte[] start(
             @NonNull CertPath verifierCertPath,
@@ -179,8 +164,6 @@ public class RecoverySession implements AutoCloseable {
      * @throws CertificateException if the {@code verifierCertPath} is invalid.
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     @NonNull public byte[] start(
@@ -215,17 +198,9 @@ public class RecoverySession implements AutoCloseable {
     }
 
     /**
-     * Imports keys.
-     *
-     * @param recoveryKeyBlob Recovery blob encrypted by symmetric key generated for this session.
-     * @param applicationKeys Application keys. Key material can be decrypted using recoveryKeyBlob
-     *     and session. KeyStore only uses package names from the application info in {@link
-     *     WrappedApplicationKey}. Caller is responsibility to perform certificates check.
-     * @return Map from alias to raw key material.
-     * @throws SessionExpiredException if {@code session} has since been closed.
-     * @throws DecryptionFailedException if unable to decrypt the snapshot.
-     * @throws InternalRecoveryServiceException if an error occurs internal to the recovery service.
+     * @deprecated Use {@link #recoverKeyChainSnapshot(byte[], List)} instead.
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     public Map<String, byte[]> recoverKeys(
             @NonNull byte[] recoveryKeyBlob,
@@ -257,11 +232,9 @@ public class RecoverySession implements AutoCloseable {
      * @throws SessionExpiredException if {@code session} has since been closed.
      * @throws DecryptionFailedException if unable to decrypt the snapshot.
      * @throws InternalRecoveryServiceException if an error occurs internal to the recovery service.
-     *
-     * @hide
      */
     @RequiresPermission(Manifest.permission.RECOVER_KEYSTORE)
-    public Map<String, Key> recoverKeyChainSnapshot(
+    @NonNull public Map<String, Key> recoverKeyChainSnapshot(
             @NonNull byte[] recoveryKeyBlob,
             @NonNull List<WrappedApplicationKey> applicationKeys
     ) throws SessionExpiredException, DecryptionFailedException, InternalRecoveryServiceException {
@@ -284,7 +257,7 @@ public class RecoverySession implements AutoCloseable {
     }
 
     /** Given a map from alias to grant alias, returns a map from alias to a {@link Key} handle. */
-    private Map<String, Key> getKeysFromGrants(Map<String, String> grantAliases)
+    private @NonNull Map<String, Key> getKeysFromGrants(@NonNull Map<String, String> grantAliases)
             throws InternalRecoveryServiceException {
         ArrayMap<String, Key> keysByAlias = new ArrayMap<>(grantAliases.size());
         for (String alias : grantAliases.keySet()) {

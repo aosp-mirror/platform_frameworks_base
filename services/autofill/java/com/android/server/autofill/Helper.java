@@ -26,6 +26,7 @@ import android.service.autofill.Dataset;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.view.WindowManager;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillValue;
 
@@ -107,6 +108,13 @@ public final class Helper {
     }
 
     @NonNull
+    public static String paramsToString(@NonNull WindowManager.LayoutParams params) {
+        final StringBuilder builder = new StringBuilder(25);
+        params.dumpDimensions(builder);
+        return builder.toString();
+    }
+
+    @NonNull
     static ArrayMap<AutofillId, AutofillValue> getFields(@NonNull Dataset dataset) {
         final ArrayList<AutofillId> ids = dataset.getFieldIds();
         final ArrayList<AutofillValue> values = dataset.getFieldValues();
@@ -128,7 +136,7 @@ public final class Helper {
         return log;
     }
 
-    public static void printlnRedactedText(@NonNull PrintWriter pw, @Nullable String text) {
+    public static void printlnRedactedText(@NonNull PrintWriter pw, @Nullable CharSequence text) {
         if (text == null) {
             pw.println("null");
         } else {
@@ -173,6 +181,7 @@ public final class Helper {
      * @param structure Assist structure
      * @param urlBarIds list of ids; only the first id found will be sanitized.
      */
+    @Nullable
     public static void sanitizeUrlBar(@NonNull AssistStructure structure,
             @NonNull String[] urlBarIds) {
         final ViewNode urlBarNode = findViewNode(structure, (node) -> {

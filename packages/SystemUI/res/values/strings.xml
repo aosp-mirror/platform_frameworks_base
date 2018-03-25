@@ -61,10 +61,6 @@
     <!-- When the battery is low, this is displayed to the user in a dialog.  The title of the low battery alert.  [CHAR LIMIT=NONE]-->
     <string name="battery_low_title">Battery is low</string>
 
-    <!-- When the battery is low and hybrid notifications are enabled, this is displayed to the user in a dialog.
-         The title of the low battery alert.  [CHAR LIMIT=NONE]-->
-    <string name="battery_low_title_hybrid">Battery is low. Turn on Battery Saver</string>
-
     <!-- A message that appears when the battery level is getting low in a dialog.  This is
         appended to the subtitle of the low battery alert.  "percentage" is the percentage of battery
         remaining [CHAR LIMIT=none]-->
@@ -819,8 +815,8 @@
     <string name="quick_settings_night_secondary_label_until_sunrise">Until sunrise</string>
     <!-- QuickSettings: Secondary text for when the Night Light will be enabled at some user-selected time. [CHAR LIMIT=20] -->
     <string name="quick_settings_night_secondary_label_on_at">On at <xliff:g id="time" example="10 pm">%s</xliff:g></string>
-    <!-- QuickSettings: Secondary text for when the Night Light will be on until some user-selected time. [CHAR LIMIT=20] -->
-    <string name="quick_settings_night_secondary_label_until">Until <xliff:g id="time" example="7 am">%s</xliff:g></string>
+    <!-- QuickSettings: Secondary text for when the Night Light or some other tile will be on until some user-selected time. [CHAR LIMIT=20] -->
+    <string name="quick_settings_secondary_label_until">Until <xliff:g id="time" example="7 am">%s</xliff:g></string>
 
     <!-- QuickSettings: NFC tile [CHAR LIMIT=NONE] -->
     <string name="quick_settings_nfc_label">NFC</string>
@@ -1353,8 +1349,6 @@
 
     <string name="volume_dialog_title">%s volume controls</string>
 
-    <string name="volume_dialog_ringer_guidance_vibrate">Calls and notifications will vibrate</string>
-    <string name="volume_dialog_ringer_guidance_silent">Calls and notifications will be muted</string>
     <string name="volume_dialog_ringer_guidance_ring">Calls and notifications will ring</string>
 
     <string name="output_title">Media output</string>
@@ -1607,6 +1601,9 @@
 
     <!-- Notification: Menu row: Content description for the snooze icon. [CHAR LIMIT=NONE] -->
     <string name="notification_menu_snooze_description">notification snooze options</string>
+
+    <!-- Notification: Menu row: Content description for the snooze action shown in local context menu. [CHAR LIMIT=NONE] -->
+    <string name="notification_menu_snooze_action">Snooze</string>
 
     <!-- Notification: Snooze panel: Snooze undo button label. [CHAR LIMIT=50]-->
     <string name="snooze_undo">UNDO</string>

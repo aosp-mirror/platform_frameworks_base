@@ -16,7 +16,7 @@
 
 package android.security.keystore.recovery;
 
-import static android.security.keystore.recovery.TrustedRootCertificates.listRootCertificates;
+import static android.security.keystore.recovery.TrustedRootCertificates.getRootCertificates;
 
 import static org.junit.Assert.assertTrue;
 
@@ -36,8 +36,8 @@ public class TrustedRootCertificatesTest {
             "GoogleCloudKeyVaultServiceV1";
 
     @Test
-    public void listRootCertificates_listsGoogleCloudVaultV1Certificate() {
-        Map<String, X509Certificate> certificates = listRootCertificates();
+    public void getRootCertificates_listsGoogleCloudVaultV1Certificate() {
+        Map<String, X509Certificate> certificates = getRootCertificates();
 
         assertTrue(certificates.containsKey(GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_ALIAS));
     }

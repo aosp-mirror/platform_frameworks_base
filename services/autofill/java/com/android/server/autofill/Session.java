@@ -2077,8 +2077,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if (saveTriggerId != null) {
                 writeLog(MetricsEvent.AUTOFILL_EXPLICIT_SAVE_TRIGGER_DEFINITION);
             }
-            saveOnAllViewsInvisible =
-                    (saveInfo.getFlags() & SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE) != 0;
+            int flags = saveInfo.getFlags();
+            if (mCompatMode) {
+                flags |= SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE;
+            }
+            saveOnAllViewsInvisible = (flags & SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE) != 0;
 
             // We only need to track views if we want to save once they become invisible.
             if (saveOnAllViewsInvisible) {

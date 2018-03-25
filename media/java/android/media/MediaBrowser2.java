@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
+ * @hide
  * Browses media content offered by a {@link MediaLibraryService2}.
  */
 public class MediaBrowser2 extends MediaController2 {
@@ -142,8 +143,8 @@ public class MediaBrowser2 extends MediaController2 {
     @Override
     MediaBrowser2Provider createProvider(Context context, SessionToken2 token,
             Executor executor, ControllerCallback callback) {
-        return ApiLoader.getProvider(context)
-                .createMediaBrowser2(context, this, token, executor, (BrowserCallback) callback);
+        return ApiLoader.getProvider().createMediaBrowser2(
+                context, this, token, executor, (BrowserCallback) callback);
     }
 
     /**

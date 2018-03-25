@@ -62,6 +62,7 @@ statsd_common_src := \
     src/storage/StorageManager.cpp \
     src/StatsLogProcessor.cpp \
     src/StatsService.cpp \
+    src/statscompanion_util.cpp \
     src/subscriber/IncidentdReporter.cpp \
     src/subscriber/SubscriberReporter.cpp \
     src/HashableDimensionKey.cpp \
@@ -138,7 +139,7 @@ LOCAL_MODULE_CLASS := EXECUTABLES
 # Enable sanitizer on eng builds
 ifeq ($(TARGET_BUILD_VARIANT),eng)
     LOCAL_CLANG := true
-    LOCAL_SANITIZE := address unsigned-integer-overflow signed-integer-overflow
+    LOCAL_SANITIZE := address
 endif
 
 LOCAL_INIT_RC := statsd.rc

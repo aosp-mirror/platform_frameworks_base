@@ -198,7 +198,14 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         ParcelFileDescriptor fd = null;
         try {
             fd = ParcelFileDescriptor.open(snapshotProfile, ParcelFileDescriptor.MODE_READ_ONLY);
-            postSuccess(packageName, fd, callback);
+            if (fd == null || !fd.getFileDescriptor().valid()) {
+                Slog.wtf(TAG,
+                        "ParcelFileDescriptor.open returned an invalid descriptor for "
+                                + packageName + ":" + snapshotProfile + ". isNull=" + (fd == null));
+                postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
+            } else {
+                postSuccess(packageName, fd, callback);
+            }
         } catch (FileNotFoundException e) {
             Slog.w(TAG, "Could not open snapshot profile for " + packageName + ":"
                     + snapshotProfile, e);
@@ -264,7 +271,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         mHandler.post(() -> {
             try {
                 callback.onError(errCode);
-            } catch (RemoteException e) {
+            } catch (Exception e) {
                 Slog.w(TAG, "Failed to callback after profile snapshot for " + packageName, e);
             }
         });
@@ -277,8 +284,17 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         }
         mHandler.post(() -> {
             try {
-                callback.onSuccess(fd);
-            } catch (RemoteException e) {
+                // Double check that the descriptor is still valid.
+                // We've seen production issues (b/76028139) where this can turn invalid (there are
+                // suspicions around the finalizer behaviour).
+                if (fd.getFileDescriptor().valid()) {
+                    callback.onSuccess(fd);
+                } else {
+                    Slog.wtf(TAG, "The snapshot FD became invalid before posting the result for "
+                            + packageName);
+                    callback.onError(ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
+                }
+            } catch (Exception e) {
                 Slog.w(TAG,
                         "Failed to call onSuccess after profile snapshot for " + packageName, e);
             } finally {

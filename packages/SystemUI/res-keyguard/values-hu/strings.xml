@@ -28,6 +28,9 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Érintse meg jelszó megadásához"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"A feloldáshoz írja be a jelszót"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"A feloldáshoz írja be a PIN-kódot"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Adja meg PIN-kódját"</string>
+    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"Adja meg mintáját"</string>
+    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"Adja meg jelszavát"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Helytelen PIN-kód."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Érvénytelen kártya."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"Feltöltve"</string>

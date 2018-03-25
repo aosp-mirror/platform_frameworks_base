@@ -365,7 +365,8 @@ void UidMap::appendUidMap(const int64_t& timestamp, const ConfigKey& key,
             count++;
             proto->write(FIELD_TYPE_INT64 | FIELD_ID_SNAPSHOT_TIMESTAMP,
                          (long long)record.timestampNs);
-            proto->write(FIELD_TYPE_MESSAGE | FIELD_ID_SNAPSHOT_PACKAGE_INFO, record.bytes.data());
+            proto->write(FIELD_TYPE_MESSAGE | FIELD_ID_SNAPSHOT_PACKAGE_INFO, record.bytes.data(),
+                         record.bytes.size());
             proto->end(snapshotsToken);
         }
     }

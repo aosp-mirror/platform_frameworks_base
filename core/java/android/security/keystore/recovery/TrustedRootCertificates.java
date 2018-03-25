@@ -18,6 +18,7 @@ package android.security.keystore.recovery;
 
 import static android.security.keystore.recovery.X509CertificateParsingUtils.decodeBase64Cert;
 
+import android.annotation.NonNull;
 import android.util.ArrayMap;
 
 import java.security.cert.CertificateException;
@@ -32,7 +33,7 @@ import java.util.Map;
  *
  * @hide
  */
-public class TrustedRootCertificates {
+public final class TrustedRootCertificates {
 
     public static final String GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_ALIAS =
             "GoogleCloudKeyVaultServiceV1";
@@ -83,7 +84,7 @@ public class TrustedRootCertificates {
     /**
      * Returns all available root certificates, keyed by alias.
      */
-    public static Map<String, X509Certificate> listRootCertificates() {
+    public static @NonNull Map<String, X509Certificate> getRootCertificates() {
         return new ArrayMap(ALL_ROOT_CERTIFICATES);
     }
 
@@ -93,7 +94,7 @@ public class TrustedRootCertificates {
      * @param alias the alias of the certificate
      * @return the certificate referenced by the alias, or null if such a certificate doesn't exist.
      */
-    public static X509Certificate getRootCertificate(String alias) {
+    public static @NonNull X509Certificate getRootCertificate(String alias) {
         return ALL_ROOT_CERTIFICATES.get(alias);
     }
 
@@ -114,4 +115,7 @@ public class TrustedRootCertificates {
             throw new RuntimeException(e);
         }
     }
+
+    // Statics only
+    private TrustedRootCertificates() {}
 }

@@ -167,8 +167,7 @@ void StorageManager::appendConfigMetricsReport(const ConfigKey& key, ProtoOutput
         return;
     }
 
-    const char* suffix =
-            StringPrintf("%d_%lld", key.GetUid(), (long long)key.GetId()).c_str();
+    string suffix = StringPrintf("%d_%lld", key.GetUid(), (long long)key.GetId());
 
     dirent* de;
     while ((de = readdir(dir.get()))) {
@@ -176,9 +175,9 @@ void StorageManager::appendConfigMetricsReport(const ConfigKey& key, ProtoOutput
         if (name[0] == '.') continue;
 
         size_t nameLen = strlen(name);
-        size_t suffixLen = strlen(suffix);
+        size_t suffixLen = suffix.length();
         if (suffixLen <= nameLen &&
-                strncmp(name + nameLen - suffixLen, suffix, suffixLen) == 0) {
+            strncmp(name + nameLen - suffixLen, suffix.c_str(), suffixLen) == 0) {
             int64_t result[3];
             parseFileName(name, result);
             if (result[0] == -1) continue;
@@ -262,8 +261,7 @@ bool StorageManager::hasIdenticalConfig(const ConfigKey& key,
         return false;
     }
 
-    const char* suffix =
-            StringPrintf("%d_%lld", key.GetUid(), (long long)key.GetId()).c_str();
+    string suffix = StringPrintf("%d_%lld", key.GetUid(), (long long)key.GetId());
 
     dirent* de;
     while ((de = readdir(dir.get()))) {
@@ -272,10 +270,10 @@ bool StorageManager::hasIdenticalConfig(const ConfigKey& key,
             continue;
         }
         size_t nameLen = strlen(name);
-        size_t suffixLen = strlen(suffix);
+        size_t suffixLen = suffix.length();
         // There can be at most one file that matches this suffix (config key).
         if (suffixLen <= nameLen &&
-                strncmp(name + nameLen - suffixLen, suffix, suffixLen) == 0) {
+            strncmp(name + nameLen - suffixLen, suffix.c_str(), suffixLen) == 0) {
             int fd = open(StringPrintf("%s/%s", STATS_SERVICE_DIR, name).c_str(),
                                   O_RDONLY | O_CLOEXEC);
             if (fd != -1) {

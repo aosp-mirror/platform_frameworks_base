@@ -138,7 +138,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 176 + (USE_OLD_HISTORY ? 1000 : 0);
+    private static final int VERSION = 177 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS;
@@ -1551,27 +1551,31 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    @VisibleForTesting
     public static class LongSamplingCounter extends LongCounter implements TimeBaseObs {
         final TimeBase mTimeBase;
-        long mCount;
-        long mLoadedCount;
-        long mUnpluggedCount;
+        public long mCount;
+        public long mCurrentCount;
+        public long mLoadedCount;
+        public long mUnpluggedCount;
 
-        LongSamplingCounter(TimeBase timeBase, Parcel in) {
+        public LongSamplingCounter(TimeBase timeBase, Parcel in) {
             mTimeBase = timeBase;
             mCount = in.readLong();
+            mCurrentCount = in.readLong();
             mLoadedCount = in.readLong();
             mUnpluggedCount = in.readLong();
             timeBase.add(this);
         }
 
-        LongSamplingCounter(TimeBase timeBase) {
+        public LongSamplingCounter(TimeBase timeBase) {
             mTimeBase = timeBase;
             timeBase.add(this);
         }
 
         public void writeToParcel(Parcel out) {
             out.writeLong(mCount);
+            out.writeLong(mCurrentCount);
             out.writeLong(mLoadedCount);
             out.writeLong(mUnpluggedCount);
         }
@@ -1598,24 +1602,37 @@ public class BatteryStatsImpl extends BatteryStats {
         @Override
         public void logState(Printer pw, String prefix) {
             pw.println(prefix + "mCount=" + mCount
+                    + " mCurrentCount=" + mCurrentCount
                     + " mLoadedCount=" + mLoadedCount
                     + " mUnpluggedCount=" + mUnpluggedCount);
         }
 
-        void addCountLocked(long count) {
-            addCountLocked(count, mTimeBase.isRunning());
+        public void addCountLocked(long count) {
+            update(mCurrentCount + count, mTimeBase.isRunning());
         }
 
-        void addCountLocked(long count, boolean isRunning) {
-            if (isRunning) {
-                mCount += count;
+        public void addCountLocked(long count, boolean isRunning) {
+            update(mCurrentCount + count, isRunning);
+        }
+
+        public void update(long count) {
+            update(count, mTimeBase.isRunning());
+        }
+
+        public void update(long count, boolean isRunning) {
+            if (count < mCurrentCount) {
+                mCurrentCount = 0;
             }
+            if (isRunning) {
+                mCount += count - mCurrentCount;
+            }
+            mCurrentCount = count;
         }
 
         /**
          * Clear state of this counter.
          */
-        void reset(boolean detachIfReset) {
+        public void reset(boolean detachIfReset) {
             mCount = 0;
             mLoadedCount = mUnpluggedCount = 0;
             if (detachIfReset) {
@@ -1623,18 +1640,16 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        void detach() {
+        public void detach() {
             mTimeBase.remove(this);
         }
 
-        void writeSummaryFromParcelLocked(Parcel out) {
+        public void writeSummaryFromParcelLocked(Parcel out) {
             out.writeLong(mCount);
         }
 
-        void readSummaryFromParcelLocked(Parcel in) {
-            mLoadedCount = in.readLong();
-            mCount = mLoadedCount;
-            mUnpluggedCount = mLoadedCount;
+        public void readSummaryFromParcelLocked(Parcel in) {
+            mCount = mUnpluggedCount= mLoadedCount = in.readLong();
         }
     }
 
@@ -11603,10 +11618,6 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    // Cache last value for comparison.
-    private BluetoothActivityEnergyInfo mLastBluetoothActivityEnergyInfo =
-            new BluetoothActivityEnergyInfo(0, 0, 0, 0, 0, 0);
-
     /**
      * Add modem tx power to history
      * Device is said to be in high cellular transmit power when it has spent most of the transmit
@@ -11645,8 +11656,35 @@ public class BatteryStatsImpl extends BatteryStats {
         return;
     }
 
+    private final class BluetoothActivityInfoCache {
+        long idleTimeMs;
+        long rxTimeMs;
+        long txTimeMs;
+        long energy;
+
+        SparseLongArray uidRxBytes = new SparseLongArray();
+        SparseLongArray uidTxBytes = new SparseLongArray();
+
+        void set(BluetoothActivityEnergyInfo info) {
+            idleTimeMs = info.getControllerIdleTimeMillis();
+            rxTimeMs = info.getControllerRxTimeMillis();
+            txTimeMs = info.getControllerTxTimeMillis();
+            energy = info.getControllerEnergyUsed();
+            if (info.getUidTraffic() != null) {
+                for (UidTraffic traffic : info.getUidTraffic()) {
+                    uidRxBytes.put(traffic.getUid(), traffic.getRxBytes());
+                    uidTxBytes.put(traffic.getUid(), traffic.getTxBytes());
+                }
+            }
+        }
+    }
+
+    private final BluetoothActivityInfoCache mLastBluetoothActivityInfo
+            = new BluetoothActivityInfoCache();
+
     /**
      * Distribute Bluetooth energy info and network traffic to apps.
+     *
      * @param info The energy information from the bluetooth controller.
      */
     public void updateBluetoothStateLocked(@Nullable final BluetoothActivityEnergyInfo info) {
@@ -11661,12 +11699,13 @@ public class BatteryStatsImpl extends BatteryStats {
         mHasBluetoothReporting = true;
 
         final long elapsedRealtimeMs = mClocks.elapsedRealtime();
-        final long rxTimeMs = info.getControllerRxTimeMillis() -
-                mLastBluetoothActivityEnergyInfo.getControllerRxTimeMillis();
-        final long txTimeMs = info.getControllerTxTimeMillis() -
-                mLastBluetoothActivityEnergyInfo.getControllerTxTimeMillis();
-        final long idleTimeMs = info.getControllerIdleTimeMillis() -
-                mLastBluetoothActivityEnergyInfo.getControllerIdleTimeMillis();
+        final long rxTimeMs =
+                info.getControllerRxTimeMillis() - mLastBluetoothActivityInfo.rxTimeMs;
+        final long txTimeMs =
+                info.getControllerTxTimeMillis() - mLastBluetoothActivityInfo.txTimeMs;
+        final long idleTimeMs =
+                info.getControllerIdleTimeMillis() - mLastBluetoothActivityInfo.idleTimeMs;
+
         if (DEBUG_ENERGY) {
             Slog.d(TAG, "------ BEGIN BLE power blaming ------");
             Slog.d(TAG, "  Tx Time:    " + txTimeMs + " ms");
@@ -11738,8 +11777,8 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         if (DEBUG_ENERGY) {
-            Slog.d(TAG, "Left over time for traffic RX=" + leftOverRxTimeMs
-                    + " TX=" + leftOverTxTimeMs);
+            Slog.d(TAG, "Left over time for traffic RX=" + leftOverRxTimeMs + " TX="
+                    + leftOverTxTimeMs);
         }
 
         //
@@ -11750,70 +11789,56 @@ public class BatteryStatsImpl extends BatteryStats {
         long totalRxBytes = 0;
 
         final UidTraffic[] uidTraffic = info.getUidTraffic();
-        final UidTraffic[] lastUidTraffic = mLastBluetoothActivityEnergyInfo.getUidTraffic();
-        final ArrayList<UidTraffic> deltaTraffic = new ArrayList<>();
-        int m = 0, n = 0;
-        for (; m < uidTraffic.length && n < lastUidTraffic.length; m++) {
-            final UidTraffic traffic = uidTraffic[m];
-            final UidTraffic lastTraffic = lastUidTraffic[n];
-            if (traffic.getUid() == lastTraffic.getUid()) {
-                deltaTraffic.add(new UidTraffic(traffic.getUid(),
-                        traffic.getRxBytes() - lastTraffic.getRxBytes(),
-                        traffic.getTxBytes() - lastTraffic.getTxBytes()));
-                n++;
-            }
-        }
-        for (; m < uidTraffic.length; m ++) {
-            deltaTraffic.add(uidTraffic[m]);
-        }
-
-        for (int i = 0, j = 0; i < deltaTraffic.size(); i++) {
-            final UidTraffic traffic = deltaTraffic.get(i);
+        final int numUids = uidTraffic != null ? uidTraffic.length : 0;
+        for (int i = 0; i < numUids; i++) {
+            final UidTraffic traffic = uidTraffic[i];
+            final long rxBytes = traffic.getRxBytes() - mLastBluetoothActivityInfo.uidRxBytes.get(
+                    traffic.getUid());
+            final long txBytes = traffic.getTxBytes() - mLastBluetoothActivityInfo.uidTxBytes.get(
+                    traffic.getUid());
 
             // Add to the global counters.
-            mNetworkByteActivityCounters[NETWORK_BT_RX_DATA].addCountLocked(
-                    traffic.getRxBytes());
-            mNetworkByteActivityCounters[NETWORK_BT_TX_DATA].addCountLocked(
-                    traffic.getTxBytes());
+            mNetworkByteActivityCounters[NETWORK_BT_RX_DATA].addCountLocked(rxBytes);
+            mNetworkByteActivityCounters[NETWORK_BT_TX_DATA].addCountLocked(txBytes);
 
             // Add to the UID counters.
             final Uid u = getUidStatsLocked(mapUid(traffic.getUid()));
-            u.noteNetworkActivityLocked(NETWORK_BT_RX_DATA, traffic.getRxBytes(), 0);
-            u.noteNetworkActivityLocked(NETWORK_BT_TX_DATA, traffic.getTxBytes(), 0);
+            u.noteNetworkActivityLocked(NETWORK_BT_RX_DATA, rxBytes, 0);
+            u.noteNetworkActivityLocked(NETWORK_BT_TX_DATA, txBytes, 0);
 
             // Calculate the total traffic.
-            totalTxBytes += traffic.getTxBytes();
-            totalRxBytes += traffic.getRxBytes();
+            totalRxBytes += rxBytes;
+            totalTxBytes += txBytes;
         }
 
-        if ((totalTxBytes != 0 || totalRxBytes != 0) &&
-                (leftOverRxTimeMs != 0 || leftOverTxTimeMs != 0)) {
-            for (int i = 0; i < deltaTraffic.size(); i++) {
-                final UidTraffic traffic = deltaTraffic.get(i);
+        if ((totalTxBytes != 0 || totalRxBytes != 0) && (leftOverRxTimeMs != 0
+                || leftOverTxTimeMs != 0)) {
+            for (int i = 0; i < numUids; i++) {
+                final UidTraffic traffic = uidTraffic[i];
+                final int uid = traffic.getUid();
+                final long rxBytes =
+                        traffic.getRxBytes() - mLastBluetoothActivityInfo.uidRxBytes.get(uid);
+                final long txBytes =
+                        traffic.getTxBytes() - mLastBluetoothActivityInfo.uidTxBytes.get(uid);
 
-                final Uid u = getUidStatsLocked(mapUid(traffic.getUid()));
+                final Uid u = getUidStatsLocked(mapUid(uid));
                 final ControllerActivityCounterImpl counter =
                         u.getOrCreateBluetoothControllerActivityLocked();
 
-                if (totalRxBytes > 0 && traffic.getRxBytes() > 0) {
-                    final long timeRxMs = (leftOverRxTimeMs * traffic.getRxBytes()) / totalRxBytes;
-
+                if (totalRxBytes > 0 && rxBytes > 0) {
+                    final long timeRxMs = (leftOverRxTimeMs * rxBytes) / totalRxBytes;
                     if (DEBUG_ENERGY) {
-                        Slog.d(TAG, "UID=" + traffic.getUid() + " rx_bytes=" + traffic.getRxBytes()
-                                + " rx_time=" + timeRxMs);
+                        Slog.d(TAG, "UID=" + uid + " rx_bytes=" + rxBytes + " rx_time=" + timeRxMs);
                     }
                     counter.getRxTimeCounter().addCountLocked(timeRxMs);
                     leftOverRxTimeMs -= timeRxMs;
                 }
 
-                if (totalTxBytes > 0 && traffic.getTxBytes() > 0) {
-                    final long timeTxMs = (leftOverTxTimeMs * traffic.getTxBytes()) / totalTxBytes;
-
+                if (totalTxBytes > 0 && txBytes > 0) {
+                    final long timeTxMs = (leftOverTxTimeMs * txBytes) / totalTxBytes;
                     if (DEBUG_ENERGY) {
-                        Slog.d(TAG, "UID=" + traffic.getUid() + " tx_bytes=" + traffic.getTxBytes()
-                                + " tx_time=" + timeTxMs);
+                        Slog.d(TAG, "UID=" + uid + " tx_bytes=" + txBytes + " tx_time=" + timeTxMs);
                     }
-
                     counter.getTxTimeCounters()[0].addCountLocked(timeTxMs);
                     leftOverTxTimeMs -= timeTxMs;
                 }
@@ -11830,10 +11855,10 @@ public class BatteryStatsImpl extends BatteryStats {
         if (opVolt != 0) {
             // We store the power drain as mAms.
             mBluetoothActivity.getPowerCounter().addCountLocked(
-                    (long) ((info.getControllerEnergyUsed() -
-                            mLastBluetoothActivityEnergyInfo.getControllerEnergyUsed() )/ opVolt));
+                    (long) ((info.getControllerEnergyUsed() - mLastBluetoothActivityInfo.energy)
+                            / opVolt));
         }
-        mLastBluetoothActivityEnergyInfo = info;
+        mLastBluetoothActivityInfo.set(info);
     }
 
     /**

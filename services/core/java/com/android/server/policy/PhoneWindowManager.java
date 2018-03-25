@@ -39,6 +39,7 @@ import static android.content.res.Configuration.UI_MODE_TYPE_CAR;
 import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.O;
+import static android.provider.Settings.Secure.VOLUME_HUSH_OFF;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.STATE_OFF;
 import static android.view.WindowManager.DOCKED_LEFT;
@@ -71,6 +72,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_ACQUIRES_SLEE
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_STATUS_BAR_VISIBLE_TRANSPARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
@@ -187,6 +189,7 @@ import android.hardware.input.InputManagerInternal;
 import android.hardware.power.V1_0.PowerHint;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.media.AudioManagerInternal;
 import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.session.MediaSessionLegacyHelper;
@@ -455,6 +458,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     PowerManagerInternal mPowerManagerInternal;
     IStatusBarService mStatusBarService;
     StatusBarManagerInternal mStatusBarManagerInternal;
+    AudioManagerInternal mAudioManagerInternal;
     boolean mPreloadedRecentApps;
     final Object mServiceAquireLock = new Object();
     Vibrator mVibrator; // Vibrator for giving feedback of orientation changes
@@ -772,6 +776,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mScreenshotChordPowerKeyTriggered;
     private long mScreenshotChordPowerKeyTime;
 
+    // Ringer toggle should reuse timing and triggering from screenshot power and a11y vol up
+    private int mRingerToggleChord = VOLUME_HUSH_OFF;
+
     private static final long BUGREPORT_TV_GESTURE_TIMEOUT_MILLIS = 1000;
 
     private boolean mBugreportTvKey1Pressed;
@@ -836,6 +843,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_LAUNCH_ASSIST_LONG_PRESS = 27;
     private static final int MSG_POWER_VERY_LONG_PRESS = 28;
     private static final int MSG_NOTIFY_USER_ACTIVITY = 29;
+    private static final int MSG_RINGER_TOGGLE_CHORD = 30;
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
@@ -943,6 +951,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                     mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                             android.Manifest.permission.USER_ACTIVITY);
+                case MSG_RINGER_TOGGLE_CHORD:
+                    handleRingerChordGesture();
                     break;
             }
         }
@@ -995,6 +1005,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.SHOW_ROTATION_SUGGESTIONS), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.VOLUME_HUSH_GESTURE), false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.POLICY_CONTROL), false, this,
@@ -1117,6 +1130,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @VisibleForTesting
     SystemGesturesPointerEventListener mSystemGestures;
 
+    private void handleRingerChordGesture() {
+        if (mRingerToggleChord == VOLUME_HUSH_OFF) {
+            return;
+        }
+        getAudioManagerInternal();
+        mAudioManagerInternal.silenceRingerModeInternal("volume_hush");
+    }
+
     IStatusBarService getStatusBarService() {
         synchronized (mServiceAquireLock) {
             if (mStatusBarService == null) {
@@ -1134,6 +1155,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         LocalServices.getService(StatusBarManagerInternal.class);
             }
             return mStatusBarManagerInternal;
+        }
+    }
+
+    AudioManagerInternal getAudioManagerInternal() {
+        synchronized (mServiceAquireLock) {
+            if (mAudioManagerInternal == null) {
+                mAudioManagerInternal = LocalServices.getService(AudioManagerInternal.class);
+            }
+            return mAudioManagerInternal;
         }
     }
 
@@ -1306,6 +1336,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mScreenshotChordPowerKeyTriggered = true;
             mScreenshotChordPowerKeyTime = event.getDownTime();
             interceptScreenshotChord();
+            interceptRingerToggleChord();
         }
 
         // Stop ringing or end call if configured to do so when power is pressed.
@@ -1701,6 +1732,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private void interceptRingerToggleChord() {
+        if (mRingerToggleChord != Settings.Secure.VOLUME_HUSH_OFF
+                && mScreenshotChordPowerKeyTriggered && mA11yShortcutChordVolumeUpKeyTriggered) {
+            final long now = SystemClock.uptimeMillis();
+            if (now <= mA11yShortcutChordVolumeUpKeyTime + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS
+                    && now <= mScreenshotChordPowerKeyTime
+                    + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS) {
+                mA11yShortcutChordVolumeUpKeyConsumed = true;
+                cancelPendingPowerKeyAction();
+
+                mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_RINGER_TOGGLE_CHORD),
+                        getRingerToggleChordDelay());
+            }
+        }
+    }
+
     private long getAccessibilityShortcutTimeout() {
         ViewConfiguration config = ViewConfiguration.get(mContext);
         return Settings.Secure.getIntForUser(mContext.getContentResolver(),
@@ -1718,12 +1765,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return ViewConfiguration.get(mContext).getDeviceGlobalActionKeyTimeout();
     }
 
+    private long getRingerToggleChordDelay() {
+        // Always timeout like a tap
+        return ViewConfiguration.getTapTimeout();
+    }
+
     private void cancelPendingScreenshotChordAction() {
         mHandler.removeCallbacks(mScreenshotRunnable);
     }
 
     private void cancelPendingAccessibilityShortcutAction() {
         mHandler.removeMessages(MSG_ACCESSIBILITY_SHORTCUT);
+    }
+
+    private void cancelPendingRingerToggleChordAction() {
+        mHandler.removeMessages(MSG_RINGER_TOGGLE_CHORD);
     }
 
     private final Runnable mEndCallLongPress = new Runnable() {
@@ -2382,7 +2438,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mSystemNavigationKeysEnabled = Settings.Secure.getIntForUser(resolver,
                     Settings.Secure.SYSTEM_NAVIGATION_KEYS_ENABLED,
                     0, UserHandle.USER_CURRENT) == 1;
-
+            mRingerToggleChord = Settings.Secure.getIntForUser(resolver,
+                    Settings.Secure.VOLUME_HUSH_GESTURE, VOLUME_HUSH_OFF,
+                    UserHandle.USER_CURRENT);
+            if (!mContext.getResources()
+                    .getBoolean(com.android.internal.R.bool.config_volumeHushGestureEnabled)) {
+                mRingerToggleChord = Settings.Secure.VOLUME_HUSH_OFF;
+            }
             // Configure rotation suggestions.
             int showRotationSuggestions = Settings.Secure.getIntForUser(resolver,
                     Settings.Secure.SHOW_ROTATION_SUGGESTIONS,
@@ -2522,7 +2584,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     @Override
     public int checkAddPermission(WindowManager.LayoutParams attrs, int[] outAppOp) {
-        int type = attrs.type;
+        final int type = attrs.type;
+        final boolean isRoundedCornerOverlay =
+                (attrs.privateFlags & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0;
+
+        if (isRoundedCornerOverlay && mContext.checkCallingOrSelfPermission(INTERNAL_SYSTEM_WINDOW)
+                != PERMISSION_GRANTED) {
+            return ADD_PERMISSION_DENIED;
+        }
 
         outAppOp[0] = AppOpsManager.OP_NONE;
 
@@ -3522,6 +3591,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mScreenshotChordVolumeDownKeyConsumed = false;
                 }
                 return -1;
+            }
+            if (keyCode == KeyEvent.KEYCODE_VOLUME_UP && mA11yShortcutChordVolumeUpKeyConsumed) {
+                if (!down) {
+                    mA11yShortcutChordVolumeUpKeyConsumed = false;
+                }
+                return -1;
+            }
+        }
+
+        // If a ringer toggle chord could be on the way but we're not sure, then tell the dispatcher
+        // to wait a little while and try again later before dispatching.
+        if (mRingerToggleChord != VOLUME_HUSH_OFF && (flags & KeyEvent.FLAG_FALLBACK) == 0) {
+            if (mA11yShortcutChordVolumeUpKeyTriggered && !mScreenshotChordPowerKeyTriggered) {
+                final long now = SystemClock.uptimeMillis();
+                final long timeoutTime = mA11yShortcutChordVolumeUpKeyTime
+                        + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS;
+                if (now < timeoutTime) {
+                    return timeoutTime - now;
+                }
             }
             if (keyCode == KeyEvent.KEYCODE_VOLUME_UP && mA11yShortcutChordVolumeUpKeyConsumed) {
                 if (!down) {
@@ -5997,6 +6085,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
                 if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
                     if (down) {
+                        // Any activity on the vol down button stops the ringer toggle shortcut
+                        cancelPendingRingerToggleChordAction();
+
                         if (interactive && !mScreenshotChordVolumeDownKeyTriggered
                                 && (event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
                             mScreenshotChordVolumeDownKeyTriggered = true;
@@ -6020,12 +6111,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             mA11yShortcutChordVolumeUpKeyConsumed = false;
                             cancelPendingPowerKeyAction();
                             cancelPendingScreenshotChordAction();
+                            cancelPendingRingerToggleChordAction();
+
                             interceptAccessibilityShortcutChord();
+                            interceptRingerToggleChord();
                         }
                     } else {
                         mA11yShortcutChordVolumeUpKeyTriggered = false;
                         cancelPendingScreenshotChordAction();
                         cancelPendingAccessibilityShortcutAction();
+                        cancelPendingRingerToggleChordAction();
                     }
                 }
                 if (down) {

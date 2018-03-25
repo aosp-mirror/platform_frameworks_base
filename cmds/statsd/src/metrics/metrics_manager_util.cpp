@@ -277,14 +277,6 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long ti
                                 config.event_metric_size() + config.value_metric_size();
     allMetricProducers.reserve(allMetricsCount);
     StatsPullerManager statsPullerManager;
-    // Align all buckets to same instant in MIN_BUCKET_SIZE_SEC, so that avoid alarm
-    // clock will not grow very aggressive. New metrics will be delayed up to
-    // MIN_BUCKET_SIZE_SEC before starting.
-    // Why not use timeBaseSec directly?
-//    long currentTimeSec = time(nullptr);
-//    uint64_t startTimeNs = (currentTimeSec - kMinBucketSizeSec -
-//                            (currentTimeSec - timeBaseSec) % kMinBucketSizeSec) *
-//                           NS_PER_SEC;
 
     uint64_t startTimeNs = timeBaseSec * NS_PER_SEC;
 

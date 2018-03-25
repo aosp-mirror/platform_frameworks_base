@@ -74,6 +74,17 @@ public class SmartReplyConstantsTest extends SysuiTestCase {
     }
 
     @Test
+    public void testRequiresTargetingPConfig() {
+        overrideSetting("enabled=true,requires_targeting_p=false");
+        triggerConstantsOnChange();
+        assertEquals(false, mConstants.requiresTargetingP());
+
+        overrideSetting("enabled=true");
+        triggerConstantsOnChange();
+        assertEquals(true, mConstants.requiresTargetingP());
+    }
+
+    @Test
     public void testGetMaxSqueezeRemeasureAttemptsWithNoConfig() {
         assertTrue(mConstants.isEnabled());
         assertEquals(7, mConstants.getMaxSqueezeRemeasureAttempts());

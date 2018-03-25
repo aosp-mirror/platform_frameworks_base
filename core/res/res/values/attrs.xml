@@ -5968,6 +5968,9 @@
              in the encoded data. Setting this to infinite (-1) will result in the
              animation repeating as long as it is displayed (once start() is called). -->
         <attr name="repeatCount"/>
+        <!-- When true, automatically start animating. The default is false, meaning
+             that the animation will not start until start() is called. -->
+        <attr name="autoStart" />
     </declare-styleable>
 
     <!-- Drawable used to draw bitmaps. -->
@@ -7984,8 +7987,6 @@
              android.content.pm.PackageInfo#getLongVersionCode()} for the target package.
         -->
         <attr name="maxLongVersionCode" format="string" />
-        <!-- TODO(b/74445943): STOPSHIP (urlBarResourceId should be removed after P DP2 is branched)-->
-        <attr name="urlBarResourceId" format="string" />
     </declare-styleable>
 
     <!-- =============================== -->

@@ -8536,22 +8536,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             structure.setHint(info.getHintText());
         }
-        if ((info.getText() != null || info.getError() != null)) {
-            structure.setText(info.getText(), info.getTextSelectionStart(),
-                    info.getTextSelectionEnd());
-            if (forAutofill) {
-                if (info.isEditable()) {
-                    structure.setDataIsSensitive(true);
+        CharSequence text = info.getText();
+        boolean hasText = text != null || info.getError() != null;
+        if (hasText) {
+            structure.setText(text, info.getTextSelectionStart(), info.getTextSelectionEnd());
+        }
+        if (forAutofill) {
+            if (info.isEditable()) {
+                structure.setDataIsSensitive(true);
+                if (hasText) {
                     structure.setAutofillType(AUTOFILL_TYPE_TEXT);
-                    final AutofillValue autofillValue = AutofillValue.forText(structure.getText());
-                    structure.setAutofillValue(autofillValue);
-                    if (info.isPassword()) {
-                        structure.setInputType(InputType.TYPE_CLASS_TEXT
-                                | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                    }
-                } else {
-                    structure.setDataIsSensitive(false);
+                    structure.setAutofillValue(AutofillValue.forText(text));
                 }
+                int inputType = info.getInputType();
+                if (inputType == 0 && info.isPassword()) {
+                    inputType = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD;
+                }
+                structure.setInputType(inputType);
+            } else {
+                structure.setDataIsSensitive(false);
             }
         }
         final int NCHILDREN = info.getChildCount();
@@ -14340,7 +14343,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Return the width of the your view.
+     * Return the width of your view.
      *
      * @return The width of your view, in pixels.
      */
@@ -14839,6 +14842,28 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             invalidateViewProperty(false, true);
 
             invalidateParentIfNeededAndWasQuickRejected();
+        }
+    }
+
+    /**
+     * Returns whether or not a pivot has been set by a call to {@link #setPivotX(float)} or
+     * {@link #setPivotY(float)}. If no pivot has been set then the pivot will be the center
+     * of the view.
+     *
+     * @return True if a pivot has been set, false if the default pivot is being used
+     */
+    public boolean isPivotSet() {
+        return mRenderNode.isPivotExplicitlySet();
+    }
+
+    /**
+     * Clears any pivot previously set by a call to  {@link #setPivotX(float)} or
+     * {@link #setPivotY(float)}. After calling this {@link #isPivotSet()} will be false
+     * and the pivot used for rotation will return to default of being centered on the view.
+     */
+    public void resetPivot() {
+        if (mRenderNode.resetPivot()) {
+            invalidateViewProperty(false, false);
         }
     }
 
@@ -27570,6 +27595,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * @return {@code true} if the default focus highlight is enabled, {@code false} otherwies.
+     * @hide
+     */
+    @TestApi
+    public static boolean isDefaultFocusHighlightEnabled() {
+        return sUseDefaultFocusHighlight;
+    }
+
+  /**
      * Allows this view to handle {@link KeyEvent}s which weren't handled by normal dispatch. This
      * occurs after the normal view hierarchy dispatch, but before the window callback. By default,
      * this will dispatch into all the listeners registered via

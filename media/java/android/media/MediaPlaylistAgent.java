@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
+ * @hide
  * MediaPlaylistAgent is the abstract class an application needs to derive from to pass an object
  * to a MediaSession2 that will override default playlist handling behaviors. It contains a set of
  * notify methods to signal MediaSession2 that playlist-related state has changed.
@@ -148,7 +149,7 @@ public abstract class MediaPlaylistAgent {
     }
 
     public MediaPlaylistAgent(@NonNull Context context) {
-        mProvider = ApiLoader.getProvider(context).createMediaPlaylistAgent(context, this);
+        mProvider = ApiLoader.getProvider().createMediaPlaylistAgent(context, this);
     }
 
     /**
@@ -228,10 +229,15 @@ public abstract class MediaPlaylistAgent {
     }
 
     /**
-     * Adds the media item to the playlist at the index
+     * Adds the media item to the playlist at position index. Index equals or greater than
+     * the current playlist size will add the item at the end of the playlist.
+     * <p>
+     * This will not change the currently playing media item.
+     * If index is less than or equal to the current index of the playlist,
+     * the current index of the playlist will be incremented correspondingly.
      *
-     * @param index index
-     * @param item media item to add
+     * @param index the index you want to add
+     * @param item the media item you want to add
      */
     public void addPlaylistItem(int index, @NonNull MediaItem2 item) {
         mProvider.addPlaylistItem_impl(index, item);

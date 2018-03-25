@@ -159,6 +159,9 @@
     <!-- Notification content to tell the user that voice/data/emergency service is blocked by access control. -->
     <string name="RestrictedStateContent">Temporarily turned off by your carrier</string>
 
+    <!-- Notification content to tell the user that voice/data/emergency service is blocked by access control when multiple SIMs are active. -->
+    <string name="RestrictedStateContentMsimTemplate">Temporarily turned off by your carrier for SIM <xliff:g id="simNumber" example="1">%d</xliff:g></string>
+
     <!-- Displayed to tell the user that they should switch their network preference. -->
     <string name="NetworkPreferenceSwitchTitle">Can\u2019t reach mobile network</string>
     <!-- Displayed to tell the user that they should switch their network preference. -->
@@ -227,14 +230,14 @@
     <string name="roamingTextSearching">Searching for Service</string>
 
     <!-- Displayed when WFC registration fails -->
-    <string name="wfcRegErrorTitle">Wi-Fi Calling</string>
+    <string name="wfcRegErrorTitle">Couldn\u2019t set up Wi\u2011Fi calling</string>
     <!-- WFC Operator Error Messages showed as alerts -->
     <string-array name="wfcOperatorErrorAlertMessages">
         <item>To make calls and send messages over Wi-Fi, first ask your carrier to set up this service. Then turn on Wi-Fi calling again from Settings. (Error code: <xliff:g id="code" example="REG09 - No 911 Address">%1$s</xliff:g>)</item>
     </string-array>
     <!-- WFC Operator Error Messages showed as notifications -->
     <string-array name="wfcOperatorErrorNotificationMessages">
-        <item>Register with your carrier (Error code: <xliff:g id="code" example="REG09 - No 911 Address">%1$s</xliff:g>)</item>
+        <item>Issue registering Wi\u2011Fi calling with your carrier: <xliff:g id="code" example="REG09 - No 911 Address">%1$s</xliff:g></item>
     </string-array>
     <!-- Template for showing mobile network operator name while WFC is active -->
     <string-array name="wfcSpnFormats">
@@ -1347,6 +1350,8 @@
 
     <!-- Message shown by the fingerprint dialog when fingerprint is not recognized -->
     <string name="fingerprint_not_recognized">Not recognized</string>
+    <!-- Accessibility message announced when a fingerprint has been authenticated [CHAR LIMIT=NONE] -->
+    <string name="fingerprint_authenticated">Fingerprint authenticated</string>
 
     <!-- Error message shown when the fingerprint hardware can't be accessed -->
     <string name="fingerprint_error_hw_not_available">Fingerprint hardware not available.</string>
@@ -3085,13 +3090,13 @@
     <string name="wifi_available_title">Connect to open Wi\u2011Fi network</string>
     <!-- Notification title for a nearby carrier wireless network.-->
     <string name="wifi_available_carrier_network_title">Connect to carrier Wi\u2011Fi network</string>
-    <!-- Notification title when the system is connecting to the specified open network. The network name is specified in the notification content. -->
-    <string name="wifi_available_title_connecting">Connecting to open Wi\u2011Fi network</string>
-    <!-- Notification title when the system has connected to the open network. The network name is specified in the notification content. -->
+    <!-- Notification title when the system is connecting to the specified network. The network name is specified in the notification content. -->
+    <string name="wifi_available_title_connecting">Connecting to Wi\u2011Fi network</string>
+    <!-- Notification title when the system has connected to the network. The network name is specified in the notification content. -->
     <string name="wifi_available_title_connected">Connected to Wi\u2011Fi network</string>
-    <!-- Notification title when the system failed to connect to the specified open network. -->
+    <!-- Notification title when the system failed to connect to the specified network. -->
     <string name="wifi_available_title_failed_to_connect">Could not connect to Wi\u2011Fi network</string>
-    <!-- Notification content when the system failed to connect to the specified open network. This informs the user that tapping on this notification will open the wifi picker. -->
+    <!-- Notification content when the system failed to connect to the specified network. This informs the user that tapping on this notification will open the wifi picker. -->
     <string name="wifi_available_content_failed_to_connect">Tap to see all networks</string>
     <!-- Notification action name for connecting to the network specified in the notification body. -->
     <string name="wifi_available_action_connect">Connect</string>
@@ -4578,14 +4583,14 @@
 
     <!-- Displayed when the USSD/SS request is modified by STK CC to a
     different request. This will be displayed in a toast. -->
-    <string name="stk_cc_ussd_to_dial">USSD request is modified to DIAL request.</string>
-    <string name="stk_cc_ussd_to_ss">USSD request is modified to SS request.</string>
-    <string name="stk_cc_ussd_to_ussd">USSD request is modified to new USSD request.</string>
-    <string name="stk_cc_ussd_to_dial_video">USSD request is modified to Video DIAL request.</string>
-    <string name="stk_cc_ss_to_dial">SS request is modified to DIAL request.</string>
-    <string name="stk_cc_ss_to_dial_video">SS request is modified to Video DIAL request.</string>
-    <string name="stk_cc_ss_to_ussd">SS request is modified to USSD request.</string>
-    <string name="stk_cc_ss_to_ss">SS request is modified to new SS request.</string>
+    <string name="stk_cc_ussd_to_dial">USSD request changed to regular call</string>
+    <string name="stk_cc_ussd_to_ss">USSD request changed to SS request</string>
+    <string name="stk_cc_ussd_to_ussd">Changed to new USSD request</string>
+    <string name="stk_cc_ussd_to_dial_video">USSD request changed to video call</string>
+    <string name="stk_cc_ss_to_dial">SS request changed to regular call</string>
+    <string name="stk_cc_ss_to_dial_video">SS request changed to video call</string>
+    <string name="stk_cc_ss_to_ussd">SS request changed to USSD request</string>
+    <string name="stk_cc_ss_to_ss">Changed to new SS request</string>
 
     <!-- Content description of the work profile icon in the notification. -->
     <string name="notification_work_profile_content_description">Work profile</string>
@@ -4833,6 +4838,12 @@
     <string name="mmcc_illegal_ms">SIM not allowed for voice</string>
     <string name="mmcc_illegal_me">Phone not allowed for voice</string>
 
+    <!-- Title of notification when UE fails to register network with MM reject cause code when multiple SIMs are active. -->
+    <string name="mmcc_authentication_reject_msim_template">SIM <xliff:g id="simNumber" example="1">%d</xliff:g> not allowed</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template">SIM <xliff:g id="simNumber" example="1">%d</xliff:g> not provisioned</string>
+    <string name="mmcc_illegal_ms_msim_template">SIM <xliff:g id="simNumber" example="1">%d</xliff:g> not allowed</string>
+    <string name="mmcc_illegal_me_msim_template">SIM <xliff:g id="simNumber" example="1">%d</xliff:g> not allowed</string>
+
     <!-- Popup window default title to be read by a screen reader-->
     <string name="popup_window_default_title">Popup Window</string>
 
@@ -4868,12 +4879,6 @@
     -->
     <string name="shortcut_disabled_reason_unknown">Shortcut is disabled</string>
 
-    <!--Battery saver warning. STOPSHIP: Remove it eventually. -->
-    <string name="battery_saver_warning" translatable="false">\"Extreme\" battery saver activated.\n\nSee the details at: go/extreme-battery-saver\n\nEBS aggressively throttles background apps and changes screen-off behavior.\n</string>
-
-    <!--Battery saver warning. STOPSHIP: Remove it eventually. -->
-    <string name="battery_saver_warning_title" translatable="false">Extreme battery saver</string>
-
     <!-- Label for the uninstall button on the harmful app warning dialog. [CHAR LIMIT=20] -->
     <string name="harmful_app_warning_uninstall">UNINSTALL</string>
     <!-- Label for the open anyway button on the harmful app warning dialog. [CHAR LIMIT=20] -->
@@ -4887,6 +4892,9 @@
 
     <!-- Notification action for editing a screenshot (drawing on it, cropping it, etc) -->
     <string name="screenshot_edit">Edit</string>
+
+    <string name="volume_dialog_ringer_guidance_vibrate">Calls and notifications will vibrate</string>
+    <string name="volume_dialog_ringer_guidance_silent">Calls and notifications will be muted</string>
 
     <!-- Title for the notification channel notifying user of settings system changes. [CHAR LIMIT=NONE] -->
     <string name="notification_channel_system_changes">System changes</string>

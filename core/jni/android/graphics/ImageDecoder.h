@@ -33,6 +33,13 @@ struct ImageDecoder {
         kHardware_Allocator     = 3,
     };
 
+    // These need to stay in sync with ImageDecoder.java's Error constants.
+    enum Error {
+        kSourceException     = 1,
+        kSourceIncomplete    = 2,
+        kSourceMalformedData = 3,
+    };
+
     // These need to stay in sync with PixelFormat.java's Format constants.
     enum PixelFormat {
         kUnknown     =  0,

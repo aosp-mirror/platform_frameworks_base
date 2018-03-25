@@ -26,6 +26,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
+ * @hide
  * Handles requests to adjust or set the volume on a session. This is also used
  * to push volume updates back to the session. The provider must call
  * {@link #setCurrentVolume(int)} each time the volume being provided changes.
@@ -76,7 +77,7 @@ public abstract class VolumeProvider2 {
      */
     public VolumeProvider2(@NonNull Context context, @ControlType int controlType,
             int maxVolume, int currentVolume) {
-        mProvider = ApiLoader.getProvider(context).createVolumeProvider2(
+        mProvider = ApiLoader.getProvider().createVolumeProvider2(
                 context, this, controlType, maxVolume, currentVolume);
     }
 

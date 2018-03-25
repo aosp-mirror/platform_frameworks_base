@@ -253,8 +253,9 @@ public final class IpSecManager {
      * @throws {@link #ResourceUnavailableException} indicating that too many SPIs are
      *     currently allocated for this user
      */
-    public SecurityParameterIndex allocateSecurityParameterIndex(InetAddress destinationAddress)
-            throws ResourceUnavailableException {
+    @NonNull
+    public SecurityParameterIndex allocateSecurityParameterIndex(
+                @NonNull InetAddress destinationAddress) throws ResourceUnavailableException {
         try {
             return new SecurityParameterIndex(
                     mService,
@@ -280,8 +281,9 @@ public final class IpSecManager {
      * @throws {@link #SpiUnavailableException} indicating that the requested SPI could not be
      *     reserved
      */
+    @NonNull
     public SecurityParameterIndex allocateSecurityParameterIndex(
-            InetAddress destinationAddress, int requestedSpi)
+            @NonNull InetAddress destinationAddress, int requestedSpi)
             throws SpiUnavailableException, ResourceUnavailableException {
         if (requestedSpi == IpSecManager.INVALID_SECURITY_PARAMETER_INDEX) {
             throw new IllegalArgumentException("Requested SPI must be a valid (non-zero) SPI");
@@ -318,9 +320,8 @@ public final class IpSecManager {
      * @param transform a transport mode {@code IpSecTransform}
      * @throws IOException indicating that the transform could not be applied
      */
-    public void applyTransportModeTransform(
-            Socket socket, @PolicyDirection int direction, IpSecTransform transform)
-            throws IOException {
+    public void applyTransportModeTransform(@NonNull Socket socket,
+            @PolicyDirection int direction, @NonNull IpSecTransform transform) throws IOException {
         applyTransportModeTransform(socket.getFileDescriptor$(), direction, transform);
     }
 
@@ -353,9 +354,8 @@ public final class IpSecManager {
      * @param transform a transport mode {@code IpSecTransform}
      * @throws IOException indicating that the transform could not be applied
      */
-    public void applyTransportModeTransform(
-            DatagramSocket socket, @PolicyDirection int direction, IpSecTransform transform)
-            throws IOException {
+    public void applyTransportModeTransform(@NonNull DatagramSocket socket,
+            @PolicyDirection int direction, @NonNull IpSecTransform transform) throws IOException {
         applyTransportModeTransform(socket.getFileDescriptor$(), direction, transform);
     }
 
@@ -388,9 +388,8 @@ public final class IpSecManager {
      * @param transform a transport mode {@code IpSecTransform}
      * @throws IOException indicating that the transform could not be applied
      */
-    public void applyTransportModeTransform(
-            FileDescriptor socket, @PolicyDirection int direction, IpSecTransform transform)
-            throws IOException {
+    public void applyTransportModeTransform(@NonNull FileDescriptor socket,
+            @PolicyDirection int direction, @NonNull IpSecTransform transform) throws IOException {
         // We dup() the FileDescriptor here because if we don't, then the ParcelFileDescriptor()
         // constructor takes control and closes the user's FD when we exit the method.
         try (ParcelFileDescriptor pfd = ParcelFileDescriptor.dup(socket)) {
@@ -413,8 +412,7 @@ public final class IpSecManager {
      * @param socket a socket that previously had a transform applied to it
      * @throws IOException indicating that the transform could not be removed from the socket
      */
-    public void removeTransportModeTransforms(Socket socket)
-            throws IOException {
+    public void removeTransportModeTransforms(@NonNull Socket socket) throws IOException {
         removeTransportModeTransforms(socket.getFileDescriptor$());
     }
 
@@ -431,8 +429,7 @@ public final class IpSecManager {
      * @param socket a socket that previously had a transform applied to it
      * @throws IOException indicating that the transform could not be removed from the socket
      */
-    public void removeTransportModeTransforms(DatagramSocket socket)
-            throws IOException {
+    public void removeTransportModeTransforms(@NonNull DatagramSocket socket) throws IOException {
         removeTransportModeTransforms(socket.getFileDescriptor$());
     }
 
@@ -449,8 +446,7 @@ public final class IpSecManager {
      * @param socket a socket that previously had a transform applied to it
      * @throws IOException indicating that the transform could not be removed from the socket
      */
-    public void removeTransportModeTransforms(FileDescriptor socket)
-            throws IOException {
+    public void removeTransportModeTransforms(@NonNull FileDescriptor socket) throws IOException {
         try (ParcelFileDescriptor pfd = ParcelFileDescriptor.dup(socket)) {
             mService.removeTransportModeTransforms(pfd);
         } catch (RemoteException e) {
@@ -588,6 +584,7 @@ public final class IpSecManager {
     // safely usable for Encapsulation without allowing a user to possibly unbind from/close
     // the port, which could potentially impact the traffic of the next user who binds to that
     // socket.
+    @NonNull
     public UdpEncapsulationSocket openUdpEncapsulationSocket(int port)
             throws IOException, ResourceUnavailableException {
         /*
@@ -617,6 +614,7 @@ public final class IpSecManager {
     // safely usable for Encapsulation without allowing a user to possibly unbind from/close
     // the port, which could potentially impact the traffic of the next user who binds to that
     // socket.
+    @NonNull
     public UdpEncapsulationSocket openUdpEncapsulationSocket()
             throws IOException, ResourceUnavailableException {
         return new UdpEncapsulationSocket(mService, 0);
@@ -645,6 +643,7 @@ public final class IpSecManager {
         private int mResourceId = INVALID_RESOURCE_ID;
 
         /** Get the underlying SPI held by this object. */
+        @NonNull
         public String getInterfaceName() {
             return mInterfaceName;
         }
@@ -659,7 +658,8 @@ public final class IpSecManager {
          * @hide
          */
         @SystemApi
-        public void addAddress(LinkAddress address) throws IOException {
+        @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
+        public void addAddress(@NonNull LinkAddress address) throws IOException {
             try {
                 mService.addAddressToTunnelInterface(mResourceId, address);
             } catch (RemoteException e) {
@@ -676,7 +676,8 @@ public final class IpSecManager {
          * @hide
          */
         @SystemApi
-        public void removeAddress(LinkAddress address) throws IOException {
+        @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
+        public void removeAddress(@NonNull LinkAddress address) throws IOException {
             try {
                 mService.removeAddressFromTunnelInterface(mResourceId, address);
             } catch (RemoteException e) {
@@ -768,7 +769,8 @@ public final class IpSecManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
+    @NonNull
+    @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
     public IpSecTunnelInterface createIpSecTunnelInterface(@NonNull InetAddress localAddress,
             @NonNull InetAddress remoteAddress, @NonNull Network underlyingNetwork)
             throws ResourceUnavailableException, IOException {
@@ -793,9 +795,9 @@ public final class IpSecManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
-    public void applyTunnelModeTransform(IpSecTunnelInterface tunnel,
-            @PolicyDirection int direction, IpSecTransform transform) throws IOException {
+    @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
+    public void applyTunnelModeTransform(@NonNull IpSecTunnelInterface tunnel,
+            @PolicyDirection int direction, @NonNull IpSecTransform transform) throws IOException {
         try {
             mService.applyTunnelModeTransform(
                     tunnel.getResourceId(), direction, transform.getResourceId());

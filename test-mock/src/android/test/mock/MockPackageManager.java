@@ -54,6 +54,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.os.storage.VolumeInfo;
 
@@ -951,7 +952,8 @@ public class MockPackageManager extends PackageManager {
 
     /** @hide */
     @Override
-    public String[] setPackagesSuspendedAsUser(String[] packageNames, boolean hidden, int userId) {
+    public String[] setPackagesSuspended(String[] packageNames, boolean hidden,
+            PersistableBundle appExtras, PersistableBundle launcherExtras, String dialogMessage) {
         throw new UnsupportedOperationException();
     }
 

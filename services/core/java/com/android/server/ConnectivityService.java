@@ -1386,6 +1386,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    private void restrictBackgroundRequestForCaller(NetworkCapabilities nc) {
+        if (!mPermissionMonitor.hasUseBackgroundNetworksPermission(Binder.getCallingUid())) {
+            nc.addCapability(NET_CAPABILITY_FOREGROUND);
+        }
+    }
+
     @Override
     public NetworkState[] getAllNetworkState() {
         // Require internal since we're handing out IMSI details
@@ -4411,15 +4417,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         NetworkCapabilities nc = new NetworkCapabilities(networkCapabilities);
         restrictRequestUidsForCaller(nc);
-        if (!ConnectivityManager.checkChangePermission(mContext)) {
-            // Apps without the CHANGE_NETWORK_STATE permission can't use background networks, so
-            // make all their listens include NET_CAPABILITY_FOREGROUND. That way, they will get
-            // onLost and onAvailable callbacks when networks move in and out of the background.
-            // There is no need to do this for requests because an app without CHANGE_NETWORK_STATE
-            // can't request networks.
-            nc.addCapability(NET_CAPABILITY_FOREGROUND);
-        }
-        ensureValidNetworkSpecifier(networkCapabilities);
+        // Apps without the CHANGE_NETWORK_STATE permission can't use background networks, so
+        // make all their listens include NET_CAPABILITY_FOREGROUND. That way, they will get
+        // onLost and onAvailable callbacks when networks move in and out of the background.
+        // There is no need to do this for requests because an app without CHANGE_NETWORK_STATE
+        // can't request networks.
+        restrictBackgroundRequestForCaller(nc);
+        ensureValidNetworkSpecifier(nc);
 
         NetworkRequest networkRequest = new NetworkRequest(nc, TYPE_NONE, nextNetworkRequestId(),
                 NetworkRequest.Type.LISTEN);
@@ -4577,17 +4581,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return nai.network.netId;
     }
 
-    private void handleRegisterNetworkAgent(NetworkAgentInfo na) {
+    private void handleRegisterNetworkAgent(NetworkAgentInfo nai) {
         if (VDBG) log("Got NetworkAgent Messenger");
-        mNetworkAgentInfos.put(na.messenger, na);
+        mNetworkAgentInfos.put(nai.messenger, nai);
         synchronized (mNetworkForNetId) {
-            mNetworkForNetId.put(na.network.netId, na);
+            mNetworkForNetId.put(nai.network.netId, nai);
         }
-        na.asyncChannel.connect(mContext, mTrackerHandler, na.messenger);
-        NetworkInfo networkInfo = na.networkInfo;
-        na.networkInfo = null;
-        updateNetworkInfo(na, networkInfo);
-        updateUids(na, null, na.networkCapabilities);
+        nai.asyncChannel.connect(mContext, mTrackerHandler, nai.messenger);
+        NetworkInfo networkInfo = nai.networkInfo;
+        nai.networkInfo = null;
+        updateNetworkInfo(nai, networkInfo);
+        updateUids(nai, null, nai.networkCapabilities);
     }
 
     private void updateLinkProperties(NetworkAgentInfo networkAgent, LinkProperties oldLp) {

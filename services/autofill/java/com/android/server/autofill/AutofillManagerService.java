@@ -80,6 +80,7 @@ import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.autofill.AutofillManagerService.PackageCompatState;
 import com.android.server.autofill.ui.AutoFillUI;
 
 import java.io.FileDescriptor;
@@ -107,10 +108,6 @@ public final class AutofillManagerService extends SystemService {
     private static final char COMPAT_PACKAGE_URL_IDS_DELIMITER = ',';
     private static final char COMPAT_PACKAGE_URL_IDS_BLOCK_BEGIN = '[';
     private static final char COMPAT_PACKAGE_URL_IDS_BLOCK_END = ']';
-
-    // TODO(b/74445943): temporary work around until P Development Preview 3 is branched
-    private static final List<String> DEFAULT_BUTTONS = Arrays.asList("url_bar",
-            "location_bar_edit_text");
 
     private final Context mContext;
     private final AutoFillUI mUi;
@@ -575,7 +572,7 @@ public final class AutofillManagerService extends SystemService {
     private String getWhitelistedCompatModePackagesFromSettings() {
         return Settings.Global.getString(
                 mContext.getContentResolver(),
-                Settings.Global.AUTOFILL_COMPAT_ALLOWED_PACKAGES);
+                Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES);
     }
 
     @Nullable
@@ -600,7 +597,7 @@ public final class AutofillManagerService extends SystemService {
             final List<String> urlBarIds;
             if (urlBlockIndex == -1) {
                 packageName = packageBlock;
-                urlBarIds = DEFAULT_BUTTONS; // TODO(b/74445943): back to null
+                urlBarIds = null;
             } else {
                 if (packageBlock.charAt(packageBlock.length() - 1)
                         != COMPAT_PACKAGE_URL_IDS_BLOCK_END) {
@@ -655,7 +652,7 @@ public final class AutofillManagerService extends SystemService {
     /**
      * Compatibility mode metadata per package.
      */
-    private static final class PackageCompatState {
+    static final class PackageCompatState {
         private final long maxVersionCode;
         private final String[] urlBarResourceIds;
 
@@ -666,8 +663,8 @@ public final class AutofillManagerService extends SystemService {
 
         @Override
         public String toString() {
-            return "PackageCompatState: [maxVersionCode=" + maxVersionCode
-                    + ", urlBarResourceIds=" + Arrays.toString(urlBarResourceIds) + "]";
+            return "maxVersionCode=" + maxVersionCode
+                    + ", urlBarResourceIds=" + Arrays.toString(urlBarResourceIds);
         }
     }
 
@@ -753,6 +750,25 @@ public final class AutofillManagerService extends SystemService {
                 if (mUserSpecs != null) {
                     mUserSpecs.clear();
                     mUserSpecs = null;
+                }
+            }
+        }
+
+        private void dump(String prefix, PrintWriter pw) {
+             if (mUserSpecs == null) {
+                 pw.println("N/A");
+                 return;
+             }
+             pw.println();
+             final String prefix2 = prefix + "  ";
+             for (int i = 0; i < mUserSpecs.size(); i++) {
+                 final int user = mUserSpecs.keyAt(i);
+                 pw.print(prefix); pw.print("User: "); pw.println(user);
+                 final ArrayMap<String,PackageCompatState> perUser = mUserSpecs.get(i);
+                 for (int j = 0; j < perUser.size(); j++) {
+                     final String packageName = perUser.keyAt(j);
+                     final PackageCompatState state = perUser.valueAt(j);
+                     pw.print(prefix2); pw.print(packageName); pw.print(": "); pw.println(state);
                 }
             }
         }
@@ -1121,6 +1137,7 @@ public final class AutofillManagerService extends SystemService {
 
             boolean oldDebug = sDebug;
             final String prefix = "  ";
+            final String prefix2 = "    ";
             try {
                 synchronized (mLock) {
                     oldDebug = sDebug;
@@ -1145,8 +1162,8 @@ public final class AutofillManagerService extends SystemService {
                     }
                     mUi.dump(pw);
                     pw.print("Autofill Compat State: ");
-                    pw.println(mAutofillCompatState.mUserSpecs);
-                    pw.print(prefix); pw.print("from settings: ");
+                    mAutofillCompatState.dump(prefix2, pw);
+                    pw.print(prefix2); pw.print("from settings: ");
                     pw.println(getWhitelistedCompatModePackagesFromSettings());
                 }
                 if (showHistory) {
@@ -1179,7 +1196,7 @@ public final class AutofillManagerService extends SystemService {
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.USER_SETUP_COMPLETE), false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Global.getUriFor(
-                    Settings.Global.AUTOFILL_COMPAT_ALLOWED_PACKAGES), false, this,
+                    Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES), false, this,
                     UserHandle.USER_ALL);
         }
 

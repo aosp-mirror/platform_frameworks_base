@@ -19,11 +19,15 @@ package com.android.systemui.statusbar.policy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
@@ -32,6 +36,9 @@ import android.content.Intent;
 import android.content.pm.StringParceledListSlice;
 import android.content.pm.UserInfo;
 import android.net.ConnectivityManager;
+import android.net.ConnectivityManager.NetworkCallback;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
 import android.os.UserManager;
 import android.security.IKeyChainService;
 import android.support.test.runner.AndroidJUnit4;
@@ -61,6 +68,7 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
     private final UserManager mUserManager = mock(UserManager.class);
     private SecurityControllerImpl mSecurityController;
     private CountDownLatch mStateChangedLatch;
+    private ConnectivityManager mConnectivityManager = mock(ConnectivityManager.class);
 
     // implementing SecurityControllerCallback
     @Override
@@ -72,7 +80,7 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
     public void setUp() throws Exception {
         mContext.addMockSystemService(Context.DEVICE_POLICY_SERVICE, mDevicePolicyManager);
         mContext.addMockSystemService(Context.USER_SERVICE, mUserManager);
-        mContext.addMockSystemService(Context.CONNECTIVITY_SERVICE, mock(ConnectivityManager.class));
+        mContext.addMockSystemService(Context.CONNECTIVITY_SERVICE, mConnectivityManager);
 
         Intent intent = new Intent(IKeyChainService.class.getName());
         ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
@@ -175,5 +183,13 @@ public class SecurityControllerTest extends SysuiTestCase implements SecurityCon
         // The retry takes 30s
         //assertTrue(mStateChangedLatch.await(31, TimeUnit.SECONDS));
         //assertFalse(mSecurityController.hasCACertInCurrentUser());
+    }
+
+    @Test
+    public void testNetworkRequest() {
+        verify(mConnectivityManager, times(1)).registerNetworkCallback(argThat(
+                (NetworkRequest request) -> request.networkCapabilities.getUids() == null
+                        && request.networkCapabilities.getCapabilities().length == 0
+                ), any(NetworkCallback.class));
     }
 }

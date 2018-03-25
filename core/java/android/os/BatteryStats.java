@@ -7138,13 +7138,20 @@ public abstract class BatteryStats implements Parcelable {
 
                 for (int isvc = serviceStats.size() - 1; isvc >= 0; --isvc) {
                     final BatteryStats.Uid.Pkg.Serv ss = serviceStats.valueAt(isvc);
+
+                    final long startTimeMs = roundUsToMs(ss.getStartTime(batteryUptimeUs, which));
+                    final int starts = ss.getStarts(which);
+                    final int launches = ss.getLaunches(which);
+                    if (startTimeMs == 0 && starts == 0 && launches == 0) {
+                        continue;
+                    }
+
                     long sToken = proto.start(UidProto.Package.SERVICES);
 
                     proto.write(UidProto.Package.Service.NAME, serviceStats.keyAt(isvc));
-                    proto.write(UidProto.Package.Service.START_DURATION_MS,
-                            roundUsToMs(ss.getStartTime(batteryUptimeUs, which)));
-                    proto.write(UidProto.Package.Service.START_COUNT, ss.getStarts(which));
-                    proto.write(UidProto.Package.Service.LAUNCH_COUNT, ss.getLaunches(which));
+                    proto.write(UidProto.Package.Service.START_DURATION_MS, startTimeMs);
+                    proto.write(UidProto.Package.Service.START_COUNT, starts);
+                    proto.write(UidProto.Package.Service.LAUNCH_COUNT, launches);
 
                     proto.end(sToken);
                 }

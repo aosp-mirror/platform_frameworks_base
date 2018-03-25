@@ -7762,6 +7762,21 @@ public final class Settings {
         public static final String BLUETOOTH_ON_WHILE_DRIVING = "bluetooth_on_while_driving";
 
         /**
+         * What behavior should be invoked when the volume hush gesture is triggered
+         * One of VOLUME_HUSH_OFF, VOLUME_HUSH_VIBRATE, VOLUME_HUSH_MUTE.
+         *
+         * @hide
+         */
+        public static final String VOLUME_HUSH_GESTURE = "volume_hush_gesture";
+
+        /** @hide */ public static final int VOLUME_HUSH_OFF = 0;
+        /** @hide */ public static final int VOLUME_HUSH_VIBRATE = 1;
+        /** @hide */ public static final int VOLUME_HUSH_MUTE = 2;
+
+        private static final Validator VOLUME_HUSH_GESTURE_VALIDATOR =
+                NON_NEGATIVE_INTEGER_VALIDATOR;
+
+        /**
          * The number of times (integer) the user has manually enabled battery saver.
          * @hide
          */
@@ -7875,6 +7890,7 @@ public final class Settings {
             SCREENSAVER_ACTIVATE_ON_SLEEP,
             LOCKDOWN_IN_POWER_MENU,
             SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
+            VOLUME_HUSH_GESTURE
         };
 
         /**
@@ -8011,6 +8027,7 @@ public final class Settings {
             VALIDATORS.put(LOCKDOWN_IN_POWER_MENU, LOCKDOWN_IN_POWER_MENU_VALIDATOR);
             VALIDATORS.put(SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
                     SHOW_FIRST_CRASH_DIALOG_DEV_OPTION_VALIDATOR);
+            VALIDATORS.put(VOLUME_HUSH_GESTURE, VOLUME_HUSH_GESTURE_VALIDATOR);
             VALIDATORS.put(ENABLED_NOTIFICATION_LISTENERS,
                     ENABLED_NOTIFICATION_LISTENERS_VALIDATOR); //legacy restore setting
             VALIDATORS.put(ENABLED_NOTIFICATION_ASSISTANT,
@@ -9649,6 +9666,21 @@ public final class Settings {
          */
         public static final String WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED =
                 "wifi_connected_mac_randomization_enabled";
+
+        /**
+         * Parameters to adjust the performance of framework wifi scoring methods.
+         * <p>
+         * Encoded as a comma-separated key=value list, for example:
+         *   "rssi5=-80:-77:-70:-57,rssi2=-83:-80:-73:-60,horizon=15"
+         * This is intended for experimenting with new parameter values,
+         * and is normally unset or empty. The example does not include all
+         * parameters that may be honored.
+         * Default values are provided by code or device configurations.
+         * Errors in the parameters will cause the entire setting to be ignored.
+         * @hide
+         */
+        public static final String WIFI_SCORE_PARAMS =
+                "wifi_score_params";
 
        /**
         * The maximum number of times we will retry a connection to an access
@@ -11610,8 +11642,8 @@ public final class Settings {
          */
         @SystemApi
         @TestApi
-        public static final String AUTOFILL_COMPAT_ALLOWED_PACKAGES =
-                "autofill_compat_allowed_packages";
+        public static final String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES =
+                "autofill_compat_mode_allowed_packages";
 
         /**
          * Exemptions to the hidden API blacklist.
@@ -12395,6 +12427,7 @@ public final class Settings {
          *
          * <pre>
          * enabled                         (boolean)
+         * requires_targeting_p            (boolean)
          * max_squeeze_remeasure_attempts  (int)
          * </pre>
          * @see com.android.systemui.statusbar.policy.SmartReplyConstants
@@ -12450,6 +12483,16 @@ public final class Settings {
          */
         public static final String BACKUP_AGENT_TIMEOUT_PARAMETERS =
                 "backup_agent_timeout_parameters";
+
+        /**
+         * Whether we have enabled swapping on this device. For Wear, default is
+         * enabled.
+         *
+         * The value is "1" for enable, "0" for disable.
+         * @hide
+         */
+         public static final String SWAP_ENABLED = "swap_enabled";
+
     }
 
     /**

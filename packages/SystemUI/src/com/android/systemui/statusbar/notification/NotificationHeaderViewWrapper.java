@@ -122,24 +122,14 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mHeaderText = mView.findViewById(com.android.internal.R.id.header_text);
         mExpandButton = mView.findViewById(com.android.internal.R.id.expand_button);
         mWorkProfileImage = mView.findViewById(com.android.internal.R.id.profile_badge);
-        mColor = resolveColor(mExpandButton);
         mNotificationHeader = mView.findViewById(com.android.internal.R.id.notification_header);
         mNotificationHeader.setShowExpandButtonAtEnd(mShowExpandButtonAtEnd);
+        mColor = mNotificationHeader.getOriginalIconColor();
         getDozer().setColor(mColor);
     }
 
     private void addAppOpsOnClickListener(ExpandableNotificationRow row) {
         mNotificationHeader.setAppOpsOnClickListener(row.getAppOpsOnClickListener());
-    }
-
-    private int resolveColor(ImageView icon) {
-        if (icon != null && icon.getDrawable() != null) {
-            ColorFilter filter = icon.getDrawable().getColorFilter();
-            if (filter instanceof PorterDuffColorFilter) {
-                return ((PorterDuffColorFilter) filter).getColor();
-            }
-        }
-        return 0;
     }
 
     @Override

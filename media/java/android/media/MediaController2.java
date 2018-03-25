@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
+ * @hide
  * Allows an app to interact with an active {@link MediaSession2} or a
  * {@link MediaSessionService2} in any status. Media buttons and other commands can be sent to
  * the session.
@@ -366,8 +367,8 @@ public class MediaController2 implements AutoCloseable {
     MediaController2Provider createProvider(@NonNull Context context,
             @NonNull SessionToken2 token, @NonNull Executor executor,
             @NonNull ControllerCallback callback) {
-        return ApiLoader.getProvider(context)
-                .createMediaController2(context, this, token, executor, callback);
+        return ApiLoader.getProvider().createMediaController2(
+                context, this, token, executor, callback);
     }
 
     /**
@@ -735,8 +736,10 @@ public class MediaController2 implements AutoCloseable {
         return mProvider.getPlaylistMetadata_impl();
     }
 
+
     /**
-     * Inserts the media item to the playlist at position index.
+     * Adds the media item to the playlist at position index. Index equals or greater than
+     * the current playlist size will add the item at the end of the playlist.
      * <p>
      * This will not change the currently playing media item.
      * If index is less than or equal to the current index of the playlist,

@@ -344,6 +344,25 @@ public final class TextClassification implements Parcelable {
         }
     }
 
+    /**
+     * Triggers the specified intent.
+     *
+     * @throws IllegalArgumentException if context or intent is null
+     * @hide
+     */
+    public static void fireIntent(@NonNull final Context context, @NonNull final Intent intent) {
+        switch (getIntentType(intent, context)) {
+            case IntentType.ACTIVITY:
+                context.startActivity(intent);
+                return;
+            case IntentType.SERVICE:
+                context.startService(intent);
+                return;
+            default:
+                return;
+        }
+    }
+
     @IntentType
     private static int getIntentType(@NonNull Intent intent, @NonNull Context context) {
         Preconditions.checkArgument(context != null);

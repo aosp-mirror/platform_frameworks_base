@@ -38,12 +38,9 @@
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> gelditzen da; <xliff:g id="TIME">%s</xliff:g> inguru gelditzen dira, erabileraren arabera"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> gelditzen da; <xliff:g id="TIME">%s</xliff:g> inguru gelditzen dira"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> gelditzen da. Bateria-aurrezlea aktibatuta dago."</string>
-    <!-- no translation found for invalid_charger (2741987096648693172) -->
-    <skip />
-    <!-- no translation found for invalid_charger_title (2836102177577255404) -->
-    <skip />
-    <!-- no translation found for invalid_charger_text (6480624964117840005) -->
-    <skip />
+    <string name="invalid_charger" msgid="2741987096648693172">"Ezin da USB bidez kargatu. Erabili gailuaren kargagailua."</string>
+    <string name="invalid_charger_title" msgid="2836102177577255404">"Ezin da USB bidez kargatu"</string>
+    <string name="invalid_charger_text" msgid="6480624964117840005">"Erabili gailuaren kargagailua"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Ezarpenak"</string>
     <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Bateria-aurrezlea aktibatu nahi duzu?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Aktibatu"</string>
@@ -151,7 +148,6 @@
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Konektatuta."</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Konektatzen."</string>
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
-    <string name="data_connection_1x" msgid="396105635197711584">"1 X"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
     <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
     <string name="data_connection_3_5g" msgid="5218328297191657602">"3.5G"</string>
@@ -213,8 +209,7 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Hegaldi modua aktibatuta dago."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Hegaldi modua desaktibatu egin da."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Hegaldi modua aktibatu egin da."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_priority_on (5836205286254617194) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"Aktibatuta dago \"Ez molestatu\"."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"\"Ez molestatu\" aukera aktibatuta dago, isiltasun osoa."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"\"Ez molestatu\" aukera aktibatuta dago, alarmak soilik."</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Ez molestatu."</string>
@@ -280,7 +275,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"Postreen kutxa"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Pantaila-babeslea"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
-    <string name="quick_settings_header_onboarding_text" msgid="7872508260264044734">"Eduki sakatuta ikonoak aukera gehiago ikusteko"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (8030309023792936283) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Ez molestatu"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Lehentasunezkoak soilik"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Alarmak soilik"</string>
@@ -439,8 +435,7 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aplikazioak pantailan bistaratzen den guztia grabatuko du."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Ez erakutsi berriro"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Garbitu guztiak"</string>
-    <!-- no translation found for dnd_suppressing_shade_text (7986451830430707907) -->
-    <skip />
+    <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"\"Ez molestatu\" modua jakinarazpenak ezkutatzen ari da"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Hasi"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Ez dago jakinarazpenik"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Baliteke profila kontrolatuta egotea"</string>
@@ -546,8 +541,6 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Sakatu hau dardara ezartzeko."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Sakatu hau audioa desaktibatzeko."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s gailuaren bolumena kontrolatzeko aukerak"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Dar-dar egingo du deiak eta jakinarazpenak jasotzean"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Ez da joko tonurik deiak eta jakinarazpenak jasotzean"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"Tonua joko da deiak eta jakinarazpenak jasotzean"</string>
     <string name="output_title" msgid="5355078100792942802">"Multimedia-irteera"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Telefono-deiaren irteera"</string>
@@ -732,8 +725,9 @@
     <string name="right_keycode" msgid="708447961000848163">"Eskuineko teklaren kodea"</string>
     <string name="left_icon" msgid="3096287125959387541">"Ezkerreko ikonoa"</string>
     <string name="right_icon" msgid="3952104823293824311">"Eskuineko ikonoa"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Arrastatu lauzak hemen gehitzeko"</string>
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"Eduki sakatuta eta arrastatu lauzak gehitzeko"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Kentzeko, arrastatu hona"</string>
+    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Gutxienez sei lauza behar dituzu"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Editatu"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Ordua"</string>
   <string-array name="clock_options">
@@ -837,7 +831,9 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Ordeztu"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Aplikazioak exekutatzen ari dira atzeko planoan"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Sakatu bateria eta datuen erabilerari buruzko xehetasunak ikusteko"</string>
-    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Datu-konexioa desaktibatu nahi duzu?"</string>
+    <string name="mobile_data_disable_title" msgid="1068272097382942231">"Datu-konexioa desaktibatu nahi duzu?"</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"<xliff:g id="CARRIER">%s</xliff:g> erabilita ezingo dituzu erabili datuak edo Internet. Wi-Fi sare batera soilik konektatu ahal izango duzu Internetera."</string>
+    <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"Uneko operadorea"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Aplikazio bat baimen-eskaera oztopatzen ari denez, ezarpenek ezin dute egiaztatu erantzuna."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g> aplikazioari <xliff:g id="APP_2">%2$s</xliff:g> aplikazioaren zatiak erakustea baimendu nahi diozu?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- <xliff:g id="APP">%1$s</xliff:g> aplikazioaren informazioa irakur dezake."</string>

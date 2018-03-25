@@ -20,6 +20,7 @@ package android.app {
 
   public class ActivityManager {
     method public void addOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener, int);
+    method public void alwaysShowUnsupportedCompileSdkWarning(android.content.ComponentName);
     method public int getPackageImportance(java.lang.String);
     method public long getTotalRam();
     method public int getUidImportance(int);
@@ -79,6 +80,7 @@ package android.app {
     field public static final java.lang.String OPSTR_GET_ACCOUNTS = "android:get_accounts";
     field public static final java.lang.String OPSTR_GPS = "android:gps";
     field public static final java.lang.String OPSTR_INSTANT_APP_START_FOREGROUND = "android:instant_app_start_foreground";
+    field public static final java.lang.String OPSTR_MANAGE_IPSEC_TUNNELS = "android:manage_ipsec_tunnels";
     field public static final java.lang.String OPSTR_MUTE_MICROPHONE = "android:mute_microphone";
     field public static final java.lang.String OPSTR_NEIGHBORING_CELLS = "android:neighboring_cells";
     field public static final java.lang.String OPSTR_PLAY_AUDIO = "android:play_audio";
@@ -294,6 +296,14 @@ package android.database.sqlite {
 
 }
 
+package android.graphics {
+
+  public final class ImageDecoder implements java.lang.AutoCloseable {
+    method public static android.graphics.ImageDecoder.Source createSource(android.content.res.Resources, java.io.InputStream, int);
+  }
+
+}
+
 package android.graphics.drawable {
 
   public class AdaptiveIconDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
@@ -407,20 +417,20 @@ package android.location {
     ctor public GnssMeasurement();
     method public void reset();
     method public void resetAutomaticGainControlLevel();
-    method public void resetCarrierCycles();
+    method public deprecated void resetCarrierCycles();
     method public void resetCarrierFrequencyHz();
-    method public void resetCarrierPhase();
-    method public void resetCarrierPhaseUncertainty();
+    method public deprecated void resetCarrierPhase();
+    method public deprecated void resetCarrierPhaseUncertainty();
     method public void resetSnrInDb();
     method public void set(android.location.GnssMeasurement);
     method public void setAccumulatedDeltaRangeMeters(double);
     method public void setAccumulatedDeltaRangeState(int);
     method public void setAccumulatedDeltaRangeUncertaintyMeters(double);
     method public void setAutomaticGainControlLevelInDb(double);
-    method public void setCarrierCycles(long);
+    method public deprecated void setCarrierCycles(long);
     method public void setCarrierFrequencyHz(float);
-    method public void setCarrierPhase(double);
-    method public void setCarrierPhaseUncertainty(double);
+    method public deprecated void setCarrierPhase(double);
+    method public deprecated void setCarrierPhaseUncertainty(double);
     method public void setCn0DbHz(double);
     method public void setConstellationType(int);
     method public void setMultipathIndicator(int);
@@ -432,6 +442,7 @@ package android.location {
     method public void setState(int);
     method public void setSvid(int);
     method public void setTimeOffsetNanos(double);
+    field public static final int ADR_STATE_ALL = 31; // 0x1f
   }
 
   public final class GnssMeasurementsEvent implements android.os.Parcelable {
@@ -570,7 +581,7 @@ package android.provider {
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
-    field public static final java.lang.String AUTOFILL_COMPAT_ALLOWED_PACKAGES = "autofill_compat_allowed_packages";
+    field public static final java.lang.String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES = "autofill_compat_mode_allowed_packages";
     field public static final java.lang.String HIDDEN_API_BLACKLIST_EXEMPTIONS = "hidden_api_blacklist_exemptions";
     field public static final java.lang.String LOCATION_GLOBAL_KILL_SWITCH = "location_global_kill_switch";
     field public static final java.lang.String LOW_POWER_MODE = "low_power";
@@ -792,18 +803,20 @@ package android.telephony.mbms.vendor {
 
   public class MbmsDownloadServiceBase extends android.os.Binder {
     ctor public MbmsDownloadServiceBase();
+    method public int addProgressListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadProgressListener) throws android.os.RemoteException;
+    method public int addStatusListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStatusListener) throws android.os.RemoteException;
     method public int cancelDownload(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
     method public void dispose(int) throws android.os.RemoteException;
     method public int download(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
     method public int initialize(int, android.telephony.mbms.MbmsDownloadSessionCallback) throws android.os.RemoteException;
     method public java.util.List<android.telephony.mbms.DownloadRequest> listPendingDownloads(int) throws android.os.RemoteException;
     method public void onAppCallbackDied(int, int);
-    method public int registerStateCallback(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStateCallback) throws android.os.RemoteException;
+    method public int removeProgressListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadProgressListener) throws android.os.RemoteException;
+    method public int removeStatusListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStatusListener) throws android.os.RemoteException;
     method public int requestDownloadState(android.telephony.mbms.DownloadRequest, android.telephony.mbms.FileInfo) throws android.os.RemoteException;
     method public int requestUpdateFileServices(int, java.util.List<java.lang.String>) throws android.os.RemoteException;
     method public int resetDownloadKnowledge(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
     method public int setTempFileRootDirectory(int, java.lang.String) throws android.os.RemoteException;
-    method public int unregisterStateCallback(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStateCallback) throws android.os.RemoteException;
   }
 
   public class MbmsStreamingServiceBase extends android.os.Binder {
@@ -1056,6 +1069,7 @@ package android.view {
 
   public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
     method public android.view.View getTooltipView();
+    method public static boolean isDefaultFocusHighlightEnabled();
     method public boolean isDefaultFocusHighlightNeeded(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);
     method public boolean restoreFocusInCluster(int);
     method public boolean restoreFocusNotInCluster();
