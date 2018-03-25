@@ -3359,19 +3359,22 @@
     <skip />
 
     <!-- Notification title when external media is being checked [CHAR LIMIT=30] -->
-    <string name="ext_media_checking_notification_title">Preparing <xliff:g id="name" example="SD card">%s</xliff:g></string>
+    <string name="ext_media_checking_notification_title">Checking <xliff:g id="name" example="SD card">%s</xliff:g>\u2026</string>
     <!-- Notification body when external media is being checked [CHAR LIMIT=NONE] -->
-    <string name="ext_media_checking_notification_message">Checking for errors</string>
+    <string name="ext_media_checking_notification_message">Reviewing current content</string>
 
+    <!-- Notification body when new external media is detected [CHAR LIMIT=30] -->
+    <string name="ext_media_new_notification_title">New <xliff:g id="name" example="SD card">%s</xliff:g></string>
     <!-- Notification body when new external media is detected [CHAR LIMIT=NONE] -->
-    <string name="ext_media_new_notification_message">New <xliff:g id="name" example="SD card">%s</xliff:g> detected</string>
+    <string name="ext_media_new_notification_message">Tap to set up</string>
+
     <!-- Notification body when external media is ready for use [CHAR LIMIT=NONE] -->
     <string name="ext_media_ready_notification_message">For transferring photos and media</string>
 
     <!-- Notification title when external media is unmountable (corrupt) [CHAR LIMIT=30] -->
-    <string name="ext_media_unmountable_notification_title">Corrupted <xliff:g id="name" example="SD card">%s</xliff:g></string>
+    <string name="ext_media_unmountable_notification_title">Issue with <xliff:g id="name" example="SD card">%s</xliff:g></string>
     <!-- Notification body when external media is unmountable (corrupt) [CHAR LIMIT=NONE] -->
-    <string name="ext_media_unmountable_notification_message"><xliff:g id="name" example="SD card">%s</xliff:g> is corrupt. Tap to fix.</string>
+    <string name="ext_media_unmountable_notification_message">Tap to fix</string>
     <!-- TV-specifiv notification body when external media is unmountable (corrupt) [CHAR LIMIT=NONE] -->
     <string name="ext_media_unmountable_notification_message" product="tv"><xliff:g id="name" example="SD card">%s</xliff:g> is corrupt. Select to fix.</string>
 
@@ -3385,17 +3388,17 @@
     <!-- Notification title when external media is unsafely removed [CHAR LIMIT=30] -->
     <string name="ext_media_badremoval_notification_title"><xliff:g id="name" example="SD card">%s</xliff:g> unexpectedly removed</string>
     <!-- Notification body when external media is unsafely removed [CHAR LIMIT=NONE] -->
-    <string name="ext_media_badremoval_notification_message">Unmount <xliff:g id="name" example="SD card">%s</xliff:g> before removing to avoid data loss</string>
+    <string name="ext_media_badremoval_notification_message">Eject media before removing to avoid losing content</string>
 
     <!-- Notification title when external media is missing [CHAR LIMIT=30] -->
-    <string name="ext_media_nomedia_notification_title">Removed <xliff:g id="name" example="SD card">%s</xliff:g></string>
+    <string name="ext_media_nomedia_notification_title"><xliff:g id="name" example="SD card">%s</xliff:g> removed</string>
     <!-- Notification body when external media is missing [CHAR LIMIT=NONE] -->
-    <string name="ext_media_nomedia_notification_message"><xliff:g id="name" example="SD card">%s</xliff:g> removed; insert a new one</string>
+    <string name="ext_media_nomedia_notification_message">Some functionality may not work properly. Insert new storage.</string>
 
     <!-- Notification title when external media is unmounting [CHAR LIMIT=30] -->
-    <string name="ext_media_unmounting_notification_title">Still ejecting <xliff:g id="name" example="SD card">%s</xliff:g>\u2026</string>
+    <string name="ext_media_unmounting_notification_title">Ejecting <xliff:g id="name" example="SD card">%s</xliff:g></string>
     <!-- Notification body when external media is unmounting [CHAR LIMIT=NONE] -->
-    <string name="ext_media_unmounting_notification_message">Don\'t remove</string>
+    <string name="ext_media_unmounting_notification_message">Don\u2019t remove</string>
 
     <!-- Notification action to setup external media [CHAR LIMIT=20] -->
     <string name="ext_media_init_action">Set up</string>
@@ -3407,7 +3410,7 @@
     <!-- Notification title when external media is missing [CHAR LIMIT=30] -->
     <string name="ext_media_missing_title"><xliff:g id="name" example="SD card">%s</xliff:g> missing</string>
     <!-- Notification body when external media is missing [CHAR LIMIT=30] -->
-    <string name="ext_media_missing_message">Reinsert this device</string>
+    <string name="ext_media_missing_message">Insert device again</string>
 
     <!-- Notification title when moving an application to external storage [CHAR LIMIT=30] -->
     <string name="ext_media_move_specific_title">Moving <xliff:g id="name" example="Calculator">%s</xliff:g></string>
@@ -3415,14 +3418,14 @@
     <string name="ext_media_move_title">Moving data</string>
 
     <!-- Notification title when moving data to external storage [CHAR LIMIT=32] -->
-    <string name="ext_media_move_success_title">Move complete</string>
+    <string name="ext_media_move_success_title">Content transfer is done</string>
     <!-- Notification title when moving data to external storage [CHAR LIMIT=64] -->
-    <string name="ext_media_move_success_message">Data moved to <xliff:g id="name" example="SD card">%s</xliff:g></string>
+    <string name="ext_media_move_success_message">Content moved to <xliff:g id="name" example="SD card">%s</xliff:g></string>
 
     <!-- Notification title when moving data to external storage failed [CHAR LIMIT=32] -->
-    <string name="ext_media_move_failure_title">Couldn\'t move data</string>
+    <string name="ext_media_move_failure_title">Couldn\u2019t move content</string>
     <!-- Notification title when moving data to external storage failed [CHAR LIMIT=64] -->
-    <string name="ext_media_move_failure_message">Data left at original location</string>
+    <string name="ext_media_move_failure_message">Try moving content again</string>
 
     <!-- Short summary of storage media status when removed [CHAR LIMIT=32] -->
     <string name="ext_media_status_removed">Removed</string>
