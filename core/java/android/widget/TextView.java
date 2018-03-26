@@ -3269,14 +3269,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Updates the top padding of the TextView so that {@code firstBaselineToTopHeight} is
-     * equal to the distance between the firt text baseline and the top of this TextView.
+     * the distance between the top of the TextView and first line's baseline.
+     * <p>
+     * <img src="{@docRoot}reference/android/images/text/widget/first_last_baseline.png" />
+     * <figcaption>First and last baseline metrics for a TextView.</figcaption>
+     *
      * <strong>Note</strong> that if {@code FontMetrics.top} or {@code FontMetrics.ascent} was
      * already greater than {@code firstBaselineToTopHeight}, the top padding is not updated.
+     * Moreover since this function sets the top padding, if the height of the TextView is less than
+     * the sum of top padding, line height and bottom padding, top of the line will be pushed
+     * down and bottom will be clipped.
      *
      * @param firstBaselineToTopHeight distance between first baseline to top of the container
      *      in pixels
      *
      * @see #getFirstBaselineToTopHeight()
+     * @see #setLastBaselineToBottomHeight(int)
      * @see #setPadding(int, int, int, int)
      * @see #setPaddingRelative(int, int, int, int)
      *
@@ -3304,14 +3312,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Updates the bottom padding of the TextView so that {@code lastBaselineToBottomHeight} is
-     * equal to the distance between the last text baseline and the bottom of this TextView.
+     * the distance between the bottom of the TextView and the last line's baseline.
+     * <p>
+     * <img src="{@docRoot}reference/android/images/text/widget/first_last_baseline.png" />
+     * <figcaption>First and last baseline metrics for a TextView.</figcaption>
+     *
      * <strong>Note</strong> that if {@code FontMetrics.bottom} or {@code FontMetrics.descent} was
      * already greater than {@code lastBaselineToBottomHeight}, the bottom padding is not updated.
+     * Moreover since this function sets the bottom padding, if the height of the TextView is less
+     * than the sum of top padding, line height and bottom padding, bottom of the text will be
+     * clipped.
      *
      * @param lastBaselineToBottomHeight distance between last baseline to bottom of the container
      *      in pixels
      *
      * @see #getLastBaselineToBottomHeight()
+     * @see #setFirstBaselineToTopHeight(int)
      * @see #setPadding(int, int, int, int)
      * @see #setPaddingRelative(int, int, int, int)
      *
@@ -5183,7 +5199,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @param lineHeight the line height in pixels
      *
      * @see #setLineSpacing(float, float)
-     * @see #getLineSpacing()
+     * @see #getLineSpacingExtra()
      *
      * @attr ref android.R.styleable#TextView_lineHeight
      */
