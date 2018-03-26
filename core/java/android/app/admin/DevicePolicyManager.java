@@ -1612,8 +1612,6 @@ public class DevicePolicyManager {
      *     <li>keyguard
      * </ul>
      *
-     * This is the default configuration for LockTask.
-     *
      * @see #setLockTaskFeatures(ComponentName, int)
      */
     public static final int LOCK_TASK_FEATURE_NONE = 0;
@@ -1631,7 +1629,10 @@ public class DevicePolicyManager {
     /**
      * Enable notifications during LockTask mode. This includes notification icons on the status
      * bar, heads-up notifications, and the expandable notification shade. Note that the Quick
-     * Settings panel will still be disabled.
+     * Settings panel remains disabled. This feature flag can only be used in combination with
+     * {@link #LOCK_TASK_FEATURE_HOME}. {@link #setLockTaskFeatures(ComponentName, int)}
+     * throws an {@link IllegalArgumentException} if this feature flag is defined without
+     * {@link #LOCK_TASK_FEATURE_HOME}.
      *
      * @see #setLockTaskFeatures(ComponentName, int)
      */
@@ -1663,6 +1664,9 @@ public class DevicePolicyManager {
      * Enable the global actions dialog during LockTask mode. This is the dialog that shows up when
      * the user long-presses the power button, for example. Note that the user may not be able to
      * power off the device if this flag is not set.
+     *
+     * <p>This flag is enabled by default until {@link #setLockTaskFeatures(ComponentName, int)} is
+     * called for the first time.
      *
      * @see #setLockTaskFeatures(ComponentName, int)
      */
@@ -7167,30 +7171,24 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets which system features to enable for LockTask mode.
-     * <p>
-     * Feature flags set through this method will only take effect for the duration when the device
-     * is in LockTask mode. If this method is not called, none of the features listed here will be
-     * enabled.
-     * <p>
-     * This function can only be called by the device owner, a profile owner of an affiliated user
-     * or profile, or the profile owner when no device owner is set. See {@link #isAffiliatedUser}.
-     * Any features set via this method will be cleared if the user becomes unaffiliated.
+     * Sets which system features are enabled when the device runs in lock task mode. This method
+     * doesn't affect the features when lock task mode is inactive. Any system features not included
+     * in {@code flags} are implicitly disabled when calling this method. By default, only
+     * {@link #LOCK_TASK_FEATURE_GLOBAL_ACTIONS} is enabled—all the other features are disabled. To
+     * disable the global actions dialog, call this method omitting
+     * {@link #LOCK_TASK_FEATURE_GLOBAL_ACTIONS}.
+     *
+     * <p>This method can only be called by the device owner, a profile owner of an affiliated
+     * user or profile, or the profile owner when no device owner is set. See
+     * {@link #isAffiliatedUser}.
+     * Any features set using this method are cleared if the user becomes unaffiliated.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param flags Bitfield of feature flags:
-     *              {@link #LOCK_TASK_FEATURE_NONE} (default),
-     *              {@link #LOCK_TASK_FEATURE_SYSTEM_INFO},
-     *              {@link #LOCK_TASK_FEATURE_NOTIFICATIONS},
-     *              {@link #LOCK_TASK_FEATURE_HOME},
-     *              {@link #LOCK_TASK_FEATURE_OVERVIEW},
-     *              {@link #LOCK_TASK_FEATURE_GLOBAL_ACTIONS},
-     *              {@link #LOCK_TASK_FEATURE_KEYGUARD}
+     * @param flags The system features enabled during lock task mode.
      * @throws SecurityException if {@code admin} is not the device owner, the profile owner of an
      * affiliated user or profile, or the profile owner when no device owner is set.
      * @see #isAffiliatedUser
-     * @throws SecurityException if {@code admin} is not the device owner or the profile owner.
-     */
+     **/
     public void setLockTaskFeatures(@NonNull ComponentName admin, @LockTaskFeature int flags) {
         throwIfParentInstance("setLockTaskFeatures");
         if (mService != null) {
