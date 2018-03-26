@@ -1036,6 +1036,18 @@ public final class AutofillManagerService extends SystemService {
         }
 
         @Override
+        public void setAutofillFailure(int sessionId, @NonNull List<AutofillId> ids, int userId) {
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    service.setAutofillFailureLocked(sessionId, getCallingUid(), ids);
+                } else if (sVerbose) {
+                    Slog.v(TAG, "setAutofillFailure(): no service for " + userId);
+                }
+            }
+        }
+
+        @Override
         public void finishSession(int sessionId, int userId) {
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
