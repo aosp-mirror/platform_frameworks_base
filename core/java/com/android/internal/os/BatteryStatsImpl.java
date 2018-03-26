@@ -5666,29 +5666,7 @@ public class BatteryStatsImpl extends BatteryStats {
             mBluetoothScanTimer.startRunningLocked(elapsedRealtime);
         }
         mBluetoothScanNesting++;
-
-        if (workChain != null) {
-            StatsLog.write(StatsLog.BLE_SCAN_STATE_CHANGED,
-                    workChain.getUids(), workChain.getTags(),
-                    StatsLog.BLE_SCAN_STATE_CHANGED__STATE__ON);
-            if (isUnoptimized) {
-                StatsLog.write(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED,
-                        workChain.getUids(), workChain.getTags(),
-                        StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED__STATE__ON);
-            }
-        } else {
-            StatsLog.write_non_chained(StatsLog.BLE_SCAN_STATE_CHANGED, uid, null,
-                    StatsLog.BLE_SCAN_STATE_CHANGED__STATE__ON);
-            if (isUnoptimized) {
-                StatsLog.write_non_chained(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED, uid, null,
-                        StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED__STATE__ON);
-            }
-        }
-
         getUidStatsLocked(uid).noteBluetoothScanStartedLocked(elapsedRealtime, isUnoptimized);
-        if (workChain != null) {
-            getUidStatsLocked(uid).addBluetoothWorkChain(workChain, isUnoptimized);
-        }
     }
 
     public void noteBluetoothScanStartedFromSourceLocked(WorkSource ws, boolean isUnoptimized) {
@@ -5718,29 +5696,7 @@ public class BatteryStatsImpl extends BatteryStats {
             addHistoryRecordLocked(elapsedRealtime, uptime);
             mBluetoothScanTimer.stopRunningLocked(elapsedRealtime);
         }
-
-        if (workChain != null) {
-            StatsLog.write(
-                    StatsLog.BLE_SCAN_STATE_CHANGED, workChain.getUids(), workChain.getTags(),
-                    StatsLog.BLE_SCAN_STATE_CHANGED__STATE__OFF);
-            if (isUnoptimized) {
-                StatsLog.write(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED,
-                        workChain.getUids(), workChain.getTags(),
-                        StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED__STATE__OFF);
-            }
-        } else {
-            StatsLog.write_non_chained(StatsLog.BLE_SCAN_STATE_CHANGED, uid, null,
-                    StatsLog.BLE_SCAN_STATE_CHANGED__STATE__OFF);
-            if (isUnoptimized) {
-                StatsLog.write_non_chained(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED, uid, null,
-                        StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED__STATE__OFF);
-            }
-        }
-
         getUidStatsLocked(uid).noteBluetoothScanStoppedLocked(elapsedRealtime, isUnoptimized);
-        if (workChain != null) {
-            getUidStatsLocked(uid).removeBluetoothWorkChain(workChain, isUnoptimized);
-        }
     }
 
     private int getAttributionUid(int uid, WorkChain workChain) {
@@ -5775,33 +5731,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states2));
             addHistoryRecordLocked(elapsedRealtime, uptime);
             mBluetoothScanTimer.stopAllRunningLocked(elapsedRealtime);
-
-
             for (int i=0; i<mUidStats.size(); i++) {
                 BatteryStatsImpl.Uid uid = mUidStats.valueAt(i);
                 uid.noteResetBluetoothScanLocked(elapsedRealtime);
-
-                List<WorkChain> allWorkChains = uid.getAllBluetoothWorkChains();
-                if (allWorkChains != null) {
-                    for (int j = 0; j < allWorkChains.size(); ++j) {
-                        StatsLog.write(StatsLog.BLE_SCAN_STATE_CHANGED,
-                                allWorkChains.get(j).getUids(),
-                                allWorkChains.get(j).getTags(),
-                                StatsLog.BLE_SCAN_STATE_CHANGED__STATE__OFF);
-                    }
-                    allWorkChains.clear();
-                }
-
-                List<WorkChain> unoptimizedWorkChains = uid.getUnoptimizedBluetoothWorkChains();
-                if (unoptimizedWorkChains != null) {
-                    for (int j = 0; j < unoptimizedWorkChains.size(); ++j) {
-                        StatsLog.write(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED,
-                                unoptimizedWorkChains.get(j).getUids(),
-                                unoptimizedWorkChains.get(j).getTags(),
-                                StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED__STATE__OFF);
-                    }
-                    unoptimizedWorkChains.clear();
-                }
             }
         }
     }
@@ -6873,15 +6805,6 @@ public class BatteryStatsImpl extends BatteryStats {
          */
         final SparseArray<Pid> mPids = new SparseArray<>();
 
-        /**
-         * The list of WorkChains associated with active bluetooth scans.
-         *
-         * NOTE: This is a hack and it only needs to exist because there's a "reset" API that is
-         * supposed to stop and log all WorkChains that were currently active.
-         */
-        ArrayList<WorkChain> mAllBluetoothChains = null;
-        ArrayList<WorkChain> mUnoptimizedBluetoothChains = null;
-
         public Uid(BatteryStatsImpl bsi, int uid) {
             mBsi = bsi;
             mUid = uid;
@@ -7409,40 +7332,6 @@ public class BatteryStatsImpl extends BatteryStats {
                 mBluetoothUnoptimizedScanTimer.stopRunningLocked(elapsedRealtimeMs);
             }
         }
-
-        public void addBluetoothWorkChain(WorkChain workChain, boolean isUnoptimized) {
-            if (mAllBluetoothChains == null) {
-                mAllBluetoothChains = new ArrayList<WorkChain>(4);
-            }
-
-            if (isUnoptimized && mUnoptimizedBluetoothChains == null) {
-                mUnoptimizedBluetoothChains = new ArrayList<WorkChain>(4);
-            }
-
-            mAllBluetoothChains.add(workChain);
-            if (isUnoptimized) {
-                mUnoptimizedBluetoothChains.add(workChain);
-            }
-        }
-
-        public void removeBluetoothWorkChain(WorkChain workChain, boolean isUnoptimized) {
-            if (mAllBluetoothChains != null) {
-                mAllBluetoothChains.remove(workChain);
-            }
-
-            if (isUnoptimized && mUnoptimizedBluetoothChains != null) {
-                mUnoptimizedBluetoothChains.remove(workChain);
-            }
-        }
-
-        public List<WorkChain> getAllBluetoothWorkChains() {
-            return mAllBluetoothChains;
-        }
-
-        public List<WorkChain> getUnoptimizedBluetoothWorkChains() {
-            return mUnoptimizedBluetoothChains;
-        }
-
 
         public void noteResetBluetoothScanLocked(long elapsedRealtimeMs) {
             if (mBluetoothScanTimer != null) {

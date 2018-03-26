@@ -49,7 +49,7 @@ message Atom {
     oneof pushed {
         // For StatsLog reasons, 1 is illegal and will not work. Must start at 2.
         BleScanStateChanged ble_scan_state_changed = 2;
-        BleUnoptimizedScanStateChanged ble_unoptimized_scan_state_changed = 3;
+        // TODO: 3 is blank, but need not be
         BleScanResultReceived ble_scan_result_received = 4;
         SensorStateChanged sensor_state_changed = 5;
         GpsScanStateChanged gps_scan_state_changed = 6;
@@ -247,31 +247,24 @@ message ProcessLifeCycleStateChanged {
  * Logged from:
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
+// TODO: Consider changing to tracking per-scanner-id (log from AppScanStats).
 message BleScanStateChanged {
     repeated AttributionNode attribution_node = 1;
 
     enum State {
         OFF = 0;
         ON = 1;
+        // RESET indicates all ble stopped. Used when it (re)starts (e.g. after it crashes).
+        RESET = 2;
     }
     optional State state = 2;
-}
 
-/**
- * Logs when an unoptimized ble scan state changes.
- *
- * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
- */
-// TODO: Consider changing to tracking per-scanner-id (log from AppScanStats).
-message BleUnoptimizedScanStateChanged {
-    repeated AttributionNode attribution_node = 1;
-
-    enum State {
-        OFF = 0;
-        ON = 1;
-    }
-    optional State state = 2;
+    // Does the scan have a filter.
+    optional bool is_filtered = 3;
+    // Whether the scan is a CALLBACK_TYPE_FIRST_MATCH scan. Called 'background' scan internally.
+    optional bool is_first_match = 4;
+    // Whether the scan set to piggy-back off the results of other scans (SCAN_MODE_OPPORTUNISTIC).
+    optional bool is_opportunistic = 5;
 }
 
 /**

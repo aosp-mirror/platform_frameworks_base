@@ -273,53 +273,6 @@ public class BatteryStatsBackgroundStatsTest extends TestCase {
     }
 
     @SmallTest
-    public void testAppBluetoothScan_workChainAccounting() throws Exception {
-        final MockClocks clocks = new MockClocks();MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
-        long curr = 0; // realtime in us
-
-        // On battery
-        curr = 1000 * (clocks.realtime = clocks.uptime = 100);
-        bi.updateTimeBasesLocked(true, Display.STATE_ON, curr, curr); // on battery
-
-        // App in foreground
-        bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
-
-        WorkSource ws = new WorkSource();
-        ws.createWorkChain().addNode(500, "foo");
-        ws.createWorkChain().addNode(500, "bar");
-
-        // Test start / stop and reset with isUnoptimized == false.
-        bi.noteBluetoothScanStartedFromSourceLocked(ws, false);
-        BatteryStatsImpl.Uid stats = (BatteryStatsImpl.Uid) bi.getUidStats().get(500);
-        assertEquals(ws.getWorkChains(), stats.getAllBluetoothWorkChains());
-        assertNull(stats.getUnoptimizedBluetoothWorkChains());
-
-        bi.noteBluetoothScanStoppedFromSourceLocked(ws, false);
-        assertTrue(stats.getAllBluetoothWorkChains().isEmpty());
-        assertNull(stats.getUnoptimizedBluetoothWorkChains());
-
-        bi.noteBluetoothScanStartedFromSourceLocked(ws, false);
-        bi.noteResetBluetoothScanLocked();
-        assertTrue(stats.getAllBluetoothWorkChains().isEmpty());
-        assertNull(stats.getUnoptimizedBluetoothWorkChains());
-
-        // Test start / stop  and reset with isUnoptimized == true.
-        bi.noteBluetoothScanStartedFromSourceLocked(ws, true);
-        stats = (BatteryStatsImpl.Uid) bi.getUidStats().get(500);
-        assertEquals(ws.getWorkChains(), stats.getAllBluetoothWorkChains());
-        assertEquals(ws.getWorkChains(), stats.getUnoptimizedBluetoothWorkChains());
-
-        bi.noteBluetoothScanStoppedFromSourceLocked(ws, true);
-        assertTrue(stats.getAllBluetoothWorkChains().isEmpty());
-        assertTrue(stats.getUnoptimizedBluetoothWorkChains().isEmpty());
-
-        bi.noteBluetoothScanStartedFromSourceLocked(ws, true);
-        bi.noteResetBluetoothScanLocked();
-        assertTrue(stats.getAllBluetoothWorkChains().isEmpty());
-        assertTrue(stats.getUnoptimizedBluetoothWorkChains().isEmpty());
-    }
-
-    @SmallTest
     public void testJob() throws Exception {
         final MockClocks clocks = new MockClocks();
         MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
