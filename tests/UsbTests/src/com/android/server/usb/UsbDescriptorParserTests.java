@@ -18,6 +18,7 @@ package com.android.server.usb;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import android.content.Context;
@@ -28,6 +29,7 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.android.server.usb.descriptors.UsbDescriptorParser;
+import com.android.server.usb.descriptors.UsbDeviceDescriptor;
 import com.google.common.io.ByteStreams;
 
 import java.io.InputStream;
@@ -61,14 +63,24 @@ public class UsbDescriptorParserTests {
         }
 
         // Testing same codepath as UsbHostManager.java:usbDeviceAdded
-        UsbDescriptorParser parser = new UsbDescriptorParser("test-usb-addr");
-        if (!parser.parseDescriptors(descriptors)) {
-            fail("failed to parse descriptors.");
-        }
+        UsbDescriptorParser parser = new UsbDescriptorParser("test-usb-addr", descriptors);
         return parser;
     }
 
-    // A Headset has a microphone and a speaker and is a headset.
+    /** A Headset has a microphone and a speaker and is a headset.
+     * Descriptors for this example show up on lsusb -v with:
+     *   bcdDevice           22.80
+     * and a UAC1 audio device with the following control interface:
+     *       bInterfaceClass         1 Audio
+     * ...
+     *       bDescriptorSubtype      2 (INPUT_TERMINAL)
+     *       bTerminalID             1
+     *       wTerminalType      0x0201 Microphone
+     * ...
+     *       bDescriptorSubtype      3 (OUTPUT_TERMINAL)
+     *       bTerminalID            15
+     *       wTerminalType      0x0302 Headphones
+     */
     @Test
     @SmallTest
     public void testHeadsetDescriptorParser() {
@@ -77,9 +89,24 @@ public class UsbDescriptorParserTests {
         assertTrue(parser.hasOutput());
         assertTrue(parser.isInputHeadset());
         assertTrue(parser.isOutputHeadset());
+
+        assertTrue(parser.hasAudioInterface());
+        assertTrue(parser.hasHIDInterface());
+        assertFalse(parser.hasStorageInterface());
+
+        assertEquals(parser.getDeviceDescriptor().getDeviceReleaseString(), "22.80");
     }
 
-    // Headphones have no microphones but are considered a headset.
+    /** Headphones have no microphones but are considered a headset.
+     * Descriptors for this example show up on lsusb -v with:
+     *   bcdDevice           22.80
+     * and a UAC1 audio device with the following control interface:
+     *       bInterfaceClass         1 Audio
+     * ...
+     *       bDescriptorSubtype      3 (OUTPUT_TERMINAL)
+     *       bTerminalID            15
+     *       wTerminalType      0x0302 Headphones
+     */
     @Test
     @SmallTest
     public void testHeadphoneDescriptorParser() {
@@ -88,9 +115,24 @@ public class UsbDescriptorParserTests {
         assertTrue(parser.hasOutput());
         assertFalse(parser.isInputHeadset());
         assertTrue(parser.isOutputHeadset());
+
+        assertTrue(parser.hasAudioInterface());
+        assertTrue(parser.hasHIDInterface());
+        assertFalse(parser.hasStorageInterface());
+
+        assertEquals(parser.getDeviceDescriptor().getDeviceReleaseString(), "22.80");
     }
 
-    // Line out has no microphones and aren't considered a headset.
+    /** Line out with no microphones aren't considered a headset.
+     * Descriptors for this example show up on lsusb -v with:
+     *     bcdDevice           22.80
+     * and the following UAC1 audio control interface
+     *  bInterfaceClass         1 Audio
+     *  ...
+     *   bDescriptorSubtype      3 (OUTPUT_TERMINAL)
+     *   bTerminalID            15
+     *   wTerminalType      0x0603 Line Connector
+     */
     @Test
     @SmallTest
     public void testLineoutDescriptorParser() {
@@ -99,9 +141,20 @@ public class UsbDescriptorParserTests {
         assertTrue(parser.hasOutput());
         assertFalse(parser.isInputHeadset());
         assertFalse(parser.isOutputHeadset());
+
+        assertTrue(parser.hasAudioInterface());
+        assertTrue(parser.hasHIDInterface());
+        assertFalse(parser.hasStorageInterface());
+
+        assertEquals(parser.getDeviceDescriptor().getDeviceReleaseString(), "22.80");
     }
 
-    // An HID-only device shouldn't be considered anything at all.
+    /** An HID-only device shouldn't be considered anything at all.
+    /* Descriptors show up on lsusb -v with:
+     *   bcdDevice           22.80
+     * and a single HID interface,
+     *   bInterfaceClass         3 Human Interface Device
+     */
     @Test
     @SmallTest
     public void testNothingDescriptorParser() {
@@ -110,6 +163,34 @@ public class UsbDescriptorParserTests {
         assertFalse(parser.hasOutput());
         assertFalse(parser.isInputHeadset());
         assertFalse(parser.isOutputHeadset());
+
+        assertFalse(parser.hasAudioInterface());
+        assertTrue(parser.hasHIDInterface());
+        assertFalse(parser.hasStorageInterface());
+
+        assertEquals(parser.getDeviceDescriptor().getDeviceReleaseString(), "22.80");
+    }
+
+    /** A USB mass-storage device.
+     * Shows up on lsusb -v with:
+     *    bcdDevice            2.08
+     * and a single interface descriptor,
+     *    bInterfaceClass         8 Mass Storage
+     */
+    @Test
+    @SmallTest
+    public void testMassStorageDescriptorParser() {
+        UsbDescriptorParser parser = loadParser(R.raw.usbdescriptors_massstorage);
+        assertFalse(parser.hasInput());
+        assertFalse(parser.hasOutput());
+        assertFalse(parser.isInputHeadset());
+        assertFalse(parser.isOutputHeadset());
+
+        assertFalse(parser.hasAudioInterface());
+        assertFalse(parser.hasHIDInterface());
+        assertTrue(parser.hasStorageInterface());
+
+        assertEquals(parser.getDeviceDescriptor().getDeviceReleaseString(), "2.08");
     }
 
 }
