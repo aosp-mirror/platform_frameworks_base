@@ -6140,4 +6140,16 @@ public abstract class PackageManager {
         throw new UnsupportedOperationException(
                 "getSystemTextClassifierPackageName not implemented in subclass");
     }
+
+    /**
+     * @return whether a given package's state is protected, e.g. package cannot be disabled,
+     *         suspended, hidden or force stopped.
+     *
+     * @hide
+     */
+    public boolean isPackageStateProtected(String packageName, int userId) {
+        throw new UnsupportedOperationException(
+            "isPackageStateProtected not implemented in subclass");
+    }
+
 }

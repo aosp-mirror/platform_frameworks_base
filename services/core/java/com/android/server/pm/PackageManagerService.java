@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import static android.Manifest.permission.DELETE_PACKAGES;
+import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.Manifest.permission.INSTALL_PACKAGES;
 import static android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS;
@@ -115,6 +116,7 @@ import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
@@ -24325,6 +24327,23 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         synchronized(mPackages) {
             return mSettings.getHarmfulAppWarningLPr(packageName, userId);
         }
+    }
+
+    @Override
+    public boolean isPackageStateProtected(@NonNull String packageName, @UserIdInt int userId) {
+        final int callingUid = Binder.getCallingUid();
+        final int callingAppId = UserHandle.getAppId(callingUid);
+
+        mPermissionManager.enforceCrossUserPermission(callingUid, userId,
+                false /*requireFullPermission*/, true /*checkShell*/, "isPackageStateProtected");
+
+        if (callingAppId != Process.SYSTEM_UID && callingAppId != Process.ROOT_UID
+                && checkUidPermission(MANAGE_DEVICE_ADMINS, callingUid) != PERMISSION_GRANTED) {
+            throw new SecurityException("Caller must have the "
+                    + MANAGE_DEVICE_ADMINS + " permission.");
+        }
+
+        return mProtectedPackages.isPackageStateProtected(userId, packageName);
     }
 }
 
