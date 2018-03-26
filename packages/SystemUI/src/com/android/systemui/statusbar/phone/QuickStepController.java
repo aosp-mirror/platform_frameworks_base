@@ -303,16 +303,18 @@ public class QuickStepController implements GestureHelper {
 
     @Override
     public void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        final int width = right - left;
-        final int height = bottom - top;
+        final int width = (right - left) - mNavigationBarView.getPaddingEnd()
+                - mNavigationBarView.getPaddingStart();
+        final int height = (bottom - top) - mNavigationBarView.getPaddingBottom()
+                - mNavigationBarView.getPaddingTop();
         final int x1, x2, y1, y2;
         if (mIsVertical) {
-            x1 = (width - mTrackThickness) / 2;
+            x1 = (width - mTrackThickness) / 2 + mNavigationBarView.getPaddingStart();
             x2 = x1 + mTrackThickness;
             y1 = mDragPositive ? height / 2 : mTrackPadding;
             y2 = y1 + height / 2 - mTrackPadding;
         } else {
-            y1 = (height - mTrackThickness) / 2;
+            y1 = (height - mTrackThickness) / 2 + mNavigationBarView.getPaddingTop();
             y2 = y1 + mTrackThickness;
             x1 = mDragPositive ? width / 2 : mTrackPadding;
             x2 = x1 + width / 2 - mTrackPadding;
