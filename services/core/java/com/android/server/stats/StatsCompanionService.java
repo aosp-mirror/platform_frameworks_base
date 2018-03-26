@@ -972,10 +972,13 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     public void triggerUidSnapshot() {
         enforceCallingPermission();
         synchronized (sStatsdLock) {
+            final long token = Binder.clearCallingIdentity();
             try {
                 informAllUidsLocked(mContext);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to trigger uid snapshot.", e);
+            } finally {
+                restoreCallingIdentity(token);
             }
         }
     }

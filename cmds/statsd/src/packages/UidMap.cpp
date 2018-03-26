@@ -116,32 +116,16 @@ void UidMap::updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
         lock_guard<mutex> lock(mMutex);  // Exclusively lock for updates.
 
         mMap.clear();
-        ProtoOutputStream proto;
-        uint64_t token = proto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
-                                      FIELD_ID_SNAPSHOT_PACKAGE_INFO);
+        vector<const SnapshotPackageInfo> infos;
         for (size_t j = 0; j < uid.size(); j++) {
             string package = string(String8(packageName[j]).string());
             mMap.insert(make_pair(uid[j], AppData(package, versionCode[j])));
-            proto.write(FIELD_TYPE_STRING | FIELD_ID_SNAPSHOT_PACKAGE_NAME, package);
-            proto.write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_VERSION, (int)versionCode[j]);
-            proto.write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_UID, (int)uid[j]);
+            infos.emplace_back(package, versionCode[j], uid[j]);
         }
-        proto.end(token);
 
-        // Copy ProtoOutputStream output to
-        auto iter = proto.data();
-        size_t pos = 0;
-        vector<char> outData(proto.size());
-        while (iter.readBuffer() != NULL) {
-            size_t toRead = iter.currentToRead();
-            std::memcpy(&(outData[pos]), iter.readBuffer(), toRead);
-            pos += toRead;
-            iter.rp()->move(toRead);
-        }
-        SnapshotRecord record(timestamp, outData);
-        mSnapshots.push_back(record);
+        mSnapshots.emplace_back(timestamp, infos);
 
-        mBytesUsed += proto.size() + kBytesTimestampField;
+        mBytesUsed += mSnapshots.back().bytes;
         ensureBytesUsedBelowLimit();
         StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
         StatsdStats::getInstance().setUidMapSnapshots(mSnapshots.size());
@@ -212,7 +196,7 @@ void UidMap::ensureBytesUsedBelowLimit() {
     while (mBytesUsed > limit) {
         ALOGI("Bytes used %zu is above limit %zu, need to delete something", mBytesUsed, limit);
         if (mSnapshots.size() > 0) {
-            mBytesUsed -= mSnapshots.front().bytes.size() + kBytesTimestampField;
+            mBytesUsed -= mSnapshots.front().bytes;
             mSnapshots.pop_front();
             StatsdStats::getInstance().noteUidMapDropped(1, 0);
         } else if (mChanges.size() > 0) {
@@ -365,8 +349,14 @@ void UidMap::appendUidMap(const int64_t& timestamp, const ConfigKey& key,
             count++;
             proto->write(FIELD_TYPE_INT64 | FIELD_ID_SNAPSHOT_TIMESTAMP,
                          (long long)record.timestampNs);
-            proto->write(FIELD_TYPE_MESSAGE | FIELD_ID_SNAPSHOT_PACKAGE_INFO, record.bytes.data(),
-                         record.bytes.size());
+            for (const SnapshotPackageInfo& info : record.infos) {
+                uint64_t token = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                                              FIELD_ID_SNAPSHOT_PACKAGE_INFO);
+                proto->write(FIELD_TYPE_STRING | FIELD_ID_SNAPSHOT_PACKAGE_NAME, info.package);
+                proto->write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_VERSION, info.version);
+                proto->write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_UID, info.uid);
+                proto->end(token);
+            }
             proto->end(snapshotsToken);
         }
     }
@@ -380,7 +370,7 @@ void UidMap::appendUidMap(const int64_t& timestamp, const ConfigKey& key,
         int64_t cutoff_nanos = newMin;
         for (auto it_snapshots = mSnapshots.begin(); it_snapshots != mSnapshots.end();) {
             if (it_snapshots->timestampNs < cutoff_nanos) {
-                mBytesUsed -= it_snapshots->bytes.size() + kBytesTimestampField;
+                mBytesUsed -= it_snapshots->bytes;
                 it_snapshots = mSnapshots.erase(it_snapshots);
             } else {
                 ++it_snapshots;
@@ -399,31 +389,13 @@ void UidMap::appendUidMap(const int64_t& timestamp, const ConfigKey& key,
             // Produce another snapshot. This results in extra data being uploaded but
             // helps ensure we can re-construct the UID->app name, versionCode mapping
             // in server.
-            ProtoOutputStream snapshotProto;
-            uint64_t token = snapshotProto.start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
-                                                 FIELD_ID_SNAPSHOT_PACKAGE_INFO);
+            vector<const SnapshotPackageInfo> infos;
             for (const auto& it : mMap) {
-                snapshotProto.write(FIELD_TYPE_STRING | FIELD_ID_SNAPSHOT_PACKAGE_NAME,
-                                    it.second.packageName);
-                snapshotProto.write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_VERSION,
-                                    (int)it.second.versionCode);
-                snapshotProto.write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_UID,
-                                    (int)it.first);
+                infos.emplace_back(it.second.packageName, it.second.versionCode, it.first);
             }
-            snapshotProto.end(token);
 
-            // Copy ProtoOutputStream output to
-            auto iter = snapshotProto.data();
-            vector<char> snapshotData(snapshotProto.size());
-            size_t pos = 0;
-            while (iter.readBuffer() != NULL) {
-                size_t toRead = iter.currentToRead();
-                std::memcpy(&(snapshotData[pos]), iter.readBuffer(), toRead);
-                pos += toRead;
-                iter.rp()->move(toRead);
-            }
-            mSnapshots.emplace_back(timestamp, snapshotData);
-            mBytesUsed += kBytesTimestampField + snapshotData.size();
+            mSnapshots.emplace_back(timestamp, infos);
+            mBytesUsed += mSnapshots.back().bytes;
         }
     }
     StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);

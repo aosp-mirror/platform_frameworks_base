@@ -14,6 +14,7 @@
 
 #include "StatsLogProcessor.h"
 #include "config/ConfigKey.h"
+#include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "guardrail/StatsdStats.h"
 #include "logd/LogEvent.h"
@@ -120,6 +121,32 @@ TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge) {
     // Expect to call the onDumpReport and skip the broadcast.
     p.flushIfNecessaryLocked(1, key, mockMetricsManager);
     EXPECT_EQ(0, broadcastCount);
+}
+
+TEST(StatsLogProcessorTest, TestUidMapHasSnapshot) {
+    // Setup simple config key corresponding to empty config.
+    sp<UidMap> m = new UidMap();
+    m->updateMap({1, 2}, {1, 2}, {String16("p1"), String16("p2")});
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    sp<AlarmMonitor> subscriberAlarmMonitor;
+    int broadcastCount = 0;
+    StatsLogProcessor p(m, anomalyAlarmMonitor, subscriberAlarmMonitor, 0,
+                        [&broadcastCount](const ConfigKey& key) { broadcastCount++; });
+    ConfigKey key(3, 4);
+    StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT");
+    p.OnConfigUpdated(key, config);
+
+    // Expect to get no metrics, but snapshot specified above in uidmap.
+    vector<uint8_t> bytes;
+    p.onDumpReport(key, 1, &bytes);
+
+    ConfigMetricsReportList output;
+    output.ParseFromArray(bytes.data(), bytes.size());
+    EXPECT_TRUE(output.reports_size() > 0);
+    auto uidmap = output.reports(0).uid_map();
+    EXPECT_TRUE(uidmap.snapshots_size() > 0);
+    EXPECT_EQ(2, uidmap.snapshots(0).package_info_size());
 }
 
 #else
