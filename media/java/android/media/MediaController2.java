@@ -203,43 +203,37 @@ public class MediaController2 implements AutoCloseable {
          * Called when a playlist is changed.
          *
          * @param controller the controller for this event
-         * @param playlistAgent playlist agent for this event
          * @param list new playlist
          * @param metadata new metadata
          */
         public void onPlaylistChanged(@NonNull MediaController2 controller,
-                @NonNull MediaPlaylistAgent playlistAgent, @NonNull List<MediaItem2> list,
-                @Nullable MediaMetadata2 metadata) { }
+                @NonNull List<MediaItem2> list, @Nullable MediaMetadata2 metadata) { }
 
         /**
          * Called when a playlist metadata is changed.
          *
          * @param controller the controller for this event
-         * @param playlistAgent playlist agent for this event
          * @param metadata new metadata
          */
         public void onPlaylistMetadataChanged(@NonNull MediaController2 controller,
-                @NonNull MediaPlaylistAgent playlistAgent, @Nullable MediaMetadata2 metadata) { }
+                @Nullable MediaMetadata2 metadata) { }
 
         /**
          * Called when the shuffle mode is changed.
          *
          * @param controller the controller for this event
-         * @param playlistAgent playlist agent for this event
          * @param shuffleMode repeat mode
          * @see MediaPlaylistAgent#SHUFFLE_MODE_NONE
          * @see MediaPlaylistAgent#SHUFFLE_MODE_ALL
          * @see MediaPlaylistAgent#SHUFFLE_MODE_GROUP
          */
         public void onShuffleModeChanged(@NonNull MediaController2 controller,
-                @NonNull MediaPlaylistAgent playlistAgent,
                 @MediaPlaylistAgent.ShuffleMode int shuffleMode) { }
 
         /**
          * Called when the repeat mode is changed.
          *
          * @param controller the controller for this event
-         * @param playlistAgent playlist agent for this event
          * @param repeatMode repeat mode
          * @see MediaPlaylistAgent#REPEAT_MODE_NONE
          * @see MediaPlaylistAgent#REPEAT_MODE_ONE
@@ -247,7 +241,6 @@ public class MediaController2 implements AutoCloseable {
          * @see MediaPlaylistAgent#REPEAT_MODE_GROUP
          */
         public void onRepeatModeChanged(@NonNull MediaController2 controller,
-                @NonNull MediaPlaylistAgent playlistAgent,
                 @MediaPlaylistAgent.RepeatMode int repeatMode) { }
     }
 
@@ -683,15 +676,14 @@ public class MediaController2 implements AutoCloseable {
 
     /**
      * Returns the cached playlist from
-     * {@link ControllerCallback#onPlaylistChanged(MediaController2, MediaPlaylistAgent, List,
-     * MediaMetadata2)}.
+     * {@link ControllerCallback#onPlaylistChanged(MediaController2, List, MediaMetadata2)}.
      * <p>
      * This list may differ with the list that was specified with
-     * {@link #setPlaylist(List, MediaMetadata2)} depending on the {@link MediaPlaylistAgent}
-     * implementation. Use media items returned here for other playlist agent APIs such as
-     * {@link MediaPlaylistAgent#skipToPlaylistItem(MediaItem2)}.
+     * {@link #setPlaylist(List, MediaMetadata2)} depending on the session implementation. Use media
+     * items returned here for other playlist APIs such as {@link #skipToPlaylistItem(MediaItem2)}.
      *
-     * @return playlist. Can be {@code null} if the controller doesn't have enough permission.
+     * @return The playlist. Can be {@code null} if the controller doesn't have enough permission or
+     *         the session hasn't set any playlist.
      */
     public @Nullable List<MediaItem2> getPlaylist() {
         return mProvider.getPlaylist_impl();
@@ -707,8 +699,7 @@ public class MediaController2 implements AutoCloseable {
      * @param list playlist
      * @param metadata metadata of the playlist
      * @see #getPlaylist()
-     * @see ControllerCallback#onPlaylistChanged(
-     *      MediaController2, MediaPlaylistAgent, List, MediaMetadata2)
+     * @see ControllerCallback#onPlaylistChanged(MediaController2, List, MediaMetadata2)
      */
     public void setPlaylist(@NonNull List<MediaItem2> list, @Nullable MediaMetadata2 metadata) {
         mProvider.setPlaylist_impl(list, metadata);
@@ -725,10 +716,8 @@ public class MediaController2 implements AutoCloseable {
 
     /**
      * Gets the lastly cached playlist playlist metadata either from
-     * {@link ControllerCallback#onPlaylistMetadataChanged(
-     * MediaController2, MediaPlaylistAgent, MediaMetadata2)} or
-     * {@link ControllerCallback#onPlaylistChanged(
-     * MediaController2, MediaPlaylistAgent, List, MediaMetadata2)}.
+     * {@link ControllerCallback#onPlaylistMetadataChanged(MediaController2,  MediaMetadata2)} or
+     * {@link ControllerCallback#onPlaylistChanged(MediaController2, List, MediaMetadata2)}.
      *
      * @return metadata metadata of the playlist, or null if none is set
      */
@@ -788,7 +777,7 @@ public class MediaController2 implements AutoCloseable {
     /**
      * Skips to the previous item in the playlist.
      * <p>
-     * This calls {@link MediaPlaylistAgent#skipToPreviousItem()}.
+     * This calls {@link MediaSession2#skipToPreviousItem()} if the session allows.
      */
      public void skipToPreviousItem() {
          mProvider.skipToPreviousItem_impl();
@@ -797,7 +786,7 @@ public class MediaController2 implements AutoCloseable {
     /**
      * Skips to the next item in the playlist.
      * <p>
-     * This calls {@link MediaPlaylistAgent#skipToNextItem()}.
+     * This calls {@link MediaSession2#skipToNextItem()} if the session allows.
      */
     public void skipToNextItem() {
         mProvider.skipToNextItem_impl();
@@ -806,7 +795,7 @@ public class MediaController2 implements AutoCloseable {
     /**
      * Skips to the item in the playlist.
      * <p>
-     * This calls {@link MediaPlaylistAgent#skipToPlaylistItem(MediaItem2)}.
+     * This calls {@link MediaSession2#skipToPlaylistItem(MediaItem2)} if the session allows.
      *
      * @param item The item in the playlist you want to play
      */
@@ -816,7 +805,7 @@ public class MediaController2 implements AutoCloseable {
 
     /**
      * Gets the cached repeat mode from the {@link ControllerCallback#onRepeatModeChanged(
-     * MediaController2, MediaPlaylistAgent, int)}.
+     * MediaController2, int)}.
      *
      * @return repeat mode
      * @see MediaPlaylistAgent#REPEAT_MODE_NONE
@@ -843,7 +832,7 @@ public class MediaController2 implements AutoCloseable {
 
     /**
      * Gets the cached shuffle mode from the {@link ControllerCallback#onShuffleModeChanged(
-     * MediaController2, MediaPlaylistAgent, int)}.
+     * MediaController2, int)}.
      *
      * @return The shuffle mode
      * @see MediaPlaylistAgent#SHUFFLE_MODE_NONE
