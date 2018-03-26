@@ -236,6 +236,18 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_KEYGUARD_UNOCCLUDE = 23;
 
     /**
+     * A translucent activity is being opened.
+     * @hide
+     */
+    int TRANSIT_TRANSLUCENT_ACTIVITY_OPEN = 24;
+
+    /**
+     * A translucent activity is being closed.
+     * @hide
+     */
+    int TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE = 25;
+
+    /**
      * @hide
      */
     @IntDef(prefix = { "TRANSIT_" }, value = {
@@ -258,7 +270,9 @@ public interface WindowManager extends ViewManager {
             TRANSIT_KEYGUARD_GOING_AWAY,
             TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
             TRANSIT_KEYGUARD_OCCLUDE,
-            TRANSIT_KEYGUARD_UNOCCLUDE
+            TRANSIT_KEYGUARD_UNOCCLUDE,
+            TRANSIT_TRANSLUCENT_ACTIVITY_OPEN,
+            TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionType {}

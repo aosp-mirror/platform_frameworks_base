@@ -173,6 +173,8 @@ class WindowTestsBase {
 
                 mDisplayContent.removeImmediately();
                 sWm.mInputMethodTarget = null;
+                sWm.mClosingApps.clear();
+                sWm.mOpeningApps.clear();
             }
 
             // Wait until everything is really cleaned up.
