@@ -2502,11 +2502,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                         public void onAnimationEnded() {
                             CrossFadeHelper.fadeIn(mNotificationPanel);
                         }
-                    }).show();
+                    }, mDozing).show();
         } else {
             // workspace
             WirelessChargingAnimation.makeWirelessChargingAnimation(mContext, null,
-                    batteryLevel, null).show();
+                    batteryLevel, null, false).show();
         }
     }
 
