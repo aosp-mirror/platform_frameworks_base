@@ -37,6 +37,7 @@ import android.view.SurfaceControl.Transaction;
 
 import com.android.internal.util.FastPrintWriter;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
+import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -235,9 +236,11 @@ class RemoteAnimationController {
                     || mCapturedLeash == null) {
                 return null;
             }
+            final Rect insets = new Rect(mainWindow.mContentInsets);
+            InsetUtils.addInsets(insets, mAppWindowToken.getLetterboxInsets());
             mTarget = new RemoteAnimationTarget(task.mTaskId, getMode(),
                     mCapturedLeash, !mAppWindowToken.fillsParent(),
-                    mainWindow.mWinAnimator.mLastClipRect, mainWindow.mContentInsets,
+                    mainWindow.mWinAnimator.mLastClipRect, insets,
                     mAppWindowToken.getPrefixOrderIndex(), mPosition, mStackBounds,
                     task.getWindowConfiguration(), false /*isNotInRecents*/);
             return mTarget;
