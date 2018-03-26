@@ -38,6 +38,7 @@ import org.junit.runner.RunWith;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -49,19 +50,14 @@ public class TextClassificationManagerTest {
     private Context mContext;
     private TextClassificationManager mTcm;
     private TextClassifier mClassifier;
-    private TextSelection.Options mSelectionOptions;
-    private TextClassification.Options mClassificationOptions;
-    private TextLinks.Options mLinksOptions;
 
     @Before
     public void setup() {
         mContext = InstrumentationRegistry.getTargetContext();
         mTcm = mContext.getSystemService(TextClassificationManager.class);
-        mTcm.setTextClassifier(null);
-        mClassifier = mTcm.getTextClassifier();
-        mSelectionOptions = new TextSelection.Options().setDefaultLocales(LOCALES);
-        mClassificationOptions = new TextClassification.Options().setDefaultLocales(LOCALES);
-        mLinksOptions = new TextLinks.Options().setDefaultLocales(LOCALES);
+        // Test with the local textClassifier only. (We only bundle "en" model by default).
+        // It's hard to reliably test the results of the device's TextClassifierServiceImpl here.
+        mClassifier = mTcm.getTextClassifier(TextClassifier.LOCAL);
     }
 
     @Test
@@ -75,9 +71,12 @@ public class TextClassificationManagerTest {
         int endIndex = startIndex + selected.length();
         int smartStartIndex = text.indexOf(suggested);
         int smartEndIndex = smartStartIndex + suggested.length();
+        TextSelection.Request request = new TextSelection.Request.Builder(
+                text, startIndex, endIndex)
+                .setDefaultLocales(LOCALES)
+                .build();
 
-        TextSelection selection = mClassifier.suggestSelection(
-                text, startIndex, endIndex, mSelectionOptions);
+        TextSelection selection = mClassifier.suggestSelection(request);
         assertThat(selection,
                 isTextSelection(smartStartIndex, smartEndIndex, TextClassifier.TYPE_EMAIL));
     }
@@ -93,9 +92,12 @@ public class TextClassificationManagerTest {
         int endIndex = startIndex + selected.length();
         int smartStartIndex = text.indexOf(suggested);
         int smartEndIndex = smartStartIndex + suggested.length();
+        TextSelection.Request request = new TextSelection.Request.Builder(
+                text, startIndex, endIndex)
+                .setDefaultLocales(LOCALES)
+                .build();
 
-        TextSelection selection = mClassifier.suggestSelection(
-                text, startIndex, endIndex, mSelectionOptions);
+        TextSelection selection = mClassifier.suggestSelection(request);
         assertThat(selection,
                 isTextSelection(smartStartIndex, smartEndIndex, TextClassifier.TYPE_URL));
     }
@@ -108,9 +110,12 @@ public class TextClassificationManagerTest {
         String selected = "Hello";
         int startIndex = text.indexOf(selected);
         int endIndex = startIndex + selected.length();
+        TextSelection.Request request = new TextSelection.Request.Builder(
+                text, startIndex, endIndex)
+                .setDefaultLocales(LOCALES)
+                .build();
 
-        TextSelection selection = mClassifier.suggestSelection(
-                text, startIndex, endIndex, mSelectionOptions);
+        TextSelection selection = mClassifier.suggestSelection(request);
         assertThat(selection,
                 isTextSelection(startIndex, endIndex, NO_TYPE));
     }
@@ -123,9 +128,12 @@ public class TextClassificationManagerTest {
         String classifiedText = "droid@android.com";
         int startIndex = text.indexOf(classifiedText);
         int endIndex = startIndex + classifiedText.length();
+        TextClassification.Request request = new TextClassification.Request.Builder(
+                text, startIndex, endIndex)
+                .setDefaultLocales(LOCALES)
+                .build();
 
-        TextClassification classification = mClassifier.classifyText(
-                text, startIndex, endIndex, mClassificationOptions);
+        TextClassification classification = mClassifier.classifyText(request);
         assertThat(classification, isTextClassification(classifiedText, TextClassifier.TYPE_EMAIL));
     }
 
@@ -137,9 +145,12 @@ public class TextClassificationManagerTest {
         String classifiedText = "www.android.com";
         int startIndex = text.indexOf(classifiedText);
         int endIndex = startIndex + classifiedText.length();
+        TextClassification.Request request = new TextClassification.Request.Builder(
+                text, startIndex, endIndex)
+                .setDefaultLocales(LOCALES)
+                .build();
 
-        TextClassification classification = mClassifier.classifyText(
-                text, startIndex, endIndex, mClassificationOptions);
+        TextClassification classification = mClassifier.classifyText(request);
         assertThat(classification, isTextClassification(classifiedText, TextClassifier.TYPE_URL));
     }
 
@@ -148,8 +159,12 @@ public class TextClassificationManagerTest {
         if (isTextClassifierDisabled()) return;
 
         String text = "Brandschenkestrasse 110, Zürich, Switzerland";
-        TextClassification classification = mClassifier.classifyText(
-                text, 0, text.length(), mClassificationOptions);
+        TextClassification.Request request = new TextClassification.Request.Builder(
+                text, 0, text.length())
+                .setDefaultLocales(LOCALES)
+                .build();
+
+        TextClassification classification = mClassifier.classifyText(request);
         assertThat(classification, isTextClassification(text, TextClassifier.TYPE_ADDRESS));
     }
 
@@ -161,9 +176,12 @@ public class TextClassificationManagerTest {
         String classifiedText = "HTTP://ANDROID.COM";
         int startIndex = text.indexOf(classifiedText);
         int endIndex = startIndex + classifiedText.length();
+        TextClassification.Request request = new TextClassification.Request.Builder(
+                text, startIndex, endIndex)
+                .setDefaultLocales(LOCALES)
+                .build();
 
-        TextClassification classification = mClassifier.classifyText(
-                text, startIndex, endIndex, mClassificationOptions);
+        TextClassification classification = mClassifier.classifyText(request);
         assertThat(classification, isTextClassification(classifiedText, TextClassifier.TYPE_URL));
     }
 
@@ -175,9 +193,12 @@ public class TextClassificationManagerTest {
         String classifiedText = "January 9, 2018";
         int startIndex = text.indexOf(classifiedText);
         int endIndex = startIndex + classifiedText.length();
+        TextClassification.Request request = new TextClassification.Request.Builder(
+                text, startIndex, endIndex)
+                .setDefaultLocales(LOCALES)
+                .build();
 
-        TextClassification classification = mClassifier.classifyText(
-                text, startIndex, endIndex, mClassificationOptions);
+        TextClassification classification = mClassifier.classifyText(request);
         assertThat(classification, isTextClassification(classifiedText, TextClassifier.TYPE_DATE));
     }
 
@@ -189,9 +210,12 @@ public class TextClassificationManagerTest {
         String classifiedText = "2018/01/01 10:30:20";
         int startIndex = text.indexOf(classifiedText);
         int endIndex = startIndex + classifiedText.length();
+        TextClassification.Request request = new TextClassification.Request.Builder(
+                text, startIndex, endIndex)
+                .setDefaultLocales(LOCALES)
+                .build();
 
-        TextClassification classification = mClassifier.classifyText(
-                text, startIndex, endIndex, mClassificationOptions);
+        TextClassification classification = mClassifier.classifyText(request);
         assertThat(classification,
                 isTextClassification(classifiedText, TextClassifier.TYPE_DATE_TIME));
     }
@@ -200,7 +224,8 @@ public class TextClassificationManagerTest {
     public void testGenerateLinks_phone() {
         if (isTextClassifierDisabled()) return;
         String text = "The number is +12122537077. See you tonight!";
-        assertThat(mClassifier.generateLinks(text, null),
+        TextLinks.Request request = new TextLinks.Request.Builder(text).build();
+        assertThat(mClassifier.generateLinks(request),
                 isTextLinksContaining(text, "+12122537077", TextClassifier.TYPE_PHONE));
     }
 
@@ -208,9 +233,14 @@ public class TextClassificationManagerTest {
     public void testGenerateLinks_exclude() {
         if (isTextClassifierDisabled()) return;
         String text = "The number is +12122537077. See you tonight!";
-        assertThat(mClassifier.generateLinks(text, mLinksOptions.setEntityConfig(
-                TextClassifier.EntityConfig.create(Collections.EMPTY_LIST,
-                        Collections.EMPTY_LIST, Arrays.asList(TextClassifier.TYPE_PHONE)))),
+        List<String> hints = Collections.EMPTY_LIST;
+        List<String> included = Collections.EMPTY_LIST;
+        List<String> excluded = Arrays.asList(TextClassifier.TYPE_PHONE);
+        TextLinks.Request request = new TextLinks.Request.Builder(text)
+                .setEntityConfig(TextClassifier.EntityConfig.create(hints, included, excluded))
+                .setDefaultLocales(LOCALES)
+                .build();
+        assertThat(mClassifier.generateLinks(request),
                 not(isTextLinksContaining(text, "+12122537077", TextClassifier.TYPE_PHONE)));
     }
 
@@ -218,9 +248,12 @@ public class TextClassificationManagerTest {
     public void testGenerateLinks_explicit_address() {
         if (isTextClassifierDisabled()) return;
         String text = "The address is 1600 Amphitheater Parkway, Mountain View, CA. See you!";
-        assertThat(mClassifier.generateLinks(text, mLinksOptions.setEntityConfig(
-                TextClassifier.EntityConfig.createWithEntityList(
-                        Arrays.asList(TextClassifier.TYPE_ADDRESS)))),
+        List<String> explicit = Arrays.asList(TextClassifier.TYPE_ADDRESS);
+        TextLinks.Request request = new TextLinks.Request.Builder(text)
+                .setEntityConfig(TextClassifier.EntityConfig.createWithExplicitEntityList(explicit))
+                .setDefaultLocales(LOCALES)
+                .build();
+        assertThat(mClassifier.generateLinks(request),
                 isTextLinksContaining(text, "1600 Amphitheater Parkway, Mountain View, CA",
                         TextClassifier.TYPE_ADDRESS));
     }
@@ -229,10 +262,14 @@ public class TextClassificationManagerTest {
     public void testGenerateLinks_exclude_override() {
         if (isTextClassifierDisabled()) return;
         String text = "The number is +12122537077. See you tonight!";
-        assertThat(mClassifier.generateLinks(text, mLinksOptions.setEntityConfig(
-                TextClassifier.EntityConfig.create(Collections.EMPTY_LIST,
-                        Arrays.asList(TextClassifier.TYPE_PHONE),
-                        Arrays.asList(TextClassifier.TYPE_PHONE)))),
+        List<String> hints = Collections.EMPTY_LIST;
+        List<String> included = Arrays.asList(TextClassifier.TYPE_PHONE);
+        List<String> excluded = Arrays.asList(TextClassifier.TYPE_PHONE);
+        TextLinks.Request request = new TextLinks.Request.Builder(text)
+                .setEntityConfig(TextClassifier.EntityConfig.create(hints, included, excluded))
+                .setDefaultLocales(LOCALES)
+                .build();
+        assertThat(mClassifier.generateLinks(request),
                 not(isTextLinksContaining(text, "+12122537077", TextClassifier.TYPE_PHONE)));
     }
 
@@ -241,7 +278,8 @@ public class TextClassificationManagerTest {
         if (isTextClassifierDisabled()) return;
         char[] manySpaces = new char[mClassifier.getMaxGenerateLinksTextLength()];
         Arrays.fill(manySpaces, ' ');
-        TextLinks links = mClassifier.generateLinks(new String(manySpaces), null);
+        TextLinks.Request request = new TextLinks.Request.Builder(new String(manySpaces)).build();
+        TextLinks links = mClassifier.generateLinks(request);
         assertTrue(links.getLinks().isEmpty());
     }
 
@@ -252,7 +290,8 @@ public class TextClassificationManagerTest {
         }
         char[] manySpaces = new char[mClassifier.getMaxGenerateLinksTextLength() + 1];
         Arrays.fill(manySpaces, ' ');
-        mClassifier.generateLinks(new String(manySpaces), null);
+        TextLinks.Request request = new TextLinks.Request.Builder(new String(manySpaces)).build();
+        mClassifier.generateLinks(request);
     }
 
     @Test

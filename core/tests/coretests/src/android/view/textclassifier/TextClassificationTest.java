@@ -79,14 +79,14 @@ public class TextClassificationTest {
         final RemoteAction remoteAction1 = new RemoteAction(secondaryIcon, secondaryLabel,
                 secondaryDescription, secondaryPendingIntent);
 
-        final String signature = "signature";
+        final String id = "id";
         final TextClassification reference = new TextClassification.Builder()
                 .setText(text)
                 .addAction(remoteAction0)
                 .addAction(remoteAction1)
                 .setEntityType(TextClassifier.TYPE_ADDRESS, 0.3f)
                 .setEntityType(TextClassifier.TYPE_PHONE, 0.7f)
-                .setSignature(signature)
+                .setId(id)
                 .build();
 
         // Parcel and unparcel
@@ -96,7 +96,7 @@ public class TextClassificationTest {
         final TextClassification result = TextClassification.CREATOR.createFromParcel(parcel);
 
         assertEquals(text, result.getText());
-        assertEquals(signature, result.getSignature());
+        assertEquals(id, result.getId());
         assertEquals(2, result.getActions().size());
 
         // Legacy API.
@@ -135,7 +135,7 @@ public class TextClassificationTest {
         final Intent intent = new Intent("intent");
         final View.OnClickListener onClickListener = v -> { };
 
-        final String signature = "signature";
+        final String id = "id";
         final TextClassification reference = new TextClassification.Builder()
                 .setText(text)
                 .setIcon(icon.loadDrawable(context))
@@ -144,7 +144,7 @@ public class TextClassificationTest {
                 .setOnClickListener(onClickListener)
                 .setEntityType(TextClassifier.TYPE_ADDRESS, 0.3f)
                 .setEntityType(TextClassifier.TYPE_PHONE, 0.7f)
-                .setSignature(signature)
+                .setId(id)
                 .build();
 
         // Parcel and unparcel
@@ -163,22 +163,29 @@ public class TextClassificationTest {
     }
 
     @Test
-    public void testParcelOptions() {
-        ZonedDateTime referenceTime = ZonedDateTime.ofInstant(
+    public void testParcelParcel() {
+        final ZonedDateTime referenceTime = ZonedDateTime.ofInstant(
                 Instant.ofEpochMilli(946771200000L),  // 2000-01-02
                 ZoneId.of("UTC"));
+        final String text = "text";
 
-        TextClassification.Options reference = new TextClassification.Options();
-        reference.setDefaultLocales(new LocaleList(Locale.US, Locale.GERMANY));
-        reference.setReferenceTime(referenceTime);
+        final TextClassification.Request reference =
+                new TextClassification.Request.Builder(text, 0, text.length())
+                        .setDefaultLocales(new LocaleList(Locale.US, Locale.GERMANY))
+                        .setReferenceTime(referenceTime)
+                        .build();
 
         // Parcel and unparcel.
         final Parcel parcel = Parcel.obtain();
         reference.writeToParcel(parcel, reference.describeContents());
         parcel.setDataPosition(0);
-        TextClassification.Options result = TextClassification.Options.CREATOR.createFromParcel(
-                parcel);
+        final TextClassification.Request result =
+                TextClassification.Request.CREATOR.createFromParcel(parcel);
 
+        assertEquals(text, result.getText());
+        assertEquals(0, result.getStartIndex());
+        assertEquals(text.length(), result.getEndIndex());
+        assertEquals(referenceTime, result.getReferenceTime());
         assertEquals("en-US,de-DE", result.getDefaultLocales().toLanguageTags());
         assertEquals(referenceTime, result.getReferenceTime());
     }

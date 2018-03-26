@@ -17,4 +17,4 @@
 package android.view.textclassifier;
 
 parcelable TextLinks;
-parcelable TextLinks.Options;
+parcelable TextLinks.Request;
