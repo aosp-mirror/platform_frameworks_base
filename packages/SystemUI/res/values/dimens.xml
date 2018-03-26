@@ -929,14 +929,14 @@
     <dimen name="wireless_charging_dots_radius_start">0dp</dimen>
     <dimen name="wireless_charging_dots_radius_end">4dp</dimen>
     <dimen name="wireless_charging_circle_radius_start">28dp</dimen>
-    <dimen name="wireless_charging_circle_radius_end">92dp</dimen>
+    <dimen name="wireless_charging_circle_radius_end">84dp</dimen>
     <integer name="wireless_charging_angle_offset">20</integer>
     <integer name="wireless_charging_scale_dots_duration">83</integer>
-    <integer name="wireless_charging_num_dots">20</integer>
-    <!-- Starting text size in dp of batteryLevel for wireless charging animation -->
-    <dimen name="wireless_charging_anim_battery_level_text_size_start">0dp</dimen>
-    <!-- Ending text size in dp of batteryLevel for wireless charging animation -->
-    <dimen name="wireless_charging_anim_battery_level_text_size_end">14dp</dimen>
+    <integer name="wireless_charging_num_dots">16</integer>
+    <!-- Starting text size in sp of batteryLevel for wireless charging animation -->
+    <item name="wireless_charging_anim_battery_level_text_size_start" format="float" type="dimen">0</item>
+    <!-- Ending text size in sp of batteryLevel for wireless charging animation -->
+    <item name="wireless_charging_anim_battery_level_text_size_end" format="float" type="dimen">24</item>
     <!-- time until battery info is at full opacity-->
     <integer name="wireless_charging_anim_opacity_offset">80</integer>
     <!-- duration batteryLevel opacity goes from 0 to 1 duration -->
