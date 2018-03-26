@@ -2668,6 +2668,9 @@ class StorageManagerService extends IStorageManager.Stub
         final int userId = UserHandle.getUserId(Binder.getCallingUid());
         final UserEnvironment userEnv = new UserEnvironment(userId);
 
+        // Ignore requests to create directories while storage is locked
+        if (!isUserKeyUnlocked(userId)) return;
+
         // Validate that reported package name belongs to caller
         final AppOpsManager appOps = (AppOpsManager) mContext.getSystemService(
                 Context.APP_OPS_SERVICE);
