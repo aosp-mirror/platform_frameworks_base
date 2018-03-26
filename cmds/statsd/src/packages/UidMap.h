@@ -74,17 +74,35 @@ const unsigned int kBytesChangeRecord = sizeof(struct ChangeRecord);
 // less because of varint encoding).
 const unsigned int kBytesTimestampField = 10;
 
+struct SnapshotPackageInfo {
+    const string package;
+    const int32_t version;
+    const int32_t uid;
+    SnapshotPackageInfo(const string& package, const int32_t version, const int32_t uid)
+        : package(package), version(version), uid(uid) {
+    }
+};
+
+const unsigned int kBytesSnapshotInfo = sizeof(struct SnapshotPackageInfo);
+
 // When calling appendUidMap, we retrieve all the snapshots since the last
 // timestamp we called appendUidMap for this configuration key.
 struct SnapshotRecord {
     const int64_t timestampNs;
 
-    // For performance reasons, we convert the package_info field (which is a
-    // repeated field of PackageInfo messages).
-    vector<char> bytes;
+    // All the package info known.
+    vector<const SnapshotPackageInfo> infos;
 
-    SnapshotRecord(const int64_t timestampNs, vector<char> bytes)
-        : timestampNs(timestampNs), bytes(bytes) {
+    // Tracks the number of bytes this snapshot consumes.
+    uint32_t bytes;
+
+    SnapshotRecord(const int64_t timestampNs, vector<const SnapshotPackageInfo>& infos)
+        : timestampNs(timestampNs), infos(infos) {
+        bytes = 0;
+        for (auto info : infos) {
+            bytes += info.package.size() + kBytesSnapshotInfo;
+        }
+        bytes += kBytesTimestampField;
     }
 };
 
@@ -210,6 +228,7 @@ private:
 
     // Allows unit-test to access private methods.
     FRIEND_TEST(UidMapTest, TestClearingOutput);
+    FRIEND_TEST(UidMapTest, TestOutputIncludesAtLeastOneSnapshot);
     FRIEND_TEST(UidMapTest, TestMemoryComputed);
     FRIEND_TEST(UidMapTest, TestMemoryGuardrail);
 };
