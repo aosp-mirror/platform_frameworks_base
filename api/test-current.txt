@@ -240,6 +240,7 @@ package android.content.pm {
   public abstract class PackageManager {
     method public abstract java.lang.String getDefaultBrowserPackageNameAsUser(int);
     method public abstract int getInstallReason(java.lang.String, android.os.UserHandle);
+    method public abstract java.lang.String[] getNamesForUids(int[]);
     method public abstract java.lang.String getPermissionControllerPackageName();
     method public abstract boolean isPermissionReviewModeEnabled();
     field public static final java.lang.String FEATURE_ADOPTABLE_STORAGE = "android.software.adoptable_storage";

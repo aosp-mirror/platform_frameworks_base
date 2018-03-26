@@ -3711,6 +3711,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @TestApi
     public abstract @Nullable String[] getNamesForUids(int[] uids);
 
     /**
