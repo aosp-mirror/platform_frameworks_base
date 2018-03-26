@@ -33,8 +33,8 @@ interface IKeyChainService {
     boolean isUserSelectable(String alias);
     void setUserSelectable(String alias, boolean isUserSelectable);
 
-    boolean generateKeyPair(in String algorithm, in ParcelableKeyGenParameterSpec spec);
-    boolean attestKey(in String alias, in byte[] challenge, in int[] idAttestationFlags,
+    int generateKeyPair(in String algorithm, in ParcelableKeyGenParameterSpec spec);
+    int attestKey(in String alias, in byte[] challenge, in int[] idAttestationFlags,
             out KeymasterCertificateChain chain);
     boolean setKeyPairCertificate(String alias, in byte[] userCert, in byte[] certChain);
 
