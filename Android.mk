@@ -869,11 +869,27 @@ include $(BUILD_STATIC_JAVA_LIBRARY)
 $(eval $(call copy-one-file,frameworks/base/config/hiddenapi-blacklist.txt,\
                             $(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST)))
 
+# Automatically add all methods which match the following signatures.
+# These need to be greylisted in order to allow applications to write their
+# own serializers.
+$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): REGEX_SERIALIZATION := \
+    "readObject\(Ljava/io/ObjectInputStream;\)V" \
+    "readObjectNoData\(\)V" \
+    "readResolve\(\)Ljava/lang/Object;" \
+    "serialVersionUID:J" \
+    "serialPersistentFields:\[Ljava/io/ObjectStreamField;" \
+    "writeObject\(Ljava/io/ObjectOutputStream;\)V" \
+    "writeReplace\(\)Ljava/lang/Object;"
+$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): PRIVATE_API := $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
 # Temporarily merge light greylist from two files. Vendor list will become dark
 # grey once we remove the UI toast.
 $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): frameworks/base/config/hiddenapi-light-greylist.txt \
-                                               frameworks/base/config/hiddenapi-vendor-list.txt
-	sort $^ > $@
+                                               frameworks/base/config/hiddenapi-vendor-list.txt \
+                                               $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
+	sort frameworks/base/config/hiddenapi-light-greylist.txt \
+	     frameworks/base/config/hiddenapi-vendor-list.txt \
+	     <(grep -E "\->("$(subst $(space),"|",$(REGEX_SERIALIZATION))")$$" $(PRIVATE_API)) \
+	> $@
 
 # Generate dark greylist as private API minus (blacklist plus light greylist).
 
