@@ -16,6 +16,8 @@
 
 package android.media;
 
+import static android.media.MediaPlayerBase.BUFFERING_STATE_UNKNOWN;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -166,13 +168,16 @@ public class MediaController2 implements AutoCloseable {
                 float speed) { }
 
         /**
-         * Called when the player's buffering position
+         * Called to report buffering events for a data source.
+         * <p>
+         * Use {@link #getBufferedPosition()} for current buffering position.
          *
          * @param controller the controller for this event
-         * @param positionMs buffering position in millis
+         * @param item the media item for which buffering is happening.
+         * @param state the new buffering state.
          */
-        public void onBufferedPositionChanged(@NonNull MediaController2 controller,
-                long positionMs) { }
+        public void onBufferingStateChanged(@NonNull MediaController2 controller,
+                @NonNull MediaItem2 item, @MediaPlayerBase.BuffState int state) { }
 
         /**
          * Called when a error from
@@ -193,7 +198,7 @@ public class MediaController2 implements AutoCloseable {
          * @param controller the controller for this event
          * @param item new item
          * @see #onPositionChanged(MediaController2, long, long)
-         * @see #onBufferedPositionChanged(MediaController2, long)
+         * @see #onBufferingStateChanged(MediaController2, MediaItem2, int)
          */
         // TODO(jaewan): Use this (b/74316764)
         public void onCurrentMediaItemChanged(@NonNull MediaController2 controller,
@@ -443,9 +448,11 @@ public class MediaController2 implements AutoCloseable {
     }
 
     /**
+     * Revisit this API later.
      * @hide
      */
     public void skipForward() {
+        // TODO(jaewan): (Post-P) Discuss this API later.
         // To match with KEYCODE_MEDIA_SKIP_FORWARD
     }
 
@@ -453,6 +460,7 @@ public class MediaController2 implements AutoCloseable {
      * @hide
      */
     public void skipBackward() {
+        // TODO(jaewan): (Post-P) Discuss this API later.
         // To match with KEYCODE_MEDIA_SKIP_BACKWARD
     }
 
@@ -598,16 +606,15 @@ public class MediaController2 implements AutoCloseable {
     }
 
     /**
-     * Get the lastly cached position from
-     * {@link ControllerCallback#onPositionChanged(MediaController2, long, long)}.
+     * Gets the current playback position.
      * <p>
      * This returns the calculated value of the position, based on the difference between the
      * update time and current time.
      *
      * @return position
      */
-    public long getPosition() {
-        return mProvider.getPosition_impl();
+    public long getCurrentPosition() {
+        return mProvider.getCurrentPosition_impl();
     }
 
     /**
@@ -627,9 +634,22 @@ public class MediaController2 implements AutoCloseable {
         // TODO(jaewan): implement this (b/74093080)
     }
 
+
     /**
-     * Get the lastly cached buffered position from
-     * {@link ControllerCallback#onBufferedPositionChanged(MediaController2, long)}.
+     * Gets the current buffering state of the player.
+     * During buffering, see {@link #getBufferedPosition()} for the quantifying the amount already
+     * buffered.
+     * @return the buffering state.
+     */
+    public @MediaPlayerBase.BuffState int getBufferingState() {
+        // TODO(jaewan): Implement.
+        return BUFFERING_STATE_UNKNOWN;
+    }
+
+    /**
+     * Gets the lastly cached buffered position from the session when
+     * {@link ControllerCallback#onBufferingStateChanged(MediaController2, MediaItem2, int)} is
+     * called.
      *
      * @return buffering position in millis
      */
