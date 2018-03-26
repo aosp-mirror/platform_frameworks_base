@@ -1505,6 +1505,9 @@ public class PermissionManagerService {
             return EmptyArray.INT;
         }
         for (PackageParser.Package pkg : pkgList) {
+            if (pkg.requestedPermissions == null) {
+                continue;
+            }
             final int requestedPermCount = pkg.requestedPermissions.size();
             for (int j = 0; j < requestedPermCount; j++) {
                 String permission = pkg.requestedPermissions.get(j);
