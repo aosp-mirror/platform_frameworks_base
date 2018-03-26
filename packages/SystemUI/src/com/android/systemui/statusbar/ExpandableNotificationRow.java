@@ -1558,6 +1558,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 }
             }
             invalidateOutline();
+
+            // In order to keep the shelf in sync with this swiping, we're simply translating
+            // it's icon by the same amount. The translation is already being used for the normal
+            // positioning, so we can use the scrollX instead.
+            getEntry().expandedIcon.setScrollX((int) -translationX);
         }
         if (mMenuRow.getMenuView() != null) {
             mMenuRow.onTranslationUpdate(translationX);
