@@ -147,6 +147,9 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
 
     private void handleFingerprintAuthenticated() {
         if (DEBUG) Log.d(TAG, "handleFingerprintAuthenticated");
+        mDialogView.announceForAccessibility(
+                mContext.getResources().getText(
+                        com.android.internal.R.string.fingerprint_authenticated));
         handleHideDialog(false /* userCanceled */);
     }
 
