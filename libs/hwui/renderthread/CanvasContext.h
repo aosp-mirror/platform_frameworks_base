@@ -49,6 +49,7 @@ namespace uirenderer {
 
 class AnimationContext;
 class DeferredLayerUpdater;
+class ErrorHandler;
 class Layer;
 class Rect;
 class RenderState;
@@ -74,8 +75,10 @@ public:
      *
      *  @return true if the layer has been created or updated
      */
-    bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& dmgAccumulator) {
-        return mRenderPipeline->createOrUpdateLayer(node, dmgAccumulator, mWideColorGamut);
+    bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& dmgAccumulator,
+                             ErrorHandler* errorHandler) {
+        return mRenderPipeline->createOrUpdateLayer(node, dmgAccumulator, mWideColorGamut,
+                errorHandler);
     }
 
     /**

@@ -53,7 +53,7 @@ public:
                       const BakedOpRenderer::LightInfo& lightInfo) override;
     TaskManager* getTaskManager() override;
     bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
-                             bool wideColorGamut) override;
+                             bool wideColorGamut, ErrorHandler* errorHandler) override;
     bool pinImages(std::vector<SkImage*>& mutableImages) override { return false; }
     bool pinImages(LsaVector<sk_sp<Bitmap>>& images) override;
     void unpinImages() override;

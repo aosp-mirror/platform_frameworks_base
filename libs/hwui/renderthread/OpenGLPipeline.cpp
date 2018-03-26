@@ -23,6 +23,7 @@
 #include "OpenGLReadback.h"
 #include "ProfileRenderer.h"
 #include "renderstate/RenderState.h"
+#include "TreeInfo.h"
 
 #include <cutils/properties.h>
 #include <strings.h>
@@ -202,7 +203,8 @@ static bool layerMatchesWH(OffscreenBuffer* layer, int width, int height) {
 
 bool OpenGLPipeline::createOrUpdateLayer(RenderNode* node,
                                          const DamageAccumulator& damageAccumulator,
-                                         bool wideColorGamut) {
+                                         bool wideColorGamut,
+                                         ErrorHandler* errorHandler) {
     RenderState& renderState = mRenderThread.renderState();
     OffscreenBufferPool& layerPool = renderState.layerPool();
     bool transformUpdateNeeded = false;
@@ -226,6 +228,22 @@ bool OpenGLPipeline::createOrUpdateLayer(RenderNode* node,
         Matrix4 windowTransform;
         damageAccumulator.computeCurrentTransform(&windowTransform);
         node->getLayer()->setWindowTransform(windowTransform);
+    }
+
+    if (!node->hasLayer()) {
+        Caches::getInstance().dumpMemoryUsage();
+        if (errorHandler) {
+            std::ostringstream err;
+            err << "Unable to create layer for " << node->getName();
+            const int maxTextureSize = Caches::getInstance().maxTextureSize;
+            if (node->getWidth() > maxTextureSize || node->getHeight() > maxTextureSize) {
+                err << ", size " << node->getWidth() << "x" << node->getHeight()
+                    << " exceeds max size " << maxTextureSize;
+            } else {
+                err << ", see logcat for more info";
+            }
+            errorHandler->onError(err.str());
+        }
     }
 
     return transformUpdateNeeded;
