@@ -138,7 +138,9 @@ bool SkiaOpenGLPipeline::copyLayerInto(DeferredLayerUpdater* deferredLayer, SkBi
                                                               SkBudgeted::kYes, bitmap->info());
 
     Layer* layer = deferredLayer->backingLayer();
-    if (LayerDrawable::DrawLayer(mRenderThread.getGrContext(), tmpSurface->getCanvas(), layer)) {
+    const SkRect dstRect = SkRect::MakeIWH(bitmap->width(), bitmap->height());
+    if (LayerDrawable::DrawLayer(mRenderThread.getGrContext(), tmpSurface->getCanvas(), layer,
+                                 &dstRect)) {
         sk_sp<SkImage> tmpImage = tmpSurface->makeImageSnapshot();
         if (tmpImage->readPixels(bitmap->info(), bitmap->getPixels(), bitmap->rowBytes(), 0, 0)) {
             bitmap->notifyPixelsChanged();
