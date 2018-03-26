@@ -29,6 +29,8 @@ import java.util.concurrent.TimeUnit;
  * "kibibyte" as an IEC unit of 1024 bytes.
  * <p>
  * This design is mirrored after {@link TimeUnit} and {@link ChronoUnit}.
+ *
+ * @hide
  */
 public enum DataUnit {
     KILOBYTES { @Override public long toBytes(long v) { return v * 1_000; } },
