@@ -193,6 +193,13 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
     }
 
     @Override
+    public int captureSingleRequest(CaptureRequest request, Executor executor,
+            CaptureCallback listener) throws CameraAccessException {
+        throw new UnsupportedOperationException("Constrained high speed session doesn't support"
+                + " this method");
+    }
+
+    @Override
     public int captureBurst(List<CaptureRequest> requests, CaptureCallback listener,
             Handler handler) throws CameraAccessException {
         if (!isConstrainedHighSpeedRequestList(requests)) {
@@ -204,8 +211,26 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
     }
 
     @Override
+    public int captureBurstRequests(List<CaptureRequest> requests, Executor executor,
+            CaptureCallback listener) throws CameraAccessException {
+        if (!isConstrainedHighSpeedRequestList(requests)) {
+            throw new IllegalArgumentException(
+                "Only request lists created by createHighSpeedRequestList() can be submitted to " +
+                "a constrained high speed capture session");
+        }
+        return mSessionImpl.captureBurstRequests(requests, executor, listener);
+    }
+
+    @Override
     public int setRepeatingRequest(CaptureRequest request, CaptureCallback listener,
             Handler handler) throws CameraAccessException {
+        throw new UnsupportedOperationException("Constrained high speed session doesn't support"
+                + " this method");
+    }
+
+    @Override
+    public int setSingleRepeatingRequest(CaptureRequest request, Executor executor,
+            CaptureCallback listener) throws CameraAccessException {
         throw new UnsupportedOperationException("Constrained high speed session doesn't support"
                 + " this method");
     }
@@ -219,6 +244,17 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
                 "a constrained high speed capture session");
         }
         return mSessionImpl.setRepeatingBurst(requests, listener, handler);
+    }
+
+    @Override
+    public int setRepeatingBurstRequests(List<CaptureRequest> requests, Executor executor,
+            CaptureCallback listener) throws CameraAccessException {
+        if (!isConstrainedHighSpeedRequestList(requests)) {
+            throw new IllegalArgumentException(
+                "Only request lists created by createHighSpeedRequestList() can be submitted to " +
+                "a constrained high speed capture session");
+        }
+        return mSessionImpl.setRepeatingBurstRequests(requests, executor, listener);
     }
 
     @Override
