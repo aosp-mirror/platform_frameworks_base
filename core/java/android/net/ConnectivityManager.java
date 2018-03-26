@@ -3851,8 +3851,8 @@ public class ConnectivityManager {
 
     /**
      * The network watchlist is a list of domains and IP addresses that are associated with
-     * potentially harmful apps. This method returns the hash of the watchlist currently
-     * used by the system.
+     * potentially harmful apps. This method returns the SHA-256 of the watchlist config file
+     * currently used by the system for validation purposes.
      *
      * @return Hash of network watchlist config file. Null if config does not exist.
      */
