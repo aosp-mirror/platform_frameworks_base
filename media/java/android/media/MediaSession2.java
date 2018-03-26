@@ -519,12 +519,20 @@ public class MediaSession2 implements AutoCloseable {
             mProvider.addCommand_impl(command);
         }
 
+        public void addCommand(int commandCode) {
+            // TODO(jaewna): Implement
+        }
+
         public void addAllPredefinedCommands() {
             mProvider.addAllPredefinedCommands_impl();
         }
 
         public void removeCommand(@NonNull Command command) {
             mProvider.removeCommand_impl(command);
+        }
+
+        public void removeCommand(int commandCode) {
+            // TODO(jaewan): Implement.
         }
 
         public boolean hasCommand(@NonNull Command command) {
