@@ -1990,17 +1990,14 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public KeyChainSnapshot getKeyChainSnapshot() throws RemoteException {
+    public @NonNull KeyChainSnapshot getKeyChainSnapshot() throws RemoteException {
         return mRecoverableKeyStoreManager.getKeyChainSnapshot();
     }
 
+    @Override
     public void setSnapshotCreatedPendingIntent(@Nullable PendingIntent intent)
             throws RemoteException {
         mRecoverableKeyStoreManager.setSnapshotCreatedPendingIntent(intent);
-    }
-
-    public Map getRecoverySnapshotVersions() throws RemoteException {
-        return mRecoverableKeyStoreManager.getRecoverySnapshotVersions();
     }
 
     @Override
@@ -2013,7 +2010,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         mRecoverableKeyStoreManager.setRecoveryStatus(alias, status);
     }
 
-    public Map getRecoveryStatus() throws RemoteException {
+    @Override
+    public @NonNull Map getRecoveryStatus() throws RemoteException {
         return mRecoverableKeyStoreManager.getRecoveryStatus();
     }
 
@@ -2024,16 +2022,11 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public int[] getRecoverySecretTypes() throws RemoteException {
+    public @NonNull int[] getRecoverySecretTypes() throws RemoteException {
         return mRecoverableKeyStoreManager.getRecoverySecretTypes();
 
     }
 
-    @Override
-    public int[] getPendingRecoverySecretTypes() throws RemoteException {
-        throw new SecurityException("Not implemented");
-    }
-    
     @Override
     public byte[] startRecoverySession(@NonNull String sessionId,
             @NonNull byte[] verifierPublicKey, @NonNull byte[] vaultParams,
@@ -2044,7 +2037,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public byte[] startRecoverySessionWithCertPath(@NonNull String sessionId,
+    public @NonNull byte[] startRecoverySessionWithCertPath(@NonNull String sessionId,
             @NonNull String rootCertificateAlias, @NonNull RecoveryCertPath verifierCertPath,
             @NonNull byte[] vaultParams, @NonNull byte[] vaultChallenge,
             @NonNull List<KeyChainProtectionParams> secrets)
@@ -2054,6 +2047,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 secrets);
     }
 
+    @Override
     public void closeSession(@NonNull String sessionId) throws RemoteException {
         mRecoverableKeyStoreManager.closeSession(sessionId);
     }
@@ -2068,7 +2062,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public Map<String, byte[]> recoverKeys(@NonNull String sessionId,
+    public @NonNull Map<String, byte[]> recoverKeys(@NonNull String sessionId,
             @NonNull byte[] recoveryKeyBlob, @NonNull List<WrappedApplicationKey> applicationKeys)
             throws RemoteException {
         return mRecoverableKeyStoreManager.recoverKeys(sessionId, recoveryKeyBlob, applicationKeys);
@@ -2085,17 +2079,17 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public String generateKey(@NonNull String alias) throws RemoteException {
+    public @Nullable String generateKey(@NonNull String alias) throws RemoteException {
         return mRecoverableKeyStoreManager.generateKey(alias);
     }
 
     @Override
-    public String importKey(@NonNull String alias, byte[] keyBytes) throws RemoteException {
+    public @Nullable String importKey(@NonNull String alias, byte[] keyBytes) throws RemoteException {
         return mRecoverableKeyStoreManager.importKey(alias, keyBytes);
     }
 
     @Override
-    public String getKey(@NonNull String alias) throws RemoteException {
+    public @Nullable String getKey(@NonNull String alias) throws RemoteException {
         return mRecoverableKeyStoreManager.getKey(alias);
     }
 
