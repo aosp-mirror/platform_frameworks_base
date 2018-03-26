@@ -31,6 +31,8 @@ import android.media.session.MediaSession;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.media.session.MediaSessionManager;
+import android.media.session.MediaSessionManager.RemoteUserInfo;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -112,6 +114,8 @@ public abstract class MediaBrowserService extends Service {
      */
     private class ConnectionRecord implements IBinder.DeathRecipient {
         String pkg;
+        int uid;
+        int pid;
         Bundle rootHints;
         IMediaBrowserServiceCallbacks callbacks;
         BrowserRoot root;
@@ -199,6 +203,7 @@ public abstract class MediaBrowserService extends Service {
         public void connect(final String pkg, final Bundle rootHints,
                 final IMediaBrowserServiceCallbacks callbacks) {
 
+            final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             if (!isValidPackage(pkg, uid)) {
                 throw new IllegalArgumentException("Package/uid mismatch: uid=" + uid
@@ -215,9 +220,14 @@ public abstract class MediaBrowserService extends Service {
 
                         final ConnectionRecord connection = new ConnectionRecord();
                         connection.pkg = pkg;
+                        connection.pid = pid;
+                        connection.uid = uid;
                         connection.rootHints = rootHints;
                         connection.callbacks = callbacks;
+
+                        mCurConnection = connection;
                         connection.root = MediaBrowserService.this.onGetRoot(pkg, uid, rootHints);
+                        mCurConnection = null;
 
                         // If they didn't return something, don't allow this client.
                         if (connection.root == null) {
@@ -505,18 +515,33 @@ public abstract class MediaBrowserService extends Service {
      * media browser service when connecting and retrieving the root id for browsing, or null if
      * none. The contents of this bundle may affect the information returned when browsing.
      *
-     * @throws IllegalStateException If this method is called outside of {@link #onLoadChildren} or
-     *             {@link #onLoadItem}.
+     * @throws IllegalStateException If this method is called outside of {@link #onGetRoot} or
+     *             {@link #onLoadChildren} or {@link #onLoadItem}.
      * @see MediaBrowserService.BrowserRoot#EXTRA_RECENT
      * @see MediaBrowserService.BrowserRoot#EXTRA_OFFLINE
      * @see MediaBrowserService.BrowserRoot#EXTRA_SUGGESTED
      */
     public final Bundle getBrowserRootHints() {
         if (mCurConnection == null) {
-            throw new IllegalStateException("This should be called inside of onLoadChildren or"
-                    + " onLoadItem methods");
+            throw new IllegalStateException("This should be called inside of onGetRoot or"
+                    + " onLoadChildren or onLoadItem methods");
         }
         return mCurConnection.rootHints == null ? null : new Bundle(mCurConnection.rootHints);
+    }
+
+    /**
+     * Gets the browser information who sent the current request.
+     *
+     * @throws IllegalStateException If this method is called outside of {@link #onGetRoot} or
+     *             {@link #onLoadChildren} or {@link #onLoadItem}.
+     * @see MediaSessionManager#isTrustedForMediaControl(RemoteUserInfo)
+     */
+    public final RemoteUserInfo getCurrentBrowserInfo() {
+        if (mCurConnection == null) {
+            throw new IllegalStateException("This should be called inside of onGetRoot or"
+                    + " onLoadChildren or onLoadItem methods");
+        }
+        return new RemoteUserInfo(mCurConnection.pkg, mCurConnection.pid, mCurConnection.uid);
     }
 
     /**
