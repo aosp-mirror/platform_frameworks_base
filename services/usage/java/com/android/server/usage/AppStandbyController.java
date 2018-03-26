@@ -198,6 +198,10 @@ public class AppStandbyController {
     long mSystemUpdateUsageTimeoutMillis;
     /** Maximum time to wait for a prediction before using simple timeouts to downgrade buckets. */
     long mPredictionTimeoutMillis;
+    /** Maximum time a sync adapter associated with a CP should keep the buckets elevated. */
+    long mSyncAdapterTimeoutMillis;
+    /** Maximum time a system interaction should keep the buckets elevated. */
+    long mSystemInteractionTimeoutMillis;
 
     volatile boolean mAppIdleEnabled;
     boolean mAppIdleTempParoled;
@@ -357,8 +361,8 @@ public class AppStandbyController {
                     synchronized (mAppIdleLock) {
                         AppUsageHistory appUsage = mAppIdleHistory.reportUsage(packageName, userId,
                                 STANDBY_BUCKET_ACTIVE, REASON_SUB_USAGE_SYNC_ADAPTER,
-                                elapsedRealtime,
-                                elapsedRealtime + mStrongUsageTimeoutMillis);
+                                0,
+                                elapsedRealtime + mSyncAdapterTimeoutMillis);
                         maybeInformListeners(packageName, userId, elapsedRealtime,
                                 appUsage.currentBucket, appUsage.bucketingReason, false);
                     }
@@ -708,7 +712,11 @@ public class AppStandbyController {
                             STANDBY_BUCKET_WORKING_SET, subReason,
                             0, elapsedRealtime + mNotificationSeenTimeoutMillis);
                     nextCheckTime = mNotificationSeenTimeoutMillis;
-
+                } else if (event.mEventType == UsageEvents.Event.SYSTEM_INTERACTION) {
+                    mAppIdleHistory.reportUsage(appHistory, event.mPackage,
+                            STANDBY_BUCKET_ACTIVE, subReason,
+                            0, elapsedRealtime + mSystemInteractionTimeoutMillis);
+                    nextCheckTime = mSystemInteractionTimeoutMillis;
                 } else {
                     mAppIdleHistory.reportUsage(appHistory, event.mPackage,
                             STANDBY_BUCKET_ACTIVE, subReason,
@@ -1523,6 +1531,14 @@ public class AppStandbyController {
         private static final String KEY_SYSTEM_UPDATE_HOLD_DURATION =
                 "system_update_usage_duration";
         private static final String KEY_PREDICTION_TIMEOUT = "prediction_timeout";
+        private static final String KEY_SYNC_ADAPTER_HOLD_DURATION = "sync_adapter_duration";
+        private static final String KEY_SYSTEM_INTERACTION_HOLD_DURATION =
+                "system_interaction_duration";
+        public static final long DEFAULT_STRONG_USAGE_TIMEOUT = 1 * ONE_HOUR;
+        public static final long DEFAULT_NOTIFICATION_TIMEOUT = 12 * ONE_HOUR;
+        public static final long DEFAULT_SYSTEM_UPDATE_TIMEOUT = 2 * ONE_HOUR;
+        public static final long DEFAULT_SYSTEM_INTERACTION_TIMEOUT = 10 * ONE_MINUTE;
+        public static final long DEFAULT_SYNC_ADAPTER_TIMEOUT = 10 * ONE_MINUTE;
 
         private final KeyValueListParser mParser = new KeyValueListParser(',');
 
@@ -1585,16 +1601,22 @@ public class AppStandbyController {
                         COMPRESS_TIME ? ONE_MINUTE : 4 * 60 * ONE_MINUTE); // 4 hours
                 mStrongUsageTimeoutMillis = mParser.getDurationMillis
                         (KEY_STRONG_USAGE_HOLD_DURATION,
-                                COMPRESS_TIME ? ONE_MINUTE : 1 * ONE_HOUR);
+                                COMPRESS_TIME ? ONE_MINUTE : DEFAULT_STRONG_USAGE_TIMEOUT);
                 mNotificationSeenTimeoutMillis = mParser.getDurationMillis
                         (KEY_NOTIFICATION_SEEN_HOLD_DURATION,
-                                COMPRESS_TIME ? 12 * ONE_MINUTE : 12 * ONE_HOUR);
+                                COMPRESS_TIME ? 12 * ONE_MINUTE : DEFAULT_NOTIFICATION_TIMEOUT);
                 mSystemUpdateUsageTimeoutMillis = mParser.getDurationMillis
                         (KEY_SYSTEM_UPDATE_HOLD_DURATION,
-                                COMPRESS_TIME ? 2 * ONE_MINUTE : 2 * ONE_HOUR);
+                                COMPRESS_TIME ? 2 * ONE_MINUTE : DEFAULT_SYSTEM_UPDATE_TIMEOUT);
                 mPredictionTimeoutMillis = mParser.getDurationMillis
                         (KEY_PREDICTION_TIMEOUT,
                                 COMPRESS_TIME ? 10 * ONE_MINUTE : DEFAULT_PREDICTION_TIMEOUT);
+                mSyncAdapterTimeoutMillis = mParser.getDurationMillis
+                        (KEY_SYNC_ADAPTER_HOLD_DURATION,
+                                COMPRESS_TIME ? ONE_MINUTE : DEFAULT_SYNC_ADAPTER_TIMEOUT);
+                mSystemInteractionTimeoutMillis = mParser.getDurationMillis
+                        (KEY_SYSTEM_INTERACTION_HOLD_DURATION,
+                                COMPRESS_TIME ? ONE_MINUTE : DEFAULT_SYSTEM_INTERACTION_TIMEOUT);
             }
         }
 
