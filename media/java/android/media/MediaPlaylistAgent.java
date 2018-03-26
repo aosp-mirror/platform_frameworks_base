@@ -337,16 +337,21 @@ public abstract class MediaPlaylistAgent {
     }
 
     /**
-     * Gets a {@link MediaItem2} in the playlist that matches given {@code dsd}.
-     * You can override this method to have more finer control of updating {@link DataSourceDesc}
-     * on items in the playlist.
+     * Called by {@link MediaSession2} when it wants to translate {@link DataSourceDesc} from the
+     * {@link MediaPlayerBase.PlayerEventCallback} to the {@link MediaItem2}. Override this method
+     * if you want to create {@link DataSourceDesc}s dynamically, instead of specifying them with
+     * {@link #setPlaylist(List, MediaMetadata2)}.
+     * <p>
+     * Session would throw an exception if this returns {@code null} for {@param dsd} from the
+     * {@link MediaPlayerBase.PlayerEventCallback}.
+     * <p>
+     * Default implementation calls the {@link #getPlaylist()} and searches the {@link MediaItem2}
+     * with the {@param dsd}.
      *
+     * @param dsd The dsd to query.
      * @return A {@link MediaItem2} object in the playlist that matches given {@code dsd}.
-     *         {@code null} if playlist is not set, or if the playlist has no matching item.
      * @throws IllegalArgumentException if {@code dsd} is null
-     * @hide
      */
-    // TODO(jaewan): Unhide
     public @Nullable MediaItem2 getMediaItem(@NonNull DataSourceDesc dsd) {
         return mProvider.getMediaItem_impl(dsd);
     }
