@@ -15,6 +15,15 @@ import java.util.ArrayList;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class RecoverySnapshotStorageTest {
+    private static final KeyChainSnapshot MINIMAL_KEYCHAIN_SNAPSHOT = new KeyChainSnapshot.Builder()
+            .setCounterId(1)
+            .setSnapshotVersion(1)
+            .setServerParams(new byte[0])
+            .setMaxAttempts(10)
+            .setEncryptedRecoveryKeyBlob(new byte[0])
+            .setKeyChainProtectionParams(new ArrayList<>())
+            .setWrappedApplicationKeys(new ArrayList<>())
+            .build();
 
     private final RecoverySnapshotStorage mRecoverySnapshotStorage = new RecoverySnapshotStorage();
 
@@ -26,26 +35,17 @@ public class RecoverySnapshotStorageTest {
     @Test
     public void get_returnsSetSnapshot() {
         int userId = 1000;
-        KeyChainSnapshot keyChainSnapshot = new KeyChainSnapshot(
-                /*snapshotVersion=*/ 1,
-                new ArrayList<>(),
-                new ArrayList<>(),
-                new byte[0]);
-        mRecoverySnapshotStorage.put(userId, keyChainSnapshot);
 
-        assertEquals(keyChainSnapshot, mRecoverySnapshotStorage.get(userId));
+        mRecoverySnapshotStorage.put(userId, MINIMAL_KEYCHAIN_SNAPSHOT);
+
+        assertEquals(MINIMAL_KEYCHAIN_SNAPSHOT, mRecoverySnapshotStorage.get(userId));
     }
 
     @Test
     public void remove_removesSnapshots() {
         int userId = 1000;
-        KeyChainSnapshot keyChainSnapshot = new KeyChainSnapshot(
-                /*snapshotVersion=*/ 1,
-                new ArrayList<>(),
-                new ArrayList<>(),
-                new byte[0]);
-        mRecoverySnapshotStorage.put(userId, keyChainSnapshot);
 
+        mRecoverySnapshotStorage.put(userId, MINIMAL_KEYCHAIN_SNAPSHOT);
         mRecoverySnapshotStorage.remove(userId);
 
         assertNull(mRecoverySnapshotStorage.get(1000));
