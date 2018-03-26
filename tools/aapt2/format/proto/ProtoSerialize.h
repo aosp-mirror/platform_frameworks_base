@@ -46,13 +46,13 @@ void SerializeXmlResourceToPb(const xml::XmlResource& resource, pb::XmlNode* out
 
 // Serializes a StringPool into its protobuf representation, which is really just the binary
 // ResStringPool representation stuffed into a bytes field.
-void SerializeStringPoolToPb(const StringPool& pool, pb::StringPool* out_pb_pool);
+void SerializeStringPoolToPb(const StringPool& pool, pb::StringPool* out_pb_pool, IDiagnostics* diag);
 
 // Serializes a ConfigDescription into its protobuf representation.
 void SerializeConfig(const ConfigDescription& config, pb::Configuration* out_pb_config);
 
 // Serializes a ResourceTable into its protobuf representation.
-void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table);
+void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table, IDiagnostics* diag);
 
 // Serializes a ResourceFile into its protobuf representation.
 void SerializeCompiledFileToPb(const ResourceFile& file, pb::internal::CompiledFile* out_file);

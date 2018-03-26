@@ -226,7 +226,7 @@ class ProtoApkSerializer : public IApkSerializer {
 
   bool SerializeTable(ResourceTable* table, IArchiveWriter* writer) override {
     pb::ResourceTable pb_table;
-    SerializeTableToPb(*table, &pb_table);
+    SerializeTableToPb(*table, &pb_table, context_->GetDiagnostics());
     return io::CopyProtoToArchive(context_, &pb_table, kProtoResourceTablePath,
                                   ArchiveEntry::kCompress, writer);
   }
