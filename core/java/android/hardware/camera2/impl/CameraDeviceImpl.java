@@ -2349,7 +2349,7 @@ public class CameraDeviceImpl extends CameraDevice
      *
      * <p>If the callback isn't null, check the executor, otherwise pass it through.</p>
      */
-    static <T> Executor checkExecutor(Executor executor, T callback) {
+    public static <T> Executor checkExecutor(Executor executor, T callback) {
         return (callback != null) ? checkExecutor(executor) : executor;
     }
 
