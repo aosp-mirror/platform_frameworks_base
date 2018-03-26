@@ -38,12 +38,9 @@
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Преостануваат <xliff:g id="PERCENTAGE">%s</xliff:g>, уште околу <xliff:g id="TIME">%s</xliff:g> според користењето"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Преостануваат <xliff:g id="PERCENTAGE">%s</xliff:g>, уште околу <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Преостануваат <xliff:g id="PERCENTAGE">%s</xliff:g>. Штедачот на батерија е вклучен."</string>
-    <!-- no translation found for invalid_charger (2741987096648693172) -->
-    <skip />
-    <!-- no translation found for invalid_charger_title (2836102177577255404) -->
-    <skip />
-    <!-- no translation found for invalid_charger_text (6480624964117840005) -->
-    <skip />
+    <string name="invalid_charger" msgid="2741987096648693172">"Не може да се полни преку USB. Користете го полначот што дојде со вашиот уред."</string>
+    <string name="invalid_charger_title" msgid="2836102177577255404">"Не може да се полни преку USB"</string>
+    <string name="invalid_charger_text" msgid="6480624964117840005">"Користете го полначот што дојде со вашиот уред"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"Поставки"</string>
     <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"Да се вклучи штедачот на батерија?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"Вклучи"</string>
@@ -151,7 +148,6 @@
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Поврзана."</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Се поврзува."</string>
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
-    <string name="data_connection_1x" msgid="396105635197711584">"1 X"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
     <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
     <string name="data_connection_3_5g" msgid="5218328297191657602">"3.5G"</string>
@@ -211,8 +207,7 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Авионскиот режим е вклучен."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Авионскиот режим е исклучен."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Авионскиот режим е вклучен."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_priority_on (5836205286254617194) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"„Не вознемирувај“ е вклучено."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"„Не вознемирувај“ е вклучено, целосна тишина."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"„Не вознемирувај“ е вклучено, само аларми."</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Не вознемирувај."</string>
@@ -278,7 +273,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"Dessert Case"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Заштитник на екран"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Етернет"</string>
-    <string name="quick_settings_header_onboarding_text" msgid="7872508260264044734">"Притиснете и задржете ги иконите за повеќе опции"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (8030309023792936283) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Не вознемирувај"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Само приоритетно"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Само аларми"</string>
@@ -437,8 +433,7 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ќе започне да презема сѐ што се прикажува на вашиот екран."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Не покажувај повторно"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Исчисти сè"</string>
-    <!-- no translation found for dnd_suppressing_shade_text (7986451830430707907) -->
-    <skip />
+    <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"„Не вознемирувај“ ги крие известувањата"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Започни сега"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Нема известувања"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Профилот можеби се следи"</string>
@@ -544,8 +539,6 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Допрете за да се постави на вибрации."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Допрете за да се исклучи звукот."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"Контроли на јачината на звукот за %s"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"Повиците и известувањата ќе вибрираат"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Повиците и известувањата нема да имаат звук"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"Повиците и известувањата ќе ѕвонат"</string>
     <string name="output_title" msgid="5355078100792942802">"Излез за аудиовизуелни содржини"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Излез за телефонски повик"</string>
@@ -730,8 +723,9 @@
     <string name="right_keycode" msgid="708447961000848163">"Код за десно копче"</string>
     <string name="left_icon" msgid="3096287125959387541">"Лева икона"</string>
     <string name="right_icon" msgid="3952104823293824311">"Десна икона"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Повлечете за додавање плочки"</string>
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"Задржете и влечете за да додадете плочки"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Повлечете тука за да се отстрани"</string>
+    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Потребни ви се најмалку 6 плочки"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Измени"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Време"</string>
   <string-array name="clock_options">
@@ -835,7 +829,9 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Замени"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Апликациите се извршуваат во заднина"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Допрете за детали за батеријата и потрошениот сообраќај"</string>
-    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Да се исклучи мобилниот интернет?"</string>
+    <string name="mobile_data_disable_title" msgid="1068272097382942231">"Да се исклучи ли мобилниот интернет?"</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"Нема да имате пристап до податоците или интернетот преку <xliff:g id="CARRIER">%s</xliff:g>. Интернетот ќе биде достапен само преку Wi-Fi."</string>
+    <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"вашиот оператор"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Бидејќи апликацијата го прикрива барањето за дозвола, „Поставките“ не може да го потврдат вашиот одговор."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"Дали да се дозволи <xliff:g id="APP_0">%1$s</xliff:g> да прикажува делови од <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- Може да чита информации од <xliff:g id="APP">%1$s</xliff:g>"</string>

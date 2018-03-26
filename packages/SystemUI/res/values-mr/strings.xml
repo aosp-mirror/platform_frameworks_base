@@ -38,12 +38,9 @@
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> बाकी, तुमच्या वापरावर आधारित सुमारे <xliff:g id="TIME">%s</xliff:g> शिल्लक"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> बाकी, सुमारे <xliff:g id="TIME">%s</xliff:g> शिल्लक"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> शिल्लक. बॅटरी सेव्‍हर चालू आहे."</string>
-    <!-- no translation found for invalid_charger (2741987096648693172) -->
-    <skip />
-    <!-- no translation found for invalid_charger_title (2836102177577255404) -->
-    <skip />
-    <!-- no translation found for invalid_charger_text (6480624964117840005) -->
-    <skip />
+    <string name="invalid_charger" msgid="2741987096648693172">"USB द्वारे चार्ज करू शकत नाही. तुमच्या डिव्हाइससह आलेल्‍या चार्जरचा वापर करा."</string>
+    <string name="invalid_charger_title" msgid="2836102177577255404">"USB द्वारे चार्ज होऊ शकत नाही"</string>
+    <string name="invalid_charger_text" msgid="6480624964117840005">"तुमच्या डिव्हाइससह आलेल्या चार्जरचा वापर करा"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"सेटिंग्ज"</string>
     <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"बॅटरी सेव्हर सुरू करायचा का?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"चालू करा"</string>
@@ -151,12 +148,10 @@
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"कनेक्‍ट केले."</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"कनेक्ट करत आहे."</string>
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
-    <string name="data_connection_1x" msgid="396105635197711584">"१ X"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
     <string name="data_connection_3g" msgid="503045449315378373">"३G"</string>
     <string name="data_connection_3_5g" msgid="5218328297191657602">"३.५G"</string>
-    <!-- no translation found for data_connection_3_5g_plus (7570783890290275297) -->
-    <skip />
+    <string name="data_connection_3_5g_plus" msgid="7570783890290275297">"३.५G+"</string>
     <string name="data_connection_4g" msgid="9139963475267449144">"४G"</string>
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"४G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
@@ -212,8 +207,7 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"विमान मोड चालू."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"विमान मोड बंद केला."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"विमान मोड चालू केला."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_priority_on (5836205286254617194) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"व्यत्यय आणू नका सुरू आहे."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"व्यत्यय आणू नका चालू, संपूर्ण शांतता."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"व्यत्यय आणू नका चालू, केवळ अलार्म."</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"व्यत्यय आणू नका."</string>
@@ -279,7 +273,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"मिष्ठान्न प्रकरण"</string>
     <string name="start_dreams" msgid="5640361424498338327">"स्क्रीन सेव्हर"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"इथरनेट"</string>
-    <string name="quick_settings_header_onboarding_text" msgid="7872508260264044734">"अधिक पर्यायांसाठी आयकन दाबा आणि धरून ठेवा"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (8030309023792936283) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"व्यत्यय आणू नका"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"केवळ प्राधान्य"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"केवळ अलार्म"</string>
@@ -438,8 +433,7 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> आपल्‍या स्‍क्रीनवर प्रदर्शित होणारी प्रत्‍येक गोष्‍ट कॅप्‍चर करणे प्रारंभ करेल."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"पुन्हा दर्शवू नका"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"सर्व साफ करा"</string>
-    <!-- no translation found for dnd_suppressing_shade_text (7986451830430707907) -->
-    <skip />
+    <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"व्यत्यय आणू नका सूचना लपवत आहे"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"आता सुरू करा"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"सूचना नाहीत"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"प्रोफाईलचे परीक्षण केले जाऊ शकते"</string>
@@ -507,8 +501,7 @@
     <string name="hidden_notifications_setup" msgid="41079514801976810">"सेट अप"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="6930243045593601084">"आता बंद करा"</string>
-    <!-- no translation found for accessibility_volume_settings (4915364006817819212) -->
-    <skip />
+    <string name="accessibility_volume_settings" msgid="4915364006817819212">"आवाज सेटिंग्ज"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"विस्तृत करा"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"संकुचित करा"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"आउटपुट डिव्‍हाइस स्विच करा"</string>
@@ -546,8 +539,6 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. कंपन सेट करण्यासाठी टॅप करा."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. नि:शब्द करण्यासाठी टॅप करा."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s व्हॉल्यूम नियंत्रण"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"कॉल आणि सूचनांवर व्हायब्रेट होईल"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"कॉल आणि सूचना म्युट केल्या जातील"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"कॉल अन्नि सूचना रिंग करा"</string>
     <string name="output_title" msgid="5355078100792942802">"मीडिया आउटपुट"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"फोन कॉल आउटपुट"</string>
@@ -732,8 +723,11 @@
     <string name="right_keycode" msgid="708447961000848163">"उजवा कीकोड"</string>
     <string name="left_icon" msgid="3096287125959387541">"डावे आयकन"</string>
     <string name="right_icon" msgid="3952104823293824311">"उजवे आयकन"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"टाइल जोडण्यासाठी ड्रॅग करा"</string>
+    <!-- no translation found for drag_to_add_tiles (230586591689084925) -->
+    <skip />
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"काढण्यासाठी येथे ड्रॅग करा"</string>
+    <!-- no translation found for drag_to_remove_disabled (2390968976638993382) -->
+    <skip />
     <string name="qs_edit" msgid="2232596095725105230">"संपादित करा"</string>
     <string name="tuner_time" msgid="6572217313285536011">"वेळ"</string>
   <string-array name="clock_options">
@@ -837,7 +831,12 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"पुनर्स्थित करा"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"अॅप्‍स बॅकग्राउंडमध्‍ये चालू आहेत"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"बॅटरी आणि डेटा वापराच्‍या तपशीलांसाठी टॅप करा"</string>
-    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"मोबाइल डेटा बंद करायचा?"</string>
+    <!-- no translation found for mobile_data_disable_title (1068272097382942231) -->
+    <skip />
+    <!-- no translation found for mobile_data_disable_message (4756541658791493506) -->
+    <skip />
+    <!-- no translation found for mobile_data_disable_message_default_carrier (6078110473451946831) -->
+    <skip />
     <string name="touch_filtered_warning" msgid="8671693809204767551">"अ‍ॅप परवानगी विनंती अस्पष्‍ट करत असल्‍याने, सेटिंग्ज तुमचा प्रतिसाद पडताळू शकत नाहीत."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g> ला <xliff:g id="APP_2">%2$s</xliff:g> चे तुकडे दाखवण्याची अनुमती द्यायची का?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- ते <xliff:g id="APP">%1$s</xliff:g> ची माहिती वाचू शकते"</string>

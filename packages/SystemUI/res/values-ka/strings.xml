@@ -38,12 +38,9 @@
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"დარჩენილია <xliff:g id="PERCENTAGE">%s</xliff:g>, რაც დაახლოებით <xliff:g id="TIME">%s</xliff:g> არის, მოხმარების გათვალისწინებით"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"დარჩენილია <xliff:g id="PERCENTAGE">%s</xliff:g>, რაც დაახლოებით <xliff:g id="TIME">%s</xliff:g> არის"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"დარჩენილია <xliff:g id="PERCENTAGE">%s</xliff:g>. ბატარეის დამზოგი ჩართულია."</string>
-    <!-- no translation found for invalid_charger (2741987096648693172) -->
-    <skip />
-    <!-- no translation found for invalid_charger_title (2836102177577255404) -->
-    <skip />
-    <!-- no translation found for invalid_charger_text (6480624964117840005) -->
-    <skip />
+    <string name="invalid_charger" msgid="2741987096648693172">"USB-თ დატენვა ვერ ხერხდება. გამოიყენეთ დამტენი, რომელიც თქვენს მოწყობილობას მოჰყვა."</string>
+    <string name="invalid_charger_title" msgid="2836102177577255404">"USB-თ დატენვა ვერ ხერხდება"</string>
+    <string name="invalid_charger_text" msgid="6480624964117840005">"გამოიყენეთ დამტენი, რომელიც თქვენს მოწყობილობას მოჰყვა"</string>
     <string name="battery_low_why" msgid="4553600287639198111">"პარამეტრები"</string>
     <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"გსურთ ბატარეის დამზოგის ჩართვა?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"ჩართვა"</string>
@@ -151,7 +148,6 @@
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"დაკავშირებულია."</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"უკავშირდება."</string>
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
-    <string name="data_connection_1x" msgid="396105635197711584">"1 X"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
     <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
     <string name="data_connection_3_5g" msgid="5218328297191657602">"3.5G"</string>
@@ -211,8 +207,7 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"თვითმფრინავის რეჟიმი ჩართულია."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"თვითმფრინავის რეჟიმი გამოირთო."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"თვითმფრინავის რეჟიმი ჩაირთო."</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_priority_on (5836205286254617194) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="5836205286254617194">"„არ შემაწუხოთ“ ჩართულია."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"„ნუ შემაწუხებთ“ ჩართულია, სრული სიჩუმე."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"„ნუ შემაწუხებთ“ ჩართულია, მხოლოდ გაფრთხილებები."</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"არ შემაწუხოთ."</string>
@@ -278,7 +273,8 @@
     <string name="dessert_case" msgid="1295161776223959221">"სადესერტო ყუთი"</string>
     <string name="start_dreams" msgid="5640361424498338327">"ეკრანმზოგი"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ეთერნეტი"</string>
-    <string name="quick_settings_header_onboarding_text" msgid="7872508260264044734">"ხანგრძლივად დააჭირეთ ხატულებს დამატებითი ვარიანტებისთვის"</string>
+    <!-- no translation found for quick_settings_header_onboarding_text (8030309023792936283) -->
+    <skip />
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"არ შემაწუხოთ"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"მხოლოდ პრიორიტეტული"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"მხოლოდ გაფრთხილებები"</string>
@@ -437,8 +433,7 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> დაიწყებს იმ ყველაფრის აღბეჭდვას, რაც თქვენს ეკრანზე ჩანს."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"აღარ მაჩვენო"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ყველას გასუფთავება"</string>
-    <!-- no translation found for dnd_suppressing_shade_text (7986451830430707907) -->
-    <skip />
+    <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"„არ შემაწუხოთ“ რეჟიმი მალავს შეტყობინებებს"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"დაწყება ახლავე"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"შეტყობინებები არ არის."</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"შესაძლოა პროფილზე ხორციელდებოდეს მონიტორინგი"</string>
@@ -544,8 +539,6 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. შეეხეთ ვიბრაციაზე დასაყენებლად."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. შეეხეთ დასადუმებლად."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s-ის ხმის მართვის საშუალებები"</string>
-    <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"ზარების და შეტყობინებების მიღებისას ვიბრაცია ჩაირთვება"</string>
-    <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"ზარები და შეტყობინებები დადუმებული იქნება"</string>
     <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"ზარები და შეტყობინებები ხმის თანხლებით იქნება"</string>
     <string name="output_title" msgid="5355078100792942802">"მედია გამომავალი"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"სატელეფონო ზარის გამომავალი სიგნალი"</string>
@@ -730,8 +723,9 @@
     <string name="right_keycode" msgid="708447961000848163">"მარჯვენა კლავიშის კოდი"</string>
     <string name="left_icon" msgid="3096287125959387541">"მარცხენა ხატულა"</string>
     <string name="right_icon" msgid="3952104823293824311">"მარჯვენა ხატულა"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"ფაილების დასამატებლად, გადაიტანეთ ჩავლებით"</string>
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"ჩავლებით გადაიტანეთ ბლოკების დასამატებლად"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ამოსაშლელად, ჩავლებით გადმოიტანეთ აქ"</string>
+    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"გჭირდებათ მინიმუმ 6 ბლოკი"</string>
     <string name="qs_edit" msgid="2232596095725105230">"რედაქტირება"</string>
     <string name="tuner_time" msgid="6572217313285536011">"დრო"</string>
   <string-array name="clock_options">
@@ -835,7 +829,9 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"ჩანაცვლება"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"ფონურ რეჟიმში გაშვებული აპები"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"შეეხეთ ბატარეისა და მონაცემების მოხმარების შესახებ დეტალური ინფორმაციისთვის"</string>
-    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"გსურთ მობილური ინტერნეტის გამორთვა?"</string>
+    <string name="mobile_data_disable_title" msgid="1068272097382942231">"გსურთ მობილური ინტერნეტის გამორთვა?"</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"თქვენ არ გექნებათ მობილურ ინტერნეტზე ან ზოგადად ინტერნეტზე წვდომა <xliff:g id="CARRIER">%s</xliff:g>-ის მეშვეობით. ინტერნეტი მხოლოდ Wi-Fi-კავშირის მეშვეობით იქნება ხელმისაწვდომი."</string>
+    <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"თქვენი ოპერატორი"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"ვინაიდან აპი ფარავს ნებართვის მოთხოვნას, პარამეტრების მიერ თქვენი პასუხი ვერ დასტურდება."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"ანიჭებთ ნებართვას <xliff:g id="APP_0">%1$s</xliff:g>-ს, აჩვენოს <xliff:g id="APP_2">%2$s</xliff:g>-ის ფრაგმენტები?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- მას შეუძლია ინფორმაციის <xliff:g id="APP">%1$s</xliff:g>-დან წაკითხვა"</string>
