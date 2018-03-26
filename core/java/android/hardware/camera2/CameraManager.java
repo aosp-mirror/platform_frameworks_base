@@ -16,6 +16,7 @@
 
 package android.hardware.camera2;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -134,6 +135,27 @@ public final class CameraManager {
     }
 
     /**
+     * Register a callback to be notified about camera device availability.
+     *
+     * <p>The behavior of this method matches that of
+     * {@link #registerAvailabilityCallback(AvailabilityCallback, Handler)},
+     * except that it uses {@link java.util.concurrent.Executor} as an argument
+     * instead of {@link android.os.Handler}.</p>
+     *
+     * @param executor The executor which will be used to invoke the callback.
+     * @param callback the new callback to send camera availability notices to
+     *
+     * @throws IllegalArgumentException if the executor is {@code null}.
+     */
+    public void registerAvailabilityCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull AvailabilityCallback callback) {
+        if (executor == null) {
+            throw new IllegalArgumentException("executor was null");
+        }
+        CameraManagerGlobal.get().registerAvailabilityCallback(callback, executor);
+    }
+
+    /**
      * Remove a previously-added callback; the callback will no longer receive connection and
      * disconnection callbacks.
      *
@@ -170,6 +192,27 @@ public final class CameraManager {
     public void registerTorchCallback(@NonNull TorchCallback callback, @Nullable Handler handler) {
         CameraManagerGlobal.get().registerTorchCallback(callback,
                 CameraDeviceImpl.checkAndWrapHandler(handler));
+    }
+
+    /**
+     * Register a callback to be notified about torch mode status.
+     *
+     * <p>The behavior of this method matches that of
+     * {@link #registerTorchCallback(TorchCallback, Handler)},
+     * except that it uses {@link java.util.concurrent.Executor} as an argument
+     * instead of {@link android.os.Handler}.</p>
+     *
+     * @param executor The executor which will be used to invoke the callback
+     * @param callback The new callback to send torch mode status to
+     *
+     * @throws IllegalArgumentException if the executor is {@code null}.
+     */
+    public void registerTorchCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull TorchCallback callback) {
+        if (executor == null) {
+            throw new IllegalArgumentException("executor was null");
+        }
+        CameraManagerGlobal.get().registerTorchCallback(callback, executor);
     }
 
     /**
@@ -248,7 +291,7 @@ public final class CameraManager {
      *
      * @param cameraId The unique identifier of the camera device to open
      * @param callback The callback for the camera. Must not be null.
-     * @param handler  The handler to invoke the callback on. Must not be null.
+     * @param executor The executor to invoke the callback with. Must not be null.
      * @param uid      The UID of the application actually opening the camera.
      *                 Must be USE_CALLING_UID unless the caller is a service
      *                 that is trusted to open the device on behalf of an
@@ -267,7 +310,7 @@ public final class CameraManager {
      * @see android.app.admin.DevicePolicyManager#setCameraDisabled
      */
     private CameraDevice openCameraDeviceUserAsync(String cameraId,
-            CameraDevice.StateCallback callback, Handler handler, final int uid)
+            CameraDevice.StateCallback callback, Executor executor, final int uid)
             throws CameraAccessException {
         CameraCharacteristics characteristics = getCameraCharacteristics(cameraId);
         CameraDevice device = null;
@@ -280,7 +323,7 @@ public final class CameraManager {
                     new android.hardware.camera2.impl.CameraDeviceImpl(
                         cameraId,
                         callback,
-                        handler,
+                        executor,
                         characteristics,
                         mContext.getApplicationInfo().targetSdkVersion);
 
@@ -421,7 +464,47 @@ public final class CameraManager {
             @NonNull final CameraDevice.StateCallback callback, @Nullable Handler handler)
             throws CameraAccessException {
 
-        openCameraForUid(cameraId, callback, handler, USE_CALLING_UID);
+        openCameraForUid(cameraId, callback, CameraDeviceImpl.checkAndWrapHandler(handler),
+                USE_CALLING_UID);
+    }
+
+    /**
+     * Open a connection to a camera with the given ID.
+     *
+     * <p>The behavior of this method matches that of
+     * {@link #openCamera(String, StateCallback, Handler)}, except that it uses
+     * {@link java.util.concurrent.Executor} as an argument instead of
+     * {@link android.os.Handler}.</p>
+     *
+     * @param cameraId
+     *             The unique identifier of the camera device to open
+     * @param executor
+     *             The executor which will be used when invoking the callback.
+     * @param callback
+     *             The callback which is invoked once the camera is opened
+     *
+     * @throws CameraAccessException if the camera is disabled by device policy,
+     * has been disconnected, or is being used by a higher-priority camera API client.
+     *
+     * @throws IllegalArgumentException if cameraId, the callback or the executor was null,
+     * or the cameraId does not match any currently or previously available
+     * camera device.
+     *
+     * @throws SecurityException if the application does not have permission to
+     * access the camera
+     *
+     * @see #getCameraIdList
+     * @see android.app.admin.DevicePolicyManager#setCameraDisabled
+     */
+    @RequiresPermission(android.Manifest.permission.CAMERA)
+    public void openCamera(@NonNull String cameraId,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull final CameraDevice.StateCallback callback)
+            throws CameraAccessException {
+        if (executor == null) {
+            throw new IllegalArgumentException("executor was null");
+        }
+        openCameraForUid(cameraId, callback, executor, USE_CALLING_UID);
     }
 
     /**
@@ -440,7 +523,7 @@ public final class CameraManager {
      * @hide
      */
     public void openCameraForUid(@NonNull String cameraId,
-            @NonNull final CameraDevice.StateCallback callback, @Nullable Handler handler,
+            @NonNull final CameraDevice.StateCallback callback, @NonNull Executor executor,
             int clientUid)
             throws CameraAccessException {
 
@@ -448,19 +531,12 @@ public final class CameraManager {
             throw new IllegalArgumentException("cameraId was null");
         } else if (callback == null) {
             throw new IllegalArgumentException("callback was null");
-        } else if (handler == null) {
-            if (Looper.myLooper() != null) {
-                handler = new Handler();
-            } else {
-                throw new IllegalArgumentException(
-                        "Handler argument is null, but no looper exists in the calling thread");
-            }
         }
         if (CameraManagerGlobal.sCameraServiceDisabled) {
             throw new IllegalArgumentException("No cameras available on device");
         }
 
-        openCameraDeviceUserAsync(cameraId, callback, handler, clientUid);
+        openCameraDeviceUserAsync(cameraId, callback, executor, clientUid);
     }
 
     /**
