@@ -16,7 +16,7 @@
 
 package android.media;
 
-import static android.media.MediaPlayerBase.PLAYER_STATE_IDLE;
+import static android.media.MediaPlayerBase.BUFFERING_STATE_UNKNOWN;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -26,7 +26,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayerBase.BuffState;
-import android.media.MediaPlayerBase.PlayerEventCallback;
 import android.media.MediaPlayerBase.PlayerState;
 import android.media.MediaPlaylistAgent.RepeatMode;
 import android.media.MediaPlaylistAgent.ShuffleMode;
@@ -1476,9 +1475,7 @@ public class MediaSession2 implements AutoCloseable {
      * Gets the current player state.
      *
      * @return the current player state
-     * @hide
      */
-    // TODO(jaewan): Unhide (b/74578458)
     public @PlayerState int getPlayerState() {
         return mProvider.getPlayerState_impl();
     }
@@ -1488,22 +1485,30 @@ public class MediaSession2 implements AutoCloseable {
      *
      * @return the current playback position in ms, or {@link MediaPlayerBase#UNKNOWN_TIME} if
      *         unknown.
-     * @hide
      */
-    // TODO(jaewan): Unhide (b/74578458)
-    public long getPosition() {
-        return mProvider.getPosition_impl();
+    public long getCurrentPosition() {
+        return mProvider.getCurrentPosition_impl();
     }
 
     /**
      * Gets the buffered position, or {@link MediaPlayerBase#UNKNOWN_TIME} if unknown.
      *
      * @return the buffered position in ms, or {@link MediaPlayerBase#UNKNOWN_TIME}.
-     * @hide
      */
-    // TODO(jaewan): Unhide (b/74578458)
     public long getBufferedPosition() {
         return mProvider.getBufferedPosition_impl();
+    }
+
+    /**
+     * Gets the current buffering state of the player.
+     * During buffering, see {@link #getBufferedPosition()} for the quantifying the amount already
+     * buffered.
+     *
+     * @return the buffering state.
+     */
+    public @BuffState int getBufferingState() {
+        // TODO(jaewan): Implement this
+        return BUFFERING_STATE_UNKNOWN;
     }
 
     /**
