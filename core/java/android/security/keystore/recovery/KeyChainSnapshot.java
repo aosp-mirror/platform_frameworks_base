@@ -252,12 +252,12 @@ public final class KeyChainSnapshot implements Parcelable {
         /**
          * Sets UI and key derivation parameters
          *
-         * @param recoveryMetadata The UI and key derivation parameters
+         * @param keyChainProtectionParams The UI and key derivation parameters
          * @return This builder.
          */
         public Builder setKeyChainProtectionParams(
-                @NonNull List<KeyChainProtectionParams> recoveryMetadata) {
-            mInstance.mKeyChainProtectionParams = recoveryMetadata;
+                @NonNull List<KeyChainProtectionParams> keyChainProtectionParams) {
+            mInstance.mKeyChainProtectionParams = keyChainProtectionParams;
             return this;
         }
 
@@ -292,7 +292,7 @@ public final class KeyChainSnapshot implements Parcelable {
          */
         @NonNull public KeyChainSnapshot build() {
             Preconditions.checkCollectionElementsNotNull(mInstance.mKeyChainProtectionParams,
-                    "recoveryMetadata");
+                    "keyChainProtectionParams");
             Preconditions.checkCollectionElementsNotNull(mInstance.mEntryRecoveryData,
                     "entryRecoveryData");
             Preconditions.checkNotNull(mInstance.mEncryptedRecoveryKeyBlob);
