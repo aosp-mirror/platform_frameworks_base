@@ -896,6 +896,51 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
+    public void setServerParams_updatesServerParams() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        byte[] serverParams = new byte[] { 1 };
+
+        mRecoverableKeyStoreManager.setServerParams(serverParams);
+
+        assertThat(mRecoverableKeyStoreDb.getServerParams(userId, uid)).isEqualTo(serverParams);
+    }
+
+    @Test
+    public void setServerParams_doesNotSetSnapshotPendingIfInitializing() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        byte[] serverParams = new byte[] { 1 };
+
+        mRecoverableKeyStoreManager.setServerParams(serverParams);
+
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isFalse();
+    }
+
+    @Test
+    public void setServerParams_doesNotSetSnapshotPendingIfSettingSameValue() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        byte[] serverParams = new byte[] { 1 };
+
+        mRecoverableKeyStoreManager.setServerParams(serverParams);
+        mRecoverableKeyStoreManager.setServerParams(serverParams);
+
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isFalse();
+    }
+
+    @Test
+    public void setServerParams_setsSnapshotPendingIfUpdatingValue() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+
+        mRecoverableKeyStoreManager.setServerParams(new byte[] { 1 });
+        mRecoverableKeyStoreManager.setServerParams(new byte[] { 2 });
+
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
+    }
+
+    @Test
     public void setRecoverySecretTypes() throws Exception {
         int[] types1 = new int[]{11, 2000};
         int[] types2 = new int[]{1, 2, 3};
