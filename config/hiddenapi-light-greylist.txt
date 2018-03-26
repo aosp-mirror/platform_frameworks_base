@@ -167,10 +167,13 @@ Landroid/app/ApplicationPackageManager;-><init>(Landroid/app/ContextImpl;Landroi
 Landroid/app/ApplicationPackageManager;->mPM:Landroid/content/pm/IPackageManager;
 Landroid/app/AppOpsManager;->checkOp(IILjava/lang/String;)I
 Landroid/app/AppOpsManager;->checkOpNoThrow(IILjava/lang/String;)I
+Landroid/app/AppOpsManager;->getOpsForPackage(ILjava/lang/String;[I)Ljava/util/List;
 Landroid/app/AppOpsManager;->mService:Lcom/android/internal/app/IAppOpsService;
 Landroid/app/AppOpsManager;->noteOp(I)I
 Landroid/app/AppOpsManager;->noteOp(IILjava/lang/String;)I
 Landroid/app/AppOpsManager;->OP_COARSE_LOCATION:I
+Landroid/app/AppOpsManager$OpEntry;->getDuration()I
+Landroid/app/AppOpsManager$OpEntry;->getRejectTime()J
 Landroid/app/AppOpsManager;->OP_FINE_LOCATION:I
 Landroid/app/AppOpsManager;->OP_GET_USAGE_STATS:I
 Landroid/app/AppOpsManager;->OP_POST_NOTIFICATION:I
@@ -327,6 +330,8 @@ Landroid/app/StatusBarManager;->getService()Lcom/android/internal/statusbar/ISta
 Landroid/app/TaskStackListener;-><init>()V
 Landroid/app/TimePickerDialog;->mTimePicker:Landroid/widget/TimePicker;
 Landroid/app/trust/ITrustManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
+Landroid/app/usage/StorageStatsManager;->getFreeBytes(Ljava/lang/String;)J
+Landroid/app/usage/StorageStatsManager;->getTotalBytes(Ljava/lang/String;)J
 Landroid/app/usage/UsageStatsManager;->mService:Landroid/app/usage/IUsageStatsManager;
 Landroid/app/usage/UsageStats;->mLastEvent:I
 Landroid/app/usage/UsageStats;->mTotalTimeInForeground:J
@@ -357,6 +362,7 @@ Landroid/bluetooth/BluetoothAdapter;->mService:Landroid/bluetooth/IBluetooth;
 Landroid/bluetooth/BluetoothAdapter;->setScanMode(II)Z
 Landroid/bluetooth/BluetoothAdapter;->setScanMode(I)Z
 Landroid/bluetooth/BluetoothDevice;->createBond(I)Z
+Landroid/bluetooth/BluetoothDevice;->getAlias()Ljava/lang/String;
 Landroid/bluetooth/BluetoothDevice;->getAliasName()Ljava/lang/String;
 Landroid/bluetooth/BluetoothGattCharacteristic;->mInstance:I
 Landroid/bluetooth/BluetoothGattCharacteristic;->mService:Landroid/bluetooth/BluetoothGattService;
@@ -614,6 +620,7 @@ Landroid/graphics/drawable/AnimationDrawable;->mCurFrame:I
 Landroid/graphics/drawable/BitmapDrawable;->getOpticalInsets()Landroid/graphics/Insets;
 Landroid/graphics/drawable/BitmapDrawable;->getTint()Landroid/content/res/ColorStateList;
 Landroid/graphics/drawable/BitmapDrawable;->getTintMode()Landroid/graphics/PorterDuff$Mode;
+Landroid/graphics/drawable/BitmapDrawable;->mTargetDensity:I
 Landroid/graphics/drawable/BitmapDrawable;->setBitmap(Landroid/graphics/Bitmap;)V
 Landroid/graphics/drawable/DrawableContainer$DrawableContainerState;->mConstantPadding:Landroid/graphics/Rect;
 Landroid/graphics/drawable/DrawableContainer;->getOpticalInsets()Landroid/graphics/Insets;
@@ -677,6 +684,7 @@ Landroid/graphics/Movie;->mNativeMovie:J
 Landroid/graphics/NinePatch$InsetStruct;-><init>(IIIIIIIIFIF)V
 Landroid/graphics/NinePatch;->mBitmap:Landroid/graphics/Bitmap;
 Landroid/graphics/Picture;->mNativePicture:J
+Landroid/graphics/PixelXorXfermode;-><init>(I)V
 Landroid/graphics/PorterDuffColorFilter;->setColor(I)V
 Landroid/graphics/PorterDuffColorFilter;->setMode(Landroid/graphics/PorterDuff$Mode;)V
 Landroid/graphics/Region;-><init>(JI)V
@@ -972,6 +980,7 @@ Landroid/media/IVolumeController$Stub;->asInterface(Landroid/os/IBinder;)Landroi
 Landroid/media/JetPlayer;->mNativePlayerInJavaObj:J
 Landroid/media/JetPlayer;->postEventFromNative(Ljava/lang/Object;III)V
 Landroid/media/MediaCodec$CodecException;-><init>(IILjava/lang/String;)V
+Landroid/media/MediaCodec;->getBuffers(Z)[Ljava/nio/ByteBuffer;
 Landroid/media/MediaCodec;->releaseOutputBuffer(IZZJ)V
 Landroid/media/MediaFile;->FIRST_AUDIO_FILE_TYPE:I
 Landroid/media/MediaFile;->getFileType(Ljava/lang/String;)Landroid/media/MediaFile$MediaFileType;
@@ -1348,6 +1357,7 @@ Landroid/os/storage/VolumeInfo;->getFsUuid()Ljava/lang/String;
 Landroid/os/storage/VolumeInfo;->getPath()Ljava/io/File;
 Landroid/os/storage/VolumeInfo;->getState()I
 Landroid/os/storage/VolumeInfo;->getType()I
+Landroid/os/storage/VolumeInfo;->isMountedReadable()Z
 Landroid/os/storage/VolumeInfo;->isPrimary()Z
 Landroid/os/storage/VolumeInfo;->isVisible()Z
 Landroid/os/StrictMode;->disableDeathOnFileUriExposure()V
@@ -1899,10 +1909,10 @@ Landroid/text/AndroidBidi;->bidi(I[C[B)I
 Landroid/text/DynamicLayout;-><init>(Ljava/lang/CharSequence;Ljava/lang/CharSequence;Landroid/text/TextPaint;ILandroid/text/Layout$Alignment;Landroid/text/TextDirectionHeuristic;FFZIIILandroid/text/TextUtils$TruncateAt;I)V
 Landroid/text/DynamicLayout;->sStaticLayout:Landroid/text/StaticLayout;
 Landroid/text/Html;->withinStyle(Ljava/lang/StringBuilder;Ljava/lang/CharSequence;II)V
-Landroid/text/Layout;->DIRS_ALL_LEFT_TO_RIGHT:Landroid/text/Layout$Directions;
-Landroid/text/Layout;->getPrimaryHorizontal(IZ)F
 Landroid/text/Layout$Alignment;->ALIGN_LEFT:Landroid/text/Layout$Alignment;
 Landroid/text/Layout$Alignment;->ALIGN_RIGHT:Landroid/text/Layout$Alignment;
+Landroid/text/Layout;->DIRS_ALL_LEFT_TO_RIGHT:Landroid/text/Layout$Directions;
+Landroid/text/Layout;->getPrimaryHorizontal(IZ)F
 Landroid/text/method/LinkMovementMethod;->sInstance:Landroid/text/method/LinkMovementMethod;
 Landroid/text/SpannableStringBuilder;->mGapLength:I
 Landroid/text/SpannableStringBuilder;->mGapStart:I
@@ -1984,6 +1994,7 @@ Landroid/util/Rational;->mDenominator:I
 Landroid/util/Rational;->mNumerator:I
 Landroid/util/Rational;->readObject(Ljava/io/ObjectInputStream;)V
 Landroid/util/Singleton;->mInstance:Ljava/lang/Object;
+Landroid/util/Slog;->d(Ljava/lang/String;Ljava/lang/String;)I
 Landroid/util/SparseIntArray;->mKeys:[I
 Landroid/util/SparseIntArray;->mSize:I
 Landroid/util/SparseIntArray;->mValues:[I
