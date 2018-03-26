@@ -32,9 +32,11 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
+import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -392,6 +394,9 @@ public class SliceManager {
      */
     public void enforceSlicePermission(Uri uri, String pkg, int pid, int uid) {
         try {
+            if (UserHandle.isSameApp(uid, Process.myUid())) {
+                return;
+            }
             if (pkg == null) {
                 throw new SecurityException("No pkg specified");
             }
