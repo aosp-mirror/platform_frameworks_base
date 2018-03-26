@@ -19,6 +19,7 @@ package com.android.server.usage;
 import static android.app.usage.UsageEvents.Event.NOTIFICATION_SEEN;
 import static android.app.usage.UsageEvents.Event.SLICE_PINNED;
 import static android.app.usage.UsageEvents.Event.SLICE_PINNED_PRIV;
+import static android.app.usage.UsageEvents.Event.SYSTEM_INTERACTION;
 import static android.app.usage.UsageEvents.Event.USER_INTERACTION;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_DEFAULT;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED;
@@ -565,6 +566,31 @@ public class AppStandbyControllerTests {
         mInjector.mElapsedRealtime = mController.mNotificationSeenTimeoutMillis + 2000;
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
                 REASON_MAIN_PREDICTED, mInjector.mElapsedRealtime);
+        assertBucket(STANDBY_BUCKET_RARE);
+    }
+
+    @Test
+    public void testSystemInteractionTimeout() throws Exception {
+        setChargingState(mController, false);
+
+        reportEvent(mController, USER_INTERACTION, 0);
+        // Fast forward to RARE
+        mInjector.mElapsedRealtime = RARE_THRESHOLD + 100;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_RARE);
+
+        // Trigger a SYSTEM_INTERACTION and verify bucket
+        reportEvent(mController, SYSTEM_INTERACTION, mInjector.mElapsedRealtime);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // Verify it's still in ACTIVE close to end of timeout
+        mInjector.mElapsedRealtime += mController.mSystemInteractionTimeoutMillis - 100;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // Verify bucket moves to RARE after timeout
+        mInjector.mElapsedRealtime += 200;
+        mController.checkIdleStates(USER_ID);
         assertBucket(STANDBY_BUCKET_RARE);
     }
 
