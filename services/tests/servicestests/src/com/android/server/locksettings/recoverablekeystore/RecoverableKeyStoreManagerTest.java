@@ -941,7 +941,7 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
-    public void setRecoverySecretTypes() throws Exception {
+    public void setRecoverySecretTypes_updatesSecretTypes() throws Exception {
         int[] types1 = new int[]{11, 2000};
         int[] types2 = new int[]{1, 2, 3};
         int[] types3 = new int[]{};
@@ -957,6 +957,41 @@ public class RecoverableKeyStoreManagerTest {
         mRecoverableKeyStoreManager.setRecoverySecretTypes(types3);
         assertThat(mRecoverableKeyStoreManager.getRecoverySecretTypes()).isEqualTo(
                 types3);
+    }
+
+    @Test
+    public void setRecoverySecretTypes_doesNotSetSnapshotPendingIfIniting() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        int[] secretTypes = new int[] { 101 };
+
+        mRecoverableKeyStoreManager.setRecoverySecretTypes(secretTypes);
+
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isFalse();
+    }
+
+    @Test
+    public void setRecoverySecretTypes_doesNotSetSnapshotPendingIfSettingSameValue()
+            throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        int[] secretTypes = new int[] { 101 };
+
+        mRecoverableKeyStoreManager.setRecoverySecretTypes(secretTypes);
+        mRecoverableKeyStoreManager.setRecoverySecretTypes(secretTypes);
+
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isFalse();
+    }
+
+    @Test
+    public void setRecoverySecretTypes_setsSnapshotPendingIfUpdatingValue() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+
+        mRecoverableKeyStoreManager.setRecoverySecretTypes(new int[] { 101 });
+        mRecoverableKeyStoreManager.setRecoverySecretTypes(new int[] { 102 });
+
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
     }
 
     @Test
