@@ -19,6 +19,7 @@ import android.annotation.WorkerThread;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.telecom.Log;
 
 /**
  * <p>
@@ -261,9 +262,16 @@ public class BlockedNumberContract {
      */
     @WorkerThread
     public static boolean isBlocked(Context context, String phoneNumber) {
-        final Bundle res = context.getContentResolver().call(
-                AUTHORITY_URI, METHOD_IS_BLOCKED, phoneNumber, null);
-        return res != null && res.getBoolean(RES_NUMBER_IS_BLOCKED, false);
+        try {
+            final Bundle res = context.getContentResolver().call(
+                    AUTHORITY_URI, METHOD_IS_BLOCKED, phoneNumber, null);
+            return res != null && res.getBoolean(RES_NUMBER_IS_BLOCKED, false);
+        } catch (NullPointerException | IllegalArgumentException ex) {
+            // The content resolver can throw an NPE or IAE; we don't want to crash Telecom if
+            // either of these happen.
+            Log.w(null, "isBlocked: provider not ready.");
+            return false;
+        }
     }
 
     /**
@@ -297,9 +305,16 @@ public class BlockedNumberContract {
      * @return {@code true} if the current user can block numbers.
      */
     public static boolean canCurrentUserBlockNumbers(Context context) {
-        final Bundle res = context.getContentResolver().call(
-                AUTHORITY_URI, METHOD_CAN_CURRENT_USER_BLOCK_NUMBERS, null, null);
-        return res != null && res.getBoolean(RES_CAN_BLOCK_NUMBERS, false);
+        try {
+            final Bundle res = context.getContentResolver().call(
+                    AUTHORITY_URI, METHOD_CAN_CURRENT_USER_BLOCK_NUMBERS, null, null);
+            return res != null && res.getBoolean(RES_CAN_BLOCK_NUMBERS, false);
+        } catch (NullPointerException | IllegalArgumentException ex) {
+            // The content resolver can throw an NPE or IAE; we don't want to crash Telecom if
+            // either of these happen.
+            Log.w(null, "canCurrentUserBlockNumbers: provider not ready.");
+            return false;
+        }
     }
 
     /**
@@ -368,8 +383,14 @@ public class BlockedNumberContract {
          * the provider unless {@link #endBlockSuppression(Context)} is called.
          */
         public static void notifyEmergencyContact(Context context) {
-            context.getContentResolver().call(
-                    AUTHORITY_URI, METHOD_NOTIFY_EMERGENCY_CONTACT, null, null);
+            try {
+                context.getContentResolver().call(
+                        AUTHORITY_URI, METHOD_NOTIFY_EMERGENCY_CONTACT, null, null);
+            } catch (NullPointerException | IllegalArgumentException ex) {
+                // The content resolver can throw an NPE or IAE; we don't want to crash Telecom if
+                // either of these happen.
+                Log.w(null, "notifyEmergencyContact: provider not ready.");
+            }
         }
 
         /**
@@ -394,9 +415,16 @@ public class BlockedNumberContract {
          */
         public static boolean shouldSystemBlockNumber(Context context, String phoneNumber,
                 Bundle extras) {
-            final Bundle res = context.getContentResolver().call(
-                    AUTHORITY_URI, METHOD_SHOULD_SYSTEM_BLOCK_NUMBER, phoneNumber, extras);
-            return res != null && res.getBoolean(RES_NUMBER_IS_BLOCKED, false);
+            try {
+                final Bundle res = context.getContentResolver().call(
+                        AUTHORITY_URI, METHOD_SHOULD_SYSTEM_BLOCK_NUMBER, phoneNumber, extras);
+                return res != null && res.getBoolean(RES_NUMBER_IS_BLOCKED, false);
+            } catch (NullPointerException | IllegalArgumentException ex) {
+                // The content resolver can throw an NPE or IAE; we don't want to crash Telecom if
+                // either of these happen.
+                Log.w(null, "shouldSystemBlockNumber: provider not ready.");
+                return false;
+            }
         }
 
         /**
@@ -416,9 +444,16 @@ public class BlockedNumberContract {
          * @return {@code true} if should show emergency call notification. {@code false} otherwise.
          */
         public static boolean shouldShowEmergencyCallNotification(Context context) {
-            final Bundle res = context.getContentResolver().call(
-                    AUTHORITY_URI, METHOD_SHOULD_SHOW_EMERGENCY_CALL_NOTIFICATION, null, null);
-            return res != null && res.getBoolean(RES_SHOW_EMERGENCY_CALL_NOTIFICATION, false);
+            try {
+                final Bundle res = context.getContentResolver().call(
+                        AUTHORITY_URI, METHOD_SHOULD_SHOW_EMERGENCY_CALL_NOTIFICATION, null, null);
+                return res != null && res.getBoolean(RES_SHOW_EMERGENCY_CALL_NOTIFICATION, false);
+            } catch (NullPointerException | IllegalArgumentException ex) {
+                // The content resolver can throw an NPE or IAE; we don't want to crash Telecom if
+                // either of these happen.
+                Log.w(null, "shouldShowEmergencyCallNotification: provider not ready.");
+                return false;
+            }
         }
 
         /**
@@ -436,9 +471,16 @@ public class BlockedNumberContract {
         public static boolean getEnhancedBlockSetting(Context context, String key) {
             Bundle extras = new Bundle();
             extras.putString(EXTRA_ENHANCED_SETTING_KEY, key);
-            final Bundle res = context.getContentResolver().call(
-                    AUTHORITY_URI, METHOD_GET_ENHANCED_BLOCK_SETTING, null, extras);
-            return res != null && res.getBoolean(RES_ENHANCED_SETTING_IS_ENABLED, false);
+            try {
+                final Bundle res = context.getContentResolver().call(
+                        AUTHORITY_URI, METHOD_GET_ENHANCED_BLOCK_SETTING, null, extras);
+                return res != null && res.getBoolean(RES_ENHANCED_SETTING_IS_ENABLED, false);
+            } catch (NullPointerException | IllegalArgumentException ex) {
+                // The content resolver can throw an NPE or IAE; we don't want to crash Telecom if
+                // either of these happen.
+                Log.w(null, "getEnhancedBlockSetting: provider not ready.");
+                return false;
+            }
         }
 
         /**
