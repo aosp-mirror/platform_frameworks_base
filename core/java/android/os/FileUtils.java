@@ -411,6 +411,9 @@ public class FileUtils {
                 checkpoint = 0;
             }
         }
+        if (listener != null) {
+            listener.onProgress(progress);
+        }
         return progress;
     }
 
@@ -439,6 +442,9 @@ public class FileUtils {
                 }
                 checkpoint = 0;
             }
+        }
+        if (listener != null) {
+            listener.onProgress(progress);
         }
         return progress;
     }
@@ -478,6 +484,9 @@ public class FileUtils {
                 }
                 checkpoint = 0;
             }
+        }
+        if (listener != null) {
+            listener.onProgress(progress);
         }
         return progress;
     }
