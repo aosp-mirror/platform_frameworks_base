@@ -195,17 +195,7 @@ public class RecoveryController {
      */
     public @NonNull Map<byte[], Integer> getRecoverySnapshotVersions()
             throws InternalRecoveryServiceException {
-        try {
-            // IPC doesn't support generic Maps.
-            @SuppressWarnings("unchecked")
-            Map<byte[], Integer> result =
-                    (Map<byte[], Integer>) mBinder.getRecoverySnapshotVersions();
-            return result;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } catch (ServiceSpecificException e) {
-            throw wrapUnexpectedServiceSpecificException(e);
-        }
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -337,13 +327,7 @@ public class RecoveryController {
     @NonNull
     public @KeychainProtectionParams.UserSecretType int[] getPendingRecoverySecretTypes()
             throws InternalRecoveryServiceException {
-        try {
-            return mBinder.getPendingRecoverySecretTypes();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } catch (ServiceSpecificException e) {
-            throw wrapUnexpectedServiceSpecificException(e);
-        }
+        throw new UnsupportedOperationException();
     }
 
     /**
