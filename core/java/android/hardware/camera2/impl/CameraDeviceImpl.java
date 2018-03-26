@@ -240,14 +240,14 @@ public class CameraDeviceImpl extends CameraDevice
         }
     };
 
-    public CameraDeviceImpl(String cameraId, StateCallback callback, Handler handler,
+    public CameraDeviceImpl(String cameraId, StateCallback callback, Executor executor,
                         CameraCharacteristics characteristics, int appTargetSdkVersion) {
-        if (cameraId == null || callback == null || handler == null || characteristics == null) {
+        if (cameraId == null || callback == null || executor == null || characteristics == null) {
             throw new IllegalArgumentException("Null argument given");
         }
         mCameraId = cameraId;
         mDeviceCallback = callback;
-        mDeviceExecutor = checkAndWrapHandler(handler);
+        mDeviceExecutor = executor;
         mCharacteristics = characteristics;
         mAppTargetSdkVersion = appTargetSdkVersion;
 
