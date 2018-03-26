@@ -16,8 +16,7 @@
 
 #include <DeviceInfo.h>
 
-#include <gui/ISurfaceComposer.h>
-#include <gui/SurfaceComposerClient.h>
+#include "Extensions.h"
 
 #include <thread>
 #include <mutex>
@@ -47,21 +46,12 @@ void DeviceInfo::initialize() {
 void DeviceInfo::initialize(int maxTextureSize) {
     std::call_once(sInitializedFlag, [maxTextureSize]() {
         sDeviceInfo = new DeviceInfo();
-        sDeviceInfo->loadDisplayInfo();
         sDeviceInfo->mMaxTextureSize = maxTextureSize;
     });
 }
 
 void DeviceInfo::load() {
-    loadDisplayInfo();
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
-}
-
-void DeviceInfo::loadDisplayInfo() {
-    sp<IBinder> dtoken(SurfaceComposerClient::getBuiltInDisplay(
-            ISurfaceComposer::eDisplayIdMain));
-    status_t status = SurfaceComposerClient::getDisplayInfo(dtoken, &mDisplayInfo);
-    LOG_ALWAYS_FATAL_IF(status, "Failed to get display info, error %d", status);
 }
 
 } /* namespace uirenderer */

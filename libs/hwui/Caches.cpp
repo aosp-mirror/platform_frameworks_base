@@ -50,9 +50,9 @@ Caches* Caches::sInstance = nullptr;
 ///////////////////////////////////////////////////////////////////////////////
 
 Caches::Caches(RenderState& renderState)
-        : gradientCache(extensions())
+        : gradientCache(mExtensions)
         , patchCache(renderState)
-        , programCache(extensions())
+        , programCache(mExtensions)
         , mRenderState(&renderState)
         , mInitialized(false) {
     INIT_LOGD("Creating OpenGL renderer caches");
@@ -80,7 +80,7 @@ bool Caches::init() {
 }
 
 void Caches::initExtensions() {
-    if (extensions().hasDebugMarker()) {
+    if (mExtensions.hasDebugMarker()) {
         eventMark = glInsertEventMarkerEXT;
 
         startMark = glPushGroupMarkerEXT;
@@ -93,12 +93,12 @@ void Caches::initExtensions() {
 }
 
 void Caches::initConstraints() {
-    maxTextureSize = DeviceInfo::get()->maxTextureSize();
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
 }
 
 void Caches::initStaticProperties() {
     // OpenGL ES 3.0+ specific features
-    gpuPixelBuffersEnabled = extensions().hasPixelBufferObjects()
+    gpuPixelBuffersEnabled = mExtensions.hasPixelBufferObjects()
             && property_get_bool(PROPERTY_ENABLE_GPU_PIXEL_BUFFERS, true);
 }
 

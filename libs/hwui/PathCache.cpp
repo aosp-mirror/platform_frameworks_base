@@ -38,8 +38,6 @@
 namespace android {
 namespace uirenderer {
 
-static constexpr size_t PATH_CACHE_COUNT_LIMIT = 256;
-
 template <class T>
 static bool compareWidthHeight(const T& lhs, const T& rhs) {
     return (lhs.mWidth == rhs.mWidth) && (lhs.mHeight == rhs.mHeight);
@@ -181,9 +179,13 @@ static sk_sp<Bitmap> drawPath(const SkPath* path, const SkPaint* paint, PathText
 PathCache::PathCache()
         : mCache(LruCache<PathDescription, PathTexture*>::kUnlimitedCapacity)
         , mSize(0)
-        , mMaxSize(DeviceInfo::multiplyByResolution(4)) {
+        , mMaxSize(Properties::pathCacheSize) {
     mCache.setOnEntryRemovedListener(this);
-    mMaxTextureSize = DeviceInfo::get()->maxTextureSize();
+
+    GLint maxTextureSize;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+    mMaxTextureSize = maxTextureSize;
+
     mDebugEnabled = Properties::debugLevel & kDebugCaches;
 }
 
@@ -257,7 +259,12 @@ void PathCache::purgeCache(uint32_t width, uint32_t height) {
 }
 
 void PathCache::trim() {
-    while (mSize > mMaxSize || mCache.size() > PATH_CACHE_COUNT_LIMIT) {
+    // 25 is just an arbitrary lower bound to ensure we aren't in weird edge cases
+    // of things like a cap of 0 or 1 as that's going to break things.
+    // It does not represent a reasonable minimum value
+    static_assert(DEFAULT_PATH_TEXTURE_CAP > 25, "Path cache texture cap is too small");
+
+    while (mSize > mMaxSize || mCache.size() > DEFAULT_PATH_TEXTURE_CAP) {
         LOG_ALWAYS_FATAL_IF(!mCache.size(), "Inconsistent mSize! Ran out of items to remove!"
                 " mSize = %u, mMaxSize = %u", mSize, mMaxSize);
         mCache.removeOldest();

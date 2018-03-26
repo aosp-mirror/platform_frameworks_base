@@ -24,7 +24,6 @@
 #include "Properties.h"
 #include "utils/TraceUtils.h"
 #include "hwui/Bitmap.h"
-#include "DeviceInfo.h"
 
 namespace android {
 namespace uirenderer {
@@ -36,10 +35,13 @@ namespace uirenderer {
 TextureCache::TextureCache()
         : mCache(LruCache<uint32_t, Texture*>::kUnlimitedCapacity)
         , mSize(0)
-        , mMaxSize(DeviceInfo::multiplyByResolution(4 * 6)) // 6 screen-sized RGBA_8888 bitmaps
-        , mFlushRate(.4f) {
+        , mMaxSize(Properties::textureCacheSize)
+        , mFlushRate(Properties::textureCacheFlushRate) {
     mCache.setOnEntryRemovedListener(this);
-    mMaxTextureSize = DeviceInfo::get()->maxTextureSize();
+
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
+    INIT_LOGD("    Maximum texture dimension is %d pixels", mMaxTextureSize);
+
     mDebugEnabled = Properties::debugLevel & kDebugCaches;
 }
 
