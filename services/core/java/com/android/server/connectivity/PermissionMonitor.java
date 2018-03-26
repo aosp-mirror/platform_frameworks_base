@@ -202,7 +202,9 @@ public class PermissionMonitor {
             // Only using the first package name. There may be multiple names if multiple
             // apps share the same UID, but in that case they also share permissions so
             // querying with any of the names will return the same results.
-            final PackageInfo app = mPackageManager.getPackageInfo(names[0], GET_PERMISSIONS);
+            int userId = UserHandle.getUserId(uid);
+            final PackageInfo app = mPackageManager.getPackageInfoAsUser(
+                    names[0], GET_PERMISSIONS, userId);
             return hasUseBackgroundNetworksPermission(app);
         } catch (NameNotFoundException e) {
             // App not found.
