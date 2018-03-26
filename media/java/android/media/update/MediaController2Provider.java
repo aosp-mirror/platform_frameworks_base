@@ -65,7 +65,7 @@ public interface MediaController2Provider extends TransportControlProvider {
     void removePlaylistItem_impl(MediaItem2 item);
 
     int getPlayerState_impl();
-    long getPosition_impl();
+    long getCurrentPosition_impl();
     float getPlaybackSpeed_impl();
     long getBufferedPosition_impl();
     MediaItem2 getCurrentMediaItem_impl();
