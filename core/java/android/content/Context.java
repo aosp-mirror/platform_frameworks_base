@@ -621,7 +621,7 @@ public abstract class Context {
      * @throws android.content.res.Resources.NotFoundException if the given ID
      *         does not exist.
      */
-    @NonNull
+    @Nullable
     public final Drawable getDrawable(@DrawableRes int id) {
         return getResources().getDrawable(id, getTheme());
     }

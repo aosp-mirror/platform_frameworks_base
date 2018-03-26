@@ -544,7 +544,7 @@ public class ResourcesImpl {
         }
     }
 
-    @NonNull
+    @Nullable
     Drawable loadDrawable(@NonNull Resources wrapper, @NonNull TypedValue value, int id,
             int density, @Nullable Resources.Theme theme)
             throws NotFoundException {
@@ -757,6 +757,7 @@ public class ResourcesImpl {
      *
      * This call will handle closing ais.
      */
+    @Nullable
     private Drawable decodeImageDrawable(@NonNull AssetInputStream ais,
             @NonNull Resources wrapper, @NonNull TypedValue value) {
         ImageDecoder.Source src = new ImageDecoder.AssetInputStreamSource(ais,
@@ -774,8 +775,10 @@ public class ResourcesImpl {
 
     /**
      * Loads a drawable from XML or resources stream.
+     *
+     * @return Drawable, or null if Drawable cannot be decoded.
      */
-    @NonNull
+    @Nullable
     private Drawable loadDrawableForCookie(@NonNull Resources wrapper, @NonNull TypedValue value,
             int id, int density) {
         if (value.string == null) {
