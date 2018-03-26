@@ -255,10 +255,10 @@ class PackageFlattener {
     FlattenTypes(&type_buffer);
 
     pkg_header->typeStrings = util::HostToDevice32(pkg_writer.size());
-    StringPool::FlattenUtf16(pkg_writer.buffer(), type_pool_);
+    StringPool::FlattenUtf16(pkg_writer.buffer(), type_pool_, diag_);
 
     pkg_header->keyStrings = util::HostToDevice32(pkg_writer.size());
-    StringPool::FlattenUtf8(pkg_writer.buffer(), key_pool_);
+    StringPool::FlattenUtf8(pkg_writer.buffer(), key_pool_, diag_);
 
     // Append the types.
     buffer->AppendBuffer(std::move(type_buffer));
@@ -590,7 +590,8 @@ bool TableFlattener::Consume(IAaptContext* context, ResourceTable* table) {
   table_header->packageCount = util::HostToDevice32(table->packages.size());
 
   // Flatten the values string pool.
-  StringPool::FlattenUtf8(table_writer.buffer(), table->string_pool);
+  StringPool::FlattenUtf8(table_writer.buffer(), table->string_pool,
+      context->GetDiagnostics());
 
   BigBuffer package_buffer(1024);
 

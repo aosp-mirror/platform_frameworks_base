@@ -27,6 +27,7 @@
 #include "androidfw/StringPiece.h"
 
 #include "ConfigDescription.h"
+#include "Diagnostics.h"
 #include "util/BigBuffer.h"
 
 namespace aapt {
@@ -152,8 +153,8 @@ class StringPool {
     int ref_;
   };
 
-  static bool FlattenUtf8(BigBuffer* out, const StringPool& pool);
-  static bool FlattenUtf16(BigBuffer* out, const StringPool& pool);
+  static bool FlattenUtf8(BigBuffer* out, const StringPool& pool, IDiagnostics* diag);
+  static bool FlattenUtf16(BigBuffer* out, const StringPool& pool, IDiagnostics* diag);
 
   StringPool() = default;
   StringPool(StringPool&&) = default;
@@ -207,7 +208,7 @@ class StringPool {
  private:
   DISALLOW_COPY_AND_ASSIGN(StringPool);
 
-  static bool Flatten(BigBuffer* out, const StringPool& pool, bool utf8);
+  static bool Flatten(BigBuffer* out, const StringPool& pool, bool utf8, IDiagnostics* diag);
 
   Ref MakeRefImpl(const android::StringPiece& str, const Context& context, bool unique);
   void ReAssignIndices();

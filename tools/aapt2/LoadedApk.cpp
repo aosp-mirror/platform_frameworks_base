@@ -225,7 +225,7 @@ bool LoadedApk::WriteToArchive(IAaptContext* context, ResourceTable* split_table
       }
     } else if (format_ == ApkFormat::kProto && path == kProtoResourceTablePath) {
       pb::ResourceTable pb_table;
-      SerializeTableToPb(*split_table, &pb_table);
+      SerializeTableToPb(*split_table, &pb_table, context->GetDiagnostics());
       if (!io::CopyProtoToArchive(context,
                                   &pb_table,
                                   path,

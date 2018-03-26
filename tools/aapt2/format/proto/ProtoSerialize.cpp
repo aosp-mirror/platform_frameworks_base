@@ -21,9 +21,9 @@
 
 namespace aapt {
 
-void SerializeStringPoolToPb(const StringPool& pool, pb::StringPool* out_pb_pool) {
+void SerializeStringPoolToPb(const StringPool& pool, pb::StringPool* out_pb_pool, IDiagnostics* diag) {
   BigBuffer buffer(1024);
-  StringPool::FlattenUtf8(&buffer, pool);
+  StringPool::FlattenUtf8(&buffer, pool, diag);
 
   std::string* data = out_pb_pool->mutable_data();
   data->reserve(buffer.size());
@@ -270,7 +270,8 @@ void SerializeConfig(const ConfigDescription& config, pb::Configuration* out_pb_
   out_pb_config->set_sdk_version(config.sdkVersion);
 }
 
-void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table) {
+void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table,
+                        IDiagnostics* diag) {
   StringPool source_pool;
   for (const std::unique_ptr<ResourceTablePackage>& package : table.packages) {
     pb::Package* pb_package = out_table->add_package();
@@ -323,7 +324,7 @@ void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table
       }
     }
   }
-  SerializeStringPoolToPb(source_pool, out_table->mutable_source_pool());
+  SerializeStringPoolToPb(source_pool, out_table->mutable_source_pool(), diag);
 }
 
 static pb::Reference_Type SerializeReferenceTypeToPb(Reference::Type type) {

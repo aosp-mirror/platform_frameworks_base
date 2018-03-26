@@ -258,7 +258,7 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
     ContainerWriter container_writer(&copying_adaptor, 1u);
 
     pb::ResourceTable pb_table;
-    SerializeTableToPb(table, &pb_table);
+    SerializeTableToPb(table, &pb_table, context->GetDiagnostics());
     if (!container_writer.AddResTableEntry(pb_table)) {
       context->GetDiagnostics()->Error(DiagMessage(output_path) << "failed to write");
       return false;
