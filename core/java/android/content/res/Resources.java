@@ -847,6 +847,7 @@ public class Resources {
      * @see #getDrawableForDensity(int, int, Theme)
      * @deprecated Use {@link #getDrawableForDensity(int, int, Theme)} instead.
      */
+    @Nullable
     @Deprecated
     public Drawable getDrawableForDensity(@DrawableRes int id, int density)
             throws NotFoundException {
@@ -864,12 +865,13 @@ public class Resources {
      *            found in {@link DisplayMetrics}. A value of 0 means to use the
      *            density returned from {@link #getConfiguration()}.
      *            This is equivalent to calling {@link #getDrawable(int, Theme)}.
-     * @param theme The theme used to style the drawable attributes, may be {@code null}.
+     * @param theme The theme used to style the drawable attributes, may be {@code null} if the
+     *              drawable cannot be decoded.
      * @return Drawable An object that can be used to draw this resource.
      * @throws NotFoundException Throws NotFoundException if the given ID does
-     *             not exist, or cannot be decoded.
+     *             not exist.
      */
-    @NonNull
+    @Nullable
     public Drawable getDrawableForDensity(@DrawableRes int id, int density, @Nullable Theme theme) {
         final TypedValue value = obtainTempTypedValue();
         try {
