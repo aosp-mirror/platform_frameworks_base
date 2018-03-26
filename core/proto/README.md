@@ -8,7 +8,7 @@ Conventions for the protos in this directory:
 1. If the proto describes the top level output of dumpsys, it should contain
    `Dump`. This makes it easy to understand that the proto is the dumpsys output
    of a certain service, not the data structure of that service, e.g.
-   `WindowManagerServiceDumpProto` vs `WindowManagerServiceDumpProto`.
+   `WindowManagerServiceDumpProto` vs `WindowManagerServiceProto`.
 
    * Inner messages whose containing messages have the `Proto` suffix do not
      need to have a `Proto` suffix. E.g:
