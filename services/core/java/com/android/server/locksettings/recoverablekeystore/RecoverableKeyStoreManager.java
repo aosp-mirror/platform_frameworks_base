@@ -317,14 +317,35 @@ public class RecoverableKeyStoreManager {
         mListenersStorage.setSnapshotListener(uid, intent);
     }
 
+    /**
+     * Set the server params for the user's key chain. This is used to uniquely identify a key
+     * chain. Along with the counter ID, it is used to uniquely identify an instance of a vault.
+     */
     public void setServerParams(@NonNull byte[] serverParams) throws RemoteException {
         checkRecoverKeyStorePermission();
         int userId = UserHandle.getCallingUserId();
         int uid = Binder.getCallingUid();
-        long updatedRows = mDatabase.setServerParams(userId, uid, serverParams);
-        if (updatedRows > 0) {
-            mDatabase.setShouldCreateSnapshot(userId, uid, true);
+
+        byte[] currentServerParams = mDatabase.getServerParams(userId, uid);
+
+        if (Arrays.equals(serverParams, currentServerParams)) {
+            Log.v(TAG, "Not updating server params - same as old value.");
+            return;
         }
+
+        long updatedRows = mDatabase.setServerParams(userId, uid, serverParams);
+        if (updatedRows < 1) {
+            throw new ServiceSpecificException(
+                    ERROR_SERVICE_INTERNAL_ERROR, "Database failure trying to set server params.");
+        }
+
+        if (currentServerParams == null) {
+            Log.i(TAG, "Initialized server params.");
+            return;
+        }
+
+        Log.i(TAG, "Updated server params. Snapshot pending.");
+        mDatabase.setShouldCreateSnapshot(userId, uid, true);
     }
 
     /**
