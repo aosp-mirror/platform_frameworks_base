@@ -371,6 +371,7 @@ Landroid/bluetooth/BluetoothGattDescriptor;->mInstance:I
 Landroid/bluetooth/BluetoothGatt;->mAuthRetryState:I
 Landroid/bluetooth/BluetoothGatt;->refresh()Z
 Landroid/bluetooth/BluetoothHeadset;->close()V
+Landroid/bluetooth/BluetoothMapClient;->sendMessage(Landroid/bluetooth/BluetoothDevice;[Landroid/net/Uri;Ljava/lang/String;Landroid/app/PendingIntent;Landroid/app/PendingIntent;)Z
 Landroid/bluetooth/BluetoothPan;->isTetheringOn()Z
 Landroid/bluetooth/BluetoothPan;->setBluetoothTethering(Z)V
 Landroid/bluetooth/BluetoothUuid;->RESERVED_UUIDS:[Landroid/os/ParcelUuid;
