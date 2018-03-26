@@ -337,6 +337,13 @@ public abstract class MediaPlayerBase implements AutoCloseable {
          */
         public void onBufferingStateChanged(@NonNull MediaPlayerBase mpb,
                 @NonNull DataSourceDesc dsd, @BuffState int state) { }
+
+        /**
+         * Called to indicate that the playback speed has changed.
+         * @param mpb the player that is buffering
+         * @param speed the new playback speed.
+         */
+        public void onPlaybackSpeedChanged(@NonNull MediaPlayerBase mpb, float speed) { }
     }
 
 }
