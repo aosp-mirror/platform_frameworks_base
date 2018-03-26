@@ -830,6 +830,15 @@ public class MediaSession2 implements AutoCloseable {
                 @NonNull MediaPlayerBase player, @NonNull MediaItem2 item, @BuffState int state) { }
 
         /**
+         * Called to indicate that the playback speed has changed.
+         * @param session the session for this event
+         * @param player the player for this event
+         * @param speed the new playback speed.
+         */
+        public void onPlaybackSpeedChanged(@NonNull MediaSession2 session,
+                @NonNull MediaPlayerBase player, float speed) { }
+
+        /**
          * Called when a playlist is changed from the {@link MediaPlaylistAgent}.
          * <p>
          * This is called when the underlying agent has called
