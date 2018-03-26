@@ -2754,12 +2754,17 @@ public class SettingsProvider extends ContentProvider {
             mGenerationRegistry.incrementGeneration(key);
 
             if (isGlobalSettingsKey(key)) {
-                if (Global.LOCATION_GLOBAL_KILL_SWITCH.equals(name)) {
-                    // When the global kill switch is updated, send the
-                    // change notification for the location setting.
-                    notifyLocationChangeForRunningUsers();
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    if (Global.LOCATION_GLOBAL_KILL_SWITCH.equals(name)) {
+                        // When the global kill switch is updated, send the
+                        // change notification for the location setting.
+                        notifyLocationChangeForRunningUsers();
+                    }
+                    notifyGlobalSettingChangeForRunningUsers(key, name);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
                 }
-                notifyGlobalSettingChangeForRunningUsers(key, name);
             } else {
                 final int userId = getUserIdFromKey(key);
                 final Uri uri = getNotificationUriFor(key, name);
