@@ -11593,6 +11593,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    /** @hide */
+    public void hideFloatingToolbar(int durationMs) {
+        if (mEditor != null) {
+            mEditor.hideFloatingToolbar(durationMs);
+        }
+    }
+
     boolean canUndo() {
         return mEditor != null && mEditor.canUndo();
     }
@@ -11687,7 +11694,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     boolean selectAllText() {
         if (mEditor != null) {
             // Hide the toolbar before changing the selection to avoid flickering.
-            mEditor.hideFloatingToolbar(FLOATING_TOOLBAR_SELECT_ALL_REFRESH_DELAY);
+            hideFloatingToolbar(FLOATING_TOOLBAR_SELECT_ALL_REFRESH_DELAY);
         }
         final int length = mText.length();
         Selection.setSelection((Spannable) mText, 0, length);
