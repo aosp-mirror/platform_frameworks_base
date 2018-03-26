@@ -1851,6 +1851,8 @@ Landroid/text/DynamicLayout;->sStaticLayout:Landroid/text/StaticLayout;
 Landroid/text/Html;->withinStyle(Ljava/lang/StringBuilder;Ljava/lang/CharSequence;II)V
 Landroid/text/Layout;->DIRS_ALL_LEFT_TO_RIGHT:Landroid/text/Layout$Directions;
 Landroid/text/Layout;->getPrimaryHorizontal(IZ)F
+Landroid/text/Layout$Alignment;->ALIGN_LEFT:Landroid/text/Layout$Alignment;
+Landroid/text/Layout$Alignment;->ALIGN_RIGHT:Landroid/text/Layout$Alignment;
 Landroid/text/method/LinkMovementMethod;->sInstance:Landroid/text/method/LinkMovementMethod;
 Landroid/text/SpannableStringBuilder;->mGapLength:I
 Landroid/text/SpannableStringBuilder;->mGapStart:I
@@ -2095,6 +2097,7 @@ Landroid/view/textclassifier/logging/SmartSelectionEventTracker$SelectionEvent;-
 Landroid/view/textclassifier/logging/SmartSelectionEventTracker$SelectionEvent;->selectionModified(IILandroid/view/textclassifier/TextClassification;)Landroid/view/textclassifier/logging/SmartSelectionEventTracker$SelectionEvent;
 Landroid/view/textclassifier/logging/SmartSelectionEventTracker$SelectionEvent;->selectionModified(IILandroid/view/textclassifier/TextSelection;)Landroid/view/textclassifier/logging/SmartSelectionEventTracker$SelectionEvent;
 Landroid/view/textclassifier/logging/SmartSelectionEventTracker$SelectionEvent;->selectionStarted(I)Landroid/view/textclassifier/logging/SmartSelectionEventTracker$SelectionEvent;
+Landroid/view/textclassifier/TextClassificationManager;->getTextClassifier(I)Landroid/view/textclassifier/TextClassifier;
 Landroid/view/textservice/TextServicesManager;->isSpellCheckerEnabled()Z
 Landroid/view/TextureView;->destroyHardwareLayer()V
 Landroid/view/TextureView;->mLayer:Landroid/view/TextureLayer;
