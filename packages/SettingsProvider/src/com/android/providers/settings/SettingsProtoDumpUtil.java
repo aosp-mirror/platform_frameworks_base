@@ -85,22 +85,23 @@ class SettingsProtoDumpUtil {
     private static void dumpProtoGlobalSettingsLocked(
             @NonNull ProtoOutputStream p, long fieldId, @NonNull SettingsState s) {
         final long token = p.start(fieldId);
-
         s.dumpHistoricalOperations(p, GlobalSettingsProto.HISTORICAL_OPERATIONS);
 
-        // This uses the same order as in Settings.Global.
+        // This uses the same order as in GlobalSettingsProto.
+        dumpSetting(s, p,
+                Settings.Global.ACTIVITY_MANAGER_CONSTANTS,
+                GlobalSettingsProto.ACTIVITY_MANAGER_CONSTANTS);
+        dumpSetting(s, p,
+                Settings.Global.ADB_ENABLED,
+                GlobalSettingsProto.ADB_ENABLED);
         dumpSetting(s, p,
                 Settings.Global.ADD_USERS_WHEN_LOCKED,
                 GlobalSettingsProto.ADD_USERS_WHEN_LOCKED);
-        dumpSetting(s, p,
-                Settings.Global.ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED,
-                GlobalSettingsProto.ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED);
+
+        final long airplaneModeToken = p.start(GlobalSettingsProto.AIRPLANE_MODE);
         dumpSetting(s, p,
                 Settings.Global.AIRPLANE_MODE_ON,
-                GlobalSettingsProto.AIRPLANE_MODE_ON);
-        dumpSetting(s, p,
-                Settings.Global.THEATER_MODE_ON,
-                GlobalSettingsProto.THEATER_MODE_ON);
+                GlobalSettingsProto.AirplaneMode.ON);
         // RADIO_BLUETOOTH is just a constant and not an actual setting.
         // RADIO_WIFI is just a constant and not an actual setting.
         // RADIO_WIMAX is just a constant and not an actual setting.
@@ -108,352 +109,1186 @@ class SettingsProtoDumpUtil {
         // RADIO_NFC is just a constant and not an actual setting.
         dumpSetting(s, p,
                 Settings.Global.AIRPLANE_MODE_RADIOS,
-                GlobalSettingsProto.AIRPLANE_MODE_RADIOS);
+                GlobalSettingsProto.AirplaneMode.RADIOS);
         dumpSetting(s, p,
                 Settings.Global.AIRPLANE_MODE_TOGGLEABLE_RADIOS,
-                GlobalSettingsProto.AIRPLANE_MODE_TOGGLEABLE_RADIOS);
+                GlobalSettingsProto.AirplaneMode.TOGGLEABLE_RADIOS);
+        p.end(airplaneModeToken);
+
         dumpSetting(s, p,
-                Settings.Global.BLUETOOTH_CLASS_OF_DEVICE,
-                GlobalSettingsProto.BLUETOOTH_CLASS_OF_DEVICE);
+                Settings.Global.ALARM_MANAGER_CONSTANTS,
+                GlobalSettingsProto.ALARM_MANAGER_CONSTANTS);
         dumpSetting(s, p,
-                Settings.Global.BLUETOOTH_DISABLED_PROFILES,
-                GlobalSettingsProto.BLUETOOTH_DISABLED_PROFILES);
+                Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED,
+                GlobalSettingsProto.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED);
         dumpSetting(s, p,
-                Settings.Global.BLUETOOTH_INTEROPERABILITY_LIST,
-                GlobalSettingsProto.BLUETOOTH_INTEROPERABILITY_LIST);
+                Settings.Global.ALWAYS_ON_DISPLAY_CONSTANTS,
+                GlobalSettingsProto.ALWAYS_ON_DISPLAY_CONSTANTS);
         dumpSetting(s, p,
-                Settings.Global.WIFI_SLEEP_POLICY,
-                GlobalSettingsProto.WIFI_SLEEP_POLICY);
+                Settings.Global.ALWAYS_FINISH_ACTIVITIES,
+                GlobalSettingsProto.ALWAYS_FINISH_ACTIVITIES);
         dumpSetting(s, p,
-                Settings.Global.AUTO_TIME,
-                GlobalSettingsProto.AUTO_TIME);
+                Settings.Global.ANIMATOR_DURATION_SCALE,
+                GlobalSettingsProto.ANIMATOR_DURATION_SCALE);
+
+        final long anomalyToken = p.start(GlobalSettingsProto.ANOMALY);
         dumpSetting(s, p,
-                Settings.Global.AUTO_TIME_ZONE,
-                GlobalSettingsProto.AUTO_TIME_ZONE);
+                Settings.Global.ANOMALY_DETECTION_CONSTANTS,
+                GlobalSettingsProto.Anomaly.DETECTION_CONSTANTS);
         dumpSetting(s, p,
-                Settings.Global.CAR_DOCK_SOUND,
-                GlobalSettingsProto.CAR_DOCK_SOUND);
+                Settings.Global.ANOMALY_CONFIG_VERSION,
+                GlobalSettingsProto.Anomaly.CONFIG_VERSION);
         dumpSetting(s, p,
-                Settings.Global.CAR_UNDOCK_SOUND,
-                GlobalSettingsProto.CAR_UNDOCK_SOUND);
+                Settings.Global.ANOMALY_CONFIG,
+                GlobalSettingsProto.Anomaly.CONFIG);
+        p.end(anomalyToken);
+
+        final long apnDbToken = p.start(GlobalSettingsProto.APN_DB);
         dumpSetting(s, p,
-                Settings.Global.DESK_DOCK_SOUND,
-                GlobalSettingsProto.DESK_DOCK_SOUND);
+                Settings.Global.APN_DB_UPDATE_CONTENT_URL,
+                GlobalSettingsProto.ApnDb.UPDATE_CONTENT_URL);
         dumpSetting(s, p,
-                Settings.Global.DESK_UNDOCK_SOUND,
-                GlobalSettingsProto.DESK_UNDOCK_SOUND);
+                Settings.Global.APN_DB_UPDATE_METADATA_URL,
+                GlobalSettingsProto.ApnDb.UPDATE_METADATA_URL);
+        p.end(apnDbToken);
+
+        final long appToken = p.start(GlobalSettingsProto.APP);
         dumpSetting(s, p,
-                Settings.Global.DOCK_SOUNDS_ENABLED,
-                GlobalSettingsProto.DOCK_SOUNDS_ENABLED);
+                Settings.Global.APP_IDLE_CONSTANTS,
+                GlobalSettingsProto.App.IDLE_CONSTANTS);
         dumpSetting(s, p,
-                Settings.Global.DOCK_SOUNDS_ENABLED_WHEN_ACCESSIBILITY,
-                GlobalSettingsProto.DOCK_SOUNDS_ENABLED_WHEN_ACCESSIBILITY);
+                Settings.Global.APP_STANDBY_ENABLED,
+                GlobalSettingsProto.App.STANDBY_ENABLED);
         dumpSetting(s, p,
-                Settings.Global.LOCK_SOUND,
-                GlobalSettingsProto.LOCK_SOUND);
+                Settings.Global.APP_AUTO_RESTRICTION_ENABLED,
+                GlobalSettingsProto.App.AUTO_RESTRICTION_ENABLED);
         dumpSetting(s, p,
-                Settings.Global.UNLOCK_SOUND,
-                GlobalSettingsProto.UNLOCK_SOUND);
+                Settings.Global.FORCED_APP_STANDBY_ENABLED,
+                GlobalSettingsProto.App.FORCED_APP_STANDBY_ENABLED);
         dumpSetting(s, p,
-                Settings.Global.TRUSTED_SOUND,
-                GlobalSettingsProto.TRUSTED_SOUND);
-        dumpSetting(s, p,
-                Settings.Global.LOW_BATTERY_SOUND,
-                GlobalSettingsProto.LOW_BATTERY_SOUND);
-        dumpSetting(s, p,
-                Settings.Global.POWER_SOUNDS_ENABLED,
-                GlobalSettingsProto.POWER_SOUNDS_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.CHARGING_STARTED_SOUND,
-                GlobalSettingsProto.WIRELESS_CHARGING_STARTED_SOUND);
-        dumpSetting(s, p,
-                Settings.Global.CHARGING_SOUNDS_ENABLED,
-                GlobalSettingsProto.CHARGING_SOUNDS_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.STAY_ON_WHILE_PLUGGED_IN,
-                GlobalSettingsProto.STAY_ON_WHILE_PLUGGED_IN);
-        dumpSetting(s, p,
-                Settings.Global.BUGREPORT_IN_POWER_MENU,
-                GlobalSettingsProto.BUGREPORT_IN_POWER_MENU);
-        dumpSetting(s, p,
-                Settings.Global.ADB_ENABLED,
-                GlobalSettingsProto.ADB_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.DEBUG_VIEW_ATTRIBUTES,
-                GlobalSettingsProto.DEBUG_VIEW_ATTRIBUTES);
+                Settings.Global.FORCED_APP_STANDBY_FOR_SMALL_BATTERY_ENABLED,
+                GlobalSettingsProto.App.FORCED_APP_STANDBY_FOR_SMALL_BATTERY_ENABLED);
+        p.end(appToken);
+
         dumpSetting(s, p,
                 Settings.Global.ASSISTED_GPS_ENABLED,
                 GlobalSettingsProto.ASSISTED_GPS_ENABLED);
         dumpSetting(s, p,
+                Settings.Global.AUDIO_SAFE_VOLUME_STATE,
+                GlobalSettingsProto.AUDIO_SAFE_VOLUME_STATE);
+
+        final long autoToken = p.start(GlobalSettingsProto.AUTO);
+        dumpSetting(s, p,
+                Settings.Global.AUTO_TIME,
+                GlobalSettingsProto.Auto.TIME);
+        dumpSetting(s, p,
+                Settings.Global.AUTO_TIME_ZONE,
+                GlobalSettingsProto.Auto.TIME_ZONE);
+        p.end(autoToken);
+
+        dumpSetting(s, p,
+                Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES,
+                GlobalSettingsProto.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES);
+        dumpSetting(s, p,
+                Settings.Global.BACKUP_AGENT_TIMEOUT_PARAMETERS,
+                GlobalSettingsProto.BACKUP_AGENT_TIMEOUT_PARAMETERS);
+
+        final long batteryToken = p.start(GlobalSettingsProto.BATTERY);
+        dumpSetting(s, p,
+                Settings.Global.BATTERY_DISCHARGE_DURATION_THRESHOLD,
+                GlobalSettingsProto.Battery.DISCHARGE_DURATION_THRESHOLD);
+        dumpSetting(s, p,
+                Settings.Global.BATTERY_DISCHARGE_THRESHOLD,
+                GlobalSettingsProto.Battery.DISCHARGE_THRESHOLD);
+        dumpSetting(s, p,
+                Settings.Global.BATTERY_SAVER_CONSTANTS,
+                GlobalSettingsProto.Battery.SAVER_CONSTANTS);
+        dumpSetting(s, p,
+                Settings.Global.BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS,
+                GlobalSettingsProto.Battery.SAVER_DEVICE_SPECIFIC_CONSTANTS);
+        dumpSetting(s, p,
+                Settings.Global.BATTERY_STATS_CONSTANTS,
+                GlobalSettingsProto.Battery.STATS_CONSTANTS);
+        dumpSetting(s, p,
+                Settings.Global.BATTERY_TIP_CONSTANTS,
+                GlobalSettingsProto.Battery.TIP_CONSTANTS);
+        p.end(batteryToken);
+
+        final long bleScanToken = p.start(GlobalSettingsProto.BLE_SCAN);
+        dumpSetting(s, p,
+                Settings.Global.BLE_SCAN_ALWAYS_AVAILABLE,
+                GlobalSettingsProto.BleScan.ALWAYS_AVAILABLE);
+        dumpSetting(s, p,
+                Settings.Global.BLE_SCAN_LOW_POWER_WINDOW_MS,
+                GlobalSettingsProto.BleScan.LOW_POWER_WINDOW_MS);
+        dumpSetting(s, p,
+                Settings.Global.BLE_SCAN_BALANCED_WINDOW_MS,
+                GlobalSettingsProto.BleScan.BALANCED_WINDOW_MS);
+        dumpSetting(s, p,
+                Settings.Global.BLE_SCAN_LOW_LATENCY_WINDOW_MS,
+                GlobalSettingsProto.BleScan.LOW_LATENCY_WINDOW_MS);
+        dumpSetting(s, p,
+                Settings.Global.BLE_SCAN_LOW_POWER_INTERVAL_MS,
+                GlobalSettingsProto.BleScan.LOW_POWER_INTERVAL_MS);
+        dumpSetting(s, p,
+                Settings.Global.BLE_SCAN_BALANCED_INTERVAL_MS,
+                GlobalSettingsProto.BleScan.BALANCED_INTERVAL_MS);
+        dumpSetting(s, p,
+                Settings.Global.BLE_SCAN_LOW_LATENCY_INTERVAL_MS,
+                GlobalSettingsProto.BleScan.LOW_LATENCY_INTERVAL_MS);
+        dumpSetting(s, p,
+                Settings.Global.BLE_SCAN_BACKGROUND_MODE,
+                GlobalSettingsProto.BleScan.BACKGROUND_MODE);
+        p.end(bleScanToken);
+
+        final long bluetoothToken = p.start(GlobalSettingsProto.BLUETOOTH);
+        dumpSetting(s, p,
+                Settings.Global.BLUETOOTH_CLASS_OF_DEVICE,
+                GlobalSettingsProto.Bluetooth.CLASS_OF_DEVICE);
+        dumpSetting(s, p,
+                Settings.Global.BLUETOOTH_DISABLED_PROFILES,
+                GlobalSettingsProto.Bluetooth.DISABLED_PROFILES);
+        dumpSetting(s, p,
+                Settings.Global.BLUETOOTH_INTEROPERABILITY_LIST,
+                GlobalSettingsProto.Bluetooth.INTEROPERABILITY_LIST);
+        dumpSetting(s, p,
                 Settings.Global.BLUETOOTH_ON,
-                GlobalSettingsProto.BLUETOOTH_ON);
+                GlobalSettingsProto.Bluetooth.ON);
+        dumpRepeatedSetting(s, p,
+                Settings.Global.BLUETOOTH_HEADSET_PRIORITY_PREFIX,
+                GlobalSettingsProto.Bluetooth.HEADSET_PRIORITIES);
+        dumpRepeatedSetting(s, p,
+                Settings.Global.BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX,
+                GlobalSettingsProto.Bluetooth.A2DP_SINK_PRIORITIES);
+        dumpRepeatedSetting(s, p,
+                Settings.Global.BLUETOOTH_A2DP_SRC_PRIORITY_PREFIX,
+                GlobalSettingsProto.Bluetooth.A2DP_SRC_PRIORITIES);
+        dumpRepeatedSetting(s, p,
+                Settings.Global.BLUETOOTH_A2DP_SUPPORTS_OPTIONAL_CODECS_PREFIX,
+                GlobalSettingsProto.Bluetooth.A2DP_SUPPORTS_OPTIONAL_CODECS);
+        dumpRepeatedSetting(s, p,
+                Settings.Global.BLUETOOTH_A2DP_OPTIONAL_CODECS_ENABLED_PREFIX,
+                GlobalSettingsProto.Bluetooth.A2DP_OPTIONAL_CODECS_ENABLED);
+        dumpRepeatedSetting(s, p,
+                Settings.Global.BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX,
+                GlobalSettingsProto.Bluetooth.INPUT_DEVICE_PRIORITIES);
+        dumpRepeatedSetting(s, p,
+                Settings.Global.BLUETOOTH_MAP_PRIORITY_PREFIX,
+                GlobalSettingsProto.Bluetooth.MAP_PRIORITIES);
+        dumpRepeatedSetting(s, p,
+                Settings.Global.BLUETOOTH_MAP_CLIENT_PRIORITY_PREFIX,
+                GlobalSettingsProto.Bluetooth.MAP_CLIENT_PRIORITIES);
+        dumpRepeatedSetting(s, p,
+                Settings.Global.BLUETOOTH_PBAP_CLIENT_PRIORITY_PREFIX,
+                GlobalSettingsProto.Bluetooth.PBAP_CLIENT_PRIORITIES);
+        dumpRepeatedSetting(s, p,
+                Settings.Global.BLUETOOTH_SAP_PRIORITY_PREFIX,
+                GlobalSettingsProto.Bluetooth.SAP_PRIORITIES);
+        dumpRepeatedSetting(s, p,
+                Settings.Global.BLUETOOTH_PAN_PRIORITY_PREFIX,
+                GlobalSettingsProto.Bluetooth.PAN_PRIORITIES);
+        dumpRepeatedSetting(s, p,
+                Settings.Global.BLUETOOTH_HEARING_AID_PRIORITY_PREFIX,
+                GlobalSettingsProto.Bluetooth.HEARING_AID_PRIORITIES);
+        p.end(bluetoothToken);
+
+        dumpSetting(s, p,
+                Settings.Global.BOOT_COUNT,
+                GlobalSettingsProto.BOOT_COUNT);
+        dumpSetting(s, p,
+                Settings.Global.BUGREPORT_IN_POWER_MENU,
+                GlobalSettingsProto.BUGREPORT_IN_POWER_MENU);
+        dumpSetting(s, p,
+                Settings.Global.CALL_AUTO_RETRY,
+                GlobalSettingsProto.CALL_AUTO_RETRY);
+
+        final long captivePortalToken = p.start(GlobalSettingsProto.CAPTIVE_PORTAL);
+        dumpSetting(s, p,
+                Settings.Global.CAPTIVE_PORTAL_MODE,
+                GlobalSettingsProto.CaptivePortal.MODE);
+        dumpSetting(s, p,
+                Settings.Global.CAPTIVE_PORTAL_DETECTION_ENABLED,
+                GlobalSettingsProto.CaptivePortal.DETECTION_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.CAPTIVE_PORTAL_SERVER,
+                GlobalSettingsProto.CaptivePortal.SERVER);
+        dumpSetting(s, p,
+                Settings.Global.CAPTIVE_PORTAL_HTTPS_URL,
+                GlobalSettingsProto.CaptivePortal.HTTPS_URL);
+        dumpSetting(s, p,
+                Settings.Global.CAPTIVE_PORTAL_HTTP_URL,
+                GlobalSettingsProto.CaptivePortal.HTTP_URL);
+        dumpSetting(s, p,
+                Settings.Global.CAPTIVE_PORTAL_FALLBACK_URL,
+                GlobalSettingsProto.CaptivePortal.FALLBACK_URL);
+        dumpSetting(s, p,
+                Settings.Global.CAPTIVE_PORTAL_OTHER_FALLBACK_URLS,
+                GlobalSettingsProto.CaptivePortal.OTHER_FALLBACK_URLS);
+        dumpSetting(s, p,
+                Settings.Global.CAPTIVE_PORTAL_USE_HTTPS,
+                GlobalSettingsProto.CaptivePortal.USE_HTTPS);
+        dumpSetting(s, p,
+                Settings.Global.CAPTIVE_PORTAL_USER_AGENT,
+                GlobalSettingsProto.CaptivePortal.USER_AGENT);
+        p.end(captivePortalToken);
+
+        final long carrierToken = p.start(GlobalSettingsProto.CARRIER);
+        dumpSetting(s, p,
+                Settings.Global.CARRIER_APP_WHITELIST,
+                GlobalSettingsProto.Carrier.APP_WHITELIST);
+        dumpSetting(s, p,
+                Settings.Global.CARRIER_APP_NAMES,
+                GlobalSettingsProto.Carrier.APP_NAMES);
+        dumpSetting(s, p,
+                Settings.Global.INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT,
+                GlobalSettingsProto.Carrier.INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT);
+        dumpSetting(s, p,
+                Settings.Global.INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS,
+                GlobalSettingsProto.Carrier.INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS);
+        p.end(carrierToken);
+
+        final long cdmaToken = p.start(GlobalSettingsProto.CDMA);
         dumpSetting(s, p,
                 Settings.Global.CDMA_CELL_BROADCAST_SMS,
-                GlobalSettingsProto.CDMA_CELL_BROADCAST_SMS);
+                GlobalSettingsProto.Cdma.CELL_BROADCAST_SMS);
         dumpSetting(s, p,
                 Settings.Global.CDMA_ROAMING_MODE,
-                GlobalSettingsProto.CDMA_ROAMING_MODE);
+                GlobalSettingsProto.Cdma.ROAMING_MODE);
         dumpSetting(s, p,
                 Settings.Global.CDMA_SUBSCRIPTION_MODE,
-                GlobalSettingsProto.CDMA_SUBSCRIPTION_MODE);
+                GlobalSettingsProto.Cdma.SUBSCRIPTION_MODE);
+        p.end(cdmaToken);
+
+        dumpSetting(s, p,
+                Settings.Global.CELL_ON,
+                GlobalSettingsProto.CELL_ON);
+
+        final long certPinToken = p.start(GlobalSettingsProto.CERT_PIN);
+        dumpSetting(s, p,
+                Settings.Global.CERT_PIN_UPDATE_CONTENT_URL,
+                GlobalSettingsProto.CertPin.UPDATE_CONTENT_URL);
+        dumpSetting(s, p,
+                Settings.Global.CERT_PIN_UPDATE_METADATA_URL,
+                GlobalSettingsProto.CertPin.UPDATE_METADATA_URL);
+        p.end(certPinToken);
+
+        dumpSetting(s, p,
+                Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED,
+                GlobalSettingsProto.CHAINED_BATTERY_ATTRIBUTION_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.COMPATIBILITY_MODE,
+                GlobalSettingsProto.COMPATIBILITY_MODE);
+
+        final long connectivityToken = p.start(GlobalSettingsProto.CONNECTIVITY);
+        dumpSetting(s, p,
+                Settings.Global.CONNECTIVITY_METRICS_BUFFER_SIZE,
+                GlobalSettingsProto.Connectivity.METRICS_BUFFER_SIZE);
+        dumpSetting(s, p,
+                Settings.Global.CONNECTIVITY_CHANGE_DELAY,
+                GlobalSettingsProto.Connectivity.CHANGE_DELAY);
+        dumpSetting(s, p,
+                Settings.Global.CONNECTIVITY_SAMPLING_INTERVAL_IN_SECONDS,
+                GlobalSettingsProto.Connectivity.SAMPLING_INTERVAL_IN_SECONDS);
+        p.end(connectivityToken);
+
+        // Settings.Global.CONTACT_METADATA_SYNC intentionally excluded since it's deprecated.
+        dumpSetting(s, p,
+                Settings.Global.CONTACT_METADATA_SYNC_ENABLED,
+                GlobalSettingsProto.CONTACT_METADATA_SYNC_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.CONTACTS_DATABASE_WAL_ENABLED,
+                GlobalSettingsProto.CONTACTS_DATABASE_WAL_ENABLED);
+
+        final long dataToken = p.start(GlobalSettingsProto.DATA);
         // Settings.Global.DEFAULT_RESTRICT_BACKGROUND_DATA intentionally excluded.
         dumpSetting(s, p,
                 Settings.Global.DATA_ACTIVITY_TIMEOUT_MOBILE,
-                GlobalSettingsProto.DATA_ACTIVITY_TIMEOUT_MOBILE);
+                GlobalSettingsProto.Data.ACTIVITY_TIMEOUT_MOBILE);
         dumpSetting(s, p,
                 Settings.Global.DATA_ACTIVITY_TIMEOUT_WIFI,
-                GlobalSettingsProto.DATA_ACTIVITY_TIMEOUT_WIFI);
+                GlobalSettingsProto.Data.ACTIVITY_TIMEOUT_WIFI);
         dumpSetting(s, p,
                 Settings.Global.DATA_ROAMING,
-                GlobalSettingsProto.DATA_ROAMING);
+                GlobalSettingsProto.Data.ROAMING);
         dumpSetting(s, p,
-                Settings.Global.MDC_INITIAL_MAX_RETRY,
-                GlobalSettingsProto.MDC_INITIAL_MAX_RETRY);
+                Settings.Global.DATA_STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS,
+                GlobalSettingsProto.Data.STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS);
+        dumpSetting(s, p,
+                Settings.Global.DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS,
+                GlobalSettingsProto.Data.STALL_ALARM_AGGRESSIVE_DELAY_IN_MS);
+        p.end(dataToken);
+
+        final long databaseToken = p.start(GlobalSettingsProto.DATABASE);
+        dumpSetting(s, p,
+                Settings.Global.DATABASE_DOWNGRADE_REASON,
+                GlobalSettingsProto.Database.DOWNGRADE_REASON);
+        dumpSetting(s, p,
+                Settings.Global.DATABASE_CREATION_BUILDID,
+                GlobalSettingsProto.Database.CREATION_BUILDID);
+        p.end(databaseToken);
+
+        final long debugToken = p.start(GlobalSettingsProto.DEBUG);
+        dumpSetting(s, p,
+                Settings.Global.DEBUG_APP,
+                GlobalSettingsProto.Debug.APP);
+        dumpSetting(s, p,
+                Settings.Global.DEBUG_VIEW_ATTRIBUTES,
+                GlobalSettingsProto.Debug.VIEW_ATTRIBUTES);
+        p.end(debugToken);
+
+        final long defaultToken = p.start(GlobalSettingsProto.DEFAULT);
+        // Settings.Global.DEFAULT_SM_DP_PLUS intentionally excluded.
+        dumpSetting(s, p,
+                Settings.Global.DEFAULT_INSTALL_LOCATION,
+                GlobalSettingsProto.Default.INSTALL_LOCATION);
+        dumpSetting(s, p,
+                Settings.Global.DEFAULT_DNS_SERVER,
+                GlobalSettingsProto.Default.DNS_SERVER);
+        p.end(defaultToken);
+
+        final long developmentToken = p.start(GlobalSettingsProto.DEVELOPMENT);
+        dumpSetting(s, p,
+                Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES,
+                GlobalSettingsProto.Development.FORCE_RESIZABLE_ACTIVITIES);
+        dumpSetting(s, p,
+                Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT,
+                GlobalSettingsProto.Development.ENABLE_FREEFORM_WINDOWS_SUPPORT);
+        dumpSetting(s, p,
+                Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
+                GlobalSettingsProto.Development.SETTINGS_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.DEVELOPMENT_FORCE_RTL,
+                GlobalSettingsProto.Development.FORCE_RTL);
+        dumpSetting(s, p,
+                Settings.Global.EMULATE_DISPLAY_CUTOUT,
+                GlobalSettingsProto.Development.EMULATE_DISPLAY_CUTOUT);
+        p.end(developmentToken);
+
+        final long deviceToken = p.start(GlobalSettingsProto.DEVICE);
+        dumpSetting(s, p,
+                Settings.Global.DEVICE_NAME,
+                GlobalSettingsProto.Device.NAME);
+        dumpSetting(s, p,
+                Settings.Global.DEVICE_PROVISIONED,
+                GlobalSettingsProto.Device.PROVISIONED);
+        dumpSetting(s, p,
+                Settings.Global.DEVICE_PROVISIONING_MOBILE_DATA_ENABLED,
+                GlobalSettingsProto.Device.PROVISIONING_MOBILE_DATA_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.DEVICE_IDLE_CONSTANTS,
+                GlobalSettingsProto.Device.IDLE_CONSTANTS);
+        dumpSetting(s, p,
+                Settings.Global.DEVICE_POLICY_CONSTANTS,
+                GlobalSettingsProto.Device.POLICY_CONSTANTS);
+        dumpSetting(s, p,
+                Settings.Global.DEVICE_DEMO_MODE,
+                GlobalSettingsProto.Device.DEMO_MODE);
+        p.end(deviceToken);
+
+        dumpSetting(s, p,
+                Settings.Global.DISK_FREE_CHANGE_REPORTING_THRESHOLD,
+                GlobalSettingsProto.DISK_FREE_CHANGE_REPORTING_THRESHOLD);
+
+        final long displayToken = p.start(GlobalSettingsProto.DISPLAY);
+        dumpSetting(s, p,
+                Settings.Global.DISPLAY_SIZE_FORCED,
+                GlobalSettingsProto.Display.SIZE_FORCED);
+        dumpSetting(s, p,
+                Settings.Global.DISPLAY_SCALING_FORCE,
+                GlobalSettingsProto.Display.SCALING_FORCE);
+        dumpSetting(s, p,
+                Settings.Global.DISPLAY_PANEL_LPM,
+                GlobalSettingsProto.Display.PANEL_LPM);
+        p.end(displayToken);
+
+        final long dnsResolverToken = p.start(GlobalSettingsProto.DNS_RESOLVER);
+        dumpSetting(s, p,
+                Settings.Global.DNS_RESOLVER_SAMPLE_VALIDITY_SECONDS,
+                GlobalSettingsProto.DnsResolver.SAMPLE_VALIDITY_SECONDS);
+        dumpSetting(s, p,
+                Settings.Global.DNS_RESOLVER_SUCCESS_THRESHOLD_PERCENT,
+                GlobalSettingsProto.DnsResolver.SUCCESS_THRESHOLD_PERCENT);
+        dumpSetting(s, p,
+                Settings.Global.DNS_RESOLVER_MIN_SAMPLES,
+                GlobalSettingsProto.DnsResolver.MIN_SAMPLES);
+        dumpSetting(s, p,
+                Settings.Global.DNS_RESOLVER_MAX_SAMPLES,
+                GlobalSettingsProto.DnsResolver.MAX_SAMPLES);
+        p.end(dnsResolverToken);
+
+        dumpSetting(s, p,
+                Settings.Global.DOCK_AUDIO_MEDIA_ENABLED,
+                GlobalSettingsProto.DOCK_AUDIO_MEDIA_ENABLED);
+
+        final long downloadToken = p.start(GlobalSettingsProto.DOWNLOAD);
+        dumpSetting(s, p,
+                Settings.Global.DOWNLOAD_MAX_BYTES_OVER_MOBILE,
+                GlobalSettingsProto.Download.MAX_BYTES_OVER_MOBILE);
+        dumpSetting(s, p,
+                Settings.Global.DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE,
+                GlobalSettingsProto.Download.RECOMMENDED_MAX_BYTES_OVER_MOBILE);
+        p.end(downloadToken);
+
+        final long dropboxToken = p.start(GlobalSettingsProto.DROPBOX);
+        dumpSetting(s, p,
+                Settings.Global.DROPBOX_AGE_SECONDS,
+                GlobalSettingsProto.Dropbox.AGE_SECONDS);
+        dumpSetting(s, p,
+                Settings.Global.DROPBOX_MAX_FILES,
+                GlobalSettingsProto.Dropbox.MAX_FILES);
+        dumpSetting(s, p,
+                Settings.Global.DROPBOX_QUOTA_KB,
+                GlobalSettingsProto.Dropbox.QUOTA_KB);
+        dumpSetting(s, p,
+                Settings.Global.DROPBOX_QUOTA_PERCENT,
+                GlobalSettingsProto.Dropbox.QUOTA_PERCENT);
+        dumpSetting(s, p,
+                Settings.Global.DROPBOX_RESERVE_PERCENT,
+                GlobalSettingsProto.Dropbox.RESERVE_PERCENT);
+        dumpRepeatedSetting(s, p,
+                Settings.Global.DROPBOX_TAG_PREFIX,
+                GlobalSettingsProto.Dropbox.SETTINGS);
+        p.end(dropboxToken);
+
+        final long emergencyToken = p.start(GlobalSettingsProto.EMERGENCY);
+        dumpSetting(s, p,
+                Settings.Global.EMERGENCY_TONE,
+                GlobalSettingsProto.Emergency.TONE);
+        dumpSetting(s, p,
+                Settings.Global.EMERGENCY_AFFORDANCE_NEEDED,
+                GlobalSettingsProto.Emergency.AFFORDANCE_NEEDED);
+        p.end(emergencyToken);
+
+        final long enableToken = p.start(GlobalSettingsProto.ENABLE);
+        dumpSetting(s, p,
+                Settings.Global.ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED,
+                GlobalSettingsProto.Enable.ACCESSIBILITY_GLOBAL_GESTURE_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.ENABLE_GPU_DEBUG_LAYERS,
+                GlobalSettingsProto.Enable.GPU_DEBUG_LAYERS);
+        dumpSetting(s, p,
+                Settings.Global.ENABLE_EPHEMERAL_FEATURE,
+                GlobalSettingsProto.Enable.EPHEMERAL_FEATURE);
+        dumpSetting(s, p,
+                Settings.Global.ENABLE_CELLULAR_ON_BOOT,
+                GlobalSettingsProto.Enable.CELLULAR_ON_BOOT);
+        dumpSetting(s, p,
+                Settings.Global.ENABLE_DISKSTATS_LOGGING,
+                GlobalSettingsProto.Enable.DISKSTATS_LOGGING);
+        dumpSetting(s, p,
+                Settings.Global.ENABLE_CACHE_QUOTA_CALCULATION,
+                GlobalSettingsProto.Enable.CACHE_QUOTA_CALCULATION);
+        dumpSetting(s, p,
+                Settings.Global.ENABLE_DELETION_HELPER_NO_THRESHOLD_TOGGLE,
+                GlobalSettingsProto.Enable.DELETION_HELPER_NO_THRESHOLD_TOGGLE);
+        dumpSetting(s, p,
+                Settings.Global.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING,
+                GlobalSettingsProto.Enable.GNSS_RAW_MEAS_FULL_TRACKING);
+        p.end(enableToken);
+
+        dumpSetting(s, p,
+                Settings.Global.ENCODED_SURROUND_OUTPUT,
+                GlobalSettingsProto.ENCODED_SURROUND_OUTPUT);
+        dumpSetting(s, p,
+                Settings.Global.ENHANCED_4G_MODE_ENABLED,
+                GlobalSettingsProto.ENHANCED_4G_MODE_ENABLED);
+        dumpRepeatedSetting(s, p,
+                Settings.Global.ERROR_LOGCAT_PREFIX,
+                GlobalSettingsProto.ERROR_LOGCAT_LINES);
+
+        final long euiccToken = p.start(GlobalSettingsProto.EUICC);
+        dumpSetting(s, p,
+                Settings.Global.EUICC_PROVISIONED,
+                GlobalSettingsProto.Euicc.PROVISIONED);
+        dumpSetting(s, p,
+                Settings.Global.EUICC_FACTORY_RESET_TIMEOUT_MILLIS,
+                GlobalSettingsProto.Euicc.FACTORY_RESET_TIMEOUT_MILLIS);
+        p.end(euiccToken);
+
+        dumpSetting(s, p,
+                Settings.Global.FANCY_IME_ANIMATIONS,
+                GlobalSettingsProto.FANCY_IME_ANIMATIONS);
         dumpSetting(s, p,
                 Settings.Global.FORCE_ALLOW_ON_EXTERNAL,
                 GlobalSettingsProto.FORCE_ALLOW_ON_EXTERNAL);
-        // Settings.Global.DEFAULT_SM_DP_PLUS intentionally excluded.
         dumpSetting(s, p,
-                Settings.Global.EUICC_PROVISIONED,
-                GlobalSettingsProto.EUICC_PROVISIONED);
+                Settings.Global.FPS_DEVISOR,
+                GlobalSettingsProto.FPS_DIVISOR);
         dumpSetting(s, p,
-                Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES,
-                GlobalSettingsProto.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES);
+                Settings.Global.FSTRIM_MANDATORY_INTERVAL,
+                GlobalSettingsProto.FSTRIM_MANDATORY_INTERVAL);
+
+        final long ghpToken = p.start(GlobalSettingsProto.GLOBAL_HTTP_PROXY);
         dumpSetting(s, p,
-                Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT,
-                GlobalSettingsProto.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT);
+                Settings.Global.GLOBAL_HTTP_PROXY_HOST,
+                GlobalSettingsProto.GlobalHttpProxy.HOST);
         dumpSetting(s, p,
-                Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,
-                GlobalSettingsProto.DEVELOPMENT_SETTINGS_ENABLED);
+                Settings.Global.GLOBAL_HTTP_PROXY_PORT,
+                GlobalSettingsProto.GlobalHttpProxy.PORT);
         dumpSetting(s, p,
-                Settings.Global.DEVICE_PROVISIONED,
-                GlobalSettingsProto.DEVICE_PROVISIONED);
+                Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST,
+                GlobalSettingsProto.GlobalHttpProxy.EXCLUSION_LIST);
         dumpSetting(s, p,
-                Settings.Global.DEVICE_PROVISIONING_MOBILE_DATA_ENABLED,
-                GlobalSettingsProto.DEVICE_PROVISIONING_MOBILE_DATA_ENABLED);
+                Settings.Global.GLOBAL_HTTP_PROXY_PAC,
+                GlobalSettingsProto.GlobalHttpProxy.PAC);
         dumpSetting(s, p,
-                Settings.Global.DISPLAY_SIZE_FORCED,
-                GlobalSettingsProto.DISPLAY_SIZE_FORCED);
+                Settings.Global.SET_GLOBAL_HTTP_PROXY,
+                GlobalSettingsProto.GlobalHttpProxy.SETTING_UI_ENABLED);
+        p.end(ghpToken);
+
         dumpSetting(s, p,
-                Settings.Global.DISPLAY_SCALING_FORCE,
-                GlobalSettingsProto.DISPLAY_SCALING_FORCE);
+                Settings.Global.GPRS_REGISTER_CHECK_PERIOD_MS,
+                GlobalSettingsProto.GPRS_REGISTER_CHECK_PERIOD_MS);
+
+        final long gpuToken = p.start(GlobalSettingsProto.GPU);
         dumpSetting(s, p,
-                Settings.Global.DOWNLOAD_MAX_BYTES_OVER_MOBILE,
-                GlobalSettingsProto.DOWNLOAD_MAX_BYTES_OVER_MOBILE);
+                Settings.Global.GPU_DEBUG_APP,
+                GlobalSettingsProto.Gpu.DEBUG_APP);
         dumpSetting(s, p,
-                Settings.Global.DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE,
-                GlobalSettingsProto.DOWNLOAD_RECOMMENDED_MAX_BYTES_OVER_MOBILE);
-        // Settings.Global.INSTALL_NON_MARKET_APPS intentionally excluded since it's deprecated.
+                Settings.Global.GPU_DEBUG_LAYERS,
+                GlobalSettingsProto.Gpu.DEBUG_LAYERS);
+        p.end(gpuToken);
+
+        final long hdmiToken = p.start(GlobalSettingsProto.HDMI);
         dumpSetting(s, p,
                 Settings.Global.HDMI_CONTROL_ENABLED,
-                GlobalSettingsProto.HDMI_CONTROL_ENABLED);
+                GlobalSettingsProto.Hdmi.CONTROL_ENABLED);
         dumpSetting(s, p,
                 Settings.Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
-                GlobalSettingsProto.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED);
+                GlobalSettingsProto.Hdmi.SYSTEM_AUDIO_CONTROL_ENABLED);
         dumpSetting(s, p,
                 Settings.Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED,
-                GlobalSettingsProto.HDMI_CONTROL_AUTO_WAKEUP_ENABLED);
+                GlobalSettingsProto.Hdmi.CONTROL_AUTO_WAKEUP_ENABLED);
         dumpSetting(s, p,
                 Settings.Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
-                GlobalSettingsProto.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED);
+                GlobalSettingsProto.Hdmi.CONTROL_AUTO_DEVICE_OFF_ENABLED);
+        p.end(hdmiToken);
+
         dumpSetting(s, p,
-                Settings.Global.PRIV_APP_OOB_ENABLED,
-                GlobalSettingsProto.PRIV_APP_OOB_ENABLED);
+                Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
+                GlobalSettingsProto.HEADS_UP_NOTIFICATIONS_ENABLED);
+        dumpSetting(s, p,
+                Global.HIDDEN_API_BLACKLIST_EXEMPTIONS,
+                GlobalSettingsProto.HIDDEN_API_BLACKLIST_EXEMPTIONS);
+
+        final long inetCondToken = p.start(GlobalSettingsProto.INET_CONDITION);
+        dumpSetting(s, p,
+                Settings.Global.INET_CONDITION_DEBOUNCE_UP_DELAY,
+                GlobalSettingsProto.InetCondition.DEBOUNCE_UP_DELAY);
+        dumpSetting(s, p,
+                Settings.Global.INET_CONDITION_DEBOUNCE_DOWN_DELAY,
+                GlobalSettingsProto.InetCondition.DEBOUNCE_DOWN_DELAY);
+        p.end(inetCondToken);
+
+        final long instantAppToken = p.start(GlobalSettingsProto.INSTANT_APP);
+        dumpSetting(s, p,
+                Settings.Global.INSTANT_APP_DEXOPT_ENABLED,
+                GlobalSettingsProto.InstantApp.DEXOPT_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.EPHEMERAL_COOKIE_MAX_SIZE_BYTES,
+                GlobalSettingsProto.InstantApp.EPHEMERAL_COOKIE_MAX_SIZE_BYTES);
+        dumpSetting(s, p,
+                Settings.Global.INSTALLED_INSTANT_APP_MIN_CACHE_PERIOD,
+                GlobalSettingsProto.InstantApp.INSTALLED_MIN_CACHE_PERIOD);
+        dumpSetting(s, p,
+                Settings.Global.INSTALLED_INSTANT_APP_MAX_CACHE_PERIOD,
+                GlobalSettingsProto.InstantApp.INSTALLED_MAX_CACHE_PERIOD);
+        dumpSetting(s, p,
+                Settings.Global.UNINSTALLED_INSTANT_APP_MIN_CACHE_PERIOD,
+                GlobalSettingsProto.InstantApp.UNINSTALLED_MIN_CACHE_PERIOD);
+        dumpSetting(s, p,
+                Settings.Global.UNINSTALLED_INSTANT_APP_MAX_CACHE_PERIOD,
+                GlobalSettingsProto.InstantApp.UNINSTALLED_MAX_CACHE_PERIOD);
+        p.end(instantAppToken);
+
+        final long intentFirewallToken = p.start(GlobalSettingsProto.INTENT_FIREWALL);
+        dumpSetting(s, p,
+                Settings.Global.INTENT_FIREWALL_UPDATE_CONTENT_URL,
+                GlobalSettingsProto.IntentFirewall.UPDATE_CONTENT_URL);
+        dumpSetting(s, p,
+                Settings.Global.INTENT_FIREWALL_UPDATE_METADATA_URL,
+                GlobalSettingsProto.IntentFirewall.UPDATE_METADATA_URL);
+        p.end(intentFirewallToken);
+
+        dumpSetting(s, p,
+                Settings.Global.JOB_SCHEDULER_CONSTANTS,
+                GlobalSettingsProto.JOB_SCHEDULER_CONSTANTS);
+        dumpSetting(s, p,
+                Settings.Global.KEEP_PROFILE_IN_BACKGROUND,
+                GlobalSettingsProto.KEEP_PROFILE_IN_BACKGROUND);
+
+        final long langIdToken = p.start(GlobalSettingsProto.LANG_ID);
+        dumpSetting(s, p,
+                Settings.Global.LANG_ID_UPDATE_CONTENT_URL,
+                GlobalSettingsProto.LangId.UPDATE_CONTENT_URL);
+        dumpSetting(s, p,
+                Settings.Global.LANG_ID_UPDATE_METADATA_URL,
+                GlobalSettingsProto.LangId.UPDATE_METADATA_URL);
+        p.end(langIdToken);
+
+        final long locationToken = p.start(GlobalSettingsProto.LOCATION);
         dumpSetting(s, p,
                 Settings.Global.LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS,
-                GlobalSettingsProto.LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS);
+                GlobalSettingsProto.Location.BACKGROUND_THROTTLE_INTERVAL_MS);
         dumpSetting(s, p,
                 Settings.Global.LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS,
-                GlobalSettingsProto.LOCATION_BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS);
+                GlobalSettingsProto.Location.BACKGROUND_THROTTLE_PROXIMITY_ALERT_INTERVAL_MS);
         dumpSetting(s, p,
                 Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST,
-                GlobalSettingsProto.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST);
+                GlobalSettingsProto.Location.BACKGROUND_THROTTLE_PACKAGE_WHITELIST);
+        dumpSetting(s, p,
+                Settings.Global.LOCATION_SETTINGS_LINK_TO_PERMISSIONS_ENABLED,
+                GlobalSettingsProto.Location.SETTINGS_LINK_TO_PERMISSIONS_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.LOCATION_GLOBAL_KILL_SWITCH,
+                GlobalSettingsProto.Location.GLOBAL_KILL_SWITCH);
+        p.end(locationToken);
+
+        final long lpmToken = p.start(GlobalSettingsProto.LOW_POWER_MODE);
+        dumpSetting(s, p,
+                Settings.Global.LOW_POWER_MODE,
+                GlobalSettingsProto.LowPowerMode.ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL,
+                GlobalSettingsProto.LowPowerMode.TRIGGER_LEVEL);
+        dumpSetting(s, p,
+                Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL_MAX,
+                GlobalSettingsProto.LowPowerMode.TRIGGER_LEVEL_MAX);
+        p.end(lpmToken);
+
+        dumpSetting(s, p,
+                Settings.Global.LTE_SERVICE_FORCED,
+                GlobalSettingsProto.LTE_SERVICE_FORCED);
+        dumpSetting(s, p,
+                Settings.Global.MDC_INITIAL_MAX_RETRY,
+                GlobalSettingsProto.MDC_INITIAL_MAX_RETRY);
+
+        final long mhlToken = p.start(GlobalSettingsProto.MHL);
         dumpSetting(s, p,
                 Settings.Global.MHL_INPUT_SWITCHING_ENABLED,
-                GlobalSettingsProto.MHL_INPUT_SWITCHING_ENABLED);
+                GlobalSettingsProto.Mhl.INPUT_SWITCHING_ENABLED);
         dumpSetting(s, p,
                 Settings.Global.MHL_POWER_CHARGE_ENABLED,
-                GlobalSettingsProto.MHL_POWER_CHARGE_ENABLED);
+                GlobalSettingsProto.Mhl.POWER_CHARGE_ENABLED);
+        p.end(mhlToken);
+
+        final long mobileDataToken = p.start(GlobalSettingsProto.MOBILE_DATA);
         dumpSetting(s, p,
                 Settings.Global.MOBILE_DATA,
-                GlobalSettingsProto.MOBILE_DATA);
+                GlobalSettingsProto.MobileData.ALLOWED);
         dumpSetting(s, p,
                 Settings.Global.MOBILE_DATA_ALWAYS_ON,
-                GlobalSettingsProto.MOBILE_DATA_ALWAYS_ON);
+                GlobalSettingsProto.MobileData.ALWAYS_ON);
+        p.end(mobileDataToken);
+
         dumpSetting(s, p,
-                Settings.Global.CONNECTIVITY_METRICS_BUFFER_SIZE,
-                GlobalSettingsProto.CONNECTIVITY_METRICS_BUFFER_SIZE);
+                Settings.Global.MODE_RINGER,
+                GlobalSettingsProto.MODE_RINGER);
+
+        final long multiSimToken = p.start(GlobalSettingsProto.MULTI_SIM);
+        dumpSetting(s, p,
+                Settings.Global.MULTI_SIM_VOICE_CALL_SUBSCRIPTION,
+                GlobalSettingsProto.MultiSim.VOICE_CALL_SUBSCRIPTION);
+        dumpSetting(s, p,
+                Settings.Global.MULTI_SIM_VOICE_PROMPT,
+                GlobalSettingsProto.MultiSim.VOICE_PROMPT);
+        dumpSetting(s, p,
+                Settings.Global.MULTI_SIM_DATA_CALL_SUBSCRIPTION,
+                GlobalSettingsProto.MultiSim.DATA_CALL_SUBSCRIPTION);
+        dumpSetting(s, p,
+                Settings.Global.MULTI_SIM_SMS_SUBSCRIPTION,
+                GlobalSettingsProto.MultiSim.SMS_SUBSCRIPTION);
+        dumpSetting(s, p,
+                Settings.Global.MULTI_SIM_SMS_PROMPT,
+                GlobalSettingsProto.MultiSim.SMS_PROMPT);
+        p.end(multiSimToken);
+
+        final long netstatsToken = p.start(GlobalSettingsProto.NETSTATS);
         dumpSetting(s, p,
                 Settings.Global.NETSTATS_ENABLED,
-                GlobalSettingsProto.NETSTATS_ENABLED);
+                GlobalSettingsProto.Netstats.ENABLED);
         dumpSetting(s, p,
                 Settings.Global.NETSTATS_POLL_INTERVAL,
-                GlobalSettingsProto.NETSTATS_POLL_INTERVAL);
+                GlobalSettingsProto.Netstats.POLL_INTERVAL);
         dumpSetting(s, p,
                 Settings.Global.NETSTATS_TIME_CACHE_MAX_AGE,
-                GlobalSettingsProto.NETSTATS_TIME_CACHE_MAX_AGE);
+                GlobalSettingsProto.Netstats.TIME_CACHE_MAX_AGE);
         dumpSetting(s, p,
                 Settings.Global.NETSTATS_GLOBAL_ALERT_BYTES,
-                GlobalSettingsProto.NETSTATS_GLOBAL_ALERT_BYTES);
+                GlobalSettingsProto.Netstats.GLOBAL_ALERT_BYTES);
         dumpSetting(s, p,
                 Settings.Global.NETSTATS_SAMPLE_ENABLED,
-                GlobalSettingsProto.NETSTATS_SAMPLE_ENABLED);
+                GlobalSettingsProto.Netstats.SAMPLE_ENABLED);
         dumpSetting(s, p,
                 Settings.Global.NETSTATS_AUGMENT_ENABLED,
-                GlobalSettingsProto.NETSTATS_AUGMENT_ENABLED);
+                GlobalSettingsProto.Netstats.AUGMENT_ENABLED);
         dumpSetting(s, p,
                 Settings.Global.NETSTATS_DEV_BUCKET_DURATION,
-                GlobalSettingsProto.NETSTATS_DEV_BUCKET_DURATION);
+                GlobalSettingsProto.Netstats.DEV_BUCKET_DURATION);
         dumpSetting(s, p,
                 Settings.Global.NETSTATS_DEV_PERSIST_BYTES,
-                GlobalSettingsProto.NETSTATS_DEV_PERSIST_BYTES);
+                GlobalSettingsProto.Netstats.DEV_PERSIST_BYTES);
         dumpSetting(s, p,
                 Settings.Global.NETSTATS_DEV_ROTATE_AGE,
-                GlobalSettingsProto.NETSTATS_DEV_ROTATE_AGE);
+                GlobalSettingsProto.Netstats.DEV_ROTATE_AGE);
         dumpSetting(s, p,
                 Settings.Global.NETSTATS_DEV_DELETE_AGE,
-                GlobalSettingsProto.NETSTATS_DEV_DELETE_AGE);
+                GlobalSettingsProto.Netstats.DEV_DELETE_AGE);
         dumpSetting(s, p,
                 Settings.Global.NETSTATS_UID_BUCKET_DURATION,
-                GlobalSettingsProto.NETSTATS_UID_BUCKET_DURATION);
+                GlobalSettingsProto.Netstats.UID_BUCKET_DURATION);
         dumpSetting(s, p,
                 Settings.Global.NETSTATS_UID_PERSIST_BYTES,
-                GlobalSettingsProto.NETSTATS_UID_PERSIST_BYTES);
+                GlobalSettingsProto.Netstats.UID_PERSIST_BYTES);
         dumpSetting(s, p,
                 Settings.Global.NETSTATS_UID_ROTATE_AGE,
-                GlobalSettingsProto.NETSTATS_UID_ROTATE_AGE);
+                GlobalSettingsProto.Netstats.UID_ROTATE_AGE);
         dumpSetting(s, p,
                 Settings.Global.NETSTATS_UID_DELETE_AGE,
-                GlobalSettingsProto.NETSTATS_UID_DELETE_AGE);
+                GlobalSettingsProto.Netstats.UID_DELETE_AGE);
         dumpSetting(s, p,
                 Settings.Global.NETSTATS_UID_TAG_BUCKET_DURATION,
-                GlobalSettingsProto.NETSTATS_UID_TAG_BUCKET_DURATION);
+                GlobalSettingsProto.Netstats.UID_TAG_BUCKET_DURATION);
         dumpSetting(s, p,
                 Settings.Global.NETSTATS_UID_TAG_PERSIST_BYTES,
-                GlobalSettingsProto.NETSTATS_UID_TAG_PERSIST_BYTES);
+                GlobalSettingsProto.Netstats.UID_TAG_PERSIST_BYTES);
         dumpSetting(s, p,
                 Settings.Global.NETSTATS_UID_TAG_ROTATE_AGE,
-                GlobalSettingsProto.NETSTATS_UID_TAG_ROTATE_AGE);
+                GlobalSettingsProto.Netstats.UID_TAG_ROTATE_AGE);
         dumpSetting(s, p,
                 Settings.Global.NETSTATS_UID_TAG_DELETE_AGE,
-                GlobalSettingsProto.NETSTATS_UID_TAG_DELETE_AGE);
+                GlobalSettingsProto.Netstats.UID_TAG_DELETE_AGE);
+        p.end(netstatsToken);
+
+        final long networkToken = p.start(GlobalSettingsProto.NETWORK);
         dumpSetting(s, p,
                 Settings.Global.NETWORK_PREFERENCE,
-                GlobalSettingsProto.NETWORK_PREFERENCE);
+                GlobalSettingsProto.Network.PREFERENCE);
+        dumpSetting(s, p,
+                Settings.Global.PREFERRED_NETWORK_MODE,
+                GlobalSettingsProto.Network.PREFERRED_NETWORK_MODE);
         dumpSetting(s, p,
                 Settings.Global.NETWORK_SCORER_APP,
-                GlobalSettingsProto.NETWORK_SCORER_APP);
+                GlobalSettingsProto.Network.SCORER_APP);
+        dumpSetting(s, p,
+                Settings.Global.NETWORK_SWITCH_NOTIFICATION_DAILY_LIMIT,
+                GlobalSettingsProto.Network.SWITCH_NOTIFICATION_DAILY_LIMIT);
+        dumpSetting(s, p,
+                Settings.Global.NETWORK_SWITCH_NOTIFICATION_RATE_LIMIT_MILLIS,
+                GlobalSettingsProto.Network.SWITCH_NOTIFICATION_RATE_LIMIT_MILLIS);
+        dumpSetting(s, p,
+                Settings.Global.NETWORK_AVOID_BAD_WIFI,
+                GlobalSettingsProto.Network.AVOID_BAD_WIFI);
+        dumpSetting(s, p,
+                Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE,
+                GlobalSettingsProto.Network.METERED_MULTIPATH_PREFERENCE);
+        dumpSetting(s, p,
+                Settings.Global.NETWORK_WATCHLIST_LAST_REPORT_TIME,
+                GlobalSettingsProto.Network.WATCHLIST_LAST_REPORT_TIME);
+        dumpSetting(s, p,
+                Settings.Global.NETWORK_SCORING_UI_ENABLED,
+                GlobalSettingsProto.Network.SCORING_UI_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED,
+                GlobalSettingsProto.Network.RECOMMENDATIONS_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE,
+                GlobalSettingsProto.Network.RECOMMENDATIONS_PACKAGE);
+        dumpSetting(s, p,
+                Settings.Global.NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS,
+                GlobalSettingsProto.Network.RECOMMENDATION_REQUEST_TIMEOUT_MS);
+        dumpSetting(s, p,
+                Settings.Global.NETWORK_WATCHLIST_ENABLED,
+                GlobalSettingsProto.Network.WATCHLIST_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.NETWORK_SCORING_PROVISIONED,
+                GlobalSettingsProto.Network.SCORING_PROVISIONED);
+        dumpSetting(s, p,
+                Settings.Global.NETWORK_ACCESS_TIMEOUT_MS,
+                GlobalSettingsProto.Network.ACCESS_TIMEOUT_MS);
+        dumpSetting(s, p,
+                Settings.Global.RECOMMENDED_NETWORK_EVALUATOR_CACHE_EXPIRY_MS,
+                GlobalSettingsProto.Network.RECOMMENDED_NETWORK_EVALUATOR_CACHE_EXPIRY_MS);
+        p.end(networkToken);
+
+        dumpSetting(s, p,
+                Settings.Global.NEW_CONTACT_AGGREGATOR,
+                GlobalSettingsProto.NEW_CONTACT_AGGREGATOR);
         dumpSetting(s, p,
                 Settings.Global.NIGHT_DISPLAY_FORCED_AUTO_MODE_AVAILABLE,
                 GlobalSettingsProto.NIGHT_DISPLAY_FORCED_AUTO_MODE_AVAILABLE);
+
+        final long nitzUpdateToken = p.start(GlobalSettingsProto.NITZ_UPDATE);
         dumpSetting(s, p,
                 Settings.Global.NITZ_UPDATE_DIFF,
-                GlobalSettingsProto.NITZ_UPDATE_DIFF);
+                GlobalSettingsProto.NitzUpdate.DIFF);
         dumpSetting(s, p,
                 Settings.Global.NITZ_UPDATE_SPACING,
-                GlobalSettingsProto.NITZ_UPDATE_SPACING);
+                GlobalSettingsProto.NitzUpdate.SPACING);
+        p.end(nitzUpdateToken);
+
+        final long notificationToken = p.start(GlobalSettingsProto.NOTIFICATION);
+        dumpSetting(s, p,
+                Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
+                GlobalSettingsProto.Notification.MAX_NOTIFICATION_ENQUEUE_RATE);
+        dumpSetting(s, p,
+                Settings.Global.SHOW_NOTIFICATION_CHANNEL_WARNINGS,
+                GlobalSettingsProto.Notification.SHOW_NOTIFICATION_CHANNEL_WARNINGS);
+        // The list of snooze options for notifications. This is encoded as a key=value list,
+        // separated by commas.
+        dumpSetting(s, p,
+                Settings.Global.NOTIFICATION_SNOOZE_OPTIONS,
+                GlobalSettingsProto.Notification.SNOOZE_OPTIONS);
+        dumpSetting(s, p,
+                Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS,
+                GlobalSettingsProto.Notification.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS);
+        p.end(notificationToken);
+
+        dumpSetting(s, p,
+                Settings.Global.NSD_ON,
+                GlobalSettingsProto.NSD_ON);
+
+        final long ntpToken = p.start(GlobalSettingsProto.NTP);
         dumpSetting(s, p,
                 Settings.Global.NTP_SERVER,
-                GlobalSettingsProto.NTP_SERVER);
+                GlobalSettingsProto.Ntp.SERVER);
         dumpSetting(s, p,
                 Settings.Global.NTP_TIMEOUT,
-                GlobalSettingsProto.NTP_TIMEOUT);
+                GlobalSettingsProto.Ntp.TIMEOUT_MS);
+        p.end(ntpToken);
+
+        final long obroToken = p.start(GlobalSettingsProto.OFF_BODY_RADIOS_OFF);
         dumpSetting(s, p,
-                Settings.Global.STORAGE_BENCHMARK_INTERVAL,
-                GlobalSettingsProto.STORAGE_BENCHMARK_INTERVAL);
+                Settings.Global.OFF_BODY_RADIOS_OFF_FOR_SMALL_BATTERY_ENABLED,
+                GlobalSettingsProto.OffBodyRadiosOff.ENABLED_FOR_SMALL_BATTERY);
         dumpSetting(s, p,
-                Settings.Global.DNS_RESOLVER_SAMPLE_VALIDITY_SECONDS,
-                GlobalSettingsProto.DNS_RESOLVER_SAMPLE_VALIDITY_SECONDS);
-        dumpSetting(s, p,
-                Settings.Global.DNS_RESOLVER_SUCCESS_THRESHOLD_PERCENT,
-                GlobalSettingsProto.DNS_RESOLVER_SUCCESS_THRESHOLD_PERCENT);
-        dumpSetting(s, p,
-                Settings.Global.DNS_RESOLVER_MIN_SAMPLES,
-                GlobalSettingsProto.DNS_RESOLVER_MIN_SAMPLES);
-        dumpSetting(s, p,
-                Settings.Global.DNS_RESOLVER_MAX_SAMPLES,
-                GlobalSettingsProto.DNS_RESOLVER_MAX_SAMPLES);
+                Settings.Global.OFF_BODY_RADIOS_OFF_DELAY_MS,
+                GlobalSettingsProto.OffBodyRadiosOff.DELAY_MS);
+        p.end(obroToken);
+
         dumpSetting(s, p,
                 Settings.Global.OTA_DISABLE_AUTOMATIC_UPDATE,
                 GlobalSettingsProto.OTA_DISABLE_AUTOMATIC_UPDATE);
         dumpSetting(s, p,
+                Settings.Global.OVERLAY_DISPLAY_DEVICES,
+                GlobalSettingsProto.OVERLAY_DISPLAY_DEVICES);
+        dumpSetting(s, p,
+                Settings.Global.OVERRIDE_SETTINGS_PROVIDER_RESTORE_ANY_VERSION,
+                GlobalSettingsProto.OVERRIDE_SETTINGS_PROVIDER_RESTORE_ANY_VERSION);
+        dumpSetting(s, p,
+                Settings.Global.PAC_CHANGE_DELAY,
+                GlobalSettingsProto.PAC_CHANGE_DELAY);
+
+        final long pkgVerifierToken = p.start(GlobalSettingsProto.PACKAGE_VERIFIER);
+        dumpSetting(s, p,
                 Settings.Global.PACKAGE_VERIFIER_ENABLE,
-                GlobalSettingsProto.PACKAGE_VERIFIER_ENABLE);
+                GlobalSettingsProto.PackageVerifier.ENABLED);
         dumpSetting(s, p,
                 Settings.Global.PACKAGE_VERIFIER_TIMEOUT,
-                GlobalSettingsProto.PACKAGE_VERIFIER_TIMEOUT);
+                GlobalSettingsProto.PackageVerifier.TIMEOUT);
         dumpSetting(s, p,
                 Settings.Global.PACKAGE_VERIFIER_DEFAULT_RESPONSE,
-                GlobalSettingsProto.PACKAGE_VERIFIER_DEFAULT_RESPONSE);
+                GlobalSettingsProto.PackageVerifier.DEFAULT_RESPONSE);
         dumpSetting(s, p,
                 Settings.Global.PACKAGE_VERIFIER_SETTING_VISIBLE,
-                GlobalSettingsProto.PACKAGE_VERIFIER_SETTING_VISIBLE);
+                GlobalSettingsProto.PackageVerifier.SETTING_VISIBLE);
         dumpSetting(s, p,
                 Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB,
-                GlobalSettingsProto.PACKAGE_VERIFIER_INCLUDE_ADB);
-        dumpSetting(s, p,
-                Settings.Global.FSTRIM_MANDATORY_INTERVAL,
-                GlobalSettingsProto.FSTRIM_MANDATORY_INTERVAL);
+                GlobalSettingsProto.PackageVerifier.INCLUDE_ADB);
+        p.end(pkgVerifierToken);
+
+        final long pdpWatchdogToken = p.start(GlobalSettingsProto.PDP_WATCHDOG);
         dumpSetting(s, p,
                 Settings.Global.PDP_WATCHDOG_POLL_INTERVAL_MS,
-                GlobalSettingsProto.PDP_WATCHDOG_POLL_INTERVAL_MS);
+                GlobalSettingsProto.PdpWatchdog.POLL_INTERVAL_MS);
         dumpSetting(s, p,
                 Settings.Global.PDP_WATCHDOG_LONG_POLL_INTERVAL_MS,
-                GlobalSettingsProto.PDP_WATCHDOG_LONG_POLL_INTERVAL_MS);
+                GlobalSettingsProto.PdpWatchdog.LONG_POLL_INTERVAL_MS);
         dumpSetting(s, p,
                 Settings.Global.PDP_WATCHDOG_ERROR_POLL_INTERVAL_MS,
-                GlobalSettingsProto.PDP_WATCHDOG_ERROR_POLL_INTERVAL_MS);
+                GlobalSettingsProto.PdpWatchdog.ERROR_POLL_INTERVAL_MS);
         dumpSetting(s, p,
                 Settings.Global.PDP_WATCHDOG_TRIGGER_PACKET_COUNT,
-                GlobalSettingsProto.PDP_WATCHDOG_TRIGGER_PACKET_COUNT);
+                GlobalSettingsProto.PdpWatchdog.TRIGGER_PACKET_COUNT);
         dumpSetting(s, p,
                 Settings.Global.PDP_WATCHDOG_ERROR_POLL_COUNT,
-                GlobalSettingsProto.PDP_WATCHDOG_ERROR_POLL_COUNT);
+                GlobalSettingsProto.PdpWatchdog.ERROR_POLL_COUNT);
         dumpSetting(s, p,
                 Settings.Global.PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT,
-                GlobalSettingsProto.PDP_WATCHDOG_MAX_PDP_RESET_FAIL_COUNT);
+                GlobalSettingsProto.PdpWatchdog.MAX_PDP_RESET_FAIL_COUNT);
+        p.end(pdpWatchdogToken);
+
+        dumpSetting(s, p,
+                Settings.Global.POLICY_CONTROL,
+                GlobalSettingsProto.POLICY_CONTROL);
+        dumpSetting(s, p,
+                Settings.Global.POWER_MANAGER_CONSTANTS,
+                GlobalSettingsProto.POWER_MANAGER_CONSTANTS);
+        dumpSetting(s, p,
+                Settings.Global.PRIV_APP_OOB_ENABLED,
+                GlobalSettingsProto.PRIV_APP_OOB_ENABLED);
+
+        final long prepaidSetupToken = p.start(GlobalSettingsProto.PREPAID_SETUP);
         dumpSetting(s, p,
                 Settings.Global.SETUP_PREPAID_DATA_SERVICE_URL,
-                GlobalSettingsProto.SETUP_PREPAID_DATA_SERVICE_URL);
+                GlobalSettingsProto.PrepaidSetup.DATA_SERVICE_URL);
         dumpSetting(s, p,
                 Settings.Global.SETUP_PREPAID_DETECTION_TARGET_URL,
-                GlobalSettingsProto.SETUP_PREPAID_DETECTION_TARGET_URL);
+                GlobalSettingsProto.PrepaidSetup.DETECTION_TARGET_URL);
         dumpSetting(s, p,
                 Settings.Global.SETUP_PREPAID_DETECTION_REDIR_HOST,
-                GlobalSettingsProto.SETUP_PREPAID_DETECTION_REDIR_HOST);
+                GlobalSettingsProto.PrepaidSetup.DETECTION_REDIR_HOST);
+        p.end(prepaidSetupToken);
+
+        final long privateToken = p.start(GlobalSettingsProto.PRIVATE);
+        dumpSetting(s, p,
+                Settings.Global.PRIVATE_DNS_MODE,
+                GlobalSettingsProto.Private.DNS_MODE);
+        dumpSetting(s, p,
+                Settings.Global.PRIVATE_DNS_SPECIFIER,
+                GlobalSettingsProto.Private.DNS_SPECIFIER);
+        p.end(privateToken);
+
+        dumpSetting(s, p,
+                Settings.Global.PROVISIONING_APN_ALARM_DELAY_IN_MS,
+                GlobalSettingsProto.PROVISIONING_APN_ALARM_DELAY_IN_MS);
+        dumpSetting(s, p,
+                Settings.Global.READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT,
+                GlobalSettingsProto.READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT);
+        dumpSetting(s, p,
+                Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT,
+                GlobalSettingsProto.REQUIRE_PASSWORD_TO_DECRYPT);
+        dumpSetting(s, p,
+                Settings.Global.SAFE_BOOT_DISALLOWED,
+                GlobalSettingsProto.SAFE_BOOT_DISALLOWED);
+
+        final long selinuxToken = p.start(GlobalSettingsProto.SELINUX);
+        dumpSetting(s, p,
+                Settings.Global.SELINUX_UPDATE_CONTENT_URL,
+                GlobalSettingsProto.Selinux.UPDATE_CONTENT_URL);
+        dumpSetting(s, p,
+                Settings.Global.SELINUX_UPDATE_METADATA_URL,
+                GlobalSettingsProto.Selinux.UPDATE_METADATA_URL);
+        dumpSetting(s, p,
+                Settings.Global.SELINUX_STATUS,
+                GlobalSettingsProto.Selinux.STATUS);
+        p.end(selinuxToken);
+
+        dumpSetting(s, p,
+                Settings.Global.SEND_ACTION_APP_ERROR,
+                GlobalSettingsProto.SEND_ACTION_APP_ERROR);
+        dumpSetting(s, p,
+                Settings.Global.SET_INSTALL_LOCATION,
+                GlobalSettingsProto.SET_INSTALL_LOCATION);
+        dumpSetting(s, p,
+                Settings.Global.SHORTCUT_MANAGER_CONSTANTS,
+                GlobalSettingsProto.SHORTCUT_MANAGER_CONSTANTS);
+        dumpSetting(s, p,
+                Settings.Global.SHOW_FIRST_CRASH_DIALOG,
+                GlobalSettingsProto.SHOW_FIRST_CRASH_DIALOG);
+        // Settings.Global.SHOW_PROCESSES intentionally excluded since it's deprecated.
+        dumpSetting(s, p,
+                Settings.Global.SHOW_RESTART_IN_CRASH_DIALOG,
+                GlobalSettingsProto.SHOW_RESTART_IN_CRASH_DIALOG);
+        dumpSetting(s, p,
+                Settings.Global.SHOW_MUTE_IN_CRASH_DIALOG,
+                GlobalSettingsProto.SHOW_MUTE_IN_CRASH_DIALOG);
+
+        final long smartSelectToken = p.start(GlobalSettingsProto.SMART_SELECTION);
+        dumpSetting(s, p,
+                Settings.Global.SMART_SELECTION_UPDATE_CONTENT_URL,
+                GlobalSettingsProto.SmartSelection.UPDATE_CONTENT_URL);
+        dumpSetting(s, p,
+                Settings.Global.SMART_SELECTION_UPDATE_METADATA_URL,
+                GlobalSettingsProto.SmartSelection.UPDATE_METADATA_URL);
+        p.end(smartSelectToken);
+
+        final long smsToken = p.start(GlobalSettingsProto.SMS);
         dumpSetting(s, p,
                 Settings.Global.SMS_OUTGOING_CHECK_INTERVAL_MS,
-                GlobalSettingsProto.SMS_OUTGOING_CHECK_INTERVAL_MS);
+                GlobalSettingsProto.Sms.OUTGOING_CHECK_INTERVAL_MS);
         dumpSetting(s, p,
                 Settings.Global.SMS_OUTGOING_CHECK_MAX_COUNT,
-                GlobalSettingsProto.SMS_OUTGOING_CHECK_MAX_COUNT);
+                GlobalSettingsProto.Sms.OUTGOING_CHECK_MAX_COUNT);
         dumpSetting(s, p,
                 Settings.Global.SMS_SHORT_CODE_CONFIRMATION,
-                GlobalSettingsProto.SMS_SHORT_CODE_CONFIRMATION);
+                GlobalSettingsProto.Sms.SHORT_CODE_CONFIRMATION);
         dumpSetting(s, p,
                 Settings.Global.SMS_SHORT_CODE_RULE,
-                GlobalSettingsProto.SMS_SHORT_CODE_RULE);
+                GlobalSettingsProto.Sms.SHORT_CODE_RULE);
+        dumpSetting(s, p,
+                Settings.Global.SMS_SHORT_CODES_UPDATE_CONTENT_URL,
+                GlobalSettingsProto.Sms.SHORT_CODES_UPDATE_CONTENT_URL);
+        dumpSetting(s, p,
+                Settings.Global.SMS_SHORT_CODES_UPDATE_METADATA_URL,
+                GlobalSettingsProto.Sms.SHORT_CODES_UPDATE_METADATA_URL);
+        p.end(smsToken);
+
+        final long soundsToken = p.start(GlobalSettingsProto.SOUNDS);
+        dumpSetting(s, p,
+                Settings.Global.CAR_DOCK_SOUND,
+                GlobalSettingsProto.Sounds.CAR_DOCK);
+        dumpSetting(s, p,
+                Settings.Global.CAR_UNDOCK_SOUND,
+                GlobalSettingsProto.Sounds.CAR_UNDOCK);
+        dumpSetting(s, p,
+                Settings.Global.DESK_DOCK_SOUND,
+                GlobalSettingsProto.Sounds.DESK_DOCK);
+        dumpSetting(s, p,
+                Settings.Global.DESK_UNDOCK_SOUND,
+                GlobalSettingsProto.Sounds.DESK_UNDOCK);
+        dumpSetting(s, p,
+                Settings.Global.DOCK_SOUNDS_ENABLED,
+                GlobalSettingsProto.Sounds.DOCK_SOUNDS_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.DOCK_SOUNDS_ENABLED_WHEN_ACCESSIBILITY,
+                GlobalSettingsProto.Sounds.DOCK_SOUNDS_ENABLED_WHEN_ACCESSIBILITY);
+        dumpSetting(s, p,
+                Settings.Global.LOCK_SOUND,
+                GlobalSettingsProto.Sounds.LOCK);
+        dumpSetting(s, p,
+                Settings.Global.UNLOCK_SOUND,
+                GlobalSettingsProto.Sounds.UNLOCK);
+        dumpSetting(s, p,
+                Settings.Global.TRUSTED_SOUND,
+                GlobalSettingsProto.Sounds.TRUSTED);
+        dumpSetting(s, p,
+                Settings.Global.LOW_BATTERY_SOUND,
+                GlobalSettingsProto.Sounds.LOW_BATTERY);
+        dumpSetting(s, p,
+                Settings.Global.LOW_BATTERY_SOUND_TIMEOUT,
+                GlobalSettingsProto.Sounds.LOW_BATTERY_SOUND_TIMEOUT);
+        dumpSetting(s, p,
+                Settings.Global.POWER_SOUNDS_ENABLED,
+                GlobalSettingsProto.Sounds.LOW_BATTERY_SOUNDS_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.CHARGING_STARTED_SOUND,
+                GlobalSettingsProto.Sounds.CHARGING_STARTED);
+        dumpSetting(s, p,
+                Settings.Global.CHARGING_SOUNDS_ENABLED,
+                GlobalSettingsProto.Sounds.CHARGING_SOUNDS_ENABLED);
+        p.end(soundsToken);
+
+        final long soundTriggerToken = p.start(GlobalSettingsProto.SOUND_TRIGGER);
+        dumpSetting(s, p,
+                Global.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY,
+                GlobalSettingsProto.SoundTrigger.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY);
+        dumpSetting(s, p,
+                Global.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT,
+                GlobalSettingsProto.SoundTrigger.DETECTION_SERVICE_OP_TIMEOUT_MS);
+        p.end(soundTriggerToken);
+
+        dumpSetting(s, p,
+                Settings.Global.SPEED_LABEL_CACHE_EVICTION_AGE_MILLIS,
+                GlobalSettingsProto.SPEED_LABEL_CACHE_EVICTION_AGE_MS);
+        dumpSetting(s, p,
+                Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS,
+                GlobalSettingsProto.SQLITE_COMPATIBILITY_WAL_FLAGS);
+        dumpSetting(s, p,
+                Settings.Global.STAY_ON_WHILE_PLUGGED_IN,
+                GlobalSettingsProto.STAY_ON_WHILE_PLUGGED_IN);
+
+        final long storageToken = p.start(GlobalSettingsProto.STORAGE);
+        dumpSetting(s, p,
+                Settings.Global.STORAGE_BENCHMARK_INTERVAL,
+                GlobalSettingsProto.Storage.BENCHMARK_INTERVAL);
+        dumpSetting(s, p,
+                Settings.Global.STORAGE_SETTINGS_CLOBBER_THRESHOLD,
+                GlobalSettingsProto.Storage.SETTINGS_CLOBBER_THRESHOLD);
+        p.end(storageToken);
+
+        final long syncToken = p.start(GlobalSettingsProto.SYNC);
+        dumpSetting(s, p,
+                Settings.Global.SYNC_MAX_RETRY_DELAY_IN_SECONDS,
+                GlobalSettingsProto.Sync.MAX_RETRY_DELAY_IN_SECONDS);
+        dumpSetting(s, p,
+                Settings.Global.SYNC_MANAGER_CONSTANTS,
+                GlobalSettingsProto.Sync.MANAGER_CONSTANTS);
+        p.end(syncToken);
+
+        final long sysToken = p.start(GlobalSettingsProto.SYS);
+        dumpSetting(s, p,
+                Settings.Global.SYS_FREE_STORAGE_LOG_INTERVAL,
+                GlobalSettingsProto.Sys.FREE_STORAGE_LOG_INTERVAL_MINS);
+        dumpSetting(s, p,
+                Settings.Global.SYS_STORAGE_THRESHOLD_PERCENTAGE,
+                GlobalSettingsProto.Sys.STORAGE_THRESHOLD_PERCENTAGE);
+        dumpSetting(s, p,
+                Settings.Global.SYS_STORAGE_THRESHOLD_MAX_BYTES,
+                GlobalSettingsProto.Sys.STORAGE_THRESHOLD_MAX_BYTES);
+        dumpSetting(s, p,
+                Settings.Global.SYS_STORAGE_FULL_THRESHOLD_BYTES,
+                GlobalSettingsProto.Sys.STORAGE_FULL_THRESHOLD_BYTES);
+        dumpSetting(s, p,
+                Settings.Global.SYS_STORAGE_CACHE_PERCENTAGE,
+                GlobalSettingsProto.Sys.STORAGE_CACHE_PERCENTAGE);
+        dumpSetting(s, p,
+                Settings.Global.SYS_STORAGE_CACHE_MAX_BYTES,
+                GlobalSettingsProto.Sys.STORAGE_CACHE_MAX_BYTES);
+        dumpSetting(s, p,
+                Settings.Global.SYS_VDSO,
+                GlobalSettingsProto.Sys.VDSO);
+        dumpSetting(s, p,
+                Settings.Global.SYS_UIDCPUPOWER,
+                GlobalSettingsProto.Sys.UIDCPUPOWER);
+        p.end(sysToken);
+
         dumpSetting(s, p,
                 Settings.Global.TCP_DEFAULT_INIT_RWND,
                 GlobalSettingsProto.TCP_DEFAULT_INIT_RWND);
+
+        final long tempWarningToken = p.start(GlobalSettingsProto.TEMPERATURE_WARNING);
+        dumpSetting(s, p,
+                Settings.Global.SHOW_TEMPERATURE_WARNING,
+                GlobalSettingsProto.TemperatureWarning.SHOW_TEMPERATURE_WARNING);
+        dumpSetting(s, p,
+                Settings.Global.WARNING_TEMPERATURE,
+                GlobalSettingsProto.TemperatureWarning.WARNING_TEMPERATURE_LEVEL);
+        p.end(tempWarningToken);
+
+        final long tetherToken = p.start(GlobalSettingsProto.TETHER);
         dumpSetting(s, p,
                 Settings.Global.TETHER_SUPPORTED,
-                GlobalSettingsProto.TETHER_SUPPORTED);
+                GlobalSettingsProto.Tether.SUPPORTED);
         dumpSetting(s, p,
                 Settings.Global.TETHER_DUN_REQUIRED,
-                GlobalSettingsProto.TETHER_DUN_REQUIRED);
+                GlobalSettingsProto.Tether.DUN_REQUIRED);
         dumpSetting(s, p,
                 Settings.Global.TETHER_DUN_APN,
-                GlobalSettingsProto.TETHER_DUN_APN);
+                GlobalSettingsProto.Tether.DUN_APN);
         dumpSetting(s, p,
                 Settings.Global.TETHER_OFFLOAD_DISABLED,
-                GlobalSettingsProto.TETHER_OFFLOAD_DISABLED);
+                GlobalSettingsProto.Tether.OFFLOAD_DISABLED);
         dumpSetting(s, p,
-                Settings.Global.CARRIER_APP_WHITELIST,
-                GlobalSettingsProto.CARRIER_APP_WHITELIST);
+                Settings.Global.SOFT_AP_TIMEOUT_ENABLED,
+                GlobalSettingsProto.Tether.TIMEOUT_ENABLED);
+        p.end(tetherToken);
+
         dumpSetting(s, p,
-                Settings.Global.CARRIER_APP_NAMES,
-                GlobalSettingsProto.CARRIER_APP_NAMES);
+                Settings.Global.TEXT_CLASSIFIER_CONSTANTS,
+                GlobalSettingsProto.TEXT_CLASSIFIER_CONSTANTS);
+        dumpSetting(s, p,
+                Settings.Global.THEATER_MODE_ON,
+                GlobalSettingsProto.THEATER_MODE_ON);
+        dumpSetting(s, p,
+                Settings.Global.TIME_ONLY_MODE_CONSTANTS,
+                GlobalSettingsProto.TIME_ONLY_MODE_CONSTANTS);
+        dumpSetting(s, p,
+                Settings.Global.TRANSITION_ANIMATION_SCALE,
+                GlobalSettingsProto.TRANSITION_ANIMATION_SCALE);
+
+        final long tzinfoToken = p.start(GlobalSettingsProto.TZINFO);
+        dumpSetting(s, p,
+                Settings.Global.TZINFO_UPDATE_CONTENT_URL,
+                GlobalSettingsProto.Tzinfo.UPDATE_CONTENT_URL);
+        dumpSetting(s, p,
+                Settings.Global.TZINFO_UPDATE_METADATA_URL,
+                GlobalSettingsProto.Tzinfo.UPDATE_METADATA_URL);
+        p.end(tzinfoToken);
+
+        dumpSetting(s, p,
+                Settings.Global.UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD,
+                GlobalSettingsProto.UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD_MS);
         dumpSetting(s, p,
                 Settings.Global.USB_MASS_STORAGE_ENABLED,
                 GlobalSettingsProto.USB_MASS_STORAGE_ENABLED);
@@ -461,807 +1296,186 @@ class SettingsProtoDumpUtil {
                 Settings.Global.USE_GOOGLE_MAIL,
                 GlobalSettingsProto.USE_GOOGLE_MAIL);
         dumpSetting(s, p,
-                Settings.Global.WEBVIEW_DATA_REDUCTION_PROXY_KEY,
-                GlobalSettingsProto.WEBVIEW_DATA_REDUCTION_PROXY_KEY);
-        dumpSetting(s, p,
-                Settings.Global.WEBVIEW_FALLBACK_LOGIC_ENABLED,
-                GlobalSettingsProto.WEBVIEW_FALLBACK_LOGIC_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.WEBVIEW_PROVIDER,
-                GlobalSettingsProto.WEBVIEW_PROVIDER);
-        dumpSetting(s, p,
-                Settings.Global.WEBVIEW_MULTIPROCESS,
-                GlobalSettingsProto.WEBVIEW_MULTIPROCESS);
-        dumpSetting(s, p,
-                Settings.Global.NETWORK_SWITCH_NOTIFICATION_DAILY_LIMIT,
-                GlobalSettingsProto.NETWORK_SWITCH_NOTIFICATION_DAILY_LIMIT);
-        dumpSetting(s, p,
-                Settings.Global.NETWORK_SWITCH_NOTIFICATION_RATE_LIMIT_MILLIS,
-                GlobalSettingsProto.NETWORK_SWITCH_NOTIFICATION_RATE_LIMIT_MILLIS);
-        dumpSetting(s, p,
-                Settings.Global.NETWORK_AVOID_BAD_WIFI,
-                GlobalSettingsProto.NETWORK_AVOID_BAD_WIFI);
-        dumpSetting(s, p,
-                Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE,
-                GlobalSettingsProto.NETWORK_METERED_MULTIPATH_PREFERENCE);
-        dumpSetting(s, p,
-                Settings.Global.NETWORK_WATCHLIST_LAST_REPORT_TIME,
-                GlobalSettingsProto.NETWORK_WATCHLIST_LAST_REPORT_TIME);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_BADGING_THRESHOLDS,
-                GlobalSettingsProto.WIFI_BADGING_THRESHOLDS);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_DISPLAY_ON,
-                GlobalSettingsProto.WIFI_DISPLAY_ON);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_DISPLAY_CERTIFICATION_ON,
-                GlobalSettingsProto.WIFI_DISPLAY_CERTIFICATION_ON);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_DISPLAY_WPS_CONFIG,
-                GlobalSettingsProto.WIFI_DISPLAY_WPS_CONFIG);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
-                GlobalSettingsProto.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON,
-                GlobalSettingsProto.WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON);
-        dumpSetting(s, p,
-                Settings.Global.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON,
-                GlobalSettingsProto.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,
-                GlobalSettingsProto.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_COUNTRY_CODE,
-                GlobalSettingsProto.WIFI_COUNTRY_CODE);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_FRAMEWORK_SCAN_INTERVAL_MS,
-                GlobalSettingsProto.WIFI_FRAMEWORK_SCAN_INTERVAL_MS);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_IDLE_MS,
-                GlobalSettingsProto.WIFI_IDLE_MS);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_NUM_OPEN_NETWORKS_KEPT,
-                GlobalSettingsProto.WIFI_NUM_OPEN_NETWORKS_KEPT);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_ON,
-                GlobalSettingsProto.WIFI_ON);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE,
-                GlobalSettingsProto.WIFI_SCAN_ALWAYS_AVAILABLE);
-        dumpSetting(s, p,
-                Settings.Global.SOFT_AP_TIMEOUT_ENABLED,
-                GlobalSettingsProto.SOFT_AP_TIMEOUT_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_WAKEUP_ENABLED,
-                GlobalSettingsProto.WIFI_WAKEUP_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.NETWORK_SCORING_UI_ENABLED,
-                GlobalSettingsProto.NETWORK_SCORING_UI_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.SPEED_LABEL_CACHE_EVICTION_AGE_MILLIS,
-                GlobalSettingsProto.SPEED_LABEL_CACHE_EVICTION_AGE_MILLIS);
-        dumpSetting(s, p,
-                Settings.Global.RECOMMENDED_NETWORK_EVALUATOR_CACHE_EXPIRY_MS,
-                GlobalSettingsProto.RECOMMENDED_NETWORK_EVALUATOR_CACHE_EXPIRY_MS);
-        dumpSetting(s, p,
-                Settings.Global.NETWORK_RECOMMENDATIONS_ENABLED,
-                GlobalSettingsProto.NETWORK_RECOMMENDATIONS_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.NETWORK_RECOMMENDATIONS_PACKAGE,
-                GlobalSettingsProto.NETWORK_RECOMMENDATIONS_PACKAGE);
-        dumpSetting(s, p,
                 Settings.Global.USE_OPEN_WIFI_PACKAGE,
                 GlobalSettingsProto.USE_OPEN_WIFI_PACKAGE);
-        dumpSetting(s, p,
-                Settings.Global.NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS,
-                GlobalSettingsProto.NETWORK_RECOMMENDATION_REQUEST_TIMEOUT_MS);
-        dumpSetting(s, p,
-                Settings.Global.BLE_SCAN_ALWAYS_AVAILABLE,
-                GlobalSettingsProto.BLE_SCAN_ALWAYS_AVAILABLE);
-        dumpSetting(s, p,
-                Settings.Global.BLE_SCAN_LOW_POWER_WINDOW_MS,
-                GlobalSettingsProto.BLE_SCAN_LOW_POWER_WINDOW_MS);
-        dumpSetting(s, p,
-                Settings.Global.BLE_SCAN_BALANCED_WINDOW_MS,
-                GlobalSettingsProto.BLE_SCAN_BALANCED_WINDOW_MS);
-        dumpSetting(s, p,
-                Settings.Global.BLE_SCAN_LOW_LATENCY_WINDOW_MS,
-                GlobalSettingsProto.BLE_SCAN_LOW_LATENCY_WINDOW_MS);
-        dumpSetting(s, p,
-                Settings.Global.BLE_SCAN_LOW_POWER_INTERVAL_MS,
-                GlobalSettingsProto.BLE_SCAN_LOW_POWER_INTERVAL_MS);
-        dumpSetting(s, p,
-                Settings.Global.BLE_SCAN_BALANCED_INTERVAL_MS,
-                GlobalSettingsProto.BLE_SCAN_BALANCED_INTERVAL_MS);
-        dumpSetting(s, p,
-                Settings.Global.BLE_SCAN_LOW_LATENCY_INTERVAL_MS,
-                GlobalSettingsProto.BLE_SCAN_LOW_LATENCY_INTERVAL_MS);
-        dumpSetting(s, p,
-                Settings.Global.BLE_SCAN_BACKGROUND_MODE,
-                GlobalSettingsProto.BLE_SCAN_BACKGROUND_MODE);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_SAVED_STATE,
-                GlobalSettingsProto.WIFI_SAVED_STATE);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS,
-                GlobalSettingsProto.WIFI_SUPPLICANT_SCAN_INTERVAL_MS);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_ENHANCED_AUTO_JOIN,
-                GlobalSettingsProto.WIFI_ENHANCED_AUTO_JOIN);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_NETWORK_SHOW_RSSI,
-                GlobalSettingsProto.WIFI_NETWORK_SHOW_RSSI);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_SCAN_INTERVAL_WHEN_P2P_CONNECTED_MS,
-                GlobalSettingsProto.WIFI_SCAN_INTERVAL_WHEN_P2P_CONNECTED_MS);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_WATCHDOG_ON,
-                GlobalSettingsProto.WIFI_WATCHDOG_ON);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED,
-                GlobalSettingsProto.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED,
-                GlobalSettingsProto.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_VERBOSE_LOGGING_ENABLED,
-                GlobalSettingsProto.WIFI_VERBOSE_LOGGING_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED,
-                GlobalSettingsProto.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_MAX_DHCP_RETRY_COUNT,
-                GlobalSettingsProto.WIFI_MAX_DHCP_RETRY_COUNT);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS,
-                GlobalSettingsProto.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN,
-                GlobalSettingsProto.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_FREQUENCY_BAND,
-                GlobalSettingsProto.WIFI_FREQUENCY_BAND);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_P2P_DEVICE_NAME,
-                GlobalSettingsProto.WIFI_P2P_DEVICE_NAME);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_REENABLE_DELAY_MS,
-                GlobalSettingsProto.WIFI_REENABLE_DELAY_MS);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_EPHEMERAL_OUT_OF_RANGE_TIMEOUT_MS,
-                GlobalSettingsProto.WIFI_EPHEMERAL_OUT_OF_RANGE_TIMEOUT_MS);
-        dumpSetting(s, p,
-                Settings.Global.DATA_STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS,
-                GlobalSettingsProto.DATA_STALL_ALARM_NON_AGGRESSIVE_DELAY_IN_MS);
-        dumpSetting(s, p,
-                Settings.Global.DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS,
-                GlobalSettingsProto.DATA_STALL_ALARM_AGGRESSIVE_DELAY_IN_MS);
-        dumpSetting(s, p,
-                Settings.Global.PROVISIONING_APN_ALARM_DELAY_IN_MS,
-                GlobalSettingsProto.PROVISIONING_APN_ALARM_DELAY_IN_MS);
-        dumpSetting(s, p,
-                Settings.Global.GPRS_REGISTER_CHECK_PERIOD_MS,
-                GlobalSettingsProto.GPRS_REGISTER_CHECK_PERIOD_MS);
-        dumpSetting(s, p,
-                Settings.Global.WTF_IS_FATAL,
-                GlobalSettingsProto.WTF_IS_FATAL);
-        dumpSetting(s, p,
-                Settings.Global.MODE_RINGER,
-                GlobalSettingsProto.MODE_RINGER);
-        dumpSetting(s, p,
-                Settings.Global.OVERLAY_DISPLAY_DEVICES,
-                GlobalSettingsProto.OVERLAY_DISPLAY_DEVICES);
-        dumpSetting(s, p,
-                Settings.Global.BATTERY_DISCHARGE_DURATION_THRESHOLD,
-                GlobalSettingsProto.BATTERY_DISCHARGE_DURATION_THRESHOLD);
-        dumpSetting(s, p,
-                Settings.Global.BATTERY_DISCHARGE_THRESHOLD,
-                GlobalSettingsProto.BATTERY_DISCHARGE_THRESHOLD);
-        dumpSetting(s, p,
-                Settings.Global.SEND_ACTION_APP_ERROR,
-                GlobalSettingsProto.SEND_ACTION_APP_ERROR);
-        dumpSetting(s, p,
-                Settings.Global.DROPBOX_AGE_SECONDS,
-                GlobalSettingsProto.DROPBOX_AGE_SECONDS);
-        dumpSetting(s, p,
-                Settings.Global.DROPBOX_MAX_FILES,
-                GlobalSettingsProto.DROPBOX_MAX_FILES);
-        dumpSetting(s, p,
-                Settings.Global.DROPBOX_QUOTA_KB,
-                GlobalSettingsProto.DROPBOX_QUOTA_KB);
-        dumpSetting(s, p,
-                Settings.Global.DROPBOX_QUOTA_PERCENT,
-                GlobalSettingsProto.DROPBOX_QUOTA_PERCENT);
-        dumpSetting(s, p,
-                Settings.Global.DROPBOX_RESERVE_PERCENT,
-                GlobalSettingsProto.DROPBOX_RESERVE_PERCENT);
-        dumpRepeatedSetting(s, p,
-                Settings.Global.DROPBOX_TAG_PREFIX,
-                GlobalSettingsProto.DROPBOX_SETTINGS);
-        dumpRepeatedSetting(s, p,
-                Settings.Global.ERROR_LOGCAT_PREFIX,
-                GlobalSettingsProto.ERROR_LOGCAT_LINES);
-        dumpSetting(s, p,
-                Settings.Global.SYS_FREE_STORAGE_LOG_INTERVAL,
-                GlobalSettingsProto.SYS_FREE_STORAGE_LOG_INTERVAL);
-        dumpSetting(s, p,
-                Settings.Global.DISK_FREE_CHANGE_REPORTING_THRESHOLD,
-                GlobalSettingsProto.DISK_FREE_CHANGE_REPORTING_THRESHOLD);
-        dumpSetting(s, p,
-                Settings.Global.SYS_STORAGE_THRESHOLD_PERCENTAGE,
-                GlobalSettingsProto.SYS_STORAGE_THRESHOLD_PERCENTAGE);
-        dumpSetting(s, p,
-                Settings.Global.SYS_STORAGE_THRESHOLD_MAX_BYTES,
-                GlobalSettingsProto.SYS_STORAGE_THRESHOLD_MAX_BYTES);
-        dumpSetting(s, p,
-                Settings.Global.SYS_STORAGE_FULL_THRESHOLD_BYTES,
-                GlobalSettingsProto.SYS_STORAGE_FULL_THRESHOLD_BYTES);
-        dumpSetting(s, p,
-                Settings.Global.SYS_STORAGE_CACHE_PERCENTAGE,
-                GlobalSettingsProto.SYS_STORAGE_CACHE_PERCENTAGE);
-        dumpSetting(s, p,
-                Settings.Global.SYS_STORAGE_CACHE_MAX_BYTES,
-                GlobalSettingsProto.SYS_STORAGE_CACHE_MAX_BYTES);
-        dumpSetting(s, p,
-                Settings.Global.SYNC_MAX_RETRY_DELAY_IN_SECONDS,
-                GlobalSettingsProto.SYNC_MAX_RETRY_DELAY_IN_SECONDS);
-        dumpSetting(s, p,
-                Settings.Global.CONNECTIVITY_CHANGE_DELAY,
-                GlobalSettingsProto.CONNECTIVITY_CHANGE_DELAY);
-        dumpSetting(s, p,
-                Settings.Global.CONNECTIVITY_SAMPLING_INTERVAL_IN_SECONDS,
-                GlobalSettingsProto.CONNECTIVITY_SAMPLING_INTERVAL_IN_SECONDS);
-        dumpSetting(s, p,
-                Settings.Global.PAC_CHANGE_DELAY,
-                GlobalSettingsProto.PAC_CHANGE_DELAY);
-        dumpSetting(s, p,
-                Settings.Global.CAPTIVE_PORTAL_MODE,
-                GlobalSettingsProto.CAPTIVE_PORTAL_MODE);
-        dumpSetting(s, p,
-                Settings.Global.CAPTIVE_PORTAL_DETECTION_ENABLED,
-                GlobalSettingsProto.CAPTIVE_PORTAL_DETECTION_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.CAPTIVE_PORTAL_SERVER,
-                GlobalSettingsProto.CAPTIVE_PORTAL_SERVER);
-        dumpSetting(s, p,
-                Settings.Global.CAPTIVE_PORTAL_HTTPS_URL,
-                GlobalSettingsProto.CAPTIVE_PORTAL_HTTPS_URL);
-        dumpSetting(s, p,
-                Settings.Global.CAPTIVE_PORTAL_HTTP_URL,
-                GlobalSettingsProto.CAPTIVE_PORTAL_HTTP_URL);
-        dumpSetting(s, p,
-                Settings.Global.CAPTIVE_PORTAL_FALLBACK_URL,
-                GlobalSettingsProto.CAPTIVE_PORTAL_FALLBACK_URL);
-        dumpSetting(s, p,
-                Settings.Global.CAPTIVE_PORTAL_OTHER_FALLBACK_URLS,
-                GlobalSettingsProto.CAPTIVE_PORTAL_OTHER_FALLBACK_URLS);
-        dumpSetting(s, p,
-                Settings.Global.CAPTIVE_PORTAL_USE_HTTPS,
-                GlobalSettingsProto.CAPTIVE_PORTAL_USE_HTTPS);
-        dumpSetting(s, p,
-                Settings.Global.CAPTIVE_PORTAL_USER_AGENT,
-                GlobalSettingsProto.CAPTIVE_PORTAL_USER_AGENT);
-        dumpSetting(s, p,
-                Settings.Global.NSD_ON,
-                GlobalSettingsProto.NSD_ON);
-        dumpSetting(s, p,
-                Settings.Global.SET_INSTALL_LOCATION,
-                GlobalSettingsProto.SET_INSTALL_LOCATION);
-        dumpSetting(s, p,
-                Settings.Global.DEFAULT_INSTALL_LOCATION,
-                GlobalSettingsProto.DEFAULT_INSTALL_LOCATION);
-        dumpSetting(s, p,
-                Settings.Global.INET_CONDITION_DEBOUNCE_UP_DELAY,
-                GlobalSettingsProto.INET_CONDITION_DEBOUNCE_UP_DELAY);
-        dumpSetting(s, p,
-                Settings.Global.INET_CONDITION_DEBOUNCE_DOWN_DELAY,
-                GlobalSettingsProto.INET_CONDITION_DEBOUNCE_DOWN_DELAY);
-        dumpSetting(s, p,
-                Settings.Global.READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT,
-                GlobalSettingsProto.READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT);
-        dumpSetting(s, p,
-                Settings.Global.HTTP_PROXY,
-                GlobalSettingsProto.HTTP_PROXY);
-        dumpSetting(s, p,
-                Settings.Global.GLOBAL_HTTP_PROXY_HOST,
-                GlobalSettingsProto.GLOBAL_HTTP_PROXY_HOST);
-        dumpSetting(s, p,
-                Settings.Global.GLOBAL_HTTP_PROXY_PORT,
-                GlobalSettingsProto.GLOBAL_HTTP_PROXY_PORT);
-        dumpSetting(s, p,
-                Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST,
-                GlobalSettingsProto.GLOBAL_HTTP_PROXY_EXCLUSION_LIST);
-        dumpSetting(s, p,
-                Settings.Global.GLOBAL_HTTP_PROXY_PAC,
-                GlobalSettingsProto.GLOBAL_HTTP_PROXY_PAC);
-        dumpSetting(s, p,
-                Settings.Global.SET_GLOBAL_HTTP_PROXY,
-                GlobalSettingsProto.SET_GLOBAL_HTTP_PROXY);
-        dumpSetting(s, p,
-                Settings.Global.DEFAULT_DNS_SERVER,
-                GlobalSettingsProto.DEFAULT_DNS_SERVER);
-        dumpSetting(s, p,
-                Settings.Global.PRIVATE_DNS_MODE,
-                GlobalSettingsProto.PRIVATE_DNS_MODE);
-        dumpSetting(s, p,
-                Settings.Global.PRIVATE_DNS_SPECIFIER,
-                GlobalSettingsProto.PRIVATE_DNS_SPECIFIER);
-        dumpRepeatedSetting(s, p,
-                Settings.Global.BLUETOOTH_HEADSET_PRIORITY_PREFIX,
-                GlobalSettingsProto.BLUETOOTH_HEADSET_PRIORITIES);
-        dumpRepeatedSetting(s, p,
-                Settings.Global.BLUETOOTH_A2DP_SINK_PRIORITY_PREFIX,
-                GlobalSettingsProto.BLUETOOTH_A2DP_SINK_PRIORITIES);
-        dumpRepeatedSetting(s, p,
-                Settings.Global.BLUETOOTH_A2DP_SRC_PRIORITY_PREFIX,
-                GlobalSettingsProto.BLUETOOTH_A2DP_SRC_PRIORITIES);
-        dumpRepeatedSetting(s, p,
-                Settings.Global.BLUETOOTH_A2DP_SUPPORTS_OPTIONAL_CODECS_PREFIX,
-                GlobalSettingsProto.BLUETOOTH_A2DP_SUPPORTS_OPTIONAL_CODECS);
-        dumpRepeatedSetting(s, p,
-                Settings.Global.BLUETOOTH_A2DP_OPTIONAL_CODECS_ENABLED_PREFIX,
-                GlobalSettingsProto.BLUETOOTH_A2DP_OPTIONAL_CODECS_ENABLED);
-        dumpRepeatedSetting(s, p,
-                Settings.Global.BLUETOOTH_INPUT_DEVICE_PRIORITY_PREFIX,
-                GlobalSettingsProto.BLUETOOTH_INPUT_DEVICE_PRIORITIES);
-        dumpRepeatedSetting(s, p,
-                Settings.Global.BLUETOOTH_MAP_PRIORITY_PREFIX,
-                GlobalSettingsProto.BLUETOOTH_MAP_PRIORITIES);
-        dumpRepeatedSetting(s, p,
-                Settings.Global.BLUETOOTH_MAP_CLIENT_PRIORITY_PREFIX,
-                GlobalSettingsProto.BLUETOOTH_MAP_CLIENT_PRIORITIES);
-        dumpRepeatedSetting(s, p,
-                Settings.Global.BLUETOOTH_PBAP_CLIENT_PRIORITY_PREFIX,
-                GlobalSettingsProto.BLUETOOTH_PBAP_CLIENT_PRIORITIES);
-        dumpRepeatedSetting(s, p,
-                Settings.Global.BLUETOOTH_SAP_PRIORITY_PREFIX,
-                GlobalSettingsProto.BLUETOOTH_SAP_PRIORITIES);
-        dumpRepeatedSetting(s, p,
-                Settings.Global.BLUETOOTH_PAN_PRIORITY_PREFIX,
-                GlobalSettingsProto.BLUETOOTH_PAN_PRIORITIES);
-        dumpRepeatedSetting(s, p,
-                Settings.Global.BLUETOOTH_HEARING_AID_PRIORITY_PREFIX,
-                GlobalSettingsProto.BLUETOOTH_HEARING_AID_PRIORITIES);
-        dumpSetting(s, p,
-                Settings.Global.ACTIVITY_MANAGER_CONSTANTS,
-                GlobalSettingsProto.ACTIVITY_MANAGER_CONSTANTS);
-        dumpSetting(s, p,
-                Settings.Global.DEVICE_IDLE_CONSTANTS,
-                GlobalSettingsProto.DEVICE_IDLE_CONSTANTS);
-        dumpSetting(s, p,
-                Settings.Global.BATTERY_SAVER_CONSTANTS,
-                GlobalSettingsProto.BATTERY_SAVER_CONSTANTS);
-        dumpSetting(s, p,
-                Settings.Global.BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS,
-                GlobalSettingsProto.BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS);
-        dumpSetting(s, p,
-                Settings.Global.BATTERY_TIP_CONSTANTS,
-                GlobalSettingsProto.BATTERY_TIP_CONSTANTS);
-        dumpSetting(s, p,
-                Settings.Global.ANOMALY_DETECTION_CONSTANTS,
-                GlobalSettingsProto.ANOMALY_DETECTION_CONSTANTS);
-        dumpSetting(s, p,
-                Settings.Global.ANOMALY_CONFIG_VERSION,
-                GlobalSettingsProto.ANOMALY_CONFIG_VERSION);
-        dumpSetting(s, p,
-                Settings.Global.ANOMALY_CONFIG,
-                GlobalSettingsProto.ANOMALY_CONFIG);
-        dumpSetting(s, p,
-                Settings.Global.ALWAYS_ON_DISPLAY_CONSTANTS,
-                GlobalSettingsProto.ALWAYS_ON_DISPLAY_CONSTANTS);
-        dumpSetting(s, p,
-                Settings.Global.SYS_VDSO,
-                GlobalSettingsProto.SYS_VDSO);
-        dumpSetting(s, p,
-                Settings.Global.SYS_UIDCPUPOWER,
-                GlobalSettingsProto.SYS_UIDCPUPOWER);
-        dumpSetting(s, p,
-                Settings.Global.FPS_DEVISOR,
-                GlobalSettingsProto.FPS_DIVISOR);
-        dumpSetting(s, p,
-                Settings.Global.DISPLAY_PANEL_LPM,
-                GlobalSettingsProto.DISPLAY_PANEL_LPM);
-        dumpSetting(s, p,
-                Settings.Global.APP_IDLE_CONSTANTS,
-                GlobalSettingsProto.APP_IDLE_CONSTANTS);
-        dumpSetting(s, p,
-                Settings.Global.POWER_MANAGER_CONSTANTS,
-                GlobalSettingsProto.POWER_MANAGER_CONSTANTS);
-        dumpSetting(s, p,
-                Settings.Global.ALARM_MANAGER_CONSTANTS,
-                GlobalSettingsProto.ALARM_MANAGER_CONSTANTS);
-        dumpSetting(s, p,
-                Settings.Global.JOB_SCHEDULER_CONSTANTS,
-                GlobalSettingsProto.JOB_SCHEDULER_CONSTANTS);
-        dumpSetting(s, p,
-                Settings.Global.SHORTCUT_MANAGER_CONSTANTS,
-                GlobalSettingsProto.SHORTCUT_MANAGER_CONSTANTS);
-        dumpSetting(s, p,
-                Settings.Global.DEVICE_POLICY_CONSTANTS,
-                GlobalSettingsProto.DEVICE_POLICY_CONSTANTS);
-        dumpSetting(s, p,
-                Settings.Global.TEXT_CLASSIFIER_CONSTANTS,
-                GlobalSettingsProto.TEXT_CLASSIFIER_CONSTANTS);
-        dumpSetting(s, p,
-                Settings.Global.BATTERY_STATS_CONSTANTS,
-                GlobalSettingsProto.BATTERY_STATS_CONSTANTS);
-        dumpSetting(s, p,
-                Settings.Global.SYNC_MANAGER_CONSTANTS,
-                GlobalSettingsProto.SYNC_MANAGER_CONSTANTS);
-        dumpSetting(s, p,
-                Settings.Global.APP_STANDBY_ENABLED,
-                GlobalSettingsProto.APP_STANDBY_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.APP_AUTO_RESTRICTION_ENABLED,
-                GlobalSettingsProto.APP_AUTO_RESTRICTION_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.FORCED_APP_STANDBY_ENABLED,
-                GlobalSettingsProto.FORCED_APP_STANDBY_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.FORCED_APP_STANDBY_FOR_SMALL_BATTERY_ENABLED,
-                GlobalSettingsProto.FORCED_APP_STANDBY_FOR_SMALL_BATTERY_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.OFF_BODY_RADIOS_OFF_FOR_SMALL_BATTERY_ENABLED,
-                GlobalSettingsProto.OFF_BODY_RADIOS_OFF_FOR_SMALL_BATTERY_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.OFF_BODY_RADIOS_OFF_DELAY_MS,
-                GlobalSettingsProto.OFF_BODY_RADIOS_OFF_DELAY_MS);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_ON_WHEN_PROXY_DISCONNECTED,
-                GlobalSettingsProto.WIFI_ON_WHEN_PROXY_DISCONNECTED);
-        dumpSetting(s, p,
-                Settings.Global.TIME_ONLY_MODE_CONSTANTS,
-                GlobalSettingsProto.TIME_ONLY_MODE_CONSTANTS);
-        dumpSetting(s, p,
-                Settings.Global.NETWORK_WATCHLIST_ENABLED,
-                GlobalSettingsProto.NETWORK_WATCHLIST_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.KEEP_PROFILE_IN_BACKGROUND,
-                GlobalSettingsProto.KEEP_PROFILE_IN_BACKGROUND);
-        dumpSetting(s, p,
-                Settings.Global.WINDOW_ANIMATION_SCALE,
-                GlobalSettingsProto.WINDOW_ANIMATION_SCALE);
-        dumpSetting(s, p,
-                Settings.Global.TRANSITION_ANIMATION_SCALE,
-                GlobalSettingsProto.TRANSITION_ANIMATION_SCALE);
-        dumpSetting(s, p,
-                Settings.Global.ANIMATOR_DURATION_SCALE,
-                GlobalSettingsProto.ANIMATOR_DURATION_SCALE);
-        dumpSetting(s, p,
-                Settings.Global.FANCY_IME_ANIMATIONS,
-                GlobalSettingsProto.FANCY_IME_ANIMATIONS);
-        dumpSetting(s, p,
-                Settings.Global.COMPATIBILITY_MODE,
-                GlobalSettingsProto.COMPATIBILITY_MODE);
-        dumpSetting(s, p,
-                Settings.Global.EMERGENCY_TONE,
-                GlobalSettingsProto.EMERGENCY_TONE);
-        dumpSetting(s, p,
-                Settings.Global.CALL_AUTO_RETRY,
-                GlobalSettingsProto.CALL_AUTO_RETRY);
-        dumpSetting(s, p,
-                Settings.Global.EMERGENCY_AFFORDANCE_NEEDED,
-                GlobalSettingsProto.EMERGENCY_AFFORDANCE_NEEDED);
-        dumpSetting(s, p,
-                Settings.Global.PREFERRED_NETWORK_MODE,
-                GlobalSettingsProto.PREFERRED_NETWORK_MODE);
-        dumpSetting(s, p,
-                Settings.Global.DEBUG_APP,
-                GlobalSettingsProto.DEBUG_APP);
-        dumpSetting(s, p,
-                Settings.Global.WAIT_FOR_DEBUGGER,
-                GlobalSettingsProto.WAIT_FOR_DEBUGGER);
-        dumpSetting(s, p,
-                Settings.Global.ENABLE_GPU_DEBUG_LAYERS,
-                GlobalSettingsProto.ENABLE_GPU_DEBUG_LAYERS);
-        dumpSetting(s, p,
-                Settings.Global.GPU_DEBUG_APP,
-                GlobalSettingsProto.GPU_DEBUG_APP);
-        dumpSetting(s, p,
-                Settings.Global.GPU_DEBUG_LAYERS,
-                GlobalSettingsProto.GPU_DEBUG_LAYERS);
-        // Settings.Global.SHOW_PROCESSES intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.Global.LOW_POWER_MODE,
-                GlobalSettingsProto.LOW_POWER_MODE);
-        dumpSetting(s, p,
-                Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL,
-                GlobalSettingsProto.LOW_POWER_MODE_TRIGGER_LEVEL);
-        dumpSetting(s, p,
-                Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL_MAX,
-                GlobalSettingsProto.LOW_POWER_MODE_TRIGGER_LEVEL_MAX);
-        dumpSetting(s, p,
-                Settings.Global.ALWAYS_FINISH_ACTIVITIES,
-                GlobalSettingsProto.ALWAYS_FINISH_ACTIVITIES);
-        dumpSetting(s, p,
-                Settings.Global.DOCK_AUDIO_MEDIA_ENABLED,
-                GlobalSettingsProto.DOCK_AUDIO_MEDIA_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.ENCODED_SURROUND_OUTPUT,
-                GlobalSettingsProto.ENCODED_SURROUND_OUTPUT);
-        dumpSetting(s, p,
-                Settings.Global.AUDIO_SAFE_VOLUME_STATE,
-                GlobalSettingsProto.AUDIO_SAFE_VOLUME_STATE);
-        dumpSetting(s, p,
-                Settings.Global.TZINFO_UPDATE_CONTENT_URL,
-                GlobalSettingsProto.TZINFO_UPDATE_CONTENT_URL);
-        dumpSetting(s, p,
-                Settings.Global.TZINFO_UPDATE_METADATA_URL,
-                GlobalSettingsProto.TZINFO_UPDATE_METADATA_URL);
-        dumpSetting(s, p,
-                Settings.Global.SELINUX_UPDATE_CONTENT_URL,
-                GlobalSettingsProto.SELINUX_UPDATE_CONTENT_URL);
-        dumpSetting(s, p,
-                Settings.Global.SELINUX_UPDATE_METADATA_URL,
-                GlobalSettingsProto.SELINUX_UPDATE_METADATA_URL);
-        dumpSetting(s, p,
-                Settings.Global.SMS_SHORT_CODES_UPDATE_CONTENT_URL,
-                GlobalSettingsProto.SMS_SHORT_CODES_UPDATE_CONTENT_URL);
-        dumpSetting(s, p,
-                Settings.Global.SMS_SHORT_CODES_UPDATE_METADATA_URL,
-                GlobalSettingsProto.SMS_SHORT_CODES_UPDATE_METADATA_URL);
-        dumpSetting(s, p,
-                Settings.Global.APN_DB_UPDATE_CONTENT_URL,
-                GlobalSettingsProto.APN_DB_UPDATE_CONTENT_URL);
-        dumpSetting(s, p,
-                Settings.Global.APN_DB_UPDATE_METADATA_URL,
-                GlobalSettingsProto.APN_DB_UPDATE_METADATA_URL);
-        dumpSetting(s, p,
-                Settings.Global.CERT_PIN_UPDATE_CONTENT_URL,
-                GlobalSettingsProto.CERT_PIN_UPDATE_CONTENT_URL);
-        dumpSetting(s, p,
-                Settings.Global.CERT_PIN_UPDATE_METADATA_URL,
-                GlobalSettingsProto.CERT_PIN_UPDATE_METADATA_URL);
-        dumpSetting(s, p,
-                Settings.Global.INTENT_FIREWALL_UPDATE_CONTENT_URL,
-                GlobalSettingsProto.INTENT_FIREWALL_UPDATE_CONTENT_URL);
-        dumpSetting(s, p,
-                Settings.Global.INTENT_FIREWALL_UPDATE_METADATA_URL,
-                GlobalSettingsProto.INTENT_FIREWALL_UPDATE_METADATA_URL);
-        dumpSetting(s, p,
-                Settings.Global.LANG_ID_UPDATE_CONTENT_URL,
-                GlobalSettingsProto.LANG_ID_UPDATE_CONTENT_URL);
-        dumpSetting(s, p,
-                Settings.Global.LANG_ID_UPDATE_METADATA_URL,
-                GlobalSettingsProto.LANG_ID_UPDATE_METADATA_URL);
-        dumpSetting(s, p,
-                Settings.Global.SMART_SELECTION_UPDATE_CONTENT_URL,
-                GlobalSettingsProto.SMART_SELECTION_UPDATE_CONTENT_URL);
-        dumpSetting(s, p,
-                Settings.Global.SMART_SELECTION_UPDATE_METADATA_URL,
-                GlobalSettingsProto.SMART_SELECTION_UPDATE_METADATA_URL);
-        dumpSetting(s, p,
-                Settings.Global.SELINUX_STATUS,
-                GlobalSettingsProto.SELINUX_STATUS);
-        dumpSetting(s, p,
-                Settings.Global.DEVELOPMENT_FORCE_RTL,
-                GlobalSettingsProto.DEVELOPMENT_FORCE_RTL);
-        dumpSetting(s, p,
-                Settings.Global.LOW_BATTERY_SOUND_TIMEOUT,
-                GlobalSettingsProto.LOW_BATTERY_SOUND_TIMEOUT);
-        dumpSetting(s, p,
-                Settings.Global.WIFI_BOUNCE_DELAY_OVERRIDE_MS,
-                GlobalSettingsProto.WIFI_BOUNCE_DELAY_OVERRIDE_MS);
-        dumpSetting(s, p,
-                Settings.Global.POLICY_CONTROL,
-                GlobalSettingsProto.POLICY_CONTROL);
-        dumpSetting(s, p,
-                Settings.Global.EMULATE_DISPLAY_CUTOUT,
-                GlobalSettingsProto.EMULATE_DISPLAY_CUTOUT);
-        dumpSetting(s, p,
-                Settings.Global.ZEN_MODE,
-                GlobalSettingsProto.ZEN_MODE);
-        dumpSetting(s, p,
-                Settings.Global.ZEN_MODE_RINGER_LEVEL,
-                GlobalSettingsProto.ZEN_MODE_RINGER_LEVEL);
-        dumpSetting(s, p,
-                Settings.Global.ZEN_MODE_CONFIG_ETAG,
-                GlobalSettingsProto.ZEN_MODE_CONFIG_ETAG);
-        dumpSetting(s, p,
-                Settings.Global.ZEN_DURATION,
-                GlobalSettingsProto.ZEN_DURATION);
-        dumpSetting(s, p,
-                Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
-                GlobalSettingsProto.HEADS_UP_NOTIFICATIONS_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.DEVICE_NAME,
-                GlobalSettingsProto.DEVICE_NAME);
-        dumpSetting(s, p,
-                Settings.Global.NETWORK_SCORING_PROVISIONED,
-                GlobalSettingsProto.NETWORK_SCORING_PROVISIONED);
-        dumpSetting(s, p,
-                Settings.Global.REQUIRE_PASSWORD_TO_DECRYPT,
-                GlobalSettingsProto.REQUIRE_PASSWORD_TO_DECRYPT);
-        dumpSetting(s, p,
-                Settings.Global.ENHANCED_4G_MODE_ENABLED,
-                GlobalSettingsProto.ENHANCED_4G_MODE_ENABLED);
         dumpSetting(s, p,
                 Settings.Global.VT_IMS_ENABLED,
                 GlobalSettingsProto.VT_IMS_ENABLED);
         dumpSetting(s, p,
+                Settings.Global.WAIT_FOR_DEBUGGER,
+                GlobalSettingsProto.WAIT_FOR_DEBUGGER);
+
+        final long webviewToken = p.start(GlobalSettingsProto.WEBVIEW);
+        dumpSetting(s, p,
+                Settings.Global.WEBVIEW_DATA_REDUCTION_PROXY_KEY,
+                GlobalSettingsProto.Webview.DATA_REDUCTION_PROXY_KEY);
+        dumpSetting(s, p,
+                Settings.Global.WEBVIEW_FALLBACK_LOGIC_ENABLED,
+                GlobalSettingsProto.Webview.FALLBACK_LOGIC_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.WEBVIEW_PROVIDER,
+                GlobalSettingsProto.Webview.PROVIDER);
+        dumpSetting(s, p,
+                Settings.Global.WEBVIEW_MULTIPROCESS,
+                GlobalSettingsProto.Webview.MULTIPROCESS);
+        p.end(webviewToken);
+
+        final long wfcToken = p.start(GlobalSettingsProto.WFC);
+        dumpSetting(s, p,
                 Settings.Global.WFC_IMS_ENABLED,
-                GlobalSettingsProto.WFC_IMS_ENABLED);
+                GlobalSettingsProto.Wfc.IMS_ENABLED);
         dumpSetting(s, p,
                 Settings.Global.WFC_IMS_MODE,
-                GlobalSettingsProto.WFC_IMS_MODE);
+                GlobalSettingsProto.Wfc.IMS_MODE);
         dumpSetting(s, p,
                 Settings.Global.WFC_IMS_ROAMING_MODE,
-                GlobalSettingsProto.WFC_IMS_ROAMING_MODE);
+                GlobalSettingsProto.Wfc.IMS_ROAMING_MODE);
         dumpSetting(s, p,
                 Settings.Global.WFC_IMS_ROAMING_ENABLED,
-                GlobalSettingsProto.WFC_IMS_ROAMING_ENABLED);
+                GlobalSettingsProto.Wfc.IMS_ROAMING_ENABLED);
+        p.end(wfcToken);
+
+        final long wifiToken = p.start(GlobalSettingsProto.WIFI);
         dumpSetting(s, p,
-                Settings.Global.LTE_SERVICE_FORCED,
-                GlobalSettingsProto.LTE_SERVICE_FORCED);
+                Settings.Global.WIFI_SLEEP_POLICY,
+                GlobalSettingsProto.Wifi.SLEEP_POLICY);
         dumpSetting(s, p,
-                Settings.Global.EPHEMERAL_COOKIE_MAX_SIZE_BYTES,
-                GlobalSettingsProto.EPHEMERAL_COOKIE_MAX_SIZE_BYTES);
+                Settings.Global.WIFI_BADGING_THRESHOLDS,
+                GlobalSettingsProto.Wifi.BADGING_THRESHOLDS);
         dumpSetting(s, p,
-                Settings.Global.ENABLE_EPHEMERAL_FEATURE,
-                GlobalSettingsProto.ENABLE_EPHEMERAL_FEATURE);
+                Settings.Global.WIFI_DISPLAY_ON,
+                GlobalSettingsProto.Wifi.DISPLAY_ON);
         dumpSetting(s, p,
-                Settings.Global.INSTANT_APP_DEXOPT_ENABLED,
-                GlobalSettingsProto.INSTANT_APP_DEXOPT_ENABLED);
+                Settings.Global.WIFI_DISPLAY_CERTIFICATION_ON,
+                GlobalSettingsProto.Wifi.DISPLAY_CERTIFICATION_ON);
         dumpSetting(s, p,
-                Settings.Global.INSTALLED_INSTANT_APP_MIN_CACHE_PERIOD,
-                GlobalSettingsProto.INSTALLED_INSTANT_APP_MIN_CACHE_PERIOD);
+                Settings.Global.WIFI_DISPLAY_WPS_CONFIG,
+                GlobalSettingsProto.Wifi.DISPLAY_WPS_CONFIG);
         dumpSetting(s, p,
-                Settings.Global.INSTALLED_INSTANT_APP_MAX_CACHE_PERIOD,
-                GlobalSettingsProto.INSTALLED_INSTANT_APP_MAX_CACHE_PERIOD);
+                Settings.Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
+                GlobalSettingsProto.Wifi.NETWORKS_AVAILABLE_NOTIFICATION_ON);
         dumpSetting(s, p,
-                Settings.Global.UNINSTALLED_INSTANT_APP_MIN_CACHE_PERIOD,
-                GlobalSettingsProto.UNINSTALLED_INSTANT_APP_MIN_CACHE_PERIOD);
+                Settings.Global.WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON,
+                GlobalSettingsProto.Wifi.CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON);
         dumpSetting(s, p,
-                Settings.Global.UNINSTALLED_INSTANT_APP_MAX_CACHE_PERIOD,
-                GlobalSettingsProto.UNINSTALLED_INSTANT_APP_MAX_CACHE_PERIOD);
+                Settings.Global.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,
+                GlobalSettingsProto.Wifi.NETWORKS_AVAILABLE_REPEAT_DELAY);
         dumpSetting(s, p,
-                Settings.Global.UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD,
-                GlobalSettingsProto.UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD);
+                Settings.Global.WIFI_COUNTRY_CODE,
+                GlobalSettingsProto.Wifi.COUNTRY_CODE);
         dumpSetting(s, p,
-                Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED,
-                GlobalSettingsProto.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED);
+                Settings.Global.WIFI_FRAMEWORK_SCAN_INTERVAL_MS,
+                GlobalSettingsProto.Wifi.FRAMEWORK_SCAN_INTERVAL_MS);
         dumpSetting(s, p,
-                Settings.Global.BOOT_COUNT,
-                GlobalSettingsProto.BOOT_COUNT);
+                Settings.Global.WIFI_IDLE_MS,
+                GlobalSettingsProto.Wifi.IDLE_MS);
         dumpSetting(s, p,
-                Settings.Global.SAFE_BOOT_DISALLOWED,
-                GlobalSettingsProto.SAFE_BOOT_DISALLOWED);
+                Settings.Global.WIFI_NUM_OPEN_NETWORKS_KEPT,
+                GlobalSettingsProto.Wifi.NUM_OPEN_NETWORKS_KEPT);
         dumpSetting(s, p,
-                Settings.Global.DEVICE_DEMO_MODE,
-                GlobalSettingsProto.DEVICE_DEMO_MODE);
+                Settings.Global.WIFI_ON,
+                GlobalSettingsProto.Wifi.ON);
         dumpSetting(s, p,
-                Settings.Global.NETWORK_ACCESS_TIMEOUT_MS,
-                GlobalSettingsProto.NETWORK_ACCESS_TIMEOUT_MS);
+                Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE,
+                GlobalSettingsProto.Wifi.SCAN_ALWAYS_AVAILABLE);
         dumpSetting(s, p,
-                Settings.Global.DATABASE_DOWNGRADE_REASON,
-                GlobalSettingsProto.DATABASE_DOWNGRADE_REASON);
+                Settings.Global.WIFI_WAKEUP_ENABLED,
+                GlobalSettingsProto.Wifi.WAKEUP_ENABLED);
         dumpSetting(s, p,
-                Settings.Global.DATABASE_CREATION_BUILDID,
-                GlobalSettingsProto.DATABASE_CREATION_BUILDID);
+                Settings.Global.WIFI_SAVED_STATE,
+                GlobalSettingsProto.Wifi.SAVED_STATE);
         dumpSetting(s, p,
-                Settings.Global.CONTACTS_DATABASE_WAL_ENABLED,
-                GlobalSettingsProto.CONTACTS_DATABASE_WAL_ENABLED);
+                Settings.Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS,
+                GlobalSettingsProto.Wifi.SUPPLICANT_SCAN_INTERVAL_MS);
         dumpSetting(s, p,
-                Settings.Global.LOCATION_SETTINGS_LINK_TO_PERMISSIONS_ENABLED,
-                GlobalSettingsProto.LOCATION_SETTINGS_LINK_TO_PERMISSIONS_ENABLED);
+                Settings.Global.WIFI_ENHANCED_AUTO_JOIN,
+                GlobalSettingsProto.Wifi.ENHANCED_AUTO_JOIN);
         dumpSetting(s, p,
-                Settings.Global.EUICC_FACTORY_RESET_TIMEOUT_MILLIS,
-                GlobalSettingsProto.EUICC_FACTORY_RESET_TIMEOUT_MILLIS);
+                Settings.Global.WIFI_NETWORK_SHOW_RSSI,
+                GlobalSettingsProto.Wifi.NETWORK_SHOW_RSSI);
         dumpSetting(s, p,
-                Settings.Global.STORAGE_SETTINGS_CLOBBER_THRESHOLD,
-                GlobalSettingsProto.STORAGE_SETTINGS_CLOBBER_THRESHOLD);
+                Settings.Global.WIFI_SCAN_INTERVAL_WHEN_P2P_CONNECTED_MS,
+                GlobalSettingsProto.Wifi.SCAN_INTERVAL_WHEN_P2P_CONNECTED_MS);
         dumpSetting(s, p,
-                Settings.Global.LOCATION_GLOBAL_KILL_SWITCH,
-                GlobalSettingsProto.LOCATION_GLOBAL_KILL_SWITCH);
+                Settings.Global.WIFI_WATCHDOG_ON,
+                GlobalSettingsProto.Wifi.WATCHDOG_ON);
         dumpSetting(s, p,
-                Settings.Global.OVERRIDE_SETTINGS_PROVIDER_RESTORE_ANY_VERSION,
-                GlobalSettingsProto.OVERRIDE_SETTINGS_PROVIDER_RESTORE_ANY_VERSION);
+                Settings.Global.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED,
+                GlobalSettingsProto.Wifi.WATCHDOG_POOR_NETWORK_TEST_ENABLED);
         dumpSetting(s, p,
-                Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED,
-                GlobalSettingsProto.CHAINED_BATTERY_ATTRIBUTION_ENABLED);
+                Settings.Global.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED,
+                GlobalSettingsProto.Wifi.SUSPEND_OPTIMIZATIONS_ENABLED);
         dumpSetting(s, p,
-                Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES,
-                GlobalSettingsProto.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES);
+                Settings.Global.WIFI_VERBOSE_LOGGING_ENABLED,
+                GlobalSettingsProto.Wifi.VERBOSE_LOGGING_ENABLED);
         dumpSetting(s, p,
-                Global.HIDDEN_API_BLACKLIST_EXEMPTIONS,
-                GlobalSettingsProto.HIDDEN_API_BLACKLIST_EXEMPTIONS);
+                Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED,
+                GlobalSettingsProto.Wifi.CONNECTED_MAC_RANDOMIZATION_ENABLED);
         dumpSetting(s, p,
-                Global.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT,
-                GlobalSettingsProto.SOUND_TRIGGER_DETECTION_SERVICE_OP_TIMEOUT);
+                Settings.Global.WIFI_MAX_DHCP_RETRY_COUNT,
+                GlobalSettingsProto.Wifi.MAX_DHCP_RETRY_COUNT);
         dumpSetting(s, p,
-                Global.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY,
-                GlobalSettingsProto.MAX_SOUND_TRIGGER_DETECTION_SERVICE_OPS_PER_DAY);
+                Settings.Global.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS,
+                GlobalSettingsProto.Wifi.MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS);
         dumpSetting(s, p,
-                Settings.Global.MULTI_SIM_VOICE_CALL_SUBSCRIPTION,
-                GlobalSettingsProto.MULTI_SIM_VOICE_CALL_SUBSCRIPTION);
+                Settings.Global.WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN,
+                GlobalSettingsProto.Wifi.DEVICE_OWNER_CONFIGS_LOCKDOWN);
         dumpSetting(s, p,
-                Settings.Global.MULTI_SIM_VOICE_PROMPT,
-                GlobalSettingsProto.MULTI_SIM_VOICE_PROMPT);
+                Settings.Global.WIFI_FREQUENCY_BAND,
+                GlobalSettingsProto.Wifi.FREQUENCY_BAND);
         dumpSetting(s, p,
-                Settings.Global.MULTI_SIM_DATA_CALL_SUBSCRIPTION,
-                GlobalSettingsProto.MULTI_SIM_DATA_CALL_SUBSCRIPTION);
+                Settings.Global.WIFI_P2P_DEVICE_NAME,
+                GlobalSettingsProto.Wifi.P2P_DEVICE_NAME);
         dumpSetting(s, p,
-                Settings.Global.MULTI_SIM_SMS_SUBSCRIPTION,
-                GlobalSettingsProto.MULTI_SIM_SMS_SUBSCRIPTION);
+                Settings.Global.WIFI_REENABLE_DELAY_MS,
+                GlobalSettingsProto.Wifi.REENABLE_DELAY_MS);
         dumpSetting(s, p,
-                Settings.Global.MULTI_SIM_SMS_PROMPT,
-                GlobalSettingsProto.MULTI_SIM_SMS_PROMPT);
+                Settings.Global.WIFI_EPHEMERAL_OUT_OF_RANGE_TIMEOUT_MS,
+                GlobalSettingsProto.Wifi.EPHEMERAL_OUT_OF_RANGE_TIMEOUT_MS);
         dumpSetting(s, p,
-                Settings.Global.NEW_CONTACT_AGGREGATOR,
-                GlobalSettingsProto.NEW_CONTACT_AGGREGATOR);
-        // Settings.Global.CONTACT_METADATA_SYNC intentionally excluded since it's deprecated.
+                Settings.Global.WIFI_ON_WHEN_PROXY_DISCONNECTED,
+                GlobalSettingsProto.Wifi.ON_WHEN_PROXY_DISCONNECTED);
         dumpSetting(s, p,
-                Settings.Global.CONTACT_METADATA_SYNC_ENABLED,
-                GlobalSettingsProto.CONTACT_METADATA_SYNC_ENABLED);
+                Settings.Global.WIFI_BOUNCE_DELAY_OVERRIDE_MS,
+                GlobalSettingsProto.Wifi.BOUNCE_DELAY_OVERRIDE_MS);
+        p.end(wifiToken);
+
         dumpSetting(s, p,
-                Settings.Global.ENABLE_CELLULAR_ON_BOOT,
-                GlobalSettingsProto.ENABLE_CELLULAR_ON_BOOT);
+                Settings.Global.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON,
+                GlobalSettingsProto.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON);
         dumpSetting(s, p,
-                Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
-                GlobalSettingsProto.MAX_NOTIFICATION_ENQUEUE_RATE);
+                Settings.Global.WINDOW_ANIMATION_SCALE,
+                GlobalSettingsProto.WINDOW_ANIMATION_SCALE);
         dumpSetting(s, p,
-                Settings.Global.SHOW_NOTIFICATION_CHANNEL_WARNINGS,
-                GlobalSettingsProto.SHOW_NOTIFICATION_CHANNEL_WARNINGS);
+                Settings.Global.WTF_IS_FATAL,
+                GlobalSettingsProto.WTF_IS_FATAL);
+
+        final long zenToken = p.start(GlobalSettingsProto.ZEN);
         dumpSetting(s, p,
-                Settings.Global.CELL_ON,
-                GlobalSettingsProto.CELL_ON);
+                Settings.Global.ZEN_MODE,
+                GlobalSettingsProto.Zen.MODE);
         dumpSetting(s, p,
-                Settings.Global.SHOW_TEMPERATURE_WARNING,
-                GlobalSettingsProto.SHOW_TEMPERATURE_WARNING);
+                Settings.Global.ZEN_MODE_RINGER_LEVEL,
+                GlobalSettingsProto.Zen.MODE_RINGER_LEVEL);
         dumpSetting(s, p,
-                Settings.Global.WARNING_TEMPERATURE,
-                GlobalSettingsProto.WARNING_TEMPERATURE);
+                Settings.Global.ZEN_MODE_CONFIG_ETAG,
+                GlobalSettingsProto.Zen.MODE_CONFIG_ETAG);
         dumpSetting(s, p,
-                Settings.Global.ENABLE_DISKSTATS_LOGGING,
-                GlobalSettingsProto.ENABLE_DISKSTATS_LOGGING);
+                Settings.Global.ZEN_DURATION,
+                GlobalSettingsProto.Zen.DURATION);
         dumpSetting(s, p,
-                Settings.Global.ENABLE_CACHE_QUOTA_CALCULATION,
-                GlobalSettingsProto.ENABLE_CACHE_QUOTA_CALCULATION);
-        dumpSetting(s, p,
-                Settings.Global.ENABLE_DELETION_HELPER_NO_THRESHOLD_TOGGLE,
-                GlobalSettingsProto.ENABLE_DELETION_HELPER_NO_THRESHOLD_TOGGLE);
-        // The list of snooze options for notifications. This is encoded as a key=value list,
-        // separated by commas.
-        dumpSetting(s, p,
-                Settings.Global.NOTIFICATION_SNOOZE_OPTIONS,
-                GlobalSettingsProto.NOTIFICATION_SNOOZE_OPTIONS);
-        dumpSetting(s, p,
-                Settings.Global.SQLITE_COMPATIBILITY_WAL_FLAGS,
-                GlobalSettingsProto.SQLITE_COMPATIBILITY_WAL_FLAGS);
-        dumpSetting(s, p,
-                Settings.Global.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING,
-                GlobalSettingsProto.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING);
-        dumpSetting(s, p,
-                Settings.Global.INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT,
-                GlobalSettingsProto.INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT);
-        dumpSetting(s, p,
-                Settings.Global.INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS,
-                GlobalSettingsProto.INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS);
+                Settings.Global.SHOW_ZEN_UPGRADE_NOTIFICATION,
+                GlobalSettingsProto.Zen.SHOW_ZEN_UPGRADE_NOTIFICATION);
+        p.end(zenToken);
+
         dumpSetting(s, p,
                 Settings.Global.ZRAM_ENABLED,
                 GlobalSettingsProto.ZRAM_ENABLED);
-        dumpSetting(s, p,
-                Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS,
-                GlobalSettingsProto.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS);
-        dumpSetting(s, p,
-                Settings.Global.SHOW_FIRST_CRASH_DIALOG,
-                GlobalSettingsProto.SHOW_FIRST_CRASH_DIALOG);
-        dumpSetting(s, p,
-                Settings.Global.SHOW_RESTART_IN_CRASH_DIALOG,
-                GlobalSettingsProto.SHOW_RESTART_IN_CRASH_DIALOG);
-        dumpSetting(s, p,
-                Settings.Global.SHOW_MUTE_IN_CRASH_DIALOG,
-                GlobalSettingsProto.SHOW_MUTE_IN_CRASH_DIALOG);
-        dumpSetting(s, p,
-                Settings.Global.SHOW_ZEN_UPGRADE_NOTIFICATION,
-                GlobalSettingsProto.SHOW_ZEN_UPGRADE_NOTIFICATION);
-        dumpSetting(s, p,
-                Settings.Global.BACKUP_AGENT_TIMEOUT_PARAMETERS,
-                GlobalSettingsProto.BACKUP_AGENT_TIMEOUT_PARAMETERS);
-        // Please insert new settings using the same order as in Settings.Global.
 
         p.end(token);
+        // Please insert new settings using the same order as in GlobalSettingsProto.
+
+        // Settings.Global.INSTALL_NON_MARKET_APPS intentionally excluded since it's deprecated.
     }
 
     /** Dumps settings that use a common prefix into a repeated field. */
