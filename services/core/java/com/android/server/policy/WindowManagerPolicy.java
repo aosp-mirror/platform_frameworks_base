@@ -649,6 +649,12 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
                     return Integer.toString(lens);
             }
         }
+
+        /**
+         * Hint to window manager that the user has started a navigation action that should
+         * abort animations that have no timeout, in case they got stuck.
+         */
+        void triggerAnimationFailsafe();
     }
 
     /** Window has been added to the screen. */

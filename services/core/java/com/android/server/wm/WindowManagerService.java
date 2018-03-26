@@ -25,12 +25,10 @@ import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
-import static android.content.Intent.EXTRA_USER_HANDLE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
-import static android.os.UserHandle.USER_NULL;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.DOCKED_INVALID;
@@ -181,7 +179,6 @@ import android.util.Log;
 import android.util.MergedConfiguration;
 import android.util.Pair;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
@@ -2793,6 +2790,11 @@ public class WindowManagerService extends IWindowManager.Stub
         mTaskSnapshotController.screenTurningOff(listener);
     }
 
+    @Override
+    public void triggerAnimationFailsafe() {
+        mH.sendEmptyMessage(H.ANIMATION_FAILSAFE);
+    }
+
     /**
      * Starts deferring layout passes. Useful when doing multiple changes but to optimize
      * performance, only one layout pass should be done. This can be called multiple times, and
@@ -4566,6 +4568,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int NOTIFY_KEYGUARD_TRUSTED_CHANGED = 57;
         public static final int SET_HAS_OVERLAY_UI = 58;
         public static final int SET_RUNNING_REMOTE_ANIMATION = 59;
+        public static final int ANIMATION_FAILSAFE = 60;
 
         /**
          * Used to denote that an integer field in a message will not be used.
@@ -4982,6 +4985,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 break;
                 case SET_RUNNING_REMOTE_ANIMATION: {
                     mAmInternal.setRunningRemoteAnimation(msg.arg1, msg.arg2 == 1);
+                }
+                break;
+                case ANIMATION_FAILSAFE: {
+                    synchronized (mWindowMap) {
+                        if (mRecentsAnimationController != null) {
+                            mRecentsAnimationController.scheduleFailsafe();
+                        }
+                    }
                 }
                 break;
             }

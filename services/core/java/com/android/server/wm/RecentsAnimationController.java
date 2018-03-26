@@ -34,6 +34,7 @@ import android.app.WindowConfiguration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.ArraySet;
@@ -61,15 +62,17 @@ import java.util.ArrayList;
  * window manager when the animation is completed. In addition, window manager may also notify the
  * app if it requires the animation to be canceled at any time (ie. due to timeout, etc.)
  */
-public class RecentsAnimationController {
+public class RecentsAnimationController implements DeathRecipient {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "RecentsAnimationController" : TAG_WM;
     private static final boolean DEBUG = false;
+    private static final long FAILSAFE_DELAY = 1000;
 
     private final WindowManagerService mService;
     private final IRecentsAnimationRunner mRunner;
     private final RecentsAnimationCallbacks mCallbacks;
     private final ArrayList<TaskAnimationAdapter> mPendingAnimations = new ArrayList<>();
     private final int mDisplayId;
+    private final Runnable mFailsafeRunnable = this::cancelAnimation;
 
     // The recents component app token that is shown behind the visibile tasks
     private AppWindowToken mHomeAppToken;
@@ -223,6 +226,13 @@ public class RecentsAnimationController {
             return;
         }
 
+        try {
+            mRunner.asBinder().linkToDeath(this, 0);
+        } catch (RemoteException e) {
+            cancelAnimation();
+            return;
+        }
+
         // Adjust the wallpaper visibility for the showing home activity
         final AppWindowToken recentsComponentAppToken =
                 dc.getHomeStack().getTopChild().getTopFullscreenAppToken();
@@ -296,6 +306,7 @@ public class RecentsAnimationController {
                 // We've already canceled the animation
                 return;
             }
+            mService.mH.removeCallbacks(mFailsafeRunnable);
             mCanceled = true;
             try {
                 mRunner.onAnimationCanceled();
@@ -321,8 +332,19 @@ public class RecentsAnimationController {
         }
         mPendingAnimations.clear();
 
+        mRunner.asBinder().unlinkToDeath(this, 0);
+
         mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
         mService.destroyInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
+    }
+
+    void scheduleFailsafe() {
+        mService.mH.postDelayed(mFailsafeRunnable, FAILSAFE_DELAY);
+    }
+
+    @Override
+    public void binderDied() {
+        cancelAnimation();
     }
 
     void checkAnimationReady(WallpaperController wallpaperController) {
