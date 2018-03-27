@@ -24,11 +24,13 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region.Op;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.Trace;
 import android.service.wallpaper.WallpaperService;
 import android.util.Log;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
 
@@ -45,6 +47,7 @@ public class ImageWallpaper extends WallpaperService {
     private static final String GL_LOG_TAG = "ImageWallpaperGL";
     private static final boolean DEBUG = false;
     private static final String PROPERTY_KERNEL_QEMU = "ro.kernel.qemu";
+    private static final long DELAY_FORGET_WALLPAPER = 5000;
 
     private WallpaperManager mWallpaperManager;
     private DrawableEngine mEngine;
@@ -69,6 +72,10 @@ public class ImageWallpaper extends WallpaperService {
     }
 
     class DrawableEngine extends Engine {
+        private final Runnable mUnloadWallpaperCallback = () -> {
+            unloadWallpaper(false /* forgetSize */);
+        };
+
         Bitmap mBackground;
         int mBackgroundWidth = -1, mBackgroundHeight = -1;
         int mLastSurfaceWidth = -1, mLastSurfaceHeight = -1;
@@ -331,6 +338,7 @@ public class ImageWallpaper extends WallpaperService {
                 }
 
                 drawWallpaperWithCanvas(sh, availw, availh, xPixels, yPixels);
+                scheduleUnloadWallpaper();
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_VIEW);
             }
@@ -433,6 +441,9 @@ public class ImageWallpaper extends WallpaperService {
                 mBackgroundHeight = -1;
             }
 
+            final Surface surface = getSurfaceHolder().getSurface();
+            surface.hwuiDestroy();
+
             mLoader = new AsyncTask<Void, Void, Bitmap>() {
                 @Override
                 protected Bitmap doInBackground(Void... params) {
@@ -440,6 +451,12 @@ public class ImageWallpaper extends WallpaperService {
                     return null;
                 }
             }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+
+        private void scheduleUnloadWallpaper() {
+            Handler handler = getMainThreadHandler();
+            handler.removeCallbacks(mUnloadWallpaperCallback);
+            handler.postDelayed(mUnloadWallpaperCallback, DELAY_FORGET_WALLPAPER);
         }
 
         @Override
