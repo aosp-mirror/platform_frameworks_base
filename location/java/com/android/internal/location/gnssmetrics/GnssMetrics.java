@@ -224,7 +224,9 @@ public class GnssMetrics {
     s.append("GNSS_KPI_END").append("\n");
     GpsBatteryStats stats = mGnssPowerMetrics.getGpsBatteryStats();
     if (stats != null) {
-      s.append("Power Metrics").append('\n');
+      s.append("Power Metrics").append("\n");
+      s.append("  Time on battery (min): "
+          + stats.getLoggingDurationMs() / ((double) DateUtils.MINUTE_IN_MILLIS)).append("\n");
       long[] t = stats.getTimeInGpsSignalQualityLevel();
       if (t != null && t.length == NUM_GPS_SIGNAL_QUALITY_LEVELS) {
         s.append("  Amount of time (while on battery) Top 4 Avg CN0 > " +
