@@ -80,6 +80,13 @@ public class Task {
             return this.baseIntent.getComponent();
         }
 
+        public String getPackageName() {
+            if (this.baseIntent.getComponent() != null) {
+                return this.baseIntent.getComponent().getPackageName();
+            }
+            return this.baseIntent.getPackage();
+        }
+
         @Override
         public boolean equals(Object o) {
             if (!(o instanceof TaskKey)) {
