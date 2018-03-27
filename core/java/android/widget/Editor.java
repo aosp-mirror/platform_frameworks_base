@@ -289,6 +289,7 @@ public class Editor {
     boolean mShowSoftInputOnFocus = true;
     private boolean mPreserveSelection;
     private boolean mRestartActionModeOnNextRefresh;
+    private boolean mRequestingLinkActionMode;
 
     private SelectionActionModeHelper mSelectionActionModeHelper;
 
@@ -2127,6 +2128,7 @@ public class Editor {
             return;
         }
         stopTextActionMode();
+        mRequestingLinkActionMode = true;
         getSelectionActionModeHelper().startLinkActionModeAsync(start, end);
     }
 
@@ -2212,7 +2214,9 @@ public class Editor {
         mTextActionMode = mTextView.startActionMode(actionModeCallback, ActionMode.TYPE_FLOATING);
 
         final boolean selectionStarted = mTextActionMode != null;
-        if (selectionStarted && !mTextView.isTextSelectable() && mShowSoftInputOnFocus) {
+        if (selectionStarted
+                && mTextView.isTextEditable() && !mTextView.isTextSelectable()
+                && mShowSoftInputOnFocus) {
             // Show the IME to be able to replace text, except when selecting non editable text.
             final InputMethodManager imm = InputMethodManager.peekInstance();
             if (imm != null) {
@@ -2322,10 +2326,14 @@ public class Editor {
         if (!selectAllGotFocus && text.length() > 0) {
             // Move cursor
             final int offset = mTextView.getOffsetForPosition(event.getX(), event.getY());
-            Selection.setSelection((Spannable) text, offset);
-            if (mSpellChecker != null) {
-                // When the cursor moves, the word that was typed may need spell check
-                mSpellChecker.onSelectionChanged();
+
+            final boolean shouldInsertCursor = !mRequestingLinkActionMode;
+            if (shouldInsertCursor) {
+                Selection.setSelection((Spannable) text, offset);
+                if (mSpellChecker != null) {
+                    // When the cursor moves, the word that was typed may need spell check
+                    mSpellChecker.onSelectionChanged();
+                }
             }
 
             if (!extractedTextModeWillBeStarted()) {
@@ -2335,16 +2343,17 @@ public class Editor {
                         mTextView.removeCallbacks(mInsertionActionModeRunnable);
                     }
 
-                    mShowSuggestionRunnable = new Runnable() {
-                        public void run() {
-                            replace();
-                        }
-                    };
+                    mShowSuggestionRunnable = this::replace;
+
                     // removeCallbacks is performed on every touch
                     mTextView.postDelayed(mShowSuggestionRunnable,
                             ViewConfiguration.getDoubleTapTimeout());
                 } else if (hasInsertionController()) {
-                    getInsertionController().show();
+                    if (shouldInsertCursor) {
+                        getInsertionController().show();
+                    } else {
+                        getInsertionController().hide();
+                    }
                 }
             }
         }
@@ -4170,6 +4179,7 @@ public class Editor {
             }
 
             mAssistClickHandlers.clear();
+            mRequestingLinkActionMode = false;
         }
 
         @Override
