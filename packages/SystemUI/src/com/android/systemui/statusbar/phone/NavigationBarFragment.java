@@ -926,7 +926,9 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     private boolean onLongPressRecents() {
         if (mRecents == null || !ActivityManager.supportsMultiWindow(getContext())
                 || !mDivider.getView().getSnapAlgorithm().isSplitScreenFeasible()
-                || Recents.getConfiguration().isLowRamDevice) {
+                || Recents.getConfiguration().isLowRamDevice
+                // If we are connected to the overview service, then disable the recents button
+                || mOverviewProxyService.getProxy() != null) {
             return false;
         }
 
