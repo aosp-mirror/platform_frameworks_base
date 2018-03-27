@@ -5557,6 +5557,10 @@ message MetricsEvent {
     // OS: P
     SETTINGS_CONDITION_DEVICE_VIBRATE = 1369;
 
+    // OPEN: Settings > Connected devices > previously connected devices
+    // CATEGORY: SETTINGS
+    // OS: P
+    PREVIOUSLY_CONNECTED_DEVICES = 1370;
 
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
