@@ -24,13 +24,16 @@ namespace android {
 namespace os {
 namespace statsd {
 
+class ConfigKey;
 class PerfettoDetails;  // Declared in statsd_config.pb.h
 
 // Starts the collection of a Perfetto trace with the given |config|.
 // The trace is uploaded to Dropbox by the perfetto cmdline util once done.
 // This method returns immediately after passing the config and does NOT wait
 // for the full duration of the trace.
-bool CollectPerfettoTraceAndUploadToDropbox(const PerfettoDetails& config);
+bool CollectPerfettoTraceAndUploadToDropbox(const PerfettoDetails& config,
+                                            int64_t alert_id,
+                                            const ConfigKey& configKey);
 
 }  // namespace statsd
 }  // namespace os
