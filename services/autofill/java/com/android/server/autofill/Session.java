@@ -1827,6 +1827,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             viewState.setState(ViewState.STATE_STARTED_PARTITION);
             requestNewFillResponseLocked(flags);
+        } else {
+            if (sVerbose) {
+                Slog.v(TAG, "Not starting new partition for view " + id + ": "
+                        + viewState.getStateAsString());
+            }
         }
     }
 
@@ -2191,6 +2196,27 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     saveOnFinish, toArray(fillableIds), saveTriggerId);
         } catch (RemoteException e) {
             Slog.w(TAG, "Cannot set tracked ids", e);
+        }
+    }
+
+    /**
+     * Sets the state of views that failed to autofill.
+     */
+    @GuardedBy("mLock")
+    void setAutofillFailureLocked(@NonNull List<AutofillId> ids) {
+        for (int i = 0; i < ids.size(); i++) {
+            final AutofillId id = ids.get(i);
+            final ViewState viewState = mViewStates.get(id);
+            if (viewState == null) {
+                Slog.w(TAG, "setAutofillFailure(): no view for id " + id);
+                continue;
+            }
+            viewState.resetState(ViewState.STATE_AUTOFILLED);
+            final int state = viewState.getState();
+            viewState.setState(state | ViewState.STATE_AUTOFILL_FAILED);
+            if (sVerbose) {
+                Slog.v(TAG, "Changed state of " + id + " to " + viewState.getStateAsString());
+            }
         }
     }
 
