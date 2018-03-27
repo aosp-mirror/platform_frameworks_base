@@ -18,7 +18,9 @@ package com.android.systemui.statusbar;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -32,6 +34,7 @@ import android.view.NotificationHeaderView;
 import android.view.View;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.stack.NotificationChildrenContainer;
 
@@ -156,6 +159,22 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         mGroup.setSecureStateProvider(()-> true);
         Assert.assertTrue("Should always play sounds when not trusted.",
                 mGroup.isSoundEffectsEnabled());
+    }
+
+    @Test
+    public void testSetDismissed_longPressListenerRemoved() {
+        ExpandableNotificationRow.LongPressListener listener =
+                mock(ExpandableNotificationRow.LongPressListener.class);
+        mGroup.setLongPressListener(listener);
+        mGroup.doLongClickCallback(0,0);
+        verify(listener, times(1)).onLongPress(eq(mGroup), eq(0), eq(0),
+                any(NotificationMenuRowPlugin.MenuItem.class));
+        reset(listener);
+
+        mGroup.setDismissed(true);
+        mGroup.doLongClickCallback(0,0);
+        verify(listener, times(0)).onLongPress(eq(mGroup), eq(0), eq(0),
+                any(NotificationMenuRowPlugin.MenuItem.class));
     }
 
     @Test
