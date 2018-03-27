@@ -402,9 +402,9 @@ public class VolumeInfo implements Parcelable {
      * Build an intent to browse the contents of this volume. Only valid for
      * {@link #TYPE_EMULATED} or {@link #TYPE_PUBLIC}.
      */
-    public Intent buildBrowseIntent() {
+    public @Nullable Intent buildBrowseIntent() {
         final Uri uri;
-        if (type == VolumeInfo.TYPE_PUBLIC) {
+        if (type == VolumeInfo.TYPE_PUBLIC && mountUserId == UserHandle.myUserId()) {
             uri = DocumentsContract.buildRootUri(DOCUMENT_AUTHORITY, fsUuid);
         } else if (type == VolumeInfo.TYPE_EMULATED && isPrimary()) {
             uri = DocumentsContract.buildRootUri(DOCUMENT_AUTHORITY,
