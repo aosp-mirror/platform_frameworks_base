@@ -111,13 +111,14 @@ message Atom {
         BluetoothEnabledStateChanged bluetooth_enabled_state_changed = 67;
         BluetoothConnectionStateChanged bluetooth_connection_state_changed = 68;
         BluetoothA2dpAudioStateChanged bluetooth_a2dp_audio_state_changed = 69;
-        UsbConnectorStateChanged usb_connector_changed = 70;
+        UsbConnectorStateChanged usb_connector_state_changed = 70;
         SpeakerImpedanceReported speaker_impedance_reported = 71;
         HardwareFailed hardware_failed = 72;
         PhysicalDropDetected physical_drop_detected = 73;
         ChargeCyclesReported charge_cycles_reported = 74;
         MobileConnectionStateChanged mobile_connection_state_changed = 75;
         MobileRadioTechnologyChanged mobile_radio_technology_changed = 76;
+        UsbDeviceAttached usb_device_attached = 77;
     }
 
     // Pulled events will start at field 10000.
@@ -966,6 +967,21 @@ message MobileRadioTechnologyChanged {
     optional int32 sim_slot_index = 2;
 }
 
+/**
+ * Logs the VID and PID of any connected USB devices.
+ *
+ * Notes if any Audio, HID (input buttons/mouse/keyboard), or Storage interfaces are present.
+ *
+ * Logged by Vendor.
+ */
+message UsbDeviceAttached {
+    optional int32 vid = 1;
+    optional int32 pid = 2;
+    optional bool has_audio = 3;
+    optional bool has_hid = 4;
+    optional bool has_storage = 5;
+}
+
 
 /**
  * Logs when Bluetooth is enabled and disabled.
@@ -1103,6 +1119,8 @@ message PhysicalDropDetected {
     optional int32 confidence_pctg = 1;
     // Peak acceleration of the drop, in 1/1000s of a g.
     optional int32 accel_peak_thousandths_g = 2;
+    // Duration of freefall in ms
+    optional int32 freefall_time_millis = 3;
 }
 
 /**
