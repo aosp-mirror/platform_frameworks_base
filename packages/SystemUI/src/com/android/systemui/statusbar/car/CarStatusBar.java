@@ -17,13 +17,9 @@
 package com.android.systemui.statusbar.car;
 
 import android.app.ActivityManager;
-import android.app.ActivityOptions;
-import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
-import android.os.RemoteException;
-import android.os.UserHandle;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -45,8 +41,8 @@ import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.car.hvac.HvacController;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
-import com.android.systemui.statusbar.phone.NavigationBarView;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -60,6 +56,8 @@ import java.util.Map;
 public class CarStatusBar extends StatusBar implements
         CarBatteryController.BatteryViewHandler {
     private static final String TAG = "CarStatusBar";
+    public static final boolean ENABLE_HVAC_CONNECTION
+            = !SystemProperties.getBoolean("android.car.hvac.demo", true);
 
     private TaskStackListenerImpl mTaskStackListener;
 
@@ -93,6 +91,11 @@ public class CarStatusBar extends StatusBar implements
 
         createBatteryController();
         mCarBatteryController.startListening();
+
+        if (ENABLE_HVAC_CONNECTION) {
+            Log.d(TAG, "Connecting to HVAC service");
+            Dependency.get(HvacController.class).connectToCarService();
+        }
     }
 
     @Override
@@ -164,7 +167,7 @@ public class CarStatusBar extends StatusBar implements
 
     @Override
     protected void createNavigationBar() {
-        mCarFacetButtonController = new CarFacetButtonController(mContext);
+        mCarFacetButtonController = Dependency.get(CarFacetButtonController.class);
         if (mNavigationBarView != null) {
             return;
         }
@@ -225,7 +228,6 @@ public class CarStatusBar extends StatusBar implements
         lp.windowAnimations = 0;
 
 
-        mCarFacetButtonController.addCarNavigationBar(mNavigationBarView);
         mWindowManager.addView(mNavigationBarWindow, lp);
     }
 
@@ -243,7 +245,6 @@ public class CarStatusBar extends StatusBar implements
             throw new RuntimeException("Unable to build left nav bar due to missing layout");
         }
         mLeftNavigationBarView.setStatusBar(this);
-        mCarFacetButtonController.addCarNavigationBar(mLeftNavigationBarView);
 
         WindowManager.LayoutParams leftlp = new WindowManager.LayoutParams(
                 widthForSides, LayoutParams.MATCH_PARENT,
@@ -275,7 +276,6 @@ public class CarStatusBar extends StatusBar implements
             throw new RuntimeException("Unable to build right nav bar due to missing layout");
         }
         mRightNavigationBarView.setStatusBar(this);
-        mCarFacetButtonController.addCarNavigationBar(mRightNavigationBarView);
 
         WindowManager.LayoutParams rightlp = new WindowManager.LayoutParams(
                 widthForSides, LayoutParams.MATCH_PARENT,

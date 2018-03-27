@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.view.View;
-import android.view.ViewGroup;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,38 +27,24 @@ public class CarFacetButtonController {
     }
 
     /**
-     * Goes through the supplied CarNavigationBarView and keeps track of all the CarFacetButtons
-     * such that it can select and unselect them based on running task chages
-     * @param bar that may contain CarFacetButtons
+     * Add facet button to this controller. The expected use is for the facet button
+     * to get a reference to this controller via {@link com.android.systemui.Dependency}
+     * and self add.
+     * @param facetButton
      */
-    public void addCarNavigationBar(CarNavigationBarView bar) {
-        findFacets(bar);
-    }
+    public void addFacetButton(CarFacetButton facetButton) {
+        String[] categories = facetButton.getCategories();
+        for (int j = 0; j < categories.length; j++) {
+            String category = categories[j];
+            mButtonsByCategory.put(category, facetButton);
+        }
 
-    private void findFacets(ViewGroup root) {
-        final int childCount = root.getChildCount();
-
-        for (int i = 0; i < childCount; ++i) {
-            final View v = root.getChildAt(i);
-            if (v instanceof CarFacetButton) {
-                CarFacetButton facetButton = (CarFacetButton) v;
-                String[] categories = facetButton.getCategories();
-                for (int j = 0; j < categories.length; j++) {
-                    String category = categories[j];
-                    mButtonsByCategory.put(category, facetButton);
-                }
-
-                String[] facetPackages = facetButton.getFacetPackages();
-                for (int j = 0; j < facetPackages.length; j++) {
-                    String facetPackage = facetPackages[j];
-                    mButtonsByPackage.put(facetPackage, facetButton);
-                }
-            } else if (v instanceof ViewGroup) {
-                findFacets((ViewGroup) v);
-            }
+        String[] facetPackages = facetButton.getFacetPackages();
+        for (int j = 0; j < facetPackages.length; j++) {
+            String facetPackage = facetPackages[j];
+            mButtonsByPackage.put(facetPackage, facetButton);
         }
     }
-
 
     /**
      * This will unselect the currently selected CarFacetButton and determine which one should be
