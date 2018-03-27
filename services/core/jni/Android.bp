@@ -86,6 +86,7 @@ cc_defaults {
         "libhardware_legacy",
         "libhidlbase",
         "libkeystore_binder",
+        "libmtp",
         "libnativehelper",
         "libutils",
         "libui",

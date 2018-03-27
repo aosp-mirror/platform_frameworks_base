@@ -55,22 +55,17 @@ static inline MtpServer* getMtpServer(JNIEnv *env, jobject thiz) {
     return (MtpServer*)env->GetLongField(thiz, field_MtpServer_nativeContext);
 }
 
-static void android_mtp_configure(JNIEnv *, jobject, jboolean usePtp) {
-    MtpServer::configure(usePtp);
-}
-
 static void
-android_mtp_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase, jboolean usePtp,
-        jstring deviceInfoManufacturer,
-        jstring deviceInfoModel,
-        jstring deviceInfoDeviceVersion,
-        jstring deviceInfoSerialNumber)
+android_mtp_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase, jobject jControlFd,
+        jboolean usePtp, jstring deviceInfoManufacturer, jstring deviceInfoModel,
+        jstring deviceInfoDeviceVersion, jstring deviceInfoSerialNumber)
 {
     const char *deviceInfoManufacturerStr = env->GetStringUTFChars(deviceInfoManufacturer, NULL);
     const char *deviceInfoModelStr = env->GetStringUTFChars(deviceInfoModel, NULL);
     const char *deviceInfoDeviceVersionStr = env->GetStringUTFChars(deviceInfoDeviceVersion, NULL);
     const char *deviceInfoSerialNumberStr = env->GetStringUTFChars(deviceInfoSerialNumber, NULL);
-    MtpServer* server = new MtpServer(getMtpDatabase(env, javaDatabase),
+    int controlFd = dup(jniGetFDFromFileDescriptor(env, jControlFd));
+    MtpServer* server = new MtpServer(getMtpDatabase(env, javaDatabase), controlFd,
             usePtp,
             MtpString((deviceInfoManufacturerStr != NULL) ? deviceInfoManufacturerStr : ""),
             MtpString((deviceInfoModelStr != NULL) ? deviceInfoModelStr : ""),
@@ -201,8 +196,7 @@ android_mtp_MtpServer_remove_storage(JNIEnv *env, jobject thiz, jint storageId)
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
-    {"native_configure",              "(Z)V",  (void *)android_mtp_configure},
-    {"native_setup",                "(Landroid/mtp/MtpDatabase;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
+    {"native_setup",                "(Landroid/mtp/MtpDatabase;Ljava/io/FileDescriptor;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
                                             (void *)android_mtp_MtpServer_setup},
     {"native_run",                  "()V",  (void *)android_mtp_MtpServer_run},
     {"native_cleanup",              "()V",  (void *)android_mtp_MtpServer_cleanup},
