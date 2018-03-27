@@ -16,14 +16,15 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.AnimationAdapterProto.REMOTE;
+import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.AnimationAdapterProto.REMOTE;
-import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
 
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -195,12 +196,17 @@ class RemoteAnimationController {
 
         @Override
         public void onAnimationFinished() throws RemoteException {
-            if (mOuter != null) {
-                mOuter.onAnimationFinished();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                if (mOuter != null) {
+                    mOuter.onAnimationFinished();
 
-                // In case the client holds on to the finish callback, make sure we don't leak
-                // RemoteAnimationController which in turn would leak the runner on the client.
-                mOuter = null;
+                    // In case the client holds on to the finish callback, make sure we don't leak
+                    // RemoteAnimationController which in turn would leak the runner on the client.
+                    mOuter = null;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
 
