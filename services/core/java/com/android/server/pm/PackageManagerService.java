@@ -1316,6 +1316,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int INTENT_FILTER_VERIFIED = 18;
     static final int WRITE_PACKAGE_LIST = 19;
     static final int INSTANT_APP_RESOLUTION_PHASE_TWO = 20;
+    static final int DEF_CONTAINER_BIND = 21;
 
     static final int WRITE_SETTINGS_DELAY = 10*1000;  // 10 seconds
 
@@ -1407,8 +1408,7 @@ public class PackageManagerService extends IPackageManager.Stub
             new ArrayList<HandlerParams>();
 
         private boolean connectToService() {
-            if (DEBUG_SD_INSTALL) Log.i(TAG, "Trying to bind to" +
-                    " DefaultContainerService");
+            if (DEBUG_INSTALL) Log.i(TAG, "Trying to bind to DefaultContainerService");
             Intent service = new Intent().setComponent(DEFAULT_CONTAINER_COMPONENT);
             Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
             if (mContext.bindServiceAsUser(service, mDefContainerConn,
@@ -1443,6 +1443,17 @@ public class PackageManagerService extends IPackageManager.Stub
 
         void doHandleMessage(Message msg) {
             switch (msg.what) {
+                case DEF_CONTAINER_BIND:
+                    if (!mBound) {
+                        Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "earlyBindingMCS",
+                                System.identityHashCode(mHandler));
+                        if (!connectToService()) {
+                            Slog.e(TAG, "Failed to bind to media container service");
+                        }
+                        Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "earlyBindingMCS",
+                                System.identityHashCode(mHandler));
+                    }
+                    break;
                 case INIT_COPY: {
                     HandlerParams params = (HandlerParams) msg.obj;
                     int idx = mPendingInstalls.size();
@@ -13604,6 +13615,14 @@ public class PackageManagerService extends IPackageManager.Stub
         // If the install is being performed by a regular app and the install reason was set to any
         // value but enterprise policy, leave the install reason unchanged.
         return installReason;
+    }
+
+    /**
+     * Attempts to bind to the default container service explicitly instead of doing so lazily on
+     * install commit.
+     */
+    void earlyBindToDefContainer() {
+        mHandler.sendMessage(mHandler.obtainMessage(DEF_CONTAINER_BIND));
     }
 
     void installStage(String packageName, File stagedDir,

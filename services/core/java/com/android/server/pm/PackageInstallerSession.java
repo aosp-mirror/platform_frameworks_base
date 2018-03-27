@@ -122,8 +122,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final boolean LOGD = true;
     private static final String REMOVE_SPLIT_MARKER_EXTENSION = ".removed";
 
-    private static final int MSG_COMMIT = 0;
-    private static final int MSG_ON_PACKAGE_INSTALLED = 1;
+    private static final int MSG_EARLY_BIND = 0;
+    private static final int MSG_COMMIT = 1;
+    private static final int MSG_ON_PACKAGE_INSTALLED = 2;
 
     /** XML constants used for persisting a session */
     static final String TAG_SESSION = "session";
@@ -280,6 +281,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         @Override
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
+                case MSG_EARLY_BIND:
+                    earlyBindToDefContainer();
+                    break;
                 case MSG_COMMIT:
                     synchronized (mLock) {
                         try {
@@ -314,6 +318,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return true;
         }
     };
+
+    private void earlyBindToDefContainer() {
+        mPm.earlyBindToDefContainer();
+    }
 
     /**
      * @return {@code true} iff the installing is app an device owner or affiliated profile owner.
@@ -409,6 +417,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             defaultContainerGid = UserHandle.getSharedAppGid(uid);
         } finally {
             Binder.restoreCallingIdentity(identity);
+        }
+        // attempt to bind to the DefContainer as early as possible
+        if ((params.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_EARLY_BIND));
         }
     }
 
