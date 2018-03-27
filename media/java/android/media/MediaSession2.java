@@ -463,6 +463,17 @@ public class MediaSession2 implements AutoCloseable {
                 @NonNull MediaPlayerBase player, float speed) { }
 
         /**
+         * Called to indicate that {@link #seekTo(long)} is completed.
+         *
+         * @param session the session for this event.
+         * @param mpb the player that has completed seeking.
+         * @param position the previous seeking request.
+         * @see #seekTo(long)
+         */
+        public void onSeekCompleted(@NonNull MediaSession2 session, @NonNull MediaPlayerBase mpb,
+                long position) { }
+
+        /**
          * Called when a playlist is changed from the {@link MediaPlaylistAgent}.
          * <p>
          * This is called when the underlying agent has called
