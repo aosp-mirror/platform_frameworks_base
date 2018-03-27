@@ -445,12 +445,12 @@ public class MediaSession2 implements AutoCloseable {
     public static final class Command {
         private final CommandProvider mProvider;
 
-        public Command(@NonNull Context context, int commandCode) {
+        public Command(int commandCode) {
             mProvider = ApiLoader.getProvider().createMediaSession2Command(
                     this, commandCode, null, null);
         }
 
-        public Command(@NonNull Context context, @NonNull String action, @Nullable Bundle extras) {
+        public Command(@NonNull String action, @Nullable Bundle extras) {
             if (action == null) {
                 throw new IllegalArgumentException("action shouldn't be null");
             }
@@ -502,8 +502,8 @@ public class MediaSession2 implements AutoCloseable {
          * @return a new Command instance from the Bundle
          * @hide
          */
-        public static Command fromBundle(@NonNull Context context, @NonNull Bundle command) {
-            return ApiLoader.getProvider().fromBundle_MediaSession2Command(context, command);
+        public static Command fromBundle(@NonNull Bundle command) {
+            return ApiLoader.getProvider().fromBundle_MediaSession2Command(command);
         }
     }
 
@@ -513,14 +513,12 @@ public class MediaSession2 implements AutoCloseable {
     public static final class CommandGroup {
         private final CommandGroupProvider mProvider;
 
-        public CommandGroup(@NonNull Context context) {
-            mProvider = ApiLoader.getProvider().createMediaSession2CommandGroup(
-                    context, this, null);
+        public CommandGroup() {
+            mProvider = ApiLoader.getProvider().createMediaSession2CommandGroup(this, null);
         }
 
-        public CommandGroup(@NonNull Context context, @Nullable CommandGroup others) {
-            mProvider = ApiLoader.getProvider().createMediaSession2CommandGroup(
-                    context, this, others);
+        public CommandGroup(@Nullable CommandGroup others) {
+            mProvider = ApiLoader.getProvider().createMediaSession2CommandGroup(this, others);
         }
 
         /**
@@ -581,8 +579,8 @@ public class MediaSession2 implements AutoCloseable {
          * @return new instance of CommandGroup from the bundle
          * @hide
          */
-        public static @Nullable CommandGroup fromBundle(Context context, Bundle commands) {
-            return ApiLoader.getProvider().fromBundle_MediaSession2CommandGroup(context, commands);
+        public static @Nullable CommandGroup fromBundle(Bundle commands) {
+            return ApiLoader.getProvider().fromBundle_MediaSession2CommandGroup(commands);
         }
     }
 
@@ -594,15 +592,6 @@ public class MediaSession2 implements AutoCloseable {
      */
     // TODO(jaewan): Move this to updatable for default implementation (b/74091963)
     public static abstract class SessionCallback {
-        private final Context mContext;
-
-        public SessionCallback(@NonNull Context context) {
-            if (context == null) {
-                throw new IllegalArgumentException("context shouldn't be null");
-            }
-            mContext = context;
-        }
-
         /**
          * Called when a controller is created for this session. Return allowed commands for
          * controller. By default it allows all connection requests and commands.
@@ -617,7 +606,7 @@ public class MediaSession2 implements AutoCloseable {
          */
         public @Nullable CommandGroup onConnect(@NonNull MediaSession2 session,
                 @NonNull ControllerInfo controller) {
-            CommandGroup commands = new CommandGroup(mContext);
+            CommandGroup commands = new CommandGroup();
             commands.addAllPredefinedCommands();
             return commands;
         }
@@ -1221,9 +1210,8 @@ public class MediaSession2 implements AutoCloseable {
         public static final class Builder {
             private final CommandButtonProvider.BuilderProvider mProvider;
 
-            public Builder(@NonNull Context context) {
-                mProvider = ApiLoader.getProvider().createMediaSession2CommandButtonBuilder(
-                        context, this);
+            public Builder() {
+                mProvider = ApiLoader.getProvider().createMediaSession2CommandButtonBuilder(this);
             }
 
             public @NonNull Builder setCommand(@Nullable Command command) {
