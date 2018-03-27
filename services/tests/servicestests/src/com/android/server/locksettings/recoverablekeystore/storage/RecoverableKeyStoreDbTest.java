@@ -49,6 +49,9 @@ import java.util.Map;
 public class RecoverableKeyStoreDbTest {
     private static final String DATABASE_FILE_NAME = "recoverablekeystore.db";
 
+    private static final String TEST_ROOT_CERT_ALIAS = "trusted_root";
+    private static final String TEST_ROOT_CERT_ALIAS2 = "another_trusted_root";
+
     private RecoverableKeyStoreDb mRecoverableKeyStoreDb;
     private File mDatabaseFile;
 
@@ -284,7 +287,8 @@ public class RecoverableKeyStoreDbTest {
 
         Map<String, Integer> statuses = mRecoverableKeyStoreDb.getStatusForAllKeys(uid);
         assertThat(statuses).hasSize(3);
-        assertThat(statuses).containsEntry(alias, RecoveryController.RECOVERY_STATUS_SYNC_IN_PROGRESS);
+        assertThat(statuses).containsEntry(alias,
+                RecoveryController.RECOVERY_STATUS_SYNC_IN_PROGRESS);
         assertThat(statuses).containsEntry(alias2, status);
         assertThat(statuses).containsEntry(alias3, status);
 
@@ -401,26 +405,53 @@ public class RecoverableKeyStoreDbTest {
     public void setRecoveryServiceCertPath_replaceOldValue() throws Exception {
         int userId = 12;
         int uid = 10009;
-        mRecoverableKeyStoreDb.setRecoveryServiceCertPath(userId, uid, TestData.CERT_PATH_1);
-        mRecoverableKeyStoreDb.setRecoveryServiceCertPath(userId, uid, TestData.CERT_PATH_2);
-        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid)).isEqualTo(
+        mRecoverableKeyStoreDb.setRecoveryServiceCertPath(userId, uid, TEST_ROOT_CERT_ALIAS,
+                TestData.CERT_PATH_1);
+        mRecoverableKeyStoreDb.setRecoveryServiceCertPath(userId, uid, TEST_ROOT_CERT_ALIAS,
                 TestData.CERT_PATH_2);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid,
+                TEST_ROOT_CERT_ALIAS)).isEqualTo(TestData.CERT_PATH_2);
+    }
+
+    @Test
+    public void setRecoveryServiceCertPath_updateValuesForCorrectRootCert() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        mRecoverableKeyStoreDb.setRecoveryServiceCertPath(userId, uid, TEST_ROOT_CERT_ALIAS,
+                TestData.CERT_PATH_1);
+        mRecoverableKeyStoreDb.setRecoveryServiceCertPath(userId, uid, TEST_ROOT_CERT_ALIAS2,
+                TestData.CERT_PATH_1);
+
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid,
+                TEST_ROOT_CERT_ALIAS)).isEqualTo(TestData.CERT_PATH_1);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid,
+                TEST_ROOT_CERT_ALIAS2)).isEqualTo(TestData.CERT_PATH_1);
+
+        mRecoverableKeyStoreDb.setRecoveryServiceCertPath(userId, uid, TEST_ROOT_CERT_ALIAS2,
+                TestData.CERT_PATH_2);
+
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid,
+                TEST_ROOT_CERT_ALIAS)).isEqualTo(TestData.CERT_PATH_1);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid,
+                TEST_ROOT_CERT_ALIAS2)).isEqualTo(TestData.CERT_PATH_2);
     }
 
     @Test
     public void getRecoveryServiceCertPath_returnsNullIfNoValue() throws Exception {
         int userId = 12;
         int uid = 10009;
-        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid)).isNull();
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid,
+                TEST_ROOT_CERT_ALIAS)).isNull();
     }
 
     @Test
     public void getRecoveryServiceCertPath_returnsInsertedValue() throws Exception {
         int userId = 12;
         int uid = 10009;
-        mRecoverableKeyStoreDb.setRecoveryServiceCertPath(userId, uid, TestData.CERT_PATH_1);
-        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid)).isEqualTo(
+        mRecoverableKeyStoreDb.setRecoveryServiceCertPath(userId, uid, TEST_ROOT_CERT_ALIAS,
                 TestData.CERT_PATH_1);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid,
+                TEST_ROOT_CERT_ALIAS)).isEqualTo(TestData.CERT_PATH_1);
     }
 
     @Test
@@ -428,25 +459,50 @@ public class RecoverableKeyStoreDbTest {
         int userId = 12;
         int uid = 10009;
 
-        mRecoverableKeyStoreDb.setRecoveryServiceCertSerial(userId, uid, 1L);
-        mRecoverableKeyStoreDb.setRecoveryServiceCertSerial(userId, uid, 3L);
-        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid)).isEqualTo(3L);
+        mRecoverableKeyStoreDb.setRecoveryServiceCertSerial(userId, uid, TEST_ROOT_CERT_ALIAS, 1L);
+        mRecoverableKeyStoreDb.setRecoveryServiceCertSerial(userId, uid, TEST_ROOT_CERT_ALIAS, 3L);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid,
+                TEST_ROOT_CERT_ALIAS)).isEqualTo(3L);
+    }
+
+    @Test
+    public void setRecoveryServiceCertSerial_updateValuesForCorrectRootCert() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        mRecoverableKeyStoreDb.setRecoveryServiceCertSerial(userId, uid, TEST_ROOT_CERT_ALIAS, 1L);
+        mRecoverableKeyStoreDb.setRecoveryServiceCertSerial(userId, uid, TEST_ROOT_CERT_ALIAS2, 1L);
+
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid,
+                TEST_ROOT_CERT_ALIAS)).isEqualTo(1L);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid,
+                TEST_ROOT_CERT_ALIAS2)).isEqualTo(1L);
+
+        mRecoverableKeyStoreDb.setRecoveryServiceCertSerial(userId, uid, TEST_ROOT_CERT_ALIAS2, 3L);
+
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid,
+                TEST_ROOT_CERT_ALIAS)).isEqualTo(1L);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid,
+                TEST_ROOT_CERT_ALIAS2)).isEqualTo(3L);
     }
 
     @Test
     public void getRecoveryServiceCertSerial_returnsNullIfNoValue() throws Exception {
         int userId = 12;
         int uid = 10009;
-        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid)).isNull();
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid,
+                TEST_ROOT_CERT_ALIAS)).isNull();
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid,
+                TEST_ROOT_CERT_ALIAS2)).isNull();
     }
 
     @Test
     public void getRecoveryServiceCertSerial_returnsInsertedValue() throws Exception {
         int userId = 12;
         int uid = 10009;
-        mRecoverableKeyStoreDb.setRecoveryServiceCertSerial(userId, uid, 1234L);
-        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid)).isEqualTo(
-                1234L);
+        mRecoverableKeyStoreDb.setRecoveryServiceCertSerial(userId, uid,
+                TEST_ROOT_CERT_ALIAS, 1234L);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid,
+                TEST_ROOT_CERT_ALIAS)).isEqualTo(1234L);
     }
 
     @Test
@@ -480,6 +536,24 @@ public class RecoverableKeyStoreDbTest {
     }
 
     @Test
+    public void setActiveRootOfTrust_emptyDefaultValue() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        assertThat(mRecoverableKeyStoreDb.getActiveRootOfTrust(userId, uid)).isEqualTo(null);
+    }
+
+    @Test
+    public void setActiveRootOfTrust_updateValue() throws Exception {
+        int userId = 12;
+        int uid = 10009;
+        mRecoverableKeyStoreDb.setActiveRootOfTrust(userId, uid, "root");
+        assertThat(mRecoverableKeyStoreDb.getActiveRootOfTrust(userId, uid)).isEqualTo("root");
+
+        mRecoverableKeyStoreDb.setActiveRootOfTrust(userId, uid, "root2");
+        assertThat(mRecoverableKeyStoreDb.getActiveRootOfTrust(userId, uid)).isEqualTo("root2");
+    }
+
+    @Test
     public void setRecoverySecretTypes_emptyDefaultValue() throws Exception {
         int userId = 12;
         int uid = 10009;
@@ -495,11 +569,9 @@ public class RecoverableKeyStoreDbTest {
         int[] types2 = new int[]{2};
 
         mRecoverableKeyStoreDb.setRecoverySecretTypes(userId, uid, types1);
-        assertThat(mRecoverableKeyStoreDb.getRecoverySecretTypes(userId, uid)).isEqualTo(
-                types1);
+        assertThat(mRecoverableKeyStoreDb.getRecoverySecretTypes(userId, uid)).isEqualTo(types1);
         mRecoverableKeyStoreDb.setRecoverySecretTypes(userId, uid, types2);
-        assertThat(mRecoverableKeyStoreDb.getRecoverySecretTypes(userId, uid)).isEqualTo(
-                types2);
+        assertThat(mRecoverableKeyStoreDb.getRecoverySecretTypes(userId, uid)).isEqualTo(types2);
     }
 
     @Test

@@ -34,6 +34,7 @@ import android.support.test.runner.AndroidJUnit4;
 
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.KeysEntry;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.RecoveryServiceMetadataEntry;
+import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.RootOfTrustEntry;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.UserMetadataEntry;
 
 @SmallTest
@@ -55,6 +56,7 @@ public class RecoverableKeyStoreDbHelperTest {
     private static final String TEST_SECRET_TYPES = "test-secret-types";
     private static final long TEST_COUNTER_ID = -3981205205038476415L;
     private static final byte[] TEST_SERVER_PARAMS = "test-server-params".getBytes(UTF_8);
+    private static final String TEST_ROOT_ALIAS = "root_cert_alias";
     private static final byte[] TEST_CERT_PATH = "test-cert-path".getBytes(UTF_8);
     private static final long TEST_CERT_SERIAL = 1000L;
 
@@ -135,6 +137,32 @@ public class RecoverableKeyStoreDbHelperTest {
         checkAllColumns();
     }
 
+    @Test
+    public void onUpgrade_v2_to_v3_to_v4() throws Exception {
+        createV2Tables();
+
+        assertThat(isRootOfTrustTableAvailable()).isFalse(); // V2 doesn't have the table;
+
+        mDatabaseHelper.onUpgrade(mDatabase, /*oldVersion=*/ 2, /*newVersion=*/ 3);
+
+        assertThat(isRootOfTrustTableAvailable()).isFalse(); // V3 doesn't have the table;
+
+        mDatabaseHelper.onUpgrade(mDatabase, /*oldVersion=*/ 3,
+                RecoverableKeyStoreDbHelper.DATABASE_VERSION);
+        checkAllColumns();
+    }
+
+    private boolean isRootOfTrustTableAvailable() {
+        ContentValues values = new ContentValues();
+        values.put(RootOfTrustEntry.COLUMN_NAME_USER_ID, TEST_USER_ID);
+        values.put(RootOfTrustEntry.COLUMN_NAME_UID, TEST_UID);
+        values.put(RootOfTrustEntry.COLUMN_NAME_ROOT_ALIAS, TEST_ROOT_ALIAS);
+        values.put(RootOfTrustEntry.COLUMN_NAME_CERT_PATH, TEST_CERT_PATH);
+        values.put(RootOfTrustEntry.COLUMN_NAME_CERT_SERIAL, TEST_CERT_SERIAL);
+        return mDatabase.insert(RootOfTrustEntry.TABLE_NAME, /*nullColumnHack=*/ null, values)
+                > -1;
+    }
+
     private void checkAllColumns() throws Exception {
         // Check the table containing encrypted application keys
         ContentValues values = new ContentValues();
@@ -165,6 +193,7 @@ public class RecoverableKeyStoreDbHelperTest {
                 TEST_SNAPSHOT_VERSION);
         values.put(RecoveryServiceMetadataEntry.COLUMN_NAME_SHOULD_CREATE_SNAPSHOT,
                 TEST_SHOULD_CREATE_SNAPSHOT);
+        values.put(RecoveryServiceMetadataEntry.COLUMN_NAME_ACTIVE_ROOT_OF_TRUST, TEST_ROOT_ALIAS);
         values.put(RecoveryServiceMetadataEntry.COLUMN_NAME_PUBLIC_KEY, TEST_PUBLIC_KEY);
         values.put(RecoveryServiceMetadataEntry.COLUMN_NAME_SECRET_TYPES, TEST_SECRET_TYPES);
         values.put(RecoveryServiceMetadataEntry.COLUMN_NAME_COUNTER_ID, TEST_COUNTER_ID);
@@ -175,5 +204,8 @@ public class RecoverableKeyStoreDbHelperTest {
                 mDatabase.insert(RecoveryServiceMetadataEntry.TABLE_NAME, /*nullColumnHack=*/ null,
                         values))
                 .isGreaterThan(-1L);
+
+        // Check the table about recovery service and root of trust data introduced in V4
+        assertThat(isRootOfTrustTableAvailable()).isTrue();
     }
 }
