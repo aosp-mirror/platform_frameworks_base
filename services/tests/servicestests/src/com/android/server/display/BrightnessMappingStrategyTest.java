@@ -85,6 +85,9 @@ public class BrightnessMappingStrategyTest {
         255
     };
 
+    private static final int[] MINIMUM_BRIGHTNESS_CURVE_LUX = { 2000, 4000 };
+    private static final float[] MINIMUM_BRIGHTNESS_CURVE_NITS = { 1.0f, 50.0f, 90.0f };
+
     private static final float[] DISPLAY_RANGE_NITS = { 2.685f, 478.5f };
     private static final int[] BACKLIGHT_RANGE = { 1, 255 };
 
@@ -381,6 +384,19 @@ public class BrightnessMappingStrategyTest {
                 com.android.internal.R.array.config_autoBrightnessDisplayValuesNits))
                 .thenReturn(mockBrightnessLevelNits);
 
+        int[] mockMinimumBrightnessCurveLux = new int[MINIMUM_BRIGHTNESS_CURVE_LUX.length];
+        for (int i = 0; i < mockMinimumBrightnessCurveLux.length; i++) {
+            mockMinimumBrightnessCurveLux[i] = (int) MINIMUM_BRIGHTNESS_CURVE_LUX[i];
+        }
+        when(mockResources.getIntArray(
+                com.android.internal.R.array.config_autoBrightnessMinimumBrightnessCurveLux))
+                .thenReturn(mockMinimumBrightnessCurveLux);
+        TypedArray mockMinimumBrightnessCurveNits = createFloatTypedArray(
+                MINIMUM_BRIGHTNESS_CURVE_NITS);
+        when(mockResources.obtainTypedArray(
+                com.android.internal.R.array.config_autoBrightnessMinimumBrightnessCurveNits))
+                .thenReturn(mockMinimumBrightnessCurveNits);
+
         TypedArray mockNitsRange = createFloatTypedArray(nitsRange);
         when(mockResources.obtainTypedArray(
                 com.android.internal.R.array.config_screenBrightnessNits))
@@ -419,4 +435,78 @@ public class BrightnessMappingStrategyTest {
         return mockArray;
     }
 
+    private float[] getNearMinimumNits(float epsilon) {
+        float[] lux = new float[MINIMUM_BRIGHTNESS_CURVE_LUX.length + 1];
+        for (int i = 0; i < MINIMUM_BRIGHTNESS_CURVE_LUX.length; i++) {
+            lux[i+1] = MINIMUM_BRIGHTNESS_CURVE_LUX[i];
+        }
+        Spline minimumBrightnessCurve = Spline.createSpline(lux, MINIMUM_BRIGHTNESS_CURVE_NITS);
+        float[] nits = new float[LUX_LEVELS.length];
+        for (int i = 0; i < nits.length; i++) {
+            nits[i] = minimumBrightnessCurve.interpolate(LUX_LEVELS[i]) + epsilon;
+        }
+        return nits;
+    }
+
+    @Test
+    public void testCreateWithTooDarkBrightnessConfigurationThrowsException() {
+        float[] nits = getNearMinimumNits(-0.1f);
+        Resources res = createResources(LUX_LEVELS, nits, DISPLAY_RANGE_NITS, BACKLIGHT_RANGE);
+        Exception thrown = null;
+        try {
+            BrightnessMappingStrategy.create(res);
+        } catch (IllegalArgumentException e) {
+            thrown = e;
+        }
+        assertNotNull("Failed to throw IllegalArgumentException", thrown);
+    }
+
+    @Test
+    public void testCreationWithBrightEnoughBrightnessConfigurationDoesNotThrowException() {
+        float[] nits = getNearMinimumNits(0);
+        Resources res = createResources(LUX_LEVELS, nits, DISPLAY_RANGE_NITS, BACKLIGHT_RANGE);
+        assertNotNull("Failed to create BrightnessMappingStrategy",
+                BrightnessMappingStrategy.create(res));
+    }
+
+    @Test
+    public void testSettingTooDarkBrightnessConfigurationThrowsException() {
+        Resources res = createResources(LUX_LEVELS, DISPLAY_LEVELS_NITS, DISPLAY_RANGE_NITS,
+                BACKLIGHT_RANGE);
+        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res);
+        assertNotNull("Failed to create BrightnessMappingStrategy", strategy);
+        float[] lux = new float[LUX_LEVELS.length];
+        for (int i = 0; i < lux.length; i++) {
+            lux[i] = LUX_LEVELS[i];
+        }
+        float[] nits = getNearMinimumNits(-0.1f);
+        BrightnessConfiguration config = new BrightnessConfiguration.Builder()
+                .setCurve(lux, nits)
+                .build();
+        Exception thrown = null;
+        try {
+            strategy.setBrightnessConfiguration(config);
+        } catch (IllegalArgumentException e) {
+            thrown = e;
+        }
+        assertNotNull("Failed to throw IllegalArgumentException", thrown);
+    }
+
+    @Test
+    public void testSettingBrightEnouhgBrightnessConfigurationDoesNotThrowException() {
+        Resources res = createResources(LUX_LEVELS, DISPLAY_LEVELS_NITS, DISPLAY_RANGE_NITS,
+                BACKLIGHT_RANGE);
+        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res);
+        assertNotNull("Failed to create BrightnessMappingStrategy", strategy);
+        float[] lux = new float[LUX_LEVELS.length];
+        for (int i = 0; i < lux.length; i++) {
+            lux[i] = LUX_LEVELS[i];
+        }
+        float[] nits = getNearMinimumNits(0);
+        BrightnessConfiguration config = new BrightnessConfiguration.Builder()
+                .setCurve(lux, nits)
+                .build();
+        assertTrue("failed to set brightness configuration",
+            strategy.setBrightnessConfiguration(config));
+    }
 }
