@@ -217,12 +217,17 @@ public class RecoverableKeyStoreManager {
                     ERROR_INVALID_CERTIFICATE, "Failed to validate certificate.");
         }
 
+        boolean wasInitialized = mDatabase.getRecoveryServiceCertPath(userId, uid) != null;
+
         // Save the chosen and validated certificate into database
         try {
             Log.d(TAG, "Saving the randomly chosen endpoint certificate to database");
             if (mDatabase.setRecoveryServiceCertPath(userId, uid, certPath) > 0) {
                 mDatabase.setRecoveryServiceCertSerial(userId, uid, newSerial);
-                mDatabase.setShouldCreateSnapshot(userId, uid, true);
+                if (wasInitialized) {
+                    Log.i(TAG, "This is a certificate change. Snapshot pending.");
+                    mDatabase.setShouldCreateSnapshot(userId, uid, true);
+                }
                 mDatabase.setCounterId(userId, uid, new SecureRandom().nextLong());
             }
         } catch (CertificateEncodingException e) {

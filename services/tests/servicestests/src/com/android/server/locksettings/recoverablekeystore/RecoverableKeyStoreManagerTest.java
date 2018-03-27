@@ -298,7 +298,7 @@ public class RecoverableKeyStoreManagerTest {
         mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
                 TestData.getCertXmlWithSerial(certSerial));
 
-        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isFalse();
         assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid)).isEqualTo(
                 TestData.CERT_PATH_1);
         assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid)).isEqualTo(
@@ -348,6 +348,7 @@ public class RecoverableKeyStoreManagerTest {
 
         assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid))
                 .isEqualTo(certSerial + 1);
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
     }
 
     @Test
@@ -363,6 +364,7 @@ public class RecoverableKeyStoreManagerTest {
 
         assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid))
                 .isEqualTo(certSerial);
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isFalse();
     }
 
     @Test
@@ -373,7 +375,6 @@ public class RecoverableKeyStoreManagerTest {
 
         mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
                 TestData.getCertXmlWithSerial(certSerial));
-        mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
         mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
                 TestData.getCertXmlWithSerial(certSerial));
 
@@ -404,7 +405,7 @@ public class RecoverableKeyStoreManagerTest {
         mRecoverableKeyStoreManager.initRecoveryServiceWithSigFile(
                 ROOT_CERTIFICATE_ALIAS, TestData.getCertXml(), TestData.getSigXml());
 
-        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isFalse();
         assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid)).isEqualTo(
                 TestData.CERT_PATH_1);
         assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isNull();
@@ -946,12 +947,12 @@ public class RecoverableKeyStoreManagerTest {
     public void setRecoverySecretTypes_updatesShouldCreateSnapshot() throws Exception {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
-        int[] types = new int[]{1, 2, 3};
+        mRecoverableKeyStoreManager.setRecoverySecretTypes(new int[] { 1 });
 
         mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS);
         // Pretend that key was synced
         mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
-        mRecoverableKeyStoreManager.setRecoverySecretTypes(types);
+        mRecoverableKeyStoreManager.setRecoverySecretTypes(new int[] { 2 });
 
         assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
     }
