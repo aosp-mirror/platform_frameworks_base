@@ -117,6 +117,8 @@ public class TetherInterfaceStateMachine extends StateMachine {
     private final int mInterfaceType;
     private final LinkProperties mLinkProperties;
 
+    private final TetheringDependencies mDeps;
+
     private int mLastError;
     private int mServingMode;
     private String mMyUpstreamIfaceName;  // may change over time
@@ -134,18 +136,19 @@ public class TetherInterfaceStateMachine extends StateMachine {
     public TetherInterfaceStateMachine(
             String ifaceName, Looper looper, int interfaceType, SharedLog log,
             INetworkManagementService nMService, INetworkStatsService statsService,
-            IControlsTethering tetherController) {
+            IControlsTethering tetherController,
+            TetheringDependencies deps) {
         super(ifaceName, looper);
         mLog = log.forSubComponent(ifaceName);
         mNMService = nMService;
-        // TODO: This should be passed in for testability.
-        mNetd = NetdService.getInstance();
+        mNetd = deps.getNetdService();
         mStatsService = statsService;
         mTetherController = tetherController;
         mInterfaceCtrl = new InterfaceController(ifaceName, nMService, mNetd, mLog);
         mIfaceName = ifaceName;
         mInterfaceType = interfaceType;
         mLinkProperties = new LinkProperties();
+        mDeps = deps;
         resetLinkProperties();
         mLastError = ConnectivityManager.TETHER_ERROR_NO_ERROR;
         mServingMode = IControlsTethering.STATE_AVAILABLE;
@@ -246,16 +249,14 @@ public class TetherInterfaceStateMachine extends StateMachine {
     }
 
     private boolean startIPv6() {
-        // TODO: Refactor for better testability.  This is one of the things
-        // that prohibits unittesting IPv6 tethering setup.
-        mInterfaceParams = InterfaceParams.getByName(mIfaceName);
+        mInterfaceParams = mDeps.getInterfaceParams(mIfaceName);
         if (mInterfaceParams == null) {
             mLog.e("Failed to find InterfaceParams");
             stopIPv6();
             return false;
         }
 
-        mRaDaemon = new RouterAdvertisementDaemon(mInterfaceParams);
+        mRaDaemon = mDeps.getRouterAdvertisementDaemon(mInterfaceParams);
         if (!mRaDaemon.start()) {
             stopIPv6();
             return false;
