@@ -189,7 +189,6 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         mPublicNotificationBuilder =
                 new Notification.Builder(context, NotificationChannels.SCREENSHOTS_HEADSUP)
                         .setContentTitle(r.getString(R.string.screenshot_saving_title))
-                        .setContentText(r.getString(R.string.screenshot_saving_text))
                         .setSmallIcon(R.drawable.stat_notify_image)
                         .setCategory(Notification.CATEGORY_PROGRESS)
                         .setWhen(now)
@@ -203,7 +202,6 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             .setTicker(r.getString(R.string.screenshot_saving_ticker)
                     + (mTickerAddSpace ? " " : ""))
             .setContentTitle(r.getString(R.string.screenshot_saving_title))
-            .setContentText(r.getString(R.string.screenshot_saving_text))
             .setSmallIcon(R.drawable.stat_notify_image)
             .setWhen(now)
             .setShowWhen(true)
