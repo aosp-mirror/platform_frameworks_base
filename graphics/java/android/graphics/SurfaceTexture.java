@@ -318,13 +318,17 @@ public class SurfaceTexture {
      * Retrieve the timestamp associated with the texture image set by the most recent call to
      * updateTexImage.
      *
-     * This timestamp is in nanoseconds, and is normally monotonically increasing. The timestamp
-     * should be unaffected by time-of-day adjustments, and for a camera should be strictly
-     * monotonic but for a MediaPlayer may be reset when the position is set.  The
-     * specific meaning and zero point of the timestamp depends on the source providing images to
-     * the SurfaceTexture. Unless otherwise specified by the image source, timestamps cannot
-     * generally be compared across SurfaceTexture instances, or across multiple program
-     * invocations. It is mostly useful for determining time offsets between subsequent frames.
+     * <p>This timestamp is in nanoseconds, and is normally monotonically increasing. The timestamp
+     * should be unaffected by time-of-day adjustments. The specific meaning and zero point of the
+     * timestamp depends on the source providing images to the SurfaceTexture. Unless otherwise
+     * specified by the image source, timestamps cannot generally be compared across SurfaceTexture
+     * instances, or across multiple program invocations. It is mostly useful for determining time
+     * offsets between subsequent frames.</p>
+     *
+     * <p>For camera sources, timestamps should be strictly monotonic. Timestamps from MediaPlayer
+     * sources may be reset when the playback position is set. For EGL and Vulkan producers, the
+     * timestamp is the desired present time set with the EGL_ANDROID_presentation_time or
+     * VK_GOOGLE_display_timing extensions.</p>
      */
 
     public long getTimestamp() {
