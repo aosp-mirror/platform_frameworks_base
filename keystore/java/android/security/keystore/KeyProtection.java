@@ -212,7 +212,7 @@ import javax.crypto.Mac;
  * ...
  * }</pre>
  */
-public final class KeyProtection implements ProtectionParameter {
+public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
     private final Date mKeyValidityStart;
     private final Date mKeyValidityForOriginationEnd;
     private final Date mKeyValidityForConsumptionEnd;
@@ -224,6 +224,7 @@ public final class KeyProtection implements ProtectionParameter {
     private final boolean mRandomizedEncryptionRequired;
     private final boolean mUserAuthenticationRequired;
     private final int mUserAuthenticationValidityDurationSeconds;
+    private final boolean mTrustedUserPresenceRequred;
     private final boolean mUserAuthenticationValidWhileOnBody;
     private final boolean mInvalidatedByBiometricEnrollment;
     private final long mBoundToSecureUserId;
@@ -242,6 +243,7 @@ public final class KeyProtection implements ProtectionParameter {
             boolean randomizedEncryptionRequired,
             boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds,
+            boolean trustedUserPresenceRequred,
             boolean userAuthenticationValidWhileOnBody,
             boolean invalidatedByBiometricEnrollment,
             long boundToSecureUserId,
@@ -260,6 +262,7 @@ public final class KeyProtection implements ProtectionParameter {
         mRandomizedEncryptionRequired = randomizedEncryptionRequired;
         mUserAuthenticationRequired = userAuthenticationRequired;
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
+        mTrustedUserPresenceRequred = trustedUserPresenceRequred;
         mUserAuthenticationValidWhileOnBody = userAuthenticationValidWhileOnBody;
         mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
         mBoundToSecureUserId = boundToSecureUserId;
@@ -437,6 +440,14 @@ public final class KeyProtection implements ProtectionParameter {
     }
 
     /**
+     * Returns {@code true} if the key is authorized to be used only if a test of user presence has
+     * been performed between the {@code Signature.initSign()} and {@code Signature.sign()} calls.
+     */
+    public boolean isTrustedUserPresenceRequired() {
+        return mTrustedUserPresenceRequred;
+    }
+
+    /**
      * Returns {@code true} if the key will be de-authorized when the device is removed from the
      * user's body.  This option has no effect on keys that don't have an authentication validity
      * duration, and has no effect if the device lacks an on-body sensor.
@@ -509,6 +520,7 @@ public final class KeyProtection implements ProtectionParameter {
         private boolean mRandomizedEncryptionRequired = true;
         private boolean mUserAuthenticationRequired;
         private int mUserAuthenticationValidityDurationSeconds = -1;
+        private boolean mTrustedUserPresenceRequired = false;
         private boolean mUserAuthenticationValidWhileOnBody;
         private boolean mInvalidatedByBiometricEnrollment = true;
         private boolean mUserConfirmationRequired;
@@ -811,6 +823,16 @@ public final class KeyProtection implements ProtectionParameter {
         }
 
         /**
+         * Sets whether a test of user presence is required to be performed between the
+         * {@code Signature.initSign()} and {@code Signature.sign()} method calls.
+         */
+        @NonNull
+        public Builder setTrustedUserPresenceRequired(boolean required) {
+            mTrustedUserPresenceRequired = required;
+            return this;
+        }
+
+        /**
          * Sets whether the key will remain authorized only until the device is removed from the
          * user's body up to the limit of the authentication validity period (see
          * {@link #setUserAuthenticationValidityDurationSeconds} and
@@ -910,6 +932,7 @@ public final class KeyProtection implements ProtectionParameter {
                     mRandomizedEncryptionRequired,
                     mUserAuthenticationRequired,
                     mUserAuthenticationValidityDurationSeconds,
+                    mTrustedUserPresenceRequired,
                     mUserAuthenticationValidWhileOnBody,
                     mInvalidatedByBiometricEnrollment,
                     mBoundToSecureUserId,
