@@ -40,9 +40,12 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVE
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -310,6 +313,17 @@ public class WindowStateTests extends WindowTestsBase {
         child2.mAnimatingExit = false;
         root.mAnimatingExit = true;
         assertTrue(child2.isSelfOrAncestorWindowAnimatingExit());
+    }
+
+    @Test
+    public void testLayoutSeqResetOnReparent() throws Exception {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        app.mLayoutSeq = 1;
+        mDisplayContent.mLayoutSeq = 1;
+
+        app.onDisplayChanged(mDisplayContent);
+
+        assertThat(app.mLayoutSeq, not(is(mDisplayContent.mLayoutSeq)));
     }
 
     private void testPrepareWindowToDisplayDuringRelayout(boolean wasVisible) {
