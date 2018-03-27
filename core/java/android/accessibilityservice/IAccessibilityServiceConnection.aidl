@@ -35,22 +35,22 @@ interface IAccessibilityServiceConnection {
 
     void setServiceInfo(in AccessibilityServiceInfo info);
 
-    boolean findAccessibilityNodeInfoByAccessibilityId(int accessibilityWindowId,
+    String[] findAccessibilityNodeInfoByAccessibilityId(int accessibilityWindowId,
         long accessibilityNodeId, int interactionId,
         IAccessibilityInteractionConnectionCallback callback, int flags, long threadId);
 
-    boolean findAccessibilityNodeInfosByText(int accessibilityWindowId, long accessibilityNodeId,
+    String[] findAccessibilityNodeInfosByText(int accessibilityWindowId, long accessibilityNodeId,
         String text, int interactionId, IAccessibilityInteractionConnectionCallback callback,
         long threadId);
 
-    boolean findAccessibilityNodeInfosByViewId(int accessibilityWindowId,
+    String[] findAccessibilityNodeInfosByViewId(int accessibilityWindowId,
         long accessibilityNodeId, String viewId, int interactionId,
         IAccessibilityInteractionConnectionCallback callback, long threadId);
 
-    boolean findFocus(int accessibilityWindowId, long accessibilityNodeId, int focusType,
+    String[] findFocus(int accessibilityWindowId, long accessibilityNodeId, int focusType,
         int interactionId, IAccessibilityInteractionConnectionCallback callback, long threadId);
 
-    boolean focusSearch(int accessibilityWindowId, long accessibilityNodeId, int direction,
+    String[] focusSearch(int accessibilityWindowId, long accessibilityNodeId, int direction,
         int interactionId, IAccessibilityInteractionConnectionCallback callback, long threadId);
 
     boolean performAccessibilityAction(int accessibilityWindowId, long accessibilityNodeId,
