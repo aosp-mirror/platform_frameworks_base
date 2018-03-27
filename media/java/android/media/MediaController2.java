@@ -423,16 +423,14 @@ public class MediaController2 implements AutoCloseable {
     }
 
     /**
-     * Start fast forwarding. If playback is already fast forwarding this
-     * may increase the rate.
+     * Fast forwards playback. If playback is already fast forwarding this may increase the rate.
      */
     public void fastForward() {
         mProvider.fastForward_impl();
     }
 
     /**
-     * Start rewinding. If playback is already rewinding this may increase
-     * the rate.
+     * Rewinds playback. If playback is already rewinding this may increase the rate.
      */
     public void rewind() {
         mProvider.rewind_impl();

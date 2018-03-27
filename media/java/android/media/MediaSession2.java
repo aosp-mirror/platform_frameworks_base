@@ -142,20 +142,13 @@ public class MediaSession2 implements AutoCloseable {
 
     /**
      * Command code for {@link MediaController2#fastForward()}.
-     * <p>
-     * This is transport control command. Command would be sent directly to the player if the
-     * session doesn't reject the request through the
-     * {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
      */
-    public static final int COMMAND_CODE_PLAYBACK_FAST_FORWARD = 7;
+    public static final int COMMAND_CODE_SESSION_FAST_FORWARD = 7;
 
     /**
      * Command code for {@link MediaController2#rewind()}.
-     * <p>
-     * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
      */
-    public static final int COMMAND_CODE_PLAYBACK_REWIND = 8;
+    public static final int COMMAND_CODE_SESSION_REWIND = 8;
 
     /**
      * Command code for {@link MediaController2#seekTo(long)}.
@@ -634,8 +627,8 @@ public class MediaSession2 implements AutoCloseable {
          * @see #COMMAND_CODE_PLAYLIST_SKIP_NEXT_ITEM
          * @see #COMMAND_CODE_PLAYLIST_SKIP_PREV_ITEM
          * @see #COMMAND_CODE_PLAYBACK_PREPARE
-         * @see #COMMAND_CODE_PLAYBACK_FAST_FORWARD
-         * @see #COMMAND_CODE_PLAYBACK_REWIND
+         * @see #COMMAND_CODE_SESSION_FAST_FORWARD
+         * @see #COMMAND_CODE_SESSION_REWIND
          * @see #COMMAND_CODE_PLAYBACK_SEEK_TO
          * @see #COMMAND_CODE_PLAYLIST_SKIP_TO_PLAYLIST_ITEM
          * @see #COMMAND_CODE_PLAYLIST_ADD_ITEM
@@ -794,6 +787,20 @@ public class MediaSession2 implements AutoCloseable {
          */
         public void onPrepareFromUri(@NonNull MediaSession2 session,
                 @NonNull ControllerInfo controller, @NonNull Uri uri, @Nullable Bundle extras) { }
+
+        /**
+         * Called when a controller called {@link MediaController2#fastForward()}
+         *
+         * @param session the session for this event
+         */
+        public void onFastForward(@NonNull MediaSession2 session) { }
+
+        /**
+         * Called when a controller called {@link MediaController2#rewind()}
+         *
+         * @param session the session for this event
+         */
+        public void onRewind(@NonNull MediaSession2 session) { }
 
         /**
          * Called when the player's current playing item is changed
@@ -1433,20 +1440,6 @@ public class MediaSession2 implements AutoCloseable {
      */
     public void prepare() {
         mProvider.prepare_impl();
-    }
-
-    /**
-     * Fast forwards playback. If playback is already fast forwarding this may increase the rate.
-     */
-    public void fastForward() {
-        mProvider.fastForward_impl();
-    }
-
-    /**
-     * Rewinds playback. If playback is already rewinding this may increase the rate.
-     */
-    public void rewind() {
-        mProvider.rewind_impl();
     }
 
     /**
