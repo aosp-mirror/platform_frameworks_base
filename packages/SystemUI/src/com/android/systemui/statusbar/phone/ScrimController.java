@@ -148,7 +148,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     private float mNotificationDensity;
 
     // Scrim blanking callbacks
-    private Choreographer.FrameCallback mPendingFrameCallback;
+    private Runnable mPendingFrameCallback;
     private Runnable mBlankingTransitionRunnable;
 
     private final WakeLock mWakeLock;
@@ -240,7 +240,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
         // Cancel blanking transitions that were pending before we requested a new state
         if (mPendingFrameCallback != null) {
-            Choreographer.getInstance().removeFrameCallback(mPendingFrameCallback);
+            mScrimBehind.removeCallbacks(mPendingFrameCallback);
             mPendingFrameCallback = null;
         }
         if (getHandler().hasCallbacks(mBlankingTransitionRunnable)) {
@@ -278,7 +278,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             // with too many things at this case, in order to not skip the initial frames.
             mScrimInFront.postOnAnimationDelayed(this::scheduleUpdate, 16);
             mAnimationDelay = StatusBar.FADE_KEYGUARD_START_DELAY;
-        } else if (!mDozeParameters.getAlwaysOn() && oldState == ScrimState.AOD
+        } else if ((!mDozeParameters.getAlwaysOn() && oldState == ScrimState.AOD)
                 || (mState == ScrimState.AOD && !mDozeParameters.getDisplayNeedsBlanking())) {
             // Scheduling a frame isn't enough when:
             //  • Leaving doze and we need to modify scrim color immediately
@@ -727,7 +727,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
         // Notify callback that the screen is completely black and we're
         // ready to change the display power mode
-        mPendingFrameCallback = frameTimeNanos -> {
+        mPendingFrameCallback = () -> {
             if (mCallback != null) {
                 mCallback.onDisplayBlanked();
                 mScreenBlankingCallbackCalled = true;
@@ -743,7 +743,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
             // Setting power states can happen after we push out the frame. Make sure we
             // stay fully opaque until the power state request reaches the lower levels.
-            final int delay = mScreenOn ? 16 : 500;
+            final int delay = mScreenOn ? 32 : 500;
             if (DEBUG) {
                 Log.d(TAG, "Fading out scrims with delay: " + delay);
             }
@@ -752,9 +752,15 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         doOnTheNextFrame(mPendingFrameCallback);
     }
 
+    /**
+     * Executes a callback after the frame has hit the display.
+     * @param callback What to run.
+     */
     @VisibleForTesting
-    protected void doOnTheNextFrame(Choreographer.FrameCallback callback) {
-        Choreographer.getInstance().postFrameCallback(callback);
+    protected void doOnTheNextFrame(Runnable callback) {
+        // Just calling View#postOnAnimation isn't enough because the frame might not have reached
+        // the display yet. A timeout is the safest solution.
+        mScrimBehind.postOnAnimationDelayed(callback, 32 /* delayMillis */);
     }
 
     @VisibleForTesting
