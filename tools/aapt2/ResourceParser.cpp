@@ -447,6 +447,9 @@ bool ResourceParser::ParseResources(xml::XmlPullParser* parser) {
     parsed_resource.config = config_;
     parsed_resource.source = source_.WithLine(parser->line_number());
     parsed_resource.comment = std::move(comment);
+    if (options_.visibility) {
+      parsed_resource.visibility_level = options_.visibility.value();
+    }
 
     // Extract the product name if it exists.
     if (Maybe<StringPiece> maybe_product = xml::FindNonEmptyAttribute(parser, "product")) {
@@ -811,6 +814,12 @@ bool ResourceParser::ParseString(xml::XmlPullParser* parser,
 }
 
 bool ResourceParser::ParsePublic(xml::XmlPullParser* parser, ParsedResource* out_resource) {
+  if (options_.visibility) {
+    diag_->Error(DiagMessage(out_resource->source)
+                 << "<public> tag not allowed with --visibility flag");
+    return false;
+  }
+
   if (out_resource->config != ConfigDescription::DefaultConfig()) {
     diag_->Warn(DiagMessage(out_resource->source)
                 << "ignoring configuration '" << out_resource->config << "' for <public> tag");
@@ -853,6 +862,12 @@ bool ResourceParser::ParsePublic(xml::XmlPullParser* parser, ParsedResource* out
 }
 
 bool ResourceParser::ParsePublicGroup(xml::XmlPullParser* parser, ParsedResource* out_resource) {
+  if (options_.visibility) {
+    diag_->Error(DiagMessage(out_resource->source)
+                 << "<public-group> tag not allowed with --visibility flag");
+    return false;
+  }
+
   if (out_resource->config != ConfigDescription::DefaultConfig()) {
     diag_->Warn(DiagMessage(out_resource->source)
                 << "ignoring configuration '" << out_resource->config
@@ -974,6 +989,11 @@ bool ResourceParser::ParseSymbolImpl(xml::XmlPullParser* parser,
 }
 
 bool ResourceParser::ParseSymbol(xml::XmlPullParser* parser, ParsedResource* out_resource) {
+  if (options_.visibility) {
+    diag_->Error(DiagMessage(out_resource->source)
+                 << "<java-symbol> and <symbol> tags not allowed with --visibility flag");
+    return false;
+  }
   if (out_resource->config != ConfigDescription::DefaultConfig()) {
     diag_->Warn(DiagMessage(out_resource->source)
                 << "ignoring configuration '" << out_resource->config << "' for <"
@@ -1045,6 +1065,9 @@ bool ResourceParser::ParseOverlayable(xml::XmlPullParser* parser, ParsedResource
       child_resource.name.entry = maybe_name.value().to_string();
       child_resource.source = item_source;
       child_resource.overlayable = true;
+      if (options_.visibility) {
+        child_resource.visibility_level = options_.visibility.value();
+      }
       out_resource->child_resources.push_back(std::move(child_resource));
 
       xml::XmlPullParser::SkipCurrentElement(parser);
@@ -1187,6 +1210,9 @@ bool ResourceParser::ParseAttrImpl(xml::XmlPullParser* parser,
         child_resource.name = symbol.symbol.name.value();
         child_resource.source = item_source;
         child_resource.value = util::make_unique<Id>();
+        if (options_.visibility) {
+          child_resource.visibility_level = options_.visibility.value();
+        }
         out_resource->child_resources.push_back(std::move(child_resource));
 
         symbol.symbol.SetComment(std::move(comment));
@@ -1564,6 +1590,9 @@ bool ResourceParser::ParseDeclareStyleable(xml::XmlPullParser* parser,
       child_resource.name = child_ref.name.value();
       child_resource.source = item_source;
       child_resource.comment = std::move(comment);
+      if (options_.visibility) {
+        child_resource.visibility_level = options_.visibility.value();
+      }
 
       if (!ParseAttrImpl(parser, &child_resource, true)) {
         error = true;
