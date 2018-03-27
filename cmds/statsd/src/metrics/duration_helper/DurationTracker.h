@@ -92,7 +92,7 @@ public:
                           const bool stopAll) = 0;
     virtual void noteStopAll(const uint64_t eventTime) = 0;
 
-    virtual void onSlicedConditionMayChange(const uint64_t timestamp) = 0;
+    virtual void onSlicedConditionMayChange(bool overallCondition, const uint64_t timestamp) = 0;
     virtual void onConditionChanged(bool condition, const uint64_t timestamp) = 0;
 
     // Flush stale buckets if needed, and return true if the tracker has no on-going duration
