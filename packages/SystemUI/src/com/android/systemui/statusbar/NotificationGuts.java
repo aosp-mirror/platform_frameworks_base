@@ -30,6 +30,7 @@ import android.view.ViewAnimationUtils;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
@@ -189,8 +190,12 @@ public class NotificationGuts extends FrameLayout {
     }
 
     public void openControls(
-            int x, int y, boolean needsFalsingProtection, @Nullable Runnable onAnimationEnd) {
-        animateOpen(x, y, onAnimationEnd);
+            boolean shouldDoCircularReveal,
+            int x,
+            int y,
+            boolean needsFalsingProtection,
+            @Nullable Runnable onAnimationEnd) {
+        animateOpen(shouldDoCircularReveal, x, y, onAnimationEnd);
         setExposed(true /* exposed */, needsFalsingProtection);
     }
 
@@ -204,7 +209,20 @@ public class NotificationGuts extends FrameLayout {
         }
     }
 
+    /**
+     * Closes any exposed guts/views.
+     *
+     * @param x x coordinate to animate the close circular reveal with
+     * @param y y coordinate to animate the close circular reveal with
+     * @param save whether the state should be saved
+     * @param force whether the guts should be force-closed regardless of state.
+     */
     public void closeControls(int x, int y, boolean save, boolean force) {
+        // First try to dismiss any blocking helper.
+        boolean wasBlockingHelperDismissed =
+                Dependency.get(NotificationBlockingHelperManager.class)
+                        .dismissCurrentBlockingHelper();
+
         if (getWindowToken() == null) {
             if (mClosedListener != null) {
                 mClosedListener.onGutsClosed(this);
@@ -212,8 +230,12 @@ public class NotificationGuts extends FrameLayout {
             return;
         }
 
-        if (mGutsContent == null || !mGutsContent.handleCloseControls(save, force)) {
-            animateClose(x, y);
+        if (mGutsContent == null
+                || !mGutsContent.handleCloseControls(save, force)
+                || wasBlockingHelperDismissed) {
+            // We only want to do a circular reveal if we're not showing the blocking helper.
+            animateClose(x, y, !wasBlockingHelperDismissed /* shouldDoCircularReveal */);
+
             setExposed(false, mNeedsFalsingProtection);
             if (mClosedListener != null) {
                 mClosedListener.onGutsClosed(this);
@@ -221,47 +243,58 @@ public class NotificationGuts extends FrameLayout {
         }
     }
 
-    private void animateOpen(int x, int y, @Nullable Runnable onAnimationEnd) {
-        final double horz = Math.max(getWidth() - x, x);
-        final double vert = Math.max(getHeight() - y, y);
-        final float r = (float) Math.hypot(horz, vert);
-
-        final Animator a
-                = ViewAnimationUtils.createCircularReveal(this, x, y, 0, r);
-        a.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-        a.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
-        a.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                if (onAnimationEnd != null) {
-                    onAnimationEnd.run();
-                }
-            }
-        });
-        a.start();
+    /** Animates in the guts view via either a fade or a circular reveal. */
+    private void animateOpen(
+            boolean shouldDoCircularReveal, int x, int y, @Nullable Runnable onAnimationEnd) {
+        if (shouldDoCircularReveal) {
+            double horz = Math.max(getWidth() - x, x);
+            double vert = Math.max(getHeight() - y, y);
+            float r = (float) Math.hypot(horz, vert);
+            // Circular reveal originating at (x, y)
+            Animator a = ViewAnimationUtils.createCircularReveal(this, x, y, 0, r);
+            a.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+            a.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+            a.addListener(new AnimateOpenListener(onAnimationEnd));
+            a.start();
+        } else {
+            // Fade in content
+            this.setAlpha(0f);
+            this.animate()
+                    .alpha(1f)
+                    .setDuration(StackStateAnimator.ANIMATION_DURATION_BLOCKING_HELPER_FADE)
+                    .setInterpolator(Interpolators.ALPHA_IN)
+                    .setListener(new AnimateOpenListener(onAnimationEnd))
+                    .start();
+        }
     }
 
-    private void animateClose(int x, int y) {
-        if (x == -1 || y == -1) {
-            x = (getLeft() + getRight()) / 2;
-            y = (getTop() + getHeight() / 2);
-        }
-        final double horz = Math.max(getWidth() - x, x);
-        final double vert = Math.max(getHeight() - y, y);
-        final float r = (float) Math.hypot(horz, vert);
-        final Animator a = ViewAnimationUtils.createCircularReveal(this,
-                x, y, r, 0);
-        a.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-        a.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
-        a.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                setVisibility(View.GONE);
+
+    /** Animates out the guts view via either a fade or a circular reveal. */
+    private void animateClose(int x, int y, boolean shouldDoCircularReveal) {
+        if (shouldDoCircularReveal) {
+            // Circular reveal originating at (x, y)
+            if (x == -1 || y == -1) {
+                x = (getLeft() + getRight()) / 2;
+                y = (getTop() + getHeight() / 2);
             }
-        });
-        a.start();
+            double horz = Math.max(getWidth() - x, x);
+            double vert = Math.max(getHeight() - y, y);
+            float r = (float) Math.hypot(horz, vert);
+            Animator a = ViewAnimationUtils.createCircularReveal(this,
+                    x, y, r, 0);
+            a.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+            a.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
+            a.addListener(new AnimateCloseListener(this /* view */));
+            a.start();
+        } else {
+            // Fade in the blocking helper.
+            this.animate()
+                    .alpha(0f)
+                    .setDuration(StackStateAnimator.ANIMATION_DURATION_BLOCKING_HELPER_FADE)
+                    .setInterpolator(Interpolators.ALPHA_OUT)
+                    .setListener(new AnimateCloseListener(this /* view */))
+                    .start();
+        }
     }
 
     public void setActualHeight(int actualHeight) {
@@ -335,5 +368,37 @@ public class NotificationGuts extends FrameLayout {
 
     public boolean isLeavebehind() {
         return mGutsContent != null && mGutsContent.isLeavebehind();
+    }
+
+    /** Listener for animations executed in {@link #animateOpen(boolean, int, int, Runnable)}. */
+    private static class AnimateOpenListener extends AnimatorListenerAdapter {
+        final Runnable mOnAnimationEnd;
+
+        private AnimateOpenListener(Runnable onAnimationEnd) {
+            mOnAnimationEnd = onAnimationEnd;
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            super.onAnimationEnd(animation);
+            if (mOnAnimationEnd != null) {
+                mOnAnimationEnd.run();
+            }
+        }
+    }
+
+    /** Listener for animations executed in {@link #animateClose(int, int, boolean)}. */
+    private static class AnimateCloseListener extends AnimatorListenerAdapter {
+        final View mView;
+
+        private AnimateCloseListener(View view) {
+            mView = view;
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            super.onAnimationEnd(animation);
+            mView.setVisibility(View.GONE);
+        }
     }
 }
