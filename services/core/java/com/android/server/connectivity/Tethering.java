@@ -177,6 +177,7 @@ public class Tethering extends BaseNetworkObserver {
     private final VersionedBroadcastListener mCarrierConfigChange;
     // TODO: Delete SimChangeListener; it's obsolete.
     private final SimChangeListener mSimChange;
+    private final TetheringDependencies mDeps;
 
     private volatile TetheringConfiguration mConfig;
     private String mCurrentUpstreamIface;
@@ -198,12 +199,13 @@ public class Tethering extends BaseNetworkObserver {
         mPolicyManager = policyManager;
         mLooper = looper;
         mSystemProperties = systemProperties;
+        mDeps = deps;
 
         mPublicSync = new Object();
 
         mTetherStates = new ArrayMap<>();
 
-        mTetherMasterSM = new TetherMasterSM("TetherMaster", mLooper);
+        mTetherMasterSM = new TetherMasterSM("TetherMaster", mLooper, deps);
         mTetherMasterSM.start();
 
         final Handler smHandler = mTetherMasterSM.getHandler();
@@ -211,8 +213,8 @@ public class Tethering extends BaseNetworkObserver {
                 deps.getOffloadHardwareInterface(smHandler, mLog),
                 mContext.getContentResolver(), mNMService,
                 mLog);
-        mUpstreamNetworkMonitor = new UpstreamNetworkMonitor(
-                mContext, mTetherMasterSM, mLog, TetherMasterSM.EVENT_UPSTREAM_CALLBACK);
+        mUpstreamNetworkMonitor = deps.getUpstreamNetworkMonitor(mContext, mTetherMasterSM, mLog,
+                TetherMasterSM.EVENT_UPSTREAM_CALLBACK);
         mForwardedDownstreams = new HashSet<>();
 
         IntentFilter filter = new IntentFilter();
@@ -1184,7 +1186,7 @@ public class Tethering extends BaseNetworkObserver {
 
         private static final int UPSTREAM_SETTLE_TIME_MS     = 10000;
 
-        TetherMasterSM(String name, Looper looper) {
+        TetherMasterSM(String name, Looper looper, TetheringDependencies deps) {
             super(name, looper);
 
             mInitialState = new InitialState();
@@ -1204,7 +1206,7 @@ public class Tethering extends BaseNetworkObserver {
             addState(mSetDnsForwardersErrorState);
 
             mNotifyList = new ArrayList<>();
-            mIPv6TetheringCoordinator = new IPv6TetheringCoordinator(mNotifyList, mLog);
+            mIPv6TetheringCoordinator = deps.getIPv6TetheringCoordinator(mNotifyList, mLog);
             mOffload = new OffloadWrapper();
 
             setInitialState(mInitialState);
@@ -1940,7 +1942,7 @@ public class Tethering extends BaseNetworkObserver {
         final TetherState tetherState = new TetherState(
                 new TetherInterfaceStateMachine(
                     iface, mLooper, interfaceType, mLog, mNMService, mStatsService,
-                    makeControlCallback(iface)));
+                    makeControlCallback(iface), mDeps));
         mTetherStates.put(iface, tetherState);
         tetherState.stateMachine.start();
     }
