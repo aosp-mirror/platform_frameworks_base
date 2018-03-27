@@ -11843,6 +11843,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean isDeviceProvisioned() {
+        enforceManageUsers();
         synchronized (this) {
             return getUserDataUnchecked(UserHandle.USER_SYSTEM).mUserSetupComplete;
         }
