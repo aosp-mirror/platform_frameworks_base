@@ -156,6 +156,11 @@ public final class UserHandle implements Parcelable {
     }
 
     /** @hide */
+    public static @AppIdInt int getCallingAppId() {
+        return getAppId(Binder.getCallingUid());
+    }
+
+    /** @hide */
     @SystemApi
     public static UserHandle of(@UserIdInt int userId) {
         return userId == USER_SYSTEM ? SYSTEM : new UserHandle(userId);
