@@ -143,7 +143,7 @@ interface IWifiManager
 
     WifiConfiguration getWifiApConfiguration();
 
-    void setWifiApConfiguration(in WifiConfiguration wifiConfig, String packageName);
+    boolean setWifiApConfiguration(in WifiConfiguration wifiConfig, String packageName);
 
     Messenger getWifiServiceMessenger(String packageName);
 
