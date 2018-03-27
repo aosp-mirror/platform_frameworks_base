@@ -160,7 +160,7 @@ public final class ConnectivityController extends StateController implements
     private static boolean isRelaxedSatisfied(JobStatus jobStatus, Network network,
             NetworkCapabilities capabilities, Constants constants) {
         // Only consider doing this for prefetching jobs
-        if ((jobStatus.getJob().getFlags() & JobInfo.FLAG_IS_PREFETCH) == 0) {
+        if (!jobStatus.getJob().isPrefetch()) {
             return false;
         }
 
