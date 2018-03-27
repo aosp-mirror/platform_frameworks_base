@@ -180,7 +180,7 @@ public class Selection {
      * Remove the selection or cursor, if any, from the text.
      */
     public static final void removeSelection(Spannable text) {
-        text.removeSpan(SELECTION_START);
+        text.removeSpan(SELECTION_START, Spanned.SPAN_INTERMEDIATE);
         text.removeSpan(SELECTION_END);
         removeMemory(text);
     }

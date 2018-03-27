@@ -249,6 +249,13 @@ import java.lang.reflect.Array;
     }
 
     /* package */ void removeSpan(Object what) {
+        removeSpan(what, 0 /* flags */);
+    }
+
+    /**
+     * @hide
+     */
+    public void removeSpan(Object what, int flags) {
         int count = mSpanCount;
         Object[] spans = mSpans;
         int[] data = mSpanData;
@@ -262,11 +269,13 @@ import java.lang.reflect.Array;
 
                 System.arraycopy(spans, i + 1, spans, i, c);
                 System.arraycopy(data, (i + 1) * COLUMNS,
-                                 data, i * COLUMNS, c * COLUMNS);
+                        data, i * COLUMNS, c * COLUMNS);
 
                 mSpanCount--;
 
-                sendSpanRemoved(what, ostart, oend);
+                if ((flags & Spanned.SPAN_INTERMEDIATE) == 0) {
+                    sendSpanRemoved(what, ostart, oend);
+                }
                 return;
             }
         }
