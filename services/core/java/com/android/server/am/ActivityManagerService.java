@@ -1261,8 +1261,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         public static GrantUri resolve(int defaultSourceUserHandle, Uri uri) {
-            return new GrantUri(ContentProvider.getUserIdFromUri(uri, defaultSourceUserHandle),
-                    ContentProvider.getUriWithoutUserId(uri), false);
+            if (ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) {
+                return new GrantUri(ContentProvider.getUserIdFromUri(uri, defaultSourceUserHandle),
+                        ContentProvider.getUriWithoutUserId(uri), false);
+            } else {
+                return new GrantUri(defaultSourceUserHandle, uri, false);
+            }
         }
     }
 
