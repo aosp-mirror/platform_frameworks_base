@@ -22,6 +22,7 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/qs_footer_height"
     android:elevation="4dp"
+    android:background="@android:color/transparent"
     android:baselineAligned="false"
     android:clickable="false"
     android:clipChildren="false"
