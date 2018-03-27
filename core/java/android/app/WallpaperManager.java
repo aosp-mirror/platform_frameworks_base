@@ -57,10 +57,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
-import android.os.UserHandle;
-import android.service.wallpaper.WallpaperService;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -915,9 +912,14 @@ public class WallpaperManager {
     /**
      * Get the primary colors of a wallpaper.
      *
-     * <p>You can expect null if:
-     * • Colors are still being processed by the system.
-     * • A live wallpaper doesn't implement {@link WallpaperService.Engine#onComputeColors()}.
+     * <p>This method can return {@code null} when:
+     * <ul>
+     * <li>Colors are still being processed by the system.</li>
+     * <li>The user has chosen to use a live wallpaper:  live wallpapers might not
+     * implement
+     * {@link android.service.wallpaper.WallpaperService.Engine#onComputeColors()
+     *     WallpaperService.Engine#onComputeColors()}.</li>
+     * </ul>
      *
      * @param which Wallpaper type. Must be either {@link #FLAG_SYSTEM} or
      *     {@link #FLAG_LOCK}.
@@ -929,7 +931,7 @@ public class WallpaperManager {
     }
 
     /**
-     * Get the primary colors of a wallpaper
+     * Get the primary colors of the wallpaper configured in the given user.
      * @param which wallpaper type. Must be either {@link #FLAG_SYSTEM} or
      *     {@link #FLAG_LOCK}
      * @param userId Owner of the wallpaper.
@@ -1559,11 +1561,13 @@ public class WallpaperManager {
      * Specify extra padding that the wallpaper should have outside of the display.
      * That is, the given padding supplies additional pixels the wallpaper should extend
      * outside of the display itself.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#SET_WALLPAPER_HINTS}.
+     *
      * @param padding The number of pixels the wallpaper should extend beyond the display,
      * on its left, top, right, and bottom sides.
-     * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_HINTS)
     public void setDisplayPadding(Rect padding) {
         try {
@@ -1600,11 +1604,11 @@ public class WallpaperManager {
     }
 
     /**
-     * Clear the wallpaper.
+     * Reset all wallpaper to the factory default.
      *
-     * @hide
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#SET_WALLPAPER}.
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
     public void clearWallpaper() {
         clearWallpaper(FLAG_LOCK, mContext.getUserId());
