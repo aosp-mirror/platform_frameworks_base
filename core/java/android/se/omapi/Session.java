@@ -47,7 +47,8 @@ public class Session {
     private final ISecureElementSession mSession;
     private static final String TAG = "OMAPI.Session";
 
-    Session(SEService service, ISecureElementSession session, Reader reader) {
+    Session(@NonNull SEService service, @NonNull ISecureElementSession session,
+            @NonNull Reader reader) {
         if (service == null || reader == null || session == null) {
             throw new IllegalArgumentException("Parameters cannot be null");
         }
@@ -195,7 +196,8 @@ public class Session {
      *             supported by the device
      * @return an instance of Channel if available or null.
      */
-    public @Nullable Channel openBasicChannel(byte[] aid, byte p2) throws IOException {
+    public @Nullable Channel openBasicChannel(@Nullable byte[] aid, @Nullable byte p2)
+            throws IOException {
         if (!mService.isConnected()) {
             throw new IllegalStateException("service not connected to system");
         }
@@ -220,32 +222,6 @@ public class Session {
                 throw new IllegalStateException(e.getMessage());
             }
         }
-    }
-
-    /**
-     * This method is provided to ease the development of mobile application and for compliancy
-     * with existing applications.
-     * This method is equivalent to openBasicChannel(aid, P2=0x00)
-     *
-     * @param aid the AID of the Applet to be selected on this channel, as a
-     *            byte array, or null if no Applet is to be selected.
-     * @throws IOException if there is a communication problem to the reader or
-     *             the Secure Element.
-     * @throws IllegalStateException if the Secure Element session is used after
-     *             being closed.
-     * @throws IllegalArgumentException if the aid's length is not within 5 to
-     *             16 (inclusive).
-     * @throws SecurityException if the calling application cannot be granted
-     *             access to this AID or the default Applet on this
-     *             session.
-     * @throws NoSuchElementException if the AID on the Secure Element is not available or cannot be
-     *             selected.
-     * @throws UnsupportedOperationException if the given P2 parameter is not
-     *             supported by the device
-     * @return an instance of Channel if available or null.
-     */
-    public @Nullable Channel openBasicChannel(byte[] aid) throws IOException {
-        return openBasicChannel(aid, (byte) 0x00);
     }
 
     /**
@@ -300,7 +276,8 @@ public class Session {
      * @return an instance of Channel. Null if the Secure Element is unable to
      *         provide a new logical channel.
      */
-    public @Nullable Channel openLogicalChannel(byte[] aid, byte p2) throws IOException {
+    public @Nullable Channel openLogicalChannel(@Nullable byte[] aid, @Nullable byte p2)
+            throws IOException {
         if (!mService.isConnected()) {
             throw new IllegalStateException("service not connected to system");
         }
@@ -326,33 +303,5 @@ public class Session {
                 throw new IllegalStateException(e.getMessage());
             }
         }
-    }
-
-    /**
-     * This method is provided to ease the development of mobile application and for compliancy
-     * with existing applications.
-     * This method is equivalent to openLogicalChannel(aid, P2=0x00)
-     *
-     * @param aid the AID of the Applet to be selected on this channel, as a
-     *            byte array.
-     * @throws IOException if there is a communication problem to the reader or
-     *             the Secure Element.
-     * @throws IllegalStateException if the Secure Element is used after being
-     *             closed.
-     * @throws IllegalArgumentException if the aid's length is not within 5 to
-     *             16 (inclusive).
-     * @throws SecurityException if the calling application cannot be granted
-     *             access to this AID or the default Applet on this
-     *             session.
-     * @throws NoSuchElementException if the AID on the Secure Element is not
-     *             available or cannot be selected or a logical channel is already
-     *             open to a non-multiselectable Applet.
-     * @throws UnsupportedOperationException if the given P2 parameter is not
-     *             supported by the device.
-     * @return an instance of Channel. Null if the Secure Element is unable to
-     *         provide a new logical channel.
-     */
-    public @Nullable Channel openLogicalChannel(byte[] aid) throws IOException {
-        return openLogicalChannel(aid, (byte) 0x00);
     }
 }
