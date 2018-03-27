@@ -26,11 +26,12 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.stack.ExpandableViewState;
 import com.android.systemui.statusbar.stack.StackScrollState;
 
-public class DismissView extends StackScrollerDecorView {
+public class FooterView extends StackScrollerDecorView {
     private final int mClearAllTopPadding;
-    private DismissViewButton mDismissButton;
+    private FooterViewButton mDismissButton;
+    private FooterViewButton mManageButton;
 
-    public DismissView(Context context, AttributeSet attrs) {
+    public FooterView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mClearAllTopPadding = context.getResources().getDimensionPixelSize(
                 R.dimen.clear_all_padding_top);
@@ -38,21 +39,31 @@ public class DismissView extends StackScrollerDecorView {
 
     @Override
     protected View findContentView() {
+        return findViewById(R.id.content);
+    }
+
+    protected View findSecondaryView() {
         return findViewById(R.id.dismiss_text);
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mDismissButton = (DismissViewButton) findContentView();
+        mDismissButton = (FooterViewButton) findSecondaryView();
+        mManageButton = findViewById(R.id.manage_text);
     }
 
     public void setTextColor(@ColorInt int color) {
+        mManageButton.setTextColor(color);
         mDismissButton.setTextColor(color);
     }
 
-    public void setOnButtonClickListener(OnClickListener listener) {
-        mContent.setOnClickListener(listener);
+    public void setManageButtonClickListener(OnClickListener listener) {
+        mManageButton.setOnClickListener(listener);
+    }
+
+    public void setDismissButtonClickListener(OnClickListener listener) {
+        mDismissButton.setOnClickListener(listener);
     }
 
     public boolean isOnEmptySpace(float touchX, float touchY) {
@@ -68,25 +79,26 @@ public class DismissView extends StackScrollerDecorView {
         mDismissButton.setText(R.string.clear_all_notifications_text);
         mDismissButton.setContentDescription(
                 mContext.getString(R.string.accessibility_clear_all));
+        mManageButton.setText(R.string.manage_notifications_text);
     }
 
     public boolean isButtonVisible() {
-        return mDismissButton.getAlpha() != 0.0f;
+        return mManageButton.getAlpha() != 0.0f;
     }
 
     @Override
     public ExpandableViewState createNewViewState(StackScrollState stackScrollState) {
-        return new DismissViewState();
+        return new FooterViewState();
     }
 
-    public class DismissViewState extends ExpandableViewState {
+    public class FooterViewState extends ExpandableViewState {
         @Override
         public void applyToView(View view) {
             super.applyToView(view);
-            if (view instanceof DismissView) {
-                DismissView dismissView = (DismissView) view;
+            if (view instanceof FooterView) {
+                FooterView footerView = (FooterView) view;
                 boolean visible = this.clipTopAmount < mClearAllTopPadding;
-                dismissView.performVisibilityAnimation(visible && !dismissView.willBeGone());
+                footerView.performVisibilityAnimation(visible && !footerView.willBeGone());
             }
         }
     }
