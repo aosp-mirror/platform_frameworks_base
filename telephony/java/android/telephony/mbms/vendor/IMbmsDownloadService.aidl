@@ -20,8 +20,9 @@ import android.app.PendingIntent;
 import android.net.Uri;
 import android.telephony.mbms.DownloadRequest;
 import android.telephony.mbms.FileInfo;
+import android.telephony.mbms.IDownloadProgressListener;
+import android.telephony.mbms.IDownloadStatusListener;
 import android.telephony.mbms.IMbmsDownloadSessionCallback;
-import android.telephony.mbms.IDownloadStateCallback;
 
 /**
  * @hide
@@ -36,11 +37,17 @@ interface IMbmsDownloadService
 
     int download(in DownloadRequest downloadRequest);
 
-    int registerStateCallback(in DownloadRequest downloadRequest, IDownloadStateCallback listener,
-        int flags);
+    int addStatusListener(in DownloadRequest downloadRequest,
+        IDownloadStatusListener listener);
 
-    int unregisterStateCallback(in DownloadRequest downloadRequest,
-        IDownloadStateCallback listener);
+    int removeStatusListener(in DownloadRequest downloadRequest,
+        IDownloadStatusListener listener);
+
+    int addProgressListener(in DownloadRequest downloadRequest,
+        IDownloadProgressListener listener);
+
+    int removeProgressListener(in DownloadRequest downloadRequest,
+        IDownloadProgressListener listener);
 
     List<DownloadRequest> listPendingDownloads(int subscriptionId);
 
