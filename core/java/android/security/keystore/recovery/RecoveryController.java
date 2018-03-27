@@ -159,7 +159,7 @@ public class RecoveryController {
      * Gets a new instance of the class.
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public static RecoveryController getInstance(Context context) {
+    @NonNull public static RecoveryController getInstance(@NonNull Context context) {
         ILockSettings lockSettings =
                 ILockSettings.Stub.asInterface(ServiceManager.getService("lock_settings"));
         return new RecoveryController(lockSettings, KeyStore.getInstance());

@@ -28,12 +28,18 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"पासवर्ड टाइप गर्न छुनुहोस्"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"अनलक गर्न पासवर्ड टाइप गर्नुहोस्"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"अनलक गर्न PIN कोड टाइप गर्नुहोस्"</string>
+    <!-- no translation found for keyguard_enter_your_pin (7152989016739952871) -->
+    <skip />
+    <!-- no translation found for keyguard_enter_your_pattern (3915717164691787047) -->
+    <skip />
+    <!-- no translation found for keyguard_enter_your_password (5761514484663983731) -->
+    <skip />
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"PIN कोड गलत छ।"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"अमान्य कार्ड।"</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"चार्ज भयो"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"चार्ज हुँदै"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"छिटो चार्ज हुँदै"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"बिस्तारै चार्ज हुँदै"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • चार्ज गरिँदै"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • द्रुत गतिमा चार्ज गरिँदै"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • मन्द गतिमा चार्ज गरिँदै"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"तपाईंको चार्जर जोड्नुहोस्।"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"अनलक गर्न मेनु थिच्नुहोस्।"</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"नेटवर्क लक भएको छ"</string>
@@ -76,7 +82,7 @@
     <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"रूचाइएको PIN कोड पुष्टि गर्नुहोस्"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"SIM कार्ड अनलक गरिँदै..."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="3057533256729513335">"४ देखि ८ वटा नम्बर भएको एउटा PIN टाइप गर्नुहोस्।"</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"PUK कोड ८ वा सो भन्दा बढी नम्बरको हुनुपर्छ।"</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6003602401368264144">"PUK कोड ८ वा सो भन्दा बढी नम्बरको हुनु पर्छ।"</string>
     <string name="kg_invalid_puk" msgid="5399287873762592502">"PUK कोड पुन: प्रविष्ट गर्नुहोस्। पटक-पटकको प्रयासले SIM सदाका लागि असक्षम हुनेछ।"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="5672736555427444330">"PIN कोडहरू मिलेनन्"</string>
     <string name="kg_login_too_many_attempts" msgid="6604574268387867255">"अत्यन्त धेरै ढाँचा कोर्ने प्रयासहरू"</string>

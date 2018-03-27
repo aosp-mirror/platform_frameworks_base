@@ -266,6 +266,10 @@ package android.net {
     method public static deprecated org.apache.http.conn.ssl.SSLSocketFactory getHttpSocketFactory(int, android.net.SSLSessionCache);
   }
 
+  public class TrafficStats {
+    method public static deprecated void setThreadStatsUidSelf();
+  }
+
 }
 
 package android.os {

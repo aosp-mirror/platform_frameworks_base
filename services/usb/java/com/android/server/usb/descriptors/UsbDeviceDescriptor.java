@@ -48,7 +48,7 @@ public final class UsbDeviceDescriptor extends UsbDescriptor {
     private int mDeviceRelease; // 12:2 Device Release number - BCD
     private byte mMfgIndex;     // 14:1 Index of Manufacturer String Descriptor
     private byte mProductIndex; // 15:1 Index of Product String Descriptor
-    private byte mSerialNum;    // 16:1 Index of Serial Number String Descriptor
+    private byte mSerialIndex;  // 16:1 Index of Serial Number String Descriptor
     private byte mNumConfigs;   // 17:1 Number of Possible Configurations
 
     private ArrayList<UsbConfigDescriptor> mConfigDescriptors =
@@ -91,16 +91,37 @@ public final class UsbDeviceDescriptor extends UsbDescriptor {
         return mDeviceRelease;
     }
 
+    // mDeviceRelease is binary-coded decimal, format DD.DD
+    public String getDeviceReleaseString() {
+        int hundredths = mDeviceRelease & 0xF;
+        int tenths = (mDeviceRelease & 0xF0) >> 4;
+        int ones = (mDeviceRelease & 0xF00) >> 8;
+        int tens = (mDeviceRelease & 0xF000) >> 12;
+        return String.format("%d.%d%d", tens * 10 + ones, tenths, hundredths);
+    }
+
     public byte getMfgIndex() {
         return mMfgIndex;
+    }
+
+    public String getMfgString(UsbDescriptorParser p) {
+        return p.getDescriptorString(mMfgIndex);
     }
 
     public byte getProductIndex() {
         return mProductIndex;
     }
 
-    public byte getSerialNum() {
-        return mSerialNum;
+    public String getProductString(UsbDescriptorParser p) {
+        return p.getDescriptorString(mProductIndex);
+    }
+
+    public byte getSerialIndex() {
+        return mSerialIndex;
+    }
+
+    public String getSerialString(UsbDescriptorParser p) {
+        return p.getDescriptorString(mSerialIndex);
     }
 
     public byte getNumConfigs() {
@@ -119,16 +140,14 @@ public final class UsbDeviceDescriptor extends UsbDescriptor {
             Log.d(TAG, "toAndroid()");
         }
 
-        String mfgName = parser.getDescriptorString(mMfgIndex);
-        String prodName = parser.getDescriptorString(mProductIndex);
+        String mfgName = getMfgString(parser);
+        String prodName = getProductString(parser);
         if (DEBUG) {
             Log.d(TAG, "  mfgName:" + mfgName + " prodName:" + prodName);
         }
 
-        // Create version string in "%.%" format
-        String versionString =
-                Integer.toString(mDeviceRelease >> 8) + "." + (mDeviceRelease & 0xFF);
-        String serialStr = parser.getDescriptorString(mSerialNum);
+        String versionString = getDeviceReleaseString();
+        String serialStr = getSerialString(parser);
         if (DEBUG) {
             Log.d(TAG, "  versionString:" + versionString + " serialStr:" + serialStr);
         }
@@ -159,7 +178,7 @@ public final class UsbDeviceDescriptor extends UsbDescriptor {
         mDeviceRelease = stream.unpackUsbShort();
         mMfgIndex = stream.getByte();
         mProductIndex = stream.getByte();
-        mSerialNum = stream.getByte();
+        mSerialIndex = stream.getByte();
         mNumConfigs = stream.getByte();
 
         return mLength;

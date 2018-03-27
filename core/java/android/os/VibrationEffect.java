@@ -340,11 +340,17 @@ public abstract class VibrationEffect implements Parcelable {
          * Scale the amplitude of this effect.
          *
          * @param gamma the gamma adjustment to apply
-         * @param maxAmplitude the new maximum amplitude of the effect
+         * @param maxAmplitude the new maximum amplitude of the effect, must be between 0 and
+         *         MAX_AMPLITUDE
+         * @throws IllegalArgumentException if maxAmplitude less than 0 or more than MAX_AMPLITUDE
          *
          * @return A {@link OneShot} effect with the same timing but scaled amplitude.
          */
-        public VibrationEffect scale(float gamma, int maxAmplitude) {
+        public OneShot scale(float gamma, int maxAmplitude) {
+            if (maxAmplitude > MAX_AMPLITUDE || maxAmplitude < 0) {
+                throw new IllegalArgumentException(
+                        "Amplitude is negative or greater than MAX_AMPLITUDE");
+            }
             int newAmplitude = scale(mAmplitude, gamma, maxAmplitude);
             return new OneShot(mDuration, newAmplitude);
         }
@@ -452,12 +458,18 @@ public abstract class VibrationEffect implements Parcelable {
          * Scale the Waveform with the given gamma and new max amplitude.
          *
          * @param gamma the gamma adjustment to apply
-         * @param maxAmplitude the new maximum amplitude of the effect
+         * @param maxAmplitude the new maximum amplitude of the effect, must be between 0 and
+         *         MAX_AMPLITUDE
+         * @throws IllegalArgumentException if maxAmplitude less than 0 or more than MAX_AMPLITUDE
          *
          * @return A {@link Waveform} effect with the same timings and repeat index
          *         but scaled amplitude.
          */
-        public VibrationEffect scale(float gamma, int maxAmplitude) {
+        public Waveform scale(float gamma, int maxAmplitude) {
+            if (maxAmplitude > MAX_AMPLITUDE || maxAmplitude < 0) {
+                throw new IllegalArgumentException(
+                        "Amplitude is negative or greater than MAX_AMPLITUDE");
+            }
             if (gamma == 1.0f && maxAmplitude == MAX_AMPLITUDE) {
                 // Just return a copy of the original if there's no scaling to be done.
                 return new Waveform(mTimings, mAmplitudes, mRepeat);

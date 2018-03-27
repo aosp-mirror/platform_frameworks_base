@@ -7833,8 +7833,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             ApplicationInfo appInfo = userContext.getApplicationInfo();
             CharSequence result = null;
             if (appInfo != null) {
-                PackageManager pm = userContext.getPackageManager();
-                result = pm.getApplicationLabel(appInfo);
+                result = appInfo.loadUnsafeLabel(userContext.getPackageManager());
             }
             return result != null ? result.toString() : null;
         } finally {

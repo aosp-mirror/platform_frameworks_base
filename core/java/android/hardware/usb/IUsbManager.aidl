@@ -105,6 +105,12 @@ interface IUsbManager
     /* Gets the current screen unlocked functions. */
     long getScreenUnlockedFunctions();
 
+    /* Get the functionfs control handle for the given function. Usb
+     * descriptors will already be written, and the handle will be
+     * ready to use.
+     */
+    ParcelFileDescriptor getControlFd(long function);
+
     /* Allow USB debugging from the attached host. If alwaysAllow is true, add the
      * the public key to list of host keys that the user has approved.
      */

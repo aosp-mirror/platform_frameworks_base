@@ -45,6 +45,7 @@ import android.os.ResultReceiver;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -116,18 +117,20 @@ public class MediaSession2 implements AutoCloseable {
     /**
      * Command code for {@link MediaController2#skipToNextItem()}.
      * <p>
-     * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
+     * Command would be sent directly to the playlist agent if the session doesn't reject the
+     * request through the {@link SessionCallback#onCommandRequest(
+     * MediaSession2, ControllerInfo, Command)}.
      */
-    public static final int COMMAND_CODE_PLAYBACK_SKIP_NEXT_ITEM = 4;
+    public static final int COMMAND_CODE_PLAYLIST_SKIP_NEXT_ITEM = 4;
 
     /**
      * Command code for {@link MediaController2#skipToPreviousItem()}.
      * <p>
-     * Command would be sent directly to the player if the session doesn't reject the request
-     * through the {@link SessionCallback#onCommandRequest(MediaSession2, ControllerInfo, Command)}.
+     * Command would be sent directly to the playlist agent if the session doesn't reject the
+     * request through the {@link SessionCallback#onCommandRequest(
+     * MediaSession2, ControllerInfo, Command)}.
      */
-    public static final int COMMAND_CODE_PLAYBACK_SKIP_PREV_ITEM = 5;
+    public static final int COMMAND_CODE_PLAYLIST_SKIP_PREV_ITEM = 5;
 
     /**
      * Command code for {@link MediaController2#prepare()}.
@@ -275,48 +278,60 @@ public class MediaSession2 implements AutoCloseable {
     /**
      * Command code for {@link MediaController2#playFromMediaId(String, Bundle)}.
      */
-    public static final int COMMAND_CODE_PLAY_FROM_MEDIA_ID = 22;
+    public static final int COMMAND_CODE_SESSION_PLAY_FROM_MEDIA_ID = 22;
 
     /**
      * Command code for {@link MediaController2#playFromUri(Uri, Bundle)}.
      */
-    public static final int COMMAND_CODE_PLAY_FROM_URI = 23;
+    public static final int COMMAND_CODE_SESSION_PLAY_FROM_URI = 23;
 
     /**
      * Command code for {@link MediaController2#playFromSearch(String, Bundle)}.
      */
-    public static final int COMMAND_CODE_PLAY_FROM_SEARCH = 24;
+    public static final int COMMAND_CODE_SESSION_PLAY_FROM_SEARCH = 24;
 
     /**
      * Command code for {@link MediaController2#prepareFromMediaId(String, Bundle)}.
      */
-    public static final int COMMAND_CODE_PREPARE_FROM_MEDIA_ID = 25;
+    public static final int COMMAND_CODE_SESSION_PREPARE_FROM_MEDIA_ID = 25;
 
     /**
      * Command code for {@link MediaController2#prepareFromUri(Uri, Bundle)}.
      */
-    public static final int COMMAND_CODE_PREPARE_FROM_URI = 26;
+    public static final int COMMAND_CODE_SESSION_PREPARE_FROM_URI = 26;
 
     /**
      * Command code for {@link MediaController2#prepareFromSearch(String, Bundle)}.
      */
-    public static final int COMMAND_CODE_PREPARE_FROM_SEARCH = 27;
+    public static final int COMMAND_CODE_SESSION_PREPARE_FROM_SEARCH = 27;
 
     /**
      * Command code for {@link MediaController2#setRating(String, Rating2)}.
      * @hide
      */
-    // TODO(jaewan): Unhide
-    public static final int COMMAND_CODE_SET_RATING = 29;
+    public static final int COMMAND_CODE_SESSION_SET_RATING = 28;
 
     /**
-     * Command code for {@link MediaBrowser2} specific functions that allows navigation and search
-     * from the {@link MediaLibraryService2}. This would be ignored for a {@link MediaSession2},
-     * not {@link android.media.MediaLibraryService2.MediaLibrarySession}.
+     * Command code for {@link android.media.MediaLibraryService2.MediaLibrarySession} specific
+     * functions. With or without this, a {@link MediaSession2} that isn't
+     * {@link android.media.MediaLibraryService2.MediaLibrarySession} would automatically reject
+     * the calls.
      *
+     * @see android.media.MediaLibraryService2.MediaLibrarySession
      * @see MediaBrowser2
+     * @hide
      */
-    public static final int COMMAND_CODE_BROWSER = 28;
+    // TODO(jaewan): Remove
+    public static final int COMMAND_CODE_BROWSER = 29;
+
+    // TODO(jaewan): Add javadoc
+    public static final int COMMAND_CODE_LIBRARY_GET_CHILDREN = 29;
+    public static final int COMMAND_CODE_LIBRARY_GET_ITEM = 30;
+    public static final int COMMAND_CODE_LIBRARY_GET_LIBRARY_ROOT = 31;
+    public static final int COMMAND_CODE_LIBRARY_GET_SEARCH_RESULT = 32;
+    public static final int COMMAND_CODE_LIBRARY_SEARCH = 33;
+    public static final int COMMAND_CODE_LIBRARY_SUBSCRIBE = 34;
+    public static final int COMMAND_CODE_LIBRARY_UNSUBSCRIBE = 35;
 
     /**
      * @hide
@@ -519,12 +534,20 @@ public class MediaSession2 implements AutoCloseable {
             mProvider.addCommand_impl(command);
         }
 
+        public void addCommand(int commandCode) {
+            // TODO(jaewna): Implement
+        }
+
         public void addAllPredefinedCommands() {
             mProvider.addAllPredefinedCommands_impl();
         }
 
         public void removeCommand(@NonNull Command command) {
             mProvider.removeCommand_impl(command);
+        }
+
+        public void removeCommand(int commandCode) {
+            // TODO(jaewan): Implement.
         }
 
         public boolean hasCommand(@NonNull Command command) {
@@ -535,7 +558,7 @@ public class MediaSession2 implements AutoCloseable {
             return mProvider.hasCommand_impl(code);
         }
 
-        public @NonNull List<Command> getCommands() {
+        public @NonNull Set<Command> getCommands() {
             return mProvider.getCommands_impl();
         }
 
@@ -619,8 +642,8 @@ public class MediaSession2 implements AutoCloseable {
          * @see #COMMAND_CODE_PLAYBACK_PLAY
          * @see #COMMAND_CODE_PLAYBACK_PAUSE
          * @see #COMMAND_CODE_PLAYBACK_STOP
-         * @see #COMMAND_CODE_PLAYBACK_SKIP_NEXT_ITEM
-         * @see #COMMAND_CODE_PLAYBACK_SKIP_PREV_ITEM
+         * @see #COMMAND_CODE_PLAYLIST_SKIP_NEXT_ITEM
+         * @see #COMMAND_CODE_PLAYLIST_SKIP_PREV_ITEM
          * @see #COMMAND_CODE_PLAYBACK_PREPARE
          * @see #COMMAND_CODE_PLAYBACK_FAST_FORWARD
          * @see #COMMAND_CODE_PLAYBACK_REWIND
@@ -675,7 +698,7 @@ public class MediaSession2 implements AutoCloseable {
          * @param controller controller information
          * @param mediaId media id
          * @param extras optional extra bundle
-         * @see #COMMAND_CODE_PLAY_FROM_MEDIA_ID
+         * @see #COMMAND_CODE_SESSION_PLAY_FROM_MEDIA_ID
          */
         public void onPlayFromMediaId(@NonNull MediaSession2 session,
                 @NonNull ControllerInfo controller, @NonNull String mediaId,
@@ -692,7 +715,7 @@ public class MediaSession2 implements AutoCloseable {
          * @param controller controller information
          * @param query query string. Can be empty to indicate any suggested media
          * @param extras optional extra bundle
-         * @see #COMMAND_CODE_PLAY_FROM_SEARCH
+         * @see #COMMAND_CODE_SESSION_PLAY_FROM_SEARCH
          */
         public void onPlayFromSearch(@NonNull MediaSession2 session,
                 @NonNull ControllerInfo controller, @NonNull String query,
@@ -706,7 +729,7 @@ public class MediaSession2 implements AutoCloseable {
          * @param controller controller information
          * @param uri uri
          * @param extras optional extra bundle
-         * @see #COMMAND_CODE_PLAY_FROM_URI
+         * @see #COMMAND_CODE_SESSION_PLAY_FROM_URI
          */
         public void onPlayFromUri(@NonNull MediaSession2 session,
                 @NonNull ControllerInfo controller, @NonNull Uri uri,
@@ -730,7 +753,7 @@ public class MediaSession2 implements AutoCloseable {
          * @param controller controller information
          * @param mediaId media id to prepare
          * @param extras optional extra bundle
-         * @see #COMMAND_CODE_PREPARE_FROM_MEDIA_ID
+         * @see #COMMAND_CODE_SESSION_PREPARE_FROM_MEDIA_ID
          */
         public void onPrepareFromMediaId(@NonNull MediaSession2 session,
                 @NonNull ControllerInfo controller, @NonNull String mediaId,
@@ -754,7 +777,7 @@ public class MediaSession2 implements AutoCloseable {
          * @param controller controller information
          * @param query query string. Can be empty to indicate any suggested media
          * @param extras optional extra bundle
-         * @see #COMMAND_CODE_PREPARE_FROM_SEARCH
+         * @see #COMMAND_CODE_SESSION_PREPARE_FROM_SEARCH
          */
         public void onPrepareFromSearch(@NonNull MediaSession2 session,
                 @NonNull ControllerInfo controller, @NonNull String query,
@@ -778,7 +801,7 @@ public class MediaSession2 implements AutoCloseable {
          * @param controller controller information
          * @param uri uri
          * @param extras optional extra bundle
-         * @see #COMMAND_CODE_PREPARE_FROM_URI
+         * @see #COMMAND_CODE_SESSION_PREPARE_FROM_URI
          */
         public void onPrepareFromUri(@NonNull MediaSession2 session,
                 @NonNull ControllerInfo controller, @NonNull Uri uri, @Nullable Bundle extras) { }

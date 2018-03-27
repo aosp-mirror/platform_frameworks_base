@@ -36,6 +36,7 @@ import android.os.Bundle;
 import android.os.ResultReceiver;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -87,7 +88,7 @@ public interface MediaSession2Provider extends TransportControlProvider {
         void removeCommand_impl(Command command);
         boolean hasCommand_impl(Command command);
         boolean hasCommand_impl(int code);
-        List<Command> getCommands_impl();
+        Set<Command> getCommands_impl();
         Bundle toBundle_impl();
     }
 

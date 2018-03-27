@@ -29,6 +29,9 @@ import com.android.server.am.TaskPersister;
 import java.io.File;
 import java.util.Random;
 
+/**
+ * atest FrameworksServicesTests:TaskPersisterTest
+ */
 public class TaskPersisterTest extends AndroidTestCase {
     private static final String TEST_USER_NAME = "AM-Test-User";
 

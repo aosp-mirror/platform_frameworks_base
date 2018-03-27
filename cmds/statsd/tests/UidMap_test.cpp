@@ -173,6 +173,33 @@ static void protoOutputStreamToUidMapping(ProtoOutputStream* proto, UidMapping* 
     results->ParseFromArray(bytes.data(), bytes.size());
 }
 
+// Test that uid map returns at least one snapshot even if we already obtained
+// this snapshot from a previous call to getData.
+TEST(UidMapTest, TestOutputIncludesAtLeastOneSnapshot) {
+    UidMap m;
+    // Initialize single config key.
+    ConfigKey config1(1, StringToId("config1"));
+    m.OnConfigUpdated(config1);
+    vector<int32_t> uids;
+    vector<int64_t> versions;
+    vector<String16> apps;
+    uids.push_back(1000);
+    apps.push_back(String16(kApp2.c_str()));
+    versions.push_back(5);
+    m.updateMap(1, uids, versions, apps);
+
+    // Set the last timestamp for this config key to be newer.
+    m.mLastUpdatePerConfigKey[config1] = 2;
+
+    ProtoOutputStream proto;
+    m.appendUidMap(3, config1, &proto);
+
+    // Check there's still a uidmap attached this one.
+    UidMapping results;
+    protoOutputStreamToUidMapping(&proto, &results);
+    EXPECT_EQ(1, results.snapshots_size());
+}
+
 TEST(UidMapTest, TestClearingOutput) {
     UidMap m;
 
@@ -199,7 +226,7 @@ TEST(UidMapTest, TestClearingOutput) {
     protoOutputStreamToUidMapping(&proto, &results);
     EXPECT_EQ(1, results.snapshots_size());
 
-    // It should be cleared now
+    // We have to keep at least one snapshot in memory at all times.
     EXPECT_EQ(1U, m.mSnapshots.size());
     proto.clear();
     m.appendUidMap(2, config1, &proto);

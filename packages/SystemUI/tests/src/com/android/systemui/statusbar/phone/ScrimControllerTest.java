@@ -39,10 +39,8 @@ import android.os.Looper;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
-import android.view.Choreographer;
 import android.view.View;
 
-import com.android.internal.util.Preconditions;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.ScrimView;
@@ -557,8 +555,8 @@ public class ScrimControllerTest extends SysuiTestCase {
          * @param callback What to execute.
          */
         @Override
-        protected void doOnTheNextFrame(Choreographer.FrameCallback callback) {
-            callback.doFrame(0);
+        protected void doOnTheNextFrame(Runnable callback) {
+            callback.run();
         }
     }
 

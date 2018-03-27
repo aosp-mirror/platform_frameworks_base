@@ -674,4 +674,6 @@ interface IPackageManager {
     boolean hasUidSigningCertificate(int uid, in byte[] signingCertificate, int flags);
 
     String getSystemTextClassifierPackageName();
+
+    boolean isPackageStateProtected(String packageName, int userId);
 }

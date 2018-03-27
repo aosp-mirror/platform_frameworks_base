@@ -842,10 +842,17 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             buttonBounds.setEmpty();
             return;
         }
+        // Temporarily reset the translation back to origin to get the position in window
+        final float posX = view.getTranslationX();
+        final float posY = view.getTranslationY();
+        view.setTranslationX(0);
+        view.setTranslationY(0);
         view.getLocationInWindow(mTmpPosition);
         buttonBounds.set(mTmpPosition[0], mTmpPosition[1],
                 mTmpPosition[0] + view.getMeasuredWidth(),
                 mTmpPosition[1] + view.getMeasuredHeight());
+        view.setTranslationX(posX);
+        view.setTranslationY(posY);
     }
 
     private void updateRotatedViews() {

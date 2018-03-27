@@ -28,6 +28,9 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Prek për të shkruar fjalëkalimin"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Shkruaj fjalëkalimin për të shkyçur"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Shkruaj kodin PIN për ta shkyçur"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Fut kodin PIN"</string>
+    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"Fut motivin"</string>
+    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"Fut fjalëkalimin"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Kodi PIN është i pasaktë."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Karta e pavlefshme."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"I ngarkuar"</string>

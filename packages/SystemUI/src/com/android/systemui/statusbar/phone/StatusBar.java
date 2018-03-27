@@ -2502,11 +2502,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                         public void onAnimationEnded() {
                             CrossFadeHelper.fadeIn(mNotificationPanel);
                         }
-                    }).show();
+                    }, mDozing).show();
         } else {
             // workspace
             WirelessChargingAnimation.makeWirelessChargingAnimation(mContext, null,
-                    batteryLevel, null).show();
+                    batteryLevel, null, false).show();
         }
     }
 
@@ -4654,9 +4654,12 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         if (mBouncerShowing) {
             // Bouncer needs the front scrim when it's on top of an activity,
-            // tapping on a notification or editing QS.
-            mScrimController.transitionTo(mIsOccluded || mNotificationPanel.needsScrimming() ?
-                    ScrimState.BOUNCER_SCRIMMED : ScrimState.BOUNCER);
+            // tapping on a notification, editing QS or being dismissed by
+            // FLAG_DISMISS_KEYGUARD_ACTIVITY.
+            ScrimState state = mIsOccluded || mNotificationPanel.needsScrimming()
+                    || mStatusBarKeyguardViewManager.willDismissWithAction() ?
+                    ScrimState.BOUNCER_SCRIMMED : ScrimState.BOUNCER;
+            mScrimController.transitionTo(state);
         } else if (mLaunchCameraOnScreenTurningOn || isInLaunchTransition()) {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         } else if (mBrightnessMirrorVisible) {

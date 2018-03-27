@@ -1243,15 +1243,13 @@ class RecentTasks {
      */
     private int findRemoveIndexForAddTask(TaskRecord task) {
         final int recentsCount = mTasks.size();
-        final int taskActivityType = task.getActivityType();
         final Intent intent = task.intent;
         final boolean document = intent != null && intent.isDocument();
         int maxRecents = task.maxRecents - 1;
         for (int i = 0; i < recentsCount; i++) {
             final TaskRecord tr = mTasks.get(i);
-            final int trActivityType = tr.getActivityType();
             if (task != tr) {
-                if (taskActivityType != trActivityType || task.userId != tr.userId) {
+                if (!task.hasCompatibleActivityType(tr)) {
                     continue;
                 }
                 final Intent trIntent = tr.intent;
