@@ -414,7 +414,7 @@ import java.util.List;
  * vs. those targeting prior platforms.  Starting with Honeycomb, an application
  * is not in the killable state until its {@link #onStop} has returned.  This
  * impacts when {@link #onSaveInstanceState(Bundle)} may be called (it may be
- * safely called after {@link #onPause()} and allows and application to safely
+ * safely called after {@link #onPause()}) and allows an application to safely
  * wait until {@link #onStop()} to save persistent state.</p>
  *
  * <p>For those methods that are not marked as being killable, the activity's

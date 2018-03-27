@@ -264,8 +264,8 @@ import java.util.Set;
  * </ul>
  *
  * <p>For example, consider the Note Pad sample application that
- * allows user to browse through a list of notes data and view details about
- * individual items.  Text in italics indicate places were you would replace a
+ * allows a user to browse through a list of notes data and view details about
+ * individual items.  Text in italics indicates places where you would replace a
  * name with one specific to your own package.</p>
  *
  * <pre> &lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
