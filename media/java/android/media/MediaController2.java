@@ -25,9 +25,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.media.MediaPlaylistAgent.RepeatMode;
 import android.media.MediaPlaylistAgent.ShuffleMode;
-import android.media.MediaSession2.Command;
 import android.media.MediaSession2.CommandButton;
-import android.media.MediaSession2.CommandGroup;
 import android.media.MediaSession2.ControllerInfo;
 import android.media.MediaSession2.ErrorCode;
 import android.media.session.MediaSessionManager;
@@ -56,7 +54,7 @@ import java.util.concurrent.Executor;
  * When controlling {@link MediaSessionService2}, the {@link MediaController2} would be
  * available only if the session service allows this controller by
  * {@link MediaSession2.SessionCallback#onConnect(MediaSession2, ControllerInfo)} for the service.
- * Wait {@link ControllerCallback#onConnected(MediaController2, CommandGroup)} or
+ * Wait {@link ControllerCallback#onConnected(MediaController2, SessionCommandGroup2)} or
  * {@link ControllerCallback#onDisconnected(MediaController2)} for the result.
  * <p>
  * A controller can be created through token from {@link MediaSessionManager} if you hold the
@@ -83,7 +81,7 @@ public class MediaController2 implements AutoCloseable {
          * @param allowedCommands commands that's allowed by the session.
          */
         public void onConnected(@NonNull MediaController2 controller,
-                @NonNull CommandGroup allowedCommands) { }
+                @NonNull SessionCommandGroup2 allowedCommands) { }
 
         /**
          * Called when the session refuses the controller or the controller is disconnected from
@@ -102,7 +100,8 @@ public class MediaController2 implements AutoCloseable {
          * Called when the session set the custom layout through the
          * {@link MediaSession2#setCustomLayout(ControllerInfo, List)}.
          * <p>
-         * Can be called before {@link #onConnected(MediaController2, CommandGroup)} is called.
+         * Can be called before {@link #onConnected(MediaController2, SessionCommandGroup2)} is
+         * called.
          *
          * @param controller the controller for this event
          * @param layout
@@ -126,7 +125,7 @@ public class MediaController2 implements AutoCloseable {
          * @param commands newly allowed commands
          */
         public void onAllowedCommandsChanged(@NonNull MediaController2 controller,
-                @NonNull CommandGroup commands) { }
+                @NonNull SessionCommandGroup2 commands) { }
 
         /**
          * Called when the session sent a custom command.
@@ -137,7 +136,7 @@ public class MediaController2 implements AutoCloseable {
          * @param receiver
          */
         public void onCustomCommand(@NonNull MediaController2 controller,
-                @NonNull Command command, @Nullable Bundle args,
+                @NonNull SessionCommand2 command, @Nullable Bundle args,
                 @Nullable ResultReceiver receiver) { }
 
         /**
@@ -687,7 +686,7 @@ public class MediaController2 implements AutoCloseable {
      * @param args optional argument
      * @param cb optional result receiver
      */
-    public void sendCustomCommand(@NonNull Command command, @Nullable Bundle args,
+    public void sendCustomCommand(@NonNull SessionCommand2 command, @Nullable Bundle args,
             @Nullable ResultReceiver cb) {
         mProvider.sendCustomCommand_impl(command, args, cb);
     }
