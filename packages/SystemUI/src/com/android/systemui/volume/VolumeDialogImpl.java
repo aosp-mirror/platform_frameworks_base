@@ -18,7 +18,6 @@ package com.android.systemui.volume;
 
 import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK;
 import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_GENERIC;
-import static android.media.AudioManager.RINGER_MODE_MAX;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
@@ -570,7 +569,11 @@ public class VolumeDialogImpl implements VolumeDialog {
                 return;
             }
 
-            enableRingerViewsH(mState.zenMode == Global.ZEN_MODE_OFF || !mState.disallowRinger);
+            boolean isZenMuted = mState.zenMode == Global.ZEN_MODE_ALARMS
+                    || mState.zenMode == Global.ZEN_MODE_NO_INTERRUPTIONS
+                    || (mState.zenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
+                        && mState.disallowRinger);
+            enableRingerViewsH(!isZenMuted);
             switch (mState.ringerModeInternal) {
                 case AudioManager.RINGER_MODE_VIBRATE:
                     mRingerIcon.setImageResource(R.drawable.ic_volume_ringer_vibrate);
@@ -586,7 +589,7 @@ public class VolumeDialogImpl implements VolumeDialog {
                 case AudioManager.RINGER_MODE_NORMAL:
                 default:
                     boolean muted = (mAutomute && ss.level == 0) || ss.muted;
-                    if (muted) {
+                    if (!isZenMuted && muted) {
                         mRingerIcon.setImageResource(R.drawable.ic_volume_ringer_mute);
                         mRingerIcon.setContentDescription(mContext.getString(
                                 R.string.volume_stream_content_description_unmute,
