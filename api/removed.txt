@@ -54,6 +54,24 @@ package android.app.admin {
 
 }
 
+package android.app.job {
+
+  public class JobInfo implements android.os.Parcelable {
+    method public deprecated long getEstimatedNetworkBytes();
+  }
+
+  public static final class JobInfo.Builder {
+    method public deprecated android.app.job.JobInfo.Builder setEstimatedNetworkBytes(long);
+    method public deprecated android.app.job.JobInfo.Builder setIsPrefetch(boolean);
+  }
+
+  public final class JobWorkItem implements android.os.Parcelable {
+    ctor public deprecated JobWorkItem(android.content.Intent, long);
+    method public deprecated long getEstimatedNetworkBytes();
+  }
+
+}
+
 package android.app.usage {
 
   public final class StorageStats implements android.os.Parcelable {
