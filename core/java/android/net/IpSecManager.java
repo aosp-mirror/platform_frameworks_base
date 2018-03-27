@@ -484,7 +484,7 @@ public final class IpSecManager {
      * signalling and UDP encapsulated IPsec traffic. Instances can be obtained by calling {@link
      * IpSecManager#openUdpEncapsulationSocket}. The provided socket cannot be re-bound by the
      * caller. The caller should not close the {@code FileDescriptor} returned by {@link
-     * #getSocket}, but should use {@link #close} instead.
+     * #getFileDescriptor}, but should use {@link #close} instead.
      *
      * <p>Allowing the user to close or unbind a UDP encapsulation socket could impact the traffic
      * of the next user who binds to that port. To prevent this scenario, these sockets are held
@@ -523,8 +523,8 @@ public final class IpSecManager {
             mCloseGuard.open("constructor");
         }
 
-        /** Get the wrapped socket. */
-        public FileDescriptor getSocket() {
+        /** Get the encapsulation socket's file descriptor. */
+        public FileDescriptor getFileDescriptor() {
             if (mPfd == null) {
                 return null;
             }

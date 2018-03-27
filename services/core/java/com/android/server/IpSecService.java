@@ -934,7 +934,7 @@ public class IpSecService extends IIpSecService.Stub {
             return mPort;
         }
 
-        public FileDescriptor getSocket() {
+        public FileDescriptor getFileDescriptor() {
             return mSocket;
         }
 
