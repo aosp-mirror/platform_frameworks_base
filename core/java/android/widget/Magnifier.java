@@ -48,7 +48,6 @@ import android.view.SurfaceSession;
 import android.view.SurfaceView;
 import android.view.ThreadedRenderer;
 import android.view.View;
-import android.view.ViewParent;
 import android.view.ViewRootImpl;
 
 import com.android.internal.R;
@@ -158,36 +157,13 @@ public final class Magnifier {
 
         configureCoordinates(xPosInView, yPosInView);
 
-        // Clamp the startX value to avoid magnifying content which does not belong to the magnified
-        // view. This will not take into account overlapping views.
-        // For this, we compute:
-        // - zeroScrollXInSurface: this is the start x of mView, where this is not masked by a
-        //                         potential scrolling container. For example, if mView is a
-        //                         TextView contained in a HorizontalScrollView,
-        //                         mViewCoordinatesInSurface will reflect the surface position of
-        //                         the first text character, rather than the position of the first
-        //                         visible one. Therefore, we need to add back the amount of
-        //                         scrolling from the parent containers.
-        // - actualWidth: similarly, the width of a View will be larger than its actually visible
-        //                width when it is contained in a scrolling container. We need to use
-        //                the minimum width of a scrolling container which contains this view.
-        int zeroScrollXInSurface = mViewCoordinatesInSurface[0];
-        int actualWidth = mView.getWidth();
-        ViewParent viewParent = mView.getParent();
-        while (viewParent instanceof View) {
-            final View container = (View) viewParent;
-            if (container.canScrollHorizontally(-1 /* left scroll */)
-                    || container.canScrollHorizontally(1 /* right scroll */)) {
-                zeroScrollXInSurface += container.getScrollX();
-                actualWidth = Math.min(actualWidth, container.getWidth()
-                        - container.getPaddingLeft() - container.getPaddingRight());
-            }
-            viewParent = viewParent.getParent();
-        }
-
-        final int startX = Math.max(zeroScrollXInSurface, Math.min(
+        // Clamp the startX location to avoid magnifying content which does not belong
+        // to the magnified view. This will not take into account overlapping views.
+        final Rect viewVisibleRegion = new Rect();
+        mView.getGlobalVisibleRect(viewVisibleRegion);
+        final int startX = Math.max(viewVisibleRegion.left, Math.min(
                 mCenterZoomCoords.x - mBitmapWidth / 2,
-                zeroScrollXInSurface + actualWidth - mBitmapWidth));
+                viewVisibleRegion.right - mBitmapWidth));
         final int startY = mCenterZoomCoords.y - mBitmapHeight / 2;
 
         if (xPosInView != mPrevPosInView.x || yPosInView != mPrevPosInView.y) {
