@@ -69,14 +69,14 @@ public interface StaticProvider {
 
     CommandProvider createMediaSession2Command(MediaSession2.Command instance,
             int commandCode, String action, Bundle extra);
-    MediaSession2.Command fromBundle_MediaSession2Command(Context context, Bundle bundle);
-    CommandGroupProvider createMediaSession2CommandGroup(Context context,
+    MediaSession2.Command fromBundle_MediaSession2Command(Bundle bundle);
+    CommandGroupProvider createMediaSession2CommandGroup(
             MediaSession2.CommandGroup instance, MediaSession2.CommandGroup others);
-    MediaSession2.CommandGroup fromBundle_MediaSession2CommandGroup(Context context, Bundle bundle);
+    MediaSession2.CommandGroup fromBundle_MediaSession2CommandGroup(Bundle bundle);
     ControllerInfoProvider createMediaSession2ControllerInfo(Context context,
             MediaSession2.ControllerInfo instance, int uid, int pid,
             String packageName, IInterface callback);
-    CommandButtonProvider.BuilderProvider createMediaSession2CommandButtonBuilder(Context context,
+    CommandButtonProvider.BuilderProvider createMediaSession2CommandButtonBuilder(
             MediaSession2.CommandButton.Builder instance);
     BuilderBaseProvider<MediaSession2, SessionCallback> createMediaSession2Builder(
             Context context, MediaSession2.Builder instance);
@@ -88,7 +88,7 @@ public interface StaticProvider {
             SessionToken2 token, Executor executor, BrowserCallback callback);
 
     MediaSessionService2Provider createMediaSessionService2(MediaSessionService2 instance);
-    MediaNotificationProvider createMediaSessionService2MediaNotification(Context context,
+    MediaNotificationProvider createMediaSessionService2MediaNotification(
             MediaNotification mediaNotification, int notificationId, Notification notification);
 
     MediaSessionService2Provider createMediaLibraryService2(MediaLibraryService2 instance);
@@ -96,33 +96,32 @@ public interface StaticProvider {
         createMediaLibraryService2Builder(
             MediaLibraryService2 service, MediaLibrarySession.Builder instance,
             Executor callbackExecutor, MediaLibrarySessionCallback callback);
-    LibraryRootProvider createMediaLibraryService2LibraryRoot(Context context, LibraryRoot instance,
-            String rootId, Bundle extras);
+    LibraryRootProvider createMediaLibraryService2LibraryRoot(LibraryRoot instance, String rootId,
+            Bundle extras);
 
     SessionToken2Provider createSessionToken2(Context context, SessionToken2 instance,
             String packageName, String serviceName, int uid);
-    SessionToken2 fromBundle_SessionToken2(Context context, Bundle bundle);
+    SessionToken2 fromBundle_SessionToken2(Bundle bundle);
 
-    MediaItem2Provider.BuilderProvider createMediaItem2Builder(
-            Context context, MediaItem2.Builder instance, int flags);
-    MediaItem2 fromBundle_MediaItem2(Context context, Bundle bundle);
+    MediaItem2Provider.BuilderProvider createMediaItem2Builder(MediaItem2.Builder instance,
+            int flags);
+    MediaItem2 fromBundle_MediaItem2(Bundle bundle);
 
-    VolumeProvider2Provider createVolumeProvider2(Context context, VolumeProvider2 instance,
-            int controlType, int maxVolume, int currentVolume);
+    VolumeProvider2Provider createVolumeProvider2(VolumeProvider2 instance, int controlType,
+            int maxVolume, int currentVolume);
 
-    MediaMetadata2 fromBundle_MediaMetadata2(Context context, Bundle bundle);
+    MediaMetadata2 fromBundle_MediaMetadata2(Bundle bundle);
     MediaMetadata2Provider.BuilderProvider createMediaMetadata2Builder(
-            Context context, MediaMetadata2.Builder instance);
+            MediaMetadata2.Builder instance);
     MediaMetadata2Provider.BuilderProvider createMediaMetadata2Builder(
-            Context context, MediaMetadata2.Builder instance, MediaMetadata2 source);
+            MediaMetadata2.Builder instance, MediaMetadata2 source);
 
-    Rating2 newUnratedRating_Rating2(Context context, int ratingStyle);
-    Rating2 fromBundle_Rating2(Context context, Bundle bundle);
-    Rating2 newHeartRating_Rating2(Context context, boolean hasHeart);
-    Rating2 newThumbRating_Rating2(Context context, boolean thumbIsUp);
-    Rating2 newStarRating_Rating2(Context context, int starRatingStyle, float starRating);
-    Rating2 newPercentageRating_Rating2(Context context, float percent);
+    Rating2 newUnratedRating_Rating2(int ratingStyle);
+    Rating2 fromBundle_Rating2(Bundle bundle);
+    Rating2 newHeartRating_Rating2(boolean hasHeart);
+    Rating2 newThumbRating_Rating2(boolean thumbIsUp);
+    Rating2 newStarRating_Rating2(int starRatingStyle, float starRating);
+    Rating2 newPercentageRating_Rating2(float percent);
 
-    MediaPlaylistAgentProvider createMediaPlaylistAgent(Context context,
-            MediaPlaylistAgent instance);
+    MediaPlaylistAgentProvider createMediaPlaylistAgent(MediaPlaylistAgent instance);
 }
