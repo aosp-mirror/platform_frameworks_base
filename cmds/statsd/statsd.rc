@@ -20,5 +20,5 @@ service statsd /system/bin/statsd
 
 on post-fs-data
     # Create directory for statsd
-    mkdir /data/misc/stats-data/ 0770 statsd statsd
-    mkdir /data/misc/stats-service/ 0770 statsd statsd
+    mkdir /data/misc/stats-data/ 0770 statsd system
+    mkdir /data/misc/stats-service/ 0770 statsd system
