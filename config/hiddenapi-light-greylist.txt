@@ -330,8 +330,6 @@ Landroid/app/StatusBarManager;->getService()Lcom/android/internal/statusbar/ISta
 Landroid/app/TaskStackListener;-><init>()V
 Landroid/app/TimePickerDialog;->mTimePicker:Landroid/widget/TimePicker;
 Landroid/app/trust/ITrustManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
-Landroid/app/usage/StorageStatsManager;->getFreeBytes(Ljava/lang/String;)J
-Landroid/app/usage/StorageStatsManager;->getTotalBytes(Ljava/lang/String;)J
 Landroid/app/usage/UsageStatsManager;->mService:Landroid/app/usage/IUsageStatsManager;
 Landroid/app/usage/UsageStats;->mLastEvent:I
 Landroid/app/usage/UsageStats;->mTotalTimeInForeground:J
@@ -1357,7 +1355,6 @@ Landroid/os/storage/VolumeInfo;->getFsUuid()Ljava/lang/String;
 Landroid/os/storage/VolumeInfo;->getPath()Ljava/io/File;
 Landroid/os/storage/VolumeInfo;->getState()I
 Landroid/os/storage/VolumeInfo;->getType()I
-Landroid/os/storage/VolumeInfo;->isMountedReadable()Z
 Landroid/os/storage/VolumeInfo;->isPrimary()Z
 Landroid/os/storage/VolumeInfo;->isVisible()Z
 Landroid/os/StrictMode;->disableDeathOnFileUriExposure()V
