@@ -21,7 +21,7 @@ import android.media.AudioAttributes;
 import android.media.MediaController2.PlaybackInfo;
 import android.media.MediaItem2;
 import android.media.MediaMetadata2;
-import android.media.MediaSession2.Command;
+import android.media.SessionCommand2;
 import android.media.Rating2;
 import android.media.SessionToken2;
 import android.net.Uri;
@@ -56,7 +56,7 @@ public interface MediaController2Provider extends TransportControlProvider {
     void rewind_impl();
 
     void setRating_impl(String mediaId, Rating2 rating);
-    void sendCustomCommand_impl(Command command, Bundle args, ResultReceiver cb);
+    void sendCustomCommand_impl(SessionCommand2 command, Bundle args, ResultReceiver cb);
     List<MediaItem2> getPlaylist_impl();
     void setPlaylist_impl(List<MediaItem2> list, MediaMetadata2 metadata);
     MediaMetadata2 getPlaylistMetadata_impl();

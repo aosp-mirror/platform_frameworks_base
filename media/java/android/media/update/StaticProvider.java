@@ -35,6 +35,8 @@ import android.media.MediaSession2.SessionCallback;
 import android.media.MediaSessionService2;
 import android.media.MediaSessionService2.MediaNotification;
 import android.media.Rating2;
+import android.media.SessionCommand2;
+import android.media.SessionCommandGroup2;
 import android.media.SessionToken2;
 import android.media.VolumeProvider2;
 import android.media.update.MediaLibraryService2Provider.LibraryRootProvider;
@@ -67,12 +69,12 @@ public interface StaticProvider {
             ViewGroupProvider superProvider, ViewGroupProvider privateProvider,
             @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes);
 
-    CommandProvider createMediaSession2Command(MediaSession2.Command instance,
+    CommandProvider createMediaSession2Command(SessionCommand2 instance,
             int commandCode, String action, Bundle extra);
-    MediaSession2.Command fromBundle_MediaSession2Command(Bundle bundle);
-    CommandGroupProvider createMediaSession2CommandGroup(
-            MediaSession2.CommandGroup instance, MediaSession2.CommandGroup others);
-    MediaSession2.CommandGroup fromBundle_MediaSession2CommandGroup(Bundle bundle);
+    SessionCommand2 fromBundle_MediaSession2Command(Bundle bundle);
+    CommandGroupProvider createMediaSession2CommandGroup(SessionCommandGroup2 instance,
+            SessionCommandGroup2 others);
+    SessionCommandGroup2 fromBundle_MediaSession2CommandGroup(Bundle bundle);
     ControllerInfoProvider createMediaSession2ControllerInfo(Context context,
             MediaSession2.ControllerInfo instance, int uid, int pid,
             String packageName, IInterface callback);
