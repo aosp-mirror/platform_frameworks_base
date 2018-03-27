@@ -25,7 +25,7 @@ import com.android.internal.logging.MetricsLogger;
 /**
  * Metrics interface for slices.
  *
- * This is called by SliceView, so Slice develoers should
+ * This is called by SliceView, so Slice developers should
  * not need to reference this class.
  *
  * @see androidx.slice.widget.SliceView
@@ -55,9 +55,18 @@ public class SliceMetrics {
     }
 
     /**
-     * To be called whenever the use interacts with a slice.
-     *@param subSlice The URI of the sub-slice that is the subject of the interaction.
+     * To be called whenever the user invokes a discrete action via a slice.
+     *
+     * <P>
+     *     Use this for discrete events like a tap or the end of a drag,
+     *     not for a continuous streams of events, such as the motion during a gesture.
+     * </P>
+     *
+     * @see androidx.slice.widget.EventInfo#actionType
+     *
+     * @param actionType The type of the event.
+     * @param subSlice The URI of the sub-slice that is the subject of the interaction.
      */
-    public void logTouch(@NonNull Uri subSlice) {
+    public void logTouch(int actionType, @NonNull Uri subSlice) {
     }
 }
