@@ -291,6 +291,7 @@ public class QSFragment extends Fragment implements QS {
         mHeader.setExpansion(mKeyguardShowing, expansion, panelTranslationY);
         mFooter.setExpansion(mKeyguardShowing ? 1 : expansion);
         mQSPanel.getQsTileRevealController().setExpansion(expansion);
+        mQSPanel.getTileLayout().setExpansion(expansion);
         mQSPanel.setTranslationY(translationScaleY * heightDiff);
         mQSDetail.setFullyExpanded(fullyExpanded);
 
