@@ -17,6 +17,7 @@
 package android.widget;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
@@ -32,9 +33,11 @@ import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.GetChars;
 import android.text.Layout;
+import android.text.PrecomputedText;
 import android.text.Selection;
 import android.text.Spannable;
 import android.view.View;
+import android.widget.TextView.BufferType;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -239,6 +242,82 @@ public class TextViewTest {
         mTextView.setText(createLongText());
         mTextView.onTextContextMenuItem(TextView.ID_SELECT_ALL);
         mTextView.onTextContextMenuItem(TextView.ID_CUT);
+    }
+
+    @Test
+    public void testUseDynamicLayout() {
+        mTextView = new TextView(mActivity);
+        mTextView.setTextIsSelectable(true);
+        String text = "HelloWorld";
+        PrecomputedText precomputed =
+                PrecomputedText.create(text, mTextView.getTextMetricsParams());
+
+        mTextView.setTextIsSelectable(false);
+        mTextView.setText(text);
+        assertFalse(mTextView.useDynamicLayout());
+
+        mTextView.setTextIsSelectable(true);
+        mTextView.setText(text);
+        assertTrue(mTextView.useDynamicLayout());
+
+        mTextView.setTextIsSelectable(false);
+        mTextView.setText(precomputed);
+        assertFalse(mTextView.useDynamicLayout());
+
+        mTextView.setTextIsSelectable(true);
+        mTextView.setText(precomputed);
+        assertTrue(mTextView.useDynamicLayout());
+    }
+
+    @Test
+    public void testUseDynamicLayout_SPANNABLE() {
+        mTextView = new TextView(mActivity);
+        mTextView.setTextIsSelectable(true);
+        String text = "HelloWorld";
+        PrecomputedText precomputed =
+                PrecomputedText.create(text, mTextView.getTextMetricsParams());
+
+        mTextView.setTextIsSelectable(false);
+        mTextView.setText(text, BufferType.SPANNABLE);
+        android.util.Log.e("TextViewTest", "Text:" + mTextView.getText().getClass().getName());
+        assertTrue(mTextView.useDynamicLayout());
+
+        mTextView.setTextIsSelectable(true);
+        mTextView.setText(text, BufferType.SPANNABLE);
+        assertTrue(mTextView.useDynamicLayout());
+
+        mTextView.setTextIsSelectable(false);
+        mTextView.setText(precomputed, BufferType.SPANNABLE);
+        assertFalse(mTextView.useDynamicLayout());
+
+        mTextView.setTextIsSelectable(true);
+        mTextView.setText(precomputed, BufferType.SPANNABLE);
+        assertTrue(mTextView.useDynamicLayout());
+    }
+
+    @Test
+    public void testUseDynamicLayout_EDITABLE() {
+        mTextView = new TextView(mActivity);
+        mTextView.setTextIsSelectable(true);
+        String text = "HelloWorld";
+        PrecomputedText precomputed =
+                PrecomputedText.create(text, mTextView.getTextMetricsParams());
+
+        mTextView.setTextIsSelectable(false);
+        mTextView.setText(text, BufferType.EDITABLE);
+        assertTrue(mTextView.useDynamicLayout());
+
+        mTextView.setTextIsSelectable(true);
+        mTextView.setText(text, BufferType.EDITABLE);
+        assertTrue(mTextView.useDynamicLayout());
+
+        mTextView.setTextIsSelectable(false);
+        mTextView.setText(precomputed, BufferType.EDITABLE);
+        assertTrue(mTextView.useDynamicLayout());
+
+        mTextView.setTextIsSelectable(true);
+        mTextView.setText(precomputed, BufferType.EDITABLE);
+        assertTrue(mTextView.useDynamicLayout());
     }
 
     private String createLongText() {
