@@ -98,6 +98,8 @@ import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
+import android.app.admin.DeviceAdminInfo;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.backup.BackupManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
@@ -365,6 +367,7 @@ public class NotificationManagerService extends SystemService {
 
     private AppOpsManager mAppOps;
     private UsageStatsManagerInternal mAppUsageStats;
+    private DevicePolicyManagerInternal mDpm;
 
     private Archive mArchive;
 
@@ -1315,7 +1318,7 @@ public class NotificationManagerService extends SystemService {
             ICompanionDeviceManager companionManager, SnoozeHelper snoozeHelper,
             NotificationUsageStats usageStats, AtomicFile policyFile,
             ActivityManager activityManager, GroupHelper groupHelper, IActivityManager am,
-            UsageStatsManagerInternal appUsageStats) {
+            UsageStatsManagerInternal appUsageStats, DevicePolicyManagerInternal dpm) {
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
                 Settings.Global.MAX_NOTIFICATION_ENQUEUE_RATE,
@@ -1334,6 +1337,8 @@ public class NotificationManagerService extends SystemService {
         mActivityManager = activityManager;
         mDeviceIdleController = IDeviceIdleController.Stub.asInterface(
                 ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
+        mDpm = dpm;
+
         try {
             mPermissionOwner = mAm.newUriPermissionOwner("notification");
         } catch (RemoteException e) {
@@ -1471,7 +1476,8 @@ public class NotificationManagerService extends SystemService {
                 new AtomicFile(new File(systemDir, "notification_policy.xml"), "notification-policy"),
                 (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE),
                 getGroupHelper(), ActivityManager.getService(),
-                LocalServices.getService(UsageStatsManagerInternal.class));
+                LocalServices.getService(UsageStatsManagerInternal.class),
+                LocalServices.getService(DevicePolicyManagerInternal.class));
 
         // register for various Intents
         IntentFilter filter = new IntentFilter();
@@ -3024,8 +3030,8 @@ public class NotificationManagerService extends SystemService {
 
         private boolean checkPolicyAccess(String pkg) {
             try {
-                int uid = getContext().getPackageManager().getPackageUidAsUser(
-                        pkg, UserHandle.getCallingUserId());
+                int uid = getContext().getPackageManager().getPackageUidAsUser(pkg,
+                        UserHandle.getCallingUserId());
                 if (PackageManager.PERMISSION_GRANTED == ActivityManager.checkComponentPermission(
                         android.Manifest.permission.MANAGE_NOTIFICATIONS, uid,
                         -1, true)) {
@@ -3034,7 +3040,11 @@ public class NotificationManagerService extends SystemService {
             } catch (NameNotFoundException e) {
                 return false;
             }
-            return checkPackagePolicyAccess(pkg) || mListeners.isComponentEnabledForPackage(pkg);
+            return checkPackagePolicyAccess(pkg)
+                    || mListeners.isComponentEnabledForPackage(pkg)
+                    || (mDpm != null &&
+                            mDpm.isActiveAdminWithPolicy(Binder.getCallingUid(),
+                                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER));
         }
 
         @Override

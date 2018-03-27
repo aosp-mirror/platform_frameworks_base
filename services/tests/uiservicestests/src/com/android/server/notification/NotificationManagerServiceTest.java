@@ -68,6 +68,8 @@ import android.app.Notification.MessagingStyle.Message;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
+import android.app.admin.DeviceAdminInfo;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.UsageStatsManagerInternal;
 import android.companion.ICompanionDeviceManager;
 import android.content.ComponentName;
@@ -265,7 +267,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                     mPackageManager, mPackageManagerClient, mockLightsManager,
                     mListeners, mAssistants, mConditionProviders,
                     mCompanionMgr, mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager,
-                    mGroupHelper, mAm, mock(UsageStatsManagerInternal.class));
+                    mGroupHelper, mAm, mock(UsageStatsManagerInternal.class),
+                    mock(DevicePolicyManagerInternal.class));
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
                 throw e;
