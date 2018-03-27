@@ -1340,6 +1340,30 @@
     <integer-array name="config_autoBrightnessKeyboardBacklightValues">
     </integer-array>
 
+    <!-- Array of light sensor lux values to define the minimum brightness curve, which guarantees
+         that any curve that dips below it is rejected by the system.
+         This prevents auto-brightness from setting the screen so dark as to prevent the user from
+         disabling auto-brightness or reseting the brightness curve via ADB.
+
+         The control points must be strictly increasing. Each control point corresponds to an entry
+         in the minimum brightness nits array. -->
+    <integer-array name="config_autoBrightnessMinimumBrightnessCurveLux">
+        <item>2000</item>
+        <item>4000</item>
+    </integer-array>
+
+    <!-- Array of desired screen brightness in nits corresponding to the lux values
+         in the config_autoBrightnessMinimumBrightnessCurveLux array.
+
+         This array should have size one greater than the size of the
+         config_autoBrightnessMinimumBrightnessCurveLux array. The values must be non-negative and
+         non-decreasing. -->
+    <array name="config_autoBrightnessMinimumBrightnessCurveNits">
+        <item>1.0</item>
+        <item>50.0</item>
+        <item>90.0</item>
+    </array>
+
     <!-- Array of hysteresis constraint values for brightening, represented as tenths of a
          percent. The length of this array is assumed to be one greater than
          config_dynamicHysteresisLuxLevels. The brightening threshold is calculated as
