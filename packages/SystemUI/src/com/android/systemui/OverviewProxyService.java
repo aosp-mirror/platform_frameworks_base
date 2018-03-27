@@ -227,9 +227,14 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mHandler.removeCallbacks(mConnectionRunnable);
         Intent launcherServiceIntent = new Intent(ACTION_QUICKSTEP)
                 .setPackage(mRecentsComponentName.getPackageName());
-        boolean bound = mContext.bindServiceAsUser(launcherServiceIntent,
-                mOverviewServiceConnection, Context.BIND_AUTO_CREATE,
-                UserHandle.of(mDeviceProvisionedController.getCurrentUser()));
+        boolean bound = false;
+        try {
+            bound = mContext.bindServiceAsUser(launcherServiceIntent,
+                    mOverviewServiceConnection, Context.BIND_AUTO_CREATE,
+                    UserHandle.of(mDeviceProvisionedController.getCurrentUser()));
+        } catch (SecurityException e) {
+            Log.e(TAG_OPS, "Unable to bind because of security error", e);
+        }
         if (!bound) {
             // Retry after exponential backoff timeout
             final long timeoutMs = (long) Math.scalb(BACKOFF_MILLIS, mConnectionBackoffAttempts);
