@@ -46,9 +46,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.Utils;
+import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 
@@ -81,11 +83,12 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private OnSettingsClickListener mOnSettingsClickListener;
     private OnAppSettingsClickListener mAppSettingsClickListener;
     private NotificationGuts mGutsContainer;
+
+    /** Whether this view is being shown as part of the blocking helper */
+    private boolean mIsForBlockingHelper;
     private boolean mNegativeUserSentiment;
 
-    private OnClickListener mOnKeepShowing = v -> {
-        closeControls(v);
-    };
+    private OnClickListener mOnKeepShowing = this::closeControls;
 
     private OnClickListener mOnStopMinNotifications = v -> {
         swapContent(false);
@@ -114,7 +117,9 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         void onClick(View v, Intent intent);
     }
 
-    public void bindNotification(final PackageManager pm,
+    @VisibleForTesting
+    void bindNotification(
+            final PackageManager pm,
             final INotificationManager iNotificationManager,
             final String pkg,
             final NotificationChannel notificationChannel,
@@ -127,20 +132,24 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             throws RemoteException {
         bindNotification(pm, iNotificationManager, pkg, notificationChannel, numChannels, sbn,
                 checkSaveListener, onSettingsClick, onAppSettingsClick, nonBlockablePkgs,
-                false /* negative sentiment */);
+                false /* isBlockingHelper */,
+                false /* isUserSentimentNegative */);
     }
 
-    public void bindNotification(final PackageManager pm,
-            final INotificationManager iNotificationManager,
-            final String pkg,
-            final NotificationChannel notificationChannel,
-            final int numChannels,
-            final StatusBarNotification sbn,
-            final CheckSaveListener checkSaveListener,
-            final OnSettingsClickListener onSettingsClick,
-            final OnAppSettingsClickListener onAppSettingsClick,
-            final Set<String> nonBlockablePkgs,
-            boolean negativeUserSentiment)  throws RemoteException {
+    public void bindNotification(
+            PackageManager pm,
+            INotificationManager iNotificationManager,
+            String pkg,
+            NotificationChannel notificationChannel,
+            int numChannels,
+            StatusBarNotification sbn,
+            CheckSaveListener checkSaveListener,
+            OnSettingsClickListener onSettingsClick,
+            OnAppSettingsClickListener onAppSettingsClick,
+            Set<String> nonBlockablePkgs,
+            boolean isForBlockingHelper,
+            boolean isUserSentimentNegative)
+            throws RemoteException {
         mINotificationManager = iNotificationManager;
         mPkg = pkg;
         mNumNotificationChannels = numChannels;
@@ -152,9 +161,10 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         mOnSettingsClickListener = onSettingsClick;
         mSingleNotificationChannel = notificationChannel;
         mStartingUserImportance = mChosenImportance = mSingleNotificationChannel.getImportance();
-        mNegativeUserSentiment = negativeUserSentiment;
+        mNegativeUserSentiment = isUserSentimentNegative;
         mIsForeground =
                 (mSbn.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
+        mIsForBlockingHelper = isForBlockingHelper;
 
         int numTotalChannels = mINotificationManager.getNumNotificationChannelsForPackage(
                 pkg, mAppUid, false /* includeDeleted */);
@@ -294,12 +304,14 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     }
 
     private void bindButtons() {
+        // Set up stay-in-notification actions
         View block =  findViewById(R.id.block);
-        block.setOnClickListener(mOnStopMinNotifications);
         TextView keep = findViewById(R.id.keep);
-        keep.setOnClickListener(mOnKeepShowing);
-        findViewById(R.id.undo).setOnClickListener(mOnUndo);
         View minimize = findViewById(R.id.minimize);
+
+        findViewById(R.id.undo).setOnClickListener(mOnUndo);
+        block.setOnClickListener(mOnStopMinNotifications);
+        keep.setOnClickListener(mOnKeepShowing);
         minimize.setOnClickListener(mOnStopMinNotifications);
 
         if (mNonblockable) {
@@ -314,7 +326,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             minimize.setVisibility(GONE);
         }
 
-        // app settings link
+        // Set up app settings link
         TextView settingsLinkView = findViewById(R.id.app_settings);
         Intent settingsIntent = getAppSettingsIntent(mPm, mPkg, mSingleNotificationChannel,
                 mSbn.getId(), mSbn.getTag());
@@ -421,16 +433,23 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         return intent;
     }
 
-    private void closeControls(View v) {
-        int[] parentLoc = new int[2];
-        int[] targetLoc = new int[2];
-        mGutsContainer.getLocationOnScreen(parentLoc);
-        v.getLocationOnScreen(targetLoc);
-        final int centerX = v.getWidth() / 2;
-        final int centerY = v.getHeight() / 2;
-        final int x = targetLoc[0] - parentLoc[0] + centerX;
-        final int y = targetLoc[1] - parentLoc[1] + centerY;
-        mGutsContainer.closeControls(x, y, true /* save */, false /* force */);
+    @VisibleForTesting
+    void closeControls(View v) {
+        if (mIsForBlockingHelper) {
+            NotificationBlockingHelperManager manager =
+                    Dependency.get(NotificationBlockingHelperManager.class);
+            manager.dismissCurrentBlockingHelper();
+        } else {
+            int[] parentLoc = new int[2];
+            int[] targetLoc = new int[2];
+            mGutsContainer.getLocationOnScreen(parentLoc);
+            v.getLocationOnScreen(targetLoc);
+            final int centerX = v.getWidth() / 2;
+            final int centerY = v.getHeight() / 2;
+            final int x = targetLoc[0] - parentLoc[0] + centerX;
+            final int y = targetLoc[1] - parentLoc[1] + centerY;
+            mGutsContainer.closeControls(x, y, true /* save */, false /* force */);
+        }
     }
 
     @Override

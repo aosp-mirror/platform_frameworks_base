@@ -67,9 +67,13 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -87,14 +91,21 @@ public class NotificationInfoTest extends SysuiTestCase {
     private static final String TEST_CHANNEL_NAME = "TEST CHANNEL NAME";
 
     private NotificationInfo mNotificationInfo;
-    private final INotificationManager mMockINotificationManager = mock(INotificationManager.class);
-    private final PackageManager mMockPackageManager = mock(PackageManager.class);
     private NotificationChannel mNotificationChannel;
     private NotificationChannel mDefaultNotificationChannel;
     private StatusBarNotification mSbn;
 
+    @Rule public MockitoRule mockito = MockitoJUnit.rule();
+    @Mock private INotificationManager mMockINotificationManager;
+    @Mock private PackageManager mMockPackageManager;
+    @Mock private NotificationBlockingHelperManager mBlockingHelperManager;
+
     @Before
     public void setUp() throws Exception {
+        mDependency.injectTestDependency(
+                NotificationBlockingHelperManager.class,
+                mBlockingHelperManager);
+
         // Inflate the layout
         final LayoutInflater layoutInflater = LayoutInflater.from(mContext);
         mNotificationInfo = (NotificationInfo) layoutInflater.inflate(R.layout.notification_info,
@@ -311,7 +322,7 @@ public class NotificationInfoTest extends SysuiTestCase {
     public void testbindNotification_BlockingHelper() throws Exception {
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null,
-                null, null, true);
+                null, null, false, true);
         final TextView view = mNotificationInfo.findViewById(R.id.block_prompt);
         assertEquals(View.VISIBLE, view.getVisibility());
         assertEquals(mContext.getString(R.string.inline_blocking_helper), view.getText());
@@ -383,6 +394,27 @@ public class NotificationInfoTest extends SysuiTestCase {
         verify(mMockINotificationManager, times(1)).updateNotificationChannelForPackage(
                 anyString(), eq(TEST_UID), any());
         assertEquals(IMPORTANCE_UNSPECIFIED, mNotificationChannel.getImportance());
+    }
+
+    @Test
+    public void testCloseControls_blockingHelperDismissedIfShown() throws Exception {
+        mNotificationInfo.bindNotification(
+                mMockPackageManager,
+                mMockINotificationManager,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                1 /* numChannels */,
+                mSbn,
+                null /* checkSaveListener */,
+                null /* onSettingsClick */,
+                null /* onAppSettingsClick */,
+                null /* nonBlockablePkgs */,
+                true /* isForBlockingHelper */,
+                false /* isUserSentimentNegative */);
+
+        mNotificationInfo.closeControls(mNotificationInfo);
+
+        verify(mBlockingHelperManager).dismissCurrentBlockingHelper();
     }
 
     @Test
