@@ -70,6 +70,7 @@ import android.widget.ScrollView;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.Utils;
+import com.android.systemui.Dependency;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -83,6 +84,7 @@ import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.FooterView;
+import com.android.systemui.statusbar.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationGuts;
 import com.android.systemui.statusbar.NotificationListContainer;
@@ -447,6 +449,13 @@ public class NotificationStackScrollLayout extends ViewGroup
         mRoundnessManager.setAnimatedChildren(mChildrenToAddAnimated);
         mRoundnessManager.setOnRoundingChangedCallback(this::invalidate);
         addOnExpandedHeightListener(mRoundnessManager::setExpanded);
+
+        // Blocking helper manager wants to know the expanded state, update as well.
+        NotificationBlockingHelperManager blockingHelperManager =
+                Dependency.get(NotificationBlockingHelperManager.class);
+        addOnExpandedHeightListener((height, unused) -> {
+            blockingHelperManager.setNotificationShadeExpanded(height);
+        });
 
         updateWillNotDraw();
         mBackgroundPaint.setAntiAlias(true);
@@ -1038,45 +1047,63 @@ public class NotificationStackScrollLayout extends ViewGroup
         mQsContainer = qsContainer;
     }
 
+    /**
+     * Handles cleanup after the given {@code view} has been fully swiped out (including
+     * re-invoking dismiss logic in case the notification has not made its way out yet).
+     */
     @Override
-    public void onChildDismissed(View v) {
-        ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+    public void onChildDismissed(View view) {
+        ExpandableNotificationRow row = (ExpandableNotificationRow) view;
         if (!row.isDismissed()) {
-            handleChildDismissed(v);
+            handleChildViewDismissed(view);
         }
         ViewGroup transientContainer = row.getTransientContainer();
         if (transientContainer != null) {
-            transientContainer.removeTransientView(v);
+            transientContainer.removeTransientView(view);
         }
     }
 
-    private void handleChildDismissed(View v) {
+    /**
+     * Starts up notification dismiss and tells the notification, if any, to remove itself from
+     * layout.
+     *
+     * @param view view (e.g. notification) to dismiss from the layout
+     */
+    private void handleChildViewDismissed(View view) {
         if (mDismissAllInProgress) {
             return;
         }
+
+        boolean isBlockingHelperShown = false;
+
         setSwipingInProgress(false);
-        if (mDragAnimPendingChildren.contains(v)) {
-            // We start the swipe and finish it in the same frame, we don't want any animation
-            // for the drag
-            mDragAnimPendingChildren.remove(v);
+        if (mDragAnimPendingChildren.contains(view)) {
+            // We start the swipe and finish it in the same frame; we don't want a drag animation.
+            mDragAnimPendingChildren.remove(view);
         }
-        mSwipedOutViews.add(v);
-        mAmbientState.onDragFinished(v);
+        mAmbientState.onDragFinished(view);
         updateContinuousShadowDrawing();
-        if (v instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+
+        if (view instanceof ExpandableNotificationRow) {
+            ExpandableNotificationRow row = (ExpandableNotificationRow) view;
             if (row.isHeadsUp()) {
                 mHeadsUpManager.addSwipedOutNotification(row.getStatusBarNotification().getKey());
             }
-        }
-        if (v instanceof ExpandableNotificationRow) {
-            ((ExpandableNotificationRow) v).performDismiss(false /* fromAccessibility */);
+            isBlockingHelperShown =
+                    row.performDismissWithBlockingHelper(false /* fromAccessibility */);
         }
 
+        if (!isBlockingHelperShown) {
+            mSwipedOutViews.add(view);
+        }
         mFalsingManager.onNotificationDismissed();
         if (mFalsingManager.shouldEnforceBouncer()) {
-            mStatusBar.executeRunnableDismissingKeyguard(null, null /* cancelAction */,
-                    false /* dismissShade */, true /* afterKeyguardGone */, false /* deferred */);
+            mStatusBar.executeRunnableDismissingKeyguard(
+                    null,
+                    null /* cancelAction */,
+                    false /* dismissShade */,
+                    true /* afterKeyguardGone */,
+                    false /* deferred */);
         }
     }
 
@@ -2729,9 +2756,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         updateScrollStateForRemovedChild(expandableView);
         boolean animationGenerated = generateRemoveAnimation(child);
         if (animationGenerated) {
-            if (!mSwipedOutViews.contains(child)) {
-                container.getOverlay().add(child);
-            } else if (Math.abs(expandableView.getTranslation()) != expandableView.getWidth()) {
+            if (!mSwipedOutViews.contains(child)
+                    || Math.abs(expandableView.getTranslation()) != expandableView.getWidth()) {
                 container.addTransientView(child, 0);
                 expandableView.setTransientContainer(container);
             }
@@ -4618,7 +4644,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             if (mIsExpanded) {
                 // We don't want to quick-dismiss when it's a heads up as this might lead to closing
                 // of the panel early.
-                handleChildDismissed(view);
+                handleChildViewDismissed(view);
             }
             mStatusBar.getGutsManager().closeAndSaveGuts(true /* removeLeavebehind */,
                     false /* force */, false /* removeControls */, -1 /* x */, -1 /* y */,
