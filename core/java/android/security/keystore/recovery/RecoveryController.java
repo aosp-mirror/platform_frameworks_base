@@ -465,16 +465,7 @@ public class RecoveryController {
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     public byte[] generateAndStoreKey(@NonNull String alias, byte[] account)
             throws InternalRecoveryServiceException, LockScreenRequiredException {
-        try {
-            return mBinder.generateAndStoreKey(alias);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ERROR_INSECURE_USER) {
-                throw new LockScreenRequiredException(e.getMessage());
-            }
-            throw wrapUnexpectedServiceSpecificException(e);
-        }
+        throw new UnsupportedOperationException("Operation is not supported, use generateKey");
     }
 
     /**

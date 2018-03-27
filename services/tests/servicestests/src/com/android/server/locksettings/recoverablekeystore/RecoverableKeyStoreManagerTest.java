@@ -211,24 +211,6 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
-    public void generateAndStoreKey_storesTheKey() throws Exception {
-        int uid = Binder.getCallingUid();
-        int userId = UserHandle.getCallingUserId();
-
-        mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS);
-
-        assertThat(mRecoverableKeyStoreDb.getKey(uid, TEST_ALIAS)).isNotNull();
-
-        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
-    }
-
-    @Test
-    public void generateAndStoreKey_returnsAKeyOfAppropriateSize() throws Exception {
-        assertThat(mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS))
-                .hasLength(RECOVERABLE_KEY_SIZE_BYTES);
-    }
-
-    @Test
     public void importKey_storesTheKey() throws Exception {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
@@ -265,7 +247,7 @@ public class RecoverableKeyStoreManagerTest {
     @Test
     public void removeKey_removesAKey() throws Exception {
         int uid = Binder.getCallingUid();
-        mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS);
+        mRecoverableKeyStoreManager.generateKey(TEST_ALIAS);
 
         mRecoverableKeyStoreManager.removeKey(TEST_ALIAS);
 
@@ -276,7 +258,7 @@ public class RecoverableKeyStoreManagerTest {
     public void removeKey_updatesShouldCreateSnapshot() throws Exception {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
-        mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS);
+        mRecoverableKeyStoreManager.generateKey(TEST_ALIAS);
         // Pretend that key was synced
         mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
 
@@ -1056,7 +1038,7 @@ public class RecoverableKeyStoreManagerTest {
         int userId = UserHandle.getCallingUserId();
         mRecoverableKeyStoreManager.setRecoverySecretTypes(new int[] { 1 });
 
-        mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS);
+        mRecoverableKeyStoreManager.generateKey(TEST_ALIAS);
         // Pretend that key was synced
         mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
         mRecoverableKeyStoreManager.setRecoverySecretTypes(new int[] { 2 });

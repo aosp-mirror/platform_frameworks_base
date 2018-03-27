@@ -106,7 +106,7 @@ public final class KeyDerivationParams implements Parcelable {
     /**
      * @hide
      */
-    KeyDerivationParams(@KeyDerivationAlgorithm int algorithm, @NonNull byte[] salt,
+    private KeyDerivationParams(@KeyDerivationAlgorithm int algorithm, @NonNull byte[] salt,
             int memoryDifficulty) {
         mAlgorithm = algorithm;
         mSalt = Preconditions.checkNotNull(salt);
