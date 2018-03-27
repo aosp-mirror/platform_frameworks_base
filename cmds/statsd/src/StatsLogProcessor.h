@@ -69,6 +69,11 @@ public:
     void dumpStates(FILE* out, bool verbose);
 
 private:
+    // For testing only.
+    inline sp<AlarmMonitor> getAnomalyAlarmMonitor() const {
+        return mAnomalyAlarmMonitor;
+    }
+
     mutable mutex mMetricsMutex;
 
     std::unordered_map<ConfigKey, sp<MetricsManager>> mMetricsManagers;
@@ -133,13 +138,15 @@ private:
     FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_Link_SimpleCondition);
     FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_PartialLink_SimpleCondition);
 
-
-
     FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_PartialLink_AND_CombinationCondition);
     FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_AND_CombinationCondition);
     FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_Link_AND_CombinationCondition);
 
-
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestSlicedCountMetric_single_bucket);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestSlicedCountMetric_multiple_buckets);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_single_bucket);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_multiple_buckets);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_long_refractory_period);
 };
 
 }  // namespace statsd

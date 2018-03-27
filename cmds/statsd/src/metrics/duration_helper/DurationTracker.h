@@ -109,7 +109,7 @@ public:
 
     // Predict the anomaly timestamp given the current status.
     virtual int64_t predictAnomalyTimestampNs(const DurationAnomalyTracker& anomalyTracker,
-                                              const uint64_t currentTimestamp) const = 0;
+                                              const int64_t currentTimestamp) const = 0;
     // Dump internal states for debugging
     virtual void dumpStates(FILE* out, bool verbose) const = 0;
 
@@ -118,12 +118,19 @@ public:
     }
 
 protected:
+    uint64_t getCurrentBucketEndTimeNs() const {
+        return mStartTimeNs + (mCurrentBucketNum + 1) * mBucketSizeNs;
+    }
+
     // Starts the anomaly alarm.
     void startAnomalyAlarm(const uint64_t eventTime) {
         for (auto& anomalyTracker : mAnomalyTrackers) {
             if (anomalyTracker != nullptr) {
-                anomalyTracker->startAlarm(mEventKey,
-                                           predictAnomalyTimestampNs(*anomalyTracker, eventTime));
+                const uint64_t alarmTimestampNs =
+                    predictAnomalyTimestampNs(*anomalyTracker, eventTime);
+                if (alarmTimestampNs > 0) {
+                    anomalyTracker->startAlarm(mEventKey, alarmTimestampNs);
+                }
             }
         }
     }
