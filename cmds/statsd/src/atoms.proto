@@ -292,7 +292,7 @@ message BleScanResultReceived {
  * Logs when a sensor state changes.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message SensorStateChanged {
     repeated AttributionNode attribution_node = 1;
@@ -330,7 +330,7 @@ message GpsScanStateChanged {
  * Logs when a sync manager sync state changes.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message SyncStateChanged {
     repeated AttributionNode attribution_node = 1;
@@ -349,7 +349,7 @@ message SyncStateChanged {
  * Logs when a job scheduler job state changes.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message ScheduledJobStateChanged {
     repeated AttributionNode attribution_node = 1;
@@ -366,7 +366,7 @@ message ScheduledJobStateChanged {
 
     // The reason a job has stopped.
     // This is only applicable when the state is FINISHED.
-    // The default value is CANCELED.
+    // The default value is STOP_REASON_UNKNOWN.
     optional android.app.job.StopReasonEnum stop_reason = 4;
 }
 
@@ -374,7 +374,7 @@ message ScheduledJobStateChanged {
  * Logs when the audio state changes.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message AudioStateChanged {
     repeated AttributionNode attribution_node = 1;
@@ -382,6 +382,8 @@ message AudioStateChanged {
     enum State {
         OFF = 0;
         ON = 1;
+        // RESET indicates all audio stopped. Used when it (re)starts (e.g. after it crashes).
+        RESET = 2;
     }
     optional State state = 2;
 }
@@ -390,7 +392,7 @@ message AudioStateChanged {
  * Logs when the video codec state changes.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message MediaCodecActivityChanged {
     repeated AttributionNode attribution_node = 1;
@@ -398,6 +400,8 @@ message MediaCodecActivityChanged {
     enum State {
         OFF = 0;
         ON = 1;
+        // RESET indicates all mediaCodec stopped. Used when it (re)starts (e.g. after it crashes).
+        RESET = 2;
     }
     optional State state = 2;
 }
@@ -406,7 +410,7 @@ message MediaCodecActivityChanged {
  * Logs when the flashlight state changes.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message FlashlightStateChanged {
     repeated AttributionNode attribution_node = 1;
@@ -414,6 +418,8 @@ message FlashlightStateChanged {
     enum State {
         OFF = 0;
         ON = 1;
+        // RESET indicates all flashlight stopped. Used when it (re)starts (e.g. after it crashes).
+        RESET = 2;
     }
     optional State state = 2;
 }
@@ -422,7 +428,7 @@ message FlashlightStateChanged {
  * Logs when the camera state changes.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message CameraStateChanged {
     repeated AttributionNode attribution_node = 1;
@@ -430,6 +436,8 @@ message CameraStateChanged {
     enum State {
         OFF = 0;
         ON = 1;
+        // RESET indicates all camera stopped. Used when it (re)starts (e.g. after it crashes).
+        RESET = 2;
     }
     optional State state = 2;
 }
