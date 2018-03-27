@@ -54,7 +54,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
     private final FingerprintManager mFingerprintManager;
     protected boolean mDialogDismissed;
 
-    // Receives events from SystemUI
+    // Receives events from SystemUI and handles them before forwarding them to FingerprintDialog
     protected IFingerprintDialogReceiver mDialogReceiver = new IFingerprintDialogReceiver.Stub() {
         @Override // binder call
         public void onDialogDismissed(int reason) {
