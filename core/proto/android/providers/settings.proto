@@ -20,9 +20,9 @@ package android.providers.settings;
 option java_multiple_files = true;
 option java_outer_classname = "SettingsServiceProto";
 
-import "frameworks/base/core/proto/android/providers/settings/common.proto";
 import "frameworks/base/core/proto/android/providers/settings/global.proto";
 import "frameworks/base/core/proto/android/providers/settings/secure.proto";
+import "frameworks/base/core/proto/android/providers/settings/system.proto";
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 message SettingsServiceDumpProto {
@@ -46,111 +46,6 @@ message UserSettingsProto {
 
     // The system settings for this user
     optional SystemSettingsProto system_settings = 3;
-}
-
-// Note: it's a conscious decision to add each setting as a separate field. This
-// allows annotating each setting with its own privacy tag.
-message SystemSettingsProto {
-    option (android.msg_privacy).dest = DEST_EXPLICIT;
-
-    repeated SettingsOperationProto historical_operations = 1;
-
-    optional SettingProto end_button_behavior = 2 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto advanced_settings = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto bluetooth_discoverability = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto bluetooth_discoverability_timeout = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto font_scale = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto system_locales = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto display_color_mode = 8 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto screen_off_timeout = 9 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto screen_brightness = 10 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto screen_brightness_for_vr = 11 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto screen_brightness_mode = 12 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto screen_auto_brightness_adj = 13 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    // Determines which streams are affected by ringer mode changes. The stream
-    // type's bit will be set to 1 if it should be muted when going into an
-    // inaudible ringer mode.
-    optional SettingProto mode_ringer_streams_affected = 14 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto mute_streams_affected = 15 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto vibrate_on = 16 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto vibrate_input_devices = 17 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto notification_vibration_intensity = 18 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto haptic_feedback_intensity = 19 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto volume_ring = 20 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto volume_system = 21 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto volume_voice = 22 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto volume_music = 23 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto volume_alarm = 24 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto volume_notification = 25 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto volume_bluetooth_sco = 26 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto volume_accessibility = 27 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto volume_master = 28 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto master_mono = 29 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    // Whether silent mode should allow vibration feedback. This is used
-    // internally in AudioService and the Sound settings activity to coordinate
-    // decoupling of vibrate and silent modes. This setting will likely be
-    // removed in a future release with support for audio/vibe feedback
-    // profiles.
-    // Not used anymore. On devices with vibrator, the user explicitly selects
-    // silent or vibrate mode. Kept for use by legacy database upgrade code in
-    // DatabaseHelper.
-    optional SettingProto vibrate_in_silent = 30 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    // Appended to various volume related settings to record the previous values
-    // before the settings were affected by a silent/vibrate ringer mode change.
-    optional SettingProto append_for_last_audible = 31 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto ringtone = 32;
-    optional SettingProto ringtone_cache = 33;
-    optional SettingProto notification_sound = 34;
-    optional SettingProto notification_sound_cache = 35;
-    optional SettingProto alarm_alert = 36;
-    optional SettingProto alarm_alert_cache = 37;
-    optional SettingProto media_button_receiver = 38;
-    optional SettingProto text_auto_replace = 39 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto text_auto_caps = 40 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto text_auto_punctuate = 41 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto text_show_password = 42 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto show_gtalk_service_status = 43 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto time_12_24 = 44 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto date_format = 45 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto setup_wizard_has_run = 46 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto accelerometer_rotation = 47 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto user_rotation = 48 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto hide_rotation_lock_toggle_for_accessibility = 49 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto vibrate_when_ringing = 50 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto dtmf_tone_when_dialing = 51 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto dtmf_tone_type_when_dialing = 52 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto hearing_aid = 53 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto tty_mode = 54 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    // User-selected RTT mode. When on, outgoing and incoming calls will be
-    // answered as RTT calls when supported by the device and carrier. Boolean
-    // value.
-    optional SettingProto rtt_calling_mode = 55 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto sound_effects_enabled = 56 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto haptic_feedback_enabled = 57 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto notification_light_pulse = 58 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    // Show pointer location on screen? 0 = no, 1 = yes.
-    optional SettingProto pointer_location = 59 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto show_touches = 60 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    // Log raw orientation data from {@link
-    // com.android.server.policy.WindowOrientationListener} for use with the
-    // orientationplot.py tool.
-    // 0 = no, 1 = yes
-    optional SettingProto window_orientation_listener_log = 61 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto lockscreen_sounds_enabled = 62 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto lockscreen_disabled = 63 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto sip_receive_calls = 64 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto sip_call_options = 65 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto sip_always = 66 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto sip_address_only = 67 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto pointer_speed = 68 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto lock_to_app_enabled = 69 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto egg_mode = 70 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto show_battery_percent = 71 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto when_to_make_wifi_calls = 72 [ (android.privacy).dest = DEST_AUTOMATIC ];
-
-    // Please insert fields in the same order as in
-    // frameworks/base/core/java/android/provider/Settings.java.
-    // Next tag = 73;
 }
 
 message SettingsProto {
