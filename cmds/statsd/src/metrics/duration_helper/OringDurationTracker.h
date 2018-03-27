@@ -56,7 +56,7 @@ public:
             std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>>* output) override;
 
     int64_t predictAnomalyTimestampNs(const DurationAnomalyTracker& anomalyTracker,
-                                      const uint64_t currentTimestamp) const override;
+                                      const int64_t currentTimestamp) const override;
     void dumpStates(FILE* out, bool verbose) const override;
 
 private:

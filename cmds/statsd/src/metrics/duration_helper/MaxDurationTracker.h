@@ -57,7 +57,7 @@ public:
     void onConditionChanged(bool condition, const uint64_t timestamp) override;
 
     int64_t predictAnomalyTimestampNs(const DurationAnomalyTracker& anomalyTracker,
-                                      const uint64_t currentTimestamp) const override;
+                                      const int64_t currentTimestamp) const override;
     void dumpStates(FILE* out, bool verbose) const override;
 
 private:

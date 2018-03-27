@@ -113,6 +113,13 @@ public:
     }
 
 protected:
+    // For testing only.
+    // Returns the alarm timestamp in seconds for the query dimension if it exists. Otherwise
+    // returns 0.
+    virtual uint32_t getAlarmTimestampSec(const MetricDimensionKey& dimensionKey) const {
+        return 0;   // The base AnomalyTracker class doesn't have alarms.
+    }
+
     // statsd_config.proto Alert message that defines this tracker.
     const Alert mAlert;
 
@@ -159,8 +166,7 @@ protected:
     void subtractValueFromSum(const MetricDimensionKey& key, const int64_t& bucketValue);
 
     // Returns true if in the refractory period, else false.
-    // If there is a stored refractory period but it ended prior to timestampNs, it is removed.
-    bool isInRefractoryPeriod(const uint64_t& timestampNs, const MetricDimensionKey& key);
+    bool isInRefractoryPeriod(const uint64_t& timestampNs, const MetricDimensionKey& key) const;
 
     // Calculates the corresponding bucket index within the circular array.
     // Requires bucketNum >= 0.
@@ -176,6 +182,9 @@ protected:
     FRIEND_TEST(AnomalyTrackerTest, TestSparseBuckets);
     FRIEND_TEST(GaugeMetricProducerTest, TestAnomalyDetection);
     FRIEND_TEST(CountMetricProducerTest, TestAnomalyDetectionUnSliced);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_single_bucket);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_multiple_buckets);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_long_refractory_period);
 };
 
 }  // namespace statsd
