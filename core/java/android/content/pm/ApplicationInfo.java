@@ -1101,6 +1101,58 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /** @hide */
     public String[] splitClassLoaderNames;
 
+    /**
+     * Represents the default policy. The actual policy used will depend on other properties of
+     * the application, e.g. the target SDK version.
+     * @hide
+     */
+    public static final int HIDDEN_API_ENFORCEMENT_DEFAULT = -1;
+    /**
+     * No API enforcement; the app can access the entire internal private API. Only for use by
+     * system apps.
+     * @hide
+     */
+    public static final int HIDDEN_API_ENFORCEMENT_NONE = 0;
+    /**
+     * Light grey list enforcement, the strictest option. Enforces the light grey, dark grey and
+     * black lists.
+     * @hide
+     * */
+    public static final int HIDDEN_API_ENFORCEMENT_ALL_LISTS = 1;
+    /**
+     * Dark grey list enforcement. Enforces the dark grey and black lists
+     * @hide
+     */
+    public static final int HIDDEN_API_ENFORCEMENT_DARK_GREY_AND_BLACK = 2;
+    /**
+     * Blacklist enforcement only.
+     * @hide
+     */
+    public static final int HIDDEN_API_ENFORCEMENT_BLACK = 3;
+
+    private static final int HIDDEN_API_ENFORCEMENT_MAX = HIDDEN_API_ENFORCEMENT_BLACK;
+
+    /**
+     * Values in this IntDef MUST be kept in sync with enum hiddenapi::EnforcementPolicy in
+     * art/runtime/hidden_api.h
+     * @hide
+     */
+    @IntDef(prefix = { "HIDDEN_API_ENFORCEMENT_" }, value = {
+            HIDDEN_API_ENFORCEMENT_DEFAULT,
+            HIDDEN_API_ENFORCEMENT_NONE,
+            HIDDEN_API_ENFORCEMENT_ALL_LISTS,
+            HIDDEN_API_ENFORCEMENT_DARK_GREY_AND_BLACK,
+            HIDDEN_API_ENFORCEMENT_BLACK,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface HiddenApiEnforcementPolicy {}
+
+    private boolean isValidHiddenApiEnforcementPolicy(int policy) {
+        return policy >= HIDDEN_API_ENFORCEMENT_DEFAULT && policy <= HIDDEN_API_ENFORCEMENT_MAX;
+    }
+
+    private int mHiddenApiPolicy = HIDDEN_API_ENFORCEMENT_DEFAULT;
+
     public void dump(Printer pw, String prefix) {
         dump(pw, prefix, DUMP_FLAG_ALL);
     }
@@ -1188,7 +1240,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             if (category != CATEGORY_UNDEFINED) {
                 pw.println(prefix + "category=" + category);
             }
-            pw.println(prefix + "isAllowedToUseHiddenApi=" + isAllowedToUseHiddenApi());
+            pw.println(prefix + "HiddenApiEnforcementPolicy=" + getHiddenApiEnforcementPolicy());
         }
         super.dumpBack(pw, prefix);
     }
@@ -1386,6 +1438,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         appComponentFactory = orig.appComponentFactory;
         compileSdkVersion = orig.compileSdkVersion;
         compileSdkVersionCodename = orig.compileSdkVersionCodename;
+        mHiddenApiPolicy = orig.mHiddenApiPolicy;
     }
 
     public String toString() {
@@ -1459,6 +1512,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(compileSdkVersion);
         dest.writeString(compileSdkVersionCodename);
         dest.writeString(appComponentFactory);
+        dest.writeInt(mHiddenApiPolicy);
     }
 
     public static final Parcelable.Creator<ApplicationInfo> CREATOR
@@ -1529,6 +1583,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         compileSdkVersion = source.readInt();
         compileSdkVersionCodename = source.readString();
         appComponentFactory = source.readString();
+        mHiddenApiPolicy = source.readInt();
     }
 
     /**
@@ -1599,13 +1654,31 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         }
     }
 
+    private boolean isPackageWhitelistedForHiddenApis() {
+        return SystemConfig.getInstance().getHiddenApiWhitelistedApps().contains(packageName);
+    }
+
     /**
      * @hide
      */
-    public boolean isAllowedToUseHiddenApi() {
-        boolean whitelisted =
-                SystemConfig.getInstance().getHiddenApiWhitelistedApps().contains(packageName);
-        return whitelisted && (isSystemApp() || isUpdatedSystemApp());
+    public @HiddenApiEnforcementPolicy int getHiddenApiEnforcementPolicy() {
+        if (mHiddenApiPolicy != HIDDEN_API_ENFORCEMENT_DEFAULT) {
+            return mHiddenApiPolicy;
+        }
+        if (isPackageWhitelistedForHiddenApis() && (isSystemApp() || isUpdatedSystemApp())) {
+            return HIDDEN_API_ENFORCEMENT_NONE;
+        }
+        return HIDDEN_API_ENFORCEMENT_BLACK;
+    }
+
+    /**
+     * @hide
+     */
+    public void setHiddenApiEnforcementPolicy(@HiddenApiEnforcementPolicy int policy) {
+        if (!isValidHiddenApiEnforcementPolicy(policy)) {
+            throw new IllegalArgumentException("Invalid API enforcement policy: " + policy);
+        }
+        mHiddenApiPolicy = policy;
     }
 
     /**

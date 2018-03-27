@@ -281,6 +281,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ApplicationInfo.HiddenApiEnforcementPolicy;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageManager;
@@ -4185,12 +4186,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
             }
 
-            if (!app.info.isAllowedToUseHiddenApi() &&
-                    !disableHiddenApiChecks &&
-                    !mHiddenApiBlacklist.isDisabled()) {
-                // This app is not allowed to use undocumented and private APIs, or blacklisting is
-                // enabled. Set up its runtime with the appropriate flag.
-                runtimeFlags |= Zygote.ENABLE_HIDDEN_API_CHECKS;
+            if (!disableHiddenApiChecks && !mHiddenApiBlacklist.isDisabled()) {
+                @HiddenApiEnforcementPolicy int policy =
+                        app.info.getHiddenApiEnforcementPolicy();
+                int policyBits = (policy << Zygote.API_ENFORCEMENT_POLICY_SHIFT);
+                if ((policyBits & Zygote.API_ENFORCEMENT_POLICY_MASK) != policyBits) {
+                    throw new IllegalStateException("Invalid API policy: " + policy);
+                }
+                runtimeFlags |= policyBits;
             }
 
             String invokeWith = null;
