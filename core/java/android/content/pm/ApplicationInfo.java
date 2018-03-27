@@ -1654,13 +1654,31 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         }
     }
 
+    private boolean isPackageWhitelistedForHiddenApis() {
+        return SystemConfig.getInstance().getHiddenApiWhitelistedApps().contains(packageName);
+    }
+
     /**
      * @hide
      */
-    public boolean isAllowedToUseHiddenApi() {
-        boolean whitelisted =
-                SystemConfig.getInstance().getHiddenApiWhitelistedApps().contains(packageName);
-        return whitelisted && (isSystemApp() || isUpdatedSystemApp());
+    public @HiddenApiEnforcementPolicy int getHiddenApiEnforcementPolicy() {
+        if (mHiddenApiPolicy != HIDDEN_API_ENFORCEMENT_DEFAULT) {
+            return mHiddenApiPolicy;
+        }
+        if (isPackageWhitelistedForHiddenApis() && (isSystemApp() || isUpdatedSystemApp())) {
+            return HIDDEN_API_ENFORCEMENT_NONE;
+        }
+        return HIDDEN_API_ENFORCEMENT_BLACK;
+    }
+
+    /**
+     * @hide
+     */
+    public void setHiddenApiEnforcementPolicy(@HiddenApiEnforcementPolicy int policy) {
+        if (!isValidHiddenApiEnforcementPolicy(policy)) {
+            throw new IllegalArgumentException("Invalid API enforcement policy: " + policy);
+        }
+        mHiddenApiPolicy = policy;
     }
 
     /**
