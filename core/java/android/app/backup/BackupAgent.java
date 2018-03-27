@@ -148,10 +148,17 @@ public abstract class BackupAgent extends ContextWrapper {
      * Flag for {@link BackupDataOutput#getTransportFlags()} and
      * {@link FullBackupDataOutput#getTransportFlags()} only.
      *
-     * <p>The transport has client-side encryption enabled. i.e., the user's backup has been
-     * encrypted with a key known only to the device, and not to the remote storage solution. Even
-     * if an attacker had root access to the remote storage provider they should not be able to
-     * decrypt the user's backup data.
+     * <p>The transport has client-side encryption enabled. i.e., the user's backup is encrypted
+     * with a key known only to the device, and not to the remote storage solution where the backup
+     * data is stored. The key may be synced to a remote trusted hardware module if it has
+     * protections equivalent to those described in the
+     * <a href="https://developer.android.com/preview/features/security/ckv-whitepaper.html">Google
+     * Cloud Key Vault Service whitepaper</a>. Having direct access to the trusted hardware module
+     * must be insufficient to decrypt the user's backup data.
+     *
+     * <p>The backup data itself must be encrypted using an AES/GCM/NoPadding cipher. The key
+     * material must be randomly generated using {@link java.security.SecureRandom}, and must have
+     * at least 256 bits of entropy.
      */
     public static final int FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED = 1;
 
