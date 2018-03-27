@@ -11053,7 +11053,14 @@ public final class Settings {
          */
         public static final String LOW_POWER_MODE_TRIGGER_LEVEL_MAX = "low_power_trigger_level_max";
 
-         /**
+        /**
+         * See com.android.settingslib.fuelgauge.BatterySaverUtils.
+         * @hide
+         */
+        public static final String LOW_POWER_MODE_SUGGESTION_PARAMS =
+                "low_power_mode_suggestion_params";
+
+        /**
          * If not 0, the activity manager will aggressively finish activities and
          * processes as soon as they are no longer needed.  If 0, the normal
          * extended lifetime is used.
