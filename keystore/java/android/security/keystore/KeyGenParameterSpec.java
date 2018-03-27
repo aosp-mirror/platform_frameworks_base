@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.KeyguardManager;
 import android.hardware.fingerprint.FingerprintManager;
+import android.security.GateKeeper;
 import android.security.KeyStore;
 import android.text.TextUtils;
 
@@ -232,7 +233,7 @@ import javax.security.auth.x500.X500Principal;
  * key = (SecretKey) keyStore.getKey("key2", null);
  * }</pre>
  */
-public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
+public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAuthArgs {
 
     private static final X500Principal DEFAULT_CERT_SUBJECT = new X500Principal("CN=fake");
     private static final BigInteger DEFAULT_CERT_SERIAL_NUMBER = new BigInteger("1");
@@ -666,6 +667,13 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
      */
     public boolean isStrongBoxBacked() {
         return mIsStrongBoxBacked;
+    }
+
+    /**
+     * @hide
+     */
+    public long getBoundToSpecificSecureUserId() {
+        return GateKeeper.INVALID_SECURE_USER_ID;
     }
 
     /**
