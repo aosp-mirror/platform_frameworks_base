@@ -17,6 +17,7 @@
 package com.android.server.usage;
 
 import android.app.usage.ConfigurationStats;
+import android.app.usage.EventStats;
 import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
@@ -191,21 +192,31 @@ class UserUsageStatsService {
         }
 
         for (IntervalStats stats : mCurrentStats) {
-            if (event.mEventType == UsageEvents.Event.CONFIGURATION_CHANGE) {
-                stats.updateConfigurationStats(newFullConfig, event.mTimeStamp);
-            } else if (event.mEventType == UsageEvents.Event.CHOOSER_ACTION) {
-                stats.updateChooserCounts(event.mPackage, event.mContentType, event.mAction);
-                String[] annotations = event.mContentAnnotations;
-                if (annotations != null) {
-                    for (String annotation : annotations) {
-                        stats.updateChooserCounts(event.mPackage, annotation, event.mAction);
+            switch (event.mEventType) {
+                case UsageEvents.Event.CONFIGURATION_CHANGE: {
+                    stats.updateConfigurationStats(newFullConfig, event.mTimeStamp);
+                } break;
+                case UsageEvents.Event.CHOOSER_ACTION: {
+                    stats.updateChooserCounts(event.mPackage, event.mContentType, event.mAction);
+                    String[] annotations = event.mContentAnnotations;
+                    if (annotations != null) {
+                        for (String annotation : annotations) {
+                            stats.updateChooserCounts(event.mPackage, annotation, event.mAction);
+                        }
                     }
-                }
-            } else {
-                stats.update(event.mPackage, event.mTimeStamp, event.mEventType);
-                if (incrementAppLaunch) {
-                    stats.incrementAppLaunchCount(event.mPackage);
-                }
+                } break;
+                case UsageEvents.Event.SCREEN_INTERACTIVE: {
+                    stats.updateScreenInteractive(event.mTimeStamp);
+                } break;
+                case UsageEvents.Event.SCREEN_NON_INTERACTIVE: {
+                    stats.updateScreenNonInteractive(event.mTimeStamp);
+                } break;
+                default: {
+                    stats.update(event.mPackage, event.mTimeStamp, event.mEventType);
+                    if (incrementAppLaunch) {
+                        stats.incrementAppLaunchCount(event.mPackage);
+                    }
+                } break;
             }
         }
 
@@ -243,6 +254,15 @@ class UserUsageStatsService {
                     for (int i = 0; i < configCount; i++) {
                         accResult.add(new ConfigurationStats(stats.configurations.valueAt(i)));
                     }
+                }
+            };
+
+    private static final StatCombiner<EventStats> sEventStatsCombiner =
+            new StatCombiner<EventStats>() {
+                @Override
+                public void combine(IntervalStats stats, boolean mutable,
+                        List<EventStats> accResult) {
+                    stats.addEventStatsTo(accResult);
                 }
             };
 
@@ -323,6 +343,10 @@ class UserUsageStatsService {
 
     List<ConfigurationStats> queryConfigurationStats(int bucketType, long beginTime, long endTime) {
         return queryStats(bucketType, beginTime, endTime, sConfigStatsCombiner);
+    }
+
+    List<EventStats> queryEventStats(int bucketType, long beginTime, long endTime) {
+        return queryStats(bucketType, beginTime, endTime, sEventStatsCombiner);
     }
 
     UsageEvents queryEvents(final long beginTime, final long endTime,
@@ -448,6 +472,7 @@ class UserUsageStatsService {
             }
 
             stat.updateConfigurationStats(null, mDailyExpiryDate.getTimeInMillis() - 1);
+            stat.commitTime(mDailyExpiryDate.getTimeInMillis() - 1);
         }
 
         persistActiveStats();
@@ -640,6 +665,18 @@ class UserUsageStatsService {
         }
     }
 
+    void printEventAggregation(IndentingPrintWriter pw, String label, int count, long duration,
+            boolean prettyDates) {
+        if (count != 0 || duration != 0) {
+            pw.print(label);
+            pw.print(": ");
+            pw.print(count);
+            pw.print("x for ");
+            pw.print(formatElapsedTime(duration, prettyDates));
+            pw.println();
+        }
+    }
+
     void printIntervalStats(IndentingPrintWriter pw, IntervalStats stats,
             boolean prettyDates, boolean skipEvents, String pkg) {
         if (prettyDates) {
@@ -713,6 +750,13 @@ class UserUsageStatsService {
                 pw.println();
             }
             pw.decreaseIndent();
+            pw.println("event aggregations");
+            pw.increaseIndent();
+            printEventAggregation(pw, "screen-interactive", stats.interactiveCount,
+                    stats.interactiveDuration, prettyDates);
+            printEventAggregation(pw, "screen-non-interactive", stats.nonInteractiveCount,
+                    stats.nonInteractiveDuration, prettyDates);
+            pw.decreaseIndent();
         }
 
         // The last 24 hours of events is already printed in the non checkin dump
@@ -781,6 +825,10 @@ class UserUsageStatsService {
                 return "SLICE_PINNED";
             case UsageEvents.Event.SLICE_PINNED_PRIV:
                 return "SLICE_PINNED_PRIV";
+            case UsageEvents.Event.SCREEN_INTERACTIVE:
+                return "SCREEN_INTERACTIVE";
+            case UsageEvents.Event.SCREEN_NON_INTERACTIVE:
+                return "SCREEN_NON_INTERACTIVE";
             default:
                 return "UNKNOWN";
         }
