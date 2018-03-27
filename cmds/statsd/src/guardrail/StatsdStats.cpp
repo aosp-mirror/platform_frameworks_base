@@ -92,6 +92,10 @@ const int FIELD_ID_UID_MAP_BYTES_USED = 3;
 const int FIELD_ID_UID_MAP_DROPPED_SNAPSHOTS = 4;
 const int FIELD_ID_UID_MAP_DROPPED_CHANGES = 5;
 
+const std::map<int, std::pair<size_t, size_t>> StatsdStats::kAtomDimensionKeySizeLimitMap = {
+        {android::util::CPU_TIME_PER_UID_FREQ, {6000, 10000}},
+};
+
 // TODO: add stats for pulled atoms.
 StatsdStats::StatsdStats() {
     mPushedAtomStats.resize(android::util::kMaxPushedAtomId + 1);

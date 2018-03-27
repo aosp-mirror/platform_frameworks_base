@@ -150,6 +150,10 @@ private:
 
     static const size_t kBucketSize = sizeof(GaugeBucket{});
 
+    const size_t mDimensionSoftLimit;
+
+    const size_t mDimensionHardLimit;
+
     FRIEND_TEST(GaugeMetricProducerTest, TestWithCondition);
     FRIEND_TEST(GaugeMetricProducerTest, TestNoCondition);
     FRIEND_TEST(GaugeMetricProducerTest, TestPushedEventsWithUpgrade);

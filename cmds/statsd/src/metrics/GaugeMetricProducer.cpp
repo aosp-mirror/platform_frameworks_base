@@ -17,9 +17,9 @@
 #define DEBUG false  // STOPSHIP if true
 #include "Log.h"
 
+#include "../guardrail/StatsdStats.h"
 #include "GaugeMetricProducer.h"
-#include "guardrail/StatsdStats.h"
-#include "stats_log_util.h"
+#include "../stats_log_util.h"
 
 #include <cutils/log.h>
 
@@ -60,12 +60,20 @@ const int FIELD_ID_WALL_CLOCK_ATOM_TIMESTAMP = 5;
 
 GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& metric,
                                          const int conditionIndex,
-                                         const sp<ConditionWizard>& wizard,
-                                         const int pullTagId, const uint64_t startTimeNs,
+                                         const sp<ConditionWizard>& wizard, const int pullTagId,
+                                         const uint64_t startTimeNs,
                                          shared_ptr<StatsPullerManager> statsPullerManager)
     : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard),
       mStatsPullerManager(statsPullerManager),
-      mPullTagId(pullTagId) {
+      mPullTagId(pullTagId),
+      mDimensionSoftLimit(StatsdStats::kAtomDimensionKeySizeLimitMap.find(pullTagId) !=
+                                          StatsdStats::kAtomDimensionKeySizeLimitMap.end()
+                                  ? StatsdStats::kAtomDimensionKeySizeLimitMap.at(pullTagId).first
+                                  : StatsdStats::kDimensionKeySizeSoftLimit),
+      mDimensionHardLimit(StatsdStats::kAtomDimensionKeySizeLimitMap.find(pullTagId) !=
+                                          StatsdStats::kAtomDimensionKeySizeLimitMap.end()
+                                  ? StatsdStats::kAtomDimensionKeySizeLimitMap.at(pullTagId).second
+                                  : StatsdStats::kDimensionKeySizeHardLimit) {
     mCurrentSlicedBucket = std::make_shared<DimToGaugeAtomsMap>();
     mCurrentSlicedBucketForAnomaly = std::make_shared<DimToValMap>();
     int64_t bucketSizeMills = 0;
@@ -305,11 +313,11 @@ bool GaugeMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey) {
         return false;
     }
     // 1. Report the tuple count if the tuple count > soft limit
-    if (mCurrentSlicedBucket->size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
+    if (mCurrentSlicedBucket->size() > mDimensionSoftLimit - 1) {
         size_t newTupleCount = mCurrentSlicedBucket->size() + 1;
         StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mMetricId, newTupleCount);
         // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
-        if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
+        if (newTupleCount > mDimensionHardLimit) {
             ALOGE("GaugeMetric %lld dropping data for dimension key %s",
                 (long long)mMetricId, newKey.toString().c_str());
             return true;

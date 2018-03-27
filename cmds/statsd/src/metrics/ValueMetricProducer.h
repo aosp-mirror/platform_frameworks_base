@@ -149,6 +149,10 @@ private:
 
     static const size_t kBucketSize = sizeof(ValueBucket{});
 
+    const size_t mDimensionSoftLimit;
+
+    const size_t mDimensionHardLimit;
+
     FRIEND_TEST(ValueMetricProducerTest, TestNonDimensionalEvents);
     FRIEND_TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade);
