@@ -41,7 +41,6 @@ import android.util.Log;
 import android.util.Slog;import android.util.proto.ProtoOutputStream;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
-import android.util.proto.ProtoOutputStream;
 import android.view.IRecentsAnimationController;
 import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationTarget;
@@ -309,12 +308,15 @@ public class RecentsAnimationController {
         mCallbacks.onAnimationFinished(false /* moveHomeToTop */);
     }
 
-    void cleanupAnimation() {
+    void cleanupAnimation(boolean moveHomeToTop) {
         if (DEBUG) Log.d(TAG, "cleanupAnimation(): mPendingAnimations="
                 + mPendingAnimations.size());
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final TaskAnimationAdapter adapter = mPendingAnimations.get(i);
             adapter.mTask.setCanAffectSystemUiFlags(true);
+            if (moveHomeToTop) {
+                adapter.mTask.dontAnimateDimExit();
+            }
             adapter.mCapturedFinishCallback.onAnimationFinished(adapter);
         }
         mPendingAnimations.clear();

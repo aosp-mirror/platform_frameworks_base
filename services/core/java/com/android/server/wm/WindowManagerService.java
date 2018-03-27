@@ -2700,10 +2700,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void cleanupRecentsAnimation() {
+    public void cleanupRecentsAnimation(boolean moveHomeToTop) {
         synchronized (mWindowMap) {
             if (mRecentsAnimationController != null) {
-                mRecentsAnimationController.cleanupAnimation();
+                mRecentsAnimationController.cleanupAnimation(moveHomeToTop);
                 mRecentsAnimationController = null;
                 mAppTransition.updateBooster();
             }
