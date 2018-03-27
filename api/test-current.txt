@@ -1,8 +1,10 @@
 package android {
 
   public static final class Manifest.permission {
+    field public static final java.lang.String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
     field public static final java.lang.String BRIGHTNESS_SLIDER_USAGE = "android.permission.BRIGHTNESS_SLIDER_USAGE";
     field public static final java.lang.String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
+    field public static final java.lang.String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
   }
 
 }
@@ -127,8 +129,8 @@ package android.app {
   public final class UiAutomation {
     method public void destroy();
     method public android.os.ParcelFileDescriptor[] executeShellCommandRw(java.lang.String);
-    method public boolean grantRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
-    method public boolean revokeRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
+    method public deprecated boolean grantRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
+    method public deprecated boolean revokeRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
   }
 
   public class UiModeManager {
