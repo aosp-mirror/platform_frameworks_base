@@ -1095,6 +1095,9 @@
     <!-- Display low battery warning when battery level dips to this value -->
     <integer name="config_lowBatteryWarningLevel">15</integer>
 
+    <!-- The default suggested battery % at which we enable battery saver automatically.  -->
+    <integer name="config_lowBatteryAutoTriggerDefaultLevel">15</integer>
+
     <!-- Close low battery warning when battery level reaches the lowBatteryWarningLevel
          plus this -->
     <integer name="config_lowBatteryCloseWarningBump">5</integer>
