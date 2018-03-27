@@ -514,7 +514,7 @@ message JobPackageHistoryProto {
         optional int32 uid = 3;
         // Job IDs can technically be negative.
         optional int32 job_id = 4;
-        optional string tag = 5 [ (.android.privacy).dest = DEST_EXPLICIT ];
+        optional string tag = 5;
         // Only valid for STOP_JOB or STOP_PERIODIC_JOB Events.
         optional .android.app.job.StopReasonEnum stop_reason = 6;
     }
@@ -538,7 +538,7 @@ message JobStatusDumpProto {
 
     // The UID that scheduled the job.
     optional int32 calling_uid = 1;
-    optional string tag = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional string tag = 2;
 
     // The UID for which the job is being run.
     optional int32 source_uid = 3;
