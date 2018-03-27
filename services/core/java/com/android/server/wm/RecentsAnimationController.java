@@ -51,6 +51,7 @@ import android.view.SurfaceControl.Transaction;
 import com.google.android.collect.Sets;
 
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
+import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -400,9 +401,11 @@ public class RecentsAnimationController {
             if (mainWindow == null) {
                 return null;
             }
+            final Rect insets = new Rect(mainWindow.mContentInsets);
+            InsetUtils.addInsets(insets, mainWindow.mAppToken.getLetterboxInsets());
             mTarget = new RemoteAnimationTarget(mTask.mTaskId, MODE_CLOSING, mCapturedLeash,
                     !mTask.fillsParent(), mainWindow.mWinAnimator.mLastClipRect,
-                    mainWindow.mContentInsets, mTask.getPrefixOrderIndex(), position, bounds,
+                    insets, mTask.getPrefixOrderIndex(), position, bounds,
                     mTask.getWindowConfiguration(), mIsRecentTaskInvisible);
             return mTarget;
         }
