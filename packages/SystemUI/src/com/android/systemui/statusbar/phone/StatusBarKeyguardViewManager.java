@@ -140,11 +140,14 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     private void onPanelExpansionChanged(float expansion, boolean tracking) {
-        // We don't want to translate the bounce when the keyguard is occluded, because we're in
-        // a FLAG_SHOW_WHEN_LOCKED activity and need to conserve the original animation.
-        // We also don't want to show the bouncer when the user quickly taps on the display.
+        // We don't want to translate the bounce when:
+        // • Keyguard is occluded, because we're in a FLAG_SHOW_WHEN_LOCKED activity and need to
+        //   conserve the original animation.
+        // • The user quickly taps on the display and we show "swipe up to unlock."
+        // • Keyguard will be dismissed by an action. a.k.a: FLAG_DISMISS_KEYGUARD_ACTIVITY
         final boolean noLongerTracking = mLastTracking != tracking && !tracking;
-        if (mOccluded || mNotificationPanelView.isUnlockHintRunning()) {
+        if (mOccluded || mNotificationPanelView.isUnlockHintRunning()
+                || mBouncer.willDismissWithAction()) {
             mBouncer.setExpansion(0);
         } else if (mShowing && mStatusBar.isKeyguardCurrentlySecure() && !mDozing) {
             mBouncer.setExpansion(expansion);
@@ -694,6 +697,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (request != null && request.cancelAction != null) {
             request.cancelAction.run();
         }
+    }
+
+    public boolean willDismissWithAction() {
+        return mBouncer.willDismissWithAction();
     }
 
     private static class DismissWithActionRequest {
