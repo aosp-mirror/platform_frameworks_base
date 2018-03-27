@@ -1742,7 +1742,7 @@ public final class DisplayManagerService extends SystemService {
                             + "display.");
                 }
             }
-            if ((flags & VIRTUAL_DISPLAY_FLAG_SECURE) != 0) {
+            if (callingUid != Process.SYSTEM_UID && (flags & VIRTUAL_DISPLAY_FLAG_SECURE) != 0) {
                 if (!canProjectSecureVideo(projection)) {
                     throw new SecurityException("Requires CAPTURE_SECURE_VIDEO_OUTPUT "
                             + "or an appropriate MediaProjection token to create a "
