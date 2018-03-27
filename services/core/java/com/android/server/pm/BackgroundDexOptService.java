@@ -463,10 +463,17 @@ public class BackgroundDexOptService extends JobService {
 
         if (params.getJobId() == JOB_POST_BOOT_UPDATE) {
             mAbortPostBootUpdate.set(true);
+
+            // Do not reschedule.
+            // TODO: We should reschedule if we didn't process all apps, yet.
+            return false;
         } else {
             mAbortIdleOptimization.set(true);
+
+            // Reschedule the run.
+            // TODO: Should this be dependent on the stop reason?
+            return true;
         }
-        return false;
     }
 
     private void notifyPinService(ArraySet<String> updatedPackages) {
