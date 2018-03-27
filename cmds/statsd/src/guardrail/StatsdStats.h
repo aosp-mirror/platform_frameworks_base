@@ -81,6 +81,9 @@ public:
     const static int kDimensionKeySizeSoftLimit = 300;
     const static int kDimensionKeySizeHardLimit = 500;
 
+    // Per atom dimension key size limit
+    static const std::map<int, std::pair<size_t, size_t>> kAtomDimensionKeySizeLimitMap;
+
     const static int kMaxConfigCount = 10;
     const static int kMaxAlertCountPerConfig = 100;
     const static int kMaxConditionCountPerConfig = 200;

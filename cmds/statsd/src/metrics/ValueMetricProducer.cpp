@@ -18,8 +18,8 @@
 #include "Log.h"
 
 #include "ValueMetricProducer.h"
-#include "guardrail/StatsdStats.h"
-#include "stats_log_util.h"
+#include "../guardrail/StatsdStats.h"
+#include "../stats_log_util.h"
 
 #include <cutils/log.h>
 #include <limits.h>
@@ -68,7 +68,15 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
     : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard),
       mValueField(metric.value_field()),
       mStatsPullerManager(statsPullerManager),
-      mPullTagId(pullTagId) {
+      mPullTagId(pullTagId),
+      mDimensionSoftLimit(StatsdStats::kAtomDimensionKeySizeLimitMap.find(pullTagId) !=
+                                          StatsdStats::kAtomDimensionKeySizeLimitMap.end()
+                                  ? StatsdStats::kAtomDimensionKeySizeLimitMap.at(pullTagId).first
+                                  : StatsdStats::kDimensionKeySizeSoftLimit),
+      mDimensionHardLimit(StatsdStats::kAtomDimensionKeySizeLimitMap.find(pullTagId) !=
+                                          StatsdStats::kAtomDimensionKeySizeLimitMap.end()
+                                  ? StatsdStats::kAtomDimensionKeySizeLimitMap.at(pullTagId).second
+                                  : StatsdStats::kDimensionKeySizeHardLimit) {
     // TODO: valuemetric for pushed events may need unlimited bucket length
     int64_t bucketSizeMills = 0;
     if (metric.has_bucket()) {
@@ -266,11 +274,11 @@ bool ValueMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey) {
     if (mCurrentSlicedBucket.find(newKey) != mCurrentSlicedBucket.end()) {
         return false;
     }
-    if (mCurrentSlicedBucket.size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
+    if (mCurrentSlicedBucket.size() > mDimensionSoftLimit - 1) {
         size_t newTupleCount = mCurrentSlicedBucket.size() + 1;
         StatsdStats::getInstance().noteMetricDimensionSize(mConfigKey, mMetricId, newTupleCount);
         // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
-        if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
+        if (newTupleCount > mDimensionHardLimit) {
             ALOGE("ValueMetric %lld dropping data for dimension key %s",
                 (long long)mMetricId, newKey.toString().c_str());
             return true;
