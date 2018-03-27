@@ -23,21 +23,21 @@ import android.view.ViewGroup;
 
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
-public class DismissViewButton extends AlphaOptimizedButton {
+public class FooterViewButton extends AlphaOptimizedButton {
 
-    public DismissViewButton(Context context) {
+    public FooterViewButton(Context context) {
         this(context, null);
     }
 
-    public DismissViewButton(Context context, AttributeSet attrs) {
+    public FooterViewButton(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public DismissViewButton(Context context, AttributeSet attrs, int defStyleAttr) {
+    public FooterViewButton(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public DismissViewButton(Context context, AttributeSet attrs, int defStyleAttr,
+    public FooterViewButton(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
