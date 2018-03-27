@@ -178,6 +178,8 @@
     <protected-broadcast
         android:name="android.bluetooth.hearingaid.profile.action.PLAYING_STATE_CHANGED" />
     <protected-broadcast
+        android:name="android.bluetooth.hearingaid.profile.action.ACTIVE_DEVICE_CHANGED" />
+    <protected-broadcast
         android:name="android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast
         android:name="android.bluetooth.a2dp.profile.action.ACTIVE_DEVICE_CHANGED" />
