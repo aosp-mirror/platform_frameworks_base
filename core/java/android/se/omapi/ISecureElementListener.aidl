@@ -24,8 +24,4 @@ package android.se.omapi;
  * @hide
  */
 interface ISecureElementListener {
-  /**
-   * Called by the framework when the service is connected.
-   */
-  void serviceConnected();
 }
