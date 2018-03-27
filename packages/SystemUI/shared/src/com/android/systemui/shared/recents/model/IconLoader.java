@@ -19,6 +19,7 @@ import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -106,11 +107,12 @@ public abstract class IconLoader {
             return createDrawableFromBitmap(tdIcon, userId, desc);
         }
         if (desc.getIconResource() != 0) {
-            // TODO: Use task context here
             try {
-                return createBadgedDrawable(
-                        mContext.getDrawable(desc.getIconResource()), userId, desc);
-            } catch (Resources.NotFoundException e) {
+                Context packageContext = mContext.createPackageContextAsUser(
+                        taskKey.getPackageName(), 0, UserHandle.of(userId));
+                return createBadgedDrawable(packageContext.getDrawable(desc.getIconResource()),
+                        userId, desc);
+            } catch (Resources.NotFoundException|PackageManager.NameNotFoundException e) {
                 Log.e(TAG, "Could not find icon drawable from resource", e);
             }
         }
