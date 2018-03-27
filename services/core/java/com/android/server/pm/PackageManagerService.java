@@ -18905,7 +18905,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return true;
     }
 
-    private static final class ClearStorageConnection implements ServiceConnection {
+    private final class ClearStorageConnection implements ServiceConnection {
         IMediaContainerService mContainerService;
 
         @Override
@@ -21626,37 +21626,35 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 // the given package is involved with.
                 if (dumpState.onTitlePrinted()) pw.println();
 
-                try (final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120)) {
-                    ipw.println();
-                    ipw.println("Frozen packages:");
-                    ipw.increaseIndent();
-                    if (mFrozenPackages.size() == 0) {
-                        ipw.println("(none)");
-                    } else {
-                        for (int i = 0; i < mFrozenPackages.size(); i++) {
-                            ipw.println(mFrozenPackages.valueAt(i));
-                        }
+                final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
+                ipw.println();
+                ipw.println("Frozen packages:");
+                ipw.increaseIndent();
+                if (mFrozenPackages.size() == 0) {
+                    ipw.println("(none)");
+                } else {
+                    for (int i = 0; i < mFrozenPackages.size(); i++) {
+                        ipw.println(mFrozenPackages.valueAt(i));
                     }
-                    ipw.decreaseIndent();
                 }
+                ipw.decreaseIndent();
             }
 
             if (!checkin && dumpState.isDumping(DumpState.DUMP_VOLUMES) && packageName == null) {
                 if (dumpState.onTitlePrinted()) pw.println();
 
-                try (final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120)) {
-                    ipw.println();
-                    ipw.println("Loaded volumes:");
-                    ipw.increaseIndent();
-                    if (mLoadedVolumes.size() == 0) {
-                        ipw.println("(none)");
-                    } else {
-                        for (int i = 0; i < mLoadedVolumes.size(); i++) {
-                            ipw.println(mLoadedVolumes.valueAt(i));
-                        }
+                final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ", 120);
+                ipw.println();
+                ipw.println("Loaded volumes:");
+                ipw.increaseIndent();
+                if (mLoadedVolumes.size() == 0) {
+                    ipw.println("(none)");
+                } else {
+                    for (int i = 0; i < mLoadedVolumes.size(); i++) {
+                        ipw.println(mLoadedVolumes.valueAt(i));
                     }
-                    ipw.decreaseIndent();
                 }
+                ipw.decreaseIndent();
             }
 
             if (!checkin && dumpState.isDumping(DumpState.DUMP_SERVICE_PERMISSIONS)
@@ -21785,63 +21783,61 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
     }
 
     private void dumpDexoptStateLPr(PrintWriter pw, String packageName) {
-        try (final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ")) {
-            ipw.println();
-            ipw.println("Dexopt state:");
-            ipw.increaseIndent();
-            Collection<PackageParser.Package> packages = null;
-            if (packageName != null) {
-                PackageParser.Package targetPackage = mPackages.get(packageName);
-                if (targetPackage != null) {
-                    packages = Collections.singletonList(targetPackage);
-                } else {
-                    ipw.println("Unable to find package: " + packageName);
-                    return;
-                }
+        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+        ipw.println();
+        ipw.println("Dexopt state:");
+        ipw.increaseIndent();
+        Collection<PackageParser.Package> packages = null;
+        if (packageName != null) {
+            PackageParser.Package targetPackage = mPackages.get(packageName);
+            if (targetPackage != null) {
+                packages = Collections.singletonList(targetPackage);
             } else {
-                packages = mPackages.values();
+                ipw.println("Unable to find package: " + packageName);
+                return;
             }
+        } else {
+            packages = mPackages.values();
+        }
 
-            for (PackageParser.Package pkg : packages) {
-                ipw.println("[" + pkg.packageName + "]");
-                ipw.increaseIndent();
-                mPackageDexOptimizer.dumpDexoptState(ipw, pkg,
-                        mDexManager.getPackageUseInfoOrDefault(pkg.packageName));
-                ipw.decreaseIndent();
-            }
+        for (PackageParser.Package pkg : packages) {
+            ipw.println("[" + pkg.packageName + "]");
+            ipw.increaseIndent();
+            mPackageDexOptimizer.dumpDexoptState(ipw, pkg,
+                    mDexManager.getPackageUseInfoOrDefault(pkg.packageName));
+            ipw.decreaseIndent();
         }
     }
 
     private void dumpCompilerStatsLPr(PrintWriter pw, String packageName) {
-        try (final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ")) {
-            ipw.println();
-            ipw.println("Compiler stats:");
-            ipw.increaseIndent();
-            Collection<PackageParser.Package> packages = null;
-            if (packageName != null) {
-                PackageParser.Package targetPackage = mPackages.get(packageName);
-                if (targetPackage != null) {
-                    packages = Collections.singletonList(targetPackage);
-                } else {
-                    ipw.println("Unable to find package: " + packageName);
-                    return;
-                }
+        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+        ipw.println();
+        ipw.println("Compiler stats:");
+        ipw.increaseIndent();
+        Collection<PackageParser.Package> packages = null;
+        if (packageName != null) {
+            PackageParser.Package targetPackage = mPackages.get(packageName);
+            if (targetPackage != null) {
+                packages = Collections.singletonList(targetPackage);
             } else {
-                packages = mPackages.values();
+                ipw.println("Unable to find package: " + packageName);
+                return;
             }
+        } else {
+            packages = mPackages.values();
+        }
 
-            for (PackageParser.Package pkg : packages) {
-                ipw.println("[" + pkg.packageName + "]");
-                ipw.increaseIndent();
+        for (PackageParser.Package pkg : packages) {
+            ipw.println("[" + pkg.packageName + "]");
+            ipw.increaseIndent();
 
-                CompilerStats.PackageStats stats = getCompilerPackageStats(pkg.packageName);
-                if (stats == null) {
-                    ipw.println("(No recorded stats)");
-                } else {
-                    stats.dump(ipw);
-                }
-                ipw.decreaseIndent();
+            CompilerStats.PackageStats stats = getCompilerPackageStats(pkg.packageName);
+            if (stats == null) {
+                ipw.println("(No recorded stats)");
+            } else {
+                stats.dump(ipw);
             }
+            ipw.decreaseIndent();
         }
     }
 
