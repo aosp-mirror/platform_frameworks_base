@@ -45,7 +45,7 @@ public:
                   const bool stopAll) override;
     void noteStopAll(const uint64_t eventTime) override;
 
-    void onSlicedConditionMayChange(const uint64_t timestamp) override;
+    void onSlicedConditionMayChange(bool overallCondition, const uint64_t timestamp) override;
     void onConditionChanged(bool condition, const uint64_t timestamp) override;
 
     bool flushCurrentBucket(

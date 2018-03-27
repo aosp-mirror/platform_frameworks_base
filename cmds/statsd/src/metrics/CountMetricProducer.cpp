@@ -117,7 +117,8 @@ void CountMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
     }
 }
 
-void CountMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventTime) {
+void CountMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition,
+                                                           const uint64_t eventTime) {
     VLOG("Metric %lld onSlicedConditionMayChange", (long long)mMetricId);
 }
 

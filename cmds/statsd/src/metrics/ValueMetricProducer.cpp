@@ -134,7 +134,8 @@ ValueMetricProducer::~ValueMetricProducer() {
     }
 }
 
-void ValueMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventTime) {
+void ValueMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition,
+                                                           const uint64_t eventTime) {
     VLOG("Metric %lld onSlicedConditionMayChange", (long long)mMetricId);
 }
 

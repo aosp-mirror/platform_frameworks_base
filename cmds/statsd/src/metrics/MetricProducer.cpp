@@ -33,7 +33,6 @@ void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const Lo
 
     bool condition;
     ConditionKey conditionKey;
-
     std::unordered_set<HashableDimensionKey> dimensionKeysInCondition;
     if (mConditionSliced) {
         for (const auto& link : mMetric2ConditionLinks) {

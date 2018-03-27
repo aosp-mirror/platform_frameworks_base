@@ -245,7 +245,8 @@ bool MaxDurationTracker::flushIfNeeded(
     return flushCurrentBucket(eventTimeNs, output);
 }
 
-void MaxDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) {
+void MaxDurationTracker::onSlicedConditionMayChange(bool overallCondition,
+                                                    const uint64_t timestamp) {
     // Now for each of the on-going event, check if the condition has changed for them.
     for (auto& pair : mInfos) {
         if (pair.second.state == kStopped) {

@@ -169,7 +169,8 @@ unique_ptr<DurationTracker> DurationMetricProducer::createDurationTracker(
 // 1. If combination condition, logical operation is AND, only one sliced child predicate.
 // 2. No condition in dimension
 // 3. The links covers all dimension fields in the sliced child condition predicate.
-void DurationMetricProducer::onSlicedConditionMayChangeLocked_opt1(const uint64_t eventTime) {
+void DurationMetricProducer::onSlicedConditionMayChangeLocked_opt1(bool condition,
+                                                                   const uint64_t eventTime) {
     if (mMetric2ConditionLinks.size() != 1 ||
         !mHasLinksToAllConditionDimensionsInTracker ||
         !mDimensionsInCondition.empty()) {
@@ -241,7 +242,8 @@ void DurationMetricProducer::onSlicedConditionMayChangeLocked_opt1(const uint64_
 // SlicedConditionChange optimization case 2:
 // 1. If combination condition, logical operation is AND, only one sliced child predicate.
 // 2. Has dimensions_in_condition and it equals to the output dimensions of the sliced predicate.
-void DurationMetricProducer::onSlicedConditionMayChangeLocked_opt2(const uint64_t eventTime) {
+void DurationMetricProducer::onSlicedConditionMayChangeLocked_opt2(bool condition,
+                                                                   const uint64_t eventTime) {
     if (mMetric2ConditionLinks.size() > 1 || !mSameConditionDimensionsInTracker) {
         return;
     }
@@ -322,7 +324,8 @@ void DurationMetricProducer::onSlicedConditionMayChangeLocked_opt2(const uint64_
     }
 }
 
-void DurationMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventTime) {
+void DurationMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition,
+                                                              const uint64_t eventTime) {
     VLOG("Metric %lld onSlicedConditionMayChange", (long long)mMetricId);
     flushIfNeededLocked(eventTime);
 
@@ -333,20 +336,20 @@ void DurationMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eve
     bool changeDimTrackable = mWizard->IsChangedDimensionTrackable(mConditionTrackerIndex);
     if (changeDimTrackable && mHasLinksToAllConditionDimensionsInTracker &&
         mDimensionsInCondition.empty()) {
-        onSlicedConditionMayChangeLocked_opt1(eventTime);
+        onSlicedConditionMayChangeLocked_opt1(overallCondition, eventTime);
         return;
     }
 
     if (changeDimTrackable && mSameConditionDimensionsInTracker &&
         mMetric2ConditionLinks.size() <= 1) {
-        onSlicedConditionMayChangeLocked_opt2(eventTime);
+        onSlicedConditionMayChangeLocked_opt2(overallCondition, eventTime);
         return;
     }
 
     // Now for each of the on-going event, check if the condition has changed for them.
     for (auto& whatIt : mCurrentSlicedDurationTrackerMap) {
         for (auto& pair : whatIt.second) {
-            pair.second->onSlicedConditionMayChange(eventTime);
+            pair.second->onSlicedConditionMayChange(overallCondition, eventTime);
         }
     }
 
@@ -372,7 +375,7 @@ void DurationMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eve
                     if (newTracker != nullptr) {
                         newTracker->setEventKey(MetricDimensionKey(
                                 whatIt.first, conditionDimension));
-                        newTracker->onSlicedConditionMayChange(eventTime);
+                        newTracker->onSlicedConditionMayChange(overallCondition, eventTime);
                         whatIt.second[conditionDimension] = std::move(newTracker);
                     }
                 }
@@ -398,7 +401,7 @@ void DurationMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eve
                     if (newTracker != nullptr) {
                         newTracker->setEventKey(
                             MetricDimensionKey(whatIt.first, conditionDimension));
-                        newTracker->onSlicedConditionMayChange(eventTime);
+                        newTracker->onSlicedConditionMayChange(overallCondition, eventTime);
                         whatIt.second[conditionDimension] = std::move(newTracker);
                     }
                 }
