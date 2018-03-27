@@ -148,16 +148,6 @@ public class MediaController2 implements AutoCloseable {
         public void onPlayerStateChanged(@NonNull MediaController2 controller, int state) { }
 
         /**
-         * Called when the player's position is changed
-         *
-         * @param controller the controller for this event
-         * @param eventTimeMs timestamp when the position information is sent from the session
-         * @param positionMs position in millis
-         */
-        public void onPositionChanged(@NonNull MediaController2 controller,
-                long eventTimeMs, long positionMs) { }
-
-        /**
          * Called when playback speed is changed.
          *
          * @param controller the controller for this event
@@ -179,6 +169,14 @@ public class MediaController2 implements AutoCloseable {
                 @NonNull MediaItem2 item, @MediaPlayerBase.BuffState int state) { }
 
         /**
+         * Called to indicate that seeking is completed.
+         *
+         * @param controller the controller for this event.
+         * @param position the previous seeking request.
+         */
+        public void onSeekCompleted(@NonNull MediaController2 controller, long position) { }
+
+        /**
          * Called when a error from
          *
          * @param controller the controller for this event
@@ -196,7 +194,6 @@ public class MediaController2 implements AutoCloseable {
          *
          * @param controller the controller for this event
          * @param item new item
-         * @see #onPositionChanged(MediaController2, long, long)
          * @see #onBufferingStateChanged(MediaController2, MediaItem2, int)
          */
         // TODO(jaewan): Use this (b/74316764)
