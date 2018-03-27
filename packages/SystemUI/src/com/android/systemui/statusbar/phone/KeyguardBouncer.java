@@ -330,6 +330,10 @@ public class KeyguardBouncer {
         }
     }
 
+    public boolean willDismissWithAction() {
+        return mKeyguardView != null && mKeyguardView.hasDismissActions();
+    }
+
     protected void ensureView() {
         // Removal of the view might be deferred to reduce unlock latency,
         // in this case we need to force the removal, otherwise we'll
