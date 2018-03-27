@@ -645,6 +645,10 @@ class Task extends WindowContainer<AppWindowToken> {
         return mCanAffectSystemUiFlags;
     }
 
+    void dontAnimateDimExit() {
+        mDimmer.dontAnimateExit();
+    }
+
     @Override
     public String toString() {
         return "{taskId=" + mTaskId + " appTokens=" + mChildren + " mdr=" + mDeferRemoval + "}";

@@ -168,7 +168,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
                         "RecentsAnimation#onAnimationFinished_inSurfaceTransaction");
                 mWindowManager.deferSurfaceLayout();
                 try {
-                    mWindowManager.cleanupRecentsAnimation();
+                    mWindowManager.cleanupRecentsAnimation(moveHomeToTop);
 
                     // Move the home stack to the front
                     final ActivityRecord homeActivity = mStackSupervisor.getHomeActivity();
