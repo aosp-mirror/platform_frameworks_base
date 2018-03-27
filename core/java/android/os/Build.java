@@ -242,7 +242,9 @@ public class Build {
          * Possible values are defined in {@link Build.VERSION_CODES}.
          *
          * @see #SDK_INT
+         * @hide
          */
+        @TestApi
         public static final int FIRST_SDK_INT = SystemProperties
                 .getInt("ro.product.first_api_level", 0);
 
