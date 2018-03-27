@@ -99,7 +99,7 @@ void BootAction::shutdown() {
 
 bool BootAction::loadSymbol(const char* symbol, void** loaded) {
     *loaded = dlsym(mLibHandle, symbol);
-    if (loaded == nullptr) {
+    if (*loaded == nullptr) {
         ALOGE("Unable to load symbol : %s :: %s", symbol, dlerror());
         return false;
     }
