@@ -385,6 +385,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     private int mSurfaceSize;
 
+    /**
+     * Sequence number for the current layout pass.
+     */
+    int mLayoutSeq = 0;
+
     /** Temporary float array to retrieve 3x3 matrix values. */
     private final float[] mTmpFloats = new float[9];
 
@@ -554,7 +559,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 w.prelayout();
                 final boolean firstLayout = !w.isLaidOut();
                 mService.mPolicy.layoutWindowLw(w, null, mDisplayFrames);
-                w.mLayoutSeq = mService.mLayoutSeq;
+                w.mLayoutSeq = mLayoutSeq;
 
                 // If this is the first layout, we need to initialize the last inset values as
                 // otherwise we'd immediately cause an unnecessary resize.
@@ -593,7 +598,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 w.mLayoutNeeded = false;
                 w.prelayout();
                 mService.mPolicy.layoutWindowLw(w, w.getParentWindow(), mDisplayFrames);
-                w.mLayoutSeq = mService.mLayoutSeq;
+                w.mLayoutSeq = mLayoutSeq;
                 if (DEBUG_LAYOUT) Slog.v(TAG, " LAYOUT: mFrame=" + w.mFrame
                         + " mContainingFrame=" + w.mContainingFrame
                         + " mDisplayFrame=" + w.mDisplayFrame);
@@ -2219,6 +2224,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             pw.println(" mTouchExcludeRegion=" + mTouchExcludeRegion);
 
         pw.println();
+        pw.print(prefix); pw.print("mLayoutSeq="); pw.println(mLayoutSeq);
+
+        pw.println();
         pw.println(prefix + "Application tokens in top down Z order:");
         for (int stackNdx = mTaskStackContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
             final TaskStack stack = mTaskStackContainers.getChildAt(stackNdx);
@@ -2927,9 +2935,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mService.mScreenRect.set(0, 0, dw, dh);
         }
 
-        int seq = mService.mLayoutSeq + 1;
+        int seq = mLayoutSeq + 1;
         if (seq < 0) seq = 0;
-        mService.mLayoutSeq = seq;
+        mLayoutSeq = seq;
 
         // Used to indicate that we have processed the dream window and all additional windows are
         // behind it.

@@ -30,8 +30,10 @@ import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -432,6 +434,20 @@ public class DisplayContentTests extends WindowTestsBase {
             assertEquals(new WmDisplayCutout(
                     fromBoundingRect(r.left, r.top, r.right, r.bottom), null)
                     .computeSafeInsets(400, 200).getDisplayCutout(), dc.getDisplayInfo().displayCutout);
+        }
+    }
+
+    @Test
+    public void testLayoutSeq_assignedDuringLayout() throws Exception {
+        synchronized (sWm.getWindowManagerLock()) {
+
+            final DisplayContent dc = createNewDisplay();
+            final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, dc, "w");
+
+            dc.setLayoutNeeded();
+            dc.performLayout(true /* initial */, false /* updateImeWindows */);
+
+            assertThat(win.mLayoutSeq, is(dc.mLayoutSeq));
         }
     }
 
