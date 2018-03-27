@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.policy;
 import android.os.HandlerThread;
 import android.support.test.runner.AndroidJUnit4;
 import android.telephony.SubscriptionInfo;
-import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -81,7 +80,8 @@ public class CallbackHandlerTest extends SysuiTestCase {
         boolean in = true;
         boolean out = true;
         String description = "Test";
-        mHandler.setWifiIndicators(enabled, status, qs, in, out, description, true);
+        String secondaryLabel = "Secondary label";
+        mHandler.setWifiIndicators(enabled, status, qs, in, out, description, true, secondaryLabel);
         waitForCallbacks();
 
         ArgumentCaptor<Boolean> enableArg = ArgumentCaptor.forClass(Boolean.class);
@@ -91,9 +91,10 @@ public class CallbackHandlerTest extends SysuiTestCase {
         ArgumentCaptor<Boolean> outArg = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<String> descArg = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<Boolean> isTransient = ArgumentCaptor.forClass(Boolean.class);
+        ArgumentCaptor<String> secondary = ArgumentCaptor.forClass(String.class);
         Mockito.verify(mSignalCallback).setWifiIndicators(enableArg.capture(),
                 statusArg.capture(), qsArg.capture(), inArg.capture(), outArg.capture(),
-                descArg.capture(), isTransient.capture());
+                descArg.capture(), isTransient.capture(), secondary.capture());
         assertEquals(enabled, (boolean) enableArg.getValue());
         assertEquals(status, statusArg.getValue());
         assertEquals(qs, qsArg.getValue());
@@ -101,6 +102,7 @@ public class CallbackHandlerTest extends SysuiTestCase {
         assertEquals(out, (boolean) outArg.getValue());
         assertEquals(description, descArg.getValue());
         assertTrue(isTransient.getValue());
+        assertEquals(secondaryLabel, secondary.getValue());
     }
 
     @Test
