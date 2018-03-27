@@ -192,14 +192,6 @@ public class UsbManager {
     public static final String USB_DATA_UNLOCKED = "unlocked";
 
     /**
-     * Boolean extra indicating whether the intent represents a change in the usb
-     * configuration (as opposed to a state update).
-     *
-     * {@hide}
-     */
-    public static final String USB_CONFIG_CHANGED = "config_changed";
-
-    /**
      * A placeholder indicating that no USB function is being specified.
      * Used for compatibility with old init scripts to indicate no functions vs. charging function.
      *
@@ -465,6 +457,25 @@ public class UsbManager {
     public ParcelFileDescriptor openAccessory(UsbAccessory accessory) {
         try {
             return mService.openAccessory(accessory);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the functionfs control file descriptor for the given function, with
+     * the usb descriptors and strings already written. The file descriptor is used
+     * by the function implementation to handle events and control requests.
+     *
+     * @param function to get control fd for. Currently {@link #FUNCTION_MTP} and
+     * {@link #FUNCTION_PTP} are supported.
+     * @return A ParcelFileDescriptor holding the valid fd, or null if the fd was not found.
+     *
+     * {@hide}
+     */
+    public ParcelFileDescriptor getControlFd(long function) {
+        try {
+            return mService.getControlFd(function);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
