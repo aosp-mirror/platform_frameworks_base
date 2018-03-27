@@ -382,10 +382,26 @@ public class RecoverableKeyStoreManager {
         Preconditions.checkNotNull(secretTypes, "secretTypes is null");
         int userId = UserHandle.getCallingUserId();
         int uid = Binder.getCallingUid();
-        long updatedRows = mDatabase.setRecoverySecretTypes(userId, uid, secretTypes);
-        if (updatedRows > 0) {
-            mDatabase.setShouldCreateSnapshot(userId, uid, true);
+
+        int[] currentSecretTypes = mDatabase.getRecoverySecretTypes(userId, uid);
+        if (Arrays.equals(secretTypes, currentSecretTypes)) {
+            Log.v(TAG, "Not updating secret types - same as old value.");
+            return;
         }
+
+        long updatedRows = mDatabase.setRecoverySecretTypes(userId, uid, secretTypes);
+        if (updatedRows < 1) {
+            throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR,
+                    "Database error trying to set secret types.");
+        }
+
+        if (currentSecretTypes.length == 0) {
+            Log.i(TAG, "Initialized secret types.");
+            return;
+        }
+
+        Log.i(TAG, "Updated secret types. Snapshot pending.");
+        mDatabase.setShouldCreateSnapshot(userId, uid, true);
     }
 
     /**
