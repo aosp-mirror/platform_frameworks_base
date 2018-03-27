@@ -1154,7 +1154,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     @Nullable
     @Speed
-    private int roundToClosestSpeedEnum(int speed) {
+    private static int roundToClosestSpeedEnum(int speed) {
         if (speed < Speed.SLOW) {
             return Speed.NONE;
         } else if (speed < (Speed.SLOW + Speed.MODERATE) / 2) {
@@ -1170,19 +1170,29 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     @Nullable
     String getSpeedLabel(@Speed int speed) {
+        return getSpeedLabel(mContext, speed);
+    }
+
+    private static String getSpeedLabel(Context context, int speed) {
         switch (speed) {
             case Speed.VERY_FAST:
-                return mContext.getString(R.string.speed_label_very_fast);
+                return context.getString(R.string.speed_label_very_fast);
             case Speed.FAST:
-                return mContext.getString(R.string.speed_label_fast);
+                return context.getString(R.string.speed_label_fast);
             case Speed.MODERATE:
-                return mContext.getString(R.string.speed_label_okay);
+                return context.getString(R.string.speed_label_okay);
             case Speed.SLOW:
-                return mContext.getString(R.string.speed_label_slow);
+                return context.getString(R.string.speed_label_slow);
             case Speed.NONE:
             default:
                 return null;
         }
+    }
+
+    /** Return the speed label for a {@link ScoredNetwork} at the specified {@code rssi} level. */
+    @Nullable
+    public static String getSpeedLabel(Context context, ScoredNetwork scoredNetwork, int rssi) {
+        return getSpeedLabel(context, roundToClosestSpeedEnum(scoredNetwork.calculateBadge(rssi)));
     }
 
     /** Return true if the current RSSI is reachable, and false otherwise. */

@@ -150,8 +150,8 @@ public class WifiTile extends QSTileImpl<SignalState> {
             cb = mSignalCallback.mInfo;
         }
         boolean transientEnabling = arg == ARG_SHOW_TRANSIENT_ENABLING;
-        boolean wifiConnected = cb.enabled && (cb.wifiSignalIconId > 0) && (cb.enabledDesc != null);
-        boolean wifiNotConnected = (cb.wifiSignalIconId > 0) && (cb.enabledDesc == null);
+        boolean wifiConnected = cb.enabled && (cb.wifiSignalIconId > 0) && (cb.ssid != null);
+        boolean wifiNotConnected = (cb.wifiSignalIconId > 0) && (cb.ssid == null);
         boolean enabledChanging = state.value != cb.enabled;
         if (enabledChanging) {
             mDetailAdapter.setItemsVisible(cb.enabled);
@@ -163,7 +163,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
         }
         state.slash.isSlashed = false;
         boolean isTransient = transientEnabling || cb.isTransient;
-        state.secondaryLabel = getSecondaryLabel(isTransient);
+        state.secondaryLabel = getSecondaryLabel(isTransient, cb.statusLabel);
         state.state = Tile.STATE_ACTIVE;
         state.dualTarget = true;
         state.value = transientEnabling || cb.enabled;
@@ -181,7 +181,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
             state.label = r.getString(R.string.quick_settings_wifi_label);
         } else if (wifiConnected) {
             state.icon = ResourceIcon.get(cb.wifiSignalIconId);
-            state.label = removeDoubleQuotes(cb.enabledDesc);
+            state.label = removeDoubleQuotes(cb.ssid);
         } else if (wifiNotConnected) {
             state.icon = ResourceIcon.get(R.drawable.ic_qs_wifi_disconnected);
             state.label = r.getString(R.string.quick_settings_wifi_label);
@@ -194,7 +194,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
         if (state.value) {
             if (wifiConnected) {
                 minimalContentDescription.append(cb.wifiSignalContentDescription).append(",");
-                minimalContentDescription.append(removeDoubleQuotes(cb.enabledDesc));
+                minimalContentDescription.append(removeDoubleQuotes(cb.ssid));
             }
         }
         state.contentDescription = minimalContentDescription.toString();
@@ -203,10 +203,10 @@ public class WifiTile extends QSTileImpl<SignalState> {
         state.expandedAccessibilityClassName = Switch.class.getName();
     }
 
-    private CharSequence getSecondaryLabel(boolean isTransient) {
+    private CharSequence getSecondaryLabel(boolean isTransient, String statusLabel) {
         return isTransient
                 ? mContext.getString(R.string.quick_settings_wifi_secondary_label_transient)
-                : null;
+                : statusLabel;
     }
 
     @Override
@@ -246,11 +246,12 @@ public class WifiTile extends QSTileImpl<SignalState> {
         boolean enabled;
         boolean connected;
         int wifiSignalIconId;
-        String enabledDesc;
+        String ssid;
         boolean activityIn;
         boolean activityOut;
         String wifiSignalContentDescription;
         boolean isTransient;
+        public String statusLabel;
 
         @Override
         public String toString() {
@@ -258,7 +259,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
                     .append("enabled=").append(enabled)
                     .append(",connected=").append(connected)
                     .append(",wifiSignalIconId=").append(wifiSignalIconId)
-                    .append(",enabledDesc=").append(enabledDesc)
+                    .append(",ssid=").append(ssid)
                     .append(",activityIn=").append(activityIn)
                     .append(",activityOut=").append(activityOut)
                     .append(",wifiSignalContentDescription=").append(wifiSignalContentDescription)
@@ -272,16 +273,18 @@ public class WifiTile extends QSTileImpl<SignalState> {
 
         @Override
         public void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
-                boolean activityIn, boolean activityOut, String description, boolean isTransient) {
+                boolean activityIn, boolean activityOut, String description, boolean isTransient,
+                String statusLabel) {
             if (DEBUG) Log.d(TAG, "onWifiSignalChanged enabled=" + enabled);
             mInfo.enabled = enabled;
             mInfo.connected = qsIcon.visible;
             mInfo.wifiSignalIconId = qsIcon.icon;
-            mInfo.enabledDesc = description;
+            mInfo.ssid = description;
             mInfo.activityIn = activityIn;
             mInfo.activityOut = activityOut;
             mInfo.wifiSignalContentDescription = qsIcon.contentDescription;
             mInfo.isTransient = isTransient;
+            mInfo.statusLabel = statusLabel;
             if (isShowingDetail()) {
                 mDetailAdapter.updateItems();
             }
