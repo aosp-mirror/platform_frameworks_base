@@ -130,7 +130,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.widget.LockPatternUtils;
@@ -185,12 +184,11 @@ import com.android.systemui.statusbar.AppOpsListener;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CrossFadeHelper;
-import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
+import com.android.systemui.statusbar.FooterView;
 import com.android.systemui.statusbar.GestureRecorder;
-import com.android.systemui.statusbar.HeadsUpStatusBarView;
 import com.android.systemui.statusbar.KeyboardShortcuts;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
@@ -237,7 +235,6 @@ import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
-import com.android.systemui.util.NotificationChannels;
 import com.android.systemui.volume.VolumeComponent;
 
 import java.io.FileDescriptor;
@@ -577,7 +574,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     protected NotificationIconAreaController mNotificationIconAreaController;
     private boolean mReinflateNotificationsOnUserSwitched;
-    private boolean mClearAllEnabled;
+    protected boolean mClearAllEnabled;
     @Nullable private View mAmbientIndicationContainer;
     private SysuiColorExtractor mColorExtractor;
     private ScreenLifecycle mScreenLifecycle;
@@ -868,7 +865,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mVisualStabilityManager.setVisibilityLocationProvider(mStackScroller);
 
         inflateEmptyShadeView();
-        inflateDismissView();
+        inflateFooterView();
 
         mBackdrop = mStatusBarWindow.findViewById(R.id.backdrop);
         mBackdropFront = mBackdrop.findViewById(R.id.backdrop_front);
@@ -1133,8 +1130,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected void reevaluateStyles() {
         inflateSignalClusters();
-        inflateDismissView();
-        updateClearAll();
+        inflateFooterView();
+        updateFooter();
         inflateEmptyShadeView();
         updateEmptyShadeView();
     }
@@ -1186,18 +1183,21 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStackScroller.setEmptyShadeView(mEmptyShadeView);
     }
 
-    private void inflateDismissView() {
-        if (!mClearAllEnabled || mStackScroller == null) {
+    private void inflateFooterView() {
+        if (mStackScroller == null) {
             return;
         }
 
-        mDismissView = (DismissView) LayoutInflater.from(mContext).inflate(
-                R.layout.status_bar_notification_dismiss_all, mStackScroller, false);
-        mDismissView.setOnButtonClickListener(v -> {
+        mFooterView = (FooterView) LayoutInflater.from(mContext).inflate(
+                R.layout.status_bar_notification_footer, mStackScroller, false);
+        mFooterView.setDismissButtonClickListener(v -> {
             mMetricsLogger.action(MetricsEvent.ACTION_DISMISS_ALL_NOTES);
             clearAllNotifications();
         });
-        mStackScroller.setDismissView(mDismissView);
+        mFooterView.setManageButtonClickListener(v -> {
+            manageNotifications();
+        });
+        mStackScroller.setFooterView(mFooterView);
     }
 
     protected void createUserSwitcher() {
@@ -1209,6 +1209,12 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected void inflateStatusBarWindow(Context context) {
         mStatusBarWindow = (StatusBarWindowView) View.inflate(context,
                 R.layout.super_status_bar, null);
+    }
+
+    public void manageNotifications() {
+        Intent intent = new Intent(Settings.ACTION_ALL_APPS_NOTIFICATION_SETTINGS);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent, true, true);
     }
 
     public void clearAllNotifications() {
@@ -1393,7 +1399,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mViewHierarchyManager.updateNotificationViews();
 
         updateSpeedBumpIndex();
-        updateClearAll();
+        updateFooter();
         updateEmptyShadeView();
 
         updateQsExpansionEnabled();
@@ -1457,13 +1463,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         mQSPanel.clickTile(tile);
     }
 
-    private void updateClearAll() {
-        if (!mClearAllEnabled) {
-            return;
-        }
-        boolean showDismissView = mState != StatusBarState.KEYGUARD
+    @VisibleForTesting
+    protected void updateFooter() {
+        boolean showFooterView = mState != StatusBarState.KEYGUARD
+                && mEntryManager.getNotificationData().getActiveNotifications().size() != 0;
+        boolean showDismissView = mClearAllEnabled && mState != StatusBarState.KEYGUARD
                 && hasActiveClearableNotifications();
-        mStackScroller.updateDismissView(showDismissView);
+
+        mStackScroller.updateFooterView(showFooterView, showDismissView);
     }
 
     /**
@@ -4938,7 +4945,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected RecentsComponent mRecents;
 
     protected NotificationShelf mNotificationShelf;
-    protected DismissView mDismissView;
+    protected FooterView mFooterView;
     protected EmptyShadeView mEmptyShadeView;
 
     protected AssistManager mAssistManager;
@@ -5411,8 +5418,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         // incremented in the following "changeViewPosition" calls so that its value is correct for
         // subsequent calls.
         int offsetFromEnd = 1;
-        if (mDismissView != null) {
-            mStackScroller.changeViewPosition(mDismissView,
+        if (mFooterView != null) {
+            mStackScroller.changeViewPosition(mFooterView,
                     mStackScroller.getChildCount() - offsetFromEnd++);
         }
 
