@@ -107,6 +107,10 @@ class WatchlistConfig {
      * Reload watchlist by reading config file.
      */
     public void reloadConfig() {
+        if (!mXmlFile.exists()) {
+            // No config file
+            return;
+        }
         try (FileInputStream stream = new FileInputStream(mXmlFile)){
             final List<byte[]> crc32DomainList = new ArrayList<>();
             final List<byte[]> sha256DomainList = new ArrayList<>();
