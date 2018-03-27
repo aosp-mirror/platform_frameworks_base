@@ -2103,6 +2103,7 @@ package android.hardware.radio {
     method public java.lang.String getVersion();
     method public boolean isBackgroundScanningSupported();
     method public boolean isCaptureSupported();
+    method public boolean isInitializationRequired();
     method public boolean isProgramIdentifierSupported(int);
     method public boolean isProgramTypeSupported(int);
     method public void writeToParcel(android.os.Parcel, int);
