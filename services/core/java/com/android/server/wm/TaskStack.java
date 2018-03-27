@@ -1387,6 +1387,7 @@ public class TaskStack extends WindowContainer<Task> implements
                 token.dump(pw, "    ", dumpAll);
             }
         }
+        mAnimatingAppWindowTokenRegistry.dump(pw, "AnimatingApps:", prefix);
     }
 
     @Override

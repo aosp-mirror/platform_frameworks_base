@@ -133,11 +133,18 @@ class RemoteAnimationController {
     private RemoteAnimationTarget[] createAnimations() {
         final ArrayList<RemoteAnimationTarget> targets = new ArrayList<>();
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
+            final RemoteAnimationAdapterWrapper wrapper = mPendingAnimations.get(i);
             final RemoteAnimationTarget target =
                     mPendingAnimations.get(i).createRemoteAppAnimation();
             if (target != null) {
                 targets.add(target);
             } else {
+
+                // We can't really start an animation but we still need to make sure to finish the
+                // pending animation that was started by SurfaceAnimator
+                if (wrapper.mCapturedFinishCallback != null) {
+                    wrapper.mCapturedFinishCallback.onAnimationFinished(wrapper);
+                }
                 mPendingAnimations.remove(i);
             }
         }

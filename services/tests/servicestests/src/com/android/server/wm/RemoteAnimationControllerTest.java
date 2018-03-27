@@ -197,4 +197,16 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         assertEquals(1, appsCaptor.getValue().length);
         assertEquals(mMockLeash, appsCaptor.getValue()[0].leash);
     }
+
+    @Test
+    public void testRemovedBeforeStarted() throws Exception {
+        final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+        final AnimationAdapter adapter = mController.createAnimationAdapter(win.mAppToken,
+                new Point(50, 100), new Rect(50, 100, 150, 150));
+        adapter.startAnimation(mMockLeash, mMockTransaction, mFinishedCallback);
+        win.mAppToken.removeImmediately();
+        mController.goodToGo();
+        verifyZeroInteractions(mMockRunner);
+        verify(mFinishedCallback).onAnimationFinished(eq(adapter));
+    }
 }
