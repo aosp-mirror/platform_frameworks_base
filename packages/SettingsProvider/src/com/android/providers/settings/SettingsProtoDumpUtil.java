@@ -2258,7 +2258,6 @@ class SettingsProtoDumpUtil {
 
 
         // Please insert new settings using the same order as in SecureSettingsProto.
-
     }
 
     private static void dumpProtoSystemSettingsLocked(
@@ -2267,15 +2266,293 @@ class SettingsProtoDumpUtil {
 
         s.dumpHistoricalOperations(p, SystemSettingsProto.HISTORICAL_OPERATIONS);
 
-        // This uses the same order as in Settings.System.
+        // This uses the same order as in SystemSettingsProto.
 
-        // Settings.System.STAY_ON_WHILE_PLUGGED_IN intentionally excluded since it's deprecated.
+        dumpSetting(s, p,
+                Settings.System.ADVANCED_SETTINGS,
+                SystemSettingsProto.ADVANCED_SETTINGS);
+
+        final long alarmToken = p.start(SystemSettingsProto.ALARM);
+        dumpSetting(s, p,
+                Settings.System.ALARM_ALERT,
+                SystemSettingsProto.Alarm.DEFAULT_URI);
+        dumpSetting(s, p,
+                Settings.System.ALARM_ALERT_CACHE,
+                SystemSettingsProto.Alarm.ALERT_CACHE);
+        // Settings.System.NEXT_ALARM_FORMATTED intentionally excluded since it's deprecated.
+        p.end(alarmToken);
+
+        final long bluetoothToken = p.start(SystemSettingsProto.BLUETOOTH);
+        dumpSetting(s, p,
+                Settings.System.BLUETOOTH_DISCOVERABILITY,
+                SystemSettingsProto.Bluetooth.DISCOVERABILITY);
+        dumpSetting(s, p,
+                Settings.System.BLUETOOTH_DISCOVERABILITY_TIMEOUT,
+                SystemSettingsProto.Bluetooth.DISCOVERABILITY_TIMEOUT_SECS);
+        p.end(bluetoothToken);
+
+        dumpSetting(s, p,
+                Settings.System.DATE_FORMAT,
+                SystemSettingsProto.DATE_FORMAT);
+        dumpSetting(s, p,
+                Settings.System.DISPLAY_COLOR_MODE,
+                SystemSettingsProto.DISPLAY_COLOR_MODE);
+
+        final long devOptionsToken = p.start(SystemSettingsProto.DEVELOPER_OPTIONS);
+        dumpSetting(s, p,
+                Settings.System.SHOW_TOUCHES,
+                SystemSettingsProto.DevOptions.SHOW_TOUCHES);
+        dumpSetting(s, p,
+                Settings.System.POINTER_LOCATION,
+                SystemSettingsProto.DevOptions.POINTER_LOCATION);
+        dumpSetting(s, p,
+                Settings.System.WINDOW_ORIENTATION_LISTENER_LOG,
+                SystemSettingsProto.DevOptions.WINDOW_ORIENTATION_LISTENER_LOG);
+        p.end(devOptionsToken);
+
+        final long dtmfToneToken = p.start(SystemSettingsProto.DTMF_TONE);
+        dumpSetting(s, p,
+                Settings.System.DTMF_TONE_WHEN_DIALING,
+                SystemSettingsProto.DtmfTone.PLAY_WHEN_DIALING);
+        dumpSetting(s, p,
+                Settings.System.DTMF_TONE_TYPE_WHEN_DIALING,
+                SystemSettingsProto.DtmfTone.TYPE_PLAYED_WHEN_DIALING);
+        p.end(dtmfToneToken);
+
+        dumpSetting(s, p,
+                Settings.System.EGG_MODE,
+                SystemSettingsProto.EGG_MODE);
         dumpSetting(s, p,
                 Settings.System.END_BUTTON_BEHAVIOR,
                 SystemSettingsProto.END_BUTTON_BEHAVIOR);
         dumpSetting(s, p,
-                Settings.System.ADVANCED_SETTINGS,
-                SystemSettingsProto.ADVANCED_SETTINGS);
+                Settings.System.FONT_SCALE,
+                SystemSettingsProto.FONT_SCALE);
+
+        final long hapticFeedbackToken = p.start(SystemSettingsProto.HAPTIC_FEEDBACK);
+        dumpSetting(s, p,
+                Settings.System.HAPTIC_FEEDBACK_ENABLED,
+                SystemSettingsProto.HapticFeedback.ENABLED);
+        dumpSetting(s, p,
+                Settings.System.HAPTIC_FEEDBACK_INTENSITY,
+                SystemSettingsProto.HapticFeedback.INTENSITY);
+        p.end(hapticFeedbackToken);
+
+        dumpSetting(s, p,
+                Settings.System.HEARING_AID,
+                SystemSettingsProto.HEARING_AID);
+        dumpSetting(s, p,
+                Settings.System.LOCK_TO_APP_ENABLED,
+                SystemSettingsProto.LOCK_TO_APP_ENABLED);
+
+        final long lockscreenToken = p.start(SystemSettingsProto.LOCKSCREEN);
+        dumpSetting(s, p,
+                Settings.System.LOCKSCREEN_SOUNDS_ENABLED,
+                SystemSettingsProto.Lockscreen.SOUNDS_ENABLED);
+        dumpSetting(s, p,
+                Settings.System.LOCKSCREEN_DISABLED,
+                SystemSettingsProto.Lockscreen.DISABLED);
+        p.end(lockscreenToken);
+
+        dumpSetting(s, p,
+                Settings.System.MEDIA_BUTTON_RECEIVER,
+                SystemSettingsProto.MEDIA_BUTTON_RECEIVER);
+
+        final long notificationToken = p.start(SystemSettingsProto.NOTIFICATION);
+        dumpSetting(s, p,
+                Settings.System.NOTIFICATION_SOUND,
+                SystemSettingsProto.Notification.SOUND);
+        dumpSetting(s, p,
+                Settings.System.NOTIFICATION_SOUND_CACHE,
+                SystemSettingsProto.Notification.SOUND_CACHE);
+        dumpSetting(s, p,
+                Settings.System.NOTIFICATION_LIGHT_PULSE,
+                SystemSettingsProto.Notification.LIGHT_PULSE);
+        dumpSetting(s, p,
+                Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
+                SystemSettingsProto.Notification.VIBRATION_INTENSITY);
+        // Settings.System.NOTIFICATIONS_USE_RING_VOLUME intentionally excluded since it's deprecated.
+        p.end(notificationToken);
+
+        dumpSetting(s, p,
+                Settings.System.POINTER_SPEED,
+                SystemSettingsProto.POINTER_SPEED);
+
+        final long ringtoneToken = p.start(SystemSettingsProto.RINGTONE);
+        dumpSetting(s, p,
+                Settings.System.RINGTONE,
+                SystemSettingsProto.Ringtone.DEFAULT_URI);
+        dumpSetting(s, p,
+                Settings.System.RINGTONE_CACHE,
+                SystemSettingsProto.Ringtone.CACHE);
+        p.end(ringtoneToken);
+
+        final long rotationToken = p.start(SystemSettingsProto.ROTATION);
+        dumpSetting(s, p,
+                Settings.System.ACCELEROMETER_ROTATION,
+                SystemSettingsProto.Rotation.ACCELEROMETER_ROTATION);
+        dumpSetting(s, p,
+                Settings.System.USER_ROTATION,
+                SystemSettingsProto.Rotation.USER_ROTATION);
+        dumpSetting(s, p,
+                Settings.System.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
+                SystemSettingsProto.Rotation.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY);
+        p.end(rotationToken);
+
+        dumpSetting(s, p,
+                Settings.System.RTT_CALLING_MODE,
+                SystemSettingsProto.RTT_CALLING_MODE);
+
+        final long screenToken = p.start(SystemSettingsProto.SCREEN);
+        dumpSetting(s, p,
+                Settings.System.SCREEN_OFF_TIMEOUT,
+                SystemSettingsProto.Screen.OFF_TIMEOUT);
+        dumpSetting(s, p,
+                Settings.System.SCREEN_BRIGHTNESS,
+                SystemSettingsProto.Screen.BRIGHTNESS);
+        dumpSetting(s, p,
+                Settings.System.SCREEN_BRIGHTNESS_FOR_VR,
+                SystemSettingsProto.Screen.BRIGHTNESS_FOR_VR);
+        dumpSetting(s, p,
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                SystemSettingsProto.Screen.BRIGHTNESS_MODE);
+        dumpSetting(s, p,
+                Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
+                SystemSettingsProto.Screen.AUTO_BRIGHTNESS_ADJ);
+        p.end(screenToken);
+
+        dumpSetting(s, p,
+                Settings.System.SETUP_WIZARD_HAS_RUN,
+                SystemSettingsProto.SETUP_WIZARD_HAS_RUN);
+        dumpSetting(s, p,
+                Settings.System.SHOW_BATTERY_PERCENT,
+                SystemSettingsProto.SHOW_BATTERY_PERCENT);
+        dumpSetting(s, p,
+                Settings.System.SHOW_GTALK_SERVICE_STATUS,
+                SystemSettingsProto.SHOW_GTALK_SERVICE_STATUS);
+        // Settings.System.SHOW_PROCESSES intentionally excluded since it's deprecated.
+        // Settings.System.SHOW_WEB_SUGGESTIONS intentionally excluded since it's deprecated.
+
+        final long sipToken = p.start(SystemSettingsProto.SIP);
+        dumpSetting(s, p,
+                Settings.System.SIP_RECEIVE_CALLS,
+                SystemSettingsProto.Sip.RECEIVE_CALLS);
+        dumpSetting(s, p,
+                Settings.System.SIP_CALL_OPTIONS,
+                SystemSettingsProto.Sip.CALL_OPTIONS);
+        dumpSetting(s, p,
+                Settings.System.SIP_ALWAYS,
+                SystemSettingsProto.Sip.ALWAYS);
+        dumpSetting(s, p,
+                Settings.System.SIP_ADDRESS_ONLY,
+                SystemSettingsProto.Sip.ADDRESS_ONLY);
+        // Settings.System.SIP_ASK_ME_EACH_TIME intentionally excluded since it's deprecated.
+        p.end(sipToken);
+
+        dumpSetting(s, p,
+                Settings.System.SOUND_EFFECTS_ENABLED,
+                SystemSettingsProto.SOUND_EFFECTS_ENABLED);
+        // Settings.System.POWER_SOUNDS_ENABLED intentionally excluded since it's deprecated.
+        // Settings.System.DOCK_SOUNDS_ENABLED intentionally excluded since it's deprecated.
+        // Settings.System.LOW_BATTERY_SOUND intentionally excluded since it's deprecated.
+        // Settings.System.DESK_DOCK_SOUND intentionally excluded since it's deprecated.
+        // Settings.System.DESK_UNDOCK_SOUND intentionally excluded since it's deprecated.
+        // Settings.System.CAR_DOCK_SOUND intentionally excluded since it's deprecated.
+        // Settings.System.CAR_UNDOCK_SOUND intentionally excluded since it's deprecated.
+        // Settings.System.LOCK_SOUND intentionally excluded since it's deprecated.
+        // Settings.System.UNLOCK_SOUND intentionally excluded since it's deprecated.
+        dumpSetting(s, p,
+                Settings.System.SYSTEM_LOCALES,
+                SystemSettingsProto.SYSTEM_LOCALES);
+
+        final long textToken = p.start(SystemSettingsProto.TEXT);
+        dumpSetting(s, p,
+                Settings.System.TEXT_AUTO_REPLACE,
+                SystemSettingsProto.Text.AUTO_REPLACE);
+        dumpSetting(s, p,
+                Settings.System.TEXT_AUTO_CAPS,
+                SystemSettingsProto.Text.AUTO_CAPS);
+        dumpSetting(s, p,
+                Settings.System.TEXT_AUTO_PUNCTUATE,
+                SystemSettingsProto.Text.AUTO_PUNCTUATE);
+        dumpSetting(s, p,
+                Settings.System.TEXT_SHOW_PASSWORD,
+                SystemSettingsProto.Text.SHOW_PASSWORD);
+        p.end(textToken);
+
+        // Settings.System.AUTO_TIME intentionally excluded since it's deprecated.
+        // Settings.System.AUTO_TIME_ZONE intentionally excluded since it's deprecated.
+        dumpSetting(s, p,
+                Settings.System.TIME_12_24,
+                SystemSettingsProto.TIME_12_24);
+        dumpSetting(s, p,
+                Settings.System.TTY_MODE,
+                SystemSettingsProto.TTY_MODE);
+
+        final long vibrateToken = p.start(SystemSettingsProto.VIBRATE);
+        dumpSetting(s, p,
+                Settings.System.VIBRATE_ON,
+                SystemSettingsProto.Vibrate.ON);
+        dumpSetting(s, p,
+                Settings.System.VIBRATE_INPUT_DEVICES,
+                SystemSettingsProto.Vibrate.INPUT_DEVICES);
+        dumpSetting(s, p,
+                Settings.System.VIBRATE_IN_SILENT,
+                SystemSettingsProto.Vibrate.IN_SILENT);
+        dumpSetting(s, p,
+                Settings.System.VIBRATE_WHEN_RINGING,
+                SystemSettingsProto.Vibrate.WHEN_RINGING);
+        p.end(vibrateToken);
+
+        final long volumeToken = p.start(SystemSettingsProto.VOLUME);
+        dumpSetting(s, p,
+                Settings.System.VOLUME_RING,
+                SystemSettingsProto.Volume.RING);
+        dumpSetting(s, p,
+                Settings.System.VOLUME_SYSTEM,
+                SystemSettingsProto.Volume.SYSTEM);
+        dumpSetting(s, p,
+                Settings.System.VOLUME_VOICE,
+                SystemSettingsProto.Volume.VOICE);
+        dumpSetting(s, p,
+                Settings.System.VOLUME_MUSIC,
+                SystemSettingsProto.Volume.MUSIC);
+        dumpSetting(s, p,
+                Settings.System.VOLUME_ALARM,
+                SystemSettingsProto.Volume.ALARM);
+        dumpSetting(s, p,
+                Settings.System.VOLUME_NOTIFICATION,
+                SystemSettingsProto.Volume.NOTIFICATION);
+        dumpSetting(s, p,
+                Settings.System.VOLUME_BLUETOOTH_SCO,
+                SystemSettingsProto.Volume.BLUETOOTH_SCO);
+        dumpSetting(s, p,
+                Settings.System.VOLUME_ACCESSIBILITY,
+                SystemSettingsProto.Volume.ACCESSIBILITY);
+        dumpSetting(s, p,
+                Settings.System.VOLUME_MASTER,
+                SystemSettingsProto.Volume.MASTER);
+        dumpSetting(s, p,
+                Settings.System.MASTER_MONO,
+                SystemSettingsProto.Volume.MASTER_MONO);
+        dumpSetting(s, p,
+                Settings.System.MODE_RINGER_STREAMS_AFFECTED,
+                SystemSettingsProto.Volume.MODE_RINGER_STREAMS_AFFECTED);
+        dumpSetting(s, p,
+                Settings.System.MUTE_STREAMS_AFFECTED,
+                SystemSettingsProto.Volume.MUTE_STREAMS_AFFECTED);
+        p.end(volumeToken);
+
+        dumpSetting(s, p,
+                Settings.System.WHEN_TO_MAKE_WIFI_CALLS,
+                SystemSettingsProto.WHEN_TO_MAKE_WIFI_CALLS);
+
+        // Please insert new settings using the same order as in SecureSettingsProto.
+
+        // The rest of the settings were moved to Settings.Secure, and are thus excluded here since
+        // they're deprecated from Settings.System.
+
+        // Settings.System.STAY_ON_WHILE_PLUGGED_IN intentionally excluded since it's deprecated.
         // Settings.System.AIRPLANE_MODE_ON intentionally excluded since it's deprecated.
         // Settings.System.RADIO_BLUETOOTH intentionally excluded since it's just a constant.
         // Settings.System.RADIO_WIFI intentionally excluded since it's just a constant.
@@ -2292,245 +2569,24 @@ class SettingsProtoDumpUtil {
         // Settings.System.WIFI_STATIC_NETMASK intentionally excluded since it's deprecated.
         // Settings.System.WIFI_STATIC_DNS1 intentionally excluded since it's deprecated.
         // Settings.System.WIFI_STATIC_DNS2 intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.BLUETOOTH_DISCOVERABILITY,
-                SystemSettingsProto.BLUETOOTH_DISCOVERABILITY);
-        dumpSetting(s, p,
-                Settings.System.BLUETOOTH_DISCOVERABILITY_TIMEOUT,
-                SystemSettingsProto.BLUETOOTH_DISCOVERABILITY_TIMEOUT);
         // Settings.System.LOCK_PATTERN_ENABLED intentionally excluded since it's deprecated.
         // Settings.System.LOCK_PATTERN_VISIBLE intentionally excluded since it's deprecated.
         // Settings.System.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED intentionally excluded since it's deprecated.
-        // Settings.System.NEXT_ALARM_FORMATTED intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.FONT_SCALE,
-                SystemSettingsProto.FONT_SCALE);
-        dumpSetting(s, p,
-                Settings.System.SYSTEM_LOCALES,
-                SystemSettingsProto.SYSTEM_LOCALES);
         // Settings.System.DEBUG_APP intentionally excluded since it's deprecated.
         // Settings.System.WAIT_FOR_DEBUGGER intentionally excluded since it's deprecated.
         // Settings.System.DIM_SCREEN intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.DISPLAY_COLOR_MODE,
-                SystemSettingsProto.DISPLAY_COLOR_MODE);
-        dumpSetting(s, p,
-                Settings.System.SCREEN_OFF_TIMEOUT,
-                SystemSettingsProto.SCREEN_OFF_TIMEOUT);
-        dumpSetting(s, p,
-                Settings.System.SCREEN_BRIGHTNESS,
-                SystemSettingsProto.SCREEN_BRIGHTNESS);
-        dumpSetting(s, p,
-                Settings.System.SCREEN_BRIGHTNESS_FOR_VR,
-                SystemSettingsProto.SCREEN_BRIGHTNESS_FOR_VR);
-        dumpSetting(s, p,
-                Settings.System.SCREEN_BRIGHTNESS_MODE,
-                SystemSettingsProto.SCREEN_BRIGHTNESS_MODE);
-        dumpSetting(s, p,
-                Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
-                SystemSettingsProto.SCREEN_AUTO_BRIGHTNESS_ADJ);
-        // Settings.System.SHOW_PROCESSES intentionally excluded since it's deprecated.
         // Settings.System.ALWAYS_FINISH_ACTIVITIES intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.MODE_RINGER_STREAMS_AFFECTED,
-                SystemSettingsProto.MODE_RINGER_STREAMS_AFFECTED);
-        dumpSetting(s, p,
-                Settings.System.MUTE_STREAMS_AFFECTED,
-                SystemSettingsProto.MUTE_STREAMS_AFFECTED);
-        dumpSetting(s, p,
-                Settings.System.VIBRATE_ON,
-                SystemSettingsProto.VIBRATE_ON);
-        dumpSetting(s, p,
-                Settings.System.VIBRATE_INPUT_DEVICES,
-                SystemSettingsProto.VIBRATE_INPUT_DEVICES);
-        dumpSetting(s, p,
-                Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
-                SystemSettingsProto.NOTIFICATION_VIBRATION_INTENSITY);
-        dumpSetting(s, p,
-                Settings.System.HAPTIC_FEEDBACK_INTENSITY,
-                SystemSettingsProto.HAPTIC_FEEDBACK_INTENSITY);
-        dumpSetting(s, p,
-                Settings.System.VOLUME_RING,
-                SystemSettingsProto.VOLUME_RING);
-        dumpSetting(s, p,
-                Settings.System.VOLUME_SYSTEM,
-                SystemSettingsProto.VOLUME_SYSTEM);
-        dumpSetting(s, p,
-                Settings.System.VOLUME_VOICE,
-                SystemSettingsProto.VOLUME_VOICE);
-        dumpSetting(s, p,
-                Settings.System.VOLUME_MUSIC,
-                SystemSettingsProto.VOLUME_MUSIC);
-        dumpSetting(s, p,
-                Settings.System.VOLUME_ALARM,
-                SystemSettingsProto.VOLUME_ALARM);
-        dumpSetting(s, p,
-                Settings.System.VOLUME_NOTIFICATION,
-                SystemSettingsProto.VOLUME_NOTIFICATION);
-        dumpSetting(s, p,
-                Settings.System.VOLUME_BLUETOOTH_SCO,
-                SystemSettingsProto.VOLUME_BLUETOOTH_SCO);
-        dumpSetting(s, p,
-                Settings.System.VOLUME_ACCESSIBILITY,
-                SystemSettingsProto.VOLUME_ACCESSIBILITY);
-        dumpSetting(s, p,
-                Settings.System.VOLUME_MASTER,
-                SystemSettingsProto.VOLUME_MASTER);
-        dumpSetting(s, p,
-                Settings.System.MASTER_MONO,
-                SystemSettingsProto.MASTER_MONO);
-        // Settings.System.NOTIFICATIONS_USE_RING_VOLUME intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.VIBRATE_IN_SILENT,
-                SystemSettingsProto.VIBRATE_IN_SILENT);
-        dumpSetting(s, p,
-                Settings.System.APPEND_FOR_LAST_AUDIBLE,
-                SystemSettingsProto.APPEND_FOR_LAST_AUDIBLE);
-        dumpSetting(s, p,
-                Settings.System.RINGTONE,
-                SystemSettingsProto.RINGTONE);
-        dumpSetting(s, p,
-                Settings.System.RINGTONE_CACHE,
-                SystemSettingsProto.RINGTONE_CACHE);
-        dumpSetting(s, p,
-                Settings.System.NOTIFICATION_SOUND,
-                SystemSettingsProto.NOTIFICATION_SOUND);
-        dumpSetting(s, p,
-                Settings.System.NOTIFICATION_SOUND_CACHE,
-                SystemSettingsProto.NOTIFICATION_SOUND_CACHE);
-        dumpSetting(s, p,
-                Settings.System.ALARM_ALERT,
-                SystemSettingsProto.ALARM_ALERT);
-        dumpSetting(s, p,
-                Settings.System.ALARM_ALERT_CACHE,
-                SystemSettingsProto.ALARM_ALERT_CACHE);
-        dumpSetting(s, p,
-                Settings.System.MEDIA_BUTTON_RECEIVER,
-                SystemSettingsProto.MEDIA_BUTTON_RECEIVER);
-        dumpSetting(s, p,
-                Settings.System.TEXT_AUTO_REPLACE,
-                SystemSettingsProto.TEXT_AUTO_REPLACE);
-        dumpSetting(s, p,
-                Settings.System.TEXT_AUTO_CAPS,
-                SystemSettingsProto.TEXT_AUTO_CAPS);
-        dumpSetting(s, p,
-                Settings.System.TEXT_AUTO_PUNCTUATE,
-                SystemSettingsProto.TEXT_AUTO_PUNCTUATE);
-        dumpSetting(s, p,
-                Settings.System.TEXT_SHOW_PASSWORD,
-                SystemSettingsProto.TEXT_SHOW_PASSWORD);
-        dumpSetting(s, p,
-                Settings.System.SHOW_GTALK_SERVICE_STATUS,
-                SystemSettingsProto.SHOW_GTALK_SERVICE_STATUS);
+        // Settings.System.APPEND_FOR_LAST_AUDIBLE intentionally excluded since it hasn't been used since API 2.
         // Settings.System.WALLPAPER_ACTIVITY intentionally excluded since it's deprecated.
-        // Settings.System.AUTO_TIME intentionally excluded since it's deprecated.
-        // Settings.System.AUTO_TIME_ZONE intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.TIME_12_24,
-                SystemSettingsProto.TIME_12_24);
-        dumpSetting(s, p,
-                Settings.System.DATE_FORMAT,
-                SystemSettingsProto.DATE_FORMAT);
-        dumpSetting(s, p,
-                Settings.System.SETUP_WIZARD_HAS_RUN,
-                SystemSettingsProto.SETUP_WIZARD_HAS_RUN);
         // Settings.System.WINDOW_ANIMATION_SCALE intentionally excluded since it's deprecated.
         // Settings.System.TRANSITION_ANIMATION_SCALE intentionally excluded since it's deprecated.
         // Settings.System.ANIMATOR_ANIMATION_SCALE intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.ACCELEROMETER_ROTATION,
-                SystemSettingsProto.ACCELEROMETER_ROTATION);
-        dumpSetting(s, p,
-                Settings.System.USER_ROTATION,
-                SystemSettingsProto.USER_ROTATION);
-        dumpSetting(s, p,
-                Settings.System.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
-                SystemSettingsProto.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY);
-        dumpSetting(s, p,
-                Settings.System.VIBRATE_WHEN_RINGING,
-                SystemSettingsProto.VIBRATE_WHEN_RINGING);
-        dumpSetting(s, p,
-                Settings.System.DTMF_TONE_WHEN_DIALING,
-                SystemSettingsProto.DTMF_TONE_WHEN_DIALING);
-        dumpSetting(s, p,
-                Settings.System.DTMF_TONE_TYPE_WHEN_DIALING,
-                SystemSettingsProto.DTMF_TONE_TYPE_WHEN_DIALING);
-        dumpSetting(s, p,
-                Settings.System.HEARING_AID,
-                SystemSettingsProto.HEARING_AID);
-        dumpSetting(s, p,
-                Settings.System.TTY_MODE,
-                SystemSettingsProto.TTY_MODE);
-        dumpSetting(s, p,
-                Settings.System.RTT_CALLING_MODE,
-                SystemSettingsProto.RTT_CALLING_MODE);
-        dumpSetting(s, p,
-                Settings.System.SOUND_EFFECTS_ENABLED,
-                SystemSettingsProto.SOUND_EFFECTS_ENABLED);
-        dumpSetting(s, p,
-                Settings.System.HAPTIC_FEEDBACK_ENABLED,
-                SystemSettingsProto.HAPTIC_FEEDBACK_ENABLED);
-        // Settings.System.SHOW_WEB_SUGGESTIONS intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.NOTIFICATION_LIGHT_PULSE,
-                SystemSettingsProto.NOTIFICATION_LIGHT_PULSE);
-        dumpSetting(s, p,
-                Settings.System.POINTER_LOCATION,
-                SystemSettingsProto.POINTER_LOCATION);
-        dumpSetting(s, p,
-                Settings.System.SHOW_TOUCHES,
-                SystemSettingsProto.SHOW_TOUCHES);
-        dumpSetting(s, p,
-                Settings.System.WINDOW_ORIENTATION_LISTENER_LOG,
-                SystemSettingsProto.WINDOW_ORIENTATION_LISTENER_LOG);
-        // Settings.System.POWER_SOUNDS_ENABLED intentionally excluded since it's deprecated.
-        // Settings.System.DOCK_SOUNDS_ENABLED intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.LOCKSCREEN_SOUNDS_ENABLED,
-                SystemSettingsProto.LOCKSCREEN_SOUNDS_ENABLED);
-        dumpSetting(s, p,
-                Settings.System.LOCKSCREEN_DISABLED,
-                SystemSettingsProto.LOCKSCREEN_DISABLED);
-        // Settings.System.LOW_BATTERY_SOUND intentionally excluded since it's deprecated.
-        // Settings.System.DESK_DOCK_SOUND intentionally excluded since it's deprecated.
-        // Settings.System.DESK_UNDOCK_SOUND intentionally excluded since it's deprecated.
-        // Settings.System.CAR_DOCK_SOUND intentionally excluded since it's deprecated.
-        // Settings.System.CAR_UNDOCK_SOUND intentionally excluded since it's deprecated.
-        // Settings.System.LOCK_SOUND intentionally excluded since it's deprecated.
-        // Settings.System.UNLOCK_SOUND intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.SIP_RECEIVE_CALLS,
-                SystemSettingsProto.SIP_RECEIVE_CALLS);
-        dumpSetting(s, p,
-                Settings.System.SIP_CALL_OPTIONS,
-                SystemSettingsProto.SIP_CALL_OPTIONS);
-        dumpSetting(s, p,
-                Settings.System.SIP_ALWAYS,
-                SystemSettingsProto.SIP_ALWAYS);
-        dumpSetting(s, p,
-                Settings.System.SIP_ADDRESS_ONLY,
-                SystemSettingsProto.SIP_ADDRESS_ONLY);
-        // Settings.System.SIP_ASK_ME_EACH_TIME intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.POINTER_SPEED,
-                SystemSettingsProto.POINTER_SPEED);
-        dumpSetting(s, p,
-                Settings.System.LOCK_TO_APP_ENABLED,
-                SystemSettingsProto.LOCK_TO_APP_ENABLED);
-        dumpSetting(s, p,
-                Settings.System.EGG_MODE,
-                SystemSettingsProto.EGG_MODE);
-        dumpSetting(s, p,
-                Settings.System.SHOW_BATTERY_PERCENT,
-                SystemSettingsProto.SHOW_BATTERY_PERCENT);
-        dumpSetting(s, p,
-                Settings.System.WHEN_TO_MAKE_WIFI_CALLS,
-                SystemSettingsProto.WHEN_TO_MAKE_WIFI_CALLS);
+
         // The rest of the settings were moved to Settings.Secure, and are thus excluded here since
         // they're deprecated from Settings.System.
 
-        // Please insert new settings using the same order as in Settings.System.
-
+        // Please insert new settings using the same order as in SecureSettingsProto.
         p.end(token);
+        // Please insert new settings using the same order as in SecureSettingsProto.
     }
 }
