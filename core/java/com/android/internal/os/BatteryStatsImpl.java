@@ -767,6 +767,8 @@ public class BatteryStatsImpl extends BatteryStats {
     int mCameraOnNesting;
     StopwatchTimer mCameraOnTimer;
 
+    int mUsbDataState; // 0: unknown, 1: disconnected, 2: connected
+
     int mGpsSignalQualityBin = -1;
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     protected final StopwatchTimer[] mGpsSignalQualityTimer =
@@ -5237,6 +5239,19 @@ public class BatteryStatsImpl extends BatteryStats {
             addHistoryRecordLocked(elapsedRealtime, uptime);
             mPhoneOn = false;
             mPhoneOnTimer.stopRunningLocked(elapsedRealtime);
+        }
+    }
+
+    public void noteUsbConnectionStateLocked(boolean connected) {
+        int newState = connected ? 2 : 1;
+        if (mUsbDataState != newState) {
+            mUsbDataState = newState;
+            if (connected) {
+                mHistoryCur.states2 |= HistoryItem.STATE2_USB_DATA_LINK_FLAG;
+            } else {
+                mHistoryCur.states2 &= ~HistoryItem.STATE2_USB_DATA_LINK_FLAG;
+            }
+            addHistoryRecordLocked(mClocks.elapsedRealtime(), mClocks.uptimeMillis());
         }
     }
 
