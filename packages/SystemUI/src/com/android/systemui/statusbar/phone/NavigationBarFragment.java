@@ -171,7 +171,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     private final OverviewProxyListener mOverviewProxyListener = new OverviewProxyListener() {
         @Override
         public void onConnectionChanged(boolean isConnected) {
-            mNavigationBarView.onOverviewProxyConnectionChanged(isConnected);
+            mNavigationBarView.updateStates();
             updateScreenPinningGestures();
             WindowManagerWrapper.getInstance()
                     .setNavBarVirtualKeyHapticFeedbackEnabled(!isConnected);
@@ -188,6 +188,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         @Override
         public void onInteractionFlagsChanged(@InteractionType int flags) {
             mNavigationBarView.updateStates();
+            updateScreenPinningGestures();
         }
     };
 

@@ -681,6 +681,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         updateSlippery();
         reloadNavIcons();
         updateNavButtonIcons();
+        setUpSwipeUpOnboarding(isQuickStepSwipeUpEnabled());
     }
 
     private void updateSlippery() {
@@ -814,11 +815,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (mRecentsOnboarding != null) {
             mRecentsOnboarding.setContentDarkIntensity(intensity);
         }
-    }
-
-    public void onOverviewProxyConnectionChanged(boolean isConnected) {
-        updateStates();
-        setUpSwipeUpOnboarding(isQuickStepSwipeUpEnabled());
     }
 
     @Override
@@ -1038,7 +1034,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         onPluginDisconnected(null); // Create default gesture helper
         Dependency.get(PluginManager.class).addPluginListener(this,
                 NavGesture.class, false /* Only one */);
-        setUpSwipeUpOnboarding(mOverviewProxyService.getProxy() != null);
+        setUpSwipeUpOnboarding(isQuickStepSwipeUpEnabled());
     }
 
     @Override
