@@ -27,19 +27,18 @@ import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.ArtManager.ProfileType;
 import android.content.pm.dex.ArtManagerInternal;
 import android.content.pm.dex.DexMetadataHelper;
+import android.content.pm.dex.ISnapshotRuntimeProfileCallback;
 import android.content.pm.dex.PackageOptimizationInfo;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.content.pm.dex.ISnapshotRuntimeProfileCallback;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.system.Os;
 import android.util.ArrayMap;
 import android.util.Slog;
-
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
@@ -47,9 +46,8 @@ import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
-
+import com.android.server.pm.PackageManagerServiceCompilerMapping;
 import dalvik.system.DexFile;
-
 import dalvik.system.VMRuntime;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -87,6 +85,10 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     private final Installer mInstaller;
 
     private final Handler mHandler;
+
+    static {
+        verifyTronLoggingConstants();
+    }
 
     public ArtManagerService(IPackageManager pm, Installer installer, Object installLock) {
         mPackageManager = pm;
@@ -423,6 +425,100 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         return result;
     }
 
+    // Constants used for logging compilation filter to TRON.
+    // DO NOT CHANGE existing values.
+    //
+    // NOTE: '-1' value is reserved for the case where we cannot produce a valid
+    // PackageOptimizationInfo because the ArtManagerInternal is not ready to be used by the
+    // ActivityMetricsLoggers.
+    private static final int TRON_COMPILATION_FILTER_ERROR = 0;
+    private static final int TRON_COMPILATION_FILTER_UNKNOWN = 1;
+    private static final int TRON_COMPILATION_FILTER_ASSUMED_VERIFIED = 2;
+    private static final int TRON_COMPILATION_FILTER_EXTRACT = 3;
+    private static final int TRON_COMPILATION_FILTER_VERIFY = 4;
+    private static final int TRON_COMPILATION_FILTER_QUICKEN = 5;
+    private static final int TRON_COMPILATION_FILTER_SPACE_PROFILE = 6;
+    private static final int TRON_COMPILATION_FILTER_SPACE = 7;
+    private static final int TRON_COMPILATION_FILTER_SPEED_PROFILE = 8;
+    private static final int TRON_COMPILATION_FILTER_SPEED = 9;
+    private static final int TRON_COMPILATION_FILTER_EVERYTHING_PROFILE = 10;
+    private static final int TRON_COMPILATION_FILTER_EVERYTHING = 11;
+    private static final int TRON_COMPILATION_FILTER_FAKE_RUN_FROM_APK = 12;
+    private static final int TRON_COMPILATION_FILTER_FAKE_RUN_FROM_APK_FALLBACK = 13;
+    private static final int TRON_COMPILATION_FILTER_FAKE_RUN_FROM_VDEX_FALLBACK = 14;
+
+    // Constants used for logging compilation reason to TRON.
+    // DO NOT CHANGE existing values.
+    //
+    // NOTE: '-1' value is reserved for the case where we cannot produce a valid
+    // PackageOptimizationInfo because the ArtManagerInternal is not ready to be used by the
+    // ActivityMetricsLoggers.
+    private static final int TRON_COMPILATION_REASON_ERROR = 0;
+    private static final int TRON_COMPILATION_REASON_UNKNOWN = 1;
+    private static final int TRON_COMPILATION_REASON_FIRST_BOOT = 2;
+    private static final int TRON_COMPILATION_REASON_BOOT = 3;
+    private static final int TRON_COMPILATION_REASON_INSTALL = 4;
+    private static final int TRON_COMPILATION_REASON_BG_DEXOPT = 5;
+    private static final int TRON_COMPILATION_REASON_AB_OTA = 6;
+    private static final int TRON_COMPILATION_REASON_INACTIVE = 7;
+    private static final int TRON_COMPILATION_REASON_SHARED = 8;
+
+    /**
+     * Convert the compilation reason to an int suitable to be logged to TRON.
+     */
+    private static int getCompilationReasonTronValue(String compilationReason) {
+        switch (compilationReason) {
+            case "unknown" : return TRON_COMPILATION_REASON_UNKNOWN;
+            case "error" : return TRON_COMPILATION_REASON_ERROR;
+            case "first-boot" : return TRON_COMPILATION_REASON_FIRST_BOOT;
+            case "boot" : return TRON_COMPILATION_REASON_BOOT;
+            case "install" : return TRON_COMPILATION_REASON_INSTALL;
+            case "bg-dexopt" : return TRON_COMPILATION_REASON_BG_DEXOPT;
+            case "ab-ota" : return TRON_COMPILATION_REASON_AB_OTA;
+            case "inactive" : return TRON_COMPILATION_REASON_INACTIVE;
+            case "shared" : return TRON_COMPILATION_REASON_SHARED;
+            default: return TRON_COMPILATION_REASON_UNKNOWN;
+        }
+    }
+
+    /**
+     * Convert the compilation filter to an int suitable to be logged to TRON.
+     */
+    private static int getCompilationFilterTronValue(String compilationFilter) {
+        switch (compilationFilter) {
+            case "error" : return TRON_COMPILATION_FILTER_ERROR;
+            case "unknown" : return TRON_COMPILATION_FILTER_UNKNOWN;
+            case "assume-verified" : return TRON_COMPILATION_FILTER_ASSUMED_VERIFIED;
+            case "extract" : return TRON_COMPILATION_FILTER_EXTRACT;
+            case "verify" : return TRON_COMPILATION_FILTER_VERIFY;
+            case "quicken" : return TRON_COMPILATION_FILTER_QUICKEN;
+            case "space-profile" : return TRON_COMPILATION_FILTER_SPACE_PROFILE;
+            case "space" : return TRON_COMPILATION_FILTER_SPACE;
+            case "speed-profile" : return TRON_COMPILATION_FILTER_SPEED_PROFILE;
+            case "speed" : return TRON_COMPILATION_FILTER_SPEED;
+            case "everything-profile" : return TRON_COMPILATION_FILTER_EVERYTHING_PROFILE;
+            case "everything" : return TRON_COMPILATION_FILTER_EVERYTHING;
+            case "run-from-apk" : return TRON_COMPILATION_FILTER_FAKE_RUN_FROM_APK;
+            case "run-from-apk-fallback" :
+                return TRON_COMPILATION_FILTER_FAKE_RUN_FROM_APK_FALLBACK;
+            case "run-from-vdex-fallback" :
+                return TRON_COMPILATION_FILTER_FAKE_RUN_FROM_VDEX_FALLBACK;
+            default: return TRON_COMPILATION_FILTER_UNKNOWN;
+        }
+    }
+
+    private static void verifyTronLoggingConstants() {
+        for (int i = 0; i < PackageManagerServiceCompilerMapping.REASON_STRINGS.length; i++) {
+            String reason = PackageManagerServiceCompilerMapping.REASON_STRINGS[i];
+            int value = getCompilationReasonTronValue(reason);
+            if (value == TRON_COMPILATION_REASON_ERROR
+                    || value == TRON_COMPILATION_REASON_UNKNOWN) {
+                throw new IllegalArgumentException("Compilation reason not configured for TRON "
+                        + "logging: " + reason);
+            }
+        }
+    }
+
     private class ArtManagerInternalImpl extends ArtManagerInternal {
         @Override
         public PackageOptimizationInfo getPackageOptimizationInfo(
@@ -445,7 +541,11 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
                 compilationReason = "error";
             }
 
-            return new PackageOptimizationInfo(compilationFilter, compilationReason);
+            int compilationFilterTronValue = getCompilationFilterTronValue(compilationFilter);
+            int compilationReasonTronValue = getCompilationReasonTronValue(compilationReason);
+
+            return new PackageOptimizationInfo(
+                    compilationFilterTronValue, compilationReasonTronValue);
         }
     }
 }
