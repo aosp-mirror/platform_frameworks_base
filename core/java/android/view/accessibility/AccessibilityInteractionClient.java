@@ -28,6 +28,8 @@ import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.SparseArray;
 
+import com.android.internal.util.ArrayUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -283,14 +285,19 @@ public final class AccessibilityInteractionClient
                 }
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
                 final long identityToken = Binder.clearCallingIdentity();
-                final boolean success = connection.findAccessibilityNodeInfoByAccessibilityId(
-                        accessibilityWindowId, accessibilityNodeId, interactionId, this,
-                        prefetchFlags, Thread.currentThread().getId(), arguments);
-                Binder.restoreCallingIdentity(identityToken);
-                if (success) {
+                final String[] packageNames;
+                try {
+                    packageNames = connection.findAccessibilityNodeInfoByAccessibilityId(
+                            accessibilityWindowId, accessibilityNodeId, interactionId, this,
+                            prefetchFlags, Thread.currentThread().getId(), arguments);
+                } finally {
+                    Binder.restoreCallingIdentity(identityToken);
+                }
+                if (packageNames != null) {
                     List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
                             interactionId);
-                    finalizeAndCacheAccessibilityNodeInfos(infos, connectionId);
+                    finalizeAndCacheAccessibilityNodeInfos(infos, connectionId,
+                            bypassCache, packageNames);
                     if (infos != null && !infos.isEmpty()) {
                         for (int i = 1; i < infos.size(); i++) {
                             infos.get(i).recycle();
@@ -333,15 +340,21 @@ public final class AccessibilityInteractionClient
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
                 final long identityToken = Binder.clearCallingIdentity();
-                final boolean success = connection.findAccessibilityNodeInfosByViewId(
-                        accessibilityWindowId, accessibilityNodeId, viewId, interactionId, this,
-                        Thread.currentThread().getId());
-                Binder.restoreCallingIdentity(identityToken);
-                if (success) {
+                final String[] packageNames;
+                try {
+                    packageNames = connection.findAccessibilityNodeInfosByViewId(
+                            accessibilityWindowId, accessibilityNodeId, viewId, interactionId, this,
+                            Thread.currentThread().getId());
+                } finally {
+                    Binder.restoreCallingIdentity(identityToken);
+                }
+
+                if (packageNames != null) {
                     List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
                             interactionId);
                     if (infos != null) {
-                        finalizeAndCacheAccessibilityNodeInfos(infos, connectionId);
+                        finalizeAndCacheAccessibilityNodeInfos(infos, connectionId,
+                                false, packageNames);
                         return infos;
                     }
                 }
@@ -381,15 +394,21 @@ public final class AccessibilityInteractionClient
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
                 final long identityToken = Binder.clearCallingIdentity();
-                final boolean success = connection.findAccessibilityNodeInfosByText(
-                        accessibilityWindowId, accessibilityNodeId, text, interactionId, this,
-                        Thread.currentThread().getId());
-                Binder.restoreCallingIdentity(identityToken);
-                if (success) {
+                final String[] packageNames;
+                try {
+                    packageNames = connection.findAccessibilityNodeInfosByText(
+                            accessibilityWindowId, accessibilityNodeId, text, interactionId, this,
+                            Thread.currentThread().getId());
+                } finally {
+                    Binder.restoreCallingIdentity(identityToken);
+                }
+
+                if (packageNames != null) {
                     List<AccessibilityNodeInfo> infos = getFindAccessibilityNodeInfosResultAndClear(
                             interactionId);
                     if (infos != null) {
-                        finalizeAndCacheAccessibilityNodeInfos(infos, connectionId);
+                        finalizeAndCacheAccessibilityNodeInfos(infos, connectionId,
+                                false, packageNames);
                         return infos;
                     }
                 }
@@ -428,14 +447,19 @@ public final class AccessibilityInteractionClient
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
                 final long identityToken = Binder.clearCallingIdentity();
-                final boolean success = connection.findFocus(accessibilityWindowId,
-                        accessibilityNodeId, focusType, interactionId, this,
-                        Thread.currentThread().getId());
-                Binder.restoreCallingIdentity(identityToken);
-                if (success) {
+                final String[] packageNames;
+                try {
+                    packageNames = connection.findFocus(accessibilityWindowId,
+                            accessibilityNodeId, focusType, interactionId, this,
+                            Thread.currentThread().getId());
+                } finally {
+                    Binder.restoreCallingIdentity(identityToken);
+                }
+
+                if (packageNames != null) {
                     AccessibilityNodeInfo info = getFindAccessibilityNodeInfoResultAndClear(
                             interactionId);
-                    finalizeAndCacheAccessibilityNodeInfo(info, connectionId);
+                    finalizeAndCacheAccessibilityNodeInfo(info, connectionId, false, packageNames);
                     return info;
                 }
             } else {
@@ -472,14 +496,19 @@ public final class AccessibilityInteractionClient
             if (connection != null) {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
                 final long identityToken = Binder.clearCallingIdentity();
-                final boolean success = connection.focusSearch(accessibilityWindowId,
-                        accessibilityNodeId, direction, interactionId, this,
-                        Thread.currentThread().getId());
-                Binder.restoreCallingIdentity(identityToken);
-                if (success) {
+                final String[] packageNames;
+                try {
+                    packageNames = connection.focusSearch(accessibilityWindowId,
+                            accessibilityNodeId, direction, interactionId, this,
+                            Thread.currentThread().getId());
+                } finally {
+                    Binder.restoreCallingIdentity(identityToken);
+                }
+
+                if (packageNames != null) {
                     AccessibilityNodeInfo info = getFindAccessibilityNodeInfoResultAndClear(
                             interactionId);
-                    finalizeAndCacheAccessibilityNodeInfo(info, connectionId);
+                    finalizeAndCacheAccessibilityNodeInfo(info, connectionId, false, packageNames);
                     return info;
                 }
             } else {
@@ -580,7 +609,7 @@ public final class AccessibilityInteractionClient
                 int interactionId) {
         synchronized (mInstanceLock) {
             final boolean success = waitForResultTimedLocked(interactionId);
-            List<AccessibilityNodeInfo> result = null;
+            final List<AccessibilityNodeInfo> result;
             if (success) {
                 result = mFindAccessibilityNodeInfosResult;
             } else {
@@ -696,13 +725,25 @@ public final class AccessibilityInteractionClient
      *
      * @param info The info.
      * @param connectionId The id of the connection to the system.
+     * @param bypassCache Whether or not to bypass the cache. The node is added to the cache if
+     *                    this value is {@code false}
+     * @param packageNames The valid package names a node can come from.
      */
     private void finalizeAndCacheAccessibilityNodeInfo(AccessibilityNodeInfo info,
-            int connectionId) {
+            int connectionId, boolean bypassCache, String[] packageNames) {
         if (info != null) {
             info.setConnectionId(connectionId);
+            // Empty array means any package name is Okay
+            if (!ArrayUtils.isEmpty(packageNames)
+                    && !ArrayUtils.contains(packageNames, info.getPackageName().toString())) {
+                // If the node package not one of the valid ones, pick the top one - this
+                // is one of the packages running in the introspected UID.
+                info.setPackageName(packageNames[0]);
+            }
             info.setSealed(true);
-            sAccessibilityCache.add(info);
+            if (!bypassCache) {
+                sAccessibilityCache.add(info);
+            }
         }
     }
 
@@ -711,14 +752,18 @@ public final class AccessibilityInteractionClient
      *
      * @param infos The {@link AccessibilityNodeInfo}s.
      * @param connectionId The id of the connection to the system.
+     * @param bypassCache Whether or not to bypass the cache. The nodes are added to the cache if
+     *                    this value is {@code false}
+     * @param packageNames The valid package names a node can come from.
      */
     private void finalizeAndCacheAccessibilityNodeInfos(List<AccessibilityNodeInfo> infos,
-            int connectionId) {
+            int connectionId, boolean bypassCache, String[] packageNames) {
         if (infos != null) {
             final int infosCount = infos.size();
             for (int i = 0; i < infosCount; i++) {
                 AccessibilityNodeInfo info = infos.get(i);
-                finalizeAndCacheAccessibilityNodeInfo(info, connectionId);
+                finalizeAndCacheAccessibilityNodeInfo(info, connectionId,
+                        bypassCache, packageNames);
             }
         }
     }
