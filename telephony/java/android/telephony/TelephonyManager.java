@@ -40,6 +40,7 @@ import android.os.BatteryStats;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PersistableBundle;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -212,6 +213,10 @@ public class TelephonyManager {
             return mContext.getOpPackageName();
         }
         return ActivityThread.currentOpPackageName();
+    }
+
+    private boolean isSystemProcess() {
+        return Process.myUid() == Process.SYSTEM_UID;
     }
 
     /**
@@ -2866,15 +2871,18 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null) {
                 Rlog.e(TAG, "IMSI error: Subscriber Info is null");
+                if (!isSystemProcess()) {
+                    throw new RuntimeException("IMSI error: Subscriber Info is null");
+                }
                 return;
             }
             int subId = getSubId(SubscriptionManager.getDefaultDataSubscriptionId());
             info.resetCarrierKeysForImsiEncryption(subId, mContext.getOpPackageName());
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getCarrierInfoForImsiEncryption RemoteException" + ex);
-        } catch (NullPointerException ex) {
-            // This could happen before phone restarts due to crashing
-            Rlog.e(TAG, "getCarrierInfoForImsiEncryption NullPointerException" + ex);
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
         }
     }
 
@@ -3863,11 +3871,18 @@ public class TelephonyManager {
     public void sendDialerSpecialCode(String inputCode) {
         try {
             final ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                if (!isSystemProcess()) {
+                    throw new RuntimeException("Telephony service unavailable");
+                }
+                return;
+            }
             telephony.sendDialerSpecialCode(mContext.getOpPackageName(), inputCode);
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
-        } catch (NullPointerException ex) {
-            // This could happen before phone restarts due to crashing
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
         }
     }
 
@@ -7863,6 +7878,9 @@ public class TelephonyManager {
             }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
         }
     }
 }
