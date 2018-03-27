@@ -240,6 +240,7 @@ package android.content.pm {
   public abstract class PackageManager {
     method public abstract java.lang.String getDefaultBrowserPackageNameAsUser(int);
     method public abstract int getInstallReason(java.lang.String, android.os.UserHandle);
+    method public abstract java.lang.String[] getNamesForUids(int[]);
     method public abstract java.lang.String getPermissionControllerPackageName();
     method public abstract boolean isPermissionReviewModeEnabled();
     field public static final java.lang.String FEATURE_ADOPTABLE_STORAGE = "android.software.adoptable_storage";
@@ -481,6 +482,7 @@ package android.net {
 package android.os {
 
   public static class Build.VERSION {
+    field public static final int FIRST_SDK_INT;
     field public static final int RESOURCES_SDK_INT;
   }
 
@@ -585,6 +587,7 @@ package android.provider {
     field public static final java.lang.String HIDDEN_API_BLACKLIST_EXEMPTIONS = "hidden_api_blacklist_exemptions";
     field public static final java.lang.String LOCATION_GLOBAL_KILL_SWITCH = "location_global_kill_switch";
     field public static final java.lang.String LOW_POWER_MODE = "low_power";
+    field public static final java.lang.String LOW_POWER_MODE_STICKY = "low_power_sticky";
     field public static final java.lang.String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
   }
 

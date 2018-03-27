@@ -368,6 +368,19 @@ public class ClipboardService extends SystemService {
         return related;
     }
 
+    /** Check if the user has the given restriction set. Default to true if error occured during
+     * calling UserManager, so it fails safe.
+     */
+    private boolean hasRestriction(String restriction, int userId) {
+        try {
+            return mUm.hasUserRestriction(restriction, userId);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote Exception calling UserManager.getUserRestrictions: ", e);
+            // Fails safe
+            return true;
+        }
+    }
+
     void setPrimaryClipInternal(@Nullable ClipData clip, int callingUid) {
         // Push clipboard to host, if any
         if (mHostClipboardMonitor != null) {
@@ -391,13 +404,8 @@ public class ClipboardService extends SystemService {
         if (related != null) {
             int size = related.size();
             if (size > 1) { // Related profiles list include the current profile.
-                boolean canCopy = false;
-                try {
-                    canCopy = !mUm.getUserRestrictions(userId).getBoolean(
-                            UserManager.DISALLOW_CROSS_PROFILE_COPY_PASTE);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Remote Exception calling UserManager: " + e);
-                }
+                final boolean canCopy = !hasRestriction(
+                        UserManager.DISALLOW_CROSS_PROFILE_COPY_PASTE, userId);
                 // Copy clip data to related users if allowed. If disallowed, then remove
                 // primary clip in related users to prevent pasting stale content.
                 if (!canCopy) {
@@ -416,7 +424,11 @@ public class ClipboardService extends SystemService {
                 for (int i = 0; i < size; i++) {
                     int id = related.get(i).id;
                     if (id != userId) {
-                        setPrimaryClipInternal(getClipboard(id), clip, callingUid);
+                        final boolean canCopyIntoProfile = !hasRestriction(
+                                UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE, id);
+                        if (canCopyIntoProfile) {
+                            setPrimaryClipInternal(getClipboard(id), clip, callingUid);
+                        }
                     }
                 }
             }

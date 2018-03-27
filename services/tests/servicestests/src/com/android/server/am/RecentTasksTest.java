@@ -42,11 +42,13 @@ import static java.lang.Integer.MAX_VALUE;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Debug;
@@ -101,8 +103,8 @@ public class RecentTasksTest extends ActivityTestsBase {
     private TestRecentTasks mRecentTasks;
     private TestRunningTasks mRunningTasks;
 
-    private static ArrayList<TaskRecord> mTasks = new ArrayList<>();
-    private static ArrayList<TaskRecord> mSameDocumentTasks = new ArrayList<>();
+    private ArrayList<TaskRecord> mTasks;
+    private ArrayList<TaskRecord> mSameDocumentTasks;
 
     private CallbacksRecorder mCallbacksRecorder;
 
@@ -155,12 +157,14 @@ public class RecentTasksTest extends ActivityTestsBase {
         mRecentTasks.registerCallback(mCallbacksRecorder);
         QUIET_USER_INFO.flags = UserInfo.FLAG_MANAGED_PROFILE | UserInfo.FLAG_QUIET_MODE;
 
+        mTasks = new ArrayList<>();
         mTasks.add(createTaskBuilder(".Task1").build());
         mTasks.add(createTaskBuilder(".Task2").build());
         mTasks.add(createTaskBuilder(".Task3").build());
         mTasks.add(createTaskBuilder(".Task4").build());
         mTasks.add(createTaskBuilder(".Task5").build());
 
+        mSameDocumentTasks = new ArrayList<>();
         mSameDocumentTasks.add(createDocumentTask(".DocumentTask1"));
         mSameDocumentTasks.add(createDocumentTask(".DocumentTask1"));
     }
@@ -294,7 +298,32 @@ public class RecentTasksTest extends ActivityTestsBase {
         assertTrue(mCallbacksRecorder.added.contains(task2));
         assertTrue(mCallbacksRecorder.trimmed.isEmpty());
         assertTrue(mCallbacksRecorder.removed.isEmpty());
+    }
 
+    @Test
+    public void testAddTaskCompatibleActivityType_expectRemove() throws Exception {
+        Configuration config1 = new Configuration();
+        config1.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
+        TaskRecord task1 = createTaskBuilder(".Task1")
+                .setFlags(FLAG_ACTIVITY_NEW_TASK)
+                .setStack(mStack)
+                .build();
+        task1.onConfigurationChanged(config1);
+        assertTrue(task1.getActivityType() == ACTIVITY_TYPE_UNDEFINED);
+        mRecentTasks.add(task1);
+        mCallbacksRecorder.clear();
+
+        TaskRecord task2 = createTaskBuilder(".Task1")
+                .setFlags(FLAG_ACTIVITY_NEW_TASK)
+                .setStack(mStack)
+                .build();
+        assertTrue(task2.getActivityType() == ACTIVITY_TYPE_STANDARD);
+        mRecentTasks.add(task2);
+        assertTrue(mCallbacksRecorder.added.size() == 1);
+        assertTrue(mCallbacksRecorder.added.contains(task2));
+        assertTrue(mCallbacksRecorder.trimmed.isEmpty());
+        assertTrue(mCallbacksRecorder.removed.size() == 1);
+        assertTrue(mCallbacksRecorder.removed.contains(task1));
     }
 
     @Test

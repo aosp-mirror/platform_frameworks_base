@@ -158,14 +158,7 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
     @Override
     public int capture(CaptureRequest request, CaptureCallback callback,
             Handler handler) throws CameraAccessException {
-        if (request == null) {
-            throw new IllegalArgumentException("request must not be null");
-        } else if (request.isReprocess() && !isReprocessable()) {
-            throw new IllegalArgumentException("this capture session cannot handle reprocess " +
-                    "requests");
-        } else if (request.isReprocess() && request.getReprocessableSessionId() != mId) {
-            throw new IllegalArgumentException("capture request was created for another session");
-        }
+        checkCaptureRequest(request);
 
         synchronized (mDeviceImpl.mInterfaceLock) {
             checkNotClosed();
@@ -183,25 +176,45 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
     }
 
     @Override
+    public int captureSingleRequest(CaptureRequest request, Executor executor,
+            CaptureCallback callback) throws CameraAccessException {
+        if (executor == null) {
+            throw new IllegalArgumentException("executor must not be null");
+        } else if (callback == null) {
+            throw new IllegalArgumentException("callback must not be null");
+        }
+        checkCaptureRequest(request);
+
+        synchronized (mDeviceImpl.mInterfaceLock) {
+            checkNotClosed();
+
+            executor = CameraDeviceImpl.checkExecutor(executor, callback);
+
+            if (DEBUG) {
+                Log.v(TAG, mIdString + "capture - request " + request + ", callback " + callback +
+                        " executor " + executor);
+            }
+
+            return addPendingSequence(mDeviceImpl.capture(request,
+                    createCaptureCallbackProxyWithExecutor(executor, callback), mDeviceExecutor));
+        }
+    }
+
+    private void checkCaptureRequest(CaptureRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("request must not be null");
+        } else if (request.isReprocess() && !isReprocessable()) {
+            throw new IllegalArgumentException("this capture session cannot handle reprocess " +
+                    "requests");
+        } else if (request.isReprocess() && request.getReprocessableSessionId() != mId) {
+            throw new IllegalArgumentException("capture request was created for another session");
+        }
+    }
+
+    @Override
     public int captureBurst(List<CaptureRequest> requests, CaptureCallback callback,
             Handler handler) throws CameraAccessException {
-        if (requests == null) {
-            throw new IllegalArgumentException("Requests must not be null");
-        } else if (requests.isEmpty()) {
-            throw new IllegalArgumentException("Requests must have at least one element");
-        }
-
-        for (CaptureRequest request : requests) {
-            if (request.isReprocess()) {
-                if (!isReprocessable()) {
-                    throw new IllegalArgumentException("This capture session cannot handle " +
-                            "reprocess requests");
-                } else if (request.getReprocessableSessionId() != mId) {
-                    throw new IllegalArgumentException("Capture request was created for another " +
-                            "session");
-                }
-            }
-        }
+        checkCaptureRequests(requests);
 
         synchronized (mDeviceImpl.mInterfaceLock) {
             checkNotClosed();
@@ -220,13 +233,56 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
     }
 
     @Override
+    public int captureBurstRequests(List<CaptureRequest> requests, Executor executor,
+            CaptureCallback callback) throws CameraAccessException {
+        if (executor == null) {
+            throw new IllegalArgumentException("executor must not be null");
+        } else if (callback == null) {
+            throw new IllegalArgumentException("callback must not be null");
+        }
+        checkCaptureRequests(requests);
+
+        synchronized (mDeviceImpl.mInterfaceLock) {
+            checkNotClosed();
+
+            executor = CameraDeviceImpl.checkExecutor(executor, callback);
+
+            if (DEBUG) {
+                CaptureRequest[] requestArray = requests.toArray(new CaptureRequest[0]);
+                Log.v(TAG, mIdString + "captureBurst - requests " + Arrays.toString(requestArray) +
+                        ", callback " + callback + " executor " + executor);
+            }
+
+            return addPendingSequence(mDeviceImpl.captureBurst(requests,
+                    createCaptureCallbackProxyWithExecutor(executor, callback), mDeviceExecutor));
+        }
+    }
+
+    private void checkCaptureRequests(List<CaptureRequest> requests) {
+        if (requests == null) {
+            throw new IllegalArgumentException("Requests must not be null");
+        } else if (requests.isEmpty()) {
+            throw new IllegalArgumentException("Requests must have at least one element");
+        }
+
+        for (CaptureRequest request : requests) {
+            if (request.isReprocess()) {
+                if (!isReprocessable()) {
+                    throw new IllegalArgumentException("This capture session cannot handle " +
+                            "reprocess requests");
+                } else if (request.getReprocessableSessionId() != mId) {
+                    throw new IllegalArgumentException("Capture request was created for another " +
+                            "session");
+                }
+            }
+        }
+
+    }
+
+    @Override
     public int setRepeatingRequest(CaptureRequest request, CaptureCallback callback,
             Handler handler) throws CameraAccessException {
-        if (request == null) {
-            throw new IllegalArgumentException("request must not be null");
-        } else if (request.isReprocess()) {
-            throw new IllegalArgumentException("repeating reprocess requests are not supported");
-        }
+        checkRepeatingRequest(request);
 
         synchronized (mDeviceImpl.mInterfaceLock) {
             checkNotClosed();
@@ -244,20 +300,42 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
     }
 
     @Override
+    public int setSingleRepeatingRequest(CaptureRequest request, Executor executor,
+            CaptureCallback callback) throws CameraAccessException {
+        if (executor == null) {
+            throw new IllegalArgumentException("executor must not be null");
+        } else if (callback == null) {
+            throw new IllegalArgumentException("callback must not be null");
+        }
+        checkRepeatingRequest(request);
+
+        synchronized (mDeviceImpl.mInterfaceLock) {
+            checkNotClosed();
+
+            executor = CameraDeviceImpl.checkExecutor(executor, callback);
+
+            if (DEBUG) {
+                Log.v(TAG, mIdString + "setRepeatingRequest - request " + request + ", callback " +
+                        callback + " executor" + " " + executor);
+            }
+
+            return addPendingSequence(mDeviceImpl.setRepeatingRequest(request,
+                    createCaptureCallbackProxyWithExecutor(executor, callback), mDeviceExecutor));
+        }
+    }
+
+    private void checkRepeatingRequest(CaptureRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("request must not be null");
+        } else if (request.isReprocess()) {
+            throw new IllegalArgumentException("repeating reprocess requests are not supported");
+        }
+    }
+
+    @Override
     public int setRepeatingBurst(List<CaptureRequest> requests,
             CaptureCallback callback, Handler handler) throws CameraAccessException {
-        if (requests == null) {
-            throw new IllegalArgumentException("requests must not be null");
-        } else if (requests.isEmpty()) {
-            throw new IllegalArgumentException("requests must have at least one element");
-        }
-
-        for (CaptureRequest r : requests) {
-            if (r.isReprocess()) {
-                throw new IllegalArgumentException("repeating reprocess burst requests are not " +
-                        "supported");
-            }
-        }
+        checkRepeatingRequests(requests);
 
         synchronized (mDeviceImpl.mInterfaceLock) {
             checkNotClosed();
@@ -273,6 +351,48 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
 
             return addPendingSequence(mDeviceImpl.setRepeatingBurst(requests,
                     createCaptureCallbackProxy(handler, callback), mDeviceExecutor));
+        }
+    }
+
+    @Override
+    public int setRepeatingBurstRequests(List<CaptureRequest> requests, Executor executor,
+            CaptureCallback callback) throws CameraAccessException {
+        if (executor == null) {
+            throw new IllegalArgumentException("executor must not be null");
+        } else if (callback == null) {
+            throw new IllegalArgumentException("callback must not be null");
+        }
+        checkRepeatingRequests(requests);
+
+        synchronized (mDeviceImpl.mInterfaceLock) {
+            checkNotClosed();
+
+            executor = CameraDeviceImpl.checkExecutor(executor, callback);
+
+            if (DEBUG) {
+                CaptureRequest[] requestArray = requests.toArray(new CaptureRequest[0]);
+                Log.v(TAG, mIdString + "setRepeatingBurst - requests " +
+                        Arrays.toString(requestArray) + ", callback " + callback +
+                        " executor" + "" + executor);
+            }
+
+            return addPendingSequence(mDeviceImpl.setRepeatingBurst(requests,
+                    createCaptureCallbackProxyWithExecutor(executor, callback), mDeviceExecutor));
+        }
+    }
+
+    private void checkRepeatingRequests(List<CaptureRequest> requests) {
+        if (requests == null) {
+            throw new IllegalArgumentException("requests must not be null");
+        } else if (requests.isEmpty()) {
+            throw new IllegalArgumentException("requests must have at least one element");
+        }
+
+        for (CaptureRequest r : requests) {
+            if (r.isReprocess()) {
+                throw new IllegalArgumentException("repeating reprocess burst requests are not " +
+                        "supported");
+            }
         }
     }
 
@@ -462,6 +582,11 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
         final Executor executor = (callback != null) ? CameraDeviceImpl.checkAndWrapHandler(
                 handler) : null;
 
+        return createCaptureCallbackProxyWithExecutor(executor, callback);
+    }
+
+    private CameraDeviceImpl.CaptureCallback createCaptureCallbackProxyWithExecutor(
+            Executor executor, CaptureCallback callback) {
         return new CameraDeviceImpl.CaptureCallback() {
             @Override
             public void onCaptureStarted(CameraDevice camera,

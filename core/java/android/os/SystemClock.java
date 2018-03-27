@@ -269,6 +269,7 @@ public final class SystemClock {
      * time or throw.
      *
      * @throws DateTimeException when no accurate network time can be provided.
+     * @hide
      */
     public static long currentNetworkTimeMillis() {
         final IAlarmManager mgr = IAlarmManager.Stub
@@ -302,6 +303,7 @@ public final class SystemClock {
      * time or throw.
      *
      * @throws DateTimeException when no accurate network time can be provided.
+     * @hide
      */
     public static @NonNull Clock currentNetworkTimeClock() {
         return new SimpleClock(ZoneOffset.UTC) {

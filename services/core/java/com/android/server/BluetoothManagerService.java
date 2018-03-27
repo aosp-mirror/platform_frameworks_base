@@ -60,6 +60,7 @@ import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Slog;
+import android.util.StatsLog;
 
 import com.android.internal.R;
 import com.android.internal.util.DumpUtils;
@@ -632,23 +633,14 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             if (DBG) {
                 Slog.d(TAG, "Binder is dead - unregister " + mPackageName);
             }
-            if (isBleAppPresent()) {
-                // Nothing to do, another app is here.
-                return;
-            }
-            if (DBG) {
-                Slog.d(TAG, "Disabling LE only mode after application crash");
-            }
-            try {
-                mBluetoothLock.readLock().lock();
-                if (mBluetooth != null && mBluetooth.getState() == BluetoothAdapter.STATE_BLE_ON) {
-                    mEnable = false;
-                    mBluetooth.onBrEdrDown();
+
+            for (Map.Entry<IBinder, ClientDeathRecipient> entry : mBleApps.entrySet()) {
+                IBinder token = entry.getKey();
+                ClientDeathRecipient deathRec = entry.getValue();
+                if (deathRec.equals(this)) {
+                    updateBleAppCount(token, false, mPackageName);
+                    break;
                 }
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Unable to call onBrEdrDown", e);
-            } finally {
-                mBluetoothLock.readLock().unlock();
             }
         }
 
@@ -2178,6 +2170,11 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             mActiveLogs.add(
                     new ActiveLog(reason, packageName, enable, System.currentTimeMillis()));
         }
+
+        int state = enable ? StatsLog.BLUETOOTH_ENABLED_STATE_CHANGED__STATE__ENABLED :
+                             StatsLog.BLUETOOTH_ENABLED_STATE_CHANGED__STATE__DISABLED;
+        StatsLog.write_non_chained(StatsLog.BLUETOOTH_ENABLED_STATE_CHANGED,
+                Binder.getCallingUid(), null, state, reason, packageName);
     }
 
     private void addCrashLog() {

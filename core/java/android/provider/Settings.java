@@ -11004,11 +11004,19 @@ public final class Settings {
         public static final String SHOW_PROCESSES = "show_processes";
 
         /**
-         * If 1 low power mode is enabled.
+         * If 1 low power mode (aka battery saver) is enabled.
          * @hide
          */
         @TestApi
         public static final String LOW_POWER_MODE = "low_power";
+
+        /**
+         * If 1, battery saver ({@link #LOW_POWER_MODE}) will be re-activated after the device
+         * is unplugged from a charger or rebooted.
+         * @hide
+         */
+        @TestApi
+        public static final String LOW_POWER_MODE_STICKY = "low_power_sticky";
 
         /**
          * Battery level [1-100] at which low power mode automatically turns on.

@@ -16,6 +16,7 @@
 
 package android.text.method;
 
+import android.os.Build;
 import android.text.Layout;
 import android.text.NoCopySpan;
 import android.text.Selection;
@@ -34,6 +35,8 @@ public class LinkMovementMethod extends ScrollingMovementMethod {
     private static final int CLICK = 1;
     private static final int UP = 2;
     private static final int DOWN = 3;
+
+    private static final int HIDE_FLOATING_TOOLBAR_DELAY_MS = 200;
 
     @Override
     public boolean canSelectArbitrarily() {
@@ -65,7 +68,7 @@ public class LinkMovementMethod extends ScrollingMovementMethod {
 
         return super.up(widget, buffer);
     }
-        
+
     @Override
     protected boolean down(TextView widget, Spannable buffer) {
         if (action(DOWN, widget, buffer)) {
@@ -215,6 +218,12 @@ public class LinkMovementMethod extends ScrollingMovementMethod {
                 if (action == MotionEvent.ACTION_UP) {
                     links[0].onClick(widget);
                 } else if (action == MotionEvent.ACTION_DOWN) {
+                    if (widget.getContext().getApplicationInfo().targetSdkVersion
+                            > Build.VERSION_CODES.O_MR1) {
+                        // Selection change will reposition the toolbar. Hide it for a few ms for a
+                        // smoother transition.
+                        widget.hideFloatingToolbar(HIDE_FLOATING_TOOLBAR_DELAY_MS);
+                    }
                     Selection.setSelection(buffer,
                         buffer.getSpanStart(links[0]),
                         buffer.getSpanEnd(links[0]));

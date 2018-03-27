@@ -94,21 +94,6 @@ public final class KeyChainProtectionParams implements Parcelable {
     private KeyDerivationParams mKeyDerivationParams;
     private byte[] mSecret; // Derived from user secret. The field must have limited visibility.
 
-    /**
-     * @param secret Constructor creates a reference to the secret. Caller must use
-     * @link {#clearSecret} to overwrite its value in memory.
-     * @hide
-     */
-    public KeyChainProtectionParams(@UserSecretType int userSecretType,
-            @LockScreenUiFormat int lockScreenUiFormat,
-            @NonNull KeyDerivationParams keyDerivationParams,
-            @NonNull byte[] secret) {
-        mUserSecretType = userSecretType;
-        mLockScreenUiFormat = lockScreenUiFormat;
-        mKeyDerivationParams = Preconditions.checkNotNull(keyDerivationParams);
-        mSecret = Preconditions.checkNotNull(secret);
-    }
-
     private KeyChainProtectionParams() {
 
     }
@@ -158,6 +143,7 @@ public final class KeyChainProtectionParams implements Parcelable {
 
         /**
          * Sets user secret type.
+         * Default value is {@link TYPE_LOCKSCREEN}.
          *
          * @see TYPE_LOCKSCREEN
          * @param userSecretType The secret type
@@ -185,7 +171,7 @@ public final class KeyChainProtectionParams implements Parcelable {
         /**
          * Sets parameters of the key derivation function.
          *
-         * @param keyDerivationParams Key derivation Params
+         * @param keyDerivationParams Key derivation parameters
          * @return This builder.
          */
         public Builder setKeyDerivationParams(@NonNull KeyDerivationParams

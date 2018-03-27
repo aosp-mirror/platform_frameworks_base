@@ -29,6 +29,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
+ * @hide
  * A class to encapsulate rating information used as content metadata.
  * A rating is defined by its rating style (see {@link #RATING_HEART},
  * {@link #RATING_THUMB_UP_DOWN}, {@link #RATING_3_STARS}, {@link #RATING_4_STARS},

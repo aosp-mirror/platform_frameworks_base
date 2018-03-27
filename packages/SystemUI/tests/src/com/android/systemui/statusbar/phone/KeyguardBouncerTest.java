@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
@@ -306,5 +307,13 @@ public class KeyguardBouncerTest extends SysuiTestCase {
             Assert.assertEquals("Security doesn't match for mode: " + mode,
                     mBouncer.isSecure(), mode != KeyguardSecurityModel.SecurityMode.None);
         }
+    }
+
+    @Test
+    public void testWillDismissWithAction() {
+        mBouncer.ensureView();
+        Assert.assertFalse("Action not set yet", mBouncer.willDismissWithAction());
+        when(mKeyguardHostView.hasDismissActions()).thenReturn(true);
+        Assert.assertTrue("Action should exist", mBouncer.willDismissWithAction());
     }
 }

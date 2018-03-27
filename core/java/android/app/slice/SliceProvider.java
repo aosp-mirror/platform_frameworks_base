@@ -37,7 +37,6 @@ import android.os.Handler;
 import android.os.Process;
 import android.os.StrictMode;
 import android.os.StrictMode.ThreadPolicy;
-import android.os.UserHandle;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -146,18 +145,6 @@ public abstract class SliceProvider extends ContentProvider {
      * @hide
      */
     public static final String EXTRA_PROVIDER_PKG = "provider_pkg";
-    /**
-     * @hide
-     */
-    public static final String EXTRA_OVERRIDE_PKG = "override_pkg";
-    /**
-     * @hide
-     */
-    public static final String EXTRA_OVERRIDE_UID = "override_uid";
-    /**
-     * @hide
-     */
-    public static final String EXTRA_OVERRIDE_PID = "override_pid";
 
     private static final boolean DEBUG = false;
 
@@ -257,6 +244,23 @@ public abstract class SliceProvider extends ContentProvider {
                 "This provider has not implemented intent to uri mapping");
     }
 
+    /**
+     * Called when an app requests a slice it does not have write permission
+     * to the uri for.
+     * <p>
+     * The return value will be the action on a slice that prompts the user that
+     * the calling app wants to show slices from this app. The default implementation
+     * launches a dialog that allows the user to grant access to this slice. Apps
+     * that do not want to allow this user grant, can override this and instead
+     * launch their own dialog with different behavior.
+     *
+     * @param sliceUri the Uri of the slice attempting to be bound.
+     * @see #getCallingPackage()
+     */
+    public @NonNull PendingIntent onCreatePermissionRequest(Uri sliceUri) {
+        return createPermissionIntent(getContext(), sliceUri, getCallingPackage());
+    }
+
     @Override
     public final int update(Uri uri, ContentValues values, String selection,
             String[] selectionArgs) {
@@ -312,17 +316,7 @@ public abstract class SliceProvider extends ContentProvider {
             String callingPackage = getCallingPackage();
             int callingUid = Binder.getCallingUid();
             int callingPid = Binder.getCallingPid();
-            if (extras.containsKey(EXTRA_OVERRIDE_PKG)) {
-                if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-                    throw new SecurityException("Only the system can override calling pkg");
-                }
-                // This is safe because we would grant SYSTEM_UID access to all slices
-                // and want to allow it to bind slices as if it were a less privileged app
-                // to check their permission levels.
-                callingPackage = extras.getString(EXTRA_OVERRIDE_PKG);
-                callingUid = extras.getInt(EXTRA_OVERRIDE_UID);
-                callingPid = extras.getInt(EXTRA_OVERRIDE_PID);
-            }
+
             Slice s = handleBindSlice(uri, supportedSpecs, callingPackage, callingUid, callingPid);
             Bundle b = new Bundle();
             b.putParcelable(EXTRA_SLICE, s);
@@ -406,13 +400,11 @@ public abstract class SliceProvider extends ContentProvider {
         // SliceManager#bindSlice.
         String pkg = callingPkg != null ? callingPkg
                 : getContext().getPackageManager().getNameForUid(callingUid);
-        if (!UserHandle.isSameApp(callingUid, Process.myUid())) {
-            try {
-                mSliceManager.enforceSlicePermission(sliceUri, pkg,
-                        callingPid, callingUid);
-            } catch (SecurityException e) {
-                return createPermissionSlice(getContext(), sliceUri, pkg);
-            }
+        try {
+            mSliceManager.enforceSlicePermission(sliceUri, pkg,
+                    callingPid, callingUid);
+        } catch (SecurityException e) {
+            return createPermissionSlice(getContext(), sliceUri, pkg);
         }
         mCallback = "onBindSlice";
         Handler.getMain().postDelayed(mAnr, SLICE_BIND_ANR);
@@ -426,10 +418,18 @@ public abstract class SliceProvider extends ContentProvider {
     /**
      * @hide
      */
-    public static Slice createPermissionSlice(Context context, Uri sliceUri,
+    public Slice createPermissionSlice(Context context, Uri sliceUri,
             String callingPackage) {
+        PendingIntent action;
+        mCallback = "onCreatePermissionRequest";
+        Handler.getMain().postDelayed(mAnr, SLICE_BIND_ANR);
+        try {
+            action = onCreatePermissionRequest(sliceUri);
+        } finally {
+            Handler.getMain().removeCallbacks(mAnr);
+        }
         return new Slice.Builder(sliceUri)
-                .addAction(createPermissionIntent(context, sliceUri, callingPackage),
+                .addAction(action,
                         new Slice.Builder(sliceUri.buildUpon().appendPath("permission").build())
                                 .addText(getPermissionString(context, callingPackage), null,
                                         Collections.emptyList())

@@ -21,6 +21,7 @@
 #include <nativehelper/JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"
+#include "MtpDescriptors.h"
 
 #include <stdio.h>
 #include <asm/byteorder.h>
@@ -118,6 +119,38 @@ static jint android_server_UsbDeviceManager_getAudioMode(JNIEnv* /* env */, jobj
     return result;
 }
 
+static jobject android_server_UsbDeviceManager_openControl(JNIEnv *env, jobject /* thiz */, jstring jFunction) {
+    const char *function = env->GetStringUTFChars(jFunction, NULL);
+    bool ptp = false;
+    int fd = -1;
+    if (!strcmp(function, "ptp")) {
+        ptp = true;
+    }
+    if (!strcmp(function, "mtp") || ptp) {
+        fd = TEMP_FAILURE_RETRY(open(ptp ? FFS_PTP_EP0 : FFS_MTP_EP0, O_RDWR));
+        if (fd < 0) {
+            ALOGE("could not open control for %s %s", function, strerror(errno));
+            goto error;
+        }
+        if (!writeDescriptors(fd, ptp)) {
+            goto error;
+        }
+    }
+
+    if (function != NULL) {
+        env->ReleaseStringUTFChars(jFunction, function);
+    }
+    return jniCreateFileDescriptor(env, fd);
+error:
+    if (fd != -1) {
+        close(fd);
+    }
+    if (function != NULL) {
+        env->ReleaseStringUTFChars(jFunction, function);
+    }
+    return NULL;
+}
+
 static const JNINativeMethod method_table[] = {
     { "nativeGetAccessoryStrings",  "()[Ljava/lang/String;",
                                     (void*)android_server_UsbDeviceManager_getAccessoryStrings },
@@ -127,6 +160,8 @@ static const JNINativeMethod method_table[] = {
                                     (void*)android_server_UsbDeviceManager_isStartRequested },
     { "nativeGetAudioMode",         "()I",
                                     (void*)android_server_UsbDeviceManager_getAudioMode },
+    { "nativeOpenControl",          "(Ljava/lang/String;)Ljava/io/FileDescriptor;",
+                                    (void*)android_server_UsbDeviceManager_openControl },
 };
 
 int register_android_server_UsbDeviceManager(JNIEnv *env)
