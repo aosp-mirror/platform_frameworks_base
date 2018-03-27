@@ -1724,6 +1724,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.BACKUP_LOCAL_TRANSPORT_PARAMETERS,
                 SecureSettingsProto.Backup.LOCAL_TRANSPORT_PARAMETERS);
+        dumpSetting(s, p,
+                Settings.Secure.PACKAGES_TO_CLEAR_DATA_BEFORE_FULL_RESTORE,
+                SecureSettingsProto.Backup.PACKAGES_TO_CLEAR_DATA_BEFORE_FULL_RESTORE);
         p.end(backupToken);
 
         // Settings.Secure.BLUETOOTH_ON intentionally excluded since it's deprecated.
