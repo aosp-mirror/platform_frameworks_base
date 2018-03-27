@@ -2096,6 +2096,8 @@
     <string name="notification_channel_general">General Messages</string>
     <!-- Title for the notification channel for problems with storage (i.e. low disk). [CHAR LIMIT=NONE] -->
     <string name="notification_channel_storage">Storage</string>
+    <!-- Title for the notification channel for hints and suggestions. [CHAR LIMIT=NONE] -->
+    <string name="notification_channel_hints">Hints</string>
 
     <!-- App label of the instant apps notification [CHAR LIMIT=60] -->
     <string name="instant_apps">Instant Apps</string>
@@ -2185,5 +2187,26 @@
     <!-- List of packages for which we don't want to show recents onboarding, add into overlay as needed. -->
     <string-array name="recents_onboarding_blacklisted_packages" translatable="false">
     </string-array>
+
+    <!-- The title of the notification to suggest enabling automatic battery saver.  [CHAR LIMIT=NONE]-->
+    <string name="auto_saver_title">Tap to schedule Battery Saver</string>
+
+    <!-- The content of the notification to suggest enabling automatic battery saver.  [CHAR LIMIT=NONE]-->
+    <string name="auto_saver_text">Turn on automatically when battery is at <xliff:g id="percentage">%d</xliff:g>%%</string>
+
+    <!-- An action on the notification to suggest enabling automatic battery saver: Do not turn on automatic battery saver.  [CHAR LIMIT=NONE]-->
+    <string name="no_auto_saver_action">No thanks</string>
+
+    <!-- The title of the dialog that tells that scheduled (i.e. automatic) battery saver has been turned on. [CHAR LIMIT=NONE]-->
+    <string name="auto_saver_enabled_title">Battery Saver schedule turned on</string>
+
+    <!-- The content of the dialog that tells that scheduled (i.e. automatic) battery saver has been turned on. [CHAR LIMIT=NONE]-->
+    <string name="auto_saver_enabled_text">Battery Saver will turn on automatically once battery goes below <xliff:g id="percentage">%d</xliff:g>%%.</string>
+
+    <!-- An action on the dialog that tells that scheduled (i.e. automatic) battery saver: open the battery saver setting.  [CHAR LIMIT=NONE]-->
+    <string name="open_saver_setting_action">Settings</string>
+
+    <!-- An action on the dialog that tells that scheduled (i.e. automatic) battery saver: user acknowledges and closes the dialog.  [CHAR LIMIT=NONE]-->
+    <string name="auto_saver_okay_action">Got it</string>
 
 </resources>

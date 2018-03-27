@@ -7801,6 +7801,14 @@ public final class Settings {
                 "low_power_warning_acknowledged";
 
         /**
+         * 0 (default) Auto battery saver suggestion has not been suppressed. 1) it has been
+         * suppressed.
+         * @hide
+         */
+        public static final String SUPPRESS_AUTO_BATTERY_SAVER_SUGGESTION =
+                "suppress_auto_battery_saver_suggestion";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
