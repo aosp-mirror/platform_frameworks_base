@@ -1819,13 +1819,22 @@ public final class AutofillManager {
             final View[] views = client.autofillClientFindViewsByAutofillIdTraversal(
                     Helper.toArray(ids));
 
+            ArrayList<AutofillId> failedIds = null;
+
             for (int i = 0; i < itemCount; i++) {
                 final AutofillId id = ids.get(i);
                 final AutofillValue value = values.get(i);
                 final int viewId = id.getViewId();
                 final View view = views[i];
                 if (view == null) {
-                    Log.w(TAG, "autofill(): no View with id " + viewId);
+                    // Most likely view has been removed after the initial request was sent to the
+                    // the service; this is fine, but we need to update the view status in the
+                    // server side so it can be triggered again.
+                    Log.d(TAG, "autofill(): no View with id " + id);
+                    if (failedIds == null) {
+                        failedIds = new ArrayList<>();
+                    }
+                    failedIds.add(id);
                     continue;
                 }
                 if (id.isVirtual()) {
@@ -1859,12 +1868,28 @@ public final class AutofillManager {
                 }
             }
 
+            if (failedIds != null) {
+                if (sVerbose) {
+                    Log.v(TAG, "autofill(): total failed views: " + failedIds);
+                }
+                try {
+                    mService.setAutofillFailure(mSessionId, failedIds, mContext.getUserId());
+                } catch (RemoteException e) {
+                    // In theory, we could ignore this error since it's not a big deal, but
+                    // in reality, we rather crash the app anyways, as the failure could be
+                    // a consequence of something going wrong on the server side...
+                    e.rethrowFromSystemServer();
+                }
+            }
+
             if (virtualValues != null) {
                 for (int i = 0; i < virtualValues.size(); i++) {
                     final View parent = virtualValues.keyAt(i);
                     final SparseArray<AutofillValue> childrenValues = virtualValues.valueAt(i);
                     parent.autofill(childrenValues);
                     numApplied += childrenValues.size();
+                    // TODO: we should provide a callback so the parent can call failures; something
+                    // like notifyAutofillFailed(View view, int[] childrenIds);
                 }
             }
 
