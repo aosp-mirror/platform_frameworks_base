@@ -1833,7 +1833,9 @@ public interface WindowManager extends ViewManager {
         public static final int SOFT_INPUT_MASK_STATE = 0x0f;
 
         /**
-         * Visibility state for {@link #softInputMode}: no state has been specified.
+         * Visibility state for {@link #softInputMode}: no state has been specified. The system may
+         * show or hide the software keyboard for better user experience when the window gains
+         * focus.
          */
         public static final int SOFT_INPUT_STATE_UNSPECIFIED = 0;
 
