@@ -1324,7 +1324,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 final ActivityRecord ar = activities.get(activityNdx);
 
                 if ((userId == ar.userId) && packageName.equals(ar.packageName)) {
-                    ar.info.applicationInfo = aInfo;
+                    ar.updateApplicationInfo(aInfo);
                 }
             }
         }
@@ -3987,7 +3987,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             } else {
                 try {
                     ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
-                            destIntent.getComponent(), 0, srec.userId);
+                            destIntent.getComponent(), ActivityManagerService.STOCK_PM_FLAGS,
+                            srec.userId);
                     // TODO(b/64750076): Check if calling pid should really be -1.
                     final int res = mService.getActivityStartController()
                             .obtainStarter(destIntent, "navigateUpTo")

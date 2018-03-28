@@ -10605,8 +10605,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         intent.addFlags(Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS);
                     }
                 }
-                final ActivityInfo ainfo = AppGlobals.getPackageManager().getActivityInfo(comp, 0,
-                        UserHandle.getUserId(callingUid));
+                final ActivityInfo ainfo = AppGlobals.getPackageManager().getActivityInfo(comp,
+                        STOCK_PM_FLAGS, UserHandle.getUserId(callingUid));
                 if (ainfo.applicationInfo.uid != callingUid) {
                     throw new SecurityException(
                             "Can't add task for another application: target uid="
@@ -21213,7 +21213,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         ApplicationInfo aInfo = null;
                         try {
                             aInfo = AppGlobals.getPackageManager()
-                                    .getApplicationInfo(ssp, 0 /*flags*/, userId);
+                                    .getApplicationInfo(ssp, STOCK_PM_FLAGS, userId);
                         } catch (RemoteException ignore) {}
                         if (aInfo == null) {
                             Slog.w(TAG, "Dropping ACTION_PACKAGE_REPLACED for non-existent pkg:"
@@ -21238,7 +21238,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                         try {
                             ApplicationInfo ai = AppGlobals.getPackageManager().
-                                    getApplicationInfo(ssp, 0, 0);
+                                    getApplicationInfo(ssp, STOCK_PM_FLAGS, 0);
                             mBatteryStatsService.notePackageInstalled(ssp,
                                     ai != null ? ai.versionCode : 0);
                         } catch (RemoteException e) {
