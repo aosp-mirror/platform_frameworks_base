@@ -347,7 +347,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         if (mExpansionFraction != fraction) {
             mExpansionFraction = fraction;
 
-            if (!(mState == ScrimState.UNLOCKED || mState == ScrimState.KEYGUARD)) {
+            final boolean keyguardOrUnlocked = mState == ScrimState.UNLOCKED
+                    || mState == ScrimState.KEYGUARD;
+            if (!keyguardOrUnlocked || !mExpansionAffectsAlpha) {
                 return;
             }
 
