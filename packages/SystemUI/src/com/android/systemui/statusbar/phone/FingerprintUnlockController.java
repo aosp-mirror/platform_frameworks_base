@@ -399,4 +399,11 @@ public class FingerprintUnlockController extends KeyguardUpdateMonitorCallback {
         pw.print("   mMode="); pw.println(mMode);
         pw.print("   mWakeLock="); pw.println(mWakeLock);
     }
+
+    public boolean isWakeAndUnlock() {
+        return mMode == MODE_UNLOCK
+                || mMode == MODE_WAKE_AND_UNLOCK
+                || mMode == MODE_WAKE_AND_UNLOCK_PULSING
+                || mMode == MODE_WAKE_AND_UNLOCK_FROM_DREAM;
+    }
 }

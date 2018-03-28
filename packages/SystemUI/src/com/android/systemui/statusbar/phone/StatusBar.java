@@ -4659,9 +4659,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         final boolean wakeAndUnlocking = mFingerprintUnlockController.getMode()
                 == FingerprintUnlockController.MODE_WAKE_AND_UNLOCK;
 
-        // Do not animate the scrim expansion when it's triggered by the fingerprint sensor.
-        mScrimController.setExpansionAffectsAlpha(mFingerprintUnlockController.getMode()
-                != FingerprintUnlockController.MODE_UNLOCK);
+        // Do not animate the scrim expansion when triggered by the fingerprint sensor.
+        mScrimController.setExpansionAffectsAlpha(!mFingerprintUnlockController.isWakeAndUnlock());
 
         if (mBouncerShowing) {
             // Bouncer needs the front scrim when it's on top of an activity,
