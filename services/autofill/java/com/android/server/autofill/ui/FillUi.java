@@ -19,6 +19,7 @@ import static com.android.server.autofill.Helper.paramsToString;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sFullScreenMode;
 import static com.android.server.autofill.Helper.sVerbose;
+import static com.android.server.autofill.Helper.sVisibleDatasetsMaxCount;
 
 import android.annotation.AttrRes;
 import android.annotation.NonNull;
@@ -59,8 +60,6 @@ import android.widget.RemoteViews;
 import com.android.internal.R;
 import com.android.server.UiThread;
 import com.android.server.autofill.Helper;
-
-import static com.android.server.autofill.Helper.sVisibleDatasetsMaxCount;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -131,6 +130,7 @@ final class FillUi {
     private @Nullable AnnounceFilterResult mAnnounceFilterResult;
 
     private final boolean mFullScreen;
+    private final int mVisibleDatasetsMaxCount;
     private int mContentWidth;
     private int mContentHeight;
 
@@ -191,6 +191,16 @@ final class FillUi {
             }
         }
 
+        if (sVisibleDatasetsMaxCount > 0) {
+            mVisibleDatasetsMaxCount = sVisibleDatasetsMaxCount;
+            if (sVerbose) {
+                Slog.v(TAG, "overriding maximum visible datasets to " + mVisibleDatasetsMaxCount);
+            }
+        } else {
+            mVisibleDatasetsMaxCount = mContext.getResources()
+                    .getInteger(com.android.internal.R.integer.autofill_max_visible_datasets);
+        }
+
         final RemoteViews.OnClickHandler interceptionHandler = new RemoteViews.OnClickHandler() {
             @Override
             public boolean onClickHandler(View view, PendingIntent pendingIntent,
@@ -247,7 +257,7 @@ final class FillUi {
             final int datasetCount = response.getDatasets().size();
             if (sVerbose) {
                 Slog.v(TAG, "Number datasets: " + datasetCount + " max visible: "
-                        + sVisibleDatasetsMaxCount);
+                        + mVisibleDatasetsMaxCount);
             }
 
             RemoteViews.OnClickHandler clickBlocker = null;
@@ -386,7 +396,7 @@ final class FillUi {
                     }
                     requestShowFillUi();
                 }
-                if (mAdapter.getCount() > sVisibleDatasetsMaxCount) {
+                if (mAdapter.getCount() > mVisibleDatasetsMaxCount) {
                     mListView.setVerticalScrollBarEnabled(true);
                     mListView.onVisibilityAggregated(true);
                 } else {
@@ -492,7 +502,7 @@ final class FillUi {
                 }
             } else {
                 changed |= updateWidth(view, maxSize);
-                if (i < sVisibleDatasetsMaxCount) {
+                if (i < mVisibleDatasetsMaxCount) {
                     changed |= updateHeight(view, maxSize);
                 }
             }
@@ -723,6 +733,8 @@ final class FillUi {
     public void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mCallback: "); pw.println(mCallback != null);
         pw.print(prefix); pw.print("mFullScreen: "); pw.println(mFullScreen);
+        pw.print(prefix); pw.print("mVisibleDatasetsMaxCount: "); pw.println(
+                mVisibleDatasetsMaxCount);
         if (mHeader != null) {
             pw.print(prefix); pw.print("mHeader: "); pw.println(mHeader);
         }
