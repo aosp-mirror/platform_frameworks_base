@@ -33,7 +33,6 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Em andamento"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificações"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Bateria fraca"</string>
-    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"A bateria está com pouca carga. Ative a Economia de bateria"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> restantes"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> restante(s), cerca de <xliff:g id="TIME">%s</xliff:g> com base no seu uso"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> restante(s), cerca de <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -73,11 +72,12 @@
     <string name="global_action_screenshot" msgid="8329831278085426283">"Captura de tela"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Salvando captura de tela..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Salvando captura de tela..."</string>
-    <string name="screenshot_saving_text" msgid="2545047868936087248">"A captura de tela está sendo salva"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"Captura de tela salva"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"Toque para ver sua captura de tela"</string>
-    <string name="screenshot_failed_title" msgid="9096484883063264803">"Não foi possível fazer a captura de tela"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Problema encontrado ao salvar captura de tela"</string>
+    <!-- no translation found for screenshot_failed_title (7612509838919089748) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_to_save_unknown_text (3637758096565605541) -->
+    <skip />
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Não é possível salvar a captura de tela, porque não há espaço suficiente"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"O app ou a organização não permitem capturas de tela"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opções transf. arq. por USB"</string>
@@ -275,8 +275,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"Mostruário de sobremesas"</string>
     <string name="start_dreams" msgid="5640361424498338327">"Protetor de tela"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
-    <!-- no translation found for quick_settings_header_onboarding_text (8030309023792936283) -->
-    <skip />
+    <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Toque nos ícones e mantenha-os pressionados para ver mais opções"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Não perturbe"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Somente prioridade"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Somente alarmes"</string>
@@ -351,7 +350,8 @@
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Ativ. ao pôr do sol"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Até o nascer do sol"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Ativado às <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"Até <xliff:g id="TIME">%s</xliff:g>"</string>
+    <!-- no translation found for quick_settings_secondary_label_until (2749196569462600150) -->
+    <skip />
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"A NFC está desativada"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"A NFC está ativada"</string>
@@ -435,6 +435,8 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> começará a capturar tudo o que for exibido na tela."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Não mostrar novamente"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Limpar tudo"</string>
+    <!-- no translation found for manage_notifications_text (8035284146227267681) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"O modo \"Não perturbe\" está ocultando as notificações"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Iniciar agora"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Sem notificações"</string>
@@ -628,6 +630,8 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g> do <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"controles de notificação"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"opções de adiamento de notificação"</string>
+    <!-- no translation found for notification_menu_snooze_action (1112254519029621372) -->
+    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"DESFAZER"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Adiada para <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
@@ -725,11 +729,9 @@
     <string name="right_keycode" msgid="708447961000848163">"Código de tecla à direita"</string>
     <string name="left_icon" msgid="3096287125959387541">"Ícone à esquerda"</string>
     <string name="right_icon" msgid="3952104823293824311">"Ícone à direita"</string>
-    <!-- no translation found for drag_to_add_tiles (230586591689084925) -->
-    <skip />
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"Mantenha pressionado e arraste para adicionar blocos"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Arraste aqui para remover"</string>
-    <!-- no translation found for drag_to_remove_disabled (2390968976638993382) -->
-    <skip />
+    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"É preciso haver pelo menos seis blocos"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Editar"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Horas"</string>
   <string-array name="clock_options">
@@ -816,6 +818,8 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Capturas de tela"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Mensagens gerais"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Armazenamento"</string>
+    <!-- no translation found for notification_channel_hints (7323870212489152689) -->
+    <skip />
     <string name="instant_apps" msgid="6647570248119804907">"Instant Apps"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Os Instant Apps não requerem instalação."</string>
     <string name="app_info" msgid="6856026610594615344">"Informações do app"</string>
@@ -833,12 +837,9 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Substituir"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Apps sendo executados em segundo plano"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tocar para ver detalhes sobre a bateria e o uso de dados"</string>
-    <!-- no translation found for mobile_data_disable_title (1068272097382942231) -->
-    <skip />
-    <!-- no translation found for mobile_data_disable_message (4756541658791493506) -->
-    <skip />
-    <!-- no translation found for mobile_data_disable_message_default_carrier (6078110473451946831) -->
-    <skip />
+    <string name="mobile_data_disable_title" msgid="1068272097382942231">"Desativar os dados móveis?"</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"Você não terá acesso a dados ou à Internet por meio da operadora <xliff:g id="CARRIER">%s</xliff:g>. A Internet só estará disponível via Wi-Fi."</string>
+    <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"sua operadora"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Como um app está ocultando uma solicitação de permissão, as configurações não podem verificar sua resposta."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"Permitir que <xliff:g id="APP_0">%1$s</xliff:g> mostre partes do app <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- Pode ler informações do app <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -846,4 +847,18 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"Permitir que <xliff:g id="APP">%1$s</xliff:g> mostre partes de qualquer app"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"Permitir"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Negar"</string>
+    <!-- no translation found for auto_saver_title (1217959994732964228) -->
+    <skip />
+    <!-- no translation found for auto_saver_text (6324376061044218113) -->
+    <skip />
+    <!-- no translation found for no_auto_saver_action (8086002101711328500) -->
+    <skip />
+    <!-- no translation found for auto_saver_enabled_title (6726474226058316862) -->
+    <skip />
+    <!-- no translation found for auto_saver_enabled_text (874711029884777579) -->
+    <skip />
+    <!-- no translation found for open_saver_setting_action (8314624730997322529) -->
+    <skip />
+    <!-- no translation found for auto_saver_okay_action (2701221740227683650) -->
+    <skip />
 </resources>
