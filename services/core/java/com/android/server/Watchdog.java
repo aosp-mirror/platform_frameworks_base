@@ -587,13 +587,8 @@ public class Watchdog extends Thread {
     }
 
     private File dumpKernelStackTraces() {
-        String tracesPath = SystemProperties.get("dalvik.vm.stack-trace-file", null);
-        if (tracesPath == null || tracesPath.length() == 0) {
-            return null;
-        }
-
-        native_dumpKernelStacks(tracesPath);
-        return new File(tracesPath);
+        native_dumpKernelStacks("/data/anr");
+        return new File("/data/anr");
     }
 
     private native void native_dumpKernelStacks(String tracesPath);
@@ -615,14 +610,6 @@ public class Watchdog extends Thread {
                 return null;
             }
 
-            // Don't run the FD monitor on builds that have a global ANR trace file. We're using
-            // the ANR trace directory as a quick hack in order to get these traces in bugreports
-            // and we wouldn't want to overwrite something important.
-            final String dumpDirStr = SystemProperties.get("dalvik.vm.stack-trace-dir", "");
-            if (dumpDirStr.isEmpty()) {
-                return null;
-            }
-
             final StructRlimit rlimit;
             try {
                 rlimit = android.system.Os.getrlimit(OsConstants.RLIMIT_NOFILE);
@@ -639,7 +626,7 @@ public class Watchdog extends Thread {
             // We do this to avoid having to enumerate the contents of /proc/self/fd in order to
             // count the number of descriptors open in the process.
             final File fdThreshold = new File("/proc/self/fd/" + (rlimit.rlim_cur - FD_HIGH_WATER_MARK));
-            return new OpenFdMonitor(new File(dumpDirStr), fdThreshold);
+            return new OpenFdMonitor(new File("/data/anr"), fdThreshold);
         }
 
         OpenFdMonitor(File dumpDir, File fdThreshold) {
