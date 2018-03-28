@@ -451,7 +451,7 @@ package android.app.admin {
     field public static final int STATE_USER_UNMANAGED = 0; // 0x0
   }
 
-  public class SystemUpdatePolicy implements android.os.Parcelable {
+  public final class SystemUpdatePolicy implements android.os.Parcelable {
     method public int describeContents();
     method public android.app.admin.SystemUpdatePolicy.InstallationOption getInstallationOptionAt(long);
     method public void writeToParcel(android.os.Parcel, int);

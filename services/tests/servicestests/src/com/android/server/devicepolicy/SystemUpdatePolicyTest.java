@@ -24,7 +24,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import android.app.admin.FreezeInterval;
+import android.app.admin.FreezePeriod;
 import android.app.admin.SystemUpdatePolicy;
 import android.os.Parcel;
 import android.support.test.runner.AndroidJUnit4;
@@ -42,14 +42,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.MonthDay;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
 
 /**
  * Unit tests for {@link android.app.admin.SystemUpdatePolicy}.
@@ -224,36 +224,36 @@ public final class SystemUpdatePolicyTest {
 
     @Test
     public void testDistanceWithoutLeapYear() {
-        assertEquals(364, FreezeInterval.distanceWithoutLeapYear(
+        assertEquals(364, FreezePeriod.distanceWithoutLeapYear(
                 LocalDate.of(2016, 12, 31), LocalDate.of(2016, 1, 1)));
-        assertEquals(365, FreezeInterval.distanceWithoutLeapYear(
+        assertEquals(365, FreezePeriod.distanceWithoutLeapYear(
                 LocalDate.of(2017, 1, 1), LocalDate.of(2016, 1, 1)));
-        assertEquals(365, FreezeInterval.distanceWithoutLeapYear(
+        assertEquals(365, FreezePeriod.distanceWithoutLeapYear(
                 LocalDate.of(2017, 2, 28), LocalDate.of(2016, 2, 29)));
-        assertEquals(-365, FreezeInterval.distanceWithoutLeapYear(
+        assertEquals(-365, FreezePeriod.distanceWithoutLeapYear(
                 LocalDate.of(2016, 1, 1), LocalDate.of(2017, 1, 1)));
-        assertEquals(1, FreezeInterval.distanceWithoutLeapYear(
+        assertEquals(1, FreezePeriod.distanceWithoutLeapYear(
                 LocalDate.of(2016, 3, 1), LocalDate.of(2016, 2, 29)));
-        assertEquals(1, FreezeInterval.distanceWithoutLeapYear(
+        assertEquals(1, FreezePeriod.distanceWithoutLeapYear(
                 LocalDate.of(2016, 3, 1), LocalDate.of(2016, 2, 28)));
-        assertEquals(0, FreezeInterval.distanceWithoutLeapYear(
+        assertEquals(0, FreezePeriod.distanceWithoutLeapYear(
                 LocalDate.of(2016, 2, 29), LocalDate.of(2016, 2, 28)));
-        assertEquals(0, FreezeInterval.distanceWithoutLeapYear(
+        assertEquals(0, FreezePeriod.distanceWithoutLeapYear(
                 LocalDate.of(2016, 2, 28), LocalDate.of(2016, 2, 28)));
 
-        assertEquals(59, FreezeInterval.distanceWithoutLeapYear(
+        assertEquals(59, FreezePeriod.distanceWithoutLeapYear(
                 LocalDate.of(2016, 3, 1), LocalDate.of(2016, 1, 1)));
-        assertEquals(59, FreezeInterval.distanceWithoutLeapYear(
+        assertEquals(59, FreezePeriod.distanceWithoutLeapYear(
                 LocalDate.of(2017, 3, 1), LocalDate.of(2017, 1, 1)));
 
-        assertEquals(365 * 40, FreezeInterval.distanceWithoutLeapYear(
+        assertEquals(365 * 40, FreezePeriod.distanceWithoutLeapYear(
                 LocalDate.of(2040, 1, 1), LocalDate.of(2000, 1, 1)));
 
-        assertEquals(365 * 2, FreezeInterval.distanceWithoutLeapYear(
+        assertEquals(365 * 2, FreezePeriod.distanceWithoutLeapYear(
                 LocalDate.of(2019, 3, 1), LocalDate.of(2017, 3, 1)));
-        assertEquals(365 * 2, FreezeInterval.distanceWithoutLeapYear(
+        assertEquals(365 * 2, FreezePeriod.distanceWithoutLeapYear(
                 LocalDate.of(2018, 3, 1), LocalDate.of(2016, 3, 1)));
-        assertEquals(365 * 2, FreezeInterval.distanceWithoutLeapYear(
+        assertEquals(365 * 2, FreezePeriod.distanceWithoutLeapYear(
                 LocalDate.of(2017, 3, 1), LocalDate.of(2015, 3, 1)));
 
     }
@@ -386,10 +386,10 @@ public final class SystemUpdatePolicyTest {
 
         // Two freeze periods
         p = SystemUpdatePolicy.createAutomaticInstallPolicy();
-        setFreezePeriods(p, "05-01", "06-01", "11-01", "01-29");
-        // automatic policy for July, August, September and October
+        setFreezePeriods(p, "05-01", "06-01", "10-15", "01-10");
+        // automatic policy for July, August, September and October until 15th
         assertInstallationOption(
-                SystemUpdatePolicy.TYPE_INSTALL_AUTOMATIC, TimeUnit.DAYS.toMillis(92),
+                SystemUpdatePolicy.TYPE_INSTALL_AUTOMATIC, TimeUnit.DAYS.toMillis(31 + 30 + 14),
                 millis_2018_08_01, p);
     }
 
@@ -435,18 +435,18 @@ public final class SystemUpdatePolicyTest {
             String... dates) throws Exception {
         SystemUpdatePolicy p = SystemUpdatePolicy.createPostponeInstallPolicy();
         setFreezePeriods(p, dates);
-        p.validateAgainstPreviousFreezePeriod(parseDate(prevStart), parseDate(prevEnd),
-                parseDate(now));
+        p.validateAgainstPreviousFreezePeriod(parseLocalDate(prevStart),
+                parseLocalDate(prevEnd), parseLocalDate(now));
     }
 
     // "MM-DD" format for date
     private void setFreezePeriods(SystemUpdatePolicy policy, String... dates) throws Exception {
-        List<Pair<Integer, Integer>> periods = new ArrayList<>();
-        LocalDate lastDate = null;
+        List<FreezePeriod> periods = new ArrayList<>();
+        MonthDay lastDate = null;
         for (String date : dates) {
-            LocalDate currentDate = parseDate(date);
+            MonthDay currentDate = parseMonthDay(date);
             if (lastDate != null) {
-                periods.add(new Pair<>(lastDate.getDayOfYear(), currentDate.getDayOfYear()));
+                periods.add(new FreezePeriod(lastDate, currentDate));
                 lastDate = null;
             } else {
                 lastDate = currentDate;
@@ -457,7 +457,7 @@ public final class SystemUpdatePolicyTest {
     }
 
     private void testSerialization(SystemUpdatePolicy policy,
-            List<Pair<Integer, Integer>> expectedPeriods) throws Exception {
+            List<FreezePeriod> expectedPeriods) throws Exception {
         // Test parcel / unparcel
         Parcel parcel = Parcel.obtain();
         policy.writeToParcel(parcel, 0);
@@ -485,35 +485,26 @@ public final class SystemUpdatePolicyTest {
     }
 
     private void checkFreezePeriods(SystemUpdatePolicy policy,
-            List<Pair<Integer, Integer>> expectedPeriods) {
+            List<FreezePeriod> expectedPeriods) {
         int i = 0;
-        for (Pair<Integer, Integer> period : policy.getFreezePeriods()) {
-            assertEquals(expectedPeriods.get(i).first, period.first);
-            assertEquals(expectedPeriods.get(i).second, period.second);
+        for (FreezePeriod period : policy.getFreezePeriods()) {
+            assertEquals(expectedPeriods.get(i).getStart(), period.getStart());
+            assertEquals(expectedPeriods.get(i).getEnd(), period.getEnd());
             i++;
         }
     }
 
-    private LocalDate parseDate(String date) {
-        // Use leap year when parsing date string to handle "02-29", but force round down
-        // to Feb 28th by overriding the year to non-leap year.
-        final int year;
-        boolean monthDateOnly = false;
-        if (date.length() == 5) {
-            year = 2000;
-            monthDateOnly = true;
-        } else {
-            year = Integer.parseInt(date.substring(0, 4));
-            date = date.substring(5);
-        }
-        LocalDate result = LocalDate.of(year, Integer.parseInt(date.substring(0, 2)),
+    // MonthDay is of format MM-dd
+    private MonthDay parseMonthDay(String date) {
+        return MonthDay.of(Integer.parseInt(date.substring(0, 2)),
                 Integer.parseInt(date.substring(3, 5)));
-        if (monthDateOnly) {
-            return result.withYear(2001);
-        } else {
-            return result;
-        }
     }
+
+    // LocalDat is of format YYYY-MM-dd
+    private LocalDate parseLocalDate(String date) {
+        return parseMonthDay(date.substring(5)).atYear(Integer.parseInt(date.substring(0, 4)));
+    }
+
 
     private long toMillis(int year, int month, int day) {
         return LocalDateTime.of(year, month, day, 0, 0, 0).atZone(ZoneId.systemDefault())
