@@ -92,6 +92,7 @@ import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO
 import static com.android.internal.app.IntentForwarderActivity.FORWARD_INTENT_TO_PARENT;
 import static com.android.internal.content.NativeLibraryHelper.LIB64_DIR_NAME;
 import static com.android.internal.content.NativeLibraryHelper.LIB_DIR_NAME;
+import static com.android.internal.util.ArrayUtils.appendElement;
 import static com.android.internal.util.ArrayUtils.appendInt;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
@@ -14002,18 +14003,15 @@ public class PackageManagerService extends IPackageManager.Stub
             return packageNames;
         }
 
-        // List of package names for whom the suspended state has changed.
-        final List<String> changedPackages = new ArrayList<>(packageNames.length);
-        // List of package names for whom the suspended state is not set as requested in this
-        // method.
+        final List<String> changedPackagesList = new ArrayList<>(packageNames.length);
         final List<String> unactionedPackages = new ArrayList<>(packageNames.length);
         final long callingId = Binder.clearCallingIdentity();
         try {
             synchronized (mPackages) {
                 for (int i = 0; i < packageNames.length; i++) {
                     final String packageName = packageNames[i];
-                    if (packageName == callingPackage) {
-                        Slog.w(TAG, "Calling package: " + callingPackage + "trying to "
+                    if (callingPackage.equals(packageName)) {
+                        Slog.w(TAG, "Calling package: " + callingPackage + " trying to "
                                 + (suspended ? "" : "un") + "suspend itself. Ignoring");
                         unactionedPackages.add(packageName);
                         continue;
@@ -14033,17 +14031,18 @@ public class PackageManagerService extends IPackageManager.Stub
                         }
                         pkgSetting.setSuspended(suspended, callingPackage, appExtras,
                                 launcherExtras, userId);
-                        changedPackages.add(packageName);
+                        changedPackagesList.add(packageName);
                     }
                 }
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
-        // TODO (b/75036698): Also send each package a broadcast when suspended state changed
-        if (!changedPackages.isEmpty()) {
-            sendPackagesSuspendedForUser(changedPackages.toArray(
-                    new String[changedPackages.size()]), userId, suspended);
+        if (!changedPackagesList.isEmpty()) {
+            final String[] changedPackages = changedPackagesList.toArray(
+                    new String[changedPackagesList.size()]);
+            sendPackagesSuspendedForUser(changedPackages, userId, suspended);
+            sendMyPackageSuspendedOrUnsuspended(changedPackages, suspended, appExtras, userId);
             synchronized (mPackages) {
                 scheduleWritePackageRestrictionsLocked(userId);
             }
@@ -14053,7 +14052,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public PersistableBundle getPackageSuspendedAppExtras(String packageName, int userId) {
+    public PersistableBundle getSuspendedPackageAppExtras(String packageName, int userId) {
         final int callingUid = Binder.getCallingUid();
         if (getPackageUid(packageName, 0, userId) != callingUid) {
             mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS, null);
@@ -14064,7 +14063,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 throw new IllegalArgumentException("Unknown target package: " + packageName);
             }
             final PackageUserState packageUserState = ps.readUserState(userId);
-            return packageUserState.suspended ? packageUserState.suspendedAppExtras : null;
+            if (packageUserState.suspended) {
+                return packageUserState.suspendedAppExtras;
+            }
+            return null;
         }
     }
 
@@ -14080,10 +14082,47 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             final PackageUserState packageUserState = ps.readUserState(userId);
             if (packageUserState.suspended) {
-                // TODO (b/75036698): Also send this package a broadcast with the new app extras
                 packageUserState.suspendedAppExtras = appExtras;
+                sendMyPackageSuspendedOrUnsuspended(new String[] {packageName}, true, appExtras,
+                        userId);
             }
         }
+    }
+
+    private void sendMyPackageSuspendedOrUnsuspended(String[] affectedPackages, boolean suspended,
+            PersistableBundle appExtras, int userId) {
+        final String action;
+        final Bundle intentExtras = new Bundle();
+        if (suspended) {
+            action = Intent.ACTION_MY_PACKAGE_SUSPENDED;
+            if (appExtras != null) {
+                final Bundle bundledAppExtras = new Bundle(appExtras.deepCopy());
+                intentExtras.putBundle(Intent.EXTRA_SUSPENDED_PACKAGE_EXTRAS, bundledAppExtras);
+            }
+        } else {
+            action = Intent.ACTION_MY_PACKAGE_UNSUSPENDED;
+        }
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final IActivityManager am = ActivityManager.getService();
+                    if (am == null) {
+                        Slog.wtf(TAG, "IActivityManager null. Cannot send MY_PACKAGE_ "
+                                + (suspended ? "" : "UN") + "SUSPENDED broadcasts");
+                        return;
+                    }
+                    final int[] targetUserIds = new int[] {userId};
+                    for (String packageName : affectedPackages) {
+                        doSendBroadcast(am, action, null, intentExtras,
+                                Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND, packageName, null,
+                                targetUserIds, false);
+                    }
+                } catch (RemoteException ex) {
+                    // Shouldn't happen as AMS is in the same process.
+                }
+            }
+        });
     }
 
     @Override
