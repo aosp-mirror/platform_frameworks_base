@@ -305,6 +305,19 @@ public final class IpSecManager {
      * will throw IOException if the user deactivates the transform (by calling {@link
      * IpSecTransform#close()}) without calling {@link #removeTransportModeTransforms}.
      *
+     * <p>Note that when applied to TCP sockets, calling {@link IpSecTransform#close()} on an
+     * applied transform before completion of graceful shutdown may result in the shutdown sequence
+     * failing to complete. As such, applications requiring graceful shutdown MUST close the socket
+     * prior to deactivating the applied transform. Socket closure may be performed asynchronously
+     * (in batches), so the returning of a close function does not guarantee shutdown of a socket.
+     * Setting an SO_LINGER timeout results in socket closure being performed synchronously, and is
+     * sufficient to ensure shutdown.
+     *
+     * Specifically, if the transform is deactivated (by calling {@link IpSecTransform#close()}),
+     * prior to the socket being closed, the standard [FIN - FIN/ACK - ACK], or the reset [RST]
+     * packets are dropped due to the lack of a valid Transform. Similarly, if a socket without the
+     * SO_LINGER option set is closed, the delayed/batched FIN packets may be dropped.
+     *
      * <h4>Rekey Procedure</h4>
      *
      * <p>When applying a new tranform to a socket in the outbound direction, the previous transform
@@ -372,6 +385,19 @@ public final class IpSecManager {
      * other IP address will result in an IOException. In addition, reads and writes on the socket
      * will throw IOException if the user deactivates the transform (by calling {@link
      * IpSecTransform#close()}) without calling {@link #removeTransportModeTransforms}.
+     *
+     * <p>Note that when applied to TCP sockets, calling {@link IpSecTransform#close()} on an
+     * applied transform before completion of graceful shutdown may result in the shutdown sequence
+     * failing to complete. As such, applications requiring graceful shutdown MUST close the socket
+     * prior to deactivating the applied transform. Socket closure may be performed asynchronously
+     * (in batches), so the returning of a close function does not guarantee shutdown of a socket.
+     * Setting an SO_LINGER timeout results in socket closure being performed synchronously, and is
+     * sufficient to ensure shutdown.
+     *
+     * Specifically, if the transform is deactivated (by calling {@link IpSecTransform#close()}),
+     * prior to the socket being closed, the standard [FIN - FIN/ACK - ACK], or the reset [RST]
+     * packets are dropped due to the lack of a valid Transform. Similarly, if a socket without the
+     * SO_LINGER option set is closed, the delayed/batched FIN packets may be dropped.
      *
      * <h4>Rekey Procedure</h4>
      *
