@@ -527,6 +527,7 @@ package android.os {
     field public static final int DETECT_VM_CURSOR_LEAKS = 256; // 0x100
     field public static final int DETECT_VM_FILE_URI_EXPOSURE = 8192; // 0x2000
     field public static final int DETECT_VM_INSTANCE_LEAKS = 2048; // 0x800
+    field public static final int DETECT_VM_NON_SDK_API_USAGE = 1073741824; // 0x40000000
     field public static final int DETECT_VM_REGISTRATION_LEAKS = 4096; // 0x1000
     field public static final int DETECT_VM_UNTAGGED_SOCKET = -2147483648; // 0x80000000
   }

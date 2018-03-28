@@ -40,6 +40,7 @@ import android.os.strictmode.InstanceCountViolation;
 import android.os.strictmode.IntentReceiverLeakedViolation;
 import android.os.strictmode.LeakedClosableViolation;
 import android.os.strictmode.NetworkViolation;
+import android.os.strictmode.NonSdkApiUsedViolation;
 import android.os.strictmode.ResourceMismatchViolation;
 import android.os.strictmode.ServiceConnectionLeakedViolation;
 import android.os.strictmode.SqliteObjectLeakedViolation;
@@ -77,6 +78,7 @@ import java.util.HashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 /**
  * StrictMode is a developer tool which detects things you might be doing by accident and brings
@@ -267,6 +269,9 @@ public final class StrictMode {
     /** @hide */
     @TestApi public static final int DETECT_VM_UNTAGGED_SOCKET = 0x80 << 24; // for VmPolicy
 
+    /** @hide */
+    @TestApi public static final int DETECT_VM_NON_SDK_API_USAGE = 0x40 << 24; // for VmPolicy
+
     private static final int ALL_VM_DETECT_BITS =
             DETECT_VM_CURSOR_LEAKS
                     | DETECT_VM_CLOSABLE_LEAKS
@@ -276,7 +281,9 @@ public final class StrictMode {
                     | DETECT_VM_FILE_URI_EXPOSURE
                     | DETECT_VM_CLEARTEXT_NETWORK
                     | DETECT_VM_CONTENT_URI_WITHOUT_PERMISSION
-                    | DETECT_VM_UNTAGGED_SOCKET;
+                    | DETECT_VM_UNTAGGED_SOCKET
+                    | DETECT_VM_NON_SDK_API_USAGE;
+
 
     // Byte 3: Penalty
 
@@ -417,6 +424,13 @@ public final class StrictMode {
      * paranoia.
      */
     private static final AtomicInteger sDropboxCallsInFlight = new AtomicInteger(0);
+
+    /**
+     * Callback supplied to dalvik / libcore to get informed of usages of java API that are not
+     * a part of the public SDK.
+     */
+    private static final Consumer<String> sNonSdkApiUsageConsumer =
+            message -> onVmPolicyViolation(new NonSdkApiUsedViolation(message));
 
     private StrictMode() {}
 
@@ -824,6 +838,23 @@ public final class StrictMode {
             }
 
             /**
+             * Detect reflective usage of APIs that are not part of the public Android SDK.
+             */
+            public Builder detectNonSdkApiUsage() {
+                return enable(DETECT_VM_NON_SDK_API_USAGE);
+            }
+
+            /**
+             * Permit reflective usage of APIs that are not part of the public Android SDK. Note
+             * that this <b>only</b> affects {@code StrictMode}, the underlying runtime may
+             * continue to restrict or warn on access to methods that are not part of the
+             * public SDK.
+             */
+            public Builder permitNonSdkApiUsage() {
+                return disable(DETECT_VM_NON_SDK_API_USAGE);
+            }
+
+            /**
              * Detect everything that's potentially suspect.
              *
              * <p>In the Honeycomb release this includes leaks of SQLite cursors, Activities, and
@@ -854,6 +885,8 @@ public final class StrictMode {
                     detectContentUriWithoutPermission();
                     detectUntaggedSockets();
                 }
+
+                // TODO: Decide whether to detect non SDK API usage beyond a certain API level.
                 return this;
             }
 
@@ -1887,6 +1920,13 @@ public final class StrictMode {
             } else if (networkPolicy != NETWORK_POLICY_ACCEPT) {
                 Log.w(TAG, "Dropping requested network policy due to missing service!");
             }
+
+
+            if ((sVmPolicy.mask & DETECT_VM_NON_SDK_API_USAGE) != 0) {
+                VMRuntime.setNonSdkApiUsageConsumer(sNonSdkApiUsageConsumer);
+            } else {
+                VMRuntime.setNonSdkApiUsageConsumer(null);
+            }
         }
     }
 
@@ -2617,6 +2657,8 @@ public final class StrictMode {
                 return DETECT_VM_UNTAGGED_SOCKET;
             } else if (mViolation instanceof ExplicitGcViolation) {
                 return DETECT_EXPLICIT_GC;
+            } else if (mViolation instanceof NonSdkApiUsedViolation) {
+                return DETECT_VM_NON_SDK_API_USAGE;
             }
             throw new IllegalStateException("missing violation bit");
         }
