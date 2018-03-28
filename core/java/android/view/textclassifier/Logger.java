@@ -18,55 +18,24 @@ package android.view.textclassifier;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.StringDef;
 import android.content.Context;
-import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.text.BreakIterator;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.UUID;
 
 /**
  * A helper for logging TextClassifier related events.
+ * @hide
  */
 public abstract class Logger {
-
-    /**
-     * Use this to specify an indeterminate positive index.
-     */
-    public static final int OUT_OF_BOUNDS = Integer.MAX_VALUE;
-
-    /**
-     * Use this to specify an indeterminate negative index.
-     */
-    public static final int OUT_OF_BOUNDS_NEGATIVE = Integer.MIN_VALUE;
 
     private static final String LOG_TAG = "Logger";
     /* package */ static final boolean DEBUG_LOG_ENABLED = true;
 
     private static final String NO_SIGNATURE = "";
-
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @StringDef({WIDGET_TEXTVIEW, WIDGET_WEBVIEW, WIDGET_EDITTEXT,
-            WIDGET_EDIT_WEBVIEW, WIDGET_CUSTOM_TEXTVIEW, WIDGET_CUSTOM_EDITTEXT,
-            WIDGET_CUSTOM_UNSELECTABLE_TEXTVIEW, WIDGET_UNKNOWN})
-    public @interface WidgetType {}
-
-    public static final String WIDGET_TEXTVIEW = "textview";
-    public static final String WIDGET_EDITTEXT = "edittext";
-    public static final String WIDGET_UNSELECTABLE_TEXTVIEW = "nosel-textview";
-    public static final String WIDGET_WEBVIEW = "webview";
-    public static final String WIDGET_EDIT_WEBVIEW = "edit-webview";
-    public static final String WIDGET_CUSTOM_TEXTVIEW = "customview";
-    public static final String WIDGET_CUSTOM_EDITTEXT = "customedit";
-    public static final String WIDGET_CUSTOM_UNSELECTABLE_TEXTVIEW = "nosel-customview";
-    public static final String WIDGET_UNKNOWN = "unknown";
 
     private @SelectionEvent.InvocationMethod int mInvocationMethod;
     private SelectionEvent mPrevEvent;
@@ -107,7 +76,6 @@ public abstract class Logger {
     public boolean isSmartSelection(@NonNull String signature) {
         return false;
     }
-
 
     /**
      * Returns a token iterator for tokenizing text for logging purposes.
@@ -299,6 +267,9 @@ public abstract class Logger {
                     // Selection did not change. Ignore event.
                     return;
                 }
+                break;
+            default:
+                // do nothing.
         }
 
         event.setEventTime(now);
@@ -325,9 +296,9 @@ public abstract class Logger {
         }
     }
 
-    private String startNewSession() {
+    private TextClassificationSessionId startNewSession() {
         endSession();
-        return UUID.randomUUID().toString();
+        return new TextClassificationSessionId();
     }
 
     private void endSession() {
@@ -372,12 +343,12 @@ public abstract class Logger {
         /**
          * @param context Context of the widget the logger logs for
          * @param widgetType a name for the widget being logged for. e.g.
-         *      {@link #WIDGET_TEXTVIEW}
+         *      {@link TextClassifier#WIDGET_TYPE_TEXTVIEW}
          * @param widgetVersion a string version info for the widget the logger logs for
          */
         public Config(
                 @NonNull Context context,
-                @WidgetType String widgetType,
+                @TextClassifier.WidgetType String widgetType,
                 @Nullable String widgetVersion) {
             mPackageName = Preconditions.checkNotNull(context).getPackageName();
             mWidgetType = widgetType;
@@ -392,7 +363,8 @@ public abstract class Logger {
         }
 
         /**
-         * Returns the name for the widget being logged for. e.g. {@link #WIDGET_TEXTVIEW}.
+         * Returns the name for the widget being logged for. e.g.
+         * {@link TextClassifier#WIDGET_TYPE_TEXTVIEW}.
          */
         public String getWidgetType() {
             return mWidgetType;
