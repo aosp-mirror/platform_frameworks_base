@@ -2283,6 +2283,35 @@ public interface WindowManager extends ViewManager {
          * The window must make sure that no important content overlaps with the
          * {@link DisplayCutout}.
          *
+         * <p>
+         * In this mode, the window extends under cutouts on the short edge of the display in both
+         * portrait and landscape, regardless of whether the window is hiding the system bars:<br/>
+         * <img src="{@docRoot}reference/android/images/display_cutout/short_edge/fullscreen_top_no_letterbox.png"
+         * height="720"
+         * alt="Screenshot of a fullscreen activity on a display with a cutout at the top edge in
+         *         portrait, no letterbox is applied."/>
+         *
+         * <img src="{@docRoot}reference/android/images/display_cutout/short_edge/landscape_top_no_letterbox.png"
+         * width="720"
+         * alt="Screenshot of an activity on a display with a cutout at the top edge in landscape,
+         *         no letterbox is applied."/>
+         *
+         * <p>
+         * A cutout in the corner is considered to be on the short edge: <br/>
+         * <img src="{@docRoot}reference/android/images/display_cutout/short_edge/fullscreen_corner_no_letterbox.png"
+         * height="720"
+         * alt="Screenshot of a fullscreen activity on a display with a cutout in the corner in
+         *         portrait, no letterbox is applied."/>
+         *
+         * <p>
+         * On the other hand, should the cutout be on the long edge of the display, a letterbox will
+         * be applied such that the window does not extend into the cutout on either long edge:
+         * <br/>
+         * <img src="{@docRoot}reference/android/images/display_cutout/short_edge/portrait_side_letterbox.png"
+         * height="720"
+         * alt="Screenshot of an activity on a display with a cutout on the long edge in portrait,
+         *         letterbox is applied."/>
+         *
          * @see DisplayCutout
          * @see WindowInsets#getDisplayCutout()
          * @see #layoutInDisplayCutoutMode
