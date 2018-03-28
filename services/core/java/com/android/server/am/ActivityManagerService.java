@@ -820,7 +820,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     public boolean canShowErrorDialogs() {
         return mShowDialogs && !mSleeping && !mShuttingDown
-                && !mKeyguardController.isKeyguardShowing(DEFAULT_DISPLAY)
+                && !mKeyguardController.isKeyguardOrAodShowing(DEFAULT_DISPLAY)
                 && !mUserController.hasUserRestriction(UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS,
                         mUserController.getCurrentUserId())
                 && !(UserManager.isDeviceInDemoMode(mContext)
@@ -13113,7 +13113,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void setLockScreenShown(boolean showing, int secondaryDisplayShowing) {
+    public void setLockScreenShown(boolean keyguardShowing, boolean aodShowing,
+            int secondaryDisplayShowing) {
         if (checkCallingPermission(android.Manifest.permission.DEVICE_POWER)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires permission "
@@ -13123,13 +13124,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized(this) {
             long ident = Binder.clearCallingIdentity();
             try {
-                mKeyguardController.setKeyguardShown(showing, secondaryDisplayShowing);
+                mKeyguardController.setKeyguardShown(keyguardShowing, aodShowing,
+                        secondaryDisplayShowing);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
         }
 
-        mHandler.obtainMessage(DISPATCH_SCREEN_KEYGUARD_MSG, showing ? 1 : 0, 0)
+        mHandler.obtainMessage(DISPATCH_SCREEN_KEYGUARD_MSG, keyguardShowing ? 1 : 0, 0)
                 .sendToTarget();
     }
 

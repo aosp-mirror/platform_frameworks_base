@@ -322,12 +322,14 @@ interface IActivityManager {
     /**
      * Informs ActivityManagerService that the keyguard is showing.
      *
-     * @param showing True if the keyguard is showing, false otherwise.
+     * @param showingKeyguard True if the keyguard is showing, false otherwise.
+     * @param showingAod True if AOD is showing, false otherwise.
      * @param secondaryDisplayShowing The displayId of the secondary display on which the keyguard
      *        is showing, or INVALID_DISPLAY if there is no such display. Only meaningful if
      *        showing is true.
      */
-    void setLockScreenShown(boolean showing, int secondaryDisplayShowing);
+    void setLockScreenShown(boolean showingKeyguard, boolean showingAod,
+            int secondaryDisplayShowing);
     boolean finishActivityAffinity(in IBinder token);
     // This is not public because you need to be very careful in how you
     // manage your activity to make sure it is always the uid you expect.
