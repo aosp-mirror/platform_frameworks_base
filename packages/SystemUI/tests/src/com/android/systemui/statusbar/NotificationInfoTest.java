@@ -218,6 +218,18 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
+    public void testBindNotification_DefaultChannelUsesChannelNameIfMoreChannelsExist()
+            throws Exception {
+        // Package has one channel by default.
+        when(mMockINotificationManager.getNumNotificationChannelsForPackage(
+                eq(TEST_PACKAGE_NAME), eq(TEST_UID), anyBoolean())).thenReturn(10);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mDefaultNotificationChannel, 1, mSbn, null, null, null, null);
+        final TextView textView = mNotificationInfo.findViewById(R.id.channel_name);
+        assertEquals(VISIBLE, textView.getVisibility());
+    }
+
+    @Test
     public void testBindNotification_UnblockablePackageUsesChannelName() throws Exception {
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null,
