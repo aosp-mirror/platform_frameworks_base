@@ -378,7 +378,7 @@ public class RestrictedLockUtils {
 
         final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
-        return dpm.isMeteredDataDisabledForUser(enforcedAdmin.component, packageName, userId)
+        return dpm.isMeteredDataDisabledPackageForUser(enforcedAdmin.component, packageName, userId)
                 ? enforcedAdmin : null;
     }
 
