@@ -972,6 +972,7 @@ public final class DefaultPermissionGrantPolicy {
                 grantRuntimePermissions(imsServicePackage, MICROPHONE_PERMISSIONS, userId);
                 grantRuntimePermissions(imsServicePackage, LOCATION_PERMISSIONS, userId);
                 grantRuntimePermissions(imsServicePackage, CAMERA_PERMISSIONS, userId);
+                grantRuntimePermissions(imsServicePackage, CONTACTS_PERMISSIONS, userId);
             }
         }
     }
