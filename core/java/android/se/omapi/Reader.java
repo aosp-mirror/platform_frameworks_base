@@ -46,7 +46,7 @@ public class Reader {
     private final Object mLock = new Object();
 
 
-    Reader(SEService service, String name, ISecureElementReader reader) {
+    Reader(@NonNull SEService service, @NonNull String name, @NonNull ISecureElementReader reader) {
         if (reader == null || service == null || name == null) {
             throw new IllegalArgumentException("Parameters cannot be null");
         }

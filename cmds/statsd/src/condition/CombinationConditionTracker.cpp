@@ -149,9 +149,9 @@ void CombinationConditionTracker::evaluateCondition(
         }
     }
 
+    ConditionState newCondition =
+            evaluateCombinationCondition(mChildren, mLogicalOperation, nonSlicedConditionCache);
     if (!mSliced) {
-        ConditionState newCondition =
-                evaluateCombinationCondition(mChildren, mLogicalOperation, nonSlicedConditionCache);
 
         bool nonSlicedChanged = (mNonSlicedConditionState != newCondition);
         mNonSlicedConditionState = newCondition;
@@ -172,7 +172,7 @@ void CombinationConditionTracker::evaluateCondition(
                 break;
             }
         }
-        nonSlicedConditionCache[mIndex] = ConditionState::kUnknown;
+        nonSlicedConditionCache[mIndex] = newCondition;
         VLOG("CombinationPredicate %lld sliced may changed? %d", (long long)mConditionId,
             conditionChangedCache[mIndex] == true);
     }

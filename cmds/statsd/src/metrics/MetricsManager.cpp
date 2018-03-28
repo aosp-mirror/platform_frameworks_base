@@ -326,7 +326,8 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
                     // notification, and the metric can query the sliced conditions that are
                     // interesting to it.
                 } else {
-                    mAllMetricProducers[metricIndex]->onSlicedConditionMayChange(eventTime);
+                    mAllMetricProducers[metricIndex]->onSlicedConditionMayChange(conditionCache[i],
+                                                                                 eventTime);
                 }
             }
         }

@@ -62,17 +62,32 @@ public class SEService {
     /**
      * Interface to send call-backs to the application when the service is connected.
      */
-    public abstract static class SecureElementListener extends ISecureElementListener.Stub {
+    public interface SecureElementListener {
+        /**
+         * Called by the framework when the service is connected.
+         */
+        void onServiceConnected();
+    }
+
+    /**
+     * Listener object that allows the notification of the caller if this
+     * SEService could be bound to the backend.
+     */
+    private class SEListener extends ISecureElementListener.Stub {
+        public SecureElementListener mListener = null;
+
         @Override
         public IBinder asBinder() {
             return this;
         }
 
-        /**
-         * Called by the framework when the service is connected.
-         */
-        public void serviceConnected() {};
+        public void onServiceConnected() {
+            if (mListener != null) {
+                mListener.onServiceConnected();
+            }
+        }
     }
+    private SEListener mSEListener = new SEListener();
 
     private static final String TAG = "OMAPI.SEService";
 
@@ -95,34 +110,28 @@ public class SEService {
     private final HashMap<String, Reader> mReaders = new HashMap<String, Reader>();
 
     /**
-     * Listener object that allows the notification of the caller if this
-     * SEService could be bound to the backend.
-     */
-    private ISecureElementListener mSEListener;
-
-    /**
      * Establishes a new connection that can be used to connect to all the
      * Secure Elements available in the system. The connection process can be
      * quite long, so it happens in an asynchronous way. It is usable only if
      * the specified listener is called or if isConnected() returns
      * <code>true</code>. <br>
      * The call-back object passed as a parameter will have its
-     * serviceConnected() method called when the connection actually happen.
+     * onServiceConnected() method called when the connection actually happen.
      *
      * @param context
      *            the context of the calling application. Cannot be
      *            <code>null</code>.
      * @param listener
-     *            a SecureElementListener object. Can be <code>null</code>.
+     *            a SecureElementListener object.
      */
-    public SEService(Context context, SecureElementListener listener) {
+    public SEService(@NonNull Context context, @NonNull SecureElementListener listener) {
 
         if (context == null) {
             throw new NullPointerException("context must not be null");
         }
 
         mContext = context;
-        mSEListener = listener;
+        mSEListener.mListener = listener;
 
         mConnection = new ServiceConnection() {
 
@@ -131,9 +140,7 @@ public class SEService {
 
                 mSecureElementService = ISecureElementService.Stub.asInterface(service);
                 if (mSEListener != null) {
-                    try {
-                        mSEListener.serviceConnected();
-                    } catch (RemoteException ignore) { }
+                    mSEListener.onServiceConnected();
                 }
                 Log.i(TAG, "Service onServiceConnected");
             }
@@ -233,7 +240,7 @@ public class SEService {
      *
      * @return String containing the OpenMobile API version (e.g. "3.0").
      */
-    public String getVersion() {
+    public @NonNull String getVersion() {
         return "3.2";
     }
 

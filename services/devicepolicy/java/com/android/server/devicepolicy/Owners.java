@@ -723,6 +723,11 @@ class Owners {
                 mSystemUpdatePolicy.saveToXml(out);
                 out.endTag(null, TAG_SYSTEM_UPDATE_POLICY);
             }
+
+            if (mSystemUpdateInfo != null) {
+                mSystemUpdateInfo.writeToXml(out, TAG_PENDING_OTA_INFO);
+            }
+
             if (mSystemUpdateFreezeStart != null || mSystemUpdateFreezeEnd != null) {
                 out.startTag(null, TAG_FREEZE_PERIOD_RECORD);
                 if (mSystemUpdateFreezeStart != null) {

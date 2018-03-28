@@ -27,6 +27,7 @@ import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.content.res.Configuration;
 import android.util.ArrayMap;
+import android.util.Pair;
 
 import java.io.IOException;
 import java.net.ProtocolException;
@@ -36,6 +37,9 @@ import java.net.ProtocolException;
  */
 final class UsageStatsXmlV1 {
     private static final String TAG = "UsageStatsXmlV1";
+
+    private static final String INTERACTIVE_TAG = "interactive";
+    private static final String NON_INTERACTIVE_TAG = "non-interactive";
 
     private static final String PACKAGES_TAG = "packages";
     private static final String PACKAGE_TAG = "package";
@@ -97,6 +101,14 @@ final class UsageStatsXmlV1 {
                 loadChooserCounts(parser, stats, action);
             }
         }
+    }
+
+    private static Pair<Integer, Long> loadCountAndTime(XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        int count = XmlUtils.readIntAttribute(parser, COUNT_ATTR, 0);
+        long time = XmlUtils.readLongAttribute(parser, TIME_ATTR, 0);
+        XmlUtils.skipCurrentTag(parser);
+        return new Pair<>(count, time);
     }
 
     private static void loadChooserCounts(
@@ -200,6 +212,14 @@ final class UsageStatsXmlV1 {
         }
         writeChooserCounts(xml, usageStats);
         xml.endTag(null, PACKAGE_TAG);
+    }
+
+    private static void writeCountAndTime(XmlSerializer xml, String tag, int count, long time)
+            throws IOException {
+        xml.startTag(null, tag);
+        XmlUtils.writeIntAttribute(xml, COUNT_ATTR, count);
+        XmlUtils.writeLongAttribute(xml, TIME_ATTR, time);
+        xml.endTag(null, tag);
     }
 
     private static void writeChooserCounts(XmlSerializer xml, final UsageStats usageStats)
@@ -320,6 +340,18 @@ final class UsageStatsXmlV1 {
 
             final String tag = parser.getName();
             switch (tag) {
+                case INTERACTIVE_TAG: {
+                    Pair<Integer, Long> result = loadCountAndTime(parser);
+                    statsOut.interactiveCount = result.first;
+                    statsOut.interactiveDuration = result.second;
+                } break;
+
+                case NON_INTERACTIVE_TAG: {
+                    Pair<Integer, Long> result = loadCountAndTime(parser);
+                    statsOut.nonInteractiveCount = result.first;
+                    statsOut.nonInteractiveDuration = result.second;
+                } break;
+
                 case PACKAGE_TAG:
                     loadUsageStats(parser, statsOut);
                     break;
@@ -345,6 +377,11 @@ final class UsageStatsXmlV1 {
      */
     public static void write(XmlSerializer xml, IntervalStats stats) throws IOException {
         XmlUtils.writeLongAttribute(xml, END_TIME_ATTR, stats.endTime - stats.beginTime);
+
+        writeCountAndTime(xml, INTERACTIVE_TAG, stats.interactiveCount, stats.interactiveDuration);
+
+        writeCountAndTime(xml, NON_INTERACTIVE_TAG, stats.nonInteractiveCount,
+                stats.nonInteractiveDuration);
 
         xml.startTag(null, PACKAGES_TAG);
         final int statsCount = stats.packageStats.size();

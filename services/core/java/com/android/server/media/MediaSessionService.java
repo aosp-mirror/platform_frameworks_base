@@ -1532,7 +1532,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         @Override
         public boolean createSession2(Bundle sessionToken) {
             final int uid = Binder.getCallingUid();
-            final SessionToken2 token = SessionToken2.fromBundle(getContext(), sessionToken);
+            final SessionToken2 token = SessionToken2.fromBundle(sessionToken);
             if (token == null || token.getUid() != uid) {
                 Log.w(TAG, "onSessionCreated failed, expected caller uid=" + token.getUid()
                         + " but from uid=" + uid);
@@ -1571,7 +1571,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         @Override
         public void destroySession2(Bundle sessionToken) {
             final int uid = Binder.getCallingUid();
-            final SessionToken2 token = SessionToken2.fromBundle(getContext(), sessionToken);
+            final SessionToken2 token = SessionToken2.fromBundle(sessionToken);
             if (token == null || token.getUid() != uid) {
                 Log.w(TAG, "onSessionDestroyed failed, expected caller uid=" + token.getUid()
                         + " but from uid=" + uid);

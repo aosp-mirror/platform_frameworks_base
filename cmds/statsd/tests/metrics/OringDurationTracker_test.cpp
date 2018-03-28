@@ -44,7 +44,7 @@ const HashableDimensionKey eventKey = getMockedDimensionKey(TagId, 0, "event");
 const HashableDimensionKey kConditionKey1 = getMockedDimensionKey(TagId, 1, "maps");
 const HashableDimensionKey kEventKey1 = getMockedDimensionKey(TagId, 2, "maps");
 const HashableDimensionKey kEventKey2 = getMockedDimensionKey(TagId, 3, "maps");
-const uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+const uint64_t bucketSizeNs = 30 * NS_PER_SEC;
 
 TEST(OringDurationTrackerTest, TestDurationOverlap) {
     const MetricDimensionKey eventKey = getMockedMetricDimensionKey(TagId, 0, "event");
@@ -209,7 +209,7 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange) {
 
     tracker.noteStart(kEventKey1, true, eventStartTimeNs, key1);
 
-    tracker.onSlicedConditionMayChange(eventStartTimeNs + 5);
+    tracker.onSlicedConditionMayChange(true, eventStartTimeNs + 5);
 
     tracker.noteStop(kEventKey1, eventStartTimeNs + durationTimeNs, false);
 
@@ -249,9 +249,9 @@ TEST(OringDurationTrackerTest, TestDurationConditionChange2) {
 
     tracker.noteStart(kEventKey1, true, eventStartTimeNs, key1);
     // condition to false; record duration 5n
-    tracker.onSlicedConditionMayChange(eventStartTimeNs + 5);
+    tracker.onSlicedConditionMayChange(true, eventStartTimeNs + 5);
     // condition to true.
-    tracker.onSlicedConditionMayChange(eventStartTimeNs + 1000);
+    tracker.onSlicedConditionMayChange(true, eventStartTimeNs + 1000);
     // 2nd duration: 1000ns
     tracker.noteStop(kEventKey1, eventStartTimeNs + durationTimeNs, false);
 
@@ -291,7 +291,7 @@ TEST(OringDurationTrackerTest, TestDurationConditionChangeNested) {
 
     tracker.noteStop(kEventKey1, eventStartTimeNs + 3, false);
 
-    tracker.onSlicedConditionMayChange(eventStartTimeNs + 15);
+    tracker.onSlicedConditionMayChange(true, eventStartTimeNs + 15);
 
     tracker.noteStop(kEventKey1, eventStartTimeNs + 2003, false);
 
@@ -368,6 +368,103 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
     tracker.noteStart(kEventKey1, true, event3StartTimeNs, ConditionKey());
     EXPECT_EQ((long long)(event3StartTimeNs + alert.trigger_if_sum_gt() - bucket1Duration - 1LL),
               tracker.predictAnomalyTimestampNs(*anomalyTracker, event3StartTimeNs));
+}
+
+TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp2) {
+    vector<Matcher> dimensionInCondition;
+    Alert alert;
+    alert.set_id(101);
+    alert.set_metric_id(1);
+    alert.set_trigger_if_sum_gt(5 * NS_PER_SEC);
+    alert.set_num_buckets(1);
+    alert.set_refractory_period_secs(20);
+
+    uint64_t bucketStartTimeNs = 10 * NS_PER_SEC;
+    uint64_t bucketNum = 0;
+
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+    sp<AlarmMonitor> alarmMonitor;
+    sp<DurationAnomalyTracker> anomalyTracker =
+        new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
+    OringDurationTracker tracker(kConfigKey, metricId, DEFAULT_METRIC_DIMENSION_KEY, wizard, 1,
+                                 dimensionInCondition,
+                                 true, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
+                                 bucketSizeNs, true, false, {anomalyTracker});
+
+    uint64_t eventStartTimeNs = bucketStartTimeNs + 9 * NS_PER_SEC;
+    tracker.noteStart(DEFAULT_DIMENSION_KEY, true, eventStartTimeNs, ConditionKey());
+    // Anomaly happens in the bucket #1.
+    EXPECT_EQ((long long)(bucketStartTimeNs + 14 * NS_PER_SEC),
+              tracker.predictAnomalyTimestampNs(*anomalyTracker, eventStartTimeNs));
+
+    tracker.noteStop(DEFAULT_DIMENSION_KEY, bucketStartTimeNs + 14 * NS_PER_SEC, false);
+
+    EXPECT_EQ((long long)(bucketStartTimeNs + 34 * NS_PER_SEC) / NS_PER_SEC,
+              anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_METRIC_DIMENSION_KEY));
+
+    uint64_t event2StartTimeNs = bucketStartTimeNs + 22 * NS_PER_SEC;
+    EXPECT_EQ((long long)(bucketStartTimeNs + 34 * NS_PER_SEC) / NS_PER_SEC,
+              anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_METRIC_DIMENSION_KEY));
+    EXPECT_EQ((long long)(bucketStartTimeNs + 35 * NS_PER_SEC),
+              tracker.predictAnomalyTimestampNs(*anomalyTracker, event2StartTimeNs));
+}
+
+TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp3) {
+    // Test the cases where the refractory period is smaller than the bucket size, longer than
+    // the bucket size, and longer than 2x of the anomaly detection window.
+    for (int j = 0; j < 3; j++) {
+        uint64_t thresholdNs = j * bucketSizeNs + 5 * NS_PER_SEC;
+        for (int i = 0; i <= 7; ++i) {
+            vector<Matcher> dimensionInCondition;
+            Alert alert;
+            alert.set_id(101);
+            alert.set_metric_id(1);
+            alert.set_trigger_if_sum_gt(thresholdNs);
+            alert.set_num_buckets(3);
+            alert.set_refractory_period_secs(
+                bucketSizeNs / NS_PER_SEC / 2 + i * bucketSizeNs / NS_PER_SEC);
+
+            uint64_t bucketStartTimeNs = 10 * NS_PER_SEC;
+            uint64_t bucketNum = 101;
+
+            sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+            sp<AlarmMonitor> alarmMonitor;
+            sp<DurationAnomalyTracker> anomalyTracker =
+                new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
+            OringDurationTracker tracker(kConfigKey, metricId, DEFAULT_METRIC_DIMENSION_KEY,
+                                         wizard, 1, dimensionInCondition,
+                                         true, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
+                                         bucketSizeNs, true, false, {anomalyTracker});
+
+            uint64_t eventStartTimeNs = bucketStartTimeNs + 9 * NS_PER_SEC;
+            tracker.noteStart(DEFAULT_DIMENSION_KEY, true, eventStartTimeNs, ConditionKey());
+            EXPECT_EQ((long long)(eventStartTimeNs + thresholdNs),
+                      tracker.predictAnomalyTimestampNs(*anomalyTracker, eventStartTimeNs));
+            uint64_t eventStopTimeNs = eventStartTimeNs + thresholdNs + NS_PER_SEC;
+            tracker.noteStop(DEFAULT_DIMENSION_KEY, eventStopTimeNs, false);
+
+            uint64_t refractoryPeriodEndSec =
+                anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_METRIC_DIMENSION_KEY);
+            EXPECT_EQ((long long)(eventStopTimeNs) / NS_PER_SEC + alert.refractory_period_secs(),
+                       refractoryPeriodEndSec);
+
+            // Acquire and release a wakelock in the next bucket.
+            uint64_t event2StartTimeNs = eventStopTimeNs + bucketSizeNs;
+            tracker.noteStart(DEFAULT_DIMENSION_KEY, true, event2StartTimeNs, ConditionKey());
+            uint64_t event2StopTimeNs = event2StartTimeNs + 4 * NS_PER_SEC;
+            tracker.noteStop(DEFAULT_DIMENSION_KEY, event2StopTimeNs, false);
+
+            // Test the alarm prediction works well when seeing another wakelock start event.
+            for (int k = 0; k <= 2; ++k) {
+                uint64_t event3StartTimeNs = event2StopTimeNs + NS_PER_SEC + k * bucketSizeNs;
+                uint64_t alarmTimestampNs =
+                    tracker.predictAnomalyTimestampNs(*anomalyTracker, event3StartTimeNs);
+                EXPECT_GT(alarmTimestampNs, 0u);
+                EXPECT_GE(alarmTimestampNs, event3StartTimeNs);
+                EXPECT_GE(alarmTimestampNs, refractoryPeriodEndSec * NS_PER_SEC);
+            }
+        }
+    }
 }
 
 TEST(OringDurationTrackerTest, TestAnomalyDetectionExpiredAlarm) {

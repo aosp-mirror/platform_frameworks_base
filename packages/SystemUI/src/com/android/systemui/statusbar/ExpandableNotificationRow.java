@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 import static com.android.systemui.statusbar.notification.NotificationInflater.InflationCallback;
 
@@ -34,7 +35,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.AttributeSet;
@@ -127,6 +127,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mHasUserChangedExpansion;
     /** If {@link #mHasUserChangedExpansion}, has the user expanded this row */
     private boolean mUserExpanded;
+    /** Whether the blocking helper is showing on this notification (even if dismissed) */
+    private boolean mIsBlockingHelperShowing;
 
     /**
      * Has this notification been expanded while it was pinned
@@ -400,8 +402,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         updateIconVisibilities();
         updateShelfIconColor();
 
-        showBlockingHelper(mEntry.userSentiment ==
-                NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE);
+        showBlockingHelperButton(mEntry.userSentiment == USER_SENTIMENT_NEGATIVE);
         updateRippleAllowed();
     }
 
@@ -592,6 +593,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     @Override
     public boolean isChildInGroup() {
         return mNotificationParent != null;
+    }
+
+    /**
+     * @return whether this notification is the only child in the group summary
+     */
+    public boolean isOnlyChildInGroup() {
+        return mGroupManager.isOnlyChildInGroup(getStatusBarNotification());
     }
 
     public ExpandableNotificationRow getNotificationParent() {
@@ -1061,6 +1069,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     public void setDismissed(boolean fromAccessibility) {
+        setLongPressListener(null);
         mDismissed = true;
         mGroupParentWhenDismissed = mNotificationParent;
         mRefocusOnDismiss = fromAccessibility;
@@ -1149,11 +1158,31 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mGroupParentWhenDismissed;
     }
 
+    /**
+     * Dismisses the notification with the option of showing the blocking helper in-place if we have
+     * a negative user sentiment.
+     *
+     * @param fromAccessibility whether this dismiss is coming from an accessibility action
+     * @return whether a blocking helper is shown in this row
+     */
+    public boolean performDismissWithBlockingHelper(boolean fromAccessibility) {
+        NotificationBlockingHelperManager manager =
+                Dependency.get(NotificationBlockingHelperManager.class);
+        boolean isBlockingHelperShown = manager.perhapsShowBlockingHelper(this, mMenuRow);
+
+        // Continue with dismiss since we don't want the blocking helper to be directly associated
+        // with a certain notification.
+        performDismiss(fromAccessibility);
+        return isBlockingHelperShown;
+    }
+
     public void performDismiss(boolean fromAccessibility) {
-        if (mGroupManager.isOnlyChildInGroup(getStatusBarNotification())) {
+        if (isOnlyChildInGroup()) {
             ExpandableNotificationRow groupSummary =
                     mGroupManager.getLogicalGroupSummary(getStatusBarNotification());
             if (groupSummary.isClearable()) {
+                // If this is the only child in the group, dismiss the group, but don't try to show
+                // the blocking helper affordance!
                 groupSummary.performDismiss(fromAccessibility);
             }
         }
@@ -1163,6 +1192,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 mOnDismissRunnable.run();
             }
         }
+    }
+
+    public void setBlockingHelperShowing(boolean isBlockingHelperShowing) {
+        mIsBlockingHelperShowing = isBlockingHelperShowing;
+    }
+
+    public boolean isBlockingHelperShowing() {
+        return mIsBlockingHelperShowing;
     }
 
     public void setOnDismissRunnable(Runnable onDismissRunnable) {
@@ -1389,7 +1426,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         requestLayout();
     }
 
-    public void showBlockingHelper(boolean show) {
+    public void showBlockingHelperButton(boolean show) {
         mHelperButton.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
@@ -1422,7 +1459,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mPrivateLayout = (NotificationContentView) findViewById(R.id.expanded);
         mLayouts = new NotificationContentView[] {mPrivateLayout, mPublicLayout};
 
-        final NotificationGutsManager gutsMan = Dependency.get(NotificationGutsManager.class);
         mHelperButton = findViewById(R.id.helper);
         mHelperButton.setOnClickListener(view -> {
             doLongClickCallback();
@@ -2525,7 +2561,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         switch (action) {
             case AccessibilityNodeInfo.ACTION_DISMISS:
-                performDismiss(true /* fromAccessibility */);
+                performDismissWithBlockingHelper(true /* fromAccessibility */);
                 return true;
             case AccessibilityNodeInfo.ACTION_COLLAPSE:
             case AccessibilityNodeInfo.ACTION_EXPAND:

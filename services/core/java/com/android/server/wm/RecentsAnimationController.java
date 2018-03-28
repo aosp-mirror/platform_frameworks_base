@@ -41,7 +41,6 @@ import android.util.Log;
 import android.util.Slog;import android.util.proto.ProtoOutputStream;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
-import android.util.proto.ProtoOutputStream;
 import android.view.IRecentsAnimationController;
 import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationTarget;
@@ -51,6 +50,7 @@ import android.view.SurfaceControl.Transaction;
 import com.google.android.collect.Sets;
 
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
+import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -308,12 +308,15 @@ public class RecentsAnimationController {
         mCallbacks.onAnimationFinished(false /* moveHomeToTop */);
     }
 
-    void cleanupAnimation() {
+    void cleanupAnimation(boolean moveHomeToTop) {
         if (DEBUG) Log.d(TAG, "cleanupAnimation(): mPendingAnimations="
                 + mPendingAnimations.size());
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final TaskAnimationAdapter adapter = mPendingAnimations.get(i);
             adapter.mTask.setCanAffectSystemUiFlags(true);
+            if (moveHomeToTop) {
+                adapter.mTask.dontAnimateDimExit();
+            }
             adapter.mCapturedFinishCallback.onAnimationFinished(adapter);
         }
         mPendingAnimations.clear();
@@ -400,9 +403,11 @@ public class RecentsAnimationController {
             if (mainWindow == null) {
                 return null;
             }
+            final Rect insets = new Rect(mainWindow.mContentInsets);
+            InsetUtils.addInsets(insets, mainWindow.mAppToken.getLetterboxInsets());
             mTarget = new RemoteAnimationTarget(mTask.mTaskId, MODE_CLOSING, mCapturedLeash,
                     !mTask.fillsParent(), mainWindow.mWinAnimator.mLastClipRect,
-                    mainWindow.mContentInsets, mTask.getPrefixOrderIndex(), position, bounds,
+                    insets, mTask.getPrefixOrderIndex(), position, bounds,
                     mTask.getWindowConfiguration(), mIsRecentTaskInvisible);
             return mTarget;
         }

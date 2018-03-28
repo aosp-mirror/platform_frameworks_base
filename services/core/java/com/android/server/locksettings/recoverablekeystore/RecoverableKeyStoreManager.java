@@ -217,12 +217,17 @@ public class RecoverableKeyStoreManager {
                     ERROR_INVALID_CERTIFICATE, "Failed to validate certificate.");
         }
 
+        boolean wasInitialized = mDatabase.getRecoveryServiceCertPath(userId, uid) != null;
+
         // Save the chosen and validated certificate into database
         try {
             Log.d(TAG, "Saving the randomly chosen endpoint certificate to database");
             if (mDatabase.setRecoveryServiceCertPath(userId, uid, certPath) > 0) {
                 mDatabase.setRecoveryServiceCertSerial(userId, uid, newSerial);
-                mDatabase.setShouldCreateSnapshot(userId, uid, true);
+                if (wasInitialized) {
+                    Log.i(TAG, "This is a certificate change. Snapshot pending.");
+                    mDatabase.setShouldCreateSnapshot(userId, uid, true);
+                }
                 mDatabase.setCounterId(userId, uid, new SecureRandom().nextLong());
             }
         } catch (CertificateEncodingException e) {
@@ -382,10 +387,26 @@ public class RecoverableKeyStoreManager {
         Preconditions.checkNotNull(secretTypes, "secretTypes is null");
         int userId = UserHandle.getCallingUserId();
         int uid = Binder.getCallingUid();
-        long updatedRows = mDatabase.setRecoverySecretTypes(userId, uid, secretTypes);
-        if (updatedRows > 0) {
-            mDatabase.setShouldCreateSnapshot(userId, uid, true);
+
+        int[] currentSecretTypes = mDatabase.getRecoverySecretTypes(userId, uid);
+        if (Arrays.equals(secretTypes, currentSecretTypes)) {
+            Log.v(TAG, "Not updating secret types - same as old value.");
+            return;
         }
+
+        long updatedRows = mDatabase.setRecoverySecretTypes(userId, uid, secretTypes);
+        if (updatedRows < 1) {
+            throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR,
+                    "Database error trying to set secret types.");
+        }
+
+        if (currentSecretTypes.length == 0) {
+            Log.i(TAG, "Initialized secret types.");
+            return;
+        }
+
+        Log.i(TAG, "Updated secret types. Snapshot pending.");
+        mDatabase.setShouldCreateSnapshot(userId, uid, true);
     }
 
     /**

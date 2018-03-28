@@ -47,7 +47,8 @@ public class Channel {
     private final SEService mService;
     private final Object mLock = new Object();
 
-    Channel(SEService service, Session session, ISecureElementChannel channel) {
+    Channel(@NonNull SEService service, @NonNull Session session,
+            @NonNull ISecureElementChannel channel) {
         if (service == null || session == null || channel == null) {
             throw new IllegalArgumentException("Parameters cannot be null");
         }
@@ -158,7 +159,7 @@ public class Channel {
      * @throws SecurityException if the command is filtered by the security policy.
      * @throws NullPointerException if command is NULL.
      */
-    public @NonNull byte[] transmit(byte[] command) throws IOException {
+    public @NonNull byte[] transmit(@NonNull byte[] command) throws IOException {
         if (!mService.isConnected()) {
             throw new IllegalStateException("service not connected to system");
         }

@@ -22,10 +22,10 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.ExpandableView;
+import com.android.systemui.statusbar.FooterView;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 
@@ -390,7 +390,7 @@ public class StackScrollAlgorithm {
         int paddingAfterChild = getPaddingAfterChild(algorithmState, child);
         int childHeight = getMaxAllowedChildHeight(child);
         childViewState.yTranslation = currentYPosition;
-        boolean isDismissView = child instanceof DismissView;
+        boolean isFooterView = child instanceof FooterView;
         boolean isEmptyShadeView = child instanceof EmptyShadeView;
 
         childViewState.location = ExpandableViewState.LOCATION_MAIN_AREA;
@@ -404,7 +404,7 @@ public class StackScrollAlgorithm {
             float end = childViewState.yTranslation + childViewState.height + inset;
             childViewState.headsUpIsVisible = end < ambientState.getMaxHeadsUpTranslation();
         }
-        if (isDismissView) {
+        if (isFooterView) {
             childViewState.yTranslation = Math.min(childViewState.yTranslation,
                     ambientState.getInnerHeight() - childHeight);
         } else if (isEmptyShadeView) {

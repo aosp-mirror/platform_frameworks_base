@@ -166,12 +166,12 @@ bool OringDurationTracker::flushCurrentBucket(
         current_info.mDuration = mDuration;
         (*output)[mEventKey].push_back(current_info);
         mDurationFullBucket += mDuration;
-        if (eventTimeNs > fullBucketEnd) {
-            // End of full bucket, can send to anomaly tracker now.
-            addPastBucketToAnomalyTrackers(mDurationFullBucket, mCurrentBucketNum);
-            mDurationFullBucket = 0;
-        }
         VLOG("  duration: %lld", (long long)current_info.mDuration);
+    }
+    if (eventTimeNs > fullBucketEnd) {
+        // End of full bucket, can send to anomaly tracker now.
+        addPastBucketToAnomalyTrackers(mDurationFullBucket, mCurrentBucketNum);
+        mDurationFullBucket = 0;
     }
 
     if (mStarted.size() > 0) {
@@ -185,6 +185,10 @@ bool OringDurationTracker::flushCurrentBucket(
             // If it's a partial bucket, numBucketsForward would be 0.
             addPastBucketToAnomalyTrackers(info.mDuration, mCurrentBucketNum + i);
             VLOG("  add filling bucket with duration %lld", (long long)info.mDuration);
+        }
+    } else {
+        if (numBucketsForward >= 2) {
+            addPastBucketToAnomalyTrackers(0, mCurrentBucketNum + numBucketsForward - 1);
         }
     }
 
@@ -210,7 +214,8 @@ bool OringDurationTracker::flushIfNeeded(
     return flushCurrentBucket(eventTimeNs, output);
 }
 
-void OringDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) {
+void OringDurationTracker::onSlicedConditionMayChange(bool overallCondition,
+                                                      const uint64_t timestamp) {
     vector<pair<HashableDimensionKey, int>> startedToPaused;
     vector<pair<HashableDimensionKey, int>> pausedToStarted;
     if (!mStarted.empty()) {
@@ -320,57 +325,84 @@ void OringDurationTracker::onConditionChanged(bool condition, const uint64_t tim
 }
 
 int64_t OringDurationTracker::predictAnomalyTimestampNs(
-        const DurationAnomalyTracker& anomalyTracker, const uint64_t eventTimestampNs) const {
+        const DurationAnomalyTracker& anomalyTracker, const int64_t eventTimestampNs) const {
     // TODO: Unit-test this and see if it can be done more efficiently (e.g. use int32).
-    // All variables below represent durations (not timestamps).
 
+    // The anomaly threshold.
     const int64_t thresholdNs = anomalyTracker.getAnomalyThreshold();
 
-    // The time until the current bucket ends. This is how much more 'space' it can hold.
-    const int64_t currRemainingBucketSizeNs =
-            mBucketSizeNs - (eventTimestampNs - mCurrentBucketStartTimeNs);
-    if (currRemainingBucketSizeNs < 0) {
-        ALOGE("OringDurationTracker currRemainingBucketSizeNs < 0");
-        // This should never happen. Return the safest thing possible given that data is corrupt.
-        return eventTimestampNs + thresholdNs;
-    }
+    // The timestamp of the current bucket end.
+    const int64_t currentBucketEndNs = getCurrentBucketEndTimeNs();
+
+    // The past duration ns for the current bucket.
+    int64_t currentBucketPastNs = mDuration + mDurationFullBucket;
 
     // As we move into the future, old buckets get overwritten (so their old data is erased).
-
     // Sum of past durations. Will change as we overwrite old buckets.
-    int64_t pastNs = mDuration + mDurationFullBucket;
-    pastNs += anomalyTracker.getSumOverPastBuckets(mEventKey);
+    int64_t pastNs = currentBucketPastNs + anomalyTracker.getSumOverPastBuckets(mEventKey);
 
-    // How much of the threshold is still unaccounted after considering pastNs.
-    int64_t leftNs = thresholdNs - pastNs;
+    // The refractory period end timestamp for dimension mEventKey.
+    const int64_t refractoryPeriodEndNs =
+            anomalyTracker.getRefractoryPeriodEndsSec(mEventKey) * NS_PER_SEC;
 
-    // First deal with the remainder of the current bucket.
-    if (leftNs <= currRemainingBucketSizeNs) {  // Predict the anomaly will occur in this bucket.
-        return eventTimestampNs + leftNs;
+    // The anomaly should happen when accumulated wakelock duration is above the threshold and
+    // not within the refractory period.
+    int64_t anomalyTimestampNs =
+        std::max(eventTimestampNs + thresholdNs - pastNs, refractoryPeriodEndNs);
+    // If the predicted the anomaly timestamp is within the current bucket, return it directly.
+    if (anomalyTimestampNs <= currentBucketEndNs) {
+        return std::max(eventTimestampNs, anomalyTimestampNs);
     }
-    // The remainder of this bucket contributes, but we must then move to the next bucket.
-    pastNs += currRemainingBucketSizeNs;
 
-    // Now deal with the past buckets, starting with the oldest.
-    for (int futBucketIdx = 0; futBucketIdx < anomalyTracker.getNumOfPastBuckets();
-         futBucketIdx++) {
-        // We now overwrite the oldest bucket with the previous 'current', and start a new
-        // 'current'.
+    // Remove the old bucket.
+    if (anomalyTracker.getNumOfPastBuckets() > 0) {
         pastNs -= anomalyTracker.getPastBucketValue(
-                mEventKey, mCurrentBucketNum - anomalyTracker.getNumOfPastBuckets() + futBucketIdx);
-        leftNs = thresholdNs - pastNs;
-        if (leftNs <= mBucketSizeNs) {  // Predict anomaly will occur in this bucket.
-            return eventTimestampNs + currRemainingBucketSizeNs + (futBucketIdx * mBucketSizeNs) +
-                   leftNs;
-        } else {  // This bucket would be entirely filled, and we'll need to move to the next
-                  // bucket.
-            pastNs += mBucketSizeNs;
+                            mEventKey,
+                            mCurrentBucketNum - anomalyTracker.getNumOfPastBuckets());
+        // Add the remaining of the current bucket to the accumulated wakelock duration.
+        pastNs += (currentBucketEndNs - eventTimestampNs);
+    } else {
+        // The anomaly depends on only one bucket.
+        pastNs = 0;
+    }
+
+    // The anomaly will not happen in the current bucket. We need to iterate over the future buckets
+    // to predict the accumulated wakelock duration and determine the anomaly timestamp accordingly.
+    for (int futureBucketIdx = 1; futureBucketIdx <= anomalyTracker.getNumOfPastBuckets() + 1;
+            futureBucketIdx++) {
+        // The alarm candidate timestamp should meet two requirements:
+        // 1. the accumulated wakelock duration is above the threshold.
+        // 2. it is not within the refractory period.
+        // 3. the alarm timestamp falls in this bucket. Otherwise we need to flush the past buckets,
+        //    find the new alarm candidate timestamp and check these requirements again.
+        const int64_t bucketEndNs = currentBucketEndNs + futureBucketIdx * mBucketSizeNs;
+        int64_t anomalyTimestampNs =
+            std::max(bucketEndNs - mBucketSizeNs + thresholdNs - pastNs, refractoryPeriodEndNs);
+        if (anomalyTimestampNs <= bucketEndNs) {
+            return anomalyTimestampNs;
+        }
+        if (anomalyTracker.getNumOfPastBuckets() <= 0) {
+            continue;
+        }
+
+        // No valid alarm timestamp is found in this bucket. The clock moves to the end of the
+        // bucket. Update the pastNs.
+        pastNs += mBucketSizeNs;
+        // 1. If the oldest past bucket is still in the past bucket window, we could fetch the past
+        // bucket and erase it from pastNs.
+        // 2. If the oldest past bucket is the current bucket, we should compute the
+        //   wakelock duration in the current bucket and erase it from pastNs.
+        // 3. Otherwise all othe past buckets are ancient.
+        if (futureBucketIdx < anomalyTracker.getNumOfPastBuckets()) {
+            pastNs -= anomalyTracker.getPastBucketValue(
+                    mEventKey,
+                    mCurrentBucketNum - anomalyTracker.getNumOfPastBuckets() + futureBucketIdx);
+        } else if (futureBucketIdx == anomalyTracker.getNumOfPastBuckets()) {
+            pastNs -= (currentBucketPastNs + (currentBucketEndNs - eventTimestampNs));
         }
     }
 
-    // If we have reached this point, we even have to overwrite the the original current bucket.
-    // Thus, none of the past data will still be extant - pastNs is now 0.
-    return eventTimestampNs + thresholdNs;
+    return std::max(eventTimestampNs + thresholdNs, refractoryPeriodEndNs);
 }
 
 void OringDurationTracker::dumpStates(FILE* out, bool verbose) const {

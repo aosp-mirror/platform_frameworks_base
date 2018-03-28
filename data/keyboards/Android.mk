@@ -28,7 +28,7 @@ LOCAL_BUILT_MODULE := $(intermediates)/stamp
 validatekeymaps := $(HOST_OUT_EXECUTABLES)/validatekeymaps$(HOST_EXECUTABLE_SUFFIX)
 $(LOCAL_BUILT_MODULE): PRIVATE_VALIDATEKEYMAPS := $(validatekeymaps)
 $(LOCAL_BUILT_MODULE) : $(framework_keylayouts) $(framework_keycharmaps) $(framework_keyconfigs) | $(validatekeymaps)
-	$(hide) -q $(PRIVATE_VALIDATEKEYMAPS) $^
+	$(hide) $(PRIVATE_VALIDATEKEYMAPS) -q $^
 	$(hide) mkdir -p $(dir $@) && touch $@
 
 # Run validatekeymaps uncondionally for platform build.

@@ -110,6 +110,11 @@ class Dimmer {
         SurfaceAnimator mSurfaceAnimator;
 
         /**
+         * Determines whether the dim layer should animate before destroying.
+         */
+        boolean mAnimateExit = true;
+
+        /**
          * Used for Dims not associated with a WindowContainer. See {@link Dimmer#dimAbove} for
          * details on Dim lifecycle.
          */
@@ -260,6 +265,12 @@ class Dimmer {
         }
     }
 
+    void dontAnimateExit() {
+        if (mDimState != null) {
+            mDimState.mAnimateExit = false;
+        }
+    }
+
     /**
      * Call after invoking {@link WindowContainer#prepareSurfaces} on children as
      * described in {@link #resetDimStates}.
@@ -274,7 +285,11 @@ class Dimmer {
         }
 
         if (!mDimState.mDimming) {
-            startDimExit(mLastRequestedDimContainer, mDimState.mSurfaceAnimator, t);
+            if (!mDimState.mAnimateExit) {
+                t.destroy(mDimState.mDimLayer);
+            } else {
+                startDimExit(mLastRequestedDimContainer, mDimState.mSurfaceAnimator, t);
+            }
             mDimState = null;
             return false;
         } else {

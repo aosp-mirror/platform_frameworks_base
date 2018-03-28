@@ -146,6 +146,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     /** Whether the app being autofilled is running in compat mode. */
     private final boolean mCompatMode;
 
+    /** Node representing the URL bar on compat mode. */
+    @GuardedBy("mLock")
+    private ViewNode mUrlBar;
+
+    @GuardedBy("mLock")
+    private boolean mSaveOnAllViewsInvisible;
+
     @GuardedBy("mLock")
     private final ArrayMap<AutofillId, ViewState> mViewStates = new ArrayMap<>();
 
@@ -280,7 +287,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         Slog.d(TAG, "url_bars in compat mode: " + Arrays.toString(urlBarIds));
                     }
                     if (urlBarIds != null) {
-                        Helper.sanitizeUrlBar(structure, urlBarIds);
+                        mUrlBar = Helper.sanitizeUrlBar(structure, urlBarIds);
+                        if (mUrlBar != null) {
+                            final AutofillId urlBarId = mUrlBar.getAutofillId();
+                            if (sDebug) {
+                                Slog.d(TAG, "Setting urlBar as id=" + urlBarId + " and domain "
+                                        + mUrlBar.getWebDomain());
+                            }
+                            final ViewState viewState = new ViewState(Session.this, urlBarId,
+                                    Session.this, ViewState.STATE_URL_BAR);
+                            mViewStates.put(urlBarId, viewState);
+                        }
                     }
                 }
                 structure.sanitizeForParceling(true);
@@ -1810,6 +1827,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             viewState.setState(ViewState.STATE_STARTED_PARTITION);
             requestNewFillResponseLocked(flags);
+        } else {
+            if (sVerbose) {
+                Slog.v(TAG, "Not starting new partition for view " + id + ": "
+                        + viewState.getStateAsString());
+            }
         }
     }
 
@@ -1878,14 +1900,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
         if (sVerbose) {
-            Slog.v(TAG, "updateLocked(): id=" + id + ", action=" + action + ", flags=" + flags);
+            Slog.v(TAG, "updateLocked(): id=" + id + ", action=" + actionAsString(action)
+                    + ", flags=" + flags);
         }
         ViewState viewState = mViewStates.get(id);
 
         if (viewState == null) {
             if (action == ACTION_START_SESSION || action == ACTION_VALUE_CHANGED
                     || action == ACTION_VIEW_ENTERED) {
-                if (sVerbose) Slog.v(TAG, "Creating viewState for " + id + " on " + action);
+                if (sVerbose) Slog.v(TAG, "Creating viewState for " + id);
                 boolean isIgnored = isIgnoredLocked(id);
                 viewState = new ViewState(this, id, this,
                         isIgnored ? ViewState.STATE_IGNORED : ViewState.STATE_INITIAL);
@@ -1895,11 +1918,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 // detectable, and batch-send them when the session is finished (but that will
                 // require tracking detectable fields on AutofillManager)
                 if (isIgnored) {
-                    if (sDebug) Slog.d(TAG, "updateLocked(): ignoring view " + id);
+                    if (sDebug) Slog.d(TAG, "updateLocked(): ignoring view " + viewState);
                     return;
                 }
             } else {
-                if (sVerbose) Slog.v(TAG, "Ignored action " + action + " for " + id);
+                if (sVerbose) Slog.v(TAG, "Ignoring specific action when viewState=null");
                 return;
             }
         }
@@ -1913,6 +1936,40 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 requestNewFillResponseLocked(flags);
                 break;
             case ACTION_VALUE_CHANGED:
+                if (mCompatMode && (viewState.getState() & ViewState.STATE_URL_BAR) != 0) {
+                    // Must cancel the session if the value of the URL bar changed
+                    final String currentUrl = mUrlBar == null ? null
+                            : mUrlBar.getText().toString().trim();
+                    if (currentUrl == null) {
+                        // Sanity check - shouldn't happen.
+                        wtf(null, "URL bar value changed, but current value is null");
+                        return;
+                    }
+                    if (value == null || ! value.isText()) {
+                        // Sanity check - shouldn't happen.
+                        wtf(null, "URL bar value changed to null or non-text: %s", value);
+                        return;
+                    }
+                    final String newUrl = value.getTextValue().toString();
+                    if (newUrl.equals(currentUrl)) {
+                        if (sDebug) Slog.d(TAG, "Ignoring change on URL bar as it's the same");
+                        return;
+                    }
+                    if (mSaveOnAllViewsInvisible) {
+                        // We cannot cancel the session because it could hinder Save when all views
+                        // are finished, as the URL bar changed callback is usually called before
+                        // the virtual views become invisible.
+                        if (sDebug) {
+                            Slog.d(TAG, "Ignoring change on URL because session will finish when "
+                                    + "views are gone");
+                        }
+                        return;
+                    }
+                    if (sDebug) Slog.d(TAG, "Finishing session because URL bar changed");
+                    forceRemoveSelfLocked(AutofillManager.STATE_UNKNOWN_COMPAT_MODE);
+                    return;
+                }
+
                 if (value != null && !value.equals(viewState.getCurrentValue())) {
                     if (value.isEmpty()
                             && viewState.getCurrentValue() != null
@@ -1953,6 +2010,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (sVerbose && virtualBounds != null) {
                     Slog.v(TAG, "entered on virtual child " + id + ": " + virtualBounds);
                 }
+
+                if (mCompatMode && (viewState.getState() & ViewState.STATE_URL_BAR) != 0) {
+                    if (sDebug) Slog.d(TAG, "Ignoring VIEW_ENTERED on URL BAR (id=" + id + ")");
+                    return;
+                }
+
                 requestNewFillResponseOnViewEnteredIfNecessaryLocked(id, viewState, flags);
 
                 // Remove the UI if the ViewState has changed.
@@ -2068,7 +2131,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (response == null) return;
 
         ArraySet<AutofillId> trackedViews = null;
-        boolean saveOnAllViewsInvisible = false;
+        mSaveOnAllViewsInvisible = false;
         boolean saveOnFinish = true;
         final SaveInfo saveInfo = response.getSaveInfo();
         final AutofillId saveTriggerId;
@@ -2081,10 +2144,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             if (mCompatMode) {
                 flags |= SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE;
             }
-            saveOnAllViewsInvisible = (flags & SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE) != 0;
+            mSaveOnAllViewsInvisible = (flags & SaveInfo.FLAG_SAVE_ON_ALL_VIEWS_INVISIBLE) != 0;
 
             // We only need to track views if we want to save once they become invisible.
-            if (saveOnAllViewsInvisible) {
+            if (mSaveOnAllViewsInvisible) {
                 if (trackedViews == null) {
                     trackedViews = new ArraySet<>();
                 }
@@ -2129,10 +2192,31 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 Slog.v(TAG, "updateTrackedIdsLocked(): " + trackedViews + " => " + fillableIds
                         + " triggerId: " + saveTriggerId + " saveOnFinish:" + saveOnFinish);
             }
-            mClient.setTrackedViews(id, toArray(trackedViews), saveOnAllViewsInvisible,
+            mClient.setTrackedViews(id, toArray(trackedViews), mSaveOnAllViewsInvisible,
                     saveOnFinish, toArray(fillableIds), saveTriggerId);
         } catch (RemoteException e) {
             Slog.w(TAG, "Cannot set tracked ids", e);
+        }
+    }
+
+    /**
+     * Sets the state of views that failed to autofill.
+     */
+    @GuardedBy("mLock")
+    void setAutofillFailureLocked(@NonNull List<AutofillId> ids) {
+        for (int i = 0; i < ids.size(); i++) {
+            final AutofillId id = ids.get(i);
+            final ViewState viewState = mViewStates.get(id);
+            if (viewState == null) {
+                Slog.w(TAG, "setAutofillFailure(): no view for id " + id);
+                continue;
+            }
+            viewState.resetState(ViewState.STATE_AUTOFILLED);
+            final int state = viewState.getState();
+            viewState.setState(state | ViewState.STATE_AUTOFILL_FAILED);
+            if (sVerbose) {
+                Slog.v(TAG, "Changed state of " + id + " to " + viewState.getStateAsString());
+            }
         }
     }
 
@@ -2421,6 +2505,16 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         pw.print(prefix); pw.print("mClientState: "); pw.println(
                 Helper.bundleToString(mClientState));
         pw.print(prefix); pw.print("mCompatMode: "); pw.println(mCompatMode);
+        pw.print(prefix); pw.print("mUrlBar: ");
+        if (mUrlBar == null) {
+            pw.println("N/A");
+        } else {
+            pw.print("id="); pw.print(mUrlBar.getAutofillId());
+            pw.print(" domain="); pw.print(mUrlBar.getWebDomain());
+            pw.print(" text="); Helper.printlnRedactedText(pw, mUrlBar.getText());
+        }
+        pw.print(prefix); pw.print("mSaveOnAllViewsInvisible: "); pw.println(
+                mSaveOnAllViewsInvisible);
         pw.print(prefix); pw.print("mSelectedDatasetIds: "); pw.println(mSelectedDatasetIds);
         mRemoteFillService.dump(prefix, pw);
     }
@@ -2513,6 +2607,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     @GuardedBy("mLock")
     void forceRemoveSelfLocked() {
+        forceRemoveSelfLocked(AutofillManager.STATE_UNKNOWN);
+    }
+
+    @GuardedBy("mLock")
+    void forceRemoveSelfLocked(int clientState) {
         if (sVerbose) Slog.v(TAG, "forceRemoveSelfLocked(): " + mPendingSaveUi);
 
         final boolean isPendingSaveUi = isSaveUiPendingLocked();
@@ -2521,7 +2620,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mUi.destroyAll(mPendingSaveUi, this, false);
         if (!isPendingSaveUi) {
             try {
-                mClient.setSessionFinished(AutofillManager.STATE_UNKNOWN);
+                mClient.setSessionFinished(clientState);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error notifying client to finish session", e);
             }
@@ -2622,6 +2721,21 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             Slog.wtf(TAG, message, e);
         } else {
             Slog.wtf(TAG, message);
+        }
+    }
+
+    private static String actionAsString(int action) {
+        switch (action) {
+            case ACTION_START_SESSION:
+                return "START_SESSION";
+            case ACTION_VIEW_ENTERED:
+                return "VIEW_ENTERED";
+            case ACTION_VIEW_EXITED:
+                return "VIEW_EXITED";
+            case ACTION_VALUE_CHANGED:
+                return "VALUE_CHANGED";
+            default:
+                return "UNKNOWN_" + action;
         }
     }
 }

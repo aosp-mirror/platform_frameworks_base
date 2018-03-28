@@ -1095,6 +1095,9 @@
     <!-- Display low battery warning when battery level dips to this value -->
     <integer name="config_lowBatteryWarningLevel">15</integer>
 
+    <!-- The default suggested battery % at which we enable battery saver automatically.  -->
+    <integer name="config_lowBatteryAutoTriggerDefaultLevel">15</integer>
+
     <!-- Close low battery warning when battery level reaches the lowBatteryWarningLevel
          plus this -->
     <integer name="config_lowBatteryCloseWarningBump">5</integer>
@@ -1339,6 +1342,30 @@
          This must be overridden in platform specific overlays -->
     <integer-array name="config_autoBrightnessKeyboardBacklightValues">
     </integer-array>
+
+    <!-- Array of light sensor lux values to define the minimum brightness curve, which guarantees
+         that any curve that dips below it is rejected by the system.
+         This prevents auto-brightness from setting the screen so dark as to prevent the user from
+         disabling auto-brightness or reseting the brightness curve via ADB.
+
+         The control points must be strictly increasing. Each control point corresponds to an entry
+         in the minimum brightness nits array. -->
+    <integer-array name="config_autoBrightnessMinimumBrightnessCurveLux">
+        <item>2000</item>
+        <item>4000</item>
+    </integer-array>
+
+    <!-- Array of desired screen brightness in nits corresponding to the lux values
+         in the config_autoBrightnessMinimumBrightnessCurveLux array.
+
+         This array should have size one greater than the size of the
+         config_autoBrightnessMinimumBrightnessCurveLux array. The values must be non-negative and
+         non-decreasing. -->
+    <array name="config_autoBrightnessMinimumBrightnessCurveNits">
+        <item>1.0</item>
+        <item>50.0</item>
+        <item>90.0</item>
+    </array>
 
     <!-- Array of hysteresis constraint values for brightening, represented as tenths of a
          percent. The length of this array is assumed to be one greater than
@@ -2364,19 +2391,6 @@
     <string-array name="config_disabledUntilUsedPreinstalledImes" translatable="false">
         <item>com.android.inputmethod.latin</item>
     </string-array>
-
-    <!-- The list of carrier applications which should be disabled until used.
-         This function suppresses update notifications for these pre-installed apps.
-         In SubscriptionInfoUpdater, the listed applications are disabled until used when all of the
-         following conditions are met.
-         1. Not currently carrier-privileged according to the inserted SIM
-         2. Pre-installed
-         3. In the default state (enabled but not explicitly)
-         And SubscriptionInfoUpdater undoes this and marks the app enabled when a SIM is inserted
-         that marks the app as carrier privileged. It also grants the app default permissions
-         for Phone and Location. As such, apps MUST only ever be added to this list if they
-         obtain user consent to access their location through other means. -->
-    <string-array name="config_disabledUntilUsedPreinstalledCarrierApps" translatable="false" />
 
     <!-- The list of classes that should be added to the notification ranking pipeline.
      See {@link com.android.server.notification.NotificationSignalExtractor}

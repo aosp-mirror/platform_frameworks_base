@@ -2387,12 +2387,12 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     public void testGetUserProvisioningState_defaultResult() {
+        mContext.callerPermissions.add(permission.MANAGE_USERS);
         assertEquals(DevicePolicyManager.STATE_USER_UNMANAGED, dpm.getUserProvisioningState());
     }
 
     public void testSetUserProvisioningState_permission() throws Exception {
         setupProfileOwner();
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
         exerciseUserProvisioningTransitions(DpmMockContext.CALLER_USER_HANDLE,
                 DevicePolicyManager.STATE_USER_SETUP_FINALIZED);
@@ -2407,6 +2407,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     public void testSetUserProvisioningState_noManagement() {
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+        mContext.callerPermissions.add(permission.MANAGE_USERS);
         assertExpectException(IllegalStateException.class,
                 /* messageRegex= */ "change provisioning state unless a .* owner is set",
                 () -> dpm.setUserProvisioningState(DevicePolicyManager.STATE_USER_SETUP_FINALIZED,
@@ -2417,7 +2418,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testSetUserProvisioningState_deviceOwnerFromSetupWizard() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
         exerciseUserProvisioningTransitions(UserHandle.USER_SYSTEM,
                 DevicePolicyManager.STATE_USER_SETUP_COMPLETE,
@@ -2428,7 +2428,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
         exerciseUserProvisioningTransitions(UserHandle.USER_SYSTEM,
                 DevicePolicyManager.STATE_USER_SETUP_INCOMPLETE,
@@ -2438,7 +2437,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testSetUserProvisioningState_deviceOwnerWithoutSetupWizard() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
         exerciseUserProvisioningTransitions(UserHandle.USER_SYSTEM,
                 DevicePolicyManager.STATE_USER_SETUP_FINALIZED);
@@ -2447,7 +2445,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testSetUserProvisioningState_managedProfileFromSetupWizard_primaryUser()
             throws Exception {
         setupProfileOwner();
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
         exerciseUserProvisioningTransitions(DpmMockContext.CALLER_USER_HANDLE,
                 DevicePolicyManager.STATE_USER_PROFILE_COMPLETE,
@@ -2457,7 +2454,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testSetUserProvisioningState_managedProfileFromSetupWizard_managedProfile()
             throws Exception {
         setupProfileOwner();
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
         exerciseUserProvisioningTransitions(DpmMockContext.CALLER_USER_HANDLE,
                 DevicePolicyManager.STATE_USER_SETUP_COMPLETE,
@@ -2466,7 +2462,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     public void testSetUserProvisioningState_managedProfileWithoutSetupWizard() throws Exception {
         setupProfileOwner();
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
         exerciseUserProvisioningTransitions(DpmMockContext.CALLER_USER_HANDLE,
                 DevicePolicyManager.STATE_USER_SETUP_FINALIZED);
@@ -2474,7 +2469,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     public void testSetUserProvisioningState_illegalTransitionOutOfFinalized1() throws Exception {
         setupProfileOwner();
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
         assertExpectException(IllegalStateException.class,
                 /* messageRegex= */ "Cannot move to user provisioning state",
@@ -2486,7 +2480,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testSetUserProvisioningState_illegalTransitionToAnotherInProgressState()
             throws Exception {
         setupProfileOwner();
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
         assertExpectException(IllegalStateException.class,
                 /* messageRegex= */ "Cannot move to user provisioning state",
@@ -2496,6 +2489,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     private void exerciseUserProvisioningTransitions(int userId, int... states) {
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+        mContext.callerPermissions.add(permission.MANAGE_USERS);
+
         assertEquals(DevicePolicyManager.STATE_USER_UNMANAGED, dpm.getUserProvisioningState());
         for (int state : states) {
             dpm.setUserProvisioningState(state, userId);

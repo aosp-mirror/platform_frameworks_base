@@ -5969,6 +5969,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     private boolean isPackageSuspendedForUser(String pkg, int uid) {
+        final long identity = Binder.clearCallingIdentity();
         int userId = UserHandle.getUserId(uid);
         try {
             return mPackageManager.isPackageSuspendedForUser(pkg, userId);
@@ -5977,6 +5978,8 @@ public class NotificationManagerService extends SystemService {
         } catch (IllegalArgumentException ex) {
             // Package not found.
             return false;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 

@@ -335,7 +335,7 @@ public class SubscriptionInfo implements Parcelable {
         return this.mCountryIso;
     }
 
-    /** @return whether the subscription is an embedded one. */
+    /** @return whether the subscription is an eUICC one. */
     public boolean isEmbedded() {
         return this.mIsEmbedded;
     }

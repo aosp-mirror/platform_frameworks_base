@@ -400,10 +400,8 @@ package android.app {
   }
 
   public class WallpaperManager {
-    method public void clearWallpaper();
     method public void clearWallpaper(int, int);
     method public void setDisplayOffset(android.os.IBinder, int, int);
-    method public void setDisplayPadding(android.graphics.Rect);
     method public boolean setWallpaperComponent(android.content.ComponentName);
   }
 
@@ -5503,7 +5501,6 @@ package android.telephony.euicc {
     field public static final int EUICC_OTA_NOT_NEEDED = 4; // 0x4
     field public static final int EUICC_OTA_STATUS_UNAVAILABLE = 5; // 0x5
     field public static final int EUICC_OTA_SUCCEEDED = 3; // 0x3
-    field public static final java.lang.String EXTRA_EMBEDDED_SUBSCRIPTION_DOWNLOADABLE_SUBSCRIPTION = "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_DOWNLOADABLE_SUBSCRIPTION";
     field public static final java.lang.String EXTRA_EMBEDDED_SUBSCRIPTION_DOWNLOADABLE_SUBSCRIPTIONS = "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_DOWNLOADABLE_SUBSCRIPTIONS";
   }
 

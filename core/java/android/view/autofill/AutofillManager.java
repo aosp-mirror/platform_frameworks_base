@@ -274,6 +274,16 @@ public final class AutofillManager {
     public static final int STATE_DISABLED_BY_SERVICE = 4;
 
     /**
+     * Same as {@link #STATE_UNKNOWN}, but used on
+     * {@link AutofillManagerClient#setSessionFinished(int)} when the session was finished because
+     * the URL bar changed on client mode
+     *
+     * @hide
+     */
+    public static final int STATE_UNKNOWN_COMPAT_MODE = 5;
+
+
+    /**
      * Timeout in ms for calls to the field classification service.
      * @hide
      */
@@ -1809,13 +1819,22 @@ public final class AutofillManager {
             final View[] views = client.autofillClientFindViewsByAutofillIdTraversal(
                     Helper.toArray(ids));
 
+            ArrayList<AutofillId> failedIds = null;
+
             for (int i = 0; i < itemCount; i++) {
                 final AutofillId id = ids.get(i);
                 final AutofillValue value = values.get(i);
                 final int viewId = id.getViewId();
                 final View view = views[i];
                 if (view == null) {
-                    Log.w(TAG, "autofill(): no View with id " + viewId);
+                    // Most likely view has been removed after the initial request was sent to the
+                    // the service; this is fine, but we need to update the view status in the
+                    // server side so it can be triggered again.
+                    Log.d(TAG, "autofill(): no View with id " + id);
+                    if (failedIds == null) {
+                        failedIds = new ArrayList<>();
+                    }
+                    failedIds.add(id);
                     continue;
                 }
                 if (id.isVirtual()) {
@@ -1849,12 +1868,28 @@ public final class AutofillManager {
                 }
             }
 
+            if (failedIds != null) {
+                if (sVerbose) {
+                    Log.v(TAG, "autofill(): total failed views: " + failedIds);
+                }
+                try {
+                    mService.setAutofillFailure(mSessionId, failedIds, mContext.getUserId());
+                } catch (RemoteException e) {
+                    // In theory, we could ignore this error since it's not a big deal, but
+                    // in reality, we rather crash the app anyways, as the failure could be
+                    // a consequence of something going wrong on the server side...
+                    e.rethrowFromSystemServer();
+                }
+            }
+
             if (virtualValues != null) {
                 for (int i = 0; i < virtualValues.size(); i++) {
                     final View parent = virtualValues.keyAt(i);
                     final SparseArray<AutofillValue> childrenValues = virtualValues.valueAt(i);
                     parent.autofill(childrenValues);
                     numApplied += childrenValues.size();
+                    // TODO: we should provide a callback so the parent can call failures; something
+                    // like notifyAutofillFailed(View view, int[] childrenIds);
                 }
             }
 
@@ -1947,15 +1982,24 @@ public final class AutofillManager {
      * Marks the state of the session as finished.
      *
      * @param newState {@link #STATE_FINISHED} (because the autofill service returned a {@code null}
-     *  FillResponse), {@link #STATE_UNKNOWN} (because the session was removed), or
-     *  {@link #STATE_DISABLED_BY_SERVICE} (because the autofill service disabled further autofill
-     *  requests for the activity).
+     *  FillResponse), {@link #STATE_UNKNOWN} (because the session was removed),
+     *  {@link #STATE_UNKNOWN_COMPAT_MODE} (beucase the session was finished when the URL bar
+     *  changed on compat mode), or {@link #STATE_DISABLED_BY_SERVICE} (because the autofill service
+     *  disabled further autofill requests for the activity).
      */
     private void setSessionFinished(int newState) {
         synchronized (mLock) {
-            if (sVerbose) Log.v(TAG, "setSessionFinished(): from " + mState + " to " + newState);
-            resetSessionLocked(/* resetEnteredIds= */ false);
-            mState = newState;
+            if (sVerbose) {
+                Log.v(TAG, "setSessionFinished(): from " + getStateAsStringLocked() + " to "
+                        + getStateAsString(newState));
+            }
+            if (newState == STATE_UNKNOWN_COMPAT_MODE) {
+                resetSessionLocked(/* resetEnteredIds= */ true);
+                mState = STATE_UNKNOWN;
+            } else {
+                resetSessionLocked(/* resetEnteredIds= */ false);
+                mState = newState;
+            }
         }
     }
 
@@ -2107,19 +2151,26 @@ public final class AutofillManager {
 
     @GuardedBy("mLock")
     private String getStateAsStringLocked() {
-        switch (mState) {
+        return getStateAsString(mState);
+    }
+
+    @NonNull
+    private static String getStateAsString(int state) {
+        switch (state) {
             case STATE_UNKNOWN:
-                return "STATE_UNKNOWN";
+                return "UNKNOWN";
             case STATE_ACTIVE:
-                return "STATE_ACTIVE";
+                return "ACTIVE";
             case STATE_FINISHED:
-                return "STATE_FINISHED";
+                return "FINISHED";
             case STATE_SHOWING_SAVE_UI:
-                return "STATE_SHOWING_SAVE_UI";
+                return "SHOWING_SAVE_UI";
             case STATE_DISABLED_BY_SERVICE:
-                return "STATE_DISABLED_BY_SERVICE";
+                return "DISABLED_BY_SERVICE";
+            case STATE_UNKNOWN_COMPAT_MODE:
+                return "UNKNOWN_COMPAT_MODE";
             default:
-                return "INVALID:" + mState;
+                return "INVALID:" + state;
         }
     }
 

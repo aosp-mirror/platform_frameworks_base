@@ -301,6 +301,44 @@ public final class UsageStatsManager {
     }
 
     /**
+     * Gets aggregated event stats for the given time range, aggregated by the specified interval.
+     * <p>The returned list will contain a {@link EventStats} object for each event type that
+     * is being aggregated and has data for an interval that is a subset of the time range given.
+     *
+     * <p>The current event types that will be aggregated here are:</p>
+     * <ul>
+     *     <li>{@link UsageEvents.Event#SCREEN_INTERACTIVE}</li>
+     *     <li>{@link UsageEvents.Event#SCREEN_NON_INTERACTIVE}</li>
+     * </ul>
+     *
+     * <p> The caller must have {@link android.Manifest.permission#PACKAGE_USAGE_STATS} </p>
+     *
+     * @param intervalType The time interval by which the stats are aggregated.
+     * @param beginTime The inclusive beginning of the range of stats to include in the results.
+     * @param endTime The exclusive end of the range of stats to include in the results.
+     * @return A list of {@link EventStats}
+     *
+     * @see #INTERVAL_DAILY
+     * @see #INTERVAL_WEEKLY
+     * @see #INTERVAL_MONTHLY
+     * @see #INTERVAL_YEARLY
+     * @see #INTERVAL_BEST
+     */
+    public List<EventStats> queryEventStats(int intervalType, long beginTime, long endTime) {
+        try {
+            @SuppressWarnings("unchecked")
+            ParceledListSlice<EventStats> slice = mService.queryEventStats(intervalType, beginTime,
+                    endTime, mContext.getOpPackageName());
+            if (slice != null) {
+                return slice.getList();
+            }
+        } catch (RemoteException e) {
+            // fallthrough and return the empty list.
+        }
+        return Collections.emptyList();
+    }
+
+    /**
      * Query for events in the given time range. Events are only kept by the system for a few
      * days.
      * <p> The caller must have {@link android.Manifest.permission#PACKAGE_USAGE_STATS} </p>

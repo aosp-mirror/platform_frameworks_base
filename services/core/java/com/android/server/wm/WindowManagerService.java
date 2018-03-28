@@ -596,8 +596,6 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mClientFreezingScreen = false;
     int mAppsFreezingScreen = 0;
 
-    int mLayoutSeq = 0;
-
     // Last systemUiVisibility we received from status bar.
     int mLastStatusBarVisibility = 0;
     // Last systemUiVisibility we dispatched to windows.
@@ -2702,10 +2700,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void cleanupRecentsAnimation() {
+    public void cleanupRecentsAnimation(boolean moveHomeToTop) {
         synchronized (mWindowMap) {
             if (mRecentsAnimationController != null) {
-                mRecentsAnimationController.cleanupAnimation();
+                mRecentsAnimationController.cleanupAnimation(moveHomeToTop);
                 mRecentsAnimationController = null;
                 mAppTransition.updateBooster();
             }
@@ -6344,8 +6342,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mInputMethodTarget != null) {
             pw.print("  mInputMethodTarget="); pw.println(mInputMethodTarget);
         }
-        pw.print("  mInTouchMode="); pw.print(mInTouchMode);
-                pw.print(" mLayoutSeq="); pw.println(mLayoutSeq);
+        pw.print("  mInTouchMode="); pw.println(mInTouchMode);
         pw.print("  mLastDisplayFreezeDuration=");
                 TimeUtils.formatDuration(mLastDisplayFreezeDuration, pw);
                 if ( mLastFinishedFreezeSource != null) {

@@ -17,14 +17,18 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := tests
-LOCAL_SDK_VERSION := current
 
 LOCAL_COMPATIBILITY_SUITE := device-tests
 
+LOCAL_STATIC_JAVA_LIBRARIES := android-support-test
+
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
+LOCAL_SRC_FILES += ../../src/com/android/server/pm/SuspendPackagesTest.java
 
 LOCAL_PACKAGE_NAME := SuspendTestApp
 LOCAL_DEX_PREOPT := false
 LOCAL_PROGUARD_ENABLED := disabled
+
+LOCAL_PRIVATE_PLATFORM_APIS := true
 
 include $(BUILD_PACKAGE)

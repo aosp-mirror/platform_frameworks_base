@@ -89,6 +89,8 @@
     <protected-broadcast android:name="android.intent.action.OVERLAY_REMOVED" />
     <protected-broadcast android:name="android.intent.action.OVERLAY_PRIORITY_CHANGED" />
     <protected-broadcast android:name="android.intent.action.USER_ACTIVITY_NOTIFICATION" />
+    <protected-broadcast android:name="android.intent.action.MY_PACKAGE_SUSPENDED" />
+    <protected-broadcast android:name="android.intent.action.MY_PACKAGE_UNSUSPENDED" />
 
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGED" />
     <protected-broadcast android:name="android.os.action.POWER_SAVE_MODE_CHANGING" />
@@ -4227,6 +4229,16 @@
         <receiver android:name="com.android.server.stats.StatsCompanionService$PollingAlarmReceiver"
                   android:permission="android.permission.STATSCOMPANION"
                   android:exported="false">
+        </receiver>
+
+        <receiver android:name="com.android.server.am.BatteryStatsService$UsbConnectionReceiver"
+                  android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_STATE" />
+            </intent-filter>
         </receiver>
 
         <service android:name="android.hardware.location.GeofenceHardwareService"

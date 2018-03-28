@@ -17,10 +17,15 @@
 package com.android.server.am;
 
 import android.app.ActivityManager;
+import android.app.job.JobProtoEnums;
 import android.bluetooth.BluetoothActivityEnergyInfo;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.hardware.usb.UsbManager;
 import android.net.wifi.WifiActivityEnergyInfo;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerSaveState;
@@ -34,6 +39,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.ParcelFormatException;
 import android.os.PowerManagerInternal;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -70,7 +76,6 @@ import java.nio.CharBuffer;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -438,6 +443,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteSyncStartLocked(name, uid);
+            StatsLog.write_non_chained(StatsLog.SYNC_STATE_CHANGED, uid, null, name,
+                    StatsLog.SYNC_STATE_CHANGED__STATE__ON);
         }
     }
 
@@ -445,6 +452,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteSyncFinishLocked(name, uid);
+            StatsLog.write_non_chained(StatsLog.SYNC_STATE_CHANGED, uid, null, name,
+                    StatsLog.SYNC_STATE_CHANGED__STATE__OFF);
         }
     }
 
@@ -452,6 +461,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteJobStartLocked(name, uid);
+            StatsLog.write_non_chained(StatsLog.SCHEDULED_JOB_STATE_CHANGED, uid, null,
+                    name, StatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__STARTED,
+                    JobProtoEnums.STOP_REASON_UNKNOWN);
         }
     }
 
@@ -459,6 +471,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteJobFinishLocked(name, uid, stopReason);
+            StatsLog.write_non_chained(StatsLog.SCHEDULED_JOB_STATE_CHANGED, uid, null,
+                    name, StatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__FINISHED,
+                    stopReason);
         }
     }
 
@@ -573,6 +588,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteStartSensorLocked(uid, sensor);
+            StatsLog.write_non_chained(StatsLog.SENSOR_STATE_CHANGED, uid, null, sensor,
+                    StatsLog.SENSOR_STATE_CHANGED__STATE__ON);
         }
     }
 
@@ -580,6 +597,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteStopSensorLocked(uid, sensor);
+            StatsLog.write_non_chained(StatsLog.SENSOR_STATE_CHANGED, uid, null,
+                    sensor, StatsLog.SENSOR_STATE_CHANGED__STATE__OFF);
         }
     }
 
@@ -684,6 +703,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
+    public void noteUsbConnectionState(boolean connected) {
+        enforceCallingPermission();
+        synchronized (mStats) {
+            mStats.noteUsbConnectionStateLocked(connected);
+        }
+    }
+
     public void notePhoneSignalStrength(SignalStrength signalStrength) {
         enforceCallingPermission();
         synchronized (mStats) {
@@ -724,6 +750,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteAudioOnLocked(uid);
+            StatsLog.write_non_chained(StatsLog.AUDIO_STATE_CHANGED, uid, null,
+                    StatsLog.AUDIO_STATE_CHANGED__STATE__ON);
         }
     }
 
@@ -731,6 +759,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteAudioOffLocked(uid);
+            StatsLog.write_non_chained(StatsLog.AUDIO_STATE_CHANGED, uid, null,
+                    StatsLog.AUDIO_STATE_CHANGED__STATE__OFF);
         }
     }
 
@@ -738,6 +768,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteVideoOnLocked(uid);
+            StatsLog.write_non_chained(StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED, uid, null,
+                    StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED__STATE__ON);
         }
     }
 
@@ -745,6 +777,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteVideoOffLocked(uid);
+            StatsLog.write_non_chained(StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED, uid,
+                    null, StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED__STATE__OFF);
         }
     }
 
@@ -752,6 +786,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteResetAudioLocked();
+            StatsLog.write_non_chained(StatsLog.AUDIO_STATE_CHANGED, -1, null,
+                    StatsLog.AUDIO_STATE_CHANGED__STATE__RESET);
         }
     }
 
@@ -759,6 +795,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteResetVideoLocked();
+            StatsLog.write_non_chained(StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED, -1, null,
+                    StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED__STATE__RESET);
         }
     }
 
@@ -766,6 +804,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteFlashlightOnLocked(uid);
+            StatsLog.write_non_chained(StatsLog.FLASHLIGHT_STATE_CHANGED, uid, null,
+                    StatsLog.FLASHLIGHT_STATE_CHANGED__STATE__ON);
         }
     }
 
@@ -773,6 +813,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteFlashlightOffLocked(uid);
+            StatsLog.write_non_chained(StatsLog.FLASHLIGHT_STATE_CHANGED, uid, null,
+                    StatsLog.FLASHLIGHT_STATE_CHANGED__STATE__OFF);
         }
     }
 
@@ -781,6 +823,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         if (DBG) Slog.d(TAG, "begin noteStartCamera");
         synchronized (mStats) {
             mStats.noteCameraOnLocked(uid);
+            StatsLog.write_non_chained(StatsLog.CAMERA_STATE_CHANGED, uid, null,
+                    StatsLog.CAMERA_STATE_CHANGED__STATE__ON);
         }
         if (DBG) Slog.d(TAG, "end noteStartCamera");
     }
@@ -789,6 +833,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteCameraOffLocked(uid);
+            StatsLog.write_non_chained(StatsLog.CAMERA_STATE_CHANGED, uid, null,
+                    StatsLog.CAMERA_STATE_CHANGED__STATE__OFF);
         }
     }
 
@@ -796,6 +842,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteResetCameraLocked();
+            StatsLog.write_non_chained(StatsLog.CAMERA_STATE_CHANGED, -1, null,
+                    StatsLog.CAMERA_STATE_CHANGED__STATE__RESET);
         }
     }
 
@@ -803,6 +851,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteResetFlashlightLocked();
+            StatsLog.write_non_chained(StatsLog.FLASHLIGHT_STATE_CHANGED, -1, null,
+                    StatsLog.FLASHLIGHT_STATE_CHANGED__STATE__RESET);
         }
     }
 
@@ -1114,6 +1164,35 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
         mContext.enforcePermission(android.Manifest.permission.UPDATE_DEVICE_STATS,
                 Binder.getCallingPid(), Binder.getCallingUid(), null);
+    }
+
+    public final static class UsbConnectionReceiver extends BroadcastReceiver {
+        private static final String TAG = UsbConnectionReceiver.class.getSimpleName();
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
+                final Intent usbState = context.registerReceiver(null, new IntentFilter(UsbManager.ACTION_USB_STATE));
+                if (usbState != null) {
+                    handleUsbState(usbState);
+                }
+            } else if (UsbManager.ACTION_USB_STATE.equals(action)) {
+                handleUsbState(intent);
+            }
+        }
+        private void handleUsbState(Intent intent) {
+            IBatteryStats bs = getService();
+            if (bs == null) {
+                Slog.w(TAG, "Could not access batterystats");
+                return;
+            }
+            boolean connected = intent.getExtras().getBoolean(UsbManager.USB_CONNECTED);
+            try {
+                bs.noteUsbConnectionState(connected);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Could not access batterystats: ", e);
+            }
+        }
     }
 
     final class WakeupReasonThread extends Thread {

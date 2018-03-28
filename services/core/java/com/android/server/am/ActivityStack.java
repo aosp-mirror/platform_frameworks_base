@@ -1324,7 +1324,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 final ActivityRecord ar = activities.get(activityNdx);
 
                 if ((userId == ar.userId) && packageName.equals(ar.packageName)) {
-                    ar.info.applicationInfo = aInfo;
+                    ar.updateApplicationInfo(aInfo);
                 }
             }
         }
@@ -2019,8 +2019,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * @return true if {@param r} is visible taken Keyguard state into account, false otherwise
      */
     boolean checkKeyguardVisibility(ActivityRecord r, boolean shouldBeVisible, boolean isTop) {
-        final boolean keyguardShowing = mStackSupervisor.getKeyguardController().isKeyguardShowing(
-                mDisplayId != INVALID_DISPLAY ? mDisplayId : DEFAULT_DISPLAY);
+        final int displayId = mDisplayId != INVALID_DISPLAY ? mDisplayId : DEFAULT_DISPLAY;
+        final boolean keyguardOrAodShowing = mStackSupervisor.getKeyguardController()
+                .isKeyguardOrAodShowing(displayId);
         final boolean keyguardLocked = mStackSupervisor.getKeyguardController().isKeyguardLocked();
         final boolean showWhenLocked = r.canShowWhenLocked();
         final boolean dismissKeyguard = r.hasDismissKeyguardWindows();
@@ -2041,10 +2042,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 return true;
             }
         }
-        if (keyguardShowing) {
-
+        if (keyguardOrAodShowing) {
             // If keyguard is showing, nothing is visible, except if we are able to dismiss Keyguard
-            // right away.
+            // right away and AOD isn't visible.
             return shouldBeVisible && mStackSupervisor.getKeyguardController()
                     .canShowActivityWhileKeyguardShowing(r, dismissKeyguard);
         } else if (keyguardLocked) {
@@ -3987,7 +3987,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             } else {
                 try {
                     ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
-                            destIntent.getComponent(), 0, srec.userId);
+                            destIntent.getComponent(), ActivityManagerService.STOCK_PM_FLAGS,
+                            srec.userId);
                     // TODO(b/64750076): Check if calling pid should really be -1.
                     final int res = mService.getActivityStartController()
                             .obtainStarter(destIntent, "navigateUpTo")
@@ -5139,8 +5140,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 mService, taskId, info, intent, voiceSession, voiceInteractor);
         // add the task to stack first, mTaskPositioner might need the stack association
         addTask(task, toTop, "createTaskRecord");
+        final int displayId = mDisplayId != INVALID_DISPLAY ? mDisplayId : DEFAULT_DISPLAY;
         final boolean isLockscreenShown = mService.mStackSupervisor.getKeyguardController()
-                .isKeyguardShowing(mDisplayId != INVALID_DISPLAY ? mDisplayId : DEFAULT_DISPLAY);
+                .isKeyguardOrAodShowing(displayId);
         if (!mStackSupervisor.getLaunchParamsController()
                 .layoutTask(task, info.windowLayout, activity, source, options)
                 && !matchParentBounds() && task.isResizeable() && !isLockscreenShown) {

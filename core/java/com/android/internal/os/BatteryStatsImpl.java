@@ -19,7 +19,6 @@ package com.android.internal.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.job.JobProtoEnums;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.UidTraffic;
 import android.content.ContentResolver;
@@ -766,6 +765,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
     int mCameraOnNesting;
     StopwatchTimer mCameraOnTimer;
+
+    int mUsbDataState; // 0: unknown, 1: disconnected, 2: connected
 
     int mGpsSignalQualityBin = -1;
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
@@ -5240,6 +5241,19 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    public void noteUsbConnectionStateLocked(boolean connected) {
+        int newState = connected ? 2 : 1;
+        if (mUsbDataState != newState) {
+            mUsbDataState = newState;
+            if (connected) {
+                mHistoryCur.states2 |= HistoryItem.STATE2_USB_DATA_LINK_FLAG;
+            } else {
+                mHistoryCur.states2 &= ~HistoryItem.STATE2_USB_DATA_LINK_FLAG;
+            }
+            addHistoryRecordLocked(mClocks.elapsedRealtime(), mClocks.uptimeMillis());
+        }
+    }
+
     void stopAllPhoneSignalStrengthTimersLocked(int except) {
         final long elapsedRealtime = mClocks.elapsedRealtime();
         for (int i = 0; i < SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
@@ -5999,7 +6013,6 @@ public class BatteryStatsImpl extends BatteryStats {
             if (strengthBin >= 0) {
                 if (!mWifiSignalStrengthsTimer[strengthBin].isRunningLocked()) {
                     mWifiSignalStrengthsTimer[strengthBin].startRunningLocked(elapsedRealtime);
-                    StatsLog.write(StatsLog.WIFI_SIGNAL_STRENGTH_CHANGED, strengthBin);
                 }
                 mHistoryCur.states2 =
                         (mHistoryCur.states2&~HistoryItem.STATE2_WIFI_SIGNAL_STRENGTH_MASK)
@@ -6010,6 +6023,7 @@ public class BatteryStatsImpl extends BatteryStats {
             } else {
                 stopAllWifiSignalStrengthTimersLocked(-1);
             }
+            StatsLog.write(StatsLog.WIFI_SIGNAL_STRENGTH_CHANGED, strengthBin);
             mWifiSignalStrengthBin = strengthBin;
         }
     }
@@ -7250,25 +7264,17 @@ public class BatteryStatsImpl extends BatteryStats {
 
         public void noteAudioTurnedOnLocked(long elapsedRealtimeMs) {
             createAudioTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
-            StatsLog.write_non_chained(StatsLog.AUDIO_STATE_CHANGED, getUid(), null,
-                    StatsLog.AUDIO_STATE_CHANGED__STATE__ON);
         }
 
         public void noteAudioTurnedOffLocked(long elapsedRealtimeMs) {
             if (mAudioTurnedOnTimer != null) {
                 mAudioTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
-                if (!mAudioTurnedOnTimer.isRunningLocked()) { // only tell statsd if truly stopped
-                    StatsLog.write_non_chained(StatsLog.AUDIO_STATE_CHANGED, getUid(), null,
-                            StatsLog.AUDIO_STATE_CHANGED__STATE__OFF);
-                }
             }
         }
 
         public void noteResetAudioLocked(long elapsedRealtimeMs) {
             if (mAudioTurnedOnTimer != null) {
                 mAudioTurnedOnTimer.stopAllRunningLocked(elapsedRealtimeMs);
-                StatsLog.write_non_chained(StatsLog.AUDIO_STATE_CHANGED, getUid(), null,
-                        StatsLog.AUDIO_STATE_CHANGED__STATE__OFF);
             }
         }
 
@@ -7282,25 +7288,17 @@ public class BatteryStatsImpl extends BatteryStats {
 
         public void noteVideoTurnedOnLocked(long elapsedRealtimeMs) {
             createVideoTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
-            StatsLog.write_non_chained(StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED, getUid(), null,
-                    StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED__STATE__ON);
         }
 
         public void noteVideoTurnedOffLocked(long elapsedRealtimeMs) {
             if (mVideoTurnedOnTimer != null) {
                 mVideoTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
-                if (!mVideoTurnedOnTimer.isRunningLocked()) { // only tell statsd if truly stopped
-                    StatsLog.write_non_chained(StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED, getUid(),
-                            null, StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED__STATE__OFF);
-                }
             }
         }
 
         public void noteResetVideoLocked(long elapsedRealtimeMs) {
             if (mVideoTurnedOnTimer != null) {
                 mVideoTurnedOnTimer.stopAllRunningLocked(elapsedRealtimeMs);
-                StatsLog.write_non_chained(StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED, getUid(), null,
-                        StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED__STATE__OFF);
             }
         }
 
@@ -7314,25 +7312,17 @@ public class BatteryStatsImpl extends BatteryStats {
 
         public void noteFlashlightTurnedOnLocked(long elapsedRealtimeMs) {
             createFlashlightTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
-            StatsLog.write_non_chained(StatsLog.FLASHLIGHT_STATE_CHANGED, getUid(), null,
-                    StatsLog.FLASHLIGHT_STATE_CHANGED__STATE__ON);
         }
 
         public void noteFlashlightTurnedOffLocked(long elapsedRealtimeMs) {
             if (mFlashlightTurnedOnTimer != null) {
                 mFlashlightTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
-                if (!mFlashlightTurnedOnTimer.isRunningLocked()) {
-                    StatsLog.write_non_chained(StatsLog.FLASHLIGHT_STATE_CHANGED, getUid(), null,
-                            StatsLog.FLASHLIGHT_STATE_CHANGED__STATE__OFF);
-                }
             }
         }
 
         public void noteResetFlashlightLocked(long elapsedRealtimeMs) {
             if (mFlashlightTurnedOnTimer != null) {
                 mFlashlightTurnedOnTimer.stopAllRunningLocked(elapsedRealtimeMs);
-                StatsLog.write_non_chained(StatsLog.FLASHLIGHT_STATE_CHANGED, getUid(), null,
-                        StatsLog.FLASHLIGHT_STATE_CHANGED__STATE__OFF);
             }
         }
 
@@ -7346,25 +7336,17 @@ public class BatteryStatsImpl extends BatteryStats {
 
         public void noteCameraTurnedOnLocked(long elapsedRealtimeMs) {
             createCameraTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
-            StatsLog.write_non_chained(StatsLog.CAMERA_STATE_CHANGED, getUid(), null,
-                    StatsLog.CAMERA_STATE_CHANGED__STATE__ON);
         }
 
         public void noteCameraTurnedOffLocked(long elapsedRealtimeMs) {
             if (mCameraTurnedOnTimer != null) {
                 mCameraTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
-                if (!mCameraTurnedOnTimer.isRunningLocked()) { // only tell statsd if truly stopped
-                    StatsLog.write_non_chained(StatsLog.CAMERA_STATE_CHANGED, getUid(), null,
-                            StatsLog.CAMERA_STATE_CHANGED__STATE__OFF);
-                }
             }
         }
 
         public void noteResetCameraLocked(long elapsedRealtimeMs) {
             if (mCameraTurnedOnTimer != null) {
                 mCameraTurnedOnTimer.stopAllRunningLocked(elapsedRealtimeMs);
-                StatsLog.write_non_chained(StatsLog.CAMERA_STATE_CHANGED, getUid(), null,
-                        StatsLog.CAMERA_STATE_CHANGED__STATE__OFF);
             }
         }
 
@@ -10040,8 +10022,6 @@ public class BatteryStatsImpl extends BatteryStats {
             DualTimer t = mSyncStats.startObject(name);
             if (t != null) {
                 t.startRunningLocked(elapsedRealtimeMs);
-                StatsLog.write_non_chained(StatsLog.SYNC_STATE_CHANGED, getUid(), null, name,
-                        StatsLog.SYNC_STATE_CHANGED__STATE__ON);
             }
         }
 
@@ -10049,10 +10029,6 @@ public class BatteryStatsImpl extends BatteryStats {
             DualTimer t = mSyncStats.stopObject(name);
             if (t != null) {
                 t.stopRunningLocked(elapsedRealtimeMs);
-                if (!t.isRunningLocked()) { // only tell statsd if truly stopped
-                    StatsLog.write_non_chained(StatsLog.SYNC_STATE_CHANGED, getUid(), null, name,
-                            StatsLog.SYNC_STATE_CHANGED__STATE__OFF);
-                }
             }
         }
 
@@ -10060,9 +10036,6 @@ public class BatteryStatsImpl extends BatteryStats {
             DualTimer t = mJobStats.startObject(name);
             if (t != null) {
                 t.startRunningLocked(elapsedRealtimeMs);
-                StatsLog.write_non_chained(StatsLog.SCHEDULED_JOB_STATE_CHANGED, getUid(), null,
-                        name, StatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__STARTED,
-                        JobProtoEnums.STOP_REASON_CANCELLED);
             }
         }
 
@@ -10070,11 +10043,6 @@ public class BatteryStatsImpl extends BatteryStats {
             DualTimer t = mJobStats.stopObject(name);
             if (t != null) {
                 t.stopRunningLocked(elapsedRealtimeMs);
-                if (!t.isRunningLocked()) { // only tell statsd if truly stopped
-                    StatsLog.write_non_chained(StatsLog.SCHEDULED_JOB_STATE_CHANGED, getUid(), null,
-                            name, StatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__FINISHED,
-                            stopReason);
-                }
             }
             if (mBsi.mOnBatteryTimeBase.isRunning()) {
                 SparseIntArray types = mJobCompletions.get(name);
@@ -10182,10 +10150,6 @@ public class BatteryStatsImpl extends BatteryStats {
         public void noteStartSensor(int sensor, long elapsedRealtimeMs) {
             DualTimer t = getSensorTimerLocked(sensor, /* create= */ true);
             t.startRunningLocked(elapsedRealtimeMs);
-            if (sensor != Sensor.GPS) {
-                StatsLog.write_non_chained(StatsLog.SENSOR_STATE_CHANGED, getUid(), null, sensor,
-                        StatsLog.SENSOR_STATE_CHANGED__STATE__ON);
-            }
         }
 
         public void noteStopSensor(int sensor, long elapsedRealtimeMs) {
@@ -10193,10 +10157,6 @@ public class BatteryStatsImpl extends BatteryStats {
             DualTimer t = getSensorTimerLocked(sensor, false);
             if (t != null) {
                 t.stopRunningLocked(elapsedRealtimeMs);
-                if (sensor != Sensor.GPS) {
-                    StatsLog.write_non_chained(StatsLog.SENSOR_STATE_CHANGED, getUid(), null,
-                             sensor, StatsLog.SENSOR_STATE_CHANGED__STATE__OFF);
-                }
             }
         }
 

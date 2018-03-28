@@ -566,9 +566,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     public static class DevicePolicyData {
-        @NonNull PasswordMetrics mActivePasswordMetrics = new PasswordMetrics();
         int mFailedPasswordAttempts = 0;
-        boolean mPasswordStateHasBeenSetSinceBoot = false;
         boolean mPasswordValidAtLastCheckpoint = true;
 
         int mUserHandle;
@@ -628,6 +626,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     final SparseArray<DevicePolicyData> mUserData = new SparseArray<>();
+    @GuardedBy("DevicePolicyManagerService.this")
+    final SparseArray<PasswordMetrics> mUserPasswordMetrics = new SparseArray<>();
 
     final Handler mHandler;
     final Handler mBackgroundHandler;
@@ -2158,6 +2158,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     /**
+     * Provides PasswordMetrics object corresponding to the given user.
+     * @param userHandle the user for whom to provide metrics.
+     * @return the user password metrics, or {@code null} if none have been associated with
+     * the user yet (for example, if the device has booted but not been unlocked).
+     */
+    PasswordMetrics getUserPasswordMetricsLocked(int userHandle) {
+        return mUserPasswordMetrics.get(userHandle);
+    }
+
+    /**
      * Creates and loads the policy data from xml for data that is shared between
      * various profiles of a user. In contrast to {@link #getUserData(int)}
      * it allows access to data of users other than the calling user.
@@ -2191,6 +2201,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (policy != null) {
                 mUserData.remove(userHandle);
             }
+            if (mUserPasswordMetrics.get(userHandle) != null) {
+                mUserPasswordMetrics.remove(userHandle);
+            }
+
             File policyFile = new File(mInjector.environmentGetUserSystemDirectory(userHandle),
                     DEVICE_POLICIES_XML);
             policyFile.delete();
@@ -3907,9 +3921,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private void updatePasswordValidityCheckpointLocked(int userHandle, boolean parent) {
         final int credentialOwner = getCredentialOwner(userHandle, parent);
         DevicePolicyData policy = getUserData(credentialOwner);
+        PasswordMetrics metrics = getUserPasswordMetricsLocked(credentialOwner);
+        if (metrics == null) {
+            Slog.wtf(LOG_TAG, "Should have had a valid password metrics for updating checkpoint " +
+                    "validity.");
+            metrics = new PasswordMetrics();
+        }
         policy.mPasswordValidAtLastCheckpoint =
                 isPasswordSufficientForUserWithoutCheckpointLocked(
-                        policy.mActivePasswordMetrics, userHandle, parent);
+                        metrics, userHandle, parent);
 
         saveSettingsLocked(credentialOwner);
     }
@@ -4532,8 +4552,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
             getActiveAdminForCallerLocked(null, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
-            DevicePolicyData policy = getUserDataUnchecked(getCredentialOwner(userHandle, parent));
-            return isActivePasswordSufficientForUserLocked(policy, userHandle, parent);
+            int credentialOwner = getCredentialOwner(userHandle, parent);
+            DevicePolicyData policy = getUserDataUnchecked(credentialOwner);
+            PasswordMetrics metrics = getUserPasswordMetricsLocked(credentialOwner);
+            return isActivePasswordSufficientForUserLocked(
+                    policy.mPasswordValidAtLastCheckpoint, metrics, userHandle, parent);
         }
     }
 
@@ -4559,25 +4582,31 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (this) {
             final int targetUser = getProfileParentId(userHandle);
             enforceUserUnlocked(targetUser, false);
-            DevicePolicyData policy = getUserDataUnchecked(getCredentialOwner(userHandle, false));
-            return isActivePasswordSufficientForUserLocked(policy, targetUser, false);
+            int credentialOwner = getCredentialOwner(userHandle, false);
+            DevicePolicyData policy = getUserDataUnchecked(credentialOwner);
+            PasswordMetrics metrics = getUserPasswordMetricsLocked(credentialOwner);
+            return isActivePasswordSufficientForUserLocked(
+                    policy.mPasswordValidAtLastCheckpoint, metrics, targetUser, false);
         }
     }
 
     private boolean isActivePasswordSufficientForUserLocked(
-            DevicePolicyData policy, int userHandle, boolean parent) {
-        if (!mInjector.storageManagerIsFileBasedEncryptionEnabled()
-                && !policy.mPasswordStateHasBeenSetSinceBoot) {
+            boolean passwordValidAtLastCheckpoint, PasswordMetrics metrics, int userHandle,
+            boolean parent) {
+        if (!mInjector.storageManagerIsFileBasedEncryptionEnabled() && (metrics == null)) {
             // Before user enters their password for the first time after a reboot, return the
             // value of this flag, which tells us whether the password was valid the last time
             // settings were saved.  If DPC changes password requirements on boot so that the
             // current password no longer meets the requirements, this value will be stale until
             // the next time the password is entered.
-            return policy.mPasswordValidAtLastCheckpoint;
+            return passwordValidAtLastCheckpoint;
         }
 
-        return isPasswordSufficientForUserWithoutCheckpointLocked(
-                policy.mActivePasswordMetrics, userHandle, parent);
+        if (metrics == null) {
+            Slog.wtf(LOG_TAG, "FBE device, should have been unlocked and had valid metrics.");
+            metrics = new PasswordMetrics();
+        }
+        return isPasswordSufficientForUserWithoutCheckpointLocked(metrics, userHandle, parent);
     }
 
     /**
@@ -6123,10 +6152,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         validateQualityConstant(metrics.quality);
-        DevicePolicyData policy = getUserData(userHandle);
         synchronized (this) {
-            policy.mActivePasswordMetrics = metrics;
-            policy.mPasswordStateHasBeenSetSinceBoot = true;
+            mUserPasswordMetrics.put(userHandle, metrics);
         }
     }
 
@@ -7640,6 +7667,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return DevicePolicyManager.STATE_USER_UNMANAGED;
         }
+        enforceManageUsers();
         int userHandle = mInjector.userHandleGetCallingUserId();
         return getUserProvisioningState(userHandle);
     }
@@ -11815,6 +11843,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean isDeviceProvisioned() {
+        enforceManageUsers();
         synchronized (this) {
             return getUserDataUnchecked(UserHandle.USER_SYSTEM).mUserSetupComplete;
         }

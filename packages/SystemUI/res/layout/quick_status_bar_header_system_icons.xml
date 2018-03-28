@@ -31,25 +31,23 @@
 
     <com.android.systemui.statusbar.policy.Clock
         android:id="@+id/clock"
-        android:textAppearance="@style/TextAppearance.StatusBar.Clock"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:singleLine="true"
+        android:gravity="center_vertical|start"
         android:paddingStart="@dimen/status_bar_left_clock_starting_padding"
         android:paddingEnd="@dimen/status_bar_left_clock_end_padding"
-        android:gravity="center_vertical|start"
-        systemui:showDark="false"
-    />
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.StatusBar.Clock"
+        systemui:showDark="false" />
 
     <com.android.systemui.statusbar.policy.DateView
         android:id="@+id/date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="4dp"
+        android:gravity="center_vertical"
         android:singleLine="true"
         android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
         android:textSize="@dimen/qs_time_collapsed_size"
-        android:gravity="center_vertical"
         systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm" />
 
     <android.widget.Space
@@ -57,12 +55,11 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:gravity="center_vertical|center_horizontal"
-    />
+        android:gravity="center_vertical|center_horizontal" />
 
-    <com.android.systemui.BatteryMeterView android:id="@+id/battery"
+    <com.android.systemui.BatteryMeterView
+        android:id="@+id/battery"
         android:layout_height="match_parent"
         android:layout_width="wrap_content"
-        android:gravity="center_vertical|end"
-        />
+        android:gravity="center_vertical|end" />
 </LinearLayout>

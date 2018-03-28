@@ -93,7 +93,7 @@ private:
     void onConditionChangedLocked(const bool conditionMet, const uint64_t eventTime) override;
 
     // Internal interface to handle sliced condition change.
-    void onSlicedConditionMayChangeLocked(const uint64_t eventTime) override;
+    void onSlicedConditionMayChangeLocked(bool overallCondition, const uint64_t eventTime) override;
 
     // Internal function to calculate the current used bytes.
     size_t byteSizeLocked() const override;

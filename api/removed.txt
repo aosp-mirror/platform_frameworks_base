@@ -54,6 +54,24 @@ package android.app.admin {
 
 }
 
+package android.app.job {
+
+  public class JobInfo implements android.os.Parcelable {
+    method public deprecated long getEstimatedNetworkBytes();
+  }
+
+  public static final class JobInfo.Builder {
+    method public deprecated android.app.job.JobInfo.Builder setEstimatedNetworkBytes(long);
+    method public deprecated android.app.job.JobInfo.Builder setIsPrefetch(boolean);
+  }
+
+  public final class JobWorkItem implements android.os.Parcelable {
+    ctor public deprecated JobWorkItem(android.content.Intent, long);
+    method public deprecated long getEstimatedNetworkBytes();
+  }
+
+}
+
 package android.app.usage {
 
   public final class StorageStats implements android.os.Parcelable {
@@ -150,6 +168,17 @@ package android.graphics {
   public class Canvas {
     method public deprecated boolean clipRegion(android.graphics.Region, android.graphics.Region.Op);
     method public deprecated boolean clipRegion(android.graphics.Region);
+    method public deprecated int save(int);
+    method public deprecated int saveLayer(android.graphics.RectF, android.graphics.Paint, int);
+    method public deprecated int saveLayer(float, float, float, float, android.graphics.Paint, int);
+    method public deprecated int saveLayerAlpha(android.graphics.RectF, int, int);
+    method public deprecated int saveLayerAlpha(float, float, float, float, int, int);
+    field public static final int ALL_SAVE_FLAG = 31; // 0x1f
+    field public static final deprecated int CLIP_SAVE_FLAG = 2; // 0x2
+    field public static final deprecated int CLIP_TO_LAYER_SAVE_FLAG = 16; // 0x10
+    field public static final deprecated int FULL_COLOR_LAYER_SAVE_FLAG = 8; // 0x8
+    field public static final deprecated int HAS_ALPHA_LAYER_SAVE_FLAG = 4; // 0x4
+    field public static final deprecated int MATRIX_SAVE_FLAG = 1; // 0x1
   }
 
   public final class ImageDecoder implements java.lang.AutoCloseable {

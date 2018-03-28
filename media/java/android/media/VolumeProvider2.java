@@ -18,7 +18,6 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.content.Context;
 import android.media.update.ApiLoader;
 import android.media.update.VolumeProvider2Provider;
 
@@ -75,10 +74,9 @@ public abstract class VolumeProvider2 {
      * @param maxVolume The maximum allowed volume.
      * @param currentVolume The current volume on the output.
      */
-    public VolumeProvider2(@NonNull Context context, @ControlType int controlType,
-            int maxVolume, int currentVolume) {
+    public VolumeProvider2(@ControlType int controlType, int maxVolume, int currentVolume) {
         mProvider = ApiLoader.getProvider().createVolumeProvider2(
-                context, this, controlType, maxVolume, currentVolume);
+                this, controlType, maxVolume, currentVolume);
     }
 
     /**

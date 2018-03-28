@@ -180,9 +180,11 @@ public final class Helper {
      *
      * @param structure Assist structure
      * @param urlBarIds list of ids; only the first id found will be sanitized.
+     *
+     * @return the node containing the URL bar
      */
     @Nullable
-    public static void sanitizeUrlBar(@NonNull AssistStructure structure,
+    public static ViewNode sanitizeUrlBar(@NonNull AssistStructure structure,
             @NonNull String[] urlBarIds) {
         final ViewNode urlBarNode = findViewNode(structure, (node) -> {
             return ArrayUtils.contains(urlBarIds, node.getIdEntry());
@@ -191,7 +193,7 @@ public final class Helper {
             final String domain = urlBarNode.getText().toString();
             if (domain.isEmpty()) {
                 if (sDebug) Slog.d(TAG, "sanitizeUrlBar(): empty on " + urlBarNode.getIdEntry());
-                return;
+                return null;
             }
             urlBarNode.setWebDomain(domain);
             if (sDebug) {
@@ -199,6 +201,7 @@ public final class Helper {
                         + urlBarNode.getWebDomain());
             }
         }
+        return urlBarNode;
     }
 
     private interface ViewNodeFilter {

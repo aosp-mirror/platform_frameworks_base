@@ -98,9 +98,9 @@ public:
         onConditionChangedLocked(condition, eventTime);
     }
 
-    void onSlicedConditionMayChange(const uint64_t eventTime) {
+    void onSlicedConditionMayChange(bool overallCondition, const uint64_t eventTime) {
         std::lock_guard<std::mutex> lock(mMutex);
-        onSlicedConditionMayChangeLocked(eventTime);
+        onSlicedConditionMayChangeLocked(overallCondition, eventTime);
     }
 
     bool isConditionSliced() const {
@@ -163,7 +163,8 @@ public:
 
 protected:
     virtual void onConditionChangedLocked(const bool condition, const uint64_t eventTime) = 0;
-    virtual void onSlicedConditionMayChangeLocked(const uint64_t eventTime) = 0;
+    virtual void onSlicedConditionMayChangeLocked(bool overallCondition,
+                                                  const uint64_t eventTime) = 0;
     virtual void onDumpReportLocked(const uint64_t dumpTimeNs,
                                     android::util::ProtoOutputStream* protoOutput) = 0;
     virtual size_t byteSizeLocked() const = 0;
@@ -188,7 +189,7 @@ protected:
 
     // Convenience to compute the current bucket's end time, which is always aligned with the
     // start time of the metric.
-    uint64_t getCurrentBucketEndTimeNs() {
+    uint64_t getCurrentBucketEndTimeNs() const {
         return mStartTimeNs + (mCurrentBucketNum + 1) * mBucketSizeNs;
     }
 
