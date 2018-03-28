@@ -274,7 +274,8 @@ public final class IpSecManager {
      *
      * @param destinationAddress the destination address for traffic bearing the requested SPI.
      *     For inbound traffic, the destination should be an address currently assigned on-device.
-     * @param requestedSpi the requested SPI, or '0' to allocate a random SPI
+     * @param requestedSpi the requested SPI, or '0' to allocate a random SPI. The range 1-255 is
+     *     reserved and may not be used. See RFC 4303 Section 2.1.
      * @return the reserved SecurityParameterIndex
      * @throws {@link #ResourceUnavailableException} indicating that too many SPIs are
      *     currently allocated for this user
