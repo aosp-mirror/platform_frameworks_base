@@ -43,7 +43,7 @@ public:
     ANDROID_API static void getPathDataFromAsciiString(PathData* outData, ParseResult* result,
                                                        const char* pathStr, size_t strLength);
     static void dump(const PathData& data);
-    static bool isVerbValid(char verb);
+    static void validateVerbAndPoints(char verb, size_t points, ParseResult* result);
 };
 
 };      // namespace uirenderer
