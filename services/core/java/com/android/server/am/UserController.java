@@ -47,6 +47,7 @@ import android.app.Dialog;
 import android.app.IStopUserCallback;
 import android.app.IUserSwitchObserver;
 import android.app.KeyguardManager;
+import android.app.usage.UsageEvents;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
@@ -959,6 +960,8 @@ class UserController implements Handler.Callback {
                 mInjector.getUserManagerInternal().setUserState(userId, uss.state);
             }
             if (foreground) {
+                // Make sure the old user is no longer considering the display to be on.
+                mInjector.reportGlobalUsageEventLocked(UsageEvents.Event.SCREEN_NON_INTERACTIVE);
                 synchronized (mLock) {
                     mCurrentUserId = userId;
                     mTargetUserId = UserHandle.USER_NULL; // reset, mCurrentUserId has caught up
@@ -966,6 +969,7 @@ class UserController implements Handler.Callback {
                 mInjector.updateUserConfiguration();
                 updateCurrentProfileIds();
                 mInjector.getWindowManager().setCurrentUser(userId, getCurrentProfileIds());
+                mInjector.reportCurWakefulnessUsageEvent();
                 // Once the internal notion of the active user has switched, we lock the device
                 // with the option to show the user switcher on the keyguard.
                 if (mUserSwitchUiEnabled) {
@@ -2181,6 +2185,18 @@ class UserController implements Handler.Callback {
                     true /* above system */, switchingFromSystemUserMessage,
                     switchingToSystemUserMessage);
             d.show();
+        }
+
+        void reportGlobalUsageEventLocked(int event) {
+            synchronized (mService) {
+                mService.reportGlobalUsageEventLocked(event);
+            }
+        }
+
+        void reportCurWakefulnessUsageEvent() {
+            synchronized (mService) {
+                mService.reportCurWakefulnessUsageEventLocked();
+            }
         }
 
         void stackSupervisorRemoveUser(int userId) {
