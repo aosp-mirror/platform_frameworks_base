@@ -19,6 +19,7 @@ package com.android.server.wm;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -87,5 +88,14 @@ class AnimatingAppWindowTokenRegistry {
             mTmpRunnableList.get(i).run();
         }
         mTmpRunnableList.clear();
+    }
+
+    void dump(PrintWriter pw, String header, String prefix) {
+        if (!mAnimatingTokens.isEmpty() || !mFinishedTokens.isEmpty()) {
+            pw.print(prefix); pw.println(header);
+            prefix = prefix + "  ";
+            pw.print(prefix); pw.print("mAnimatingTokens="); pw.println(mAnimatingTokens);
+            pw.print(prefix); pw.print("mFinishedTokens="); pw.println(mFinishedTokens);
+        }
     }
 }

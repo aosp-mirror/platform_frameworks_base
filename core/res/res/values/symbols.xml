@@ -1794,8 +1794,6 @@
   <java-symbol type="array" name="config_autoBrightnessKeyboardBacklightValues" />
   <java-symbol type="array" name="config_autoBrightnessLcdBacklightValues" />
   <java-symbol type="array" name="config_autoBrightnessLevels" />
-  <java-symbol type="array" name="config_autoBrightnessMinimumBrightnessCurveLux" />
-  <java-symbol type="array" name="config_autoBrightnessMinimumBrightnessCurveNits" />
   <java-symbol type="array" name="config_dynamicHysteresisBrightLevels" />
   <java-symbol type="array" name="config_dynamicHysteresisDarkLevels" />
   <java-symbol type="array" name="config_dynamicHysteresisLuxLevels" />
