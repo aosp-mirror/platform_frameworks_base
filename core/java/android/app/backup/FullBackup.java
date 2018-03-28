@@ -84,6 +84,8 @@ public class FullBackup {
 
     public static final String FLAG_REQUIRED_CLIENT_SIDE_ENCRYPTION = "clientSideEncryption";
     public static final String FLAG_REQUIRED_DEVICE_TO_DEVICE_TRANSFER = "deviceToDeviceTransfer";
+    public static final String FLAG_REQUIRED_FAKE_CLIENT_SIDE_ENCRYPTION =
+            "fakeClientSideEncryption";
 
     /**
      * @hide
@@ -600,6 +602,8 @@ public class FullBackup {
                     case FLAG_REQUIRED_DEVICE_TO_DEVICE_TRANSFER:
                         flags |= BackupAgent.FLAG_DEVICE_TO_DEVICE_TRANSFER;
                         break;
+                    case FLAG_REQUIRED_FAKE_CLIENT_SIDE_ENCRYPTION:
+                        flags |= BackupAgent.FLAG_FAKE_CLIENT_SIDE_ENCRYPTION_ENABLED;
                     default:
                         Log.w(TAG, "Unrecognized requiredFlag provided, value: \"" + f + "\"");
                 }
