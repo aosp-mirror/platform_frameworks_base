@@ -16,12 +16,15 @@
 
 package com.android.servicestests.apps.suspendtestapp;
 
+import static com.android.server.pm.SuspendPackagesTest.ACTION_REPORT_MY_PACKAGE_SUSPENDED;
+import static com.android.server.pm.SuspendPackagesTest.ACTION_REPORT_MY_PACKAGE_UNSUSPENDED;
+import static com.android.server.pm.SuspendPackagesTest.INSTRUMENTATION_PACKAGE;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.util.Log;
 
 public class SuspendTestReceiver extends BroadcastReceiver {
@@ -34,20 +37,32 @@ public class SuspendTestReceiver extends BroadcastReceiver {
     public static final String EXTRA_SUSPENDED_APP_EXTRAS =
             PACKAGE_NAME + ".extra.SUSPENDED_APP_EXTRAS";
 
-    private PackageManager mPm;
-
     @Override
     public void onReceive(Context context, Intent intent) {
-        mPm = context.getPackageManager();
-        Log.d(TAG, "Received request action " + intent.getAction());
+        final PackageManager packageManager = context.getPackageManager();
+        Log.d(TAG, "Received action " + intent.getAction());
+        final Bundle appExtras;
         switch (intent.getAction()) {
             case ACTION_GET_SUSPENDED_STATE:
                 final Bundle result = new Bundle();
-                final boolean suspended = mPm.isPackageSuspended();
-                final PersistableBundle appExtras = mPm.getSuspendedPackageAppExtras();
+                final boolean suspended = packageManager.isPackageSuspended();
+                appExtras = packageManager.getSuspendedPackageAppExtras();
                 result.putBoolean(EXTRA_SUSPENDED, suspended);
-                result.putParcelable(EXTRA_SUSPENDED_APP_EXTRAS, appExtras);
+                result.putBundle(EXTRA_SUSPENDED_APP_EXTRAS, appExtras);
                 setResult(0, null, result);
+                break;
+            case Intent.ACTION_MY_PACKAGE_SUSPENDED:
+                appExtras = intent.getBundleExtra(Intent.EXTRA_SUSPENDED_PACKAGE_EXTRAS);
+                final Intent reportSuspendIntent = new Intent(ACTION_REPORT_MY_PACKAGE_SUSPENDED)
+                        .putExtra(EXTRA_SUSPENDED_APP_EXTRAS, appExtras)
+                        .setPackage(INSTRUMENTATION_PACKAGE);
+                context.sendBroadcast(reportSuspendIntent);
+                break;
+            case Intent.ACTION_MY_PACKAGE_UNSUSPENDED:
+                final Intent reportUnsuspendIntent =
+                        new Intent(ACTION_REPORT_MY_PACKAGE_UNSUSPENDED)
+                        .setPackage(INSTRUMENTATION_PACKAGE);
+                context.sendBroadcast(reportUnsuspendIntent);
                 break;
             default:
                 Log.e(TAG, "Unknown action: " + intent.getAction());
