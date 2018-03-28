@@ -70,6 +70,11 @@ public final class Helper {
      */
     public static int sVisibleDatasetsMaxCount = 3;
 
+    /**
+     * When non-null, overrides whether the UI should be shown on full-screen mode.
+     */
+    public static Boolean sFullScreenMode = null;
+
     private Helper() {
         throw new UnsupportedOperationException("contains static members only");
     }
