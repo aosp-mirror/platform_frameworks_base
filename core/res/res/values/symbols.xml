@@ -545,14 +545,23 @@
   <java-symbol type="string" name="undo" />
   <java-symbol type="string" name="redo" />
   <java-symbol type="string" name="email" />
+  <java-symbol type="string" name="email_desc" />
   <java-symbol type="string" name="dial" />
+  <java-symbol type="string" name="dial_desc" />
   <java-symbol type="string" name="map" />
+  <java-symbol type="string" name="map_desc" />
   <java-symbol type="string" name="browse" />
+  <java-symbol type="string" name="browse_desc" />
   <java-symbol type="string" name="sms" />
+  <java-symbol type="string" name="sms_desc" />
   <java-symbol type="string" name="add_contact" />
+  <java-symbol type="string" name="add_contact_desc" />
   <java-symbol type="string" name="view_calendar" />
+  <java-symbol type="string" name="view_calendar_desc" />
   <java-symbol type="string" name="add_calendar_event" />
+  <java-symbol type="string" name="add_calendar_event_desc" />
   <java-symbol type="string" name="view_flight" />
+  <java-symbol type="string" name="view_flight_desc" />
   <java-symbol type="string" name="textSelectionCABTitle" />
   <java-symbol type="string" name="BaMmi" />
   <java-symbol type="string" name="CLIRDefaultOffNextCallOff" />
