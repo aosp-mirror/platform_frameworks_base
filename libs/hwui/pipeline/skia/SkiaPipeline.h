@@ -47,7 +47,7 @@ public:
                       const BakedOpRenderer::LightInfo& lightInfo) override;
 
     bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
-                             bool wideColorGamut) override;
+                             bool wideColorGamut, ErrorHandler* errorHandler) override;
 
     void renderFrame(const LayerUpdateQueue& layers, const SkRect& clip,
                      const std::vector<sp<RenderNode>>& nodes, bool opaque, bool wideColorGamut,

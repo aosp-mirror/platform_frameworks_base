@@ -243,24 +243,11 @@ void RenderNode::pushLayerUpdate(TreeInfo& info) {
         return;
     }
 
-    if (info.canvasContext.createOrUpdateLayer(this, *info.damageAccumulator)) {
+    if (info.canvasContext.createOrUpdateLayer(this, *info.damageAccumulator, info.errorHandler)) {
         damageSelf(info);
     }
 
     if (!hasLayer()) {
-        Caches::getInstance().dumpMemoryUsage();
-        if (info.errorHandler) {
-            std::ostringstream err;
-            err << "Unable to create layer for " << getName();
-            const int maxTextureSize = Caches::getInstance().maxTextureSize;
-            if (getWidth() > maxTextureSize || getHeight() > maxTextureSize) {
-                err << ", size " << getWidth() << "x" << getHeight() << " exceeds max size "
-                    << maxTextureSize;
-            } else {
-                err << ", see logcat for more info";
-            }
-            info.errorHandler->onError(err.str());
-        }
         return;
     }
 
