@@ -61,12 +61,15 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.IntArray;
 import android.util.Slog;
@@ -1030,7 +1033,7 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void setBrightnessConfigurationForUserInternal(
-            @NonNull BrightnessConfiguration c, @UserIdInt int userId,
+            @Nullable BrightnessConfiguration c, @UserIdInt int userId,
             @Nullable String packageName) {
         final int userSerial = getUserManager().getUserSerialNumber(userId);
         synchronized (mSyncRoot) {
@@ -1981,6 +1984,29 @@ public final class DisplayManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+        }
+
+        @Override // Binder call
+        public void onShellCommand(FileDescriptor in, FileDescriptor out,
+                FileDescriptor err, String[] args, ShellCallback callback,
+                ResultReceiver resultReceiver) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                DisplayManagerShellCommand command = new DisplayManagerShellCommand(this);
+                command.exec(this, in, out, err, args, callback, resultReceiver);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        void setBrightness(int brightness) {
+            Settings.System.putIntForUser(mContext.getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS, brightness, UserHandle.USER_CURRENT);
+        }
+
+        void resetBrightnessConfiguration() {
+            setBrightnessConfigurationForUserInternal(null, mContext.getUserId(),
+                    mContext.getPackageName());
         }
 
         private boolean validatePackageName(int uid, String packageName) {
