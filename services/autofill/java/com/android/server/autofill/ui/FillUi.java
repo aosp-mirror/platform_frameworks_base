@@ -17,6 +17,7 @@ package com.android.server.autofill.ui;
 
 import static com.android.server.autofill.Helper.paramsToString;
 import static com.android.server.autofill.Helper.sDebug;
+import static com.android.server.autofill.Helper.sFullScreenMode;
 import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.AttrRes;
@@ -133,6 +134,10 @@ final class FillUi {
     private boolean mDestroyed;
 
     public static boolean isFullScreen(Context context) {
+        if (sFullScreenMode != null) {
+            if (sVerbose) Slog.v(TAG, "forcing full-screen mode to " + sFullScreenMode);
+            return sFullScreenMode;
+        }
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
     }
 
