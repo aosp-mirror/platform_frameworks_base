@@ -407,7 +407,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         /**
          * Returns true if this window has been shown on screen at some time in
          * the past.  Must be called with the window manager lock held.
+         *
+         * @deprecated Use {@link #isDrawnLw} or any of the other drawn/visibility methods.
          */
+        @Deprecated
         public boolean hasDrawnLw();
 
         /**

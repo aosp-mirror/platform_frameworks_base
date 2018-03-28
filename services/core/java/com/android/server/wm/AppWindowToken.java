@@ -1485,7 +1485,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (w == null || winHint != null && w != winHint) {
             return;
         }
-        final boolean surfaceReady = w.hasDrawnLw()  // Regular case
+        final boolean surfaceReady = w.isDrawnLw()  // Regular case
                 || w.mWinAnimator.mSurfaceDestroyDeferred  // The preserved surface is still ready.
                 || w.isDragResizeChanged();  // Waiting for relayoutWindow to call preserveSurface.
         final boolean needsLetterbox = w.isLetterboxedAppWindow() && fillsParent() && surfaceReady;
