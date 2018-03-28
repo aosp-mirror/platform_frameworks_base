@@ -4224,7 +4224,7 @@
                   android:exported="false">
         </receiver>
 
-        <receiver android:name="com.android.server.stats.StatsCompanionService$PollingAlarmReceiver"
+        <receiver android:name="com.android.server.stats.StatsCompanionService$PullingAlarmReceiver"
                   android:permission="android.permission.STATSCOMPANION"
                   android:exported="false">
         </receiver>
