@@ -1943,7 +1943,8 @@ message FullBatteryCapacity {
 }
 
 /**
- * Pulls the temperature of various parts of the device, in Celsius.
+ * Pulls the temperature of various parts of the device.
+ * The units are tenths of a degree Celsius. Eg: 30.3C is reported as 303.
  *
  * Pulled from:
  *   frameworks/base/cmds/statsd/src/external/ResourceThermalManagerPuller.cpp
@@ -1955,6 +1956,6 @@ message Temperature {
     // The name of the temperature source. Eg. CPU0
     optional string sensor_name = 2;
 
-    // Temperature in degrees C.
-    optional float temperature_C = 3;
+    // Temperature in tenths of a degree C.
+    optional int32 temperature_dC = 3;
 }
