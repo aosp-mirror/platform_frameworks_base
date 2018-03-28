@@ -35,6 +35,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.TypedValue;
@@ -531,7 +532,7 @@ public class CaptivePortalLoginActivity extends Activity {
 
     private String getHeaderTitle() {
         NetworkInfo info = mCm.getNetworkInfo(mNetwork);
-        if (info == null) {
+        if (info == null || TextUtils.isEmpty(info.getExtraInfo())) {
             return getString(R.string.action_bar_label);
         }
         NetworkCapabilities nc = mCm.getNetworkCapabilities(mNetwork);
