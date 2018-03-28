@@ -18,12 +18,15 @@
 #ifndef INCIDENTD_UTIL_H
 #define INCIDENTD_UTIL_H
 
-#include <android-base/unique_fd.h>
-
 #include <stdarg.h>
+#include <unistd.h>
+
+#include <android-base/unique_fd.h>
+#include <utils/Errors.h>
 
 #include "Privacy.h"
 
+using namespace android;
 using namespace android::base;
 
 /**
@@ -52,8 +55,9 @@ private:
 /**
  * Forks and exec a command with two pipes, one connects stdin for input,
  * one connects stdout for output. It returns the pid of the child.
+ * Input pipe can be NULL to indicate child process doesn't read stdin.
  */
-pid_t fork_execute_cmd(const char* cmd, char* const argv[], Fpipe* input, Fpipe* output);
+pid_t fork_execute_cmd(char* const argv[], Fpipe* input, Fpipe* output);
 
 /**
  * Grabs varargs from stack and stores them in heap with NULL-terminated array.
@@ -64,5 +68,11 @@ const char** varargs(const char* first, va_list rest);
  * Returns the current monotonic clock time in nanoseconds.
  */
 uint64_t Nanotime();
+
+/**
+ * Methods to wait or kill child process, return exit status code.
+ */
+status_t kill_child(pid_t pid);
+status_t wait_child(pid_t pid);
 
 #endif  // INCIDENTD_UTIL_H
