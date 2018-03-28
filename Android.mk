@@ -252,6 +252,11 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS += \
 		-federate SupportLib https://developer.android.com \
 		-federationapi SupportLib prebuilts/sdk/current/support-api.txt
 
+# Federate AndroidX references against local API file.
+framework_docs_LOCAL_DROIDDOC_OPTIONS += \
+		-federate AndroidX https://developer.android.com \
+		-federationapi AndroidX prebuilts/sdk/current/androidx-api.txt
+
 # ====  Public API diff ===========================
 include $(CLEAR_VARS)
 
