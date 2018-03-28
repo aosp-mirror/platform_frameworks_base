@@ -250,6 +250,18 @@ public class Surface implements Parcelable {
     }
 
     /**
+     * Destroys the HwuiContext without completely
+     * releasing the Surface.
+     * @hide
+     */
+    public void hwuiDestroy() {
+        if (mHwuiContext != null) {
+            mHwuiContext.destroy();
+            mHwuiContext = null;
+        }
+    }
+
+    /**
      * Returns true if this object holds a valid surface.
      *
      * @return True if it holds a physical surface, so lockCanvas() will succeed.
