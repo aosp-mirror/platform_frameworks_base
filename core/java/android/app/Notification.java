@@ -1219,11 +1219,11 @@ public class Notification implements Parcelable
     public static final String EXTRA_SUBSTITUTE_APP_NAME = "android.substName";
 
     /**
-     * This is set on the notification shown by the activity manager about all apps
-     * running in the background.  It indicates that the notification should be shown
-     * only if any of the given apps do not already have a {@link #FLAG_FOREGROUND_SERVICE}
-     * notification currently visible to the user.  This is a string array of all
-     * package names of the apps.
+     * This is set on the notifications shown by system_server about apps running foreground
+     * services. It indicates that the notification should be shown
+     * only if any of the given apps do not already have a properly tagged
+     * {@link #FLAG_FOREGROUND_SERVICE} notification currently visible to the user.
+     * This is a string array of all package names of the apps.
      * @hide
      */
     public static final String EXTRA_FOREGROUND_APPS = "android.foregroundApps";
