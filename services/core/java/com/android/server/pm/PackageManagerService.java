@@ -779,8 +779,14 @@ public class PackageManagerService extends IPackageManager.Stub
             return PackageManagerService.this.hasSystemFeature(feature, 0);
         }
 
-        final List<PackageParser.Package> getStaticOverlayPackagesLocked(
+        final List<PackageParser.Package> getStaticOverlayPackages(
                 Collection<PackageParser.Package> allPackages, String targetPackageName) {
+            if ("android".equals(targetPackageName)) {
+                // Static RROs targeting to "android", ie framework-res.apk, are already applied by
+                // native AssetManager.
+                return null;
+            }
+
             List<PackageParser.Package> overlayPackages = null;
             for (PackageParser.Package p : allPackages) {
                 if (targetPackageName.equals(p.mOverlayTarget) && p.mOverlayIsStatic) {
@@ -801,16 +807,8 @@ public class PackageManagerService extends IPackageManager.Stub
             return overlayPackages;
         }
 
-        @GuardedBy("mInstallLock")
-        final String[] getStaticOverlayPathsLocked(Collection<PackageParser.Package> allPackages,
-                String targetPackageName, String targetPath) {
-            if ("android".equals(targetPackageName)) {
-                // Static RROs targeting to "android", ie framework-res.apk, are already applied by
-                // native AssetManager.
-                return null;
-            }
-            List<PackageParser.Package> overlayPackages =
-                    getStaticOverlayPackagesLocked(allPackages, targetPackageName);
+        final String[] getStaticOverlayPaths(List<PackageParser.Package> overlayPackages,
+                String targetPath) {
             if (overlayPackages == null || overlayPackages.isEmpty()) {
                 return null;
             }
@@ -830,9 +828,11 @@ public class PackageManagerService extends IPackageManager.Stub
                     //
                     // OverlayManagerService will update each of them with a correct gid from its
                     // target package app id.
-                    mInstaller.idmap(targetPath, overlayPackage.baseCodePath,
-                            UserHandle.getSharedAppGid(
-                                    UserHandle.getUserGid(UserHandle.USER_SYSTEM)));
+                    synchronized (mInstallLock) {
+                        mInstaller.idmap(targetPath, overlayPackage.baseCodePath,
+                                UserHandle.getSharedAppGid(
+                                        UserHandle.getUserGid(UserHandle.USER_SYSTEM)));
+                    }
                     if (overlayPathList == null) {
                         overlayPathList = new ArrayList<String>();
                     }
@@ -846,10 +846,14 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         String[] getStaticOverlayPaths(String targetPackageName, String targetPath) {
+            List<PackageParser.Package> overlayPackages;
             synchronized (mPackages) {
-                return getStaticOverlayPathsLocked(
-                        mPackages.values(), targetPackageName, targetPath);
+                overlayPackages = getStaticOverlayPackages(
+                        mPackages.values(), targetPackageName);
             }
+            // It is safe to keep overlayPackages without holding mPackages because static overlay
+            // packages can't be uninstalled or disabled.
+            return getStaticOverlayPaths(overlayPackages, targetPath);
         }
 
         @Override public final String[] getOverlayApks(String targetPackageName) {
@@ -884,7 +888,9 @@ public class PackageManagerService extends IPackageManager.Stub
             // can't happen while running parallel parsing.
             // Moreover holding mPackages on each parsing thread causes dead-lock.
             return mOverlayPackages == null ? null :
-                    getStaticOverlayPathsLocked(mOverlayPackages, targetPackageName, targetPath);
+                    getStaticOverlayPaths(
+                            getStaticOverlayPackages(mOverlayPackages, targetPackageName),
+                            targetPath);
         }
     }
 
