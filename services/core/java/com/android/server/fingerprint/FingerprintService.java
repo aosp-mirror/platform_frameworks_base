@@ -61,7 +61,6 @@ import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.security.KeyStore;
@@ -1483,10 +1482,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 userId = getUserOrWorkProfileId(clientPackage, userId);
                 if (userId != mCurrentUserId) {
                     File baseDir;
-                    if (Build.VERSION.FIRST_SDK_INT <= Build.VERSION_CODES.O_MR1
-                            && !SystemProperties.getBoolean(
-                                "ro.treble.supports_vendor_data", false)) {
-                        // TODO(b/72405644) remove the override when possible.
+                    if (Build.VERSION.FIRST_SDK_INT <= Build.VERSION_CODES.O_MR1) {
                         baseDir = Environment.getUserSystemDirectory(userId);
                     } else {
                         baseDir = Environment.getDataVendorDeDirectory(userId);
