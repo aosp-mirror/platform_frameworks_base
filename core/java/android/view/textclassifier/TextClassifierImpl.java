@@ -19,6 +19,7 @@ package android.view.textclassifier;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
+import android.app.RemoteAction;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.ContentUris;
@@ -26,7 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.LocaleList;
@@ -418,48 +419,25 @@ public final class TextClassifierImpl implements TextClassifier {
             }
         }
 
-        addActions(builder, IntentFactory.create(
-                mContext, referenceTime, highestScoringResult, classifiedText));
+        boolean isPrimaryAction = true;
+        for (LabeledIntent labeledIntent : IntentFactory.create(
+                mContext, referenceTime, highestScoringResult, classifiedText)) {
+            RemoteAction action = labeledIntent.asRemoteAction(mContext);
+            if (isPrimaryAction) {
+                // For O backwards compatibility, the first RemoteAction is also written to the
+                // legacy API fields.
+                builder.setIcon(action.getIcon().loadDrawable(mContext));
+                builder.setLabel(action.getTitle().toString());
+                builder.setIntent(labeledIntent.getIntent());
+                builder.setOnClickListener(TextClassification.createIntentOnClickListener(
+                        TextClassification.createPendingIntent(mContext,
+                                labeledIntent.getIntent())));
+                isPrimaryAction = false;
+            }
+            builder.addAction(action);
+        }
 
         return builder.setSignature(getSignature(text, start, end)).build();
-    }
-
-    /** Extends the classification with the intents that can be resolved. */
-    private void addActions(
-            TextClassification.Builder builder, List<Intent> intents) {
-        final PackageManager pm = mContext.getPackageManager();
-        final int size = intents.size();
-        for (int i = 0; i < size; i++) {
-            final Intent intent = intents.get(i);
-            final ResolveInfo resolveInfo;
-            if (intent != null) {
-                resolveInfo = pm.resolveActivity(intent, 0);
-            } else {
-                resolveInfo = null;
-            }
-            if (resolveInfo != null && resolveInfo.activityInfo != null) {
-                final String packageName = resolveInfo.activityInfo.packageName;
-                final String label = IntentFactory.getLabel(mContext, intent);
-                Drawable icon;
-                if ("android".equals(packageName)) {
-                    // Requires the chooser to find an activity to handle the intent.
-                    icon = null;
-                } else {
-                    // A default activity will handle the intent.
-                    intent.setComponent(
-                            new ComponentName(packageName, resolveInfo.activityInfo.name));
-                    icon = resolveInfo.activityInfo.loadIcon(pm);
-                    if (icon == null) {
-                        icon = resolveInfo.loadIcon(pm);
-                    }
-                }
-                if (i == 0) {
-                    builder.setPrimaryAction(intent, label, icon);
-                } else {
-                    builder.addSecondaryAction(intent, label, icon);
-                }
-            }
-        }
     }
 
     /**
@@ -588,6 +566,60 @@ public final class TextClassifierImpl implements TextClassifier {
     }
 
     /**
+     * Helper class to store the information from which RemoteActions are built.
+     */
+    private static final class LabeledIntent {
+        private String mTitle;
+        private String mDescription;
+        private Intent mIntent;
+
+        LabeledIntent(String title, String description, Intent intent) {
+            mTitle = title;
+            mDescription = description;
+            mIntent = intent;
+        }
+
+        String getTitle() {
+            return mTitle;
+        }
+
+        String getDescription() {
+            return mDescription;
+        }
+
+        Intent getIntent() {
+            return mIntent;
+        }
+
+        RemoteAction asRemoteAction(Context context) {
+            final PackageManager pm = context.getPackageManager();
+            final ResolveInfo resolveInfo = pm.resolveActivity(mIntent, 0);
+            final String packageName = resolveInfo != null && resolveInfo.activityInfo != null
+                    ? resolveInfo.activityInfo.packageName : null;
+            Icon icon = null;
+            boolean shouldShowIcon = false;
+            if (packageName != null && !"android".equals(packageName)) {
+                // There is a default activity handling the intent.
+                mIntent.setComponent(new ComponentName(packageName, resolveInfo.activityInfo.name));
+                if (resolveInfo.activityInfo.getIconResource() != 0) {
+                    icon = Icon.createWithResource(
+                            packageName, resolveInfo.activityInfo.getIconResource());
+                    shouldShowIcon = true;
+                }
+            }
+            if (icon == null) {
+                // RemoteAction requires that there be an icon.
+                icon = Icon.createWithResource("android",
+                        com.android.internal.R.drawable.ic_more_items);
+            }
+            RemoteAction action = new RemoteAction(icon, mTitle, mDescription,
+                    TextClassification.createPendingIntent(context, mIntent));
+            action.setShouldShowIcon(shouldShowIcon);
+            return action;
+        }
+    }
+
+    /**
      * Creates intents based on the classification type.
      */
     static final class IntentFactory {
@@ -598,7 +630,7 @@ public final class TextClassifierImpl implements TextClassifier {
         private IntentFactory() {}
 
         @NonNull
-        public static List<Intent> create(
+        public static List<LabeledIntent> create(
                 Context context,
                 @Nullable Calendar referenceTime,
                 TextClassifierImplNative.ClassificationResult classification,
@@ -607,11 +639,11 @@ public final class TextClassifierImpl implements TextClassifier {
             text = text.trim();
             switch (type) {
                 case TextClassifier.TYPE_EMAIL:
-                    return createForEmail(text);
+                    return createForEmail(context, text);
                 case TextClassifier.TYPE_PHONE:
                     return createForPhone(context, text);
                 case TextClassifier.TYPE_ADDRESS:
-                    return createForAddress(text);
+                    return createForAddress(context, text);
                 case TextClassifier.TYPE_URL:
                     return createForUrl(context, text);
                 case TextClassifier.TYPE_DATE:
@@ -620,62 +652,80 @@ public final class TextClassifierImpl implements TextClassifier {
                         Calendar eventTime = Calendar.getInstance();
                         eventTime.setTimeInMillis(
                                 classification.getDatetimeResult().getTimeMsUtc());
-                        return createForDatetime(type, referenceTime, eventTime);
+                        return createForDatetime(context, type, referenceTime, eventTime);
                     } else {
                         return new ArrayList<>();
                     }
                 case TextClassifier.TYPE_FLIGHT_NUMBER:
-                    return createForFlight(text);
+                    return createForFlight(context, text);
                 default:
                     return new ArrayList<>();
             }
         }
 
         @NonNull
-        private static List<Intent> createForEmail(String text) {
+        private static List<LabeledIntent> createForEmail(Context context, String text) {
             return Arrays.asList(
-                    new Intent(Intent.ACTION_SENDTO)
-                            .setData(Uri.parse(String.format("mailto:%s", text))),
-                    new Intent(Intent.ACTION_INSERT_OR_EDIT)
-                            .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
-                            .putExtra(ContactsContract.Intents.Insert.EMAIL, text));
+                    new LabeledIntent(
+                            context.getString(com.android.internal.R.string.email),
+                            context.getString(com.android.internal.R.string.email_desc),
+                            new Intent(Intent.ACTION_SENDTO)
+                                    .setData(Uri.parse(String.format("mailto:%s", text)))),
+                    new LabeledIntent(
+                            context.getString(com.android.internal.R.string.add_contact),
+                            context.getString(com.android.internal.R.string.add_contact_desc),
+                            new Intent(Intent.ACTION_INSERT_OR_EDIT)
+                                    .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
+                                    .putExtra(ContactsContract.Intents.Insert.EMAIL, text)));
         }
 
         @NonNull
-        private static List<Intent> createForPhone(Context context, String text) {
-            final List<Intent> intents = new ArrayList<>();
+        private static List<LabeledIntent> createForPhone(Context context, String text) {
+            final List<LabeledIntent> actions = new ArrayList<>();
             final UserManager userManager = context.getSystemService(UserManager.class);
             final Bundle userRestrictions = userManager != null
                     ? userManager.getUserRestrictions() : new Bundle();
             if (!userRestrictions.getBoolean(UserManager.DISALLOW_OUTGOING_CALLS, false)) {
-                intents.add(new Intent(Intent.ACTION_DIAL)
-                        .setData(Uri.parse(String.format("tel:%s", text))));
+                actions.add(new LabeledIntent(
+                        context.getString(com.android.internal.R.string.dial),
+                        context.getString(com.android.internal.R.string.dial_desc),
+                        new Intent(Intent.ACTION_DIAL).setData(
+                                Uri.parse(String.format("tel:%s", text)))));
             }
-            intents.add(new Intent(Intent.ACTION_INSERT_OR_EDIT)
-                    .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
-                    .putExtra(ContactsContract.Intents.Insert.PHONE, text));
+            actions.add(new LabeledIntent(
+                    context.getString(com.android.internal.R.string.add_contact),
+                    context.getString(com.android.internal.R.string.add_contact_desc),
+                    new Intent(Intent.ACTION_INSERT_OR_EDIT)
+                            .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
+                            .putExtra(ContactsContract.Intents.Insert.PHONE, text)));
             if (!userRestrictions.getBoolean(UserManager.DISALLOW_SMS, false)) {
-                intents.add(new Intent(Intent.ACTION_SENDTO)
-                        .setData(Uri.parse(String.format("smsto:%s", text))));
+                actions.add(new LabeledIntent(
+                        context.getString(com.android.internal.R.string.sms),
+                        context.getString(com.android.internal.R.string.sms_desc),
+                        new Intent(Intent.ACTION_SENDTO)
+                                .setData(Uri.parse(String.format("smsto:%s", text)))));
             }
-            return intents;
+            return actions;
         }
 
         @NonNull
-        private static List<Intent> createForAddress(String text) {
-            final List<Intent> intents = new ArrayList<>();
+        private static List<LabeledIntent> createForAddress(Context context, String text) {
+            final List<LabeledIntent> actions = new ArrayList<>();
             try {
                 final String encText = URLEncoder.encode(text, "UTF-8");
-                intents.add(new Intent(Intent.ACTION_VIEW)
-                        .setData(Uri.parse(String.format("geo:0,0?q=%s", encText))));
+                actions.add(new LabeledIntent(
+                        context.getString(com.android.internal.R.string.map),
+                        context.getString(com.android.internal.R.string.map_desc),
+                        new Intent(Intent.ACTION_VIEW)
+                                .setData(Uri.parse(String.format("geo:0,0?q=%s", encText)))));
             } catch (UnsupportedEncodingException e) {
                 Log.e(LOG_TAG, "Could not encode address", e);
             }
-            return intents;
+            return actions;
         }
 
         @NonNull
-        private static List<Intent> createForUrl(Context context, String text) {
+        private static List<LabeledIntent> createForUrl(Context context, String text) {
             final String httpPrefix = "http://";
             final String httpsPrefix = "https://";
             if (text.toLowerCase().startsWith(httpPrefix)) {
@@ -685,99 +735,65 @@ public final class TextClassifierImpl implements TextClassifier {
             } else {
                 text = httpPrefix + text;
             }
-            return Arrays.asList(new Intent(Intent.ACTION_VIEW, Uri.parse(text))
-                    .putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName()));
+            return Arrays.asList(new LabeledIntent(
+                    context.getString(com.android.internal.R.string.browse),
+                    context.getString(com.android.internal.R.string.browse_desc),
+                    new Intent(Intent.ACTION_VIEW, Uri.parse(text))
+                            .putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName())));
         }
 
         @NonNull
-        private static List<Intent> createForDatetime(
-                String type, @Nullable Calendar referenceTime, Calendar eventTime) {
+        private static List<LabeledIntent> createForDatetime(
+                Context context, String type, @Nullable Calendar referenceTime,
+                Calendar eventTime) {
             if (referenceTime == null) {
                 // If no reference time was given, use now.
                 referenceTime = Calendar.getInstance();
             }
-            List<Intent> intents = new ArrayList<>();
-            intents.add(createCalendarViewIntent(eventTime));
+            List<LabeledIntent> actions = new ArrayList<>();
+            actions.add(createCalendarViewIntent(context, eventTime));
             final long millisSinceReference =
                     eventTime.getTimeInMillis() - referenceTime.getTimeInMillis();
             if (millisSinceReference > MIN_EVENT_FUTURE_MILLIS) {
-                intents.add(createCalendarCreateEventIntent(eventTime, type));
+                actions.add(createCalendarCreateEventIntent(context, eventTime, type));
             }
-            return intents;
+            return actions;
         }
 
         @NonNull
-        private static List<Intent> createForFlight(String text) {
-            return Arrays.asList(new Intent(Intent.ACTION_WEB_SEARCH)
-                    .putExtra(SearchManager.QUERY, text));
+        private static List<LabeledIntent> createForFlight(Context context, String text) {
+            return Arrays.asList(new LabeledIntent(
+                    context.getString(com.android.internal.R.string.view_flight),
+                    context.getString(com.android.internal.R.string.view_flight_desc),
+                    new Intent(Intent.ACTION_WEB_SEARCH)
+                            .putExtra(SearchManager.QUERY, text)));
         }
 
         @NonNull
-        private static Intent createCalendarViewIntent(Calendar eventTime) {
+        private static LabeledIntent createCalendarViewIntent(Context context, Calendar eventTime) {
             Uri.Builder builder = CalendarContract.CONTENT_URI.buildUpon();
             builder.appendPath("time");
             ContentUris.appendId(builder, eventTime.getTimeInMillis());
-            return new Intent(Intent.ACTION_VIEW).setData(builder.build());
+            return new LabeledIntent(
+                    context.getString(com.android.internal.R.string.view_calendar),
+                    context.getString(com.android.internal.R.string.view_calendar_desc),
+                    new Intent(Intent.ACTION_VIEW).setData(builder.build()));
         }
 
         @NonNull
-        private static Intent createCalendarCreateEventIntent(
-                Calendar eventTime, @EntityType String type) {
+        private static LabeledIntent createCalendarCreateEventIntent(
+                Context context, Calendar eventTime, @EntityType String type) {
             final boolean isAllDay = TextClassifier.TYPE_DATE.equals(type);
-            return new Intent(Intent.ACTION_INSERT)
-                    .setData(CalendarContract.Events.CONTENT_URI)
-                    .putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, isAllDay)
-                    .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, eventTime.getTimeInMillis())
-                    .putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
-                            eventTime.getTimeInMillis() + DEFAULT_EVENT_DURATION);
-        }
-
-        @Nullable
-        public static String getLabel(Context context, @Nullable Intent intent) {
-            if (intent == null || intent.getAction() == null) {
-                return null;
-            }
-            final String authority =
-                    intent.getData() == null ? null : intent.getData().getAuthority();
-            switch (intent.getAction()) {
-                case Intent.ACTION_DIAL:
-                    return context.getString(com.android.internal.R.string.dial);
-                case Intent.ACTION_SENDTO:
-                    if ("mailto".equals(intent.getScheme())) {
-                        return context.getString(com.android.internal.R.string.email);
-                    } else if ("smsto".equals(intent.getScheme())) {
-                        return context.getString(com.android.internal.R.string.sms);
-                    } else {
-                        return null;
-                    }
-                case Intent.ACTION_INSERT:
-                    if (CalendarContract.AUTHORITY.equals(authority)) {
-                        return context.getString(com.android.internal.R.string.add_calendar_event);
-                    }
-                    return null;
-                case Intent.ACTION_INSERT_OR_EDIT:
-                    if (ContactsContract.Contacts.CONTENT_ITEM_TYPE.equals(
-                            intent.getType())) {
-                        return context.getString(com.android.internal.R.string.add_contact);
-                    } else {
-                        return null;
-                    }
-                case Intent.ACTION_VIEW:
-                    if (CalendarContract.AUTHORITY.equals(authority)) {
-                        return context.getString(com.android.internal.R.string.view_calendar);
-                    } else if ("geo".equals(intent.getScheme())) {
-                        return context.getString(com.android.internal.R.string.map);
-                    } else if ("http".equals(intent.getScheme())
-                            || "https".equals(intent.getScheme())) {
-                        return context.getString(com.android.internal.R.string.browse);
-                    } else {
-                        return null;
-                    }
-                case Intent.ACTION_WEB_SEARCH:
-                    return context.getString(com.android.internal.R.string.view_flight);
-                default:
-                    return null;
-            }
+            return new LabeledIntent(
+                    context.getString(com.android.internal.R.string.add_calendar_event),
+                    context.getString(com.android.internal.R.string.add_calendar_event_desc),
+                    new Intent(Intent.ACTION_INSERT)
+                            .setData(CalendarContract.Events.CONTENT_URI)
+                            .putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, isAllDay)
+                            .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
+                                    eventTime.getTimeInMillis())
+                            .putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
+                                    eventTime.getTimeInMillis() + DEFAULT_EVENT_DURATION));
         }
     }
 }
