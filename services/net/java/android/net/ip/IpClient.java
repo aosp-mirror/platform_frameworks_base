@@ -1490,7 +1490,7 @@ public class IpClient extends StateMachine {
                     mContext.getResources().getBoolean(R.bool.config_apfDrop802_3Frames);
             apfConfig.ethTypeBlackList =
                     mContext.getResources().getIntArray(R.array.config_apfEthTypeBlackList);
-            mApfFilter = ApfFilter.maybeCreate(apfConfig, mInterfaceParams, mCallback);
+            mApfFilter = ApfFilter.maybeCreate(mContext, apfConfig, mInterfaceParams, mCallback);
             // TODO: investigate the effects of any multicast filtering racing/interfering with the
             // rest of this IP configuration startup.
             if (mApfFilter == null) {
