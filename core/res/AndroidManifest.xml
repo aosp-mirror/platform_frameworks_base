@@ -1104,11 +1104,22 @@
 
     <!-- Allows an app to use fingerprint hardware.
          <p>Protection level: normal
+         @deprecated Applications should request {@link
+         android.Manifest.permission#USE_BIOMETRIC} instead
     -->
     <permission android:name="android.permission.USE_FINGERPRINT"
         android:permissionGroup="android.permission-group.SENSORS"
         android:label="@string/permlab_useFingerprint"
         android:description="@string/permdesc_useFingerprint"
+        android:protectionLevel="normal" />
+
+    <!-- Allows an app to use device supported biometric modalities.
+         <p>Protection level: normal
+    -->
+    <permission android:name="android.permission.USE_BIOMETRIC"
+        android:permissionGroup="android.permission-group.SENSORS"
+        android:label="@string/permlab_useBiometric"
+        android:description="@string/permdesc_useBiometric"
         android:protectionLevel="normal" />
 
     <!-- ====================================================================== -->
