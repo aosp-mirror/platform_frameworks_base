@@ -52,6 +52,12 @@ public class SyncManagerConstants extends ContentObserver {
     private static final int DEF_MAX_RETRIES_WITH_APP_STANDBY_EXEMPTION = 5;
     private int mMaxRetriesWithAppStandbyExemption = DEF_MAX_RETRIES_WITH_APP_STANDBY_EXEMPTION;
 
+    private static final String KEY_EXEMPTION_TEMP_WHITELIST_DURATION_IN_SECONDS =
+            "exemption_temp_whitelist_duration_in_seconds";
+    private static final int DEF_EXEMPTION_TEMP_WHITELIST_DURATION_IN_SECONDS = 10 * 60;
+    private int mKeyExemptionTempWhitelistDurationInSeconds
+            = DEF_EXEMPTION_TEMP_WHITELIST_DURATION_IN_SECONDS;
+
     protected SyncManagerConstants(Context context) {
         super(null);
         mContext = context;
@@ -97,6 +103,11 @@ public class SyncManagerConstants extends ContentObserver {
             mMaxRetriesWithAppStandbyExemption = parser.getInt(
                     KEY_MAX_RETRIES_WITH_APP_STANDBY_EXEMPTION,
                     DEF_MAX_RETRIES_WITH_APP_STANDBY_EXEMPTION);
+
+            mKeyExemptionTempWhitelistDurationInSeconds = parser.getInt(
+                    KEY_EXEMPTION_TEMP_WHITELIST_DURATION_IN_SECONDS,
+                    DEF_EXEMPTION_TEMP_WHITELIST_DURATION_IN_SECONDS);
+
         }
     }
 
@@ -124,6 +135,12 @@ public class SyncManagerConstants extends ContentObserver {
         }
     }
 
+    public int getKeyExemptionTempWhitelistDurationInSeconds() {
+        synchronized (mLock) {
+            return mKeyExemptionTempWhitelistDurationInSeconds;
+        }
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         synchronized (mLock) {
             pw.print(prefix);
@@ -144,6 +161,10 @@ public class SyncManagerConstants extends ContentObserver {
             pw.print(prefix);
             pw.print("  mMaxRetriesWithAppStandbyExemption=");
             pw.println(mMaxRetriesWithAppStandbyExemption);
+
+            pw.print(prefix);
+            pw.print("  mKeyExemptionTempWhitelistDurationInSeconds=");
+            pw.println(mKeyExemptionTempWhitelistDurationInSeconds);
         }
     }
 }

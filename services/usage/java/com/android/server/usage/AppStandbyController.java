@@ -24,6 +24,7 @@ import static android.app.usage.UsageStatsManager.REASON_MAIN_TIMEOUT;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_USAGE;
 import static android.app.usage.UsageStatsManager.REASON_SUB_PREDICTED_RESTORED;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_ACTIVE_TIMEOUT;
+import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_EXEMPTED_SYNC_START;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_MOVE_TO_BACKGROUND;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_MOVE_TO_FOREGROUND;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_NOTIFICATION_SEEN;
@@ -186,6 +187,7 @@ public class AppStandbyController {
     static final int MSG_ONE_TIME_CHECK_IDLE_STATES = 10;
     /** Check the state of one app: arg1 = userId, arg2 = uid, obj = (String) packageName */
     static final int MSG_CHECK_PACKAGE_IDLE_STATE = 11;
+    static final int MSG_REPORT_EXEMPTED_SYNC_START = 12;
 
     long mCheckIdleIntervalMillis;
     long mAppIdleParoleIntervalMillis;
@@ -202,6 +204,8 @@ public class AppStandbyController {
     long mPredictionTimeoutMillis;
     /** Maximum time a sync adapter associated with a CP should keep the buckets elevated. */
     long mSyncAdapterTimeoutMillis;
+    /** Maximum time an exempted sync should keep the buckets elevated. */
+    long mExemptedSyncAdapterTimeoutMillis;
     /** Maximum time a system interaction should keep the buckets elevated. */
     long mSystemInteractionTimeoutMillis;
 
@@ -372,6 +376,21 @@ public class AppStandbyController {
             } catch (PackageManager.NameNotFoundException e) {
                 // Shouldn't happen
             }
+        }
+    }
+
+    void reportExemptedSyncStart(String packageName, int userId) {
+        if (!mAppIdleEnabled) return;
+
+        final long elapsedRealtime = mInjector.elapsedRealtime();
+
+        synchronized (mAppIdleLock) {
+            AppUsageHistory appUsage = mAppIdleHistory.reportUsage(packageName, userId,
+                    STANDBY_BUCKET_ACTIVE, REASON_SUB_USAGE_EXEMPTED_SYNC_START,
+                    0,
+                    elapsedRealtime + mExemptedSyncAdapterTimeoutMillis);
+            maybeInformListeners(packageName, userId, elapsedRealtime,
+                    appUsage.currentBucket, appUsage.bucketingReason, false);
         }
     }
 
@@ -1274,6 +1293,11 @@ public class AppStandbyController {
                 .sendToTarget();
     }
 
+    void postReportExemptedSyncStart(String packageName, int userId) {
+        mHandler.obtainMessage(MSG_REPORT_EXEMPTED_SYNC_START, userId, 0, packageName)
+                .sendToTarget();
+    }
+
     void dumpUser(IndentingPrintWriter idpw, int userId, String pkg) {
         synchronized (mAppIdleLock) {
             mAppIdleHistory.dump(idpw, userId, pkg);
@@ -1488,6 +1512,11 @@ public class AppStandbyController {
                     checkAndUpdateStandbyState((String) msg.obj, msg.arg1, msg.arg2,
                             mInjector.elapsedRealtime());
                     break;
+
+                case MSG_REPORT_EXEMPTED_SYNC_START:
+                    reportExemptedSyncStart((String) msg.obj, msg.arg1);
+                    break;
+
                 default:
                     super.handleMessage(msg);
                     break;
@@ -1550,6 +1579,7 @@ public class AppStandbyController {
                 "system_update_usage_duration";
         private static final String KEY_PREDICTION_TIMEOUT = "prediction_timeout";
         private static final String KEY_SYNC_ADAPTER_HOLD_DURATION = "sync_adapter_duration";
+        private static final String KEY_EXEMPTED_SYNC_HOLD_DURATION = "exempted_sync_duration";
         private static final String KEY_SYSTEM_INTERACTION_HOLD_DURATION =
                 "system_interaction_duration";
         public static final long DEFAULT_STRONG_USAGE_TIMEOUT = 1 * ONE_HOUR;
@@ -1557,6 +1587,7 @@ public class AppStandbyController {
         public static final long DEFAULT_SYSTEM_UPDATE_TIMEOUT = 2 * ONE_HOUR;
         public static final long DEFAULT_SYSTEM_INTERACTION_TIMEOUT = 10 * ONE_MINUTE;
         public static final long DEFAULT_SYNC_ADAPTER_TIMEOUT = 10 * ONE_MINUTE;
+        public static final long DEFAULT_EXEMPTED_SYNC_TIMEOUT = 10 * ONE_MINUTE;
 
         private final KeyValueListParser mParser = new KeyValueListParser(',');
 
@@ -1632,6 +1663,9 @@ public class AppStandbyController {
                 mSyncAdapterTimeoutMillis = mParser.getDurationMillis
                         (KEY_SYNC_ADAPTER_HOLD_DURATION,
                                 COMPRESS_TIME ? ONE_MINUTE : DEFAULT_SYNC_ADAPTER_TIMEOUT);
+                mExemptedSyncAdapterTimeoutMillis = mParser.getDurationMillis
+                        (KEY_EXEMPTED_SYNC_HOLD_DURATION,
+                                COMPRESS_TIME ? ONE_MINUTE : DEFAULT_EXEMPTED_SYNC_TIMEOUT);
                 mSystemInteractionTimeoutMillis = mParser.getDurationMillis
                         (KEY_SYSTEM_INTERACTION_HOLD_DURATION,
                                 COMPRESS_TIME ? ONE_MINUTE : DEFAULT_SYSTEM_INTERACTION_TIMEOUT);

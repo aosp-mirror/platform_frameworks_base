@@ -166,24 +166,13 @@ public abstract class ContentResolver {
     public static final String SYNC_EXTRAS_DISALLOW_METERED = "allow_metered";
 
     /**
-     * {@hide} Flag only used by the requestsync command to treat a request as if it was made by
-     * a foreground app.
+     * {@hide} Integer extra containing a SyncExemption flag.
      *
      * Only the system and the shell user can set it.
      *
      * This extra is "virtual". Once passed to the system server, it'll be removed from the bundle.
      */
-    public static final String SYNC_VIRTUAL_EXTRAS_FORCE_FG_SYNC = "force_fg_sync";
-
-    /**
-     * {@hide} Flag only used by the requestsync command to treat a request as if it was made by
-     * a background app.
-     *
-     * Only the system and the shell user can set it.
-     *
-     * This extra is "virtual". Once passed to the system server, it'll be removed from the bundle.
-     */
-    public static final String SYNC_VIRTUAL_EXTRAS_FORCE_BG_SYNC = "force_bg_sync";
+    public static final String SYNC_VIRTUAL_EXTRAS_EXEMPTION_FLAG = "v_exemption";
 
     /**
      * Set by the SyncManager to request that the SyncAdapter initialize itself for
@@ -524,6 +513,38 @@ public abstract class ContentResolver {
      * when sending the former, so that observers of "X and descendants" only see the latter.
      */
     public static final int NOTIFY_SKIP_NOTIFY_FOR_DESCENDANTS = 1<<1;
+
+    /**
+     * No exception, throttled by app standby normally.
+     * @hide
+     */
+    public static final int SYNC_EXEMPTION_NONE = 0;
+
+    /**
+     * When executing a sync with this exemption, we'll put the target app in the ACTIVE bucket
+     * for 10 minutes. This will allow the sync adapter to schedule/run further syncs and jobs.
+     *
+     * Note this will still *not* let RARE apps to run syncs, because they still won't get network
+     * connection.
+     * @hide
+     */
+    public static final int SYNC_EXEMPTION_ACTIVE = 1;
+
+    /**
+     * In addition to {@link #SYNC_EXEMPTION_ACTIVE}, we put the sync adapter app in the
+     * temp whitelist for 10 minutes, so that even RARE apps can run syncs right away.
+     * @hide
+     */
+    public static final int SYNC_EXEMPTION_ACTIVE_WITH_TEMP = 2;
+
+    /** @hide */
+    @IntDef(flag = false, prefix = { "SYNC_EXEMPTION_" }, value = {
+            SYNC_EXEMPTION_NONE,
+            SYNC_EXEMPTION_ACTIVE,
+            SYNC_EXEMPTION_ACTIVE_WITH_TEMP,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SyncExemption {}
 
     // Always log queries which take 500ms+; shorter queries are
     // sampled accordingly.

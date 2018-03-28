@@ -19,6 +19,7 @@ package com.android.server.content;
 import android.accounts.Account;
 import android.app.job.JobInfo;
 import android.content.ContentResolver;
+import android.content.ContentResolver.SyncExemption;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -98,33 +99,33 @@ public class SyncOperation {
     /** jobId of the JobScheduler job corresponding to this sync */
     public int jobId;
 
-    /** Whether this operation should be exempted from the app-standby throttling. */
-    public boolean isAppStandbyExempted;
+    @SyncExemption
+    public int syncExemptionFlag;
 
     public SyncOperation(Account account, int userId, int owningUid, String owningPackage,
                          int reason, int source, String provider, Bundle extras,
-                         boolean allowParallelSyncs, boolean isAppStandbyExempted) {
+                         boolean allowParallelSyncs, @SyncExemption int syncExemptionFlag) {
         this(new SyncStorageEngine.EndPoint(account, provider, userId), owningUid, owningPackage,
-                reason, source, extras, allowParallelSyncs, isAppStandbyExempted);
+                reason, source, extras, allowParallelSyncs, syncExemptionFlag);
     }
 
     private SyncOperation(SyncStorageEngine.EndPoint info, int owningUid, String owningPackage,
             int reason, int source, Bundle extras, boolean allowParallelSyncs,
-            boolean isAppStandbyExempted) {
+            @SyncExemption int syncExemptionFlag) {
         this(info, owningUid, owningPackage, reason, source, extras, allowParallelSyncs, false,
-                NO_JOB_ID, 0, 0, isAppStandbyExempted);
+                NO_JOB_ID, 0, 0, syncExemptionFlag);
     }
 
     public SyncOperation(SyncOperation op, long periodMillis, long flexMillis) {
         this(op.target, op.owningUid, op.owningPackage, op.reason, op.syncSource,
                 new Bundle(op.extras), op.allowParallelSyncs, op.isPeriodic, op.sourcePeriodicId,
-                periodMillis, flexMillis, /*isAppStandbyExempted=*/ false);
+                periodMillis, flexMillis, ContentResolver.SYNC_EXEMPTION_NONE);
     }
 
     public SyncOperation(SyncStorageEngine.EndPoint info, int owningUid, String owningPackage,
                          int reason, int source, Bundle extras, boolean allowParallelSyncs,
                          boolean isPeriodic, int sourcePeriodicId, long periodMillis,
-                         long flexMillis, boolean isAppStandbyExempted) {
+                         long flexMillis, @SyncExemption int syncExemptionFlag) {
         this.target = info;
         this.owningUid = owningUid;
         this.owningPackage = owningPackage;
@@ -138,7 +139,7 @@ public class SyncOperation {
         this.flexMillis = flexMillis;
         this.jobId = NO_JOB_ID;
         this.key = toKey();
-        this.isAppStandbyExempted = isAppStandbyExempted;
+        this.syncExemptionFlag = syncExemptionFlag;
     }
 
     /* Get a one off sync operation instance from a periodic sync. */
@@ -148,7 +149,7 @@ public class SyncOperation {
         }
         SyncOperation op = new SyncOperation(target, owningUid, owningPackage, reason, syncSource,
                 new Bundle(extras), allowParallelSyncs, false, jobId /* sourcePeriodicId */,
-                periodMillis, flexMillis, /*isAppStandbyExempted=*/ false);
+                periodMillis, flexMillis, ContentResolver.SYNC_EXEMPTION_NONE);
         return op;
     }
 
@@ -166,7 +167,7 @@ public class SyncOperation {
         periodMillis = other.periodMillis;
         flexMillis = other.flexMillis;
         this.key = other.key;
-        isAppStandbyExempted = other.isAppStandbyExempted;
+        syncExemptionFlag = other.syncExemptionFlag;
     }
 
     /**
@@ -235,7 +236,7 @@ public class SyncOperation {
         jobInfoExtras.putLong("flexMillis", flexMillis);
         jobInfoExtras.putLong("expectedRuntime", expectedRuntime);
         jobInfoExtras.putInt("retries", retries);
-        jobInfoExtras.putBoolean("isAppStandbyExempted", isAppStandbyExempted);
+        jobInfoExtras.putInt("syncExemptionFlag", syncExemptionFlag);
         return jobInfoExtras;
     }
 
@@ -256,7 +257,7 @@ public class SyncOperation {
         Bundle extras;
         boolean allowParallelSyncs, isPeriodic;
         long periodMillis, flexMillis;
-        boolean isAppStandbyExempted;
+        int syncExemptionFlag;
 
         if (!jobExtras.getBoolean("SyncManagerJob", false)) {
             return null;
@@ -275,7 +276,8 @@ public class SyncOperation {
         initiatedBy = jobExtras.getInt("sourcePeriodicId", NO_JOB_ID);
         periodMillis = jobExtras.getLong("periodMillis");
         flexMillis = jobExtras.getLong("flexMillis");
-        isAppStandbyExempted = jobExtras.getBoolean("isAppStandbyExempted", false);
+        syncExemptionFlag = jobExtras.getInt("syncExemptionFlag",
+                ContentResolver.SYNC_EXEMPTION_NONE);
         extras = new Bundle();
 
         PersistableBundle syncExtras = jobExtras.getPersistableBundle("syncExtras");
@@ -298,7 +300,7 @@ public class SyncOperation {
                 new SyncStorageEngine.EndPoint(account, provider, userId);
         SyncOperation op = new SyncOperation(target, owningUid, owningPackage, reason, source,
                 extras, allowParallelSyncs, isPeriodic, initiatedBy, periodMillis, flexMillis,
-                isAppStandbyExempted);
+                syncExemptionFlag);
         op.jobId = jobExtras.getInt("jobId");
         op.expectedRuntime = jobExtras.getLong("expectedRuntime");
         op.retries = jobExtras.getInt("retries");
@@ -361,10 +363,10 @@ public class SyncOperation {
 
     @Override
     public String toString() {
-        return dump(null, true);
+        return dump(null, true, null);
     }
 
-    String dump(PackageManager pm, boolean shorter) {
+    String dump(PackageManager pm, boolean shorter, SyncAdapterStateFetcher appStates) {
         StringBuilder sb = new StringBuilder();
         sb.append("JobId=").append(jobId)
                 .append(" ")
@@ -385,8 +387,18 @@ public class SyncOperation {
         if (extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false)) {
             sb.append(" EXPEDITED");
         }
-        if (isAppStandbyExempted) {
-            sb.append(" STANDBY-EXEMPTED");
+        switch (syncExemptionFlag) {
+            case ContentResolver.SYNC_EXEMPTION_NONE:
+                break;
+            case ContentResolver.SYNC_EXEMPTION_ACTIVE:
+                sb.append(" STANDBY-EXEMPTED");
+                break;
+            case ContentResolver.SYNC_EXEMPTION_ACTIVE_WITH_TEMP:
+                sb.append(" STANDBY-EXEMPTED(TOP)");
+                break;
+            default:
+                sb.append(" ExemptionFlag=" + syncExemptionFlag);
+                break;
         }
         sb.append(" Reason=");
         sb.append(reasonToString(pm, reason));
@@ -397,20 +409,30 @@ public class SyncOperation {
             SyncManager.formatDurationHMS(sb, flexMillis);
             sb.append(")");
         }
+        if (retries > 0) {
+            sb.append(" Retries=");
+            sb.append(retries);
+        }
         if (!shorter) {
             sb.append(" Owner={");
             UserHandle.formatUid(sb, owningUid);
             sb.append(" ");
             sb.append(owningPackage);
+            if (appStates != null) {
+                sb.append(" [");
+                sb.append(appStates.getStandbyBucket(
+                        UserHandle.getUserId(owningUid), owningPackage));
+                sb.append("]");
+
+                if (appStates.isAppActive(owningUid)) {
+                    sb.append(" [ACTIVE]");
+                }
+            }
             sb.append("}");
             if (!extras.keySet().isEmpty()) {
                 sb.append(" ");
                 extrasToStringBuilder(extras, sb);
             }
-        }
-        if (retries > 0) {
-            sb.append(" Retries=");
-            sb.append(retries);
         }
         return sb.toString();
     }
@@ -462,6 +484,10 @@ public class SyncOperation {
 
     boolean isIgnoreSettings() {
         return extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, false);
+    }
+
+    boolean isAppStandbyExempted() {
+        return syncExemptionFlag != ContentResolver.SYNC_EXEMPTION_NONE;
     }
 
     static void extrasToStringBuilder(Bundle bundle, StringBuilder sb) {
