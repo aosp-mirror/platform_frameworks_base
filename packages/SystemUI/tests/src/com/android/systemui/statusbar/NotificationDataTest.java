@@ -250,6 +250,7 @@ public class NotificationDataTest extends SysuiTestCase {
 
     @Test
     public void testShouldFilterHiddenNotifications() {
+        initStatusBarNotification(false);
         // setup
         when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(false);
         when(mFsc.isSystemAlertNotification(any())).thenReturn(false);

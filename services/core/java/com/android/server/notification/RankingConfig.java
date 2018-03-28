@@ -38,7 +38,7 @@ public interface RankingConfig {
     ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
             int uid, boolean includeDeleted, boolean includeNonGrouped);
     void createNotificationChannel(String pkg, int uid, NotificationChannel channel,
-            boolean fromTargetApp);
+            boolean fromTargetApp, boolean hasDndAccess);
     void updateNotificationChannel(String pkg, int uid, NotificationChannel channel, boolean fromUser);
     NotificationChannel getNotificationChannel(String pkg, int uid, String channelId, boolean includeDeleted);
     void deleteNotificationChannel(String pkg, int uid, String channelId);
