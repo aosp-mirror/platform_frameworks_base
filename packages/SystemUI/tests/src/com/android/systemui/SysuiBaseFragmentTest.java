@@ -21,6 +21,7 @@ import android.app.Fragment;
 import android.app.Instrumentation;
 import android.support.test.InstrumentationRegistry;
 import android.testing.BaseFragmentTest;
+import android.testing.DexmakerShareClassLoaderRule;
 
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 import com.android.systemui.utils.leaks.LeakCheckedTest.SysuiLeakCheck;
@@ -36,6 +37,10 @@ public abstract class SysuiBaseFragmentTest extends BaseFragmentTest {
     @Rule
     public final SysuiLeakCheck mLeakCheck = new SysuiLeakCheck();
 
+    @Rule
+    public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
+            new DexmakerShareClassLoaderRule();
+
     protected final TestableDependency mDependency = new TestableDependency(mContext);
     protected SysuiTestableContext mSysuiContext;
     private Instrumentation mRealInstrumentation;
@@ -46,7 +51,6 @@ public abstract class SysuiBaseFragmentTest extends BaseFragmentTest {
 
     @Before
     public void SysuiSetup() {
-        System.setProperty("dexmaker.share_classloader", "true");
         SystemUIFactory.createFromConfig(mContext);
         // TODO: Figure out another way to give reference to a SysuiTestableContext.
         mSysuiContext = (SysuiTestableContext) mContext;

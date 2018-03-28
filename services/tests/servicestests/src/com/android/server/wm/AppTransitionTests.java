@@ -28,6 +28,7 @@ import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -41,12 +42,14 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class AppTransitionTests {
 
+    @Rule
+    public final WindowManagerServiceRule mRule = new WindowManagerServiceRule();
     private WindowManagerService mWm;
 
     @Before
     public void setUp() throws Exception {
         final Context context = InstrumentationRegistry.getTargetContext();
-        mWm = TestWindowManagerPolicy.getWindowManagerService(context);
+        mWm = mRule.getWindowManagerService();
     }
 
     @Test

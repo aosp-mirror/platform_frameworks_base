@@ -24,14 +24,14 @@ import static android.view.View.VISIBLE;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
+import android.testing.DexmakerShareClassLoaderRule;
 import android.util.Log;
 import android.view.Display;
 import android.view.DisplayInfo;
 import org.junit.Assert;
 import org.junit.After;
 import org.junit.Before;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.Rule;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -66,16 +66,15 @@ import java.util.LinkedList;
  */
 class WindowTestsBase {
     private static final String TAG = WindowTestsBase.class.getSimpleName();
-    static WindowManagerService sWm = null;
-    private static final IWindow sIWindow = new TestIWindow();
-    private static Session sMockSession;
+    WindowManagerService sWm = null;  // TODO(roosa): rename to mWm in follow-up CL
+    private final IWindow mIWindow = new TestIWindow();
+    private Session mMockSession;
     // The default display is removed in {@link #setUp} and then we iterate over all displays to
     // make sure we don't collide with any existing display. If we run into no other display, the
     // added display should be treated as default. This cannot be the default display
     private static int sNextDisplayId = DEFAULT_DISPLAY + 1;
     static int sNextStackId = 1000;
 
-    private static boolean sOneTimeSetupDone = false;
     DisplayContent mDisplayContent;
     DisplayInfo mDisplayInfo = new DisplayInfo();
     WindowState mWallpaperWindow;
@@ -90,27 +89,27 @@ class WindowTestsBase {
     HashSet<WindowState> mCommonWindows;
     WallpaperController mWallpaperController;
 
-    @Mock
-    static WindowState.PowerManagerWrapper mPowerManagerWrapper;
+    @Rule
+    public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
+            new DexmakerShareClassLoaderRule();
+
+    @Rule
+    public final WindowManagerServiceRule mWmRule = new WindowManagerServiceRule();
+
+    static WindowState.PowerManagerWrapper mPowerManagerWrapper;  // TODO(roosa): make non-static.
 
     @Before
     public void setUp() throws Exception {
         // If @Before throws an exception, the error isn't logged. This will make sure any failures
         // in the set up are clear. This can be removed when b/37850063 is fixed.
         try {
-            if (!sOneTimeSetupDone) {
-                sOneTimeSetupDone = true;
-
-                // Allows to mock package local classes and methods
-                System.setProperty("dexmaker.share_classloader", "true");
-                MockitoAnnotations.initMocks(this);
-                sMockSession = mock(Session.class);
-            }
+            mMockSession = mock(Session.class);
+            mPowerManagerWrapper = mock(WindowState.PowerManagerWrapper.class);
 
             final Context context = InstrumentationRegistry.getTargetContext();
             AttributeCache.init(context);
 
-            sWm = TestWindowManagerPolicy.getWindowManagerService(context);
+            sWm = mWmRule.getWindowManagerService();
             beforeCreateDisplay();
 
             mWallpaperController = new WallpaperController(sWm);
@@ -217,9 +216,7 @@ class WindowTestsBase {
      * Waits until the main handler for WM has processed all messages.
      */
     void waitUntilHandlersIdle() {
-        sWm.mH.runWithScissors(() -> { }, 0);
-        sWm.mAnimationHandler.runWithScissors(() -> { }, 0);
-        SurfaceAnimationThread.getHandler().runWithScissors(() -> { }, 0);
+        mWmRule.waitUntilWindowManagerHandlersIdle();
     }
 
     private WindowToken createWindowToken(
@@ -285,20 +282,27 @@ class WindowTestsBase {
         }
     }
 
-    static WindowState createWindow(WindowState parent, int type, WindowToken token, String name) {
+    WindowState createWindow(WindowState parent, int type, WindowToken token, String name) {
         synchronized (sWm.mWindowMap) {
             return createWindow(parent, type, token, name, 0 /* ownerId */,
                     false /* ownerCanAddInternalSystemWindow */);
         }
     }
 
-    static WindowState createWindow(WindowState parent, int type, WindowToken token, String name,
+    WindowState createWindow(WindowState parent, int type, WindowToken token, String name,
             int ownerId, boolean ownerCanAddInternalSystemWindow) {
-        synchronized (sWm.mWindowMap) {
+        return createWindow(parent, type, token, name, ownerId, ownerCanAddInternalSystemWindow,
+                sWm, mMockSession, mIWindow);
+    }
+
+    static WindowState createWindow(WindowState parent, int type, WindowToken token,
+            String name, int ownerId, boolean ownerCanAddInternalSystemWindow,
+            WindowManagerService service, Session session, IWindow iWindow) {
+        synchronized (service.mWindowMap) {
             final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(type);
             attrs.setTitle(name);
 
-            final WindowState w = new WindowState(sWm, sMockSession, sIWindow, token, parent,
+            final WindowState w = new WindowState(service, session, iWindow, token, parent,
                     OP_NONE,
                     0, attrs, VISIBLE, ownerId, ownerCanAddInternalSystemWindow,
                     mPowerManagerWrapper);
@@ -357,7 +361,7 @@ class WindowTestsBase {
     WindowTestUtils.TestWindowState createWindowState(WindowManager.LayoutParams attrs,
             WindowToken token) {
         synchronized (sWm.mWindowMap) {
-            return new WindowTestUtils.TestWindowState(sWm, sMockSession, sIWindow, attrs, token);
+            return new WindowTestUtils.TestWindowState(sWm, mMockSession, mIWindow, attrs, token);
         }
     }
 

@@ -31,6 +31,8 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 
 import com.android.server.wm.DisplayWindowController;
+
+import org.junit.Rule;
 import org.mockito.invocation.InvocationOnMock;
 
 import android.app.IApplicationThread;
@@ -47,6 +49,8 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.service.voice.IVoiceInteractionSession;
 import android.support.test.InstrumentationRegistry;
+import android.testing.DexmakerShareClassLoaderRule;
+
 import com.android.server.AttributeCache;
 import com.android.server.wm.AppWindowContainerController;
 import com.android.server.wm.PinnedStackWindowController;
@@ -64,6 +68,10 @@ import org.mockito.MockitoAnnotations;
 public class ActivityTestsBase {
     private static boolean sOneTimeSetupDone = false;
 
+    @Rule
+    public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
+            new DexmakerShareClassLoaderRule();
+
     private final Context mContext = InstrumentationRegistry.getContext();
     private HandlerThread mHandlerThread;
 
@@ -77,9 +85,6 @@ public class ActivityTestsBase {
     public void setUp() throws Exception {
         if (!sOneTimeSetupDone) {
             sOneTimeSetupDone = true;
-
-            // Allows to mock package local classes and methods
-            System.setProperty("dexmaker.share_classloader", "true");
             MockitoAnnotations.initMocks(this);
         }
         mHandlerThread = new HandlerThread("ActivityTestsBaseThread");
