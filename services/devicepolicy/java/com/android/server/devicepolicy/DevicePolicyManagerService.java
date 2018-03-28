@@ -2028,8 +2028,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Settings.Global.putString(mContext.getContentResolver(), name, value);
         }
 
-        void settingsSystemPutString(String name, String value) {
-            Settings.System.putString(mContext.getContentResolver(), name, value);
+        void settingsSystemPutStringForUser(String name, String value, int userId) {
+          Settings.System.putStringForUser(
+              mContext.getContentResolver(), name, value, userId);
         }
 
         void securityLogSetLoggingEnabledProperty(boolean enabled) {
@@ -10049,15 +10050,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkStringNotEmpty(setting, "String setting is null or empty");
 
         synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             if (!SYSTEM_SETTINGS_WHITELIST.contains(setting)) {
                 throw new SecurityException(String.format(
                         "Permission denial: device owners cannot update %1$s", setting));
             }
 
-            mInjector.binderWithCleanCallingIdentity(() -> mInjector.settingsSystemPutString(
-                    setting, value));
+            final int callingUserId = mInjector.userHandleGetCallingUserId();
+
+            mInjector.binderWithCleanCallingIdentity(() ->
+                mInjector.settingsSystemPutStringForUser(setting, value, callingUserId));
         }
     }
 

@@ -7326,11 +7326,12 @@ public class DevicePolicyManager {
     public @interface SystemSettingsWhitelist {}
 
     /**
-     * Called by device owner to update {@link android.provider.Settings.System} settings.
-     * Validation that the value of the setting is in the correct form for the setting type should
-     * be performed by the caller.
+     * Called by a device or profile owner to update {@link android.provider.Settings.System}
+     * settings. Validation that the value of the setting is in the correct form for the setting
+     * type should be performed by the caller.
      * <p>
-     * The settings that can be updated with this method are:
+     * The settings that can be updated by a device owner or profile owner of secondary user with
+     * this method are:
      * <ul>
      * <li>{@link android.provider.Settings.System#SCREEN_BRIGHTNESS}</li>
      * <li>{@link android.provider.Settings.System#SCREEN_BRIGHTNESS_MODE}</li>
@@ -7342,7 +7343,7 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param setting The name of the setting to update.
      * @param value The value to update the setting to.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setSystemSetting(@NonNull ComponentName admin,
             @NonNull @SystemSettingsWhitelist String setting, String value) {
