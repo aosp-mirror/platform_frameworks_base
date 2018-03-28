@@ -19,10 +19,12 @@ package com.android.server.locksettings.recoverablekeystore;
 import static android.security.keystore.recovery.KeyChainProtectionParams.TYPE_LOCKSCREEN;
 
 import android.annotation.Nullable;
+import android.annotation.NonNull;
 import android.content.Context;
-import android.security.keystore.recovery.KeyDerivationParams;
 import android.security.keystore.recovery.KeyChainProtectionParams;
 import android.security.keystore.recovery.KeyChainSnapshot;
+import android.security.keystore.recovery.KeyDerivationParams;
+import android.security.keystore.recovery.TrustedRootCertificates;
 import android.security.keystore.recovery.WrappedApplicationKey;
 import android.util.Log;
 
@@ -185,8 +187,12 @@ public class KeySyncTask implements Runnable {
         }
 
         PublicKey publicKey;
+        String rootCertAlias =
+                mRecoverableKeyStoreDb.getActiveRootOfTrust(mUserId, recoveryAgentUid);
+
+        rootCertAlias = replaceEmptyValueWithSecureDefault(rootCertAlias);
         CertPath certPath = mRecoverableKeyStoreDb.getRecoveryServiceCertPath(mUserId,
-                recoveryAgentUid);
+                recoveryAgentUid, rootCertAlias);
         if (certPath != null) {
             Log.d(TAG, "Using the public key in stored CertPath for syncing");
             publicKey = certPath.getCertificates().get(0).getPublicKey();
@@ -204,6 +210,14 @@ public class KeySyncTask implements Runnable {
         if (vaultHandle == null) {
             Log.w(TAG, "No device ID set for user " + mUserId);
             return;
+        }
+
+        // The only place in this class which uses credential value
+        if (!TrustedRootCertificates.GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_ALIAS.equals(
+                rootCertAlias)) {
+            // TODO: allow only whitelisted LSKF usage
+            Log.w(TAG, "Untrusted root certificate is used by recovery agent "
+                    + recoveryAgentUid);
         }
 
         byte[] salt = generateSalt();
@@ -225,6 +239,8 @@ public class KeySyncTask implements Runnable {
             return;
         }
 
+        // TODO: filter raw keys based on the root of trust.
+        // It is the only place in the class where raw key material is used.
         SecretKey recoveryKey;
         try {
             recoveryKey = generateRecoveryKey();
@@ -450,5 +466,15 @@ public class KeySyncTask implements Runnable {
                     .build());
         }
         return keyEntries;
+    }
+
+    private @NonNull String replaceEmptyValueWithSecureDefault(
+            @Nullable String rootCertificateAlias) {
+        if (rootCertificateAlias == null || rootCertificateAlias.isEmpty()) {
+            Log.e(TAG, "rootCertificateAlias is null or empty");
+            // Use the default Google Key Vault Service CA certificate if the alias is not provided
+            rootCertificateAlias = TrustedRootCertificates.GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_ALIAS;
+        }
+        return rootCertificateAlias;
     }
 }
