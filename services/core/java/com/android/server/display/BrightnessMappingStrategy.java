@@ -60,14 +60,8 @@ public abstract class BrightnessMappingStrategy {
         int[] backlightRange = resources.getIntArray(
                 com.android.internal.R.array.config_screenBrightnessBacklight);
 
-        float[] minimumBrightnessCurveLux = getLuxLevels(resources.getIntArray(
-                com.android.internal.R.array.config_autoBrightnessMinimumBrightnessCurveLux));
-        float[] minimumBrightnessCurveNits = getFloatArray(resources.obtainTypedArray(
-                com.android.internal.R.array.config_autoBrightnessMinimumBrightnessCurveNits));
-
         if (isValidMapping(nitsRange, backlightRange)
-                && isValidMapping(luxLevels, brightnessLevelsNits)
-                && isValidMapping(minimumBrightnessCurveLux, minimumBrightnessCurveNits)) {
+                && isValidMapping(luxLevels, brightnessLevelsNits)) {
             int minimumBacklight = resources.getInteger(
                     com.android.internal.R.integer.config_screenBrightnessSettingMinimum);
             int maximumBacklight = resources.getInteger(
@@ -79,8 +73,7 @@ public abstract class BrightnessMappingStrategy {
             }
             BrightnessConfiguration.Builder builder = new BrightnessConfiguration.Builder();
             builder.setCurve(luxLevels, brightnessLevelsNits);
-            return new PhysicalMappingStrategy(builder.build(), nitsRange, backlightRange,
-                    minimumBrightnessCurveLux, minimumBrightnessCurveNits);
+            return new PhysicalMappingStrategy(builder.build(), nitsRange, backlightRange);
         } else if (isValidMapping(luxLevels, brightnessLevelsBacklight)) {
             return new SimpleMappingStrategy(luxLevels, brightnessLevelsBacklight);
         } else {
@@ -455,11 +448,8 @@ public abstract class BrightnessMappingStrategy {
         private float mUserLux;
         private float mUserBrightness;
 
-        private final Spline mMinimumBrightnessCurve;
-
         public PhysicalMappingStrategy(BrightnessConfiguration config,
-                float[] nits, int[] backlight, float[] minimumBrightnessCurveLux,
-                float[] minimumBrightnessCurveNits) {
+                float[] nits, int[] backlight) {
             Preconditions.checkArgument(nits.length != 0 && backlight.length != 0,
                     "Nits and backlight arrays must not be empty!");
             Preconditions.checkArgument(nits.length == backlight.length,
@@ -479,9 +469,6 @@ public abstract class BrightnessMappingStrategy {
                 normalizedBacklight[i] = normalizeAbsoluteBrightness(backlight[i]);
             }
 
-            mMinimumBrightnessCurve = Spline.createSpline(
-                minimumBrightnessCurveLux, minimumBrightnessCurveNits);
-
             mNitsToBacklightSpline = createSpline(nits, normalizedBacklight);
             mBacklightToNitsSpline = createSpline(normalizedBacklight, nits);
 
@@ -497,7 +484,7 @@ public abstract class BrightnessMappingStrategy {
             if (config.equals(mConfig)) {
                 return false;
             }
-            validateBrightnessConfiguration(config);
+
             Pair<float[], float[]> curve = config.getCurve();
             mBrightnessSpline = createSpline(curve.first /*lux*/, curve.second /*nits*/);
             mConfig = config;
@@ -561,25 +548,6 @@ public abstract class BrightnessMappingStrategy {
             pw.println("  mNitsToBacklightSpline=" + mNitsToBacklightSpline);
             pw.println("  mUserLux=" + mUserLux);
             pw.println("  mUserBrightness=" + mUserBrightness);
-        }
-
-        private void validateBrightnessConfiguration(BrightnessConfiguration config) {
-            Pair<float[], float[]> curve = config.getCurve();
-            Spline brightnessSpline = Spline.createSpline(curve.first, curve.second);
-            if (isBrightnessSplineTooDark(brightnessSpline)) {
-                throw new IllegalArgumentException("brightness curve is too dark");
-            }
-        }
-
-        private boolean isBrightnessSplineTooDark(Spline brightnessSpline) {
-            float[] lux = mDefaultConfig.getCurve().first;
-            for (int i = 0; i < lux.length; i++) {
-                if (brightnessSpline.interpolate(lux[i]) <
-                        mMinimumBrightnessCurve.interpolate(lux[i])) {
-                    return true;
-                }
-            }
-            return false;
         }
     }
 }
