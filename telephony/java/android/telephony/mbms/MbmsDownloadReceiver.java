@@ -31,6 +31,8 @@ import android.telephony.MbmsDownloadSession;
 import android.telephony.mbms.vendor.VendorUtils;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -268,7 +270,10 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
 
         Uri finalLocation;
         try {
-            finalLocation = moveToFinalLocation(finalTempFile, appSpecifiedDestination);
+            String relativeLocation = getFileRelativePath(request.getSourceUri().getPath(),
+                    completedFileInfo.getUri().getPath());
+            finalLocation = moveToFinalLocation(finalTempFile, appSpecifiedDestination,
+                    relativeLocation);
         } catch (IOException e) {
             Log.w(LOG_TAG, "Failed to move temp file to final destination");
             setResultCode(RESULT_DOWNLOAD_FINALIZATION_ERROR);
@@ -442,7 +447,8 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
     /*
      * Moves a tempfile located at fromPath to its final home where the app wants it
      */
-    private static Uri moveToFinalLocation(Uri fromPath, Path appSpecifiedPath) throws IOException {
+    private static Uri moveToFinalLocation(Uri fromPath, Path appSpecifiedPath,
+            String relativeLocation) throws IOException {
         if (!ContentResolver.SCHEME_FILE.equals(fromPath.getScheme())) {
             Log.w(LOG_TAG, "Downloaded file location uri " + fromPath +
                     " does not have a file scheme");
@@ -450,14 +456,44 @@ public class MbmsDownloadReceiver extends BroadcastReceiver {
         }
 
         Path fromFile = FileSystems.getDefault().getPath(fromPath.getPath());
-        if (!Files.isDirectory(appSpecifiedPath)) {
-            Files.createDirectory(appSpecifiedPath);
+        Path toFile = appSpecifiedPath.resolve(relativeLocation);
+
+        if (!Files.isDirectory(toFile.getParent())) {
+            Files.createDirectories(toFile.getParent());
         }
-        // TODO: do we want to support directory trees within the download directory?
-        Path result = Files.move(fromFile, appSpecifiedPath.resolve(fromFile.getFileName()),
+        Path result = Files.move(fromFile, toFile,
                 StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
 
         return Uri.fromFile(result.toFile());
+    }
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public static String getFileRelativePath(String sourceUriPath, String fileInfoPath) {
+        if (sourceUriPath.endsWith("*")) {
+            // This is a wildcard path. Strip the last path component and use that as the root of
+            // the relative path.
+            int lastSlash = sourceUriPath.lastIndexOf('/');
+            sourceUriPath = sourceUriPath.substring(0, lastSlash);
+        }
+        if (!fileInfoPath.startsWith(sourceUriPath)) {
+            Log.e(LOG_TAG, "File location specified in FileInfo does not match the source URI."
+                    + " source: " + sourceUriPath + " fileinfo path: " + fileInfoPath);
+            return null;
+        }
+        if (fileInfoPath.length() == sourceUriPath.length()) {
+            // This is the single-file download case. Return the name of the file so that the
+            // receiver puts the file directly into the dest directory.
+            return sourceUriPath.substring(sourceUriPath.lastIndexOf('/') + 1);
+        }
+
+        String prefixOmittedPath = fileInfoPath.substring(sourceUriPath.length());
+        if (prefixOmittedPath.startsWith("/")) {
+            prefixOmittedPath = prefixOmittedPath.substring(1);
+        }
+        return prefixOmittedPath;
     }
 
     private static boolean verifyTempFilePath(Context context, String serviceId,
