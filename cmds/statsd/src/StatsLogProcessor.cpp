@@ -79,8 +79,6 @@ StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
       mSendBroadcast(sendBroadcast),
       mTimeBaseSec(timeBaseSec),
       mLastLogTimestamp(0) {
-    StatsPullerManager statsPullerManager;
-    statsPullerManager.SetTimeBaseSec(mTimeBaseSec);
 }
 
 StatsLogProcessor::~StatsLogProcessor() {
@@ -177,7 +175,7 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event) {
 
     uint64_t curTimeSec = getElapsedRealtimeSec();
     if (curTimeSec - mLastPullerCacheClearTimeSec > StatsdStats::kPullerCacheClearIntervalSec) {
-        mStatsPullerManager.ClearPullerCacheIfNecessary(curTimeSec);
+        mStatsPullerManager.ClearPullerCacheIfNecessary(curTimeSec * NS_PER_SEC);
         mLastPullerCacheClearTimeSec = curTimeSec;
     }
 

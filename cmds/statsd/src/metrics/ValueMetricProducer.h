@@ -53,7 +53,7 @@ public:
 
         if (mPullTagId != -1) {
             vector<shared_ptr<LogEvent>> allData;
-            mStatsPullerManager->Pull(mPullTagId, &allData);
+            mStatsPullerManager->Pull(mPullTagId, eventTimeNs, &allData);
             if (allData.size() == 0) {
                 // This shouldn't happen since this valuemetric is not useful now.
             }
