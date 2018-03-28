@@ -21,7 +21,7 @@ import android.os.Parcelable;
 import android.telephony.Rlog;
 
 /**
- * Immutable cell information from a point in time.
+ * A {@link CellInfo} representing an LTE cell that provides identity and measurement info.
  */
 public final class CellInfoLte extends CellInfo implements Parcelable {
 
