@@ -170,7 +170,9 @@ public final class RangingResult implements Parcelable {
     /**
      * @return The standard deviation of the measured distance (in mm) to the device specified by
      * {@link #getMacAddress()} or {@link #getPeerHandle()}. The standard deviation is calculated
-     * over the measurements executed in a single RTT burst.
+     * over the measurements executed in a single RTT burst. The number of measurements is returned
+     * by {@link #getNumSuccessfulMeasurements()} - 0 successful measurements indicate that the
+     * standard deviation is not valid (a valid standard deviation requires at least 2 data points).
      * <p>
      * Only valid if {@link #getStatus()} returns {@link #STATUS_SUCCESS}, otherwise will throw an
      * exception.
@@ -199,11 +201,12 @@ public final class RangingResult implements Parcelable {
 
     /**
      * @return The number of attempted measurements used in the RTT exchange resulting in this set
-     * of results.
+     * of results. The number of successful measurements is returned by
+     * {@link #getNumSuccessfulMeasurements()} which at most, if there are no errors, will be 1 less
+     * that the number of attempted measurements.
      * <p>
      * Only valid if {@link #getStatus()} returns {@link #STATUS_SUCCESS}, otherwise will throw an
      * exception.
-     * @hide
      */
     public int getNumAttemptedMeasurements() {
         if (mStatus != STATUS_SUCCESS) {
@@ -220,9 +223,12 @@ public final class RangingResult implements Parcelable {
      * returned by {@link #getDistanceStdDevMm()}, is not valid (a 0 is returned for the standard
      * deviation).
      * <p>
+     * The total number of measurement attempts is returned by
+     * {@link #getNumAttemptedMeasurements()}. The number of successful measurements will be at
+     * most 1 less then the number of attempted measurements.
+     * <p>
      * Only valid if {@link #getStatus()} returns {@link #STATUS_SUCCESS}, otherwise will throw an
      * exception.
-     * @hide
      */
     public int getNumSuccessfulMeasurements() {
         if (mStatus != STATUS_SUCCESS) {
