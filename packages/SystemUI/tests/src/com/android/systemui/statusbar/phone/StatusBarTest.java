@@ -70,6 +70,7 @@ import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.statusbar.ActivatableNotificationView;
@@ -132,6 +133,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NotificationViewHierarchyManager mViewHierarchyManager;
     @Mock private VisualStabilityManager mVisualStabilityManager;
     @Mock private NotificationListener mNotificationListener;
+    @Mock private KeyguardViewMediator mKeyguardViewMediator;
 
     private TestableStatusBar mStatusBar;
     private FakeMetricsLogger mMetricsLogger;
@@ -200,7 +202,7 @@ public class StatusBarTest extends SysuiTestCase {
                 mPowerManager, mNotificationPanelView, mBarService, mNotificationListener,
                 mNotificationLogger, mVisualStabilityManager, mViewHierarchyManager,
                 mEntryManager, mScrimController, mFingerprintUnlockController,
-                mock(ActivityLaunchAnimator.class));
+                mock(ActivityLaunchAnimator.class), mKeyguardViewMediator);
         mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mContext.getComponents();
         mEntryManager.setUpForTest(mStatusBar, mStackScroller, mStatusBar, mHeadsUpManager,
@@ -638,7 +640,7 @@ public class StatusBarTest extends SysuiTestCase {
                 NotificationViewHierarchyManager viewHierarchyManager,
                 TestableNotificationEntryManager entryManager, ScrimController scrimController,
                 FingerprintUnlockController fingerprintUnlockController,
-                ActivityLaunchAnimator launchAnimator) {
+                ActivityLaunchAnimator launchAnimator, KeyguardViewMediator keyguardViewMediator) {
             mStatusBarKeyguardViewManager = man;
             mUnlockMethodCache = unlock;
             mKeyguardIndicationController = key;
@@ -656,6 +658,7 @@ public class StatusBarTest extends SysuiTestCase {
             mScrimController = scrimController;
             mFingerprintUnlockController = fingerprintUnlockController;
             mActivityLaunchAnimator = launchAnimator;
+            mKeyguardViewMediator = keyguardViewMediator;
             mClearAllEnabled = true;
         }
 
