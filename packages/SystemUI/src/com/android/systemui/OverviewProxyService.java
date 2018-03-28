@@ -57,6 +57,8 @@ import static com.android.systemui.shared.system.NavigationBarCompat.Interaction
  */
 public class OverviewProxyService implements CallbackController<OverviewProxyListener>, Dumpable {
 
+    private static final String ACTION_QUICKSTEP = "android.intent.action.QUICKSTEP_SERVICE";
+
     public static final String TAG_OPS = "OverviewProxyService";
     public static final boolean DEBUG_OVERVIEW_PROXY = false;
     private static final long BACKOFF_MILLIS = 5000;
@@ -64,7 +66,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final Context mContext;
     private final Handler mHandler;
     private final Runnable mConnectionRunnable = this::internalConnectToCurrentUser;
-    private final ComponentName mLauncherComponentName;
+    private final ComponentName mRecentsComponentName;
     private final DeviceProvisionedController mDeviceProvisionedController
             = Dependency.get(DeviceProvisionedController.class);
     private final List<OverviewProxyListener> mConnectionCallbacks = new ArrayList<>();
@@ -191,8 +193,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mContext = context;
         mHandler = new Handler();
         mConnectionBackoffAttempts = 0;
-        mLauncherComponentName = ComponentName
-                .unflattenFromString(context.getString(R.string.config_overviewServiceComponent));
+        mRecentsComponentName = ComponentName.unflattenFromString(context.getString(
+                com.android.internal.R.string.config_recentsComponentName));
 
         // Listen for the package update changes.
         if (SystemServicesProxy.getInstance(context)
@@ -200,7 +202,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             mDeviceProvisionedController.addCallback(mDeviceProvisionedCallback);
             IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
             filter.addDataScheme("package");
-            filter.addDataSchemeSpecificPart(mLauncherComponentName.getPackageName(),
+            filter.addDataSchemeSpecificPart(mRecentsComponentName.getPackageName(),
                     PatternMatcher.PATTERN_LITERAL);
             filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
             mContext.registerReceiver(mLauncherAddedReceiver, filter);
@@ -223,8 +225,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             return;
         }
         mHandler.removeCallbacks(mConnectionRunnable);
-        Intent launcherServiceIntent = new Intent();
-        launcherServiceIntent.setComponent(mLauncherComponentName);
+        Intent launcherServiceIntent = new Intent(ACTION_QUICKSTEP)
+                .setPackage(mRecentsComponentName.getPackageName());
         boolean bound = mContext.bindServiceAsUser(launcherServiceIntent,
                 mOverviewServiceConnection, Context.BIND_AUTO_CREATE,
                 UserHandle.of(mDeviceProvisionedController.getCurrentUser()));
