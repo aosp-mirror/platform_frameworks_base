@@ -108,11 +108,6 @@ Landroid/graphics/Bitmap;->createGraphicBufferHandle()Landroid/graphics/GraphicB
 Landroid/graphics/Bitmap;->createHardwareBitmap(Landroid/graphics/GraphicBuffer;)Landroid/graphics/Bitmap;
 Landroid/graphics/Canvas;->clipRegion(Landroid/graphics/Region;Landroid/graphics/Region$Op;)Z
 Landroid/graphics/Canvas;->clipRegion(Landroid/graphics/Region;)Z
-Landroid/graphics/Canvas;->save(I)I
-Landroid/graphics/Canvas;->saveLayerAlpha(FFFFII)I
-Landroid/graphics/Canvas;->saveLayerAlpha(Landroid/graphics/RectF;II)I
-Landroid/graphics/Canvas;->saveLayer(FFFFLandroid/graphics/Paint;I)I
-Landroid/graphics/Canvas;->saveLayer(Landroid/graphics/RectF;Landroid/graphics/Paint;I)I
 Landroid/graphics/drawable/Drawable;->isProjected()Z
 Landroid/graphics/drawable/Drawable;->updateTintFilter(Landroid/graphics/PorterDuffColorFilter;Landroid/content/res/ColorStateList;Landroid/graphics/PorterDuff$Mode;)Landroid/graphics/PorterDuffColorFilter;
 Landroid/hardware/camera2/CaptureRequest$Key;-><init>(Ljava/lang/String;Ljava/lang/Class;)V
