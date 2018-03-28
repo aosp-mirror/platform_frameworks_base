@@ -17,6 +17,7 @@ package android.telephony.euicc;
 
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.app.PendingIntent;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.UiccAccessRule;
@@ -26,7 +27,14 @@ import java.util.List;
 
 import com.android.internal.util.Preconditions;
 
-/** Information about a subscription which is available for download. */
+/**
+ * Information about a subscription which is downloadable to an eUICC using
+ * {@link EuiccManager#downloadSubscription(DownloadableSubscription, boolean, PendingIntent).
+ *
+ * <p>For example, a DownloadableSubscription can be created through an activation code parsed from
+ * a QR code. A server address can be parsed from the activation code to download more information
+ * about the profile, such as carrier name, access rules, etc.
+ */
 public final class DownloadableSubscription implements Parcelable {
 
     public static final Creator<DownloadableSubscription> CREATOR =
@@ -136,7 +144,15 @@ public final class DownloadableSubscription implements Parcelable {
     /**
      * Create a DownloadableSubscription for the given activation code.
      *
-     * @param encodedActivationCode the activation code to use. Must not be null.
+     * <p>This fills the encodedActivationCode field. Other fields like confirmationCode,
+     * carrierName and accessRules may be filled in the implementation of
+     * {@code android.service.euicc.EuiccService} if exists.
+     *
+     * @param encodedActivationCode the activation code to use. An activation code can be parsed
+     *         from a user scanned QR code. The format of activation code is defined in SGP.22. For
+     *         example, "1$SMDP.GSMA.COM$04386-AGYFT-A74Y8-3F815$1.3.6.1.4.1.31746". For detail, see
+     *         {@code com.android.euicc.data.ActivationCode}. Must not be null.
+     *
      * @return the {@link DownloadableSubscription} which may be passed to
      *     {@link EuiccManager#downloadSubscription}.
      */
@@ -157,6 +173,9 @@ public final class DownloadableSubscription implements Parcelable {
 
     /**
      * Returns the confirmation code.
+     *
+     * <p>As an example, the confirmation code can be input by the user through a carrier app or the
+     * UI component of the eUICC local profile assistant (LPA) application.
      */
     @Nullable
     public String getConfirmationCode() {
