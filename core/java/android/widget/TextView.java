@@ -12474,9 +12474,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         + " before=" + before + " after=" + after + ": " + buffer);
             }
 
-            if (AccessibilityManager.getInstance(mContext).isEnabled()
-                    && !isPasswordInputType(getInputType()) && !hasPasswordTransformationMethod()) {
-                mBeforeText = buffer.toString();
+            if (AccessibilityManager.getInstance(mContext).isEnabled() && (mTransformed != null)) {
+                mBeforeText = mTransformed.toString();
             }
 
             TextView.this.sendBeforeTextChanged(buffer, start, before, after);
