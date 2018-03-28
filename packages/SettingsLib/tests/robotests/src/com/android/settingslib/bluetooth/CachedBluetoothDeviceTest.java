@@ -61,6 +61,8 @@ public class CachedBluetoothDeviceTest {
     @Mock
     private PanProfile mPanProfile;
     @Mock
+    private HearingAidProfile mHearingAidProfile;
+    @Mock
     private BluetoothDevice mDevice;
     private CachedBluetoothDevice mCachedDevice;
     private Context mContext;
@@ -75,6 +77,7 @@ public class CachedBluetoothDeviceTest {
         when(mHfpProfile.isProfileReady()).thenReturn(true);
         when(mA2dpProfile.isProfileReady()).thenReturn(true);
         when(mPanProfile.isProfileReady()).thenReturn(true);
+        when(mHearingAidProfile.isProfileReady()).thenReturn(true);
         mCachedDevice = spy(
                 new CachedBluetoothDevice(mContext, mAdapter, mProfileManager, mDevice));
         doAnswer((invocation) -> mBatteryLevel).when(mCachedDevice).getBatteryLevel();
@@ -209,6 +212,23 @@ public class CachedBluetoothDeviceTest {
     }
 
     @Test
+    public void testGetConnectionSummary_testSingleProfileActiveDeviceHearingAid() {
+        // Test without battery level
+        // Set Hearing Aid profile to be connected and test connection state summary
+        mCachedDevice.onProfileStateChanged(mHearingAidProfile, BluetoothProfile.STATE_CONNECTED);
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Connected");
+
+        // Set device as Active for Hearing Aid and test connection state summary
+        mCachedDevice.onActiveDeviceChanged(true, BluetoothProfile.HEARING_AID);
+        assertThat(mCachedDevice.getConnectionSummary()).isEqualTo("Connected, active");
+
+        // Set Hearing Aid profile to be disconnected and test connection state summary
+        mCachedDevice.onActiveDeviceChanged(false, BluetoothProfile.HEARING_AID);
+        mCachedDevice.onProfileStateChanged(mHearingAidProfile, BluetoothProfile.STATE_DISCONNECTED);
+        assertThat(mCachedDevice.getConnectionSummary()).isNull();
+    }
+
+    @Test
     public void testGetConnectionSummary_testMultipleProfilesActiveDevice() {
         // Test without battery level
         // Set A2DP and HFP profiles to be connected and test connection state summary
@@ -298,5 +318,25 @@ public class CachedBluetoothDeviceTest {
         verify(mDevice).setAlias(DEVICE_ALIAS_NEW);
         // Verify new alias is returned on getName
         assertThat(cachedBluetoothDevice.getName()).isEqualTo(DEVICE_ALIAS_NEW);
+    }
+
+    @Test
+    public void testSetActive() {
+        when(mProfileManager.getA2dpProfile()).thenReturn(mA2dpProfile);
+        when(mProfileManager.getHeadsetProfile()).thenReturn(mHfpProfile);
+        when(mA2dpProfile.setActiveDevice(any(BluetoothDevice.class))).thenReturn(true);
+        when(mHfpProfile.setActiveDevice(any(BluetoothDevice.class))).thenReturn(true);
+
+        assertThat(mCachedDevice.setActive()).isFalse();
+
+        mCachedDevice.onProfileStateChanged(mA2dpProfile, BluetoothProfile.STATE_CONNECTED);
+        assertThat(mCachedDevice.setActive()).isTrue();
+
+        mCachedDevice.onProfileStateChanged(mA2dpProfile, BluetoothProfile.STATE_DISCONNECTED);
+        mCachedDevice.onProfileStateChanged(mHfpProfile, BluetoothProfile.STATE_CONNECTED);
+        assertThat(mCachedDevice.setActive()).isTrue();
+
+        mCachedDevice.onProfileStateChanged(mHfpProfile, BluetoothProfile.STATE_DISCONNECTED);
+        assertThat(mCachedDevice.setActive()).isFalse();
     }
 }

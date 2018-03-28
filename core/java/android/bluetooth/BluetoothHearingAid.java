@@ -17,6 +17,7 @@
 package android.bluetooth;
 
 import android.Manifest;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -373,6 +374,76 @@ public final class BluetoothHearingAid implements BluetoothProfile {
         } catch (RemoteException e) {
             Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
             return BluetoothProfile.STATE_DISCONNECTED;
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+    }
+
+    /**
+     * Select a connected device as active.
+     *
+     * The active device selection is per profile. An active device's
+     * purpose is profile-specific. For example, Hearing Aid audio
+     * streaming is to the active Hearing Aid device. If a remote device
+     * is not connected, it cannot be selected as active.
+     *
+     * <p> This API returns false in scenarios like the profile on the
+     * device is not connected or Bluetooth is not turned on.
+     * When this API returns true, it is guaranteed that the
+     * {@link #ACTION_ACTIVE_DEVICE_CHANGED} intent will be broadcasted
+     * with the active device.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission.
+     *
+     * @param device the remote Bluetooth device. Could be null to clear
+     * the active device and stop streaming audio to a Bluetooth device.
+     * @return false on immediate error, true otherwise
+     * @hide
+     */
+    public boolean setActiveDevice(@Nullable BluetoothDevice device) {
+        if (DBG) log("setActiveDevice(" + device + ")");
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null && isEnabled()
+                    && ((device == null) || isValidDevice(device))) {
+                mService.setActiveDevice(device);
+                return true;
+            }
+            if (mService == null) Log.w(TAG, "Proxy not attached to service");
+            return false;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+            return false;
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+    }
+
+    /**
+     * Check whether the device is active.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
+     * permission.
+     *
+     * @return the connected device that is active or null if no device
+     * is active
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    public boolean isActiveDevice(@Nullable BluetoothDevice device) {
+        if (VDBG) log("isActiveDevice()");
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null && isEnabled()
+                    && ((device == null) || isValidDevice(device))) {
+                return mService.isActiveDevice(device);
+            }
+            if (mService == null) Log.w(TAG, "Proxy not attached to service");
+            return false;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+            return false;
         } finally {
             mServiceLock.readLock().unlock();
         }
