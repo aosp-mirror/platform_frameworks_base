@@ -3032,12 +3032,12 @@
   <java-symbol type="layout" name="autofill_dataset_picker_fullscreen"/>
   <java-symbol type="layout" name="autofill_dataset_picker_header_footer"/>
   <java-symbol type="layout" name="autofill_dataset_picker_header_footer_fullscreen"/>
+  <java-symbol type="id" name="autofill" />
   <java-symbol type="id" name="autofill_dataset_container"/>
   <java-symbol type="id" name="autofill_dataset_footer"/>
   <java-symbol type="id" name="autofill_dataset_header"/>
   <java-symbol type="id" name="autofill_dataset_list"/>
   <java-symbol type="id" name="autofill_dataset_picker"/>
-  <java-symbol type="id" name="autofill" />
   <java-symbol type="id" name="autofill_save_custom_subtitle" />
   <java-symbol type="id" name="autofill_save_icon" />
   <java-symbol type="id" name="autofill_save_no" />
@@ -3067,6 +3067,7 @@
   <java-symbol type="dimen" name="autofill_dataset_picker_max_height"/>
   <java-symbol type="dimen" name="autofill_save_custom_subtitle_max_height"/>
   <java-symbol type="dimen" name="autofill_save_icon_max_size"/>
+  <java-symbol type="integer" name="autofill_max_visible_datasets" />
 
   <java-symbol type="dimen" name="notification_big_picture_max_height"/>
   <java-symbol type="dimen" name="notification_big_picture_max_width"/>

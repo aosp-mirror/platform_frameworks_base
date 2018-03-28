@@ -81,7 +81,6 @@ import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.autofill.AutofillManagerService.PackageCompatState;
 import com.android.server.autofill.ui.AutoFillUI;
 
 import java.io.FileDescriptor;
