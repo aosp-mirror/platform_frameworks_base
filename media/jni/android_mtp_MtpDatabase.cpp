@@ -16,6 +16,7 @@
 
 #define LOG_TAG "MtpDatabaseJNI"
 #include "utils/Log.h"
+#include "utils/String8.h"
 
 #include "android_media_Utils.h"
 #include "mtp.h"
@@ -161,7 +162,7 @@ public:
     virtual void*                   getThumbnail(MtpObjectHandle handle, size_t& outThumbSize);
 
     virtual MtpResponseCode         getObjectFilePath(MtpObjectHandle handle,
-                                            MtpString& outFilePath,
+                                            MtpStringBuffer& outFilePath,
                                             int64_t& outFileLength,
                                             MtpObjectFormat& outFormat);
     virtual MtpResponseCode         beginDeleteObject(MtpObjectHandle handle);
@@ -287,7 +288,7 @@ MtpObjectHandleList* MtpDatabase::getObjectList(MtpStorageID storageID,
     jint* handles = env->GetIntArrayElements(array, 0);
     jsize length = env->GetArrayLength(array);
     for (int i = 0; i < length; i++)
-        list->push(handles[i]);
+        list->push_back(handles[i]);
     env->ReleaseIntArrayElements(array, handles, 0);
     env->DeleteLocalRef(array);
 
@@ -316,7 +317,7 @@ MtpObjectFormatList* MtpDatabase::getSupportedPlaybackFormats() {
     jint* formats = env->GetIntArrayElements(array, 0);
     jsize length = env->GetArrayLength(array);
     for (int i = 0; i < length; i++)
-        list->push(formats[i]);
+        list->push_back(formats[i]);
     env->ReleaseIntArrayElements(array, formats, 0);
     env->DeleteLocalRef(array);
 
@@ -334,7 +335,7 @@ MtpObjectFormatList* MtpDatabase::getSupportedCaptureFormats() {
     jint* formats = env->GetIntArrayElements(array, 0);
     jsize length = env->GetArrayLength(array);
     for (int i = 0; i < length; i++)
-        list->push(formats[i]);
+        list->push_back(formats[i]);
     env->ReleaseIntArrayElements(array, formats, 0);
     env->DeleteLocalRef(array);
 
@@ -352,7 +353,7 @@ MtpObjectPropertyList* MtpDatabase::getSupportedObjectProperties(MtpObjectFormat
     jint* properties = env->GetIntArrayElements(array, 0);
     jsize length = env->GetArrayLength(array);
     for (int i = 0; i < length; i++)
-        list->push(properties[i]);
+        list->push_back(properties[i]);
     env->ReleaseIntArrayElements(array, properties, 0);
     env->DeleteLocalRef(array);
 
@@ -370,7 +371,7 @@ MtpDevicePropertyList* MtpDatabase::getSupportedDeviceProperties() {
     jint* properties = env->GetIntArrayElements(array, 0);
     jsize length = env->GetArrayLength(array);
     for (int i = 0; i < length; i++)
-        list->push(properties[i]);
+        list->push_back(properties[i]);
     env->ReleaseIntArrayElements(array, properties, 0);
     env->DeleteLocalRef(array);
 
@@ -826,7 +827,7 @@ static ExifData *getExifFromExtractor(const char *path) {
 
 MtpResponseCode MtpDatabase::getObjectInfo(MtpObjectHandle handle,
                                              MtpObjectInfo& info) {
-    MtpString       path;
+    MtpStringBuffer path;
     int64_t         length;
     MtpObjectFormat format;
 
@@ -861,8 +862,8 @@ MtpResponseCode MtpDatabase::getObjectInfo(MtpObjectHandle handle,
     info.mAssociationType = MTP_ASSOCIATION_TYPE_UNDEFINED;
 
     jchar* str = env->GetCharArrayElements(mStringBuffer, 0);
-    MtpString temp(reinterpret_cast<char16_t*>(str));
-    info.mName = strdup((const char *)temp);
+    MtpStringBuffer temp(str);
+    info.mName = strdup(temp);
     env->ReleaseCharArrayElements(mStringBuffer, str, 0);
 
     // read EXIF data for thumbnail information
@@ -901,9 +902,10 @@ MtpResponseCode MtpDatabase::getObjectInfo(MtpObjectHandle handle,
         case MTP_FORMAT_TIFF:
         case MTP_FORMAT_TIFF_EP:
         case MTP_FORMAT_DEFINED: {
-            std::unique_ptr<FileStream> stream(new FileStream(path));
+            String8 temp(path);
+            std::unique_ptr<FileStream> stream(new FileStream(temp));
             piex::PreviewImageData image_data;
-            if (!GetExifFromRawImage(stream.get(), path, image_data)) {
+            if (!GetExifFromRawImage(stream.get(), temp, image_data)) {
                 // Couldn't parse EXIF data from a image file via piex.
                 break;
             }
@@ -922,7 +924,7 @@ MtpResponseCode MtpDatabase::getObjectInfo(MtpObjectHandle handle,
 }
 
 void* MtpDatabase::getThumbnail(MtpObjectHandle handle, size_t& outThumbSize) {
-    MtpString path;
+    MtpStringBuffer path;
     int64_t length;
     MtpObjectFormat format;
     void* result = NULL;
@@ -957,9 +959,10 @@ void* MtpDatabase::getThumbnail(MtpObjectHandle handle, size_t& outThumbSize) {
             case MTP_FORMAT_TIFF:
             case MTP_FORMAT_TIFF_EP:
             case MTP_FORMAT_DEFINED: {
-                std::unique_ptr<FileStream> stream(new FileStream(path));
+                String8 temp(path);
+                std::unique_ptr<FileStream> stream(new FileStream(temp));
                 piex::PreviewImageData image_data;
-                if (!GetExifFromRawImage(stream.get(), path, image_data)) {
+                if (!GetExifFromRawImage(stream.get(), temp, image_data)) {
                     // Couldn't parse EXIF data from a image file via piex.
                     break;
                 }
@@ -992,7 +995,7 @@ void* MtpDatabase::getThumbnail(MtpObjectHandle handle, size_t& outThumbSize) {
 }
 
 MtpResponseCode MtpDatabase::getObjectFilePath(MtpObjectHandle handle,
-                                                 MtpString& outFilePath,
+                                                 MtpStringBuffer& outFilePath,
                                                  int64_t& outFileLength,
                                                  MtpObjectFormat& outFormat) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
@@ -1004,8 +1007,7 @@ MtpResponseCode MtpDatabase::getObjectFilePath(MtpObjectHandle handle,
     }
 
     jchar* str = env->GetCharArrayElements(mStringBuffer, 0);
-    outFilePath.setTo(reinterpret_cast<char16_t*>(str),
-                      strlen16(reinterpret_cast<char16_t*>(str)));
+    outFilePath.set(str);
     env->ReleaseCharArrayElements(mStringBuffer, str, 0);
 
     jlong* longValues = env->GetLongArrayElements(mLongBuffer, 0);
@@ -1146,7 +1148,7 @@ MtpObjectHandleList* MtpDatabase::getObjectReferences(MtpObjectHandle handle) {
     jint* handles = env->GetIntArrayElements(array, 0);
     jsize length = env->GetArrayLength(array);
     for (int i = 0; i < length; i++)
-        list->push(handles[i]);
+        list->push_back(handles[i]);
     env->ReleaseIntArrayElements(array, handles, 0);
     env->DeleteLocalRef(array);
 
