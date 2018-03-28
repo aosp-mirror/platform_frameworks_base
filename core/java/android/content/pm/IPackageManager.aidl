@@ -619,6 +619,8 @@ interface IPackageManager {
             in String[] packageNames, int userId);
     void revokeDefaultPermissionsFromDisabledTelephonyDataServices(
             in String[] packageNames, int userId);
+    void grantDefaultPermissionsToActiveLuiApp(in String packageName, int userId);
+    void revokeDefaultPermissionsFromLuiApps(in String[] packageNames, int userId);
 
     boolean isPermissionRevokedByPolicy(String permission, String packageName, int userId);
 

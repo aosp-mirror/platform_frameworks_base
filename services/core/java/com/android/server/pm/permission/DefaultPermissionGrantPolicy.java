@@ -1010,6 +1010,32 @@ public final class DefaultPermissionGrantPolicy {
         }
     }
 
+    public void grantDefaultPermissionsToActiveLuiApp(String packageName, int userId) {
+        Log.i(TAG, "Granting permissions to active LUI app for user:" + userId);
+        if (packageName == null) {
+            return;
+        }
+        PackageParser.Package luiAppPackage = getSystemPackage(packageName);
+        if (luiAppPackage != null
+                && doesPackageSupportRuntimePermissions(luiAppPackage)) {
+            grantRuntimePermissions(luiAppPackage, CAMERA_PERMISSIONS, true, userId);
+        }
+    }
+
+    public void revokeDefaultPermissionsFromLuiApps(String[] packageNames, int userId) {
+        Log.i(TAG, "Revoke permissions from LUI apps for user:" + userId);
+        if (packageNames == null) {
+            return;
+        }
+        for (String packageName : packageNames) {
+            PackageParser.Package luiAppPackage = getSystemPackage(packageName);
+            if (luiAppPackage != null
+                    && doesPackageSupportRuntimePermissions(luiAppPackage)) {
+                revokeRuntimePermissions(luiAppPackage, CAMERA_PERMISSIONS, true, userId);
+            }
+        }
+    }
+
     public void grantDefaultPermissionsToDefaultBrowser(String packageName, int userId) {
         Log.i(TAG, "Granting permissions to default browser for user:" + userId);
         if (packageName == null) {
