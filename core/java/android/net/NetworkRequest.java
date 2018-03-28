@@ -17,6 +17,8 @@
 package android.net;
 
 import android.annotation.NonNull;
+import android.net.NetworkCapabilities.NetCapability;
+import android.net.NetworkCapabilities.Transport;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
@@ -425,6 +427,20 @@ public class NetworkRequest implements Parcelable {
      */
     public boolean isBackgroundRequest() {
         return type == Type.BACKGROUND_REQUEST;
+    }
+
+    /**
+     * @see Builder#addCapability(int)
+     */
+    public boolean hasCapability(@NetCapability int capability) {
+        return networkCapabilities.hasCapability(capability);
+    }
+
+    /**
+     * @see Builder#addTransportType(int)
+     */
+    public boolean hasTransport(@Transport int transportType) {
+        return networkCapabilities.hasTransport(transportType);
     }
 
     public String toString() {
