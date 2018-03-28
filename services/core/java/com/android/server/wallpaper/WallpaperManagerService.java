@@ -1428,7 +1428,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     void clearWallpaperLocked(boolean defaultFailed, int which, int userId, IRemoteCallback reply) {
         if (which != FLAG_SYSTEM && which != FLAG_LOCK) {
-            throw new IllegalArgumentException("Must specify exactly one kind of wallpaper to read");
+            throw new IllegalArgumentException("Must specify exactly one kind of wallpaper to clear");
         }
 
         WallpaperData wallpaper = null;
