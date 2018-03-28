@@ -36,6 +36,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
@@ -60,6 +61,7 @@ import android.view.View;
 import android.view.View.AccessibilityDelegate;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
@@ -192,7 +194,7 @@ public class VolumeDialogImpl implements VolumeDialog {
         mDialog.setCanceledOnTouchOutside(true);
         mDialog.setContentView(R.layout.volume_dialog);
         mDialog.setOnShowListener(dialog -> {
-            mDialogView.setTranslationX(mDialogView.getWidth() / 2);
+            if (!isLandscape()) mDialogView.setTranslationX(mDialogView.getWidth() / 2);
             mDialogView.setAlpha(0);
             mDialogView.animate()
                     .alpha(1)
@@ -252,6 +254,11 @@ public class VolumeDialogImpl implements VolumeDialog {
 
     private ColorStateList loadColorStateList(int colorResId) {
         return ColorStateList.valueOf(mContext.getColor(colorResId));
+    }
+
+    private boolean isLandscape() {
+        return mContext.getResources().getConfiguration().orientation ==
+                Configuration.ORIENTATION_LANDSCAPE;
     }
 
     public void setStreamImportant(int stream, boolean important) {
@@ -509,16 +516,16 @@ public class VolumeDialogImpl implements VolumeDialog {
 
         mDialogView.setTranslationX(0);
         mDialogView.setAlpha(1);
-        mDialogView.animate()
+        ViewPropertyAnimator animator = mDialogView.animate()
                 .alpha(0)
-                .translationX(mDialogView.getWidth() / 2)
                 .setDuration(250)
                 .setInterpolator(new SystemUIInterpolators.LogAccelerateInterpolator())
                 .withEndAction(() -> mHandler.postDelayed(() -> {
                     if (D.BUG) Log.d(TAG, "mDialog.dismiss()");
                     mDialog.dismiss();
-                }, 50))
-                .start();
+                }, 50));
+        if (!isLandscape()) animator.translationX(mDialogView.getWidth() / 2);
+        animator.start();
 
         Events.writeEvent(mContext, Events.EVENT_DISMISS_DIALOG, reason);
         mController.notifyVisible(false);
