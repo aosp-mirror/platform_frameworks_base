@@ -57,6 +57,7 @@ import java.util.Arrays;
 final class ProcessRecord {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ProcessRecord" : TAG_AM;
 
+    private final ActivityManagerService mService; // where we came from
     private final BatteryStatsImpl mBatteryStats; // where to collect runtime statistics
     final ApplicationInfo info; // all about the first app in the process
     final boolean isolated;     // true if this is a special isolated process
@@ -486,8 +487,9 @@ final class ProcessRecord {
         }
     }
 
-    ProcessRecord(BatteryStatsImpl _batteryStats, ApplicationInfo _info,
-            String _processName, int _uid) {
+    ProcessRecord(ActivityManagerService _service, BatteryStatsImpl _batteryStats,
+            ApplicationInfo _info, String _processName, int _uid) {
+        mService = _service;
         mBatteryStats = _batteryStats;
         info = _info;
         isolated = _info.uid != _uid;
@@ -660,8 +662,10 @@ final class ProcessRecord {
     void kill(String reason, boolean noisy) {
         if (!killedByAm) {
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "kill");
-            if (noisy) {
-                Slog.i(TAG, "Killing " + toShortString() + " (adj " + setAdj + "): " + reason);
+            if (mService != null && (noisy || info.uid == mService.mCurOomAdjUid)) {
+                mService.reportUidInfoMessageLocked(TAG,
+                        "Killing " + toShortString() + " (adj " + setAdj + "): " + reason,
+                        info.uid);
             }
             if (pid > 0) {
                 EventLog.writeEvent(EventLogTags.AM_KILL, userId, pid, processName, setAdj, reason);

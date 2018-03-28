@@ -95,6 +95,7 @@ package android.app {
     field public static final java.lang.String OPSTR_REQUEST_INSTALL_PACKAGES = "android:request_install_packages";
     field public static final java.lang.String OPSTR_RUN_ANY_IN_BACKGROUND = "android:run_any_in_background";
     field public static final java.lang.String OPSTR_RUN_IN_BACKGROUND = "android:run_in_background";
+    field public static final java.lang.String OPSTR_START_FOREGROUND = "android:start_foreground";
     field public static final java.lang.String OPSTR_TAKE_AUDIO_FOCUS = "android:take_audio_focus";
     field public static final java.lang.String OPSTR_TAKE_MEDIA_BUTTONS = "android:take_media_buttons";
     field public static final java.lang.String OPSTR_TOAST_WINDOW = "android:toast_window";
