@@ -120,7 +120,9 @@ bool ResourceThermalManagerPuller::PullInternal(vector<shared_ptr<LogEvent>>* da
                         wallClockTimestampNs, elapsedTimestampNs);
                 ptr->write((static_cast<int>(temps[i].type)));
                 ptr->write(temps[i].name);
-                ptr->write(temps[i].currentValue);
+                // Convert the temperature to an int.
+                int32_t temp = static_cast<int>(temps[i].currentValue * 10);
+                ptr->write(temp);
                 ptr->init();
                 data->push_back(ptr);
             }
