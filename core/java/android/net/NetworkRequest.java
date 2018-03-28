@@ -229,7 +229,6 @@ public class NetworkRequest implements Parcelable {
          *
          * @param capability The capability to add to unwanted capability list.
          * @return The builder to facilitate chaining.
-         * @hide
          */
         public Builder addUnwantedCapability(@NetworkCapabilities.NetCapability int capability) {
             mNetworkCapabilities.addUnwantedCapability(capability);
