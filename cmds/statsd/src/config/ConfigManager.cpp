@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
+#define DEBUG false  // STOPSHIP if true
+#include "Log.h"
+
 #include "config/ConfigManager.h"
 #include "storage/StorageManager.h"
 
+#include "guardrail/StatsdStats.h"
 #include "stats_util.h"
 
 #include <android-base/file.h>
@@ -68,24 +72,37 @@ void ConfigManager::UpdateConfig(const ConfigKey& key, const StatsdConfig& confi
     {
         lock_guard <mutex> lock(mMutex);
 
-        auto it = mConfigs.find(key);
-
         const int numBytes = config.ByteSize();
         vector<uint8_t> buffer(numBytes);
         config.SerializeToArray(&buffer[0], numBytes);
 
-        const bool isDuplicate =
-            it != mConfigs.end() &&
-            StorageManager::hasIdenticalConfig(key, buffer);
+        auto uidIt = mConfigs.find(key.GetUid());
+        // GuardRail: Limit the number of configs per uid.
+        if (uidIt != mConfigs.end()) {
+            auto it = uidIt->second.find(key);
+            if (it == uidIt->second.end() &&
+                uidIt->second.size() >= StatsdStats::kMaxConfigCountPerUid) {
+                ALOGE("ConfigManager: uid %d has exceeded the config count limit", key.GetUid());
+                return;
+            }
+        }
 
-        // Update saved file on disk. We still update timestamp of file when
-        // there exists a duplicate configuration to avoid garbage collection.
+        // Check if it's a duplicate config.
+        if (uidIt != mConfigs.end() && uidIt->second.find(key) != uidIt->second.end() &&
+            StorageManager::hasIdenticalConfig(key, buffer)) {
+            // This is a duplicate config.
+            ALOGI("ConfigManager This is a duplicate config %s", key.ToString().c_str());
+            // Update saved file on disk. We still update timestamp of file when
+            // there exists a duplicate configuration to avoid garbage collection.
+            update_saved_configs_locked(key, buffer, numBytes);
+            return;
+        }
+
+        // Update saved file on disk.
         update_saved_configs_locked(key, buffer, numBytes);
 
-        if (isDuplicate) return;
-
-        // Add to set
-        mConfigs.insert(key);
+        // Add to set.
+        mConfigs[key.GetUid()].insert(key);
 
         for (sp<ConfigListener> listener : mListeners) {
             broadcastList.push_back(listener);
@@ -113,11 +130,10 @@ void ConfigManager::RemoveConfig(const ConfigKey& key) {
     {
         lock_guard <mutex> lock(mMutex);
 
-        auto it = mConfigs.find(key);
-        if (it != mConfigs.end()) {
+        auto uidIt = mConfigs.find(key.GetUid());
+        if (uidIt != mConfigs.end() && uidIt->second.find(key) != uidIt->second.end()) {
             // Remove from map
-            mConfigs.erase(it);
-
+            uidIt->second.erase(key);
             for (sp<ConfigListener> listener : mListeners) {
                 broadcastList.push_back(listener);
             }
@@ -150,17 +166,19 @@ void ConfigManager::RemoveConfigs(int uid) {
     {
         lock_guard <mutex> lock(mMutex);
 
-        for (auto it = mConfigs.begin(); it != mConfigs.end();) {
+        auto uidIt = mConfigs.find(uid);
+        if (uidIt == mConfigs.end()) {
+            return;
+        }
+
+        for (auto it = uidIt->second.begin(); it != uidIt->second.end(); ++it) {
             // Remove from map
-            if (it->GetUid() == uid) {
                 remove_saved_configs(*it);
                 removed.push_back(*it);
                 mConfigReceivers.erase(*it);
-                it = mConfigs.erase(it);
-            } else {
-                it++;
-            }
         }
+
+        mConfigs.erase(uidIt);
 
         for (sp<ConfigListener> listener : mListeners) {
             broadcastList.push_back(listener);
@@ -182,17 +200,16 @@ void ConfigManager::RemoveAllConfigs() {
     {
         lock_guard <mutex> lock(mMutex);
 
-
-        for (auto it = mConfigs.begin(); it != mConfigs.end();) {
-            // Remove from map
-            removed.push_back(*it);
-            auto receiverIt = mConfigReceivers.find(*it);
-            if (receiverIt != mConfigReceivers.end()) {
-                mConfigReceivers.erase(*it);
+        for (auto uidIt = mConfigs.begin(); uidIt != mConfigs.end();) {
+            for (auto it = uidIt->second.begin(); it != uidIt->second.end();) {
+                // Remove from map
+                removed.push_back(*it);
+                it = uidIt->second.erase(it);
             }
-            it = mConfigs.erase(it);
+            uidIt = mConfigs.erase(uidIt);
         }
 
+        mConfigReceivers.clear();
         for (sp<ConfigListener> listener : mListeners) {
             broadcastList.push_back(listener);
         }
@@ -211,8 +228,10 @@ vector<ConfigKey> ConfigManager::GetAllConfigKeys() const {
     lock_guard<mutex> lock(mMutex);
 
     vector<ConfigKey> ret;
-    for (auto it = mConfigs.cbegin(); it != mConfigs.cend(); ++it) {
-        ret.push_back(*it);
+    for (auto uidIt = mConfigs.cbegin(); uidIt != mConfigs.cend(); ++uidIt) {
+        for (auto it = uidIt->second.cbegin(); it != uidIt->second.cend(); ++it) {
+            ret.push_back(*it);
+        }
     }
     return ret;
 }
@@ -231,13 +250,15 @@ const sp<android::IBinder> ConfigManager::GetConfigReceiver(const ConfigKey& key
 void ConfigManager::Dump(FILE* out) {
     lock_guard<mutex> lock(mMutex);
 
-    fprintf(out, "CONFIGURATIONS (%d)\n", (int)mConfigs.size());
+    fprintf(out, "CONFIGURATIONS\n");
     fprintf(out, "     uid name\n");
-    for (const auto& key : mConfigs) {
-        fprintf(out, "  %6d %lld\n", key.GetUid(), (long long)key.GetId());
-        auto receiverIt = mConfigReceivers.find(key);
-        if (receiverIt != mConfigReceivers.end()) {
-            fprintf(out, "    -> received by PendingIntent as binder\n");
+    for (auto uidIt = mConfigs.cbegin(); uidIt != mConfigs.cend(); ++uidIt) {
+        for (auto it = uidIt->second.cbegin(); it != uidIt->second.cend(); ++it) {
+            fprintf(out, "  %6d %lld\n", it->GetUid(), (long long)it->GetId());
+            auto receiverIt = mConfigReceivers.find(*it);
+            if (receiverIt != mConfigReceivers.end()) {
+                fprintf(out, "    -> received by PendingIntent as binder\n");
+            }
         }
     }
 }

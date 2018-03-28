@@ -199,11 +199,6 @@ void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig
     sp<MetricsManager> newMetricsManager =
         new MetricsManager(key, config, mTimeBaseSec, mUidMap,
                            mAnomalyAlarmMonitor, mPeriodicAlarmMonitor);
-    auto it = mMetricsManagers.find(key);
-    if (it == mMetricsManagers.end() && mMetricsManagers.size() > StatsdStats::kMaxConfigCount) {
-        ALOGE("Can't accept more configs!");
-        return;
-    }
 
     if (newMetricsManager->isConfigValid()) {
         mUidMap->OnConfigUpdated(key);
@@ -213,7 +208,6 @@ void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig
             mUidMap->addListener(newMetricsManager.get());
         }
         mMetricsManagers[key] = newMetricsManager;
-        // Why doesn't this work? mMetricsManagers.insert({key, std::move(newMetricsManager)});
         VLOG("StatsdConfig valid");
     } else {
         // If there is any error in the config, don't use it.
