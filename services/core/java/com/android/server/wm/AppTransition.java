@@ -34,6 +34,8 @@ import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
+import static android.view.WindowManager.TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_TRANSLUCENT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_UNSET;
 import static android.view.WindowManager.TRANSIT_WALLPAPER_CLOSE;
 import static android.view.WindowManager.TRANSIT_WALLPAPER_INTRA_CLOSE;
@@ -114,6 +116,7 @@ import android.view.animation.PathInterpolator;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 
+import com.android.internal.R;
 import com.android.internal.util.DumpUtils.Dump;
 import com.android.server.AttributeCache;
 import com.android.server.wm.WindowManagerService.H;
@@ -1652,14 +1655,26 @@ public class AppTransition implements Dump {
                         + " Callers=" + Debug.getCallers(3));
             }
         } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS && enter) {
-
-            a = loadAnimationRes("android", enter
-                    ? com.android.internal.R.anim.task_open_enter_cross_profile_apps
-                    : com.android.internal.R.anim.task_open_exit);
+            a = loadAnimationRes("android",
+                    com.android.internal.R.anim.task_open_enter_cross_profile_apps);
             Slog.v(TAG,
                     "applyAnimation NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS:"
                             + " anim=" + a + " transit=" + appTransitionToString(transit)
-                            + " isEntrance=" + enter + " Callers=" + Debug.getCallers(3));
+                            + " isEntrance=true" + " Callers=" + Debug.getCallers(3));
+        } else if (transit == TRANSIT_TRANSLUCENT_ACTIVITY_OPEN && enter) {
+            a = loadAnimationRes("android",
+                    com.android.internal.R.anim.activity_translucent_open_enter);
+            Slog.v(TAG,
+                    "applyAnimation TRANSIT_TRANSLUCENT_ACTIVITY_OPEN:"
+                            + " anim=" + a + " transit=" + appTransitionToString(transit)
+                            + " isEntrance=true" + " Callers=" + Debug.getCallers(3));
+        } else if (transit == TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE && !enter) {
+            a = loadAnimationRes("android",
+                    com.android.internal.R.anim.activity_translucent_close_exit);
+            Slog.v(TAG,
+                    "applyAnimation TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE:"
+                            + " anim=" + a + " transit=" + appTransitionToString(transit)
+                            + " isEntrance=false" + " Callers=" + Debug.getCallers(3));
         } else {
             int animAttr = 0;
             switch (transit) {
@@ -2001,6 +2016,12 @@ public class AppTransition implements Dump {
             case TRANSIT_KEYGUARD_UNOCCLUDE: {
                 return "TRANSIT_KEYGUARD_UNOCCLUDE";
             }
+            case TRANSIT_TRANSLUCENT_ACTIVITY_OPEN: {
+                return "TRANSIT_TRANSLUCENT_ACTIVITY_OPEN";
+            }
+            case TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE: {
+                return "TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE";
+            }
             default: {
                 return "<UNKNOWN>";
             }
@@ -2173,16 +2194,20 @@ public class AppTransition implements Dump {
                 || transit == TRANSIT_KEYGUARD_UNOCCLUDE;
     }
 
-    private static boolean isTaskTransit(int transit) {
-        return transit == TRANSIT_TASK_OPEN
+    static boolean isTaskTransit(int transit) {
+        return isTaskOpenTransit(transit)
                 || transit == TRANSIT_TASK_CLOSE
-                || transit == TRANSIT_TASK_OPEN_BEHIND
                 || transit == TRANSIT_TASK_TO_BACK
-                || transit == TRANSIT_TASK_TO_FRONT
                 || transit == TRANSIT_TASK_IN_PLACE;
     }
 
-    private static boolean isActivityTransit(int transit) {
+    private static  boolean isTaskOpenTransit(int transit) {
+        return transit == TRANSIT_TASK_OPEN
+                || transit == TRANSIT_TASK_OPEN_BEHIND
+                || transit == TRANSIT_TASK_TO_FRONT;
+    }
+
+    static boolean isActivityTransit(int transit) {
         return transit == TRANSIT_ACTIVITY_OPEN
                 || transit == TRANSIT_ACTIVITY_CLOSE
                 || transit == TRANSIT_ACTIVITY_RELAUNCH;
