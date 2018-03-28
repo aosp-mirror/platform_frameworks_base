@@ -13942,6 +13942,18 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public boolean isUidActive(int uid, String callingPackage) {
+        if (!hasUsageStatsPermission(callingPackage)) {
+            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
+                    "getPackageProcessState");
+        }
+        synchronized (this) {
+            final UidRecord uidRecord = mActiveUids.get(uid);
+            return uidRecord != null && !uidRecord.setIdle;
+        }
+    }
+
+    @Override
     public boolean convertFromTranslucent(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
         try {
