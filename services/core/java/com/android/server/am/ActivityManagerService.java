@@ -2731,7 +2731,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mBlacklistDisabled = false;
                     mExemptions = TextUtils.isEmpty(exemptions)
                             ? Collections.emptyList()
-                            : Arrays.asList(exemptions.split(":"));
+                            : Arrays.asList(exemptions.split(","));
                 }
                 zygoteProcess.setApiBlacklistExemptions(mExemptions);
             }
