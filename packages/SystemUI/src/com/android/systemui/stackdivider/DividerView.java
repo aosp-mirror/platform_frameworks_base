@@ -592,7 +592,16 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
             // Record last snap target the divider moved to
             if (mHomeStackResizable && !mIsInMinimizeInteraction) {
-                saveSnapTargetBeforeMinimized(snapTarget);
+                // The last snapTarget position can be negative when the last divider position was
+                // offscreen. In that case, save the middle (default) SnapTarget so calculating next
+                // position isn't negative.
+                final SnapTarget saveTarget;
+                if (snapTarget.position < 0) {
+                    saveTarget = mSnapAlgorithm.getMiddleTarget();
+                } else {
+                    saveTarget = snapTarget;
+                }
+                saveSnapTargetBeforeMinimized(saveTarget);
             }
         };
         Runnable notCancelledEndAction = () -> {
