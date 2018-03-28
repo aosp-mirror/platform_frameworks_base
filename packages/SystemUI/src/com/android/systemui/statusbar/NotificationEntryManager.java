@@ -299,12 +299,12 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         updateNotifications();
     }
 
-    private boolean shouldSuppressFullScreenIntent(String key) {
+    private boolean shouldSuppressFullScreenIntent(StatusBarNotification sbn) {
         if (mPresenter.isDeviceInVrMode()) {
             return true;
         }
 
-        return mNotificationData.shouldSuppressFullScreenIntent(key);
+        return mNotificationData.shouldSuppressFullScreenIntent(sbn);
     }
 
     private void inflateViews(NotificationData.Entry entry, ViewGroup parent) {
@@ -690,7 +690,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         NotificationData.Entry shadeEntry = createNotificationViews(notification);
         boolean isHeadsUped = shouldPeek(shadeEntry);
         if (!isHeadsUped && notification.getNotification().fullScreenIntent != null) {
-            if (shouldSuppressFullScreenIntent(key)) {
+            if (shouldSuppressFullScreenIntent(notification)) {
                 if (DEBUG) {
                     Log.d(TAG, "No Fullscreen intent: suppressed by DND: " + key);
                 }
@@ -846,13 +846,13 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             return false;
         }
 
-        if (!mPresenter.isDozing() && mNotificationData.shouldSuppressPeek(sbn.getKey())) {
+        if (!mPresenter.isDozing() && mNotificationData.shouldSuppressPeek(sbn)) {
             if (DEBUG) Log.d(TAG, "No peeking: suppressed by DND: " + sbn.getKey());
             return false;
         }
 
         // Peeking triggers an ambient display pulse, so disable peek is ambient is active
-        if (mPresenter.isDozing() && mNotificationData.shouldSuppressAmbient(sbn.getKey())) {
+        if (mPresenter.isDozing() && mNotificationData.shouldSuppressAmbient(sbn)) {
             if (DEBUG) Log.d(TAG, "No peeking: suppressed by DND: " + sbn.getKey());
             return false;
         }
