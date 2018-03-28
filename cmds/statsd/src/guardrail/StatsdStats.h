@@ -78,17 +78,17 @@ public:
     ~StatsdStats(){};
 
     // TODO: set different limit if the device is low ram.
-    const static int kDimensionKeySizeSoftLimit = 300;
-    const static int kDimensionKeySizeHardLimit = 500;
+    const static int kDimensionKeySizeSoftLimit = 500;
+    const static int kDimensionKeySizeHardLimit = 800;
 
     // Per atom dimension key size limit
     static const std::map<int, std::pair<size_t, size_t>> kAtomDimensionKeySizeLimitMap;
 
-    const static int kMaxConfigCount = 10;
+    const static int kMaxConfigCountPerUid = 10;
     const static int kMaxAlertCountPerConfig = 100;
-    const static int kMaxConditionCountPerConfig = 200;
-    const static int kMaxMetricCountPerConfig = 300;
-    const static int kMaxMatcherCountPerConfig = 500;
+    const static int kMaxConditionCountPerConfig = 300;
+    const static int kMaxMetricCountPerConfig = 1000;
+    const static int kMaxMatcherCountPerConfig = 800;
 
     // The max number of old config stats we keep.
     const static int kMaxIceBoxSize = 20;
