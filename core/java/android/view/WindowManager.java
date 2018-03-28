@@ -2220,7 +2220,7 @@ public interface WindowManager extends ViewManager {
         @IntDef(
                 flag = true,
                 value = {LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT,
-                        LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS,
+                        LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES,
                         LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER})
         @interface LayoutInDisplayCutoutMode {}
 
@@ -2231,10 +2231,11 @@ public interface WindowManager extends ViewManager {
          * Defaults to {@link #LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT}.
          *
          * @see #LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
-         * @see #LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+         * @see #LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
          * @see #LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
          * @see DisplayCutout
-         * @see android.R.attr#layoutInDisplayCutoutMode
+         * @see android.R.attr#windowLayoutInDisplayCutoutMode
+         *         android:windowLayoutInDisplayCutoutMode
          */
         @LayoutInDisplayCutoutMode
         public int layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
@@ -2245,10 +2246,10 @@ public interface WindowManager extends ViewManager {
          * laid out such that it does not overlap with the {@link DisplayCutout} area.
          *
          * <p>
-         * In practice, this means that if the window did not set FLAG_FULLSCREEN or
-         * SYSTEM_UI_FLAG_FULLSCREEN, it can extend into the cutout area in portrait if the cutout
-         * is at the top edge. Similarly for SYSTEM_UI_FLAG_HIDE_NAVIGATION and a cutout at the
-         * bottom of the screen.
+         * In practice, this means that if the window did not set {@link #FLAG_FULLSCREEN} or
+         * {@link View#SYSTEM_UI_FLAG_FULLSCREEN}, it can extend into the cutout area in portrait
+         * if the cutout is at the top edge. Similarly for
+         * {@link View#SYSTEM_UI_FLAG_HIDE_NAVIGATION} and a cutout at the bottom of the screen.
          * Otherwise (i.e. fullscreen or landscape) it is laid out such that it does not overlap the
          * cutout area.
          *
@@ -2258,6 +2259,9 @@ public interface WindowManager extends ViewManager {
          *
          * @see DisplayCutout
          * @see WindowInsets
+         * @see #layoutInDisplayCutoutMode
+         * @see android.R.attr#windowLayoutInDisplayCutoutMode
+         *         android:windowLayoutInDisplayCutoutMode
          */
         public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT = 0;
 
@@ -2281,6 +2285,9 @@ public interface WindowManager extends ViewManager {
          *
          * @see DisplayCutout
          * @see WindowInsets#getDisplayCutout()
+         * @see #layoutInDisplayCutoutMode
+         * @see android.R.attr#windowLayoutInDisplayCutoutMode
+         *         android:windowLayoutInDisplayCutoutMode
          */
         public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES = 1;
 
@@ -2288,12 +2295,14 @@ public interface WindowManager extends ViewManager {
          * The window is never allowed to overlap with the DisplayCutout area.
          *
          * <p>
-         * This should be used with windows that transiently set SYSTEM_UI_FLAG_FULLSCREEN to
-         * avoid a relayout of the window when the flag is set or cleared.
+         * This should be used with windows that transiently set
+         * {@link View#SYSTEM_UI_FLAG_FULLSCREEN} or {@link View#SYSTEM_UI_FLAG_HIDE_NAVIGATION}
+         * to avoid a relayout of the window when the respective flag is set or cleared.
          *
          * @see DisplayCutout
-         * @see View#SYSTEM_UI_FLAG_FULLSCREEN SYSTEM_UI_FLAG_FULLSCREEN
-         * @see View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+         * @see #layoutInDisplayCutoutMode
+         * @see android.R.attr#windowLayoutInDisplayCutoutMode
+         *         android:windowLayoutInDisplayCutoutMode
          */
         public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER = 2;
 
