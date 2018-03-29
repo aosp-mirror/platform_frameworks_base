@@ -189,7 +189,6 @@ public class RecoverableKeyStoreManagerTest {
 
         mRecoverableKeyStoreManager = new RecoverableKeyStoreManager(
                 mMockContext,
-                KeyStore.getInstance(),
                 mRecoverableKeyStoreDb,
                 mRecoverySessionStorage,
                 Executors.newSingleThreadExecutor(),
