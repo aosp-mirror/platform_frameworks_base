@@ -226,12 +226,21 @@ public class NotificationDataTest extends SysuiTestCase {
     public void testSuppressSystemAlertNotification() {
         when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(false);
         when(mFsc.isSystemAlertNotification(any())).thenReturn(true);
+        StatusBarNotification sbn = mRow.getEntry().notification;
+        Bundle bundle = new Bundle();
+        bundle.putStringArray(Notification.EXTRA_FOREGROUND_APPS, new String[] {"something"});
+        sbn.getNotification().extras = bundle;
 
         assertTrue(mNotificationData.shouldFilterOut(mRow.getEntry().notification));
     }
 
     @Test
     public void testDoNotSuppressSystemAlertNotification() {
+        StatusBarNotification sbn = mRow.getEntry().notification;
+        Bundle bundle = new Bundle();
+        bundle.putStringArray(Notification.EXTRA_FOREGROUND_APPS, new String[] {"something"});
+        sbn.getNotification().extras = bundle;
+
         when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(true);
         when(mFsc.isSystemAlertNotification(any())).thenReturn(true);
 
@@ -245,6 +254,22 @@ public class NotificationDataTest extends SysuiTestCase {
         when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(false);
         when(mFsc.isSystemAlertNotification(any())).thenReturn(false);
 
+        assertFalse(mNotificationData.shouldFilterOut(mRow.getEntry().notification));
+    }
+
+    @Test
+    public void testDoNotSuppressMalformedSystemAlertNotification() {
+        when(mFsc.isSystemAlertWarningNeeded(anyInt(), anyString())).thenReturn(true);
+
+        // missing extra
+        assertFalse(mNotificationData.shouldFilterOut(mRow.getEntry().notification));
+
+        StatusBarNotification sbn = mRow.getEntry().notification;
+        Bundle bundle = new Bundle();
+        bundle.putStringArray(Notification.EXTRA_FOREGROUND_APPS, new String[] {});
+        sbn.getNotification().extras = bundle;
+
+        // extra missing values
         assertFalse(mNotificationData.shouldFilterOut(mRow.getEntry().notification));
     }
 
