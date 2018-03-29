@@ -41,7 +41,6 @@ public class FeatureFlagUtils {
     static {
         DEFAULT_FLAGS = new HashMap<>();
         DEFAULT_FLAGS.put("settings_battery_display_app_list", "false");
-        DEFAULT_FLAGS.put("settings_zone_picker_v2", "true");
         DEFAULT_FLAGS.put("settings_about_phone_v2", "true");
         DEFAULT_FLAGS.put("settings_bluetooth_while_driving", "false");
         DEFAULT_FLAGS.put("settings_data_usage_v2", "true");
