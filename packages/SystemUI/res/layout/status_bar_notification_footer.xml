@@ -44,7 +44,6 @@
             android:focusable="true"
             android:contentDescription="@string/accessibility_clear_all"
             android:text="@string/clear_all_notifications_text"
-            android:textColor="?attr/wallpaperTextColor"
-            android:textAllCaps="true"/>
+            android:textColor="?attr/wallpaperTextColor"/>
     </FrameLayout>
 </com.android.systemui.statusbar.FooterView>
