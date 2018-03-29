@@ -33,11 +33,16 @@
          a light UI more visible. -->
     <drawable name="screen_background_light_transparent">#80ffffff</drawable>
     <color name="safe_mode_text">#80ffffff</color>
+    <!-- The color white, equivalent to 0xffffffff -->
     <color name="white">#ffffffff</color>
+    <!-- The color black, equivalent to 0xff000000 -->
     <color name="black">#ff000000</color>
     <color name="red">#ffff0000</color>
+    <!-- Fully transparent, equivalent to 0x00000000 -->
     <color name="transparent">#00000000</color>
+    <!-- Equivalent to 0xff000000 -->
     <color name="background_dark">#ff000000</color>
+    <!-- Equivalent to 0xffffffff -->
     <color name="background_light">#ffffffff</color>
     <color name="bright_foreground_dark">@android:color/background_light</color>
     <color name="bright_foreground_light">@android:color/background_dark</color>
@@ -80,6 +85,7 @@
 
     <!-- For settings framework -->
     <color name="lighter_gray">#ddd</color>
+    <!-- A dark gray, equivalent to 0xffaaaaaa -->
     <color name="darker_gray">#aaa</color>
 
     <!-- For security permissions -->
