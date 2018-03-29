@@ -35,6 +35,22 @@ import java.lang.annotation.RetentionPolicy;
  */
 @SystemApi
 public final class KeyDerivationParams implements Parcelable {
+
+    // IMPORTANT! PLEASE READ!
+    // -----------------------
+    // If you edit this file (e.g., to add new fields), please MAKE SURE to also do the following:
+    // - Update the #writeToParcel(Parcel) method below
+    // - Update the #(Parcel) constructor below
+    // - Update android.security.keystore.recovery.KeyChainSnapshotTest to make sure nobody
+    //     accidentally breaks your fields in the Parcel in the future.
+    // - Update com.android.server.locksettings.recoverablekeystore.serialization
+    //     .KeyChainSnapshotSerializer to correctly serialize your new field
+    // - Update com.android.server.locksettings.recoverablekeystore.serialization
+    //     .KeyChainSnapshotSerializer to correctly deserialize your new field
+    // - Update com.android.server.locksettings.recoverablekeystore.serialization
+    //     .KeychainSnapshotSerializerTest to make sure nobody breaks serialization of your field
+    //     in the future.
+
     private final int mAlgorithm;
     private final byte[] mSalt;
     private final int mMemoryDifficulty;
