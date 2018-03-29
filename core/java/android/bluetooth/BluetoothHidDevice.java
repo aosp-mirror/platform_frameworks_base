@@ -701,29 +701,6 @@ public final class BluetoothHidDevice implements BluetoothProfile {
     }
 
     /**
-     * Sends Virtual Cable Unplug to currently connected host.
-     *
-     * @return
-     * {@hide}
-     */
-    public boolean unplug(BluetoothDevice device) {
-        boolean result = false;
-
-        final IBluetoothHidDevice service = mService;
-        if (service != null) {
-            try {
-                result = service.unplug(device);
-            } catch (RemoteException e) {
-                Log.e(TAG, e.toString());
-            }
-        } else {
-            Log.w(TAG, "Proxy not attached to service");
-        }
-
-        return result;
-    }
-
-    /**
      * Initiates connection to host which is currently paired with this device. If the application
      * is not registered, #connect(BluetoothDevice) will fail. The connection state should be
      * tracked by the application by handling callback from Callback#onConnectionStateChanged. The
