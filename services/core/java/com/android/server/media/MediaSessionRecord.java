@@ -71,8 +71,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      */
     private static final int OPTIMISTIC_VOLUME_TIMEOUT = 1000;
 
-    private static final int UID_NOT_SET = -1;
-
     private final MessageHandler mHandler;
 
     private final int mOwnerPid;
@@ -116,9 +114,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     private boolean mIsActive = false;
     private boolean mDestroyed = false;
-
-    private int mCallingUid = UID_NOT_SET;
-    private String mCallingPackage;
 
     public MediaSessionRecord(int ownerPid, int ownerUid, int userId, String ownerPackageName,
             ISessionCallback cb, String tag, MediaSessionService service, Looper handlerLooper) {
@@ -234,14 +229,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
      * {@link AudioManager#ADJUST_LOWER}, {@link AudioManager#ADJUST_RAISE},
      * {@link AudioManager#ADJUST_SAME}.
      *
+     * @param packageName The package that made the original volume request.
+     * @param pid The pid that made the original volume request.
+     * @param uid The uid that made the original volume request.
      * @param direction The direction to adjust volume in.
      * @param flags Any of the flags from {@link AudioManager}.
-     * @param packageName The package that made the original volume request.
-     * @param uid The uid that made the original volume request.
      * @param useSuggested True to use adjustSuggestedStreamVolume instead of
-     *            adjustStreamVolume.
      */
-    public void adjustVolume(int direction, int flags, String packageName, int uid,
+    public void adjustVolume(String packageName, int pid, int uid, int direction, int flags,
             boolean useSuggested) {
         int previousFlagPlaySound = flags & AudioManager.FLAG_PLAY_SOUND;
         if (isPlaybackActive() || hasFlag(MediaSession.FLAG_EXCLUSIVE_GLOBAL_PRIORITY)) {
@@ -263,7 +258,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 Log.w(TAG, "Muting remote playback is not supported");
                 return;
             }
-            mSessionCb.adjustVolume(direction);
+            mSessionCb.adjustVolume(packageName, pid, uid, direction);
 
             int volumeBefore = (mOptimisticVolume < 0 ? mCurrentVolume : mOptimisticVolume);
             mOptimisticVolume = volumeBefore + direction;
@@ -282,7 +277,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
     }
 
-    public void setVolumeTo(int value, int flags, String packageName, int uid) {
+    public void setVolumeTo(String packageName, int pid, int uid, int value, int flags) {
         if (mVolumeType == PlaybackInfo.PLAYBACK_TYPE_LOCAL) {
             int stream = AudioAttributes.toLegacyStreamType(mAudioAttrs);
             mAudioManagerInternal.setStreamVolumeForUid(stream, value, flags, packageName, uid);
@@ -292,7 +287,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 return;
             }
             value = Math.max(0, Math.min(value, mMaxVolume));
-            mSessionCb.setVolumeTo(value);
+            mSessionCb.setVolumeTo(packageName, pid, uid, value);
 
             int volumeBefore = (mOptimisticVolume < 0 ? mCurrentVolume : mOptimisticVolume);
             mOptimisticVolume = Math.max(0, Math.min(value, mMaxVolume));
@@ -423,10 +418,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         return mSessionCb.mCb;
     }
 
-    public void sendMediaButton(KeyEvent ke, int sequenceId,
-            ResultReceiver cb, int uid, String packageName) {
-        updateCallingPackage(uid, packageName);
-        mSessionCb.sendMediaButton(ke, sequenceId, cb);
+    public void sendMediaButton(String packageName, int pid, int uid, KeyEvent ke, int sequenceId,
+            ResultReceiver cb) {
+        mSessionCb.sendMediaButton(packageName, pid, uid, ke, sequenceId, cb);
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -703,22 +697,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         return -1;
     }
 
-    private void updateCallingPackage() {
-        updateCallingPackage(UID_NOT_SET, null);
-    }
-
-    private void updateCallingPackage(int uid, String packageName) {
-        if (uid == UID_NOT_SET) {
-            uid = Binder.getCallingUid();
-        }
-        synchronized (mLock) {
-            if (mCallingUid == UID_NOT_SET || mCallingUid != uid) {
-                mCallingUid = uid;
-                mCallingPackage = packageName != null ? packageName : getPackageName(uid);
-            }
-        }
-    }
-
     private String getPackageName(int uid) {
         Context context = mService.getContext();
         if (context == null) {
@@ -920,11 +898,6 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
                 mHandler.post(MessageHandler.MSG_UPDATE_VOLUME);
             }
         }
-
-        @Override
-        public String getCallingPackage() {
-            return mCallingPackage;
-        }
     }
 
     class SessionCb {
@@ -934,11 +907,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             mCb = cb;
         }
 
-        public boolean sendMediaButton(KeyEvent keyEvent, int sequenceId, ResultReceiver cb) {
+        public boolean sendMediaButton(String packageName, int pid, int uid, KeyEvent keyEvent,
+                int sequenceId, ResultReceiver cb) {
             Intent mediaButtonIntent = new Intent(Intent.ACTION_MEDIA_BUTTON);
             mediaButtonIntent.putExtra(Intent.EXTRA_KEY_EVENT, keyEvent);
             try {
-                mCb.onMediaButton(mediaButtonIntent, sequenceId, cb);
+                mCb.onMediaButton(packageName, pid, uid, mediaButtonIntent, sequenceId, cb);
                 return true;
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in sendMediaRequest.", e);
@@ -946,169 +920,176 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
             return false;
         }
 
-        public void sendCommand(String command, Bundle args, ResultReceiver cb) {
+        public void sendCommand(String packageName, int pid, int uid, String command, Bundle args,
+                ResultReceiver cb) {
             try {
-                mCb.onCommand(command, args, cb);
+                mCb.onCommand(packageName, pid, uid, command, args, cb);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in sendCommand.", e);
             }
         }
 
-        public void sendCustomAction(String action, Bundle args) {
+        public void sendCustomAction(String packageName, int pid, int uid, String action,
+                Bundle args) {
             try {
-                mCb.onCustomAction(action, args);
+                mCb.onCustomAction(packageName, pid, uid, action, args);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in sendCustomAction.", e);
             }
         }
 
-        public void prepare() {
+        public void prepare(String packageName, int pid, int uid) {
             try {
-                mCb.onPrepare();
+                mCb.onPrepare(packageName, pid, uid);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in prepare.", e);
             }
         }
 
-        public void prepareFromMediaId(String mediaId, Bundle extras) {
+        public void prepareFromMediaId(String packageName, int pid, int uid, String mediaId,
+                Bundle extras) {
             try {
-                mCb.onPrepareFromMediaId(mediaId, extras);
+                mCb.onPrepareFromMediaId(packageName, pid, uid, mediaId, extras);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in prepareFromMediaId.", e);
             }
         }
 
-        public void prepareFromSearch(String query, Bundle extras) {
+        public void prepareFromSearch(String packageName, int pid, int uid, String query,
+                Bundle extras) {
             try {
-                mCb.onPrepareFromSearch(query, extras);
+                mCb.onPrepareFromSearch(packageName, pid, uid, query, extras);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in prepareFromSearch.", e);
             }
         }
 
-        public void prepareFromUri(Uri uri, Bundle extras) {
+        public void prepareFromUri(String packageName, int pid, int uid, Uri uri,
+                Bundle extras) {
             try {
-                mCb.onPrepareFromUri(uri, extras);
+                mCb.onPrepareFromUri(packageName, pid, uid, uri, extras);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in prepareFromUri.", e);
             }
         }
 
-        public void play() {
+        public void play(String packageName, int pid, int uid) {
             try {
-                mCb.onPlay();
+                mCb.onPlay(packageName, pid, uid);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in play.", e);
             }
         }
 
-        public void playFromMediaId(String mediaId, Bundle extras) {
+        public void playFromMediaId(String packageName, int pid, int uid, String mediaId,
+                Bundle extras) {
             try {
-                mCb.onPlayFromMediaId(mediaId, extras);
+                mCb.onPlayFromMediaId(packageName, pid, uid, mediaId, extras);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in playFromMediaId.", e);
             }
         }
 
-        public void playFromSearch(String query, Bundle extras) {
+        public void playFromSearch(String packageName, int pid, int uid, String query,
+                Bundle extras) {
             try {
-                mCb.onPlayFromSearch(query, extras);
+                mCb.onPlayFromSearch(packageName, pid, uid, query, extras);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in playFromSearch.", e);
             }
         }
 
-        public void playFromUri(Uri uri, Bundle extras) {
+        public void playFromUri(String packageName, int pid, int uid, Uri uri, Bundle extras) {
             try {
-                mCb.onPlayFromUri(uri, extras);
+                mCb.onPlayFromUri(packageName, pid, uid, uri, extras);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in playFromUri.", e);
             }
         }
 
-        public void skipToTrack(long id) {
+        public void skipToTrack(String packageName, int pid, int uid, long id) {
             try {
-                mCb.onSkipToTrack(id);
+                mCb.onSkipToTrack(packageName, pid, uid, id);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in skipToTrack", e);
             }
         }
 
-        public void pause() {
+        public void pause(String packageName, int pid, int uid) {
             try {
-                mCb.onPause();
+                mCb.onPause(packageName, pid, uid);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in pause.", e);
             }
         }
 
-        public void stop() {
+        public void stop(String packageName, int pid, int uid) {
             try {
-                mCb.onStop();
+                mCb.onStop(packageName, pid, uid);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in stop.", e);
             }
         }
 
-        public void next() {
+        public void next(String packageName, int pid, int uid) {
             try {
-                mCb.onNext();
+                mCb.onNext(packageName, pid, uid);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in next.", e);
             }
         }
 
-        public void previous() {
+        public void previous(String packageName, int pid, int uid) {
             try {
-                mCb.onPrevious();
+                mCb.onPrevious(packageName, pid, uid);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in previous.", e);
             }
         }
 
-        public void fastForward() {
+        public void fastForward(String packageName, int pid, int uid) {
             try {
-                mCb.onFastForward();
+                mCb.onFastForward(packageName, pid, uid);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in fastForward.", e);
             }
         }
 
-        public void rewind() {
+        public void rewind(String packageName, int pid, int uid) {
             try {
-                mCb.onRewind();
+                mCb.onRewind(packageName, pid, uid);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in rewind.", e);
             }
         }
 
-        public void seekTo(long pos) {
+        public void seekTo(String packageName, int pid, int uid, long pos) {
             try {
-                mCb.onSeekTo(pos);
+                mCb.onSeekTo(packageName, pid, uid, pos);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in seekTo.", e);
             }
         }
 
-        public void rate(Rating rating) {
+        public void rate(String packageName, int pid, int uid, Rating rating) {
             try {
-                mCb.onRate(rating);
+                mCb.onRate(packageName, pid, uid, rating);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in rate.", e);
             }
         }
 
-        public void adjustVolume(int direction) {
+        public void adjustVolume(String packageName, int pid, int uid, int direction) {
             try {
-                mCb.onAdjustVolume(direction);
+                mCb.onAdjustVolume(packageName, pid, uid, direction);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in adjustVolume.", e);
             }
         }
 
-        public void setVolumeTo(int value) {
+        public void setVolumeTo(String packageName, int pid, int uid, int value) {
             try {
-                mCb.onSetVolumeTo(value);
+                mCb.onSetVolumeTo(packageName, pid, uid, value);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote failure in setVolumeTo.", e);
             }
@@ -1117,16 +1098,16 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
 
     class ControllerStub extends ISessionController.Stub {
         @Override
-        public void sendCommand(String command, Bundle args, ResultReceiver cb)
-                throws RemoteException {
-            updateCallingPackage();
-            mSessionCb.sendCommand(command, args, cb);
+        public void sendCommand(String packageName, String command, Bundle args,
+                ResultReceiver cb) {
+            mSessionCb.sendCommand(packageName, Binder.getCallingPid(), Binder.getCallingUid(),
+                    command, args, cb);
         }
 
         @Override
-        public boolean sendMediaButton(KeyEvent mediaButtonIntent) {
-            updateCallingPackage();
-            return mSessionCb.sendMediaButton(mediaButtonIntent, 0, null);
+        public boolean sendMediaButton(String packageName, KeyEvent mediaButtonIntent) {
+            return mSessionCb.sendMediaButton(packageName, Binder.getCallingPid(),
+                    Binder.getCallingUid(), mediaButtonIntent, 0, null);
         }
 
         @Override
@@ -1207,137 +1188,125 @@ public class MediaSessionRecord implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void adjustVolume(int direction, int flags, String packageName) {
-            updateCallingPackage();
+        public void adjustVolume(String packageName, int direction, int flags) {
+            int pid = Binder.getCallingPid();
             int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
-                MediaSessionRecord.this.adjustVolume(direction, flags, packageName, uid, false);
+                MediaSessionRecord.this.adjustVolume(packageName, pid, uid, direction, flags,
+                        false /* useSuggested */);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         }
 
         @Override
-        public void setVolumeTo(int value, int flags, String packageName) {
-            updateCallingPackage();
+        public void setVolumeTo(String packageName, int value, int flags) {
+            int pid = Binder.getCallingPid();
             int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
-                MediaSessionRecord.this.setVolumeTo(value, flags, packageName, uid);
+                MediaSessionRecord.this.setVolumeTo(packageName, pid, uid, value, flags);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
         }
 
         @Override
-        public void prepare() throws RemoteException {
-            updateCallingPackage();
-            mSessionCb.prepare();
+        public void prepare(String packageName) {
+            mSessionCb.prepare(packageName, Binder.getCallingPid(), Binder.getCallingUid());
         }
 
         @Override
-        public void prepareFromMediaId(String mediaId, Bundle extras)
-                throws RemoteException {
-            updateCallingPackage();
-            mSessionCb.prepareFromMediaId(mediaId, extras);
+        public void prepareFromMediaId(String packageName, String mediaId, Bundle extras) {
+            mSessionCb.prepareFromMediaId(packageName, Binder.getCallingPid(),
+                    Binder.getCallingUid(), mediaId, extras);
         }
 
         @Override
-        public void prepareFromSearch(String query, Bundle extras) throws RemoteException {
-            updateCallingPackage();
-            mSessionCb.prepareFromSearch(query, extras);
+        public void prepareFromSearch(String packageName, String query, Bundle extras) {
+            mSessionCb.prepareFromSearch(packageName, Binder.getCallingPid(),
+                    Binder.getCallingUid(), query, extras);
         }
 
         @Override
-        public void prepareFromUri(Uri uri, Bundle extras) throws RemoteException {
-            updateCallingPackage();
-            mSessionCb.prepareFromUri(uri, extras);
+        public void prepareFromUri(String packageName, Uri uri, Bundle extras) {
+            mSessionCb.prepareFromUri(packageName, Binder.getCallingPid(), Binder.getCallingUid(),
+                    uri, extras);
         }
 
         @Override
-        public void play() throws RemoteException {
-            updateCallingPackage();
-            mSessionCb.play();
+        public void play(String packageName) {
+            mSessionCb.play(packageName, Binder.getCallingPid(), Binder.getCallingUid());
         }
 
         @Override
-        public void playFromMediaId(String mediaId, Bundle extras) throws RemoteException {
-            updateCallingPackage();
-            mSessionCb.playFromMediaId(mediaId, extras);
+        public void playFromMediaId(String packageName, String mediaId, Bundle extras) {
+            mSessionCb.playFromMediaId(packageName, Binder.getCallingPid(), Binder.getCallingUid(),
+                    mediaId, extras);
         }
 
         @Override
-        public void playFromSearch(String query, Bundle extras) throws RemoteException {
-            updateCallingPackage();
-            mSessionCb.playFromSearch(query, extras);
+        public void playFromSearch(String packageName, String query, Bundle extras) {
+            mSessionCb.playFromSearch(packageName, Binder.getCallingPid(), Binder.getCallingUid(),
+                    query, extras);
         }
 
         @Override
-        public void playFromUri(Uri uri, Bundle extras) throws RemoteException {
-            updateCallingPackage();
-            mSessionCb.playFromUri(uri, extras);
+        public void playFromUri(String packageName, Uri uri, Bundle extras) {
+            mSessionCb.playFromUri(packageName, Binder.getCallingPid(), Binder.getCallingUid(),
+                    uri, extras);
         }
 
         @Override
-        public void skipToQueueItem(long id) {
-            updateCallingPackage();
-            mSessionCb.skipToTrack(id);
+        public void skipToQueueItem(String packageName, long id) {
+            mSessionCb.skipToTrack(packageName, Binder.getCallingPid(), Binder.getCallingUid(), id);
         }
 
         @Override
-        public void pause() throws RemoteException {
-            updateCallingPackage();
-            mSessionCb.pause();
+        public void pause(String packageName) {
+            mSessionCb.pause(packageName, Binder.getCallingPid(), Binder.getCallingUid());
         }
 
         @Override
-        public void stop() throws RemoteException {
-            updateCallingPackage();
-            mSessionCb.stop();
+        public void stop(String packageName) {
+            mSessionCb.stop(packageName, Binder.getCallingPid(), Binder.getCallingUid());
         }
 
         @Override
-        public void next() throws RemoteException {
-            updateCallingPackage();
-            mSessionCb.next();
+        public void next(String packageName) {
+            mSessionCb.next(packageName, Binder.getCallingPid(), Binder.getCallingUid());
         }
 
         @Override
-        public void previous() throws RemoteException {
-            updateCallingPackage();
-            mSessionCb.previous();
+        public void previous(String packageName) {
+            mSessionCb.previous(packageName, Binder.getCallingPid(), Binder.getCallingUid());
         }
 
         @Override
-        public void fastForward() throws RemoteException {
-            updateCallingPackage();
-            mSessionCb.fastForward();
+        public void fastForward(String packageName) {
+            mSessionCb.fastForward(packageName, Binder.getCallingPid(), Binder.getCallingUid());
         }
 
         @Override
-        public void rewind() throws RemoteException {
-            updateCallingPackage();
-            mSessionCb.rewind();
+        public void rewind(String packageName) {
+            mSessionCb.rewind(packageName, Binder.getCallingPid(), Binder.getCallingUid());
         }
 
         @Override
-        public void seekTo(long pos) throws RemoteException {
-            updateCallingPackage();
-            mSessionCb.seekTo(pos);
+        public void seekTo(String packageName, long pos) {
+            mSessionCb.seekTo(packageName, Binder.getCallingPid(), Binder.getCallingUid(), pos);
         }
 
         @Override
-        public void rate(Rating rating) throws RemoteException {
-            updateCallingPackage();
-            mSessionCb.rate(rating);
+        public void rate(String packageName, Rating rating) {
+            mSessionCb.rate(packageName, Binder.getCallingPid(), Binder.getCallingUid(), rating);
         }
 
         @Override
-        public void sendCustomAction(String action, Bundle args)
-                throws RemoteException {
-            updateCallingPackage();
-            mSessionCb.sendCustomAction(action, args);
+        public void sendCustomAction(String packageName, String action, Bundle args) {
+            mSessionCb.sendCustomAction(packageName, Binder.getCallingPid(), Binder.getCallingUid(),
+                    action, args);
         }
 
 
