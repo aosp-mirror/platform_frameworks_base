@@ -70,6 +70,8 @@ public class AppIdleHistory {
     private SparseArray<ArrayMap<String,AppUsageHistory>> mIdleHistory = new SparseArray<>();
     private static final long ONE_MINUTE = 60 * 1000;
 
+    private static final int STANDBY_BUCKET_UNKNOWN = -1;
+
     @VisibleForTesting
     static final String APP_IDLE_FILENAME = "app_idle_stats.xml";
     private static final String TAG_PACKAGES = "packages";
@@ -111,6 +113,9 @@ public class AppIdleHistory {
         long lastUsedScreenTime;
         // Last predicted time using elapsed timebase
         long lastPredictedTime;
+        // Last predicted bucket
+        @UsageStatsManager.StandbyBuckets
+        int lastPredictedBucket = STANDBY_BUCKET_UNKNOWN;
         // Standby bucket
         @UsageStatsManager.StandbyBuckets
         int currentBucket;
@@ -342,11 +347,23 @@ public class AppIdleHistory {
         appUsageHistory.bucketingReason = reason;
         if ((reason & REASON_MAIN_MASK) == REASON_MAIN_PREDICTED) {
             appUsageHistory.lastPredictedTime = getElapsedTime(elapsedRealtime);
+            appUsageHistory.lastPredictedBucket = bucket;
         }
         if (DEBUG) {
             Slog.d(TAG, "Moved " + packageName + " to bucket=" + appUsageHistory.currentBucket
                     + ", reason=0x0" + Integer.toHexString(appUsageHistory.bucketingReason));
         }
+    }
+
+    /**
+     * Update the prediction for the app but don't change the actual bucket
+     * @param app The app for which the prediction was made
+     * @param elapsedTimeAdjusted The elapsed time in the elapsed duration timebase
+     * @param bucket The predicted bucket
+     */
+    public void updateLastPrediction(AppUsageHistory app, long elapsedTimeAdjusted, int bucket) {
+        app.lastPredictedTime = elapsedTimeAdjusted;
+        app.lastPredictedBucket = bucket;
     }
 
     /**
