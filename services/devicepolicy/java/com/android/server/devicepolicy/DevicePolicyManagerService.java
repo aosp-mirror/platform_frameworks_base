@@ -5533,10 +5533,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         .setAttestationChallenge(null)
                         .build();
 
-                final boolean generationResult = keyChain.generateKeyPair(algorithm,
+                final int generationResult = keyChain.generateKeyPair(algorithm,
                     new ParcelableKeyGenParameterSpec(noAttestationSpec));
-                if (!generationResult) {
-                    Log.e(LOG_TAG, "KeyChain failed to generate a keypair.");
+                if (generationResult != KeyChain.KEY_GEN_SUCCESS) {
+                    Log.e(LOG_TAG, String.format(
+                            "KeyChain failed to generate a keypair, error %d.", generationResult));
                     return false;
                 }
 
@@ -5549,12 +5550,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
                 final byte[] attestationChallenge = keySpec.getAttestationChallenge();
                 if (attestationChallenge != null) {
-                    final boolean attestationResult = keyChain.attestKey(
+                    final int attestationResult = keyChain.attestKey(
                             alias, attestationChallenge, attestationUtilsFlags, attestationChain);
-                    if (!attestationResult) {
+                    if (attestationResult != KeyChain.KEY_ATTESTATION_SUCCESS) {
                         Log.e(LOG_TAG, String.format(
-                                "Attestation for %s failed, deleting key.", alias));
+                                "Attestation for %s failed (rc=%d), deleting key.",
+                                alias, attestationResult));
                         keyChain.removeKeyPair(alias);
+                        if (attestationResult == KeyChain.KEY_ATTESTATION_CANNOT_ATTEST_IDS) {
+                            throw new UnsupportedOperationException(
+                                    "Device does not support Device ID attestation.");
+                        }
                         return false;
                     }
                 }
