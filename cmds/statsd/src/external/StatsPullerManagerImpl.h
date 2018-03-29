@@ -41,7 +41,7 @@ typedef struct {
   std::vector<int> nonAdditiveFields;
   // How long should the puller wait before doing an actual pull again. Default
   // 1 sec. Set this to 0 if this is handled elsewhere.
-  long coolDownSec = 1;
+  int64_t coolDownNs = 1 * NS_PER_SEC;
   // The actual puller
   sp<StatsPuller> puller;
 } PullAtomInfo;
@@ -50,7 +50,8 @@ class StatsPullerManagerImpl : public virtual RefBase {
 public:
     static StatsPullerManagerImpl& GetInstance();
 
-    void RegisterReceiver(int tagId, wp<PullDataReceiver> receiver, long intervalMs);
+    void RegisterReceiver(int tagId, wp<PullDataReceiver> receiver, int64_t nextPullTimeNs,
+                          int64_t intervalNs);
 
     void UnRegisterReceiver(int tagId, wp<PullDataReceiver> receiver);
 
@@ -59,13 +60,11 @@ public:
 
     void OnAlarmFired();
 
-    bool Pull(const int tagId, vector<std::shared_ptr<LogEvent>>* data);
-
-    void SetTimeBaseSec(long timeBaseSec) {mTimeBaseSec = timeBaseSec;};
+    bool Pull(const int tagId, const int64_t timeNs, vector<std::shared_ptr<LogEvent>>* data);
 
     int ForceClearPullerCache();
 
-    int ClearPullerCacheIfNecessary(long timestampSec);
+    int ClearPullerCacheIfNecessary(int64_t timestampNs);
 
     void SetStatsCompanionService(sp<IStatsCompanionService> statsCompanionService);
 
@@ -77,8 +76,8 @@ public:
     sp<IStatsCompanionService> mStatsCompanionService = nullptr;
 
     typedef struct {
-        // pull_interval_sec : last_pull_time_sec
-        std::pair<uint64_t, uint64_t> timeInfo;
+        int64_t nextPullTimeNs;
+        int64_t intervalNs;
         wp<PullDataReceiver> receiver;
     } ReceiverInfo;
 
@@ -90,12 +89,7 @@ public:
 
     void updateAlarmLocked();
 
-    long mCurrentPullingInterval;
-
-    // for pulled metrics, it is important for the buckets to be aligned to multiple of smallest
-    // bucket size. All pulled metrics start pulling based on this time, so that they can be
-    // correctly attributed to the correct buckets.
-    long mTimeBaseSec;
+    int64_t mNextPullTimeNs;
 };
 
 }  // namespace statsd
