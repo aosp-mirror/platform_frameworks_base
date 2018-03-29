@@ -350,9 +350,6 @@ public class NotificationViewHierarchyManager {
                 }
             }
 
-            row.showBlockingHelperButton(entry.userSentiment ==
-                    NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE);
-
             row.showAppOpsIcons(entry.mActiveAppOps);
         }
 
