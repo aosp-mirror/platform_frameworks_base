@@ -466,34 +466,32 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     }
 
     @Override // Binder call
-    public void setPullingAlarms(long timestampMs, long intervalMs) {
-        enforceCallingPermission();
-        if (DEBUG)
-            Slog.d(TAG, "Setting pulling alarm for " + timestampMs + " every " + intervalMs + "ms");
-        final long callingToken = Binder.clearCallingIdentity();
-        try {
-            // using ELAPSED_REALTIME, not ELAPSED_REALTIME_WAKEUP, so if device is asleep, will
-            // only fire when it awakens.
-            // This alarm is inexact, leaving its exactness completely up to the OS optimizations.
-            // TODO: totally inexact means that stats per bucket could be quite off. Is this okay?
-            mAlarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME, timestampMs, intervalMs,
-                    mPullingAlarmIntent);
-        } finally {
-            Binder.restoreCallingIdentity(callingToken);
-        }
+    public void setPullingAlarm(long nextPullTimeMs) {
+      enforceCallingPermission();
+      if (DEBUG)
+        Slog.d(TAG,
+            "Setting pulling alarm in about " + (nextPullTimeMs - SystemClock.elapsedRealtime()));
+      final long callingToken = Binder.clearCallingIdentity();
+      try {
+        // using ELAPSED_REALTIME, not ELAPSED_REALTIME_WAKEUP, so if device is asleep, will
+        // only fire when it awakens.
+        mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME, nextPullTimeMs, mPullingAlarmIntent);
+      } finally {
+        Binder.restoreCallingIdentity(callingToken);
+      }
     }
 
     @Override // Binder call
-    public void cancelPullingAlarms() {
-        enforceCallingPermission();
-        if (DEBUG)
-            Slog.d(TAG, "Cancelling pulling alarm");
-        final long callingToken = Binder.clearCallingIdentity();
-        try {
-            mAlarmManager.cancel(mPullingAlarmIntent);
-        } finally {
-            Binder.restoreCallingIdentity(callingToken);
-        }
+    public void cancelPullingAlarm() {
+      enforceCallingPermission();
+      if (DEBUG)
+        Slog.d(TAG, "Cancelling pulling alarm");
+      final long callingToken = Binder.clearCallingIdentity();
+      try {
+        mAlarmManager.cancel(mPullingAlarmIntent);
+      } finally {
+        Binder.restoreCallingIdentity(callingToken);
+      }
     }
 
     private void addNetworkStats(
@@ -1109,7 +1107,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             mContext.unregisterReceiver(mUserUpdateReceiver);
             mContext.unregisterReceiver(mShutdownEventReceiver);
             cancelAnomalyAlarm();
-            cancelPullingAlarms();
+            cancelPullingAlarm();
         }
     }
 

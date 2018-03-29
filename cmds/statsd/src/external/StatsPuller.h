@@ -37,13 +37,13 @@ public:
 
     virtual ~StatsPuller() {}
 
-    bool Pull(std::vector<std::shared_ptr<LogEvent>>* data);
+    bool Pull(const int64_t timeNs, std::vector<std::shared_ptr<LogEvent>>* data);
 
     // Clear cache immediately
     int ForceClearCache();
 
     // Clear cache if elapsed time is more than cooldown time
-    int ClearCacheIfNecessary(long timestampSec);
+    int ClearCacheIfNecessary(int64_t timestampNs);
 
     static void SetUidMap(const sp<UidMap>& uidMap);
 
@@ -59,9 +59,9 @@ private:
     // If a pull request comes before cooldown, a cached version from purevious pull
     // will be returned.
     // The actual value should be determined by individual pullers.
-    long mCoolDownSec;
+    int64_t mCoolDownNs;
     // For puller stats
-    long mMinPullIntervalSec = LONG_MAX;
+    int64_t mMinPullIntervalNs = LONG_MAX;
 
     virtual bool PullInternal(std::vector<std::shared_ptr<LogEvent>>* data) = 0;
 
@@ -69,7 +69,7 @@ private:
     // cached data will be returned.
     std::vector<std::shared_ptr<LogEvent>> mCachedData;
 
-    long mLastPullTimeSec;
+    int64_t mLastPullTimeNs;
 
     int clearCache();
 
