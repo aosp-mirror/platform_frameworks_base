@@ -100,7 +100,6 @@ public class RecoverableKeyStoreManager {
     private final RecoverableKeyGenerator mRecoverableKeyGenerator;
     private final RecoverySnapshotStorage mSnapshotStorage;
     private final PlatformKeyManager mPlatformKeyManager;
-    private final KeyStore mKeyStore;
     private final ApplicationKeyStorage mApplicationKeyStorage;
 
     /**
@@ -126,7 +125,6 @@ public class RecoverableKeyStoreManager {
 
             mInstance = new RecoverableKeyStoreManager(
                     context.getApplicationContext(),
-                    keystore,
                     db,
                     new RecoverySessionStorage(),
                     Executors.newSingleThreadExecutor(),
@@ -141,7 +139,6 @@ public class RecoverableKeyStoreManager {
     @VisibleForTesting
     RecoverableKeyStoreManager(
             Context context,
-            KeyStore keystore,
             RecoverableKeyStoreDb recoverableKeyStoreDb,
             RecoverySessionStorage recoverySessionStorage,
             ExecutorService executorService,
@@ -150,7 +147,6 @@ public class RecoverableKeyStoreManager {
             PlatformKeyManager platformKeyManager,
             ApplicationKeyStorage applicationKeyStorage) {
         mContext = context;
-        mKeyStore = keystore;
         mDatabase = recoverableKeyStoreDb;
         mRecoverySessionStorage = recoverySessionStorage;
         mExecutorService = executorService;
