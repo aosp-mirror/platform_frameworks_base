@@ -2423,8 +2423,8 @@ public class WindowManagerService extends IWindowManager.Stub
         final int oldRotation = defaultDisplayContent.getRotation();
         final boolean oldAltOrientation = defaultDisplayContent.getAltOrientation();
 
-        final int rotation = mPolicy.rotationForOrientationLw(lastOrientation,
-                oldRotation);
+        final int rotation = mPolicy.rotationForOrientationLw(lastOrientation, oldRotation,
+                true /* defaultDisplay */);
         boolean altOrientation = !mPolicy.rotationHasCompatibleMetricsLw(
                 lastOrientation, rotation);
         if (oldRotation == rotation && oldAltOrientation == altOrientation) {
