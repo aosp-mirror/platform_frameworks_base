@@ -32,7 +32,6 @@ Landroid/app/IActivityManager;->getRunningAppProcesses()Ljava/util/List;
 Landroid/app/IActivityManager;->getTaskSnapshot(IZ)Landroid/app/ActivityManager$TaskSnapshot;
 Landroid/app/IActivityManager;->registerTaskStackListener(Landroid/app/ITaskStackListener;)V
 Landroid/app/IActivityManager;->removeTask(I)Z
-Landroid/app/IActivityManager;->requestBugReport(I)V
 Landroid/app/IActivityManager;->startActivityAsUser(Landroid/app/IApplicationThread;Ljava/lang/String;Landroid/content/Intent;Ljava/lang/String;Landroid/os/IBinder;Ljava/lang/String;IILandroid/app/ProfilerInfo;Landroid/os/Bundle;I)I
 Landroid/app/IActivityManager;->startActivityFromRecents(ILandroid/os/Bundle;)I
 Landroid/app/IActivityManager;->startActivity(Landroid/app/IApplicationThread;Ljava/lang/String;Landroid/content/Intent;Ljava/lang/String;Landroid/os/IBinder;Ljava/lang/String;IILandroid/app/ProfilerInfo;Landroid/os/Bundle;)I
