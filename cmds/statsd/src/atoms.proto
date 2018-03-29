@@ -245,7 +245,7 @@ message ProcessLifeCycleStateChanged {
  * Logs when the ble scan state changes.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   packages/apps/Bluetooth/src/com/android/bluetooth/gatt/AppScanStats.java
  */
 // TODO: Consider changing to tracking per-scanner-id (log from AppScanStats).
 message BleScanStateChanged {
