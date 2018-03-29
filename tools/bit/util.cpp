@@ -241,6 +241,8 @@ read_file(const string& filename)
 
     char* buf = (char*)malloc(size);
     if ((size_t) size != fread(buf, 1, size, file)) {
+        free(buf);
+        fclose(file);
         return string();
     }
 
