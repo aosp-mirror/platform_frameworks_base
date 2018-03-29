@@ -1804,8 +1804,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                     }
                 });
             } else {
-                session.adjustVolume(direction, flags, getContext().getPackageName(),
-                        Process.SYSTEM_UID, true);
+                session.adjustVolume(getContext().getPackageName(), Process.myPid(),
+                        Process.SYSTEM_UID, direction, flags, true);
             }
         }
 
@@ -1843,10 +1843,12 @@ public class MediaSessionService extends SystemService implements Monitor {
                     mKeyEventReceiver.aquireWakeLockLocked();
                 }
                 // If we don't need a wakelock use -1 as the id so we won't release it later.
-                session.sendMediaButton(keyEvent,
+                session.sendMediaButton(getContext().getPackageName(),
+                        Process.myPid(),
+                        Process.SYSTEM_UID,
+                        keyEvent,
                         needWakeLock ? mKeyEventReceiver.mLastTimeoutId : -1,
-                        mKeyEventReceiver, Process.SYSTEM_UID,
-                        getContext().getPackageName());
+                        mKeyEventReceiver);
                 if (mCurrentFullUserRecord.mCallback != null) {
                     try {
                         mCurrentFullUserRecord.mCallback.onMediaKeyEventDispatchedToMediaSession(

@@ -25,30 +25,33 @@ import android.os.ResultReceiver;
  * @hide
  */
 oneway interface ISessionCallback {
-    void onCommand(String command, in Bundle args, in ResultReceiver cb);
-    void onMediaButton(in Intent mediaButtonIntent, int sequenceNumber, in ResultReceiver cb);
+    void onCommand(String packageName, int pid, int uid, String command, in Bundle args,
+            in ResultReceiver cb);
+    void onMediaButton(String packageName, int pid, int uid, in Intent mediaButtonIntent,
+            int sequenceNumber, in ResultReceiver cb);
 
     // These callbacks are for the TransportPerformer
-    void onPrepare();
-    void onPrepareFromMediaId(String mediaId, in Bundle extras);
-    void onPrepareFromSearch(String query, in Bundle extras);
-    void onPrepareFromUri(in Uri uri, in Bundle extras);
-    void onPlay();
-    void onPlayFromMediaId(String mediaId, in Bundle extras);
-    void onPlayFromSearch(String query, in Bundle extras);
-    void onPlayFromUri(in Uri uri, in Bundle extras);
-    void onSkipToTrack(long id);
-    void onPause();
-    void onStop();
-    void onNext();
-    void onPrevious();
-    void onFastForward();
-    void onRewind();
-    void onSeekTo(long pos);
-    void onRate(in Rating rating);
-    void onCustomAction(String action, in Bundle args);
+    void onPrepare(String packageName, int pid, int uid);
+    void onPrepareFromMediaId(String packageName, int pid, int uid, String mediaId,
+            in Bundle extras);
+    void onPrepareFromSearch(String packageName, int pid, int uid, String query, in Bundle extras);
+    void onPrepareFromUri(String packageName, int pid, int uid, in Uri uri, in Bundle extras);
+    void onPlay(String packageName, int pid, int uid);
+    void onPlayFromMediaId(String packageName, int pid, int uid, String mediaId, in Bundle extras);
+    void onPlayFromSearch(String packageName, int pid, int uid, String query, in Bundle extras);
+    void onPlayFromUri(String packageName, int pid, int uid, in Uri uri, in Bundle extras);
+    void onSkipToTrack(String packageName, int pid, int uid, long id);
+    void onPause(String packageName, int pid, int uid);
+    void onStop(String packageName, int pid, int uid);
+    void onNext(String packageName, int pid, int uid);
+    void onPrevious(String packageName, int pid, int uid);
+    void onFastForward(String packageName, int pid, int uid);
+    void onRewind(String packageName, int pid, int uid);
+    void onSeekTo(String packageName, int pid, int uid, long pos);
+    void onRate(String packageName, int pid, int uid, in Rating rating);
+    void onCustomAction(String packageName, int pid, int uid, String action, in Bundle args);
 
     // These callbacks are for volume handling
-    void onAdjustVolume(int direction);
-    void onSetVolumeTo(int value);
+    void onAdjustVolume(String packageName, int pid, int uid, int direction);
+    void onSetVolumeTo(String packageName, int pid, int uid, int value);
 }
