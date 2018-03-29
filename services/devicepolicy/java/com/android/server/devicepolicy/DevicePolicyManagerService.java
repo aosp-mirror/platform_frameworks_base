@@ -8738,6 +8738,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public List getPermittedInputMethodsForCurrentUser() {
+        enforceManageUsers();
         UserInfo currentUser;
         try {
             currentUser = mInjector.getIActivityManager().getCurrentUser();
