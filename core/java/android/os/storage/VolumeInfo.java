@@ -312,7 +312,7 @@ public class VolumeInfo implements Parcelable {
      * {@link android.Manifest.permission#WRITE_MEDIA_STORAGE}.
      */
     public File getInternalPathForUser(int userId) {
-        if (type == TYPE_PUBLIC) {
+        if (type == TYPE_PUBLIC && !isVisible()) {
             // TODO: plumb through cleaner path from vold
             return new File(path.replace("/storage/", "/mnt/media_rw/"));
         } else {
