@@ -4585,8 +4585,8 @@ public class Editor {
             return mContainer.isShowing();
         }
 
-        private boolean isVisible() {
-            // Always show a dragging handle.
+        private boolean shouldShow() {
+            // A dragging handle should always be shown.
             if (mIsDragging) {
                 return true;
             }
@@ -4597,6 +4597,10 @@ public class Editor {
 
             return mTextView.isPositionVisible(
                     mPositionX + mHotspotX + getHorizontalOffset(), mPositionY);
+        }
+
+        private void setVisible(final boolean visible) {
+            mContainer.getContentView().setVisibility(visible ? VISIBLE : INVISIBLE);
         }
 
         public abstract int getCurrentCursorOffset();
@@ -4692,7 +4696,7 @@ public class Editor {
                     onHandleMoved();
                 }
 
-                if (isVisible()) {
+                if (shouldShow()) {
                     // Transform to the window coordinates to follow the view tranformation.
                     final int[] pts = { mPositionX + mHotspotX + getHorizontalOffset(), mPositionY};
                     mTextView.transformFromViewToWindowSpace(pts);
@@ -4743,6 +4747,15 @@ public class Editor {
 
         protected int getCursorOffset() {
             return 0;
+        }
+
+        private boolean tooLargeTextForMagnifier() {
+            final float magnifierContentHeight = Math.round(
+                    mMagnifierAnimator.mMagnifier.getHeight()
+                            / mMagnifierAnimator.mMagnifier.getZoom());
+            final Paint.FontMetrics fontMetrics = mTextView.getPaint().getFontMetrics();
+            final float glyphHeight = fontMetrics.descent - fontMetrics.ascent;
+            return glyphHeight > magnifierContentHeight;
         }
 
         /**
@@ -4824,13 +4837,12 @@ public class Editor {
             return true;
         }
 
-        private boolean tooLargeTextForMagnifier() {
-            final float magnifierContentHeight = Math.round(
-                    mMagnifierAnimator.mMagnifier.getHeight()
-                            / mMagnifierAnimator.mMagnifier.getZoom());
-            final Paint.FontMetrics fontMetrics = mTextView.getPaint().getFontMetrics();
-            final float glyphHeight = fontMetrics.descent - fontMetrics.ascent;
-            return glyphHeight > magnifierContentHeight;
+        private boolean handleOverlapsMagnifier() {
+            final int handleY = mContainer.getDecorViewLayoutParams().y;
+            final int magnifierBottomWhenAtWindowTop =
+                    mTextView.getRootWindowInsets().getSystemWindowInsetTop()
+                        + mMagnifierAnimator.mMagnifier.getHeight();
+            return handleY <= magnifierBottomWhenAtWindowTop;
         }
 
         protected final void updateMagnifier(@NonNull final MotionEvent event) {
@@ -4846,6 +4858,13 @@ public class Editor {
                 mRenderCursorRegardlessTiming = true;
                 mTextView.invalidateCursorPath();
                 suspendBlink();
+                // Hide handle if it overlaps the magnifier.
+                if (handleOverlapsMagnifier()) {
+                    setVisible(false);
+                } else {
+                    setVisible(true);
+                }
+
                 mMagnifierAnimator.show(showPosInView.x, showPosInView.y);
             } else {
                 dismissMagnifier();
@@ -4857,6 +4876,7 @@ public class Editor {
                 mMagnifierAnimator.dismiss();
                 mRenderCursorRegardlessTiming = false;
                 resumeBlink();
+                setVisible(true);
             }
         }
 
