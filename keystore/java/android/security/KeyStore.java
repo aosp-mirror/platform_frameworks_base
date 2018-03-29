@@ -66,6 +66,7 @@ public class KeyStore {
     public static final int VALUE_CORRUPTED = 8;
     public static final int UNDEFINED_ACTION = 9;
     public static final int WRONG_PASSWORD = 10;
+    public static final int CANNOT_ATTEST_IDS = -66;
     public static final int HARDWARE_TYPE_UNAVAILABLE = -68;
 
     /**

@@ -4246,6 +4246,8 @@ public class DevicePolicyManager {
      *         algorithm specification in {@code keySpec} is not {@code RSAKeyGenParameterSpec}
      *         or {@code ECGenParameterSpec}, or if Device ID attestation was requested but the
      *         {@code keySpec} does not contain an attestation challenge.
+     * @throws UnsupportedOperationException if Device ID attestation was requested but the
+     *         underlying hardware does not support it.
      * @see KeyGenParameterSpec.Builder#setAttestationChallenge(byte[])
      */
     public AttestedKeyPair generateKeyPair(@Nullable ComponentName admin,
