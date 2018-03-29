@@ -185,6 +185,9 @@ public final class UsageStatsManager {
     public static final int REASON_SUB_USAGE_SLICE_PINNED_PRIV  = 0x000A;
 
     /** @hide */
+    public static final int REASON_SUB_PREDICTED_RESTORED       = 0x0001;
+
+    /** @hide */
     @IntDef(flag = false, prefix = { "STANDBY_BUCKET_" }, value = {
             STANDBY_BUCKET_EXEMPTED,
             STANDBY_BUCKET_ACTIVE,
@@ -620,36 +623,41 @@ public final class UsageStatsManager {
                 break;
             case REASON_MAIN_PREDICTED:
                 sb.append("p");
+                switch (standbyReason & REASON_SUB_MASK) {
+                    case REASON_SUB_PREDICTED_RESTORED:
+                        sb.append("-r");
+                        break;
+                }
                 break;
             case REASON_MAIN_TIMEOUT:
                 sb.append("t");
                 break;
             case REASON_MAIN_USAGE:
-                sb.append("u-");
+                sb.append("u");
                 switch (standbyReason & REASON_SUB_MASK) {
                     case REASON_SUB_USAGE_SYSTEM_INTERACTION:
-                        sb.append("si");
+                        sb.append("-si");
                         break;
                     case REASON_SUB_USAGE_NOTIFICATION_SEEN:
-                        sb.append("ns");
+                        sb.append("-ns");
                         break;
                     case REASON_SUB_USAGE_USER_INTERACTION:
-                        sb.append("ui");
+                        sb.append("-ui");
                         break;
                     case REASON_SUB_USAGE_MOVE_TO_FOREGROUND:
-                        sb.append("mf");
+                        sb.append("-mf");
                         break;
                     case REASON_SUB_USAGE_MOVE_TO_BACKGROUND:
-                        sb.append("mb");
+                        sb.append("-mb");
                         break;
                     case REASON_SUB_USAGE_SYSTEM_UPDATE:
-                        sb.append("su");
+                        sb.append("-su");
                         break;
                     case REASON_SUB_USAGE_ACTIVE_TIMEOUT:
-                        sb.append("at");
+                        sb.append("-at");
                         break;
                     case REASON_SUB_USAGE_SYNC_ADAPTER:
-                        sb.append("sa");
+                        sb.append("-sa");
                         break;
                     case REASON_SUB_USAGE_SLICE_PINNED:
                         sb.append("slp");
