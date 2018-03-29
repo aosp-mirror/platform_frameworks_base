@@ -114,6 +114,11 @@ public class KeyguardClockPositionAlgorithm {
     private boolean mTracking;
 
     /**
+     * Distance in pixels between the top of the screen and the first view of the bouncer.
+     */
+    private int mBouncerTop;
+
+    /**
      * Refreshes the dimension values.
      */
     public void loadDimens(Resources res) {
@@ -129,7 +134,7 @@ public class KeyguardClockPositionAlgorithm {
 
     public void setup(int minTopMargin, int maxShadeBottom, int notificationStackHeight,
             float expandedHeight, float maxPanelHeight, int parentHeight, int keyguardStatusHeight,
-            float dark, boolean secure, boolean tracking) {
+            float dark, boolean secure, boolean tracking, int bouncerTop) {
         mMinTopMargin = minTopMargin + mContainerTopPadding;
         mMaxShadeBottom = maxShadeBottom;
         mNotificationStackHeight = notificationStackHeight;
@@ -140,6 +145,7 @@ public class KeyguardClockPositionAlgorithm {
         mDarkAmount = dark;
         mCurrentlySecure = secure;
         mTracking = tracking;
+        mBouncerTop = bouncerTop;
     }
 
     public void run(Result result) {
@@ -189,8 +195,10 @@ public class KeyguardClockPositionAlgorithm {
     private int getClockY() {
         // Dark: Align the bottom edge of the clock at about half of the screen:
         final float clockYDark = getMaxClockY() + burnInPreventionOffsetY();
-        float clockYRegular = getExpandedClockPosition();
-        float clockYTarget = mCurrentlySecure ? mMinTopMargin : -mKeyguardStatusHeight;
+        final float clockYRegular = getExpandedClockPosition();
+        final boolean hasEnoughSpace = mMinTopMargin + mKeyguardStatusHeight < mBouncerTop;
+        float clockYTarget = mCurrentlySecure && hasEnoughSpace ?
+                mMinTopMargin : -mKeyguardStatusHeight;
 
         // Move clock up while collapsing the shade
         float shadeExpansion = mExpandedHeight / mMaxPanelHeight;

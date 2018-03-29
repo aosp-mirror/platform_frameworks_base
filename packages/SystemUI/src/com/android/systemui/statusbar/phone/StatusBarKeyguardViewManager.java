@@ -135,8 +135,14 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mFingerprintUnlockController = fingerprintUnlockController;
         mBouncer = SystemUIFactory.getInstance().createKeyguardBouncer(mContext,
                 mViewMediatorCallback, mLockPatternUtils, container, dismissCallbackRegistry);
+        mContainer.addOnLayoutChangeListener(this::onContainerLayout);
         mNotificationPanelView = notificationPanelView;
         notificationPanelView.setExpansionListener(this::onPanelExpansionChanged);
+    }
+
+    private void onContainerLayout(View v, int left, int top, int right, int bottom,
+            int oldLeft, int oldTop, int oldRight, int oldBottom) {
+        mNotificationPanelView.setBouncerTop(mBouncer.getTop());
     }
 
     private void onPanelExpansionChanged(float expansion, boolean tracking) {
@@ -156,7 +162,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             if (expansion == 1) {
                 mBouncer.onFullyHidden();
             } else if (!mBouncer.isShowing() && !mBouncer.isAnimatingAway()) {
-                mBouncer.show(false /* resetSecuritySelection */, false /* notifyFalsing */);
+                mBouncer.show(false /* resetSecuritySelection */, false /* animated */);
             } else if (noLongerTracking) {
                 // Notify that falsing manager should stop its session when user stops touching,
                 // even before the animation ends, to guarantee that we're not recording sensitive
