@@ -42,17 +42,12 @@ import com.android.server.wm.WindowManagerService;
 class RecentsAnimation implements RecentsAnimationCallbacks {
     private static final String TAG = RecentsAnimation.class.getSimpleName();
 
-    private static final int RECENTS_ANIMATION_TIMEOUT = 10 * 1000;
-
     private final ActivityManagerService mService;
     private final ActivityStackSupervisor mStackSupervisor;
     private final ActivityStartController mActivityStartController;
     private final WindowManagerService mWindowManager;
     private final UserController mUserController;
-    private final Handler mHandler;
     private final int mCallingPid;
-
-    private final Runnable mCancelAnimationRunnable;
 
     // The stack to restore the home stack behind when the animation is finished
     private ActivityStack mRestoreHomeBehindStack;
@@ -63,16 +58,9 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
         mService = am;
         mStackSupervisor = stackSupervisor;
         mActivityStartController = activityStartController;
-        mHandler = new Handler(mStackSupervisor.mLooper);
         mWindowManager = wm;
         mUserController = userController;
         mCallingPid = callingPid;
-
-        mCancelAnimationRunnable = () -> {
-            // The caller has not finished the animation in a predefined amount of time, so
-            // force-cancel the animation
-            mWindowManager.cancelRecentsAnimation();
-        };
     }
 
     void startRecentsActivity(Intent intent, IRecentsAnimationRunner recentsAnimationRunner,
@@ -133,10 +121,6 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
             // duration of the gesture that is driven by the recents component
             homeActivity.mLaunchTaskBehind = true;
 
-            // Post a timeout for the animation. This needs to happen before initializing the
-            // recents animation on the WM side since we may decide to cancel the animation there
-            mHandler.postDelayed(mCancelAnimationRunnable, RECENTS_ANIMATION_TIMEOUT);
-
             // Fetch all the surface controls and pass them to the client to get the animation
             // started
             mWindowManager.cancelRecentsAnimation();
@@ -157,7 +141,6 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
 
     @Override
     public void onAnimationFinished(boolean moveHomeToTop) {
-        mHandler.removeCallbacks(mCancelAnimationRunnable);
         synchronized (mService) {
             if (mWindowManager.getRecentsAnimationController() == null) return;
 

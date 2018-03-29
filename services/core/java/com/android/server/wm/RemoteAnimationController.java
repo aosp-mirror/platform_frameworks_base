@@ -26,6 +26,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Slog;
@@ -47,7 +48,7 @@ import java.util.ArrayList;
 /**
  * Helper class to run app animations in a remote process.
  */
-class RemoteAnimationController {
+class RemoteAnimationController implements DeathRecipient {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "RemoteAnimationController" : TAG_WM;
     private static final long TIMEOUT_MS = 2000;
 
@@ -56,12 +57,10 @@ class RemoteAnimationController {
     private final ArrayList<RemoteAnimationAdapterWrapper> mPendingAnimations = new ArrayList<>();
     private final Rect mTmpRect = new Rect();
     private final Handler mHandler;
-    private FinishedCallback mFinishedCallback;
+    private final Runnable mTimeoutRunnable = this::cancelAnimation;
 
-    private final Runnable mTimeoutRunnable = () -> {
-        onAnimationFinished();
-        invokeAnimationCancelled();
-    };
+    private FinishedCallback mFinishedCallback;
+    private boolean mCanceled;
 
     RemoteAnimationController(WindowManagerService service,
             RemoteAnimationAdapter remoteAnimationAdapter, Handler handler) {
@@ -90,7 +89,7 @@ class RemoteAnimationController {
      * Called when the transition is ready to be started, and all leashes have been set up.
      */
     void goodToGo() {
-        if (mPendingAnimations.isEmpty()) {
+        if (mPendingAnimations.isEmpty() || mCanceled) {
             onAnimationFinished();
             return;
         }
@@ -107,8 +106,8 @@ class RemoteAnimationController {
         }
         mService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
             try {
-                mRemoteAnimationAdapter.getRunner().onAnimationStart(animations,
-                        mFinishedCallback);
+                mRemoteAnimationAdapter.getRunner().asBinder().linkToDeath(this, 0);
+                mRemoteAnimationAdapter.getRunner().onAnimationStart(animations, mFinishedCallback);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to start remote animation", e);
                 onAnimationFinished();
@@ -118,6 +117,17 @@ class RemoteAnimationController {
         if (DEBUG_APP_TRANSITIONS) {
             writeStartDebugStatement();
         }
+    }
+
+    private void cancelAnimation() {
+        synchronized (mService.getWindowManagerLock()) {
+            if (mCanceled) {
+                return;
+            }
+            mCanceled = true;
+        }
+        onAnimationFinished();
+        invokeAnimationCancelled();
     }
 
     private void writeStartDebugStatement() {
@@ -154,6 +164,7 @@ class RemoteAnimationController {
 
     private void onAnimationFinished() {
         mHandler.removeCallbacks(mTimeoutRunnable);
+        mRemoteAnimationAdapter.getRunner().asBinder().unlinkToDeath(this, 0);
         synchronized (mService.mWindowMap) {
             releaseFinishedCallback();
             mService.openSurfaceTransaction();
@@ -191,6 +202,11 @@ class RemoteAnimationController {
             throw new RuntimeException("Calling pid of remote animation was null");
         }
         mService.sendSetRunningRemoteAnimation(pid, running);
+    }
+
+    @Override
+    public void binderDied() {
+        cancelAnimation();
     }
 
     private static final class FinishedCallback extends IRemoteAnimationFinishedCallback.Stub {
