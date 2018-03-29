@@ -232,6 +232,7 @@ class Convert {
                  * HAL implementation instance. */
                 1,      // numTuners
                 1,      // numAudioSources
+                false,  // isInitializationRequired
                 false,  // isCaptureSupported
 
                 amfmConfigToBands(amfmConfig),
