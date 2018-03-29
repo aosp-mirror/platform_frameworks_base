@@ -70,6 +70,7 @@ public final class Slice implements Parcelable {
             HINT_ERROR,
             HINT_TTL,
             HINT_LAST_UPDATED,
+            HINT_PERMISSION_REQUEST,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SliceHint {}
@@ -183,6 +184,11 @@ public final class Slice implements Parcelable {
      * Hint indicating an item representing when the content was created or last updated.
      */
     public static final String HINT_LAST_UPDATED = "last_updated";
+    /**
+     * A hint to indicate that this slice represents a permission request for showing
+     * slices.
+     */
+    public static final String HINT_PERMISSION_REQUEST = "permission_request";
     /**
      * Key to retrieve an extra added to an intent when a control is changed.
      */
