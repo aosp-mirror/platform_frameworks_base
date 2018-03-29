@@ -165,6 +165,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         mIsForeground =
                 (mSbn.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
         mIsForBlockingHelper = isForBlockingHelper;
+        mAppUid = mSbn.getUid();
 
         int numTotalChannels = mINotificationManager.getNumNotificationChannelsForPackage(
                 pkg, mAppUid, false /* includeDeleted */);
@@ -173,9 +174,9 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         } else  {
             // Special behavior for the Default channel if no other channels have been defined.
             mIsSingleDefaultChannel = mNumNotificationChannels == 1
-                    && mSingleNotificationChannel.getId()
-                    .equals(NotificationChannel.DEFAULT_CHANNEL_ID)
-                    && numTotalChannels <= 1;
+                    && mSingleNotificationChannel.getId().equals(
+                            NotificationChannel.DEFAULT_CHANNEL_ID)
+                    && numTotalChannels == 1;
         }
 
         try {
@@ -210,7 +211,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                             | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                             | PackageManager.MATCH_DIRECT_BOOT_AWARE);
             if (info != null) {
-                mAppUid = mSbn.getUid();
                 mAppName = String.valueOf(mPm.getApplicationLabel(info));
                 pkgicon = mPm.getApplicationIcon(info);
             }
