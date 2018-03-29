@@ -8382,12 +8382,12 @@ public class DevicePolicyManager {
      * @return a list of package names which could not be restricted.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
-    public @NonNull List<String> setMeteredDataDisabled(@NonNull ComponentName admin,
+    public @NonNull List<String> setMeteredDataDisabledPackages(@NonNull ComponentName admin,
             @NonNull List<String> packageNames) {
         throwIfParentInstance("setMeteredDataDisabled");
         if (mService != null) {
             try {
-                return mService.setMeteredDataDisabled(admin, packageNames);
+                return mService.setMeteredDataDisabledPackages(admin, packageNames);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -8403,11 +8403,11 @@ public class DevicePolicyManager {
      * @return the list of restricted package names.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
-    public @NonNull List<String> getMeteredDataDisabled(@NonNull ComponentName admin) {
+    public @NonNull List<String> getMeteredDataDisabledPackages(@NonNull ComponentName admin) {
         throwIfParentInstance("getMeteredDataDisabled");
         if (mService != null) {
             try {
-                return mService.getMeteredDataDisabled(admin);
+                return mService.getMeteredDataDisabledPackages(admin);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -8426,12 +8426,12 @@ public class DevicePolicyManager {
      * @throws SecurityException if the caller doesn't run with {@link Process#SYSTEM_UID}
      * @hide
      */
-    public boolean isMeteredDataDisabledForUser(@NonNull ComponentName admin, String packageName,
-            @UserIdInt int userId) {
+    public boolean isMeteredDataDisabledPackageForUser(@NonNull ComponentName admin,
+            String packageName, @UserIdInt int userId) {
         throwIfParentInstance("getMeteredDataDisabledForUser");
         if (mService != null) {
             try {
-                return mService.isMeteredDataDisabledForUser(admin, packageName, userId);
+                return mService.isMeteredDataDisabledPackageForUser(admin, packageName, userId);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
