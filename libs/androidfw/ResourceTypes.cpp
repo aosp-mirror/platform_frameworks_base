@@ -727,11 +727,42 @@ const char16_t* ResStringPool::stringAt(size_t idx, size_t* u16len) const
                 if ((uint32_t)(u8str+u8len-strings) < mStringPoolSize) {
                     AutoMutex lock(mDecodeLock);
 
+                    if (mCache != NULL && mCache[idx] != NULL) {
+                        return mCache[idx];
+                    }
+
+                    // Retrieve the actual length of the utf8 string if the
+                    // encoded length was truncated
+                    if (stringDecodeAt(idx, u8str, u8len, &u8len) == NULL) {
+                        return NULL;
+                    }
+
+                    // Since AAPT truncated lengths longer than 0x7FFF, check
+                    // that the bits that remain after truncation at least match
+                    // the bits of the actual length
+                    ssize_t actualLen = utf8_to_utf16_length(u8str, u8len);
+                    if (actualLen < 0 || ((size_t)actualLen & 0x7FFF) != *u16len) {
+                        ALOGW("Bad string block: string #%lld decoded length is not correct "
+                                "%lld vs %llu\n",
+                                (long long)idx, (long long)actualLen, (long long)*u16len);
+                        return NULL;
+                    }
+
+                    *u16len = (size_t) actualLen;
+                    char16_t *u16str = (char16_t *)calloc(*u16len+1, sizeof(char16_t));
+                    if (!u16str) {
+                        ALOGW("No memory when trying to allocate decode cache for string #%d\n",
+                                (int)idx);
+                        return NULL;
+                    }
+
+                    utf8_to_utf16(u8str, u8len, u16str, *u16len + 1);
+
                     if (mCache == NULL) {
 #ifndef __ANDROID__
                         if (kDebugStringPoolNoisy) {
                             ALOGI("CREATING STRING CACHE OF %zu bytes",
-                                    mHeader->stringCount*sizeof(char16_t**));
+                                  mHeader->stringCount*sizeof(char16_t**));
                         }
 #else
                         // We do not want to be in this case when actually running Android.
@@ -741,41 +772,15 @@ const char16_t* ResStringPool::stringAt(size_t idx, size_t* u16len) const
                         mCache = (char16_t**)calloc(mHeader->stringCount, sizeof(char16_t*));
                         if (mCache == NULL) {
                             ALOGW("No memory trying to allocate decode cache table of %d bytes\n",
-                                    (int)(mHeader->stringCount*sizeof(char16_t**)));
+                                  (int)(mHeader->stringCount*sizeof(char16_t**)));
                             return NULL;
                         }
                     }
 
-                    if (mCache[idx] != NULL) {
-                        return mCache[idx];
-                    }
-
-                    ssize_t actualLen = utf8_to_utf16_length(u8str, u8len);
-                    if (actualLen < 0 || (size_t)actualLen != *u16len) {
-                        ALOGW("Bad string block: string #%lld decoded length is not correct "
-                                "%lld vs %llu\n",
-                                (long long)idx, (long long)actualLen, (long long)*u16len);
-                        return NULL;
-                    }
-
-                    // Reject malformed (non null-terminated) strings
-                    if (u8str[u8len] != 0x00) {
-                        ALOGW("Bad string block: string #%d is not null-terminated",
-                              (int)idx);
-                        return NULL;
-                    }
-
-                    char16_t *u16str = (char16_t *)calloc(*u16len+1, sizeof(char16_t));
-                    if (!u16str) {
-                        ALOGW("No memory when trying to allocate decode cache for string #%d\n",
-                                (int)idx);
-                        return NULL;
-                    }
-
                     if (kDebugStringPoolNoisy) {
-                        ALOGI("Caching UTF8 string: %s", u8str);
+                      ALOGI("Caching UTF8 string: %s", u8str);
                     }
-                    utf8_to_utf16(u8str, u8len, u16str, *u16len + 1);
+
                     mCache[idx] = u16str;
                     return u16str;
                 } else {
@@ -812,13 +817,8 @@ const char* ResStringPool::string8At(size_t idx, size_t* outLen) const
             *outLen = encLen;
 
             if ((uint32_t)(str+encLen-strings) < mStringPoolSize) {
-                // Reject malformed (non null-terminated) strings
-                if (str[encLen] != 0x00) {
-                    ALOGW("Bad string block: string #%d is not null-terminated",
-                          (int)idx);
-                    return NULL;
-                }
-              return (const char*)str;
+                return stringDecodeAt(idx, str, encLen, outLen);
+
             } else {
                 ALOGW("Bad string block: string #%d extends to %d, past end at %d\n",
                         (int)idx, (int)(str+encLen-strings), (int)mStringPoolSize);
@@ -829,6 +829,38 @@ const char* ResStringPool::string8At(size_t idx, size_t* outLen) const
                     (int)(mStringPoolSize*sizeof(uint16_t)));
         }
     }
+    return NULL;
+}
+
+/**
+ * AAPT incorrectly writes a truncated string length when the string size
+ * exceeded the maximum possible encode length value (0x7FFF). To decode a
+ * truncated length, iterate through length values that end in the encode length
+ * bits. Strings that exceed the maximum encode length are not placed into
+ * StringPools in AAPT2.
+ **/
+const char* ResStringPool::stringDecodeAt(size_t idx, const uint8_t* str,
+                                          const size_t encLen, size_t* outLen) const {
+    const uint8_t* strings = (uint8_t*)mStrings;
+
+    size_t i = 0, end = encLen;
+    while ((uint32_t)(str+end-strings) < mStringPoolSize) {
+        if (str[end] == 0x00) {
+            if (i != 0) {
+                ALOGW("Bad string block: string #%d is truncated (actual length is %d)",
+                      (int)idx, (int)end);
+            }
+
+            *outLen = end;
+            return (const char*)str;
+        }
+
+        end = (++i << (sizeof(uint8_t) * 8 * 2 - 1)) | encLen;
+    }
+
+    // Reject malformed (non null-terminated) strings
+    ALOGW("Bad string block: string #%d is not null-terminated",
+          (int)idx);
     return NULL;
 }
 
