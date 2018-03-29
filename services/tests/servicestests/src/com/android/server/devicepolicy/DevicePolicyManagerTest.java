@@ -2113,11 +2113,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         }
     }
 
-    public void testSetGetMeteredDataDisabled() throws Exception {
+    public void testSetGetMeteredDataDisabledPackages() throws Exception {
         setAsProfileOwner(admin1);
 
         final ArrayList<String> emptyList = new ArrayList<>();
-        assertEquals(emptyList, dpm.getMeteredDataDisabled(admin1));
+        assertEquals(emptyList, dpm.getMeteredDataDisabledPackages(admin1));
 
         // Setup
         final ArrayList<String> pkgsToRestrict = new ArrayList<>();
@@ -2127,40 +2127,40 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         pkgsToRestrict.add(package2);
         setupPackageInPackageManager(package1, DpmMockContext.CALLER_USER_HANDLE, 123, 0);
         setupPackageInPackageManager(package2, DpmMockContext.CALLER_USER_HANDLE, 456, 0);
-        List<String> excludedPkgs = dpm.setMeteredDataDisabled(admin1, pkgsToRestrict);
+        List<String> excludedPkgs = dpm.setMeteredDataDisabledPackages(admin1, pkgsToRestrict);
 
         // Verify
         assertEquals(emptyList, excludedPkgs);
-        assertEquals(pkgsToRestrict, dpm.getMeteredDataDisabled(admin1));
+        assertEquals(pkgsToRestrict, dpm.getMeteredDataDisabledPackages(admin1));
         verify(getServices().networkPolicyManagerInternal).setMeteredRestrictedPackages(
                 MockUtils.checkApps(pkgsToRestrict.toArray(new String[0])),
                 eq(DpmMockContext.CALLER_USER_HANDLE));
 
         // Setup
         pkgsToRestrict.remove(package1);
-        excludedPkgs = dpm.setMeteredDataDisabled(admin1, pkgsToRestrict);
+        excludedPkgs = dpm.setMeteredDataDisabledPackages(admin1, pkgsToRestrict);
 
         // Verify
         assertEquals(emptyList, excludedPkgs);
-        assertEquals(pkgsToRestrict, dpm.getMeteredDataDisabled(admin1));
+        assertEquals(pkgsToRestrict, dpm.getMeteredDataDisabledPackages(admin1));
         verify(getServices().networkPolicyManagerInternal).setMeteredRestrictedPackages(
                 MockUtils.checkApps(pkgsToRestrict.toArray(new String[0])),
                 eq(DpmMockContext.CALLER_USER_HANDLE));
     }
 
-    public void testSetGetMeteredDataDisabled_deviceAdmin() {
+    public void testSetGetMeteredDataDisabledPackages_deviceAdmin() {
         mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
         dpm.setActiveAdmin(admin1, true);
         assertTrue(dpm.isAdminActive(admin1));
         mContext.callerPermissions.remove(permission.MANAGE_DEVICE_ADMINS);
 
         assertExpectException(SecurityException.class,  /* messageRegex= */ NOT_PROFILE_OWNER_MSG,
-                () -> dpm.setMeteredDataDisabled(admin1, new ArrayList<>()));
+                () -> dpm.setMeteredDataDisabledPackages(admin1, new ArrayList<>()));
         assertExpectException(SecurityException.class,  /* messageRegex= */ NOT_PROFILE_OWNER_MSG,
-                () -> dpm.getMeteredDataDisabled(admin1));
+                () -> dpm.getMeteredDataDisabledPackages(admin1));
     }
 
-    public void testGetMeteredDataDisabledForUser() throws Exception {
+    public void testIsMeteredDataDisabledForUserPackage() throws Exception {
         setAsProfileOwner(admin1);
 
         // Setup
@@ -2173,34 +2173,34 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         pkgsToRestrict.add(package2);
         setupPackageInPackageManager(package1, DpmMockContext.CALLER_USER_HANDLE, 123, 0);
         setupPackageInPackageManager(package2, DpmMockContext.CALLER_USER_HANDLE, 456, 0);
-        List<String> excludedPkgs = dpm.setMeteredDataDisabled(admin1, pkgsToRestrict);
+        List<String> excludedPkgs = dpm.setMeteredDataDisabledPackages(admin1, pkgsToRestrict);
 
         // Verify
         assertEquals(emptyList, excludedPkgs);
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         assertTrue(package1 + "should be restricted",
-                dpm.isMeteredDataDisabledForUser(admin1, package1,
+                dpm.isMeteredDataDisabledPackageForUser(admin1, package1,
                         DpmMockContext.CALLER_USER_HANDLE));
         assertTrue(package2 + "should be restricted",
-                dpm.isMeteredDataDisabledForUser(admin1, package2,
+                dpm.isMeteredDataDisabledPackageForUser(admin1, package2,
                         DpmMockContext.CALLER_USER_HANDLE));
         assertFalse(package3 + "should not be restricted",
-                dpm.isMeteredDataDisabledForUser(admin1, package3,
+                dpm.isMeteredDataDisabledPackageForUser(admin1, package3,
                         DpmMockContext.CALLER_USER_HANDLE));
     }
 
-    public void testGetMeteredDataDisabledForUser_nonSystemUidCaller() throws Exception {
+    public void testIsMeteredDataDisabledForUserPackage_nonSystemUidCaller() throws Exception {
         setAsProfileOwner(admin1);
         assertExpectException(SecurityException.class,
                 /* messageRegex= */ "Only the system can query restricted pkgs",
-                () -> dpm.isMeteredDataDisabledForUser(
+                () -> dpm.isMeteredDataDisabledPackageForUser(
                         admin1, "com.example.one", DpmMockContext.CALLER_USER_HANDLE));
         dpm.clearProfileOwner(admin1);
 
         setDeviceOwner();
         assertExpectException(SecurityException.class,
                 /* messageRegex= */ "Only the system can query restricted pkgs",
-                () -> dpm.isMeteredDataDisabledForUser(
+                () -> dpm.isMeteredDataDisabledPackageForUser(
                         admin1, "com.example.one", DpmMockContext.CALLER_USER_HANDLE));
         clearDeviceOwner();
     }
