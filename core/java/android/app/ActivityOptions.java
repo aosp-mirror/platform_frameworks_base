@@ -1139,7 +1139,8 @@ public class ActivityOptions {
      * {@link android.app.admin.DevicePolicyManager} can run in LockTask mode. Therefore, if
      * {@link android.app.admin.DevicePolicyManager#isLockTaskPermitted(String)} returns
      * {@code false} for the package of the target activity, a {@link SecurityException} will be
-     * thrown during {@link Context#startActivity(Intent, Bundle)}.
+     * thrown during {@link Context#startActivity(Intent, Bundle)}. This method doesn't affect
+     * activities that are already running — relaunch the activity to run in lock task mode.
      *
      * Defaults to {@code false} if not set.
      *
