@@ -50,7 +50,9 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
                 }
             };
     private final NetworkRequest mNetworkRequest = new NetworkRequest.Builder()
-            .clearCapabilities().addTransportType(NetworkCapabilities.TRANSPORT_WIFI).build();
+            .clearCapabilities()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI).build();
     private final ConnectivityManager.NetworkCallback mNetworkCallback = new ConnectivityManager
             .NetworkCallback() {
         @Override

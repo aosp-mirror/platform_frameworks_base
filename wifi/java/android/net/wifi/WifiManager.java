@@ -1317,6 +1317,7 @@ public class WifiManager {
         if (pin) {
             NetworkRequest request = new NetworkRequest.Builder()
                     .clearCapabilities()
+                    .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
                     .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
                     .build();
             NetworkPinner.pin(mContext, request);
