@@ -21,6 +21,7 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.util.KeyValueListParser;
 import android.util.KeyValueSettingObserver;
+import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -31,6 +32,8 @@ import com.android.internal.annotations.VisibleForTesting;
  * are represented as a comma-delimited key value list.
  */
 public class BackupAgentTimeoutParameters extends KeyValueSettingObserver {
+    private static final String TAG = "BackupAgentTimeout";
+
     @VisibleForTesting
     public static final String SETTING = Settings.Global.BACKUP_AGENT_TIMEOUT_PARAMETERS;
 
@@ -120,30 +123,50 @@ public class BackupAgentTimeoutParameters extends KeyValueSettingObserver {
 
     public long getKvBackupAgentTimeoutMillis() {
         synchronized (mLock) {
+            if (BackupManagerService.DEBUG_SCHEDULING) {
+                Slog.v(TAG, "getKvBackupAgentTimeoutMillis(): " + mKvBackupAgentTimeoutMillis);
+            }
             return mKvBackupAgentTimeoutMillis;
         }
     }
 
     public long getFullBackupAgentTimeoutMillis() {
         synchronized (mLock) {
+            if (BackupManagerService.DEBUG_SCHEDULING) {
+                Slog.v(TAG, "getFullBackupAgentTimeoutMillis(): " + mFullBackupAgentTimeoutMillis);
+            }
             return mFullBackupAgentTimeoutMillis;
         }
     }
 
     public long getSharedBackupAgentTimeoutMillis() {
         synchronized (mLock) {
+            if (BackupManagerService.DEBUG_SCHEDULING) {
+                Slog.v(
+                        TAG,
+                        "getSharedBackupAgentTimeoutMillis(): " + mSharedBackupAgentTimeoutMillis);
+            }
             return mSharedBackupAgentTimeoutMillis;
         }
     }
 
     public long getRestoreAgentTimeoutMillis() {
         synchronized (mLock) {
+            if (BackupManagerService.DEBUG_SCHEDULING) {
+                Slog.v(TAG, "getRestoreAgentTimeoutMillis(): " + mRestoreAgentTimeoutMillis);
+            }
             return mRestoreAgentTimeoutMillis;
         }
     }
 
     public long getRestoreAgentFinishedTimeoutMillis() {
         synchronized (mLock) {
+            if (BackupManagerService.DEBUG_SCHEDULING) {
+                Slog.v(
+                        TAG,
+                        "getRestoreAgentFinishedTimeoutMillis(): "
+                                + mRestoreAgentFinishedTimeoutMillis);
+            }
             return mRestoreAgentFinishedTimeoutMillis;
         }
     }
