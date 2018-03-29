@@ -17,14 +17,20 @@
 package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Binder;
+import android.os.IInterface;
+import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -50,7 +56,7 @@ import org.mockito.MockitoAnnotations;
  * atest FrameworksServicesTests:com.android.server.wm.RemoteAnimationControllerTest
  */
 @SmallTest
-@FlakyTest(detail = "Promote to presubmit if non-flakyness is established")
+@Presubmit
 @RunWith(AndroidJUnit4.class)
 public class RemoteAnimationControllerTest extends WindowTestsBase {
 
@@ -67,6 +73,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
     public void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
+        when(mMockRunner.asBinder()).thenReturn(new Binder());
         mAdapter = new RemoteAnimationAdapter(mMockRunner, 100, 50);
         mAdapter.setCallingPid(123);
         sWm.mH.runWithScissors(() -> {
@@ -166,7 +173,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testZeroAnimations() throws Exception {
         mController.goodToGo();
-        verifyZeroInteractions(mMockRunner);
+        verifyNoMoreInteractionsExceptAsBinder(mMockRunner);
     }
 
     @Test
@@ -175,7 +182,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         mController.createAnimationAdapter(win.mAppToken,
                 new Point(50, 100), new Rect(50, 100, 150, 150));
         mController.goodToGo();
-        verifyZeroInteractions(mMockRunner);
+        verifyNoMoreInteractionsExceptAsBinder(mMockRunner);
     }
 
     @Test
@@ -206,7 +213,12 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
         adapter.startAnimation(mMockLeash, mMockTransaction, mFinishedCallback);
         win.mAppToken.removeImmediately();
         mController.goodToGo();
-        verifyZeroInteractions(mMockRunner);
+        verifyNoMoreInteractionsExceptAsBinder(mMockRunner);
         verify(mFinishedCallback).onAnimationFinished(eq(adapter));
+    }
+
+    private static void verifyNoMoreInteractionsExceptAsBinder(IInterface binder) {
+        verify(binder, atLeast(0)).asBinder();
+        verifyNoMoreInteractions(binder);
     }
 }
