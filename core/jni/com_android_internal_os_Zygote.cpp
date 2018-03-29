@@ -260,7 +260,7 @@ static void SetUpSeccompFilter(uid_t uid) {
   }
 
   // Apply system or app filter based on uid.
-  if (getuid() >= AID_APP_START) {
+  if (uid >= AID_APP_START) {
     set_app_seccomp_filter();
   } else {
     set_system_seccomp_filter();
@@ -619,11 +619,6 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
       fail_fn(CREATE_ERROR("sigprocmask(SIG_SETMASK, { SIGCHLD }) failed: %s", strerror(errno)));
     }
 
-    // Must be called when the new process still has CAP_SYS_ADMIN.  The other alternative is to
-    // call prctl(PR_SET_NO_NEW_PRIVS, 1) afterward, but that breaks SELinux domain transition (see
-    // b/71859146).
-    SetUpSeccompFilter(uid);
-
     // Keep capabilities across UID change, unless we're staying root.
     if (uid != 0) {
       if (!EnableKeepCapabilities(&error_msg)) {
@@ -698,6 +693,13 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
     if (rc == -1) {
       fail_fn(CREATE_ERROR("setresgid(%d) failed: %s", gid, strerror(errno)));
     }
+
+    // Must be called when the new process still has CAP_SYS_ADMIN, in this case, before changing
+    // uid from 0, which clears capabilities.  The other alternative is to call
+    // prctl(PR_SET_NO_NEW_PRIVS, 1) afterward, but that breaks SELinux domain transition (see
+    // b/71859146).  As the result, privileged syscalls used below still need to be accessible in
+    // app process.
+    SetUpSeccompFilter(uid);
 
     rc = setresuid(uid, uid, uid);
     if (rc == -1) {
