@@ -29,6 +29,7 @@ import static com.android.server.wm.WindowManagerService.H.NOTIFY_APP_TRANSITION
 import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
 import static com.android.server.wm.AnimationAdapterProto.REMOTE;
 
+import android.annotation.IntDef;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.WindowConfiguration;
 import android.graphics.Point;
@@ -67,12 +68,25 @@ public class RecentsAnimationController implements DeathRecipient {
     private static final boolean DEBUG = false;
     private static final long FAILSAFE_DELAY = 1000;
 
+    public static final int REORDER_KEEP_HOME_IN_PLACE = 0;
+    public static final int REORDER_MOVE_HOME_TO_TOP = 1;
+    public static final int REORDER_MOVE_HOME_TO_ORIGINAL_POSITION = 2;
+
+    @IntDef(prefix = { "REORDER_MODE_" }, value = {
+            REORDER_KEEP_HOME_IN_PLACE,
+            REORDER_MOVE_HOME_TO_TOP,
+            REORDER_MOVE_HOME_TO_ORIGINAL_POSITION
+    })
+    public @interface ReorderMode {}
+
     private final WindowManagerService mService;
     private final IRecentsAnimationRunner mRunner;
     private final RecentsAnimationCallbacks mCallbacks;
     private final ArrayList<TaskAnimationAdapter> mPendingAnimations = new ArrayList<>();
     private final int mDisplayId;
-    private final Runnable mFailsafeRunnable = this::cancelAnimation;
+    private final Runnable mFailsafeRunnable = () -> {
+        cancelAnimation(REORDER_MOVE_HOME_TO_ORIGINAL_POSITION);
+    };
 
     // The recents component app token that is shown behind the visibile tasks
     private AppWindowToken mHomeAppToken;
@@ -93,7 +107,7 @@ public class RecentsAnimationController implements DeathRecipient {
     private Rect mTmpRect = new Rect();
 
     public interface RecentsAnimationCallbacks {
-        void onAnimationFinished(boolean moveHomeToTop);
+        void onAnimationFinished(@ReorderMode int reorderMode);
     }
 
     private final IRecentsAnimationController mController =
@@ -141,7 +155,9 @@ public class RecentsAnimationController implements DeathRecipient {
 
                 // Note, the callback will handle its own synchronization, do not lock on WM lock
                 // prior to calling the callback
-                mCallbacks.onAnimationFinished(moveHomeToTop);
+                mCallbacks.onAnimationFinished(moveHomeToTop
+                        ? REORDER_MOVE_HOME_TO_TOP
+                        : REORDER_MOVE_HOME_TO_ORIGINAL_POSITION);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -222,14 +238,14 @@ public class RecentsAnimationController implements DeathRecipient {
 
         // Skip the animation if there is nothing to animate
         if (mPendingAnimations.isEmpty()) {
-            cancelAnimation();
+            cancelAnimation(REORDER_MOVE_HOME_TO_ORIGINAL_POSITION);
             return;
         }
 
         try {
             mRunner.asBinder().linkToDeath(this, 0);
         } catch (RemoteException e) {
-            cancelAnimation();
+            cancelAnimation(REORDER_MOVE_HOME_TO_ORIGINAL_POSITION);
             return;
         }
 
@@ -299,7 +315,7 @@ public class RecentsAnimationController implements DeathRecipient {
                 reasons).sendToTarget();
     }
 
-    void cancelAnimation() {
+    void cancelAnimation(@ReorderMode int reorderMode) {
         if (DEBUG) Log.d(TAG, "cancelAnimation()");
         synchronized (mService.getWindowManagerLock()) {
             if (mCanceled) {
@@ -316,16 +332,17 @@ public class RecentsAnimationController implements DeathRecipient {
         }
         // Clean up and return to the previous app
         // Don't hold the WM lock here as it calls back to AM/RecentsAnimation
-        mCallbacks.onAnimationFinished(false /* moveHomeToTop */);
+        mCallbacks.onAnimationFinished(reorderMode);
     }
 
-    void cleanupAnimation(boolean moveHomeToTop) {
+    void cleanupAnimation(@ReorderMode int reorderMode) {
         if (DEBUG) Log.d(TAG, "cleanupAnimation(): mPendingAnimations="
                 + mPendingAnimations.size());
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final TaskAnimationAdapter adapter = mPendingAnimations.get(i);
             adapter.mTask.setCanAffectSystemUiFlags(true);
-            if (moveHomeToTop) {
+            if (reorderMode == REORDER_MOVE_HOME_TO_TOP
+                    || reorderMode == REORDER_KEEP_HOME_IN_PLACE) {
                 adapter.mTask.dontAnimateDimExit();
             }
             adapter.mCapturedFinishCallback.onAnimationFinished(adapter);
@@ -344,7 +361,7 @@ public class RecentsAnimationController implements DeathRecipient {
 
     @Override
     public void binderDied() {
-        cancelAnimation();
+        cancelAnimation(REORDER_MOVE_HOME_TO_ORIGINAL_POSITION);
     }
 
     void checkAnimationReady(WallpaperController wallpaperController) {
@@ -458,7 +475,7 @@ public class RecentsAnimationController implements DeathRecipient {
 
         @Override
         public void onAnimationCancelled(SurfaceControl animationLeash) {
-            cancelAnimation();
+            cancelAnimation(REORDER_MOVE_HOME_TO_ORIGINAL_POSITION);
         }
 
         @Override

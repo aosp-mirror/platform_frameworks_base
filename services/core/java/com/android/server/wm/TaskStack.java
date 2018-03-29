@@ -33,8 +33,6 @@ import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.StackProto.ADJUSTED_BOUNDS;
 import static com.android.server.wm.StackProto.ADJUSTED_FOR_IME;
 import static com.android.server.wm.StackProto.ADJUST_DIVIDER_AMOUNT;
@@ -47,6 +45,8 @@ import static com.android.server.wm.StackProto.ID;
 import static com.android.server.wm.StackProto.MINIMIZE_AMOUNT;
 import static com.android.server.wm.StackProto.TASKS;
 import static com.android.server.wm.StackProto.WINDOW_CONTAINER;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.CallSuper;
 import android.content.res.Configuration;
@@ -62,12 +62,10 @@ import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceControl;
-
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.internal.policy.DockedDividerUtils;
 import com.android.server.EventLogTags;
-
 import java.io.PrintWriter;
 
 public class TaskStack extends WindowContainer<Task> implements
@@ -1685,6 +1683,25 @@ public class TaskStack extends WindowContainer<Task> implements
                 // I don't believe you...
             }
         }
+    }
+
+    @Override
+    public boolean shouldDeferStartOnMoveToFullscreen() {
+        // Workaround for the recents animation -- normally we need to wait for the new activity to
+        // show before starting the PiP animation, but because we start and show the home activity
+        // early for the recents animation prior to the PiP animation starting, there is no
+        // subsequent all-drawn signal. In this case, we can skip the pause when the home stack is
+        // already visible and drawn.
+        final TaskStack homeStack = mDisplayContent.getHomeStack();
+        if (homeStack == null) {
+            return true;
+        }
+        final Task homeTask = homeStack.getTopChild();
+        final AppWindowToken homeApp = homeTask.getTopVisibleAppToken();
+        if (!homeTask.isVisible() || homeApp == null) {
+            return true;
+        }
+        return !homeApp.allDrawn;
     }
 
     /**

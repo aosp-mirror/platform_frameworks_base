@@ -204,6 +204,8 @@ import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
+import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_HOME_TO_ORIGINAL_POSITION;
+import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_HOME_IN_PLACE;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
@@ -257,7 +259,6 @@ import android.app.WaitResult;
 import android.app.WindowConfiguration.ActivityType;
 import android.app.WindowConfiguration.WindowingMode;
 import android.app.admin.DevicePolicyCache;
-import android.app.admin.DevicePolicyManager;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.IBackupManager;
@@ -5225,12 +5226,14 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void cancelRecentsAnimation() {
+    public void cancelRecentsAnimation(boolean restoreHomeStackPosition) {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "cancelRecentsAnimation()");
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                mWindowManager.cancelRecentsAnimation();
+                mWindowManager.cancelRecentsAnimation(restoreHomeStackPosition
+                        ? REORDER_MOVE_HOME_TO_ORIGINAL_POSITION
+                        : REORDER_KEEP_HOME_IN_PLACE);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
