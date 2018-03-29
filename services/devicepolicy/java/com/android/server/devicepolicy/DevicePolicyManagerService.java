@@ -820,7 +820,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         private static final String TAG_PASSWORD_HISTORY_LENGTH = "password-history-length";
         private static final String TAG_MIN_PASSWORD_LENGTH = "min-password-length";
         private static final String ATTR_VALUE = "value";
-        private static final String TAG_PASSWORD_BLACKLIST = "password-blacklist";
         private static final String TAG_PASSWORD_QUALITY = "password-quality";
         private static final String TAG_POLICIES = "policies";
         private static final String TAG_CROSS_PROFILE_WIDGET_PROVIDERS =
@@ -961,9 +960,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // Default title of confirm credentials screen
         String organizationName = null;
 
-        // The blacklist data is stored in a file whose name is stored in the XML
-        String passwordBlacklistFile = null;
-
         // The component name of the backup transport which has to be used if backups are mandatory
         // or null if backups are not mandatory.
         ComponentName mandatoryBackupTransport = null;
@@ -1052,11 +1048,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             null, ATTR_VALUE, Integer.toString(minimumPasswordMetrics.nonLetter));
                     out.endTag(null, TAG_MIN_PASSWORD_NONLETTER);
                 }
-            }
-            if (passwordBlacklistFile != null) {
-                out.startTag(null, TAG_PASSWORD_BLACKLIST);
-                out.attribute(null, ATTR_VALUE, passwordBlacklistFile);
-                out.endTag(null, TAG_PASSWORD_BLACKLIST);
             }
             if (maximumTimeToUnlock != DEF_MAXIMUM_TIME_TO_UNLOCK) {
                 out.startTag(null, TAG_MAX_TIME_TO_UNLOCK);
@@ -1313,8 +1304,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 } else if (TAG_MIN_PASSWORD_NONLETTER.equals(tag)) {
                     minimumPasswordMetrics.nonLetter = Integer.parseInt(
                             parser.getAttributeValue(null, ATTR_VALUE));
-                } else if (TAG_PASSWORD_BLACKLIST.equals(tag)) {
-                    passwordBlacklistFile = parser.getAttributeValue(null, ATTR_VALUE);
                 }else if (TAG_MAX_TIME_TO_UNLOCK.equals(tag)) {
                     maximumTimeToUnlock = Long.parseLong(
                             parser.getAttributeValue(null, ATTR_VALUE));
@@ -1589,8 +1578,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     pw.println(minimumPasswordMetrics.symbols);
             pw.print(prefix); pw.print("minimumPasswordNonLetter=");
                     pw.println(minimumPasswordMetrics.nonLetter);
-            pw.print(prefix); pw.print("passwordBlacklist=");
-                    pw.println(passwordBlacklistFile != null);
             pw.print(prefix); pw.print("maximumTimeToUnlock=");
                     pw.println(maximumTimeToUnlock);
             pw.print(prefix); pw.print("strongAuthUnlockTimeout=");
@@ -1855,10 +1842,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         LockPatternUtils newLockPatternUtils() {
             return new LockPatternUtils(mContext);
-        }
-
-        PasswordBlacklist newPasswordBlacklist(File file) {
-            return new PasswordBlacklist(file);
         }
 
         boolean storageManagerIsFileBasedEncryptionEnabled() {
@@ -4412,136 +4395,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    /* @return the password blacklist set by the admin or {@code null} if none. */
-    PasswordBlacklist getAdminPasswordBlacklistLocked(@NonNull ActiveAdmin admin) {
-        final int userId = UserHandle.getUserId(admin.getUid());
-        return admin.passwordBlacklistFile == null ? null : new PasswordBlacklist(
-                new File(getPolicyFileDirectory(userId), admin.passwordBlacklistFile));
-    }
-
-    private static final String PASSWORD_BLACKLIST_FILE_PREFIX = "password-blacklist-";
-    private static final String PASSWORD_BLACKLIST_FILE_SUFFIX = "";
-
-    @Override
-    public boolean setPasswordBlacklist(ComponentName who, String name, List<String> blacklist,
-            boolean parent) {
-        if (!mHasFeature) {
-            return false;
-        }
-        Preconditions.checkNotNull(who, "who is null");
-
-        synchronized (this) {
-            final ActiveAdmin admin = getActiveAdminForCallerLocked(
-                    who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, parent);
-            final int userId = mInjector.userHandleGetCallingUserId();
-            PasswordBlacklist adminBlacklist = getAdminPasswordBlacklistLocked(admin);
-
-            if (blacklist == null || blacklist.isEmpty()) {
-                // Remove the adminBlacklist
-                admin.passwordBlacklistFile = null;
-                saveSettingsLocked(userId);
-                if (adminBlacklist != null) {
-                    adminBlacklist.delete();
-                }
-                return true;
-            }
-
-            // Validate server side
-            Preconditions.checkNotNull(name, "name is null");
-            DevicePolicyManager.enforcePasswordBlacklistSize(blacklist);
-
-            // Blacklist is case insensitive so normalize to lower case
-            final int blacklistSize = blacklist.size();
-            for (int i = 0; i < blacklistSize; ++i) {
-                blacklist.set(i, blacklist.get(i).toLowerCase());
-            }
-
-            final boolean isNewBlacklist = adminBlacklist == null;
-            if (isNewBlacklist) {
-                // Create a new file for the blacklist. There could be multiple admins, each setting
-                // different blacklists, to restrict a user's credential, for example a managed
-                // profile can impose restrictions on its parent while the parent is already
-                // restricted by its own admin. A deterministic naming scheme would be fragile if
-                // new types of admin are introduced so we generate and save the file name instead.
-                // This isn't a temporary file but it reuses the name generation logic
-                final File file;
-                try {
-                    file = File.createTempFile(PASSWORD_BLACKLIST_FILE_PREFIX,
-                            PASSWORD_BLACKLIST_FILE_SUFFIX, getPolicyFileDirectory(userId));
-                } catch (IOException e) {
-                    Slog.e(LOG_TAG, "Failed to make a file for the blacklist", e);
-                    return false;
-                }
-                adminBlacklist = mInjector.newPasswordBlacklist(file);
-            }
-
-            if (adminBlacklist.savePasswordBlacklist(name, blacklist)) {
-                if (isNewBlacklist) {
-                    // The blacklist was saved so point the admin to the file
-                    admin.passwordBlacklistFile = adminBlacklist.getFile().getName();
-                    saveSettingsLocked(userId);
-                }
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    @Override
-    public String getPasswordBlacklistName(ComponentName who, @UserIdInt int userId,
-            boolean parent) {
-        if (!mHasFeature) {
-            return null;
-        }
-        Preconditions.checkNotNull(who, "who is null");
-        enforceFullCrossUsersPermission(userId);
-        synchronized (this) {
-            final ActiveAdmin admin = getActiveAdminForCallerLocked(
-                    who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, parent);
-            final PasswordBlacklist blacklist = getAdminPasswordBlacklistLocked(admin);
-            if (blacklist == null) {
-                return null;
-            }
-            return blacklist.getName();
-        }
-    }
-
-    @Override
-    public boolean isPasswordBlacklisted(@UserIdInt int userId, String password) {
-        if (!mHasFeature) {
-            return false;
-        }
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.TEST_BLACKLISTED_PASSWORD, null);
-        return isPasswordBlacklistedInternal(userId, password);
-    }
-
-    private boolean isPasswordBlacklistedInternal(@UserIdInt int userId, String password) {
-        Preconditions.checkNotNull(password, "Password is null");
-        enforceFullCrossUsersPermission(userId);
-
-        // Normalize to lower case for case insensitive blacklist match
-        final String lowerCasePassword = password.toLowerCase();
-
-        synchronized (this) {
-            final List<ActiveAdmin> admins =
-                    getActiveAdminsForLockscreenPoliciesLocked(userId, /* parent */ false);
-            final int N = admins.size();
-            for (int i = 0; i < N; i++) {
-                final PasswordBlacklist blacklist
-                        = getAdminPasswordBlacklistLocked(admins.get(i));
-                if (blacklist != null) {
-                    if (blacklist.isPasswordBlacklisted(lowerCasePassword)) {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
-    }
-
     @Override
     public boolean isActivePasswordSufficient(int userHandle, boolean parent) {
         if (!mHasFeature) {
@@ -4936,11 +4789,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             + neededNonLetter);
                     return false;
                 }
-            }
-
-            if (isPasswordBlacklistedInternal(userHandle, password)) {
-                Slog.w(LOG_TAG, "resetPassword: the password is blacklisted");
-                return false;
             }
         }
 
