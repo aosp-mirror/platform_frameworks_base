@@ -18,11 +18,14 @@ package android.telephony;
 
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * CellIdentity represents the identity of a unique cell. This is the base class for
@@ -84,8 +87,16 @@ public abstract class CellIdentity implements Parcelable {
     /** @hide */
     protected final String mMncStr;
 
+    // long alpha Operator Name String or Enhanced Operator Name String
     /** @hide */
-    protected CellIdentity(String tag, int type, String mcc, String mnc) {
+    protected final String mAlphaLong;
+    // short alpha Operator Name String or Enhanced Operator Name String
+    /** @hide */
+    protected final String mAlphaShort;
+
+    /** @hide */
+    protected CellIdentity(String tag, int type, String mcc, String mnc, String alphal,
+                           String alphas) {
         mTag = tag;
         mType = type;
 
@@ -113,6 +124,8 @@ public abstract class CellIdentity implements Parcelable {
             mMncStr = null;
             log("invalid MNC format: " + mnc);
         }
+        mAlphaLong = alphal;
+        mAlphaShort = alphas;
     }
 
     /** Implement the Parcelable interface */
@@ -138,6 +151,40 @@ public abstract class CellIdentity implements Parcelable {
     }
 
     /**
+     * @return The long alpha tag associated with the current scan result (may be the operator
+     * name string or extended operator name string). May be null if unknown.
+     */
+    @Nullable
+    public CharSequence getOperatorAlphaLong() {
+        return mAlphaLong;
+    }
+
+    /**
+     * @return The short alpha tag associated with the current scan result (may be the operator
+     * name string or extended operator name string).  May be null if unknown.
+     */
+    @Nullable
+    public CharSequence getOperatorAlphaShort() {
+        return mAlphaShort;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof CellIdentity)) {
+            return false;
+        }
+
+        CellIdentity o = (CellIdentity) other;
+        return TextUtils.equals(mAlphaLong, o.mAlphaLong)
+                && TextUtils.equals(mAlphaShort, o.mAlphaShort);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mAlphaLong, mAlphaShort, mMccStr, mMncStr, mType);
+    }
+
+    /**
      * Used by child classes for parceling.
      *
      * @hide
@@ -147,6 +194,8 @@ public abstract class CellIdentity implements Parcelable {
         dest.writeInt(type);
         dest.writeString(mMccStr);
         dest.writeString(mMncStr);
+        dest.writeString(mAlphaLong);
+        dest.writeString(mAlphaShort);
     }
 
     /**
@@ -154,7 +203,8 @@ public abstract class CellIdentity implements Parcelable {
      * @hide
      */
     protected CellIdentity(String tag, int type, Parcel source) {
-        this(tag, type, source.readString(), source.readString());
+        this(tag, type, source.readString(), source.readString(),
+                source.readString(), source.readString());
     }
 
     /** Implement the Parcelable interface */
