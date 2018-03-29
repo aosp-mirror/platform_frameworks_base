@@ -24,6 +24,9 @@ import static com.android.server.locksettings.recoverablekeystore.serialization.
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_ALIAS;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_APPLICATION_KEY;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_APPLICATION_KEYS;
+
+import static com.android.server.locksettings.recoverablekeystore.serialization
+        .KeyChainSnapshotSchema.TAG_BACKEND_PUBLIC_KEY;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_COUNTER_ID;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_RECOVERY_KEY_MATERIAL;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_KEY_CHAIN_PROTECTION_PARAMS;
@@ -159,6 +162,10 @@ public class KeyChainSnapshotSerializer {
         writePropertyTag(xmlSerializer, TAG_SERVER_PARAMS, keyChainSnapshot.getServerParams());
         writePropertyTag(xmlSerializer, TAG_TRUSTED_HARDWARE_CERT_PATH,
                 keyChainSnapshot.getTrustedHardwareCertPath());
+        if (keyChainSnapshot.getTrustedHardwarePublicKey() != null) {
+            writePropertyTag(xmlSerializer, TAG_BACKEND_PUBLIC_KEY,
+                    keyChainSnapshot.getTrustedHardwarePublicKey());
+        }
     }
 
     private static void writePropertyTag(
