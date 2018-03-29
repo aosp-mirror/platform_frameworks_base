@@ -187,11 +187,27 @@ public class LocalTransport extends BackupTransport {
 
     @Override
     public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor data) {
+        return performBackup(packageInfo, data, /*flags=*/ 0);
+    }
+
+    @Override
+    public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor data, int flags) {
+        boolean isIncremental = (flags & FLAG_INCREMENTAL) != 0;
+        boolean isNonIncremental = (flags & FLAG_NON_INCREMENTAL) != 0;
+
+        if (isIncremental) {
+            Log.i(TAG, "Performing incremental backup for " + packageInfo.packageName);
+        } else if (isNonIncremental) {
+            Log.i(TAG, "Performing non-incremental backup for " + packageInfo.packageName);
+        } else {
+            Log.i(TAG, "Performing backup for " + packageInfo.packageName);
+        }
+
         if (DEBUG) {
             try {
-            StructStat ss = Os.fstat(data.getFileDescriptor());
-            Log.v(TAG, "performBackup() pkg=" + packageInfo.packageName
-                    + " size=" + ss.st_size);
+                StructStat ss = Os.fstat(data.getFileDescriptor());
+                Log.v(TAG, "performBackup() pkg=" + packageInfo.packageName
+                        + " size=" + ss.st_size + " flags=" + flags);
             } catch (ErrnoException e) {
                 Log.w(TAG, "Unable to stat input file in performBackup() on "
                         + packageInfo.packageName);
@@ -199,7 +215,26 @@ public class LocalTransport extends BackupTransport {
         }
 
         File packageDir = new File(mCurrentSetIncrementalDir, packageInfo.packageName);
-        packageDir.mkdirs();
+        boolean hasDataForPackage = !packageDir.mkdirs();
+
+        if (isIncremental) {
+            if (mParameters.isNonIncrementalOnly() || !hasDataForPackage) {
+                if (mParameters.isNonIncrementalOnly()) {
+                    Log.w(TAG, "Transport is in non-incremental only mode.");
+
+                } else {
+                    Log.w(TAG,
+                            "Requested incremental, but transport currently stores no data for the "
+                                    + "package, requesting non-incremental retry.");
+                }
+                return TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED;
+            }
+        }
+        if (isNonIncremental && hasDataForPackage) {
+            Log.w(TAG, "Requested non-incremental, deleting existing data.");
+            clearBackupData(packageInfo);
+            packageDir.mkdirs();
+        }
 
         // Each 'record' in the restore set is kept in its own file, named by
         // the record key.  Wind through the data file, extracting individual
