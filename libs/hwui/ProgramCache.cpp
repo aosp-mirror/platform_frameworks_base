@@ -62,7 +62,7 @@ const char* gVS_Header_Uniforms_HasRoundRectClip =
         "uniform mediump vec4 roundRectInnerRectLTWH;\n"
         "uniform mediump float roundRectRadius;\n";
 const char* gVS_Header_Varyings_HasTexture =
-        "varying vec2 outTexCoords;\n";
+        "varying highp vec2 outTexCoords;\n";
 const char* gVS_Header_Varyings_HasColors =
         "varying vec4 outColors;\n";
 const char* gVS_Header_Varyings_HasVertexAlpha =
