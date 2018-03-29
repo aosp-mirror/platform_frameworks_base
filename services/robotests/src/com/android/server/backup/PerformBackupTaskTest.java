@@ -153,8 +153,16 @@ public class PerformBackupTaskTest {
 
         Looper backupLooper = startBackupThreadAndGetLooper();
         mShadowBackupLooper = shadowOf(backupLooper);
-        mBackupHandler = new BackupHandler(mBackupManagerService, backupLooper);
+
         Handler mainHandler = new Handler(Looper.getMainLooper());
+        BackupAgentTimeoutParameters agentTimeoutParameters =
+                new BackupAgentTimeoutParameters(mainHandler, mApplication.getContentResolver());
+        agentTimeoutParameters.start();
+
+        // We need to mock BMS timeout parameters before initializing the BackupHandler since
+        // the constructor of BackupHandler relies on the timeout parameters.
+        when(mBackupManagerService.getAgentTimeoutParameters()).thenReturn(agentTimeoutParameters);
+        mBackupHandler = new BackupHandler(mBackupManagerService, backupLooper);
 
         mBackupManager = spy(FakeIBackupManager.class);
 
@@ -168,7 +176,8 @@ public class PerformBackupTaskTest {
                 mTransportManager,
                 packageManager,
                 mBackupHandler,
-                mWakeLock);
+                mWakeLock,
+                agentTimeoutParameters);
         when(mBackupManagerService.getBaseStateDir()).thenReturn(mBaseStateDir);
         when(mBackupManagerService.getDataDir()).thenReturn(dataDir);
         when(mBackupManagerService.getBackupManagerBinder()).thenReturn(mBackupManager);

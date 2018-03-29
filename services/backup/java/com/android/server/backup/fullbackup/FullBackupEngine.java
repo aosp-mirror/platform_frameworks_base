@@ -25,9 +25,6 @@ import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP_WAIT;
 import static com.android.server.backup.BackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 import static com.android.server.backup.BackupManagerService.TAG;
-import static com.android.server.backup.BackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL;
-import static com.android.server.backup.BackupManagerService
-        .TIMEOUT_SHARED_BACKUP_INTERVAL;
 
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
@@ -44,9 +41,11 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.StringBuilderPrinter;
 
+import com.android.internal.util.Preconditions;
 import com.android.server.AppWidgetBackupBridge;
-import com.android.server.backup.BackupRestoreTask;
+import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupManagerService;
+import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.utils.FullBackupUtils;
 
 import java.io.BufferedOutputStream;
@@ -75,6 +74,7 @@ public class FullBackupEngine {
     private final long mQuota;
     private final int mOpToken;
     private final int mTransportFlags;
+    private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
     class FullBackupRunner implements Runnable {
 
@@ -137,8 +137,8 @@ public class FullBackupEngine {
                 final boolean isSharedStorage =
                         mPackage.packageName.equals(SHARED_BACKUP_AGENT_PACKAGE);
                 final long timeout = isSharedStorage ?
-                        TIMEOUT_SHARED_BACKUP_INTERVAL :
-                        TIMEOUT_FULL_BACKUP_INTERVAL;
+                        mAgentTimeoutParameters.getSharedBackupAgentTimeoutMillis() :
+                        mAgentTimeoutParameters.getFullBackupAgentTimeoutMillis();
 
                 if (DEBUG) {
                     Slog.d(TAG, "Calling doFullBackup() on " + mPackage.packageName);
@@ -180,6 +180,9 @@ public class FullBackupEngine {
         mQuota = quota;
         mOpToken = opToken;
         mTransportFlags = transportFlags;
+        mAgentTimeoutParameters = Preconditions.checkNotNull(
+                backupManagerService.getAgentTimeoutParameters(),
+                "Timeout parameters cannot be null");
     }
 
     public int preflightCheck() throws RemoteException {
