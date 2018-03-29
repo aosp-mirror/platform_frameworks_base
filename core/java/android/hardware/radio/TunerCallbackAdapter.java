@@ -53,6 +53,12 @@ class TunerCallbackAdapter extends ITunerCallback.Stub {
         }
     }
 
+    void close() {
+        synchronized (mLock) {
+            if (mProgramList != null) mProgramList.close();
+        }
+    }
+
     void setProgramListObserver(@Nullable ProgramList programList,
             @NonNull ProgramList.OnCloseListener closeListener) {
         Objects.requireNonNull(closeListener);
