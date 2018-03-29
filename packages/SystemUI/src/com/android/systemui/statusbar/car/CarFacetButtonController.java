@@ -46,6 +46,12 @@ public class CarFacetButtonController {
         }
     }
 
+    public void removeAll() {
+        mButtonsByCategory.clear();
+        mButtonsByPackage.clear();
+        mSelectedFacetButton = null;
+    }
+
     /**
      * This will unselect the currently selected CarFacetButton and determine which one should be
      * selected next. It does this by reading the properties on the CarFacetButton and seeing if
