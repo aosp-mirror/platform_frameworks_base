@@ -1,4 +1,5 @@
 Landroid/accounts/AccountManager;->mContext:Landroid/content/Context;
+Landroid/accounts/IAccountAuthenticatorResponse$Stub;-><init>()V
 Landroid/accounts/IAccountManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/accounts/IAccountManager;
 Landroid/accounts/IAccountManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/animation/LayoutTransition;->cancel()V
@@ -236,6 +237,7 @@ Landroid/app/IActivityManager;->getLaunchedFromPackage(Landroid/os/IBinder;)Ljav
 Landroid/app/IActivityManager;->getTaskForActivity(Landroid/os/IBinder;Z)I
 Landroid/app/IActivityManager;->moveTaskToFront(IILandroid/os/Bundle;)V
 Landroid/app/IActivityManager;->publishContentProviders(Landroid/app/IApplicationThread;Ljava/util/List;)V
+Landroid/app/IActivityManager;->requestBugReport(I)V
 Landroid/app/IActivityManager;->resumeAppSwitches()V
 Landroid/app/IActivityManager;->setRequestedOrientation(Landroid/os/IBinder;I)V
 Landroid/app/IActivityManager;->setTaskResizeable(II)V
@@ -948,6 +950,7 @@ Landroid/media/IAudioService;->getStreamVolume(I)I
 Landroid/media/IAudioService;->setStreamVolume(IIILjava/lang/String;)V
 Landroid/media/IAudioService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/media/IAudioService;
 Landroid/media/IAudioService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
+Landroid/media/IRemoteDisplayCallback;->onStateChanged(Landroid/media/RemoteDisplayState;)V
 Landroid/media/IVolumeController$Stub;->asInterface(Landroid/os/IBinder;)Landroid/media/IVolumeController;
 Landroid/media/JetPlayer;->mNativePlayerInJavaObj:J
 Landroid/media/JetPlayer;->postEventFromNative(Ljava/lang/Object;III)V
@@ -1000,6 +1003,8 @@ Landroid/media/PlaybackParams;->SET_SPEED:I
 Landroid/media/RemoteDisplay;->notifyDisplayConnected(Landroid/view/Surface;IIII)V
 Landroid/media/RemoteDisplay;->notifyDisplayDisconnected()V
 Landroid/media/RemoteDisplay;->notifyDisplayError(I)V
+Landroid/media/RemoteDisplayState;->displays:Ljava/util/ArrayList;
+Landroid/media/RemoteDisplayState;-><init>()V
 Landroid/media/RingtoneManager;->getRingtone(Landroid/content/Context;Landroid/net/Uri;I)Landroid/media/Ringtone;
 Landroid/media/session/MediaSessionLegacyHelper;->getHelper(Landroid/content/Context;)Landroid/media/session/MediaSessionLegacyHelper;
 Landroid/media/session/MediaSession;->mCallback:Landroid/media/session/MediaSession$CallbackMessageHandler;
@@ -1011,6 +1016,11 @@ Landroid/media/soundtrigger/SoundTriggerManager;->startRecognition(Ljava/util/UU
 Landroid/media/soundtrigger/SoundTriggerManager;->stopRecognition(Ljava/util/UUID;)I
 Landroid/media/soundtrigger/SoundTriggerManager;->unloadSoundModel(Ljava/util/UUID;)I
 Landroid/media/SubtitleController;->mHandler:Landroid/os/Handler;
+Landroid/media/SubtitleTrack$RenderingWidget;->draw(Landroid/graphics/Canvas;)V
+Landroid/media/SubtitleTrack$RenderingWidget;->onAttachedToWindow()V
+Landroid/media/SubtitleTrack$RenderingWidget;->onDetachedFromWindow()V
+Landroid/media/SubtitleTrack$RenderingWidget;->setOnChangedListener(Landroid/media/SubtitleTrack$RenderingWidget$OnChangedListener;)V
+Landroid/media/SubtitleTrack$RenderingWidget;->setSize(II)V
 Landroid/media/ThumbnailUtils;->createImageThumbnail(Ljava/lang/String;I)Landroid/graphics/Bitmap;
 Landroid/media/ToneGenerator;->mNativeContext:J
 Landroid/media/VolumeShaper$Configuration;-><init>(IIIDI[F[F)V
@@ -1968,6 +1978,7 @@ Landroid/util/Rational;->mDenominator:I
 Landroid/util/Rational;->mNumerator:I
 Landroid/util/Singleton;->mInstance:Ljava/lang/Object;
 Landroid/util/Slog;->d(Ljava/lang/String;Ljava/lang/String;)I
+Landroid/util/Slog;->w(Ljava/lang/String;Ljava/lang/String;)I
 Landroid/util/SparseIntArray;->mKeys:[I
 Landroid/util/SparseIntArray;->mSize:I
 Landroid/util/SparseIntArray;->mValues:[I
@@ -2287,6 +2298,7 @@ Landroid/view/Window;->mHardwareAccelerated:Z
 Landroid/webkit/IWebViewUpdateService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/webkit/WebResourceResponse;->mImmutable:Z
 Landroid/webkit/WebSyncManager;->mHandler:Landroid/os/Handler;
+Landroid/webkit/WebViewClient;->onUnhandledInputEvent(Landroid/webkit/WebView;Landroid/view/InputEvent;)V
 Landroid/webkit/WebView;->debugDump()V
 Landroid/webkit/WebView;->disablePlatformNotifications()V
 Landroid/webkit/WebView;->emulateShiftHeld()V
@@ -2716,11 +2728,15 @@ Lcom/android/internal/R$styleable;->CheckBoxPreference_summaryOff:I
 Lcom/android/internal/R$styleable;->CheckBoxPreference_summaryOn:I
 Lcom/android/internal/R$styleable;->CompoundButton_button:I
 Lcom/android/internal/R$styleable;->CompoundButton:[I
+Lcom/android/internal/R$styleable;->DialogPreference_dialogTitle:I
+Lcom/android/internal/R$styleable;->DialogPreference:[I
 Lcom/android/internal/R$styleable;->EdgeEffect_colorEdgeEffect:I
 Lcom/android/internal/R$styleable;->EdgeEffect:[I
 Lcom/android/internal/R$styleable;->IconMenuView:[I
 Lcom/android/internal/R$styleable;->ImageView:[I
 Lcom/android/internal/R$styleable;->ImageView_src:I
+Lcom/android/internal/R$styleable;->ListPreference_entries:I
+Lcom/android/internal/R$styleable;->ListPreference:[I
 Lcom/android/internal/R$styleable;->Preference_defaultValue:I
 Lcom/android/internal/R$styleable;->Preference_dependency:I
 Lcom/android/internal/R$styleable;->Preference_enabled:I
@@ -2963,6 +2979,7 @@ Ljava/lang/Runtime;->load(Ljava/lang/String;Ljava/lang/ClassLoader;)V
 Ljava/lang/Runtime;->nativeLoad(Ljava/lang/String;Ljava/lang/ClassLoader;)Ljava/lang/String;
 Ljava/lang/Short;->value:S
 Ljava/lang/String;-><init>(II[C)V
+Ljava/lang/System;->arraycopy([II[III)V
 Ljava/lang/System;-><init>()V
 Ljava/lang/Thread;->daemon:Z
 Ljava/lang/Thread;->dispatchUncaughtException(Ljava/lang/Throwable;)V
@@ -3074,5 +3091,7 @@ Llibcore/util/ZoneInfo;->mTransitions:[J
 Lorg/apache/http/conn/ssl/SSLSocketFactory;-><init>(Ljavax/net/ssl/SSLSocketFactory;)V
 Lorg/apache/http/conn/ssl/SSLSocketFactory;-><init>()V
 Lorg/json/JSONArray;->values:Ljava/util/List;
+Lorg/json/JSONObject;->append(Ljava/lang/String;Ljava/lang/Object;)Lorg/json/JSONObject;
+Lorg/json/JSONObject;->keySet()Ljava/util/Set;
 Lorg/json/JSONObject;->writeTo(Lorg/json/JSONStringer;)V
 Lsun/misc/Unsafe;->theUnsafe:Lsun/misc/Unsafe;
