@@ -672,8 +672,10 @@ message GlobalSettingsProto {
         option (android.msg_privacy).dest = DEST_LOCAL;
 
         // The requested Private DNS mode and an accompanying specifier.
-        optional SettingProto dns_mode = 1;
-        optional SettingProto dns_specifier = 2;
+        // msg_privacy settings don't apply to sub messages, only to primitive
+        // fields, so these must also be explicitly set to LOCAL.
+        optional SettingProto dns_mode = 1 [ (android.privacy).dest = DEST_LOCAL ];
+        optional SettingProto dns_specifier = 2 [ (android.privacy).dest = DEST_LOCAL ];
     }
     optional Private private = 96;
 
