@@ -1704,26 +1704,28 @@ public class SubscriptionManager {
      *
      * @param info The subscription to check.
      * @return whether the app is authorized to manage this subscription per its metadata.
-     * @throws UnsupportedOperationException if this subscription is not embedded.
+     * @throws IllegalArgumentException if this subscription is not embedded.
      */
     public boolean canManageSubscription(SubscriptionInfo info) {
         return canManageSubscription(info, mContext.getPackageName());
     }
 
     /**
-     * Checks whether the given app is authorized to manage the given subscription according to its
-     * metadata. Only supported for embedded subscriptions (if {@code SubscriptionInfo#isEmbedded}
+     * Checks whether the given app is authorized to manage the given subscription. An app can only
+     * be authorized if it is included in the {@link android.telephony.UiccAccessRule} of the
+     * {@link android.telephony.SubscriptionInfo} with the access status.
+     * Only supported for embedded subscriptions (if {@link SubscriptionInfo#isEmbedded}
      * returns true).
      *
      * @param info The subscription to check.
      * @param packageName Package name of the app to check.
-     * @return whether the app is authorized to manage this subscription per its metadata.
-     * @throws UnsupportedOperationException if this subscription is not embedded.
+     * @return whether the app is authorized to manage this subscription per its access rules.
+     * @throws IllegalArgumentException if this subscription is not embedded.
      * @hide
      */
     public boolean canManageSubscription(SubscriptionInfo info, String packageName) {
         if (!info.isEmbedded()) {
-            throw new UnsupportedOperationException("Not an embedded subscription");
+            throw new IllegalArgumentException("Not an embedded subscription");
         }
         if (info.getAccessRules() == null) {
             return false;
