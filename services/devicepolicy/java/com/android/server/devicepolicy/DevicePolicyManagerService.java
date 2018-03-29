@@ -51,6 +51,7 @@ import static android.app.admin.DevicePolicyManager.ID_TYPE_MEID;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_SERIAL;
 import static android.app.admin.DevicePolicyManager.LEAVE_ALL_SYSTEM_APPS_ENABLED;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_HOME;
+import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
@@ -590,7 +591,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         List<String> mLockTaskPackages = new ArrayList<>();
 
         // Bitfield of feature flags to be enabled during LockTask mode.
-        int mLockTaskFeatures = DevicePolicyManager.LOCK_TASK_FEATURE_NONE;
+        // We default on the power button menu, in order to be consistent with pre-P behaviour.
+        int mLockTaskFeatures = DevicePolicyManager.LOCK_TASK_FEATURE_GLOBAL_ACTIONS;
 
         boolean mStatusBarDisabled = false;
 
@@ -9910,6 +9912,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         boolean hasOverview = (flags & LOCK_TASK_FEATURE_OVERVIEW) != 0;
         Preconditions.checkArgument(hasHome || !hasOverview,
                 "Cannot use LOCK_TASK_FEATURE_OVERVIEW without LOCK_TASK_FEATURE_HOME");
+        boolean hasNotification = (flags & LOCK_TASK_FEATURE_NOTIFICATIONS) != 0;
+        Preconditions.checkArgument(hasHome || !hasNotification,
+            "Cannot use LOCK_TASK_FEATURE_NOTIFICATIONS without LOCK_TASK_FEATURE_HOME");
 
         final int userHandle = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
