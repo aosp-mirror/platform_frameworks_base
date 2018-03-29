@@ -909,6 +909,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mRotation;
     }
 
+    @VisibleForTesting
     void setRotation(int newRotation) {
         mRotation = newRotation;
     }
@@ -974,7 +975,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final int oldRotation = mRotation;
         final int lastOrientation = mLastOrientation;
         final boolean oldAltOrientation = mAltOrientation;
-        int rotation = mService.mPolicy.rotationForOrientationLw(lastOrientation, oldRotation);
+        final int rotation = mService.mPolicy.rotationForOrientationLw(lastOrientation, oldRotation,
+                isDefaultDisplay);
+        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Computed rotation=" + rotation + " for display id="
+                + mDisplayId + " based on lastOrientation=" + lastOrientation
+                + " and oldRotation=" + oldRotation);
         boolean mayRotateSeamlessly = mService.mPolicy.shouldRotateSeamlessly(oldRotation,
                 rotation);
 
@@ -1010,7 +1015,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final boolean altOrientation = !mService.mPolicy.rotationHasCompatibleMetricsLw(
                 lastOrientation, rotation);
 
-        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Selected orientation " + lastOrientation
+        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Display id=" + mDisplayId
+                + " selected orientation " + lastOrientation
                 + ", got rotation " + rotation + " which has "
                 + (altOrientation ? "incompatible" : "compatible") + " metrics");
 
@@ -1019,7 +1025,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             return false;
         }
 
-        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Rotation changed to " + rotation
+        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Display id=" + mDisplayId
+                + " rotation changed to " + rotation
                 + (altOrientation ? " (alt)" : "") + " from " + oldRotation
                 + (oldAltOrientation ? " (alt)" : "") + ", lastOrientation=" + lastOrientation);
 
@@ -1647,8 +1654,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         if (mService.mDisplayFrozen) {
             if (mLastWindowForcedOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
-                if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
-                        "Display is frozen, return " + mLastWindowForcedOrientation);
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Display id=" + mDisplayId
+                        + " is frozen, return " + mLastWindowForcedOrientation);
                 // If the display is frozen, some activities may be in the middle of restarting, and
                 // thus have removed their old window. If the window has the flag to hide the lock
                 // screen, then the lock screen can re-appear and inflict its own orientation on us.
@@ -1660,8 +1667,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // window. We don't want to check the show when locked window directly though as
                 // things aren't stable while the display is frozen, for example the window could be
                 // momentarily unavailable due to activity relaunch.
-                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Display is frozen while keyguard locked, "
-                        + "return " + mLastOrientation);
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Display id=" + mDisplayId
+                        + " is frozen while keyguard locked, return " + mLastOrientation);
                 return mLastOrientation;
             }
         } else {
@@ -3503,19 +3510,22 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // In a car, you cannot physically rotate the screen, so it doesn't make sense to
                 // allow anything but the default orientation.
                 if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
-                        "Forcing UNSPECIFIED orientation in car. Ignoring " + orientation);
+                        "Forcing UNSPECIFIED orientation in car for display id=" + mDisplayId
+                                + ". Ignoring " + orientation);
                 return SCREEN_ORIENTATION_UNSPECIFIED;
             }
 
             if (orientation != SCREEN_ORIENTATION_UNSET
                     && orientation != SCREEN_ORIENTATION_BEHIND) {
                 if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
-                        "App is requesting an orientation, return " + orientation);
+                        "App is requesting an orientation, return " + orientation
+                                + " for display id=" + mDisplayId);
                 return orientation;
             }
 
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM,
-                    "No app is requesting an orientation, return " + mLastOrientation);
+                    "No app is requesting an orientation, return " + mLastOrientation
+                            + " for display id=" + mDisplayId);
             // The next app has not been requested to be visible, so we keep the current orientation
             // to prevent freezing/unfreezing the display too early.
             return mLastOrientation;
@@ -3708,7 +3718,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         return SCREEN_ORIENTATION_UNSET;
                     }
                 }
-                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, win + " forcing orientation to " + req);
+                if (DEBUG_ORIENTATION) Slog.v(TAG_WM, win + " forcing orientation to " + req
+                        + " for display id=" + mDisplayId);
                 return (mLastWindowForcedOrientation = req);
             }
 
