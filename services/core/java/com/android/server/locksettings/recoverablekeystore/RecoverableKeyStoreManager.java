@@ -31,7 +31,6 @@ import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.os.Binder;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
@@ -128,7 +127,7 @@ public class RecoverableKeyStoreManager {
                     db,
                     new RecoverySessionStorage(),
                     Executors.newSingleThreadExecutor(),
-                    new RecoverySnapshotStorage(),
+                    RecoverySnapshotStorage.newInstance(),
                     new RecoverySnapshotListenersStorage(),
                     platformKeyManager,
                     applicationKeyStorage);
