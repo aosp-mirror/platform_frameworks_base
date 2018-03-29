@@ -424,7 +424,7 @@ public final class FillEventHistory implements Parcelable {
          * @return map map whose key is the id of the manually-entered field, and value is the
          * ids of the datasets that have that value but were not selected by the user.
          */
-        @Nullable public Map<AutofillId, Set<String>> getManuallyEnteredField() {
+        @NonNull public Map<AutofillId, Set<String>> getManuallyEnteredField() {
             if (mManuallyFilledFieldIds == null || mManuallyFilledDatasetIds == null) {
                 return Collections.emptyMap();
             }
