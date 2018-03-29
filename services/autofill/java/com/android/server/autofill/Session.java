@@ -2503,8 +2503,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         pw.print(prefix); pw.print("mHasCallback: "); pw.println(mHasCallback);
         if (mClientState != null) {
-            pw.print(prefix); pw.println("mClientState: "); pw.print(mClientState.getSize()); pw
-                .println(" items");
+            pw.print(prefix); pw.print("mClientState: "); pw.print(mClientState.getSize()); pw
+                .println(" bytes");
         }
         pw.print(prefix); pw.print("mCompatMode: "); pw.println(mCompatMode);
         pw.print(prefix); pw.print("mUrlBar: ");
