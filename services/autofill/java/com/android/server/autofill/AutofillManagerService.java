@@ -19,7 +19,6 @@ package com.android.server.autofill;
 import static android.Manifest.permission.MANAGE_AUTO_FILL;
 import static android.content.Context.AUTOFILL_MANAGER_SERVICE;
 
-import static com.android.server.autofill.Helper.bundleToString;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sFullScreenMode;
 import static com.android.server.autofill.Helper.sPartitionMaxCount;
@@ -193,8 +192,7 @@ public final class AutofillManagerService extends SystemService {
                 if (disabledBefore == disabledNow) {
                     // Nothing changed, do nothing.
                     if (sDebug) {
-                        Slog.d(TAG, "Autofill restriction did not change for user " + userId + ": "
-                                + bundleToString(newRestrictions));
+                        Slog.d(TAG, "Autofill restriction did not change for user " + userId);
                         return;
                     }
                 }
