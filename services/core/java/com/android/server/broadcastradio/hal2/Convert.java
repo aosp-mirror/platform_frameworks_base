@@ -375,7 +375,9 @@ class Convert {
         );
     }
 
-    static @NonNull ProgramFilter programFilterToHal(@NonNull ProgramList.Filter filter) {
+    static @NonNull ProgramFilter programFilterToHal(@Nullable ProgramList.Filter filter) {
+        if (filter == null) filter = new ProgramList.Filter();
+
         ProgramFilter hwFilter = new ProgramFilter();
 
         filter.getIdentifierTypes().stream().forEachOrdered(hwFilter.identifierTypes::add);
