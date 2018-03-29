@@ -59,7 +59,7 @@ public final class KeyDerivationParams implements Parcelable {
      * Creates instance of the class to to derive keys using salted SHA256 hash.
      *
      * <p>The salted SHA256 hash is computed over the concatenation of four byte strings, salt_len +
-     * salt + key_material_len + key_material, where salt_len and key_material_len are one-byte, and
+     * salt + key_material_len + key_material, where salt_len and key_material_len are 4-byte, and
      * denote the number of bytes for salt and key_material, respectively.
      */
     public static @NonNull KeyDerivationParams createSha256Params(@NonNull byte[] salt) {
