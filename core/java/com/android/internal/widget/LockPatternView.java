@@ -1008,9 +1008,6 @@ public class LockPatternView extends View {
                 mDrawingProfilingStarted = false;
             }
         }
-        if (mFadePattern) {
-            clearPattern();
-        }
     }
 
     private void cancelLineAnimations() {
