@@ -45,6 +45,7 @@ public class KeyChainSnapshotSerializerTest {
     private static final int MAX_ATTEMPTS = 21;
     private static final byte[] SERVER_PARAMS = new byte[] { 8, 2, 4 };
     private static final byte[] KEY_BLOB = new byte[] { 124, 53, 53, 53 };
+    private static final byte[] PUBLIC_KEY_BLOB = new byte[] { 6, 6, 6, 6, 6, 6, 7 };
     private static final CertPath CERT_PATH = TestData.CERT_PATH_1;
     private static final int SECRET_TYPE = KeyChainProtectionParams.TYPE_LOCKSCREEN;
     private static final int LOCK_SCREEN_UI = KeyChainProtectionParams.UI_FORMAT_PASSWORD;
@@ -90,6 +91,11 @@ public class KeyChainSnapshotSerializerTest {
     @Test
     public void roundTrip_persistsCertPath() throws Exception {
         assertThat(roundTrip().getTrustedHardwareCertPath()).isEqualTo(CERT_PATH);
+    }
+
+    @Test
+    public void roundTrip_persistsBackendPublicKey() throws Exception {
+        assertThat(roundTrip().getTrustedHardwarePublicKey()).isEqualTo(PUBLIC_KEY_BLOB);
     }
 
     @Test
@@ -163,6 +169,12 @@ public class KeyChainSnapshotSerializerTest {
         assertThat(roundTripKeys().get(2).getEncryptedKeyMaterial()).isEqualTo(TEST_KEY_3_BYTES);
     }
 
+    @Test
+    public void serialize_doesNotThrowForNullPublicKey() throws Exception {
+        KeyChainSnapshotSerializer.serialize(
+                createTestKeyChainSnapshotNoPublicKey(), new ByteArrayOutputStream());
+    }
+
     private static List<WrappedApplicationKey> roundTripKeys() throws Exception {
         return roundTrip().getWrappedApplicationKeys();
     }
@@ -180,6 +192,41 @@ public class KeyChainSnapshotSerializerTest {
     }
 
     private static KeyChainSnapshot createTestKeyChainSnapshot() throws Exception {
+        return new KeyChainSnapshot.Builder()
+                .setCounterId(COUNTER_ID)
+                .setSnapshotVersion(SNAPSHOT_VERSION)
+                .setServerParams(SERVER_PARAMS)
+                .setMaxAttempts(MAX_ATTEMPTS)
+                .setEncryptedRecoveryKeyBlob(KEY_BLOB)
+                .setKeyChainProtectionParams(createKeyChainProtectionParamsList())
+                .setWrappedApplicationKeys(createKeys())
+                .setTrustedHardwareCertPath(CERT_PATH)
+                .setTrustedHardwarePublicKey(PUBLIC_KEY_BLOB)
+                .build();
+    }
+
+    private static KeyChainSnapshot createTestKeyChainSnapshotNoPublicKey() throws Exception {
+        return new KeyChainSnapshot.Builder()
+                .setCounterId(COUNTER_ID)
+                .setSnapshotVersion(SNAPSHOT_VERSION)
+                .setServerParams(SERVER_PARAMS)
+                .setMaxAttempts(MAX_ATTEMPTS)
+                .setEncryptedRecoveryKeyBlob(KEY_BLOB)
+                .setKeyChainProtectionParams(createKeyChainProtectionParamsList())
+                .setWrappedApplicationKeys(createKeys())
+                .setTrustedHardwareCertPath(CERT_PATH)
+                .build();
+    }
+
+    private static List<WrappedApplicationKey> createKeys() {
+        ArrayList<WrappedApplicationKey> keyList = new ArrayList<>();
+        keyList.add(createKey(TEST_KEY_1_ALIAS, TEST_KEY_1_BYTES));
+        keyList.add(createKey(TEST_KEY_2_ALIAS, TEST_KEY_2_BYTES));
+        keyList.add(createKey(TEST_KEY_3_ALIAS, TEST_KEY_3_BYTES));
+        return keyList;
+    }
+
+    private static List<KeyChainProtectionParams> createKeyChainProtectionParamsList() {
         KeyDerivationParams keyDerivationParams =
                 KeyDerivationParams.createScryptParams(SALT, MEMORY_DIFFICULTY);
         KeyChainProtectionParams keyChainProtectionParams = new KeyChainProtectionParams.Builder()
@@ -191,22 +238,7 @@ public class KeyChainSnapshotSerializerTest {
         ArrayList<KeyChainProtectionParams> keyChainProtectionParamsList =
                 new ArrayList<>(1);
         keyChainProtectionParamsList.add(keyChainProtectionParams);
-
-        ArrayList<WrappedApplicationKey> keyList = new ArrayList<>();
-        keyList.add(createKey(TEST_KEY_1_ALIAS, TEST_KEY_1_BYTES));
-        keyList.add(createKey(TEST_KEY_2_ALIAS, TEST_KEY_2_BYTES));
-        keyList.add(createKey(TEST_KEY_3_ALIAS, TEST_KEY_3_BYTES));
-
-        return new KeyChainSnapshot.Builder()
-                .setCounterId(COUNTER_ID)
-                .setSnapshotVersion(SNAPSHOT_VERSION)
-                .setServerParams(SERVER_PARAMS)
-                .setMaxAttempts(MAX_ATTEMPTS)
-                .setEncryptedRecoveryKeyBlob(KEY_BLOB)
-                .setKeyChainProtectionParams(keyChainProtectionParamsList)
-                .setWrappedApplicationKeys(keyList)
-                .setTrustedHardwareCertPath(CERT_PATH)
-                .build();
+        return keyChainProtectionParamsList;
     }
 
     private static WrappedApplicationKey createKey(String alias, byte[] bytes) {
