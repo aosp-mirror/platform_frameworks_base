@@ -72,6 +72,7 @@ cc_defaults {
         "libft2",
         "libminikin",
         "libandroidfw",
+        "libcrypto",
     ],
     static_libs: [
         "libEGL_blobCache",

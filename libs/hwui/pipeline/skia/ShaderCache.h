@@ -40,12 +40,21 @@ public:
     ANDROID_API static ShaderCache& get();
 
     /**
-     * "initShaderDiskCache" loads the serialized cache contents from disk and puts the ShaderCache
-     * into an initialized state, such that it is able to insert and retrieve entries from the
-     * cache.  This should be called when HWUI pipeline is initialized.  When not in the initialized
-     * state the load and store methods will return without performing any cache operations.
+     * initShaderDiskCache" loads the serialized cache contents from disk,
+     * optionally checks that the on-disk cache matches a provided identity,
+     * and puts the ShaderCache into an initialized state, such that it is
+     * able to insert and retrieve entries from the cache. If identity is
+     * non-null and validation fails, the cache is initialized but contains
+     * no data. If size is less than zero, the cache is initilaized but
+     * contains no data.
+     *
+     * This should be called when HWUI pipeline is initialized. When not in
+     * the initialized state the load and store methods will return without
+     * performing any cache operations.
      */
-    virtual void initShaderDiskCache();
+    virtual void initShaderDiskCache(const void *identity, ssize_t size);
+
+    virtual void initShaderDiskCache() { initShaderDiskCache(nullptr, 0); }
 
     /**
      * "setFilename" sets the name of the file that should be used to store
@@ -83,6 +92,19 @@ private:
     BlobCache* getBlobCacheLocked();
 
     /**
+     * "validateCache" updates the cache to match the given identity.  If the
+     * cache currently has the wrong identity, all entries in the cache are cleared.
+     */
+    bool validateCache(const void* identity, ssize_t size);
+
+    /**
+     * "saveToDiskLocked" attemps to save the current contents of the cache to
+     * disk. If the identity hash exists, we will insert the identity hash into
+     * the cache for next validation.
+     */
+    void saveToDiskLocked();
+
+    /**
      * "mInitialized" indicates whether the ShaderCache is in the initialized
      * state.  It is initialized to false at construction time, and gets set to
      * true when initialize is called.
@@ -109,6 +131,15 @@ private:
      * from disk.
      */
     std::string mFilename;
+
+    /**
+     * "mIDHash" is the current identity hash for the cache validation. It is
+     * initialized to an empty vector at construction time, and its content is
+     * generated in the call of the validateCache method. An empty vector
+     * indicates that cache validation is not performed, and the hash should
+     * not be stored on disk.
+     */
+    std::vector<uint8_t> mIDHash;
 
     /**
      * "mSavePending" indicates whether or not a deferred save operation is
@@ -139,6 +170,11 @@ private:
      * "sCache" is the singleton ShaderCache object.
      */
     static ShaderCache sCache;
+
+    /**
+     * "sIDKey" is the cache key of the identity hash
+     */
+    static constexpr uint8_t sIDKey = 0;
 
     friend class ShaderCacheTestUtils; //used for unit testing
 };

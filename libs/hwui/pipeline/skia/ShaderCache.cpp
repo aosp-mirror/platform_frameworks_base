@@ -18,6 +18,8 @@
 #include <algorithm>
 #include <log/log.h>
 #include <thread>
+#include <array>
+#include <openssl/sha.h>
 #include "FileBlobCache.h"
 #include "Properties.h"
 #include "utils/TraceUtils.h"
@@ -41,7 +43,40 @@ ShaderCache& ShaderCache::get() {
     return sCache;
 }
 
-void ShaderCache::initShaderDiskCache() {
+bool ShaderCache::validateCache(const void* identity, ssize_t size) {
+    if (nullptr == identity && size == 0)
+        return true;
+
+    if (nullptr == identity || size < 0) {
+        if (CC_UNLIKELY(Properties::debugLevel & kDebugCaches)) {
+            ALOGW("ShaderCache::validateCache invalid cache identity");
+        }
+        mBlobCache->clear();
+        return false;
+    }
+
+    SHA256_CTX ctx;
+    SHA256_Init(&ctx);
+
+    SHA256_Update(&ctx, identity, size);
+    mIDHash.resize(SHA256_DIGEST_LENGTH);
+    SHA256_Final(mIDHash.data(), &ctx);
+
+    std::array<uint8_t, SHA256_DIGEST_LENGTH> hash;
+    auto key = sIDKey;
+    auto loaded = mBlobCache->get(&key, sizeof(key), hash.data(), hash.size());
+
+    if (loaded && std::equal(hash.begin(), hash.end(), mIDHash.begin()))
+        return true;
+
+    if (CC_UNLIKELY(Properties::debugLevel & kDebugCaches)) {
+        ALOGW("ShaderCache::validateCache cache validation fails");
+    }
+    mBlobCache->clear();
+    return false;
+}
+
+void ShaderCache::initShaderDiskCache(const void* identity, ssize_t size) {
     ATRACE_NAME("initShaderDiskCache");
     std::lock_guard<std::mutex> lock(mMutex);
 
@@ -50,6 +85,7 @@ void ShaderCache::initShaderDiskCache() {
     // desktop / laptop GPUs. Thus, disable the shader disk cache for emulator builds.
     if (!Properties::runningInEmulator && mFilename.length() > 0) {
         mBlobCache.reset(new FileBlobCache(maxKeySize, maxValueSize, maxTotalSize, mFilename));
+        validateCache(identity, size);
         mInitialized = true;
     }
 }
@@ -104,6 +140,18 @@ sk_sp<SkData> ShaderCache::load(const SkData& key) {
     return SkData::MakeFromMalloc(valueBuffer, valueSize);
 }
 
+void ShaderCache::saveToDiskLocked() {
+    ATRACE_NAME("ShaderCache::saveToDiskLocked");
+    if (mInitialized && mBlobCache && mSavePending) {
+        if (mIDHash.size()) {
+            auto key = sIDKey;
+            mBlobCache->set(&key, sizeof(key), mIDHash.data(), mIDHash.size());
+        }
+        mBlobCache->writeToFile();
+    }
+    mSavePending = false;
+}
+
 void ShaderCache::store(const SkData& key, const SkData& data) {
     ATRACE_NAME("ShaderCache::store");
     std::lock_guard<std::mutex> lock(mMutex);
@@ -129,11 +177,7 @@ void ShaderCache::store(const SkData& key, const SkData& data) {
         std::thread deferredSaveThread([this]() {
             sleep(mDeferredSaveDelay);
             std::lock_guard<std::mutex> lock(mMutex);
-            ATRACE_NAME("ShaderCache::saveToDisk");
-            if (mInitialized && mBlobCache) {
-                mBlobCache->writeToFile();
-            }
-            mSavePending = false;
+            saveToDiskLocked();
         });
         deferredSaveThread.detach();
     }

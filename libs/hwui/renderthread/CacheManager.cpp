@@ -50,7 +50,6 @@ CacheManager::CacheManager(const DisplayInfo& display) : mMaxSurfaceArea(display
     mVectorDrawableAtlas = new skiapipeline::VectorDrawableAtlas(
             mMaxSurfaceArea / 2,
             skiapipeline::VectorDrawableAtlas::StorageMode::disallowSharedSurface);
-    skiapipeline::ShaderCache::get().initShaderDiskCache();
 }
 
 void CacheManager::reset(sk_sp<GrContext> context) {
@@ -103,7 +102,7 @@ public:
     }
 };
 
-void CacheManager::configureContext(GrContextOptions* contextOptions) {
+void CacheManager::configureContext(GrContextOptions* contextOptions, const void* identity, ssize_t size) {
     contextOptions->fAllowPathMaskCaching = true;
 
     float screenMP = mMaxSurfaceArea / 1024.0f / 1024.0f;
@@ -133,7 +132,9 @@ void CacheManager::configureContext(GrContextOptions* contextOptions) {
         contextOptions->fExecutor = mTaskProcessor.get();
     }
 
-    contextOptions->fPersistentCache = &skiapipeline::ShaderCache::get();
+    auto& cache = skiapipeline::ShaderCache::get();
+    cache.initShaderDiskCache(identity, size);
+    contextOptions->fPersistentCache = &cache;
     contextOptions->fGpuPathRenderers &= ~GpuPathRenderers::kCoverageCounting;
 }
 
