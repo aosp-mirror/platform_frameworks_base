@@ -766,7 +766,7 @@ public final class ImageDecoder implements AutoCloseable {
      *
      *  <p>This takes an input that functions like
      *  {@link BitmapFactory.Options#inSampleSize}. It returns a width and
-     *  height that can be acheived by sampling the encoded image. Other widths
+     *  height that can be achieved by sampling the encoded image. Other widths
      *  and heights may be supported, but will require an additional (internal)
      *  scaling step. Such internal scaling is *not* supported with
      *  {@link #setRequireUnpremultiplied} set to {@code true}.</p>
@@ -774,6 +774,8 @@ public final class ImageDecoder implements AutoCloseable {
      *  @param sampleSize Sampling rate of the encoded image.
      *  @return {@link android.util.Size} of the width and height after
      *      sampling.
+     *
+     *  @hide
      */
     @NonNull
     public Size getSampledSize(int sampleSize) {
@@ -789,14 +791,28 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     // Modifiers
+    /** @removed
+     * @deprecated Renamed to {@link #setTargetSize}.
+     */
+    @java.lang.Deprecated
+    public ImageDecoder setResize(int width, int height) {
+        return this.setTargetSize(width, height);
+    }
+
     /**
-     *  Resize the output to have the following size.
+     *  Specify the size of the output {@link Drawable} or {@link Bitmap}.
+     *
+     *  <p>By default, the output size will match the size of the encoded
+     *  image, which can be retrieved from the {@link ImageInfo} in
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
+     *
+     *  <p>Only the last call to this or {@link #setSampleSize} is respected.</p>
      *
      *  @param width must be greater than 0.
      *  @param height must be greater than 0.
      *  @return this object for chaining.
      */
-    public ImageDecoder setResize(int width, int height) {
+    public ImageDecoder setTargetSize(int width, int height) {
         if (width <= 0 || height <= 0) {
             throw new IllegalArgumentException("Dimensions must be positive! "
                     + "provided (" + width + ", " + height + ")");
@@ -807,18 +823,65 @@ public final class ImageDecoder implements AutoCloseable {
         return this;
     }
 
+    /** @removed
+     * @deprecated Renamed to {@link #setSampleSize}.
+     */
+    @java.lang.Deprecated
+    public ImageDecoder setResize(int sampleSize) {
+        return this.setSampleSize(sampleSize);
+    }
+
+    private int getTargetDimension(int original, int sampleSize, int computed) {
+        // Sampling will never result in a smaller size than 1.
+        if (sampleSize >= original) {
+            return 1;
+        }
+
+        // Use integer divide to find the desired size. If that is what
+        // getSampledSize computed, that is the size to use.
+        int target = original / sampleSize;
+        if (computed == target) {
+            return computed;
+        }
+
+        // If sampleSize does not divide evenly into original, the decoder
+        // may round in either direction. It just needs to get a result that
+        // is close.
+        int reverse = computed * sampleSize;
+        if (Math.abs(reverse - original) < sampleSize) {
+            // This is the size that can be decoded most efficiently.
+            return computed;
+        }
+
+        // The decoder could not get close (e.g. it is a DNG image).
+        return target;
+    }
+
     /**
-     *  Resize based on a sample size.
+     *  Set the target size with a sampleSize.
      *
-     *  <p>This has the same effect as passing the result of
-     *  {@link #getSampledSize} to {@link #setResize(int, int)}.</p>
+     *  <p>By default, the output size will match the size of the encoded
+     *  image, which can be retrieved from the {@link ImageInfo} in
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
+     *
+     *  <p>Requests the decoder to subsample the original image, returning a
+     *  smaller image to save memory. The sample size is the number of pixels
+     *  in either dimension that correspond to a single pixel in the output.
+     *  For example, sampleSize == 4 returns an image that is 1/4 the
+     *  width/height of the original, and 1/16 the number of pixels.</p>
+     *
+     *  <p>Must be greater than or equal to 1.</p>
+     *
+     *  <p>Only the last call to this or {@link #setTargetSize} is respected.</p>
      *
      *  @param sampleSize Sampling rate of the encoded image.
      *  @return this object for chaining.
      */
-    public ImageDecoder setResize(int sampleSize) {
+    public ImageDecoder setSampleSize(int sampleSize) {
         Size size = this.getSampledSize(sampleSize);
-        return this.setResize(size.getWidth(), size.getHeight());
+        int targetWidth = getTargetDimension(mWidth, sampleSize, size.getWidth());
+        int targetHeight = getTargetDimension(mHeight, sampleSize, size.getHeight());
+        return this.setTargetSize(targetWidth, targetHeight);
     }
 
     private boolean requestedResize() {
@@ -972,8 +1035,8 @@ public final class ImageDecoder implements AutoCloseable {
      *  Crop the output to {@code subset} of the (possibly) scaled image.
      *
      *  <p>{@code subset} must be contained within the size set by
-     *  {@link #setResize} or the bounds of the image if setResize was not
-     *  called. Otherwise an {@link IllegalStateException} will be thrown by
+     *  {@link #setTargetSize} or the bounds of the image if setTargetSize was
+     *  not called. Otherwise an {@link IllegalStateException} will be thrown by
      *  {@link #decodeDrawable}/{@link #decodeBitmap}.</p>
      *
      *  <p>NOT intended as a replacement for
@@ -1353,7 +1416,7 @@ public final class ImageDecoder implements AutoCloseable {
         float scale = (float) dstDensity / srcDensity;
         int scaledWidth = (int) (decoder.mWidth * scale + 0.5f);
         int scaledHeight = (int) (decoder.mHeight * scale + 0.5f);
-        decoder.setResize(scaledWidth, scaledHeight);
+        decoder.setTargetSize(scaledWidth, scaledHeight);
         return dstDensity;
     }
 
