@@ -883,15 +883,35 @@ public final class UiAutomation {
     }
 
     /**
+     * Grants a runtime permission to a package.
+     * @param packageName The package to which to grant.
+     * @param permission The permission to grant.
+     * @throws SecurityException if unable to grant the permission.
+     */
+    public void grantRuntimePermission(String packageName, String permission) {
+        grantRuntimePermissionAsUser(packageName, permission, android.os.Process.myUserHandle());
+    }
+
+    /**
+     * @deprecated replaced by
+     *             {@link #grantRuntimePermissionAsUser(String, String, UserHandle)}.
+     * @hide
+     */
+    @Deprecated
+    @TestApi
+    public boolean grantRuntimePermission(String packageName, String permission,
+            UserHandle userHandle) {
+        grantRuntimePermissionAsUser(packageName, permission, userHandle);
+        return true;
+    }
+
+    /**
      * Grants a runtime permission to a package for a user.
      * @param packageName The package to which to grant.
      * @param permission The permission to grant.
-     * @return Whether granting succeeded.
-     *
-     * @hide
+     * @throws SecurityException if unable to grant the permission.
      */
-    @TestApi
-    public boolean grantRuntimePermission(String packageName, String permission,
+    public void grantRuntimePermissionAsUser(String packageName, String permission,
             UserHandle userHandle) {
         synchronized (mLock) {
             throwIfNotConnectedLocked();
@@ -903,24 +923,41 @@ public final class UiAutomation {
             // Calling out without a lock held.
             mUiAutomationConnection.grantRuntimePermission(packageName,
                     permission, userHandle.getIdentifier());
-            // TODO: The package manager API should return boolean.
-            return true;
-        } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error granting runtime permission", re);
+        } catch (Exception e) {
+            throw new SecurityException("Error granting runtime permission", e);
         }
-        return false;
     }
 
     /**
-     * Revokes a runtime permission from a package for a user.
-     * @param packageName The package from which to revoke.
-     * @param permission The permission to revoke.
-     * @return Whether revoking succeeded.
-     *
+     * Revokes a runtime permission from a package.
+     * @param packageName The package to which to grant.
+     * @param permission The permission to grant.
+     * @throws SecurityException if unable to revoke the permission.
+     */
+    public void revokeRuntimePermission(String packageName, String permission) {
+        revokeRuntimePermissionAsUser(packageName, permission, android.os.Process.myUserHandle());
+    }
+
+    /**
+     * @deprecated replaced by
+     *             {@link #revokeRuntimePermissionAsUser(String, String, UserHandle)}.
      * @hide
      */
+    @Deprecated
     @TestApi
     public boolean revokeRuntimePermission(String packageName, String permission,
+            UserHandle userHandle) {
+        revokeRuntimePermissionAsUser(packageName, permission, userHandle);
+        return true;
+    }
+
+    /**
+     * Revokes a runtime permission from a package.
+     * @param packageName The package to which to grant.
+     * @param permission The permission to grant.
+     * @throws SecurityException if unable to revoke the permission.
+     */
+    public void revokeRuntimePermissionAsUser(String packageName, String permission,
             UserHandle userHandle) {
         synchronized (mLock) {
             throwIfNotConnectedLocked();
@@ -932,12 +969,9 @@ public final class UiAutomation {
             // Calling out without a lock held.
             mUiAutomationConnection.revokeRuntimePermission(packageName,
                     permission, userHandle.getIdentifier());
-            // TODO: The package manager API should return boolean.
-            return true;
-        } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error revoking runtime permission", re);
+        } catch (Exception e) {
+            throw new SecurityException("Error granting runtime permission", e);
         }
-        return false;
     }
 
     /**
@@ -956,6 +990,7 @@ public final class UiAutomation {
         synchronized (mLock) {
             throwIfNotConnectedLocked();
         }
+        warnIfBetterCommand(command);
 
         ParcelFileDescriptor source = null;
         ParcelFileDescriptor sink = null;
@@ -998,6 +1033,7 @@ public final class UiAutomation {
         synchronized (mLock) {
             throwIfNotConnectedLocked();
         }
+        warnIfBetterCommand(command);
 
         ParcelFileDescriptor source_read = null;
         ParcelFileDescriptor sink_read = null;
@@ -1060,6 +1096,16 @@ public final class UiAutomation {
     private void throwIfNotConnectedLocked() {
         if (!isConnectedLocked()) {
             throw new IllegalStateException("UiAutomation not connected!");
+        }
+    }
+
+    private void warnIfBetterCommand(String cmd) {
+        if (cmd.startsWith("pm grant ")) {
+            Log.w(LOG_TAG, "UiAutomation.grantRuntimePermission() "
+                    + "is more robust and should be used instead of 'pm grant'");
+        } else if (cmd.startsWith("pm revoke ")) {
+            Log.w(LOG_TAG, "UiAutomation.revokeRuntimePermission() "
+                    + "is more robust and should be used instead of 'pm revoke'");
         }
     }
 
