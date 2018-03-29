@@ -54,15 +54,14 @@
             android:layout_marginStart="@dimen/qs_header_alarm_text_margin_start"
             android:textAppearance="@style/TextAppearance.QS.TileLabel" />
 
-        <ImageView
+        <View
             android:id="@+id/status_separator"
-            android:layout_width="2dp"
-            android:layout_height="2dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_gravity="center_vertical"
-            android:src="@drawable/qs_header_status_dot"
-            android:tint="?android:attr/textColorPrimary" />
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:background="@android:color/white"
+            android:backgroundTint="?android:attr/textColorPrimary" />
 
         <ImageView
             android:id="@+id/ringer_mode_icon"
