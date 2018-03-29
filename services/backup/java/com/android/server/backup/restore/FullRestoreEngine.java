@@ -37,6 +37,8 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.util.Preconditions;
@@ -55,8 +57,11 @@ import com.android.server.backup.utils.TarBackupReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * Full restore engine, used by both adb restore and transport-based full restore.
@@ -324,12 +329,17 @@ public class FullRestoreEngine extends RestoreEngine {
                                             pkg, 0);
 
                             // If we haven't sent any data to this app yet, we probably
-                            // need to clear it first.  Check that.
+                            // need to clear it first. Check that.
                             if (!mClearedPackages.contains(pkg)) {
-                                // apps with their own backup agents are
-                                // responsible for coherently managing a full
-                                // restore.
-                                if (mTargetApp.backupAgentName == null) {
+                                // Apps with their own backup agents are responsible for coherently
+                                // managing a full restore.
+                                // In some rare cases they can't, especially in case of deferred
+                                // restore. In this case check whether this app should be forced to
+                                // clear up.
+                                // TODO: Fix this properly with manifest parameter.
+                                boolean forceClear = shouldForceClearAppDataOnFullRestore(
+                                        mTargetApp.packageName);
+                                if (mTargetApp.backupAgentName == null || forceClear) {
                                     if (DEBUG) {
                                         Slog.d(TAG,
                                                 "Clearing app data preparatory to full restore");
@@ -625,6 +635,24 @@ public class FullRestoreEngine extends RestoreEngine {
         }
 
         return true;
+    }
+
+    /**
+     * Returns whether the package is in the list of the packages for which clear app data should
+     * be called despite the fact that they have backup agent.
+     *
+     * <p>The list is read from {@link Settings.Secure.PACKAGES_TO_CLEAR_DATA_BEFORE_FULL_RESTORE}.
+     */
+    private boolean shouldForceClearAppDataOnFullRestore(String packageName) {
+        String packageListString = Settings.Secure.getString(
+                mBackupManagerService.getContext().getContentResolver(),
+                Settings.Secure.PACKAGES_TO_CLEAR_DATA_BEFORE_FULL_RESTORE);
+        if (TextUtils.isEmpty(packageListString)) {
+            return false;
+        }
+
+        List<String> packages = Arrays.asList(packageListString.split(";"));
+        return packages.contains(packageName);
     }
 
     void sendOnRestorePackage(String name) {

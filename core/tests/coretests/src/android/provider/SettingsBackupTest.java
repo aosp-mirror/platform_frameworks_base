@@ -587,7 +587,8 @@ public class SettingsBackupTest {
                  Settings.Secure.BLUETOOTH_ON_WHILE_DRIVING,
                  Settings.Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT,
                  Settings.Secure.LOW_POWER_WARNING_ACKNOWLEDGED,
-                 Settings.Secure.SUPPRESS_AUTO_BATTERY_SAVER_SUGGESTION);
+                 Settings.Secure.SUPPRESS_AUTO_BATTERY_SAVER_SUGGESTION,
+                 Settings.Secure.PACKAGES_TO_CLEAR_DATA_BEFORE_FULL_RESTORE);
 
     @Test
     public void systemSettingsBackedUpOrBlacklisted() {

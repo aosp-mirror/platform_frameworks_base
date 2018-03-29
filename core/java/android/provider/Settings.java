@@ -7809,6 +7809,14 @@ public final class Settings {
                 "suppress_auto_battery_saver_suggestion";
 
         /**
+         * List of packages, which data need to be unconditionally cleared before full restore.
+         * Type: string
+         * @hide
+         */
+        public static final String PACKAGES_TO_CLEAR_DATA_BEFORE_FULL_RESTORE =
+                "packages_to_clear_data_before_full_restore";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
