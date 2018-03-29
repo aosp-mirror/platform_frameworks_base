@@ -113,6 +113,54 @@ public class UserManagerHelperTest {
     }
 
     @Test
+    public void testGetAllUsersExcludesSystemUser() {
+        UserInfo otherUser1 = createUserInfoForId(10);
+        UserInfo otherUser2 = createUserInfoForId(11);
+        UserInfo otherUser3 = createUserInfoForId(12);
+
+        List<UserInfo> testUsers = new ArrayList<>();
+        testUsers.add(otherUser1);
+        testUsers.add(otherUser2);
+        testUsers.add(mSystemUser);
+        testUsers.add(otherUser3);
+
+        when(mUserManager.getUsers(true)).thenReturn(testUsers);
+
+        // Should return 3 users that don't have SYSTEM USER id.
+        assertThat(mHelper.getAllUsersExcludesSystemUser().size()).isEqualTo(3);
+        // Should not contain system user.
+        assertThat(mHelper.getAllUsersExcludesSystemUser()).doesNotContain(mSystemUser);
+        // Should contain non-system users.
+        assertThat(mHelper.getAllUsersExcludesSystemUser()).contains(otherUser1);
+        assertThat(mHelper.getAllUsersExcludesSystemUser()).contains(otherUser2);
+        assertThat(mHelper.getAllUsersExcludesSystemUser()).contains(otherUser3);
+    }
+
+    @Test
+    public void testGetAllUsers() {
+        int currentUser = UserHandle.myUserId();
+
+        UserInfo otherUser1 = createUserInfoForId(currentUser + 1);
+        UserInfo otherUser2 = createUserInfoForId(currentUser - 1);
+        UserInfo otherUser3 = createUserInfoForId(currentUser + 2);
+
+        List<UserInfo> testUsers = new ArrayList<>();
+        testUsers.add(otherUser1);
+        testUsers.add(otherUser2);
+        testUsers.add(mCurrentUser);
+        testUsers.add(otherUser3);
+
+        when(mUserManager.getUsers(true)).thenReturn(testUsers);
+
+        // Should return 3 users that don't have currentUser id.
+        assertThat(mHelper.getAllUsers().size()).isEqualTo(4);
+        assertThat(mHelper.getAllUsers()).contains(mCurrentUser);
+        assertThat(mHelper.getAllUsers()).contains(otherUser1);
+        assertThat(mHelper.getAllUsers()).contains(otherUser2);
+        assertThat(mHelper.getAllUsers()).contains(otherUser3);
+    }
+
+    @Test
     public void testUserCanBeRemoved() {
         UserInfo testInfo = new UserInfo();
 
@@ -207,11 +255,6 @@ public class UserManagerHelperTest {
     public void testRemoveUser() {
         // Cannot remove system user.
         assertThat(mHelper.removeUser(mSystemUser)).isFalse();
-
-        // Removing current user, calls "switch" to system user.
-        mHelper.removeUser(mCurrentUser);
-        verify(mActivityManager).switchUser(UserHandle.USER_SYSTEM);
-        verify(mUserManager).removeUser(mCurrentUser.id);
 
         // Removing non-current, non-system user, simply calls removeUser.
         UserInfo userToRemove = createUserInfoForId(mCurrentUser.id + 2);
