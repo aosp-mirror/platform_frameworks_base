@@ -43,6 +43,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -61,6 +62,8 @@ class WatchlistLoggingHandler extends Handler {
     static final int LOG_WATCHLIST_EVENT_MSG = 1;
     @VisibleForTesting
     static final int REPORT_RECORDS_IF_NECESSARY_MSG = 2;
+    @VisibleForTesting
+    static final int FORCE_REPORT_RECORDS_NOW_FOR_TEST_MSG = 3;
 
     private static final long ONE_DAY_MS = TimeUnit.DAYS.toMillis(1);
     private static final String DROPBOX_TAG = "network_watchlist_report";
@@ -110,7 +113,15 @@ class WatchlistLoggingHandler extends Handler {
                 break;
             }
             case REPORT_RECORDS_IF_NECESSARY_MSG:
-                tryAggregateRecords();
+                tryAggregateRecords(getLastMidnightTime());
+                break;
+            case FORCE_REPORT_RECORDS_NOW_FOR_TEST_MSG:
+                if (msg.obj instanceof Long) {
+                    long lastRecordTime = (Long) msg.obj;
+                    tryAggregateRecords(lastRecordTime);
+                } else {
+                    Slog.e(TAG, "Msg.obj needs to be a Long object.");
+                }
                 break;
             default: {
                 Slog.d(TAG, "WatchlistLoggingHandler received an unknown of message.");
@@ -146,6 +157,12 @@ class WatchlistLoggingHandler extends Handler {
         sendMessage(msg);
     }
 
+    public void forceReportWatchlistForTest(long lastReportTime) {
+        final Message msg = obtainMessage(FORCE_REPORT_RECORDS_NOW_FOR_TEST_MSG);
+        msg.obj = lastReportTime;
+        sendMessage(msg);
+    }
+
     /**
      * Insert network traffic event to watchlist async queue processor.
      */
@@ -177,8 +194,14 @@ class WatchlistLoggingHandler extends Handler {
     }
 
     private boolean insertRecord(int uid, String cncHost, long timestamp) {
+        if (DEBUG) {
+            Slog.i(TAG, "trying to insert record with host: " + cncHost + ", uid: " + uid);
+        }
         if (!mConfig.isConfigSecure() && !isPackageTestOnly(uid)) {
             // Skip package if config is not secure and package is not TestOnly app.
+            if (DEBUG) {
+                Slog.i(TAG, "uid: " + uid + " is not test only package");
+            }
             return true;
         }
         final byte[] digest = getDigestFromUid(uid);
@@ -187,50 +210,56 @@ class WatchlistLoggingHandler extends Handler {
             return false;
         }
         final boolean result = mDbHelper.insertNewRecord(digest, cncHost, timestamp);
-        tryAggregateRecords();
         return result;
     }
 
-    private boolean shouldReportNetworkWatchlist() {
+    private boolean shouldReportNetworkWatchlist(long lastRecordTime) {
         final long lastReportTime = Settings.Global.getLong(mResolver,
                 Settings.Global.NETWORK_WATCHLIST_LAST_REPORT_TIME, 0L);
-        final long currentTimestamp = System.currentTimeMillis();
-        if (currentTimestamp < lastReportTime) {
+        if (lastRecordTime < lastReportTime) {
             Slog.i(TAG, "Last report time is larger than current time, reset report");
-            mDbHelper.cleanup();
+            mDbHelper.cleanup(lastReportTime);
             return false;
         }
-        return currentTimestamp >= lastReportTime + ONE_DAY_MS;
+        return lastRecordTime >= lastReportTime + ONE_DAY_MS;
     }
 
-    private void tryAggregateRecords() {
-        // Check if it's necessary to generate watchlist report now.
-        if (!shouldReportNetworkWatchlist()) {
-            Slog.i(TAG, "No need to aggregate record yet.");
-            return;
-        }
-        Slog.i(TAG, "Start aggregating watchlist records.");
-        if (mDropBoxManager != null && mDropBoxManager.isTagEnabled(DROPBOX_TAG)) {
-            Settings.Global.putLong(mResolver,
-                    Settings.Global.NETWORK_WATCHLIST_LAST_REPORT_TIME,
-                    System.currentTimeMillis());
-            final WatchlistReportDbHelper.AggregatedResult aggregatedResult =
-                    mDbHelper.getAggregatedRecords();
-            if (aggregatedResult == null) {
-                Slog.i(TAG, "Cannot get result from database");
+    private void tryAggregateRecords(long lastRecordTime) {
+        long startTime = System.currentTimeMillis();
+        try {
+            // Check if it's necessary to generate watchlist report now.
+            if (!shouldReportNetworkWatchlist(lastRecordTime)) {
+                Slog.i(TAG, "No need to aggregate record yet.");
                 return;
             }
-            // Get all digests for watchlist report, it should include all installed
-            // application digests and previously recorded app digests.
-            final List<String> digestsForReport = getAllDigestsForReport(aggregatedResult);
-            final byte[] secretKey = mSettings.getPrivacySecretKey();
-            final byte[] encodedResult = ReportEncoder.encodeWatchlistReport(mConfig,
-                    secretKey, digestsForReport, aggregatedResult);
-            if (encodedResult != null) {
-                addEncodedReportToDropBox(encodedResult);
+            Slog.i(TAG, "Start aggregating watchlist records.");
+            if (mDropBoxManager != null && mDropBoxManager.isTagEnabled(DROPBOX_TAG)) {
+                Settings.Global.putLong(mResolver,
+                        Settings.Global.NETWORK_WATCHLIST_LAST_REPORT_TIME,
+                        lastRecordTime);
+                final WatchlistReportDbHelper.AggregatedResult aggregatedResult =
+                        mDbHelper.getAggregatedRecords(lastRecordTime);
+                if (aggregatedResult == null) {
+                    Slog.i(TAG, "Cannot get result from database");
+                    return;
+                }
+                // Get all digests for watchlist report, it should include all installed
+                // application digests and previously recorded app digests.
+                final List<String> digestsForReport = getAllDigestsForReport(aggregatedResult);
+                final byte[] secretKey = mSettings.getPrivacySecretKey();
+                final byte[] encodedResult = ReportEncoder.encodeWatchlistReport(mConfig,
+                        secretKey, digestsForReport, aggregatedResult);
+                if (encodedResult != null) {
+                    addEncodedReportToDropBox(encodedResult);
+                }
+            } else {
+                Slog.w(TAG, "Network Watchlist dropbox tag is not enabled");
             }
+            mDbHelper.cleanup(lastRecordTime);
+        } finally {
+            long endTime = System.currentTimeMillis();
+            Slog.i(TAG, "Milliseconds spent on tryAggregateRecords(): " + (endTime - startTime));
         }
-        mDbHelper.cleanup();
     }
 
     /**
@@ -378,5 +407,20 @@ class WatchlistLoggingHandler extends Handler {
             index = host.indexOf(".");
         }
         return subDomainList.toArray(new String[0]);
+    }
+
+    static long getLastMidnightTime() {
+        return getMidnightTimestamp(0);
+    }
+
+    static long getMidnightTimestamp(int daysBefore) {
+        java.util.Calendar date = new GregorianCalendar();
+        // reset hour, minutes, seconds and millis
+        date.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        date.set(java.util.Calendar.MINUTE, 0);
+        date.set(java.util.Calendar.SECOND, 0);
+        date.set(java.util.Calendar.MILLISECOND, 0);
+        date.add(java.util.Calendar.DAY_OF_MONTH, -daysBefore);
+        return date.getTimeInMillis();
     }
 }
