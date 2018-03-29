@@ -2149,7 +2149,8 @@ public class NotificationManagerService extends SystemService {
                 final NotificationChannel channel = channels.get(i);
                 Preconditions.checkNotNull(channel, "channel in list is null");
                 mRankingHelper.createNotificationChannel(pkg, uid, channel,
-                        true /* fromTargetApp */);
+                        true /* fromTargetApp */, mConditionProviders.isPackageOrComponentAllowed(
+                                pkg, UserHandle.getUserId(uid)));
                 mListeners.notifyNotificationChannelChanged(pkg,
                         UserHandle.getUserHandleForUid(uid),
                         mRankingHelper.getNotificationChannel(pkg, uid, channel.getId(), false),
