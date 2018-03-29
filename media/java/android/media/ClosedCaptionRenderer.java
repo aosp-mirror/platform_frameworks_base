@@ -59,7 +59,7 @@ public class ClosedCaptionRenderer extends SubtitleController.Renderer {
     public boolean supports(MediaFormat format) {
         if (format.containsKey(MediaFormat.KEY_MIME)) {
             String mimeType = format.getString(MediaFormat.KEY_MIME);
-            return MediaPlayer.MEDIA_MIMETYPE_TEXT_CEA_608.equals(mimeType);
+            return MediaFormat.MIMETYPE_TEXT_CEA_608.equals(mimeType);
         }
         return false;
     }
@@ -67,7 +67,7 @@ public class ClosedCaptionRenderer extends SubtitleController.Renderer {
     @Override
     public SubtitleTrack createTrack(MediaFormat format) {
         String mimeType = format.getString(MediaFormat.KEY_MIME);
-        if (MediaPlayer.MEDIA_MIMETYPE_TEXT_CEA_608.equals(mimeType)) {
+        if (MediaFormat.MIMETYPE_TEXT_CEA_608.equals(mimeType)) {
             if (mCCWidget == null) {
                 mCCWidget = new Cea608CCWidget(mContext);
             }

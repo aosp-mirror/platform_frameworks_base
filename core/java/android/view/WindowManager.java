@@ -236,6 +236,18 @@ public interface WindowManager extends ViewManager {
     int TRANSIT_KEYGUARD_UNOCCLUDE = 23;
 
     /**
+     * A translucent activity is being opened.
+     * @hide
+     */
+    int TRANSIT_TRANSLUCENT_ACTIVITY_OPEN = 24;
+
+    /**
+     * A translucent activity is being closed.
+     * @hide
+     */
+    int TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE = 25;
+
+    /**
      * @hide
      */
     @IntDef(prefix = { "TRANSIT_" }, value = {
@@ -258,7 +270,9 @@ public interface WindowManager extends ViewManager {
             TRANSIT_KEYGUARD_GOING_AWAY,
             TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
             TRANSIT_KEYGUARD_OCCLUDE,
-            TRANSIT_KEYGUARD_UNOCCLUDE
+            TRANSIT_KEYGUARD_UNOCCLUDE,
+            TRANSIT_TRANSLUCENT_ACTIVITY_OPEN,
+            TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface TransitionType {}
@@ -1833,7 +1847,9 @@ public interface WindowManager extends ViewManager {
         public static final int SOFT_INPUT_MASK_STATE = 0x0f;
 
         /**
-         * Visibility state for {@link #softInputMode}: no state has been specified.
+         * Visibility state for {@link #softInputMode}: no state has been specified. The system may
+         * show or hide the software keyboard for better user experience when the window gains
+         * focus.
          */
         public static final int SOFT_INPUT_STATE_UNSPECIFIED = 0;
 
@@ -2220,7 +2236,7 @@ public interface WindowManager extends ViewManager {
         @IntDef(
                 flag = true,
                 value = {LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT,
-                        LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS,
+                        LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES,
                         LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER})
         @interface LayoutInDisplayCutoutMode {}
 
@@ -2231,10 +2247,11 @@ public interface WindowManager extends ViewManager {
          * Defaults to {@link #LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT}.
          *
          * @see #LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
-         * @see #LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+         * @see #LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
          * @see #LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
          * @see DisplayCutout
-         * @see android.R.attr#layoutInDisplayCutoutMode
+         * @see android.R.attr#windowLayoutInDisplayCutoutMode
+         *         android:windowLayoutInDisplayCutoutMode
          */
         @LayoutInDisplayCutoutMode
         public int layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
@@ -2245,10 +2262,10 @@ public interface WindowManager extends ViewManager {
          * laid out such that it does not overlap with the {@link DisplayCutout} area.
          *
          * <p>
-         * In practice, this means that if the window did not set FLAG_FULLSCREEN or
-         * SYSTEM_UI_FLAG_FULLSCREEN, it can extend into the cutout area in portrait if the cutout
-         * is at the top edge. Similarly for SYSTEM_UI_FLAG_HIDE_NAVIGATION and a cutout at the
-         * bottom of the screen.
+         * In practice, this means that if the window did not set {@link #FLAG_FULLSCREEN} or
+         * {@link View#SYSTEM_UI_FLAG_FULLSCREEN}, it can extend into the cutout area in portrait
+         * if the cutout is at the top edge. Similarly for
+         * {@link View#SYSTEM_UI_FLAG_HIDE_NAVIGATION} and a cutout at the bottom of the screen.
          * Otherwise (i.e. fullscreen or landscape) it is laid out such that it does not overlap the
          * cutout area.
          *
@@ -2258,6 +2275,9 @@ public interface WindowManager extends ViewManager {
          *
          * @see DisplayCutout
          * @see WindowInsets
+         * @see #layoutInDisplayCutoutMode
+         * @see android.R.attr#windowLayoutInDisplayCutoutMode
+         *         android:windowLayoutInDisplayCutoutMode
          */
         public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT = 0;
 
@@ -2279,8 +2299,40 @@ public interface WindowManager extends ViewManager {
          * The window must make sure that no important content overlaps with the
          * {@link DisplayCutout}.
          *
+         * <p>
+         * In this mode, the window extends under cutouts on the short edge of the display in both
+         * portrait and landscape, regardless of whether the window is hiding the system bars:<br/>
+         * <img src="{@docRoot}reference/android/images/display_cutout/short_edge/fullscreen_top_no_letterbox.png"
+         * height="720"
+         * alt="Screenshot of a fullscreen activity on a display with a cutout at the top edge in
+         *         portrait, no letterbox is applied."/>
+         *
+         * <img src="{@docRoot}reference/android/images/display_cutout/short_edge/landscape_top_no_letterbox.png"
+         * width="720"
+         * alt="Screenshot of an activity on a display with a cutout at the top edge in landscape,
+         *         no letterbox is applied."/>
+         *
+         * <p>
+         * A cutout in the corner is considered to be on the short edge: <br/>
+         * <img src="{@docRoot}reference/android/images/display_cutout/short_edge/fullscreen_corner_no_letterbox.png"
+         * height="720"
+         * alt="Screenshot of a fullscreen activity on a display with a cutout in the corner in
+         *         portrait, no letterbox is applied."/>
+         *
+         * <p>
+         * On the other hand, should the cutout be on the long edge of the display, a letterbox will
+         * be applied such that the window does not extend into the cutout on either long edge:
+         * <br/>
+         * <img src="{@docRoot}reference/android/images/display_cutout/short_edge/portrait_side_letterbox.png"
+         * height="720"
+         * alt="Screenshot of an activity on a display with a cutout on the long edge in portrait,
+         *         letterbox is applied."/>
+         *
          * @see DisplayCutout
          * @see WindowInsets#getDisplayCutout()
+         * @see #layoutInDisplayCutoutMode
+         * @see android.R.attr#windowLayoutInDisplayCutoutMode
+         *         android:windowLayoutInDisplayCutoutMode
          */
         public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES = 1;
 
@@ -2288,12 +2340,14 @@ public interface WindowManager extends ViewManager {
          * The window is never allowed to overlap with the DisplayCutout area.
          *
          * <p>
-         * This should be used with windows that transiently set SYSTEM_UI_FLAG_FULLSCREEN to
-         * avoid a relayout of the window when the flag is set or cleared.
+         * This should be used with windows that transiently set
+         * {@link View#SYSTEM_UI_FLAG_FULLSCREEN} or {@link View#SYSTEM_UI_FLAG_HIDE_NAVIGATION}
+         * to avoid a relayout of the window when the respective flag is set or cleared.
          *
          * @see DisplayCutout
-         * @see View#SYSTEM_UI_FLAG_FULLSCREEN SYSTEM_UI_FLAG_FULLSCREEN
-         * @see View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+         * @see #layoutInDisplayCutoutMode
+         * @see android.R.attr#windowLayoutInDisplayCutoutMode
+         *         android:windowLayoutInDisplayCutoutMode
          */
         public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER = 2;
 

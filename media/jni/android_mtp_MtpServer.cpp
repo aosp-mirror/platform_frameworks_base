@@ -67,10 +67,10 @@ android_mtp_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase, job
     int controlFd = dup(jniGetFDFromFileDescriptor(env, jControlFd));
     MtpServer* server = new MtpServer(getMtpDatabase(env, javaDatabase), controlFd,
             usePtp,
-            MtpString((deviceInfoManufacturerStr != NULL) ? deviceInfoManufacturerStr : ""),
-            MtpString((deviceInfoModelStr != NULL) ? deviceInfoModelStr : ""),
-            MtpString((deviceInfoDeviceVersionStr != NULL) ? deviceInfoDeviceVersionStr : ""),
-            MtpString((deviceInfoSerialNumberStr != NULL) ? deviceInfoSerialNumberStr : ""));
+            (deviceInfoManufacturerStr != NULL) ? deviceInfoManufacturerStr : "",
+            (deviceInfoModelStr != NULL) ? deviceInfoModelStr : "",
+            (deviceInfoDeviceVersionStr != NULL) ? deviceInfoDeviceVersionStr : "",
+            (deviceInfoSerialNumberStr != NULL) ? deviceInfoSerialNumberStr : "");
     if (deviceInfoManufacturerStr != NULL) {
         env->ReleaseStringUTFChars(deviceInfoManufacturer, deviceInfoManufacturerStr);
     }

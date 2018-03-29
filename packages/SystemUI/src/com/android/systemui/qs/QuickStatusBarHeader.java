@@ -21,22 +21,25 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.ColorInt;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.media.AudioManager;
 import android.os.Handler;
 import android.provider.AlarmClock;
 import android.support.annotation.VisibleForTesting;
-import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.view.WindowInsets;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -95,20 +98,35 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
     private View mQuickQsStatusIcons;
     private View mDate;
     private View mHeaderTextContainerView;
-    /** View corresponding to the next alarm info (including the icon). */
-    private View mNextAlarmView;
+    /** View containing the next alarm and ringer mode info. */
+    private View mStatusContainer;
     /** Tooltip for educating users that they can long press on icons to see more details. */
     private View mLongPressTooltipView;
+
+    private int mRingerMode = AudioManager.RINGER_MODE_NORMAL;
+    private AlarmManager.AlarmClockInfo mNextAlarm;
+
+    private ImageView mNextAlarmIcon;
     /** {@link TextView} containing the actual text indicating when the next alarm will go off. */
     private TextView mNextAlarmTextView;
+    private View mStatusSeparator;
+    private ImageView mRingerModeIcon;
+    private TextView mRingerModeTextView;
     private BatteryMeterView mBatteryMeterView;
     private Clock mClockView;
     private DateView mDateView;
 
     private NextAlarmController mAlarmController;
-    private String mNextAlarmText;
     /** Counts how many times the long press tooltip has been shown to the user. */
     private int mShownCount;
+
+    private final BroadcastReceiver mRingerReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mRingerMode = intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1);
+            updateStatusText();
+        }
+    };
 
     /**
      * Runnable for automatically fading out the long press tooltip (as if it were animating away).
@@ -117,7 +135,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
-
         mAlarmController = Dependency.get(NextAlarmController.class);
         mShownCount = getStoredShownCount();
     }
@@ -136,8 +153,12 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
         // Views corresponding to the header info section (e.g. tooltip and next alarm).
         mHeaderTextContainerView = findViewById(R.id.header_text_container);
         mLongPressTooltipView = findViewById(R.id.long_press_tooltip);
-        mNextAlarmView = findViewById(R.id.next_alarm);
+        mStatusContainer = findViewById(R.id.status_container);
+        mStatusSeparator = findViewById(R.id.status_separator);
+        mNextAlarmIcon = findViewById(R.id.next_alarm_icon);
         mNextAlarmTextView = findViewById(R.id.next_alarm_text);
+        mRingerModeIcon = findViewById(R.id.ringer_mode_icon);
+        mRingerModeTextView = findViewById(R.id.ringer_mode_text);
 
         updateResources();
 
@@ -158,6 +179,32 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
         mClockView = findViewById(R.id.clock);
         mDateView = findViewById(R.id.date);
     }
+
+    private void updateStatusText() {
+        boolean ringerVisible = false;
+        if (mRingerMode == AudioManager.RINGER_MODE_VIBRATE) {
+            mRingerModeIcon.setImageResource(R.drawable.stat_sys_ringer_vibrate);
+            mRingerModeTextView.setText(R.string.volume_ringer_status_vibrate);
+            ringerVisible = true;
+        } else if (mRingerMode == AudioManager.RINGER_MODE_SILENT) {
+            mRingerModeIcon.setImageResource(R.drawable.stat_sys_ringer_silent);
+            mRingerModeTextView.setText(R.string.volume_ringer_status_silent);
+            ringerVisible = true;
+        }
+        mRingerModeIcon.setVisibility(ringerVisible ? View.VISIBLE : View.GONE);
+        mRingerModeTextView.setVisibility(ringerVisible ? View.VISIBLE : View.GONE);
+
+        boolean alarmVisible = false;
+        if (mNextAlarm != null) {
+            alarmVisible = true;
+            mNextAlarmTextView.setText(formatNextAlarm(mNextAlarm));
+        }
+        mNextAlarmIcon.setVisibility(alarmVisible ? View.VISIBLE : View.GONE);
+        mNextAlarmTextView.setVisibility(alarmVisible ? View.VISIBLE : View.GONE);
+        mStatusSeparator.setVisibility(alarmVisible && ringerVisible ? View.VISIBLE : View.GONE);
+        updateTooltipShow();
+    }
+
 
     private void applyDarkness(int id, Rect tintArea, float intensity, int color) {
         View v = findViewById(id);
@@ -323,8 +370,11 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
 
         if (listening) {
             mAlarmController.addCallback(this);
+            mContext.registerReceiver(mRingerReceiver,
+                    new IntentFilter(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION));
         } else {
             mAlarmController.removeCallback(this);
+            mContext.unregisterReceiver(mRingerReceiver);
         }
     }
 
@@ -338,14 +388,22 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
 
     @Override
     public void onNextAlarmChanged(AlarmManager.AlarmClockInfo nextAlarm) {
-        mNextAlarmText = nextAlarm != null ? formatNextAlarm(nextAlarm) : null;
+        mNextAlarm = nextAlarm;
+        updateStatusText();
+    }
 
-        if (mNextAlarmText != null) {
-            hideLongPressTooltip(true /* shouldFadeInAlarmText */);
+    private void updateTooltipShow() {
+        if (hasStatusText()) {
+            hideLongPressTooltip(true /* shouldShowStatusText */);
         } else {
-            hideAlarmText();
+            hideStatusText();
         }
         updateHeaderTextContainerAlphaAnimator();
+    }
+
+    private boolean hasStatusText() {
+        return mNextAlarmTextView.getVisibility() == View.VISIBLE
+                || mRingerModeTextView.getVisibility() == View.VISIBLE;
     }
 
     /**
@@ -353,8 +411,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
      * the space).
      */
     public void showLongPressTooltip() {
-        // If we have alarm text to show, don't bother fading in the tooltip.
-        if (!TextUtils.isEmpty(mNextAlarmText)) {
+        // If we have status text to show, don't bother fading in the tooltip.
+        if (hasStatusText()) {
             return;
         }
 
@@ -384,11 +442,11 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
 
     /**
      * Fades out the long press tooltip if it's partially visible - short circuits any running
-     * animation. Additionally has the ability to fade in the alarm info text.
+     * animation. Additionally has the ability to fade in the status info text.
      *
-     * @param shouldShowAlarmText whether we should fade in the next alarm text
+     * @param shouldShowStatusText whether we should fade in the status text
      */
-    private void hideLongPressTooltip(boolean shouldShowAlarmText) {
+    private void hideLongPressTooltip(boolean shouldShowStatusText) {
         mLongPressTooltipView.animate().cancel();
         if (mLongPressTooltipView.getVisibility() == View.VISIBLE
                 && mLongPressTooltipView.getAlpha() != 0f) {
@@ -402,44 +460,40 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
                             if (DEBUG) Log.d(TAG, "hideLongPressTooltip: Hid long press tip");
                             mLongPressTooltipView.setVisibility(View.INVISIBLE);
 
-                            if (shouldShowAlarmText) {
-                                showAlarmText();
+                            if (shouldShowStatusText) {
+                                showStatus();
                             }
                         }
                     })
                     .start();
         } else {
             mLongPressTooltipView.setVisibility(View.INVISIBLE);
-            if (shouldShowAlarmText) {
-                showAlarmText();
+            if (shouldShowStatusText) {
+                showStatus();
             }
         }
     }
 
     /**
-     * Fades in the updated alarm text. Note that if there's already an alarm showing, this will
-     * immediately hide it and fade in the updated time.
+     * Fades in the updated status text. Note that if there's already a status showing, this will
+     * immediately hide it and fade in the updated status.
      */
-    private void showAlarmText() {
-        mNextAlarmView.setAlpha(0f);
-        mNextAlarmView.setVisibility(View.VISIBLE);
-        mNextAlarmTextView.setText(mNextAlarmText);
+    private void showStatus() {
+        mStatusContainer.setAlpha(0f);
+        mStatusContainer.setVisibility(View.VISIBLE);
 
         // Animate the alarm back in. Make sure to clear the animator listener for the animation!
-        mNextAlarmView.animate()
+        mStatusContainer.animate()
                 .alpha(1f)
                 .setDuration(FADE_ANIMATION_DURATION_MS)
                 .setListener(null)
                 .start();
     }
 
-    /**
-     * Fades out and hides the next alarm text. This also resets the text contents to null in
-     * preparation for the next alarm update.
-     */
-    private void hideAlarmText() {
-        if (mNextAlarmView.getVisibility() == View.VISIBLE) {
-            mNextAlarmView.animate()
+    /** Fades out and hides the status text. */
+    private void hideStatusText() {
+        if (mStatusContainer.getVisibility() == View.VISIBLE) {
+            mStatusContainer.animate()
                     .alpha(0f)
                     .setListener(new AnimatorListenerAdapter() {
                         @Override
@@ -448,15 +502,11 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
 
                             // Reset the alpha regardless of how the animation ends for the next
                             // time we show this view/want to animate it.
-                            mNextAlarmView.setVisibility(View.INVISIBLE);
-                            mNextAlarmView.setAlpha(1f);
-                            mNextAlarmTextView.setText(null);
+                            mStatusContainer.setVisibility(View.INVISIBLE);
+                            mStatusContainer.setAlpha(1f);
                         }
                     })
                     .start();
-        } else {
-            // Next alarm view is already hidden, only need to clear the text.
-            mNextAlarmTextView.setText(null);
         }
     }
 

@@ -33,17 +33,18 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"চলিত"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"জাননীসমূহ"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"বেটাৰি কম আছে"</string>
-    <!-- no translation found for battery_low_title_hybrid (6268991275887381595) -->
-    <skip />
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> বাকী আছে"</string>
     <!-- no translation found for battery_low_percent_format_hybrid (6838677459286775617) -->
     <skip />
     <!-- no translation found for battery_low_percent_format_hybrid_short (9025795469949145586) -->
     <skip />
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> বাকী আছে। বেটাৰি সঞ্চয়কাৰী অন হৈ আছে।"</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"ইউএছবি চ্চার্জিং কৰিব পৰা নাযাব।\nআপোনাৰ ফ\'নৰ লগত দিয়া চ্চার্জাৰ ব্যৱহাৰ কৰক।"</string>
-    <string name="invalid_charger_title" msgid="3515740382572798460">"ইউএছবি চ্চার্জিং সমৰ্থিত নহয়।"</string>
-    <string name="invalid_charger_text" msgid="5474997287953892710">"কেৱল যোগান ধৰা চ্চার্জাৰ ব্যৱহাৰ কৰক।"</string>
+    <!-- no translation found for invalid_charger (2741987096648693172) -->
+    <skip />
+    <!-- no translation found for invalid_charger_title (2836102177577255404) -->
+    <skip />
+    <!-- no translation found for invalid_charger_text (6480624964117840005) -->
+    <skip />
     <string name="battery_low_why" msgid="4553600287639198111">"ছেটিংসমূহ"</string>
     <string name="battery_saver_confirmation_title" msgid="2052100465684817154">"বেটাৰি সঞ্চয়কাৰী অন কৰেনে?"</string>
     <string name="battery_saver_confirmation_ok" msgid="7507968430447930257">"অন কৰক"</string>
@@ -69,8 +70,7 @@
     <string name="usb_debugging_title" msgid="4513918393387141949">"ইউএছবি ডিবাগিংৰ অনুমতি দিবনে?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"এয়া হৈছে কম্পিউটাৰটোৰ RSA কী ফিংগাৰপ্ৰিণ্ট:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"এই কম্পিউটাৰটোৰ পৰা সদায় অনুমতি দিয়ক"</string>
-    <!-- no translation found for usb_debugging_secondary_user_title (6353808721761220421) -->
-    <skip />
+    <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"ইউএছবি ডিবাগিঙৰ অনুমতি নাই"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"এই ডিভাইচটোত বর্তমান ছাইন ইন হৈ থকা ব্যৱহাৰকাৰীজনে ইউএছবি ডিবাগিং অন কৰিব নোৱাৰে। এই সুবিধাটো ব্যৱহাৰ কৰিবলৈ হ\'লে মুখ্য ব্যৱহাৰকাৰী হিচাপে ছাইন ইন কৰক।"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"স্ক্ৰীণ পূর্ণ কৰিবলৈ জুম কৰক"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"স্ক্ৰীণ পূর্ণ কৰিবলৈ প্ৰসাৰিত কৰক"</string>
@@ -78,15 +78,13 @@
     <skip />
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"স্ক্ৰীণশ্বট ছেভ কৰি থকা হৈছে…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"স্ক্ৰীণশ্বট ছেভ কৰি থকা হৈছে…"</string>
-    <!-- no translation found for screenshot_saving_text (2545047868936087248) -->
-    <skip />
     <!-- no translation found for screenshot_saved_title (5637073968117370753) -->
     <skip />
     <!-- no translation found for screenshot_saved_text (7574667448002050363) -->
     <skip />
-    <!-- no translation found for screenshot_failed_title (9096484883063264803) -->
+    <!-- no translation found for screenshot_failed_title (7612509838919089748) -->
     <skip />
-    <!-- no translation found for screenshot_failed_to_save_unknown_text (8844781948876286488) -->
+    <!-- no translation found for screenshot_failed_to_save_unknown_text (3637758096565605541) -->
     <skip />
     <!-- no translation found for screenshot_failed_to_save_text (3041612585107107310) -->
     <skip />
@@ -105,18 +103,15 @@
     <string name="accessibility_search_light" msgid="1103867596330271848">"সন্ধান কৰক"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"কেমেৰা"</string>
     <string name="accessibility_phone_button" msgid="6738112589538563574">"ফ\'ন"</string>
-    <!-- no translation found for accessibility_voice_assist_button (487611083884852965) -->
-    <skip />
+    <string name="accessibility_voice_assist_button" msgid="487611083884852965">"কণ্ঠধ্বনিৰে সহায়"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"আনলক কৰক"</string>
     <string name="accessibility_waiting_for_fingerprint" msgid="4808860050517462885">"ফিংগাৰপ্ৰিণ্টৰ বাবে ৰৈ থকা হৈছে"</string>
     <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"ফিংগাৰপ্ৰিণ্ট ব্যৱহাৰ নকৰাকৈ আনলক কৰক"</string>
     <string name="unlock_label" msgid="8779712358041029439">"আনলক কৰক"</string>
     <string name="phone_label" msgid="2320074140205331708">"ফ\'ন খোলক"</string>
-    <!-- no translation found for voice_assist_label (3956854378310019854) -->
-    <skip />
+    <string name="voice_assist_label" msgid="3956854378310019854">"কণ্ঠধ্বনিৰে সহায় খোলক"</string>
     <string name="camera_label" msgid="7261107956054836961">"কেমেৰা খোলক"</string>
-    <!-- no translation found for recents_caption_resize (3517056471774958200) -->
-    <skip />
+    <string name="recents_caption_resize" msgid="3517056471774958200">"নতুন কাৰ্যৰ চানেকি বাছনি কৰক"</string>
     <string name="cancel" msgid="6442560571259935130">"বাতিল কৰক"</string>
     <!-- no translation found for fingerprint_dialog_touch_sensor (8511557690663181761) -->
     <skip />
@@ -153,10 +148,8 @@
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAXৰ দুডাল দণ্ড আছে।"</string>
     <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"WiMAXৰ তিনিডাল দণ্ড আছে।"</string>
     <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"WiMAXৰ ছিগনেল পূৰা আছে৷"</string>
-    <!-- no translation found for accessibility_ethernet_disconnected (5896059303377589469) -->
-    <skip />
-    <!-- no translation found for accessibility_ethernet_connected (2692130313069182636) -->
-    <skip />
+    <string name="accessibility_ethernet_disconnected" msgid="5896059303377589469">"ইথাৰনেট সংযোগ বিচ্ছিন্ন হৈছে।"</string>
+    <string name="accessibility_ethernet_connected" msgid="2692130313069182636">"ইথাৰনেট সংযোগ হৈছে।"</string>
     <string name="accessibility_no_signal" msgid="7064645320782585167">"কোনো ছিগনেল নাই।"</string>
     <string name="accessibility_not_connected" msgid="6395326276213402883">"সংযোগ হৈ থকা নাই।"</string>
     <string name="accessibility_zero_bars" msgid="3806060224467027887">"এডালো দণ্ড নাই।"</string>
@@ -168,28 +161,41 @@
     <string name="accessibility_desc_off" msgid="6475508157786853157">"অফ।"</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"সংযোগ কৰা হ’ল।"</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"সংযোগ কৰি থকা হৈছে।"</string>
-    <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"জিপিআৰএছ"</string>
-    <string name="accessibility_data_connection_1x" msgid="994133468120244018">"১ X"</string>
-    <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
-    <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
-    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
-    <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
-    <string name="accessibility_data_connection_4g_plus" msgid="3032226872470658661">"4G+"</string>
-    <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"এলটিই"</string>
-    <string name="accessibility_data_connection_lte_plus" msgid="361876866906946007">"LTE+"</string>
-    <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
-    <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"ৰ\'মিং"</string>
-    <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
+    <!-- no translation found for data_connection_gprs (7652872568358508452) -->
+    <skip />
+    <!-- no translation found for data_connection_hspa (1499615426569473562) -->
+    <skip />
+    <!-- no translation found for data_connection_3g (503045449315378373) -->
+    <skip />
+    <!-- no translation found for data_connection_3_5g (5218328297191657602) -->
+    <skip />
+    <!-- no translation found for data_connection_3_5g_plus (7570783890290275297) -->
+    <skip />
+    <!-- no translation found for data_connection_4g (9139963475267449144) -->
+    <skip />
+    <!-- no translation found for data_connection_4g_plus (1148687201877800700) -->
+    <skip />
+    <!-- no translation found for data_connection_lte (2694876797724028614) -->
+    <skip />
+    <!-- no translation found for data_connection_lte_plus (3423013208570937424) -->
+    <skip />
+    <!-- no translation found for data_connection_cdma (4677985502159869585) -->
+    <skip />
+    <!-- no translation found for data_connection_roaming (6037232010953697354) -->
+    <skip />
+    <!-- no translation found for data_connection_edge (871835227939216682) -->
+    <skip />
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"ৱাই-ফাই"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ছিম নাই।"</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"ম\'বাইল ডেটা"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"ম\'বাইল ডেটা অন অৱস্থাত আছে"</string>
-    <string name="accessibility_cell_data_off" msgid="443267573897409704">"ম\'বাইল ডেটা অফ অৱস্থাত আছে"</string>
+    <!-- no translation found for cell_data_off (5287705247512911922) -->
+    <skip />
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ব্লুটুথ টেডাৰিং।"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"এয়াৰপ্লেইন ম\'ড।"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"ভিপিএন অন অৱস্থাত আছে।"</string>
     <string name="accessibility_no_sims" msgid="3957997018324995781">"কোনো ছিম কাৰ্ড নাই"</string>
-    <!-- no translation found for accessibility_carrier_network_change_mode (4017301580441304305) -->
+    <!-- no translation found for carrier_network_change_mode (8149202439957837762) -->
     <skip />
     <string name="accessibility_battery_details" msgid="7645516654955025422">"বেটাৰিৰ বিৱৰণসমূহ খোলক"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> শতাংশ বেটাৰি।"</string>
@@ -209,8 +215,7 @@
     <skip />
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"<xliff:g id="APP">%s</xliff:g>ক আঁতৰাব।"</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> আঁতৰোৱা হৈছে৷"</string>
-    <!-- no translation found for accessibility_recents_all_items_dismissed (4464697366179168836) -->
-    <skip />
+    <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"শেহতীয়া সকলো এপ্লিকেশ্বন অগ্ৰাহ্য কৰা হৈছে।"</string>
     <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"<xliff:g id="APP">%s</xliff:g> এপ্লিকেশ্বনৰ তথ্য় খোলক।"</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g> আৰম্ভ কৰা হৈছে।"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"জাননী অগ্ৰাহ্য কৰা হৈছে।"</string>
@@ -220,8 +225,7 @@
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"ছেটিংসমূহ"</string>
     <string name="accessibility_desc_recent_apps" msgid="4876900986661819788">"অৱলোকন।"</string>
     <string name="accessibility_desc_work_lock" msgid="4288774420752813383">"কৰ্মস্থানৰ প্ৰ\'ফাইলৰ লক স্ক্ৰীণ"</string>
-    <!-- no translation found for accessibility_desc_close (7479755364962766729) -->
-    <skip />
+    <string name="accessibility_desc_close" msgid="7479755364962766729">"বন্ধ কৰক"</string>
     <string name="accessibility_quick_settings_wifi" msgid="5518210213118181692">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="8716484460897819400">"ৱাই-ফাই অফ কৰা হ\'ল।"</string>
     <string name="accessibility_quick_settings_wifi_changed_on" msgid="6440117170789528622">"ৱাই-ফাই অন কৰা হ\'ল।"</string>
@@ -231,19 +235,14 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"এয়াৰপ্লেইন ম\'ড অন হৈ আছে৷"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"এয়াৰপ্লেইন ম\'ড অফ কৰা হ\'ল।"</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"এয়াৰপ্লেইন ম\'ড অন কৰা হ\'ল।"</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_priority_on (1448402297221249355) -->
+    <!-- no translation found for accessibility_quick_settings_dnd_priority_on (5836205286254617194) -->
     <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_none_on (6882582132662613537) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_alarms_on (9152834845587554157) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"অসুবিধা নিদিব অন হৈ আছে, সম্পূর্ণ নিৰৱতা।"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"অসুবিধা নিদিব অন হৈ আছে, মাত্ৰ এলাৰ্মসমূহ বাজিব।"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"অসুবিধা নিদিব।"</string>
-    <!-- no translation found for accessibility_quick_settings_dnd_off (2371832603753738581) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_changed_off (898107593453022935) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_dnd_changed_on (4483780856613561039) -->
-    <skip />
+    <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"অসুবিধা নিদিব বন্ধ হৈ আছে।"</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"অসুবিধা নিদিব বন্ধ কৰা হ\'ল।"</string>
+    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"অসুবিধা নিদিব অন কৰা হৈছে।"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"ব্লুটুথ।"</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"ব্লুটুথ অফ হৈ আছে।"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"ব্লুটুথ অন হৈ আছে।"</string>
@@ -277,16 +276,12 @@
     <string name="accessibility_quick_settings_data_saver_changed_on" msgid="4218725402373934151">"ডেটা সঞ্চয়কাৰী সুবিধা অন কৰা হ\'ল।"</string>
     <string name="accessibility_brightness" msgid="8003681285547803095">"ডিছপ্লেৰ উজ্জ্বলতা"</string>
     <string name="accessibility_ambient_display_charging" msgid="9084521679384069087">"চ্চার্জ কৰি থকা হৈছে"</string>
-    <!-- no translation found for data_usage_disabled_dialog_3g_title (5281770593459841889) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_4g_title (1601769736881078016) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5281770593459841889">"2G-3G ডেটা পজ কৰা হৈছে"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="1601769736881078016">"4G ডেটা পজ কৰা হৈছে"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="6801382439018099779">"ম\'বাইল ডেটা পজ কৰা হৈছে"</string>
-    <!-- no translation found for data_usage_disabled_dialog_title (3932437232199671967) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"ডেটা পজ কৰা হৈছে"</string>
     <string name="data_usage_disabled_dialog" msgid="4919541636934603816">"আপুনি নির্ধাৰণ কৰা ডেটাৰ সীমা শেষ হৈছে। আপুনি এতিয়া ম\'বাইল ডেটা ব্যৱহাৰ কৰিব নোৱাৰে। \n\nযদিহে আপুনি আকৌ ম\'বাইল ডেটা ব্যৱহাৰ কৰে তেন্তে ডেটাৰ ব্যৱহাৰৰ বাবে মাচুল ভৰিবলগীয়া হ\'ব পাৰে।"</string>
-    <!-- no translation found for data_usage_disabled_dialog_enable (1412395410306390593) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"পুনৰ আৰম্ভ কৰক"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"জিপিএছ সন্ধান কৰি থকা হৈছে"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"জিপিএছএ অৱস্থান ছেট কৰিছে"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"অৱস্থানৰ অনুৰোধ সক্ৰিয় হৈ আছে"</string>
@@ -307,16 +302,12 @@
     <string name="dessert_case" msgid="1295161776223959221">"মিষ্টান্ন ভাণ্ডাৰ"</string>
     <string name="start_dreams" msgid="5640361424498338327">"স্ক্ৰীণ ছেভাৰ"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ইথাৰনেট"</string>
-    <!-- no translation found for quick_settings_header_onboarding_text (7872508260264044734) -->
+    <!-- no translation found for quick_settings_header_onboarding_text (8030309023792936283) -->
     <skip />
-    <!-- no translation found for quick_settings_dnd_label (8735855737575028208) -->
-    <skip />
-    <!-- no translation found for quick_settings_dnd_priority_label (483232950670692036) -->
-    <skip />
-    <!-- no translation found for quick_settings_dnd_alarms_label (2559229444312445858) -->
-    <skip />
-    <!-- no translation found for quick_settings_dnd_none_label (5025477807123029478) -->
-    <skip />
+    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"অসুবিধা নিদিব"</string>
+    <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"কেৱল গুৰুত্বপূৰ্ণ"</string>
+    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"কেৱল এলাৰ্মসমূহ"</string>
+    <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"সম্পূর্ণ নিৰৱতা"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"ব্লুটুথ"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"ব্লুটুথ (<xliff:g id="NUMBER">%d</xliff:g>টা ডিভাইচ)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"ব্লুটুথ বন্ধ অৱস্থাত আছে"</string>
@@ -354,12 +345,10 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"নেটৱৰ্ক নাই"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"ৱাই-ফাই অফ"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"ৱাই-ফাই অন হৈ আছে"</string>
-    <!-- no translation found for quick_settings_wifi_detail_empty_text (269990350383909226) -->
-    <skip />
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"কোনো ৱাই-ফাই নেটৱৰ্ক নাই"</string>
     <!-- no translation found for quick_settings_wifi_secondary_label_transient (7748206246119760554) -->
     <skip />
-    <!-- no translation found for quick_settings_cast_title (7709016546426454729) -->
-    <skip />
+    <string name="quick_settings_cast_title" msgid="7709016546426454729">"কাষ্ট"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"কাষ্টিং"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"নাম নথকা ডিভাইচ"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"কাষ্টৰ বাবে সাজু"</string>
@@ -376,6 +365,8 @@
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"টেডাৰ কৰি থকা হৈছে"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"হটস্পট"</string>
     <!-- no translation found for quick_settings_hotspot_secondary_label_transient (8010579363691405477) -->
+    <skip />
+    <!-- no translation found for quick_settings_hotspot_secondary_label_data_saver_enabled (5672131949987422420) -->
     <skip />
     <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"জাননীসমূহ"</string>
@@ -396,7 +387,7 @@
     <skip />
     <!-- no translation found for quick_settings_night_secondary_label_on_at (6256314040368487637) -->
     <skip />
-    <!-- no translation found for quick_settings_night_secondary_label_until (8664820079774824618) -->
+    <!-- no translation found for quick_settings_secondary_label_until (2749196569462600150) -->
     <skip />
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC নিষ্ক্ৰিয় হৈ আছে"</string>
@@ -410,12 +401,9 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g>টো সুৰক্ষিত ম\'ডত অক্ষম কৰা হ\'ল।"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"সকলো মচক"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"বিভাজিত স্ক্ৰীণ ব্য়ৱহাৰ কৰিবলৈ ইয়ালৈ টানি আনি এৰক"</string>
-    <!-- no translation found for recents_multistack_add_stack_dialog_split_horizontal (8848514474543427332) -->
-    <skip />
-    <!-- no translation found for recents_multistack_add_stack_dialog_split_vertical (9075292233696180813) -->
-    <skip />
-    <!-- no translation found for recents_multistack_add_stack_dialog_split_custom (4177837597513701943) -->
-    <skip />
+    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"আনুভূমিকভাৱে বিভাজিত কৰক"</string>
+    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"উলম্বভাৱে বিভাজিত কৰক"</string>
+    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"উপযোগিতা অনুসৰি বিভাজিত কৰক"</string>
     <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"স্ক্ৰীণখনক ওপৰফাললৈ ভাগ কৰক"</string>
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"স্ক্ৰীণখনক বাওঁফাললৈ ভাগ কৰক"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"স্ক্ৰীণখনক সোঁফাললৈ ভাগ কৰক"</string>
@@ -429,8 +417,7 @@
     <string name="description_direction_left" msgid="7207478719805562165">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>ৰ বাবে বাওঁফাললৈ শ্লাইড কৰক।"</string>
     <string name="zen_priority_introduction" msgid="1149025108714420281">"আপুনি নিৰ্দিষ্ট কৰা এলাৰ্ম, ৰিমাইণ্ডাৰ, ইভেন্ট আৰু কল কৰোঁতাৰ বাহিৰে আন কোনো শব্দৰ পৰা আপুনি অসুবিধা নাপাব। কিন্তু, সংগীত, ভিডিঅ\' আৰু খেলসমূহকে ধৰি আপুনি প্লে কৰিব খোজা যিকোনো বস্তু তথাপি শুনিব পাৰিব।"</string>
     <string name="zen_alarms_introduction" msgid="4934328096749380201">"আপুনি নিৰ্দিষ্ট কৰা এলাৰ্মৰ বাহিৰে আন কোনো ধ্বনি আৰু কম্পনৰ পৰা আপুনি অসুবিধা নাপাব। কিন্তু, সংগীত, ভিডিঅ\' আৰু খেলসমূহকে ধৰি আপুনি প্লে কৰিব খোজা যিকোনো বস্তু তথাপি শুনিব পাৰিব।"</string>
-    <!-- no translation found for zen_priority_customize_button (7948043278226955063) -->
-    <skip />
+    <string name="zen_priority_customize_button" msgid="7948043278226955063">"নিজৰ উপযোগিতা অনুসৰি"</string>
     <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"এই কার্যই এলার্ম, সংগীত, ভিডিঅ\' আৰু খেলসমূহকে ধৰি সকলোৰে বাবে ধ্বনি আৰু কম্পন অৱৰোধ কৰিব। আপুনি ফ\'ন কল তথাপি কৰিবলৈ সক্ষম হ\'ব।"</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"এই কার্যই এলার্ম, মিউজিক, ভিডিঅ\' আৰু গেইমকে ধৰি সকলোৰে ধ্বনি আৰু কম্পন অৱৰোধ কৰে।"</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
@@ -439,25 +426,16 @@
     <string name="keyguard_unlock" msgid="8043466894212841998">"আনলক কৰিবলৈ ওপৰলৈ ছোৱাইপ কৰক"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"আপোনাৰ প্ৰতিষ্ঠানে এই ডিভাইচটো পৰিচালনা কৰে"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"এই ডিভাইচটো <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>ৰ দ্বাৰা পৰিচালিত।"</string>
-    <!-- no translation found for phone_hint (4872890986869209950) -->
-    <skip />
-    <!-- no translation found for voice_hint (8939888732119726665) -->
-    <skip />
-    <!-- no translation found for camera_hint (7939688436797157483) -->
-    <skip />
+    <string name="phone_hint" msgid="4872890986869209950">"ফ\'নৰ বাবে আইকনৰপৰা ছোৱাইপ কৰক"</string>
+    <string name="voice_hint" msgid="8939888732119726665">"কণ্ঠধ্বনিৰে সহায়ৰ বাবে আইকনৰ পৰা ছোৱাইপ কৰক"</string>
+    <string name="camera_hint" msgid="7939688436797157483">"কেমেৰা খুলিবলৈ আইকনৰপৰা ছোৱাইপ কৰক"</string>
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"সম্পূর্ণ নিৰৱতা। এই কার্যই স্ক্ৰীণ ৰীডাৰসমূহকো নিৰৱ কৰিব।"</string>
-    <!-- no translation found for interruption_level_none (6000083681244492992) -->
-    <skip />
-    <!-- no translation found for interruption_level_priority (6426766465363855505) -->
-    <skip />
-    <!-- no translation found for interruption_level_alarms (5226306993448328896) -->
-    <skip />
-    <!-- no translation found for interruption_level_none_twoline (3957581548190765889) -->
-    <skip />
-    <!-- no translation found for interruption_level_priority_twoline (1564715335217164124) -->
-    <skip />
-    <!-- no translation found for interruption_level_alarms_twoline (3266909566410106146) -->
-    <skip />
+    <string name="interruption_level_none" msgid="6000083681244492992">"সম্পূর্ণ নিৰৱতা"</string>
+    <string name="interruption_level_priority" msgid="6426766465363855505">"কেৱল গুৰুত্বপূৰ্ণ"</string>
+    <string name="interruption_level_alarms" msgid="5226306993448328896">"কেৱল এলাৰ্মসমূহ"</string>
+    <string name="interruption_level_none_twoline" msgid="3957581548190765889">"সম্পূর্ণ \n নিৰৱতা"</string>
+    <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"কেৱল\nগুৰুত্বপূৰ্ণ"</string>
+    <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"কেৱল\nএলাৰ্মসমূহ"</string>
     <!-- no translation found for keyguard_indication_charging_time (2056340799276374421) -->
     <skip />
     <!-- no translation found for keyguard_indication_charging_time_fast (7767562163577492332) -->
@@ -480,11 +458,9 @@
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"আপুনি আপোনাৰ ছেশ্বন অব্যাহত ৰাখিব বিচাৰেনে?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"আকৌ আৰম্ভ কৰক"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"হয়, অব্যাহত ৰাখক"</string>
-    <!-- no translation found for guest_notification_title (1585278533840603063) -->
-    <skip />
+    <string name="guest_notification_title" msgid="1585278533840603063">"অতিথি ব্য়ৱহাৰকাৰী"</string>
     <string name="guest_notification_text" msgid="335747957734796689">"এপসমূহ আৰু ডেটা মচিবলৈ অতিথি ব্যৱহাৰকাৰীক আঁতৰাওক"</string>
-    <!-- no translation found for guest_notification_remove_action (8820670703892101990) -->
-    <skip />
+    <string name="guest_notification_remove_action" msgid="8820670703892101990">"অতিথি আঁতৰাওক"</string>
     <string name="user_logout_notification_title" msgid="1453960926437240727">"ব্যৱহাৰকাৰীক লগ আউট কৰক"</string>
     <string name="user_logout_notification_text" msgid="3350262809611876284">"বর্তমানৰ ব্যৱহাৰকাৰীক লগ আউট কৰক"</string>
     <string name="user_logout_notification_action" msgid="1195428991423425062">"ব্যৱহাৰকাৰীক লগ আউট কৰক"</string>
@@ -499,6 +475,10 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"আপোনাৰ স্ক্ৰীণত প্ৰদৰ্শন হোৱা সকলো <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> কেপশ্বাৰ কৰা আৰম্ভ কৰিব।"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"পুনৰাই নেদেখুৱাব"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"সকলো মচক"</string>
+    <!-- no translation found for manage_notifications_text (8035284146227267681) -->
+    <skip />
+    <!-- no translation found for dnd_suppressing_shade_text (7986451830430707907) -->
+    <skip />
     <string name="media_projection_action_text" msgid="8470872969457985954">"এতিয়াই আৰম্ভ কৰক"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"কোনো জাননী নাই"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"প্ৰ\'ফাইল নিৰীক্ষণ কৰা হ\'ব পাৰে"</string>
@@ -549,11 +529,9 @@
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"বিশ্বাসী পৰিচয়-পত্ৰসমূহ খোলক"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"আপোনাৰ প্ৰশাসকে নেটৱৰ্ক লগিং অন কৰিছে, যিয়ে আপোনাৰ ডিভাইচটোত নেটৱৰ্ক ট্ৰেফিক পৰ্যবেক্ষণ কৰে।\n\nএই সম্পৰ্কে অধিক জানিবলৈ আপোনাৰ প্ৰশাসকৰ সৈতে যোগাযোগ কৰক।"</string>
-    <!-- no translation found for monitoring_description_vpn (4445150119515393526) -->
-    <skip />
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"আপুনি এটা এপক ভিপিএন সংযোগ ছেট আপ কৰিবলৈ অনুমতি দিছে। \n\n এই এপটোৱে ইমেইল, এপ্ আৰু ৱেবছাইটকে ধৰি আপোনাৰ নেটৱর্কৰ কাৰ্যকলাপ পৰ্যবেক্ষণ কৰিব পাৰে।"</string>
     <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"<xliff:g id="ORGANIZATION">%1$s</xliff:g>য়ে আপোনাৰ কৰ্মস্থানৰ প্ৰ\'ফাইল পৰিচালনা কৰে।\n\nআপোনাৰ প্ৰশাসকে ইমেইল, এপসমূহ আৰু আপুনি চোৱা ৱেবছাইটকে ধৰি আপোনাৰ নেটৱৰ্কৰ সকলো কাৰ্যকলাপ পৰ্যবেক্ষণ কৰিব পাৰে। \n\nঅধিক তথ্যৰ বাবে আপোনাৰ প্ৰশাসকৰ সৈতে যোগাযোগ কৰক।\n\nইয়াৰ উপৰি, আপুনি এটা ভিপিএনৰ সৈতে সংযুক্ত হৈ আছে, যিয়ে আপোনাৰ নেটৱৰ্কৰ কাৰ্যকলাপ পৰ্যবেক্ষণ কৰিব পাৰে।"</string>
-    <!-- no translation found for legacy_vpn_name (6604123105765737830) -->
-    <skip />
+    <string name="legacy_vpn_name" msgid="6604123105765737830">"ভিপিএন"</string>
     <string name="monitoring_description_app" msgid="1828472472674709532">"আপুনি <xliff:g id="APPLICATION">%1$s</xliff:g>ৰে সংযুক্ত হৈ আছে যিয়ে আপোনাৰ ইমেইল, এপ্ আৰু ৱেবছাইটকে ধৰি নেটৱর্কৰ কাৰ্যকলাপ পৰ্যবেক্ষণ কৰিব পাৰে।"</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"আপুনি <xliff:g id="APPLICATION">%1$s</xliff:g>ৰে সংযুক্ত হৈ আছে, যি ইমেইল, এপ্ আৰু ৱেবছাইটসমূহকে ধৰি আপোনাৰ ব্যক্তিগত নেটৱর্কৰ কাৰ্যকলাপ নিৰীক্ষণ কৰিব পাৰে।"</string>
     <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"আপুনি <xliff:g id="APPLICATION">%1$s</xliff:g>ৰ সৈতে সংযুক্ত হৈ আছে, যিয়ে ইমেইল, এপ্ আৰু ৱেবছাইটসমূহকে সামৰি আপোনাৰ ব্যক্তিগত নেটৱর্কৰ কার্যকলাপ নিৰীক্ষণ কৰিব পাৰে।"</string>
@@ -568,10 +546,10 @@
     <string name="hidden_notifications_setup" msgid="41079514801976810">"ছেট আপ কৰক"</string>
     <string name="zen_mode_and_condition" msgid="4462471036429759903">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="volume_zen_end_now" msgid="6930243045593601084">"এতিয়া অফ কৰক"</string>
-    <!-- no translation found for accessibility_volume_expand (5946812790999244205) -->
+    <!-- no translation found for accessibility_volume_settings (4915364006817819212) -->
     <skip />
-    <!-- no translation found for accessibility_volume_collapse (3609549593031810875) -->
-    <skip />
+    <string name="accessibility_volume_expand" msgid="5946812790999244205">"সম্প্ৰসাৰণ কৰক"</string>
+    <string name="accessibility_volume_collapse" msgid="3609549593031810875">"সংকুচিত কৰক"</string>
     <!-- no translation found for accessibility_output_chooser (8185317493017988680) -->
     <skip />
     <string name="screen_pinning_title" msgid="3273740381976175811">"স্ক্ৰীণ পিন কৰা হ\'ল"</string>
@@ -615,10 +593,6 @@
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s। মিউট কৰিবলৈ টিপক।"</string>
     <!-- no translation found for volume_dialog_title (7272969888820035876) -->
     <skip />
-    <!-- no translation found for volume_dialog_ringer_guidance_vibrate (8902050240801159042) -->
-    <skip />
-    <!-- no translation found for volume_dialog_ringer_guidance_silent (2128975224280276122) -->
-    <skip />
     <!-- no translation found for volume_dialog_ringer_guidance_ring (6144469689490528338) -->
     <skip />
     <string name="output_title" msgid="5355078100792942802">"মিডিয়া আউটপুট"</string>
@@ -629,44 +603,26 @@
     <string name="output_service_wifi" msgid="3749735218931825054">"ৱাই-ফাই"</string>
     <string name="output_service_bt_wifi" msgid="4486837869988770896">"ব্লুটুথ আৰু ৱাই-ফাই"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
-    <!-- no translation found for show_battery_percentage (5444136600512968798) -->
-    <skip />
-    <!-- no translation found for show_battery_percentage_summary (3215025775576786037) -->
-    <skip />
-    <!-- no translation found for quick_settings (10042998191725428) -->
-    <skip />
-    <!-- no translation found for status_bar (4877645476959324760) -->
-    <skip />
+    <string name="show_battery_percentage" msgid="5444136600512968798">"সংযুক্ত বেটাৰিৰ কিমান শতাংশ বাকী আছে দেখুওৱাক"</string>
+    <string name="show_battery_percentage_summary" msgid="3215025775576786037">"চাৰ্জ হৈ নথকা অৱস্থাত বেটাৰি কিমান শতাংশ বাকী স্থিতি দণ্ডৰ ভিতৰত দেখুৱাওক"</string>
+    <string name="quick_settings" msgid="10042998191725428">"ক্ষিপ্ৰ ছেটিংসমূহ"</string>
+    <string name="status_bar" msgid="4877645476959324760">"স্থিতি দণ্ড"</string>
     <string name="overview" msgid="4018602013895926956">"অৱলোকন"</string>
     <string name="demo_mode" msgid="2532177350215638026">"ছিষ্টেমৰ UI প্ৰদৰ্শন ম\'ড"</string>
-    <!-- no translation found for enable_demo_mode (4844205668718636518) -->
-    <skip />
-    <!-- no translation found for show_demo_mode (2018336697782464029) -->
-    <skip />
-    <!-- no translation found for status_bar_ethernet (5044290963549500128) -->
-    <skip />
-    <!-- no translation found for status_bar_alarm (8536256753575881818) -->
-    <skip />
-    <!-- no translation found for status_bar_work (6022553324802866373) -->
-    <skip />
-    <!-- no translation found for status_bar_airplane (7057575501472249002) -->
-    <skip />
-    <!-- no translation found for add_tile (2995389510240786221) -->
-    <skip />
-    <!-- no translation found for broadcast_tile (3894036511763289383) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning_indef (3482966345578319605) -->
-    <skip />
-    <!-- no translation found for zen_alarm_warning (444533119582244293) -->
-    <skip />
-    <!-- no translation found for alarm_template (3980063409350522735) -->
-    <skip />
-    <!-- no translation found for alarm_template_far (4242179982586714810) -->
-    <skip />
-    <!-- no translation found for accessibility_quick_settings_detail (2579369091672902101) -->
-    <skip />
-    <!-- no translation found for accessibility_status_bar_hotspot (4099381329956402865) -->
-    <skip />
+    <string name="enable_demo_mode" msgid="4844205668718636518">"ডেম\' ম\'ড সক্ষম কৰক"</string>
+    <string name="show_demo_mode" msgid="2018336697782464029">"ডেম\' ম\'ড দেখুৱাওক"</string>
+    <string name="status_bar_ethernet" msgid="5044290963549500128">"ইথাৰনেট"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"এলাৰ্ম"</string>
+    <string name="status_bar_work" msgid="6022553324802866373">"কৰ্মস্থানৰ প্ৰ\'ফাইল"</string>
+    <string name="status_bar_airplane" msgid="7057575501472249002">"এয়াৰপ্লেইন ম\'ড"</string>
+    <string name="add_tile" msgid="2995389510240786221">"টাইল যোগ দিয়ক"</string>
+    <string name="broadcast_tile" msgid="3894036511763289383">"সম্প্ৰচাৰ টাইল"</string>
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"আপুনি আপোনাৰ পিছৰটো এলাৰ্ম <xliff:g id="WHEN">%1$s</xliff:g> বজাত শুনা নাপাব যদিহে তাৰ আগতে আপুনি এইটো অফ নকৰে"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"আপুনি আপোনাৰ পিছৰটো এলাৰ্ম <xliff:g id="WHEN">%1$s</xliff:g> বজাত শুনা নাপাব"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g> বজাত"</string>
+    <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g> বজাত"</string>
+    <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"ক্ষিপ্ৰ ছেটিংসমূহ, <xliff:g id="TITLE">%s</xliff:g>।"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"হটস্পট"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"কৰ্মস্থানৰ প্ৰ\'ফাইল"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"কিছুমানৰ বাবে আমোদজনক হয় কিন্তু সকলোৰে বাবে নহয়"</string>
     <string name="tuner_warning" msgid="8730648121973575701">"System UI Tunerএ আপোনাক Android ব্যৱহাৰকাৰী ইণ্টাৰফেইচ সলনি কৰিবলৈ আৰু নিজৰ উপযোগিতা অনুসৰি ব্যৱহাৰ কৰিবলৈ অতিৰিক্ত সুবিধা প্ৰদান কৰে। এই পৰীক্ষামূলক সুবিধাসমূহ সলনি হ\'ব পাৰে, সেইবোৰে কাম নকৰিব পাৰে বা আগন্তুক সংস্কৰণসমূহত সেইবোৰ অন্তৰ্ভুক্ত কৰা নহ\'ব পাৰে। সাৱধানেৰে আগবাঢ়ক।"</string>
@@ -695,6 +651,8 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"জাননীসমূহ"</string>
     <!-- no translation found for notification_channel_disabled (344536703863700565) -->
     <skip />
+    <!-- no translation found for notification_channel_minimized (1664411570378910931) -->
+    <skip />
     <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
     <skip />
     <!-- no translation found for inline_keep_showing (8945102997083836858) -->
@@ -703,9 +661,23 @@
     <skip />
     <!-- no translation found for inline_keep_button (6665940297019018232) -->
     <skip />
+    <!-- no translation found for inline_minimize_button (966233327974702195) -->
+    <skip />
     <!-- no translation found for inline_keep_showing_app (1723113469580031041) -->
     <skip />
     <!-- no translation found for notification_unblockable_desc (1037434112919403708) -->
+    <skip />
+    <!-- no translation found for notification_appops_camera_active (730959943016785931) -->
+    <skip />
+    <!-- no translation found for notification_appops_microphone_active (1546319728924580686) -->
+    <skip />
+    <!-- no translation found for notification_appops_overlay_active (633813008357934729) -->
+    <skip />
+    <!-- no translation found for notification_appops (1258122060887196817) -->
+    <!-- no translation found for notification_using (2211008461429037973) -->
+    <!-- no translation found for notification_appops_settings (1028328314935908050) -->
+    <skip />
+    <!-- no translation found for notification_appops_ok (602562195588819631) -->
     <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ জাননী নিয়ন্ত্ৰণসমূহ খোলা অৱস্থাত আছে"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g>ৰ জাননী নিয়ন্ত্ৰণসমূহ বন্ধ অৱস্থাত আছে"</string>
@@ -719,6 +691,8 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"জাননীৰ নিয়ন্ত্ৰণসমূহ"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"জাননীক স্নুজ কৰাৰ বিকল্পসমূহ"</string>
+    <!-- no translation found for notification_menu_snooze_action (1112254519029621372) -->
+    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"আনডু কৰক"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g>ৰ বাবে স্নুজ কৰক"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
@@ -811,8 +785,11 @@
     <string name="right_keycode" msgid="708447961000848163">"সোঁ কীক\'ড"</string>
     <string name="left_icon" msgid="3096287125959387541">"বাওঁ আইকন"</string>
     <string name="right_icon" msgid="3952104823293824311">"সোঁ আইকন"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"টাইল যোগ কৰিবৰ বাবে টানি আনি এৰক"</string>
+    <!-- no translation found for drag_to_add_tiles (230586591689084925) -->
+    <skip />
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"আঁতৰাবৰ বাবে টানি আনি ইয়াত এৰি দিয়ক"</string>
+    <!-- no translation found for drag_to_remove_disabled (2390968976638993382) -->
+    <skip />
     <string name="qs_edit" msgid="2232596095725105230">"সম্পাদনা কৰক"</string>
     <string name="tuner_time" msgid="6572217313285536011">"সময়"</string>
   <string-array name="clock_options">
@@ -856,7 +833,8 @@
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"ক্ষিপ্ৰ ছেটিংসমূহ বন্ধ কৰক।"</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"এলার্ম ছেট কৰা হ\'ল।"</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> হিচাপে ছাইন ইন হ\'ল"</string>
-    <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"ইণ্টাৰনেট সংযোগ নাই।"</string>
+    <!-- no translation found for data_connection_no_internet (4503302451650972989) -->
+    <skip />
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"বিৱৰণসমূহ খোলক।"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g>ৰ ছেটিংসমূহ খোলক।"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ছেটিংসমূহৰ ক্ৰম সম্পাদনা কৰক।"</string>
@@ -899,11 +877,15 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"স্ক্ৰীণশ্বটসমূহ"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"সাধাৰণ বার্তাসমূহ"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"সঞ্চয়াগাৰ"</string>
+    <!-- no translation found for notification_channel_hints (7323870212489152689) -->
+    <skip />
     <string name="instant_apps" msgid="6647570248119804907">"তাৎক্ষণিক এপসমূহ"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"তাৎক্ষণিক এপসমূহক ইনষ্টল কৰাৰ প্ৰয়োজন নাই।"</string>
     <string name="app_info" msgid="6856026610594615344">"এপ্ সম্পৰ্কীয় তথ্য"</string>
     <string name="go_to_web" msgid="2650669128861626071">"ব্ৰাউজাৰলৈ যাওক"</string>
     <string name="mobile_data" msgid="7094582042819250762">"ম\'বাইল ডেটা"</string>
+    <!-- no translation found for mobile_data_text_format (3526214522670876454) -->
+    <skip />
     <string name="wifi_is_off" msgid="1838559392210456893">"ৱাই-ফাই অফ অৱস্থাত আছে"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"ব্লুটুথ অফ অৱস্থাত আছে"</string>
     <string name="dnd_is_off" msgid="6167780215212497572">"অসুবিধা নিদিব অফ অৱস্থাত আছে"</string>
@@ -915,7 +897,12 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"সলনি কৰক"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"নেপথ্যত চলি থকা এপসমূহ"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"বেটাৰি আৰু ডেটাৰ ব্যৱহাৰৰ বিষয়ে বিশদভাৱে জানিবলৈ টিপক"</string>
-    <string name="data_usage_disable_mobile" msgid="5116269981510015864">"ম’বাইল ডেটা অফ কৰিবনে?"</string>
+    <!-- no translation found for mobile_data_disable_title (1068272097382942231) -->
+    <skip />
+    <!-- no translation found for mobile_data_disable_message (4756541658791493506) -->
+    <skip />
+    <!-- no translation found for mobile_data_disable_message_default_carrier (6078110473451946831) -->
+    <skip />
     <string name="touch_filtered_warning" msgid="8671693809204767551">"এটা এপে অনুমতি বিচাৰি কৰা অনুৰোধ এটা ঢাকি ধৰা বাবে ছেটিংসমূহে আপোনাৰ উত্তৰ সত্যাপন কৰিব পৰা নাই।"</string>
     <!-- no translation found for slice_permission_title (7465009437851044444) -->
     <skip />
@@ -928,5 +915,19 @@
     <!-- no translation found for slice_permission_allow (2340244901366722709) -->
     <skip />
     <!-- no translation found for slice_permission_deny (7683681514008048807) -->
+    <skip />
+    <!-- no translation found for auto_saver_title (1217959994732964228) -->
+    <skip />
+    <!-- no translation found for auto_saver_text (6324376061044218113) -->
+    <skip />
+    <!-- no translation found for no_auto_saver_action (8086002101711328500) -->
+    <skip />
+    <!-- no translation found for auto_saver_enabled_title (6726474226058316862) -->
+    <skip />
+    <!-- no translation found for auto_saver_enabled_text (874711029884777579) -->
+    <skip />
+    <!-- no translation found for open_saver_setting_action (8314624730997322529) -->
+    <skip />
+    <!-- no translation found for auto_saver_okay_action (2701221740227683650) -->
     <skip />
 </resources>

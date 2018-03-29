@@ -3742,7 +3742,7 @@ public class DevicePolicyManager {
     public static final int KEYGUARD_DISABLE_TRUST_AGENTS = 1 << 4;
 
     /**
-     * Disable fingerprint sensor on keyguard secure screens (e.g. PIN/Pattern/Password).
+     * Disable fingerprint authentication on keyguard secure screens (e.g. PIN/Pattern/Password).
      */
     public static final int KEYGUARD_DISABLE_FINGERPRINT = 1 << 5;
 
@@ -3750,6 +3750,25 @@ public class DevicePolicyManager {
      * Disable text entry into notifications on secure keyguard screens (e.g. PIN/Pattern/Password).
      */
     public static final int KEYGUARD_DISABLE_REMOTE_INPUT = 1 << 6;
+
+    /**
+     * Disable face authentication on keyguard secure screens (e.g. PIN/Pattern/Password).
+     */
+    public static final int KEYGUARD_DISABLE_FACE = 1 << 7;
+
+    /**
+     * Disable iris authentication on keyguard secure screens (e.g. PIN/Pattern/Password).
+     */
+    public static final int KEYGUARD_DISABLE_IRIS = 1 << 8;
+
+    /**
+     * Disable all biometric authentication on keyguard secure screens (e.g. PIN/Pattern/Password).
+     */
+    public static final int KEYGUARD_DISABLE_BIOMETRICS =
+            DevicePolicyManager.KEYGUARD_DISABLE_FACE
+            | DevicePolicyManager.KEYGUARD_DISABLE_IRIS
+            | DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT;
+
 
     /**
      * Disable all current and future keyguard customizations.
@@ -8363,12 +8382,12 @@ public class DevicePolicyManager {
      * @return a list of package names which could not be restricted.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
-    public @NonNull List<String> setMeteredDataDisabled(@NonNull ComponentName admin,
+    public @NonNull List<String> setMeteredDataDisabledPackages(@NonNull ComponentName admin,
             @NonNull List<String> packageNames) {
         throwIfParentInstance("setMeteredDataDisabled");
         if (mService != null) {
             try {
-                return mService.setMeteredDataDisabled(admin, packageNames);
+                return mService.setMeteredDataDisabledPackages(admin, packageNames);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -8384,11 +8403,11 @@ public class DevicePolicyManager {
      * @return the list of restricted package names.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
-    public @NonNull List<String> getMeteredDataDisabled(@NonNull ComponentName admin) {
+    public @NonNull List<String> getMeteredDataDisabledPackages(@NonNull ComponentName admin) {
         throwIfParentInstance("getMeteredDataDisabled");
         if (mService != null) {
             try {
-                return mService.getMeteredDataDisabled(admin);
+                return mService.getMeteredDataDisabledPackages(admin);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -8407,12 +8426,12 @@ public class DevicePolicyManager {
      * @throws SecurityException if the caller doesn't run with {@link Process#SYSTEM_UID}
      * @hide
      */
-    public boolean isMeteredDataDisabledForUser(@NonNull ComponentName admin, String packageName,
-            @UserIdInt int userId) {
+    public boolean isMeteredDataDisabledPackageForUser(@NonNull ComponentName admin,
+            String packageName, @UserIdInt int userId) {
         throwIfParentInstance("getMeteredDataDisabledForUser");
         if (mService != null) {
             try {
-                return mService.isMeteredDataDisabledForUser(admin, packageName, userId);
+                return mService.isMeteredDataDisabledPackageForUser(admin, packageName, userId);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }

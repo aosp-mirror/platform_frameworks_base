@@ -37,7 +37,9 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.service.media.MediaBrowserService;
 import android.service.notification.NotificationListenerService;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -340,19 +342,20 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Returns whether the api
+     * Returns whether the app is trusted.
+     * <p>
+     * An app is trusted if the app holds the android.Manifest.permission.MEDIA_CONTENT_CONTROL
+     * permission or has an enabled notification listener.
      *
-     * @param packageName packageName
-     * @param pid pid of the app
-     * @param uid uid of the app
-     * @hide
+     * @param userInfo The remote user info
      */
-    public boolean isTrusted(@NonNull String packageName, int pid, int uid) {
-        if (packageName == null) {
+    public boolean isTrustedForMediaControl(RemoteUserInfo userInfo) {
+        if (userInfo.getPackageName() == null) {
             return false;
         }
         try {
-            return mService.isTrusted(packageName, pid, uid);
+            return mService.isTrusted(
+                    userInfo.getPackageName(), userInfo.getPid(), userInfo.getUid());
         } catch (RemoteException e) {
             Log.wtf(TAG, "Cannot communicate with the service.", e);
         }
@@ -761,6 +764,56 @@ public final class MediaSessionManager {
          * @param mediaButtonReceiver The media button receiver.
          */
         public abstract void onAddressedPlayerChanged(ComponentName mediaButtonReceiver);
+    }
+
+    /**
+     * Information of a remote user of {@link MediaSession} or {@link MediaBrowserService}.
+     * This can be used to decide whether the remote user is trusted app.
+     *
+     * @see #isTrustedForMediaControl(RemoteUserInfo)
+     */
+    public static final class RemoteUserInfo {
+        private String mPackageName;
+        private int mPid;
+        private int mUid;
+
+        public RemoteUserInfo(String packageName, int pid, int uid) {
+            mPackageName = packageName;
+            mPid = pid;
+            mUid = uid;
+        }
+
+        /**
+         * @return package name of the controller
+         */
+        public String getPackageName() {
+            return mPackageName;
+        }
+
+        /**
+         * @return pid of the controller
+         */
+        public int getPid() {
+            return mPid;
+        }
+
+        /**
+         * @return uid of the controller
+         */
+        public int getUid() {
+            return mUid;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof RemoteUserInfo)) {
+                return false;
+            }
+            RemoteUserInfo otherUserInfo = (RemoteUserInfo) obj;
+            return TextUtils.equals(mPackageName, otherUserInfo.mPackageName)
+                    && mPid == otherUserInfo.mPid
+                    && mUid == otherUserInfo.mUid;
+        }
     }
 
     private static final class SessionsChangedWrapper {

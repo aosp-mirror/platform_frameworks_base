@@ -37,6 +37,11 @@ package android.media;
 public final class MediaTimestamp
 {
     /**
+     * An unknown media timestamp value
+     */
+    public static final MediaTimestamp TIMESTAMP_UNKNOWN = new MediaTimestamp(-1, -1, 0.0f);
+
+    /**
      * Get the media time of the anchor in microseconds.
      */
     public long getAnchorMediaTimeUs() {
@@ -81,5 +86,16 @@ public final class MediaTimestamp
         mediaTimeUs = 0;
         nanoTime = 0;
         clockRate = 1.0f;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+
+        final MediaTimestamp that = (MediaTimestamp) obj;
+        return (this.mediaTimeUs == that.mediaTimeUs)
+                && (this.nanoTime == that.nanoTime)
+                && (this.clockRate == that.clockRate);
     }
 }

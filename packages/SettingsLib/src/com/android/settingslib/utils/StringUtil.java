@@ -41,10 +41,11 @@ public class StringUtil {
     public static final int SECONDS_PER_DAY = 24 * 60 * 60;
 
     /**
-    * Returns elapsed time for the given millis, in the following format:
-    * 2d 5h 40m 29s
-    * @param context the application context
-     * @param millis the elapsed time in milli seconds
+     * Returns elapsed time for the given millis, in the following format:
+     * 2 days, 5 hr, 40 min, 29 sec
+     *
+     * @param context     the application context
+     * @param millis      the elapsed time in milli seconds
      * @param withSeconds include seconds?
      * @return the formatted elapsed time
      */
@@ -92,7 +93,7 @@ public class StringUtil {
 
         final Locale locale = context.getResources().getConfiguration().locale;
         final MeasureFormat measureFormat = MeasureFormat.getInstance(
-                locale, FormatWidth.NARROW);
+                locale, FormatWidth.SHORT);
         sb.append(measureFormat.formatMeasures(measureArray));
 
         if (measureArray.length == 1 && MeasureUnit.MINUTE.equals(measureArray[0].getUnit())) {

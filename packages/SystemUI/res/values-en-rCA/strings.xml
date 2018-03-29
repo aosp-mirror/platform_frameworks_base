@@ -33,7 +33,6 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Ongoing"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notifications"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Battery is low"</string>
-    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Battery is low. Turn on Battery Saver"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> remaining"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> remaining, about <xliff:g id="TIME">%s</xliff:g> left based on your usage"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> remaining, about <xliff:g id="TIME">%s</xliff:g> left"</string>
@@ -73,11 +72,12 @@
     <string name="global_action_screenshot" msgid="8329831278085426283">"Screenshot"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Saving screenshot…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Saving screenshot…"</string>
-    <string name="screenshot_saving_text" msgid="2545047868936087248">"Screenshot is being saved"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"Screenshot saved"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"Tap to view your screenshot"</string>
-    <string name="screenshot_failed_title" msgid="9096484883063264803">"Couldn\'t capture screenshot"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Problem encountered while saving screenshot"</string>
+    <!-- no translation found for screenshot_failed_title (7612509838919089748) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_to_save_unknown_text (3637758096565605541) -->
+    <skip />
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Can\'t save screenshot due to limited storage space"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Taking screenshots isn\'t allowed by the app or your organisation"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB file transfer options"</string>
@@ -348,7 +348,8 @@
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"On at sunset"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Until sunrise"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"On at <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"Until <xliff:g id="TIME">%s</xliff:g>"</string>
+    <!-- no translation found for quick_settings_secondary_label_until (2749196569462600150) -->
+    <skip />
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC is disabled"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC is enabled"</string>
@@ -432,6 +433,8 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> will start capturing everything that\'s displayed on your screen."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Don\'t show again"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Clear all"</string>
+    <!-- no translation found for manage_notifications_text (8035284146227267681) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"Do not disturb is hiding notifications"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Start now"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"No notifications"</string>
@@ -625,6 +628,8 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"notification controls"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"notification snooze options"</string>
+    <!-- no translation found for notification_menu_snooze_action (1112254519029621372) -->
+    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"UNDO"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Snoozed for <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
@@ -811,6 +816,8 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Screenshots"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"General Messages"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Storage"</string>
+    <!-- no translation found for notification_channel_hints (7323870212489152689) -->
+    <skip />
     <string name="instant_apps" msgid="6647570248119804907">"Instant Apps"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Instant apps don\'t require installation."</string>
     <string name="app_info" msgid="6856026610594615344">"App info"</string>
@@ -838,4 +845,18 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"Allow <xliff:g id="APP">%1$s</xliff:g> to show slices from any app"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"Allow"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Deny"</string>
+    <!-- no translation found for auto_saver_title (1217959994732964228) -->
+    <skip />
+    <!-- no translation found for auto_saver_text (6324376061044218113) -->
+    <skip />
+    <!-- no translation found for no_auto_saver_action (8086002101711328500) -->
+    <skip />
+    <!-- no translation found for auto_saver_enabled_title (6726474226058316862) -->
+    <skip />
+    <!-- no translation found for auto_saver_enabled_text (874711029884777579) -->
+    <skip />
+    <!-- no translation found for open_saver_setting_action (8314624730997322529) -->
+    <skip />
+    <!-- no translation found for auto_saver_okay_action (2701221740227683650) -->
+    <skip />
 </resources>

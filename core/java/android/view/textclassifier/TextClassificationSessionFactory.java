@@ -13,16 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.hardware.fingerprint;
 
-import android.hardware.fingerprint.Fingerprint;
-import android.os.Bundle;
-import android.os.UserHandle;
+package android.view.textclassifier;
+
+import android.annotation.NonNull;
 
 /**
- * Communication channel from the FingerprintDialog (SysUI) back to AuthenticationClient.
- * @hide
+ * An interface for creating a session-aware TextClassifier.
+ *
+ * @see TextClassificationManager#createTextClassificationSession(TextClassificationContext)
  */
-oneway interface IFingerprintDialogReceiver {
-    void onDialogDismissed(int reason);
+public interface TextClassificationSessionFactory {
+
+    /**
+     * Creates and returns a session-aware TextClassifier.
+     *
+     * @param classificationContext the classification context
+     */
+    @NonNull
+    TextClassifier createTextClassificationSession(
+            @NonNull TextClassificationContext classificationContext);
 }

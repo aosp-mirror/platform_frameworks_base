@@ -1660,6 +1660,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 true /* topToBottom */);
     }
 
+    SurfaceControl getAppAnimationLayer() {
+        return getAppAnimationLayer(needsZBoost());
+    }
+
     @Override
     public SurfaceControl getAnimationLeashParent() {
         // All normal app transitions take place in an animation layer which is below the pinned
@@ -1855,7 +1859,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         leash.setLayer(layer);
 
         final DisplayContent dc = getDisplayContent();
-        dc.assignStackOrdering(t);
+        dc.assignStackOrdering();
         if (mAnimatingAppWindowTokenRegistry != null) {
             mAnimatingAppWindowTokenRegistry.notifyStarting(this);
         }

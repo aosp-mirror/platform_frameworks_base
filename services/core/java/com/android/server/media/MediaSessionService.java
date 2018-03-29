@@ -101,6 +101,7 @@ import java.util.NoSuchElementException;
  */
 public class MediaSessionService extends SystemService implements Monitor {
     private static final String TAG = "MediaSessionService";
+    static final boolean USE_MEDIA2_APIS = false; // TODO: Change this to true when we're ready.
     static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     // Leave log for key event always.
     private static final boolean DEBUG_KEY_EVENT = true;
@@ -508,6 +509,9 @@ public class MediaSessionService extends SystemService implements Monitor {
     }
 
     private void buildMediaSessionService2List() {
+        if (!USE_MEDIA2_APIS) {
+            return;
+        }
         if (DEBUG) {
             Log.d(TAG, "buildMediaSessionService2List");
         }
@@ -1531,6 +1535,9 @@ public class MediaSessionService extends SystemService implements Monitor {
          */
         @Override
         public boolean createSession2(Bundle sessionToken) {
+            if (!USE_MEDIA2_APIS) {
+                return false;
+            }
             final int uid = Binder.getCallingUid();
             final SessionToken2 token = SessionToken2.fromBundle(sessionToken);
             if (token == null || token.getUid() != uid) {
@@ -1570,6 +1577,9 @@ public class MediaSessionService extends SystemService implements Monitor {
          */
         @Override
         public void destroySession2(Bundle sessionToken) {
+            if (!USE_MEDIA2_APIS) {
+                return;
+            }
             final int uid = Binder.getCallingUid();
             final SessionToken2 token = SessionToken2.fromBundle(sessionToken);
             if (token == null || token.getUid() != uid) {
@@ -1586,6 +1596,9 @@ public class MediaSessionService extends SystemService implements Monitor {
         @Override
         public List<Bundle> getSessionTokens(boolean activeSessionOnly,
                 boolean sessionServiceOnly, String packageName) throws RemoteException {
+            if (!USE_MEDIA2_APIS) {
+                return null;
+            }
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
@@ -1614,6 +1627,9 @@ public class MediaSessionService extends SystemService implements Monitor {
         @Override
         public void addSessionTokensListener(ISessionTokensListener listener, int userId,
                 String packageName) throws RemoteException {
+            if (!USE_MEDIA2_APIS) {
+                return;
+            }
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
@@ -1637,6 +1653,9 @@ public class MediaSessionService extends SystemService implements Monitor {
         @Override
         public void removeSessionTokensListener(ISessionTokensListener listener,
                 String packageName) throws RemoteException {
+            if (!USE_MEDIA2_APIS) {
+                return;
+            }
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
@@ -1785,8 +1804,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                     }
                 });
             } else {
-                session.adjustVolume(direction, flags, getContext().getPackageName(),
-                        Process.SYSTEM_UID, true);
+                session.adjustVolume(getContext().getPackageName(), Process.myPid(),
+                        Process.SYSTEM_UID, direction, flags, true);
             }
         }
 
@@ -1824,10 +1843,12 @@ public class MediaSessionService extends SystemService implements Monitor {
                     mKeyEventReceiver.aquireWakeLockLocked();
                 }
                 // If we don't need a wakelock use -1 as the id so we won't release it later.
-                session.sendMediaButton(keyEvent,
+                session.sendMediaButton(getContext().getPackageName(),
+                        Process.myPid(),
+                        Process.SYSTEM_UID,
+                        keyEvent,
                         needWakeLock ? mKeyEventReceiver.mLastTimeoutId : -1,
-                        mKeyEventReceiver, Process.SYSTEM_UID,
-                        getContext().getPackageName());
+                        mKeyEventReceiver);
                 if (mCurrentFullUserRecord.mCallback != null) {
                     try {
                         mCurrentFullUserRecord.mCallback.onMediaKeyEventDispatchedToMediaSession(

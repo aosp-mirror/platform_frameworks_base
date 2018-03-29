@@ -50,6 +50,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_DISABLE_SWIPE_UP;
 import static com.android.systemui.shared.system.NavigationBarCompat.InteractionType;
 
 /**
@@ -247,6 +248,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     @Override
     public void removeCallback(OverviewProxyListener listener) {
         mConnectionCallbacks.remove(listener);
+    }
+
+    public boolean shouldShowSwipeUpUI() {
+        return getProxy() != null && ((mInteractionFlags & FLAG_DISABLE_SWIPE_UP) == 0);
     }
 
     public IOverviewProxy getProxy() {

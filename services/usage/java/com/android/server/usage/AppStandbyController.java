@@ -22,6 +22,7 @@ import static android.app.usage.UsageStatsManager.REASON_MAIN_MASK;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_PREDICTED;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_TIMEOUT;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_USAGE;
+import static android.app.usage.UsageStatsManager.REASON_SUB_PREDICTED_RESTORED;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_ACTIVE_TIMEOUT;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_MOVE_TO_BACKGROUND;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_MOVE_TO_FOREGROUND;
@@ -30,13 +31,14 @@ import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SYNC_ADAPTER;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SYSTEM_INTERACTION;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SYSTEM_UPDATE;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_USER_INTERACTION;
+import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SLICE_PINNED;
+import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SLICE_PINNED_PRIV;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_EXEMPTED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_NEVER;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
-
 import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 
@@ -538,19 +540,30 @@ public class AppStandbyController {
                 }
                 final int oldBucket = app.currentBucket;
                 int newBucket = Math.max(oldBucket, STANDBY_BUCKET_ACTIVE); // Undo EXEMPTED
-                boolean predictionLate = false;
+                boolean predictionLate = predictionTimedOut(app, elapsedRealtime);
                 // Compute age-based bucket
                 if (oldMainReason == REASON_MAIN_DEFAULT
                         || oldMainReason == REASON_MAIN_USAGE
                         || oldMainReason == REASON_MAIN_TIMEOUT
-                        || (predictionLate = predictionTimedOut(app, elapsedRealtime))) {
-                    newBucket = getBucketForLocked(packageName, userId,
-                            elapsedRealtime);
-                    if (DEBUG) {
-                        Slog.d(TAG, "Evaluated AOSP newBucket = " + newBucket);
+                        || predictionLate) {
+
+                    if (!predictionLate && app.lastPredictedBucket >= STANDBY_BUCKET_ACTIVE
+                            && app.lastPredictedBucket <= STANDBY_BUCKET_RARE) {
+                        newBucket = app.lastPredictedBucket;
+                        reason = REASON_MAIN_PREDICTED | REASON_SUB_PREDICTED_RESTORED;
+                        if (DEBUG) {
+                            Slog.d(TAG, "Restored predicted newBucket = " + newBucket);
+                        }
+                    } else {
+                        newBucket = getBucketForLocked(packageName, userId,
+                                elapsedRealtime);
+                        if (DEBUG) {
+                            Slog.d(TAG, "Evaluated AOSP newBucket = " + newBucket);
+                        }
+                        reason = REASON_MAIN_TIMEOUT;
                     }
-                    reason = REASON_MAIN_TIMEOUT;
                 }
+
                 // Check if the app is within one of the timeouts for forced bucket elevation
                 final long elapsedTimeAdjusted = mAppIdleHistory.getElapsedTime(elapsedRealtime);
                 if (newBucket >= STANDBY_BUCKET_ACTIVE
@@ -587,8 +600,7 @@ public class AppStandbyController {
 
     /** Returns true if there hasn't been a prediction for the app in a while. */
     private boolean predictionTimedOut(AppIdleHistory.AppUsageHistory app, long elapsedRealtime) {
-        return (app.bucketingReason & REASON_MAIN_MASK) == REASON_MAIN_PREDICTED
-                && app.lastPredictedTime > 0
+        return app.lastPredictedTime > 0
                 && mAppIdleHistory.getElapsedTime(elapsedRealtime)
                     - app.lastPredictedTime > mPredictionTimeoutMillis;
     }
@@ -747,6 +759,8 @@ public class AppStandbyController {
             case UsageEvents.Event.SYSTEM_INTERACTION: return REASON_SUB_USAGE_SYSTEM_INTERACTION;
             case UsageEvents.Event.USER_INTERACTION: return REASON_SUB_USAGE_USER_INTERACTION;
             case UsageEvents.Event.NOTIFICATION_SEEN: return REASON_SUB_USAGE_NOTIFICATION_SEEN;
+            case UsageEvents.Event.SLICE_PINNED: return REASON_SUB_USAGE_SLICE_PINNED;
+            case UsageEvents.Event.SLICE_PINNED_PRIV: return REASON_SUB_USAGE_SLICE_PINNED_PRIV;
             default: return 0;
         }
     }
@@ -1032,6 +1046,10 @@ public class AppStandbyController {
             if (predicted) {
                 // Check if the app is within one of the timeouts for forced bucket elevation
                 final long elapsedTimeAdjusted = mAppIdleHistory.getElapsedTime(elapsedRealtime);
+                // In case of not using the prediction, just keep track of it for applying after
+                // ACTIVE or WORKING_SET timeout.
+                mAppIdleHistory.updateLastPrediction(app, elapsedTimeAdjusted, newBucket);
+
                 if (newBucket > STANDBY_BUCKET_ACTIVE
                         && app.bucketActiveTimeoutTime > elapsedTimeAdjusted) {
                     newBucket = STANDBY_BUCKET_ACTIVE;

@@ -641,9 +641,14 @@ public class NotificationData {
             // this is a foreground-service disclosure for a user that does not need to show one
             return true;
         }
-        if (mFsc.isSystemAlertNotification(sbn) && !mFsc.isSystemAlertWarningNeeded(
-                sbn.getUserId(), sbn.getPackageName())) {
-            return true;
+        if (mFsc.isSystemAlertNotification(sbn)) {
+            final String[] apps = sbn.getNotification().extras.getStringArray(
+                    Notification.EXTRA_FOREGROUND_APPS);
+            if (apps != null && apps.length >= 1) {
+                if (!mFsc.isSystemAlertWarningNeeded(sbn.getUserId(), apps[0])) {
+                    return true;
+                }
+            }
         }
 
         return false;

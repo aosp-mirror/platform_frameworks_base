@@ -15,6 +15,7 @@
  */
 
 #define DEBUG false  // STOPSHIP if true
+#include "config/ConfigKey.h"
 #include "Log.h"
 
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"  // Alert
@@ -22,6 +23,7 @@
 #include <android-base/unique_fd.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <inttypes.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -36,13 +38,22 @@ namespace android {
 namespace os {
 namespace statsd {
 
-bool CollectPerfettoTraceAndUploadToDropbox(const PerfettoDetails& config) {
+bool CollectPerfettoTraceAndUploadToDropbox(const PerfettoDetails& config,
+                                            int64_t alert_id,
+                                            const ConfigKey& configKey) {
     VLOG("Starting trace collection through perfetto");
 
     if (!config.has_trace_config()) {
         ALOGE("The perfetto trace config is empty, aborting");
         return false;
     }
+
+    char alertId[20];
+    char configId[20];
+    char configUid[20];
+    snprintf(alertId, sizeof(alertId), "%" PRId64, alert_id);
+    snprintf(configId, sizeof(configId), "%" PRId64, configKey.GetId());
+    snprintf(configUid, sizeof(configUid), "%d", configKey.GetUid());
 
     android::base::unique_fd readPipe;
     android::base::unique_fd writePipe;
@@ -82,7 +93,8 @@ bool CollectPerfettoTraceAndUploadToDropbox(const PerfettoDetails& config) {
         }
 
         execl("/system/bin/perfetto", "perfetto", "--background", "--config", "-", "--dropbox",
-              kDropboxTag, nullptr);
+              kDropboxTag, "--alert-id", alertId, "--config-id", configId, "--config-uid",
+              configUid, nullptr);
 
         // execl() doesn't return in case of success, if we get here something
         // failed.

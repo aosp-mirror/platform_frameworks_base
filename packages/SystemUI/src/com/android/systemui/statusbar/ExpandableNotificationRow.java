@@ -183,7 +183,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private AboveShelfChangedListener mAboveShelfChangedListener;
     private HeadsUpManager mHeadsUpManager;
     private Consumer<Boolean> mHeadsUpAnimatingAwayListener;
-    private View mHelperButton;
     private boolean mChildIsExpanding;
 
     private boolean mJustClicked;
@@ -401,8 +400,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         updateLimits();
         updateIconVisibilities();
         updateShelfIconColor();
-
-        showBlockingHelperButton(mEntry.userSentiment == USER_SENTIMENT_NEGATIVE);
         updateRippleAllowed();
     }
 
@@ -1426,10 +1423,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         requestLayout();
     }
 
-    public void showBlockingHelperButton(boolean show) {
-        mHelperButton.setVisibility(show ? View.VISIBLE : View.GONE);
-    }
-
     public void showAppOpsIcons(ArraySet<Integer> activeOps) {
         if (mIsSummaryWithChildren && mChildrenContainer.getHeaderView() != null) {
             mChildrenContainer.getHeaderView().showAppOpsIcons(activeOps);
@@ -1458,11 +1451,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mPublicLayout = (NotificationContentView) findViewById(R.id.expandedPublic);
         mPrivateLayout = (NotificationContentView) findViewById(R.id.expanded);
         mLayouts = new NotificationContentView[] {mPrivateLayout, mPublicLayout};
-
-        mHelperButton = findViewById(R.id.helper);
-        mHelperButton.setOnClickListener(view -> {
-            doLongClickCallback();
-        });
 
         for (NotificationContentView l : mLayouts) {
             l.setExpandClickListener(mExpandClickListener);

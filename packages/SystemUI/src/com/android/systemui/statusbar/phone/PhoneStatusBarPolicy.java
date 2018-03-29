@@ -363,16 +363,16 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
             zenDescription = mContext.getString(R.string.interruption_level_priority);
         }
 
-        if (DndTile.isVisible(mContext) && !DndTile.isCombinedIcon(mContext)
-                && audioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_SILENT) {
-            volumeVisible = true;
-            volumeIconId = R.drawable.stat_sys_ringer_silent;
-            volumeDescription = mContext.getString(R.string.accessibility_ringer_silent);
-        } else if (zen != Global.ZEN_MODE_NO_INTERRUPTIONS && zen != Global.ZEN_MODE_ALARMS &&
+        if (zen != Global.ZEN_MODE_NO_INTERRUPTIONS && zen != Global.ZEN_MODE_ALARMS &&
                 audioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_VIBRATE) {
             volumeVisible = true;
             volumeIconId = R.drawable.stat_sys_ringer_vibrate;
             volumeDescription = mContext.getString(R.string.accessibility_ringer_vibrate);
+        } else if (zen != Global.ZEN_MODE_NO_INTERRUPTIONS && zen != Global.ZEN_MODE_ALARMS &&
+                audioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_SILENT) {
+            volumeVisible = true;
+            volumeIconId = R.drawable.stat_sys_ringer_silent;
+            volumeDescription = mContext.getString(R.string.accessibility_ringer_silent);
         }
 
         if (zenVisible) {

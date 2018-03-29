@@ -36,8 +36,8 @@ import java.util.List;
  * @hide
  */
 interface ISessionController {
-    void sendCommand(String command, in Bundle args, in ResultReceiver cb);
-    boolean sendMediaButton(in KeyEvent mediaButton);
+    void sendCommand(String packageName, String command, in Bundle args, in ResultReceiver cb);
+    boolean sendMediaButton(String packageName, in KeyEvent mediaButton);
     void registerCallbackListener(in ISessionControllerCallback cb);
     void unregisterCallbackListener(in ISessionControllerCallback cb);
     boolean isTransportControlEnabled();
@@ -46,28 +46,28 @@ interface ISessionController {
     PendingIntent getLaunchPendingIntent();
     long getFlags();
     ParcelableVolumeInfo getVolumeAttributes();
-    void adjustVolume(int direction, int flags, String packageName);
-    void setVolumeTo(int value, int flags, String packageName);
+    void adjustVolume(String packageName, int direction, int flags);
+    void setVolumeTo(String packageName, int value, int flags);
 
     // These commands are for the TransportControls
-    void prepare();
-    void prepareFromMediaId(String mediaId, in Bundle extras);
-    void prepareFromSearch(String string, in Bundle extras);
-    void prepareFromUri(in Uri uri, in Bundle extras);
-    void play();
-    void playFromMediaId(String mediaId, in Bundle extras);
-    void playFromSearch(String string, in Bundle extras);
-    void playFromUri(in Uri uri, in Bundle extras);
-    void skipToQueueItem(long id);
-    void pause();
-    void stop();
-    void next();
-    void previous();
-    void fastForward();
-    void rewind();
-    void seekTo(long pos);
-    void rate(in Rating rating);
-    void sendCustomAction(String action, in Bundle args);
+    void prepare(String packageName);
+    void prepareFromMediaId(String packageName, String mediaId, in Bundle extras);
+    void prepareFromSearch(String packageName, String string, in Bundle extras);
+    void prepareFromUri(String packageName, in Uri uri, in Bundle extras);
+    void play(String packageName);
+    void playFromMediaId(String packageName, String mediaId, in Bundle extras);
+    void playFromSearch(String packageName, String string, in Bundle extras);
+    void playFromUri(String packageName, in Uri uri, in Bundle extras);
+    void skipToQueueItem(String packageName, long id);
+    void pause(String packageName);
+    void stop(String packageName);
+    void next(String packageName);
+    void previous(String packageName);
+    void fastForward(String packageName);
+    void rewind(String packageName);
+    void seekTo(String packageName, long pos);
+    void rate(String packageName, in Rating rating);
+    void sendCustomAction(String packageName, String action, in Bundle args);
     MediaMetadata getMetadata();
     PlaybackState getPlaybackState();
     ParceledListSlice getQueue();

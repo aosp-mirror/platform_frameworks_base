@@ -369,6 +369,7 @@ Landroid/bluetooth/BluetoothGattDescriptor;->mInstance:I
 Landroid/bluetooth/BluetoothGatt;->mAuthRetryState:I
 Landroid/bluetooth/BluetoothGatt;->refresh()Z
 Landroid/bluetooth/BluetoothHeadset;->close()V
+Landroid/bluetooth/BluetoothMapClient;->sendMessage(Landroid/bluetooth/BluetoothDevice;[Landroid/net/Uri;Ljava/lang/String;Landroid/app/PendingIntent;Landroid/app/PendingIntent;)Z
 Landroid/bluetooth/BluetoothPan;->isTetheringOn()Z
 Landroid/bluetooth/BluetoothPan;->setBluetoothTethering(Z)V
 Landroid/bluetooth/BluetoothUuid;->RESERVED_UUIDS:[Landroid/os/ParcelUuid;
@@ -1109,6 +1110,7 @@ Landroid/net/wifi/p2p/WifiP2pGroupList;->getGroupList()Ljava/util/Collection;
 Landroid/net/wifi/p2p/WifiP2pManager;->deletePersistentGroup(Landroid/net/wifi/p2p/WifiP2pManager$Channel;ILandroid/net/wifi/p2p/WifiP2pManager$ActionListener;)V
 Landroid/net/wifi/p2p/WifiP2pManager;->requestPersistentGroupInfo(Landroid/net/wifi/p2p/WifiP2pManager$Channel;Landroid/net/wifi/p2p/WifiP2pManager$PersistentGroupInfoListener;)V
 Landroid/net/wifi/p2p/WifiP2pManager;->setDeviceName(Landroid/net/wifi/p2p/WifiP2pManager$Channel;Ljava/lang/String;Landroid/net/wifi/p2p/WifiP2pManager$ActionListener;)V
+Landroid/net/wifi/p2p/WifiP2pManager;->setWifiP2pChannels(Landroid/net/wifi/p2p/WifiP2pManager$Channel;IILandroid/net/wifi/p2p/WifiP2pManager$ActionListener;)V
 Landroid/net/wifi/ScanResult;->anqpDomainId:I
 Landroid/net/wifi/ScanResult;->anqpLines:Ljava/util/List;
 Landroid/net/wifi/ScanResult;->distanceCm:I

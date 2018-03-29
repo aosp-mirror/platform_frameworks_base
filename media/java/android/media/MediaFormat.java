@@ -174,9 +174,19 @@ public final class MediaFormat {
     public static final String MIMETYPE_TEXT_VTT = "text/vtt";
 
     /**
+     * MIME type for SubRip (SRT) container.
+     */
+    public static final String MIMETYPE_TEXT_SUBRIP = "application/x-subrip";
+
+    /**
      * MIME type for CEA-608 closed caption data.
      */
     public static final String MIMETYPE_TEXT_CEA_608 = "text/cea-608";
+
+    /**
+     * MIME type for CEA-708 closed caption data.
+     */
+    public static final String MIMETYPE_TEXT_CEA_708 = "text/cea-708";
 
     private Map<String, Object> mMap;
 

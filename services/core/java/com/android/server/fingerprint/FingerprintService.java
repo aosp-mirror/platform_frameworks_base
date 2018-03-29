@@ -19,6 +19,7 @@ package com.android.server.fingerprint;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_FINGERPRINT;
 import static android.Manifest.permission.RESET_FINGERPRINT_LOCKOUT;
+import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_FINGERPRINT;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 
@@ -37,12 +38,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.hardware.biometrics.IBiometricDialogReceiver;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprintClientCallback;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
-import android.hardware.fingerprint.IFingerprintDialogReceiver;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.fingerprint.IFingerprintServiceLockoutResetCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
@@ -61,7 +62,6 @@ import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.security.KeyStore;
@@ -778,7 +778,11 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
      */
     private boolean canUseFingerprint(String opPackageName, boolean requireForeground, int uid,
             int pid, int userId) {
-        checkPermission(USE_FINGERPRINT);
+        if (getContext().checkCallingPermission(USE_FINGERPRINT)
+                != PackageManager.PERMISSION_GRANTED) {
+            checkPermission(USE_BIOMETRIC);
+        }
+
         if (isKeyguard(opPackageName)) {
             return true; // Keyguard is always allowed
         }
@@ -845,7 +849,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
 
     private void startAuthentication(IBinder token, long opId, int callingUserId, int groupId,
                 IFingerprintServiceReceiver receiver, int flags, boolean restricted,
-                String opPackageName, Bundle bundle, IFingerprintDialogReceiver dialogReceiver) {
+                String opPackageName, Bundle bundle, IBiometricDialogReceiver dialogReceiver) {
         updateActiveGroup(groupId, opPackageName);
 
         if (DEBUG) Slog.v(TAG, "startAuthentication(" + opPackageName + ")");
@@ -1156,7 +1160,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         public void authenticate(final IBinder token, final long opId, final int groupId,
                 final IFingerprintServiceReceiver receiver, final int flags,
                 final String opPackageName, final Bundle bundle,
-                final IFingerprintDialogReceiver dialogReceiver) {
+                final IBiometricDialogReceiver dialogReceiver) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int callingUserId = UserHandle.getCallingUserId();
@@ -1483,10 +1487,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 userId = getUserOrWorkProfileId(clientPackage, userId);
                 if (userId != mCurrentUserId) {
                     File baseDir;
-                    if (Build.VERSION.FIRST_SDK_INT <= Build.VERSION_CODES.O_MR1
-                            && !SystemProperties.getBoolean(
-                                "ro.treble.supports_vendor_data", false)) {
-                        // TODO(b/72405644) remove the override when possible.
+                    if (Build.VERSION.FIRST_SDK_INT <= Build.VERSION_CODES.O_MR1) {
                         baseDir = Environment.getUserSystemDirectory(userId);
                     } else {
                         baseDir = Environment.getDataVendorDeDirectory(userId);

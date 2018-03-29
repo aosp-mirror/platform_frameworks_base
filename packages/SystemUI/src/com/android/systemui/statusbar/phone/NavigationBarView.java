@@ -79,7 +79,6 @@ import java.io.PrintWriter;
 import java.util.function.Consumer;
 
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_DISABLE_QUICK_SCRUB;
-import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_DISABLE_SWIPE_UP;
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_HIDE_BACK_BUTTON;
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_SHOW_OVERVIEW_BUTTON;
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_OVERVIEW;
@@ -385,17 +384,13 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     public boolean isQuickStepSwipeUpEnabled() {
-        return mOverviewProxyService.getProxy() != null
-                && isOverviewEnabled()
-                && ((mOverviewProxyService.getInteractionFlags()
-                        & FLAG_DISABLE_SWIPE_UP) == 0);
+        return mOverviewProxyService.shouldShowSwipeUpUI() && isOverviewEnabled();
     }
 
     public boolean isQuickScrubEnabled() {
         return SystemProperties.getBoolean("persist.quickstep.scrub.enabled", true)
                 && mOverviewProxyService.getProxy() != null && isOverviewEnabled()
-                && ((mOverviewProxyService.getInteractionFlags()
-                        & FLAG_DISABLE_QUICK_SCRUB) == 0);
+                && ((mOverviewProxyService.getInteractionFlags() & FLAG_DISABLE_QUICK_SCRUB) == 0);
     }
 
     private void updateCarModeIcons(Context ctx) {
@@ -468,7 +463,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private KeyButtonDrawable chooseNavigationIconDrawable(Context ctx, @DrawableRes int iconLight,
             @DrawableRes int iconDark, @DrawableRes int quickStepIconLight,
             @DrawableRes int quickStepIconDark) {
-        final boolean quickStepEnabled = isQuickStepSwipeUpEnabled() || isQuickScrubEnabled();
+        final boolean quickStepEnabled = mOverviewProxyService.shouldShowSwipeUpUI();
         return quickStepEnabled
                 ? getDrawable(ctx, quickStepIconLight, quickStepIconDark)
                 : getDrawable(ctx, iconLight, iconDark);

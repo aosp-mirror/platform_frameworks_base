@@ -21,6 +21,8 @@ import android.util.ArrayMap;
 import com.android.systemui.Dependency.DependencyProvider;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.statusbar.NotificationEntryManager;
+import com.android.systemui.statusbar.car.CarFacetButtonController;
+import com.android.systemui.statusbar.car.hvac.HvacController;
 
 /**
  * Class factory to provide car specific SystemUI components.
@@ -32,5 +34,7 @@ public class CarSystemUIFactory extends SystemUIFactory {
         super.injectDependencies(providers, context);
         providers.put(NotificationEntryManager.class,
                 () -> new CarNotificationEntryManager(context));
+        providers.put(CarFacetButtonController.class, () -> new CarFacetButtonController(context));
+        providers.put(HvacController.class, () -> new HvacController(context));
     }
 }

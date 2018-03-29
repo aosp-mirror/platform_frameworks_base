@@ -230,16 +230,19 @@ class RecoverableKeyStoreDbContract {
 
         /**
          * The public key of the recovery service.
+         * Deprecated.
          */
         static final String COLUMN_NAME_PUBLIC_KEY = "public_key";
 
         /**
          * The certificate path of the recovery service.
+         * Deprecated.
          */
         static final String COLUMN_NAME_CERT_PATH = "cert_path";
 
         /**
          * The serial number contained in the certificate XML file of the recovery service.
+         * Deprecated.
          */
         static final String COLUMN_NAME_CERT_SERIAL = "cert_serial";
 
@@ -257,5 +260,42 @@ class RecoverableKeyStoreDbContract {
          * The server parameters of the recovery service.
          */
         static final String COLUMN_NAME_SERVER_PARAMS = "server_params";
+
+        /**
+         * Active root of trust
+         */
+        static final String COLUMN_NAME_ACTIVE_ROOT_OF_TRUST = "active_root_of_trust";
+    }
+
+    /**
+     * Table data for given recovery agent and root of trust pair.
+     */
+    static class RootOfTrustEntry implements BaseColumns {
+        static final String TABLE_NAME = "root_of_trust";
+
+        /**
+         * The user id of the profile the application is running under.
+         */
+        static final String COLUMN_NAME_USER_ID = "user_id";
+
+        /**
+         * The uid of the application that initializes the local recovery components.
+         */
+        static final String COLUMN_NAME_UID = "uid";
+
+        /**
+         * Root of trust alias
+         */
+        static final String COLUMN_NAME_ROOT_ALIAS = "root_alias";
+
+        /**
+         * The certificate path of the recovery service.
+         */
+        static final String COLUMN_NAME_CERT_PATH = "cert_path";
+
+        /**
+         * The serial number contained in the certificate XML file of the recovery service.
+         */
+        static final String COLUMN_NAME_CERT_SERIAL = "cert_serial";
     }
 }

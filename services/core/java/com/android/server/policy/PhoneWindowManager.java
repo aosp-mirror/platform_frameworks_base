@@ -3027,7 +3027,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Show IME over the keyguard if the target allows it
         boolean allowWhenLocked = (win.isInputMethodWindow() || imeTarget == this)
-                && showImeOverKeyguard;;
+                && showImeOverKeyguard;
 
         if (isKeyguardLocked() && isKeyguardOccluded()) {
             // Show SHOW_WHEN_LOCKED windows if Keyguard is occluded.

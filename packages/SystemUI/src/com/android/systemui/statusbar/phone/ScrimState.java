@@ -156,7 +156,6 @@ public enum ScrimState {
                 mCurrentBehindTint = Color.BLACK;
                 mBlankScreen = true;
             } else {
-                // Scrims should still be black at the end of the transition.
                 mCurrentInFrontTint = Color.TRANSPARENT;
                 mCurrentBehindTint = Color.TRANSPARENT;
                 mBlankScreen = false;

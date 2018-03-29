@@ -16,12 +16,13 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_SNAPSHOT;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_SPLASH_SCREEN;
 import static android.app.ActivityManagerInternal.APP_TRANSITION_WINDOWS_DRAWN;
 
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
+import static android.view.WindowManager.TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_TRANSLUCENT_ACTIVITY_OPEN;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
@@ -42,6 +43,7 @@ import static android.view.WindowManager.TRANSIT_WALLPAPER_INTRA_CLOSE;
 import static android.view.WindowManager.TRANSIT_WALLPAPER_INTRA_OPEN;
 import static android.view.WindowManager.TRANSIT_WALLPAPER_OPEN;
 import static com.android.server.wm.AppTransition.isKeyguardGoingAwayTransit;
+import static com.android.server.wm.AppTransition.isTaskTransit;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
@@ -61,16 +63,15 @@ import android.util.SparseIntArray;
 import android.view.Display;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
-import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.TransitionType;
 import android.view.animation.Animation;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.function.Predicate;
 
 /**
@@ -288,6 +289,7 @@ class WindowSurfacePlacer {
         final boolean closingAppHasWallpaper = canBeWallpaperTarget(mService.mClosingApps)
                 && hasWallpaperTarget;
 
+        transit = maybeUpdateTransitToTranslucentAnim(transit);
         transit = maybeUpdateTransitToWallpaper(transit, openingAppHasWallpaper,
                 closingAppHasWallpaper);
 
@@ -676,14 +678,59 @@ class WindowSurfacePlacer {
                 transit = TRANSIT_WALLPAPER_CLOSE;
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "New transit away from wallpaper: "
                         + AppTransition.appTransitionToString(transit));
-            } else if (wallpaperTarget != null && wallpaperTarget.isVisibleLw() &&
-                    openingApps.contains(wallpaperTarget.mAppToken)) {
+            } else if (wallpaperTarget != null && wallpaperTarget.isVisibleLw()
+                    && openingApps.contains(wallpaperTarget.mAppToken)
+                    && transit != TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE) {
                 // We are transitioning from an activity without
                 // a wallpaper to now showing the wallpaper
                 transit = TRANSIT_WALLPAPER_OPEN;
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "New transit into wallpaper: "
                         + AppTransition.appTransitionToString(transit));
             }
+        }
+        return transit;
+    }
+
+    /**
+     * There are cases where we open/close a new task/activity, but in reality only a translucent
+     * activity on top of existing activities is opening/closing. For that one, we have a different
+     * animation because non of the task/activity animations actually work well with translucent
+     * apps.
+     *
+     * @param transit The current transition type.
+     * @return The current transition type or
+     *         {@link WindowManager#TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE}/
+     *         {@link WindowManager#TRANSIT_TRANSLUCENT_ACTIVITY_OPEN} if appropriate for the
+     *         situation.
+     */
+    @VisibleForTesting
+    int maybeUpdateTransitToTranslucentAnim(int transit) {
+        final boolean taskOrActivity = AppTransition.isTaskTransit(transit)
+                || AppTransition.isActivityTransit(transit);
+        boolean allOpeningVisible = true;
+        boolean allTranslucentOpeningApps = !mService.mOpeningApps.isEmpty();
+        for (int i = mService.mOpeningApps.size() - 1; i >= 0; i--) {
+            final AppWindowToken token = mService.mOpeningApps.valueAt(i);
+            if (!token.isVisible()) {
+                allOpeningVisible = false;
+                if (token.fillsParent()) {
+                    allTranslucentOpeningApps = false;
+                }
+            }
+        }
+        boolean allTranslucentClosingApps = !mService.mClosingApps.isEmpty();
+        for (int i = mService.mClosingApps.size() - 1; i >= 0; i--) {
+            if (mService.mClosingApps.valueAt(i).fillsParent()) {
+                allTranslucentClosingApps = false;
+                break;
+            }
+        }
+
+        if (taskOrActivity && allTranslucentClosingApps && allOpeningVisible) {
+            return TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE;
+        }
+        if (taskOrActivity && allTranslucentOpeningApps && mService.mClosingApps.isEmpty()) {
+            return TRANSIT_TRANSLUCENT_ACTIVITY_OPEN;
         }
         return transit;
     }

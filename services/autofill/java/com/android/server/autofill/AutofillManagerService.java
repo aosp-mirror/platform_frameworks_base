@@ -21,6 +21,7 @@ import static android.content.Context.AUTOFILL_MANAGER_SERVICE;
 
 import static com.android.server.autofill.Helper.bundleToString;
 import static com.android.server.autofill.Helper.sDebug;
+import static com.android.server.autofill.Helper.sFullScreenMode;
 import static com.android.server.autofill.Helper.sPartitionMaxCount;
 import static com.android.server.autofill.Helper.sVisibleDatasetsMaxCount;
 import static com.android.server.autofill.Helper.sVerbose;
@@ -80,7 +81,6 @@ import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.autofill.AutofillManagerService.PackageCompatState;
 import com.android.server.autofill.ui.AutoFillUI;
 
 import java.io.FileDescriptor;
@@ -449,7 +449,7 @@ public final class AutofillManagerService extends SystemService {
     }
 
     // Called by Shell command.
-    public int getMaxPartitions() {
+    int getMaxPartitions() {
         mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
 
         synchronized (mLock) {
@@ -458,7 +458,7 @@ public final class AutofillManagerService extends SystemService {
     }
 
     // Called by Shell command.
-    public void setMaxPartitions(int max) {
+    void setMaxPartitions(int max) {
         mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
         Slog.i(TAG, "setMaxPartitions(): " + max);
         synchronized (mLock) {
@@ -467,7 +467,7 @@ public final class AutofillManagerService extends SystemService {
     }
 
     // Called by Shell command.
-    public int getMaxVisibleDatasets() {
+    int getMaxVisibleDatasets() {
         mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
 
         synchronized (mLock) {
@@ -476,7 +476,7 @@ public final class AutofillManagerService extends SystemService {
     }
 
     // Called by Shell command.
-    public void setMaxVisibleDatasets(int max) {
+    void setMaxVisibleDatasets(int max) {
         mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
         Slog.i(TAG, "setMaxVisibleDatasets(): " + max);
         synchronized (mLock) {
@@ -485,7 +485,7 @@ public final class AutofillManagerService extends SystemService {
     }
 
     // Called by Shell command.
-    public void getScore(@Nullable String algorithmName, @NonNull String value1,
+    void getScore(@Nullable String algorithmName, @NonNull String value1,
             @NonNull String value2, @NonNull RemoteCallback callback) {
         mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
 
@@ -494,6 +494,18 @@ public final class AutofillManagerService extends SystemService {
 
         strategy.getScores(callback, algorithmName, null,
                 Arrays.asList(AutofillValue.forText(value1)), new String[] { value2 });
+    }
+
+    // Called by Shell command.
+    Boolean getFullScreenMode() {
+        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        return sFullScreenMode;
+    }
+
+    // Called by Shell command.
+    void setFullScreenMode(@Nullable Boolean mode) {
+        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        sFullScreenMode = mode;
     }
 
     private void setDebugLocked(boolean debug) {
@@ -1159,6 +1171,9 @@ public final class AutofillManagerService extends SystemService {
                     pw.print("Disabled users: "); pw.println(mDisabledUsers);
                     pw.print("Max partitions per session: "); pw.println(sPartitionMaxCount);
                     pw.print("Max visible datasets: "); pw.println(sVisibleDatasetsMaxCount);
+                    if (sFullScreenMode != null) {
+                        pw.print("Overridden full-screen mode: "); pw.println(sFullScreenMode);
+                    }
                     pw.println("User data constraints: "); UserData.dumpConstraints(prefix, pw);
                     final int size = mServicesCache.size();
                     pw.print("Cached services: ");

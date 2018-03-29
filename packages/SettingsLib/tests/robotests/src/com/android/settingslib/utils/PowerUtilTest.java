@@ -137,9 +137,9 @@ public class PowerUtilTest {
                 true /* basedOnUsage */);
 
         // shortened string should not have percentage
-        assertThat(info).isEqualTo("Less than 15m remaining");
+        assertThat(info).isEqualTo("Less than 15 min remaining");
         // Add percentage to string when provided
-        assertThat(info2).isEqualTo("Less than 15m remaining (10%)");
+        assertThat(info2).isEqualTo("Less than 15 min remaining (10%)");
     }
 
     @Test
@@ -154,9 +154,9 @@ public class PowerUtilTest {
                 false /* basedOnUsage */);
 
         // We only add special mention for the long string
-        assertThat(info).isEqualTo("About 1d 6h left based on your usage");
+        assertThat(info).isEqualTo("About 1 day, 6 hr left based on your usage");
         // shortened string should not have extra text
-        assertThat(info2).isEqualTo("About 1d 6h left (10%)");
+        assertThat(info2).isEqualTo("About 1 day, 6 hr left (10%)");
     }
 
     @Test

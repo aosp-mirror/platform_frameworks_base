@@ -559,7 +559,7 @@ public class UserRestrictionsUtils {
                                     android.provider.Settings.Global.AIRPLANE_MODE_ON, 0);
                             // Post the intent.
                             Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-                            intent.putExtra("state", 0);
+                            intent.putExtra("state", false);
                             context.sendBroadcastAsUser(intent, UserHandle.ALL);
                         }
                     }

@@ -18,14 +18,9 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.graphics.drawable.Icon;
-import android.os.Handler;
-import android.os.Message;
-import android.os.Messenger;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.RemoteException;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.io.PrintWriter;
 
@@ -42,6 +37,7 @@ public final class RemoteAction implements Parcelable {
     private final CharSequence mContentDescription;
     private final PendingIntent mActionIntent;
     private boolean mEnabled;
+    private boolean mShouldShowIcon;
 
     RemoteAction(Parcel in) {
         mIcon = Icon.CREATOR.createFromParcel(in);
@@ -49,6 +45,7 @@ public final class RemoteAction implements Parcelable {
         mContentDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mActionIntent = PendingIntent.CREATOR.createFromParcel(in);
         mEnabled = in.readBoolean();
+        mShouldShowIcon = in.readBoolean();
     }
 
     public RemoteAction(@NonNull Icon icon, @NonNull CharSequence title,
@@ -62,6 +59,7 @@ public final class RemoteAction implements Parcelable {
         mContentDescription = contentDescription;
         mActionIntent = intent;
         mEnabled = true;
+        mShouldShowIcon = true;
     }
 
     /**
@@ -76,6 +74,20 @@ public final class RemoteAction implements Parcelable {
      */
     public boolean isEnabled() {
         return mEnabled;
+    }
+
+    /**
+     * Sets whether the icon should be shown.
+     */
+    public void setShouldShowIcon(boolean shouldShowIcon) {
+        mShouldShowIcon = shouldShowIcon;
+    }
+
+    /**
+     * Return whether the icon should be shown.
+     */
+    public boolean shouldShowIcon() {
+        return mShouldShowIcon;
     }
 
     /**
@@ -125,6 +137,7 @@ public final class RemoteAction implements Parcelable {
         TextUtils.writeToParcel(mContentDescription, out, flags);
         mActionIntent.writeToParcel(out, flags);
         out.writeBoolean(mEnabled);
+        out.writeBoolean(mShouldShowIcon);
     }
 
     public void dump(String prefix, PrintWriter pw) {
@@ -134,6 +147,7 @@ public final class RemoteAction implements Parcelable {
         pw.print(" contentDescription=" + mContentDescription);
         pw.print(" icon=" + mIcon);
         pw.print(" action=" + mActionIntent.getIntent());
+        pw.print(" shouldShowIcon=" + mShouldShowIcon);
         pw.println();
     }
 
