@@ -323,10 +323,10 @@ public class StorageNotification extends SystemUI {
 
         if (notif != null) {
             mNotificationManager.notifyAsUser(vol.getId(), SystemMessage.NOTE_STORAGE_PUBLIC,
-                    notif, UserHandle.ALL);
+                    notif, UserHandle.of(vol.getMountUserId()));
         } else {
             mNotificationManager.cancelAsUser(vol.getId(), SystemMessage.NOTE_STORAGE_PUBLIC,
-                    UserHandle.ALL);
+                    UserHandle.of(vol.getMountUserId()));
         }
     }
 
