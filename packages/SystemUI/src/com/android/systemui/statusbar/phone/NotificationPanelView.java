@@ -160,6 +160,7 @@ public class NotificationPanelView extends PanelView implements
     protected int mQsMinExpansionHeight;
     protected int mQsMaxExpansionHeight;
     private int mQsPeekHeight;
+    private int mBouncerTop;
     private boolean mStackScrollerOverscrolling;
     private boolean mQsExpansionFromOverscroll;
     private float mLastOverscroll;
@@ -476,7 +477,8 @@ public class NotificationPanelView extends PanelView implements
                     mKeyguardStatusView.getHeight(),
                     mDarkAmount,
                     mStatusBar.isKeyguardCurrentlySecure(),
-                    mTracking);
+                    mTracking,
+                    mBouncerTop);
             mClockPositionAlgorithm.run(mClockPositionResult);
             if (animate || mClockAnimator != null) {
                 startClockAnimation(mClockPositionResult.clockX, mClockPositionResult.clockY);
@@ -548,6 +550,11 @@ public class NotificationPanelView extends PanelView implements
             }
         }
         return count;
+    }
+
+    public void setBouncerTop(int bouncerTop) {
+        mBouncerTop = bouncerTop;
+        positionClockAndNotifications();
     }
 
     private void startClockAnimation(int x, int y) {

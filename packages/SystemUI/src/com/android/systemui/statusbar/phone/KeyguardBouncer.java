@@ -334,6 +334,20 @@ public class KeyguardBouncer {
         return mKeyguardView != null && mKeyguardView.hasDismissActions();
     }
 
+    public int getTop() {
+        if (mKeyguardView == null) {
+            return 0;
+        }
+
+        int top = mKeyguardView.getTop();
+        // The password view has an extra top padding that should be ignored.
+        if (mKeyguardView.getCurrentSecurityMode() == SecurityMode.Password) {
+            View messageArea = mKeyguardView.findViewById(R.id.keyguard_message_area);
+            top += messageArea.getTop();
+        }
+        return top;
+    }
+
     protected void ensureView() {
         // Removal of the view might be deferred to reduce unlock latency,
         // in this case we need to force the removal, otherwise we'll
