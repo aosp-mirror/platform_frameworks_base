@@ -22,6 +22,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.android.keyguard.AlphaOptimizedImageButton;
 import com.android.systemui.R;
@@ -36,9 +37,11 @@ class CarNavigationBarView extends LinearLayout {
     private LinearLayout mNavButtons;
     private AlphaOptimizedImageButton mNotificationsButton;
     private CarStatusBar mCarStatusBar;
+    private Context mContext;
 
     public CarNavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mContext = context;
     }
 
     @Override
@@ -46,7 +49,9 @@ class CarNavigationBarView extends LinearLayout {
         mNavButtons = findViewById(R.id.nav_buttons);
 
         mNotificationsButton = findViewById(R.id.notifications);
-        mNotificationsButton.setOnClickListener(this::onNotificationsClick);
+        if (mNotificationsButton != null) {
+            mNotificationsButton.setOnClickListener(this::onNotificationsClick);
+        }
     }
 
     void setStatusBar(CarStatusBar carStatusBar) {
