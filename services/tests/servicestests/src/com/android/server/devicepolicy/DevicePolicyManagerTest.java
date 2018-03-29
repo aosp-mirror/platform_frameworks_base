@@ -3454,18 +3454,19 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 dpm.setSystemSetting(admin1, Settings.System.SCREEN_BRIGHTNESS_FOR_VR, "0"));
     }
 
-    public void testSetSystemSettingFailWithPO() throws Exception {
-        setupProfileOwner();
-        assertExpectException(SecurityException.class, null, () ->
-                dpm.setSystemSetting(admin1, Settings.System.SCREEN_BRIGHTNESS, "0"));
-    }
-
-    public void testSetSystemSetting() throws Exception {
+    public void testSetSystemSettingWithDO() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
         dpm.setSystemSetting(admin1, Settings.System.SCREEN_BRIGHTNESS, "0");
-        verify(getServices().settings).settingsSystemPutString(
-                Settings.System.SCREEN_BRIGHTNESS, "0");
+        verify(getServices().settings).settingsSystemPutStringForUser(
+                Settings.System.SCREEN_BRIGHTNESS, "0", UserHandle.USER_SYSTEM);
+    }
+
+    public void testSetSystemSettingWithPO() throws Exception {
+        setupProfileOwner();
+        dpm.setSystemSetting(admin1, Settings.System.SCREEN_BRIGHTNESS, "0");
+        verify(getServices().settings).settingsSystemPutStringForUser(
+            Settings.System.SCREEN_BRIGHTNESS, "0", DpmMockContext.CALLER_USER_HANDLE);
     }
 
     public void testSetTime() throws Exception {

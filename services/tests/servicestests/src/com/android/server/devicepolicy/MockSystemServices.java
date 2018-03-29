@@ -419,7 +419,7 @@ public class MockSystemServices {
         public void settingsGlobalPutString(String name, String value) {
         }
 
-        public void settingsSystemPutString(String name, String value) {
+        public void settingsSystemPutStringForUser(String name, String value, int callingUserId) {
         }
 
         public int settingsGlobalGetInt(String name, int value) {
