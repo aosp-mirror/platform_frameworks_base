@@ -1000,6 +1000,11 @@ public class LockPatternView extends View {
             setPatternInProgress(false);
             cancelLineAnimations();
             notifyPatternDetected();
+            // Also clear pattern if fading is enabled
+            if (mFadePattern) {
+                clearPatternDrawLookup();
+                mPatternDisplayMode = DisplayMode.Correct;
+            }
             invalidate();
         }
         if (PROFILE_DRAWING) {
