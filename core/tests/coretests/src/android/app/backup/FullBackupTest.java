@@ -16,9 +16,6 @@
 
 package android.app.backup;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import android.app.backup.FullBackup.BackupScheme.PathWithRequiredFlags;
 import android.content.Context;
 import android.support.test.filters.LargeTest;
@@ -99,6 +96,28 @@ public class FullBackupTest extends AndroidTestCase {
                 include.getPath());
         assertEquals("Invalid requireFlags parsed for <include/>",
                 BackupAgent.FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED,
+                include.getRequiredFlags());
+    }
+
+    public void testParseBackupSchemeFromXml_onlyIncludeRequireFakeEncryptionFlag()
+            throws Exception {
+        mXpp.setInput(new StringReader(
+                "<full-backup-content>"
+                        + "<include path=\"onlyInclude.txt\" domain=\"file\""
+                        + " requireFlags=\"fakeClientSideEncryption\"/>"
+                        + "</full-backup-content>"));
+
+        FullBackup.BackupScheme bs = FullBackup.getBackupSchemeForTest(mContext);
+        bs.parseBackupSchemeFromXmlLocked(mXpp, excludesSet, includeMap);
+
+        Set<PathWithRequiredFlags> fileDomainIncludes = includeMap.get(FullBackup.FILES_TREE_TOKEN);
+        assertEquals("Didn't find expected file domain include.", 1, fileDomainIncludes.size());
+        PathWithRequiredFlags include = fileDomainIncludes.iterator().next();
+        assertEquals("Invalid path parsed for <include/>",
+                new File(mContext.getFilesDir(), "onlyInclude.txt").getCanonicalPath(),
+                include.getPath());
+        assertEquals("Invalid requireFlags parsed for <include/>",
+                BackupAgent.FLAG_FAKE_CLIENT_SIDE_ENCRYPTION_ENABLED,
                 include.getRequiredFlags());
     }
 
