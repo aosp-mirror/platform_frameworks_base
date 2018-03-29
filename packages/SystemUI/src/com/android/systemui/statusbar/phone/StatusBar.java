@@ -562,7 +562,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     };
 
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
-    private UserSwitcherController mUserSwitcherController;
+    protected UserSwitcherController mUserSwitcherController;
     private NetworkController mNetworkController;
     private KeyguardMonitorImpl mKeyguardMonitor
             = (KeyguardMonitorImpl) Dependency.get(KeyguardMonitor.class);
@@ -588,7 +588,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     };
     private boolean mNoAnimationOnNextBarModeChange;
-    private FalsingManager mFalsingManager;
+    protected FalsingManager mFalsingManager;
 
     private final KeyguardUpdateMonitorCallback mUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -3446,6 +3446,13 @@ public class StatusBar extends SystemUI implements DemoMode,
     public boolean hideKeyguard() {
         mKeyguardRequested = false;
         return updateIsKeyguard();
+    }
+
+    /**
+     * @return True if StatusBar state is FULLSCREEN_USER_SWITCHER.
+     */
+    public boolean isFullScreenUserSwitcherState() {
+        return mState == StatusBarState.FULLSCREEN_USER_SWITCHER;
     }
 
     private boolean updateIsKeyguard() {
