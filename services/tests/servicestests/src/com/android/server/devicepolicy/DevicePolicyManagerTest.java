@@ -3719,7 +3719,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     private void verifyLockTaskState(int userId) throws Exception {
-        verifyLockTaskState(userId, new String[0], DevicePolicyManager.LOCK_TASK_FEATURE_NONE);
+        verifyLockTaskState(userId, new String[0],
+                DevicePolicyManager.LOCK_TASK_FEATURE_GLOBAL_ACTIONS);
     }
 
     private void verifyLockTaskState(int userId, String[] packages, int flags) throws Exception {
