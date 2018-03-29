@@ -7351,6 +7351,17 @@ public class WindowManagerService extends IWindowManager.Stub
         public void lockNow() {
             WindowManagerService.this.lockNow(null);
         }
+
+        @Override
+        public int getWindowOwnerUserId(IBinder token) {
+            synchronized (mWindowMap) {
+                WindowState window = mWindowMap.get(token);
+                if (window != null) {
+                    return UserHandle.getUserId(window.mOwnerUid);
+                }
+                return UserHandle.USER_NULL;
+            }
+        }
     }
 
     void registerAppFreezeListener(AppFreezeListener listener) {
