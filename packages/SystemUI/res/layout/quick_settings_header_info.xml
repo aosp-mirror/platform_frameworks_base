@@ -33,7 +33,7 @@
         android:visibility="invisible" />
 
     <LinearLayout
-        android:id="@+id/next_alarm"
+        android:id="@+id/status_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|bottom"
@@ -41,6 +41,7 @@
         android:visibility="invisible">
 
         <ImageView
+            android:id="@+id/next_alarm_icon"
             android:layout_width="@dimen/qs_header_alarm_icon_size"
             android:layout_height="@dimen/qs_header_alarm_icon_size"
             android:src="@drawable/stat_sys_alarm"
@@ -48,6 +49,29 @@
 
         <TextView
             android:id="@+id/next_alarm_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/qs_header_alarm_text_margin_start"
+            android:textAppearance="@style/TextAppearance.QS.TileLabel" />
+
+        <ImageView
+            android:id="@+id/status_separator"
+            android:layout_width="2dp"
+            android:layout_height="2dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/qs_header_status_dot"
+            android:tint="?android:attr/textColorPrimary" />
+
+        <ImageView
+            android:id="@+id/ringer_mode_icon"
+            android:layout_width="@dimen/qs_header_alarm_icon_size"
+            android:layout_height="@dimen/qs_header_alarm_icon_size"
+            android:tint="?android:attr/textColorPrimary" />
+
+        <TextView
+            android:id="@+id/ringer_mode_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/qs_header_alarm_text_margin_start"
