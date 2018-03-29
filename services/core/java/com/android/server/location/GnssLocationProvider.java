@@ -2500,9 +2500,9 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
             // register for connectivity change events, this is equivalent to the deprecated way of
             // registering for CONNECTIVITY_ACTION broadcasts
             NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
-            networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
-            networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
-            networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_BLUETOOTH);
+            networkRequestBuilder.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+            networkRequestBuilder.addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+            networkRequestBuilder.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN);
             NetworkRequest networkRequest = networkRequestBuilder.build();
             mConnMgr.registerNetworkCallback(networkRequest, mNetworkConnectivityCallback);
 
