@@ -30,13 +30,14 @@ import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SYNC_ADAPTER;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SYSTEM_INTERACTION;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SYSTEM_UPDATE;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_USER_INTERACTION;
+import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SLICE_PINNED;
+import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_SLICE_PINNED_PRIV;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_EXEMPTED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_NEVER;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
-
 import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
 
@@ -747,6 +748,8 @@ public class AppStandbyController {
             case UsageEvents.Event.SYSTEM_INTERACTION: return REASON_SUB_USAGE_SYSTEM_INTERACTION;
             case UsageEvents.Event.USER_INTERACTION: return REASON_SUB_USAGE_USER_INTERACTION;
             case UsageEvents.Event.NOTIFICATION_SEEN: return REASON_SUB_USAGE_NOTIFICATION_SEEN;
+            case UsageEvents.Event.SLICE_PINNED: return REASON_SUB_USAGE_SLICE_PINNED;
+            case UsageEvents.Event.SLICE_PINNED_PRIV: return REASON_SUB_USAGE_SLICE_PINNED_PRIV;
             default: return 0;
         }
     }
