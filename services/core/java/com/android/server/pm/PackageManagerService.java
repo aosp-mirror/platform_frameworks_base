@@ -808,7 +808,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         final String[] getStaticOverlayPaths(List<PackageParser.Package> overlayPackages,
-                String targetPath, Object installLock) {
+                String targetPath) {
             if (overlayPackages == null || overlayPackages.isEmpty()) {
                 return null;
             }
@@ -828,20 +828,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     //
                     // OverlayManagerService will update each of them with a correct gid from its
                     // target package app id.
-                    if (installLock != null) {
-                        synchronized (installLock) {
-                            mInstaller.idmap(targetPath, overlayPackage.baseCodePath,
-                                    UserHandle.getSharedAppGid(
-                                            UserHandle.getUserGid(UserHandle.USER_SYSTEM)));
-                        }
-                    } else {
-                        // We can call mInstaller without holding mInstallLock because mInstallLock
-                        // is held before running parallel parsing.
-                        // Moreover holding mInstallLock on each parsing thread causes dead-lock.
-                        mInstaller.idmap(targetPath, overlayPackage.baseCodePath,
-                                UserHandle.getSharedAppGid(
-                                        UserHandle.getUserGid(UserHandle.USER_SYSTEM)));
-                    }
+                    mInstaller.idmap(targetPath, overlayPackage.baseCodePath,
+                            UserHandle.getSharedAppGid(
+                                    UserHandle.getUserGid(UserHandle.USER_SYSTEM)));
                     if (overlayPathList == null) {
                         overlayPathList = new ArrayList<String>();
                     }
@@ -856,13 +845,15 @@ public class PackageManagerService extends IPackageManager.Stub
 
         String[] getStaticOverlayPaths(String targetPackageName, String targetPath) {
             List<PackageParser.Package> overlayPackages;
-            synchronized (mPackages) {
-                overlayPackages = getStaticOverlayPackages(
-                        mPackages.values(), targetPackageName);
+            synchronized (mInstallLock) {
+                synchronized (mPackages) {
+                    overlayPackages = getStaticOverlayPackages(
+                            mPackages.values(), targetPackageName);
+                }
+                // It is safe to keep overlayPackages without holding mPackages because static overlay
+                // packages can't be uninstalled or disabled.
+                return getStaticOverlayPaths(overlayPackages, targetPath);
             }
-            // It is safe to keep overlayPackages without holding mPackages because static overlay
-            // packages can't be uninstalled or disabled.
-            return getStaticOverlayPaths(overlayPackages, targetPath, mInstallLock);
         }
 
         @Override public final String[] getOverlayApks(String targetPackageName) {
@@ -895,11 +886,13 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized String[] getStaticOverlayPaths(String targetPackageName, String targetPath) {
             // We can trust mOverlayPackages without holding mPackages because package uninstall
             // can't happen while running parallel parsing.
-            // Moreover holding mPackages on each parsing thread causes dead-lock.
+            // And we can call mInstaller inside getStaticOverlayPaths without holding mInstallLock
+            // because mInstallLock is held before running parallel parsing.
+            // Moreover holding mPackages or mInstallLock on each parsing thread causes dead-lock.
             return mOverlayPackages == null ? null :
                     getStaticOverlayPaths(
                             getStaticOverlayPackages(mOverlayPackages, targetPackageName),
-                            targetPath, null);
+                            targetPath);
         }
     }
 
