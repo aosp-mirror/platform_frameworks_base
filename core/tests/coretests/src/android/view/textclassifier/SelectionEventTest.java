@@ -33,8 +33,11 @@ public class SelectionEventTest {
     @Test
     public void testParcel() {
         final SelectionEvent[] captured = new SelectionEvent[1];
-        final Logger logger = new Logger(new Logger.Config(
-                InstrumentationRegistry.getTargetContext(), Logger.WIDGET_TEXTVIEW, null)) {
+        final Logger logger = new Logger(
+                new Logger.Config(
+                        InstrumentationRegistry.getTargetContext(),
+                        TextClassifier.WIDGET_TYPE_TEXTVIEW,
+                        null)) {
             @Override
             public void writeEvent(SelectionEvent event) {
                 captured[0] = event;

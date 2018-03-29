@@ -39,7 +39,7 @@ import java.util.StringJoiner;
 public final class DefaultLogger extends Logger {
 
     private static final String LOG_TAG = "DefaultLogger";
-    private static final String CLASSIFIER_ID = "androidtc";
+    static final String CLASSIFIER_ID = "androidtc";
 
     private static final int START_EVENT_DELTA = MetricsEvent.FIELD_SELECTION_SINCE_START;
     private static final int PREV_EVENT_DELTA = MetricsEvent.FIELD_SELECTION_SINCE_PREVIOUS;

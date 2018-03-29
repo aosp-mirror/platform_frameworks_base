@@ -112,6 +112,38 @@ public interface TextClassifier {
     @StringDef(prefix = { "HINT_" }, value = {HINT_TEXT_IS_EDITABLE, HINT_TEXT_IS_NOT_EDITABLE})
     @interface Hints {}
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef({WIDGET_TYPE_TEXTVIEW, WIDGET_TYPE_WEBVIEW, WIDGET_TYPE_EDITTEXT,
+            WIDGET_TYPE_EDIT_WEBVIEW, WIDGET_TYPE_CUSTOM_TEXTVIEW, WIDGET_TYPE_CUSTOM_EDITTEXT,
+            WIDGET_TYPE_CUSTOM_UNSELECTABLE_TEXTVIEW, WIDGET_TYPE_UNKNOWN})
+    @interface WidgetType {}
+
+    /** The widget involved in the text classification session is a standard
+     * {@link android.widget.TextView}. */
+    String WIDGET_TYPE_TEXTVIEW = "textview";
+    /** The widget involved in the text classification session is a standard
+     * {@link android.widget.EditText}. */
+    String WIDGET_TYPE_EDITTEXT = "edittext";
+    /** The widget involved in the text classification session is a standard non-selectable
+     * {@link android.widget.TextView}. */
+    String WIDGET_TYPE_UNSELECTABLE_TEXTVIEW = "nosel-textview";
+    /** The widget involved in the text classification session is a standard
+     * {@link android.webkit.WebView}. */
+    String WIDGET_TYPE_WEBVIEW = "webview";
+    /** The widget involved in the text classification session is a standard editable
+     * {@link android.webkit.WebView}. */
+    String WIDGET_TYPE_EDIT_WEBVIEW = "edit-webview";
+    /** The widget involved in the text classification session is a custom text widget. */
+    String WIDGET_TYPE_CUSTOM_TEXTVIEW = "customview";
+    /** The widget involved in the text classification session is a custom editable text widget. */
+    String WIDGET_TYPE_CUSTOM_EDITTEXT = "customedit";
+    /** The widget involved in the text classification session is a custom non-selectable text
+     * widget. */
+    String WIDGET_TYPE_CUSTOM_UNSELECTABLE_TEXTVIEW = "nosel-customview";
+    /** The widget involved in the text classification session is of an unknown/unspecified type. */
+    String WIDGET_TYPE_UNKNOWN = "unknown";
+
     /**
      * No-op TextClassifier.
      * This may be used to turn off TextClassifier features.
@@ -123,6 +155,9 @@ public interface TextClassifier {
      * associated confidence scores. The entity types are ordered from highest to lowest scoring.
      *
      * <p><strong>NOTE: </strong>Call on a worker thread.
+     *
+     * <strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should
+     * throw an {@link IllegalStateException}. See {@link #isDestroyed()}.
      *
      * @param text text providing context for the selected text (which is specified
      *      by the sub sequence starting at selectionStartIndex and ending at selectionEndIndex)
@@ -156,6 +191,9 @@ public interface TextClassifier {
      *
      * <p><strong>NOTE: </strong>Call on a worker thread.
      *
+     * <strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should
+     * throw an {@link IllegalStateException}. See {@link #isDestroyed()}.
+     *
      * @param text text providing context for the selected text (which is specified
      *      by the sub sequence starting at selectionStartIndex and ending at selectionEndIndex)
      * @param selectionStartIndex start index of the selected part of text
@@ -185,6 +223,9 @@ public interface TextClassifier {
      * <p><b>NOTE:</b> Do not implement. The default implementation of this method calls
      * {@link #suggestSelection(CharSequence, int, int, TextSelection.Options)}. If that method
      * calls this method, a stack overflow error will happen.
+     *
+     * <strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should
+     * throw an {@link IllegalStateException}. See {@link #isDestroyed()}.
      */
     @WorkerThread
     @NonNull
@@ -204,6 +245,9 @@ public interface TextClassifier {
      * used to generate a widget for handling the classified text.
      *
      * <p><strong>NOTE: </strong>Call on a worker thread.
+     *
+     * <strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should
+     * throw an {@link IllegalStateException}. See {@link #isDestroyed()}.
      *
      * @param text text providing context for the text to classify (which is specified
      *      by the sub sequence starting at startIndex and ending at endIndex)
@@ -237,6 +281,9 @@ public interface TextClassifier {
      * {@link #classifyText(CharSequence, int, int, TextClassification.Options)}. If that method
      * calls this method, a stack overflow error will happen.
      *
+     * <strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should
+     * throw an {@link IllegalStateException}. See {@link #isDestroyed()}.
+     *
      * @param text text providing context for the text to classify (which is specified
      *      by the sub sequence starting at startIndex and ending at endIndex)
      * @param startIndex start index of the text to classify
@@ -265,6 +312,9 @@ public interface TextClassifier {
      * <p><b>NOTE:</b> Do not implement. The default implementation of this method calls
      * {@link #classifyText(CharSequence, int, int, TextClassification.Options)}. If that method
      * calls this method, a stack overflow error will happen.
+     *
+     * <strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should
+     * throw an {@link IllegalStateException}. See {@link #isDestroyed()}.
      */
     @WorkerThread
     @NonNull
@@ -285,6 +335,9 @@ public interface TextClassifier {
      *
      * <p><strong>NOTE: </strong>Call on a worker thread.
      *
+     * <strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should
+     * throw an {@link IllegalStateException}. See {@link #isDestroyed()}.
+     *
      * @param text the text to generate annotations for
      * @param options configuration for link generation
      *
@@ -295,6 +348,7 @@ public interface TextClassifier {
      * @see #getMaxGenerateLinksTextLength()
      */
     @WorkerThread
+    @NonNull
     default TextLinks generateLinks(
             @NonNull CharSequence text, @Nullable TextLinks.Options options) {
         Utils.validate(text, false);
@@ -311,6 +365,9 @@ public interface TextClassifier {
      * {@link #generateLinks(CharSequence, TextLinks.Options)}. If that method calls this method,
      * a stack overflow error will happen.
      *
+     * <strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should
+     * throw an {@link IllegalStateException}. See {@link #isDestroyed()}.
+     *
      * @param text the text to generate annotations for
      *
      * @throws IllegalArgumentException if text is null or the text is too long for the
@@ -320,12 +377,16 @@ public interface TextClassifier {
      * @see #getMaxGenerateLinksTextLength()
      */
     @WorkerThread
+    @NonNull
     default TextLinks generateLinks(@NonNull CharSequence text) {
         return generateLinks(text, null);
     }
 
     /**
      * Returns the maximal length of text that can be processed by generateLinks.
+     *
+     * <strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should
+     * throw an {@link IllegalStateException}. See {@link #isDestroyed()}.
      *
      * @see #generateLinks(CharSequence)
      * @see #generateLinks(CharSequence, TextLinks.Options)
@@ -339,11 +400,43 @@ public interface TextClassifier {
      * Returns a helper for logging TextClassifier related events.
      *
      * @param config logger configuration
+     * @hide
      */
     @WorkerThread
     default Logger getLogger(@NonNull Logger.Config config) {
         Preconditions.checkNotNull(config);
         return Logger.DISABLED;
+    }
+
+    /**
+     * Reports a selection event.
+     *
+     * <strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should
+     * throw an {@link IllegalStateException}. See {@link #isDestroyed()}.
+     */
+    default void onSelectionEvent(@NonNull SelectionEvent event) {}
+
+    /**
+     * Destroys this TextClassifier.
+     *
+     * <strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to its methods should
+     * throw an {@link IllegalStateException}. See {@link #isDestroyed()}.
+     *
+     * <p>Subsequent calls to this method are no-ops.
+     */
+    default void destroy() {}
+
+    /**
+     * Returns whether or not this TextClassifier has been destroyed.
+     *
+     * <strong>NOTE: </strong>If a TextClassifier has been destroyed, caller should not interact
+     * with the classifier and an attempt to do so would throw an {@link IllegalStateException}.
+     * However, this method should never throw an {@link IllegalStateException}.
+     *
+     * @see #destroy()
+     */
+    default boolean isDestroyed() {
+        return false;
     }
 
     /**
