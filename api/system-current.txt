@@ -5535,6 +5535,7 @@ package android.telephony.euicc {
 package android.telephony.ims {
 
   public final class ImsCallForwardInfo implements android.os.Parcelable {
+    ctor public ImsCallForwardInfo(int, int, int, int, java.lang.String, int);
     method public int describeContents();
     method public int getCondition();
     method public java.lang.String getNumber();
@@ -5848,7 +5849,7 @@ package android.telephony.ims {
   }
 
   public final class ImsSsData implements android.os.Parcelable {
-    ctor public ImsSsData();
+    ctor public ImsSsData(int, int, int, int, int);
     method public int describeContents();
     method public boolean isTypeBarring();
     method public boolean isTypeCf();
@@ -5899,7 +5900,7 @@ package android.telephony.ims {
   }
 
   public final class ImsSsInfo implements android.os.Parcelable {
-    ctor public ImsSsInfo();
+    ctor public ImsSsInfo(int, java.lang.String);
     method public int describeContents();
     method public java.lang.String getIcbNum();
     method public int getStatus();
