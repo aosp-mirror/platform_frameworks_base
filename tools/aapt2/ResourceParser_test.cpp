@@ -164,6 +164,39 @@ TEST_F(ResourceParserTest, ParseStringWithWhitespace) {
   EXPECT_THAT(*str, StrValueEq("  This is what  I think  "));
 }
 
+TEST_F(ResourceParserTest, ParseStringTruncateASCII) {
+  // Tuncate leading and trailing whitespace
+  EXPECT_TRUE(TestParse(R"(<string name="foo">&#32;Hello&#32;</string>)"));
+
+  String* str = test::GetValue<String>(&table_, "string/foo");
+  ASSERT_THAT(str, NotNull());
+  EXPECT_THAT(*str->value, StrEq("Hello"));
+  EXPECT_THAT(str->untranslatable_sections, IsEmpty());
+
+  // AAPT does not truncate unicode whitespace
+  EXPECT_TRUE(TestParse(R"(<string name="foo2">\u0020\Hello\u0020</string>)"));
+
+  str = test::GetValue<String>(&table_, "string/foo2");
+  ASSERT_THAT(str, NotNull());
+  EXPECT_THAT(*str->value, StrEq(" Hello "));
+  EXPECT_THAT(str->untranslatable_sections, IsEmpty());
+
+  // Preserve non-ASCII whitespace including extended ASCII characters
+  EXPECT_TRUE(TestParse(R"(<string name="foo3">&#160;Hello&#160;</string>)"));
+
+  str = test::GetValue<String>(&table_, "string/foo3");
+  ASSERT_THAT(str, NotNull());
+  EXPECT_THAT(*str->value, StrEq("\xC2\xA0Hello\xC2\xA0"));
+  EXPECT_THAT(str->untranslatable_sections, IsEmpty());
+
+  EXPECT_TRUE(TestParse(R"(<string name="foo4">2005年6月1日</string>)"));
+
+  str = test::GetValue<String>(&table_, "string/foo4");
+  ASSERT_THAT(str, NotNull());
+  EXPECT_THAT(*str->value, StrEq("2005年6月1日"));
+  EXPECT_THAT(str->untranslatable_sections, IsEmpty());
+}
+
 TEST_F(ResourceParserTest, ParseStyledStringWithWhitespace) {
   std::string input = R"(<string name="foo">  <b> My <i> favorite</i> string </b>  </string>)";
   ASSERT_TRUE(TestParse(input));
