@@ -380,6 +380,7 @@ static JavaRef<jobject> ModulePropertiesFromHal(JNIEnv *env, const V1_0::Propert
     auto jProduct = make_javastr(env, prop10.product);
     auto jVersion = make_javastr(env, prop10.version);
     auto jSerial = make_javastr(env, prop10.serial);
+    constexpr bool isInitializationRequired = true;
     bool isBgScanSupported = prop11 ? prop11->supportsBackgroundScanning : false;
     auto jVendorInfo = prop11 ? VendorInfoFromHal(env, prop11->vendorInfo) : nullptr;
 
@@ -394,9 +395,9 @@ static JavaRef<jobject> ModulePropertiesFromHal(JNIEnv *env, const V1_0::Propert
     return make_javaref(env, env->NewObject(gjni.ModuleProperties.clazz,
             gjni.ModuleProperties.cstor, moduleId, jServiceName.get(), prop10.classId,
             jImplementor.get(), jProduct.get(), jVersion.get(), jSerial.get(), prop10.numTuners,
-            prop10.numAudioSources, prop10.supportsCapture, jBands.get(), isBgScanSupported,
-            jSupportedProgramTypes.get(), jSupportedIdentifierTypes.get(), nullptr,
-            jVendorInfo.get()));
+            prop10.numAudioSources, isInitializationRequired, prop10.supportsCapture, jBands.get(),
+            isBgScanSupported, jSupportedProgramTypes.get(), jSupportedIdentifierTypes.get(),
+            nullptr, jVendorInfo.get()));
 }
 
 JavaRef<jobject> ModulePropertiesFromHal(JNIEnv *env, const V1_0::Properties &properties,
@@ -712,7 +713,7 @@ void register_android_server_broadcastradio_convert(JNIEnv *env) {
     gjni.ModuleProperties.clazz = MakeGlobalRefOrDie(env, modulePropertiesClass);
     gjni.ModuleProperties.cstor = GetMethodIDOrDie(env, modulePropertiesClass, "<init>",
             "(ILjava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;"
-            "Ljava/lang/String;IIZ[Landroid/hardware/radio/RadioManager$BandDescriptor;Z"
+            "Ljava/lang/String;IIZZ[Landroid/hardware/radio/RadioManager$BandDescriptor;Z"
             "[I[ILjava/util/Map;Ljava/util/Map;)V");
 
     auto programInfoClass = FindClassOrDie(env, "android/hardware/radio/RadioManager$ProgramInfo");
