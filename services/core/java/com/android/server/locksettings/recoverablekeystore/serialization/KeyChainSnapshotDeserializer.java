@@ -23,6 +23,9 @@ import static com.android.server.locksettings.recoverablekeystore.serialization.
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_ALIAS;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_APPLICATION_KEY;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_APPLICATION_KEYS;
+
+import static com.android.server.locksettings.recoverablekeystore.serialization
+        .KeyChainSnapshotSchema.TAG_BACKEND_PUBLIC_KEY;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_COUNTER_ID;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_RECOVERY_KEY_MATERIAL;
 import static com.android.server.locksettings.recoverablekeystore.serialization.KeyChainSnapshotSchema.TAG_KEY_CHAIN_PROTECTION_PARAMS;
@@ -126,6 +129,11 @@ public class KeyChainSnapshotDeserializer {
                         throw new KeyChainSnapshotParserException(
                                 "Could not set trustedHardwareCertPath", e);
                     }
+                    break;
+
+                case TAG_BACKEND_PUBLIC_KEY:
+                    builder.setTrustedHardwarePublicKey(
+                            readBlobTag(parser, TAG_BACKEND_PUBLIC_KEY));
                     break;
 
                 case TAG_KEY_CHAIN_PROTECTION_PARAMS_LIST:

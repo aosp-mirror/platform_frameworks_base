@@ -38,6 +38,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.os.FileUtils;
 import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
@@ -49,7 +50,6 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import android.util.Log;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
 
@@ -72,6 +72,9 @@ import javax.crypto.SecretKey;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class KeySyncTaskTest {
+
+    private static final String SNAPSHOT_TOP_LEVEL_DIRECTORY = "recoverablekeystore";
+
     private static final String KEY_ALGORITHM = "AES";
     private static final String ANDROID_KEY_STORE_PROVIDER = "AndroidKeyStore";
     private static final String TEST_ROOT_CERT_ALIAS = "trusted_root";
@@ -117,7 +120,7 @@ public class KeySyncTaskTest {
                 TEST_ROOT_CERT_ALIAS);
         mRecoverableKeyStoreDb.setActiveRootOfTrust(TEST_USER_ID, TEST_RECOVERY_AGENT_UID2,
                 TEST_ROOT_CERT_ALIAS);
-        mRecoverySnapshotStorage = new RecoverySnapshotStorage();
+        mRecoverySnapshotStorage = new RecoverySnapshotStorage(context.getFilesDir());
 
         mKeySyncTask = new KeySyncTask(
                 mRecoverableKeyStoreDb,
@@ -139,6 +142,10 @@ public class KeySyncTaskTest {
     public void tearDown() {
         mRecoverableKeyStoreDb.close();
         mDatabaseFile.delete();
+
+        File file = new File(InstrumentationRegistry.getTargetContext().getFilesDir(),
+                SNAPSHOT_TOP_LEVEL_DIRECTORY);
+        FileUtils.deleteContentsAndDir(file);
     }
 
     @Test
