@@ -185,6 +185,7 @@ import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
+import android.content.pm.SELinuxUtil;
 import android.content.pm.ServiceInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
@@ -10438,6 +10439,14 @@ public class PackageManagerService extends IPackageManager.Stub
             reportSettingsProblem(Log.WARN, msg);
         }
 
+        final int userId = (user == null ? UserHandle.USER_SYSTEM : user.getIdentifier());
+        // for existing packages, change the install state; but, only if it's explicitly specified
+        if (!createNewPackage) {
+            final boolean instantApp = (scanFlags & SCAN_AS_INSTANT_APP) != 0;
+            final boolean fullApp = (scanFlags & SCAN_AS_FULL_APP) != 0;
+            setInstantAppForUser(pkgSetting, userId, instantApp, fullApp);
+        }
+
         if (disabledPkgSetting != null) {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
         }
@@ -10460,6 +10469,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         pkg.applicationInfo.seInfo = SELinuxMMAC.getSeInfo(pkg, isPrivileged,
                 pkg.applicationInfo.targetSandboxVersion, targetSdkVersion);
+        pkg.applicationInfo.seInfoUser = SELinuxUtil.assignSeinfoUser(pkgSetting.readUserState(
+                userId == UserHandle.USER_ALL ? UserHandle.USER_SYSTEM : userId));
 
         pkg.mExtras = pkgSetting;
         pkg.applicationInfo.processName = fixProcessName(
@@ -13930,7 +13941,7 @@ public class PackageManagerService extends IPackageManager.Stub
         return PackageManager.INSTALL_SUCCEEDED;
     }
 
-    void setInstantAppForUser(PackageSetting pkgSetting, int userId,
+    static void setInstantAppForUser(PackageSetting pkgSetting, int userId,
             boolean instantApp, boolean fullApp) {
         // no state specified; do nothing
         if (!instantApp && !fullApp) {
@@ -16332,10 +16343,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         childPs.oldCodePaths = ps.oldCodePaths;
                     }
                 }
-                // set instant app status, but, only if it's explicitly specified
-                final boolean instantApp = (scanFlags & SCAN_AS_INSTANT_APP) != 0;
-                final boolean fullApp = (scanFlags & SCAN_AS_FULL_APP) != 0;
-                setInstantAppForUser(ps, user.getIdentifier(), instantApp, fullApp);
                 prepareAppDataAfterInstallLIF(newPackage);
                 addedPkg = true;
                 mDexManager.notifyPackageUpdated(newPackage.packageName,
@@ -22299,17 +22306,25 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     + Integer.toHexString(flags));
         }
 
+        final PackageSetting ps;
+        synchronized (mPackages) {
+            ps = mSettings.mPackages.get(pkg.packageName);
+        }
         final String volumeUuid = pkg.volumeUuid;
         final String packageName = pkg.packageName;
-        final ApplicationInfo app = pkg.applicationInfo;
+        final ApplicationInfo app = (ps == null)
+                ? pkg.applicationInfo
+                : PackageParser.generateApplicationInfo(pkg, 0, ps.readUserState(userId), userId);
+
         final int appId = UserHandle.getAppId(app.uid);
 
         Preconditions.checkNotNull(app.seInfo);
 
+        final String seInfo = app.seInfo + (app.seInfoUser != null ? app.seInfoUser : "");
         long ceDataInode = -1;
         try {
             ceDataInode = mInstaller.createAppData(volumeUuid, packageName, userId, flags,
-                    appId, app.seInfo, app.targetSdkVersion);
+                    appId, seInfo, app.targetSdkVersion);
         } catch (InstallerException e) {
             if (app.isSystemApp()) {
                 logCriticalInfo(Log.ERROR, "Failed to create app data for " + packageName
@@ -22317,7 +22332,7 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 destroyAppDataLeafLIF(pkg, userId, flags);
                 try {
                     ceDataInode = mInstaller.createAppData(volumeUuid, packageName, userId, flags,
-                            appId, app.seInfo, app.targetSdkVersion);
+                            appId, seInfo, app.targetSdkVersion);
                     logCriticalInfo(Log.DEBUG, "Recovery succeeded!");
                 } catch (InstallerException e2) {
                     logCriticalInfo(Log.DEBUG, "Recovery failed!");
@@ -22340,7 +22355,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         if ((flags & StorageManager.FLAG_STORAGE_CE) != 0 && ceDataInode != -1) {
             // TODO: mark this structure as dirty so we persist it!
             synchronized (mPackages) {
-                final PackageSetting ps = mSettings.mPackages.get(packageName);
                 if (ps != null) {
                     ps.setCeDataInode(ceDataInode, userId);
                 }
