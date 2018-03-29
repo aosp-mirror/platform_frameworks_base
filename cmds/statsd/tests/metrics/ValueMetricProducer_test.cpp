@@ -62,7 +62,7 @@ TEST(ValueMetricProducerTest, TestNonDimensionalEvents) {
     // For now we still need this so that it doesn't do real pulling.
     shared_ptr<MockStatsPullerManager> pullerManager =
             make_shared<StrictMock<MockStatsPullerManager>>();
-    EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _)).WillOnce(Return());
+    EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
 
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
@@ -141,11 +141,12 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     shared_ptr<MockStatsPullerManager> pullerManager =
             make_shared<StrictMock<MockStatsPullerManager>>();
-    EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _)).WillOnce(Return());
+    EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillRepeatedly(Return());
 
-    EXPECT_CALL(*pullerManager, Pull(tagId, _))
-            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+    EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
+            .WillOnce(Invoke([](int tagId, int64_t timeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
                 shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
                 event->write(tagId);
@@ -154,7 +155,8 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
                 data->push_back(event);
                 return true;
             }))
-            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+            .WillOnce(Invoke([](int tagId, int64_t timeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
                 shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 10);
                 event->write(tagId);
@@ -260,10 +262,11 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     shared_ptr<MockStatsPullerManager> pullerManager =
             make_shared<StrictMock<MockStatsPullerManager>>();
-    EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _)).WillOnce(Return());
+    EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
-    EXPECT_CALL(*pullerManager, Pull(tagId, _))
-            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+    EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
+            .WillOnce(Invoke([](int tagId, int64_t timeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
                 data->clear();
                 shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
                 event->write(tagId);

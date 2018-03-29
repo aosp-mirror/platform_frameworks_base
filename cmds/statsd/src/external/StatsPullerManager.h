@@ -26,10 +26,9 @@ class StatsPullerManager {
  public:
     virtual ~StatsPullerManager() {}
 
-    virtual void RegisterReceiver(int tagId,
-                                  wp <PullDataReceiver> receiver,
-                                  long intervalMs) {
-        mPullerManager.RegisterReceiver(tagId, receiver, intervalMs);
+    virtual void RegisterReceiver(int tagId, wp<PullDataReceiver> receiver, int64_t nextPullTimeNs,
+                                  int64_t intervalNs) {
+        mPullerManager.RegisterReceiver(tagId, receiver, nextPullTimeNs, intervalNs);
     };
 
     virtual void UnRegisterReceiver(int tagId, wp <PullDataReceiver> receiver) {
@@ -45,13 +44,9 @@ class StatsPullerManager {
         mPullerManager.OnAlarmFired();
     }
 
-    virtual bool
-    Pull(const int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-        return mPullerManager.Pull(tagId, data);
-    }
-
-    void SetTimeBaseSec(const long timeBaseSec) {
-        mPullerManager.SetTimeBaseSec(timeBaseSec);
+    virtual bool Pull(const int tagId, const int64_t timesNs,
+                      vector<std::shared_ptr<LogEvent>>* data) {
+        return mPullerManager.Pull(tagId, timesNs, data);
     }
 
     int ForceClearPullerCache() {
@@ -62,8 +57,8 @@ class StatsPullerManager {
         mPullerManager.SetStatsCompanionService(statsCompanionService);
     }
 
-    int ClearPullerCacheIfNecessary(long timestampSec) {
-        return mPullerManager.ClearPullerCacheIfNecessary(timestampSec);
+    int ClearPullerCacheIfNecessary(int64_t timestampNs) {
+        return mPullerManager.ClearPullerCacheIfNecessary(timestampNs);
     }
 
  private:
