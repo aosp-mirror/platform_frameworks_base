@@ -33,6 +33,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,8 +47,8 @@ import android.os.FileUtils;
 import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
-import android.security.keystore.recovery.KeyDerivationParams;
 import android.security.keystore.recovery.KeyChainSnapshot;
+import android.security.keystore.recovery.KeyDerivationParams;
 import android.security.keystore.recovery.RecoveryController;
 import android.security.keystore.recovery.WrappedApplicationKey;
 import android.support.test.InstrumentationRegistry;
@@ -59,6 +64,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -94,6 +100,7 @@ public class KeySyncTaskTest {
 
     @Mock private PlatformKeyManager mPlatformKeyManager;
     @Mock private RecoverySnapshotListenersStorage mSnapshotListenersStorage;
+    @Spy private TestOnlyInsecureCertificateHelper mTestOnlyInsecureCertificateHelper;
 
     private RecoverySnapshotStorage mRecoverySnapshotStorage;
     private RecoverableKeyStoreDb mRecoverableKeyStoreDb;
@@ -130,7 +137,8 @@ public class KeySyncTaskTest {
                 TEST_CREDENTIAL_TYPE,
                 TEST_CREDENTIAL,
                 /*credentialUpdated=*/ false,
-                mPlatformKeyManager);
+                mPlatformKeyManager,
+                mTestOnlyInsecureCertificateHelper);
 
         mWrappingKey = generateAndroidKeyStoreKey();
         mEncryptKey = new PlatformEncryptionKey(TEST_GENERATION_ID, mWrappingKey);
@@ -284,6 +292,100 @@ public class KeySyncTaskTest {
     }
 
     @Test
+    public void run_InTestModeWithWhitelistedCredentials() throws Exception {
+        mRecoverableKeyStoreDb.setServerParams(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_VAULT_HANDLE);
+        mRecoverableKeyStoreDb.setPlatformKeyGenerationId(TEST_USER_ID, TEST_GENERATION_ID);
+        addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
+        mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
+
+        // Enter test mode with whitelisted credentials
+        when(mTestOnlyInsecureCertificateHelper.isTestOnlyCertificate(any())).thenReturn(true);
+        when(mTestOnlyInsecureCertificateHelper.doesCredentailSupportInsecureMode(anyInt(), any()))
+                .thenReturn(true);
+        mKeySyncTask.run();
+
+        verify(mTestOnlyInsecureCertificateHelper)
+                .getDefaultCertificateAliasIfEmpty(eq(TEST_ROOT_CERT_ALIAS));
+
+        // run whitelist checks
+        verify(mTestOnlyInsecureCertificateHelper)
+                .doesCredentailSupportInsecureMode(anyInt(), any());
+        verify(mTestOnlyInsecureCertificateHelper)
+                .keepOnlyWhitelistedInsecureKeys(any());
+
+        KeyChainSnapshot keyChainSnapshot = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
+        assertNotNull(keyChainSnapshot); // created snapshot
+        List<WrappedApplicationKey> applicationKeys = keyChainSnapshot.getWrappedApplicationKeys();
+        assertThat(applicationKeys).hasSize(0); // non whitelisted key is not included
+    }
+
+    @Test
+    public void run_InTestModeWithNonWhitelistedCredentials() throws Exception {
+        mRecoverableKeyStoreDb.setServerParams(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_VAULT_HANDLE);
+        mRecoverableKeyStoreDb.setPlatformKeyGenerationId(TEST_USER_ID, TEST_GENERATION_ID);
+        addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
+        mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
+
+        // Enter test mode with non whitelisted credentials
+        when(mTestOnlyInsecureCertificateHelper.isTestOnlyCertificate(any())).thenReturn(true);
+        when(mTestOnlyInsecureCertificateHelper.doesCredentailSupportInsecureMode(anyInt(), any()))
+                .thenReturn(false);
+        mKeySyncTask.run();
+
+        assertNull(mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID)); // not created
+        verify(mTestOnlyInsecureCertificateHelper)
+                .getDefaultCertificateAliasIfEmpty(eq(TEST_ROOT_CERT_ALIAS));
+        verify(mTestOnlyInsecureCertificateHelper)
+                .doesCredentailSupportInsecureMode(anyInt(), any());
+    }
+
+    @Test
+    public void run_doesNotFilterCredentialsAndAliasesInProd() throws Exception {
+        mRecoverableKeyStoreDb.setServerParams(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_VAULT_HANDLE);
+        mRecoverableKeyStoreDb.setPlatformKeyGenerationId(TEST_USER_ID, TEST_GENERATION_ID);
+        addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
+        mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
+
+        mKeySyncTask.run();
+        assertNotNull(mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID));
+
+        verify(mTestOnlyInsecureCertificateHelper)
+                .getDefaultCertificateAliasIfEmpty(eq(TEST_ROOT_CERT_ALIAS));
+        verify(mTestOnlyInsecureCertificateHelper, atLeast(1))
+                .isTestOnlyCertificate(eq(TEST_ROOT_CERT_ALIAS));
+
+        // no whitelists check
+        verify(mTestOnlyInsecureCertificateHelper, never())
+                .doesCredentailSupportInsecureMode(anyInt(), any());
+        verify(mTestOnlyInsecureCertificateHelper, never())
+                .keepOnlyWhitelistedInsecureKeys(any());
+    }
+
+    @Test
+    public void run_replacesNullActiveRootAliasWithDefaultValue() throws Exception {
+        mRecoverableKeyStoreDb.setServerParams(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_VAULT_HANDLE);
+        mRecoverableKeyStoreDb.setPlatformKeyGenerationId(TEST_USER_ID, TEST_GENERATION_ID);
+        addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
+        mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
+        mRecoverableKeyStoreDb.setActiveRootOfTrust(TEST_USER_ID, TEST_RECOVERY_AGENT_UID,
+                /*alias=*/ null);
+
+        when(mTestOnlyInsecureCertificateHelper.getDefaultCertificateAliasIfEmpty(null))
+                .thenReturn(TEST_ROOT_CERT_ALIAS); // override default.
+        mKeySyncTask.run();
+
+        verify(mTestOnlyInsecureCertificateHelper).getDefaultCertificateAliasIfEmpty(null);
+    }
+
+    @Test
     public void run_sendsEncryptedKeysIfAvailableToSync_withRawPublicKey() throws Exception {
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
@@ -398,7 +500,8 @@ public class KeySyncTaskTest {
                 CREDENTIAL_TYPE_PASSWORD,
                 "password",
                 /*credentialUpdated=*/ false,
-                mPlatformKeyManager);
+                mPlatformKeyManager,
+                mTestOnlyInsecureCertificateHelper);
 
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
@@ -424,7 +527,8 @@ public class KeySyncTaskTest {
                 CREDENTIAL_TYPE_PASSWORD,
                 /*credential=*/ "1234",
                 /*credentialUpdated=*/ false,
-                mPlatformKeyManager);
+                mPlatformKeyManager,
+                mTestOnlyInsecureCertificateHelper);
 
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
@@ -451,7 +555,8 @@ public class KeySyncTaskTest {
                 CREDENTIAL_TYPE_PATTERN,
                 "12345",
                 /*credentialUpdated=*/ false,
-                mPlatformKeyManager);
+                mPlatformKeyManager,
+                mTestOnlyInsecureCertificateHelper);
 
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
@@ -532,7 +637,8 @@ public class KeySyncTaskTest {
           /*credentialType=*/ 3,
           "12345",
           /*credentialUpdated=*/ false,
-          mPlatformKeyManager);
+          mPlatformKeyManager,
+          mTestOnlyInsecureCertificateHelper);
 
       addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
 
