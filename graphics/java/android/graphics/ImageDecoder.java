@@ -21,10 +21,12 @@ import static android.system.OsConstants.SEEK_SET;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import android.annotation.AnyThread;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.annotation.WorkerThread;
 import android.content.ContentResolver;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
@@ -65,6 +67,16 @@ public final class ImageDecoder implements AutoCloseable {
 
     /**
      *  Source of the encoded image data.
+     *
+     *  <p>This object references the data that will be used to decode a
+     *  Drawable or Bitmap in {@link #decodeDrawable} or {@link #decodeBitmap}.
+     *  Constructing a {@code Source} (with one of the overloads of
+     *  {@code createSource}) can be done on any thread because the construction
+     *  simply captures values. The real work is done in decodeDrawable or
+     *  decodeBitmap.</p>
+     *
+     *  <p>Further, a Source object can be reused with different settings, or
+     *  even used simultaneously in multiple threads.</p>
      */
     public static abstract class Source {
         private Source() {}
@@ -120,7 +132,8 @@ public final class ImageDecoder implements AutoCloseable {
                 int length = mBuffer.limit() - mBuffer.position();
                 return nCreate(mBuffer.array(), offset, length, this);
             }
-            return nCreate(mBuffer, mBuffer.position(), mBuffer.limit(), this);
+            ByteBuffer buffer = mBuffer.slice();
+            return nCreate(buffer, buffer.position(), buffer.limit(), this);
         }
     }
 
@@ -232,6 +245,8 @@ public final class ImageDecoder implements AutoCloseable {
 
     /**
      * For backwards compatibility, this does *not* close the InputStream.
+     *
+     * Further, unlike other Sources, this one is not reusable.
      */
     private static class InputStreamSource extends Source {
         InputStreamSource(Resources res, InputStream is, int inputDensity) {
@@ -322,12 +337,17 @@ public final class ImageDecoder implements AutoCloseable {
         final Resources mResources;
         final int       mResId;
         int             mResDensity;
+        private Object  mLock = new Object();
 
         @Override
         public Resources getResources() { return mResources; }
 
         @Override
-        public int getDensity() { return mResDensity; }
+        public int getDensity() {
+            synchronized (mLock) {
+                return mResDensity;
+            }
+        }
 
         @Override
         public ImageDecoder createImageDecoder() throws IOException {
@@ -336,10 +356,12 @@ public final class ImageDecoder implements AutoCloseable {
             // keep it alive.
             InputStream is = mResources.openRawResource(mResId, value);
 
-            if (value.density == TypedValue.DENSITY_DEFAULT) {
-                mResDensity = DisplayMetrics.DENSITY_DEFAULT;
-            } else if (value.density != TypedValue.DENSITY_NONE) {
-                mResDensity = value.density;
+            synchronized (mLock) {
+                if (value.density == TypedValue.DENSITY_DEFAULT) {
+                    mResDensity = DisplayMetrics.DENSITY_DEFAULT;
+                } else if (value.density != TypedValue.DENSITY_NONE) {
+                    mResDensity = value.density;
+                }
             }
 
             return createFromAsset((AssetInputStream) is, this);
@@ -455,6 +477,9 @@ public final class ImageDecoder implements AutoCloseable {
     /**
      *  Optional listener supplied to {@link #decodeDrawable} or
      *  {@link #decodeBitmap}.
+     *
+     *  <p>This is necessary in order to change the default settings of the
+     *  decode.</p>
      */
     public static interface OnHeaderDecodedListener {
         /**
@@ -546,6 +571,9 @@ public final class ImageDecoder implements AutoCloseable {
 
         /**
          *  Retrieve the {@link Source} that was interrupted.
+         *
+         *  <p>This can be used for equality checking to find the Source which
+         *  failed to completely decode.</p>
          */
         @NonNull
         public Source getSource() {
@@ -658,6 +686,7 @@ public final class ImageDecoder implements AutoCloseable {
      * @return a new Source object, which can be passed to
      *      {@link #decodeDrawable} or {@link #decodeBitmap}.
      */
+    @AnyThread
     @NonNull
     public static Source createSource(@NonNull Resources res, int resId)
     {
@@ -672,6 +701,7 @@ public final class ImageDecoder implements AutoCloseable {
      * @return a new Source object, which can be passed to
      *      {@link #decodeDrawable} or {@link #decodeBitmap}.
      */
+    @AnyThread
     @NonNull
     public static Source createSource(@NonNull ContentResolver cr,
             @NonNull Uri uri) {
@@ -683,6 +713,7 @@ public final class ImageDecoder implements AutoCloseable {
      *
      * @hide
      */
+    @AnyThread
     @NonNull
     public static Source createSource(@NonNull ContentResolver cr,
             @NonNull Uri uri, @Nullable Resources res) {
@@ -692,6 +723,7 @@ public final class ImageDecoder implements AutoCloseable {
     /**
      * Create a new {@link Source} from a file in the "assets" directory.
      */
+    @AnyThread
     @NonNull
     public static Source createSource(@NonNull AssetManager assets, @NonNull String fileName) {
         return new AssetSource(assets, fileName);
@@ -709,6 +741,7 @@ public final class ImageDecoder implements AutoCloseable {
      *      not within data.
      * @hide
      */
+    @AnyThread
     @NonNull
     public static Source createSource(@NonNull byte[] data, int offset,
             int length) throws ArrayIndexOutOfBoundsException {
@@ -727,6 +760,7 @@ public final class ImageDecoder implements AutoCloseable {
      * See {@link #createSource(byte[], int, int).
      * @hide
      */
+    @AnyThread
     @NonNull
     public static Source createSource(@NonNull byte[] data) {
         return createSource(data, 0, data.length);
@@ -744,24 +778,35 @@ public final class ImageDecoder implements AutoCloseable {
      * be modified, even after the {@code AnimatedImageDrawable} is returned.
      * {@code buffer}'s contents should never be modified during decode.</p>
      */
+    @AnyThread
     @NonNull
     public static Source createSource(@NonNull ByteBuffer buffer) {
-        return new ByteBufferSource(buffer.slice());
+        return new ByteBufferSource(buffer);
     }
 
     /**
      * Internal API used to generate bitmaps for use by Drawables (i.e. BitmapDrawable)
+     *
+     * <p>Unlike other Sources, this one cannot be reused.</p>
+     *
      * @hide
      */
+    @AnyThread
+    @NonNull
     public static Source createSource(Resources res, InputStream is) {
         return new InputStreamSource(res, is, Bitmap.getDefaultDensity());
     }
 
     /**
      * Internal API used to generate bitmaps for use by Drawables (i.e. BitmapDrawable)
+     *
+     * <p>Unlike other Sources, this one cannot be reused.</p>
+     *
      * @hide
      */
+    @AnyThread
     @TestApi
+    @NonNull
     public static Source createSource(Resources res, InputStream is, int density) {
         return new InputStreamSource(res, is, density);
     }
@@ -769,6 +814,7 @@ public final class ImageDecoder implements AutoCloseable {
     /**
      * Create a new {@link Source} from a {@link java.io.File}.
      */
+    @AnyThread
     @NonNull
     public static Source createSource(@NonNull File file) {
         return new FileSource(file);
@@ -821,6 +867,9 @@ public final class ImageDecoder implements AutoCloseable {
      *
      *  <p>Only the last call to this or {@link #setTargetSampleSize} is
      *  respected.</p>
+     *
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      *
      *  @param width must be greater than 0.
      *  @param height must be greater than 0.
@@ -888,6 +937,9 @@ public final class ImageDecoder implements AutoCloseable {
      *
      *  <p>Only the last call to this or {@link #setTargetSize} is respected.</p>
      *
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
+     *
      *  @param sampleSize Sampling rate of the encoded image.
      *  @return this object for chaining.
      */
@@ -948,7 +1000,10 @@ public final class ImageDecoder implements AutoCloseable {
     /**
      *  Choose the backing for the pixel memory.
      *
-     *  This is ignored for animated drawables.
+     *  <p>This is ignored for animated drawables.</p>
+     *
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      *
      *  @param allocator Type of allocator to use.
      *  @return this object for chaining.
@@ -981,6 +1036,9 @@ public final class ImageDecoder implements AutoCloseable {
      *  {@link #decodeDrawable}; attempting to decode an unpremultiplied
      *  {@link Drawable} will throw an {@link java.lang.IllegalStateException}.
      *  </p>
+     *
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      *
      *  @return this object for chaining.
      */
@@ -1025,6 +1083,9 @@ public final class ImageDecoder implements AutoCloseable {
      *  {@link Canvas} will be recorded immediately and then applied to each
      *  frame.</p>
      *
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
+     *
      *  @return this object for chaining.
      */
     public ImageDecoder setPostProcessor(@Nullable PostProcessor p) {
@@ -1045,6 +1106,9 @@ public final class ImageDecoder implements AutoCloseable {
      *
      *  <p>Will be called if there is an error in the input. Without one, an
      *  error will result in an Exception being thrown.</p>
+     *
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      *
      *  @return this object for chaining.
      */
@@ -1073,6 +1137,9 @@ public final class ImageDecoder implements AutoCloseable {
      *  {@link BitmapRegionDecoder#decodeRegion}. This supports all formats,
      *  but merely crops the output.</p>
      *
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
+     *
      *  @return this object for chaining.
      */
     public ImageDecoder setCrop(@Nullable Rect subset) {
@@ -1093,6 +1160,9 @@ public final class ImageDecoder implements AutoCloseable {
      *
      *  If the image is a nine patch, this Rect will be set to the padding
      *  rectangle during decode. Otherwise it will not be modified.
+     *
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      *
      *  @return this object for chaining.
      *
@@ -1118,6 +1188,9 @@ public final class ImageDecoder implements AutoCloseable {
      *  which would require retrieving the Bitmap from the returned Drawable in
      *  order to modify. Attempting to decode a mutable {@link Drawable} will
      *  throw an {@link java.lang.IllegalStateException}.</p>
+     *
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      *
      *  @return this object for chaining.
      */
@@ -1161,6 +1234,9 @@ public final class ImageDecoder implements AutoCloseable {
      *  This necessarily lowers the quality of the output, but saves half
      *  the memory used.</p>
      *
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
+     *
      *  @return this object for chaining.
      */
     public ImageDecoder setConserveMemory(boolean conserveMemory) {
@@ -1190,6 +1266,9 @@ public final class ImageDecoder implements AutoCloseable {
      *  combine them will result in {@link #decodeDrawable}/
      *  {@link #decodeBitmap} throwing an
      *  {@link java.lang.IllegalStateException}.</p>
+     *
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      *
      *  @return this object for chaining.
      */
@@ -1267,6 +1346,9 @@ public final class ImageDecoder implements AutoCloseable {
      * <code>IllegalArgumentException</code> will be thrown by the decode methods
      * if calling {@link ColorSpace.Rgb#getTransferParameters()} on the
      * specified color space returns null.</p>
+     *
+     * <p>Like all setters on ImageDecoder, this must be called inside
+     * {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      */
     public ImageDecoder setTargetColorSpace(ColorSpace colorSpace) {
         mDesiredColorSpace = colorSpace;
@@ -1334,6 +1416,7 @@ public final class ImageDecoder implements AutoCloseable {
         }
     }
 
+    @WorkerThread
     @NonNull
     private Bitmap decodeBitmapInternal() throws IOException {
         checkState();
@@ -1362,10 +1445,12 @@ public final class ImageDecoder implements AutoCloseable {
      *  @param listener for learning the {@link ImageInfo} and changing any
      *      default settings on the {@code ImageDecoder}. This will be called on
      *      the same thread as {@code decodeDrawable} before that method returns.
+     *      This is required in order to change any of the default settings.
      *  @return Drawable for displaying the image.
      *  @throws IOException if {@code src} is not found, is an unsupported
      *      format, or cannot be decoded for any reason.
      */
+    @WorkerThread
     @NonNull
     public static Drawable decodeDrawable(@NonNull Source src,
             @NonNull OnHeaderDecodedListener listener) throws IOException {
@@ -1376,6 +1461,7 @@ public final class ImageDecoder implements AutoCloseable {
         return decodeDrawableImpl(src, listener);
     }
 
+    @WorkerThread
     @NonNull
     private static Drawable decodeDrawableImpl(@NonNull Source src,
             @Nullable OnHeaderDecodedListener listener) throws IOException {
@@ -1436,8 +1522,18 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     /**
-     * See {@link #decodeDrawable(Source, OnHeaderDecodedListener)}.
+     *  Create a {@link Drawable} from a {@code Source}.
+     *
+     *  <p>Since there is no {@link OnHeaderDecodedListener}, the default
+     *  settings will be used. In order to change any settings, call
+     *  {@link #decodeDrawable(Source, OnHeaderDecodedListener)} instead.</p>
+     *
+     *  @param src representing the encoded image.
+     *  @return Drawable for displaying the image.
+     *  @throws IOException if {@code src} is not found, is an unsupported
+     *      format, or cannot be decoded for any reason.
      */
+    @WorkerThread
     @NonNull
     public static Drawable decodeDrawable(@NonNull Source src)
             throws IOException {
@@ -1451,10 +1547,12 @@ public final class ImageDecoder implements AutoCloseable {
      *  @param listener for learning the {@link ImageInfo} and changing any
      *      default settings on the {@code ImageDecoder}. This will be called on
      *      the same thread as {@code decodeBitmap} before that method returns.
+     *      This is required in order to change any of the default settings.
      *  @return Bitmap containing the image.
      *  @throws IOException if {@code src} is not found, is an unsupported
      *      format, or cannot be decoded for any reason.
      */
+    @WorkerThread
     @NonNull
     public static Bitmap decodeBitmap(@NonNull Source src,
             @NonNull OnHeaderDecodedListener listener) throws IOException {
@@ -1465,6 +1563,7 @@ public final class ImageDecoder implements AutoCloseable {
         return decodeBitmapImpl(src, listener);
     }
 
+    @WorkerThread
     @NonNull
     private static Bitmap decodeBitmapImpl(@NonNull Source src,
             @Nullable OnHeaderDecodedListener listener) throws IOException {
@@ -1536,8 +1635,18 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     /**
-     *  See {@link #decodeBitmap(Source, OnHeaderDecodedListener)}.
+     *  Create a {@link Bitmap} from a {@code Source}.
+     *
+     *  <p>Since there is no {@link OnHeaderDecodedListener}, the default
+     *  settings will be used. In order to change any settings, call
+     *  {@link #decodeBitmap(Source, OnHeaderDecodedListener)} instead.</p>
+     *
+     *  @param src representing the encoded image.
+     *  @return Bitmap containing the image.
+     *  @throws IOException if {@code src} is not found, is an unsupported
+     *      format, or cannot be decoded for any reason.
      */
+    @WorkerThread
     @NonNull
     public static Bitmap decodeBitmap(@NonNull Source src) throws IOException {
         return decodeBitmapImpl(src, null);
