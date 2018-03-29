@@ -808,7 +808,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         final String[] getStaticOverlayPaths(List<PackageParser.Package> overlayPackages,
-                String targetPath) {
+                String targetPath, Object installLock) {
             if (overlayPackages == null || overlayPackages.isEmpty()) {
                 return null;
             }
@@ -828,7 +828,16 @@ public class PackageManagerService extends IPackageManager.Stub
                     //
                     // OverlayManagerService will update each of them with a correct gid from its
                     // target package app id.
-                    synchronized (mInstallLock) {
+                    if (installLock != null) {
+                        synchronized (installLock) {
+                            mInstaller.idmap(targetPath, overlayPackage.baseCodePath,
+                                    UserHandle.getSharedAppGid(
+                                            UserHandle.getUserGid(UserHandle.USER_SYSTEM)));
+                        }
+                    } else {
+                        // We can call mInstaller without holding mInstallLock because mInstallLock
+                        // is held before running parallel parsing.
+                        // Moreover holding mInstallLock on each parsing thread causes dead-lock.
                         mInstaller.idmap(targetPath, overlayPackage.baseCodePath,
                                 UserHandle.getSharedAppGid(
                                         UserHandle.getUserGid(UserHandle.USER_SYSTEM)));
@@ -853,7 +862,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             // It is safe to keep overlayPackages without holding mPackages because static overlay
             // packages can't be uninstalled or disabled.
-            return getStaticOverlayPaths(overlayPackages, targetPath);
+            return getStaticOverlayPaths(overlayPackages, targetPath, mInstallLock);
         }
 
         @Override public final String[] getOverlayApks(String targetPackageName) {
@@ -890,7 +899,7 @@ public class PackageManagerService extends IPackageManager.Stub
             return mOverlayPackages == null ? null :
                     getStaticOverlayPaths(
                             getStaticOverlayPackages(mOverlayPackages, targetPackageName),
-                            targetPath);
+                            targetPath, null);
         }
     }
 
