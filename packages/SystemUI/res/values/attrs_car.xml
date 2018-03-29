@@ -27,6 +27,13 @@
         <attr name="categories" format="string"/>
         <!-- package names that will be added as extras to the fired intents -->
         <attr name="packages" format="string" />
+        <!-- Alpha value to used when in selected state.  Defaults 1f  -->
+        <attr name="selectedAlpha" format="float" />
+        <!-- Alpha value to used when in un-selected state.  Defaults 0.7f  -->
+        <attr name="unselectedAlpha" format="float" />
+        <!-- Render a "more" icon. Defaults true  -->
+        <attr name="useMoreIcon" format="boolean" />
+
     </declare-styleable>
 
 
@@ -38,5 +45,12 @@
         <attr name="longIntent" format="string"/>
         <!-- start the intent as a broad cast instead of an activity if true-->
         <attr name="broadcast" format="boolean"/>
+    </declare-styleable>
+
+    <!-- Custom attributes to configure hvac values -->
+    <declare-styleable name="TemperatureView">
+        <attr name="hvacAreaId" format="integer"/>
+        <attr name="hvacPropertyId" format="integer"/>
+        <attr name="hvacTempFormat" format="string"/>
     </declare-styleable>
 </resources>
