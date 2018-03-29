@@ -445,6 +445,9 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
     /**
      * Returns {@code true} if the key is authorized to be used only if a test of user presence has
      * been performed between the {@code Signature.initSign()} and {@code Signature.sign()} calls.
+     * It requires that the KeyStore implementation have a direct way to validate the user presence
+     * for example a KeyStore hardware backed strongbox can use a button press that is observable
+     * in hardware.
      */
     public boolean isTrustedUserPresenceRequired() {
         return mTrustedUserPresenceRequired;
