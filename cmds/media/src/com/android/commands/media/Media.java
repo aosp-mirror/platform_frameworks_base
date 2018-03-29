@@ -264,13 +264,13 @@ public class Media extends BaseCommand {
                     } else if ("q".equals(line) || "quit".equals(line)) {
                         break;
                     } else if ("play".equals(line)) {
-                        mController.play();
+                        mController.play("");
                     } else if ("pause".equals(line)) {
-                        mController.pause();
+                        mController.pause("");
                     } else if ("next".equals(line)) {
-                        mController.next();
+                        mController.next("");
                     } else if ("previous".equals(line)) {
-                        mController.previous();
+                        mController.previous("");
                     } else {
                         System.out.println("Invalid command: " + line);
                     }
