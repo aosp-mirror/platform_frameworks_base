@@ -101,7 +101,6 @@ public abstract class KeymasterUtils {
      *         require user authentication.
      */
     public static void addUserAuthArgs(KeymasterArguments args, UserAuthArgs spec) {
-        args.addUnsignedInt(KeymasterDefs.KM_TAG_USER_ID, ActivityManager.getCurrentUser());
 
         if (spec.isUserConfirmationRequired()) {
             args.addBoolean(KeymasterDefs.KM_TAG_TRUSTED_CONFIRMATION_REQUIRED);
