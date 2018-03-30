@@ -26,6 +26,8 @@ import android.util.proto.ProtoOutputStream;
 import com.android.okhttp.internalandroidapi.Dns;
 import com.android.okhttp.internalandroidapi.HttpURLConnectionFactory;
 
+import libcore.io.IoUtils;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -142,9 +144,15 @@ public class Network implements Parcelable {
             for (int i = 0; i < hostAddresses.length; i++) {
                 try {
                     Socket socket = createSocket();
-                    if (localAddress != null) socket.bind(localAddress);
-                    socket.connect(new InetSocketAddress(hostAddresses[i], port));
-                    return socket;
+                    boolean failed = true;
+                    try {
+                        if (localAddress != null) socket.bind(localAddress);
+                        socket.connect(new InetSocketAddress(hostAddresses[i], port));
+                        failed = false;
+                        return socket;
+                    } finally {
+                        if (failed) IoUtils.closeQuietly(socket);
+                    }
                 } catch (IOException e) {
                     if (i == (hostAddresses.length - 1)) throw e;
                 }
@@ -161,15 +169,27 @@ public class Network implements Parcelable {
         public Socket createSocket(InetAddress address, int port, InetAddress localAddress,
                 int localPort) throws IOException {
             Socket socket = createSocket();
-            socket.bind(new InetSocketAddress(localAddress, localPort));
-            socket.connect(new InetSocketAddress(address, port));
+            boolean failed = true;
+            try {
+                socket.bind(new InetSocketAddress(localAddress, localPort));
+                socket.connect(new InetSocketAddress(address, port));
+                failed = false;
+            } finally {
+                if (failed) IoUtils.closeQuietly(socket);
+            }
             return socket;
         }
 
         @Override
         public Socket createSocket(InetAddress host, int port) throws IOException {
             Socket socket = createSocket();
-            socket.connect(new InetSocketAddress(host, port));
+            boolean failed = true;
+            try {
+                socket.connect(new InetSocketAddress(host, port));
+                failed = false;
+            } finally {
+                if (failed) IoUtils.closeQuietly(socket);
+            }
             return socket;
         }
 
@@ -181,7 +201,13 @@ public class Network implements Parcelable {
         @Override
         public Socket createSocket() throws IOException {
             Socket socket = new Socket();
-            bindSocket(socket);
+            boolean failed = true;
+            try {
+                bindSocket(socket);
+                failed = false;
+            } finally {
+                if (failed) IoUtils.closeQuietly(socket);
+            }
             return socket;
         }
     }
