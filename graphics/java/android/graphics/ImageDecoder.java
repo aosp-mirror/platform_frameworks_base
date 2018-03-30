@@ -855,7 +855,8 @@ public final class ImageDecoder implements AutoCloseable {
      */
     @java.lang.Deprecated
     public ImageDecoder setResize(int width, int height) {
-        return this.setTargetSize(width, height);
+        this.setTargetSize(width, height);
+        return this;
     }
 
     /**
@@ -873,9 +874,8 @@ public final class ImageDecoder implements AutoCloseable {
      *
      *  @param width must be greater than 0.
      *  @param height must be greater than 0.
-     *  @return this object for chaining.
      */
-    public ImageDecoder setTargetSize(int width, int height) {
+    public void setTargetSize(int width, int height) {
         if (width <= 0 || height <= 0) {
             throw new IllegalArgumentException("Dimensions must be positive! "
                     + "provided (" + width + ", " + height + ")");
@@ -883,7 +883,6 @@ public final class ImageDecoder implements AutoCloseable {
 
         mDesiredWidth = width;
         mDesiredHeight = height;
-        return this;
     }
 
     /** @removed
@@ -891,7 +890,8 @@ public final class ImageDecoder implements AutoCloseable {
      */
     @java.lang.Deprecated
     public ImageDecoder setResize(int sampleSize) {
-        return this.setTargetSampleSize(sampleSize);
+        this.setTargetSampleSize(sampleSize);
+        return this;
     }
 
     private int getTargetDimension(int original, int sampleSize, int computed) {
@@ -941,13 +941,12 @@ public final class ImageDecoder implements AutoCloseable {
      *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      *
      *  @param sampleSize Sampling rate of the encoded image.
-     *  @return this object for chaining.
      */
-    public ImageDecoder setTargetSampleSize(int sampleSize) {
+    public void setTargetSampleSize(int sampleSize) {
         Size size = this.getSampledSize(sampleSize);
         int targetWidth = getTargetDimension(mWidth, sampleSize, size.getWidth());
         int targetHeight = getTargetDimension(mHeight, sampleSize, size.getHeight());
-        return this.setTargetSize(targetWidth, targetHeight);
+        this.setTargetSize(targetWidth, targetHeight);
     }
 
     private boolean requestedResize() {
@@ -1006,14 +1005,12 @@ public final class ImageDecoder implements AutoCloseable {
      *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      *
      *  @param allocator Type of allocator to use.
-     *  @return this object for chaining.
      */
-    public ImageDecoder setAllocator(@Allocator int allocator) {
+    public void setAllocator(@Allocator int allocator) {
         if (allocator < ALLOCATOR_DEFAULT || allocator > ALLOCATOR_HARDWARE) {
             throw new IllegalArgumentException("invalid allocator " + allocator);
         }
         mAllocator = allocator;
-        return this;
     }
 
     /**
@@ -1039,12 +1036,9 @@ public final class ImageDecoder implements AutoCloseable {
      *
      *  <p>Like all setters on ImageDecoder, this must be called inside
      *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
-     *
-     *  @return this object for chaining.
      */
-    public ImageDecoder setUnpremultipliedRequired(boolean unpremultipliedRequired) {
+    public void setUnpremultipliedRequired(boolean unpremultipliedRequired) {
         mUnpremultipliedRequired = unpremultipliedRequired;
-        return this;
     }
 
     /** @removed
@@ -1052,7 +1046,8 @@ public final class ImageDecoder implements AutoCloseable {
      */
     @java.lang.Deprecated
     public ImageDecoder setRequireUnpremultiplied(boolean unpremultipliedRequired) {
-        return this.setUnpremultipliedRequired(unpremultipliedRequired);
+        this.setUnpremultipliedRequired(unpremultipliedRequired);
+        return this;
     }
 
     /**
@@ -1086,11 +1081,9 @@ public final class ImageDecoder implements AutoCloseable {
      *  <p>Like all setters on ImageDecoder, this must be called inside
      *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      *
-     *  @return this object for chaining.
      */
-    public ImageDecoder setPostProcessor(@Nullable PostProcessor p) {
+    public void setPostProcessor(@Nullable PostProcessor p) {
         mPostProcessor = p;
-        return this;
     }
 
     /**
@@ -1110,11 +1103,9 @@ public final class ImageDecoder implements AutoCloseable {
      *  <p>Like all setters on ImageDecoder, this must be called inside
      *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      *
-     *  @return this object for chaining.
      */
-    public ImageDecoder setOnPartialImageListener(@Nullable OnPartialImageListener l) {
+    public void setOnPartialImageListener(@Nullable OnPartialImageListener l) {
         mOnPartialImageListener = l;
-        return this;
     }
 
     /**
@@ -1140,11 +1131,9 @@ public final class ImageDecoder implements AutoCloseable {
      *  <p>Like all setters on ImageDecoder, this must be called inside
      *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      *
-     *  @return this object for chaining.
      */
-    public ImageDecoder setCrop(@Nullable Rect subset) {
+    public void setCrop(@Nullable Rect subset) {
         mCropRect = subset;
-        return this;
     }
 
     /**
@@ -1164,13 +1153,10 @@ public final class ImageDecoder implements AutoCloseable {
      *  <p>Like all setters on ImageDecoder, this must be called inside
      *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      *
-     *  @return this object for chaining.
-     *
      *  @hide
      */
-    public ImageDecoder setOutPaddingRect(@NonNull Rect outPadding) {
+    public void setOutPaddingRect(@NonNull Rect outPadding) {
         mOutPaddingRect = outPadding;
-        return this;
     }
 
     /**
@@ -1191,12 +1177,9 @@ public final class ImageDecoder implements AutoCloseable {
      *
      *  <p>Like all setters on ImageDecoder, this must be called inside
      *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
-     *
-     *  @return this object for chaining.
      */
-    public ImageDecoder setMutableRequired(boolean mutable) {
+    public void setMutableRequired(boolean mutable) {
         mMutable = mutable;
-        return this;
     }
 
     /** @removed
@@ -1204,7 +1187,8 @@ public final class ImageDecoder implements AutoCloseable {
      */
     @java.lang.Deprecated
     public ImageDecoder setMutable(boolean mutable) {
-        return this.setMutableRequired(mutable);
+        this.setMutableRequired(mutable);
+        return this;
     }
 
     /**
@@ -1236,12 +1220,9 @@ public final class ImageDecoder implements AutoCloseable {
      *
      *  <p>Like all setters on ImageDecoder, this must be called inside
      *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
-     *
-     *  @return this object for chaining.
      */
-    public ImageDecoder setConserveMemory(boolean conserveMemory) {
+    public void setConserveMemory(boolean conserveMemory) {
         mConserveMemory = conserveMemory;
-        return this;
     }
 
     /**
@@ -1269,12 +1250,9 @@ public final class ImageDecoder implements AutoCloseable {
      *
      *  <p>Like all setters on ImageDecoder, this must be called inside
      *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
-     *
-     *  @return this object for chaining.
      */
-    public ImageDecoder setDecodeAsAlphaMaskEnabled(boolean enabled) {
+    public void setDecodeAsAlphaMaskEnabled(boolean enabled) {
         mDecodeAsAlphaMask = enabled;
-        return this;
     }
 
     /** @removed
@@ -1282,7 +1260,8 @@ public final class ImageDecoder implements AutoCloseable {
      */
     @java.lang.Deprecated
     public ImageDecoder setDecodeAsAlphaMask(boolean enabled) {
-        return this.setDecodeAsAlphaMaskEnabled(enabled);
+        this.setDecodeAsAlphaMaskEnabled(enabled);
+        return this;
     }
 
     /** @removed
@@ -1290,7 +1269,8 @@ public final class ImageDecoder implements AutoCloseable {
      */
     @java.lang.Deprecated
     public ImageDecoder setAsAlphaMask(boolean asAlphaMask) {
-        return this.setDecodeAsAlphaMask(asAlphaMask);
+        this.setDecodeAsAlphaMask(asAlphaMask);
+        return this;
     }
 
     /**
@@ -1350,9 +1330,8 @@ public final class ImageDecoder implements AutoCloseable {
      * <p>Like all setters on ImageDecoder, this must be called inside
      * {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      */
-    public ImageDecoder setTargetColorSpace(ColorSpace colorSpace) {
+    public void setTargetColorSpace(ColorSpace colorSpace) {
         mDesiredColorSpace = colorSpace;
-        return this;
     }
 
     @Override
