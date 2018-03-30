@@ -1083,7 +1083,7 @@ class LinkCommand {
 
       case OutputFormat::kProto: {
         pb::ResourceTable pb_table;
-        SerializeTableToPb(*table, &pb_table);
+        SerializeTableToPb(*table, &pb_table, context_->GetDiagnostics());
         return io::CopyProtoToArchive(context_, &pb_table, kProtoResourceTablePath,
                                       ArchiveEntry::kCompress, writer);
       } break;
