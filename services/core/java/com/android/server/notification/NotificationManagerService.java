@@ -182,6 +182,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.util.ArrayUtils;
@@ -898,6 +899,8 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_LOCALE_CHANGED.equals(intent.getAction())) {
+                // update system notification channels
+                SystemNotificationChannels.createAll(context);
                 mZenModeHelper.updateDefaultZenRules();
                 mRankingHelper.onLocaleChanged(context, ActivityManager.getCurrentUser());
             }

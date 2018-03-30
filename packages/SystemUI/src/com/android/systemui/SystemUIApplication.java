@@ -29,30 +29,16 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArraySet;
-import android.util.TimingsTraceLog;
 import android.util.Log;
+import android.util.TimingsTraceLog;
 
-import com.android.systemui.globalactions.GlobalActionsComponent;
-import com.android.systemui.keyboard.KeyboardUI;
-import com.android.systemui.keyguard.KeyguardViewMediator;
-import com.android.systemui.media.RingtonePlayer;
-import com.android.systemui.pip.PipUI;
 import com.android.systemui.plugins.OverlayPlugin;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
-import com.android.systemui.power.PowerUI;
-import com.android.systemui.recents.Recents;
-import com.android.systemui.shortcut.ShortcutKeyDispatcher;
-import com.android.systemui.stackdivider.Divider;
-import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowManager;
-import com.android.systemui.usb.StorageNotification;
 import com.android.systemui.util.NotificationChannels;
-import com.android.systemui.util.leak.GarbageMonitor;
-import com.android.systemui.volume.VolumeUI;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -99,6 +85,10 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
                             mServices[i].onBootCompleted();
                         }
                     }
+
+                    IntentFilter localeChangedFilter = new IntentFilter(
+                            Intent.ACTION_LOCALE_CHANGED);
+                    registerReceiver(mLocaleChangeReceiver, localeChangedFilter);
                 }
             }, filter);
         } else {
@@ -249,4 +239,14 @@ public class SystemUIApplication extends Application implements SysUiServiceProv
     public SystemUI[] getServices() {
         return mServices;
     }
+
+    private final BroadcastReceiver mLocaleChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_LOCALE_CHANGED.equals(intent.getAction())) {
+                // Update names of SystemUi notification channels
+                NotificationChannels.createAll(context);
+            }
+        }
+    };
 }
