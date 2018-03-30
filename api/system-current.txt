@@ -163,6 +163,7 @@ package android {
     field public static final java.lang.String REVOKE_RUNTIME_PERMISSIONS = "android.permission.REVOKE_RUNTIME_PERMISSIONS";
     field public static final java.lang.String SCORE_NETWORKS = "android.permission.SCORE_NETWORKS";
     field public static final java.lang.String SEND_RESPOND_VIA_MESSAGE = "android.permission.SEND_RESPOND_VIA_MESSAGE";
+    field public static final java.lang.String SEND_SHOW_SUSPENDED_APP_DETAILS = "android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS";
     field public static final java.lang.String SEND_SMS_NO_CONFIRMATION = "android.permission.SEND_SMS_NO_CONFIRMATION";
     field public static final java.lang.String SERIAL_PORT = "android.permission.SERIAL_PORT";
     field public static final java.lang.String SET_ACTIVITY_WATCHER = "android.permission.SET_ACTIVITY_WATCHER";
@@ -878,6 +879,7 @@ package android.content {
     field public static final java.lang.String ACTION_QUERY_PACKAGE_RESTART = "android.intent.action.QUERY_PACKAGE_RESTART";
     field public static final java.lang.String ACTION_RESOLVE_INSTANT_APP_PACKAGE = "android.intent.action.RESOLVE_INSTANT_APP_PACKAGE";
     field public static final java.lang.String ACTION_REVIEW_PERMISSIONS = "android.intent.action.REVIEW_PERMISSIONS";
+    field public static final java.lang.String ACTION_SHOW_SUSPENDED_APP_DETAILS = "android.intent.action.SHOW_SUSPENDED_APP_DETAILS";
     field public static final deprecated java.lang.String ACTION_SIM_STATE_CHANGED = "android.intent.action.SIM_STATE_CHANGED";
     field public static final java.lang.String ACTION_SPLIT_CONFIGURATION_CHANGED = "android.intent.action.SPLIT_CONFIGURATION_CHANGED";
     field public static final java.lang.String ACTION_UPGRADE_SETUP = "android.intent.action.UPGRADE_SETUP";
