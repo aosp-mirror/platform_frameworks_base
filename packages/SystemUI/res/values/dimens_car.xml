@@ -32,6 +32,8 @@
 
     <dimen name="car_navigation_button_width">64dp</dimen>
     <dimen name="car_navigation_bar_width">760dp</dimen>
+    <dimen name="car_left_navigation_bar_width">96dp</dimen>
+    <dimen name="car_right_navigation_bar_width">96dp</dimen>
 
     <dimen name="car_page_indicator_dot_diameter">12dp</dimen>
     <dimen name="car_page_indicator_margin_bottom">24dp</dimen>
