@@ -356,7 +356,7 @@ TEST(AtomMatcherTest, TestWriteAtomToProto) {
     EXPECT_EQ("location1", atom.attribution_node(0).tag());
     EXPECT_EQ(2222, atom.attribution_node(1).uid());
     EXPECT_EQ("location2", atom.attribution_node(1).tag());
-    EXPECT_EQ(999, atom.num_of_results());
+    EXPECT_EQ(999, atom.num_results());
 }
 
 

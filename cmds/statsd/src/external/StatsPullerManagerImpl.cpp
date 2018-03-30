@@ -120,11 +120,11 @@ const std::map<int, PullAtomInfo> StatsPullerManagerImpl::kAllPullAtomInfo = {
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::CPU_CLUSTER_TIME)}},
         // wifi_activity_energy_info
-        {android::util::WIFI_ACTIVITY_ENERGY_INFO,
+        {android::util::WIFI_ACTIVITY_INFO,
          {{},
           {},
           1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::WIFI_ACTIVITY_ENERGY_INFO)}},
+          new StatsCompanionServicePuller(android::util::WIFI_ACTIVITY_INFO)}},
         // modem_activity_info
         {android::util::MODEM_ACTIVITY_INFO,
          {{},
