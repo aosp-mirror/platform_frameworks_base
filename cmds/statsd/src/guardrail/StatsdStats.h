@@ -34,6 +34,7 @@ struct ConfigStats {
     int64_t id;
     int32_t creation_time_sec;
     int32_t deletion_time_sec = 0;
+    int32_t reset_time_sec = 0;
     int32_t metric_count;
     int32_t condition_count;
     int32_t matcher_count;
@@ -121,10 +122,10 @@ public:
     const static size_t kMaxBytesUsedUidMap = 50 * 1024;
 
     /* Minimum period between two broadcasts in nanoseconds. */
-    static const unsigned long long kMinBroadcastPeriodNs = 60 * NS_PER_SEC;
+    static const int64_t kMinBroadcastPeriodNs = 60 * NS_PER_SEC;
 
     /* Min period between two checks of byte size per config key in nanoseconds. */
-    static const unsigned long long kMinByteSizeCheckPeriodNs = 10 * NS_PER_SEC;
+    static const int64_t kMinByteSizeCheckPeriodNs = 10 * NS_PER_SEC;
 
     // Maximum age (30 days) that files on disk can exist in seconds.
     static const int kMaxAgeSecond = 60 * 60 * 24 * 30;
@@ -152,6 +153,10 @@ public:
      * Report a config has been removed.
      */
     void noteConfigRemoved(const ConfigKey& key);
+   /**
+     * Report a config has been reset when ttl expires.
+     */
+    void noteConfigReset(const ConfigKey& key);
 
     /**
      * Report a broadcast has been sent to a config owner to collect the data.
@@ -326,6 +331,7 @@ private:
     // Stores the number of times statsd registers the periodic alarm changes
     int mPeriodicAlarmRegisteredStats = 0;
 
+    void noteConfigResetInternalLocked(const ConfigKey& key);
 
     void noteConfigRemovedInternalLocked(const ConfigKey& key);
 

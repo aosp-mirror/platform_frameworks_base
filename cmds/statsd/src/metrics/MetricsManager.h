@@ -49,25 +49,35 @@ public:
     void onLogEvent(const LogEvent& event);
 
     void onAnomalyAlarmFired(
-        const uint64_t& timestampNs,
+        const int64_t& timestampNs,
         unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& alarmSet);
 
     void onPeriodicAlarmFired(
-        const uint64_t& timestampNs,
+        const int64_t& timestampNs,
         unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& alarmSet);
 
-    void notifyAppUpgrade(const uint64_t& eventTimeNs, const string& apk, const int uid,
+    void notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk, const int uid,
                           const int64_t version) override;
 
-    void notifyAppRemoved(const uint64_t& eventTimeNs, const string& apk, const int uid) override;
+    void notifyAppRemoved(const int64_t& eventTimeNs, const string& apk, const int uid) override;
 
-    void onUidMapReceived(const uint64_t& eventTimeNs) override;
+    void onUidMapReceived(const int64_t& eventTimeNs) override;
 
     bool shouldAddUidMapListener() const {
         return !mAllowedPkg.empty();
     }
 
     void dumpStates(FILE* out, bool verbose);
+
+    inline bool isInTtl(const int64_t timestampNs) const {
+        return mTtlNs <= 0 || timestampNs < mTtlEndNs;
+    };
+
+    void refreshTtl(const int64_t currentTimestampNs) {
+        if (mTtlNs > 0) {
+            mTtlEndNs = currentTimestampNs + mTtlNs;
+        }
+    };
 
     // Returns the elapsed realtime when this metric manager last reported metrics.
     inline int64_t getLastReportTimeNs() const {
@@ -78,21 +88,28 @@ public:
         return mLastReportWallClockNs;
     };
 
-    virtual void dropData(const uint64_t dropTimeNs);
+    virtual void dropData(const int64_t dropTimeNs);
 
     // Config source owner can call onDumpReport() to get all the metrics collected.
-    virtual void onDumpReport(const uint64_t dumpTimeNs,
+    virtual void onDumpReport(const int64_t dumpTimeNs,
                               android::util::ProtoOutputStream* protoOutput);
 
     // Computes the total byte size of all metrics managed by a single config source.
     // Does not change the state.
     virtual size_t byteSize();
+
 private:
+    // For test only.
+    inline int64_t getTtlEndNs() const { return mTtlEndNs; }
+
     const ConfigKey mConfigKey;
 
     sp<UidMap> mUidMap;
 
     bool mConfigValid = false;
+
+    const int64_t mTtlNs;
+    int64_t mTtlEndNs;
 
     int64_t mLastReportTimeNs;
     int64_t mLastReportWallClockNs;
@@ -189,6 +206,7 @@ private:
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_long_refractory_period);
 
     FRIEND_TEST(AlarmE2eTest, TestMultipleAlarms);
+    FRIEND_TEST(ConfigTtlE2eTest, TestCountMetric);
 };
 
 }  // namespace statsd

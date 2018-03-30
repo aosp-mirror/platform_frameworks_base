@@ -54,7 +54,7 @@ const int FIELD_ID_WALL_CLOCK_TIMESTAMP_NANOS = 3;
 EventMetricProducer::EventMetricProducer(const ConfigKey& key, const EventMetric& metric,
                                          const int conditionIndex,
                                          const sp<ConditionWizard>& wizard,
-                                         const uint64_t startTimeNs)
+                                         const int64_t startTimeNs)
     : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard) {
     if (metric.links().size() > 0) {
         for (const auto& link : metric.links()) {
@@ -75,12 +75,12 @@ EventMetricProducer::~EventMetricProducer() {
     VLOG("~EventMetricProducer() called");
 }
 
-void EventMetricProducer::dropDataLocked(const uint64_t dropTimeNs) {
+void EventMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
     mProto->clear();
 }
 
 void EventMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition,
-                                                           const uint64_t eventTime) {
+                                                           const int64_t eventTime) {
 }
 
 std::unique_ptr<std::vector<uint8_t>> serializeProtoLocked(ProtoOutputStream& protoOutput) {
@@ -100,7 +100,7 @@ std::unique_ptr<std::vector<uint8_t>> serializeProtoLocked(ProtoOutputStream& pr
     return buffer;
 }
 
-void EventMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
+void EventMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                                              ProtoOutputStream* protoOutput) {
     if (mProto->size() <= 0) {
         return;
@@ -119,7 +119,7 @@ void EventMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
 }
 
 void EventMetricProducer::onConditionChangedLocked(const bool conditionMet,
-                                                   const uint64_t eventTime) {
+                                                   const int64_t eventTime) {
     VLOG("Metric %lld onConditionChanged", (long long)mMetricId);
     mCondition = conditionMet;
 }

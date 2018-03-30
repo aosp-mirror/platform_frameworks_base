@@ -63,6 +63,7 @@ const int FIELD_ID_LOGGER_STATS_ERROR_CODE = 2;
 const int FIELD_ID_CONFIG_STATS_UID = 1;
 const int FIELD_ID_CONFIG_STATS_ID = 2;
 const int FIELD_ID_CONFIG_STATS_CREATION = 3;
+const int FIELD_ID_CONFIG_STATS_RESET = 18;
 const int FIELD_ID_CONFIG_STATS_DELETION = 4;
 const int FIELD_ID_CONFIG_STATS_METRIC_COUNT = 5;
 const int FIELD_ID_CONFIG_STATS_CONDITION_COUNT = 6;
@@ -163,6 +164,18 @@ void StatsdStats::noteConfigRemovedInternalLocked(const ConfigKey& key) {
 void StatsdStats::noteConfigRemoved(const ConfigKey& key) {
     lock_guard<std::mutex> lock(mLock);
     noteConfigRemovedInternalLocked(key);
+}
+
+void StatsdStats::noteConfigResetInternalLocked(const ConfigKey& key) {
+    auto it = mConfigStats.find(key);
+    if (it != mConfigStats.end()) {
+        it->second->reset_time_sec = getWallClockSec();
+    }
+}
+
+void StatsdStats::noteConfigReset(const ConfigKey& key) {
+    lock_guard<std::mutex> lock(mLock);
+    noteConfigResetInternalLocked(key);
 }
 
 void StatsdStats::noteBroadcastSent(const ConfigKey& key) {
@@ -378,10 +391,11 @@ void StatsdStats::dumpStats(FILE* out) const {
     fprintf(out, "%lu Config in icebox: \n", (unsigned long)mIceBox.size());
     for (const auto& configStats : mIceBox) {
         fprintf(out,
-                "Config {%d_%lld}: creation=%d, deletion=%d, #metric=%d, #condition=%d, "
+                "Config {%d_%lld}: creation=%d, deletion=%d, reset=%d, #metric=%d, #condition=%d, "
                 "#matcher=%d, #alert=%d,  valid=%d\n",
                 configStats->uid, (long long)configStats->id, configStats->creation_time_sec,
-                configStats->deletion_time_sec, configStats->metric_count,
+                configStats->deletion_time_sec, configStats->reset_time_sec,
+                configStats->metric_count,
                 configStats->condition_count, configStats->matcher_count, configStats->alert_count,
                 configStats->is_valid);
 
@@ -485,6 +499,9 @@ void addConfigStatsToProto(const ConfigStats& configStats, ProtoOutputStream* pr
     proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_STATS_UID, configStats.uid);
     proto->write(FIELD_TYPE_INT64 | FIELD_ID_CONFIG_STATS_ID, (long long)configStats.id);
     proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_STATS_CREATION, configStats.creation_time_sec);
+    if (configStats.reset_time_sec != 0) {
+        proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_STATS_RESET, configStats.reset_time_sec);
+    }
     if (configStats.deletion_time_sec != 0) {
         proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_STATS_DELETION,
                      configStats.deletion_time_sec);
