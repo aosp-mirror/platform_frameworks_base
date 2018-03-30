@@ -144,7 +144,8 @@ public class ScheduleCalendar {
         }
         return mSchedule.exitAtAlarm
                 && mSchedule.nextAlarm != 0
-                && time >= mSchedule.nextAlarm;
+                && time >= mSchedule.nextAlarm
+                && isInSchedule(mSchedule.nextAlarm);
     }
 
     private boolean isInSchedule(int daysOffset, long time, long start, long end) {
