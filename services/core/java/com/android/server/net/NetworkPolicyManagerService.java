@@ -149,7 +149,6 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.BestClock;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -359,6 +358,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private static final int UID_MSG_STATE_CHANGED = 100;
     private static final int UID_MSG_GONE = 101;
+
+    private static final String PROP_SUB_PLAN_OWNER = "persist.sys.sub_plan_owner";
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
@@ -2786,10 +2787,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             return;
         }
 
-        // Fourth check: is caller a testing app on a debug build?
-        final boolean enableDebug = Build.IS_USERDEBUG || Build.IS_ENG;
-        if (enableDebug && callingPackage
-                .equals(SystemProperties.get("fw.sub_plan_owner." + subId, null))) {
+        // Fourth check: is caller a testing app?
+        final String testPackage = SystemProperties.get(PROP_SUB_PLAN_OWNER + "." + subId, null);
+        if (!TextUtils.isEmpty(testPackage)
+                && Objects.equals(testPackage, callingPackage)) {
+            return;
+        }
+
+        // Fifth check: is caller a legacy testing app?
+        final String legacyTestPackage = SystemProperties.get("fw.sub_plan_owner." + subId, null);
+        if (!TextUtils.isEmpty(legacyTestPackage)
+                && Objects.equals(legacyTestPackage, callingPackage)) {
             return;
         }
 
@@ -2988,6 +2996,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+    }
+
+    /**
+     * Only visible for testing purposes. This doesn't give any access to
+     * existing plans; it simply lets the debug package define new plans.
+     */
+    void setSubscriptionPlansOwner(int subId, String packageName) {
+        SystemProperties.set(PROP_SUB_PLAN_OWNER + "." + subId, packageName);
     }
 
     @Override
