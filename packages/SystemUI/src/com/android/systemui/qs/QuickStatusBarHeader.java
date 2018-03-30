@@ -174,11 +174,11 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
         boolean ringerVisible = false;
         if (mRingerMode == AudioManager.RINGER_MODE_VIBRATE) {
             mRingerModeIcon.setImageResource(R.drawable.stat_sys_ringer_vibrate);
-            mRingerModeTextView.setText(R.string.volume_ringer_status_vibrate);
+            mRingerModeTextView.setText(R.string.qs_status_phone_vibrate);
             ringerVisible = true;
         } else if (mRingerMode == AudioManager.RINGER_MODE_SILENT) {
             mRingerModeIcon.setImageResource(R.drawable.stat_sys_ringer_silent);
-            mRingerModeTextView.setText(R.string.volume_ringer_status_silent);
+            mRingerModeTextView.setText(R.string.qs_status_phone_muted);
             ringerVisible = true;
         }
         mRingerModeIcon.setVisibility(ringerVisible ? View.VISIBLE : View.GONE);
