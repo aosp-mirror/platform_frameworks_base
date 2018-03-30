@@ -1742,7 +1742,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             if (storedHash.type == LockPatternUtils.CREDENTIAL_TYPE_PATTERN) {
                 hash = LockPatternUtils.patternToHash(LockPatternUtils.stringToPattern(credential));
             } else {
-                hash = mLockPatternUtils.passwordToHash(credential, userId);
+                hash = mLockPatternUtils.legacyPasswordToHash(credential, userId)
+                        .getBytes(StandardCharsets.UTF_8);
             }
             if (Arrays.equals(hash, storedHash.hash)) {
                 if (storedHash.type == LockPatternUtils.CREDENTIAL_TYPE_PATTERN) {
@@ -2530,6 +2531,33 @@ public class LockSettingsService extends ILockSettings.Stub {
             // synthetic password. That would invalidate existing escrow tokens though.
         }
         mRecoverableKeyStoreManager.lockScreenSecretChanged(credentialType, credential, userId);
+    }
+
+    /**
+     * Returns a fixed pseudorandom byte string derived from the user's synthetic password.
+     * This is used to salt the password history hash to protect the hash against offline
+     * bruteforcing, since rederiving this value requires a successful authentication.
+     */
+    @Override
+    public byte[] getHashFactor(String currentCredential, int userId) throws RemoteException {
+        checkPasswordReadPermission(userId);
+        if (TextUtils.isEmpty(currentCredential)) {
+            currentCredential = null;
+        }
+        synchronized (mSpManager) {
+            if (!isSyntheticPasswordBasedCredentialLocked(userId)) {
+                Slog.w(TAG, "Synthetic password not enabled");
+                return null;
+            }
+            long handle = getSyntheticPasswordHandleLocked(userId);
+            AuthenticationResult auth = mSpManager.unwrapPasswordBasedSyntheticPassword(
+                    getGateKeeperService(), handle, currentCredential, userId, null);
+            if (auth.authToken == null) {
+                Slog.w(TAG, "Current credential is incorrect");
+                return null;
+            }
+            return auth.authToken.derivePasswordHashFactor();
+        }
     }
 
     private long addEscrowToken(byte[] token, int userId) throws RemoteException {
