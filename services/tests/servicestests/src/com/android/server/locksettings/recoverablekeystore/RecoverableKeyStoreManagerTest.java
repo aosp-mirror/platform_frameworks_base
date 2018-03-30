@@ -27,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -67,6 +68,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -93,6 +95,8 @@ public class RecoverableKeyStoreManagerTest {
     private static final String ROOT_CERTIFICATE_ALIAS = "";
     private static final String DEFAULT_ROOT_CERT_ALIAS =
             TrustedRootCertificates.GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_ALIAS;
+    private static final String INSECURE_CERTIFICATE_ALIAS =
+            TrustedRootCertificates.TEST_ONLY_INSECURE_CERTIFICATE_ALIAS;
     private static final String TEST_SESSION_ID = "karlin";
     private static final byte[] TEST_PUBLIC_KEY = new byte[] {
         (byte) 0x30, (byte) 0x59, (byte) 0x30, (byte) 0x13, (byte) 0x06, (byte) 0x07, (byte) 0x2a,
@@ -160,6 +164,7 @@ public class RecoverableKeyStoreManagerTest {
     @Mock private KeyguardManager mKeyguardManager;
     @Mock private PlatformKeyManager mPlatformKeyManager;
     @Mock private ApplicationKeyStorage mApplicationKeyStorage;
+    @Spy private TestOnlyInsecureCertificateHelper mTestOnlyInsecureCertificateHelper;
 
     private RecoverableKeyStoreDb mRecoverableKeyStoreDb;
     private File mDatabaseFile;
@@ -195,7 +200,8 @@ public class RecoverableKeyStoreManagerTest {
                 mRecoverySnapshotStorage,
                 mMockListenersStorage,
                 mPlatformKeyManager,
-                mApplicationKeyStorage);
+                mApplicationKeyStorage,
+                mTestOnlyInsecureCertificateHelper);
     }
 
     @After
@@ -300,12 +306,76 @@ public class RecoverableKeyStoreManagerTest {
         mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
                 TestData.getCertXmlWithSerial(certSerial));
 
+        verify(mTestOnlyInsecureCertificateHelper, atLeast(1))
+                .getDefaultCertificateAliasIfEmpty(ROOT_CERTIFICATE_ALIAS);
+
         assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isFalse();
         assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid,
                 DEFAULT_ROOT_CERT_ALIAS)).isEqualTo(TestData.CERT_PATH_1);
         assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid,
                 DEFAULT_ROOT_CERT_ALIAS)).isEqualTo(certSerial);
         assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isNull();
+    }
+
+    @Test
+    public void initRecoveryService_triesToFilterRootAlias() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        long certSerial = 1000L;
+        mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
+
+        mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
+                TestData.getCertXmlWithSerial(certSerial));
+
+        verify(mTestOnlyInsecureCertificateHelper, atLeast(1))
+                .getDefaultCertificateAliasIfEmpty(eq(ROOT_CERTIFICATE_ALIAS));
+
+        verify(mTestOnlyInsecureCertificateHelper, atLeast(1))
+                .getRootCertificate(eq(DEFAULT_ROOT_CERT_ALIAS));
+
+        String activeRootAlias = mRecoverableKeyStoreDb.getActiveRootOfTrust(userId, uid);
+        assertThat(activeRootAlias).isEqualTo(DEFAULT_ROOT_CERT_ALIAS);
+
+    }
+
+    @Test
+    public void initRecoveryService_usesProdCertificateForEmptyRootAlias() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        long certSerial = 1000L;
+        mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
+
+        mRecoverableKeyStoreManager.initRecoveryService(/*rootCertificateAlias=*/ "",
+                TestData.getCertXmlWithSerial(certSerial));
+
+        verify(mTestOnlyInsecureCertificateHelper, atLeast(1))
+                .getDefaultCertificateAliasIfEmpty(eq(""));
+
+        verify(mTestOnlyInsecureCertificateHelper, atLeast(1))
+                .getRootCertificate(eq(DEFAULT_ROOT_CERT_ALIAS));
+
+        String activeRootAlias = mRecoverableKeyStoreDb.getActiveRootOfTrust(userId, uid);
+        assertThat(activeRootAlias).isEqualTo(DEFAULT_ROOT_CERT_ALIAS);
+    }
+
+    @Test
+    public void initRecoveryService_usesProdCertificateForNullRootAlias() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        long certSerial = 1000L;
+        mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
+
+        mRecoverableKeyStoreManager.initRecoveryService(/*rootCertificateAlias=*/ null,
+                TestData.getCertXmlWithSerial(certSerial));
+
+        verify(mTestOnlyInsecureCertificateHelper, atLeast(1))
+                .getDefaultCertificateAliasIfEmpty(null);
+
+        verify(mTestOnlyInsecureCertificateHelper, atLeast(1))
+                .getRootCertificate(eq(DEFAULT_ROOT_CERT_ALIAS));
+
+        String activeRootAlias = mRecoverableKeyStoreDb.getActiveRootOfTrust(userId, uid);
+        assertThat(activeRootAlias).isEqualTo(DEFAULT_ROOT_CERT_ALIAS);
     }
 
     @Test
@@ -417,6 +487,24 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
+    public void initRecoveryServiceWithSigFile_usesProdCertificateForNullRootAlias()
+            throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        long certSerial = 1000L;
+        mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
+
+        mRecoverableKeyStoreManager.initRecoveryServiceWithSigFile(
+                /*rootCertificateAlias=*/null, TestData.getCertXml(), TestData.getSigXml());
+
+        verify(mTestOnlyInsecureCertificateHelper, atLeast(1))
+                .getDefaultCertificateAliasIfEmpty(null);
+
+        verify(mTestOnlyInsecureCertificateHelper, atLeast(1))
+                .getRootCertificate(eq(DEFAULT_ROOT_CERT_ALIAS));
+    }
+
+    @Test
     public void initRecoveryServiceWithSigFile_throwsIfNullCertFile() throws Exception {
         try {
             mRecoverableKeyStoreManager.initRecoveryServiceWithSigFile(
@@ -449,6 +537,18 @@ public class RecoverableKeyStoreManagerTest {
             fail("should have thrown");
         } catch (ServiceSpecificException e) {
             assertThat(e.getMessage()).contains("parse the sig file");
+        }
+    }
+
+    @Test
+    public void initRecoveryServiceWithSigFile_throwsIfTestAliasUsedWithProdCert()
+            throws Exception {
+        try {
+        mRecoverableKeyStoreManager.initRecoveryServiceWithSigFile(
+                INSECURE_CERTIFICATE_ALIAS, TestData.getCertXml(), TestData.getSigXml());
+            fail("should have thrown");
+        } catch (ServiceSpecificException e) {
+            assertThat(e.getMessage()).contains("signature over the cert file is invalid");
         }
     }
 
@@ -712,7 +812,8 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
-    public void recoverKeyChainSnapshot_throwsIfFailedToDecryptAllApplicationKeys() throws Exception {
+    public void recoverKeyChainSnapshot_throwsIfFailedToDecryptAllApplicationKeys()
+            throws Exception {
         mRecoverableKeyStoreManager.startRecoverySession(
                 TEST_SESSION_ID,
                 TEST_PUBLIC_KEY,
@@ -792,7 +893,8 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
-    public void recoverKeyChainSnapshot_worksOnOtherApplicationKeysIfOneDecryptionFails() throws Exception {
+    public void recoverKeyChainSnapshot_worksOnOtherApplicationKeysIfOneDecryptionFails()
+            throws Exception {
         mRecoverableKeyStoreManager.startRecoverySession(
                 TEST_SESSION_ID,
                 TEST_PUBLIC_KEY,

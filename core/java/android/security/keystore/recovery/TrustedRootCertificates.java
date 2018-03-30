@@ -37,6 +37,40 @@ public final class TrustedRootCertificates {
 
     public static final String GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_ALIAS =
             "GoogleCloudKeyVaultServiceV1";
+    /**
+     * Certificate used for client-side end-to-end encryption tests.
+     * When recovery controller is initialized with the certificate, recovery snapshots will only
+     * contain application keys started with {@link INSECURE_KEY_ALIAS}.
+     * Recovery snapshot will only be created if device is unlocked with password started with
+     * {@link #INSECURE_PASSWORD_PREFIX}.
+     *
+     * @hide
+     */
+    public static final String TEST_ONLY_INSECURE_CERTIFICATE_ALIAS =
+            "TEST_ONLY_INSECURE_CERTIFICATE_ALIAS";
+
+    /**
+     * TODO: Add insecure certificate to TestApi.
+     * @hide
+     */
+    public static @NonNull X509Certificate getTestOnlyInsecureCertificate() {
+        return parseBase64Certificate(TEST_ONLY_INSECURE_CERTIFICATE_BASE64);
+    }
+    /**
+     * Keys, which alias starts with the prefix are not protected if
+     * recovery agent uses {@link #TEST_ONLY_INSECURE_CERTIFICATE_ALIAS} root certificate.
+     * @hide
+     */
+    public static final String INSECURE_KEY_ALIAS_PREFIX =
+            "INSECURE_KEY_ALIAS_KEY_MATERIAL_IS_NOT_PROTECTED_";
+    /**
+     * Prefix for insecure passwords with length 14.
+     * Passwords started with the prefix are not protected if recovery agent uses
+     * {@link #TEST_ONLY_INSECURE_CERTIFICATE_ALIAS} root certificate.
+     * @hide
+     */
+    public static final String INSECURE_PASSWORD_PREFIX =
+            "INSECURE_PSWD_";
 
     private static final String GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_BASE64 = ""
             + "MIIFJjCCAw6gAwIBAgIJAIobXsJlzhNdMA0GCSqGSIb3DQEBDQUAMCAxHjAcBgNV"
@@ -68,13 +102,43 @@ public final class TrustedRootCertificates {
             + "/oM58v0orUWINtIc2hBlka36PhATYQiLf+AiWKnwhCaaHExoYKfQlMtXBodNvOK8"
             + "xqx69x05q/qbHKEcTHrsss630vxrp1niXvA=";
 
+    private static final String TEST_ONLY_INSECURE_CERTIFICATE_BASE64 = ""
+            + "MIIFMDCCAxigAwIBAgIJAIZ9/G8KQie9MA0GCSqGSIb3DQEBDQUAMCUxIzAhBgNV"
+            + "BAMMGlRlc3QgT25seSBVbnNlY3VyZSBSb290IENBMB4XDTE4MDMyODAwMzIyM1oX"
+            + "DTM4MDMyMzAwMzIyM1owJTEjMCEGA1UEAwwaVGVzdCBPbmx5IFVuc2VjdXJlIFJv"
+            + "b3QgQ0EwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDGxFNzAEyzSPmw"
+            + "E5gfuBXdXq++bl9Ep62V7Xn1UiejvmS+pRHT39pf/M7sl4Zr9ezanJTrFvf9+B85"
+            + "VGehdsD32TgfEjThcqaoQCI6pKkHYsUo7FZ5n+G3eE8oabWRZJMVo3QDjnnFYp7z"
+            + "20vnpjDofI2oQyxHcb/1yep+ca1+4lIvbUp/ybhNFqhRXAMcDXo7pyH38eUQ1JdK"
+            + "Q/QlBbShpFEqx1Y6KilKfTDf7Wenqr67LkaEim//yLZjlHzn/BpuRTrpo+XmJZx1"
+            + "P9CX9LGOXTtmsaCcYgD4yijOvV8aEsIJaf1kCIO558oH0oQc+0JG5aXeLN7BDlyZ"
+            + "vH0RdSx5nQLS9kj2I6nthOw/q00/L+S6A0m5jyNZOAl1SY78p+wO0d9eHbqQzJwf"
+            + "EsSq3qGAqlgQyyjp6oxHBqT9hZtN4rxw+iq0K1S4kmTLNF1FvmIB1BE+lNvvoGdY"
+            + "5G0b6Pe4R5JFn9LV3C3PEmSYnae7iG0IQlKmRADIuvfJ7apWAVanJPJAAWh2Akfp"
+            + "8Uxr02cHoY6o7vsEhJJOeMkipaBHThESm/XeFVubQzNfZ9gjQnB9ZX2v+lyj+WYZ"
+            + "SAz3RuXx6TlLrmWccMpQDR1ibcgyyjLUtX3kwZl2OxmJXitjuD7xlxvAXYob15N+"
+            + "K4xKHgxUDrbt2zU/tY0vgepAUg/xbwIDAQABo2MwYTAdBgNVHQ4EFgQUwyeNpYgs"
+            + "XXYvh9z0/lFrja7sV+swHwYDVR0jBBgwFoAUwyeNpYgsXXYvh9z0/lFrja7sV+sw"
+            + "DwYDVR0TAQH/BAUwAwEB/zAOBgNVHQ8BAf8EBAMCAYYwDQYJKoZIhvcNAQENBQAD"
+            + "ggIBAGuOsvMN5SD3RIQnMJtBpcHNrxun+QFjPZFlYCLfIPrUkHpn5O1iIIq8tVLd"
+            + "2V+12VKnToUEANsYBD3MP8XjP+6GZ7ZQ2rwLGvUABKSX4YXvmjEEXZUZp0y3tIV4"
+            + "kUDlbACzguPneZDp5Qo7YWH4orgqzHkn0sD/ikO5XrAqmzc245ewJlrf+V11mjcu"
+            + "ELfDrEejpPhi7Hk/ZNR0ftP737Hs/dNoCLCIaVNgYzBZhgo4kd220TeJu2ttW0XZ"
+            + "ldyShtpcOmyWKBgVseixR6L/3sspPHyAPXkSuRo0Eh1xvzDKCg9ttb0qoacTlXMF"
+            + "GkBpNzmVq67NWFGGa9UElift1mv6RfktPCAGZ+Ai8xUiKAUB0Eookpt/8gX9Senq"
+            + "yP/jMxkxXmHWxUu8+KnLvj6WLrfftuuD7u3cfc7j5kkrheDz3O4h4477GnqL5wdo"
+            + "9DuEsNc4FxJVz8Iy8RS6cJuW4pihYpM1Tyn7uopLnImpYzEY+R5aQqqr+q/A1diq"
+            + "ogbEKPH6oUiqJUwq3nD70gPBUKJmIzS4vLwLouqUHEm1k/MgHV/BkEU0uVHszPFa"
+            + "XUMMCHb0iT9P8LuZ7Ajer3SR/0TRVApCrk/6OV68e+6k/OFpM5kcZnNMD5ANyBri"
+            + "Tsz3NrDwSw4i4+Dsfh6A9dB/cEghw4skLaBxnQLQIgVeqCzK";
+
     /**
      * The X509 certificate of the trusted root CA cert for the recoverable key store service.
      *
      * TODO: Change it to the production certificate root CA before the final launch.
      */
     private static final X509Certificate GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_CERTIFICATE =
-            parseGoogleCloudKeyVaultServiceV1Certificate();
+            parseBase64Certificate(GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_BASE64);
 
     private static final int NUMBER_OF_ROOT_CERTIFICATES = 1;
 
@@ -107,9 +171,9 @@ public final class TrustedRootCertificates {
         return certificates;
     }
 
-    private static X509Certificate parseGoogleCloudKeyVaultServiceV1Certificate() {
+    private static X509Certificate parseBase64Certificate(String base64Certificate) {
         try {
-            return decodeBase64Cert(GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_BASE64);
+            return decodeBase64Cert(base64Certificate);
         } catch (CertificateException e) {
             // Should not happen
             throw new RuntimeException(e);
