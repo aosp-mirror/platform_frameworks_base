@@ -62,6 +62,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -457,6 +458,7 @@ public class ApkSignatureSchemeV3Verifier {
 
             // get the version code, but don't do anything with it: creator knew about all our flags
             porBuf.getInt();
+            HashSet<X509Certificate> certHistorySet = new HashSet<>();
             while (porBuf.hasRemaining()) {
                 levelCount++;
                 ByteBuffer level = getLengthPrefixedSlice(porBuf);
@@ -495,6 +497,12 @@ public class ApkSignatureSchemeV3Verifier {
                 lastCert = new VerbatimX509Certificate(lastCert, encodedCert);
 
                 lastSigAlgorithm = sigAlgorithm;
+                if (certHistorySet.contains(lastCert)) {
+                    throw new SecurityException("Encountered duplicate entries in "
+                            + "Proof-of-rotation record at certificate #" + levelCount + ".  All "
+                            + "signing certificates should be unique");
+                }
+                certHistorySet.add(lastCert);
                 certs.add(lastCert);
                 flagsList.add(flags);
             }
