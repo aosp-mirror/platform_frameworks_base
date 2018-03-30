@@ -20936,8 +20936,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         // explicitly list each action as a protected broadcast, so we will check for that
         // one safe case and allow it: an explicit broadcast, only being received by something
         // that has protected itself.
-        if (receivers != null && receivers.size() > 0
-                && (intent.getPackage() != null || intent.getComponent() != null)) {
+        if (intent.getPackage() != null || intent.getComponent() != null) {
+            if (receivers == null || receivers.size() == 0) {
+                // Intent is explicit and there's no receivers.
+                // This happens, e.g. , when a system component sends a broadcast to
+                // its own runtime receiver, and there's no manifest receivers for it,
+                // because this method is called twice for each broadcast,
+                // for runtime receivers and manifest receivers and the later check would find
+                // no receivers.
+                return;
+            }
             boolean allProtected = true;
             for (int i = receivers.size()-1; i >= 0; i--) {
                 Object target = receivers.get(i);
