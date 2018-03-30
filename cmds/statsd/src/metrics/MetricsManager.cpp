@@ -33,6 +33,8 @@
 #include <utils/SystemClock.h>
 
 using android::util::FIELD_COUNT_REPEATED;
+using android::util::FIELD_TYPE_INT32;
+using android::util::FIELD_TYPE_INT64;
 using android::util::FIELD_TYPE_MESSAGE;
 using android::util::ProtoOutputStream;
 
@@ -47,6 +49,9 @@ namespace os {
 namespace statsd {
 
 const int FIELD_ID_METRICS = 1;
+const int FIELD_ID_ANNOTATIONS = 7;
+const int FIELD_ID_ANNOTATIONS_INT64 = 1;
+const int FIELD_ID_ANNOTATIONS_INT32 = 2;
 
 MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
                                const long timeBaseSec, const long currentTimeSec,
@@ -85,6 +90,11 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
         }
     }
 
+    // Store the sub-configs used.
+    for (const auto& annotation : config.annotation()) {
+        mAnnotations.emplace_back(annotation.field_int64(), annotation.field_int32());
+    }
+
     // Guardrail. Reject the config if it's too big.
     if (mAllMetricProducers.size() > StatsdStats::kMaxMetricCountPerConfig ||
         mAllConditionTrackers.size() > StatsdStats::kMaxConditionCountPerConfig ||
@@ -97,11 +107,9 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
         mConfigValid = false;
     }
     // no matter whether this config is valid, log it in the stats.
-    StatsdStats::getInstance().noteConfigReceived(key, mAllMetricProducers.size(),
-                                                  mAllConditionTrackers.size(),
-                                                  mAllAtomMatchers.size(),
-                                                  mAllAnomalyTrackers.size(),
-                                                  mConfigValid);
+    StatsdStats::getInstance().noteConfigReceived(
+            key, mAllMetricProducers.size(), mAllConditionTrackers.size(), mAllAtomMatchers.size(),
+            mAllAnomalyTrackers.size(), mAnnotations, mConfigValid);
 }
 
 MetricsManager::~MetricsManager() {
@@ -187,6 +195,14 @@ void MetricsManager::onDumpReport(const uint64_t dumpTimeStampNs, ProtoOutputStr
             producer->onDumpReport(dumpTimeStampNs, protoOutput);
             protoOutput->end(token);
         }
+    }
+    for (const auto& annotation : mAnnotations) {
+        uint64_t token = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                                            FIELD_ID_ANNOTATIONS);
+        protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ANNOTATIONS_INT64,
+                           (long long)annotation.first);
+        protoOutput->write(FIELD_TYPE_INT32 | FIELD_ID_ANNOTATIONS_INT32, annotation.second);
+        protoOutput->end(token);
     }
     mLastReportTimeNs = dumpTimeStampNs;
     mLastReportWallClockNs = getWallClockNs();
