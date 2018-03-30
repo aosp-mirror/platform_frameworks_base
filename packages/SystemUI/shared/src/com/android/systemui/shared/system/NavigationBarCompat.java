@@ -17,10 +17,27 @@
 package com.android.systemui.shared.system;
 
 import android.annotation.IntDef;
+import android.content.Context;
+import android.content.res.Resources;
+import android.util.DisplayMetrics;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import sun.misc.Resource;
+
 public class NavigationBarCompat {
+    /**
+     * Touch slopes and thresholds for quick step operations. Drag slop is the point where the
+     * home button press/long press over are ignored and will start to drag when exceeded and the
+     * touch slop is when the respected operation will occur when exceeded. Touch slop must be
+     * larger than the drag slop.
+     */
+    public static final int QUICK_STEP_DRAG_SLOP_PX = convertDpToPixel(10);
+    public static final int QUICK_SCRUB_DRAG_SLOP_PX = convertDpToPixel(20);
+    public static final int QUICK_STEP_TOUCH_SLOP_PX = convertDpToPixel(40);
+    public static final int QUICK_SCRUB_TOUCH_SLOP_PX = convertDpToPixel(35);
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({HIT_TARGET_NONE, HIT_TARGET_BACK, HIT_TARGET_HOME, HIT_TARGET_OVERVIEW})
     public @interface HitTarget{}
@@ -42,7 +59,6 @@ public class NavigationBarCompat {
      * Interaction type: whether the gesture to swipe up from the navigation bar will trigger
      * launcher to show overview
      */
-
     public static final int FLAG_DISABLE_SWIPE_UP = 0x1;
     /**
      * Interaction type: enable quick scrub interaction on the home button
@@ -58,4 +74,8 @@ public class NavigationBarCompat {
      * Interaction type: show/hide the back button while this service is connected to launcher
      */
     public static final int FLAG_HIDE_BACK_BUTTON = 0x8;
+
+    private static int convertDpToPixel(float dp){
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
 }

@@ -54,6 +54,8 @@ import com.android.systemui.statusbar.VibratorHelper;
 
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
+import static com.android.systemui.shared.system.NavigationBarCompat.QUICK_SCRUB_TOUCH_SLOP_PX;
+import static com.android.systemui.shared.system.NavigationBarCompat.QUICK_STEP_TOUCH_SLOP_PX;
 
 public class KeyButtonView extends ImageView implements ButtonInterface {
     private static final String TAG = KeyButtonView.class.getSimpleName();
@@ -62,9 +64,9 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     private int mContentDescriptionRes;
     private long mDownTime;
     private int mCode;
-    private int mTouchSlop;
     private int mTouchDownX;
     private int mTouchDownY;
+    private boolean mIsVertical;
     private boolean mSupportsLongpress = true;
     private AudioManager mAudioManager;
     private boolean mGestureAborted;
@@ -115,7 +117,6 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         a.recycle();
 
         setClickable(true);
-        mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
         mRipple = new KeyButtonRipple(context, this);
@@ -235,8 +236,11 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
             case MotionEvent.ACTION_MOVE:
                 x = (int)ev.getRawX();
                 y = (int)ev.getRawY();
-                boolean exceededTouchSlopX = Math.abs(x - mTouchDownX) > mTouchSlop;
-                boolean exceededTouchSlopY = Math.abs(y - mTouchDownY) > mTouchSlop;
+
+                boolean exceededTouchSlopX = Math.abs(x - mTouchDownX) >
+                        (mIsVertical ? QUICK_SCRUB_TOUCH_SLOP_PX : QUICK_STEP_TOUCH_SLOP_PX);
+                boolean exceededTouchSlopY = Math.abs(y - mTouchDownY) >
+                        (mIsVertical ? QUICK_STEP_TOUCH_SLOP_PX : QUICK_SCRUB_TOUCH_SLOP_PX);
                 if (exceededTouchSlopX || exceededTouchSlopY) {
                     // When quick step is enabled, prevent animating the ripple triggered by
                     // setPressed and decide to run it on touch up
@@ -342,7 +346,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
 
     @Override
     public void setVertical(boolean vertical) {
-        //no op
+        mIsVertical = vertical;
     }
 }
 
