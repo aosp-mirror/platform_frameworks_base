@@ -4192,36 +4192,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertTrue(dpm.clearResetPasswordToken(admin1));
     }
 
-    public void testSetPasswordBlacklistCannotBeCalledByNonAdmin() throws Exception {
-        assertExpectException(SecurityException.class, /* messageRegex= */ null,
-                () -> dpm.setPasswordBlacklist(admin1, null, null));
-        verifyZeroInteractions(getServices().passwordBlacklist);
-    }
-
-    public void testClearingPasswordBlacklistDoesNotCreateNewBlacklist() throws Exception {
-        setupProfileOwner();
-        dpm.setPasswordBlacklist(admin1, null, null);
-        verifyZeroInteractions(getServices().passwordBlacklist);
-    }
-
-    public void testSetPasswordBlacklistCreatesNewBlacklist() throws Exception {
-        final String name = "myblacklist";
-        final List<String> explicit = Arrays.asList("password", "letmein");
-        setupProfileOwner();
-        dpm.setPasswordBlacklist(admin1, name, explicit);
-        verify(getServices().passwordBlacklist).savePasswordBlacklist(name, explicit);
-    }
-
-    public void testSetPasswordBlacklistOnlyConvertsExplicitToLowerCase() throws Exception {
-        final List<String> mixedCase = Arrays.asList("password", "LETMEIN", "FooTBAll");
-        final List<String> lowerCase = Arrays.asList("password", "letmein", "football");
-        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
-        setupDeviceOwner();
-        final String name = "Name of the Blacklist";
-        dpm.setPasswordBlacklist(admin1, name, mixedCase);
-        verify(getServices().passwordBlacklist).savePasswordBlacklist(name, lowerCase);
-    }
-
     public void testIsActivePasswordSufficient() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         mContext.packageName = admin1.getPackageName();
