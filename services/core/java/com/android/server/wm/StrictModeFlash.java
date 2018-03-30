@@ -79,17 +79,25 @@ class StrictModeFlash {
         }
 
         // Top
-        c.clipRect(new Rect(0, 0, dw, mThickness), Region.Op.REPLACE);
+        c.save();
+        c.clipRect(new Rect(0, 0, dw, mThickness));
         c.drawColor(Color.RED);
+        c.restore();
         // Left
-        c.clipRect(new Rect(0, 0, mThickness, dh), Region.Op.REPLACE);
+        c.save();
+        c.clipRect(new Rect(0, 0, mThickness, dh));
         c.drawColor(Color.RED);
+        c.restore();
         // Right
-        c.clipRect(new Rect(dw - mThickness, 0, dw, dh), Region.Op.REPLACE);
+        c.save();
+        c.clipRect(new Rect(dw - mThickness, 0, dw, dh));
         c.drawColor(Color.RED);
+        c.restore();
         // Bottom
-        c.clipRect(new Rect(0, dh - mThickness, dw, dh), Region.Op.REPLACE);
+        c.save();
+        c.clipRect(new Rect(0, dh - mThickness, dw, dh));
         c.drawColor(Color.RED);
+        c.restore();
 
         mSurface.unlockCanvasAndPost(c);
     }
