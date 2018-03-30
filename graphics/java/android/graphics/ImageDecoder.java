@@ -597,7 +597,7 @@ public final class ImageDecoder implements AutoCloseable {
     private int        mDesiredWidth;
     private int        mDesiredHeight;
     private int        mAllocator = ALLOCATOR_DEFAULT;
-    private boolean    mRequireUnpremultiplied = false;
+    private boolean    mUnpremultipliedRequired = false;
     private boolean    mMutable = false;
     private boolean    mConserveMemory = false;
     private boolean    mDecodeAsAlphaMask = false;
@@ -782,7 +782,7 @@ public final class ImageDecoder implements AutoCloseable {
      *  height that can be achieved by sampling the encoded image. Other widths
      *  and heights may be supported, but will require an additional (internal)
      *  scaling step. Such internal scaling is *not* supported with
-     *  {@link #setRequireUnpremultiplied} set to {@code true}.</p>
+     *  {@link #setUnpremultipliedRequired} set to {@code true}.</p>
      *
      *  @param sampleSize Sampling rate of the encoded image.
      *  @return {@link android.util.Size} of the width and height after
@@ -909,7 +909,7 @@ public final class ImageDecoder implements AutoCloseable {
      *  Will typically result in a {@link Bitmap.Config#HARDWARE}
      *  allocation, but may be software for small images. In addition, this will
      *  switch to software when HARDWARE is incompatible, e.g.
-     *  {@link #setMutable}, {@link #setDecodeAsAlphaMask}.
+     *  {@link #setMutableRequired}, {@link #setDecodeAsAlphaMaskEnabled}.
      */
     public static final int ALLOCATOR_DEFAULT = 0;
 
@@ -932,8 +932,8 @@ public final class ImageDecoder implements AutoCloseable {
      *  Require a {@link Bitmap.Config#HARDWARE} {@link Bitmap}.
      *
      *  When this is combined with incompatible options, like
-     *  {@link #setMutable} or {@link #setDecodeAsAlphaMask}, {@link #decodeDrawable}
-     *  / {@link #decodeBitmap} will throw an
+     *  {@link #setMutableRequired} or {@link #setDecodeAsAlphaMaskEnabled},
+     *  {@link #decodeDrawable} / {@link #decodeBitmap} will throw an
      *  {@link java.lang.IllegalStateException}.
      */
     public static final int ALLOCATOR_HARDWARE = 3;
@@ -984,16 +984,32 @@ public final class ImageDecoder implements AutoCloseable {
      *
      *  @return this object for chaining.
      */
-    public ImageDecoder setRequireUnpremultiplied(boolean requireUnpremultiplied) {
-        mRequireUnpremultiplied = requireUnpremultiplied;
+    public ImageDecoder setUnpremultipliedRequired(boolean unpremultipliedRequired) {
+        mUnpremultipliedRequired = unpremultipliedRequired;
         return this;
+    }
+
+    /** @removed
+     * @deprecated Renamed to {@link #setUnpremultipliedRequired}.
+     */
+    @java.lang.Deprecated
+    public ImageDecoder setRequireUnpremultiplied(boolean unpremultipliedRequired) {
+        return this.setUnpremultipliedRequired(unpremultipliedRequired);
     }
 
     /**
      *  Return whether the {@link Bitmap} will have unpremultiplied pixels.
      */
+    public boolean isUnpremultipliedRequired() {
+        return mUnpremultipliedRequired;
+    }
+
+    /** @removed
+     * @deprecated Renamed to {@link #isUnpremultipliedRequired}.
+     */
+    @java.lang.Deprecated
     public boolean getRequireUnpremultiplied() {
-        return mRequireUnpremultiplied;
+        return this.isUnpremultipliedRequired();
     }
 
     /**
@@ -1105,16 +1121,32 @@ public final class ImageDecoder implements AutoCloseable {
      *
      *  @return this object for chaining.
      */
-    public ImageDecoder setMutable(boolean mutable) {
+    public ImageDecoder setMutableRequired(boolean mutable) {
         mMutable = mutable;
         return this;
+    }
+
+    /** @removed
+     * @deprecated Renamed to {@link #setMutableRequired}.
+     */
+    @java.lang.Deprecated
+    public ImageDecoder setMutable(boolean mutable) {
+        return this.setMutableRequired(mutable);
     }
 
     /**
      *  Return whether the {@link Bitmap} will be mutable.
      */
-    public boolean getMutable() {
+    public boolean isMutableRequired() {
         return mMutable;
+    }
+
+    /** @removed
+     * @deprecated Renamed to {@link #isMutableRequired}.
+     */
+    @java.lang.Deprecated
+    public boolean getMutable() {
+        return this.isMutableRequired();
     }
 
     /**
@@ -1154,20 +1186,28 @@ public final class ImageDecoder implements AutoCloseable {
      *  with only one channel, treat that channel as alpha. Otherwise this call has
      *  no effect.</p>
      *
-     *  <p>setDecodeAsAlphaMask is incompatible with {@link #ALLOCATOR_HARDWARE}. Trying to
+     *  <p>This is incompatible with {@link #ALLOCATOR_HARDWARE}. Trying to
      *  combine them will result in {@link #decodeDrawable}/
      *  {@link #decodeBitmap} throwing an
      *  {@link java.lang.IllegalStateException}.</p>
      *
      *  @return this object for chaining.
      */
-    public ImageDecoder setDecodeAsAlphaMask(boolean decodeAsAlphaMask) {
-        mDecodeAsAlphaMask = decodeAsAlphaMask;
+    public ImageDecoder setDecodeAsAlphaMaskEnabled(boolean enabled) {
+        mDecodeAsAlphaMask = enabled;
         return this;
     }
 
     /** @removed
-     * @deprecated Call {@link #setDecodeAsAlphaMask} instead.
+     * @deprecated Renamed to {@link #setDecodeAsAlphaMaskEnabled}.
+     */
+    @java.lang.Deprecated
+    public ImageDecoder setDecodeAsAlphaMask(boolean enabled) {
+        return this.setDecodeAsAlphaMaskEnabled(enabled);
+    }
+
+    /** @removed
+     * @deprecated Renamed to {@link #setDecodeAsAlphaMaskEnabled}.
      */
     @java.lang.Deprecated
     public ImageDecoder setAsAlphaMask(boolean asAlphaMask) {
@@ -1177,16 +1217,25 @@ public final class ImageDecoder implements AutoCloseable {
     /**
      *  Return whether to treat single channel input as alpha.
      *
-     *  <p>This returns whether {@link #setDecodeAsAlphaMask} was set to {@code true}.
-     *  It may still return {@code true} even if the image has more than one
-     *  channel and therefore will not be treated as an alpha mask.</p>
+     *  <p>This returns whether {@link #setDecodeAsAlphaMaskEnabled} was set to
+     *  {@code true}. It may still return {@code true} even if the image has
+     *  more than one channel and therefore will not be treated as an alpha
+     *  mask.</p>
      */
+    public boolean isDecodeAsAlphaMaskEnabled() {
+        return mDecodeAsAlphaMask;
+    }
+
+    /** @removed
+     * @deprecated Renamed to {@link #isDecodeAsAlphaMaskEnabled}.
+     */
+    @java.lang.Deprecated
     public boolean getDecodeAsAlphaMask() {
         return mDecodeAsAlphaMask;
     }
 
     /** @removed
-     * @deprecated Call {@link #getDecodeAsAlphaMask} instead.
+     * @deprecated Renamed to {@link #isDecodeAsAlphaMaskEnabled}.
      */
     @java.lang.Deprecated
     public boolean getAsAlphaMask() {
@@ -1259,7 +1308,7 @@ public final class ImageDecoder implements AutoCloseable {
             }
         }
 
-        if (mPostProcessor != null && mRequireUnpremultiplied) {
+        if (mPostProcessor != null && mUnpremultipliedRequired) {
             throw new IllegalStateException("Cannot draw to unpremultiplied pixels!");
         }
 
@@ -1290,7 +1339,7 @@ public final class ImageDecoder implements AutoCloseable {
         checkState();
         return nDecodeBitmap(mNativePtr, this, mPostProcessor != null,
                 mDesiredWidth, mDesiredHeight, mCropRect,
-                mMutable, mAllocator, mRequireUnpremultiplied,
+                mMutable, mAllocator, mUnpremultipliedRequired,
                 mConserveMemory, mDecodeAsAlphaMask, mDesiredColorSpace);
     }
 
@@ -1334,7 +1383,7 @@ public final class ImageDecoder implements AutoCloseable {
             decoder.mSource = src;
             decoder.callHeaderDecoded(listener, src);
 
-            if (decoder.mRequireUnpremultiplied) {
+            if (decoder.mUnpremultipliedRequired) {
                 // Though this could be supported (ignored) for opaque images,
                 // it seems better to always report this error.
                 throw new IllegalStateException("Cannot decode a Drawable " +
@@ -1534,7 +1583,7 @@ public final class ImageDecoder implements AutoCloseable {
             boolean doPostProcess,
             int width, int height,
             @Nullable Rect cropRect, boolean mutable,
-            int allocator, boolean requireUnpremul,
+            int allocator, boolean unpremulRequired,
             boolean conserveMemory, boolean decodeAsAlphaMask,
             @Nullable ColorSpace desiredColorSpace)
         throws IOException;
