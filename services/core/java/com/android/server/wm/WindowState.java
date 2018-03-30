@@ -1691,13 +1691,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return changed;
         }
 
-        // Next up we will notify the client that it's visibility has changed.
-        // We need to prevent it from destroying child surfaces until
-        // the animation has finished.
-        if (!visible && isVisibleNow()) {
-            mWinAnimator.detachChildren();
-        }
-
         if (visible != isVisibleNow()) {
             if (!runningAppAnimation) {
                 final AccessibilityController accessibilityController =
