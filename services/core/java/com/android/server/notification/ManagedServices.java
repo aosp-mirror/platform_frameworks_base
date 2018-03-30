@@ -982,7 +982,11 @@ abstract public class ManagedServices {
                     Slog.w(TAG, getCaption() + " binding died: " + name);
                     synchronized (mMutex) {
                         mServicesBinding.remove(servicesBindingTag);
-                        mContext.unbindService(this);
+                        try {
+                            mContext.unbindService(this);
+                        } catch (IllegalArgumentException e) {
+                            Slog.e(TAG, "failed to unbind " + name, e);
+                        }
                         if (!mServicesRebinding.contains(servicesBindingTag)) {
                             mServicesRebinding.add(servicesBindingTag);
                             mHandler.postDelayed(new Runnable() {
