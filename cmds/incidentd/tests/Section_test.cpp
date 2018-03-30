@@ -19,6 +19,7 @@
 #include <android-base/file.h>
 #include <android-base/test_utils.h>
 #include <android/os/IncidentReportArgs.h>
+#include <android/util/protobuf.h>
 #include <frameworks/base/libs/incident/proto/android/os/header.pb.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -31,12 +32,13 @@ const int REVERSE_PARSER = 1;
 const int QUICK_TIMEOUT_MS = 100;
 
 const string VARINT_FIELD_1 = "\x08\x96\x01";  // 150
-const string STRING_FIELD_2 = "\x12\vwhatthefuck";
+const string STRING_FIELD_2 = "\x12\vandroidwins";
 const string FIX64_FIELD_3 = "\x19\xff\xff\xff\xff\xff\xff\xff\xff";  // -1
 
 using namespace android::base;
 using namespace android::binder;
 using namespace android::os;
+using namespace android::util;
 using namespace std;
 using ::testing::StrEq;
 using ::testing::Test;
@@ -154,17 +156,26 @@ TEST_F(SectionTest, GZipSection) {
     requests.setMainDest(android::os::DEST_LOCAL);
 
     ASSERT_EQ(NO_ERROR, gs.Execute(&requests));
-    std::string expect, gzFile, actual;
+    std::string expected, gzFile, actual;
     ASSERT_TRUE(ReadFileToString(testGzFile, &gzFile));
     ASSERT_TRUE(ReadFileToString(tf.path, &actual));
-    expect = "\x2\xC6\x6\n\"" + testFile + "\x12\x9F\x6" + gzFile;
-    EXPECT_THAT(actual, StrEq(expect));
+    // generates the expected protobuf result.
+    size_t fileLen = testFile.size();
+    size_t totalLen = 1 + get_varint_size(fileLen) + fileLen + 3 + gzFile.size();
+    uint8_t header[20];
+    header[0] = '\x2'; // header 0 << 3 + 2
+    uint8_t* ptr = write_raw_varint(header + 1, totalLen);
+    *ptr = '\n'; // header 1 << 3 + 2
+    ptr = write_raw_varint(++ptr, fileLen);
+    expected.assign((const char*)header, ptr - header);
+    expected += testFile + "\x12\x9F\x6" + gzFile;
+    EXPECT_THAT(actual, StrEq(expected));
 }
 
 TEST_F(SectionTest, GZipSectionNoFileFound) {
     GZipSection gs(NOOP_PARSER, "/tmp/nonexist1", "/tmp/nonexist2", NULL);
     requests.setMainFd(STDOUT_FILENO);
-    ASSERT_EQ(-1, gs.Execute(&requests));
+    ASSERT_EQ(NO_ERROR, gs.Execute(&requests));
 }
 
 TEST_F(SectionTest, CommandSectionConstructor) {
