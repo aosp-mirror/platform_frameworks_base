@@ -1125,6 +1125,16 @@ Return<void> GnssBatchingCallback::gnssLocationBatchCb(
 }
 
 static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env, jclass clazz) {
+    gnssHal_V1_1 = IGnss_V1_1::getService();
+    if (gnssHal_V1_1 == nullptr) {
+        ALOGD("gnssHal 1.1 was null, trying 1.0");
+        gnssHal = IGnss_V1_0::getService();
+    } else {
+        gnssHal = gnssHal_V1_1;
+    }
+}
+
+static void android_location_GnssLocationProvider_init_once(JNIEnv* env, jclass clazz) {
     method_reportLocation = env->GetMethodID(clazz, "reportLocation",
             "(ZLandroid/location/Location;)V");
     method_reportStatus = env->GetMethodID(clazz, "reportStatus", "(I)V");
@@ -1173,15 +1183,6 @@ static void android_location_GnssLocationProvider_class_init_native(JNIEnv* env,
     jint jvmStatus = env->GetJavaVM(&sJvm);
     if (jvmStatus != JNI_OK) {
         LOG_ALWAYS_FATAL("Unable to get Java VM. Error: %d", jvmStatus);
-    }
-
-    // TODO(b/31632518)
-    gnssHal_V1_1 = IGnss_V1_1::getService();
-    if (gnssHal_V1_1 == nullptr) {
-        ALOGD("gnssHal 1.1 was null, trying 1.0");
-        gnssHal = IGnss_V1_0::getService();
-    } else {
-        gnssHal = gnssHal_V1_1;
     }
 
     if (gnssHal != nullptr) {
@@ -2068,6 +2069,8 @@ static const JNINativeMethod sMethods[] = {
     {"native_is_gnss_configuration_supported", "()Z",
             reinterpret_cast<void *>(
                     android_location_gpsLocationProvider_is_gnss_configuration_supported)},
+    {"native_init_once", "()V", reinterpret_cast<void *>(
+            android_location_GnssLocationProvider_init_once)},
     {"native_init", "()Z", reinterpret_cast<void *>(android_location_GnssLocationProvider_init)},
     {"native_cleanup", "()V", reinterpret_cast<void *>(
             android_location_GnssLocationProvider_cleanup)},
