@@ -327,8 +327,9 @@ int64_t MaxDurationTracker::predictAnomalyTimestampNs(const DurationAnomalyTrack
             }
         }
     }
-    int64_t threshold = anomalyTracker.getAnomalyThreshold();
-    return currentTimestamp + threshold - maxElapsed;
+    int64_t anomalyTimeNs = currentTimestamp + anomalyTracker.getAnomalyThreshold() - maxElapsed;
+    int64_t refractoryEndNs = anomalyTracker.getRefractoryPeriodEndsSec(mEventKey) * NS_PER_SEC;
+    return std::max(anomalyTimeNs, refractoryEndNs);
 }
 
 void MaxDurationTracker::dumpStates(FILE* out, bool verbose) const {
