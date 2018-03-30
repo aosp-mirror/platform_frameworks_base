@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-     Copyright (C) 2015 The Android Open Source Project
+<!-- Copyright (C) 2014 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,14 +13,11 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
-<!-- Height is 0 because it will be managed by the QS manually -->
-<com.android.systemui.qs.customize.QSCustomizer
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:elevation="4dp"
-    android:orientation="vertical"
-    android:gravity="center_horizontal">
-
-</com.android.systemui.qs.customize.QSCustomizer>
+<inset xmlns:android="http://schemas.android.com/apk/res/android">
+    <shape>
+        <solid android:color="?android:attr/colorSecondary"/>
+        <corners
+            android:topLeftRadius="?android:attr/dialogCornerRadius"
+            android:topRightRadius="?android:attr/dialogCornerRadius" />
+    </shape>
+</inset>
