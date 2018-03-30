@@ -176,6 +176,14 @@ public class HvacController {
     };
 
     /**
+     * Removes all registered components. This is useful if you need to rebuild the UI since
+     * components self register.
+     */
+    public void removeAllComponents() {
+        mTempComponents.clear();
+    }
+
+    /**
      * Key for storing {@link TemperatureView}s in a hash map
      */
     private static class HvacKey {
