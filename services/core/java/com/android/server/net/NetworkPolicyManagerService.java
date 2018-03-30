@@ -188,6 +188,7 @@ import android.util.AtomicFile;
 import android.util.DataUnit;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Range;
 import android.util.RecurrenceRule;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -1749,11 +1750,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 quotaBytes = DataUnit.MEBIBYTES.toBytes(20);
             } else {
                 // Limited data; let's only use 10% of remaining budget
-                final Pair<ZonedDateTime, ZonedDateTime> cycle = plan.cycleIterator().next();
-                final long start = cycle.first.toInstant().toEpochMilli();
-                final long end = cycle.second.toInstant().toEpochMilli();
+                final Range<ZonedDateTime> cycle = plan.cycleIterator().next();
+                final long start = cycle.getLower().toInstant().toEpochMilli();
+                final long end = cycle.getUpper().toInstant().toEpochMilli();
                 final Instant now = mClock.instant();
-                final long startOfDay = ZonedDateTime.ofInstant(now, cycle.first.getZone())
+                final long startOfDay = ZonedDateTime.ofInstant(now, cycle.getLower().getZone())
                         .truncatedTo(ChronoUnit.DAYS)
                         .toInstant().toEpochMilli();
                 final long totalBytes = getTotalBytes(

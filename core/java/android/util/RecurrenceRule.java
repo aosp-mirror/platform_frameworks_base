@@ -158,7 +158,7 @@ public class RecurrenceRule implements Parcelable {
                 && period.getDays() == 0;
     }
 
-    public Iterator<Pair<ZonedDateTime, ZonedDateTime>> cycleIterator() {
+    public Iterator<Range<ZonedDateTime>> cycleIterator() {
         if (period != null) {
             return new RecurringIterator();
         } else {
@@ -166,7 +166,7 @@ public class RecurrenceRule implements Parcelable {
         }
     }
 
-    private class NonrecurringIterator implements Iterator<Pair<ZonedDateTime, ZonedDateTime>> {
+    private class NonrecurringIterator implements Iterator<Range<ZonedDateTime>> {
         boolean hasNext;
 
         public NonrecurringIterator() {
@@ -179,13 +179,13 @@ public class RecurrenceRule implements Parcelable {
         }
 
         @Override
-        public Pair<ZonedDateTime, ZonedDateTime> next() {
+        public Range<ZonedDateTime> next() {
             hasNext = false;
-            return new Pair<>(start, end);
+            return new Range<>(start, end);
         }
     }
 
-    private class RecurringIterator implements Iterator<Pair<ZonedDateTime, ZonedDateTime>> {
+    private class RecurringIterator implements Iterator<Range<ZonedDateTime>> {
         int i;
         ZonedDateTime cycleStart;
         ZonedDateTime cycleEnd;
@@ -231,12 +231,12 @@ public class RecurrenceRule implements Parcelable {
         }
 
         @Override
-        public Pair<ZonedDateTime, ZonedDateTime> next() {
+        public Range<ZonedDateTime> next() {
             if (LOGD) Log.d(TAG, "Cycle " + i + " from " + cycleStart + " to " + cycleEnd);
-            Pair<ZonedDateTime, ZonedDateTime> p = new Pair<>(cycleStart, cycleEnd);
+            Range<ZonedDateTime> r = new Range<>(cycleStart, cycleEnd);
             i--;
             updateCycle();
-            return p;
+            return r;
         }
     }
 
