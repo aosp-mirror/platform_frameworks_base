@@ -151,6 +151,13 @@ public class Vpn {
                 .multiply(BigInteger.valueOf(howManyPercentIsMost))
                 .divide(BigInteger.valueOf(100));
     }
+    // How many routes to evaluate before bailing and declaring this Vpn should provide
+    // the INTERNET capability. This is necessary because computing the adress space is
+    // O(n²) and this is running in the system service, so a limit is needed to alleviate
+    // the risk of attack.
+    // This is taken as a total of IPv4 + IPV6 routes for simplicity, but the algorithm
+    // is actually O(n²)+O(n²).
+    private static final int MAX_ROUTES_TO_EVALUATE = 150;
 
     // TODO: create separate trackers for each unique VPN to support
     // automated reconnection
@@ -862,10 +869,12 @@ public class Vpn {
      */
     @VisibleForTesting
     static boolean providesRoutesToMostDestinations(LinkProperties lp) {
+        final List<RouteInfo> routes = lp.getAllRoutes();
+        if (routes.size() > MAX_ROUTES_TO_EVALUATE) return true;
         final Comparator<IpPrefix> prefixLengthComparator = IpPrefix.lengthComparator();
         TreeSet<IpPrefix> ipv4Prefixes = new TreeSet<>(prefixLengthComparator);
         TreeSet<IpPrefix> ipv6Prefixes = new TreeSet<>(prefixLengthComparator);
-        for (final RouteInfo route : lp.getAllRoutes()) {
+        for (final RouteInfo route : routes) {
             IpPrefix destination = route.getDestination();
             if (destination.isIPv4()) {
                 ipv4Prefixes.add(destination);

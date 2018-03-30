@@ -70,6 +70,7 @@ import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.INetworkManagementService;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.support.test.filters.SmallTest;
@@ -88,6 +89,8 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.net.Inet4Address;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -638,5 +641,33 @@ public class VpnTest {
         // V4 does not, but V6 has sufficient coverage again
         lp.addRoute(new RouteInfo(new IpPrefix("::/1")));
         assertTrue(Vpn.providesRoutesToMostDestinations(lp));
+    }
+
+    @Test
+    public void testDoesNotLockUpWithTooManyRoutes() {
+        final LinkProperties lp = new LinkProperties();
+        final byte[] ad = new byte[4];
+        // Actually evaluating this many routes under 1500ms is impossible on
+        // current hardware and for some time, as the algorithm is O(n²).
+        // Make sure the system has a safeguard against this and does not
+        // lock up.
+        final int MAX_ROUTES = 4000;
+        final long MAX_ALLOWED_TIME_MS = 1500;
+        for (int i = 0; i < MAX_ROUTES; ++i) {
+            ad[0] = (byte)((i >> 24) & 0xFF);
+            ad[1] = (byte)((i >> 16) & 0xFF);
+            ad[2] = (byte)((i >> 8) & 0xFF);
+            ad[3] = (byte)(i & 0xFF);
+            try {
+                lp.addRoute(new RouteInfo(new IpPrefix(Inet4Address.getByAddress(ad), 32)));
+            } catch (UnknownHostException e) {
+                // UnknownHostException is only thrown for an address of illegal length,
+                // which can't happen in the case above.
+            }
+        }
+        final long start = SystemClock.currentThreadTimeMillis();
+        assertTrue(Vpn.providesRoutesToMostDestinations(lp));
+        final long end = SystemClock.currentThreadTimeMillis();
+        assertTrue(end - start < MAX_ALLOWED_TIME_MS);
     }
 }
