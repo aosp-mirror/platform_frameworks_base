@@ -83,10 +83,12 @@ sk_sp<SkData> ShaderCache::load(const SkData& key) {
     int maxTries = 3;
     while (valueSize > mObservedBlobValueSize && maxTries > 0) {
         mObservedBlobValueSize = std::min(valueSize, maxValueSize);
-        valueBuffer = realloc(valueBuffer, mObservedBlobValueSize);
-        if (!valueBuffer) {
+        void *newValueBuffer = realloc(valueBuffer, mObservedBlobValueSize);
+        if (!newValueBuffer) {
+            free(valueBuffer);
             return nullptr;
         }
+        valueBuffer = newValueBuffer;
         valueSize = bc->get(key.data(), keySize, valueBuffer, mObservedBlobValueSize);
         maxTries--;
     }
