@@ -393,8 +393,8 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
-        void settingsSystemPutString(String name, String value) {
-            services.settings.settingsSystemPutString(name, value);
+        void settingsSystemPutStringForUser(String name, String value, int userId) {
+            services.settings.settingsSystemPutStringForUser(name, value, userId);
         }
 
         @Override
