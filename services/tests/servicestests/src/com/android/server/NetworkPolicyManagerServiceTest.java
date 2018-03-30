@@ -37,9 +37,12 @@ import static android.telephony.CarrierConfigManager.DATA_CYCLE_USE_PLATFORM_DEF
 import static android.telephony.CarrierConfigManager.KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG;
 import static android.telephony.CarrierConfigManager.KEY_DATA_WARNING_THRESHOLD_BYTES_LONG;
 import static android.telephony.CarrierConfigManager.KEY_MONTHLY_DATA_CYCLE_DAY_INT;
+import static android.telephony.SubscriptionPlan.BYTES_UNLIMITED;
 import static android.telephony.SubscriptionPlan.LIMIT_BEHAVIOR_DISABLED;
 import static android.text.format.Time.TIMEZONE_UTC;
 
+import static com.android.server.net.NetworkPolicyManagerInternal.QUOTA_TYPE_JOBS;
+import static com.android.server.net.NetworkPolicyManagerInternal.QUOTA_TYPE_MULTIPATH;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT_SNOOZED;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_RAPID;
@@ -1482,6 +1485,102 @@ public class NetworkPolicyManagerServiceTest {
 
         assertNetworkPolicyEquals(31, mDefaultWarningBytes, mDefaultLimitBytes,
                 true);
+    }
+
+    @Test
+    public void testOpportunisticQuota() throws Exception {
+        final Network net = new Network(TEST_NET_ID);
+        final NetworkPolicyManagerInternal internal = LocalServices
+                .getService(NetworkPolicyManagerInternal.class);
+
+        // Create a place to store fake usage
+        final NetworkStatsHistory history = new NetworkStatsHistory(TimeUnit.HOURS.toMillis(1));
+        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 0);
+        when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
+                .thenAnswer(new Answer<Long>() {
+                    @Override
+                    public Long answer(InvocationOnMock invocation) throws Throwable {
+                        final NetworkStatsHistory.Entry entry = history.getValues(
+                                invocation.getArgument(1), invocation.getArgument(2), null);
+                        return entry.rxBytes + entry.txBytes;
+                    }
+                });
+        when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
+                .thenAnswer(new Answer<NetworkStats>() {
+                    @Override
+                    public NetworkStats answer(InvocationOnMock invocation) throws Throwable {
+                        return stats;
+                    }
+                });
+
+        // Get active mobile network in place
+        expectMobileDefaults();
+        mService.updateNetworks();
+
+        // We're 20% through the month (6 days)
+        final long start = parseTime("2015-11-01T00:00Z");
+        final long end = parseTime("2015-11-07T00:00Z");
+        setCurrentTimeMillis(end);
+
+        // Get some data usage in place
+        history.clear();
+        history.recordData(start, end,
+                new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(360), 0L, 0L, 0L, 0));
+
+        // No data plan
+        {
+            reset(mTelephonyManager, mNetworkManager, mNotifManager);
+            expectMobileDefaults();
+
+            mService.updateNetworks();
+
+            // No quotas
+            assertEquals(-1, internal.getSubscriptionOpportunisticQuota(net, QUOTA_TYPE_JOBS));
+            assertEquals(-1, internal.getSubscriptionOpportunisticQuota(net, QUOTA_TYPE_MULTIPATH));
+        }
+
+        // Limited data plan
+        {
+            final SubscriptionPlan plan = SubscriptionPlan.Builder
+                    .createRecurringMonthly(ZonedDateTime.parse("2015-11-01T00:00:00.00Z"))
+                    .setDataLimit(DataUnit.MEGABYTES.toBytes(1800), LIMIT_BEHAVIOR_DISABLED)
+                    .build();
+            mService.setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[] { plan },
+                    mServiceContext.getOpPackageName());
+
+            reset(mTelephonyManager, mNetworkManager, mNotifManager);
+            expectMobileDefaults();
+
+            mService.updateNetworks();
+
+            // We have 1440MB and 24 days left, which is 60MB/day; assuming 10%
+            // for quota split equally between two types gives 3MB.
+            assertEquals(DataUnit.MEGABYTES.toBytes(3),
+                    internal.getSubscriptionOpportunisticQuota(net, QUOTA_TYPE_JOBS));
+            assertEquals(DataUnit.MEGABYTES.toBytes(3),
+                    internal.getSubscriptionOpportunisticQuota(net, QUOTA_TYPE_MULTIPATH));
+        }
+
+        // Unlimited data plan
+        {
+            final SubscriptionPlan plan = SubscriptionPlan.Builder
+                    .createRecurringMonthly(ZonedDateTime.parse("2015-11-01T00:00:00.00Z"))
+                    .setDataLimit(BYTES_UNLIMITED, LIMIT_BEHAVIOR_DISABLED)
+                    .build();
+            mService.setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[] { plan },
+                    mServiceContext.getOpPackageName());
+
+            reset(mTelephonyManager, mNetworkManager, mNotifManager);
+            expectMobileDefaults();
+
+            mService.updateNetworks();
+
+            // 20MB/day, split equally between two types gives 10MB.
+            assertEquals(DataUnit.MEBIBYTES.toBytes(10),
+                    internal.getSubscriptionOpportunisticQuota(net, QUOTA_TYPE_JOBS));
+            assertEquals(DataUnit.MEBIBYTES.toBytes(10),
+                    internal.getSubscriptionOpportunisticQuota(net, QUOTA_TYPE_MULTIPATH));
+        }
     }
 
     private ApplicationInfo buildApplicationInfo(String label) {
