@@ -249,12 +249,12 @@ message WifiLog {
   optional int32 num_wificond_crashes = 54;
 
   // Indicates the number of times an error was encountered in
-  // Wifi HAL when wifi was turned on.
-  optional int32 num_wifi_on_failure_due_to_hal = 55;
+  // Wifi HAL on |WifiNative.setupInterfaceForClientMode|.
+  optional int32 num_setup_client_interface_failure_due_to_hal = 55;
 
   // Indicates the number of times an error was encountered in
-  // Wificond when wifi was turned on.
-  optional int32 num_wifi_on_failure_due_to_wificond = 56;
+  // Wificond on |WifiNative.setupInterfaceForClientMode|.
+  optional int32 num_setup_client_interface_failure_due_to_wificond = 56;
 
   // Wi-Fi Aware metrics
   optional WifiAwareLog wifi_aware_log = 57;
@@ -385,6 +385,34 @@ message WifiLog {
 
   // Histogram counting instances of scans with N many 802.11mc (RTT) supporting APs
   repeated NumConnectableNetworksBucket observed_80211mc_supporting_aps_in_scan_histogram = 95;
+
+  // Total number of times supplicant crashed.
+  optional int32 num_supplicant_crashes = 96;
+
+  // Total number of times hostapd crashed.
+  optional int32 num_hostapd_crashes = 97;
+
+  // Indicates the number of times an error was encountered in
+  // supplicant on |WifiNative.setupInterfaceForClientMode|.
+  optional int32 num_setup_client_interface_failure_due_to_supplicant = 98;
+
+  // Indicates the number of times an error was encountered in
+  // Wifi HAL on |WifiNative.setupInterfaceForSoftApMode|.
+  optional int32 num_setup_soft_ap_interface_failure_due_to_hal = 99;
+
+  // Indicates the number of times an error was encountered in
+  // Wifi HAL on |WifiNative.setupInterfaceForSoftApMode|.
+  optional int32 num_setup_soft_ap_interface_failure_due_to_wificond = 100;
+
+  // Indicates the number of times an error was encountered in
+  // Wifi HAL on |WifiNative.setupInterfaceForSoftApMode|.
+  optional int32 num_setup_soft_ap_interface_failure_due_to_hostapd = 101;
+
+  // Indicates the number of times we got an interface down in client mode.
+  optional int32 num_client_interface_down = 102;
+
+  // Indicates the number of times we got an interface down in softap mode.
+  optional int32 num_soft_ap_interface_down = 103;
 }
 
 // Information that gets logged for every WiFi connection.
