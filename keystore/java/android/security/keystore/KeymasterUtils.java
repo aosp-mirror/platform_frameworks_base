@@ -16,9 +16,8 @@
 
 package android.security.keystore;
 
-import android.util.Log;
+import android.app.ActivityManager;
 import android.hardware.fingerprint.FingerprintManager;
-import android.os.UserHandle;
 import android.security.GateKeeper;
 import android.security.KeyStore;
 import android.security.keymaster.KeymasterArguments;
@@ -102,7 +101,7 @@ public abstract class KeymasterUtils {
      *         require user authentication.
      */
     public static void addUserAuthArgs(KeymasterArguments args, UserAuthArgs spec) {
-        // TODO (67752510): Implement "unlocked device required"
+        args.addUnsignedInt(KeymasterDefs.KM_TAG_USER_ID, ActivityManager.getCurrentUser());
 
         if (spec.isUserConfirmationRequired()) {
             args.addBoolean(KeymasterDefs.KM_TAG_TRUSTED_CONFIRMATION_REQUIRED);
@@ -110,6 +109,10 @@ public abstract class KeymasterUtils {
 
         if (spec.isTrustedUserPresenceRequired()) {
             args.addBoolean(KeymasterDefs.KM_TAG_TRUSTED_USER_PRESENCE_REQUIRED);
+        }
+
+        if (spec.isUnlockedDeviceRequired()) {
+            args.addBoolean(KeymasterDefs.KM_TAG_UNLOCKED_DEVICE_REQUIRED);
         }
 
         if (!spec.isUserAuthenticationRequired()) {
