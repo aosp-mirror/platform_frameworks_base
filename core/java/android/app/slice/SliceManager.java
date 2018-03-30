@@ -392,7 +392,8 @@ public class SliceManager {
      * Does the permission check to see if a caller has access to a specific slice.
      * @hide
      */
-    public void enforceSlicePermission(Uri uri, String pkg, int pid, int uid) {
+    public void enforceSlicePermission(Uri uri, String pkg, int pid, int uid,
+            String[] autoGrantPermissions) {
         try {
             if (UserHandle.isSameApp(uid, Process.myUid())) {
                 return;
@@ -400,7 +401,7 @@ public class SliceManager {
             if (pkg == null) {
                 throw new SecurityException("No pkg specified");
             }
-            int result = mService.checkSlicePermission(uri, pkg, pid, uid);
+            int result = mService.checkSlicePermission(uri, pkg, pid, uid, autoGrantPermissions);
             if (result == PERMISSION_DENIED) {
                 throw new SecurityException("User " + uid + " does not have slice permission for "
                         + uri + ".");
@@ -412,6 +413,8 @@ public class SliceManager {
                         Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
                                 | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                                 | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
+                // Notify a change has happened because we just granted a permission.
+                mContext.getContentResolver().notifyChange(uri, null);
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
