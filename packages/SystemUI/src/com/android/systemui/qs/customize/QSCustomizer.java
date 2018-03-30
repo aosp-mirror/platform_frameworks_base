@@ -20,6 +20,7 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -37,6 +38,7 @@ import android.widget.Toolbar.OnMenuItemClickListener;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QS;
@@ -81,10 +83,9 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
 
     public QSCustomizer(Context context, AttributeSet attrs) {
         super(new ContextThemeWrapper(context, R.style.edit_theme), attrs);
-        mClipper = new QSDetailClipper(this);
 
         LayoutInflater.from(getContext()).inflate(R.layout.qs_customize_panel_content, this);
-
+        mClipper = new QSDetailClipper(findViewById(R.id.customize_container));
         mToolbar = findViewById(com.android.internal.R.id.action_bar);
         TypedValue value = new TypedValue();
         mContext.getTheme().resolveAttribute(android.R.attr.homeAsUpIndicator, value, true);
@@ -100,7 +101,10 @@ public class QSCustomizer extends LinearLayout implements OnMenuItemClickListene
         mToolbar.getMenu().add(Menu.NONE, MENU_RESET, 0,
                 mContext.getString(com.android.internal.R.string.reset));
         mToolbar.setTitle(R.string.qs_edit);
-
+        int accentColor = Utils.getColorAttr(context, android.R.attr.colorAccent);
+        mToolbar.setTitleTextColor(accentColor);
+        mToolbar.getNavigationIcon().setTint(accentColor);
+        mToolbar.getOverflowIcon().setTint(accentColor);
         mRecyclerView = findViewById(android.R.id.list);
         mTileAdapter = new TileAdapter(getContext());
         mTileQueryHelper = new TileQueryHelper(context, mTileAdapter);
