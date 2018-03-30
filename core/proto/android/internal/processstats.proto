@@ -19,10 +19,10 @@ syntax = "proto2";
 package com.android.internal.app.procstats;
 
 message ProcessStatsProto {
-  enum MemoryFactor {
-    MEM_FACTOR_NORMAL = 0;
-    MEM_FACTOR_MODERATE = 1;
-    MEM_FACTOR_LOW = 2;
-    MEM_FACTOR_CRITICAL = 3;
-  }
+    enum MemoryFactor {
+        MEM_FACTOR_NORMAL = 0;
+        MEM_FACTOR_MODERATE = 1;
+        MEM_FACTOR_LOW = 2;
+        MEM_FACTOR_CRITICAL = 3;
+    }
 }

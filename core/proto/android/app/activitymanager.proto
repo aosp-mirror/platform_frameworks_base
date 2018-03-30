@@ -23,14 +23,14 @@ option java_outer_classname = "ActivityManagerProto";
 
 // ActivityManager.java UID_OBSERVERs flags
 enum UidObserverFlag {
-  // report changes in process state, original value is 1 << 0
-  UID_OBSERVER_FLAG_PROCSTATE = 1;
-  // report uid gone, original value is 1 << 1
-  UID_OBSERVER_FLAG_GONE = 2;
-  // report uid has become idle, original value is 1 << 2
-  UID_OBSERVER_FLAG_IDLE = 3;
-  // report uid has become active, original value is 1 << 3
-  UID_OBSERVER_FLAG_ACTIVE = 4;
-  // report uid cached state has changed, original value is 1 << 4
-  UID_OBSERVER_FLAG_CACHED = 5;
+    // report changes in process state, original value is 1 << 0
+    UID_OBSERVER_FLAG_PROCSTATE = 1;
+    // report uid gone, original value is 1 << 1
+    UID_OBSERVER_FLAG_GONE = 2;
+    // report uid has become idle, original value is 1 << 2
+    UID_OBSERVER_FLAG_IDLE = 3;
+    // report uid has become active, original value is 1 << 3
+    UID_OBSERVER_FLAG_ACTIVE = 4;
+    // report uid cached state has changed, original value is 1 << 4
+    UID_OBSERVER_FLAG_CACHED = 5;
 }

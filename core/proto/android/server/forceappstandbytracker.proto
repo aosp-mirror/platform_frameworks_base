@@ -27,51 +27,51 @@ option java_multiple_files = true;
 //
 // Next ID: 12
 message ForceAppStandbyTrackerProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-  // Whether all apps are forced standby or not.
-  optional bool force_all_apps_standby = 1;
-
-  // UIDs currently active.
-  repeated int32 active_uids = 2;
-
-  // UIDs currently in the foreground.
-  repeated int32 foreground_uids = 11;
-
-  // App ids that are in power-save whitelist.
-  repeated int32 power_save_whitelist_app_ids = 3;
-
-  // App ids that are in temporary power-save whitelist.
-  repeated int32 temp_power_save_whitelist_app_ids = 4;
-
-  message RunAnyInBackgroundRestrictedPackages {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional int32 uid = 1;
-    optional string package_name = 2;
-  }
-  // Packages that are disallowed OP_RUN_ANY_IN_BACKGROUND.
-  repeated RunAnyInBackgroundRestrictedPackages run_any_in_background_restricted_packages = 5;
+    // Whether all apps are forced standby or not.
+    optional bool force_all_apps_standby = 1;
 
-  // Whether device is a small battery device
-  optional bool is_small_battery_device = 6;
+    // UIDs currently active.
+    repeated int32 active_uids = 2;
 
-  // Whether force app standby for small battery device setting is enabled
-  optional bool force_all_apps_standby_for_small_battery = 7;
+    // UIDs currently in the foreground.
+    repeated int32 foreground_uids = 11;
 
-  // Whether device is plugged in to the charger
-  optional bool is_plugged_in = 8;
+    // App ids that are in power-save whitelist.
+    repeated int32 power_save_whitelist_app_ids = 3;
 
-  // Performance stats.
-  optional StatLoggerProto stats = 9;
+    // App ids that are in temporary power-save whitelist.
+    repeated int32 temp_power_save_whitelist_app_ids = 4;
 
-  message ExemptedPackage {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    message RunAnyInBackgroundRestrictedPackages {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional int32 userId = 1;
-    optional string package_name = 2;
-  }
+        optional int32 uid = 1;
+        optional string package_name = 2;
+    }
+    // Packages that are disallowed OP_RUN_ANY_IN_BACKGROUND.
+    repeated RunAnyInBackgroundRestrictedPackages run_any_in_background_restricted_packages = 5;
 
-  // Packages that are in the EXEMPT bucket.
-  repeated ExemptedPackage exempted_packages = 10;
+    // Whether device is a small battery device
+    optional bool is_small_battery_device = 6;
+
+    // Whether force app standby for small battery device setting is enabled
+    optional bool force_all_apps_standby_for_small_battery = 7;
+
+    // Whether device is plugged in to the charger
+    optional bool is_plugged_in = 8;
+
+    // Performance stats.
+    optional StatLoggerProto stats = 9;
+
+    message ExemptedPackage {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 userId = 1;
+        optional string package_name = 2;
+    }
+
+    // Packages that are in the EXEMPT bucket.
+    repeated ExemptedPackage exempted_packages = 10;
 }

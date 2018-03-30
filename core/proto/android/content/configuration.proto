@@ -28,63 +28,63 @@ import "frameworks/base/libs/incident/proto/android/privacy.proto";
  * An android Configuration object.
  */
 message ConfigurationProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional float font_scale = 1;
-  optional uint32 mcc = 2;
-  optional uint32 mnc = 3 [ (.android.privacy).dest = DEST_EXPLICIT ];
-  repeated LocaleProto locales = 4;
-  optional uint32 screen_layout = 5;
-  optional uint32 color_mode = 6;
-  optional uint32 touchscreen = 7;
-  optional uint32 keyboard = 8;
-  optional uint32 keyboard_hidden = 9;
-  optional uint32 hard_keyboard_hidden = 10;
-  optional uint32 navigation = 11;
-  optional uint32 navigation_hidden = 12;
-  optional uint32 orientation = 13;
-  optional uint32 ui_mode = 14;
-  optional uint32 screen_width_dp = 15;
-  optional uint32 screen_height_dp = 16;
-  optional uint32 smallest_screen_width_dp = 17;
-  optional uint32 density_dpi = 18;
-  optional .android.app.WindowConfigurationProto window_configuration = 19;
+    optional float font_scale = 1;
+    optional uint32 mcc = 2;
+    optional uint32 mnc = 3 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    repeated LocaleProto locales = 4;
+    optional uint32 screen_layout = 5;
+    optional uint32 color_mode = 6;
+    optional uint32 touchscreen = 7;
+    optional uint32 keyboard = 8;
+    optional uint32 keyboard_hidden = 9;
+    optional uint32 hard_keyboard_hidden = 10;
+    optional uint32 navigation = 11;
+    optional uint32 navigation_hidden = 12;
+    optional uint32 orientation = 13;
+    optional uint32 ui_mode = 14;
+    optional uint32 screen_width_dp = 15;
+    optional uint32 screen_height_dp = 16;
+    optional uint32 smallest_screen_width_dp = 17;
+    optional uint32 density_dpi = 18;
+    optional .android.app.WindowConfigurationProto window_configuration = 19;
 }
 
 /**
  * All current configuration data used to select resources.
  */
 message ResourcesConfigurationProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  required ConfigurationProto configuration = 1;
+    required ConfigurationProto configuration = 1;
 
-  optional uint32 sdk_version = 2;
-  optional uint32 screen_width_px = 3;
-  optional uint32 screen_height_px = 4;
+    optional uint32 sdk_version = 2;
+    optional uint32 screen_width_px = 3;
+    optional uint32 screen_height_px = 4;
 }
 
 /**
  * Overall device configuration data.
  */
 message DeviceConfigurationProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional uint32 stable_screen_width_px = 1;
-  optional uint32 stable_screen_height_px = 2;
-  optional uint32 stable_density_dpi = 3;
+    optional uint32 stable_screen_width_px = 1;
+    optional uint32 stable_screen_height_px = 2;
+    optional uint32 stable_density_dpi = 3;
 
-  optional uint64 total_ram = 4;
-  optional bool low_ram = 5;
-  optional uint32 max_cores = 6;
-  optional bool has_secure_screen_lock = 7;
+    optional uint64 total_ram = 4;
+    optional bool low_ram = 5;
+    optional uint32 max_cores = 6;
+    optional bool has_secure_screen_lock = 7;
 
-  optional uint32 opengl_version = 8;
-  repeated string opengl_extensions = 9;
+    optional uint32 opengl_version = 8;
+    repeated string opengl_extensions = 9;
 
-  repeated string shared_libraries = 10;
-  repeated string features = 11;
-  repeated string cpu_architectures = 12;
+    repeated string shared_libraries = 10;
+    repeated string features = 11;
+    repeated string cpu_architectures = 12;
 }
 
 /**
@@ -92,8 +92,8 @@ message DeviceConfigurationProto {
  * to filter and target apps.
  */
 message GlobalConfigurationProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional ResourcesConfigurationProto resources = 1;
-  optional DeviceConfigurationProto device = 2;
+    optional ResourcesConfigurationProto resources = 1;
+    optional DeviceConfigurationProto device = 2;
 }

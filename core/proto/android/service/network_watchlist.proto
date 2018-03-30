@@ -23,14 +23,14 @@ option java_multiple_files = true;
 // generate network watchlist report.
 message NetworkWatchlistReportProto {
 
-  optional int32 report_version = 1;
+    optional int32 report_version = 1;
 
-  optional string watchlist_config_hash = 2;
+    optional string watchlist_config_hash = 2;
 
-  repeated NetworkWatchlistAppResultProto app_result = 3;
+    repeated NetworkWatchlistAppResultProto app_result = 3;
 }
 
 message NetworkWatchlistAppResultProto {
-  optional string app_digest = 1;
-  optional bool encoded_result = 2;
+    optional string app_digest = 1;
+    optional bool encoded_result = 2;
 }

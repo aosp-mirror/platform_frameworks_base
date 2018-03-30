@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.AlphaAnimationSpecProto.DURATION;
+import static com.android.server.wm.AlphaAnimationSpecProto.DURATION_MS;
 import static com.android.server.wm.AlphaAnimationSpecProto.FROM;
 import static com.android.server.wm.AlphaAnimationSpecProto.TO;
 import static com.android.server.wm.AnimationSpecProto.ALPHA;
@@ -35,6 +35,7 @@ import java.io.PrintWriter;
  */
 class Dimmer {
     private static final String TAG = "WindowManager";
+    // This is in milliseconds.
     private static final int DEFAULT_DIM_ANIM_DURATION = 200;
 
     private class DimAnimatable implements SurfaceAnimator.Animatable {
@@ -370,7 +371,7 @@ class Dimmer {
             final long token = proto.start(ALPHA);
             proto.write(FROM, mFromAlpha);
             proto.write(TO, mToAlpha);
-            proto.write(DURATION, mDuration);
+            proto.write(DURATION_MS, mDuration);
             proto.end(token);
         }
     }
