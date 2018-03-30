@@ -43,6 +43,7 @@ import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.RouteInfo;
+import android.net.util.InterfaceSet;
 import android.net.util.SharedLog;
 import android.os.INetworkManagementService;
 import android.os.RemoteException;
@@ -371,7 +372,7 @@ public class TetherInterfaceStateMachineTest {
      */
     private void dispatchTetherConnectionChanged(String upstreamIface) {
         mTestedSm.sendMessage(TetherInterfaceStateMachine.CMD_TETHER_CONNECTION_CHANGED,
-                upstreamIface);
+                new InterfaceSet(upstreamIface));
         mLooper.dispatchAll();
     }
 
