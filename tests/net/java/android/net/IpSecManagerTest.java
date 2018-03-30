@@ -179,7 +179,7 @@ public class IpSecManagerTest {
 
         IpSecManager.UdpEncapsulationSocket encapSocket =
                 mIpSecManager.openUdpEncapsulationSocket(TEST_UDP_ENCAP_PORT);
-        assertNotNull(encapSocket.getSocket());
+        assertNotNull(encapSocket.getFileDescriptor());
         assertEquals(TEST_UDP_ENCAP_PORT, encapSocket.getPort());
 
         encapSocket.close();
@@ -202,7 +202,7 @@ public class IpSecManagerTest {
         IpSecManager.UdpEncapsulationSocket encapSocket =
                 mIpSecManager.openUdpEncapsulationSocket();
 
-        assertNotNull(encapSocket.getSocket());
+        assertNotNull(encapSocket.getFileDescriptor());
         assertEquals(TEST_UDP_ENCAP_PORT, encapSocket.getPort());
 
         encapSocket.close();
