@@ -527,9 +527,7 @@ message JobStatusShortInfoProto {
     optional int32 calling_uid = 1;
     // Job IDs can technically be negative.
     optional int32 job_id = 2;
-    optional string battery_name = 3 [
-        (.android.privacy).dest = DEST_EXPLICIT
-    ];
+    optional string battery_name = 3;
 }
 
 // Dump from a com.android.server.job.controllers.JobStatus object.

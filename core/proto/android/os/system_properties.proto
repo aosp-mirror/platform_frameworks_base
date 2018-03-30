@@ -192,6 +192,8 @@ message SystemPropertiesProto {
     optional string libc_debug_malloc_program = 15;
 
     message Log {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
         optional string tag_WifiHAL = 1;
         optional string tag_stats_log = 2;
 
