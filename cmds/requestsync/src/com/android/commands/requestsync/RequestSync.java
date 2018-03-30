@@ -29,23 +29,21 @@ public class RequestSync {
     private String[] mArgs;
     private int mNextArg;
     private String mCurArgData;
-    private boolean mIsForegroundRequest;
+
+    private int mExemptionFlag = ContentResolver.SYNC_EXEMPTION_NONE;
 
     enum Operation {
         REQUEST_SYNC {
             @Override
             void invoke(RequestSync caller) {
-                if (caller.mIsForegroundRequest) {
-                    caller.mExtras.putBoolean(
-                            ContentResolver.SYNC_VIRTUAL_EXTRAS_FORCE_FG_SYNC, true);
-                } else {
-                    caller.mExtras.putBoolean(
-                            ContentResolver.SYNC_VIRTUAL_EXTRAS_FORCE_BG_SYNC, true);
+                final int flag = caller.mExemptionFlag;
+                caller.mExtras.putInt(ContentResolver.SYNC_VIRTUAL_EXTRAS_EXEMPTION_FLAG, flag);
+                if (flag == ContentResolver.SYNC_EXEMPTION_NONE) {
                     System.out.println(
                             "Making a sync request as a background app.\n"
                             + "Note: request may be throttled by App Standby.\n"
                             + "To override this behavior and run a sync immediately,"
-                            + " pass a -f option.\n");
+                            + " pass a -f or -F option (use -h for help).\n");
                 }
                 final SyncRequest request =
                         new SyncRequest.Builder()
@@ -213,7 +211,10 @@ public class RequestSync {
                 mExtras.putBoolean(key, Boolean.valueOf(value));
 
             } else if (opt.equals("-f") || opt.equals("--foreground")) {
-                mIsForegroundRequest = true;
+                mExemptionFlag = ContentResolver.SYNC_EXEMPTION_ACTIVE;
+
+            } else if (opt.equals("-F") || opt.equals("--top")) {
+                mExemptionFlag = ContentResolver.SYNC_EXEMPTION_ACTIVE_WITH_TEMP;
 
             } else {
                 System.err.println("Error: Unknown option: " + opt);
@@ -293,7 +294,9 @@ public class RequestSync {
                 "       -a|--authority <AUTHORITY>\n" +
                 "    App-standby related options\n" +
                 "\n" +
-                "       -f|--foreground (Exempt a sync from app standby)\n" +
+                "       -f|--foreground (cause WORKING_SET, FREQUENT sync adapters" +
+                        " to run immediately)\n" +
+                "       -F|--top (cause even RARE sync adapters to run immediately)\n" +
                 "    ContentResolver extra options:\n" +
                 "      --is|--ignore-settings: Add SYNC_EXTRAS_IGNORE_SETTINGS\n" +
                 "      --ib|--ignore-backoff: Add SYNC_EXTRAS_IGNORE_BACKOFF\n" +
