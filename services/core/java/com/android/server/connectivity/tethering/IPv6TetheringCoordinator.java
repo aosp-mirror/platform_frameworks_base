@@ -30,10 +30,8 @@ import android.util.Log;
 
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -119,7 +117,7 @@ public class IPv6TetheringCoordinator {
         if (VDBG) {
             Log.d(TAG, "updateUpstreamNetworkState: " + toDebugString(ns));
         }
-        if (!canTetherIPv6(ns, mLog)) {
+        if (TetheringInterfaceUtils.getIPv6Interface(ns) == null) {
             stopIPv6TetheringOnAllInterfaces();
             setUpstreamNetworkState(null);
             return;
@@ -206,70 +204,6 @@ public class IPv6TetheringCoordinator {
             if (ds.tism == tism) return ds;
         }
         return null;
-    }
-
-    private static boolean canTetherIPv6(NetworkState ns, SharedLog sharedLog) {
-        // Broadly speaking:
-        //
-        //     [1] does the upstream have an IPv6 default route?
-        //
-        // and
-        //
-        //     [2] does the upstream have one or more global IPv6 /64s
-        //         dedicated to this device?
-        //
-        // In lieu of Prefix Delegation and other evaluation of whether a
-        // prefix may or may not be dedicated to this device, for now just
-        // check whether the upstream is TRANSPORT_CELLULAR. This works
-        // because "[t]he 3GPP network allocates each default bearer a unique
-        // /64 prefix", per RFC 6459, Section 5.2.
-
-        final boolean canTether =
-                (ns != null) && (ns.network != null) &&
-                (ns.linkProperties != null) && (ns.networkCapabilities != null) &&
-                // At least one upstream DNS server:
-                ns.linkProperties.isProvisioned() &&
-                // Minimal amount of IPv6 provisioning:
-                ns.linkProperties.hasIPv6DefaultRoute() &&
-                ns.linkProperties.hasGlobalIPv6Address() &&
-                // Temporary approximation of "dedicated prefix":
-                ns.networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR);
-
-        // For now, we do not support separate IPv4 and IPv6 upstreams (e.g.
-        // tethering with 464xlat involved). TODO: Rectify this shortcoming,
-        // likely by calling NetworkManagementService#startInterfaceForwarding()
-        // for all upstream interfaces.
-        RouteInfo v4default = null;
-        RouteInfo v6default = null;
-        if (canTether) {
-            for (RouteInfo r : ns.linkProperties.getAllRoutes()) {
-                if (r.isIPv4Default()) {
-                    v4default = r;
-                } else if (r.isIPv6Default()) {
-                    v6default = r;
-                }
-
-                if (v4default != null && v6default != null) {
-                    break;
-                }
-            }
-        }
-
-        final boolean supportedConfiguration =
-                (v4default != null) && (v6default != null) &&
-                (v4default.getInterface() != null) &&
-                v4default.getInterface().equals(v6default.getInterface());
-
-        final boolean outcome = canTether && supportedConfiguration;
-
-        if (ns == null) {
-            sharedLog.log("No available upstream.");
-        } else {
-            sharedLog.log(String.format("IPv6 tethering is %s for upstream: %s",
-                    (outcome ? "available" : "not available"), toDebugString(ns)));
-        }
-
-        return outcome;
     }
 
     private static LinkProperties getIPv6OnlyLinkProperties(LinkProperties lp) {

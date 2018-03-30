@@ -56,6 +56,7 @@ import android.net.NetworkInfo;
 import android.net.NetworkState;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
+import android.net.util.InterfaceSet;
 import android.net.util.PrefixUtils;
 import android.net.util.SharedLog;
 import android.net.util.VersionedBroadcastListener;
@@ -98,6 +99,7 @@ import com.android.server.connectivity.tethering.SimChangeListener;
 import com.android.server.connectivity.tethering.TetherInterfaceStateMachine;
 import com.android.server.connectivity.tethering.TetheringConfiguration;
 import com.android.server.connectivity.tethering.TetheringDependencies;
+import com.android.server.connectivity.tethering.TetheringInterfaceUtils;
 import com.android.server.connectivity.tethering.UpstreamNetworkMonitor;
 import com.android.server.net.BaseNetworkObserver;
 
@@ -184,7 +186,7 @@ public class Tethering extends BaseNetworkObserver {
     private final TetheringDependencies mDeps;
 
     private volatile TetheringConfiguration mConfig;
-    private String mCurrentUpstreamIface;
+    private InterfaceSet mCurrentUpstreamIfaceSet;
     private Notification.Builder mTetheredNotificationBuilder;
     private int mLastNotificationId;
 
@@ -1160,12 +1162,11 @@ public class Tethering extends BaseNetworkObserver {
     }
 
     // Needed because the canonical source of upstream truth is just the
-    // upstream interface name, |mCurrentUpstreamIface|.  This is ripe for
-    // future simplification, once the upstream Network is canonical.
+    // upstream interface set, |mCurrentUpstreamIfaceSet|.
     private boolean pertainsToCurrentUpstream(NetworkState ns) {
-        if (ns != null && ns.linkProperties != null && mCurrentUpstreamIface != null) {
+        if (ns != null && ns.linkProperties != null && mCurrentUpstreamIfaceSet != null) {
             for (String ifname : ns.linkProperties.getAllInterfaceNames()) {
-                if (mCurrentUpstreamIface.equals(ifname)) {
+                if (mCurrentUpstreamIfaceSet.ifnames.contains(ifname)) {
                     return true;
                 }
             }
@@ -1360,31 +1361,27 @@ public class Tethering extends BaseNetworkObserver {
         }
 
         protected void setUpstreamNetwork(NetworkState ns) {
-            String iface = null;
+            InterfaceSet ifaces = null;
             if (ns != null) {
                 // Find the interface with the default IPv4 route. It may be the
                 // interface described by linkProperties, or one of the interfaces
                 // stacked on top of it.
                 mLog.i("Looking for default routes on: " + ns.linkProperties);
-                final String iface4 = getIPv4DefaultRouteInterface(ns);
-                final String iface6 = getIPv6DefaultRouteInterface(ns);
-                mLog.i("IPv4/IPv6 upstream interface(s): " + iface4 + "/" + iface6);
-
-                iface = (iface4 != null) ? iface4 : null /* TODO: iface6 */;
+                ifaces = TetheringInterfaceUtils.getTetheringInterfaces(ns);
+                mLog.i("Found upstream interface(s): " + ifaces);
             }
 
-            if (iface != null) {
+            if (ifaces != null) {
                 setDnsForwarders(ns.network, ns.linkProperties);
             }
-            notifyDownstreamsOfNewUpstreamIface(iface);
+            notifyDownstreamsOfNewUpstreamIface(ifaces);
             if (ns != null && pertainsToCurrentUpstream(ns)) {
                 // If we already have NetworkState for this network examine
                 // it immediately, because there likely will be no second
                 // EVENT_ON_AVAILABLE (it was already received).
                 handleNewUpstreamNetworkState(ns);
-            } else if (mCurrentUpstreamIface == null) {
-                // There are no available upstream networks, or none that
-                // have an IPv4 default route (current metric for success).
+            } else if (mCurrentUpstreamIfaceSet == null) {
+                // There are no available upstream networks.
                 handleNewUpstreamNetworkState(null);
             }
         }
@@ -1411,12 +1408,10 @@ public class Tethering extends BaseNetworkObserver {
             }
         }
 
-        protected void notifyDownstreamsOfNewUpstreamIface(String ifaceName) {
-            mLog.log("Notifying downstreams of upstream=" + ifaceName);
-            mCurrentUpstreamIface = ifaceName;
+        protected void notifyDownstreamsOfNewUpstreamIface(InterfaceSet ifaces) {
+            mCurrentUpstreamIfaceSet = ifaces;
             for (TetherInterfaceStateMachine sm : mNotifyList) {
-                sm.sendMessage(TetherInterfaceStateMachine.CMD_TETHER_CONNECTION_CHANGED,
-                        ifaceName);
+                sm.sendMessage(TetherInterfaceStateMachine.CMD_TETHER_CONNECTION_CHANGED, ifaces);
             }
         }
 
@@ -1488,7 +1483,7 @@ public class Tethering extends BaseNetworkObserver {
                 // For example, after CONNECTIVITY_ACTION listening is removed, here
                 // is where we could observe a Wi-Fi network becoming available and
                 // passing validation.
-                if (mCurrentUpstreamIface == null) {
+                if (mCurrentUpstreamIfaceSet == null) {
                     // If we have no upstream interface, try to run through upstream
                     // selection again.  If, for example, IPv4 connectivity has shown up
                     // after IPv6 (e.g., 464xlat became available) we want the chance to
@@ -1512,8 +1507,7 @@ public class Tethering extends BaseNetworkObserver {
                     handleNewUpstreamNetworkState(ns);
                     break;
                 case UpstreamNetworkMonitor.EVENT_ON_LINKPROPERTIES:
-                    setDnsForwarders(ns.network, ns.linkProperties);
-                    handleNewUpstreamNetworkState(ns);
+                    chooseUpstreamType(false);
                     break;
                 case UpstreamNetworkMonitor.EVENT_ON_LOST:
                     // TODO: Re-evaluate possible upstreams. Currently upstream
@@ -1586,7 +1580,7 @@ public class Tethering extends BaseNetworkObserver {
                         if (VDBG) Log.d(TAG, "Tether Mode requested by " + who);
                         handleInterfaceServingStateActive(message.arg1, who);
                         who.sendMessage(TetherInterfaceStateMachine.CMD_TETHER_CONNECTION_CHANGED,
-                                mCurrentUpstreamIface);
+                                mCurrentUpstreamIfaceSet);
                         // If there has been a change and an upstream is now
                         // desired, kick off the selection process.
                         final boolean previousUpstreamWanted = updateUpstreamWanted();
@@ -1864,7 +1858,7 @@ public class Tethering extends BaseNetworkObserver {
                 pw.println(" - lastError = " + tetherState.lastError);
             }
             pw.println("Upstream wanted: " + upstreamWanted());
-            pw.println("Current upstream interface: " + mCurrentUpstreamIface);
+            pw.println("Current upstream interface(s): " + mCurrentUpstreamIfaceSet);
             pw.decreaseIndent();
         }
 
