@@ -443,16 +443,7 @@ public class RecoveryController {
      */
     public byte[] generateAndStoreKey(@NonNull String alias)
             throws InternalRecoveryServiceException, LockScreenRequiredException {
-        try {
-            return mBinder.generateAndStoreKey(alias);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ERROR_INSECURE_USER) {
-                throw new LockScreenRequiredException(e.getMessage());
-            }
-            throw wrapUnexpectedServiceSpecificException(e);
-        }
+        throw new UnsupportedOperationException();
     }
 
     /**

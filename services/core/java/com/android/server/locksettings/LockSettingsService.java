@@ -2079,11 +2079,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public byte[] generateAndStoreKey(@NonNull String alias) throws RemoteException {
-        return mRecoverableKeyStoreManager.generateAndStoreKey(alias);
-    }
-
-    @Override
     public @Nullable String generateKey(@NonNull String alias) throws RemoteException {
         return mRecoverableKeyStoreManager.generateKey(alias);
     }
