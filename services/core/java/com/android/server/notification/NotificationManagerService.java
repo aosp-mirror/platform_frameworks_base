@@ -2286,6 +2286,12 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public int getBlockedChannelCount(String pkg, int uid) {
+            enforceSystemOrSystemUI("getBlockedChannelCount");
+            return mRankingHelper.getBlockedChannelCount(pkg, uid);
+        }
+
+        @Override
         public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroupsForPackage(
                 String pkg, int uid, boolean includeDeleted) {
             checkCallerIsSystem();
