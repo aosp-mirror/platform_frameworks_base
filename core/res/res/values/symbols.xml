@@ -2732,6 +2732,10 @@
   <java-symbol type="string" name="status_bar_alarm_clock" />
   <java-symbol type="string" name="status_bar_secure" />
   <java-symbol type="string" name="status_bar_clock" />
+  <java-symbol type="string" name="status_bar_airplane" />
+  <java-symbol type="string" name="status_bar_mobile" />
+  <java-symbol type="string" name="status_bar_ethernet" />
+  <java-symbol type="string" name="status_bar_vpn" />
 
   <!-- Locale picker -->
   <java-symbol type="id" name="locale_search_menu" />

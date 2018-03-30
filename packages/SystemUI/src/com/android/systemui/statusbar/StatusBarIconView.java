@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.statusbar.policy.DarkIconDispatcher.getTint;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -23,6 +25,7 @@ import android.animation.ValueAnimator;
 import android.app.Notification;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Canvas;
@@ -56,7 +59,7 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import java.text.NumberFormat;
 import java.util.Arrays;
 
-public class StatusBarIconView extends AnimatedImageView {
+public class StatusBarIconView extends AnimatedImageView implements StatusIconDisplayable {
     public static final int NO_COLOR = 0;
 
     /**
@@ -865,6 +868,21 @@ public class StatusBarIconView extends AnimatedImageView {
 
     public void setOnDismissListener(Runnable onDismissListener) {
         mOnDismissListener = onDismissListener;
+    }
+
+    @Override
+    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
+        setImageTintList(ColorStateList.valueOf(getTint(area, this, tint)));
+    }
+
+    @Override
+    public boolean isIconVisible() {
+        return mIcon != null && mIcon.visible;
+    }
+
+    @Override
+    public boolean isIconBlocked() {
+        return mBlocked;
     }
 
     public interface OnVisibilityChangedListener {
