@@ -39,7 +39,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemProperties;
-import android.os.VibrationEffect;
 import android.support.annotation.ColorInt;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -69,7 +68,6 @@ import com.android.systemui.recents.RecentsOnboarding;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.NavigationBarCompat;
 import com.android.systemui.stackdivider.Divider;
-import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.DeadZone;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 import com.android.systemui.statusbar.policy.TintedKeyButtonDrawable;
@@ -150,7 +148,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private Divider mDivider;
     private RecentsOnboarding mRecentsOnboarding;
     private NotificationPanelView mPanelView;
-    private final VibratorHelper mVibratorHelper;
 
     private int mRotateBtnStyle = R.style.RotateButtonCCWStart90;
 
@@ -246,7 +243,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
         mRecentsOnboarding = new RecentsOnboarding(context, mOverviewProxyService);
-        mVibratorHelper = Dependency.get(VibratorHelper.class);
 
         mConfiguration = new Configuration();
         mConfiguration.updateFrom(context.getResources().getConfiguration());
@@ -314,9 +310,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 } else if (mRecentsButtonBounds.contains(x, y)) {
                     mDownHitTarget = HIT_TARGET_OVERVIEW;
                 }
-
-                // Vibrate tick whenever down occurs on navigation bar
-                mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
                 break;
         }
         return mGestureHelper.onInterceptTouchEvent(event);
