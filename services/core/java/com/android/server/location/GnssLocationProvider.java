@@ -2437,6 +2437,8 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
          * this handler.
          */
         private void handleInitialize() {
+            native_init_once();
+
             /*
              * A cycle of native_init() and native_cleanup() is needed so that callbacks are
              * registered after bootup even when location is disabled.
@@ -2790,6 +2792,8 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     private static native boolean native_is_agps_ril_supported();
 
     private static native boolean native_is_gnss_configuration_supported();
+
+    private static native void native_init_once();
 
     private native boolean native_init();
 
