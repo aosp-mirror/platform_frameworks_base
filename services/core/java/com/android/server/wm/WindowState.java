@@ -897,7 +897,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
             final WindowState imeWin = mService.mInputMethodWindow;
             // IME is up and obscuring this window. Adjust the window position so it is visible.
-            if (imeWin != null && imeWin.isVisibleNow() && mService.mInputMethodTarget == this) {
+            if (imeWin != null && imeWin.isVisibleNow() && isInputMethodTarget()) {
                 if (inFreeformWindowingMode()
                         && mContainingFrame.bottom > contentFrame.bottom) {
                     // In freeform we want to move the top up directly.
@@ -1885,7 +1885,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         final DisplayContent dc = getDisplayContent();
-        if (mService.mInputMethodTarget == this) {
+        if (isInputMethodTarget()) {
             dc.computeImeTarget(true /* updateImeTarget */);
         }
 
@@ -3949,7 +3949,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private boolean applyInOrderWithImeWindows(ToBooleanFunction<WindowState> callback,
             boolean traverseTopToBottom) {
         if (traverseTopToBottom) {
-            if (mService.mInputMethodTarget == this) {
+            if (isInputMethodTarget()) {
                 // This window is the current IME target, so we need to process the IME windows
                 // directly above it.
                 if (getDisplayContent().forAllImeWindows(callback, traverseTopToBottom)) {
@@ -3963,7 +3963,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (callback.apply(this)) {
                 return true;
             }
-            if (mService.mInputMethodTarget == this) {
+            if (isInputMethodTarget()) {
                 // This window is the current IME target, so we need to process the IME windows
                 // directly above it.
                 if (getDisplayContent().forAllImeWindows(callback, traverseTopToBottom)) {
@@ -4673,7 +4673,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void assignLayer(Transaction t, int layer) {
         // See comment in assignRelativeLayerForImeTargetChild
         if (!isChildWindow()
-                || (mService.mInputMethodTarget != getParentWindow())
+                || (!getParentWindow().isInputMethodTarget())
                 || !inSplitScreenWindowingMode()) {
             super.assignLayer(t, layer);
             return;
@@ -4739,6 +4739,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /** Union the region with current tap exclude region that this window provides. */
     void amendTapExcludeRegion(Region region) {
         mTapExcludeRegionHolder.amendRegion(region, getBounds());
+    }
+
+    @Override
+    public boolean isInputMethodTarget() {
+        return mService.mInputMethodTarget == this;
     }
 
     private final class MoveAnimationSpec implements AnimationSpec {
