@@ -413,6 +413,15 @@ message WifiLog {
 
   // Indicates the number of times we got an interface down in softap mode.
   optional int32 num_soft_ap_interface_down = 103;
+
+  // Indicates the number of scan requests from external apps.
+  optional int32 num_external_app_oneshot_scan_requests = 104;
+
+  // Indicates the number of times a scan request from an external foreground app was throttled.
+  optional int32 num_external_foreground_app_oneshot_scan_requests_throttled = 105;
+
+  // Indicates the number of times a scan request from an external background app was throttled.
+  optional int32 num_external_background_app_oneshot_scan_requests_throttled = 106;
 }
 
 // Information that gets logged for every WiFi connection.
