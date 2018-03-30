@@ -81,6 +81,17 @@ public class SliceManager {
      * An activity can be statically linked to a slice uri by including a meta-data item
      * for this key that contains a valid slice uri for the same application declaring
      * the activity.
+     *
+     * <pre class="prettyprint">
+     * {@literal
+     * <activity android:name="com.example.mypkg.MyActivity">
+     *     <meta-data android:name="android.metadata.SLICE_URI"
+     *                android:value="content://com.example.mypkg/main_slice" />
+     *  </activity>}
+     * </pre>
+     *
+     * @see #mapIntentToUri(Intent)
+     * @see SliceProvider#onMapIntentToUri(Intent)
      */
     public static final String SLICE_METADATA_KEY = "android.metadata.SLICE_URI";
 
@@ -257,16 +268,17 @@ public class SliceManager {
      * <p>
      * This goes through a several stage resolution process to determine if any slice
      * can represent this intent.
-     *  - If the intent contains data that {@link ContentResolver#getType} is
-     *  {@link SliceProvider#SLICE_TYPE} then the data will be returned.
-     *  - If the intent with {@link #CATEGORY_SLICE} added resolves to a provider, then
+     * <ol>
+     *  <li> If the intent contains data that {@link ContentResolver#getType} is
+     *  {@link SliceProvider#SLICE_TYPE} then the data will be returned.</li>
+     *  <li>If the intent with {@link #CATEGORY_SLICE} added resolves to a provider, then
      *  the provider will be asked to {@link SliceProvider#onMapIntentToUri} and that result
-     *  will be returned.
-     *  - Lastly, if the intent explicitly points at an activity, and that activity has
+     *  will be returned.</li>
+     *  <li>Lastly, if the intent explicitly points at an activity, and that activity has
      *  meta-data for key {@link #SLICE_METADATA_KEY}, then the Uri specified there will be
-     *  returned.
-     *  - If no slice is found, then {@code null} is returned.
-     *
+     *  returned.</li>
+     *  <li>If no slice is found, then {@code null} is returned.</li>
+     * </ol>
      * @param intent The intent associated with a slice.
      * @return The Slice Uri provided by the app or null if none exists.
      * @see Slice
