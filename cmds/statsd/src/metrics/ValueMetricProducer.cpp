@@ -312,8 +312,13 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
 
     if (mPullTagId != -1) { // for pulled events
         if (mCondition == true) {
-            interval.start = value;
-            interval.startUpdated = true;
+            if (!interval.startUpdated) {
+                interval.start = value;
+                interval.startUpdated = true;
+            } else {
+                // skip it if there is already value recorded for the start
+                VLOG("Already recorded value for this dimension %s", eventKey.toString().c_str());
+            }
         } else {
             // Generally we expect value to be monotonically increasing.
             // If not, there was a reset event. We take the absolute value as
@@ -382,6 +387,7 @@ void ValueMetricProducer::flushCurrentBucketLocked(const uint64_t& eventTimeNs) 
     int tainted = 0;
     for (const auto& slice : mCurrentSlicedBucket) {
         tainted += slice.second.tainted;
+        tainted += slice.second.startUpdated;
         info.mValue = slice.second.sum;
         // it will auto create new vector of ValuebucketInfo if the key is not found.
         auto& bucketList = mPastBuckets[slice.first];
