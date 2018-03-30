@@ -18,6 +18,8 @@ package com.android.server.locksettings.recoverablekeystore;
 
 import static android.security.keystore.recovery.KeyChainProtectionParams.TYPE_LOCKSCREEN;
 import static android.security.keystore.recovery.KeyChainProtectionParams.UI_FORMAT_PASSWORD;
+import static android.security.keystore.recovery.RecoveryController.ERROR_BAD_CERTIFICATE_FORMAT;
+import static android.security.keystore.recovery.RecoveryController.ERROR_INVALID_CERTIFICATE;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
@@ -386,7 +388,7 @@ public class RecoverableKeyStoreManagerTest {
                     modifiedCertXml);
             fail("should have thrown");
         } catch (ServiceSpecificException e) {
-            assertThat(e.getMessage()).contains("validate cert");
+            assertThat(e.errorCode).isEqualTo(ERROR_INVALID_CERTIFICATE);
         }
     }
 
@@ -518,7 +520,7 @@ public class RecoverableKeyStoreManagerTest {
                     getUtf8Bytes("wrong-sig-file-format"));
             fail("should have thrown");
         } catch (ServiceSpecificException e) {
-            assertThat(e.getMessage()).contains("parse the sig file");
+            assertThat(e.errorCode).isEqualTo(ERROR_BAD_CERTIFICATE_FORMAT);
         }
     }
 
@@ -530,7 +532,7 @@ public class RecoverableKeyStoreManagerTest {
                 INSECURE_CERTIFICATE_ALIAS, TestData.getCertXml(), TestData.getSigXml());
             fail("should have thrown");
         } catch (ServiceSpecificException e) {
-            assertThat(e.getMessage()).contains("signature over the cert file is invalid");
+            assertThat(e.errorCode).isEqualTo(ERROR_INVALID_CERTIFICATE);
         }
     }
 
