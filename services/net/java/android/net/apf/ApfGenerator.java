@@ -367,7 +367,7 @@ public class ApfGenerator {
      */
     public boolean setApfVersion(int version) {
         // This version number syncs up with APF_VERSION in hardware/google/apf/apf_interpreter.h
-        return version == 2;
+        return version >= 2;
     }
 
     private void addInstruction(Instruction instruction) {
