@@ -26,6 +26,7 @@ import android.system.Os;
 import android.util.apk.ApkSignatureVerifier;
 import android.util.apk.ByteBufferFactory;
 import android.util.apk.SignatureNotFoundException;
+import android.util.Pair;
 import android.util.Slog;
 
 import java.io.FileDescriptor;
@@ -59,12 +60,15 @@ abstract public class VerityUtils {
                 return SetupResult.skipped();
             }
 
-            shm = generateApkVerityIntoSharedMemory(apkPath, signedRootHash);
+            Pair<SharedMemory, Integer> result = generateApkVerityIntoSharedMemory(apkPath,
+                    signedRootHash);
+            shm = result.first;
+            int contentSize = result.second;
             FileDescriptor rfd = shm.getFileDescriptor();
             if (rfd == null || !rfd.valid()) {
                 return SetupResult.failed();
             }
-            return SetupResult.ok(Os.dup(rfd));
+            return SetupResult.ok(Os.dup(rfd), contentSize);
         } catch (IOException | SecurityException | DigestException | NoSuchAlgorithmException |
                 SignatureNotFoundException | ErrnoException e) {
             Slog.e(TAG, "Failed to set up apk verity: ", e);
@@ -85,10 +89,20 @@ abstract public class VerityUtils {
     }
 
     /**
-     * Returns a {@code SharedMemory} that contains Merkle tree and fsverity headers for the given
-     * apk, in the form that can immediately be used for fsverity setup.
+     * {@see ApkSignatureVerifier#getVerityRootHash(String)}.
      */
-    private static SharedMemory generateApkVerityIntoSharedMemory(
+    public static byte[] getVerityRootHash(@NonNull String apkPath)
+            throws IOException, SignatureNotFoundException, SecurityException {
+        return ApkSignatureVerifier.getVerityRootHash(apkPath);
+    }
+
+    /**
+     * Returns a pair of {@code SharedMemory} and {@code Integer}. The {@code SharedMemory} contains
+     * Merkle tree and fsverity headers for the given apk, in the form that can immediately be used
+     * for fsverity setup. The data is aligned to the beginning of {@code SharedMemory}, and has
+     * length equals to the returned {@code Integer}.
+     */
+    private static Pair<SharedMemory, Integer> generateApkVerityIntoSharedMemory(
             String apkPath, byte[] expectedRootHash)
             throws IOException, SecurityException, DigestException, NoSuchAlgorithmException,
                    SignatureNotFoundException {
@@ -101,6 +115,7 @@ abstract public class VerityUtils {
             throw new SecurityException("Locally generated verity root hash does not match");
         }
 
+        int contentSize = shmBufferFactory.getBufferLimit();
         SharedMemory shm = shmBufferFactory.releaseSharedMemory();
         if (shm == null) {
             throw new IllegalStateException("Failed to generate verity tree into shared memory");
@@ -108,7 +123,7 @@ abstract public class VerityUtils {
         if (!shm.setProtect(PROT_READ)) {
             throw new SecurityException("Failed to set up shared memory correctly");
         }
-        return shm;
+        return Pair.create(shm, contentSize);
     }
 
     public static class SetupResult {
@@ -123,22 +138,24 @@ abstract public class VerityUtils {
 
         private final int mCode;
         private final FileDescriptor mFileDescriptor;
+        private final int mContentSize;
 
-        public static SetupResult ok(@NonNull FileDescriptor fileDescriptor) {
-            return new SetupResult(RESULT_OK, fileDescriptor);
+        public static SetupResult ok(@NonNull FileDescriptor fileDescriptor, int contentSize) {
+            return new SetupResult(RESULT_OK, fileDescriptor, contentSize);
         }
 
         public static SetupResult skipped() {
-            return new SetupResult(RESULT_SKIPPED, null);
+            return new SetupResult(RESULT_SKIPPED, null, -1);
         }
 
         public static SetupResult failed() {
-            return new SetupResult(RESULT_FAILED, null);
+            return new SetupResult(RESULT_FAILED, null, -1);
         }
 
-        private SetupResult(int code, FileDescriptor fileDescriptor) {
+        private SetupResult(int code, FileDescriptor fileDescriptor, int contentSize) {
             this.mCode = code;
             this.mFileDescriptor = fileDescriptor;
+            this.mContentSize = contentSize;
         }
 
         public boolean isFailed() {
@@ -151,6 +168,10 @@ abstract public class VerityUtils {
 
         public @NonNull FileDescriptor getUnownedFileDescriptor() {
             return mFileDescriptor;
+        }
+
+        public int getContentSize() {
+            return mContentSize;
         }
     }
 
@@ -187,6 +208,10 @@ abstract public class VerityUtils {
             SharedMemory tmp = mShm;
             mShm = null;
             return tmp;
+        }
+
+        public int getBufferLimit() {
+            return mBuffer == null ? -1 : mBuffer.limit();
         }
     }
 }
