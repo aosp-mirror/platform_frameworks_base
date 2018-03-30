@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.policy;
 
 import android.annotation.ColorInt;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 
 import com.android.internal.graphics.ColorUtils;
@@ -49,16 +50,21 @@ public class TintedKeyButtonDrawable extends KeyButtonDrawable {
     public void setDarkIntensity(float intensity) {
         // Duplicate intensity scaling from KeyButtonDrawable
         mDarkIntensity = intensity;
-        int intermediateColor = ColorUtils.compositeColors(
-                setAlphaFloat(mDarkColor, intensity),
-                setAlphaFloat(mLightColor,1f - intensity));
+
+        // Dark and light colors may have an alpha component
+        final int intermediateColor = ColorUtils.compositeColors(
+                blendAlpha(mDarkColor, intensity),
+                blendAlpha(mLightColor, (1f - intensity)));
+
         getDrawable(0).setTint(intermediateColor);
         invalidateSelf();
     }
 
-    private int setAlphaFloat(int color, float alpha) {
+    private int blendAlpha(int color, float alpha) {
+        final float newAlpha = alpha < 0f ? 0f : (alpha > 1f ? 1f : alpha);
+        final float colorAlpha = Color.alpha(color) / 255f;
+        final int alphaInt = (int) (255 * newAlpha * colorAlpha); // Blend by multiplying
         // Ensure alpha is clamped [0-255] or ColorUtils will crash
-        final int alphaInt = alpha > 1f ? 255 : (alpha < 0f ? 0 : ((int) alpha*255));
         return ColorUtils.setAlphaComponent(color, alphaInt);
     }
 
