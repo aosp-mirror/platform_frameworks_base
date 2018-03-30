@@ -9212,8 +9212,8 @@ public final class Settings {
         public static final String CARRIER_APP_WHITELIST = "carrier_app_whitelist";
 
         /**
-         * Map of package name to application names.  Package names must be lower cased as they are
-         * used as a key in the map.  The application names cannot and will not be localized.
+         * Map of package name to application names. The application names cannot and will not be
+         * localized. App names may not contain colons or semicolons.
          *
          * The value is "packageName1:appName1;packageName2:appName2;..."
          * @hide
