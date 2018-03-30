@@ -38,7 +38,7 @@
             android:orientation="vertical"
             android:clipChildren="false"
             android:clipToPadding="false"
-            android:elevation="@dimen/volume_panel_elevation" >
+            android:elevation="@dimen/volume_dialog_elevation" >
             <LinearLayout
                 android:id="@+id/car_volume_dialog_rows"
                 android:layout_width="match_parent"
