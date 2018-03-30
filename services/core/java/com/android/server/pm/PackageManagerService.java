@@ -17322,8 +17322,11 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (Build.IS_DEBUGGABLE) Slog.i(TAG, "Enabling apk verity to " + apkPath);
                     FileDescriptor fd = result.getUnownedFileDescriptor();
                     try {
-                        mInstaller.installApkVerity(apkPath, fd);
-                    } catch (InstallerException e) {
+                        final byte[] signedRootHash = VerityUtils.generateFsverityRootHash(apkPath);
+                        mInstaller.installApkVerity(apkPath, fd, result.getContentSize());
+                        mInstaller.assertFsverityRootHashMatches(apkPath, signedRootHash);
+                    } catch (InstallerException | IOException | DigestException |
+                             NoSuchAlgorithmException e) {
                         res.setError(INSTALL_FAILED_INTERNAL_ERROR,
                                 "Failed to set up verity: " + e);
                         return;
