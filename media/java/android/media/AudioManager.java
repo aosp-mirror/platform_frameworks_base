@@ -4597,8 +4597,7 @@ public class AudioManager {
 
     private static boolean checkTypes(AudioDevicePort port) {
         return AudioDeviceInfo.convertInternalDeviceToDeviceType(port.type()) !=
-                    AudioDeviceInfo.TYPE_UNKNOWN &&
-                port.type() != AudioSystem.DEVICE_IN_BACK_MIC;
+                    AudioDeviceInfo.TYPE_UNKNOWN;
     }
 
     /**
