@@ -16,12 +16,12 @@
 
 syntax = "proto2";
 
-option java_package = "android";
+package android;
+
+option java_package = "com.android.incident";
 option java_multiple_files = true;
 
 import "google/protobuf/descriptor.proto";
-
-package android;
 
 enum Destination {
     // Fields or messages annotated with DEST_LOCAL must never be
