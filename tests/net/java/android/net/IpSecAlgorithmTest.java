@@ -22,8 +22,12 @@ import static org.junit.Assert.fail;
 import android.os.Parcel;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
+import java.util.Map.Entry;
 import java.util.Random;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -40,19 +44,29 @@ public class IpSecAlgorithmTest {
     };
 
     @Test
-    public void testDefaultTruncLen() throws Exception {
-        IpSecAlgorithm explicit =
+    public void testNoTruncLen() throws Exception {
+        Entry<String, Integer>[] authAndAeadList =
+                new Entry[] {
+                    new SimpleEntry<>(IpSecAlgorithm.AUTH_HMAC_MD5, 128),
+                    new SimpleEntry<>(IpSecAlgorithm.AUTH_HMAC_SHA1, 160),
+                    new SimpleEntry<>(IpSecAlgorithm.AUTH_HMAC_SHA256, 256),
+                    new SimpleEntry<>(IpSecAlgorithm.AUTH_HMAC_SHA384, 384),
+                    new SimpleEntry<>(IpSecAlgorithm.AUTH_HMAC_SHA512, 512),
+                    new SimpleEntry<>(IpSecAlgorithm.AUTH_CRYPT_AES_GCM, 224)
+                };
+
+        // Expect auth and aead algorithms to throw errors if trunclen is omitted.
+        for (Entry<String, Integer> algData : authAndAeadList) {
+            try {
                 new IpSecAlgorithm(
-                        IpSecAlgorithm.AUTH_HMAC_SHA256, Arrays.copyOf(KEY_MATERIAL, 256 / 8), 256);
-        IpSecAlgorithm implicit =
-                new IpSecAlgorithm(
-                        IpSecAlgorithm.AUTH_HMAC_SHA256, Arrays.copyOf(KEY_MATERIAL, 256 / 8));
-        assertTrue(
-                "Default Truncation Length Incorrect, Explicit: "
-                        + explicit
-                        + "implicit: "
-                        + implicit,
-                IpSecAlgorithm.equals(explicit, implicit));
+                        algData.getKey(), Arrays.copyOf(KEY_MATERIAL, algData.getValue() / 8));
+                fail("Expected exception on unprovided auth trunclen");
+            } catch (IllegalArgumentException expected) {
+            }
+        }
+
+        // Ensure crypt works with no truncation length supplied.
+        new IpSecAlgorithm(IpSecAlgorithm.CRYPT_AES_CBC, Arrays.copyOf(KEY_MATERIAL, 256 / 8));
     }
 
     @Test
