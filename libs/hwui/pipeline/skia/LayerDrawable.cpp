@@ -34,7 +34,8 @@ void LayerDrawable::onDraw(SkCanvas* canvas) {
     }
 }
 
-bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer) {
+bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer,
+                              const SkRect* dstRect) {
     if (context == nullptr) {
         SkDEBUGF(("Attempting to draw LayerDrawable into an unsupported surface"));
         return false;
@@ -43,8 +44,8 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
     SkMatrix layerTransform;
     layer->getTransform().copyTo(layerTransform);
     sk_sp<SkImage> layerImage;
-    int layerWidth = layer->getWidth();
-    int layerHeight = layer->getHeight();
+    const int layerWidth = layer->getWidth();
+    const int layerHeight = layer->getHeight();
     if (layer->getApi() == Layer::Api::OpenGL) {
         GlLayer* glLayer = static_cast<GlLayer*>(layer);
         GrGLTextureInfo externalTexture;
@@ -62,21 +63,21 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
     }
 
     if (layerImage) {
-        SkMatrix textureMatrix;
-        layer->getTexTransform().copyTo(textureMatrix);
+        SkMatrix textureMatrixInv;
+        layer->getTexTransform().copyTo(textureMatrixInv);
         // TODO: after skia bug https://bugs.chromium.org/p/skia/issues/detail?id=7075 is fixed
         // use bottom left origin and remove flipV and invert transformations.
         SkMatrix flipV;
         flipV.setAll(1, 0, 0, 0, -1, 1, 0, 0, 1);
-        textureMatrix.preConcat(flipV);
-        textureMatrix.preScale(1.0f / layerWidth, 1.0f / layerHeight);
-        textureMatrix.postScale(layerWidth, layerHeight);
-        SkMatrix textureMatrixInv;
-        if (!textureMatrix.invert(&textureMatrixInv)) {
-            textureMatrixInv = textureMatrix;
+        textureMatrixInv.preConcat(flipV);
+        textureMatrixInv.preScale(1.0f / layerWidth, 1.0f / layerHeight);
+        textureMatrixInv.postScale(layerWidth, layerHeight);
+        SkMatrix textureMatrix;
+        if (!textureMatrixInv.invert(&textureMatrix)) {
+            textureMatrix = textureMatrixInv;
         }
 
-        SkMatrix matrix = SkMatrix::Concat(layerTransform, textureMatrixInv);
+        SkMatrix matrix = SkMatrix::Concat(layerTransform, textureMatrix);
 
         SkPaint paint;
         paint.setAlpha(layer->getAlpha());
@@ -88,7 +89,20 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
             canvas->save();
             canvas->concat(matrix);
         }
-        canvas->drawImage(layerImage.get(), 0, 0, &paint);
+        if (dstRect) {
+            SkMatrix matrixInv;
+            if (!matrix.invert(&matrixInv)) {
+                matrixInv = matrix;
+            }
+            SkRect srcRect = SkRect::MakeIWH(layerWidth, layerHeight);
+            matrixInv.mapRect(&srcRect);
+            SkRect skiaDestRect = *dstRect;
+            matrixInv.mapRect(&skiaDestRect);
+            canvas->drawImageRect(layerImage.get(), srcRect, skiaDestRect, &paint,
+                                  SkCanvas::kFast_SrcRectConstraint);
+        } else {
+            canvas->drawImage(layerImage.get(), 0, 0, &paint);
+        }
         // restore the original matrix
         if (nonIdentityMatrix) {
             canvas->restore();
