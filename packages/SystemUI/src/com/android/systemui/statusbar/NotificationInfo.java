@@ -308,15 +308,15 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             minimize.setVisibility(GONE);
         }
 
-        // Set up app settings link
+        // Set up app settings link (i.e. Customize)
         TextView settingsLinkView = findViewById(R.id.app_settings);
         Intent settingsIntent = getAppSettingsIntent(mPm, mPkg, mSingleNotificationChannel,
                 mSbn.getId(), mSbn.getTag());
-        if (settingsIntent != null
+        if (!mIsForBlockingHelper
+                && settingsIntent != null
                 && !TextUtils.isEmpty(mSbn.getNotification().getSettingsText())) {
             settingsLinkView.setVisibility(VISIBLE);
-            settingsLinkView.setText(mContext.getString(R.string.notification_app_settings,
-                    mSbn.getNotification().getSettingsText()));
+            settingsLinkView.setText(mContext.getString(R.string.notification_app_settings));
             settingsLinkView.setOnClickListener((View view) -> {
                 mAppSettingsClickListener.onClick(view, settingsIntent);
             });
