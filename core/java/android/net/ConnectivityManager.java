@@ -861,6 +861,10 @@ public class ConnectivityManager {
      * You should always check {@link NetworkInfo#isConnected()} before initiating
      * network traffic. This may return {@code null} when there is no default
      * network.
+     * Note that if the default network is a VPN, this method will return the
+     * NetworkInfo for one of its underlying networks instead, or null if the
+     * VPN agent did not specify any. Apps interested in learning about VPNs
+     * should use {@link #getNetworkInfo(android.net.Network)} instead.
      *
      * @return a {@link NetworkInfo} object for the current default network
      *        or {@code null} if no default network is currently active
@@ -1018,7 +1022,11 @@ public class ConnectivityManager {
      *        which you're interested.
      * @return a {@link NetworkInfo} object for the requested
      *        network type or {@code null} if the type is not
-     *        supported by the device.
+     *        supported by the device. If {@code networkType} is
+     *        TYPE_VPN and a VPN is active for the calling app,
+     *        then this method will try to return one of the
+     *        underlying networks for the VPN or null if the
+     *        VPN agent didn't specify any.
      *
      * @deprecated This method does not support multiple connected networks
      *             of the same type. Use {@link #getAllNetworks} and
