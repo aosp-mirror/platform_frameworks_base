@@ -463,7 +463,11 @@ public final class NotificationChannel implements Parcelable {
 
     /**
      * Returns the user specified importance e.g. {@link NotificationManager#IMPORTANCE_LOW} for
-     * notifications posted to this channel.
+     * notifications posted to this channel. Note: This value might be >
+     * {@link NotificationManager#IMPORTANCE_NONE}, but notifications posted to this channel will
+     * not be shown to the user if the parent {@link NotificationChannelGroup} or app is blocked.
+     * See {@link NotificationChannelGroup#isBlocked()} and
+     * {@link NotificationManager#areNotificationsEnabled()}.
      */
     public int getImportance() {
         return mImportance;

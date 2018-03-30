@@ -468,12 +468,14 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         private final LinkedList<String> mPendingLookups;
         private final Context mContext;
 
+        // Amount of time to wait for a result from the contacts db before rechecking affinity.
+        private static final long LOOKUP_TIME = 1000;
         private float mContactAffinity = NONE;
         private NotificationRecord mRecord;
 
         private PeopleRankingReconsideration(Context context, String key,
                 LinkedList<String> pendingLookups) {
-            super(key);
+            super(key, LOOKUP_TIME);
             mContext = context;
             mPendingLookups = pendingLookups;
         }
