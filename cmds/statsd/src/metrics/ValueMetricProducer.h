@@ -159,6 +159,10 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade);
     FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestAnomalyDetection);
+    FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundaryNoCondition);
+    FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition);
+    FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition2);
+    FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition3);
 };
 
 }  // namespace statsd
