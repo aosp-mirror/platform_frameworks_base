@@ -21,17 +21,12 @@
     android:layout_marginTop="8dp"
     android:layout_marginBottom="14dp"
     android:layout_below="@id/quick_status_bar_system_icons"
-    >
+    android:paddingEnd="@dimen/signal_cluster_battery_padding" >
 
     <com.android.systemui.statusbar.phone.StatusIconContainer
         android:id="@+id/statusIcons"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1" />
-
-    <include layout="@layout/signal_cluster_view"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_marginStart="@dimen/signal_cluster_margin_start" />
 
 </LinearLayout>

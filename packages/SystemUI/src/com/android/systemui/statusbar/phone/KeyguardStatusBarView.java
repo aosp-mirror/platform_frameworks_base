@@ -207,7 +207,6 @@ public class KeyguardStatusBarView extends RelativeLayout
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         updateLayoutConsideringCutout();
-        setSignalClusterLayoutWidth();
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
@@ -294,17 +293,6 @@ public class KeyguardStatusBarView extends RelativeLayout
                 (LinearLayout.LayoutParams) mSystemIconsContainer.getLayoutParams();
         llp.setMarginStart(0);
         return true;
-    }
-
-    //TODO: Something is setting signal_cluster to MATCH_PARENT. Why?
-    private void setSignalClusterLayoutWidth() {
-        View signalCluster = findViewById(R.id.signal_cluster);
-        if (signalCluster == null) {
-            return;
-        }
-
-        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) signalCluster.getLayoutParams();
-        lp.width = LinearLayout.LayoutParams.WRAP_CONTENT;
     }
 
     public void setListening(boolean listening) {
@@ -459,7 +447,6 @@ public class KeyguardStatusBarView extends RelativeLayout
         mIconManager.setTint(iconColor);
         Rect tintArea = new Rect(0, 0, 0, 0);
 
-        applyDarkness(R.id.signal_cluster, tintArea, intensity, iconColor);
         applyDarkness(R.id.battery, tintArea, intensity, iconColor);
         applyDarkness(R.id.clock, tintArea, intensity, iconColor);
         // Reload user avatar

@@ -18,13 +18,13 @@ package com.android.systemui.statusbar.phone;
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.util.ArrayMap;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import android.view.View;
 import com.android.keyguard.AlphaOptimizedLinearLayout;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.stack.ViewState;
 
 /**
@@ -97,7 +97,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
      * Layout is happening from end -> start
      */
     private void calculateIconTranslations() {
-        float width = getWidth();
+        float width = getWidth() - getPaddingEnd();
         float translationX = width;
         float contentStart = getPaddingStart();
         int childCount = getChildCount();
@@ -109,18 +109,22 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         //TODO: Dots
         for (int i = childCount - 1; i >= 0; i--) {
             View child = getChildAt(i);
-            if (!(child instanceof StatusBarIconView)) {
+            if (!(child instanceof StatusIconDisplayable)) {
+                if (DEBUG) Log.d(TAG, "skipping child (wrong type)");
                 continue;
             }
+
+            StatusIconDisplayable iconView = (StatusIconDisplayable) child;
 
             ViewState childState = getViewStateFromChild(child);
             if (childState == null ) {
+                if (DEBUG) Log.d(TAG, "skipping child (" + iconView.getSlot() + ") no ViewState");
                 continue;
             }
 
-            // Rely on StatusBarIcon for truth about visibility
-            if (!((StatusBarIconView) child).getStatusBarIcon().visible) {
+            if (!iconView.isIconVisible() || iconView.isIconBlocked()) {
                 childState.hidden = true;
+                if (DEBUG) Log.d(TAG, "skipping child (" + iconView.getSlot() + ") not visible");
                 continue;
             }
 
@@ -175,8 +179,8 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
 
             vs.initFrom(child);
             vs.alpha = 1.0f;
-            if (child instanceof StatusBarIconView) {
-                vs.hidden = !((StatusBarIconView)child).getStatusBarIcon().visible;
+            if (child instanceof StatusIconDisplayable) {
+                vs.hidden = !((StatusIconDisplayable)child).isIconVisible();
             } else {
                 vs.hidden = false;
             }

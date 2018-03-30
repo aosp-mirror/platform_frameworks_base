@@ -297,7 +297,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
             mIconController.setIcon(mSlotLocation, LOCATION_STATUS_ICON_ID,
                     mContext.getString(R.string.accessibility_location_active));
         } else {
-            mIconController.removeIcon(mSlotLocation);
+            mIconController.removeAllIconsForSlot(mSlotLocation);
         }
     }
 
