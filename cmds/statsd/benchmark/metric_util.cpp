@@ -127,25 +127,25 @@ AtomMatcher CreateSyncEndAtomMatcher() {
 }
 
 AtomMatcher CreateActivityForegroundStateChangedAtomMatcher(
-    const string& name, ActivityForegroundStateChanged::Activity activity) {
+    const string& name, ActivityForegroundStateChanged::State state) {
     AtomMatcher atom_matcher;
     atom_matcher.set_id(StringToId(name));
     auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
     simple_atom_matcher->set_atom_id(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED);
     auto field_value_matcher = simple_atom_matcher->add_field_value_matcher();
     field_value_matcher->set_field(4);  // Activity field.
-    field_value_matcher->set_eq_int(activity);
+    field_value_matcher->set_eq_int(state);
     return atom_matcher;
 }
 
 AtomMatcher CreateMoveToBackgroundAtomMatcher() {
     return CreateActivityForegroundStateChangedAtomMatcher(
-        "MoveToBackground", ActivityForegroundStateChanged::MOVE_TO_BACKGROUND);
+        "MoveToBackground", ActivityForegroundStateChanged::BACKGROUND);
 }
 
 AtomMatcher CreateMoveToForegroundAtomMatcher() {
     return CreateActivityForegroundStateChangedAtomMatcher(
-        "MoveToForeground", ActivityForegroundStateChanged::MOVE_TO_FOREGROUND);
+        "MoveToForeground", ActivityForegroundStateChanged::FOREGROUND);
 }
 
 Predicate CreateScheduledJobPredicate() {
@@ -315,25 +315,25 @@ std::unique_ptr<LogEvent> CreateReleaseWakelockEvent(
 }
 
 std::unique_ptr<LogEvent> CreateActivityForegroundStateChangedEvent(
-    const int uid, const ActivityForegroundStateChanged::Activity activity, uint64_t timestampNs) {
+    const int uid, const ActivityForegroundStateChanged::State state, uint64_t timestampNs) {
     auto event = std::make_unique<LogEvent>(
         android::util::ACTIVITY_FOREGROUND_STATE_CHANGED, timestampNs);
     event->write(uid);
     event->write("pkg_name");
     event->write("class_name");
-    event->write(activity);
+    event->write(state);
     event->init();
     return event;
 }
 
 std::unique_ptr<LogEvent> CreateMoveToBackgroundEvent(const int uid, uint64_t timestampNs) {
     return CreateActivityForegroundStateChangedEvent(
-        uid, ActivityForegroundStateChanged::MOVE_TO_BACKGROUND, timestampNs);
+        uid, ActivityForegroundStateChanged::BACKGROUND, timestampNs);
 }
 
 std::unique_ptr<LogEvent> CreateMoveToForegroundEvent(const int uid, uint64_t timestampNs) {
     return CreateActivityForegroundStateChangedEvent(
-        uid, ActivityForegroundStateChanged::MOVE_TO_FOREGROUND, timestampNs);
+        uid, ActivityForegroundStateChanged::FOREGROUND, timestampNs);
 }
 
 std::unique_ptr<LogEvent> CreateSyncStateChangedEvent(

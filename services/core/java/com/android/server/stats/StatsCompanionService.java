@@ -751,7 +751,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         });
     }
 
-    private void pullWifiActivityEnergyInfo(int tagId, List<StatsLogEventWrapper> pulledData) {
+    private void pullWifiActivityInfo(int tagId, List<StatsLogEventWrapper> pulledData) {
         long token = Binder.clearCallingIdentity();
         if (mWifiManager == null) {
             mWifiManager =
@@ -919,8 +919,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 pullKernelUidCpuActiveTime(tagId, ret);
                 break;
             }
-            case StatsLog.WIFI_ACTIVITY_ENERGY_INFO: {
-                pullWifiActivityEnergyInfo(tagId, ret);
+            case StatsLog.WIFI_ACTIVITY_INFO: {
+                pullWifiActivityInfo(tagId, ret);
                 break;
             }
             case StatsLog.MODEM_ACTIVITY_INFO: {

@@ -210,7 +210,7 @@ TEST(StatsdStatsTest, TestAtomLog) {
 
     stats.noteAtomLogged(android::util::SENSOR_STATE_CHANGED, now + 1);
     stats.noteAtomLogged(android::util::SENSOR_STATE_CHANGED, now + 2);
-    stats.noteAtomLogged(android::util::DROPBOX_ERROR_CHANGED, now + 3);
+    stats.noteAtomLogged(android::util::APP_CRASH_OCCURRED, now + 3);
     // pulled event, should ignore
     stats.noteAtomLogged(android::util::WIFI_BYTES_TRANSFER, now + 4);
 
@@ -228,7 +228,7 @@ TEST(StatsdStatsTest, TestAtomLog) {
         if (atomStats.tag() == android::util::SENSOR_STATE_CHANGED && atomStats.count() == 3) {
             sensorAtomGood = true;
         }
-        if (atomStats.tag() == android::util::DROPBOX_ERROR_CHANGED && atomStats.count() == 1) {
+        if (atomStats.tag() == android::util::APP_CRASH_OCCURRED && atomStats.count() == 1) {
             dropboxAtomGood = true;
         }
     }
