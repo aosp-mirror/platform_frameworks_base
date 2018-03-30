@@ -1350,7 +1350,7 @@
 
     <string name="volume_dialog_title">%s volume controls</string>
 
-    <string name="volume_dialog_ringer_guidance_ring">Calls and notifications will ring</string>
+    <string name="volume_dialog_ringer_guidance_ring">Calls and notifications will ring (<xliff:g id="volume level" example="56">%1$s</xliff:g>)</string>
 
     <string name="output_title">Media output</string>
     <string name="output_calls_title">Phone call output</string>
