@@ -319,8 +319,10 @@ status_t GZipSection::Execute(ReportRequestSet* requests) const {
         index++;  // look at the next file.
     }
     VLOG("GZipSection is using file %s, fd=%d", mFilenames[index], fd.get());
-    if (fd.get() == -1) return -1;
-
+    if (fd.get() == -1) {
+      ALOGW("GZipSection %s can't open all the files", this->name.string());
+      return NO_ERROR; // e.g. LAST_KMSG will reach here in user build.
+    }
     FdBuffer buffer;
     Fpipe p2cPipe;
     Fpipe c2pPipe;
