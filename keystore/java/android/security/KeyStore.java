@@ -16,6 +16,7 @@
 
 package android.security;
 
+import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.app.KeyguardManager;
@@ -547,7 +548,7 @@ public class KeyStore {
             args = args != null ? args : new KeymasterArguments();
             entropy = entropy != null ? entropy : new byte[0];
             if (!args.containsTag(KeymasterDefs.KM_TAG_USER_ID)) {
-                args.addUnsignedInt(KeymasterDefs.KM_TAG_USER_ID, UserHandle.getCallingUserId());
+                args.addUnsignedInt(KeymasterDefs.KM_TAG_USER_ID, ActivityManager.getCurrentUser());
             }
             return mBinder.begin(getToken(), alias, purpose, pruneable, args, entropy, uid);
         } catch (RemoteException e) {
