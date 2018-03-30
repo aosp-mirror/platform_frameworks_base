@@ -756,10 +756,15 @@ public class StorageManager {
         }
         try {
             for (VolumeInfo vol : mStorageManager.getVolumes(0)) {
-                if (vol.path != null && FileUtils.contains(vol.path, pathString)) {
+                if (vol.path != null && FileUtils.contains(vol.path, pathString)
+                        && vol.type != VolumeInfo.TYPE_PUBLIC) {
                     // TODO: verify that emulated adopted devices have UUID of
                     // underlying volume
-                    return convert(vol.fsUuid);
+                    try {
+                        return convert(vol.fsUuid);
+                    } catch (IllegalArgumentException e) {
+                        continue;
+                    }
                 }
             }
         } catch (RemoteException e) {
