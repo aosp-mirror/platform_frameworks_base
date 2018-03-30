@@ -58,6 +58,7 @@ public class PowerUITest extends SysuiTestCase {
     public static final int BELOW_WARNING_BUCKET = -1;
     public static final long BELOW_HYBRID_THRESHOLD = TimeUnit.HOURS.toMillis(2);
     public static final long ABOVE_HYBRID_THRESHOLD = TimeUnit.HOURS.toMillis(4);
+    private static final long ABOVE_CHARGE_CYCLE_THRESHOLD = Duration.ofHours(8).toMillis();
     private HardwarePropertiesManager mHardProps;
     private WarningsUI mMockWarnings;
     private PowerUI mPowerUI;
@@ -198,6 +199,7 @@ public class PowerUITest extends SysuiTestCase {
         when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
         when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
         when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
+        mPowerUI.mBatteryLevel = 10;
         mPowerUI.start();
 
         // unplugged device that would show the non-hybrid notification and the hybrid
@@ -213,6 +215,7 @@ public class PowerUITest extends SysuiTestCase {
         when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
         when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
         when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
+        mPowerUI.mBatteryLevel = 10;
         mPowerUI.start();
 
         // unplugged device that would show the non-hybrid but not the hybrid
@@ -254,13 +257,14 @@ public class PowerUITest extends SysuiTestCase {
    }
 
     @Test
-    public void testShouldShowLowBatteryWarning_deviceBatteryStatusUnkown_returnsNoShow() {
+    public void testShouldShowLowBatteryWarning_deviceBatteryStatusUnknown_returnsNoShow() {
         when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
         when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
         when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
         mPowerUI.start();
 
-        // Unknown battery status device that would show the neither due
+        // Unknown battery status device that would show the neither due to the battery status being
+        // unknown
         boolean shouldShow =
                 mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
                         BELOW_WARNING_BUCKET, BELOW_HYBRID_THRESHOLD,
@@ -295,6 +299,9 @@ public class PowerUITest extends SysuiTestCase {
 
         mPowerUI.maybeShowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
                 ABOVE_WARNING_BUCKET);
+
+        // reduce battery level to handle time based trigger -> level trigger interactions
+        mPowerUI.mBatteryLevel = 10;
         boolean shouldShow =
                 mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
                         ABOVE_WARNING_BUCKET, BELOW_HYBRID_THRESHOLD,
