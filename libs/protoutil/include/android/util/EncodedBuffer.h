@@ -23,8 +23,6 @@
 namespace android {
 namespace util {
 
-using namespace std;
-
 /**
  * A stream of bytes containing a read pointer and a write pointer,
  * backed by a set of fixed-size buffers.  There are write functions for the
@@ -217,7 +215,7 @@ public:
 
 private:
     size_t mChunkSize;
-    vector<uint8_t*> mBuffers;
+    std::vector<uint8_t*> mBuffers;
 
     Pointer mWp;
     Pointer mEp;

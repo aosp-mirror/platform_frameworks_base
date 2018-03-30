@@ -22,8 +22,6 @@
 namespace android {
 namespace util {
 
-using namespace std;
-
 const int FIELD_ID_SHIFT = 3;
 const uint8_t WIRE_TYPE_MASK = (1 << FIELD_ID_SHIFT) - 1;
 

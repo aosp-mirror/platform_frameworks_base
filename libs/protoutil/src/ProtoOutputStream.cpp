@@ -173,7 +173,7 @@ ProtoOutputStream::write(uint64_t fieldId, bool val)
 }
 
 bool
-ProtoOutputStream::write(uint64_t fieldId, string val)
+ProtoOutputStream::write(uint64_t fieldId, std::string val)
 {
     if (mCompact) return false;
     const uint32_t id = (uint32_t)fieldId;

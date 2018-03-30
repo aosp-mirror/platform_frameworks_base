@@ -23,6 +23,12 @@
 
 #include "section_list.h"
 
+namespace android {
+namespace os {
+namespace incidentd {
+
+using namespace android::base;
+
 const Privacy* get_privacy_of_section(int id) {
     int l = 0;
     int r = PRIVACY_POLICY_COUNT - 1;
@@ -149,3 +155,7 @@ status_t wait_child(pid_t pid) {
     if (!died) return kill_child(pid);
     return statusCode(status);
 }
+
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android

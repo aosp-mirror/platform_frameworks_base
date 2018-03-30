@@ -20,6 +20,10 @@
 #include <utils/RefBase.h>
 
 #include <unistd.h>
+
+namespace android {
+namespace os {
+namespace incidentd {
 /**
  * This is a size-based throttler which prevents incidentd to take more data.
  */
@@ -44,5 +48,9 @@ private:
     size_t mAccumulatedSize;
     int64_t mLastRefractoryMs;
 };
+
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android
 
 #endif  // THROTTLER_H

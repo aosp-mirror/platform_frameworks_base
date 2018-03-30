@@ -23,7 +23,9 @@
 #include <android/util/protobuf.h>
 #include <cutils/log.h>
 
-using namespace android::util;
+namespace android {
+namespace os {
+namespace incidentd {
 
 /**
  * Write the field to buf based on the wire type, iterator will point to next field.
@@ -140,3 +142,7 @@ status_t PrivacyBuffer::flush(int fd) {
     }
     return NO_ERROR;
 }
+
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android

@@ -37,6 +37,10 @@
  */
 static const char* INCIDENT_DIRECTORY = "/data/misc/incidents/";
 
+namespace android {
+namespace os {
+namespace incidentd {
+
 // ================================================================================
 ReportRequest::ReportRequest(const IncidentReportArgs& a,
                              const sp<IIncidentReportStatusListener>& l, int f)
@@ -320,3 +324,7 @@ Reporter::run_report_status_t Reporter::upload_backlog() {
 
     return REPORT_FINISHED;
 }
+
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android
