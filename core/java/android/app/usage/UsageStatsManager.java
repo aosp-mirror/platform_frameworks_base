@@ -183,9 +183,12 @@ public final class UsageStatsManager {
     public static final int REASON_SUB_USAGE_SLICE_PINNED       = 0x0009;
     /** @hide */
     public static final int REASON_SUB_USAGE_SLICE_PINNED_PRIV  = 0x000A;
+    /** @hide */
+    public static final int REASON_SUB_USAGE_EXEMPTED_SYNC_START = 0x000B;
 
     /** @hide */
     public static final int REASON_SUB_PREDICTED_RESTORED       = 0x0001;
+
 
     /** @hide */
     @IntDef(flag = false, prefix = { "STANDBY_BUCKET_" }, value = {
@@ -664,6 +667,9 @@ public final class UsageStatsManager {
                         break;
                     case REASON_SUB_USAGE_SLICE_PINNED_PRIV:
                         sb.append("slpp");
+                        break;
+                    case REASON_SUB_USAGE_EXEMPTED_SYNC_START:
+                        sb.append("es");
                         break;
                 }
                 break;
