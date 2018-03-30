@@ -231,6 +231,13 @@ static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jin
             return nullptr;
         }
         bandConfigHal = module.bands[0];
+
+        /* Prefer FM to workaround possible program list fetching limitation
+         * (if tuner scans only configured band for programs). */
+        auto fmIt = std::find_if(module.bands.begin(), module.bands.end(),
+            [](const BandConfig & band) { return utils::isFm(band.type); });
+        if (fmIt != module.bands.end()) bandConfigHal = *fmIt;
+
         if (bandConfigHal.spacings.size() > 1) {
             bandConfigHal.spacings = hidl_vec<uint32_t>({ *std::min_element(
                     bandConfigHal.spacings.begin(), bandConfigHal.spacings.end()) });
