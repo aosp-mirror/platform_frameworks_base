@@ -352,8 +352,7 @@ status_t IncidentService::cmd_privacy(FILE* in, FILE* out, FILE* err, Vector<Str
             printPrivacy(p, out, String8(""));
         } else if (opt == "parse") {
             FdBuffer buf;
-            unique_fd infd(fileno(in));
-            status_t error = buf.read(&infd, 60000);
+            status_t error = buf.read(fileno(in), 60000);
             if (error != NO_ERROR) {
                 fprintf(err, "Error reading from stdin\n");
                 return error;
