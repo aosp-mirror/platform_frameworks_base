@@ -19,7 +19,6 @@ package com.android.server.job.controllers;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
 import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -101,17 +100,18 @@ public final class IdleController extends StateController {
 
     final class IdlenessTracker extends BroadcastReceiver {
         private AlarmManager mAlarm;
-        private PendingIntent mIdleTriggerIntent;
-        boolean mIdle;
-        boolean mScreenOn;
+
+        // After construction, mutations of idle/screen-on state will only happen
+        // on the main looper thread, either in onReceive() or in an alarm callback.
+        private boolean mIdle;
+        private boolean mScreenOn;
+
+        private AlarmManager.OnAlarmListener mIdleAlarmListener = () -> {
+            handleIdleTrigger();
+        };
 
         public IdlenessTracker() {
             mAlarm = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-
-            Intent intent = new Intent(ActivityManagerService.ACTION_TRIGGER_IDLE)
-                    .setPackage("android")
-                    .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-            mIdleTriggerIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
 
             // At boot we presume that the user has just "interacted" with the
             // device in some meaningful way.
@@ -150,7 +150,7 @@ public final class IdleController extends StateController {
                 }
                 mScreenOn = true;
                 //cancel the alarm
-                mAlarm.cancel(mIdleTriggerIntent);
+                mAlarm.cancel(mIdleAlarmListener);
                 if (mIdle) {
                 // possible transition to not-idle
                     mIdle = false;
@@ -169,20 +169,24 @@ public final class IdleController extends StateController {
                 }
                 mScreenOn = false;
                 mAlarm.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                        when, mIdleWindowSlop, mIdleTriggerIntent);
+                        when, mIdleWindowSlop, "JS idleness", mIdleAlarmListener, null);
             } else if (action.equals(ActivityManagerService.ACTION_TRIGGER_IDLE)) {
-                // idle time starts now. Do not set mIdle if screen is on.
-                if (!mIdle && !mScreenOn) {
-                    if (DEBUG) {
-                        Slog.v(TAG, "Idle trigger fired @ " + sElapsedRealtimeClock.millis());
-                    }
-                    mIdle = true;
-                    reportNewIdleState(mIdle);
-                } else {
-                    if (DEBUG) {
-                        Slog.v(TAG, "TRIGGER_IDLE received but not changing state; idle="
-                                + mIdle + " screen=" + mScreenOn);
-                    }
+                handleIdleTrigger();
+            }
+        }
+
+        private void handleIdleTrigger() {
+            // idle time starts now. Do not set mIdle if screen is on.
+            if (!mIdle && !mScreenOn) {
+                if (DEBUG) {
+                    Slog.v(TAG, "Idle trigger fired @ " + sElapsedRealtimeClock.millis());
+                }
+                mIdle = true;
+                reportNewIdleState(mIdle);
+            } else {
+                if (DEBUG) {
+                    Slog.v(TAG, "TRIGGER_IDLE received but not changing state; idle="
+                            + mIdle + " screen=" + mScreenOn);
                 }
             }
         }

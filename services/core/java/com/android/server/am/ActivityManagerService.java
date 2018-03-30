@@ -14830,7 +14830,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     .setPackage("android")
                     .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             broadcastIntent(null, intent, null, null, 0, null, null, null,
-                    OP_NONE, null, true, false, UserHandle.USER_ALL);
+                    OP_NONE, null, false, false, UserHandle.USER_ALL);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
