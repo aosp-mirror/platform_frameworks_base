@@ -25,12 +25,10 @@ import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.StatusBarManager.DISABLE_MASK;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
-import static android.content.Intent.EXTRA_USER_HANDLE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
-import static android.os.UserHandle.USER_NULL;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.DOCKED_INVALID;
@@ -181,7 +179,6 @@ import android.util.Log;
 import android.util.MergedConfiguration;
 import android.util.Pair;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
@@ -595,8 +592,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     boolean mClientFreezingScreen = false;
     int mAppsFreezingScreen = 0;
-
-    int mLayoutSeq = 0;
 
     // Last systemUiVisibility we received from status bar.
     int mLastStatusBarVisibility = 0;
@@ -2425,8 +2420,8 @@ public class WindowManagerService extends IWindowManager.Stub
         final int oldRotation = defaultDisplayContent.getRotation();
         final boolean oldAltOrientation = defaultDisplayContent.getAltOrientation();
 
-        final int rotation = mPolicy.rotationForOrientationLw(lastOrientation,
-                oldRotation);
+        final int rotation = mPolicy.rotationForOrientationLw(lastOrientation, oldRotation,
+                true /* defaultDisplay */);
         boolean altOrientation = !mPolicy.rotationHasCompatibleMetricsLw(
                 lastOrientation, rotation);
         if (oldRotation == rotation && oldAltOrientation == altOrientation) {
@@ -2702,10 +2697,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void cleanupRecentsAnimation() {
+    public void cleanupRecentsAnimation(boolean moveHomeToTop) {
         synchronized (mWindowMap) {
             if (mRecentsAnimationController != null) {
-                mRecentsAnimationController.cleanupAnimation();
+                mRecentsAnimationController.cleanupAnimation(moveHomeToTop);
                 mRecentsAnimationController = null;
                 mAppTransition.updateBooster();
             }
@@ -2793,6 +2788,11 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void screenTurningOff(ScreenOffListener listener) {
         mTaskSnapshotController.screenTurningOff(listener);
+    }
+
+    @Override
+    public void triggerAnimationFailsafe() {
+        mH.sendEmptyMessage(H.ANIMATION_FAILSAFE);
     }
 
     /**
@@ -4568,6 +4568,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int NOTIFY_KEYGUARD_TRUSTED_CHANGED = 57;
         public static final int SET_HAS_OVERLAY_UI = 58;
         public static final int SET_RUNNING_REMOTE_ANIMATION = 59;
+        public static final int ANIMATION_FAILSAFE = 60;
 
         /**
          * Used to denote that an integer field in a message will not be used.
@@ -4984,6 +4985,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 break;
                 case SET_RUNNING_REMOTE_ANIMATION: {
                     mAmInternal.setRunningRemoteAnimation(msg.arg1, msg.arg2 == 1);
+                }
+                break;
+                case ANIMATION_FAILSAFE: {
+                    synchronized (mWindowMap) {
+                        if (mRecentsAnimationController != null) {
+                            mRecentsAnimationController.scheduleFailsafe();
+                        }
+                    }
                 }
                 break;
             }
@@ -6344,8 +6353,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mInputMethodTarget != null) {
             pw.print("  mInputMethodTarget="); pw.println(mInputMethodTarget);
         }
-        pw.print("  mInTouchMode="); pw.print(mInTouchMode);
-                pw.print(" mLayoutSeq="); pw.println(mLayoutSeq);
+        pw.print("  mInTouchMode="); pw.println(mInTouchMode);
         pw.print("  mLastDisplayFreezeDuration=");
                 TimeUtils.formatDuration(mLastDisplayFreezeDuration, pw);
                 if ( mLastFinishedFreezeSource != null) {
@@ -7353,6 +7361,17 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void lockNow() {
             WindowManagerService.this.lockNow(null);
+        }
+
+        @Override
+        public int getWindowOwnerUserId(IBinder token) {
+            synchronized (mWindowMap) {
+                WindowState window = mWindowMap.get(token);
+                if (window != null) {
+                    return UserHandle.getUserId(window.mOwnerUid);
+                }
+                return UserHandle.USER_NULL;
+            }
         }
     }
 

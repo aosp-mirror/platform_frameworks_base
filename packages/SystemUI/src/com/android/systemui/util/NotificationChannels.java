@@ -37,6 +37,7 @@ public class NotificationChannels extends SystemUI {
     public static String STORAGE     = "DSK";
     public static String TVPIP       = "TPP";
     public static String BATTERY     = "BAT";
+    public static String HINTS       = "HNT";
 
     @VisibleForTesting
     static void createAll(Context context) {
@@ -73,6 +74,12 @@ public class NotificationChannels extends SystemUI {
                         : NotificationManager.IMPORTANCE_LOW);
         storage.setBypassDnd(true);
 
+        final NotificationChannel hint = new NotificationChannel(
+                HINTS,
+                context.getString(R.string.notification_channel_hints),
+                NotificationManager.IMPORTANCE_DEFAULT);
+        // No need to bypass DND.
+
         nm.createNotificationChannels(Arrays.asList(
                 alerts,
                 general,
@@ -80,7 +87,8 @@ public class NotificationChannels extends SystemUI {
                 createScreenshotChannel(
                         context.getString(R.string.notification_channel_screenshot),
                         nm.getNotificationChannel(SCREENSHOTS_LEGACY)),
-                batteryChannel
+                batteryChannel,
+                hint
         ));
 
         // Delete older SS channel if present.

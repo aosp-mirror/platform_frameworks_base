@@ -317,6 +317,8 @@
     <dimen name="qs_tile_margin_vertical">24dp</dimen>
     <dimen name="qs_tile_margin_top">18dp</dimen>
     <dimen name="qs_quick_tile_size">48dp</dimen>
+    <!-- Width for the spacer, used between QS tiles. -->
+    <dimen name="qs_quick_tile_space_width">0dp</dimen>
     <dimen name="qs_quick_tile_padding">12dp</dimen>
     <dimen name="qs_header_gear_translation">16dp</dimen>
     <dimen name="qs_header_tile_margin_horizontal">0dp</dimen>

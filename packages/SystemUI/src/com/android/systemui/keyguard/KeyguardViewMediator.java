@@ -27,7 +27,6 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 
 import android.app.ActivityManager;
 import android.app.AlarmManager;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.trust.TrustManager;
@@ -234,6 +233,9 @@ public class KeyguardViewMediator extends SystemUI {
     // cached value of whether we are showing (need to know this to quickly
     // answer whether the input should be restricted)
     private boolean mShowing;
+
+    // AOD is enabled and status bar is in AOD state.
+    private boolean mAodShowing;
 
     // display id of the secondary display on which we have put a keyguard window
     private int mSecondaryDisplayShowing = INVALID_DISPLAY;
@@ -664,7 +666,7 @@ public class KeyguardViewMediator extends SystemUI {
         @Override
         public void onSecondaryDisplayShowingChanged(int displayId) {
             synchronized (KeyguardViewMediator.this) {
-                setShowingLocked(mShowing, displayId, false);
+                setShowingLocked(mShowing, mAodShowing, displayId, false);
             }
         }
     };
@@ -707,10 +709,10 @@ public class KeyguardViewMediator extends SystemUI {
             setShowingLocked(!shouldWaitForProvisioning()
                     && !mLockPatternUtils.isLockScreenDisabled(
                             KeyguardUpdateMonitor.getCurrentUser()),
-                    mSecondaryDisplayShowing, true /* forceCallbacks */);
+                    mAodShowing, mSecondaryDisplayShowing, true /* forceCallbacks */);
         } else {
             // The system's keyguard is disabled or missing.
-            setShowingLocked(false, mSecondaryDisplayShowing, true);
+            setShowingLocked(false, mAodShowing, mSecondaryDisplayShowing, true);
         }
 
         mStatusBarKeyguardViewManager =
@@ -1311,7 +1313,7 @@ public class KeyguardViewMediator extends SystemUI {
             if (mLockPatternUtils.checkVoldPassword(KeyguardUpdateMonitor.getCurrentUser())) {
                 if (DEBUG) Log.d(TAG, "Not showing lock screen since just decrypted");
                 // Without this, settings is not enabled until the lock screen first appears
-                setShowingLocked(false);
+                setShowingLocked(false, mAodShowing);
                 hideLocked();
                 return;
             }
@@ -1713,10 +1715,12 @@ public class KeyguardViewMediator extends SystemUI {
         playSound(mTrustedSoundId);
     }
 
-    private void updateActivityLockScreenState(boolean showing, int secondaryDisplayShowing) {
+    private void updateActivityLockScreenState(boolean showing, boolean aodShowing,
+            int secondaryDisplayShowing) {
         mUiOffloadThread.submit(() -> {
             try {
-                ActivityManager.getService().setLockScreenShown(showing, secondaryDisplayShowing);
+                ActivityManager.getService().setLockScreenShown(showing, aodShowing,
+                        secondaryDisplayShowing);
             } catch (RemoteException e) {
             }
         });
@@ -1740,7 +1744,7 @@ public class KeyguardViewMediator extends SystemUI {
                 if (DEBUG) Log.d(TAG, "handleShow");
             }
 
-            setShowingLocked(true);
+            setShowingLocked(true, mAodShowing);
             mStatusBarKeyguardViewManager.show(options);
             mHiding = false;
             mWakeAndUnlocking = false;
@@ -1849,7 +1853,7 @@ public class KeyguardViewMediator extends SystemUI {
             }
 
             mWakeAndUnlocking = false;
-            setShowingLocked(false);
+            setShowingLocked(false, mAodShowing);
             mDismissCallbackRegistry.notifyDismissSucceeded();
             mStatusBarKeyguardViewManager.hide(startTime, fadeoutDuration);
             resetKeyguardDonePendingLocked();
@@ -1909,7 +1913,7 @@ public class KeyguardViewMediator extends SystemUI {
         Trace.beginSection("KeyguardViewMediator#handleVerifyUnlock");
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleVerifyUnlock");
-            setShowingLocked(true);
+            setShowingLocked(true, mAodShowing);
             mStatusBarKeyguardViewManager.dismissAndCollapse();
         }
         Trace.endSection();
@@ -2064,6 +2068,10 @@ public class KeyguardViewMediator extends SystemUI {
         pw.print("  mDrawnCallback: "); pw.println(mDrawnCallback);
     }
 
+    public void setAodShowing(boolean aodShowing) {
+        setShowingLocked(mShowing, aodShowing);
+    }
+
     private static class StartKeyguardExitAnimParams {
 
         long startTime;
@@ -2075,20 +2083,23 @@ public class KeyguardViewMediator extends SystemUI {
         }
     }
 
-    private void setShowingLocked(boolean showing) {
-        setShowingLocked(showing, mSecondaryDisplayShowing, false /* forceCallbacks */);
+    private void setShowingLocked(boolean showing, boolean aodShowing) {
+        setShowingLocked(showing, aodShowing, mSecondaryDisplayShowing,
+                false /* forceCallbacks */);
     }
 
-    private void setShowingLocked(
-            boolean showing, int secondaryDisplayShowing, boolean forceCallbacks) {
-        final boolean notifyDefaultDisplayCallbacks = showing != mShowing || forceCallbacks;
+    private void setShowingLocked(boolean showing, boolean aodShowing, int secondaryDisplayShowing,
+            boolean forceCallbacks) {
+        final boolean notifyDefaultDisplayCallbacks = showing != mShowing
+                || aodShowing != mAodShowing || forceCallbacks;
         if (notifyDefaultDisplayCallbacks || secondaryDisplayShowing != mSecondaryDisplayShowing) {
             mShowing = showing;
+            mAodShowing = aodShowing;
             mSecondaryDisplayShowing = secondaryDisplayShowing;
             if (notifyDefaultDisplayCallbacks) {
                 notifyDefaultDisplayCallbacks(showing);
             }
-            updateActivityLockScreenState(showing, secondaryDisplayShowing);
+            updateActivityLockScreenState(showing, aodShowing, secondaryDisplayShowing);
         }
     }
 

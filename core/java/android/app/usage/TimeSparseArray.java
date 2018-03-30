@@ -81,12 +81,17 @@ public class TimeSparseArray<E> extends LongSparseArray<E> {
     @Override
     public void put(long key, E value) {
         final long origKey = key;
-        while (indexOfKey(key) >= 0) {
-            key++;
-        }
-        if (origKey != key) {
-            Slog.w(TAG, "Value " + value + " supposed to be inserted at " + origKey
-                    + " displaced to " + key);
+        int keyIndex = indexOfKey(key);
+        if (keyIndex >= 0) {
+            final long sz = size();
+            while (keyIndex < sz && keyAt(keyIndex) == key) {
+                key++;
+                keyIndex++;
+            }
+            if (key >= origKey + 10) {
+                Slog.w(TAG, "Value " + value + " supposed to be inserted at " + origKey
+                        + " displaced to " + key);
+            }
         }
         super.put(key, value);
     }

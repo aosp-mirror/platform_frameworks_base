@@ -31,8 +31,11 @@ import com.android.systemui.Interpolators;
 public abstract class StackScrollerDecorView extends ExpandableView {
 
     protected View mContent;
+    protected View mSecondaryView;
     private boolean mIsVisible;
+    private boolean mIsSecondaryVisible;
     private boolean mAnimating;
+    private int mDuration = 260;
 
     public StackScrollerDecorView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -42,6 +45,7 @@ public abstract class StackScrollerDecorView extends ExpandableView {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mContent = findContentView();
+        mSecondaryView = findSecondaryView();
         setInvisible();
     }
 
@@ -57,15 +61,35 @@ public abstract class StackScrollerDecorView extends ExpandableView {
     }
 
     public void performVisibilityAnimation(boolean nowVisible) {
-        animateText(nowVisible, null /* onFinishedRunnable */);
+        animateText(mContent, nowVisible, null /* onFinishedRunnable */);
+        mIsVisible = nowVisible;
     }
 
     public void performVisibilityAnimation(boolean nowVisible, Runnable onFinishedRunnable) {
-        animateText(nowVisible, onFinishedRunnable);
+        animateText(mContent, nowVisible, onFinishedRunnable);
+        mIsVisible = nowVisible;
+    }
+
+    public void performSecondaryVisibilityAnimation(boolean nowVisible) {
+        performSecondaryVisibilityAnimation(nowVisible, null /* onFinishedRunnable */);
+    }
+
+    public void performSecondaryVisibilityAnimation(boolean nowVisible,
+            Runnable onFinishedRunnable) {
+        animateText(mSecondaryView, nowVisible, onFinishedRunnable);
+        mIsSecondaryVisible = nowVisible;
+    }
+
+    public boolean isSecondaryVisible() {
+        return mSecondaryView != null && (mIsSecondaryVisible || mAnimating);
     }
 
     public boolean isVisible() {
         return mIsVisible || mAnimating;
+    }
+
+    void setDuration(int duration) {
+        mDuration = duration;
     }
 
     /**
@@ -75,7 +99,10 @@ public abstract class StackScrollerDecorView extends ExpandableView {
      * @param onFinishedRunnable A runnable which should be run when the animation is
      *        finished.
      */
-    private void animateText(boolean nowVisible, final Runnable onFinishedRunnable) {
+    private void animateText(View view, boolean nowVisible, final Runnable onFinishedRunnable) {
+        if (view == null) {
+            return;
+        }
         if (nowVisible != mIsVisible) {
             // Animate text
             float endValue = nowVisible ? 1.0f : 0.0f;
@@ -86,10 +113,10 @@ public abstract class StackScrollerDecorView extends ExpandableView {
                 interpolator = Interpolators.ALPHA_OUT;
             }
             mAnimating = true;
-            mContent.animate()
+            view.animate()
                     .alpha(endValue)
                     .setInterpolator(interpolator)
-                    .setDuration(260)
+                    .setDuration(mDuration)
                     .withEndAction(new Runnable() {
                         @Override
                         public void run() {
@@ -99,7 +126,6 @@ public abstract class StackScrollerDecorView extends ExpandableView {
                             }
                         }
                     });
-            mIsVisible = nowVisible;
         } else {
             if (onFinishedRunnable != null) {
                 onFinishedRunnable.run();
@@ -109,7 +135,11 @@ public abstract class StackScrollerDecorView extends ExpandableView {
 
     public void setInvisible() {
         mContent.setAlpha(0.0f);
+        if (mSecondaryView != null) {
+            mSecondaryView.setAlpha(0.0f);
+        }
         mIsVisible = false;
+        mIsSecondaryVisible = false;
     }
 
     @Override
@@ -134,7 +164,15 @@ public abstract class StackScrollerDecorView extends ExpandableView {
 
     public void cancelAnimation() {
         mContent.animate().cancel();
+        if (mSecondaryView != null) {
+            mSecondaryView.animate().cancel();
+        }
     }
 
     protected abstract View findContentView();
+
+    /**
+     * Returns a view that might not always appear while the main content view is still visible.
+     */
+    protected abstract View findSecondaryView();
 }

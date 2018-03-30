@@ -289,9 +289,15 @@ void SimpleConditionTracker::evaluateCondition(
         // The event doesn't match this condition. So we just report existing condition values.
         conditionChangedCache[mIndex] = false;
         if (mSliced) {
-            // if the condition result is sliced. metrics won't directly get value from the
-            // cache, so just set any value other than kNotEvaluated.
+            // if the condition result is sliced. The overall condition is true if any of the sliced
+            // condition is true
             conditionCache[mIndex] = mInitialValue;
+            for (const auto& slicedCondition : mSlicedConditionState) {
+                if (slicedCondition.second > 0) {
+                    conditionCache[mIndex] = ConditionState::kTrue;
+                    break;
+                }
+            }
         } else {
             const auto& itr = mSlicedConditionState.find(DEFAULT_DIMENSION_KEY);
             if (itr == mSlicedConditionState.end()) {

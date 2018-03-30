@@ -20,7 +20,6 @@
 
 #include <dirent.h>
 #include <errno.h>
-#include <wait.h>
 
 #include <mutex>
 #include <set>
@@ -53,48 +52,14 @@ const int FIELD_ID_INCIDENT_HEADER = 1;
 const int FIELD_ID_INCIDENT_METADATA = 2;
 
 // incident section parameters
-const int WAIT_MAX = 5;
-const struct timespec WAIT_INTERVAL_NS = {0, 200 * 1000 * 1000};
 const char INCIDENT_HELPER[] = "/system/bin/incident_helper";
-const char GZIP[] = "/system/bin/gzip";
+const char* GZIP[] = {"/system/bin/gzip", NULL};
 
 static pid_t fork_execute_incident_helper(const int id, Fpipe* p2cPipe, Fpipe* c2pPipe) {
     const char* ihArgs[]{INCIDENT_HELPER, "-s", String8::format("%d", id).string(), NULL};
-    return fork_execute_cmd(INCIDENT_HELPER, const_cast<char**>(ihArgs), p2cPipe, c2pPipe);
+    return fork_execute_cmd(const_cast<char**>(ihArgs), p2cPipe, c2pPipe);
 }
 
-// ================================================================================
-static status_t statusCode(int status) {
-    if (WIFSIGNALED(status)) {
-        VLOG("return by signal: %s", strerror(WTERMSIG(status)));
-        return -WTERMSIG(status);
-    } else if (WIFEXITED(status) && WEXITSTATUS(status) > 0) {
-        VLOG("return by exit: %s", strerror(WEXITSTATUS(status)));
-        return -WEXITSTATUS(status);
-    }
-    return NO_ERROR;
-}
-
-static status_t kill_child(pid_t pid) {
-    int status;
-    VLOG("try to kill child process %d", pid);
-    kill(pid, SIGKILL);
-    if (waitpid(pid, &status, 0) == -1) return -1;
-    return statusCode(status);
-}
-
-static status_t wait_child(pid_t pid) {
-    int status;
-    bool died = false;
-    // wait for child to report status up to 1 seconds
-    for (int loop = 0; !died && loop < WAIT_MAX; loop++) {
-        if (waitpid(pid, &status, WNOHANG) == pid) died = true;
-        // sleep for 0.2 second
-        nanosleep(&WAIT_INTERVAL_NS, NULL);
-    }
-    if (!died) return kill_child(pid);
-    return statusCode(status);
-}
 // ================================================================================
 static status_t write_section_header(int fd, int sectionId, size_t size) {
     uint8_t buf[20];
@@ -328,12 +293,15 @@ status_t FileSection::Execute(ReportRequestSet* requests) const {
 }
 // ================================================================================
 GZipSection::GZipSection(int id, const char* filename, ...) : Section(id) {
-    name = "gzip ";
-    name += filename;
     va_list args;
     va_start(args, filename);
     mFilenames = varargs(filename, args);
     va_end(args);
+    name = "gzip";
+    for (int i = 0; mFilenames[i] != NULL; i++) {
+        name += " ";
+        name += mFilenames[i];
+    }
 }
 
 GZipSection::~GZipSection() {}
@@ -362,8 +330,7 @@ status_t GZipSection::Execute(ReportRequestSet* requests) const {
         return -errno;
     }
 
-    const char* gzipArgs[]{GZIP, NULL};
-    pid_t pid = fork_execute_cmd(GZIP, const_cast<char**>(gzipArgs), &p2cPipe, &c2pPipe);
+    pid_t pid = fork_execute_cmd((char* const*)GZIP, &p2cPipe, &c2pPipe);
     if (pid == -1) {
         ALOGW("GZipSection '%s' failed to fork", this->name.string());
         return -errno;
@@ -559,19 +526,27 @@ status_t WorkerThreadSection::Execute(ReportRequestSet* requests) const {
 // ================================================================================
 CommandSection::CommandSection(int id, const int64_t timeoutMs, const char* command, ...)
     : Section(id, timeoutMs) {
-    name = command;
     va_list args;
     va_start(args, command);
     mCommand = varargs(command, args);
     va_end(args);
+    name = "cmd";
+    for (int i = 0; mCommand[i] != NULL; i++) {
+        name += " ";
+        name += mCommand[i];
+    }
 }
 
 CommandSection::CommandSection(int id, const char* command, ...) : Section(id) {
-    name = command;
     va_list args;
     va_start(args, command);
     mCommand = varargs(command, args);
     va_end(args);
+    name = "cmd";
+    for (int i = 0; mCommand[i] != NULL; i++) {
+        name += " ";
+        name += mCommand[i];
+    }
 }
 
 CommandSection::~CommandSection() { free(mCommand); }
@@ -586,25 +561,10 @@ status_t CommandSection::Execute(ReportRequestSet* requests) const {
         return -errno;
     }
 
-    pid_t cmdPid = fork();
+    pid_t cmdPid = fork_execute_cmd((char* const*)mCommand, NULL, &cmdPipe);
     if (cmdPid == -1) {
         ALOGW("CommandSection '%s' failed to fork", this->name.string());
         return -errno;
-    }
-    // child process to execute the command as root
-    if (cmdPid == 0) {
-        // replace command's stdout with ihPipe's write Fd
-        if (dup2(cmdPipe.writeFd().get(), STDOUT_FILENO) != 1 || !ihPipe.close() ||
-            !cmdPipe.close()) {
-            ALOGW("CommandSection '%s' failed to set up stdout: %s", this->name.string(),
-                  strerror(errno));
-            _exit(EXIT_FAILURE);
-        }
-        execvp(this->mCommand[0], (char* const*)this->mCommand);
-        int err = errno;  // record command error code
-        ALOGW("CommandSection '%s' failed in executing command: %s", this->name.string(),
-              strerror(errno));
-        _exit(err);  // exit with command error code
     }
     pid_t ihPid = fork_execute_incident_helper(this->id, &cmdPipe, &ihPipe);
     if (ihPid == -1) {

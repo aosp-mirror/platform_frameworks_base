@@ -79,7 +79,8 @@ void EventMetricProducer::dropDataLocked(const uint64_t dropTimeNs) {
     mProto->clear();
 }
 
-void EventMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventTime) {
+void EventMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition,
+                                                           const uint64_t eventTime) {
 }
 
 std::unique_ptr<std::vector<uint8_t>> serializeProtoLocked(ProtoOutputStream& protoOutput) {

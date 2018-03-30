@@ -432,6 +432,18 @@ public final class ImageDecoder implements AutoCloseable {
         public boolean isAnimated() {
             return mDecoder.mAnimated;
         }
+
+        /**
+         * If known, the color space the decoded bitmap will have. Note that the
+         * output color space is not guaranteed to be the color space the bitmap
+         * is encoded with. If not known (when the config is
+         * {@link Bitmap.Config#ALPHA_8} for instance), or there is an error,
+         * it is set to null.
+         */
+        @Nullable
+        public ColorSpace getColorSpace() {
+            return mDecoder.getColorSpace();
+        }
     };
 
     /** @removed
@@ -582,16 +594,17 @@ public final class ImageDecoder implements AutoCloseable {
     private final int     mHeight;
     private final boolean mAnimated;
 
-    private int     mDesiredWidth;
-    private int     mDesiredHeight;
-    private int     mAllocator = ALLOCATOR_DEFAULT;
-    private boolean mRequireUnpremultiplied = false;
-    private boolean mMutable = false;
-    private boolean mConserveMemory = false;
-    private boolean mDecodeAsAlphaMask = false;
-    private Rect    mCropRect;
-    private Rect    mOutPaddingRect;
-    private Source  mSource;
+    private int        mDesiredWidth;
+    private int        mDesiredHeight;
+    private int        mAllocator = ALLOCATOR_DEFAULT;
+    private boolean    mRequireUnpremultiplied = false;
+    private boolean    mMutable = false;
+    private boolean    mConserveMemory = false;
+    private boolean    mDecodeAsAlphaMask = false;
+    private ColorSpace mDesiredColorSpace = null;
+    private Rect       mCropRect;
+    private Rect       mOutPaddingRect;
+    private Source     mSource;
 
     private PostProcessor          mPostProcessor;
     private OnPartialImageListener mOnPartialImageListener;
@@ -766,7 +779,7 @@ public final class ImageDecoder implements AutoCloseable {
      *
      *  <p>This takes an input that functions like
      *  {@link BitmapFactory.Options#inSampleSize}. It returns a width and
-     *  height that can be acheived by sampling the encoded image. Other widths
+     *  height that can be achieved by sampling the encoded image. Other widths
      *  and heights may be supported, but will require an additional (internal)
      *  scaling step. Such internal scaling is *not* supported with
      *  {@link #setRequireUnpremultiplied} set to {@code true}.</p>
@@ -774,6 +787,8 @@ public final class ImageDecoder implements AutoCloseable {
      *  @param sampleSize Sampling rate of the encoded image.
      *  @return {@link android.util.Size} of the width and height after
      *      sampling.
+     *
+     *  @hide
      */
     @NonNull
     public Size getSampledSize(int sampleSize) {
@@ -789,14 +804,29 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     // Modifiers
+    /** @removed
+     * @deprecated Renamed to {@link #setTargetSize}.
+     */
+    @java.lang.Deprecated
+    public ImageDecoder setResize(int width, int height) {
+        return this.setTargetSize(width, height);
+    }
+
     /**
-     *  Resize the output to have the following size.
+     *  Specify the size of the output {@link Drawable} or {@link Bitmap}.
+     *
+     *  <p>By default, the output size will match the size of the encoded
+     *  image, which can be retrieved from the {@link ImageInfo} in
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
+     *
+     *  <p>Only the last call to this or {@link #setTargetSampleSize} is
+     *  respected.</p>
      *
      *  @param width must be greater than 0.
      *  @param height must be greater than 0.
      *  @return this object for chaining.
      */
-    public ImageDecoder setResize(int width, int height) {
+    public ImageDecoder setTargetSize(int width, int height) {
         if (width <= 0 || height <= 0) {
             throw new IllegalArgumentException("Dimensions must be positive! "
                     + "provided (" + width + ", " + height + ")");
@@ -807,18 +837,65 @@ public final class ImageDecoder implements AutoCloseable {
         return this;
     }
 
+    /** @removed
+     * @deprecated Renamed to {@link #setTargetSampleSize}.
+     */
+    @java.lang.Deprecated
+    public ImageDecoder setResize(int sampleSize) {
+        return this.setTargetSampleSize(sampleSize);
+    }
+
+    private int getTargetDimension(int original, int sampleSize, int computed) {
+        // Sampling will never result in a smaller size than 1.
+        if (sampleSize >= original) {
+            return 1;
+        }
+
+        // Use integer divide to find the desired size. If that is what
+        // getSampledSize computed, that is the size to use.
+        int target = original / sampleSize;
+        if (computed == target) {
+            return computed;
+        }
+
+        // If sampleSize does not divide evenly into original, the decoder
+        // may round in either direction. It just needs to get a result that
+        // is close.
+        int reverse = computed * sampleSize;
+        if (Math.abs(reverse - original) < sampleSize) {
+            // This is the size that can be decoded most efficiently.
+            return computed;
+        }
+
+        // The decoder could not get close (e.g. it is a DNG image).
+        return target;
+    }
+
     /**
-     *  Resize based on a sample size.
+     *  Set the target size with a sampleSize.
      *
-     *  <p>This has the same effect as passing the result of
-     *  {@link #getSampledSize} to {@link #setResize(int, int)}.</p>
+     *  <p>By default, the output size will match the size of the encoded
+     *  image, which can be retrieved from the {@link ImageInfo} in
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
+     *
+     *  <p>Requests the decoder to subsample the original image, returning a
+     *  smaller image to save memory. The sample size is the number of pixels
+     *  in either dimension that correspond to a single pixel in the output.
+     *  For example, sampleSize == 4 returns an image that is 1/4 the
+     *  width/height of the original, and 1/16 the number of pixels.</p>
+     *
+     *  <p>Must be greater than or equal to 1.</p>
+     *
+     *  <p>Only the last call to this or {@link #setTargetSize} is respected.</p>
      *
      *  @param sampleSize Sampling rate of the encoded image.
      *  @return this object for chaining.
      */
-    public ImageDecoder setResize(int sampleSize) {
+    public ImageDecoder setTargetSampleSize(int sampleSize) {
         Size size = this.getSampledSize(sampleSize);
-        return this.setResize(size.getWidth(), size.getHeight());
+        int targetWidth = getTargetDimension(mWidth, sampleSize, size.getWidth());
+        int targetHeight = getTargetDimension(mHeight, sampleSize, size.getHeight());
+        return this.setTargetSize(targetWidth, targetHeight);
     }
 
     private boolean requestedResize() {
@@ -972,8 +1049,8 @@ public final class ImageDecoder implements AutoCloseable {
      *  Crop the output to {@code subset} of the (possibly) scaled image.
      *
      *  <p>{@code subset} must be contained within the size set by
-     *  {@link #setResize} or the bounds of the image if setResize was not
-     *  called. Otherwise an {@link IllegalStateException} will be thrown by
+     *  {@link #setTargetSize} or the bounds of the image if setTargetSize was
+     *  not called. Otherwise an {@link IllegalStateException} will be thrown by
      *  {@link #decodeDrawable}/{@link #decodeBitmap}.</p>
      *
      *  <p>NOT intended as a replacement for
@@ -1116,6 +1193,37 @@ public final class ImageDecoder implements AutoCloseable {
         return this.getDecodeAsAlphaMask();
     }
 
+    /**
+     * Specify the desired {@link ColorSpace} for the output.
+     *
+     * <p>If non-null, the decoder will try to decode into this
+     * color space. If it is null, which is the default, or the request cannot
+     * be met, the decoder will pick either the color space embedded in the
+     * image or the color space best suited for the requested image
+     * configuration (for instance {@link ColorSpace.Named#SRGB sRGB} for
+     * the {@link Bitmap.Config#ARGB_8888} configuration).</p>
+     *
+     * <p>{@link Bitmap.Config#RGBA_F16} always uses the
+     * {@link ColorSpace.Named#LINEAR_EXTENDED_SRGB scRGB} color space).
+     * Bitmaps in other configurations without an embedded color space are
+     * assumed to be in the {@link ColorSpace.Named#SRGB sRGB} color space.</p>
+     *
+     * <p class="note">Only {@link ColorSpace.Model#RGB} color spaces are
+     * currently supported. An <code>IllegalArgumentException</code> will
+     * be thrown by the decode methods when setting a non-RGB color space
+     * such as {@link ColorSpace.Named#CIE_LAB Lab}.</p>
+     *
+     * <p class="note">The specified color space's transfer function must be
+     * an {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}. An
+     * <code>IllegalArgumentException</code> will be thrown by the decode methods
+     * if calling {@link ColorSpace.Rgb#getTransferParameters()} on the
+     * specified color space returns null.</p>
+     */
+    public ImageDecoder setTargetColorSpace(ColorSpace colorSpace) {
+        mDesiredColorSpace = colorSpace;
+        return this;
+    }
+
     @Override
     public void close() {
         mCloseGuard.close();
@@ -1154,6 +1262,17 @@ public final class ImageDecoder implements AutoCloseable {
         if (mPostProcessor != null && mRequireUnpremultiplied) {
             throw new IllegalStateException("Cannot draw to unpremultiplied pixels!");
         }
+
+        if (mDesiredColorSpace != null) {
+            if (!(mDesiredColorSpace instanceof ColorSpace.Rgb)) {
+                throw new IllegalArgumentException("The target color space must use the "
+                            + "RGB color model - provided: " + mDesiredColorSpace);
+            }
+            if (((ColorSpace.Rgb) mDesiredColorSpace).getTransferParameters() == null) {
+                throw new IllegalArgumentException("The target color space must use an "
+                            + "ICC parametric transfer function - provided: " + mDesiredColorSpace);
+            }
+        }
     }
 
     private static void checkSubset(int width, int height, Rect r) {
@@ -1172,7 +1291,7 @@ public final class ImageDecoder implements AutoCloseable {
         return nDecodeBitmap(mNativePtr, this, mPostProcessor != null,
                 mDesiredWidth, mDesiredHeight, mCropRect,
                 mMutable, mAllocator, mRequireUnpremultiplied,
-                mConserveMemory, mDecodeAsAlphaMask);
+                mConserveMemory, mDecodeAsAlphaMask, mDesiredColorSpace);
     }
 
     private void callHeaderDecoded(@Nullable OnHeaderDecodedListener listener,
@@ -1353,13 +1472,18 @@ public final class ImageDecoder implements AutoCloseable {
         float scale = (float) dstDensity / srcDensity;
         int scaledWidth = (int) (decoder.mWidth * scale + 0.5f);
         int scaledHeight = (int) (decoder.mHeight * scale + 0.5f);
-        decoder.setResize(scaledWidth, scaledHeight);
+        decoder.setTargetSize(scaledWidth, scaledHeight);
         return dstDensity;
     }
 
     @NonNull
     private String getMimeType() {
         return nGetMimeType(mNativePtr);
+    }
+
+    @Nullable
+    private ColorSpace getColorSpace() {
+        return nGetColorSpace(mNativePtr);
     }
 
     /**
@@ -1411,11 +1535,13 @@ public final class ImageDecoder implements AutoCloseable {
             int width, int height,
             @Nullable Rect cropRect, boolean mutable,
             int allocator, boolean requireUnpremul,
-            boolean conserveMemory, boolean decodeAsAlphaMask)
+            boolean conserveMemory, boolean decodeAsAlphaMask,
+            @Nullable ColorSpace desiredColorSpace)
         throws IOException;
     private static native Size nGetSampledSize(long nativePtr,
                                                int sampleSize);
     private static native void nGetPadding(long nativePtr, @NonNull Rect outRect);
     private static native void nClose(long nativePtr);
     private static native String nGetMimeType(long nativePtr);
+    private static native ColorSpace nGetColorSpace(long nativePtr);
 }

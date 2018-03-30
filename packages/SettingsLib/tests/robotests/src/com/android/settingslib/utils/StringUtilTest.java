@@ -43,7 +43,7 @@ public class StringUtilTest {
     @Test
     public void testFormatElapsedTime_WithSeconds_ShowSeconds() {
         final double testMillis = 5 * DateUtils.MINUTE_IN_MILLIS + 30 * DateUtils.SECOND_IN_MILLIS;
-        final String expectedTime = "5m 30s";
+        final String expectedTime = "5 min, 30 sec";
 
         assertThat(StringUtil.formatElapsedTime(mContext, testMillis, true).toString())
                 .isEqualTo(expectedTime);
@@ -52,7 +52,7 @@ public class StringUtilTest {
     @Test
     public void testFormatElapsedTime_NoSeconds_DoNotShowSeconds() {
         final double testMillis = 5 * DateUtils.MINUTE_IN_MILLIS + 30 * DateUtils.SECOND_IN_MILLIS;
-        final String expectedTime = "6m";
+        final String expectedTime = "6 min";
 
         assertThat(StringUtil.formatElapsedTime(mContext, testMillis, false).toString())
                 .isEqualTo(expectedTime);
@@ -62,7 +62,7 @@ public class StringUtilTest {
     public void testFormatElapsedTime_TimeMoreThanOneDay_ShowCorrectly() {
         final double testMillis = 2 * DateUtils.DAY_IN_MILLIS
                 + 4 * DateUtils.HOUR_IN_MILLIS + 15 * DateUtils.MINUTE_IN_MILLIS;
-        final String expectedTime = "2d 4h 15m";
+        final String expectedTime = "2 days, 4 hr, 15 min";
 
         assertThat(StringUtil.formatElapsedTime(mContext, testMillis, false).toString())
                 .isEqualTo(expectedTime);
@@ -71,7 +71,7 @@ public class StringUtilTest {
     @Test
     public void testFormatElapsedTime_ZeroFieldsInTheMiddleDontShow() {
         final double testMillis = 2 * DateUtils.DAY_IN_MILLIS + 15 * DateUtils.MINUTE_IN_MILLIS;
-        final String expectedTime = "2d 15m";
+        final String expectedTime = "2 days, 15 min";
 
         assertThat(StringUtil.formatElapsedTime(mContext, testMillis, false).toString())
                 .isEqualTo(expectedTime);
@@ -80,7 +80,7 @@ public class StringUtilTest {
     @Test
     public void testFormatElapsedTime_FormatZero_WithSeconds() {
         final double testMillis = 0;
-        final String expectedTime = "0s";
+        final String expectedTime = "0 sec";
 
         assertThat(StringUtil.formatElapsedTime(mContext, testMillis, true).toString())
                 .isEqualTo(expectedTime);
@@ -89,7 +89,7 @@ public class StringUtilTest {
     @Test
     public void testFormatElapsedTime_FormatZero_NoSeconds() {
         final double testMillis = 0;
-        final String expectedTime = "0m";
+        final String expectedTime = "0 min";
 
         assertThat(StringUtil.formatElapsedTime(mContext, testMillis, false).toString())
                 .isEqualTo(expectedTime);

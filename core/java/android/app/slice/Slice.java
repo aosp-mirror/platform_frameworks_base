@@ -66,8 +66,11 @@ public final class Slice implements Parcelable {
             HINT_HORIZONTAL,
             HINT_PARTIAL,
             HINT_SEE_MORE,
-            HINT_KEY_WORDS,
+            HINT_KEYWORDS,
             HINT_ERROR,
+            HINT_TTL,
+            HINT_LAST_UPDATED,
+            HINT_PERMISSION_REQUEST,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SliceHint {}
@@ -168,11 +171,24 @@ public final class Slice implements Parcelable {
      * related to the parent slice.
      * Expected to be on an item of format {@link SliceItem#FORMAT_SLICE}.
      */
-    public static final String HINT_KEY_WORDS = "key_words";
+    public static final String HINT_KEYWORDS = "keywords";
     /**
      * A hint to indicate that this slice represents an error.
      */
     public static final String HINT_ERROR = "error";
+    /**
+     * Hint indicating an item representing a time-to-live for the content.
+     */
+    public static final String HINT_TTL = "ttl";
+    /**
+     * Hint indicating an item representing when the content was created or last updated.
+     */
+    public static final String HINT_LAST_UPDATED = "last_updated";
+    /**
+     * A hint to indicate that this slice represents a permission request for showing
+     * slices.
+     */
+    public static final String HINT_PERMISSION_REQUEST = "permission_request";
     /**
      * Key to retrieve an extra added to an intent when a control is changed.
      */
@@ -243,6 +259,11 @@ public final class Slice implements Parcelable {
      * Expected to be on an item of format {@link SliceItem#FORMAT_TEXT}.
      */
     public static final String SUBTYPE_CONTENT_DESCRIPTION = "content_description";
+    /**
+     * Subtype to tag an item as representing a time in milliseconds since midnight,
+     * January 1, 1970 UTC.
+     */
+    public static final String SUBTYPE_MILLIS = "millis";
 
     private final SliceItem[] mItems;
     private final @SliceHint String[] mHints;

@@ -13,16 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.hardware.fingerprint;
 
-import android.hardware.fingerprint.Fingerprint;
-import android.os.Bundle;
-import android.os.UserHandle;
+package com.android.server.locksettings.recoverablekeystore.serialization;
 
 /**
- * Communication channel from the FingerprintDialog (SysUI) back to AuthenticationClient.
- * @hide
+ * Error thrown when parsing invalid XML, while trying to read a
+ * {@link android.security.keystore.recovery.KeyChainSnapshot}.
  */
-oneway interface IFingerprintDialogReceiver {
-    void onDialogDismissed(int reason);
+public class KeyChainSnapshotParserException extends Exception {
+
+    public KeyChainSnapshotParserException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public KeyChainSnapshotParserException(String message) {
+        super(message);
+    }
 }

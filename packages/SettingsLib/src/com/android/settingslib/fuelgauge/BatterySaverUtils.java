@@ -20,7 +20,9 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.PowerManager;
+import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
 /**
@@ -34,8 +36,25 @@ public class BatterySaverUtils {
 
     private static final boolean DEBUG = false;
 
-    // Broadcast action for SystemUI to show the battery saver confirmation dialog.
+    private static final String SYSUI_PACKAGE = "com.android.systemui";
+
+    /** Broadcast action for SystemUI to show the battery saver confirmation dialog. */
     public static final String ACTION_SHOW_START_SAVER_CONFIRMATION = "PNW.startSaverConfirmation";
+
+    /**
+     * Broadcast action for SystemUI to show the notification that suggests turning on
+     * automatic battery saver.
+     */
+    public static final String ACTION_SHOW_AUTO_SAVER_SUGGESTION
+            = "PNW.autoSaverSuggestion";
+
+    /**
+     * We show the auto battery saver suggestion notification when the user manually enables
+     * battery saver for the START_NTH time through the END_NTH time.
+     * (We won't show it for END_NTH + 1 time and after.)
+     */
+    private static final int AUTO_SAVER_SUGGESTION_START_NTH = 4;
+    private static final int AUTO_SAVER_SUGGESTION_END_NTH = 8;
 
     /**
      * Enable / disable battery saver by user request.
@@ -62,11 +81,17 @@ public class BatterySaverUtils {
 
         if (context.getSystemService(PowerManager.class).setPowerSaveMode(enable)) {
             if (enable) {
-                Secure.putInt(cr, Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT,
-                        Secure.getInt(cr, Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT, 0) + 1);
+                final int count =
+                        Secure.getInt(cr, Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT, 0) + 1;
+                Secure.putInt(cr, Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT, count);
 
-                // TODO If enabling, and the count is between 4 and 8 (inclusive), then
-                // show the "battery saver schedule suggestion" notification.
+                if ((count >= AUTO_SAVER_SUGGESTION_START_NTH)
+                        && (count <= AUTO_SAVER_SUGGESTION_END_NTH)
+                        && Global.getInt(cr, Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0) == 0
+                        && Secure.getInt(cr,
+                        Secure.SUPPRESS_AUTO_BATTERY_SAVER_SUGGESTION, 0) == 0) {
+                    showAutoBatterySaverSuggestion(context);
+                }
             }
 
             return true;
@@ -79,13 +104,34 @@ public class BatterySaverUtils {
                 Secure.LOW_POWER_WARNING_ACKNOWLEDGED, 0) != 0) {
             return false; // Already shown.
         }
-        final Intent i = new Intent(ACTION_SHOW_START_SAVER_CONFIRMATION);
-        context.sendBroadcast(i);
-
+        context.sendBroadcast(getSystemUiBroadcast(ACTION_SHOW_START_SAVER_CONFIRMATION));
         return true;
+    }
+
+    private static void showAutoBatterySaverSuggestion(Context context) {
+        context.sendBroadcast(getSystemUiBroadcast(ACTION_SHOW_AUTO_SAVER_SUGGESTION));
+    }
+
+    private static Intent getSystemUiBroadcast(String action) {
+        final Intent i = new Intent(action);
+        i.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        i.setPackage(SYSUI_PACKAGE);
+        return i;
     }
 
     private static void setBatterySaverConfirmationAcknowledged(Context context) {
         Secure.putInt(context.getContentResolver(), Secure.LOW_POWER_WARNING_ACKNOWLEDGED, 1);
+    }
+
+    public static void suppressAutoBatterySaver(Context context) {
+        Secure.putInt(context.getContentResolver(),
+                Secure.SUPPRESS_AUTO_BATTERY_SAVER_SUGGESTION, 1);
+    }
+
+    public static void scheduleAutoBatterySaver(Context context, int level) {
+        if (Global.getInt(context.getContentResolver(), Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0)
+                == 0) {
+            Global.putInt(context.getContentResolver(), Global.LOW_POWER_MODE_TRIGGER_LEVEL, level);
+        }
     }
 }

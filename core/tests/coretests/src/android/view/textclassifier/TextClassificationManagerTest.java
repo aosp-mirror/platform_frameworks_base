@@ -126,11 +126,7 @@ public class TextClassificationManagerTest {
 
         TextClassification classification = mClassifier.classifyText(
                 text, startIndex, endIndex, mClassificationOptions);
-        assertThat(classification,
-                isTextClassification(
-                        classifiedText,
-                        TextClassifier.TYPE_EMAIL,
-                        "mailto:" + classifiedText));
+        assertThat(classification, isTextClassification(classifiedText, TextClassifier.TYPE_EMAIL));
     }
 
     @Test
@@ -144,11 +140,7 @@ public class TextClassificationManagerTest {
 
         TextClassification classification = mClassifier.classifyText(
                 text, startIndex, endIndex, mClassificationOptions);
-        assertThat(classification,
-                isTextClassification(
-                        classifiedText,
-                        TextClassifier.TYPE_URL,
-                        "http://" + classifiedText));
+        assertThat(classification, isTextClassification(classifiedText, TextClassifier.TYPE_URL));
     }
 
     @Test
@@ -158,11 +150,7 @@ public class TextClassificationManagerTest {
         String text = "Brandschenkestrasse 110, Zürich, Switzerland";
         TextClassification classification = mClassifier.classifyText(
                 text, 0, text.length(), mClassificationOptions);
-        assertThat(classification,
-                isTextClassification(
-                        text,
-                        TextClassifier.TYPE_ADDRESS,
-                        "geo:0,0?q=Brandschenkestrasse+110%2C+Z%C3%BCrich%2C+Switzerland"));
+        assertThat(classification, isTextClassification(text, TextClassifier.TYPE_ADDRESS));
     }
 
     @Test
@@ -176,11 +164,7 @@ public class TextClassificationManagerTest {
 
         TextClassification classification = mClassifier.classifyText(
                 text, startIndex, endIndex, mClassificationOptions);
-        assertThat(classification,
-                isTextClassification(
-                        classifiedText,
-                        TextClassifier.TYPE_URL,
-                        "http://ANDROID.COM"));
+        assertThat(classification, isTextClassification(classifiedText, TextClassifier.TYPE_URL));
     }
 
     @Test
@@ -194,11 +178,7 @@ public class TextClassificationManagerTest {
 
         TextClassification classification = mClassifier.classifyText(
                 text, startIndex, endIndex, mClassificationOptions);
-        assertThat(classification,
-                isTextClassification(
-                        classifiedText,
-                        TextClassifier.TYPE_DATE,
-                        null));
+        assertThat(classification, isTextClassification(classifiedText, TextClassifier.TYPE_DATE));
     }
 
     @Test
@@ -213,10 +193,7 @@ public class TextClassificationManagerTest {
         TextClassification classification = mClassifier.classifyText(
                 text, startIndex, endIndex, mClassificationOptions);
         assertThat(classification,
-                isTextClassification(
-                        classifiedText,
-                        TextClassifier.TYPE_DATE_TIME,
-                        null));
+                isTextClassification(classifiedText, TextClassifier.TYPE_DATE_TIME));
     }
 
     @Test
@@ -355,39 +332,15 @@ public class TextClassificationManagerTest {
     }
 
     private static Matcher<TextClassification> isTextClassification(
-            final String text, final String type, final String intentUri) {
+            final String text, final String type) {
         return new BaseMatcher<TextClassification>() {
             @Override
             public boolean matches(Object o) {
                 if (o instanceof TextClassification) {
                     TextClassification result = (TextClassification) o;
-                    final boolean typeRequirementSatisfied;
-                    String scheme;
-                    switch (type) {
-                        case TextClassifier.TYPE_EMAIL:
-                            scheme = result.getIntent().getData().getScheme();
-                            typeRequirementSatisfied = "mailto".equals(scheme);
-                            break;
-                        case TextClassifier.TYPE_URL:
-                            scheme = result.getIntent().getData().getScheme();
-                            typeRequirementSatisfied = "http".equals(scheme)
-                                    || "https".equals(scheme);
-                            break;
-                        case TextClassifier.TYPE_ADDRESS:
-                            scheme = result.getIntent().getData().getScheme();
-                            typeRequirementSatisfied = "geo".equals(scheme);
-                            break;
-                        default:
-                            typeRequirementSatisfied = true;
-                    }
-
-                    return typeRequirementSatisfied
-                            && text.equals(result.getText())
+                    return text.equals(result.getText())
                             && result.getEntityCount() > 0
-                            && type.equals(result.getEntity(0))
-                            && (intentUri == null
-                                || intentUri.equals(result.getIntent().getDataString()));
-                    // TODO: Include other properties.
+                            && type.equals(result.getEntity(0));
                 }
                 return false;
             }
@@ -395,8 +348,7 @@ public class TextClassificationManagerTest {
             @Override
             public void describeTo(Description description) {
                 description.appendText("text=").appendValue(text)
-                        .appendText(", type=").appendValue(type)
-                        .appendText(", intent.data=").appendValue(intentUri);
+                        .appendText(", type=").appendValue(type);
             }
         };
     }

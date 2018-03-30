@@ -18,8 +18,8 @@ package com.android.systemui.fingerprint;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.hardware.fingerprint.FingerprintDialog;
-import android.hardware.fingerprint.IFingerprintDialogReceiver;
+import android.hardware.biometrics.BiometricDialog;
+import android.hardware.biometrics.IBiometricDialogReceiver;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -48,7 +48,7 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
 
     private FingerprintDialogView mDialogView;
     private WindowManager mWindowManager;
-    private IFingerprintDialogReceiver mReceiver;
+    private IBiometricDialogReceiver mReceiver;
     private boolean mDialogShowing;
 
     private Handler mHandler = new Handler() {
@@ -97,7 +97,7 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
     }
 
     @Override
-    public void showFingerprintDialog(Bundle bundle, IFingerprintDialogReceiver receiver) {
+    public void showFingerprintDialog(Bundle bundle, IBiometricDialogReceiver receiver) {
         if (DEBUG) Log.d(TAG, "showFingerprintDialog");
         // Remove these messages as they are part of the previous client
         mHandler.removeMessages(MSG_FINGERPRINT_ERROR);
@@ -139,7 +139,7 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
             Log.w(TAG, "Dialog already showing");
             return;
         }
-        mReceiver = (IFingerprintDialogReceiver) args.arg2;
+        mReceiver = (IBiometricDialogReceiver) args.arg2;
         mDialogView.setBundle((Bundle)args.arg1);
         mWindowManager.addView(mDialogView, mDialogView.getLayoutParams());
         mDialogShowing = true;
@@ -147,6 +147,9 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
 
     private void handleFingerprintAuthenticated() {
         if (DEBUG) Log.d(TAG, "handleFingerprintAuthenticated");
+        mDialogView.announceForAccessibility(
+                mContext.getResources().getText(
+                        com.android.internal.R.string.fingerprint_authenticated));
         handleHideDialog(false /* userCanceled */);
     }
 
@@ -174,7 +177,7 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
         }
         if (userCanceled) {
             try {
-                mReceiver.onDialogDismissed(FingerprintDialog.DISMISSED_REASON_USER_CANCEL);
+                mReceiver.onDialogDismissed(BiometricDialog.DISMISSED_REASON_USER_CANCEL);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException when hiding dialog", e);
             }
@@ -190,7 +193,7 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
             return;
         }
         try {
-            mReceiver.onDialogDismissed(FingerprintDialog.DISMISSED_REASON_NEGATIVE);
+            mReceiver.onDialogDismissed(BiometricDialog.DISMISSED_REASON_NEGATIVE);
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception when handling negative button", e);
         }
@@ -203,7 +206,7 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
             return;
         }
         try {
-            mReceiver.onDialogDismissed(FingerprintDialog.DISMISSED_REASON_POSITIVE);
+            mReceiver.onDialogDismissed(BiometricDialog.DISMISSED_REASON_POSITIVE);
         } catch (RemoteException e) {
             Log.e(TAG, "Remote exception when handling positive button", e);
         }

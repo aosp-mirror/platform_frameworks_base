@@ -25,7 +25,7 @@ import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 // An android.content.ClipData object.
 message ClipDataProto {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_LOCAL;
 
     optional android.content.ClipDescriptionProto description = 1;
 
@@ -40,7 +40,7 @@ message ClipDataProto {
 
     // An android.content.ClipData.Item object.
     message Item {
-        option (.android.msg_privacy).dest = DEST_EXPLICIT;
+        option (.android.msg_privacy).dest = DEST_LOCAL;
 
         oneof data {
             string html_text = 1;

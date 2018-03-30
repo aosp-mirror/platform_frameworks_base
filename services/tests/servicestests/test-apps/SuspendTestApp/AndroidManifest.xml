@@ -21,7 +21,12 @@
         <activity android:name=".SuspendTestActivity"
                   android:exported="true" />
         <receiver android:name=".SuspendTestReceiver"
-                  android:exported="true" />
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_SUSPENDED" />
+                <action android:name="android.intent.action.MY_PACKAGE_UNSUSPENDED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

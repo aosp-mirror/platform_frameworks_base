@@ -1512,105 +1512,360 @@ class SettingsProtoDumpUtil {
 
         s.dumpHistoricalOperations(p, SecureSettingsProto.HISTORICAL_OPERATIONS);
 
-        // This uses the same order as in Settings.Secure.
+        // This uses the same order as in SecureSettingsProto.
 
-        // Settings.Secure.DEVELOPMENT_SETTINGS_ENABLED intentionally excluded since it's deprecated.
-        // Settings.Secure.BUGREPORT_IN_POWER_MENU intentionally excluded since it's deprecated.
-        // Settings.Secure.ADB_ENABLED intentionally excluded since it's deprecated.
-        // Settings.Secure.ALLOW_MOCK_LOCATION intentionally excluded since it's deprecated.
+        final long accessibilityToken = p.start(SecureSettingsProto.ACCESSIBILITY);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_ENABLED,
+                SecureSettingsProto.Accessibility.ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+                SecureSettingsProto.Accessibility.ENABLED_ACCESSIBILITY_SERVICES);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_AUTOCLICK_ENABLED,
+                SecureSettingsProto.Accessibility.AUTOCLICK_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_AUTOCLICK_DELAY,
+                SecureSettingsProto.Accessibility.AUTOCLICK_DELAY);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT,
+                SecureSettingsProto.Accessibility.BUTTON_TARGET_COMPONENT);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_CAPTIONING_ENABLED,
+                SecureSettingsProto.Accessibility.CAPTIONING_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_CAPTIONING_LOCALE,
+                SecureSettingsProto.Accessibility.CAPTIONING_LOCALE);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_CAPTIONING_PRESET,
+                SecureSettingsProto.Accessibility.CAPTIONING_PRESET);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_CAPTIONING_BACKGROUND_COLOR,
+                SecureSettingsProto.Accessibility.CAPTIONING_BACKGROUND_COLOR);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR,
+                SecureSettingsProto.Accessibility.CAPTIONING_FOREGROUND_COLOR);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_CAPTIONING_EDGE_TYPE,
+                SecureSettingsProto.Accessibility.CAPTIONING_EDGE_TYPE);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_CAPTIONING_EDGE_COLOR,
+                SecureSettingsProto.Accessibility.CAPTIONING_EDGE_COLOR);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_CAPTIONING_WINDOW_COLOR,
+                SecureSettingsProto.Accessibility.CAPTIONING_WINDOW_COLOR);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_CAPTIONING_TYPEFACE,
+                SecureSettingsProto.Accessibility.CAPTIONING_TYPEFACE);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_CAPTIONING_FONT_SCALE,
+                SecureSettingsProto.Accessibility.CAPTIONING_FONT_SCALE);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
+                SecureSettingsProto.Accessibility.DISPLAY_DALTONIZER_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER,
+                SecureSettingsProto.Accessibility.DISPLAY_DALTONIZER);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
+                SecureSettingsProto.Accessibility.DISPLAY_INVERSION_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
+                SecureSettingsProto.Accessibility.DISPLAY_MAGNIFICATION_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED,
+                SecureSettingsProto.Accessibility.DISPLAY_MAGNIFICATION_NAVBAR_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
+                SecureSettingsProto.Accessibility.DISPLAY_MAGNIFICATION_SCALE);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED,
+                SecureSettingsProto.Accessibility.HIGH_TEXT_CONTRAST_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON,
+                SecureSettingsProto.Accessibility.LARGE_POINTER_ICON);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_ENABLED,
+                SecureSettingsProto.Accessibility.SHORTCUT_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN,
+                SecureSettingsProto.Accessibility.SHORTCUT_ON_LOCK_SCREEN);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
+                SecureSettingsProto.Accessibility.SHORTCUT_DIALOG_SHOWN);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
+                SecureSettingsProto.Accessibility.SHORTCUT_TARGET_SERVICE);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
+                SecureSettingsProto.Accessibility.SOFT_KEYBOARD_MODE);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD,
+                SecureSettingsProto.Accessibility.SPEAK_PASSWORD);
+        dumpSetting(s, p,
+                Settings.Secure.TOUCH_EXPLORATION_ENABLED,
+                SecureSettingsProto.Accessibility.TOUCH_EXPLORATION_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
+                SecureSettingsProto.Accessibility.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES);
+        p.end(accessibilityToken);
+
+        dumpSetting(s, p,
+                Settings.Secure.ALLOWED_GEOLOCATION_ORIGINS,
+                SecureSettingsProto.ALLOWED_GEOLOCATION_ORIGINS);
+
+        final long aovToken = p.start(SecureSettingsProto.ALWAYS_ON_VPN);
+        dumpSetting(s, p,
+                Settings.Secure.ALWAYS_ON_VPN_APP,
+                SecureSettingsProto.AlwaysOnVpn.APP);
+        dumpSetting(s, p,
+                Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN,
+                SecureSettingsProto.AlwaysOnVpn.LOCKDOWN);
+        p.end(aovToken);
+
         dumpSetting(s, p,
                 Settings.Secure.ANDROID_ID,
                 SecureSettingsProto.ANDROID_ID);
-        // Settings.Secure.BLUETOOTH_ON intentionally excluded since it's deprecated.
-        // Settings.Secure.DATA_ROAMING intentionally excluded since it's deprecated.
         dumpSetting(s, p,
-                Settings.Secure.DEFAULT_INPUT_METHOD,
-                SecureSettingsProto.DEFAULT_INPUT_METHOD);
+                Settings.Secure.ANR_SHOW_BACKGROUND,
+                SecureSettingsProto.ANR_SHOW_BACKGROUND);
+
+        final long assistToken = p.start(SecureSettingsProto.ASSIST);
         dumpSetting(s, p,
-                Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE,
-                SecureSettingsProto.SELECTED_INPUT_METHOD_SUBTYPE);
+                Settings.Secure.ASSISTANT,
+                SecureSettingsProto.Assist.ASSISTANT);
         dumpSetting(s, p,
-                Settings.Secure.INPUT_METHODS_SUBTYPE_HISTORY,
-                SecureSettingsProto.INPUT_METHODS_SUBTYPE_HISTORY);
+                Settings.Secure.ASSIST_STRUCTURE_ENABLED,
+                SecureSettingsProto.Assist.STRUCTURE_ENABLED);
         dumpSetting(s, p,
-                Settings.Secure.INPUT_METHOD_SELECTOR_VISIBILITY,
-                SecureSettingsProto.INPUT_METHOD_SELECTOR_VISIBILITY);
+                Settings.Secure.ASSIST_SCREENSHOT_ENABLED,
+                SecureSettingsProto.Assist.SCREENSHOT_ENABLED);
         dumpSetting(s, p,
-                Settings.Secure.VOICE_INTERACTION_SERVICE,
-                SecureSettingsProto.VOICE_INTERACTION_SERVICE);
+                Settings.Secure.ASSIST_DISCLOSURE_ENABLED,
+                SecureSettingsProto.Assist.DISCLOSURE_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ASSIST_GESTURE_ENABLED,
+                SecureSettingsProto.Assist.GESTURE_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ASSIST_GESTURE_SENSITIVITY,
+                SecureSettingsProto.Assist.GESTURE_SENSITIVITY);
+        dumpSetting(s, p,
+                Settings.Secure.ASSIST_GESTURE_SILENCE_ALERTS_ENABLED,
+                SecureSettingsProto.Assist.GESTURE_SILENCE_ALERTS_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ASSIST_GESTURE_WAKE_ENABLED,
+                SecureSettingsProto.Assist.GESTURE_WAKE_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.ASSIST_GESTURE_SETUP_COMPLETE,
+                SecureSettingsProto.Assist.GESTURE_SETUP_COMPLETE);
+        p.end(assistToken);
+
+        final long autofillToken = p.start(SecureSettingsProto.AUTOFILL);
         dumpSetting(s, p,
                 Settings.Secure.AUTOFILL_SERVICE,
-                SecureSettingsProto.AUTOFILL_SERVICE);
+                SecureSettingsProto.Autofill.SERVICE);
         dumpSetting(s, p,
                 Settings.Secure.AUTOFILL_FEATURE_FIELD_CLASSIFICATION,
-                SecureSettingsProto.AUTOFILL_FEATURE_FIELD_CLASSIFICATION);
+                SecureSettingsProto.Autofill.FEATURE_FIELD_CLASSIFICATION);
         dumpSetting(s, p,
                 Settings.Secure.AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE,
-                SecureSettingsProto.AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE);
+                SecureSettingsProto.Autofill.USER_DATA_MAX_USER_DATA_SIZE);
         dumpSetting(s, p,
                 Settings.Secure.AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE,
-                SecureSettingsProto.AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE);
+                SecureSettingsProto.Autofill.USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE);
         dumpSetting(s, p,
                 Settings.Secure.AUTOFILL_USER_DATA_MAX_CATEGORY_COUNT,
-                SecureSettingsProto.AUTOFILL_USER_DATA_MAX_CATEGORY_COUNT);
+                SecureSettingsProto.Autofill.USER_DATA_MAX_CATEGORY_COUNT);
         dumpSetting(s, p,
                 Settings.Secure.AUTOFILL_USER_DATA_MAX_VALUE_LENGTH,
-                SecureSettingsProto.AUTOFILL_USER_DATA_MAX_VALUE_LENGTH);
+                SecureSettingsProto.Autofill.USER_DATA_MAX_VALUE_LENGTH);
         dumpSetting(s, p,
                 Settings.Secure.AUTOFILL_USER_DATA_MIN_VALUE_LENGTH,
-                SecureSettingsProto.AUTOFILL_USER_DATA_MIN_VALUE_LENGTH);
-        // Settings.Secure.DEVICE_PROVISIONED intentionally excluded since it's deprecated.
+                SecureSettingsProto.Autofill.USER_DATA_MIN_VALUE_LENGTH);
         dumpSetting(s, p,
-                Settings.Secure.USER_SETUP_COMPLETE,
-                SecureSettingsProto.USER_SETUP_COMPLETE);
-        // Whether the current user has been set up via setup wizard (0 = false, 1 = true). This
-        // value differs from USER_SETUP_COMPLETE in that it can be reset back to 0 in case
-        // SetupWizard has been re-enabled on TV devices.
+                Settings.Secure.AUTOFILL_SERVICE_SEARCH_URI,
+                SecureSettingsProto.Autofill.SERVICE_SEARCH_URI);
+        p.end(autofillToken);
+
+        final long asmToken = p.start(SecureSettingsProto.AUTOMATIC_STORAGE_MANAGER);
         dumpSetting(s, p,
-                Settings.Secure.TV_USER_SETUP_COMPLETE,
-                SecureSettingsProto.TV_USER_SETUP_COMPLETE);
+                Settings.Secure.AUTOMATIC_STORAGE_MANAGER_ENABLED,
+                SecureSettingsProto.AutomaticStorageManager.ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
+                SecureSettingsProto.AutomaticStorageManager.DAYS_TO_RETAIN);
+        dumpSetting(s, p,
+                Settings.Secure.AUTOMATIC_STORAGE_MANAGER_BYTES_CLEARED,
+                SecureSettingsProto.AutomaticStorageManager.BYTES_CLEARED);
+        dumpSetting(s, p,
+                Settings.Secure.AUTOMATIC_STORAGE_MANAGER_LAST_RUN,
+                SecureSettingsProto.AutomaticStorageManager.LAST_RUN);
+        dumpSetting(s, p,
+                Settings.Secure.AUTOMATIC_STORAGE_MANAGER_TURNED_OFF_BY_POLICY,
+                SecureSettingsProto.AutomaticStorageManager.TURNED_OFF_BY_POLICY);
+        p.end(asmToken);
+
+        final long backupToken = p.start(SecureSettingsProto.BACKUP);
+        dumpSetting(s, p,
+                Settings.Secure.BACKUP_ENABLED,
+                SecureSettingsProto.Backup.ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.BACKUP_AUTO_RESTORE,
+                SecureSettingsProto.Backup.AUTO_RESTORE);
+        dumpSetting(s, p,
+                Settings.Secure.BACKUP_PROVISIONED,
+                SecureSettingsProto.Backup.PROVISIONED);
+        dumpSetting(s, p,
+                Settings.Secure.BACKUP_TRANSPORT,
+                SecureSettingsProto.Backup.TRANSPORT);
+        dumpSetting(s, p,
+                Settings.Secure.BACKUP_MANAGER_CONSTANTS,
+                SecureSettingsProto.Backup.MANAGER_CONSTANTS);
+        dumpSetting(s, p,
+                Settings.Secure.BACKUP_LOCAL_TRANSPORT_PARAMETERS,
+                SecureSettingsProto.Backup.LOCAL_TRANSPORT_PARAMETERS);
+        dumpSetting(s, p,
+                Settings.Secure.PACKAGES_TO_CLEAR_DATA_BEFORE_FULL_RESTORE,
+                SecureSettingsProto.Backup.PACKAGES_TO_CLEAR_DATA_BEFORE_FULL_RESTORE);
+        p.end(backupToken);
+
+        // Settings.Secure.BLUETOOTH_ON intentionally excluded since it's deprecated.
+        dumpSetting(s, p,
+                Settings.Secure.BLUETOOTH_ON_WHILE_DRIVING,
+                SecureSettingsProto.BLUETOOTH_ON_WHILE_DRIVING);
+
+        final long cameraToken = p.start(SecureSettingsProto.CAMERA);
+        dumpSetting(s, p,
+                Settings.Secure.CAMERA_GESTURE_DISABLED,
+                SecureSettingsProto.Camera.GESTURE_DISABLED);
+        dumpSetting(s, p,
+                Settings.Secure.CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED,
+                SecureSettingsProto.Camera.DOUBLE_TAP_POWER_GESTURE_DISABLED);
+        dumpSetting(s, p,
+                Settings.Secure.CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
+                SecureSettingsProto.Camera.DOUBLE_TWIST_TO_FLIP_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.CAMERA_LIFT_TRIGGER_ENABLED,
+                SecureSettingsProto.Camera.LIFT_TRIGGER_ENABLED);
+        p.end(cameraToken);
+
+        dumpSetting(s, p,
+                Settings.Secure.CARRIER_APPS_HANDLED,
+                SecureSettingsProto.CARRIER_APPS_HANDLED);
+        dumpSetting(s, p,
+                Settings.Secure.CMAS_ADDITIONAL_BROADCAST_PKG,
+                SecureSettingsProto.CMAS_ADDITIONAL_BROADCAST_PKG);
         dumpRepeatedSetting(s, p,
                 Settings.Secure.COMPLETED_CATEGORY_PREFIX,
                 SecureSettingsProto.COMPLETED_CATEGORIES);
         dumpSetting(s, p,
-                Settings.Secure.ENABLED_INPUT_METHODS,
-                SecureSettingsProto.ENABLED_INPUT_METHODS);
+                Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS,
+                SecureSettingsProto.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS);
+        dumpSetting(s, p,
+                Settings.Secure.DEVICE_PAIRED,
+                SecureSettingsProto.DEVICE_PAIRED);
+        dumpSetting(s, p,
+                Settings.Secure.DIALER_DEFAULT_APPLICATION,
+                SecureSettingsProto.DIALER_DEFAULT_APPLICATION);
+        dumpSetting(s, p,
+                Settings.Secure.DISPLAY_DENSITY_FORCED,
+                SecureSettingsProto.DISPLAY_DENSITY_FORCED);
+        dumpSetting(s, p,
+                Settings.Secure.DOUBLE_TAP_TO_WAKE,
+                SecureSettingsProto.DOUBLE_TAP_TO_WAKE);
+
+        final long dozeToken = p.start(SecureSettingsProto.DOZE);
+        dumpSetting(s, p,
+                Settings.Secure.DOZE_ENABLED,
+                SecureSettingsProto.Doze.ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.DOZE_ALWAYS_ON,
+                SecureSettingsProto.Doze.ALWAYS_ON);
+        dumpSetting(s, p,
+                Settings.Secure.DOZE_PULSE_ON_PICK_UP,
+                SecureSettingsProto.Doze.PULSE_ON_PICK_UP);
+        dumpSetting(s, p,
+                Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
+                SecureSettingsProto.Doze.PULSE_ON_LONG_PRESS);
+        dumpSetting(s, p,
+                Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP,
+                SecureSettingsProto.Doze.PULSE_ON_DOUBLE_TAP);
+        p.end(dozeToken);
+
+        dumpSetting(s, p,
+                Settings.Secure.EMERGENCY_ASSISTANCE_APPLICATION,
+                SecureSettingsProto.EMERGENCY_ASSISTANCE_APPLICATION);
+        dumpSetting(s, p,
+                Settings.Secure.ENHANCED_VOICE_PRIVACY_ENABLED,
+                SecureSettingsProto.ENHANCED_VOICE_PRIVACY_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
+                SecureSettingsProto.IMMERSIVE_MODE_CONFIRMATIONS);
+
+        final long incallToken = p.start(SecureSettingsProto.INCALL);
+        dumpSetting(s, p,
+                Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR,
+                SecureSettingsProto.Incall.POWER_BUTTON_BEHAVIOR);
+        dumpSetting(s, p,
+                Settings.Secure.INCALL_BACK_BUTTON_BEHAVIOR,
+                SecureSettingsProto.Incall.BACK_BUTTON_BEHAVIOR);
+        p.end(incallToken);
+
+        final long inputMethodsToken = p.start(SecureSettingsProto.INPUT_METHODS);
+        dumpSetting(s, p,
+                Settings.Secure.DEFAULT_INPUT_METHOD,
+                SecureSettingsProto.InputMethods.DEFAULT_INPUT_METHOD);
         dumpSetting(s, p,
                 Settings.Secure.DISABLED_SYSTEM_INPUT_METHODS,
-                SecureSettingsProto.DISABLED_SYSTEM_INPUT_METHODS);
+                SecureSettingsProto.InputMethods.DISABLED_SYSTEM_INPUT_METHODS);
+        dumpSetting(s, p,
+                Settings.Secure.ENABLED_INPUT_METHODS,
+                SecureSettingsProto.InputMethods.ENABLED_INPUT_METHODS);
+        dumpSetting(s, p,
+                Settings.Secure.INPUT_METHODS_SUBTYPE_HISTORY,
+                SecureSettingsProto.InputMethods.SUBTYPE_HISTORY);
+        dumpSetting(s, p,
+                Settings.Secure.INPUT_METHOD_SELECTOR_VISIBILITY,
+                SecureSettingsProto.InputMethods.METHOD_SELECTOR_VISIBILITY);
+        dumpSetting(s, p,
+                Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE,
+                SecureSettingsProto.InputMethods.SELECTED_INPUT_METHOD_SUBTYPE);
         dumpSetting(s, p,
                 Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD,
-                SecureSettingsProto.SHOW_IME_WITH_HARD_KEYBOARD);
-        // Settings.Secure.HTTP_PROXY intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.Secure.ALWAYS_ON_VPN_APP,
-                SecureSettingsProto.ALWAYS_ON_VPN_APP);
-        dumpSetting(s, p,
-                Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN,
-                SecureSettingsProto.ALWAYS_ON_VPN_LOCKDOWN);
+                SecureSettingsProto.InputMethods.SHOW_IME_WITH_HARD_KEYBOARD);
+        p.end(inputMethodsToken);
+
         dumpSetting(s, p,
                 Settings.Secure.INSTALL_NON_MARKET_APPS,
                 SecureSettingsProto.INSTALL_NON_MARKET_APPS);
         dumpSetting(s, p,
-                Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED,
-                SecureSettingsProto.UNKNOWN_SOURCES_DEFAULT_REVERSED);
+                Settings.Secure.INSTANT_APPS_ENABLED,
+                SecureSettingsProto.INSTANT_APPS_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.KEYGUARD_SLICE_URI,
+                SecureSettingsProto.KEYGUARD_SLICE_URI);
+        dumpSetting(s, p,
+                Settings.Secure.LAST_SETUP_SHOWN,
+                SecureSettingsProto.LAST_SETUP_SHOWN);
+
+        final long locationToken = p.start(SecureSettingsProto.LOCATION);
         // Settings.Secure.LOCATION_PROVIDERS_ALLOWED intentionally excluded since it's deprecated.
         dumpSetting(s, p,
                 Settings.Secure.LOCATION_MODE,
-                SecureSettingsProto.LOCATION_MODE);
+                SecureSettingsProto.Location.MODE);
         dumpSetting(s, p,
                 Settings.Secure.LOCATION_CHANGER,
-                SecureSettingsProto.LOCATION_CHANGER);
+                SecureSettingsProto.Location.CHANGER);
+        p.end(locationToken);
+
+        final long lockScreenToken = p.start(SecureSettingsProto.LOCK_SCREEN);
         // Settings.Secure.LOCK_BIOMETRIC_WEAK_FLAGS intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.Secure.LOCK_TO_APP_EXIT_LOCKED,
-                SecureSettingsProto.LOCK_TO_APP_EXIT_LOCKED);
         // Settings.Secure.LOCK_PATTERN_ENABLED intentionally excluded since it's deprecated.
         // Settings.Secure.LOCK_PATTERN_VISIBLE intentionally excluded since it's deprecated.
         // Settings.Secure.LOCK_PATTERN_TACTICLE_FEEDBACK_ENABLED intentionally excluded since it's deprecated.
         dumpSetting(s, p,
                 Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT,
-                SecureSettingsProto.LOCK_SCREEN_LOCK_AFTER_TIMEOUT);
+                SecureSettingsProto.LockScreen.LOCK_AFTER_TIMEOUT);
         // Settings.Secure.LOCK_SCREEN_OWNER_INFO intentionally excluded since it's deprecated.
         // Settings.Secure.LOCK_SCREEN_APPWIDGET_IDS intentionally excluded since it's deprecated.
         // Settings.Secure.LOCK_SCREEN_FALLBACK_APPWIDGET_ID intentionally excluded since it's deprecated.
@@ -1618,162 +1873,371 @@ class SettingsProtoDumpUtil {
         // Settings.Secure.LOCK_SCREEN_OWNER_INFO_ENABLED intentionally excluded since it's deprecated.
         dumpSetting(s, p,
                 Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS,
-                SecureSettingsProto.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
+                SecureSettingsProto.LockScreen.ALLOW_PRIVATE_NOTIFICATIONS);
         dumpSetting(s, p,
                 Settings.Secure.LOCK_SCREEN_ALLOW_REMOTE_INPUT,
-                SecureSettingsProto.LOCK_SCREEN_ALLOW_REMOTE_INPUT);
+                SecureSettingsProto.LockScreen.ALLOW_REMOTE_INPUT);
         dumpSetting(s, p,
-                Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING,
-                SecureSettingsProto.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING);
+                Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
+                SecureSettingsProto.LockScreen.SHOW_NOTIFICATIONS);
+        p.end(lockScreenToken);
+
         dumpSetting(s, p,
-                Settings.Secure.TRUST_AGENTS_INITIALIZED,
-                SecureSettingsProto.TRUST_AGENTS_INITIALIZED);
-        // Settings.Secure.LOGGING_ID intentionally excluded since it's deprecated.
-        // Settings.Secure.NETWORK_PREFERENCE intentionally excluded since it's deprecated.
+                Settings.Secure.LOCK_TO_APP_EXIT_LOCKED,
+                SecureSettingsProto.LOCK_TO_APP_EXIT_LOCKED);
         dumpSetting(s, p,
-                Settings.Secure.PARENTAL_CONTROL_ENABLED,
-                SecureSettingsProto.PARENTAL_CONTROL_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.PARENTAL_CONTROL_LAST_UPDATE,
-                SecureSettingsProto.PARENTAL_CONTROL_LAST_UPDATE);
-        dumpSetting(s, p,
-                Settings.Secure.PARENTAL_CONTROL_REDIRECT_URL,
-                SecureSettingsProto.PARENTAL_CONTROL_REDIRECT_URL);
-        dumpSetting(s, p,
-                Settings.Secure.SETTINGS_CLASSNAME,
-                SecureSettingsProto.SETTINGS_CLASSNAME);
-        // Settings.Secure.USB_MASS_STORAGE_ENABLED intentionally excluded since it's deprecated.
-        // Settings.Secure.USE_GOOGLE_MAIL intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_ENABLED,
-                SecureSettingsProto.ACCESSIBILITY_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_SHORTCUT_ENABLED,
-                SecureSettingsProto.ACCESSIBILITY_SHORTCUT_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN,
-                SecureSettingsProto.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
-                SecureSettingsProto.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
-                SecureSettingsProto.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT,
-                SecureSettingsProto.ACCESSIBILITY_BUTTON_TARGET_COMPONENT);
-        dumpSetting(s, p,
-                Settings.Secure.TOUCH_EXPLORATION_ENABLED,
-                SecureSettingsProto.TOUCH_EXPLORATION_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
-                SecureSettingsProto.ENABLED_ACCESSIBILITY_SERVICES);
-        dumpSetting(s, p,
-                Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
-                SecureSettingsProto.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES);
-        dumpSetting(s, p,
-                Settings.Secure.KEYGUARD_SLICE_URI,
-                SecureSettingsProto.KEYGUARD_SLICE_URI);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_SPEAK_PASSWORD,
-                SecureSettingsProto.ACCESSIBILITY_SPEAK_PASSWORD);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED,
-                SecureSettingsProto.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
-                SecureSettingsProto.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED,
-                SecureSettingsProto.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
-                SecureSettingsProto.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE,
-                SecureSettingsProto.ACCESSIBILITY_SOFT_KEYBOARD_MODE);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_CAPTIONING_ENABLED,
-                SecureSettingsProto.ACCESSIBILITY_CAPTIONING_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_CAPTIONING_LOCALE,
-                SecureSettingsProto.ACCESSIBILITY_CAPTIONING_LOCALE);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_CAPTIONING_PRESET,
-                SecureSettingsProto.ACCESSIBILITY_CAPTIONING_PRESET);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_CAPTIONING_BACKGROUND_COLOR,
-                SecureSettingsProto.ACCESSIBILITY_CAPTIONING_BACKGROUND_COLOR);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR,
-                SecureSettingsProto.ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_CAPTIONING_EDGE_TYPE,
-                SecureSettingsProto.ACCESSIBILITY_CAPTIONING_EDGE_TYPE);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_CAPTIONING_EDGE_COLOR,
-                SecureSettingsProto.ACCESSIBILITY_CAPTIONING_EDGE_COLOR);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_CAPTIONING_WINDOW_COLOR,
-                SecureSettingsProto.ACCESSIBILITY_CAPTIONING_WINDOW_COLOR);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_CAPTIONING_TYPEFACE,
-                SecureSettingsProto.ACCESSIBILITY_CAPTIONING_TYPEFACE);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_CAPTIONING_FONT_SCALE,
-                SecureSettingsProto.ACCESSIBILITY_CAPTIONING_FONT_SCALE);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
-                SecureSettingsProto.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
-                SecureSettingsProto.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_DISPLAY_DALTONIZER,
-                SecureSettingsProto.ACCESSIBILITY_DISPLAY_DALTONIZER);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_AUTOCLICK_ENABLED,
-                SecureSettingsProto.ACCESSIBILITY_AUTOCLICK_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_AUTOCLICK_DELAY,
-                SecureSettingsProto.ACCESSIBILITY_AUTOCLICK_DELAY);
-        dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON,
-                SecureSettingsProto.ACCESSIBILITY_LARGE_POINTER_ICON);
+                Settings.Secure.LOCKDOWN_IN_POWER_MENU,
+                SecureSettingsProto.LOCKDOWN_IN_POWER_MENU);
         dumpSetting(s, p,
                 Settings.Secure.LONG_PRESS_TIMEOUT,
                 SecureSettingsProto.LONG_PRESS_TIMEOUT);
+
+        final long managedProfileToken = p.start(SecureSettingsProto.MANAGED_PROFILE);
+        dumpSetting(s, p,
+                Settings.Secure.MANAGED_PROFILE_CONTACT_REMOTE_SEARCH,
+                SecureSettingsProto.ManagedProfile.CONTACT_REMOTE_SEARCH);
+        p.end(managedProfileToken);
+
+        final long mountToken = p.start(SecureSettingsProto.MOUNT);
+        dumpSetting(s, p,
+                Settings.Secure.MOUNT_PLAY_NOTIFICATION_SND,
+                SecureSettingsProto.Mount.PLAY_NOTIFICATION_SND);
+        dumpSetting(s, p,
+                Settings.Secure.MOUNT_UMS_AUTOSTART,
+                SecureSettingsProto.Mount.UMS_AUTOSTART);
+        dumpSetting(s, p,
+                Settings.Secure.MOUNT_UMS_PROMPT,
+                SecureSettingsProto.Mount.UMS_PROMPT);
+        dumpSetting(s, p,
+                Settings.Secure.MOUNT_UMS_NOTIFY_ENABLED,
+                SecureSettingsProto.Mount.UMS_NOTIFY_ENABLED);
+        p.end(mountToken);
+
         dumpSetting(s, p,
                 Settings.Secure.MULTI_PRESS_TIMEOUT,
                 SecureSettingsProto.MULTI_PRESS_TIMEOUT);
+
+        final long nfcPaymentToken = p.start(SecureSettingsProto.NFC_PAYMENT);
+        dumpSetting(s, p,
+                Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT,
+                SecureSettingsProto.NfcPayment.DEFAULT_COMPONENT);
+        dumpSetting(s, p,
+                Settings.Secure.NFC_PAYMENT_FOREGROUND,
+                SecureSettingsProto.NfcPayment.FOREGROUND);
+        dumpSetting(s, p,
+                Settings.Secure.PAYMENT_SERVICE_SEARCH_URI,
+                SecureSettingsProto.NfcPayment.PAYMENT_SERVICE_SEARCH_URI);
+        p.end(nfcPaymentToken);
+
+        final long nightDisplayToken = p.start(SecureSettingsProto.NIGHT_DISPLAY);
+        dumpSetting(s, p,
+                Settings.Secure.NIGHT_DISPLAY_ACTIVATED,
+                SecureSettingsProto.NightDisplay.ACTIVATED);
+        dumpSetting(s, p,
+                Settings.Secure.NIGHT_DISPLAY_AUTO_MODE,
+                SecureSettingsProto.NightDisplay.AUTO_MODE);
+        dumpSetting(s, p,
+                Settings.Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE,
+                SecureSettingsProto.NightDisplay.COLOR_TEMPERATURE);
+        dumpSetting(s, p,
+                Settings.Secure.NIGHT_DISPLAY_CUSTOM_START_TIME,
+                SecureSettingsProto.NightDisplay.CUSTOM_START_TIME);
+        dumpSetting(s, p,
+                Settings.Secure.NIGHT_DISPLAY_CUSTOM_END_TIME,
+                SecureSettingsProto.NightDisplay.CUSTOM_END_TIME);
+        dumpSetting(s, p,
+                Settings.Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME,
+                SecureSettingsProto.NightDisplay.LAST_ACTIVATED_TIME);
+        p.end(nightDisplayToken);
+
+        final long notificationToken = p.start(SecureSettingsProto.NOTIFICATION);
+        dumpSetting(s, p,
+                Settings.Secure.ENABLED_NOTIFICATION_ASSISTANT,
+                SecureSettingsProto.Notification.ENABLED_ASSISTANT);
+        dumpSetting(s, p,
+                Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
+                SecureSettingsProto.Notification.ENABLED_LISTENERS);
+        dumpSetting(s, p,
+                Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
+                SecureSettingsProto.Notification.ENABLED_POLICY_ACCESS_PACKAGES);
+        dumpSetting(s, p,
+                Settings.Secure.NOTIFICATION_BADGING,
+                SecureSettingsProto.Notification.BADGING);
+        dumpSetting(s, p,
+                Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING,
+                SecureSettingsProto.Notification.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING);
+        p.end(notificationToken);
+
+        final long packageVerifierToken = p.start(SecureSettingsProto.PACKAGE_VERIFIER);
+        dumpSetting(s, p,
+                Settings.Secure.PACKAGE_VERIFIER_USER_CONSENT,
+                SecureSettingsProto.PackageVerifier.USER_CONSENT);
+        dumpSetting(s, p,
+                Settings.Secure.PACKAGE_VERIFIER_STATE,
+                SecureSettingsProto.PackageVerifier.STATE);
+        p.end(packageVerifierToken);
+
+        final long parentalControlToken = p.start(SecureSettingsProto.PARENTAL_CONTROL);
+        dumpSetting(s, p,
+                Settings.Secure.PARENTAL_CONTROL_ENABLED,
+                SecureSettingsProto.ParentalControl.ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.PARENTAL_CONTROL_LAST_UPDATE,
+                SecureSettingsProto.ParentalControl.LAST_UPDATE);
+        dumpSetting(s, p,
+                Settings.Secure.PARENTAL_CONTROL_REDIRECT_URL,
+                SecureSettingsProto.ParentalControl.REDIRECT_URL);
+        p.end(parentalControlToken);
+
+        final long printServiceToken = p.start(SecureSettingsProto.PRINT_SERVICE);
+        dumpSetting(s, p,
+                Settings.Secure.PRINT_SERVICE_SEARCH_URI,
+                SecureSettingsProto.PrintService.SEARCH_URI);
         dumpSetting(s, p,
                 Settings.Secure.ENABLED_PRINT_SERVICES,
-                SecureSettingsProto.ENABLED_PRINT_SERVICES);
+                SecureSettingsProto.PrintService.ENABLED_PRINT_SERVICES);
         dumpSetting(s, p,
                 Settings.Secure.DISABLED_PRINT_SERVICES,
-                SecureSettingsProto.DISABLED_PRINT_SERVICES);
+                SecureSettingsProto.PrintService.DISABLED_PRINT_SERVICES);
+        p.end(printServiceToken);
+
+        final long qsToken = p.start(SecureSettingsProto.QS);
         dumpSetting(s, p,
-                Settings.Secure.DISPLAY_DENSITY_FORCED,
-                SecureSettingsProto.DISPLAY_DENSITY_FORCED);
+                Settings.Secure.QS_TILES,
+                SecureSettingsProto.QuickSettings.TILES);
+        dumpSetting(s, p,
+                Settings.Secure.QS_AUTO_ADDED_TILES,
+                SecureSettingsProto.QuickSettings.AUTO_ADDED_TILES);
+        p.end(qsToken);
+
+        final long rotationToken = p.start(SecureSettingsProto.ROTATION);
+        dumpSetting(s, p,
+                Settings.Secure.SHOW_ROTATION_SUGGESTIONS,
+                SecureSettingsProto.Rotation.SHOW_ROTATION_SUGGESTIONS);
+        dumpSetting(s, p,
+                Settings.Secure.NUM_ROTATION_SUGGESTIONS_ACCEPTED,
+                SecureSettingsProto.Rotation.NUM_ROTATION_SUGGESTIONS_ACCEPTED);
+        p.end(rotationToken);
+
+        final long screensaverToken = p.start(SecureSettingsProto.SCREENSAVER);
+        dumpSetting(s, p,
+                Settings.Secure.SCREENSAVER_ENABLED,
+                SecureSettingsProto.Screensaver.ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.SCREENSAVER_COMPONENTS,
+                SecureSettingsProto.Screensaver.COMPONENTS);
+        dumpSetting(s, p,
+                Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
+                SecureSettingsProto.Screensaver.ACTIVATE_ON_DOCK);
+        dumpSetting(s, p,
+                Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
+                SecureSettingsProto.Screensaver.ACTIVATE_ON_SLEEP);
+        dumpSetting(s, p,
+                Settings.Secure.SCREENSAVER_DEFAULT_COMPONENT,
+                SecureSettingsProto.Screensaver.DEFAULT_COMPONENT);
+        p.end(screensaverToken);
+
+        final long searchToken = p.start(SecureSettingsProto.SEARCH);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_GLOBAL_SEARCH_ACTIVITY,
+                SecureSettingsProto.Search.GLOBAL_SEARCH_ACTIVITY);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_NUM_PROMOTED_SOURCES,
+                SecureSettingsProto.Search.NUM_PROMOTED_SOURCES);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_MAX_RESULTS_TO_DISPLAY,
+                SecureSettingsProto.Search.MAX_RESULTS_TO_DISPLAY);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_MAX_RESULTS_PER_SOURCE,
+                SecureSettingsProto.Search.MAX_RESULTS_PER_SOURCE);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_WEB_RESULTS_OVERRIDE_LIMIT,
+                SecureSettingsProto.Search.WEB_RESULTS_OVERRIDE_LIMIT);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_PROMOTED_SOURCE_DEADLINE_MILLIS,
+                SecureSettingsProto.Search.PROMOTED_SOURCE_DEADLINE_MILLIS);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_SOURCE_TIMEOUT_MILLIS,
+                SecureSettingsProto.Search.SOURCE_TIMEOUT_MILLIS);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_PREFILL_MILLIS,
+                SecureSettingsProto.Search.PREFILL_MILLIS);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_MAX_STAT_AGE_MILLIS,
+                SecureSettingsProto.Search.MAX_STAT_AGE_MILLIS);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_MAX_SOURCE_EVENT_AGE_MILLIS,
+                SecureSettingsProto.Search.MAX_SOURCE_EVENT_AGE_MILLIS);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_MIN_IMPRESSIONS_FOR_SOURCE_RANKING,
+                SecureSettingsProto.Search.MIN_IMPRESSIONS_FOR_SOURCE_RANKING);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_MIN_CLICKS_FOR_SOURCE_RANKING,
+                SecureSettingsProto.Search.MIN_CLICKS_FOR_SOURCE_RANKING);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_MAX_SHORTCUTS_RETURNED,
+                SecureSettingsProto.Search.MAX_SHORTCUTS_RETURNED);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_QUERY_THREAD_CORE_POOL_SIZE,
+                SecureSettingsProto.Search.QUERY_THREAD_CORE_POOL_SIZE);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_QUERY_THREAD_MAX_POOL_SIZE,
+                SecureSettingsProto.Search.QUERY_THREAD_MAX_POOL_SIZE);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_SHORTCUT_REFRESH_CORE_POOL_SIZE,
+                SecureSettingsProto.Search.SHORTCUT_REFRESH_CORE_POOL_SIZE);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_SHORTCUT_REFRESH_MAX_POOL_SIZE,
+                SecureSettingsProto.Search.SHORTCUT_REFRESH_MAX_POOL_SIZE);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_THREAD_KEEPALIVE_SECONDS,
+                SecureSettingsProto.Search.THREAD_KEEPALIVE_SECONDS);
+        dumpSetting(s, p,
+                Settings.Secure.SEARCH_PER_SOURCE_CONCURRENT_QUERY_LIMIT,
+                SecureSettingsProto.Search.PER_SOURCE_CONCURRENT_QUERY_LIMIT);
+        p.end(searchToken);
+
+        final long spellCheckerToken = p.start(SecureSettingsProto.SPELL_CHECKER);
+        dumpSetting(s, p,
+                Settings.Secure.SPELL_CHECKER_ENABLED,
+                SecureSettingsProto.SpellChecker.ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.SELECTED_SPELL_CHECKER,
+                SecureSettingsProto.SpellChecker.SELECTED);
+        dumpSetting(s, p,
+                Settings.Secure.SELECTED_SPELL_CHECKER_SUBTYPE,
+                SecureSettingsProto.SpellChecker.SELECTED_SUBTYPE);
+        p.end(spellCheckerToken);
+
+        dumpSetting(s, p,
+                Settings.Secure.SETTINGS_CLASSNAME,
+                SecureSettingsProto.SETTINGS_CLASSNAME);
+        dumpSetting(s, p,
+                Settings.Secure.SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
+                SecureSettingsProto.SHOW_FIRST_CRASH_DIALOG_DEV_OPTION);
+        dumpSetting(s, p,
+                Settings.Secure.SKIP_FIRST_USE_HINTS,
+                SecureSettingsProto.SKIP_FIRST_USE_HINTS);
+        dumpSetting(s, p,
+                Settings.Secure.SLEEP_TIMEOUT,
+                SecureSettingsProto.SLEEP_TIMEOUT);
+        dumpSetting(s, p,
+                Settings.Secure.SMS_DEFAULT_APPLICATION,
+                SecureSettingsProto.SMS_DEFAULT_APPLICATION);
+        dumpSetting(s, p,
+                Settings.Secure.SYNC_PARENT_SOUNDS,
+                SecureSettingsProto.SYNC_PARENT_SOUNDS);
+        dumpSetting(s, p,
+                Settings.Secure.SYSTEM_NAVIGATION_KEYS_ENABLED,
+                SecureSettingsProto.SYSTEM_NAVIGATION_KEYS_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.TRUST_AGENTS_INITIALIZED,
+                SecureSettingsProto.TRUST_AGENTS_INITIALIZED);
+
+        final long ttsToken = p.start(SecureSettingsProto.TTS);
         // Settings.Secure.TTS_USE_DEFAULTS intentionally excluded since it's deprecated.
         dumpSetting(s, p,
                 Settings.Secure.TTS_DEFAULT_RATE,
-                SecureSettingsProto.TTS_DEFAULT_RATE);
+                SecureSettingsProto.Tts.DEFAULT_RATE);
         dumpSetting(s, p,
                 Settings.Secure.TTS_DEFAULT_PITCH,
-                SecureSettingsProto.TTS_DEFAULT_PITCH);
+                SecureSettingsProto.Tts.DEFAULT_PITCH);
         dumpSetting(s, p,
                 Settings.Secure.TTS_DEFAULT_SYNTH,
-                SecureSettingsProto.TTS_DEFAULT_SYNTH);
+                SecureSettingsProto.Tts.DEFAULT_SYNTH);
         // Settings.Secure.TTS_DEFAULT_LANG intentionally excluded since it's deprecated.
         // Settings.Secure.TTS_DEFAULT_COUNTRY intentionally excluded since it's deprecated.
         // Settings.Secure.TTS_DEFAULT_VARIANT intentionally excluded since it's deprecated.
         dumpSetting(s, p,
                 Settings.Secure.TTS_DEFAULT_LOCALE,
-                SecureSettingsProto.TTS_DEFAULT_LOCALE);
+                SecureSettingsProto.Tts.DEFAULT_LOCALE);
         dumpSetting(s, p,
                 Settings.Secure.TTS_ENABLED_PLUGINS,
-                SecureSettingsProto.TTS_ENABLED_PLUGINS);
+                SecureSettingsProto.Tts.ENABLED_PLUGINS);
+        p.end(ttsToken);
+
+        final long ttyToken = p.start(SecureSettingsProto.TTY);
+        dumpSetting(s, p,
+                Settings.Secure.TTY_MODE_ENABLED,
+                SecureSettingsProto.Tty.TTY_MODE_ENABLED);
+        dumpSetting(s, p,
+                Settings.Secure.PREFERRED_TTY_MODE,
+                SecureSettingsProto.Tty.PREFERRED_TTY_MODE);
+        p.end(ttyToken);
+
+        final long tvToken = p.start(SecureSettingsProto.TV);
+        // Whether the current user has been set up via setup wizard (0 = false, 1 = true). This
+        // value differs from USER_SETUP_COMPLETE in that it can be reset back to 0 in case
+        // SetupWizard has been re-enabled on TV devices.
+        dumpSetting(s, p,
+                Settings.Secure.TV_USER_SETUP_COMPLETE,
+                SecureSettingsProto.Tv.USER_SETUP_COMPLETE);
+        dumpSetting(s, p,
+                Settings.Secure.TV_INPUT_HIDDEN_INPUTS,
+                SecureSettingsProto.Tv.INPUT_HIDDEN_INPUTS);
+        dumpSetting(s, p,
+                Settings.Secure.TV_INPUT_CUSTOM_LABELS,
+                SecureSettingsProto.Tv.INPUT_CUSTOM_LABELS);
+        p.end(tvToken);
+
+        dumpSetting(s, p,
+                Settings.Secure.UI_NIGHT_MODE,
+                SecureSettingsProto.UI_NIGHT_MODE);
+        dumpSetting(s, p,
+                Settings.Secure.UNKNOWN_SOURCES_DEFAULT_REVERSED,
+                SecureSettingsProto.UNKNOWN_SOURCES_DEFAULT_REVERSED);
+        dumpSetting(s, p,
+                Settings.Secure.USB_AUDIO_AUTOMATIC_ROUTING_DISABLED,
+                SecureSettingsProto.USB_AUDIO_AUTOMATIC_ROUTING_DISABLED);
+        dumpSetting(s, p,
+                Settings.Secure.USER_SETUP_COMPLETE,
+                SecureSettingsProto.USER_SETUP_COMPLETE);
+
+        final long voiceToken = p.start(SecureSettingsProto.VOICE);
+        dumpSetting(s, p,
+                Settings.Secure.VOICE_INTERACTION_SERVICE,
+                SecureSettingsProto.Voice.INTERACTION_SERVICE);
+        dumpSetting(s, p,
+                Settings.Secure.VOICE_RECOGNITION_SERVICE,
+                SecureSettingsProto.Voice.RECOGNITION_SERVICE);
+        p.end(voiceToken);
+
+        final long volumeToken = p.start(SecureSettingsProto.VOLUME);
+        dumpSetting(s, p,
+                Settings.Secure.VOLUME_HUSH_GESTURE,
+                SecureSettingsProto.Volume.HUSH_GESTURE);
+        dumpSetting(s, p,
+                Settings.Secure.UNSAFE_VOLUME_MUSIC_ACTIVE_MS,
+                SecureSettingsProto.Volume.UNSAFE_VOLUME_MUSIC_ACTIVE_MS);
+        p.end(volumeToken);
+
+        final long vrToken = p.start(SecureSettingsProto.VR);
+        dumpSetting(s, p,
+                Settings.Secure.VR_DISPLAY_MODE,
+                SecureSettingsProto.Vr.DISPLAY_MODE);
+        dumpSetting(s, p,
+                Settings.Secure.ENABLED_VR_LISTENERS,
+                SecureSettingsProto.Vr.ENABLED_LISTENERS);
+        p.end(vrToken);
+
+        dumpSetting(s, p,
+                Settings.Secure.WAKE_GESTURE_ENABLED,
+                SecureSettingsProto.WAKE_GESTURE_ENABLED);
+
+        // Please insert new settings using the same order as in SecureSettingsProto.
+        p.end(token);
+
+        // Settings.Secure.DEVELOPMENT_SETTINGS_ENABLED intentionally excluded since it's deprecated.
+        // Settings.Secure.BUGREPORT_IN_POWER_MENU intentionally excluded since it's deprecated.
+        // Settings.Secure.ADB_ENABLED intentionally excluded since it's deprecated.
+        // Settings.Secure.ALLOW_MOCK_LOCATION intentionally excluded since it's deprecated.
+        // Settings.Secure.DATA_ROAMING intentionally excluded since it's deprecated.
+        // Settings.Secure.DEVICE_PROVISIONED intentionally excluded since it's deprecated.
+        // Settings.Secure.HTTP_PROXY intentionally excluded since it's deprecated.
+        // Settings.Secure.LOGGING_ID intentionally excluded since it's deprecated.
+        // Settings.Secure.NETWORK_PREFERENCE intentionally excluded since it's deprecated.
+        // Settings.Secure.USB_MASS_STORAGE_ENABLED intentionally excluded since it's deprecated.
+        // Settings.Secure.USE_GOOGLE_MAIL intentionally excluded since it's deprecated.
         // Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON intentionally excluded since it's deprecated.
         // Settings.Secure.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY intentionally excluded since it's deprecated.
         // Settings.Secure.WIFI_NUM_OPEN_NETWORKS_KEPT intentionally excluded since it's deprecated.
@@ -1792,365 +2256,11 @@ class SettingsProtoDumpUtil {
         // Settings.Secure.WIFI_WATCHDOG_PING_TIMEOUT_MS intentionally excluded since it's deprecated.
         // Settings.Secure.WIFI_MAX_DHCP_RETRY_COUNT intentionally excluded since it's deprecated.
         // Settings.Secure.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.Secure.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS,
-                SecureSettingsProto.CONNECTIVITY_RELEASE_PENDING_INTENT_DELAY_MS);
         // Settings.Secure.BACKGROUND_DATA intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.Secure.ALLOWED_GEOLOCATION_ORIGINS,
-                SecureSettingsProto.ALLOWED_GEOLOCATION_ORIGINS);
-        dumpSetting(s, p,
-                Settings.Secure.PREFERRED_TTY_MODE,
-                SecureSettingsProto.PREFERRED_TTY_MODE);
-        dumpSetting(s, p,
-                Settings.Secure.ENHANCED_VOICE_PRIVACY_ENABLED,
-                SecureSettingsProto.ENHANCED_VOICE_PRIVACY_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.TTY_MODE_ENABLED,
-                SecureSettingsProto.TTY_MODE_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.BACKUP_ENABLED,
-                SecureSettingsProto.BACKUP_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.BACKUP_AUTO_RESTORE,
-                SecureSettingsProto.BACKUP_AUTO_RESTORE);
-        dumpSetting(s, p,
-                Settings.Secure.BACKUP_PROVISIONED,
-                SecureSettingsProto.BACKUP_PROVISIONED);
-        dumpSetting(s, p,
-                Settings.Secure.BACKUP_TRANSPORT,
-                SecureSettingsProto.BACKUP_TRANSPORT);
-        dumpSetting(s, p,
-                Settings.Secure.LAST_SETUP_SHOWN,
-                SecureSettingsProto.LAST_SETUP_SHOWN);
         // Settings.Secure.WIFI_IDLE_MS intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.Secure.SEARCH_GLOBAL_SEARCH_ACTIVITY,
-                SecureSettingsProto.SEARCH_GLOBAL_SEARCH_ACTIVITY);
-        dumpSetting(s, p,
-                Settings.Secure.SEARCH_NUM_PROMOTED_SOURCES,
-                SecureSettingsProto.SEARCH_NUM_PROMOTED_SOURCES);
-        dumpSetting(s, p,
-                Settings.Secure.SEARCH_MAX_RESULTS_TO_DISPLAY,
-                SecureSettingsProto.SEARCH_MAX_RESULTS_TO_DISPLAY);
-        dumpSetting(s, p,
-                Settings.Secure.SEARCH_MAX_RESULTS_PER_SOURCE,
-                SecureSettingsProto.SEARCH_MAX_RESULTS_PER_SOURCE);
-        dumpSetting(s, p,
-                Settings.Secure.SEARCH_WEB_RESULTS_OVERRIDE_LIMIT,
-                SecureSettingsProto.SEARCH_WEB_RESULTS_OVERRIDE_LIMIT);
-        dumpSetting(s, p,
-                Settings.Secure.SEARCH_PROMOTED_SOURCE_DEADLINE_MILLIS,
-                SecureSettingsProto.SEARCH_PROMOTED_SOURCE_DEADLINE_MILLIS);
-        dumpSetting(s, p,
-                Settings.Secure.SEARCH_SOURCE_TIMEOUT_MILLIS,
-                SecureSettingsProto.SEARCH_SOURCE_TIMEOUT_MILLIS);
-        dumpSetting(s, p,
-                Settings.Secure.SEARCH_PREFILL_MILLIS,
-                SecureSettingsProto.SEARCH_PREFILL_MILLIS);
-        dumpSetting(s, p,
-                Settings.Secure.SEARCH_MAX_STAT_AGE_MILLIS,
-                SecureSettingsProto.SEARCH_MAX_STAT_AGE_MILLIS);
-        dumpSetting(s, p,
-                Settings.Secure.SEARCH_MAX_SOURCE_EVENT_AGE_MILLIS,
-                SecureSettingsProto.SEARCH_MAX_SOURCE_EVENT_AGE_MILLIS);
-        dumpSetting(s, p,
-                Settings.Secure.SEARCH_MIN_IMPRESSIONS_FOR_SOURCE_RANKING,
-                SecureSettingsProto.SEARCH_MIN_IMPRESSIONS_FOR_SOURCE_RANKING);
-        dumpSetting(s, p,
-                Settings.Secure.SEARCH_MIN_CLICKS_FOR_SOURCE_RANKING,
-                SecureSettingsProto.SEARCH_MIN_CLICKS_FOR_SOURCE_RANKING);
-        dumpSetting(s, p,
-                Settings.Secure.SEARCH_MAX_SHORTCUTS_RETURNED,
-                SecureSettingsProto.SEARCH_MAX_SHORTCUTS_RETURNED);
-        dumpSetting(s, p,
-                Settings.Secure.SEARCH_QUERY_THREAD_CORE_POOL_SIZE,
-                SecureSettingsProto.SEARCH_QUERY_THREAD_CORE_POOL_SIZE);
-        dumpSetting(s, p,
-                Settings.Secure.SEARCH_QUERY_THREAD_MAX_POOL_SIZE,
-                SecureSettingsProto.SEARCH_QUERY_THREAD_MAX_POOL_SIZE);
-        dumpSetting(s, p,
-                Settings.Secure.SEARCH_SHORTCUT_REFRESH_CORE_POOL_SIZE,
-                SecureSettingsProto.SEARCH_SHORTCUT_REFRESH_CORE_POOL_SIZE);
-        dumpSetting(s, p,
-                Settings.Secure.SEARCH_SHORTCUT_REFRESH_MAX_POOL_SIZE,
-                SecureSettingsProto.SEARCH_SHORTCUT_REFRESH_MAX_POOL_SIZE);
-        dumpSetting(s, p,
-                Settings.Secure.SEARCH_THREAD_KEEPALIVE_SECONDS,
-                SecureSettingsProto.SEARCH_THREAD_KEEPALIVE_SECONDS);
-        dumpSetting(s, p,
-                Settings.Secure.SEARCH_PER_SOURCE_CONCURRENT_QUERY_LIMIT,
-                SecureSettingsProto.SEARCH_PER_SOURCE_CONCURRENT_QUERY_LIMIT);
-        dumpSetting(s, p,
-                Settings.Secure.MOUNT_PLAY_NOTIFICATION_SND,
-                SecureSettingsProto.MOUNT_PLAY_NOTIFICATION_SND);
-        dumpSetting(s, p,
-                Settings.Secure.MOUNT_UMS_AUTOSTART,
-                SecureSettingsProto.MOUNT_UMS_AUTOSTART);
-        dumpSetting(s, p,
-                Settings.Secure.MOUNT_UMS_PROMPT,
-                SecureSettingsProto.MOUNT_UMS_PROMPT);
-        dumpSetting(s, p,
-                Settings.Secure.MOUNT_UMS_NOTIFY_ENABLED,
-                SecureSettingsProto.MOUNT_UMS_NOTIFY_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.ANR_SHOW_BACKGROUND,
-                SecureSettingsProto.ANR_SHOW_BACKGROUND);
-        dumpSetting(s, p,
-                Settings.Secure.SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
-                SecureSettingsProto.SHOW_FIRST_CRASH_DIALOG_DEV_OPTION);
-        dumpSetting(s, p,
-                Settings.Secure.VOICE_RECOGNITION_SERVICE,
-                SecureSettingsProto.VOICE_RECOGNITION_SERVICE);
-        dumpSetting(s, p,
-                Settings.Secure.PACKAGE_VERIFIER_USER_CONSENT,
-                SecureSettingsProto.PACKAGE_VERIFIER_USER_CONSENT);
-        dumpSetting(s, p,
-                Settings.Secure.SELECTED_SPELL_CHECKER,
-                SecureSettingsProto.SELECTED_SPELL_CHECKER);
-        dumpSetting(s, p,
-                Settings.Secure.SELECTED_SPELL_CHECKER_SUBTYPE,
-                SecureSettingsProto.SELECTED_SPELL_CHECKER_SUBTYPE);
-        dumpSetting(s, p,
-                Settings.Secure.SPELL_CHECKER_ENABLED,
-                SecureSettingsProto.SPELL_CHECKER_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR,
-                SecureSettingsProto.INCALL_POWER_BUTTON_BEHAVIOR);
-        dumpSetting(s, p,
-                Settings.Secure.INCALL_BACK_BUTTON_BEHAVIOR,
-                SecureSettingsProto.INCALL_BACK_BUTTON_BEHAVIOR);
-        dumpSetting(s, p,
-                Settings.Secure.WAKE_GESTURE_ENABLED,
-                SecureSettingsProto.WAKE_GESTURE_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.DOZE_ENABLED,
-                SecureSettingsProto.DOZE_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.DOZE_ALWAYS_ON,
-                SecureSettingsProto.DOZE_ALWAYS_ON);
-        dumpSetting(s, p,
-                Settings.Secure.DOZE_PULSE_ON_PICK_UP,
-                SecureSettingsProto.DOZE_PULSE_ON_PICK_UP);
-        dumpSetting(s, p,
-                Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
-                SecureSettingsProto.DOZE_PULSE_ON_LONG_PRESS);
-        dumpSetting(s, p,
-                Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP,
-                SecureSettingsProto.DOZE_PULSE_ON_DOUBLE_TAP);
-        dumpSetting(s, p,
-                Settings.Secure.UI_NIGHT_MODE,
-                SecureSettingsProto.UI_NIGHT_MODE);
-        dumpSetting(s, p,
-                Settings.Secure.SCREENSAVER_ENABLED,
-                SecureSettingsProto.SCREENSAVER_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.SCREENSAVER_COMPONENTS,
-                SecureSettingsProto.SCREENSAVER_COMPONENTS);
-        dumpSetting(s, p,
-                Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
-                SecureSettingsProto.SCREENSAVER_ACTIVATE_ON_DOCK);
-        dumpSetting(s, p,
-                Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
-                SecureSettingsProto.SCREENSAVER_ACTIVATE_ON_SLEEP);
-        dumpSetting(s, p,
-                Settings.Secure.SCREENSAVER_DEFAULT_COMPONENT,
-                SecureSettingsProto.SCREENSAVER_DEFAULT_COMPONENT);
-        dumpSetting(s, p,
-                Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT,
-                SecureSettingsProto.NFC_PAYMENT_DEFAULT_COMPONENT);
-        dumpSetting(s, p,
-                Settings.Secure.NFC_PAYMENT_FOREGROUND,
-                SecureSettingsProto.NFC_PAYMENT_FOREGROUND);
-        dumpSetting(s, p,
-                Settings.Secure.SMS_DEFAULT_APPLICATION,
-                SecureSettingsProto.SMS_DEFAULT_APPLICATION);
-        dumpSetting(s, p,
-                Settings.Secure.DIALER_DEFAULT_APPLICATION,
-                SecureSettingsProto.DIALER_DEFAULT_APPLICATION);
-        dumpSetting(s, p,
-                Settings.Secure.EMERGENCY_ASSISTANCE_APPLICATION,
-                SecureSettingsProto.EMERGENCY_ASSISTANCE_APPLICATION);
-        dumpSetting(s, p,
-                Settings.Secure.ASSIST_STRUCTURE_ENABLED,
-                SecureSettingsProto.ASSIST_STRUCTURE_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.ASSIST_SCREENSHOT_ENABLED,
-                SecureSettingsProto.ASSIST_SCREENSHOT_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.ASSIST_DISCLOSURE_ENABLED,
-                SecureSettingsProto.ASSIST_DISCLOSURE_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.SHOW_ROTATION_SUGGESTIONS,
-                SecureSettingsProto.SHOW_ROTATION_SUGGESTIONS);
-        dumpSetting(s, p,
-                Settings.Secure.NUM_ROTATION_SUGGESTIONS_ACCEPTED,
-                SecureSettingsProto.NUM_ROTATION_SUGGESTIONS_ACCEPTED);
-        dumpSetting(s, p,
-                Settings.Secure.ENABLED_NOTIFICATION_ASSISTANT,
-                SecureSettingsProto.ENABLED_NOTIFICATION_ASSISTANT);
-        dumpSetting(s, p,
-                Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
-                SecureSettingsProto.ENABLED_NOTIFICATION_LISTENERS);
-        dumpSetting(s, p,
-                Settings.Secure.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES,
-                SecureSettingsProto.ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES);
-        dumpSetting(s, p,
-                Settings.Secure.SYNC_PARENT_SOUNDS,
-                SecureSettingsProto.SYNC_PARENT_SOUNDS);
-        dumpSetting(s, p,
-                Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS,
-                SecureSettingsProto.IMMERSIVE_MODE_CONFIRMATIONS);
-        dumpSetting(s, p,
-                Settings.Secure.PRINT_SERVICE_SEARCH_URI,
-                SecureSettingsProto.PRINT_SERVICE_SEARCH_URI);
-        dumpSetting(s, p,
-                Settings.Secure.PAYMENT_SERVICE_SEARCH_URI,
-                SecureSettingsProto.PAYMENT_SERVICE_SEARCH_URI);
-        dumpSetting(s, p,
-                Settings.Secure.AUTOFILL_SERVICE_SEARCH_URI,
-                SecureSettingsProto.AUTOFILL_SERVICE_SEARCH_URI);
-        dumpSetting(s, p,
-                Settings.Secure.SKIP_FIRST_USE_HINTS,
-                SecureSettingsProto.SKIP_FIRST_USE_HINTS);
-        dumpSetting(s, p,
-                Settings.Secure.UNSAFE_VOLUME_MUSIC_ACTIVE_MS,
-                SecureSettingsProto.UNSAFE_VOLUME_MUSIC_ACTIVE_MS);
-        dumpSetting(s, p,
-                Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS,
-                SecureSettingsProto.LOCK_SCREEN_SHOW_NOTIFICATIONS);
-        dumpSetting(s, p,
-                Settings.Secure.TV_INPUT_HIDDEN_INPUTS,
-                SecureSettingsProto.TV_INPUT_HIDDEN_INPUTS);
-        dumpSetting(s, p,
-                Settings.Secure.TV_INPUT_CUSTOM_LABELS,
-                SecureSettingsProto.TV_INPUT_CUSTOM_LABELS);
-        dumpSetting(s, p,
-                Settings.Secure.USB_AUDIO_AUTOMATIC_ROUTING_DISABLED,
-                SecureSettingsProto.USB_AUDIO_AUTOMATIC_ROUTING_DISABLED);
-        dumpSetting(s, p,
-                Settings.Secure.SLEEP_TIMEOUT,
-                SecureSettingsProto.SLEEP_TIMEOUT);
-        dumpSetting(s, p,
-                Settings.Secure.DOUBLE_TAP_TO_WAKE,
-                SecureSettingsProto.DOUBLE_TAP_TO_WAKE);
-        dumpSetting(s, p,
-                Settings.Secure.ASSISTANT,
-                SecureSettingsProto.ASSISTANT);
-        dumpSetting(s, p,
-                Settings.Secure.CAMERA_GESTURE_DISABLED,
-                SecureSettingsProto.CAMERA_GESTURE_DISABLED);
-        dumpSetting(s, p,
-                Settings.Secure.CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED,
-                SecureSettingsProto.CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED);
-        dumpSetting(s, p,
-                Settings.Secure.CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
-                SecureSettingsProto.CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.CAMERA_LIFT_TRIGGER_ENABLED,
-                SecureSettingsProto.CAMERA_LIFT_TRIGGER_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.ASSIST_GESTURE_ENABLED,
-                SecureSettingsProto.ASSIST_GESTURE_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.ASSIST_GESTURE_SENSITIVITY,
-                SecureSettingsProto.ASSIST_GESTURE_SENSITIVITY);
-        dumpSetting(s, p,
-                Settings.Secure.ASSIST_GESTURE_SILENCE_ALERTS_ENABLED,
-                SecureSettingsProto.ASSIST_GESTURE_SILENCE_ALERTS_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.ASSIST_GESTURE_WAKE_ENABLED,
-                SecureSettingsProto.ASSIST_GESTURE_WAKE_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.ASSIST_GESTURE_SETUP_COMPLETE,
-                SecureSettingsProto.ASSIST_GESTURE_SETUP_COMPLETE);
-        dumpSetting(s, p,
-                Settings.Secure.NIGHT_DISPLAY_ACTIVATED,
-                SecureSettingsProto.NIGHT_DISPLAY_ACTIVATED);
-        dumpSetting(s, p,
-                Settings.Secure.NIGHT_DISPLAY_AUTO_MODE,
-                SecureSettingsProto.NIGHT_DISPLAY_AUTO_MODE);
-        dumpSetting(s, p,
-                Settings.Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE,
-                SecureSettingsProto.NIGHT_DISPLAY_COLOR_TEMPERATURE);
-        dumpSetting(s, p,
-                Settings.Secure.NIGHT_DISPLAY_CUSTOM_START_TIME,
-                SecureSettingsProto.NIGHT_DISPLAY_CUSTOM_START_TIME);
-        dumpSetting(s, p,
-                Settings.Secure.NIGHT_DISPLAY_CUSTOM_END_TIME,
-                SecureSettingsProto.NIGHT_DISPLAY_CUSTOM_END_TIME);
-        dumpSetting(s, p,
-                Settings.Secure.NIGHT_DISPLAY_LAST_ACTIVATED_TIME,
-                SecureSettingsProto.NIGHT_DISPLAY_LAST_ACTIVATED_TIME);
-        dumpSetting(s, p,
-                Settings.Secure.ENABLED_VR_LISTENERS,
-                SecureSettingsProto.ENABLED_VR_LISTENERS);
-        dumpSetting(s, p,
-                Settings.Secure.VR_DISPLAY_MODE,
-                SecureSettingsProto.VR_DISPLAY_MODE);
-        dumpSetting(s, p,
-                Settings.Secure.CARRIER_APPS_HANDLED,
-                SecureSettingsProto.CARRIER_APPS_HANDLED);
-        dumpSetting(s, p,
-                Settings.Secure.MANAGED_PROFILE_CONTACT_REMOTE_SEARCH,
-                SecureSettingsProto.MANAGED_PROFILE_CONTACT_REMOTE_SEARCH);
-        dumpSetting(s, p,
-                Settings.Secure.AUTOMATIC_STORAGE_MANAGER_ENABLED,
-                SecureSettingsProto.AUTOMATIC_STORAGE_MANAGER_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
-                SecureSettingsProto.AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN);
-        dumpSetting(s, p,
-                Settings.Secure.AUTOMATIC_STORAGE_MANAGER_BYTES_CLEARED,
-                SecureSettingsProto.AUTOMATIC_STORAGE_MANAGER_BYTES_CLEARED);
-        dumpSetting(s, p,
-                Settings.Secure.AUTOMATIC_STORAGE_MANAGER_LAST_RUN,
-                SecureSettingsProto.AUTOMATIC_STORAGE_MANAGER_LAST_RUN);
-        dumpSetting(s, p,
-                Settings.Secure.AUTOMATIC_STORAGE_MANAGER_TURNED_OFF_BY_POLICY,
-                SecureSettingsProto.AUTOMATIC_STORAGE_MANAGER_TURNED_OFF_BY_POLICY);
-        dumpSetting(s, p,
-                Settings.Secure.SYSTEM_NAVIGATION_KEYS_ENABLED,
-                SecureSettingsProto.SYSTEM_NAVIGATION_KEYS_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.QS_TILES,
-                SecureSettingsProto.QS_TILES);
-        dumpSetting(s, p,
-                Settings.Secure.INSTANT_APPS_ENABLED,
-                SecureSettingsProto.INSTANT_APPS_ENABLED);
-        dumpSetting(s, p,
-                Settings.Secure.DEVICE_PAIRED,
-                SecureSettingsProto.DEVICE_PAIRED);
-        dumpSetting(s, p,
-                Settings.Secure.PACKAGE_VERIFIER_STATE,
-                SecureSettingsProto.PACKAGE_VERIFIER_STATE);
-        dumpSetting(s, p,
-                Settings.Secure.CMAS_ADDITIONAL_BROADCAST_PKG,
-                SecureSettingsProto.CMAS_ADDITIONAL_BROADCAST_PKG);
-        dumpSetting(s, p,
-                Settings.Secure.NOTIFICATION_BADGING,
-                SecureSettingsProto.NOTIFICATION_BADGING);
-        dumpSetting(s, p,
-                Settings.Secure.QS_AUTO_ADDED_TILES,
-                SecureSettingsProto.QS_AUTO_ADDED_TILES);
-        dumpSetting(s, p,
-                Settings.Secure.LOCKDOWN_IN_POWER_MENU,
-                SecureSettingsProto.LOCKDOWN_IN_POWER_MENU);
-        dumpSetting(s, p,
-                Settings.Secure.BACKUP_MANAGER_CONSTANTS,
-                SecureSettingsProto.BACKUP_MANAGER_CONSTANTS);
-        dumpSetting(s, p,
-                Settings.Secure.BACKUP_LOCAL_TRANSPORT_PARAMETERS,
-                SecureSettingsProto.BACKUP_LOCAL_TRANSPORT_PARAMETERS);
-        dumpSetting(s, p,
-                Settings.Secure.BLUETOOTH_ON_WHILE_DRIVING,
-                SecureSettingsProto.BLUETOOTH_ON_WHILE_DRIVING);
-        dumpSetting(s, p,
-                Settings.Secure.VOLUME_HUSH_GESTURE,
-                SecureSettingsProto.VOLUME_HUSH_GESTURE);
-        // Please insert new settings using the same order as in Settings.Secure.
 
-        p.end(token);
+
+        // Please insert new settings using the same order as in SecureSettingsProto.
     }
 
     private static void dumpProtoSystemSettingsLocked(
@@ -2159,15 +2269,293 @@ class SettingsProtoDumpUtil {
 
         s.dumpHistoricalOperations(p, SystemSettingsProto.HISTORICAL_OPERATIONS);
 
-        // This uses the same order as in Settings.System.
+        // This uses the same order as in SystemSettingsProto.
 
-        // Settings.System.STAY_ON_WHILE_PLUGGED_IN intentionally excluded since it's deprecated.
+        dumpSetting(s, p,
+                Settings.System.ADVANCED_SETTINGS,
+                SystemSettingsProto.ADVANCED_SETTINGS);
+
+        final long alarmToken = p.start(SystemSettingsProto.ALARM);
+        dumpSetting(s, p,
+                Settings.System.ALARM_ALERT,
+                SystemSettingsProto.Alarm.DEFAULT_URI);
+        dumpSetting(s, p,
+                Settings.System.ALARM_ALERT_CACHE,
+                SystemSettingsProto.Alarm.ALERT_CACHE);
+        // Settings.System.NEXT_ALARM_FORMATTED intentionally excluded since it's deprecated.
+        p.end(alarmToken);
+
+        final long bluetoothToken = p.start(SystemSettingsProto.BLUETOOTH);
+        dumpSetting(s, p,
+                Settings.System.BLUETOOTH_DISCOVERABILITY,
+                SystemSettingsProto.Bluetooth.DISCOVERABILITY);
+        dumpSetting(s, p,
+                Settings.System.BLUETOOTH_DISCOVERABILITY_TIMEOUT,
+                SystemSettingsProto.Bluetooth.DISCOVERABILITY_TIMEOUT_SECS);
+        p.end(bluetoothToken);
+
+        dumpSetting(s, p,
+                Settings.System.DATE_FORMAT,
+                SystemSettingsProto.DATE_FORMAT);
+        dumpSetting(s, p,
+                Settings.System.DISPLAY_COLOR_MODE,
+                SystemSettingsProto.DISPLAY_COLOR_MODE);
+
+        final long devOptionsToken = p.start(SystemSettingsProto.DEVELOPER_OPTIONS);
+        dumpSetting(s, p,
+                Settings.System.SHOW_TOUCHES,
+                SystemSettingsProto.DevOptions.SHOW_TOUCHES);
+        dumpSetting(s, p,
+                Settings.System.POINTER_LOCATION,
+                SystemSettingsProto.DevOptions.POINTER_LOCATION);
+        dumpSetting(s, p,
+                Settings.System.WINDOW_ORIENTATION_LISTENER_LOG,
+                SystemSettingsProto.DevOptions.WINDOW_ORIENTATION_LISTENER_LOG);
+        p.end(devOptionsToken);
+
+        final long dtmfToneToken = p.start(SystemSettingsProto.DTMF_TONE);
+        dumpSetting(s, p,
+                Settings.System.DTMF_TONE_WHEN_DIALING,
+                SystemSettingsProto.DtmfTone.PLAY_WHEN_DIALING);
+        dumpSetting(s, p,
+                Settings.System.DTMF_TONE_TYPE_WHEN_DIALING,
+                SystemSettingsProto.DtmfTone.TYPE_PLAYED_WHEN_DIALING);
+        p.end(dtmfToneToken);
+
+        dumpSetting(s, p,
+                Settings.System.EGG_MODE,
+                SystemSettingsProto.EGG_MODE);
         dumpSetting(s, p,
                 Settings.System.END_BUTTON_BEHAVIOR,
                 SystemSettingsProto.END_BUTTON_BEHAVIOR);
         dumpSetting(s, p,
-                Settings.System.ADVANCED_SETTINGS,
-                SystemSettingsProto.ADVANCED_SETTINGS);
+                Settings.System.FONT_SCALE,
+                SystemSettingsProto.FONT_SCALE);
+
+        final long hapticFeedbackToken = p.start(SystemSettingsProto.HAPTIC_FEEDBACK);
+        dumpSetting(s, p,
+                Settings.System.HAPTIC_FEEDBACK_ENABLED,
+                SystemSettingsProto.HapticFeedback.ENABLED);
+        dumpSetting(s, p,
+                Settings.System.HAPTIC_FEEDBACK_INTENSITY,
+                SystemSettingsProto.HapticFeedback.INTENSITY);
+        p.end(hapticFeedbackToken);
+
+        dumpSetting(s, p,
+                Settings.System.HEARING_AID,
+                SystemSettingsProto.HEARING_AID);
+        dumpSetting(s, p,
+                Settings.System.LOCK_TO_APP_ENABLED,
+                SystemSettingsProto.LOCK_TO_APP_ENABLED);
+
+        final long lockscreenToken = p.start(SystemSettingsProto.LOCKSCREEN);
+        dumpSetting(s, p,
+                Settings.System.LOCKSCREEN_SOUNDS_ENABLED,
+                SystemSettingsProto.Lockscreen.SOUNDS_ENABLED);
+        dumpSetting(s, p,
+                Settings.System.LOCKSCREEN_DISABLED,
+                SystemSettingsProto.Lockscreen.DISABLED);
+        p.end(lockscreenToken);
+
+        dumpSetting(s, p,
+                Settings.System.MEDIA_BUTTON_RECEIVER,
+                SystemSettingsProto.MEDIA_BUTTON_RECEIVER);
+
+        final long notificationToken = p.start(SystemSettingsProto.NOTIFICATION);
+        dumpSetting(s, p,
+                Settings.System.NOTIFICATION_SOUND,
+                SystemSettingsProto.Notification.SOUND);
+        dumpSetting(s, p,
+                Settings.System.NOTIFICATION_SOUND_CACHE,
+                SystemSettingsProto.Notification.SOUND_CACHE);
+        dumpSetting(s, p,
+                Settings.System.NOTIFICATION_LIGHT_PULSE,
+                SystemSettingsProto.Notification.LIGHT_PULSE);
+        dumpSetting(s, p,
+                Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
+                SystemSettingsProto.Notification.VIBRATION_INTENSITY);
+        // Settings.System.NOTIFICATIONS_USE_RING_VOLUME intentionally excluded since it's deprecated.
+        p.end(notificationToken);
+
+        dumpSetting(s, p,
+                Settings.System.POINTER_SPEED,
+                SystemSettingsProto.POINTER_SPEED);
+
+        final long ringtoneToken = p.start(SystemSettingsProto.RINGTONE);
+        dumpSetting(s, p,
+                Settings.System.RINGTONE,
+                SystemSettingsProto.Ringtone.DEFAULT_URI);
+        dumpSetting(s, p,
+                Settings.System.RINGTONE_CACHE,
+                SystemSettingsProto.Ringtone.CACHE);
+        p.end(ringtoneToken);
+
+        final long rotationToken = p.start(SystemSettingsProto.ROTATION);
+        dumpSetting(s, p,
+                Settings.System.ACCELEROMETER_ROTATION,
+                SystemSettingsProto.Rotation.ACCELEROMETER_ROTATION);
+        dumpSetting(s, p,
+                Settings.System.USER_ROTATION,
+                SystemSettingsProto.Rotation.USER_ROTATION);
+        dumpSetting(s, p,
+                Settings.System.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
+                SystemSettingsProto.Rotation.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY);
+        p.end(rotationToken);
+
+        dumpSetting(s, p,
+                Settings.System.RTT_CALLING_MODE,
+                SystemSettingsProto.RTT_CALLING_MODE);
+
+        final long screenToken = p.start(SystemSettingsProto.SCREEN);
+        dumpSetting(s, p,
+                Settings.System.SCREEN_OFF_TIMEOUT,
+                SystemSettingsProto.Screen.OFF_TIMEOUT);
+        dumpSetting(s, p,
+                Settings.System.SCREEN_BRIGHTNESS,
+                SystemSettingsProto.Screen.BRIGHTNESS);
+        dumpSetting(s, p,
+                Settings.System.SCREEN_BRIGHTNESS_FOR_VR,
+                SystemSettingsProto.Screen.BRIGHTNESS_FOR_VR);
+        dumpSetting(s, p,
+                Settings.System.SCREEN_BRIGHTNESS_MODE,
+                SystemSettingsProto.Screen.BRIGHTNESS_MODE);
+        dumpSetting(s, p,
+                Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
+                SystemSettingsProto.Screen.AUTO_BRIGHTNESS_ADJ);
+        p.end(screenToken);
+
+        dumpSetting(s, p,
+                Settings.System.SETUP_WIZARD_HAS_RUN,
+                SystemSettingsProto.SETUP_WIZARD_HAS_RUN);
+        dumpSetting(s, p,
+                Settings.System.SHOW_BATTERY_PERCENT,
+                SystemSettingsProto.SHOW_BATTERY_PERCENT);
+        dumpSetting(s, p,
+                Settings.System.SHOW_GTALK_SERVICE_STATUS,
+                SystemSettingsProto.SHOW_GTALK_SERVICE_STATUS);
+        // Settings.System.SHOW_PROCESSES intentionally excluded since it's deprecated.
+        // Settings.System.SHOW_WEB_SUGGESTIONS intentionally excluded since it's deprecated.
+
+        final long sipToken = p.start(SystemSettingsProto.SIP);
+        dumpSetting(s, p,
+                Settings.System.SIP_RECEIVE_CALLS,
+                SystemSettingsProto.Sip.RECEIVE_CALLS);
+        dumpSetting(s, p,
+                Settings.System.SIP_CALL_OPTIONS,
+                SystemSettingsProto.Sip.CALL_OPTIONS);
+        dumpSetting(s, p,
+                Settings.System.SIP_ALWAYS,
+                SystemSettingsProto.Sip.ALWAYS);
+        dumpSetting(s, p,
+                Settings.System.SIP_ADDRESS_ONLY,
+                SystemSettingsProto.Sip.ADDRESS_ONLY);
+        // Settings.System.SIP_ASK_ME_EACH_TIME intentionally excluded since it's deprecated.
+        p.end(sipToken);
+
+        dumpSetting(s, p,
+                Settings.System.SOUND_EFFECTS_ENABLED,
+                SystemSettingsProto.SOUND_EFFECTS_ENABLED);
+        // Settings.System.POWER_SOUNDS_ENABLED intentionally excluded since it's deprecated.
+        // Settings.System.DOCK_SOUNDS_ENABLED intentionally excluded since it's deprecated.
+        // Settings.System.LOW_BATTERY_SOUND intentionally excluded since it's deprecated.
+        // Settings.System.DESK_DOCK_SOUND intentionally excluded since it's deprecated.
+        // Settings.System.DESK_UNDOCK_SOUND intentionally excluded since it's deprecated.
+        // Settings.System.CAR_DOCK_SOUND intentionally excluded since it's deprecated.
+        // Settings.System.CAR_UNDOCK_SOUND intentionally excluded since it's deprecated.
+        // Settings.System.LOCK_SOUND intentionally excluded since it's deprecated.
+        // Settings.System.UNLOCK_SOUND intentionally excluded since it's deprecated.
+        dumpSetting(s, p,
+                Settings.System.SYSTEM_LOCALES,
+                SystemSettingsProto.SYSTEM_LOCALES);
+
+        final long textToken = p.start(SystemSettingsProto.TEXT);
+        dumpSetting(s, p,
+                Settings.System.TEXT_AUTO_REPLACE,
+                SystemSettingsProto.Text.AUTO_REPLACE);
+        dumpSetting(s, p,
+                Settings.System.TEXT_AUTO_CAPS,
+                SystemSettingsProto.Text.AUTO_CAPS);
+        dumpSetting(s, p,
+                Settings.System.TEXT_AUTO_PUNCTUATE,
+                SystemSettingsProto.Text.AUTO_PUNCTUATE);
+        dumpSetting(s, p,
+                Settings.System.TEXT_SHOW_PASSWORD,
+                SystemSettingsProto.Text.SHOW_PASSWORD);
+        p.end(textToken);
+
+        // Settings.System.AUTO_TIME intentionally excluded since it's deprecated.
+        // Settings.System.AUTO_TIME_ZONE intentionally excluded since it's deprecated.
+        dumpSetting(s, p,
+                Settings.System.TIME_12_24,
+                SystemSettingsProto.TIME_12_24);
+        dumpSetting(s, p,
+                Settings.System.TTY_MODE,
+                SystemSettingsProto.TTY_MODE);
+
+        final long vibrateToken = p.start(SystemSettingsProto.VIBRATE);
+        dumpSetting(s, p,
+                Settings.System.VIBRATE_ON,
+                SystemSettingsProto.Vibrate.ON);
+        dumpSetting(s, p,
+                Settings.System.VIBRATE_INPUT_DEVICES,
+                SystemSettingsProto.Vibrate.INPUT_DEVICES);
+        dumpSetting(s, p,
+                Settings.System.VIBRATE_IN_SILENT,
+                SystemSettingsProto.Vibrate.IN_SILENT);
+        dumpSetting(s, p,
+                Settings.System.VIBRATE_WHEN_RINGING,
+                SystemSettingsProto.Vibrate.WHEN_RINGING);
+        p.end(vibrateToken);
+
+        final long volumeToken = p.start(SystemSettingsProto.VOLUME);
+        dumpSetting(s, p,
+                Settings.System.VOLUME_RING,
+                SystemSettingsProto.Volume.RING);
+        dumpSetting(s, p,
+                Settings.System.VOLUME_SYSTEM,
+                SystemSettingsProto.Volume.SYSTEM);
+        dumpSetting(s, p,
+                Settings.System.VOLUME_VOICE,
+                SystemSettingsProto.Volume.VOICE);
+        dumpSetting(s, p,
+                Settings.System.VOLUME_MUSIC,
+                SystemSettingsProto.Volume.MUSIC);
+        dumpSetting(s, p,
+                Settings.System.VOLUME_ALARM,
+                SystemSettingsProto.Volume.ALARM);
+        dumpSetting(s, p,
+                Settings.System.VOLUME_NOTIFICATION,
+                SystemSettingsProto.Volume.NOTIFICATION);
+        dumpSetting(s, p,
+                Settings.System.VOLUME_BLUETOOTH_SCO,
+                SystemSettingsProto.Volume.BLUETOOTH_SCO);
+        dumpSetting(s, p,
+                Settings.System.VOLUME_ACCESSIBILITY,
+                SystemSettingsProto.Volume.ACCESSIBILITY);
+        dumpSetting(s, p,
+                Settings.System.VOLUME_MASTER,
+                SystemSettingsProto.Volume.MASTER);
+        dumpSetting(s, p,
+                Settings.System.MASTER_MONO,
+                SystemSettingsProto.Volume.MASTER_MONO);
+        dumpSetting(s, p,
+                Settings.System.MODE_RINGER_STREAMS_AFFECTED,
+                SystemSettingsProto.Volume.MODE_RINGER_STREAMS_AFFECTED);
+        dumpSetting(s, p,
+                Settings.System.MUTE_STREAMS_AFFECTED,
+                SystemSettingsProto.Volume.MUTE_STREAMS_AFFECTED);
+        p.end(volumeToken);
+
+        dumpSetting(s, p,
+                Settings.System.WHEN_TO_MAKE_WIFI_CALLS,
+                SystemSettingsProto.WHEN_TO_MAKE_WIFI_CALLS);
+
+        // Please insert new settings using the same order as in SecureSettingsProto.
+
+        // The rest of the settings were moved to Settings.Secure, and are thus excluded here since
+        // they're deprecated from Settings.System.
+
+        // Settings.System.STAY_ON_WHILE_PLUGGED_IN intentionally excluded since it's deprecated.
         // Settings.System.AIRPLANE_MODE_ON intentionally excluded since it's deprecated.
         // Settings.System.RADIO_BLUETOOTH intentionally excluded since it's just a constant.
         // Settings.System.RADIO_WIFI intentionally excluded since it's just a constant.
@@ -2184,245 +2572,24 @@ class SettingsProtoDumpUtil {
         // Settings.System.WIFI_STATIC_NETMASK intentionally excluded since it's deprecated.
         // Settings.System.WIFI_STATIC_DNS1 intentionally excluded since it's deprecated.
         // Settings.System.WIFI_STATIC_DNS2 intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.BLUETOOTH_DISCOVERABILITY,
-                SystemSettingsProto.BLUETOOTH_DISCOVERABILITY);
-        dumpSetting(s, p,
-                Settings.System.BLUETOOTH_DISCOVERABILITY_TIMEOUT,
-                SystemSettingsProto.BLUETOOTH_DISCOVERABILITY_TIMEOUT);
         // Settings.System.LOCK_PATTERN_ENABLED intentionally excluded since it's deprecated.
         // Settings.System.LOCK_PATTERN_VISIBLE intentionally excluded since it's deprecated.
         // Settings.System.LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED intentionally excluded since it's deprecated.
-        // Settings.System.NEXT_ALARM_FORMATTED intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.FONT_SCALE,
-                SystemSettingsProto.FONT_SCALE);
-        dumpSetting(s, p,
-                Settings.System.SYSTEM_LOCALES,
-                SystemSettingsProto.SYSTEM_LOCALES);
         // Settings.System.DEBUG_APP intentionally excluded since it's deprecated.
         // Settings.System.WAIT_FOR_DEBUGGER intentionally excluded since it's deprecated.
         // Settings.System.DIM_SCREEN intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.DISPLAY_COLOR_MODE,
-                SystemSettingsProto.DISPLAY_COLOR_MODE);
-        dumpSetting(s, p,
-                Settings.System.SCREEN_OFF_TIMEOUT,
-                SystemSettingsProto.SCREEN_OFF_TIMEOUT);
-        dumpSetting(s, p,
-                Settings.System.SCREEN_BRIGHTNESS,
-                SystemSettingsProto.SCREEN_BRIGHTNESS);
-        dumpSetting(s, p,
-                Settings.System.SCREEN_BRIGHTNESS_FOR_VR,
-                SystemSettingsProto.SCREEN_BRIGHTNESS_FOR_VR);
-        dumpSetting(s, p,
-                Settings.System.SCREEN_BRIGHTNESS_MODE,
-                SystemSettingsProto.SCREEN_BRIGHTNESS_MODE);
-        dumpSetting(s, p,
-                Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
-                SystemSettingsProto.SCREEN_AUTO_BRIGHTNESS_ADJ);
-        // Settings.System.SHOW_PROCESSES intentionally excluded since it's deprecated.
         // Settings.System.ALWAYS_FINISH_ACTIVITIES intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.MODE_RINGER_STREAMS_AFFECTED,
-                SystemSettingsProto.MODE_RINGER_STREAMS_AFFECTED);
-        dumpSetting(s, p,
-                Settings.System.MUTE_STREAMS_AFFECTED,
-                SystemSettingsProto.MUTE_STREAMS_AFFECTED);
-        dumpSetting(s, p,
-                Settings.System.VIBRATE_ON,
-                SystemSettingsProto.VIBRATE_ON);
-        dumpSetting(s, p,
-                Settings.System.VIBRATE_INPUT_DEVICES,
-                SystemSettingsProto.VIBRATE_INPUT_DEVICES);
-        dumpSetting(s, p,
-                Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
-                SystemSettingsProto.NOTIFICATION_VIBRATION_INTENSITY);
-        dumpSetting(s, p,
-                Settings.System.HAPTIC_FEEDBACK_INTENSITY,
-                SystemSettingsProto.HAPTIC_FEEDBACK_INTENSITY);
-        dumpSetting(s, p,
-                Settings.System.VOLUME_RING,
-                SystemSettingsProto.VOLUME_RING);
-        dumpSetting(s, p,
-                Settings.System.VOLUME_SYSTEM,
-                SystemSettingsProto.VOLUME_SYSTEM);
-        dumpSetting(s, p,
-                Settings.System.VOLUME_VOICE,
-                SystemSettingsProto.VOLUME_VOICE);
-        dumpSetting(s, p,
-                Settings.System.VOLUME_MUSIC,
-                SystemSettingsProto.VOLUME_MUSIC);
-        dumpSetting(s, p,
-                Settings.System.VOLUME_ALARM,
-                SystemSettingsProto.VOLUME_ALARM);
-        dumpSetting(s, p,
-                Settings.System.VOLUME_NOTIFICATION,
-                SystemSettingsProto.VOLUME_NOTIFICATION);
-        dumpSetting(s, p,
-                Settings.System.VOLUME_BLUETOOTH_SCO,
-                SystemSettingsProto.VOLUME_BLUETOOTH_SCO);
-        dumpSetting(s, p,
-                Settings.System.VOLUME_ACCESSIBILITY,
-                SystemSettingsProto.VOLUME_ACCESSIBILITY);
-        dumpSetting(s, p,
-                Settings.System.VOLUME_MASTER,
-                SystemSettingsProto.VOLUME_MASTER);
-        dumpSetting(s, p,
-                Settings.System.MASTER_MONO,
-                SystemSettingsProto.MASTER_MONO);
-        // Settings.System.NOTIFICATIONS_USE_RING_VOLUME intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.VIBRATE_IN_SILENT,
-                SystemSettingsProto.VIBRATE_IN_SILENT);
-        dumpSetting(s, p,
-                Settings.System.APPEND_FOR_LAST_AUDIBLE,
-                SystemSettingsProto.APPEND_FOR_LAST_AUDIBLE);
-        dumpSetting(s, p,
-                Settings.System.RINGTONE,
-                SystemSettingsProto.RINGTONE);
-        dumpSetting(s, p,
-                Settings.System.RINGTONE_CACHE,
-                SystemSettingsProto.RINGTONE_CACHE);
-        dumpSetting(s, p,
-                Settings.System.NOTIFICATION_SOUND,
-                SystemSettingsProto.NOTIFICATION_SOUND);
-        dumpSetting(s, p,
-                Settings.System.NOTIFICATION_SOUND_CACHE,
-                SystemSettingsProto.NOTIFICATION_SOUND_CACHE);
-        dumpSetting(s, p,
-                Settings.System.ALARM_ALERT,
-                SystemSettingsProto.ALARM_ALERT);
-        dumpSetting(s, p,
-                Settings.System.ALARM_ALERT_CACHE,
-                SystemSettingsProto.ALARM_ALERT_CACHE);
-        dumpSetting(s, p,
-                Settings.System.MEDIA_BUTTON_RECEIVER,
-                SystemSettingsProto.MEDIA_BUTTON_RECEIVER);
-        dumpSetting(s, p,
-                Settings.System.TEXT_AUTO_REPLACE,
-                SystemSettingsProto.TEXT_AUTO_REPLACE);
-        dumpSetting(s, p,
-                Settings.System.TEXT_AUTO_CAPS,
-                SystemSettingsProto.TEXT_AUTO_CAPS);
-        dumpSetting(s, p,
-                Settings.System.TEXT_AUTO_PUNCTUATE,
-                SystemSettingsProto.TEXT_AUTO_PUNCTUATE);
-        dumpSetting(s, p,
-                Settings.System.TEXT_SHOW_PASSWORD,
-                SystemSettingsProto.TEXT_SHOW_PASSWORD);
-        dumpSetting(s, p,
-                Settings.System.SHOW_GTALK_SERVICE_STATUS,
-                SystemSettingsProto.SHOW_GTALK_SERVICE_STATUS);
+        // Settings.System.APPEND_FOR_LAST_AUDIBLE intentionally excluded since it hasn't been used since API 2.
         // Settings.System.WALLPAPER_ACTIVITY intentionally excluded since it's deprecated.
-        // Settings.System.AUTO_TIME intentionally excluded since it's deprecated.
-        // Settings.System.AUTO_TIME_ZONE intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.TIME_12_24,
-                SystemSettingsProto.TIME_12_24);
-        dumpSetting(s, p,
-                Settings.System.DATE_FORMAT,
-                SystemSettingsProto.DATE_FORMAT);
-        dumpSetting(s, p,
-                Settings.System.SETUP_WIZARD_HAS_RUN,
-                SystemSettingsProto.SETUP_WIZARD_HAS_RUN);
         // Settings.System.WINDOW_ANIMATION_SCALE intentionally excluded since it's deprecated.
         // Settings.System.TRANSITION_ANIMATION_SCALE intentionally excluded since it's deprecated.
         // Settings.System.ANIMATOR_ANIMATION_SCALE intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.ACCELEROMETER_ROTATION,
-                SystemSettingsProto.ACCELEROMETER_ROTATION);
-        dumpSetting(s, p,
-                Settings.System.USER_ROTATION,
-                SystemSettingsProto.USER_ROTATION);
-        dumpSetting(s, p,
-                Settings.System.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
-                SystemSettingsProto.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY);
-        dumpSetting(s, p,
-                Settings.System.VIBRATE_WHEN_RINGING,
-                SystemSettingsProto.VIBRATE_WHEN_RINGING);
-        dumpSetting(s, p,
-                Settings.System.DTMF_TONE_WHEN_DIALING,
-                SystemSettingsProto.DTMF_TONE_WHEN_DIALING);
-        dumpSetting(s, p,
-                Settings.System.DTMF_TONE_TYPE_WHEN_DIALING,
-                SystemSettingsProto.DTMF_TONE_TYPE_WHEN_DIALING);
-        dumpSetting(s, p,
-                Settings.System.HEARING_AID,
-                SystemSettingsProto.HEARING_AID);
-        dumpSetting(s, p,
-                Settings.System.TTY_MODE,
-                SystemSettingsProto.TTY_MODE);
-        dumpSetting(s, p,
-                Settings.System.RTT_CALLING_MODE,
-                SystemSettingsProto.RTT_CALLING_MODE);
-        dumpSetting(s, p,
-                Settings.System.SOUND_EFFECTS_ENABLED,
-                SystemSettingsProto.SOUND_EFFECTS_ENABLED);
-        dumpSetting(s, p,
-                Settings.System.HAPTIC_FEEDBACK_ENABLED,
-                SystemSettingsProto.HAPTIC_FEEDBACK_ENABLED);
-        // Settings.System.SHOW_WEB_SUGGESTIONS intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.NOTIFICATION_LIGHT_PULSE,
-                SystemSettingsProto.NOTIFICATION_LIGHT_PULSE);
-        dumpSetting(s, p,
-                Settings.System.POINTER_LOCATION,
-                SystemSettingsProto.POINTER_LOCATION);
-        dumpSetting(s, p,
-                Settings.System.SHOW_TOUCHES,
-                SystemSettingsProto.SHOW_TOUCHES);
-        dumpSetting(s, p,
-                Settings.System.WINDOW_ORIENTATION_LISTENER_LOG,
-                SystemSettingsProto.WINDOW_ORIENTATION_LISTENER_LOG);
-        // Settings.System.POWER_SOUNDS_ENABLED intentionally excluded since it's deprecated.
-        // Settings.System.DOCK_SOUNDS_ENABLED intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.LOCKSCREEN_SOUNDS_ENABLED,
-                SystemSettingsProto.LOCKSCREEN_SOUNDS_ENABLED);
-        dumpSetting(s, p,
-                Settings.System.LOCKSCREEN_DISABLED,
-                SystemSettingsProto.LOCKSCREEN_DISABLED);
-        // Settings.System.LOW_BATTERY_SOUND intentionally excluded since it's deprecated.
-        // Settings.System.DESK_DOCK_SOUND intentionally excluded since it's deprecated.
-        // Settings.System.DESK_UNDOCK_SOUND intentionally excluded since it's deprecated.
-        // Settings.System.CAR_DOCK_SOUND intentionally excluded since it's deprecated.
-        // Settings.System.CAR_UNDOCK_SOUND intentionally excluded since it's deprecated.
-        // Settings.System.LOCK_SOUND intentionally excluded since it's deprecated.
-        // Settings.System.UNLOCK_SOUND intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.SIP_RECEIVE_CALLS,
-                SystemSettingsProto.SIP_RECEIVE_CALLS);
-        dumpSetting(s, p,
-                Settings.System.SIP_CALL_OPTIONS,
-                SystemSettingsProto.SIP_CALL_OPTIONS);
-        dumpSetting(s, p,
-                Settings.System.SIP_ALWAYS,
-                SystemSettingsProto.SIP_ALWAYS);
-        dumpSetting(s, p,
-                Settings.System.SIP_ADDRESS_ONLY,
-                SystemSettingsProto.SIP_ADDRESS_ONLY);
-        // Settings.System.SIP_ASK_ME_EACH_TIME intentionally excluded since it's deprecated.
-        dumpSetting(s, p,
-                Settings.System.POINTER_SPEED,
-                SystemSettingsProto.POINTER_SPEED);
-        dumpSetting(s, p,
-                Settings.System.LOCK_TO_APP_ENABLED,
-                SystemSettingsProto.LOCK_TO_APP_ENABLED);
-        dumpSetting(s, p,
-                Settings.System.EGG_MODE,
-                SystemSettingsProto.EGG_MODE);
-        dumpSetting(s, p,
-                Settings.System.SHOW_BATTERY_PERCENT,
-                SystemSettingsProto.SHOW_BATTERY_PERCENT);
-        dumpSetting(s, p,
-                Settings.System.WHEN_TO_MAKE_WIFI_CALLS,
-                SystemSettingsProto.WHEN_TO_MAKE_WIFI_CALLS);
+
         // The rest of the settings were moved to Settings.Secure, and are thus excluded here since
         // they're deprecated from Settings.System.
 
-        // Please insert new settings using the same order as in Settings.System.
-
+        // Please insert new settings using the same order as in SecureSettingsProto.
         p.end(token);
+        // Please insert new settings using the same order as in SecureSettingsProto.
     }
 }

@@ -18,25 +18,21 @@ package com.android.systemui.statusbar;
 
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
-import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
 
+import android.Manifest;
 import android.app.AppGlobals;
-import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.Context;
 import android.graphics.drawable.Icon;
-import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.SnoozeCriterion;
@@ -46,10 +42,8 @@ import android.util.ArraySet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RemoteViews;
-import android.Manifest;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.NotificationColorUtil;
 import com.android.systemui.Dependency;
@@ -454,47 +448,44 @@ public class NotificationData {
         return Ranking.VISIBILITY_NO_OVERRIDE;
     }
 
-    public boolean shouldSuppressFullScreenIntent(String key) {
+    public boolean shouldSuppressFullScreenIntent(StatusBarNotification sbn) {
+        return shouldSuppressVisualEffect(sbn, SUPPRESSED_EFFECT_FULL_SCREEN_INTENT);
+    }
+
+    public boolean shouldSuppressPeek(StatusBarNotification sbn) {
+        return shouldSuppressVisualEffect(sbn, SUPPRESSED_EFFECT_PEEK);
+    }
+
+    public boolean shouldSuppressStatusBar(StatusBarNotification sbn) {
+        return shouldSuppressVisualEffect(sbn, SUPPRESSED_EFFECT_STATUS_BAR);
+    }
+
+    public boolean shouldSuppressAmbient(StatusBarNotification sbn) {
+        return shouldSuppressVisualEffect(sbn, SUPPRESSED_EFFECT_AMBIENT);
+    }
+
+    public boolean shouldSuppressNotificationList(StatusBarNotification sbn) {
+        return shouldSuppressVisualEffect(sbn, SUPPRESSED_EFFECT_NOTIFICATION_LIST);
+    }
+
+    private boolean shouldSuppressVisualEffect(StatusBarNotification sbn, int effect) {
+        if (isExemptFromDndVisualSuppression(sbn)) {
+            return false;
+        }
+        String key = sbn.getKey();
         if (mRankingMap != null) {
             getRanking(key, mTmpRanking);
-            return (mTmpRanking.getSuppressedVisualEffects()
-                    & SUPPRESSED_EFFECT_FULL_SCREEN_INTENT) != 0;
+            return (mTmpRanking.getSuppressedVisualEffects() & effect) != 0;
         }
         return false;
     }
 
-    public boolean shouldSuppressPeek(String key) {
-        if (mRankingMap != null) {
-            getRanking(key, mTmpRanking);
-            return (mTmpRanking.getSuppressedVisualEffects()
-                    & SUPPRESSED_EFFECT_PEEK) != 0;
+    protected boolean isExemptFromDndVisualSuppression(StatusBarNotification sbn) {
+        if ((sbn.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
+            return true;
         }
-        return false;
-    }
-
-    public boolean shouldSuppressStatusBar(String key) {
-        if (mRankingMap != null) {
-            getRanking(key, mTmpRanking);
-            return (mTmpRanking.getSuppressedVisualEffects()
-                    & SUPPRESSED_EFFECT_STATUS_BAR) != 0;
-        }
-        return false;
-    }
-
-    public boolean shouldSuppressAmbient(String key) {
-        if (mRankingMap != null) {
-            getRanking(key, mTmpRanking);
-            return (mTmpRanking.getSuppressedVisualEffects()
-                    & SUPPRESSED_EFFECT_AMBIENT) != 0;
-        }
-        return false;
-    }
-
-    public boolean shouldSuppressNotificationList(String key) {
-        if (mRankingMap != null) {
-            getRanking(key, mTmpRanking);
-            return (mTmpRanking.getSuppressedVisualEffects()
-                    & SUPPRESSED_EFFECT_NOTIFICATION_LIST) != 0;
+        if (sbn.getNotification().isMediaNotification()) {
+            return true;
         }
         return false;
     }
@@ -620,11 +611,11 @@ public class NotificationData {
             return true;
         }
 
-        if (mEnvironment.isDozing() && shouldSuppressAmbient(sbn.getKey())) {
+        if (mEnvironment.isDozing() && shouldSuppressAmbient(sbn)) {
             return true;
         }
 
-        if (!mEnvironment.isDozing() && shouldSuppressNotificationList(sbn.getKey())) {
+        if (!mEnvironment.isDozing() && shouldSuppressNotificationList(sbn)) {
             return true;
         }
 
@@ -641,9 +632,14 @@ public class NotificationData {
             // this is a foreground-service disclosure for a user that does not need to show one
             return true;
         }
-        if (mFsc.isSystemAlertNotification(sbn) && !mFsc.isSystemAlertWarningNeeded(
-                sbn.getUserId(), sbn.getPackageName())) {
-            return true;
+        if (mFsc.isSystemAlertNotification(sbn)) {
+            final String[] apps = sbn.getNotification().extras.getStringArray(
+                    Notification.EXTRA_FOREGROUND_APPS);
+            if (apps != null && apps.length >= 1) {
+                if (!mFsc.isSystemAlertWarningNeeded(sbn.getUserId(), apps[0])) {
+                    return true;
+                }
+            }
         }
 
         return false;

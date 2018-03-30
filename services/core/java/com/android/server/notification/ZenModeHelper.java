@@ -933,11 +933,7 @@ public class ZenModeHelper {
                 }
                 break;
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
-                if (ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(mConfig)
-                        && ringerModeInternal != AudioManager.RINGER_MODE_SILENT) {
-                    setPreviousRingerModeSetting(ringerModeInternal);
-                    newRingerModeInternal = AudioManager.RINGER_MODE_SILENT;
-                }
+                // do not apply zen to ringer, streams zen muted in AudioService
                 break;
             case Global.ZEN_MODE_OFF:
                 if (ringerModeInternal == AudioManager.RINGER_MODE_SILENT) {

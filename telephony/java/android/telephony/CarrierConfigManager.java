@@ -397,6 +397,15 @@ public class CarrierConfigManager {
     public static final String KEY_DEFAULT_VM_NUMBER_STRING = "default_vm_number_string";
 
     /**
+     * Where there is no preloaded voicemail number on a SIM card, specifies the carrier's default
+     * voicemail number for roaming network.
+     * When empty string, no default voicemail number is specified for roaming network.
+     * @hide
+     */
+    public static final String KEY_DEFAULT_VM_NUMBER_ROAMING_STRING =
+            "default_vm_number_roaming_string";
+
+    /**
      * Flag that specifies to use the user's own phone number as the voicemail number when there is
      * no pre-loaded voicemail number on the SIM card.
      * <p>
@@ -951,6 +960,8 @@ public class CarrierConfigManager {
      * If user has explicitly disabled some packages in the list, won't re-enable.
      * Other carrier specific apps which are not in this list may be disabled for current carrier,
      * and only be re-enabled when this config for another carrier includes it.
+     *
+     * @hide
      */
     public static final String KEY_ENABLE_APPS_STRING_ARRAY = "enable_apps_string_array";
 
@@ -1929,6 +1940,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_NOTIFY_HANDOVER_VIDEO_FROM_LTE_TO_WIFI_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_DOWNGRADE_VT_TO_AUDIO_BOOL, true);
         sDefaults.putString(KEY_DEFAULT_VM_NUMBER_STRING, "");
+        sDefaults.putString(KEY_DEFAULT_VM_NUMBER_ROAMING_STRING, "");
         sDefaults.putBoolean(KEY_CONFIG_TELEPHONY_USE_OWN_NUMBER_FOR_VOICEMAIL_BOOL, false);
         sDefaults.putBoolean(KEY_IGNORE_DATA_ENABLED_CHANGED_FOR_VIDEO_CALLS, true);
         sDefaults.putBoolean(KEY_VILTE_DATA_IS_METERED_BOOL, true);

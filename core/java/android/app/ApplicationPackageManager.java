@@ -2167,15 +2167,16 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public PersistableBundle getSuspendedPackageAppExtras(String packageName) {
         try {
-            return mPM.getPackageSuspendedAppExtras(packageName, mContext.getUserId());
+            return mPM.getSuspendedPackageAppExtras(packageName, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
 
     @Override
-    public PersistableBundle getSuspendedPackageAppExtras() {
-        return getSuspendedPackageAppExtras(mContext.getOpPackageName());
+    public Bundle getSuspendedPackageAppExtras() {
+        final PersistableBundle extras = getSuspendedPackageAppExtras(mContext.getOpPackageName());
+        return extras != null ? new Bundle(extras.deepCopy()) : null;
     }
 
     @Override

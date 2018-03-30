@@ -18,8 +18,12 @@ package com.android.server.wm;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -99,16 +103,23 @@ public class DimmerTests extends WindowTestsBase {
     private MockSurfaceBuildingContainer mHost;
     private Dimmer mDimmer;
     private SurfaceControl.Transaction mTransaction;
+    private Dimmer.SurfaceAnimatorStarter mSurfaceAnimatorStarter;
+
+    private static class SurfaceAnimatorStarterImpl implements Dimmer.SurfaceAnimatorStarter {
+        @Override
+        public void startAnimation(SurfaceAnimator surfaceAnimator, SurfaceControl.Transaction t,
+                AnimationAdapter anim, boolean hidden) {
+            surfaceAnimator.mAnimationFinishedCallback.run();
+        }
+    }
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         mHost = new MockSurfaceBuildingContainer();
-
+        mSurfaceAnimatorStarter = spy(new SurfaceAnimatorStarterImpl());
         mTransaction = mock(SurfaceControl.Transaction.class);
-        mDimmer = new Dimmer(mHost,
-                (surfaceAnimator, t, anim, hidden) -> surfaceAnimator.mAnimationFinishedCallback
-                        .run());
+        mDimmer = new Dimmer(mHost, mSurfaceAnimatorStarter);
     }
 
     @Test
@@ -202,6 +213,8 @@ public class DimmerTests extends WindowTestsBase {
         mDimmer.resetDimStates();
 
         mDimmer.updateDims(mTransaction, new Rect());
+        verify(mSurfaceAnimatorStarter).startAnimation(any(SurfaceAnimator.class), any(
+                SurfaceControl.Transaction.class), any(AnimationAdapter.class), anyBoolean());
         verify(dimLayer).destroy();
     }
 
@@ -241,6 +254,25 @@ public class DimmerTests extends WindowTestsBase {
         mDimmer.updateDims(mTransaction, bounds);
         verify(mTransaction).setSize(dimLayer, bounds.width(), bounds.height());
         verify(mTransaction).setPosition(dimLayer, 10, 10);
+    }
+
+    @Test
+    public void testRemoveDimImmediately() throws Exception {
+        TestWindowContainer child = new TestWindowContainer();
+        mHost.addChild(child, 0);
+
+        mDimmer.dimAbove(mTransaction, child, 1);
+        SurfaceControl dimLayer = getDimLayer();
+        mDimmer.updateDims(mTransaction, new Rect());
+        verify(mTransaction, times(1)).show(dimLayer);
+
+        reset(mSurfaceAnimatorStarter);
+        mDimmer.dontAnimateExit();
+        mDimmer.resetDimStates();
+        mDimmer.updateDims(mTransaction, new Rect());
+        verify(mSurfaceAnimatorStarter, never()).startAnimation(any(SurfaceAnimator.class), any(
+                SurfaceControl.Transaction.class), any(AnimationAdapter.class), anyBoolean());
+        verify(mTransaction).destroy(dimLayer);
     }
 
     private SurfaceControl getDimLayer() {

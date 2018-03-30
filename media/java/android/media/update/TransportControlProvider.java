@@ -29,8 +29,6 @@ public interface TransportControlProvider {
     void skipToNextItem_impl();
 
     void prepare_impl();
-    void fastForward_impl();
-    void rewind_impl();
     void seekTo_impl(long pos);
     void skipToPlaylistItem_impl(MediaItem2 item);
 

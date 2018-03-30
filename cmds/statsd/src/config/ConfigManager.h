@@ -36,9 +36,6 @@ StatsdConfig build_fake_config();
 
 /**
  * Keeps track of which configurations have been set from various sources.
- *
- * TODO: Store the configs persistently too.
- * TODO: Dump method for debugging.
  */
 class ConfigManager : public virtual android::RefBase {
 public:
@@ -125,9 +122,9 @@ private:
     void remove_saved_configs(const ConfigKey& key);
 
     /**
-     * Config keys that have been set.
+     * Maps from uid to the config keys that have been set.
      */
-    std::set<ConfigKey> mConfigs;
+    std::map<int, std::set<ConfigKey>> mConfigs;
 
     /**
      * Each config key can be subscribed by up to one receiver, specified as IBinder from

@@ -419,4 +419,10 @@ public abstract class WindowManagerInternal {
      * @see android.view.IWindowManager#lockNow
      */
     public abstract void lockNow();
+
+    /**
+     * Return the user that owns the given window, {@link android.os.UserHandle#USER_NULL} if
+     * the window token is not found.
+     */
+    public abstract int getWindowOwnerUserId(IBinder windowToken);
 }

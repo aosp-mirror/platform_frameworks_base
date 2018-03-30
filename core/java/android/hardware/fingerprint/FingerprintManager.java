@@ -18,6 +18,7 @@ package android.hardware.fingerprint;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_FINGERPRINT;
+import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_FINGERPRINT;
 
 import android.annotation.CallbackExecutor;
@@ -30,7 +31,9 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricAuthenticator;
+import android.hardware.biometrics.BiometricDialog;
 import android.hardware.biometrics.BiometricFingerprintConstants;
+import android.hardware.biometrics.IBiometricDialogReceiver;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -54,10 +57,10 @@ import javax.crypto.Mac;
 
 /**
  * A class that coordinates access to the fingerprint hardware.
- * @deprecated See {@link FingerprintDialog} which shows a system-provided dialog upon starting
- * authentication. In a world where devices may have in-display fingerprint sensors, it's much
- * more realistic to have a system-provided authentication dialog since the in-display sensor
- * location may vary by vendor/device.
+ * @deprecated See {@link BiometricDialog} which shows a system-provided dialog upon starting
+ * authentication. In a world where devices may have different types of biometric authentication,
+ * it's much more realistic to have a system-provided authentication dialog since the method may
+ * vary by vendor/device.
  */
 @Deprecated
 @SystemService(Context.FINGERPRINT_SERVICE)
@@ -108,7 +111,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
     /**
      * A wrapper class for the crypto objects supported by FingerprintManager. Currently the
      * framework supports {@link Signature}, {@link Cipher} and {@link Mac} objects.
-     * @deprecated See {@link android.hardware.fingerprint.FingerprintDialog.CryptoObject}
+     * @deprecated See {@link android.hardware.biometrics.BiometricDialog.CryptoObject}
      */
     @Deprecated
     public static final class CryptoObject extends android.hardware.biometrics.CryptoObject {
@@ -152,7 +155,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
     /**
      * Container for callback data from {@link FingerprintManager#authenticate(CryptoObject,
      *     CancellationSignal, int, AuthenticationCallback, Handler)}.
-     * @deprecated See {@link android.hardware.fingerprint.FingerprintDialog.AuthenticationResult}
+     * @deprecated See {@link android.hardware.biometrics.BiometricDialog.AuthenticationResult}
      */
     @Deprecated
     public static class AuthenticationResult {
@@ -201,7 +204,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
      * FingerprintManager#authenticate(CryptoObject, CancellationSignal,
      * int, AuthenticationCallback, Handler) } must provide an implementation of this for listening to
      * fingerprint events.
-     * @deprecated See {@link android.hardware.fingerprint.FingerprintDialog.AuthenticationCallback}
+     * @deprecated See {@link android.hardware.biometrics.BiometricDialog.AuthenticationCallback}
      */
     @Deprecated
     public static abstract class AuthenticationCallback
@@ -375,13 +378,13 @@ public class FingerprintManager implements BiometricFingerprintConstants {
      *         by <a href="{@docRoot}training/articles/keystore.html">Android Keystore
      *         facility</a>.
      * @throws IllegalStateException if the crypto primitive is not initialized.
-     * @deprecated See {@link FingerprintDialog#authenticate(CancellationSignal, Executor,
-     * FingerprintDialog.AuthenticationCallback)} and {@link FingerprintDialog#authenticate(
-     * FingerprintDialog.CryptoObject, CancellationSignal, Executor,
-     * FingerprintDialog.AuthenticationCallback)}
+     * @deprecated See {@link BiometricDialog#authenticate(CancellationSignal, Executor,
+     * BiometricDialog.AuthenticationCallback)} and {@link BiometricDialog#authenticate(
+     * BiometricDialog.CryptoObject, CancellationSignal, Executor,
+     * BiometricDialog.AuthenticationCallback)}
      */
     @Deprecated
-    @RequiresPermission(USE_FINGERPRINT)
+    @RequiresPermission(anyOf = {USE_BIOMETRIC, USE_FINGERPRINT})
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
             int flags, @NonNull AuthenticationCallback callback, @Nullable Handler handler) {
         authenticate(crypto, cancel, flags, callback, handler, mContext.getUserId());
@@ -405,7 +408,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
      * @param userId the user ID that the fingerprint hardware will authenticate for.
      * @hide
      */
-    @RequiresPermission(USE_FINGERPRINT)
+    @RequiresPermission(anyOf = {USE_BIOMETRIC, USE_FINGERPRINT})
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
             int flags, @NonNull AuthenticationCallback callback, Handler handler, int userId) {
         if (callback == null) {
@@ -441,7 +444,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
 
     /**
      * Per-user version, see {@link FingerprintManager#authenticate(CryptoObject,
-     * CancellationSignal, Bundle, Executor, IFingerprintDialogReceiver, AuthenticationCallback)}
+     * CancellationSignal, Bundle, Executor, IBiometricDialogReceiver, AuthenticationCallback)}
      * @param userId the user ID that the fingerprint hardware will authenticate for.
      */
     private void authenticate(int userId,
@@ -449,7 +452,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
             @NonNull CancellationSignal cancel,
             @NonNull Bundle bundle,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull IFingerprintDialogReceiver receiver,
+            @NonNull IBiometricDialogReceiver receiver,
             @NonNull BiometricAuthenticator.AuthenticationCallback callback) {
         mCryptoObject = crypto;
         if (cancel.isCanceled()) {
@@ -477,8 +480,8 @@ public class FingerprintManager implements BiometricFingerprintConstants {
     }
 
     /**
-     * Private method, see {@link FingerprintDialog#authenticate(CancellationSignal, Executor,
-     * AuthenticationCallback)}
+     * Private method, see {@link BiometricDialog#authenticate(CancellationSignal, Executor,
+     * BiometricDialog.AuthenticationCallback)}
      * @param cancel
      * @param executor
      * @param callback
@@ -488,7 +491,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
             @NonNull CancellationSignal cancel,
             @NonNull Bundle bundle,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull IFingerprintDialogReceiver receiver,
+            @NonNull IBiometricDialogReceiver receiver,
             @NonNull BiometricAuthenticator.AuthenticationCallback callback) {
         if (cancel == null) {
             throw new IllegalArgumentException("Must supply a cancellation signal");
@@ -509,8 +512,8 @@ public class FingerprintManager implements BiometricFingerprintConstants {
     }
 
     /**
-     * Private method, see {@link FingerprintDialog#authenticate(CryptoObject, CancellationSignal,
-     * Executor, AuthenticationCallback)}
+     * Private method, see {@link BiometricDialog#authenticate(BiometricDialog.CryptoObject,
+     * CancellationSignal, Executor, BiometricDialog.AuthenticationCallback)}
      * @param crypto
      * @param cancel
      * @param executor
@@ -521,7 +524,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
             @NonNull CancellationSignal cancel,
             @NonNull Bundle bundle,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull IFingerprintDialogReceiver receiver,
+            @NonNull IBiometricDialogReceiver receiver,
             @NonNull BiometricAuthenticator.AuthenticationCallback callback) {
         if (crypto == null) {
             throw new IllegalArgumentException("Must supply a crypto object");
@@ -740,8 +743,8 @@ public class FingerprintManager implements BiometricFingerprintConstants {
      * Determine if there is at least one fingerprint enrolled.
      *
      * @return true if at least one fingerprint is enrolled, false otherwise
-     * @deprecated See {@link FingerprintDialog} and
-     * {@link FingerprintDialog#FINGERPRINT_ERROR_NO_FINGERPRINTS}
+     * @deprecated See {@link BiometricDialog} and
+     * {@link FingerprintManager#FINGERPRINT_ERROR_NO_FINGERPRINTS}
      */
     @Deprecated
     @RequiresPermission(USE_FINGERPRINT)
@@ -774,8 +777,8 @@ public class FingerprintManager implements BiometricFingerprintConstants {
      * Determine if fingerprint hardware is present and functional.
      *
      * @return true if hardware is present and functional, false otherwise.
-     * @deprecated See {@link FingerprintDialog} and
-     * {@link FingerprintDialog#FINGERPRINT_ERROR_HW_UNAVAILABLE}
+     * @deprecated See {@link BiometricDialog} and
+     * {@link FingerprintManager#FINGERPRINT_ERROR_HW_UNAVAILABLE}
      */
     @Deprecated
     @RequiresPermission(USE_FINGERPRINT)
@@ -1155,9 +1158,14 @@ public class FingerprintManager implements BiometricFingerprintConstants {
         @Override // binder call
         public void onError(long deviceId, int error, int vendorCode) {
             if (mExecutor != null) {
-                mExecutor.execute(() -> {
-                    sendErrorResult(deviceId, error, vendorCode);
-                });
+                // BiometricDialog case, post a delayed runnable on the FingerprintManager handler
+                // that sends the error message after FingerprintDialog.HIDE_DIALOG_DELAY to send
+                // the error to the application.
+                mHandler.postDelayed(() -> {
+                    mExecutor.execute(() -> {
+                        sendErrorResult(deviceId, error, vendorCode);
+                    });
+                }, BiometricDialog.HIDE_DIALOG_DELAY);
             } else {
                 mHandler.obtainMessage(MSG_ERROR, error, vendorCode, deviceId).sendToTarget();
             }

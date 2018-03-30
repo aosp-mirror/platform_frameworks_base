@@ -27,7 +27,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.os.Environment;
@@ -45,6 +44,7 @@ import com.android.internal.graphics.ColorUtils;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.policy.WindowManagerPolicy.StartingSurface;
 import com.android.server.wm.TaskSnapshotSurface.SystemBarBackgroundPainter;
+import com.android.server.wm.utils.InsetUtils;
 
 import com.google.android.collect.Sets;
 
@@ -273,7 +273,7 @@ class TaskSnapshotController {
             return null;
         }
         return new TaskSnapshot(buffer, top.getConfiguration().orientation,
-                getInsetsFromTaskBounds(mainWindow, task),
+                getInsets(mainWindow),
                 isLowRamDevice /* reduced */, scaleFraction /* scale */,
                 true /* isRealSnapshot */);
     }
@@ -282,11 +282,11 @@ class TaskSnapshotController {
         return mIsRunningOnWear || mIsRunningOnTv || mIsRunningOnIoT;
     }
 
-    private Rect getInsetsFromTaskBounds(WindowState state, Task task) {
+    private Rect getInsets(WindowState state) {
         // XXX(b/72757033): These are insets relative to the window frame, but we're really
         // interested in the insets relative to the task bounds.
-        Rect insets = minRect(state.mContentInsets, state.mStableInsets);
-        insets = maxRect(insets, state.mAppToken.getLetterboxInsets());
+        final Rect insets = minRect(state.mContentInsets, state.mStableInsets);
+        InsetUtils.addInsets(insets, state.mAppToken.getLetterboxInsets());
         return insets;
     }
 
@@ -295,13 +295,6 @@ class TaskSnapshotController {
                 Math.min(rect1.top, rect2.top),
                 Math.min(rect1.right, rect2.right),
                 Math.min(rect1.bottom, rect2.bottom));
-    }
-
-    private Rect maxRect(Rect rect1, Rect rect2) {
-        return new Rect(Math.max(rect1.left, rect2.left),
-                Math.max(rect1.top, rect2.top),
-                Math.max(rect1.right, rect2.right),
-                Math.max(rect1.bottom, rect2.bottom));
     }
 
     /**

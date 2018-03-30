@@ -56,7 +56,8 @@ public final class IpSecAlgorithm implements Parcelable {
      * new applications and is provided for legacy compatibility with 3gpp infrastructure.</b>
      *
      * <p>Keys for this algorithm must be 128 bits in length.
-     * <p>Valid truncation lengths are multiples of 8 bits from 96 to (default) 128.
+     *
+     * <p>Valid truncation lengths are multiples of 8 bits from 96 to 128.
      */
     public static final String AUTH_HMAC_MD5 = "hmac(md5)";
 
@@ -65,7 +66,8 @@ public final class IpSecAlgorithm implements Parcelable {
      * new applications and is provided for legacy compatibility with 3gpp infrastructure.</b>
      *
      * <p>Keys for this algorithm must be 160 bits in length.
-     * <p>Valid truncation lengths are multiples of 8 bits from 96 to (default) 160.
+     *
+     * <p>Valid truncation lengths are multiples of 8 bits from 96 to 160.
      */
     public static final String AUTH_HMAC_SHA1 = "hmac(sha1)";
 
@@ -73,7 +75,8 @@ public final class IpSecAlgorithm implements Parcelable {
      * SHA256 HMAC Authentication/Integrity Algorithm.
      *
      * <p>Keys for this algorithm must be 256 bits in length.
-     * <p>Valid truncation lengths are multiples of 8 bits from 96 to (default) 256.
+     *
+     * <p>Valid truncation lengths are multiples of 8 bits from 96 to 256.
      */
     public static final String AUTH_HMAC_SHA256 = "hmac(sha256)";
 
@@ -81,7 +84,8 @@ public final class IpSecAlgorithm implements Parcelable {
      * SHA384 HMAC Authentication/Integrity Algorithm.
      *
      * <p>Keys for this algorithm must be 384 bits in length.
-     * <p>Valid truncation lengths are multiples of 8 bits from 192 to (default) 384.
+     *
+     * <p>Valid truncation lengths are multiples of 8 bits from 192 to 384.
      */
     public static final String AUTH_HMAC_SHA384 = "hmac(sha384)";
 
@@ -89,7 +93,8 @@ public final class IpSecAlgorithm implements Parcelable {
      * SHA512 HMAC Authentication/Integrity Algorithm.
      *
      * <p>Keys for this algorithm must be 512 bits in length.
-     * <p>Valid truncation lengths are multiples of 8 bits from 256 to (default) 512.
+     *
+     * <p>Valid truncation lengths are multiples of 8 bits from 256 to 512.
      */
     public static final String AUTH_HMAC_SHA512 = "hmac(sha512)";
 
@@ -112,6 +117,7 @@ public final class IpSecAlgorithm implements Parcelable {
         AUTH_HMAC_MD5,
         AUTH_HMAC_SHA1,
         AUTH_HMAC_SHA256,
+        AUTH_HMAC_SHA384,
         AUTH_HMAC_SHA512,
         AUTH_CRYPT_AES_GCM
     })
@@ -126,11 +132,14 @@ public final class IpSecAlgorithm implements Parcelable {
      * Creates an IpSecAlgorithm of one of the supported types. Supported algorithm names are
      * defined as constants in this class.
      *
+     * <p>For algorithms that produce an integrity check value, the truncation length is a required
+     * parameter. See {@link #IpSecAlgorithm(String algorithm, byte[] key, int truncLenBits)}
+     *
      * @param algorithm name of the algorithm.
      * @param key key padded to a multiple of 8 bits.
      */
     public IpSecAlgorithm(@NonNull @AlgorithmName String algorithm, @NonNull byte[] key) {
-        this(algorithm, key, key.length * 8);
+        this(algorithm, key, 0);
     }
 
     /**
@@ -228,6 +237,7 @@ public final class IpSecAlgorithm implements Parcelable {
             case AUTH_CRYPT_AES_GCM:
                 // The keying material for GCM is a key plus a 32-bit salt
                 isValidLen = keyLen == 128 + 32 || keyLen == 192 + 32 || keyLen == 256 + 32;
+                isValidTruncLen = truncLen == 64 || truncLen == 96 || truncLen == 128;
                 break;
             default:
                 throw new IllegalArgumentException("Couldn't find an algorithm: " + name);

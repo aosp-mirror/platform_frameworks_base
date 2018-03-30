@@ -62,6 +62,7 @@ class KeyguardController {
     private final ActivityStackSupervisor mStackSupervisor;
     private WindowManagerService mWindowManager;
     private boolean mKeyguardShowing;
+    private boolean mAodShowing;
     private boolean mKeyguardGoingAway;
     private boolean mOccluded;
     private boolean mDismissalRequested;
@@ -79,6 +80,15 @@ class KeyguardController {
 
     void setWindowManager(WindowManagerService windowManager) {
         mWindowManager = windowManager;
+    }
+
+    /**
+     * @return true if either Keyguard or AOD are showing, not going away, and not being occluded
+     *         on the given display, false otherwise
+     */
+    boolean isKeyguardOrAodShowing(int displayId) {
+        return (mKeyguardShowing || mAodShowing) && !mKeyguardGoingAway &&
+                (displayId == DEFAULT_DISPLAY ? !mOccluded : displayId == mSecondaryDisplayShowing);
     }
 
     /**
@@ -108,17 +118,19 @@ class KeyguardController {
     /**
      * Update the Keyguard showing state.
      */
-    void setKeyguardShown(boolean showing, int secondaryDisplayShowing) {
-        boolean showingChanged = showing != mKeyguardShowing;
+    void setKeyguardShown(boolean keyguardShowing, boolean aodShowing,
+            int secondaryDisplayShowing) {
+        boolean showingChanged = keyguardShowing != mKeyguardShowing || aodShowing != mAodShowing;
         if (!showingChanged && secondaryDisplayShowing == mSecondaryDisplayShowing) {
             return;
         }
-        mKeyguardShowing = showing;
+        mKeyguardShowing = keyguardShowing;
+        mAodShowing = aodShowing;
         mSecondaryDisplayShowing = secondaryDisplayShowing;
         if (showingChanged) {
             dismissDockedStackIfNeeded();
             setKeyguardGoingAway(false);
-            if (showing) {
+            if (keyguardShowing) {
                 mDismissalRequested = false;
             }
         }
@@ -230,8 +242,8 @@ class KeyguardController {
         // Allow to show it when we are about to dismiss Keyguard. This isn't allowed if r is
         // already the dismissing activity, in which case we don't allow it to repeatedly dismiss
         // Keyguard.
-        return dismissKeyguard && canDismissKeyguard() &&
-                (mDismissalRequested || r != mDismissingKeyguardActivity);
+        return dismissKeyguard && canDismissKeyguard() && !mAodShowing
+                && (mDismissalRequested || r != mDismissingKeyguardActivity);
     }
 
     /**
@@ -369,9 +381,9 @@ class KeyguardController {
     }
 
     private void updateKeyguardSleepToken() {
-        if (mSleepToken == null && isKeyguardShowing(DEFAULT_DISPLAY)) {
+        if (mSleepToken == null && isKeyguardOrAodShowing(DEFAULT_DISPLAY)) {
             mSleepToken = mService.acquireSleepToken("Keyguard", DEFAULT_DISPLAY);
-        } else if (mSleepToken != null && !isKeyguardShowing(DEFAULT_DISPLAY)) {
+        } else if (mSleepToken != null && !isKeyguardOrAodShowing(DEFAULT_DISPLAY)) {
             mSleepToken.release();
             mSleepToken = null;
         }
@@ -380,6 +392,7 @@ class KeyguardController {
     void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + "KeyguardController:");
         pw.println(prefix + "  mKeyguardShowing=" + mKeyguardShowing);
+        pw.println(prefix + "  mAodShowing=" + mAodShowing);
         pw.println(prefix + "  mKeyguardGoingAway=" + mKeyguardGoingAway);
         pw.println(prefix + "  mOccluded=" + mOccluded);
         pw.println(prefix + "  mDismissingKeyguardActivity=" + mDismissingKeyguardActivity);

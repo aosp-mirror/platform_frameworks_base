@@ -382,6 +382,9 @@ message WifiLog {
 
   // WifiWake statistics
   optional WifiWakeStats wifi_wake_stats = 94;
+
+  // Histogram counting instances of scans with N many 802.11mc (RTT) supporting APs
+  repeated NumConnectableNetworksBucket observed_80211mc_supporting_aps_in_scan_histogram = 95;
 }
 
 // Information that gets logged for every WiFi connection.

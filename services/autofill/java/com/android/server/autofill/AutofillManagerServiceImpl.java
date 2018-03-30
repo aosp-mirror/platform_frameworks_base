@@ -404,6 +404,19 @@ final class AutofillManagerServiceImpl {
     }
 
     @GuardedBy("mLock")
+    void setAutofillFailureLocked(int sessionId, int uid, @NonNull List<AutofillId> ids) {
+        if (!isEnabledLocked()) {
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.v(TAG, "setAutofillFailure(): no session for " + sessionId + "(" + uid + ")");
+            return;
+        }
+        session.setAutofillFailureLocked(ids);
+    }
+
+    @GuardedBy("mLock")
     void finishSessionLocked(int sessionId, int uid) {
         if (!isEnabledLocked()) {
             return;

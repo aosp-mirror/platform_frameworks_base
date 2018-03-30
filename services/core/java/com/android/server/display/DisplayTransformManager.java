@@ -17,7 +17,6 @@
 package com.android.server.display;
 
 import android.app.ActivityManager;
-import android.app.IActivityManager;
 import android.opengl.Matrix;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -28,7 +27,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
-
 import com.android.internal.app.ColorDisplayController;
 import java.util.Arrays;
 
@@ -45,6 +43,10 @@ public class DisplayTransformManager {
      * Color transform level used by Night display to tint the display red.
      */
     public static final int LEVEL_COLOR_MATRIX_NIGHT_DISPLAY = 100;
+    /**
+     * Color transform level used to adjust the color saturation of the display.
+     */
+    public static final int LEVEL_COLOR_MATRIX_SATURATION = 150;
     /**
      * Color transform level used by A11y services to make the display monochromatic.
      */

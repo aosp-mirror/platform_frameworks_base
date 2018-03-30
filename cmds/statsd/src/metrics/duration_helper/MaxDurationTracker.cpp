@@ -245,7 +245,8 @@ bool MaxDurationTracker::flushIfNeeded(
     return flushCurrentBucket(eventTimeNs, output);
 }
 
-void MaxDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) {
+void MaxDurationTracker::onSlicedConditionMayChange(bool overallCondition,
+                                                    const uint64_t timestamp) {
     // Now for each of the on-going event, check if the condition has changed for them.
     for (auto& pair : mInfos) {
         if (pair.second.state == kStopped) {
@@ -313,7 +314,7 @@ void MaxDurationTracker::noteConditionChanged(const HashableDimensionKey& key, b
 }
 
 int64_t MaxDurationTracker::predictAnomalyTimestampNs(const DurationAnomalyTracker& anomalyTracker,
-                                                      const uint64_t currentTimestamp) const {
+                                                      const int64_t currentTimestamp) const {
     // The allowed time we can continue in the current state is the
     // (anomaly threshold) - max(elapsed time of the started mInfos).
     int64_t maxElapsed = 0;

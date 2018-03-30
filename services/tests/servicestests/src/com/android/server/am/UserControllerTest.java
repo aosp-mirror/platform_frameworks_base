@@ -389,6 +389,14 @@ public class UserControllerTest extends AndroidTestCase {
             sentIntents.add(intent);
             return 0;
         }
+
+        @Override
+        void reportGlobalUsageEventLocked(int event) {
+        }
+
+        @Override
+        void reportCurWakefulnessUsageEvent() {
+        }
     }
 
     private static class TestHandler extends Handler {

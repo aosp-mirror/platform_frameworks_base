@@ -69,6 +69,8 @@ final class ViewState {
     public static final int STATE_RESTARTED_SESSION = 0x100;
     /** View is the URL bar of a package on compat mode. */
     public  static final int STATE_URL_BAR = 0x200;
+    /** View was asked to autofil but failed to do so. */
+    public static final int STATE_AUTOFILL_FAILED = 0x400;
 
     public final AutofillId id;
 

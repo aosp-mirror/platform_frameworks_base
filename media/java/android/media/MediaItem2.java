@@ -19,7 +19,6 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.Context;
 import android.media.update.ApiLoader;
 import android.media.update.MediaItem2Provider;
 import android.os.Bundle;
@@ -81,8 +80,8 @@ public class MediaItem2 {
         return mProvider.toBundle_impl();
     }
 
-    public static MediaItem2 fromBundle(Context context, Bundle bundle) {
-        return ApiLoader.getProvider().fromBundle_MediaItem2(context, bundle);
+    public static MediaItem2 fromBundle(Bundle bundle) {
+        return ApiLoader.getProvider().fromBundle_MediaItem2(bundle);
     }
 
     public String toString() {
@@ -161,11 +160,10 @@ public class MediaItem2 {
         /**
          * Constructor for {@link Builder}
          *
-         * @param context
          * @param flags
          */
-        public Builder(@NonNull Context context, @Flags int flags) {
-            mProvider = ApiLoader.getProvider().createMediaItem2Builder(context, this, flags);
+        public Builder(@Flags int flags) {
+            mProvider = ApiLoader.getProvider().createMediaItem2Builder(this, flags);
         }
 
         /**

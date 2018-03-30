@@ -2416,7 +2416,7 @@ public class MediaPlayer extends PlayerBase
          * Gets the track type.
          * @return TrackType which indicates if the track is video, audio, timed text.
          */
-        public int getTrackType() {
+        public @TrackType int getTrackType() {
             return mTrackType;
         }
 
@@ -2449,6 +2449,19 @@ public class MediaPlayer extends PlayerBase
         public static final int MEDIA_TRACK_TYPE_TIMEDTEXT = 3;
         public static final int MEDIA_TRACK_TYPE_SUBTITLE = 4;
         public static final int MEDIA_TRACK_TYPE_METADATA = 5;
+
+        /** @hide */
+        @IntDef(flag = false, prefix = "MEDIA_TRACK_TYPE", value = {
+                MEDIA_TRACK_TYPE_UNKNOWN,
+                MEDIA_TRACK_TYPE_VIDEO,
+                MEDIA_TRACK_TYPE_AUDIO,
+                MEDIA_TRACK_TYPE_TIMEDTEXT,
+                MEDIA_TRACK_TYPE_SUBTITLE,
+                MEDIA_TRACK_TYPE_METADATA }
+        )
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface TrackType {}
+
 
         final int mTrackType;
         final MediaFormat mFormat;
@@ -2600,26 +2613,30 @@ public class MediaPlayer extends PlayerBase
      */
     /**
      * MIME type for SubRip (SRT) container. Used in addTimedTextSource APIs.
+     * @deprecated use {@link MediaFormat#MIMETYPE_TEXT_SUBRIP}
      */
-    public static final String MEDIA_MIMETYPE_TEXT_SUBRIP = "application/x-subrip";
+    public static final String MEDIA_MIMETYPE_TEXT_SUBRIP = MediaFormat.MIMETYPE_TEXT_SUBRIP;
 
     /**
      * MIME type for WebVTT subtitle data.
      * @hide
+     * @deprecated
      */
-    public static final String MEDIA_MIMETYPE_TEXT_VTT = "text/vtt";
+    public static final String MEDIA_MIMETYPE_TEXT_VTT = MediaFormat.MIMETYPE_TEXT_VTT;
 
     /**
      * MIME type for CEA-608 closed caption data.
      * @hide
+     * @deprecated
      */
-    public static final String MEDIA_MIMETYPE_TEXT_CEA_608 = "text/cea-608";
+    public static final String MEDIA_MIMETYPE_TEXT_CEA_608 = MediaFormat.MIMETYPE_TEXT_CEA_608;
 
     /**
      * MIME type for CEA-708 closed caption data.
      * @hide
+     * @deprecated
      */
-    public static final String MEDIA_MIMETYPE_TEXT_CEA_708 = "text/cea-708";
+    public static final String MEDIA_MIMETYPE_TEXT_CEA_708 = MediaFormat.MIMETYPE_TEXT_CEA_708;
 
     /*
      * A helper function to check if the mime type is supported by media framework.
@@ -3108,7 +3125,7 @@ public class MediaPlayer extends PlayerBase
      * this function is called.
      * </p>
      * <p>
-     * Currently, only timed text tracks or audio tracks can be selected via this method.
+     * Currently, only timed text, subtitle or audio tracks can be selected via this method.
      * In addition, the support for selecting an audio track at runtime is pretty limited
      * in that an audio track can only be selected in the <em>Prepared</em> state.
      * </p>
@@ -3795,29 +3812,158 @@ public class MediaPlayer extends PlayerBase
     private OnTimedTextListener mOnTimedTextListener;
 
     /**
-     * Interface definition of a callback to be invoked when a
-     * track has data available.
-     *
-     * @hide
+     * Interface definition of a callback to be invoked when a player subtitle track has new
+     * subtitle data available.
+     * See the {@link MediaPlayer#setOnSubtitleDataListener(OnSubtitleDataListener, Handler)}
+     * method for the description of which track will report data through this listener.
      */
-    public interface OnSubtitleDataListener
-    {
-        public void onSubtitleData(MediaPlayer mp, SubtitleData data);
+    public interface OnSubtitleDataListener {
+        /**
+         * Method called when new subtitle data is available
+         * @param mp the player that reports the new subtitle data
+         * @param data the subtitle data
+         */
+        public void onSubtitleData(@NonNull MediaPlayer mp, @NonNull SubtitleData data);
     }
 
     /**
-     * Register a callback to be invoked when a track has data available.
-     *
-     * @param listener the callback that will be run
-     *
-     * @hide
+     * Sets the listener to be invoked when a subtitle track has new data available.
+     * The subtitle data comes from a subtitle track previously selected with
+     * {@link #selectTrack(int)}. Use {@link #getTrackInfo()} to determine which tracks are
+     * subtitles (of type {@link TrackInfo#MEDIA_TRACK_TYPE_SUBTITLE}), Subtitle track encodings
+     * can be determined by {@link TrackInfo#getFormat()}).<br>
+     * See {@link SubtitleData} for an example of querying subtitle encoding.
+     * @param listener the listener called when new data is available
+     * @param handler the {@link Handler} that receives the listener events
      */
-    public void setOnSubtitleDataListener(OnSubtitleDataListener listener)
+    public void setOnSubtitleDataListener(@NonNull OnSubtitleDataListener listener,
+            @NonNull Handler handler) {
+        if (listener == null) {
+            throw new IllegalArgumentException("Illegal null listener");
+        }
+        if (handler == null) {
+            throw new IllegalArgumentException("Illegal null handler");
+        }
+        setOnSubtitleDataListenerInt(listener, handler);
+    }
+    /**
+     * Sets the listener to be invoked when a subtitle track has new data available.
+     * The subtitle data comes from a subtitle track previously selected with
+     * {@link #selectTrack(int)}. Use {@link #getTrackInfo()} to determine which tracks are
+     * subtitles (of type {@link TrackInfo#MEDIA_TRACK_TYPE_SUBTITLE}), Subtitle track encodings
+     * can be determined by {@link TrackInfo#getFormat()}).<br>
+     * See {@link SubtitleData} for an example of querying subtitle encoding.<br>
+     * The listener will be called on the same thread as the one in which the MediaPlayer was
+     * created.
+     * @param listener the listener called when new data is available
+     */
+    public void setOnSubtitleDataListener(@NonNull OnSubtitleDataListener listener)
     {
-        mOnSubtitleDataListener = listener;
+        if (listener == null) {
+            throw new IllegalArgumentException("Illegal null listener");
+        }
+        setOnSubtitleDataListenerInt(listener, null);
+    }
+
+    /**
+     * Clears the listener previously set with
+     * {@link #setOnSubtitleDataListener(OnSubtitleDataListener)} or
+     * {@link #setOnSubtitleDataListener(OnSubtitleDataListener, Handler)}.
+     */
+    public void clearOnSubtitleDataListener() {
+        setOnSubtitleDataListenerInt(null, null);
+    }
+
+    private void setOnSubtitleDataListenerInt(
+            @Nullable OnSubtitleDataListener listener, @Nullable Handler handler) {
+        synchronized (this) {
+            mOnSubtitleDataListener = listener;
+            mOnSubtitleDataHandler = handler;
+        }
     }
 
     private OnSubtitleDataListener mOnSubtitleDataListener;
+    private Handler mOnSubtitleDataHandler;
+
+    /**
+     * Interface definition of a callback to be invoked when discontinuity in the normal progression
+     * of the media time is detected.
+     * The "normal progression" of media time is defined as the expected increase of the playback
+     * position when playing media, relative to the playback speed (for instance every second, media
+     * time increases by two seconds when playing at 2x).<br>
+     * Discontinuities are encountered in the following cases:
+     * <ul>
+     * <li>when the player is starved for data and cannot play anymore</li>
+     * <li>when the player encounters a playback error</li>
+     * <li>when the a seek operation starts, and when it's completed</li>
+     * <li>when the playback speed changes</li>
+     * <li>when the playback state changes</li>
+     * <li>when the player is reset</li>
+     * </ul>
+     * See the
+     * {@link MediaPlayer#setOnMediaTimeDiscontinuityListener(OnMediaTimeDiscontinuityListener, Handler)}
+     * method to set a listener for these events.
+     */
+    public interface OnMediaTimeDiscontinuityListener {
+        /**
+         * Called to indicate a time discontinuity has occured.
+         * @param mp the MediaPlayer for which the discontinuity has occured.
+         * @param mts the timestamp that correlates media time, system time and clock rate,
+         *     or {@link MediaTimestamp#TIMESTAMP_UNKNOWN} in an error case.
+         */
+        public void onMediaTimeDiscontinuity(@NonNull MediaPlayer mp, @NonNull MediaTimestamp mts);
+    }
+
+    /**
+     * Sets the listener to be invoked when a media time discontinuity is encountered.
+     * @param listener the listener called after a discontinuity
+     * @param handler the {@link Handler} that receives the listener events
+     */
+    public void setOnMediaTimeDiscontinuityListener(
+            @NonNull OnMediaTimeDiscontinuityListener listener, @NonNull Handler handler) {
+        if (listener == null) {
+            throw new IllegalArgumentException("Illegal null listener");
+        }
+        if (handler == null) {
+            throw new IllegalArgumentException("Illegal null handler");
+        }
+        setOnMediaTimeDiscontinuityListenerInt(listener, handler);
+    }
+
+    /**
+     * Sets the listener to be invoked when a media time discontinuity is encountered.
+     * The listener will be called on the same thread as the one in which the MediaPlayer was
+     * created.
+     * @param listener the listener called after a discontinuity
+     */
+    public void setOnMediaTimeDiscontinuityListener(
+            @NonNull OnMediaTimeDiscontinuityListener listener)
+    {
+        if (listener == null) {
+            throw new IllegalArgumentException("Illegal null listener");
+        }
+        setOnMediaTimeDiscontinuityListenerInt(listener, null);
+    }
+
+    /**
+     * Clears the listener previously set with
+     * {@link #setOnMediaTimeDiscontinuityListener(OnMediaTimeDiscontinuityListener)}
+     * or {@link #setOnMediaTimeDiscontinuityListener(OnMediaTimeDiscontinuityListener, Handler)}
+     */
+    public void clearOnMediaTimeDiscontinuityListener() {
+        setOnMediaTimeDiscontinuityListenerInt(null, null);
+    }
+
+    private void setOnMediaTimeDiscontinuityListenerInt(
+            @Nullable OnMediaTimeDiscontinuityListener listener, @Nullable Handler handler) {
+        synchronized (this) {
+            mOnMediaTimeDiscontinuityListener = listener;
+            mOnMediaTimeDiscontinuityHandler = handler;
+        }
+    }
+
+    private OnMediaTimeDiscontinuityListener mOnMediaTimeDiscontinuityListener;
+    private Handler mOnMediaTimeDiscontinuityHandler;
 
     /**
      * Interface definition of a callback to be invoked when a

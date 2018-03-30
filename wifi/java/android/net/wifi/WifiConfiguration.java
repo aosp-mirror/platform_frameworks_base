@@ -25,11 +25,13 @@ import android.net.MacAddress;
 import android.net.ProxyInfo;
 import android.net.StaticIpConfiguration;
 import android.net.Uri;
+import android.net.wifi.WifiInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.BackupUtils;
+import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -76,6 +78,8 @@ public class WifiConfiguration implements Parcelable {
 
     /** {@hide} */
     private String mPasspointManagementObjectTree;
+    /** {@hide} */
+    private static final int MAXIMUM_RANDOM_MAC_GENERATION_RETRY = 3;
 
     /**
      * Recognized key management schemes.
@@ -798,27 +802,37 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      * Randomized MAC address to use with this particular network
      */
+    @NonNull
     private MacAddress mRandomizedMacAddress;
 
     /**
      * @hide
      * Checks if the given MAC address can be used for Connected Mac Randomization
-     * by verifying that it is non-null, unicast, and locally assigned.
+     * by verifying that it is non-null, unicast, locally assigned, and not default mac.
      * @param mac MacAddress to check
      * @return true if mac is good to use
      */
-    private boolean isValidMacAddressForRandomization(MacAddress mac) {
-        return mac != null && !mac.isMulticastAddress() && mac.isLocallyAssigned();
+    public static boolean isValidMacAddressForRandomization(MacAddress mac) {
+        return mac != null && !mac.isMulticastAddress() && mac.isLocallyAssigned()
+                && !MacAddress.fromString(WifiInfo.DEFAULT_MAC_ADDRESS).equals(mac);
     }
 
     /**
      * @hide
      * Returns Randomized MAC address to use with the network.
-     * If it is not set/valid, create a new randomized address.
+     * If it is not set/valid, creates a new randomized address.
+     * If it can't generate a valid mac, returns the default MAC.
      */
-    public MacAddress getOrCreateRandomizedMacAddress() {
-        if (!isValidMacAddressForRandomization(mRandomizedMacAddress)) {
+    public @NonNull MacAddress getOrCreateRandomizedMacAddress() {
+        int randomMacGenerationCount = 0;
+        while (!isValidMacAddressForRandomization(mRandomizedMacAddress)
+                && randomMacGenerationCount < MAXIMUM_RANDOM_MAC_GENERATION_RETRY) {
             mRandomizedMacAddress = MacAddress.createRandomUnicastAddress();
+            randomMacGenerationCount++;
+        }
+
+        if (!isValidMacAddressForRandomization(mRandomizedMacAddress)) {
+            mRandomizedMacAddress = MacAddress.fromString(WifiInfo.DEFAULT_MAC_ADDRESS);
         }
         return mRandomizedMacAddress;
     }
@@ -828,10 +842,7 @@ public class WifiConfiguration implements Parcelable {
      * Returns MAC address set to be the local randomized MAC address.
      * Does not guarantee that the returned address is valid for use.
      */
-    public MacAddress getRandomizedMacAddress() {
-        if (mRandomizedMacAddress == null) {
-            mRandomizedMacAddress = MacAddress.ALL_ZEROS_ADDRESS;
-        }
+    public @NonNull MacAddress getRandomizedMacAddress() {
         return mRandomizedMacAddress;
     }
 
@@ -839,7 +850,11 @@ public class WifiConfiguration implements Parcelable {
      * @hide
      * @param mac MacAddress to change into
      */
-    public void setRandomizedMacAddress(MacAddress mac) {
+    public void setRandomizedMacAddress(@NonNull MacAddress mac) {
+        if (mac == null) {
+            Log.e(TAG, "setRandomizedMacAddress received null MacAddress.");
+            return;
+        }
         mRandomizedMacAddress = mac;
     }
 
@@ -1532,7 +1547,7 @@ public class WifiConfiguration implements Parcelable {
         creatorUid = -1;
         shared = true;
         dtimInterval = 0;
-        mRandomizedMacAddress = MacAddress.ALL_ZEROS_ADDRESS;
+        mRandomizedMacAddress = MacAddress.fromString(WifiInfo.DEFAULT_MAC_ADDRESS);
     }
 
     /**

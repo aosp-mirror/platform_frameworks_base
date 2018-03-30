@@ -66,6 +66,9 @@ size_t AnomalyTracker::index(int64_t bucketNum) const {
 
 void AnomalyTracker::advanceMostRecentBucketTo(const int64_t& bucketNum) {
     VLOG("advanceMostRecentBucketTo() called.");
+    if (mNumOfPastBuckets <= 0) {
+        return;
+    }
     if (bucketNum <= mMostRecentBucketNum) {
         ALOGW("Cannot advance buckets backwards (bucketNum=%lld but mMostRecentBucketNum=%lld)",
               (long long)bucketNum, (long long)mMostRecentBucketNum);
@@ -170,7 +173,8 @@ void AnomalyTracker::addBucketToSum(const shared_ptr<DimToValMap>& bucket) {
 
 int64_t AnomalyTracker::getPastBucketValue(const MetricDimensionKey& key,
                                            const int64_t& bucketNum) const {
-    if (bucketNum < 0 || bucketNum <= mMostRecentBucketNum - mNumOfPastBuckets
+    if (bucketNum < 0 || mMostRecentBucketNum < 0
+            || bucketNum <= mMostRecentBucketNum - mNumOfPastBuckets
             || bucketNum > mMostRecentBucketNum) {
         return 0;
     }
@@ -241,14 +245,10 @@ void AnomalyTracker::detectAndDeclareAnomaly(const uint64_t& timestampNs,
 }
 
 bool AnomalyTracker::isInRefractoryPeriod(const uint64_t& timestampNs,
-                                          const MetricDimensionKey& key) {
+                                          const MetricDimensionKey& key) const {
     const auto& it = mRefractoryPeriodEndsSec.find(key);
     if (it != mRefractoryPeriodEndsSec.end()) {
-        if (timestampNs < it->second * NS_PER_SEC) {
-            return true;
-        } else {
-            mRefractoryPeriodEndsSec.erase(key);
-        }
+        return timestampNs < it->second * NS_PER_SEC;
     }
     return false;
 }

@@ -43,8 +43,6 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiNetworkScoreCache;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -896,6 +894,13 @@ public class AccessPoint implements Comparable<AccessPoint> {
             summary.append(WifiUtils.buildLoggingSummary(this, config));
         }
 
+        if (config != null && (WifiUtils.isMeteredOverridden(config) || config.meteredHint)) {
+            return mContext.getResources().getString(
+                    R.string.preference_summary_default_combination,
+                    WifiUtils.getMeteredLabel(mContext, config),
+                    summary.toString());
+        }
+
         // If Speed label and summary are both present, use the preference combination to combine
         // the two, else return the non-null one.
         if (getSpeedLabel() != null && summary.length() != 0) {
@@ -1154,7 +1159,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     @Nullable
     @Speed
-    private int roundToClosestSpeedEnum(int speed) {
+    private static int roundToClosestSpeedEnum(int speed) {
         if (speed < Speed.SLOW) {
             return Speed.NONE;
         } else if (speed < (Speed.SLOW + Speed.MODERATE) / 2) {
@@ -1170,19 +1175,29 @@ public class AccessPoint implements Comparable<AccessPoint> {
 
     @Nullable
     String getSpeedLabel(@Speed int speed) {
+        return getSpeedLabel(mContext, speed);
+    }
+
+    private static String getSpeedLabel(Context context, int speed) {
         switch (speed) {
             case Speed.VERY_FAST:
-                return mContext.getString(R.string.speed_label_very_fast);
+                return context.getString(R.string.speed_label_very_fast);
             case Speed.FAST:
-                return mContext.getString(R.string.speed_label_fast);
+                return context.getString(R.string.speed_label_fast);
             case Speed.MODERATE:
-                return mContext.getString(R.string.speed_label_okay);
+                return context.getString(R.string.speed_label_okay);
             case Speed.SLOW:
-                return mContext.getString(R.string.speed_label_slow);
+                return context.getString(R.string.speed_label_slow);
             case Speed.NONE:
             default:
                 return null;
         }
+    }
+
+    /** Return the speed label for a {@link ScoredNetwork} at the specified {@code rssi} level. */
+    @Nullable
+    public static String getSpeedLabel(Context context, ScoredNetwork scoredNetwork, int rssi) {
+        return getSpeedLabel(context, roundToClosestSpeedEnum(scoredNetwork.calculateBadge(rssi)));
     }
 
     /** Return true if the current RSSI is reachable, and false otherwise. */

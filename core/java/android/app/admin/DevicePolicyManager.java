@@ -124,6 +124,7 @@ import java.util.concurrent.Executor;
 @SystemService(Context.DEVICE_POLICY_SERVICE)
 @RequiresFeature(PackageManager.FEATURE_DEVICE_ADMIN)
 public class DevicePolicyManager {
+
     private static String TAG = "DevicePolicyManager";
 
     private final Context mContext;
@@ -1612,8 +1613,6 @@ public class DevicePolicyManager {
      *     <li>keyguard
      * </ul>
      *
-     * This is the default configuration for LockTask.
-     *
      * @see #setLockTaskFeatures(ComponentName, int)
      */
     public static final int LOCK_TASK_FEATURE_NONE = 0;
@@ -1631,7 +1630,10 @@ public class DevicePolicyManager {
     /**
      * Enable notifications during LockTask mode. This includes notification icons on the status
      * bar, heads-up notifications, and the expandable notification shade. Note that the Quick
-     * Settings panel will still be disabled.
+     * Settings panel remains disabled. This feature flag can only be used in combination with
+     * {@link #LOCK_TASK_FEATURE_HOME}. {@link #setLockTaskFeatures(ComponentName, int)}
+     * throws an {@link IllegalArgumentException} if this feature flag is defined without
+     * {@link #LOCK_TASK_FEATURE_HOME}.
      *
      * @see #setLockTaskFeatures(ComponentName, int)
      */
@@ -1663,6 +1665,9 @@ public class DevicePolicyManager {
      * Enable the global actions dialog during LockTask mode. This is the dialog that shows up when
      * the user long-presses the power button, for example. Note that the user may not be able to
      * power off the device if this flag is not set.
+     *
+     * <p>This flag is enabled by default until {@link #setLockTaskFeatures(ComponentName, int)} is
+     * called for the first time.
      *
      * @see #setLockTaskFeatures(ComponentName, int)
      */
@@ -1745,6 +1750,25 @@ public class DevicePolicyManager {
      * @see #generateKeyPair
      */
     public static final int ID_TYPE_MEID = 8;
+
+    /**
+     * Specifies that the calling app should be granted access to the installed credentials
+     * immediately. Otherwise, access to the credentials will be gated by user approval.
+     * For use with {@link #installKeyPair(ComponentName, PrivateKey, Certificate[], String, int)}
+     *
+     * @see #installKeyPair(ComponentName, PrivateKey, Certificate[], String, int)
+     */
+    public static final int INSTALLKEY_REQUEST_CREDENTIALS_ACCESS = 1;
+
+    /**
+     * Specifies that a user can select the key via the Certificate Selection prompt.
+     * If this flag is not set when calling {@link #installKeyPair}, the key can only be granted
+     * access by implementing {@link android.app.admin.DeviceAdminReceiver#onChoosePrivateKeyAlias}.
+     * For use with {@link #installKeyPair(ComponentName, PrivateKey, Certificate[], String, int)}
+     *
+     * @see #installKeyPair(ComponentName, PrivateKey, Certificate[], String, int)
+     */
+    public static final int INSTALLKEY_SET_USER_SELECTABLE = 2;
 
     /**
      * Broadcast action: sent when the profile owner is set, changed or cleared.
@@ -3742,7 +3766,7 @@ public class DevicePolicyManager {
     public static final int KEYGUARD_DISABLE_TRUST_AGENTS = 1 << 4;
 
     /**
-     * Disable fingerprint sensor on keyguard secure screens (e.g. PIN/Pattern/Password).
+     * Disable fingerprint authentication on keyguard secure screens (e.g. PIN/Pattern/Password).
      */
     public static final int KEYGUARD_DISABLE_FINGERPRINT = 1 << 5;
 
@@ -3750,6 +3774,25 @@ public class DevicePolicyManager {
      * Disable text entry into notifications on secure keyguard screens (e.g. PIN/Pattern/Password).
      */
     public static final int KEYGUARD_DISABLE_REMOTE_INPUT = 1 << 6;
+
+    /**
+     * Disable face authentication on keyguard secure screens (e.g. PIN/Pattern/Password).
+     */
+    public static final int KEYGUARD_DISABLE_FACE = 1 << 7;
+
+    /**
+     * Disable iris authentication on keyguard secure screens (e.g. PIN/Pattern/Password).
+     */
+    public static final int KEYGUARD_DISABLE_IRIS = 1 << 8;
+
+    /**
+     * Disable all biometric authentication on keyguard secure screens (e.g. PIN/Pattern/Password).
+     */
+    public static final int KEYGUARD_DISABLE_BIOMETRICS =
+            DevicePolicyManager.KEYGUARD_DISABLE_FACE
+            | DevicePolicyManager.KEYGUARD_DISABLE_IRIS
+            | DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT;
+
 
     /**
      * Disable all current and future keyguard customizations.
@@ -4103,7 +4146,11 @@ public class DevicePolicyManager {
      */
     public boolean installKeyPair(@Nullable ComponentName admin, @NonNull PrivateKey privKey,
             @NonNull Certificate[] certs, @NonNull String alias, boolean requestAccess) {
-        return installKeyPair(admin, privKey, certs, alias, requestAccess, true);
+        int flags = INSTALLKEY_SET_USER_SELECTABLE;
+        if (requestAccess) {
+            flags |= INSTALLKEY_REQUEST_CREDENTIALS_ACCESS;
+        }
+        return installKeyPair(admin, privKey, certs, alias, flags);
     }
 
     /**
@@ -4127,13 +4174,9 @@ public class DevicePolicyManager {
      *        {@link android.security.KeyChain#getCertificateChain}.
      * @param alias The private key alias under which to install the certificate. If a certificate
      *        with that alias already exists, it will be overwritten.
-     * @param requestAccess {@code true} to request that the calling app be granted access to the
-     *        credentials immediately. Otherwise, access to the credentials will be gated by user
-     *        approval.
-     * @param isUserSelectable {@code true} to indicate that a user can select this key via the
-     *        Certificate Selection prompt, false to indicate that this key can only be granted
-     *        access by implementing
-     *        {@link android.app.admin.DeviceAdminReceiver#onChoosePrivateKeyAlias}.
+     * @param flags Flags to request that the calling app be granted access to the credentials
+     *        and set the key to be user-selectable. See {@link #INSTALLKEY_SET_USER_SELECTABLE} and
+     *        {@link #INSTALLKEY_REQUEST_CREDENTIALS_ACCESS}.
      * @return {@code true} if the keys were installed, {@code false} otherwise.
      * @throws SecurityException if {@code admin} is not {@code null} and not a device or profile
      *         owner.
@@ -4142,9 +4185,12 @@ public class DevicePolicyManager {
      * @see #DELEGATION_CERT_INSTALL
      */
     public boolean installKeyPair(@Nullable ComponentName admin, @NonNull PrivateKey privKey,
-            @NonNull Certificate[] certs, @NonNull String alias, boolean requestAccess,
-            boolean isUserSelectable) {
+            @NonNull Certificate[] certs, @NonNull String alias, int flags) {
         throwIfParentInstance("installKeyPair");
+        boolean requestAccess = (flags & INSTALLKEY_REQUEST_CREDENTIALS_ACCESS)
+                == INSTALLKEY_REQUEST_CREDENTIALS_ACCESS;
+        boolean isUserSelectable = (flags & INSTALLKEY_SET_USER_SELECTABLE)
+                == INSTALLKEY_SET_USER_SELECTABLE;
         try {
             final byte[] pemCert = Credentials.convertToPem(certs[0]);
             byte[] pemChain = null;
@@ -4223,6 +4269,8 @@ public class DevicePolicyManager {
      *         algorithm specification in {@code keySpec} is not {@code RSAKeyGenParameterSpec}
      *         or {@code ECGenParameterSpec}, or if Device ID attestation was requested but the
      *         {@code keySpec} does not contain an attestation challenge.
+     * @throws UnsupportedOperationException if Device ID attestation was requested but the
+     *         underlying hardware does not support it.
      * @see KeyGenParameterSpec.Builder#setAttestationChallenge(byte[])
      */
     public AttestedKeyPair generateKeyPair(@Nullable ComponentName admin,
@@ -6340,6 +6388,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public @Nullable List<String> getPermittedInputMethodsForCurrentUser() {
         throwIfParentInstance("getPermittedInputMethodsForCurrentUser");
         if (mService != null) {
@@ -7167,30 +7216,24 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Sets which system features to enable for LockTask mode.
-     * <p>
-     * Feature flags set through this method will only take effect for the duration when the device
-     * is in LockTask mode. If this method is not called, none of the features listed here will be
-     * enabled.
-     * <p>
-     * This function can only be called by the device owner, a profile owner of an affiliated user
-     * or profile, or the profile owner when no device owner is set. See {@link #isAffiliatedUser}.
-     * Any features set via this method will be cleared if the user becomes unaffiliated.
+     * Sets which system features are enabled when the device runs in lock task mode. This method
+     * doesn't affect the features when lock task mode is inactive. Any system features not included
+     * in {@code flags} are implicitly disabled when calling this method. By default, only
+     * {@link #LOCK_TASK_FEATURE_GLOBAL_ACTIONS} is enabled—all the other features are disabled. To
+     * disable the global actions dialog, call this method omitting
+     * {@link #LOCK_TASK_FEATURE_GLOBAL_ACTIONS}.
+     *
+     * <p>This method can only be called by the device owner, a profile owner of an affiliated
+     * user or profile, or the profile owner when no device owner is set. See
+     * {@link #isAffiliatedUser}.
+     * Any features set using this method are cleared if the user becomes unaffiliated.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param flags Bitfield of feature flags:
-     *              {@link #LOCK_TASK_FEATURE_NONE} (default),
-     *              {@link #LOCK_TASK_FEATURE_SYSTEM_INFO},
-     *              {@link #LOCK_TASK_FEATURE_NOTIFICATIONS},
-     *              {@link #LOCK_TASK_FEATURE_HOME},
-     *              {@link #LOCK_TASK_FEATURE_OVERVIEW},
-     *              {@link #LOCK_TASK_FEATURE_GLOBAL_ACTIONS},
-     *              {@link #LOCK_TASK_FEATURE_KEYGUARD}
+     * @param flags The system features enabled during lock task mode.
      * @throws SecurityException if {@code admin} is not the device owner, the profile owner of an
      * affiliated user or profile, or the profile owner when no device owner is set.
      * @see #isAffiliatedUser
-     * @throws SecurityException if {@code admin} is not the device owner or the profile owner.
-     */
+     **/
     public void setLockTaskFeatures(@NonNull ComponentName admin, @LockTaskFeature int flags) {
         throwIfParentInstance("setLockTaskFeatures");
         if (mService != null) {
@@ -7283,11 +7326,12 @@ public class DevicePolicyManager {
     public @interface SystemSettingsWhitelist {}
 
     /**
-     * Called by device owner to update {@link android.provider.Settings.System} settings.
-     * Validation that the value of the setting is in the correct form for the setting type should
-     * be performed by the caller.
+     * Called by a device or profile owner to update {@link android.provider.Settings.System}
+     * settings. Validation that the value of the setting is in the correct form for the setting
+     * type should be performed by the caller.
      * <p>
-     * The settings that can be updated with this method are:
+     * The settings that can be updated by a device owner or profile owner of secondary user with
+     * this method are:
      * <ul>
      * <li>{@link android.provider.Settings.System#SCREEN_BRIGHTNESS}</li>
      * <li>{@link android.provider.Settings.System#SCREEN_BRIGHTNESS_MODE}</li>
@@ -7299,7 +7343,7 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param setting The name of the setting to update.
      * @param value The value to update the setting to.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
     public void setSystemSetting(@NonNull ComponentName admin,
             @NonNull @SystemSettingsWhitelist String setting, String value) {
@@ -8363,12 +8407,12 @@ public class DevicePolicyManager {
      * @return a list of package names which could not be restricted.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
-    public @NonNull List<String> setMeteredDataDisabled(@NonNull ComponentName admin,
+    public @NonNull List<String> setMeteredDataDisabledPackages(@NonNull ComponentName admin,
             @NonNull List<String> packageNames) {
         throwIfParentInstance("setMeteredDataDisabled");
         if (mService != null) {
             try {
-                return mService.setMeteredDataDisabled(admin, packageNames);
+                return mService.setMeteredDataDisabledPackages(admin, packageNames);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -8384,11 +8428,11 @@ public class DevicePolicyManager {
      * @return the list of restricted package names.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
      */
-    public @NonNull List<String> getMeteredDataDisabled(@NonNull ComponentName admin) {
+    public @NonNull List<String> getMeteredDataDisabledPackages(@NonNull ComponentName admin) {
         throwIfParentInstance("getMeteredDataDisabled");
         if (mService != null) {
             try {
-                return mService.getMeteredDataDisabled(admin);
+                return mService.getMeteredDataDisabledPackages(admin);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -8407,12 +8451,12 @@ public class DevicePolicyManager {
      * @throws SecurityException if the caller doesn't run with {@link Process#SYSTEM_UID}
      * @hide
      */
-    public boolean isMeteredDataDisabledForUser(@NonNull ComponentName admin, String packageName,
-            @UserIdInt int userId) {
+    public boolean isMeteredDataDisabledPackageForUser(@NonNull ComponentName admin,
+            String packageName, @UserIdInt int userId) {
         throwIfParentInstance("getMeteredDataDisabledForUser");
         if (mService != null) {
             try {
-                return mService.isMeteredDataDisabledForUser(admin, packageName, userId);
+                return mService.isMeteredDataDisabledPackageForUser(admin, packageName, userId);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -8610,6 +8654,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     @UserProvisioningState
     public int getUserProvisioningState() {
         throwIfParentInstance("getUserProvisioningState");
@@ -8754,6 +8799,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public boolean isDeviceProvisioned() {
         try {
             return mService.isDeviceProvisioned();
@@ -9418,7 +9464,21 @@ public class DevicePolicyManager {
      * <p>This method may returns {@code -1} if {@code apnSetting} conflicts with an existing
      * override APN. Update the existing conflicted APN with
      * {@link #updateOverrideApn(ComponentName, int, ApnSetting)} instead of adding a new entry.
-     * <p>See {@link ApnSetting} for the definition of conflict.
+     * <p>Two override APNs are considered to conflict when all the following APIs return
+     * the same values on both override APNs:
+     * <ul>
+     *   <li>{@link ApnSetting#getOperatorNumeric()}</li>
+     *   <li>{@link ApnSetting#getApnName()}</li>
+     *   <li>{@link ApnSetting#getProxyAddress()}</li>
+     *   <li>{@link ApnSetting#getProxyPort()}</li>
+     *   <li>{@link ApnSetting#getMmsProxyAddress()}</li>
+     *   <li>{@link ApnSetting#getMmsProxyPort()}</li>
+     *   <li>{@link ApnSetting#getMmsc()}</li>
+     *   <li>{@link ApnSetting#isEnabled()}</li>
+     *   <li>{@link ApnSetting#getMvnoType()}</li>
+     *   <li>{@link ApnSetting#getProtocol()}</li>
+     *   <li>{@link ApnSetting#getRoamingProtocol()}</li>
+     * </ul>
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param apnSetting the override APN to insert
@@ -9447,7 +9507,7 @@ public class DevicePolicyManager {
      * {@code apnId}.
      * <p>This method may also returns {@code false} if {@code apnSetting} conflicts with an
      * existing override APN. Update the existing conflicted APN instead.
-     * <p>See {@link ApnSetting} for the definition of conflict.
+     * <p>See {@link #addOverrideApn} for the definition of conflict.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param apnId the {@code id} of the override APN to update

@@ -246,6 +246,82 @@ public final class KeyChain {
     public static final String EXTRA_KEY_ACCESSIBLE = "android.security.extra.KEY_ACCESSIBLE";
 
     /**
+     * Indicates that a call to {@link #generateKeyPair} was successful.
+     * @hide
+     */
+    public static final int KEY_GEN_SUCCESS = 0;
+
+    /**
+     * An alias was missing from the key specifications when calling {@link #generateKeyPair}.
+     * @hide
+     */
+    public static final int KEY_GEN_MISSING_ALIAS = 1;
+
+    /**
+     * A key attestation challenge was provided to {@link #generateKeyPair}, but it shouldn't
+     * have been provided.
+     * @hide
+     */
+    public static final int KEY_GEN_SUPERFLUOUS_ATTESTATION_CHALLENGE = 2;
+
+    /**
+     * Algorithm not supported by {@link #generateKeyPair}
+     * @hide
+     */
+    public static final int KEY_GEN_NO_SUCH_ALGORITHM = 3;
+
+    /**
+     * Invalid algorithm parameters when calling {@link #generateKeyPair}
+     * @hide
+     */
+    public static final int KEY_GEN_INVALID_ALGORITHM_PARAMETERS = 4;
+
+    /**
+     * Keystore is not available when calling {@link #generateKeyPair}
+     * @hide
+     */
+    public static final int KEY_GEN_NO_KEYSTORE_PROVIDER = 5;
+
+    /**
+     * General failure while calling {@link #generateKeyPair}
+     * @hide
+     */
+    public static final int KEY_GEN_FAILURE = 6;
+
+    /**
+     * Successful call to {@link #attestKey}
+     * @hide
+     */
+    public static final int KEY_ATTESTATION_SUCCESS = 0;
+
+    /**
+     * Attestation challenge missing when calling {@link #attestKey}
+     * @hide
+     */
+    public static final int KEY_ATTESTATION_MISSING_CHALLENGE = 1;
+
+    /**
+     * The caller requested Device ID attestation when calling {@link #attestKey}, but has no
+     * permissions to get device identifiers.
+     * @hide
+     */
+    public static final int KEY_ATTESTATION_CANNOT_COLLECT_DATA = 2;
+
+    /**
+     * The underlying hardware does not support Device ID attestation or cannot attest to the
+     * identifiers that are stored on the device. This indicates permanent inability
+     * to get attestation records on the device.
+     * @hide
+     */
+    public static final int KEY_ATTESTATION_CANNOT_ATTEST_IDS = 3;
+
+    /**
+     * General failure when calling {@link #attestKey}
+     * @hide
+     */
+    public static final int KEY_ATTESTATION_FAILURE = 4;
+
+    /**
      * Returns an {@code Intent} that can be used for credential
      * installation. The intent may be used without any extras, in
      * which case the user will be able to install credentials from

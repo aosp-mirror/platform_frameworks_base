@@ -110,10 +110,12 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
     }
     mConditionSliced = (metric.links().size() > 0) || (mDimensionsInCondition.size() > 0);
 
-    if (!metric.has_condition() && mPullTagId != -1) {
-        VLOG("Setting up periodic pulling for %d", mPullTagId);
-        mStatsPullerManager->RegisterReceiver(mPullTagId, this, bucketSizeMills);
+    // Kicks off the puller immediately.
+    if (mPullTagId != -1) {
+        mStatsPullerManager->RegisterReceiver(
+            mPullTagId, this, mCurrentBucketStartTimeNs + mBucketSizeNs, mBucketSizeNs);
     }
+
     VLOG("value metric %lld created. bucket size %lld start_time: %lld",
         (long long)metric.id(), (long long)mBucketSizeNs, (long long)mStartTimeNs);
 }
@@ -134,7 +136,8 @@ ValueMetricProducer::~ValueMetricProducer() {
     }
 }
 
-void ValueMetricProducer::onSlicedConditionMayChangeLocked(const uint64_t eventTime) {
+void ValueMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition,
+                                                           const uint64_t eventTime) {
     VLOG("Metric %lld onSlicedConditionMayChange", (long long)mMetricId);
 }
 
@@ -193,26 +196,21 @@ void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     // TODO: Clear mDimensionKeyMap once the report is dumped.
 }
 
-void ValueMetricProducer::onConditionChangedLocked(const bool condition, const uint64_t eventTime) {
+void ValueMetricProducer::onConditionChangedLocked(const bool condition,
+                                                   const uint64_t eventTimeNs) {
     mCondition = condition;
 
-    if (eventTime < mCurrentBucketStartTimeNs) {
-        VLOG("Skip event due to late arrival: %lld vs %lld", (long long)eventTime,
+    if (eventTimeNs < mCurrentBucketStartTimeNs) {
+        VLOG("Skip event due to late arrival: %lld vs %lld", (long long)eventTimeNs,
              (long long)mCurrentBucketStartTimeNs);
         return;
     }
 
-    flushIfNeededLocked(eventTime);
+    flushIfNeededLocked(eventTimeNs);
 
     if (mPullTagId != -1) {
-        if (mCondition == true) {
-            mStatsPullerManager->RegisterReceiver(mPullTagId, this, mBucketSizeNs / 1000 / 1000);
-        } else if (mCondition == false) {
-            mStatsPullerManager->UnRegisterReceiver(mPullTagId, this);
-        }
-
         vector<shared_ptr<LogEvent>> allData;
-        if (mStatsPullerManager->Pull(mPullTagId, &allData)) {
+        if (mStatsPullerManager->Pull(mPullTagId, eventTimeNs, &allData)) {
             if (allData.size() == 0) {
                 return;
             }

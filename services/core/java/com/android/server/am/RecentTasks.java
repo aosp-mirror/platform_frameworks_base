@@ -600,7 +600,8 @@ class RecentTasks {
                         // activities that are fully runnable based on
                         // current system state.
                         ai = pm.getActivityInfo(task.realActivity,
-                                PackageManager.MATCH_DEBUG_TRIAGED_MISSING, userId);
+                                PackageManager.MATCH_DEBUG_TRIAGED_MISSING
+                                        | ActivityManagerService.STOCK_PM_FLAGS, userId);
                     } catch (RemoteException e) {
                         // Will never happen.
                         continue;
@@ -1152,6 +1153,11 @@ class RecentTasks {
                     // Only the non-top task of the primary split screen mode is visible
                     return false;
                 }
+        }
+
+        // If we're in lock task mode, ignore the root task
+        if (task == mService.mLockTaskController.getRootTask()) {
+            return false;
         }
 
         return true;

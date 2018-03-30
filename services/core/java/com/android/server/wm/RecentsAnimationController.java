@@ -34,6 +34,7 @@ import android.app.WindowConfiguration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.ArraySet;
@@ -41,7 +42,6 @@ import android.util.Log;
 import android.util.Slog;import android.util.proto.ProtoOutputStream;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
-import android.util.proto.ProtoOutputStream;
 import android.view.IRecentsAnimationController;
 import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationTarget;
@@ -51,6 +51,7 @@ import android.view.SurfaceControl.Transaction;
 import com.google.android.collect.Sets;
 
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
+import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -61,15 +62,17 @@ import java.util.ArrayList;
  * window manager when the animation is completed. In addition, window manager may also notify the
  * app if it requires the animation to be canceled at any time (ie. due to timeout, etc.)
  */
-public class RecentsAnimationController {
+public class RecentsAnimationController implements DeathRecipient {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "RecentsAnimationController" : TAG_WM;
     private static final boolean DEBUG = false;
+    private static final long FAILSAFE_DELAY = 1000;
 
     private final WindowManagerService mService;
     private final IRecentsAnimationRunner mRunner;
     private final RecentsAnimationCallbacks mCallbacks;
     private final ArrayList<TaskAnimationAdapter> mPendingAnimations = new ArrayList<>();
     private final int mDisplayId;
+    private final Runnable mFailsafeRunnable = this::cancelAnimation;
 
     // The recents component app token that is shown behind the visibile tasks
     private AppWindowToken mHomeAppToken;
@@ -223,6 +226,13 @@ public class RecentsAnimationController {
             return;
         }
 
+        try {
+            mRunner.asBinder().linkToDeath(this, 0);
+        } catch (RemoteException e) {
+            cancelAnimation();
+            return;
+        }
+
         // Adjust the wallpaper visibility for the showing home activity
         final AppWindowToken recentsComponentAppToken =
                 dc.getHomeStack().getTopChild().getTopFullscreenAppToken();
@@ -296,6 +306,7 @@ public class RecentsAnimationController {
                 // We've already canceled the animation
                 return;
             }
+            mService.mH.removeCallbacks(mFailsafeRunnable);
             mCanceled = true;
             try {
                 mRunner.onAnimationCanceled();
@@ -308,18 +319,32 @@ public class RecentsAnimationController {
         mCallbacks.onAnimationFinished(false /* moveHomeToTop */);
     }
 
-    void cleanupAnimation() {
+    void cleanupAnimation(boolean moveHomeToTop) {
         if (DEBUG) Log.d(TAG, "cleanupAnimation(): mPendingAnimations="
                 + mPendingAnimations.size());
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final TaskAnimationAdapter adapter = mPendingAnimations.get(i);
             adapter.mTask.setCanAffectSystemUiFlags(true);
+            if (moveHomeToTop) {
+                adapter.mTask.dontAnimateDimExit();
+            }
             adapter.mCapturedFinishCallback.onAnimationFinished(adapter);
         }
         mPendingAnimations.clear();
 
+        mRunner.asBinder().unlinkToDeath(this, 0);
+
         mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
         mService.destroyInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
+    }
+
+    void scheduleFailsafe() {
+        mService.mH.postDelayed(mFailsafeRunnable, FAILSAFE_DELAY);
+    }
+
+    @Override
+    public void binderDied() {
+        cancelAnimation();
     }
 
     void checkAnimationReady(WallpaperController wallpaperController) {
@@ -400,9 +425,11 @@ public class RecentsAnimationController {
             if (mainWindow == null) {
                 return null;
             }
+            final Rect insets = new Rect(mainWindow.mContentInsets);
+            InsetUtils.addInsets(insets, mainWindow.mAppToken.getLetterboxInsets());
             mTarget = new RemoteAnimationTarget(mTask.mTaskId, MODE_CLOSING, mCapturedLeash,
                     !mTask.fillsParent(), mainWindow.mWinAnimator.mLastClipRect,
-                    mainWindow.mContentInsets, mTask.getPrefixOrderIndex(), position, bounds,
+                    insets, mTask.getPrefixOrderIndex(), position, bounds,
                     mTask.getWindowConfiguration(), mIsRecentTaskInvisible);
             return mTarget;
         }

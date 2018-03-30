@@ -109,13 +109,13 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
     @Override
     public void setWifiIndicators(final boolean enabled, final IconState statusIcon,
             final IconState qsIcon, final boolean activityIn, final boolean activityOut,
-            final String description, boolean isTransient) {
+            final String description, boolean isTransient, String secondaryLabel) {
         post(new Runnable() {
             @Override
             public void run() {
                 for (SignalCallback callback : mSignalCallbacks) {
                     callback.setWifiIndicators(enabled, statusIcon, qsIcon, activityIn, activityOut,
-                            description, isTransient);
+                            description, isTransient, secondaryLabel);
                 }
             }
         });

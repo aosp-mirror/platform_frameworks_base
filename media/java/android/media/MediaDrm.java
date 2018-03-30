@@ -654,9 +654,11 @@ public final class MediaDrm implements AutoCloseable {
      * ID is returned.
      *
      * @param level the new security level, one of
-     * {@link #SW_SECURE_CRYPTO}, {@link #SW_SECURE_DECODE},
-     * {@link #HW_SECURE_CRYPTO}, {@link #HW_SECURE_DECODE} or
-     * {@link #HW_SECURE_ALL}.
+     * {@link #SECURITY_LEVEL_SW_SECURE_CRYPTO},
+     * {@link #SECURITY_LEVEL_SW_SECURE_DECODE},
+     * {@link #SECURITY_LEVEL_HW_SECURE_CRYPTO},
+     * {@link #SECURITY_LEVEL_HW_SECURE_DECODE} or
+     * {@link #SECURITY_LEVEL_HW_SECURE_ALL}.
      *
      * @throws NotProvisionedException if provisioning is needed
      * @throws ResourceBusyException if required resources are in use
@@ -1140,8 +1142,9 @@ public final class MediaDrm implements AutoCloseable {
      * implementation.
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({SECURITY_LEVEL_UNKNOWN, SW_SECURE_CRYPTO, SW_SECURE_DECODE,
-            HW_SECURE_CRYPTO, HW_SECURE_DECODE, HW_SECURE_ALL})
+    @IntDef({SECURITY_LEVEL_UNKNOWN, SECURITY_LEVEL_SW_SECURE_CRYPTO,
+            SECURITY_LEVEL_SW_SECURE_DECODE, SECURITY_LEVEL_HW_SECURE_CRYPTO,
+            SECURITY_LEVEL_HW_SECURE_DECODE, SECURITY_LEVEL_HW_SECURE_ALL})
     public @interface SecurityLevel {}
 
     /**
@@ -1153,31 +1156,31 @@ public final class MediaDrm implements AutoCloseable {
     /**
      * DRM key management uses software-based whitebox crypto.
      */
-    public static final int SW_SECURE_CRYPTO = 1;
+    public static final int SECURITY_LEVEL_SW_SECURE_CRYPTO = 1;
 
     /**
      * DRM key management and decoding use software-based whitebox crypto.
      */
-    public static final int SW_SECURE_DECODE = 2;
+    public static final int SECURITY_LEVEL_SW_SECURE_DECODE = 2;
 
     /**
      * DRM key management and crypto operations are performed within a hardware
      * backed trusted execution environment.
      */
-    public static final int HW_SECURE_CRYPTO = 3;
+    public static final int SECURITY_LEVEL_HW_SECURE_CRYPTO = 3;
 
     /**
      * DRM key management, crypto operations and decoding of content are
      * performed within a hardware backed trusted execution environment.
      */
-    public static final int HW_SECURE_DECODE = 4;
+    public static final int SECURITY_LEVEL_HW_SECURE_DECODE = 4;
 
     /**
      * DRM key management, crypto operations, decoding of content and all
      * handling of the media (compressed and uncompressed) is handled within a
      * hardware backed trusted execution environment.
      */
-    public static final int HW_SECURE_ALL = 5;
+    public static final int SECURITY_LEVEL_HW_SECURE_ALL = 5;
 
     /**
      * The maximum security level supported by the device. This is the default
@@ -1203,9 +1206,9 @@ public final class MediaDrm implements AutoCloseable {
      * @param sessionId the session to query.
      * <p>
      * @return one of {@link #SECURITY_LEVEL_UNKNOWN},
-     * {@link #SW_SECURE_CRYPTO}, {@link #SW_SECURE_DECODE},
-     * {@link #HW_SECURE_CRYPTO}, {@link #HW_SECURE_DECODE} or
-     * {@link #HW_SECURE_ALL}.
+     * {@link #SECURITY_LEVEL_SW_SECURE_CRYPTO}, {@link #SECURITY_LEVEL_SW_SECURE_DECODE},
+     * {@link #SECURITY_LEVEL_HW_SECURE_CRYPTO}, {@link #SECURITY_LEVEL_HW_SECURE_DECODE} or
+     * {@link #SECURITY_LEVEL_HW_SECURE_ALL}.
      */
     @SecurityLevel
     public native int getSecurityLevel(@NonNull byte[] sessionId);

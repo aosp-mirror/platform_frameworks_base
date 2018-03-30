@@ -278,7 +278,7 @@ interface IPackageManager {
 
     boolean isPackageSuspendedForUser(String packageName, int userId);
 
-    PersistableBundle getPackageSuspendedAppExtras(String pacakgeName, int userId);
+    PersistableBundle getSuspendedPackageAppExtras(String packageName, int userId);
 
     void setSuspendedPackageAppExtras(String packageName, in PersistableBundle appExtras,
             int userId);
@@ -619,6 +619,8 @@ interface IPackageManager {
             in String[] packageNames, int userId);
     void revokeDefaultPermissionsFromDisabledTelephonyDataServices(
             in String[] packageNames, int userId);
+    void grantDefaultPermissionsToActiveLuiApp(in String packageName, int userId);
+    void revokeDefaultPermissionsFromLuiApps(in String[] packageNames, int userId);
 
     boolean isPermissionRevokedByPolicy(String permission, String packageName, int userId);
 

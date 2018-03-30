@@ -972,6 +972,7 @@ public final class DefaultPermissionGrantPolicy {
                 grantRuntimePermissions(imsServicePackage, MICROPHONE_PERMISSIONS, userId);
                 grantRuntimePermissions(imsServicePackage, LOCATION_PERMISSIONS, userId);
                 grantRuntimePermissions(imsServicePackage, CAMERA_PERMISSIONS, userId);
+                grantRuntimePermissions(imsServicePackage, CONTACTS_PERMISSIONS, userId);
             }
         }
     }
@@ -1006,6 +1007,32 @@ public final class DefaultPermissionGrantPolicy {
                     && doesPackageSupportRuntimePermissions(dataServicePackage)) {
                 revokeRuntimePermissions(dataServicePackage, PHONE_PERMISSIONS, true, userId);
                 revokeRuntimePermissions(dataServicePackage, LOCATION_PERMISSIONS, true, userId);
+            }
+        }
+    }
+
+    public void grantDefaultPermissionsToActiveLuiApp(String packageName, int userId) {
+        Log.i(TAG, "Granting permissions to active LUI app for user:" + userId);
+        if (packageName == null) {
+            return;
+        }
+        PackageParser.Package luiAppPackage = getSystemPackage(packageName);
+        if (luiAppPackage != null
+                && doesPackageSupportRuntimePermissions(luiAppPackage)) {
+            grantRuntimePermissions(luiAppPackage, CAMERA_PERMISSIONS, true, userId);
+        }
+    }
+
+    public void revokeDefaultPermissionsFromLuiApps(String[] packageNames, int userId) {
+        Log.i(TAG, "Revoke permissions from LUI apps for user:" + userId);
+        if (packageNames == null) {
+            return;
+        }
+        for (String packageName : packageNames) {
+            PackageParser.Package luiAppPackage = getSystemPackage(packageName);
+            if (luiAppPackage != null
+                    && doesPackageSupportRuntimePermissions(luiAppPackage)) {
+                revokeRuntimePermissions(luiAppPackage, CAMERA_PERMISSIONS, true, userId);
             }
         }
     }

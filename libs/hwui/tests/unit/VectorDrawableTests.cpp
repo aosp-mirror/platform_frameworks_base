@@ -242,7 +242,8 @@ const StringPath sStringPaths[] = {
         {"\n \t   z", true},   // Valid path data with leading spaces
         {"1-2e34567", false},  // Not starting with a verb and ill-formatted float
         {"f 4 5", false},      // Invalid verb
-        {"\r      ", false}    // Empty string
+        {"\r      ", false},   // Empty string
+        {"L1,0 L1,1 L0,1 z M1000", false}    // Not enough floats following verb M.
 };
 
 static bool hasSameVerbs(const PathData& from, const PathData& to) {

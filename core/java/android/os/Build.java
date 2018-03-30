@@ -295,8 +295,10 @@ public class Build {
 
         /**
          * The current lowest supported value of app target SDK. Applications targeting
-         * lower values will fail to install and run. Its possible values are defined
-         * in {@link Build.VERSION_CODES}.
+         * lower values may not function on devices running this SDK version. Its possible
+         * values are defined in {@link Build.VERSION_CODES}.
+         *
+         * @hide
          */
         public static final int MIN_SUPPORTED_TARGET_SDK_INT = SystemProperties.getInt(
                 "ro.build.version.min_supported_target_sdk", 0);
@@ -905,6 +907,8 @@ public class Build {
          * <li>{@link android.app.Service#startForeground Service.startForeground} requires
          * that apps hold the permission
          * {@link android.Manifest.permission#FOREGROUND_SERVICE}.</li>
+         * <li>{@link android.widget.LinearLayout} will always remeasure weighted children,
+         * even if there is no excess space.</li>
          * </ul>
          */
         public static final int P = CUR_DEVELOPMENT; // STOPSHIP Replace with the real version.

@@ -329,12 +329,12 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.mConfig.allowEvents = false;
         mZenModeHelperSpy.mConfig.allowRepeatCallers= false;
 
-        // 2. apply priority only zen - verify ringer is set to silent
+        // 2. apply priority only zen - verify ringer is unchanged
         mZenModeHelperSpy.applyZenToRingerMode();
-        verify(mAudioManager, atLeastOnce()).setRingerModeInternal(AudioManager.RINGER_MODE_SILENT,
+        verify(mAudioManager, never()).setRingerModeInternal(AudioManager.RINGER_MODE_SILENT,
                 mZenModeHelperSpy.TAG);
 
-        // 3. apply zen off - verify zen is set to prevoius ringer (normal)
+        // 3. apply zen off - verify zen is set to previous ringer (normal)
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_SILENT);
         mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_OFF;
         mZenModeHelperSpy.applyZenToRingerMode();

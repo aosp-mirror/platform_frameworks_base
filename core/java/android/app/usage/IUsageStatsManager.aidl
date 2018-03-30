@@ -32,6 +32,8 @@ interface IUsageStatsManager {
             String callingPackage);
     ParceledListSlice queryConfigurationStats(int bucketType, long beginTime, long endTime,
             String callingPackage);
+    ParceledListSlice queryEventStats(int bucketType, long beginTime, long endTime,
+            String callingPackage);
     UsageEvents queryEvents(long beginTime, long endTime, String callingPackage);
     UsageEvents queryEventsForPackage(long beginTime, long endTime, String callingPackage);
     void setAppInactive(String packageName, boolean inactive, int userId);

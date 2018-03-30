@@ -266,8 +266,8 @@ import java.util.Set;
  * </ul>
  *
  * <p>For example, consider the Note Pad sample application that
- * allows user to browse through a list of notes data and view details about
- * individual items.  Text in italics indicate places were you would replace a
+ * allows a user to browse through a list of notes data and view details about
+ * individual items.  Text in italics indicates places where you would replace a
  * name with one specific to your own package.</p>
  *
  * <pre> &lt;manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -1814,6 +1814,17 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_PACKAGE_NAME = "android.intent.extra.PACKAGE_NAME";
 
     /**
+     * Intent extra: A {@link Bundle} of extras for a package being suspended. Will be sent with
+     * {@link #ACTION_MY_PACKAGE_SUSPENDED}.
+     *
+     * @see #ACTION_MY_PACKAGE_SUSPENDED
+     * @see #ACTION_MY_PACKAGE_UNSUSPENDED
+     * @see PackageManager#isPackageSuspended()
+     * @see PackageManager#getSuspendedPackageAppExtras()
+     */
+    public static final String EXTRA_SUSPENDED_PACKAGE_EXTRAS = "android.intent.extra.SUSPENDED_PACKAGE_EXTRAS";
+
+    /**
      * Intent extra: An app split name.
      * <p>
      * Type: String
@@ -2237,6 +2248,43 @@ public class Intent implements Parcelable, Cloneable {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGES_UNSUSPENDED = "android.intent.action.PACKAGES_UNSUSPENDED";
+
+    /**
+     * Broadcast Action: Sent to a package that has been suspended by the system. This is sent
+     * whenever a package is put into a suspended state or any of it's app extras change while
+     * in the suspended state.
+     * <p> Optionally includes the following extras:
+     * <ul>
+     *     <li> {@link #EXTRA_SUSPENDED_PACKAGE_EXTRAS} which is a {@link Bundle} which will contain
+     *     useful information for the app being suspended.
+     * </ul>
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system. <em>This will be delivered to {@link BroadcastReceiver} components declared in
+     * the manifest.</em>
+     *
+     * @see #ACTION_MY_PACKAGE_UNSUSPENDED
+     * @see #EXTRA_SUSPENDED_PACKAGE_EXTRAS
+     * @see PackageManager#isPackageSuspended()
+     * @see PackageManager#getSuspendedPackageAppExtras()
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_MY_PACKAGE_SUSPENDED = "android.intent.action.MY_PACKAGE_SUSPENDED";
+
+    /**
+     * Broadcast Action: Sent to a package that has been unsuspended.
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system. <em>This will be delivered to {@link BroadcastReceiver} components declared in
+     * the manifest.</em>
+     *
+     * @see #ACTION_MY_PACKAGE_SUSPENDED
+     * @see #EXTRA_SUSPENDED_PACKAGE_EXTRAS
+     * @see PackageManager#isPackageSuspended()
+     * @see PackageManager#getSuspendedPackageAppExtras()
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_MY_PACKAGE_UNSUSPENDED = "android.intent.action.MY_PACKAGE_UNSUSPENDED";
+
     /**
      * Broadcast Action: A user ID has been removed from the system.  The user
      * ID number is stored in the extra data under {@link #EXTRA_UID}.

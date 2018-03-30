@@ -23,10 +23,10 @@ import android.media.MediaMetadata2;
 import android.media.MediaPlayerBase;
 import android.media.MediaPlaylistAgent;
 import android.media.MediaSession2;
-import android.media.MediaSession2.Command;
+import android.media.SessionCommand2;
 import android.media.MediaSession2.CommandButton;
 import android.media.MediaSession2.CommandButton.Builder;
-import android.media.MediaSession2.CommandGroup;
+import android.media.SessionCommandGroup2;
 import android.media.MediaSession2.ControllerInfo;
 import android.media.MediaSession2.OnDataSourceMissingHelper;
 import android.media.MediaSession2.SessionCallback;
@@ -55,10 +55,10 @@ public interface MediaSession2Provider extends TransportControlProvider {
     List<ControllerInfo> getConnectedControllers_impl();
     void setCustomLayout_impl(ControllerInfo controller, List<CommandButton> layout);
     void setAudioFocusRequest_impl(AudioFocusRequest afr);
-    void setAllowedCommands_impl(ControllerInfo controller, CommandGroup commands);
-    void sendCustomCommand_impl(ControllerInfo controller, Command command, Bundle args,
+    void setAllowedCommands_impl(ControllerInfo controller, SessionCommandGroup2 commands);
+    void sendCustomCommand_impl(ControllerInfo controller, SessionCommand2 command, Bundle args,
             ResultReceiver receiver);
-    void sendCustomCommand_impl(Command command, Bundle args);
+    void sendCustomCommand_impl(SessionCommand2 command, Bundle args);
     void addPlaylistItem_impl(int index, MediaItem2 item);
     void removePlaylistItem_impl(MediaItem2 item);
     void replacePlaylistItem_impl(int index, MediaItem2 item);
@@ -72,6 +72,7 @@ public interface MediaSession2Provider extends TransportControlProvider {
     void setOnDataSourceMissingHelper_impl(OnDataSourceMissingHelper helper);
     void clearOnDataSourceMissingHelper_impl();
 
+    // TODO(jaewan): Rename and move provider
     interface CommandProvider {
         int getCommandCode_impl();
         String getCustomCommand_impl();
@@ -82,25 +83,26 @@ public interface MediaSession2Provider extends TransportControlProvider {
         int hashCode_impl();
     }
 
+    // TODO(jaewan): Rename and move provider
     interface CommandGroupProvider {
-        void addCommand_impl(Command command);
+        void addCommand_impl(SessionCommand2 command);
         void addAllPredefinedCommands_impl();
-        void removeCommand_impl(Command command);
-        boolean hasCommand_impl(Command command);
+        void removeCommand_impl(SessionCommand2 command);
+        boolean hasCommand_impl(SessionCommand2 command);
         boolean hasCommand_impl(int code);
-        Set<Command> getCommands_impl();
+        Set<SessionCommand2> getCommands_impl();
         Bundle toBundle_impl();
     }
 
     interface CommandButtonProvider {
-        Command getCommand_impl();
+        SessionCommand2 getCommand_impl();
         int getIconResId_impl();
         String getDisplayName_impl();
         Bundle getExtras_impl();
         boolean isEnabled_impl();
 
         interface BuilderProvider {
-            Builder setCommand_impl(Command command);
+            Builder setCommand_impl(SessionCommand2 command);
             Builder setIconResId_impl(int resId);
             Builder setDisplayName_impl(String displayName);
             Builder setEnabled_impl(boolean enabled);

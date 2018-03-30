@@ -16,9 +16,12 @@
 
 package android.view.textclassifier;
 
+import static java.time.temporal.ChronoUnit.MILLIS;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
+import android.app.RemoteAction;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.ContentUris;
@@ -26,7 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.LocaleList;
@@ -44,9 +47,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -93,6 +97,8 @@ public final class TextClassifierImpl implements TextClassifier {
     private Logger.Config mLoggerConfig;
     @GuardedBy("mLoggerLock") // Do not access outside this lock.
     private Logger mLogger;
+    @GuardedBy("mLoggerLock") // Do not access outside this lock.
+    private Logger mLogger2;  // This is the new logger. Will replace mLogger.
 
     private final TextClassificationConstants mSettings;
 
@@ -116,7 +122,7 @@ public final class TextClassifierImpl implements TextClassifier {
                     && rangeLength <= mSettings.getSuggestSelectionMaxRangeLength()) {
                 final LocaleList locales = (options == null) ? null : options.getDefaultLocales();
                 final String localesString = concatenateLocales(locales);
-                final Calendar refTime = Calendar.getInstance();
+                final ZonedDateTime refTime = ZonedDateTime.now();
                 final boolean darkLaunchAllowed = options != null && options.isDarkLaunchAllowed();
                 final TextClassifierImplNative nativeImpl = getNative(locales);
                 final String string = text.toString();
@@ -140,8 +146,8 @@ public final class TextClassifierImpl implements TextClassifier {
                             nativeImpl.classifyText(
                                     string, start, end,
                                     new TextClassifierImplNative.ClassificationOptions(
-                                            refTime.getTimeInMillis(),
-                                            refTime.getTimeZone().getID(),
+                                            refTime.toInstant().toEpochMilli(),
+                                            refTime.getZone().getId(),
                                             localesString));
                     final int size = results.length;
                     for (int i = 0; i < size; i++) {
@@ -180,19 +186,20 @@ public final class TextClassifierImpl implements TextClassifier {
                 final String string = text.toString();
                 final LocaleList locales = (options == null) ? null : options.getDefaultLocales();
                 final String localesString = concatenateLocales(locales);
-                final Calendar refTime = (options != null && options.getReferenceTime() != null)
-                        ? options.getReferenceTime() : Calendar.getInstance();
+                final ZonedDateTime refTime =
+                        (options != null && options.getReferenceTime() != null)
+                                ? options.getReferenceTime() : ZonedDateTime.now();
 
                 final TextClassifierImplNative.ClassificationResult[] results =
                         getNative(locales)
                                 .classifyText(string, startIndex, endIndex,
                                         new TextClassifierImplNative.ClassificationOptions(
-                                                refTime.getTimeInMillis(),
-                                                refTime.getTimeZone().getID(),
+                                                refTime.toInstant().toEpochMilli(),
+                                                refTime.getZone().getId(),
                                                 localesString));
                 if (results.length > 0) {
                     return createClassificationResult(
-                            results, string, startIndex, endIndex, refTime);
+                            results, string, startIndex, endIndex, refTime.toInstant());
                 }
             }
         } catch (Throwable t) {
@@ -221,7 +228,7 @@ public final class TextClassifierImpl implements TextClassifier {
         try {
             final long startTimeMs = System.currentTimeMillis();
             final LocaleList defaultLocales = options != null ? options.getDefaultLocales() : null;
-            final Calendar refTime = Calendar.getInstance();
+            final ZonedDateTime refTime = ZonedDateTime.now();
             final Collection<String> entitiesToIdentify =
                     options != null && options.getEntityConfig() != null
                             ? options.getEntityConfig().resolveEntityListModifications(
@@ -233,8 +240,8 @@ public final class TextClassifierImpl implements TextClassifier {
                     nativeImpl.annotate(
                         textString,
                         new TextClassifierImplNative.AnnotationOptions(
-                                refTime.getTimeInMillis(),
-                                refTime.getTimeZone().getID(),
+                                refTime.toInstant().toEpochMilli(),
+                                refTime.getZone().getId(),
                                 concatenateLocales(defaultLocales)));
             for (TextClassifierImplNative.AnnotatedSpan span : annotations) {
                 final TextClassifierImplNative.ClassificationResult[] results =
@@ -297,6 +304,18 @@ public final class TextClassifierImpl implements TextClassifier {
             }
         }
         return mLogger;
+    }
+
+    @Override
+    public void onSelectionEvent(SelectionEvent event) {
+        Preconditions.checkNotNull(event);
+        synchronized (mLoggerLock) {
+            if (mLogger2 == null) {
+                mLogger2 = new DefaultLogger(
+                        new Logger.Config(mContext, WIDGET_TYPE_UNKNOWN, null));
+            }
+            mLogger2.writeEvent(event);
+        }
     }
 
     private TextClassifierImplNative getNative(LocaleList localeList)
@@ -401,7 +420,7 @@ public final class TextClassifierImpl implements TextClassifier {
 
     private TextClassification createClassificationResult(
             TextClassifierImplNative.ClassificationResult[] classifications,
-            String text, int start, int end, @Nullable Calendar referenceTime) {
+            String text, int start, int end, @Nullable Instant referenceTime) {
         final String classifiedText = text.substring(start, end);
         final TextClassification.Builder builder = new TextClassification.Builder()
                 .setText(classifiedText);
@@ -418,48 +437,25 @@ public final class TextClassifierImpl implements TextClassifier {
             }
         }
 
-        addActions(builder, IntentFactory.create(
-                mContext, referenceTime, highestScoringResult, classifiedText));
+        boolean isPrimaryAction = true;
+        for (LabeledIntent labeledIntent : IntentFactory.create(
+                mContext, referenceTime, highestScoringResult, classifiedText)) {
+            RemoteAction action = labeledIntent.asRemoteAction(mContext);
+            if (isPrimaryAction) {
+                // For O backwards compatibility, the first RemoteAction is also written to the
+                // legacy API fields.
+                builder.setIcon(action.getIcon().loadDrawable(mContext));
+                builder.setLabel(action.getTitle().toString());
+                builder.setIntent(labeledIntent.getIntent());
+                builder.setOnClickListener(TextClassification.createIntentOnClickListener(
+                        TextClassification.createPendingIntent(mContext,
+                                labeledIntent.getIntent())));
+                isPrimaryAction = false;
+            }
+            builder.addAction(action);
+        }
 
         return builder.setSignature(getSignature(text, start, end)).build();
-    }
-
-    /** Extends the classification with the intents that can be resolved. */
-    private void addActions(
-            TextClassification.Builder builder, List<Intent> intents) {
-        final PackageManager pm = mContext.getPackageManager();
-        final int size = intents.size();
-        for (int i = 0; i < size; i++) {
-            final Intent intent = intents.get(i);
-            final ResolveInfo resolveInfo;
-            if (intent != null) {
-                resolveInfo = pm.resolveActivity(intent, 0);
-            } else {
-                resolveInfo = null;
-            }
-            if (resolveInfo != null && resolveInfo.activityInfo != null) {
-                final String packageName = resolveInfo.activityInfo.packageName;
-                final String label = IntentFactory.getLabel(mContext, intent);
-                Drawable icon;
-                if ("android".equals(packageName)) {
-                    // Requires the chooser to find an activity to handle the intent.
-                    icon = null;
-                } else {
-                    // A default activity will handle the intent.
-                    intent.setComponent(
-                            new ComponentName(packageName, resolveInfo.activityInfo.name));
-                    icon = resolveInfo.activityInfo.loadIcon(pm);
-                    if (icon == null) {
-                        icon = resolveInfo.loadIcon(pm);
-                    }
-                }
-                if (i == 0) {
-                    builder.setPrimaryAction(intent, label, icon);
-                } else {
-                    builder.addSecondaryAction(intent, label, icon);
-                }
-            }
-        }
     }
 
     /**
@@ -588,6 +584,60 @@ public final class TextClassifierImpl implements TextClassifier {
     }
 
     /**
+     * Helper class to store the information from which RemoteActions are built.
+     */
+    private static final class LabeledIntent {
+        private String mTitle;
+        private String mDescription;
+        private Intent mIntent;
+
+        LabeledIntent(String title, String description, Intent intent) {
+            mTitle = title;
+            mDescription = description;
+            mIntent = intent;
+        }
+
+        String getTitle() {
+            return mTitle;
+        }
+
+        String getDescription() {
+            return mDescription;
+        }
+
+        Intent getIntent() {
+            return mIntent;
+        }
+
+        RemoteAction asRemoteAction(Context context) {
+            final PackageManager pm = context.getPackageManager();
+            final ResolveInfo resolveInfo = pm.resolveActivity(mIntent, 0);
+            final String packageName = resolveInfo != null && resolveInfo.activityInfo != null
+                    ? resolveInfo.activityInfo.packageName : null;
+            Icon icon = null;
+            boolean shouldShowIcon = false;
+            if (packageName != null && !"android".equals(packageName)) {
+                // There is a default activity handling the intent.
+                mIntent.setComponent(new ComponentName(packageName, resolveInfo.activityInfo.name));
+                if (resolveInfo.activityInfo.getIconResource() != 0) {
+                    icon = Icon.createWithResource(
+                            packageName, resolveInfo.activityInfo.getIconResource());
+                    shouldShowIcon = true;
+                }
+            }
+            if (icon == null) {
+                // RemoteAction requires that there be an icon.
+                icon = Icon.createWithResource("android",
+                        com.android.internal.R.drawable.ic_more_items);
+            }
+            RemoteAction action = new RemoteAction(icon, mTitle, mDescription,
+                    TextClassification.createPendingIntent(context, mIntent));
+            action.setShouldShowIcon(shouldShowIcon);
+            return action;
+        }
+    }
+
+    /**
      * Creates intents based on the classification type.
      */
     static final class IntentFactory {
@@ -598,84 +648,101 @@ public final class TextClassifierImpl implements TextClassifier {
         private IntentFactory() {}
 
         @NonNull
-        public static List<Intent> create(
+        public static List<LabeledIntent> create(
                 Context context,
-                @Nullable Calendar referenceTime,
+                @Nullable Instant referenceTime,
                 TextClassifierImplNative.ClassificationResult classification,
                 String text) {
             final String type = classification.getCollection().trim().toLowerCase(Locale.ENGLISH);
             text = text.trim();
             switch (type) {
                 case TextClassifier.TYPE_EMAIL:
-                    return createForEmail(text);
+                    return createForEmail(context, text);
                 case TextClassifier.TYPE_PHONE:
                     return createForPhone(context, text);
                 case TextClassifier.TYPE_ADDRESS:
-                    return createForAddress(text);
+                    return createForAddress(context, text);
                 case TextClassifier.TYPE_URL:
                     return createForUrl(context, text);
                 case TextClassifier.TYPE_DATE:
                 case TextClassifier.TYPE_DATE_TIME:
                     if (classification.getDatetimeResult() != null) {
-                        Calendar eventTime = Calendar.getInstance();
-                        eventTime.setTimeInMillis(
+                        final Instant parsedTime = Instant.ofEpochMilli(
                                 classification.getDatetimeResult().getTimeMsUtc());
-                        return createForDatetime(type, referenceTime, eventTime);
+                        return createForDatetime(context, type, referenceTime, parsedTime);
                     } else {
                         return new ArrayList<>();
                     }
                 case TextClassifier.TYPE_FLIGHT_NUMBER:
-                    return createForFlight(text);
+                    return createForFlight(context, text);
                 default:
                     return new ArrayList<>();
             }
         }
 
         @NonNull
-        private static List<Intent> createForEmail(String text) {
+        private static List<LabeledIntent> createForEmail(Context context, String text) {
             return Arrays.asList(
-                    new Intent(Intent.ACTION_SENDTO)
-                            .setData(Uri.parse(String.format("mailto:%s", text))),
-                    new Intent(Intent.ACTION_INSERT_OR_EDIT)
-                            .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
-                            .putExtra(ContactsContract.Intents.Insert.EMAIL, text));
+                    new LabeledIntent(
+                            context.getString(com.android.internal.R.string.email),
+                            context.getString(com.android.internal.R.string.email_desc),
+                            new Intent(Intent.ACTION_SENDTO)
+                                    .setData(Uri.parse(String.format("mailto:%s", text)))),
+                    new LabeledIntent(
+                            context.getString(com.android.internal.R.string.add_contact),
+                            context.getString(com.android.internal.R.string.add_contact_desc),
+                            new Intent(Intent.ACTION_INSERT_OR_EDIT)
+                                    .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
+                                    .putExtra(ContactsContract.Intents.Insert.EMAIL, text)));
         }
 
         @NonNull
-        private static List<Intent> createForPhone(Context context, String text) {
-            final List<Intent> intents = new ArrayList<>();
+        private static List<LabeledIntent> createForPhone(Context context, String text) {
+            final List<LabeledIntent> actions = new ArrayList<>();
             final UserManager userManager = context.getSystemService(UserManager.class);
             final Bundle userRestrictions = userManager != null
                     ? userManager.getUserRestrictions() : new Bundle();
             if (!userRestrictions.getBoolean(UserManager.DISALLOW_OUTGOING_CALLS, false)) {
-                intents.add(new Intent(Intent.ACTION_DIAL)
-                        .setData(Uri.parse(String.format("tel:%s", text))));
+                actions.add(new LabeledIntent(
+                        context.getString(com.android.internal.R.string.dial),
+                        context.getString(com.android.internal.R.string.dial_desc),
+                        new Intent(Intent.ACTION_DIAL).setData(
+                                Uri.parse(String.format("tel:%s", text)))));
             }
-            intents.add(new Intent(Intent.ACTION_INSERT_OR_EDIT)
-                    .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
-                    .putExtra(ContactsContract.Intents.Insert.PHONE, text));
+            actions.add(new LabeledIntent(
+                    context.getString(com.android.internal.R.string.add_contact),
+                    context.getString(com.android.internal.R.string.add_contact_desc),
+                    new Intent(Intent.ACTION_INSERT_OR_EDIT)
+                            .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
+                            .putExtra(ContactsContract.Intents.Insert.PHONE, text)));
             if (!userRestrictions.getBoolean(UserManager.DISALLOW_SMS, false)) {
-                intents.add(new Intent(Intent.ACTION_SENDTO)
-                        .setData(Uri.parse(String.format("smsto:%s", text))));
+                actions.add(new LabeledIntent(
+                        context.getString(com.android.internal.R.string.sms),
+                        context.getString(com.android.internal.R.string.sms_desc),
+                        new Intent(Intent.ACTION_SENDTO)
+                                .setData(Uri.parse(String.format("smsto:%s", text)))));
             }
-            return intents;
+            return actions;
         }
 
         @NonNull
-        private static List<Intent> createForAddress(String text) {
-            final List<Intent> intents = new ArrayList<>();
+        private static List<LabeledIntent> createForAddress(Context context, String text) {
+            final List<LabeledIntent> actions = new ArrayList<>();
             try {
                 final String encText = URLEncoder.encode(text, "UTF-8");
-                intents.add(new Intent(Intent.ACTION_VIEW)
-                        .setData(Uri.parse(String.format("geo:0,0?q=%s", encText))));
+                actions.add(new LabeledIntent(
+                        context.getString(com.android.internal.R.string.map),
+                        context.getString(com.android.internal.R.string.map_desc),
+                        new Intent(Intent.ACTION_VIEW)
+                                .setData(Uri.parse(String.format("geo:0,0?q=%s", encText)))));
             } catch (UnsupportedEncodingException e) {
                 Log.e(LOG_TAG, "Could not encode address", e);
             }
-            return intents;
+            return actions;
         }
 
         @NonNull
-        private static List<Intent> createForUrl(Context context, String text) {
+        private static List<LabeledIntent> createForUrl(Context context, String text) {
             final String httpPrefix = "http://";
             final String httpsPrefix = "https://";
             if (text.toLowerCase().startsWith(httpPrefix)) {
@@ -685,99 +752,64 @@ public final class TextClassifierImpl implements TextClassifier {
             } else {
                 text = httpPrefix + text;
             }
-            return Arrays.asList(new Intent(Intent.ACTION_VIEW, Uri.parse(text))
-                    .putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName()));
+            return Arrays.asList(new LabeledIntent(
+                    context.getString(com.android.internal.R.string.browse),
+                    context.getString(com.android.internal.R.string.browse_desc),
+                    new Intent(Intent.ACTION_VIEW, Uri.parse(text))
+                            .putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName())));
         }
 
         @NonNull
-        private static List<Intent> createForDatetime(
-                String type, @Nullable Calendar referenceTime, Calendar eventTime) {
+        private static List<LabeledIntent> createForDatetime(
+                Context context, String type, @Nullable Instant referenceTime,
+                Instant parsedTime) {
             if (referenceTime == null) {
                 // If no reference time was given, use now.
-                referenceTime = Calendar.getInstance();
+                referenceTime = Instant.now();
             }
-            List<Intent> intents = new ArrayList<>();
-            intents.add(createCalendarViewIntent(eventTime));
-            final long millisSinceReference =
-                    eventTime.getTimeInMillis() - referenceTime.getTimeInMillis();
-            if (millisSinceReference > MIN_EVENT_FUTURE_MILLIS) {
-                intents.add(createCalendarCreateEventIntent(eventTime, type));
+            List<LabeledIntent> actions = new ArrayList<>();
+            actions.add(createCalendarViewIntent(context, parsedTime));
+            final long millisUntilEvent = referenceTime.until(parsedTime, MILLIS);
+            if (millisUntilEvent > MIN_EVENT_FUTURE_MILLIS) {
+                actions.add(createCalendarCreateEventIntent(context, parsedTime, type));
             }
-            return intents;
+            return actions;
         }
 
         @NonNull
-        private static List<Intent> createForFlight(String text) {
-            return Arrays.asList(new Intent(Intent.ACTION_WEB_SEARCH)
-                    .putExtra(SearchManager.QUERY, text));
+        private static List<LabeledIntent> createForFlight(Context context, String text) {
+            return Arrays.asList(new LabeledIntent(
+                    context.getString(com.android.internal.R.string.view_flight),
+                    context.getString(com.android.internal.R.string.view_flight_desc),
+                    new Intent(Intent.ACTION_WEB_SEARCH)
+                            .putExtra(SearchManager.QUERY, text)));
         }
 
         @NonNull
-        private static Intent createCalendarViewIntent(Calendar eventTime) {
+        private static LabeledIntent createCalendarViewIntent(Context context, Instant parsedTime) {
             Uri.Builder builder = CalendarContract.CONTENT_URI.buildUpon();
             builder.appendPath("time");
-            ContentUris.appendId(builder, eventTime.getTimeInMillis());
-            return new Intent(Intent.ACTION_VIEW).setData(builder.build());
+            ContentUris.appendId(builder, parsedTime.toEpochMilli());
+            return new LabeledIntent(
+                    context.getString(com.android.internal.R.string.view_calendar),
+                    context.getString(com.android.internal.R.string.view_calendar_desc),
+                    new Intent(Intent.ACTION_VIEW).setData(builder.build()));
         }
 
         @NonNull
-        private static Intent createCalendarCreateEventIntent(
-                Calendar eventTime, @EntityType String type) {
+        private static LabeledIntent createCalendarCreateEventIntent(
+                Context context, Instant parsedTime, @EntityType String type) {
             final boolean isAllDay = TextClassifier.TYPE_DATE.equals(type);
-            return new Intent(Intent.ACTION_INSERT)
-                    .setData(CalendarContract.Events.CONTENT_URI)
-                    .putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, isAllDay)
-                    .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, eventTime.getTimeInMillis())
-                    .putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
-                            eventTime.getTimeInMillis() + DEFAULT_EVENT_DURATION);
-        }
-
-        @Nullable
-        public static String getLabel(Context context, @Nullable Intent intent) {
-            if (intent == null || intent.getAction() == null) {
-                return null;
-            }
-            final String authority =
-                    intent.getData() == null ? null : intent.getData().getAuthority();
-            switch (intent.getAction()) {
-                case Intent.ACTION_DIAL:
-                    return context.getString(com.android.internal.R.string.dial);
-                case Intent.ACTION_SENDTO:
-                    if ("mailto".equals(intent.getScheme())) {
-                        return context.getString(com.android.internal.R.string.email);
-                    } else if ("smsto".equals(intent.getScheme())) {
-                        return context.getString(com.android.internal.R.string.sms);
-                    } else {
-                        return null;
-                    }
-                case Intent.ACTION_INSERT:
-                    if (CalendarContract.AUTHORITY.equals(authority)) {
-                        return context.getString(com.android.internal.R.string.add_calendar_event);
-                    }
-                    return null;
-                case Intent.ACTION_INSERT_OR_EDIT:
-                    if (ContactsContract.Contacts.CONTENT_ITEM_TYPE.equals(
-                            intent.getType())) {
-                        return context.getString(com.android.internal.R.string.add_contact);
-                    } else {
-                        return null;
-                    }
-                case Intent.ACTION_VIEW:
-                    if (CalendarContract.AUTHORITY.equals(authority)) {
-                        return context.getString(com.android.internal.R.string.view_calendar);
-                    } else if ("geo".equals(intent.getScheme())) {
-                        return context.getString(com.android.internal.R.string.map);
-                    } else if ("http".equals(intent.getScheme())
-                            || "https".equals(intent.getScheme())) {
-                        return context.getString(com.android.internal.R.string.browse);
-                    } else {
-                        return null;
-                    }
-                case Intent.ACTION_WEB_SEARCH:
-                    return context.getString(com.android.internal.R.string.view_flight);
-                default:
-                    return null;
-            }
+            return new LabeledIntent(
+                    context.getString(com.android.internal.R.string.add_calendar_event),
+                    context.getString(com.android.internal.R.string.add_calendar_event_desc),
+                    new Intent(Intent.ACTION_INSERT)
+                            .setData(CalendarContract.Events.CONTENT_URI)
+                            .putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, isAllDay)
+                            .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
+                                    parsedTime.toEpochMilli())
+                            .putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
+                                    parsedTime.toEpochMilli() + DEFAULT_EVENT_DURATION));
         }
     }
 }

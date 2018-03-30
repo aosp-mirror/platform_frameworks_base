@@ -16,9 +16,9 @@
 
 package com.android.server.net;
 
-import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
 import static android.net.NetworkStats.DEFAULT_NETWORK_YES;
+import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.METERED_NO;
 import static android.net.NetworkStats.METERED_YES;
 import static android.net.NetworkStats.ROAMING_NO;
@@ -42,9 +42,11 @@ import android.service.NetworkStatsCollectionKeyProto;
 import android.service.NetworkStatsCollectionProto;
 import android.service.NetworkStatsCollectionStatsProto;
 import android.telephony.SubscriptionPlan;
+import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.IntArray;
+import android.util.MathUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -245,7 +247,10 @@ public class NetworkStatsCollection implements FileRotator.Reader {
                     + " is forbidden for caller " + callerUid);
         }
 
-        final int bucketEstimate = (int) ((end - start) / mBucketDuration);
+        // 180 days of history should be enough for anyone; if we end up needing
+        // more, we'll dynamically grow the history object.
+        final int bucketEstimate = (int) MathUtils.constrain(((end - start) / mBucketDuration), 0,
+                (180 * DateUtils.DAY_IN_MILLIS) / mBucketDuration);
         final NetworkStatsHistory combined = new NetworkStatsHistory(
                 mBucketDuration, bucketEstimate, fields);
 

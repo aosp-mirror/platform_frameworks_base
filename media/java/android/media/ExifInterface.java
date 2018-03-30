@@ -3226,9 +3226,18 @@ public class ExifInterface {
 
         if (stripOffsetsAttribute != null && stripByteCountsAttribute != null) {
             long[] stripOffsets =
-                    (long[]) stripOffsetsAttribute.getValue(mExifByteOrder);
+                    convertToLongArray(stripOffsetsAttribute.getValue(mExifByteOrder));
             long[] stripByteCounts =
-                    (long[]) stripByteCountsAttribute.getValue(mExifByteOrder);
+                    convertToLongArray(stripByteCountsAttribute.getValue(mExifByteOrder));
+
+            if (stripOffsets == null) {
+                Log.w(TAG, "stripOffsets should not be null.");
+                return;
+            }
+            if (stripByteCounts == null) {
+                Log.w(TAG, "stripByteCounts should not be null.");
+                return;
+            }
 
             // Set thumbnail byte array data for non-consecutive strip bytes
             byte[] totalStripBytes =
@@ -4024,5 +4033,23 @@ public class ExifInterface {
             }
         }
         return false;
+    }
+
+    /**
+     * Convert given int[] to long[]. If long[] is given, just return it.
+     * Return null for other types of input.
+     */
+    private static long[] convertToLongArray(Object inputObj) {
+        if (inputObj instanceof int[]) {
+            int[] input = (int[]) inputObj;
+            long[] result = new long[input.length];
+            for (int i = 0; i < input.length; i++) {
+                result[i] = input[i];
+            }
+            return result;
+        } else if (inputObj instanceof long[]) {
+            return (long[]) inputObj;
+        }
+        return null;
     }
 }

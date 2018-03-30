@@ -1373,7 +1373,7 @@ public class ProgressBar extends View {
      * indicator. To animate the visual position to the target value, use
      * {@link #setProgress(int, boolean)}}.
      *
-     * @param progress the new progress, between 0 and {@link #getMax()}
+     * @param progress the new progress, between {@link #getMin()} and {@link #getMax()}
      *
      * @see #setIndeterminate(boolean)
      * @see #isIndeterminate()
@@ -1392,7 +1392,7 @@ public class ProgressBar extends View {
      * Animation does not affect the result of {@link #getProgress()}, which
      * will return the target value immediately after this method is called.
      *
-     * @param progress the new progress value, between 0 and {@link #getMax()}
+     * @param progress the new progress value, between {@link #getMin()} and {@link #getMax()}
      * @param animate {@code true} to animate between the current and target
      *                values or {@code false} to not animate
      */
@@ -1425,7 +1425,8 @@ public class ProgressBar extends View {
      * anything if the progress bar is in indeterminate mode.
      * </p>
      *
-     * @param secondaryProgress the new secondary progress, between 0 and {@link #getMax()}
+     * @param secondaryProgress the new secondary progress, between {@link #getMin()} and
+     * {@link #getMax()}
      * @see #setIndeterminate(boolean)
      * @see #isIndeterminate()
      * @see #getSecondaryProgress()
@@ -1455,7 +1456,7 @@ public class ProgressBar extends View {
      * <p>Get the progress bar's current level of progress. Return 0 when the
      * progress bar is in indeterminate mode.</p>
      *
-     * @return the current progress, between 0 and {@link #getMax()}
+     * @return the current progress, between {@link #getMin()} and {@link #getMax()}
      *
      * @see #setIndeterminate(boolean)
      * @see #isIndeterminate()
@@ -1472,7 +1473,7 @@ public class ProgressBar extends View {
      * <p>Get the progress bar's current level of secondary progress. Return 0 when the
      * progress bar is in indeterminate mode.</p>
      *
-     * @return the current secondary progress, between 0 and {@link #getMax()}
+     * @return the current secondary progress, between {@link #getMin()} and {@link #getMax()}
      *
      * @see #setIndeterminate(boolean)
      * @see #isIndeterminate()
@@ -1990,7 +1991,8 @@ public class ProgressBar extends View {
 
         if (!isIndeterminate()) {
             AccessibilityNodeInfo.RangeInfo rangeInfo = AccessibilityNodeInfo.RangeInfo.obtain(
-                    AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INT, 0, getMax(), getProgress());
+                    AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_INT, getMin(), getMax(),
+                    getProgress());
             info.setRangeInfo(rangeInfo);
         }
     }

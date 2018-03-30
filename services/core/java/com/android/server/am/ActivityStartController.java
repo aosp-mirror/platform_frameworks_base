@@ -198,9 +198,10 @@ public class ActivityStartController {
 
             // See if we should be showing the platform update setup UI.
             final Intent intent = new Intent(Intent.ACTION_UPGRADE_SETUP);
-            final List<ResolveInfo> ris = mService.mContext.getPackageManager()
-                    .queryIntentActivities(intent,
-                            PackageManager.MATCH_SYSTEM_ONLY | PackageManager.GET_META_DATA);
+            final List<ResolveInfo> ris =
+                    mService.mContext.getPackageManager().queryIntentActivities(intent,
+                            PackageManager.MATCH_SYSTEM_ONLY | PackageManager.GET_META_DATA
+                                    | ActivityManagerService.STOCK_PM_FLAGS);
             if (!ris.isEmpty()) {
                 final ResolveInfo ri = ris.get(0);
                 String vers = ri.activityInfo.metaData != null

@@ -21,7 +21,6 @@ import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.service.notification.NotificationListenerService.Ranking
         .USER_SENTIMENT_NEGATIVE;
 
-import android.app.AppOpsManager;
 import android.app.INotificationManager;
 import android.app.NotificationChannel;
 import android.content.Context;
@@ -34,6 +33,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
+import android.support.annotation.VisibleForTesting;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
@@ -119,22 +119,6 @@ public class NotificationGutsManager implements Dumpable {
         bindGuts(row);
     }
 
-    private void saveAndCloseNotificationMenu(
-            ExpandableNotificationRow row, NotificationGuts guts, View done) {
-        guts.resetFalsingCheck();
-        int[] rowLocation = new int[2];
-        int[] doneLocation = new int[2];
-        row.getLocationOnScreen(rowLocation);
-        done.getLocationOnScreen(doneLocation);
-
-        final int centerX = done.getWidth() / 2;
-        final int centerY = done.getHeight() / 2;
-        final int x = doneLocation[0] - rowLocation[0] + centerX;
-        final int y = doneLocation[1] - rowLocation[1] + centerY;
-        closeAndSaveGuts(false /* removeLeavebehind */, false /* force */,
-                true /* removeControls */, x, y, true /* resetMenu */);
-    }
-
     /**
      * Sends an intent to open the app settings for a particular package and optional
      * channel.
@@ -174,12 +158,12 @@ public class NotificationGutsManager implements Dumpable {
 
     private void bindGuts(final ExpandableNotificationRow row,
             NotificationMenuRowPlugin.MenuItem item) {
+        StatusBarNotification sbn = row.getStatusBarNotification();
+
         row.inflateGuts();
         row.setGutsView(item);
-        final StatusBarNotification sbn = row.getStatusBarNotification();
         row.setTag(sbn.getPackageName());
-        final NotificationGuts guts = row.getGuts();
-        guts.setClosedListener((NotificationGuts g) -> {
+        row.getGuts().setClosedListener((NotificationGuts g) -> {
             if (!g.willBeRemoved() && !row.isRemoved()) {
                 mListContainer.onHeightChanged(
                         row, !mPresenter.isPresenterFullyCollapsed() /* needsAnimation */);
@@ -197,87 +181,143 @@ public class NotificationGutsManager implements Dumpable {
 
         View gutsView = item.getGutsView();
         if (gutsView instanceof NotificationSnooze) {
-            NotificationSnooze snoozeGuts = (NotificationSnooze) gutsView;
-            snoozeGuts.setSnoozeListener(mListContainer.getSwipeActionHelper());
-            snoozeGuts.setStatusBarNotification(sbn);
-            snoozeGuts.setSnoozeOptions(row.getEntry().snoozeCriteria);
-            guts.setHeightChangedListener((NotificationGuts g) -> {
-                mListContainer.onHeightChanged(row, row.isShown() /* needsAnimation */);
-            });
+            initializeSnoozeView(row, (NotificationSnooze) gutsView);
+        } else if (gutsView instanceof AppOpsInfo) {
+            initializeAppOpsInfo(row, (AppOpsInfo) gutsView);
+        } else if (gutsView instanceof NotificationInfo) {
+            initializeNotificationInfo(row, (NotificationInfo) gutsView);
         }
+    }
 
-        if (gutsView instanceof AppOpsInfo) {
-            AppOpsInfo info = (AppOpsInfo) gutsView;
-            final UserHandle userHandle = sbn.getUser();
-            PackageManager pmUser = StatusBar.getPackageManagerForUser(mContext,
-                    userHandle.getIdentifier());
-            final AppOpsInfo.OnSettingsClickListener onSettingsClick = (View v,
-                    String pkg, int uid, ArraySet<Integer> ops) -> {
-                mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_OPS_GUTS_SETTINGS);
-                guts.resetFalsingCheck();
-                startAppOpsSettingsActivity(pkg, uid, ops, row);
-            };
-            if (!row.getEntry().mActiveAppOps.isEmpty()) {
-                info.bindGuts(pmUser, onSettingsClick, sbn, row.getEntry().mActiveAppOps);
-            }
+    /**
+     * Sets up the {@link NotificationSnooze} inside the notification row's guts.
+     *
+     * @param row view to set up the guts for
+     * @param notificationSnoozeView view to set up/bind within {@code row}
+     */
+    private void initializeSnoozeView(
+            final ExpandableNotificationRow row,
+            NotificationSnooze notificationSnoozeView) {
+        NotificationGuts guts = row.getGuts();
+        StatusBarNotification sbn = row.getStatusBarNotification();
+
+        notificationSnoozeView.setSnoozeListener(mListContainer.getSwipeActionHelper());
+        notificationSnoozeView.setStatusBarNotification(sbn);
+        notificationSnoozeView.setSnoozeOptions(row.getEntry().snoozeCriteria);
+        guts.setHeightChangedListener((NotificationGuts g) -> {
+            mListContainer.onHeightChanged(row, row.isShown() /* needsAnimation */);
+        });
+    }
+
+    /**
+     * Sets up the {@link AppOpsInfo} inside the notification row's guts.
+     *
+     * @param row view to set up the guts for
+     * @param appOpsInfoView view to set up/bind within {@code row}
+     */
+    private void initializeAppOpsInfo(
+            final ExpandableNotificationRow row,
+            AppOpsInfo appOpsInfoView) {
+        NotificationGuts guts = row.getGuts();
+        StatusBarNotification sbn = row.getStatusBarNotification();
+        UserHandle userHandle = sbn.getUser();
+        PackageManager pmUser = StatusBar.getPackageManagerForUser(mContext,
+                userHandle.getIdentifier());
+
+        AppOpsInfo.OnSettingsClickListener onSettingsClick =
+                (View v, String pkg, int uid, ArraySet<Integer> ops) -> {
+            mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_OPS_GUTS_SETTINGS);
+            guts.resetFalsingCheck();
+            startAppOpsSettingsActivity(pkg, uid, ops, row);
+        };
+        if (!row.getEntry().mActiveAppOps.isEmpty()) {
+            appOpsInfoView.bindGuts(pmUser, onSettingsClick, sbn, row.getEntry().mActiveAppOps);
         }
+    }
 
-        if (gutsView instanceof NotificationInfo) {
-            final UserHandle userHandle = sbn.getUser();
-            PackageManager pmUser = StatusBar.getPackageManagerForUser(mContext,
-                    userHandle.getIdentifier());
-            final INotificationManager iNotificationManager = INotificationManager.Stub.asInterface(
-                    ServiceManager.getService(Context.NOTIFICATION_SERVICE));
-            final String pkg = sbn.getPackageName();
-            NotificationInfo info = (NotificationInfo) gutsView;
-            // Settings link is only valid for notifications that specify a user, unless this is the
-            // system user.
-            NotificationInfo.OnSettingsClickListener onSettingsClick = null;
-            if (!userHandle.equals(UserHandle.ALL)
-                    || mLockscreenUserManager.getCurrentUserId() == UserHandle.USER_SYSTEM) {
-                onSettingsClick = (View v, NotificationChannel channel, int appUid) -> {
-                    mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_NOTE_INFO);
+    /**
+     * Sets up the {@link NotificationInfo} inside the notification row's guts.
+     *
+     * @param row view to set up the guts for
+     * @param notificationInfoView view to set up/bind within {@code row}
+     */
+    @VisibleForTesting
+    void initializeNotificationInfo(
+            final ExpandableNotificationRow row,
+            NotificationInfo notificationInfoView) {
+        NotificationGuts guts = row.getGuts();
+        StatusBarNotification sbn = row.getStatusBarNotification();
+        String packageName = sbn.getPackageName();
+        // Settings link is only valid for notifications that specify a non-system user
+        NotificationInfo.OnSettingsClickListener onSettingsClick = null;
+        UserHandle userHandle = sbn.getUser();
+        PackageManager pmUser = StatusBar.getPackageManagerForUser(
+                mContext, userHandle.getIdentifier());
+        INotificationManager iNotificationManager = INotificationManager.Stub.asInterface(
+                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
+        final NotificationInfo.OnAppSettingsClickListener onAppSettingsClick =
+                (View v, Intent intent) -> {
+                    mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_APP_NOTE_SETTINGS);
                     guts.resetFalsingCheck();
-                    mOnSettingsClickListener.onClick(sbn.getKey());
-                    startAppNotificationSettingsActivity(pkg, appUid, channel, row);
+                    mPresenter.startNotificationGutsIntent(intent, sbn.getUid(), row);
                 };
-            }
-            final NotificationInfo.OnAppSettingsClickListener onAppSettingsClick = (View v,
-                    Intent intent) -> {
-                mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_APP_NOTE_SETTINGS);
-                guts.resetFalsingCheck();
-                mPresenter.startNotificationGutsIntent(intent, sbn.getUid(), row);
-            };
-            final View.OnClickListener onDoneClick = (View v) -> {
-                saveAndCloseNotificationMenu(row, guts, v);
-            };
+        boolean isForBlockingHelper = row.isBlockingHelperShowing();
 
-            ArraySet<NotificationChannel> channels = new ArraySet<>();
-            channels.add(row.getEntry().channel);
-            if (row.isSummaryWithChildren()) {
-                // If this is a summary, then add in the children notification channels for the
-                // same user and pkg.
-                final List<ExpandableNotificationRow> childrenRows = row.getNotificationChildren();
-                final int numChildren = childrenRows.size();
-                for (int i = 0; i < numChildren; i++) {
-                    final ExpandableNotificationRow childRow = childrenRows.get(i);
-                    final NotificationChannel childChannel = childRow.getEntry().channel;
-                    final StatusBarNotification childSbn = childRow.getStatusBarNotification();
-                    if (childSbn.getUser().equals(userHandle) &&
-                            childSbn.getPackageName().equals(pkg)) {
-                        channels.add(childChannel);
-                    }
+        if (!userHandle.equals(UserHandle.ALL)
+                || mLockscreenUserManager.getCurrentUserId() == UserHandle.USER_SYSTEM) {
+            onSettingsClick = (View v, NotificationChannel channel, int appUid) -> {
+                mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_NOTE_INFO);
+                guts.resetFalsingCheck();
+                mOnSettingsClickListener.onClick(sbn.getKey());
+                startAppNotificationSettingsActivity(packageName, appUid, channel, row);
+            };
+        }
+
+        try {
+            notificationInfoView.bindNotification(
+                    pmUser,
+                    iNotificationManager,
+                    packageName,
+                    row.getEntry().channel,
+                    getNumNotificationChannels(row, packageName, userHandle),
+                    sbn,
+                    mCheckSaveListener,
+                    onSettingsClick,
+                    onAppSettingsClick,
+                    mNonBlockablePkgs,
+                    isForBlockingHelper,
+                    row.getEntry().userSentiment == USER_SENTIMENT_NEGATIVE);
+        } catch (RemoteException e) {
+            Log.e(TAG, e.toString());
+        }
+    }
+
+    /**
+     * @return the number of channels covered by the notification row (including its children if
+     * it's a summary notification).
+     */
+    private int getNumNotificationChannels(
+            ExpandableNotificationRow row, String packageName, UserHandle userHandle) {
+        ArraySet<NotificationChannel> channels = new ArraySet<>();
+
+        channels.add(row.getEntry().channel);
+
+        // If this is a summary, then add in the children notification channels for the
+        // same user and pkg.
+        if (row.isSummaryWithChildren()) {
+            final List<ExpandableNotificationRow> childrenRows = row.getNotificationChildren();
+            final int numChildren = childrenRows.size();
+            for (int i = 0; i < numChildren; i++) {
+                final ExpandableNotificationRow childRow = childrenRows.get(i);
+                final NotificationChannel childChannel = childRow.getEntry().channel;
+                final StatusBarNotification childSbn = childRow.getStatusBarNotification();
+                if (childSbn.getUser().equals(userHandle) &&
+                        childSbn.getPackageName().equals(packageName)) {
+                    channels.add(childChannel);
                 }
             }
-            try {
-                info.bindNotification(pmUser, iNotificationManager, pkg, row.getEntry().channel,
-                        channels.size(), sbn, mCheckSaveListener, onSettingsClick,
-                        onAppSettingsClick, mNonBlockablePkgs,
-                        row.getEntry().userSentiment == USER_SENTIMENT_NEGATIVE);
-            } catch (RemoteException e) {
-                Log.e(TAG, e.toString());
-            }
         }
+        return channels.size();
     }
 
     /**
@@ -312,37 +352,42 @@ public class NotificationGutsManager implements Dumpable {
     }
 
     /**
-     * Opens guts on the given ExpandableNotificationRow |v|.
+     * Opens guts on the given ExpandableNotificationRow {@code view}. This handles opening guts for
+     * the normal half-swipe and long-press use cases via a circular reveal. When the blocking
+     * helper needs to be shown on the row, this will skip the circular reveal.
      *
-     * @param v ExpandableNotificationRow to open guts on
+     * @param view ExpandableNotificationRow to open guts on
      * @param x x coordinate of origin of circular reveal
      * @param y y coordinate of origin of circular reveal
-     * @param item MenuItem the guts should display
+     * @param menuItem MenuItem the guts should display
      * @return true if guts was opened
      */
-    public boolean openGuts(View v, int x, int y,
-            NotificationMenuRowPlugin.MenuItem item) {
-        if (!(v instanceof ExpandableNotificationRow)) {
+    boolean openGuts(
+            View view,
+            int x,
+            int y,
+            NotificationMenuRowPlugin.MenuItem menuItem) {
+        if (!(view instanceof ExpandableNotificationRow)) {
             return false;
         }
 
-        if (v.getWindowToken() == null) {
+        if (view.getWindowToken() == null) {
             Log.e(TAG, "Trying to show notification guts, but not attached to window");
             return false;
         }
 
-        final ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+        final ExpandableNotificationRow row = (ExpandableNotificationRow) view;
         if (row.isDark()) {
             return false;
         }
-        v.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
         if (row.areGutsExposed()) {
             closeAndSaveGuts(false /* removeLeavebehind */, false /* force */,
                     true /* removeControls */, -1 /* x */, -1 /* y */,
                     true /* resetMenu */);
             return false;
         }
-        bindGuts(row, item);
+        bindGuts(row, menuItem);
         NotificationGuts guts = row.getGuts();
 
         // Assume we are a status_bar_notification_row
@@ -372,15 +417,18 @@ public class NotificationGutsManager implements Dumpable {
                 final boolean needsFalsingProtection =
                         (mPresenter.isPresenterLocked() &&
                                 !mAccessibilityManager.isTouchExplorationEnabled());
-                guts.openControls(x, y, needsFalsingProtection, () -> {
-                    // Move the notification view back over the menu
-                    row.resetTranslation();
-                });
+
+                guts.openControls(
+                        !row.isBlockingHelperShowing(),
+                        x,
+                        y,
+                        needsFalsingProtection,
+                        row::resetTranslation);
 
                 row.closeRemoteInput();
                 mListContainer.onHeightChanged(row, true /* needsAnimation */);
                 mNotificationGutsExposed = guts;
-                mGutsMenuItem = item;
+                mGutsMenuItem = menuItem;
             }
         });
         return true;

@@ -16,6 +16,8 @@
 
 package android.view.autofill;
 
+import java.util.List;
+
 import android.content.ComponentName;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -47,6 +49,7 @@ interface IAutoFillManager {
             in AutofillId autoFillId, in Rect bounds, in AutofillValue value, int userId,
             boolean hasCallback, int flags, in ComponentName componentName, int sessionId,
             int action, boolean compatMode);
+    void setAutofillFailure(int sessionId, in List<AutofillId> ids, int userId);
     void finishSession(int sessionId, int userId);
     void cancelSession(int sessionId, int userId);
     void setAuthenticationResult(in Bundle data, int sessionId, int authenticationId, int userId);

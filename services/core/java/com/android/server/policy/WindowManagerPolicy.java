@@ -407,7 +407,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         /**
          * Returns true if this window has been shown on screen at some time in
          * the past.  Must be called with the window manager lock held.
+         *
+         * @deprecated Use {@link #isDrawnLw} or any of the other drawn/visibility methods.
          */
+        @Deprecated
         public boolean hasDrawnLw();
 
         /**
@@ -649,6 +652,12 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
                     return Integer.toString(lens);
             }
         }
+
+        /**
+         * Hint to window manager that the user has started a navigation action that should
+         * abort animations that have no timeout, in case they got stuck.
+         */
+        void triggerAnimationFailsafe();
     }
 
     /** Window has been added to the screen. */
@@ -1426,10 +1435,13 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @param orientation An orientation constant, such as
      * {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_LANDSCAPE}.
      * @param lastRotation The most recently used rotation.
+     * @param defaultDisplay Flag indicating whether the rotation is computed for the default
+     *                       display. Currently for all non-default displays sensors, docking mode,
+     *                       rotation lock and other factors are ignored.
      * @return The surface rotation to use.
      */
     public int rotationForOrientationLw(@ActivityInfo.ScreenOrientation int orientation,
-            int lastRotation);
+            int lastRotation, boolean defaultDisplay);
 
     /**
      * Given an orientation constant and a rotation, returns true if the rotation

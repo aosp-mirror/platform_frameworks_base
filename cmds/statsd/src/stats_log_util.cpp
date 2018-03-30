@@ -221,7 +221,8 @@ void writeFieldValueTreeToStream(int tagId, const std::vector<FieldValue>& value
 
 int64_t TimeUnitToBucketSizeInMillisGuardrailed(int uid, TimeUnit unit) {
     int64_t bucketSizeMillis = TimeUnitToBucketSizeInMillis(unit);
-    if (bucketSizeMillis > 1000 && bucketSizeMillis < 5 * 60 * 1000LL && uid != AID_SHELL) {
+    if (bucketSizeMillis > 1000 && bucketSizeMillis < 5 * 60 * 1000LL && uid != AID_SHELL &&
+        uid != AID_ROOT) {
         bucketSizeMillis = 5 * 60 * 1000LL;
     }
     return bucketSizeMillis;

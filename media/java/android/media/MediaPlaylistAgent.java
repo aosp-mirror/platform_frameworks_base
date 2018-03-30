@@ -20,7 +20,6 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.Context;
 import android.media.update.ApiLoader;
 import android.media.update.MediaPlaylistAgentProvider;
 
@@ -148,8 +147,8 @@ public abstract class MediaPlaylistAgent {
                 @RepeatMode int repeatMode) { }
     }
 
-    public MediaPlaylistAgent(@NonNull Context context) {
-        mProvider = ApiLoader.getProvider().createMediaPlaylistAgent(context, this);
+    public MediaPlaylistAgent() {
+        mProvider = ApiLoader.getProvider().createMediaPlaylistAgent(this);
     }
 
     /**

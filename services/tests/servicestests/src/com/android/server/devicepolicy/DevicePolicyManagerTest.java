@@ -2113,11 +2113,11 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         }
     }
 
-    public void testSetGetMeteredDataDisabled() throws Exception {
+    public void testSetGetMeteredDataDisabledPackages() throws Exception {
         setAsProfileOwner(admin1);
 
         final ArrayList<String> emptyList = new ArrayList<>();
-        assertEquals(emptyList, dpm.getMeteredDataDisabled(admin1));
+        assertEquals(emptyList, dpm.getMeteredDataDisabledPackages(admin1));
 
         // Setup
         final ArrayList<String> pkgsToRestrict = new ArrayList<>();
@@ -2127,40 +2127,40 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         pkgsToRestrict.add(package2);
         setupPackageInPackageManager(package1, DpmMockContext.CALLER_USER_HANDLE, 123, 0);
         setupPackageInPackageManager(package2, DpmMockContext.CALLER_USER_HANDLE, 456, 0);
-        List<String> excludedPkgs = dpm.setMeteredDataDisabled(admin1, pkgsToRestrict);
+        List<String> excludedPkgs = dpm.setMeteredDataDisabledPackages(admin1, pkgsToRestrict);
 
         // Verify
         assertEquals(emptyList, excludedPkgs);
-        assertEquals(pkgsToRestrict, dpm.getMeteredDataDisabled(admin1));
+        assertEquals(pkgsToRestrict, dpm.getMeteredDataDisabledPackages(admin1));
         verify(getServices().networkPolicyManagerInternal).setMeteredRestrictedPackages(
                 MockUtils.checkApps(pkgsToRestrict.toArray(new String[0])),
                 eq(DpmMockContext.CALLER_USER_HANDLE));
 
         // Setup
         pkgsToRestrict.remove(package1);
-        excludedPkgs = dpm.setMeteredDataDisabled(admin1, pkgsToRestrict);
+        excludedPkgs = dpm.setMeteredDataDisabledPackages(admin1, pkgsToRestrict);
 
         // Verify
         assertEquals(emptyList, excludedPkgs);
-        assertEquals(pkgsToRestrict, dpm.getMeteredDataDisabled(admin1));
+        assertEquals(pkgsToRestrict, dpm.getMeteredDataDisabledPackages(admin1));
         verify(getServices().networkPolicyManagerInternal).setMeteredRestrictedPackages(
                 MockUtils.checkApps(pkgsToRestrict.toArray(new String[0])),
                 eq(DpmMockContext.CALLER_USER_HANDLE));
     }
 
-    public void testSetGetMeteredDataDisabled_deviceAdmin() {
+    public void testSetGetMeteredDataDisabledPackages_deviceAdmin() {
         mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
         dpm.setActiveAdmin(admin1, true);
         assertTrue(dpm.isAdminActive(admin1));
         mContext.callerPermissions.remove(permission.MANAGE_DEVICE_ADMINS);
 
         assertExpectException(SecurityException.class,  /* messageRegex= */ NOT_PROFILE_OWNER_MSG,
-                () -> dpm.setMeteredDataDisabled(admin1, new ArrayList<>()));
+                () -> dpm.setMeteredDataDisabledPackages(admin1, new ArrayList<>()));
         assertExpectException(SecurityException.class,  /* messageRegex= */ NOT_PROFILE_OWNER_MSG,
-                () -> dpm.getMeteredDataDisabled(admin1));
+                () -> dpm.getMeteredDataDisabledPackages(admin1));
     }
 
-    public void testGetMeteredDataDisabledForUser() throws Exception {
+    public void testIsMeteredDataDisabledForUserPackage() throws Exception {
         setAsProfileOwner(admin1);
 
         // Setup
@@ -2173,34 +2173,34 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         pkgsToRestrict.add(package2);
         setupPackageInPackageManager(package1, DpmMockContext.CALLER_USER_HANDLE, 123, 0);
         setupPackageInPackageManager(package2, DpmMockContext.CALLER_USER_HANDLE, 456, 0);
-        List<String> excludedPkgs = dpm.setMeteredDataDisabled(admin1, pkgsToRestrict);
+        List<String> excludedPkgs = dpm.setMeteredDataDisabledPackages(admin1, pkgsToRestrict);
 
         // Verify
         assertEquals(emptyList, excludedPkgs);
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         assertTrue(package1 + "should be restricted",
-                dpm.isMeteredDataDisabledForUser(admin1, package1,
+                dpm.isMeteredDataDisabledPackageForUser(admin1, package1,
                         DpmMockContext.CALLER_USER_HANDLE));
         assertTrue(package2 + "should be restricted",
-                dpm.isMeteredDataDisabledForUser(admin1, package2,
+                dpm.isMeteredDataDisabledPackageForUser(admin1, package2,
                         DpmMockContext.CALLER_USER_HANDLE));
         assertFalse(package3 + "should not be restricted",
-                dpm.isMeteredDataDisabledForUser(admin1, package3,
+                dpm.isMeteredDataDisabledPackageForUser(admin1, package3,
                         DpmMockContext.CALLER_USER_HANDLE));
     }
 
-    public void testGetMeteredDataDisabledForUser_nonSystemUidCaller() throws Exception {
+    public void testIsMeteredDataDisabledForUserPackage_nonSystemUidCaller() throws Exception {
         setAsProfileOwner(admin1);
         assertExpectException(SecurityException.class,
                 /* messageRegex= */ "Only the system can query restricted pkgs",
-                () -> dpm.isMeteredDataDisabledForUser(
+                () -> dpm.isMeteredDataDisabledPackageForUser(
                         admin1, "com.example.one", DpmMockContext.CALLER_USER_HANDLE));
         dpm.clearProfileOwner(admin1);
 
         setDeviceOwner();
         assertExpectException(SecurityException.class,
                 /* messageRegex= */ "Only the system can query restricted pkgs",
-                () -> dpm.isMeteredDataDisabledForUser(
+                () -> dpm.isMeteredDataDisabledPackageForUser(
                         admin1, "com.example.one", DpmMockContext.CALLER_USER_HANDLE));
         clearDeviceOwner();
     }
@@ -2387,12 +2387,12 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     public void testGetUserProvisioningState_defaultResult() {
+        mContext.callerPermissions.add(permission.MANAGE_USERS);
         assertEquals(DevicePolicyManager.STATE_USER_UNMANAGED, dpm.getUserProvisioningState());
     }
 
     public void testSetUserProvisioningState_permission() throws Exception {
         setupProfileOwner();
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
         exerciseUserProvisioningTransitions(DpmMockContext.CALLER_USER_HANDLE,
                 DevicePolicyManager.STATE_USER_SETUP_FINALIZED);
@@ -2407,6 +2407,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     public void testSetUserProvisioningState_noManagement() {
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+        mContext.callerPermissions.add(permission.MANAGE_USERS);
         assertExpectException(IllegalStateException.class,
                 /* messageRegex= */ "change provisioning state unless a .* owner is set",
                 () -> dpm.setUserProvisioningState(DevicePolicyManager.STATE_USER_SETUP_FINALIZED,
@@ -2417,7 +2418,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testSetUserProvisioningState_deviceOwnerFromSetupWizard() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
         exerciseUserProvisioningTransitions(UserHandle.USER_SYSTEM,
                 DevicePolicyManager.STATE_USER_SETUP_COMPLETE,
@@ -2428,7 +2428,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
         exerciseUserProvisioningTransitions(UserHandle.USER_SYSTEM,
                 DevicePolicyManager.STATE_USER_SETUP_INCOMPLETE,
@@ -2438,7 +2437,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testSetUserProvisioningState_deviceOwnerWithoutSetupWizard() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
         exerciseUserProvisioningTransitions(UserHandle.USER_SYSTEM,
                 DevicePolicyManager.STATE_USER_SETUP_FINALIZED);
@@ -2447,7 +2445,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testSetUserProvisioningState_managedProfileFromSetupWizard_primaryUser()
             throws Exception {
         setupProfileOwner();
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
         exerciseUserProvisioningTransitions(DpmMockContext.CALLER_USER_HANDLE,
                 DevicePolicyManager.STATE_USER_PROFILE_COMPLETE,
@@ -2457,7 +2454,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testSetUserProvisioningState_managedProfileFromSetupWizard_managedProfile()
             throws Exception {
         setupProfileOwner();
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
         exerciseUserProvisioningTransitions(DpmMockContext.CALLER_USER_HANDLE,
                 DevicePolicyManager.STATE_USER_SETUP_COMPLETE,
@@ -2466,7 +2462,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     public void testSetUserProvisioningState_managedProfileWithoutSetupWizard() throws Exception {
         setupProfileOwner();
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
         exerciseUserProvisioningTransitions(DpmMockContext.CALLER_USER_HANDLE,
                 DevicePolicyManager.STATE_USER_SETUP_FINALIZED);
@@ -2474,7 +2469,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     public void testSetUserProvisioningState_illegalTransitionOutOfFinalized1() throws Exception {
         setupProfileOwner();
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
         assertExpectException(IllegalStateException.class,
                 /* messageRegex= */ "Cannot move to user provisioning state",
@@ -2486,7 +2480,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testSetUserProvisioningState_illegalTransitionToAnotherInProgressState()
             throws Exception {
         setupProfileOwner();
-        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
 
         assertExpectException(IllegalStateException.class,
                 /* messageRegex= */ "Cannot move to user provisioning state",
@@ -2496,6 +2489,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     private void exerciseUserProvisioningTransitions(int userId, int... states) {
+        mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
+        mContext.callerPermissions.add(permission.MANAGE_USERS);
+
         assertEquals(DevicePolicyManager.STATE_USER_UNMANAGED, dpm.getUserProvisioningState());
         for (int state : states) {
             dpm.setUserProvisioningState(state, userId);
@@ -3458,18 +3454,19 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 dpm.setSystemSetting(admin1, Settings.System.SCREEN_BRIGHTNESS_FOR_VR, "0"));
     }
 
-    public void testSetSystemSettingFailWithPO() throws Exception {
-        setupProfileOwner();
-        assertExpectException(SecurityException.class, null, () ->
-                dpm.setSystemSetting(admin1, Settings.System.SCREEN_BRIGHTNESS, "0"));
-    }
-
-    public void testSetSystemSetting() throws Exception {
+    public void testSetSystemSettingWithDO() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
         dpm.setSystemSetting(admin1, Settings.System.SCREEN_BRIGHTNESS, "0");
-        verify(getServices().settings).settingsSystemPutString(
-                Settings.System.SCREEN_BRIGHTNESS, "0");
+        verify(getServices().settings).settingsSystemPutStringForUser(
+                Settings.System.SCREEN_BRIGHTNESS, "0", UserHandle.USER_SYSTEM);
+    }
+
+    public void testSetSystemSettingWithPO() throws Exception {
+        setupProfileOwner();
+        dpm.setSystemSetting(admin1, Settings.System.SCREEN_BRIGHTNESS, "0");
+        verify(getServices().settings).settingsSystemPutStringForUser(
+            Settings.System.SCREEN_BRIGHTNESS, "0", DpmMockContext.CALLER_USER_HANDLE);
     }
 
     public void testSetTime() throws Exception {
@@ -3723,7 +3720,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     private void verifyLockTaskState(int userId) throws Exception {
-        verifyLockTaskState(userId, new String[0], DevicePolicyManager.LOCK_TASK_FEATURE_NONE);
+        verifyLockTaskState(userId, new String[0],
+                DevicePolicyManager.LOCK_TASK_FEATURE_GLOBAL_ACTIONS);
     }
 
     private void verifyLockTaskState(int userId, String[] packages, int flags) throws Exception {

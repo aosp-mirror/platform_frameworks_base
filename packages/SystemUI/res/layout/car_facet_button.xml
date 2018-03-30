@@ -42,6 +42,7 @@
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:animateLayoutChanges="true"
+            android:src="@drawable/car_ic_arrow"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter">
         </com.android.keyguard.AlphaOptimizedImageButton>

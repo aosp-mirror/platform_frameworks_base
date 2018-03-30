@@ -179,6 +179,13 @@ public final class UsageStatsManager {
     public static final int REASON_SUB_USAGE_ACTIVE_TIMEOUT     = 0x0007;
     /** @hide */
     public static final int REASON_SUB_USAGE_SYNC_ADAPTER       = 0x0008;
+    /** @hide */
+    public static final int REASON_SUB_USAGE_SLICE_PINNED       = 0x0009;
+    /** @hide */
+    public static final int REASON_SUB_USAGE_SLICE_PINNED_PRIV  = 0x000A;
+
+    /** @hide */
+    public static final int REASON_SUB_PREDICTED_RESTORED       = 0x0001;
 
     /** @hide */
     @IntDef(flag = false, prefix = { "STANDBY_BUCKET_" }, value = {
@@ -291,6 +298,44 @@ public final class UsageStatsManager {
             @SuppressWarnings("unchecked")
             ParceledListSlice<ConfigurationStats> slice = mService.queryConfigurationStats(
                     intervalType, beginTime, endTime, mContext.getOpPackageName());
+            if (slice != null) {
+                return slice.getList();
+            }
+        } catch (RemoteException e) {
+            // fallthrough and return the empty list.
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * Gets aggregated event stats for the given time range, aggregated by the specified interval.
+     * <p>The returned list will contain a {@link EventStats} object for each event type that
+     * is being aggregated and has data for an interval that is a subset of the time range given.
+     *
+     * <p>The current event types that will be aggregated here are:</p>
+     * <ul>
+     *     <li>{@link UsageEvents.Event#SCREEN_INTERACTIVE}</li>
+     *     <li>{@link UsageEvents.Event#SCREEN_NON_INTERACTIVE}</li>
+     * </ul>
+     *
+     * <p> The caller must have {@link android.Manifest.permission#PACKAGE_USAGE_STATS} </p>
+     *
+     * @param intervalType The time interval by which the stats are aggregated.
+     * @param beginTime The inclusive beginning of the range of stats to include in the results.
+     * @param endTime The exclusive end of the range of stats to include in the results.
+     * @return A list of {@link EventStats}
+     *
+     * @see #INTERVAL_DAILY
+     * @see #INTERVAL_WEEKLY
+     * @see #INTERVAL_MONTHLY
+     * @see #INTERVAL_YEARLY
+     * @see #INTERVAL_BEST
+     */
+    public List<EventStats> queryEventStats(int intervalType, long beginTime, long endTime) {
+        try {
+            @SuppressWarnings("unchecked")
+            ParceledListSlice<EventStats> slice = mService.queryEventStats(intervalType, beginTime,
+                    endTime, mContext.getOpPackageName());
             if (slice != null) {
                 return slice.getList();
             }
@@ -578,36 +623,47 @@ public final class UsageStatsManager {
                 break;
             case REASON_MAIN_PREDICTED:
                 sb.append("p");
+                switch (standbyReason & REASON_SUB_MASK) {
+                    case REASON_SUB_PREDICTED_RESTORED:
+                        sb.append("-r");
+                        break;
+                }
                 break;
             case REASON_MAIN_TIMEOUT:
                 sb.append("t");
                 break;
             case REASON_MAIN_USAGE:
-                sb.append("u-");
+                sb.append("u");
                 switch (standbyReason & REASON_SUB_MASK) {
                     case REASON_SUB_USAGE_SYSTEM_INTERACTION:
-                        sb.append("si");
+                        sb.append("-si");
                         break;
                     case REASON_SUB_USAGE_NOTIFICATION_SEEN:
-                        sb.append("ns");
+                        sb.append("-ns");
                         break;
                     case REASON_SUB_USAGE_USER_INTERACTION:
-                        sb.append("ui");
+                        sb.append("-ui");
                         break;
                     case REASON_SUB_USAGE_MOVE_TO_FOREGROUND:
-                        sb.append("mf");
+                        sb.append("-mf");
                         break;
                     case REASON_SUB_USAGE_MOVE_TO_BACKGROUND:
-                        sb.append("mb");
+                        sb.append("-mb");
                         break;
                     case REASON_SUB_USAGE_SYSTEM_UPDATE:
-                        sb.append("su");
+                        sb.append("-su");
                         break;
                     case REASON_SUB_USAGE_ACTIVE_TIMEOUT:
-                        sb.append("at");
+                        sb.append("-at");
                         break;
                     case REASON_SUB_USAGE_SYNC_ADAPTER:
-                        sb.append("sa");
+                        sb.append("-sa");
+                        break;
+                    case REASON_SUB_USAGE_SLICE_PINNED:
+                        sb.append("slp");
+                        break;
+                    case REASON_SUB_USAGE_SLICE_PINNED_PRIV:
+                        sb.append("slpp");
                         break;
                 }
                 break;

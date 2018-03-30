@@ -64,6 +64,7 @@ which apps should be allowed to access the entire private API.
   <hidden-api-whitelisted-app package="com.android.gallery" />
   <hidden-api-whitelisted-app package="com.android.hotspot2" />
   <hidden-api-whitelisted-app package="com.android.keychain" />
+  <hidden-api-whitelisted-app package="com.android.launcher3" />
   <hidden-api-whitelisted-app package="com.android.location.fused" />
   <hidden-api-whitelisted-app package="com.android.managedprovisioning" />
   <hidden-api-whitelisted-app package="com.android.mms.service" />

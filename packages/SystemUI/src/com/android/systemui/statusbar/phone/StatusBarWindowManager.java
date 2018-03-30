@@ -143,7 +143,9 @@ public class StatusBarWindowManager implements RemoteInputController.Callback, D
 
         final boolean scrimsOccludingWallpaper =
                 state.scrimsVisibility == ScrimController.VISIBILITY_FULLY_OPAQUE;
-        if (state.keyguardShowing && !state.backdropShowing && !scrimsOccludingWallpaper) {
+        final boolean keyguardOrAod = state.keyguardShowing
+                || (state.dozing && mDozeParameters.getAlwaysOn());
+        if (keyguardOrAod && !state.backdropShowing && !scrimsOccludingWallpaper) {
             mLpChanged.flags |= WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
         } else {
             mLpChanged.flags &= ~WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;

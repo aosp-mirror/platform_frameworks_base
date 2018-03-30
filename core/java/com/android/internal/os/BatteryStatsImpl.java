@@ -19,7 +19,6 @@ package com.android.internal.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.job.JobProtoEnums;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.UidTraffic;
 import android.content.ContentResolver;
@@ -766,6 +765,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
     int mCameraOnNesting;
     StopwatchTimer mCameraOnTimer;
+
+    int mUsbDataState; // 0: unknown, 1: disconnected, 2: connected
 
     int mGpsSignalQualityBin = -1;
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
@@ -5240,6 +5241,19 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    public void noteUsbConnectionStateLocked(boolean connected) {
+        int newState = connected ? 2 : 1;
+        if (mUsbDataState != newState) {
+            mUsbDataState = newState;
+            if (connected) {
+                mHistoryCur.states2 |= HistoryItem.STATE2_USB_DATA_LINK_FLAG;
+            } else {
+                mHistoryCur.states2 &= ~HistoryItem.STATE2_USB_DATA_LINK_FLAG;
+            }
+            addHistoryRecordLocked(mClocks.elapsedRealtime(), mClocks.uptimeMillis());
+        }
+    }
+
     void stopAllPhoneSignalStrengthTimersLocked(int except) {
         final long elapsedRealtime = mClocks.elapsedRealtime();
         for (int i = 0; i < SignalStrength.NUM_SIGNAL_STRENGTH_BINS; i++) {
@@ -5652,29 +5666,7 @@ public class BatteryStatsImpl extends BatteryStats {
             mBluetoothScanTimer.startRunningLocked(elapsedRealtime);
         }
         mBluetoothScanNesting++;
-
-        if (workChain != null) {
-            StatsLog.write(StatsLog.BLE_SCAN_STATE_CHANGED,
-                    workChain.getUids(), workChain.getTags(),
-                    StatsLog.BLE_SCAN_STATE_CHANGED__STATE__ON);
-            if (isUnoptimized) {
-                StatsLog.write(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED,
-                        workChain.getUids(), workChain.getTags(),
-                        StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED__STATE__ON);
-            }
-        } else {
-            StatsLog.write_non_chained(StatsLog.BLE_SCAN_STATE_CHANGED, uid, null,
-                    StatsLog.BLE_SCAN_STATE_CHANGED__STATE__ON);
-            if (isUnoptimized) {
-                StatsLog.write_non_chained(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED, uid, null,
-                        StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED__STATE__ON);
-            }
-        }
-
         getUidStatsLocked(uid).noteBluetoothScanStartedLocked(elapsedRealtime, isUnoptimized);
-        if (workChain != null) {
-            getUidStatsLocked(uid).addBluetoothWorkChain(workChain, isUnoptimized);
-        }
     }
 
     public void noteBluetoothScanStartedFromSourceLocked(WorkSource ws, boolean isUnoptimized) {
@@ -5704,29 +5696,7 @@ public class BatteryStatsImpl extends BatteryStats {
             addHistoryRecordLocked(elapsedRealtime, uptime);
             mBluetoothScanTimer.stopRunningLocked(elapsedRealtime);
         }
-
-        if (workChain != null) {
-            StatsLog.write(
-                    StatsLog.BLE_SCAN_STATE_CHANGED, workChain.getUids(), workChain.getTags(),
-                    StatsLog.BLE_SCAN_STATE_CHANGED__STATE__OFF);
-            if (isUnoptimized) {
-                StatsLog.write(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED,
-                        workChain.getUids(), workChain.getTags(),
-                        StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED__STATE__OFF);
-            }
-        } else {
-            StatsLog.write_non_chained(StatsLog.BLE_SCAN_STATE_CHANGED, uid, null,
-                    StatsLog.BLE_SCAN_STATE_CHANGED__STATE__OFF);
-            if (isUnoptimized) {
-                StatsLog.write_non_chained(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED, uid, null,
-                        StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED__STATE__OFF);
-            }
-        }
-
         getUidStatsLocked(uid).noteBluetoothScanStoppedLocked(elapsedRealtime, isUnoptimized);
-        if (workChain != null) {
-            getUidStatsLocked(uid).removeBluetoothWorkChain(workChain, isUnoptimized);
-        }
     }
 
     private int getAttributionUid(int uid, WorkChain workChain) {
@@ -5761,33 +5731,9 @@ public class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states2));
             addHistoryRecordLocked(elapsedRealtime, uptime);
             mBluetoothScanTimer.stopAllRunningLocked(elapsedRealtime);
-
-
             for (int i=0; i<mUidStats.size(); i++) {
                 BatteryStatsImpl.Uid uid = mUidStats.valueAt(i);
                 uid.noteResetBluetoothScanLocked(elapsedRealtime);
-
-                List<WorkChain> allWorkChains = uid.getAllBluetoothWorkChains();
-                if (allWorkChains != null) {
-                    for (int j = 0; j < allWorkChains.size(); ++j) {
-                        StatsLog.write(StatsLog.BLE_SCAN_STATE_CHANGED,
-                                allWorkChains.get(j).getUids(),
-                                allWorkChains.get(j).getTags(),
-                                StatsLog.BLE_SCAN_STATE_CHANGED__STATE__OFF);
-                    }
-                    allWorkChains.clear();
-                }
-
-                List<WorkChain> unoptimizedWorkChains = uid.getUnoptimizedBluetoothWorkChains();
-                if (unoptimizedWorkChains != null) {
-                    for (int j = 0; j < unoptimizedWorkChains.size(); ++j) {
-                        StatsLog.write(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED,
-                                unoptimizedWorkChains.get(j).getUids(),
-                                unoptimizedWorkChains.get(j).getTags(),
-                                StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED__STATE__OFF);
-                    }
-                    unoptimizedWorkChains.clear();
-                }
             }
         }
     }
@@ -5999,7 +5945,6 @@ public class BatteryStatsImpl extends BatteryStats {
             if (strengthBin >= 0) {
                 if (!mWifiSignalStrengthsTimer[strengthBin].isRunningLocked()) {
                     mWifiSignalStrengthsTimer[strengthBin].startRunningLocked(elapsedRealtime);
-                    StatsLog.write(StatsLog.WIFI_SIGNAL_STRENGTH_CHANGED, strengthBin);
                 }
                 mHistoryCur.states2 =
                         (mHistoryCur.states2&~HistoryItem.STATE2_WIFI_SIGNAL_STRENGTH_MASK)
@@ -6010,6 +5955,7 @@ public class BatteryStatsImpl extends BatteryStats {
             } else {
                 stopAllWifiSignalStrengthTimersLocked(-1);
             }
+            StatsLog.write(StatsLog.WIFI_SIGNAL_STRENGTH_CHANGED, strengthBin);
             mWifiSignalStrengthBin = strengthBin;
         }
     }
@@ -6859,15 +6805,6 @@ public class BatteryStatsImpl extends BatteryStats {
          */
         final SparseArray<Pid> mPids = new SparseArray<>();
 
-        /**
-         * The list of WorkChains associated with active bluetooth scans.
-         *
-         * NOTE: This is a hack and it only needs to exist because there's a "reset" API that is
-         * supposed to stop and log all WorkChains that were currently active.
-         */
-        ArrayList<WorkChain> mAllBluetoothChains = null;
-        ArrayList<WorkChain> mUnoptimizedBluetoothChains = null;
-
         public Uid(BatteryStatsImpl bsi, int uid) {
             mBsi = bsi;
             mUid = uid;
@@ -7250,25 +7187,17 @@ public class BatteryStatsImpl extends BatteryStats {
 
         public void noteAudioTurnedOnLocked(long elapsedRealtimeMs) {
             createAudioTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
-            StatsLog.write_non_chained(StatsLog.AUDIO_STATE_CHANGED, getUid(), null,
-                    StatsLog.AUDIO_STATE_CHANGED__STATE__ON);
         }
 
         public void noteAudioTurnedOffLocked(long elapsedRealtimeMs) {
             if (mAudioTurnedOnTimer != null) {
                 mAudioTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
-                if (!mAudioTurnedOnTimer.isRunningLocked()) { // only tell statsd if truly stopped
-                    StatsLog.write_non_chained(StatsLog.AUDIO_STATE_CHANGED, getUid(), null,
-                            StatsLog.AUDIO_STATE_CHANGED__STATE__OFF);
-                }
             }
         }
 
         public void noteResetAudioLocked(long elapsedRealtimeMs) {
             if (mAudioTurnedOnTimer != null) {
                 mAudioTurnedOnTimer.stopAllRunningLocked(elapsedRealtimeMs);
-                StatsLog.write_non_chained(StatsLog.AUDIO_STATE_CHANGED, getUid(), null,
-                        StatsLog.AUDIO_STATE_CHANGED__STATE__OFF);
             }
         }
 
@@ -7282,25 +7211,17 @@ public class BatteryStatsImpl extends BatteryStats {
 
         public void noteVideoTurnedOnLocked(long elapsedRealtimeMs) {
             createVideoTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
-            StatsLog.write_non_chained(StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED, getUid(), null,
-                    StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED__STATE__ON);
         }
 
         public void noteVideoTurnedOffLocked(long elapsedRealtimeMs) {
             if (mVideoTurnedOnTimer != null) {
                 mVideoTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
-                if (!mVideoTurnedOnTimer.isRunningLocked()) { // only tell statsd if truly stopped
-                    StatsLog.write_non_chained(StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED, getUid(),
-                            null, StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED__STATE__OFF);
-                }
             }
         }
 
         public void noteResetVideoLocked(long elapsedRealtimeMs) {
             if (mVideoTurnedOnTimer != null) {
                 mVideoTurnedOnTimer.stopAllRunningLocked(elapsedRealtimeMs);
-                StatsLog.write_non_chained(StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED, getUid(), null,
-                        StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED__STATE__OFF);
             }
         }
 
@@ -7314,25 +7235,17 @@ public class BatteryStatsImpl extends BatteryStats {
 
         public void noteFlashlightTurnedOnLocked(long elapsedRealtimeMs) {
             createFlashlightTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
-            StatsLog.write_non_chained(StatsLog.FLASHLIGHT_STATE_CHANGED, getUid(), null,
-                    StatsLog.FLASHLIGHT_STATE_CHANGED__STATE__ON);
         }
 
         public void noteFlashlightTurnedOffLocked(long elapsedRealtimeMs) {
             if (mFlashlightTurnedOnTimer != null) {
                 mFlashlightTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
-                if (!mFlashlightTurnedOnTimer.isRunningLocked()) {
-                    StatsLog.write_non_chained(StatsLog.FLASHLIGHT_STATE_CHANGED, getUid(), null,
-                            StatsLog.FLASHLIGHT_STATE_CHANGED__STATE__OFF);
-                }
             }
         }
 
         public void noteResetFlashlightLocked(long elapsedRealtimeMs) {
             if (mFlashlightTurnedOnTimer != null) {
                 mFlashlightTurnedOnTimer.stopAllRunningLocked(elapsedRealtimeMs);
-                StatsLog.write_non_chained(StatsLog.FLASHLIGHT_STATE_CHANGED, getUid(), null,
-                        StatsLog.FLASHLIGHT_STATE_CHANGED__STATE__OFF);
             }
         }
 
@@ -7346,25 +7259,17 @@ public class BatteryStatsImpl extends BatteryStats {
 
         public void noteCameraTurnedOnLocked(long elapsedRealtimeMs) {
             createCameraTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
-            StatsLog.write_non_chained(StatsLog.CAMERA_STATE_CHANGED, getUid(), null,
-                    StatsLog.CAMERA_STATE_CHANGED__STATE__ON);
         }
 
         public void noteCameraTurnedOffLocked(long elapsedRealtimeMs) {
             if (mCameraTurnedOnTimer != null) {
                 mCameraTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
-                if (!mCameraTurnedOnTimer.isRunningLocked()) { // only tell statsd if truly stopped
-                    StatsLog.write_non_chained(StatsLog.CAMERA_STATE_CHANGED, getUid(), null,
-                            StatsLog.CAMERA_STATE_CHANGED__STATE__OFF);
-                }
             }
         }
 
         public void noteResetCameraLocked(long elapsedRealtimeMs) {
             if (mCameraTurnedOnTimer != null) {
                 mCameraTurnedOnTimer.stopAllRunningLocked(elapsedRealtimeMs);
-                StatsLog.write_non_chained(StatsLog.CAMERA_STATE_CHANGED, getUid(), null,
-                        StatsLog.CAMERA_STATE_CHANGED__STATE__OFF);
             }
         }
 
@@ -7427,40 +7332,6 @@ public class BatteryStatsImpl extends BatteryStats {
                 mBluetoothUnoptimizedScanTimer.stopRunningLocked(elapsedRealtimeMs);
             }
         }
-
-        public void addBluetoothWorkChain(WorkChain workChain, boolean isUnoptimized) {
-            if (mAllBluetoothChains == null) {
-                mAllBluetoothChains = new ArrayList<WorkChain>(4);
-            }
-
-            if (isUnoptimized && mUnoptimizedBluetoothChains == null) {
-                mUnoptimizedBluetoothChains = new ArrayList<WorkChain>(4);
-            }
-
-            mAllBluetoothChains.add(workChain);
-            if (isUnoptimized) {
-                mUnoptimizedBluetoothChains.add(workChain);
-            }
-        }
-
-        public void removeBluetoothWorkChain(WorkChain workChain, boolean isUnoptimized) {
-            if (mAllBluetoothChains != null) {
-                mAllBluetoothChains.remove(workChain);
-            }
-
-            if (isUnoptimized && mUnoptimizedBluetoothChains != null) {
-                mUnoptimizedBluetoothChains.remove(workChain);
-            }
-        }
-
-        public List<WorkChain> getAllBluetoothWorkChains() {
-            return mAllBluetoothChains;
-        }
-
-        public List<WorkChain> getUnoptimizedBluetoothWorkChains() {
-            return mUnoptimizedBluetoothChains;
-        }
-
 
         public void noteResetBluetoothScanLocked(long elapsedRealtimeMs) {
             if (mBluetoothScanTimer != null) {
@@ -10040,8 +9911,6 @@ public class BatteryStatsImpl extends BatteryStats {
             DualTimer t = mSyncStats.startObject(name);
             if (t != null) {
                 t.startRunningLocked(elapsedRealtimeMs);
-                StatsLog.write_non_chained(StatsLog.SYNC_STATE_CHANGED, getUid(), null, name,
-                        StatsLog.SYNC_STATE_CHANGED__STATE__ON);
             }
         }
 
@@ -10049,10 +9918,6 @@ public class BatteryStatsImpl extends BatteryStats {
             DualTimer t = mSyncStats.stopObject(name);
             if (t != null) {
                 t.stopRunningLocked(elapsedRealtimeMs);
-                if (!t.isRunningLocked()) { // only tell statsd if truly stopped
-                    StatsLog.write_non_chained(StatsLog.SYNC_STATE_CHANGED, getUid(), null, name,
-                            StatsLog.SYNC_STATE_CHANGED__STATE__OFF);
-                }
             }
         }
 
@@ -10060,9 +9925,6 @@ public class BatteryStatsImpl extends BatteryStats {
             DualTimer t = mJobStats.startObject(name);
             if (t != null) {
                 t.startRunningLocked(elapsedRealtimeMs);
-                StatsLog.write_non_chained(StatsLog.SCHEDULED_JOB_STATE_CHANGED, getUid(), null,
-                        name, StatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__STARTED,
-                        JobProtoEnums.STOP_REASON_CANCELLED);
             }
         }
 
@@ -10070,11 +9932,6 @@ public class BatteryStatsImpl extends BatteryStats {
             DualTimer t = mJobStats.stopObject(name);
             if (t != null) {
                 t.stopRunningLocked(elapsedRealtimeMs);
-                if (!t.isRunningLocked()) { // only tell statsd if truly stopped
-                    StatsLog.write_non_chained(StatsLog.SCHEDULED_JOB_STATE_CHANGED, getUid(), null,
-                            name, StatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__FINISHED,
-                            stopReason);
-                }
             }
             if (mBsi.mOnBatteryTimeBase.isRunning()) {
                 SparseIntArray types = mJobCompletions.get(name);
@@ -10182,10 +10039,6 @@ public class BatteryStatsImpl extends BatteryStats {
         public void noteStartSensor(int sensor, long elapsedRealtimeMs) {
             DualTimer t = getSensorTimerLocked(sensor, /* create= */ true);
             t.startRunningLocked(elapsedRealtimeMs);
-            if (sensor != Sensor.GPS) {
-                StatsLog.write_non_chained(StatsLog.SENSOR_STATE_CHANGED, getUid(), null, sensor,
-                        StatsLog.SENSOR_STATE_CHANGED__STATE__ON);
-            }
         }
 
         public void noteStopSensor(int sensor, long elapsedRealtimeMs) {
@@ -10193,10 +10046,6 @@ public class BatteryStatsImpl extends BatteryStats {
             DualTimer t = getSensorTimerLocked(sensor, false);
             if (t != null) {
                 t.stopRunningLocked(elapsedRealtimeMs);
-                if (sensor != Sensor.GPS) {
-                    StatsLog.write_non_chained(StatsLog.SENSOR_STATE_CHANGED, getUid(), null,
-                             sensor, StatsLog.SENSOR_STATE_CHANGED__STATE__OFF);
-                }
             }
         }
 

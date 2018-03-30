@@ -16,6 +16,7 @@
 package com.android.server.usage;
 
 import android.app.usage.ConfigurationStats;
+import android.app.usage.EventStats;
 import android.app.usage.TimeSparseArray;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
@@ -23,10 +24,18 @@ import android.content.res.Configuration;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
+import java.util.List;
+
 class IntervalStats {
     public long beginTime;
     public long endTime;
     public long lastTimeSaved;
+    public long lastInteractiveTime;
+    public long lastNonInteractiveTime;
+    public long interactiveDuration;
+    public int interactiveCount;
+    public long nonInteractiveDuration;
+    public int nonInteractiveCount;
     public final ArrayMap<String, UsageStats> packageStats = new ArrayMap<>();
     public final ArrayMap<Configuration, ConfigurationStats> configurations = new ArrayMap<>();
     public Configuration activeConfiguration;
@@ -169,6 +178,60 @@ class IntervalStats {
     void incrementAppLaunchCount(String packageName) {
         UsageStats usageStats = getOrCreateUsageStats(packageName);
         usageStats.mAppLaunchCount += 1;
+    }
+
+    private void commitInteractiveTime(long timeStamp) {
+        if (lastInteractiveTime != 0) {
+            interactiveDuration += timeStamp - lastInteractiveTime;
+            lastInteractiveTime = 0;
+        }
+        if (lastNonInteractiveTime != 0) {
+            nonInteractiveDuration += timeStamp - lastNonInteractiveTime;
+            lastNonInteractiveTime = 0;
+        }
+    }
+
+    void commitTime(long timeStamp) {
+        commitInteractiveTime(timeStamp);
+    }
+
+    void updateScreenInteractive(long timeStamp) {
+        if (lastInteractiveTime != 0) {
+            // Already interactive, just keep running.
+            return;
+        }
+        commitInteractiveTime(timeStamp);
+        lastInteractiveTime = timeStamp;
+        interactiveCount++;
+    }
+
+    void updateScreenNonInteractive(long timeStamp) {
+        if (lastNonInteractiveTime != 0) {
+            // Already non-interactive, just keep running.
+            return;
+        }
+        commitInteractiveTime(timeStamp);
+        lastNonInteractiveTime = timeStamp;
+        nonInteractiveCount++;
+    }
+
+    private void addOneEventStats(List<EventStats> out, int event, int count, long duration) {
+        if (count != 0 || duration != 0) {
+            EventStats ev = new EventStats();
+            ev.mEventType = event;
+            ev.mCount = count;
+            ev.mTotalTime = duration;
+            ev.mBeginTimeStamp = beginTime;
+            ev.mEndTimeStamp = endTime;
+            out.add(ev);
+        }
+    }
+
+    void addEventStatsTo(List<EventStats> out) {
+        addOneEventStats(out, UsageEvents.Event.SCREEN_INTERACTIVE, interactiveCount,
+                interactiveDuration);
+        addOneEventStats(out, UsageEvents.Event.SCREEN_NON_INTERACTIVE, nonInteractiveCount,
+                nonInteractiveDuration);
     }
 
     private String getCachedStringRef(String str) {

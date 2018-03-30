@@ -38,6 +38,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.os.FileUtils;
 import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
@@ -49,7 +50,6 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import android.util.Log;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
 
@@ -72,8 +72,12 @@ import javax.crypto.SecretKey;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class KeySyncTaskTest {
+
+    private static final String SNAPSHOT_TOP_LEVEL_DIRECTORY = "recoverablekeystore";
+
     private static final String KEY_ALGORITHM = "AES";
     private static final String ANDROID_KEY_STORE_PROVIDER = "AndroidKeyStore";
+    private static final String TEST_ROOT_CERT_ALIAS = "trusted_root";
     private static final String WRAPPING_KEY_ALIAS = "KeySyncTaskTest/WrappingKey";
     private static final String DATABASE_FILE_NAME = "recoverablekeystore.db";
     private static final int TEST_USER_ID = 1000;
@@ -111,7 +115,12 @@ public class KeySyncTaskTest {
                 new int[] {TYPE_LOCKSCREEN});
         mRecoverableKeyStoreDb.setRecoverySecretTypes(TEST_USER_ID, TEST_RECOVERY_AGENT_UID2,
                 new int[] {TYPE_LOCKSCREEN});
-        mRecoverySnapshotStorage = new RecoverySnapshotStorage();
+
+        mRecoverableKeyStoreDb.setActiveRootOfTrust(TEST_USER_ID, TEST_RECOVERY_AGENT_UID,
+                TEST_ROOT_CERT_ALIAS);
+        mRecoverableKeyStoreDb.setActiveRootOfTrust(TEST_USER_ID, TEST_RECOVERY_AGENT_UID2,
+                TEST_ROOT_CERT_ALIAS);
+        mRecoverySnapshotStorage = new RecoverySnapshotStorage(context.getFilesDir());
 
         mKeySyncTask = new KeySyncTask(
                 mRecoverableKeyStoreDb,
@@ -133,6 +142,10 @@ public class KeySyncTaskTest {
     public void tearDown() {
         mRecoverableKeyStoreDb.close();
         mDatabaseFile.delete();
+
+        File file = new File(InstrumentationRegistry.getTargetContext().getFilesDir(),
+                SNAPSHOT_TOP_LEVEL_DIRECTORY);
+        FileUtils.deleteContentsAndDir(file);
     }
 
     @Test
@@ -247,7 +260,7 @@ public class KeySyncTaskTest {
                 TEST_APP_KEY_ALIAS,
                 WrappedKey.fromSecretKey(mEncryptKey, applicationKey));
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
-                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TestData.CERT_PATH_1);
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
 
         mKeySyncTask.run();
@@ -263,7 +276,7 @@ public class KeySyncTaskTest {
         mRecoverableKeyStoreDb.setPlatformKeyGenerationId(TEST_USER_ID, TEST_GENERATION_ID);
         addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
-                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TestData.CERT_PATH_1);
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
 
         mKeySyncTask.run();
 
@@ -273,7 +286,7 @@ public class KeySyncTaskTest {
     @Test
     public void run_sendsEncryptedKeysIfAvailableToSync_withRawPublicKey() throws Exception {
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
-                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TestData.CERT_PATH_1);
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
 
         mRecoverableKeyStoreDb.setServerParams(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_VAULT_HANDLE);
@@ -320,7 +333,7 @@ public class KeySyncTaskTest {
     @Test
     public void run_sendsEncryptedKeysIfAvailableToSync_withCertPath() throws Exception {
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
-                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TestData.CERT_PATH_1);
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
         mRecoverableKeyStoreDb.setServerParams(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_VAULT_HANDLE);
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
@@ -339,7 +352,7 @@ public class KeySyncTaskTest {
     @Test
     public void run_setsCorrectSnapshotVersion() throws Exception {
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
-                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TestData.CERT_PATH_1);
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
         addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
 
@@ -358,7 +371,7 @@ public class KeySyncTaskTest {
     @Test
     public void run_recreatesMissingSnapshot() throws Exception {
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
-                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TestData.CERT_PATH_1);
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
         addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
 
@@ -388,7 +401,7 @@ public class KeySyncTaskTest {
                 mPlatformKeyManager);
 
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
-                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TestData.CERT_PATH_1);
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
         SecretKey applicationKey =
                 addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
@@ -414,7 +427,7 @@ public class KeySyncTaskTest {
                 mPlatformKeyManager);
 
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
-                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TestData.CERT_PATH_1);
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
         SecretKey applicationKey =
                 addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
@@ -441,7 +454,7 @@ public class KeySyncTaskTest {
                 mPlatformKeyManager);
 
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
-                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TestData.CERT_PATH_1);
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
         SecretKey applicationKey =
                 addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
@@ -457,9 +470,9 @@ public class KeySyncTaskTest {
     @Test
     public void run_sendsEncryptedKeysWithTwoRegisteredAgents() throws Exception {
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
-                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TestData.CERT_PATH_1);
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
-                TEST_USER_ID, TEST_RECOVERY_AGENT_UID2, TestData.CERT_PATH_1);
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID2, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID2)).thenReturn(true);
         addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
@@ -479,9 +492,9 @@ public class KeySyncTaskTest {
                 new int[] {1000});
 
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
-                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TestData.CERT_PATH_1);
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
-                TEST_USER_ID, TEST_RECOVERY_AGENT_UID2, TestData.CERT_PATH_1);
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID2, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID2)).thenReturn(true);
         addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
@@ -496,9 +509,9 @@ public class KeySyncTaskTest {
     @Test
     public void run_notifiesNonregisteredAgent() throws Exception {
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
-                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TestData.CERT_PATH_1);
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
         mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
-                TEST_USER_ID, TEST_RECOVERY_AGENT_UID2, TestData.CERT_PATH_1);
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID2, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID2)).thenReturn(false);
         addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);

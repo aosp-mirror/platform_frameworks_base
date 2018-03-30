@@ -17,6 +17,7 @@
 package com.android.systemui.qs;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
@@ -179,13 +180,53 @@ public class QuickQSPanel extends QSPanel {
 
         protected final ArrayList<TileRecord> mRecords = new ArrayList<>();
         private boolean mListening;
+        /** Size of the QS tile (width & height). */
+        private int mTileDimensionSize;
 
         public HeaderTileLayout(Context context) {
             super(context);
             setClipChildren(false);
             setClipToPadding(false);
-            setGravity(Gravity.CENTER_VERTICAL);
+
+            mTileDimensionSize = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.qs_quick_tile_size);
+
+            setGravity(Gravity.CENTER);
             setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        }
+
+        @Override
+        protected void onConfigurationChanged(Configuration newConfig) {
+            super.onConfigurationChanged(newConfig);
+
+            setGravity(Gravity.CENTER);
+            LayoutParams staticSpaceLayoutParams = generateSpaceLayoutParams(
+                    mContext.getResources().getDimensionPixelSize(
+                            R.dimen.qs_quick_tile_space_width));
+
+            // Update space params since they fill any open space in portrait orientation and have
+            // a static width in landscape orientation.
+            final int childViewCount = getChildCount();
+            for (int i = 0; i < childViewCount; i++) {
+                View childView = getChildAt(i);
+                if (childView instanceof Space) {
+                    childView.setLayoutParams(staticSpaceLayoutParams);
+                }
+            }
+        }
+
+        /**
+         * Returns {@link LayoutParams} based on the given {@code spaceWidth}. If the width is 0,
+         * then we're going to have the space expand to take up as much space as possible. If the
+         * width is non-zero, we want the inter-tile spacers to be fixed.
+         */
+        private LayoutParams generateSpaceLayoutParams(int spaceWidth) {
+            LayoutParams lp = new LayoutParams(spaceWidth, mTileDimensionSize);
+            if (spaceWidth == 0) {
+                lp.weight = 1;
+            }
+            lp.gravity = Gravity.CENTER;
+            return lp;
         }
 
         @Override
@@ -200,25 +241,22 @@ public class QuickQSPanel extends QSPanel {
         @Override
         public void addTile(TileRecord tile) {
             if (getChildCount() != 0) {
-                // Add a spacer.
-                addView(new Space(mContext), getChildCount(), generateSpaceParams());
+                // Add a spacer between tiles. We want static-width spaces if we're in landscape to
+                // keep the tiles close. For portrait, we stick with spaces that fill up any
+                // available space.
+                LayoutParams spaceLayoutParams = generateSpaceLayoutParams(
+                        mContext.getResources().getDimensionPixelSize(
+                                R.dimen.qs_quick_tile_space_width));
+                addView(new Space(mContext), getChildCount(), spaceLayoutParams);
             }
-            addView(tile.tileView, getChildCount(), generateLayoutParams());
+
+            addView(tile.tileView, getChildCount(), generateTileLayoutParams());
             mRecords.add(tile);
             tile.tile.setListening(this, mListening);
         }
 
-        private LayoutParams generateSpaceParams() {
-            int size = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
-            LayoutParams lp = new LayoutParams(0, size);
-            lp.weight = 1;
-            lp.gravity = Gravity.CENTER;
-            return lp;
-        }
-
-        private LayoutParams generateLayoutParams() {
-            int size = mContext.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
-            LayoutParams lp = new LayoutParams(size, size);
+        private LayoutParams generateTileLayoutParams() {
+            LayoutParams lp = new LayoutParams(mTileDimensionSize, mTileDimensionSize);
             lp.gravity = Gravity.CENTER;
             return lp;
         }
@@ -237,8 +275,8 @@ public class QuickQSPanel extends QSPanel {
         }
 
         private int getChildIndex(QSTileView tileView) {
-            final int N = getChildCount();
-            for (int i = 0; i < N; i++) {
+            final int childViewCount = getChildCount();
+            for (int i = 0; i < childViewCount; i++) {
                 if (getChildAt(i) == tileView) {
                     return i;
                 }

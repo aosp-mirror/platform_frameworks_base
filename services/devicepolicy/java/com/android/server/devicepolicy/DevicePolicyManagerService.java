@@ -51,6 +51,7 @@ import static android.app.admin.DevicePolicyManager.ID_TYPE_MEID;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_SERIAL;
 import static android.app.admin.DevicePolicyManager.LEAVE_ALL_SYSTEM_APPS_ENABLED;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_HOME;
+import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS;
 import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
@@ -566,9 +567,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     public static class DevicePolicyData {
-        @NonNull PasswordMetrics mActivePasswordMetrics = new PasswordMetrics();
         int mFailedPasswordAttempts = 0;
-        boolean mPasswordStateHasBeenSetSinceBoot = false;
         boolean mPasswordValidAtLastCheckpoint = true;
 
         int mUserHandle;
@@ -592,7 +591,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         List<String> mLockTaskPackages = new ArrayList<>();
 
         // Bitfield of feature flags to be enabled during LockTask mode.
-        int mLockTaskFeatures = DevicePolicyManager.LOCK_TASK_FEATURE_NONE;
+        // We default on the power button menu, in order to be consistent with pre-P behaviour.
+        int mLockTaskFeatures = DevicePolicyManager.LOCK_TASK_FEATURE_GLOBAL_ACTIONS;
 
         boolean mStatusBarDisabled = false;
 
@@ -628,6 +628,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     final SparseArray<DevicePolicyData> mUserData = new SparseArray<>();
+    @GuardedBy("DevicePolicyManagerService.this")
+    final SparseArray<PasswordMetrics> mUserPasswordMetrics = new SparseArray<>();
 
     final Handler mHandler;
     final Handler mBackgroundHandler;
@@ -2026,8 +2028,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Settings.Global.putString(mContext.getContentResolver(), name, value);
         }
 
-        void settingsSystemPutString(String name, String value) {
-            Settings.System.putString(mContext.getContentResolver(), name, value);
+        void settingsSystemPutStringForUser(String name, String value, int userId) {
+          Settings.System.putStringForUser(
+              mContext.getContentResolver(), name, value, userId);
         }
 
         void securityLogSetLoggingEnabledProperty(boolean enabled) {
@@ -2158,6 +2161,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     /**
+     * Provides PasswordMetrics object corresponding to the given user.
+     * @param userHandle the user for whom to provide metrics.
+     * @return the user password metrics, or {@code null} if none have been associated with
+     * the user yet (for example, if the device has booted but not been unlocked).
+     */
+    PasswordMetrics getUserPasswordMetricsLocked(int userHandle) {
+        return mUserPasswordMetrics.get(userHandle);
+    }
+
+    /**
      * Creates and loads the policy data from xml for data that is shared between
      * various profiles of a user. In contrast to {@link #getUserData(int)}
      * it allows access to data of users other than the calling user.
@@ -2191,6 +2204,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (policy != null) {
                 mUserData.remove(userHandle);
             }
+            if (mUserPasswordMetrics.get(userHandle) != null) {
+                mUserPasswordMetrics.remove(userHandle);
+            }
+
             File policyFile = new File(mInjector.environmentGetUserSystemDirectory(userHandle),
                     DEVICE_POLICIES_XML);
             policyFile.delete();
@@ -3907,9 +3924,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private void updatePasswordValidityCheckpointLocked(int userHandle, boolean parent) {
         final int credentialOwner = getCredentialOwner(userHandle, parent);
         DevicePolicyData policy = getUserData(credentialOwner);
+        PasswordMetrics metrics = getUserPasswordMetricsLocked(credentialOwner);
+        if (metrics == null) {
+            Slog.wtf(LOG_TAG, "Should have had a valid password metrics for updating checkpoint " +
+                    "validity.");
+            metrics = new PasswordMetrics();
+        }
         policy.mPasswordValidAtLastCheckpoint =
                 isPasswordSufficientForUserWithoutCheckpointLocked(
-                        policy.mActivePasswordMetrics, userHandle, parent);
+                        metrics, userHandle, parent);
 
         saveSettingsLocked(credentialOwner);
     }
@@ -4532,8 +4555,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // This API can only be called by an active device admin,
             // so try to retrieve it to check that the caller is one.
             getActiveAdminForCallerLocked(null, DeviceAdminInfo.USES_POLICY_LIMIT_PASSWORD, parent);
-            DevicePolicyData policy = getUserDataUnchecked(getCredentialOwner(userHandle, parent));
-            return isActivePasswordSufficientForUserLocked(policy, userHandle, parent);
+            int credentialOwner = getCredentialOwner(userHandle, parent);
+            DevicePolicyData policy = getUserDataUnchecked(credentialOwner);
+            PasswordMetrics metrics = getUserPasswordMetricsLocked(credentialOwner);
+            return isActivePasswordSufficientForUserLocked(
+                    policy.mPasswordValidAtLastCheckpoint, metrics, userHandle, parent);
         }
     }
 
@@ -4559,25 +4585,31 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (this) {
             final int targetUser = getProfileParentId(userHandle);
             enforceUserUnlocked(targetUser, false);
-            DevicePolicyData policy = getUserDataUnchecked(getCredentialOwner(userHandle, false));
-            return isActivePasswordSufficientForUserLocked(policy, targetUser, false);
+            int credentialOwner = getCredentialOwner(userHandle, false);
+            DevicePolicyData policy = getUserDataUnchecked(credentialOwner);
+            PasswordMetrics metrics = getUserPasswordMetricsLocked(credentialOwner);
+            return isActivePasswordSufficientForUserLocked(
+                    policy.mPasswordValidAtLastCheckpoint, metrics, targetUser, false);
         }
     }
 
     private boolean isActivePasswordSufficientForUserLocked(
-            DevicePolicyData policy, int userHandle, boolean parent) {
-        if (!mInjector.storageManagerIsFileBasedEncryptionEnabled()
-                && !policy.mPasswordStateHasBeenSetSinceBoot) {
+            boolean passwordValidAtLastCheckpoint, PasswordMetrics metrics, int userHandle,
+            boolean parent) {
+        if (!mInjector.storageManagerIsFileBasedEncryptionEnabled() && (metrics == null)) {
             // Before user enters their password for the first time after a reboot, return the
             // value of this flag, which tells us whether the password was valid the last time
             // settings were saved.  If DPC changes password requirements on boot so that the
             // current password no longer meets the requirements, this value will be stale until
             // the next time the password is entered.
-            return policy.mPasswordValidAtLastCheckpoint;
+            return passwordValidAtLastCheckpoint;
         }
 
-        return isPasswordSufficientForUserWithoutCheckpointLocked(
-                policy.mActivePasswordMetrics, userHandle, parent);
+        if (metrics == null) {
+            Slog.wtf(LOG_TAG, "FBE device, should have been unlocked and had valid metrics.");
+            metrics = new PasswordMetrics();
+        }
+        return isPasswordSufficientForUserWithoutCheckpointLocked(metrics, userHandle, parent);
     }
 
     /**
@@ -5502,10 +5534,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         .setAttestationChallenge(null)
                         .build();
 
-                final boolean generationResult = keyChain.generateKeyPair(algorithm,
+                final int generationResult = keyChain.generateKeyPair(algorithm,
                     new ParcelableKeyGenParameterSpec(noAttestationSpec));
-                if (!generationResult) {
-                    Log.e(LOG_TAG, "KeyChain failed to generate a keypair.");
+                if (generationResult != KeyChain.KEY_GEN_SUCCESS) {
+                    Log.e(LOG_TAG, String.format(
+                            "KeyChain failed to generate a keypair, error %d.", generationResult));
                     return false;
                 }
 
@@ -5518,12 +5551,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
                 final byte[] attestationChallenge = keySpec.getAttestationChallenge();
                 if (attestationChallenge != null) {
-                    final boolean attestationResult = keyChain.attestKey(
+                    final int attestationResult = keyChain.attestKey(
                             alias, attestationChallenge, attestationUtilsFlags, attestationChain);
-                    if (!attestationResult) {
+                    if (attestationResult != KeyChain.KEY_ATTESTATION_SUCCESS) {
                         Log.e(LOG_TAG, String.format(
-                                "Attestation for %s failed, deleting key.", alias));
+                                "Attestation for %s failed (rc=%d), deleting key.",
+                                alias, attestationResult));
                         keyChain.removeKeyPair(alias);
+                        if (attestationResult == KeyChain.KEY_ATTESTATION_CANNOT_ATTEST_IDS) {
+                            throw new UnsupportedOperationException(
+                                    "Device does not support Device ID attestation.");
+                        }
                         return false;
                     }
                 }
@@ -6123,10 +6161,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         validateQualityConstant(metrics.quality);
-        DevicePolicyData policy = getUserData(userHandle);
         synchronized (this) {
-            policy.mActivePasswordMetrics = metrics;
-            policy.mPasswordStateHasBeenSetSinceBoot = true;
+            mUserPasswordMetrics.put(userHandle, metrics);
         }
     }
 
@@ -7640,6 +7676,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return DevicePolicyManager.STATE_USER_UNMANAGED;
         }
+        enforceManageUsers();
         int userHandle = mInjector.userHandleGetCallingUserId();
         return getUserProvisioningState(userHandle);
     }
@@ -8710,6 +8747,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public List getPermittedInputMethodsForCurrentUser() {
+        enforceManageUsers();
         UserInfo currentUser;
         try {
             currentUser = mInjector.getIActivityManager().getCurrentUser();
@@ -9881,6 +9919,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         boolean hasOverview = (flags & LOCK_TASK_FEATURE_OVERVIEW) != 0;
         Preconditions.checkArgument(hasHome || !hasOverview,
                 "Cannot use LOCK_TASK_FEATURE_OVERVIEW without LOCK_TASK_FEATURE_HOME");
+        boolean hasNotification = (flags & LOCK_TASK_FEATURE_NOTIFICATIONS) != 0;
+        Preconditions.checkArgument(hasHome || !hasNotification,
+            "Cannot use LOCK_TASK_FEATURE_NOTIFICATIONS without LOCK_TASK_FEATURE_HOME");
 
         final int userHandle = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
@@ -10009,15 +10050,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkStringNotEmpty(setting, "String setting is null or empty");
 
         synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
 
             if (!SYSTEM_SETTINGS_WHITELIST.contains(setting)) {
                 throw new SecurityException(String.format(
                         "Permission denial: device owners cannot update %1$s", setting));
             }
 
-            mInjector.binderWithCleanCallingIdentity(() -> mInjector.settingsSystemPutString(
-                    setting, value));
+            final int callingUserId = mInjector.userHandleGetCallingUserId();
+
+            mInjector.binderWithCleanCallingIdentity(() ->
+                mInjector.settingsSystemPutStringForUser(setting, value, callingUserId));
         }
     }
 
@@ -11420,7 +11463,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public List<String> setMeteredDataDisabled(ComponentName who, List<String> packageNames) {
+    public List<String> setMeteredDataDisabledPackages(ComponentName who, List<String> packageNames) {
         Preconditions.checkNotNull(who);
         Preconditions.checkNotNull(packageNames);
 
@@ -11470,7 +11513,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public List<String> getMeteredDataDisabled(ComponentName who) {
+    public List<String> getMeteredDataDisabledPackages(ComponentName who) {
         Preconditions.checkNotNull(who);
 
         if (!mHasFeature) {
@@ -11485,7 +11528,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean isMeteredDataDisabledForUser(ComponentName who,
+    public boolean isMeteredDataDisabledPackageForUser(ComponentName who,
             String packageName, int userId) {
         Preconditions.checkNotNull(who);
 
@@ -11815,6 +11858,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean isDeviceProvisioned() {
+        enforceManageUsers();
         synchronized (this) {
             return getUserDataUnchecked(UserHandle.USER_SYSTEM).mUserSetupComplete;
         }

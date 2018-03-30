@@ -25,6 +25,7 @@ import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.ConfigurationStats;
+import android.app.usage.EventStats;
 import android.app.usage.IUsageStatsManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager;
@@ -486,6 +487,23 @@ public class UsageStatsService extends SystemService implements
     /**
      * Called by the Binder stub.
      */
+    List<EventStats> queryEventStats(int userId, int bucketType, long beginTime,
+            long endTime) {
+        synchronized (mLock) {
+            final long timeNow = checkAndGetTimeLocked();
+            if (!validRange(timeNow, beginTime, endTime)) {
+                return null;
+            }
+
+            final UserUsageStatsService service =
+                    getUserDataAndInitializeIfNeededLocked(userId, timeNow);
+            return service.queryEventStats(bucketType, beginTime, endTime);
+        }
+    }
+
+    /**
+     * Called by the Binder stub.
+     */
     UsageEvents queryEvents(int userId, long beginTime, long endTime,
             boolean shouldObfuscateInstantApps) {
         synchronized (mLock) {
@@ -702,6 +720,28 @@ public class UsageStatsService extends SystemService implements
             try {
                 final List<ConfigurationStats> results =
                         UsageStatsService.this.queryConfigurationStats(userId, bucketType,
+                                beginTime, endTime);
+                if (results != null) {
+                    return new ParceledListSlice<>(results);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+            return null;
+        }
+
+        @Override
+        public ParceledListSlice<EventStats> queryEventStats(int bucketType,
+                long beginTime, long endTime, String callingPackage) throws RemoteException {
+            if (!hasPermission(callingPackage)) {
+                return null;
+            }
+
+            final int userId = UserHandle.getCallingUserId();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                final List<EventStats> results =
+                        UsageStatsService.this.queryEventStats(userId, bucketType,
                                 beginTime, endTime);
                 if (results != null) {
                     return new ParceledListSlice<>(results);

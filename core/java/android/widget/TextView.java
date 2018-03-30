@@ -163,6 +163,7 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.view.textclassifier.TextClassification;
+import android.view.textclassifier.TextClassificationContext;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextLinks;
@@ -427,6 +428,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean mPreDrawListenerDetached;
 
     private TextClassifier mTextClassifier;
+    private TextClassifier mTextClassificationSession;
 
     // A flag to prevent repeated movements from escaping the enclosing text view. The idea here is
     // that if a user is holding down a movement key to traverse text, we shouldn't also traverse
@@ -11543,16 +11545,61 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @NonNull
     public TextClassifier getTextClassifier() {
         if (mTextClassifier == null) {
-            TextClassificationManager tcm =
+            final TextClassificationManager tcm =
                     mContext.getSystemService(TextClassificationManager.class);
             if (tcm != null) {
-                mTextClassifier = tcm.getTextClassifier();
-            } else {
-                mTextClassifier = TextClassifier.NO_OP;
+                return tcm.getTextClassifier();
             }
+            return TextClassifier.NO_OP;
         }
         return mTextClassifier;
     }
+
+    /**
+     * Returns a session-aware text classifier.
+     */
+    @NonNull
+    TextClassifier getTextClassificationSession() {
+        if (mTextClassificationSession == null || mTextClassificationSession.isDestroyed()) {
+            final TextClassificationManager tcm =
+                    mContext.getSystemService(TextClassificationManager.class);
+            if (tcm != null) {
+                final String widgetType;
+                if (isTextEditable()) {
+                    widgetType = TextClassifier.WIDGET_TYPE_EDITTEXT;
+                } else if (isTextSelectable()) {
+                    widgetType = TextClassifier.WIDGET_TYPE_TEXTVIEW;
+                } else {
+                    widgetType = TextClassifier.WIDGET_TYPE_UNSELECTABLE_TEXTVIEW;
+                }
+                // TODO: Tagged this widgetType with a * so it we can monitor if it reports
+                // SelectionEvents exactly as the older Logger does. Remove once investigations
+                // are complete.
+                final TextClassificationContext textClassificationContext =
+                        new TextClassificationContext.Builder(
+                                mContext.getPackageName(), "*" + widgetType)
+                                .build();
+                if (mTextClassifier != null) {
+                    mTextClassificationSession = tcm.createTextClassificationSession(
+                            textClassificationContext, mTextClassifier);
+                } else {
+                    mTextClassificationSession = tcm.createTextClassificationSession(
+                            textClassificationContext);
+                }
+            } else {
+                mTextClassificationSession = TextClassifier.NO_OP;
+            }
+        }
+        return mTextClassificationSession;
+    }
+
+    /**
+     * Returns true if this TextView uses a no-op TextClassifier.
+     */
+    boolean usesNoOpTextClassifier() {
+        return getTextClassifier() == TextClassifier.NO_OP;
+    }
+
 
     /**
      * Starts an ActionMode for the specified TextLinkSpan.
@@ -12490,9 +12537,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         + " before=" + before + " after=" + after + ": " + buffer);
             }
 
-            if (AccessibilityManager.getInstance(mContext).isEnabled()
-                    && !isPasswordInputType(getInputType()) && !hasPasswordTransformationMethod()) {
-                mBeforeText = buffer.toString();
+            if (AccessibilityManager.getInstance(mContext).isEnabled() && (mTransformed != null)) {
+                mBeforeText = mTransformed.toString();
             }
 
             TextView.this.sendBeforeTextChanged(buffer, start, before, after);

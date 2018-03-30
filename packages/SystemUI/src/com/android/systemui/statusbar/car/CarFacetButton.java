@@ -3,6 +3,7 @@ package com.android.systemui.statusbar.car;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.android.keyguard.AlphaOptimizedImageButton;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 
 /**
@@ -21,9 +23,6 @@ import com.android.systemui.R;
  * other music apps installed.
  */
 public class CarFacetButton extends LinearLayout {
-    private static final float SELECTED_ALPHA = 1f;
-    private static final float UNSELECTED_ALPHA = 0.7f;
-
     private static final String FACET_FILTER_DELIMITER = ";";
     /**
      * Extra information to be sent to a helper to make the decision of what app to launch when
@@ -42,6 +41,10 @@ public class CarFacetButton extends LinearLayout {
     private String[] mFacetCategories;
     /** App packages that are allowed to be used with this widget */
     private String[] mFacetPackages;
+    private int mIconResourceId;
+    private boolean mUseMoreIcon = true;
+    private float mSelectedAlpha = 1f;
+    private float mUnselectedAlpha = 1f;
 
 
     public CarFacetButton(Context context, AttributeSet attrs) {
@@ -53,6 +56,10 @@ public class CarFacetButton extends LinearLayout {
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.CarFacetButton);
         setupIntents(typedArray);
         setupIcons(typedArray);
+        CarFacetButtonController carFacetButtonController = Dependency.get(
+                CarFacetButtonController.class);
+        carFacetButtonController.addFacetButton(this);
+
     }
 
     /**
@@ -96,21 +103,25 @@ public class CarFacetButton extends LinearLayout {
 
 
     private void setupIcons(TypedArray styledAttributes) {
+        mSelectedAlpha = styledAttributes.getFloat(
+                R.styleable.CarFacetButton_selectedAlpha, mSelectedAlpha);
+        mUnselectedAlpha = styledAttributes.getFloat(
+                R.styleable.CarFacetButton_unselectedAlpha, mUnselectedAlpha);
         mIcon = findViewById(R.id.car_nav_button_icon);
         mIcon.setScaleType(ImageView.ScaleType.CENTER);
         mIcon.setClickable(false);
-        mIcon.setAlpha(UNSELECTED_ALPHA);
-        int iconResourceId = styledAttributes.getResourceId(R.styleable.CarFacetButton_icon, 0);
-        if (iconResourceId == 0)  {
+        mIcon.setAlpha(mUnselectedAlpha);
+        mIconResourceId = styledAttributes.getResourceId(R.styleable.CarFacetButton_icon, 0);
+        if (mIconResourceId == 0)  {
             throw new RuntimeException("specified icon resource was not found and is required");
         }
-        mIcon.setImageResource(iconResourceId);
+        mIcon.setImageResource(mIconResourceId);
 
         mMoreIcon = findViewById(R.id.car_nav_button_more_icon);
         mMoreIcon.setClickable(false);
-        mMoreIcon.setImageDrawable(getContext().getDrawable(R.drawable.car_ic_arrow));
-        mMoreIcon.setAlpha(UNSELECTED_ALPHA);
+        mMoreIcon.setAlpha(mSelectedAlpha);
         mMoreIcon.setVisibility(GONE);
+        mUseMoreIcon = styledAttributes.getBoolean(R.styleable.CarFacetButton_useMoreIcon, true);
     }
 
     /**
@@ -145,17 +156,27 @@ public class CarFacetButton extends LinearLayout {
     /**
      * Updates the visual state to let the user know if it's been selected.
      * @param selected true if should update the alpha of the icon to selected, false otherwise
-     * @param showMoreIcon true if the "more icon" should be shown, false otherwise
+     * @param showMoreIcon true if the "more icon" should be shown, false otherwise. Note this
+     *                     is ignored if the attribute useMoreIcon is set to false
      */
     public void setSelected(boolean selected, boolean showMoreIcon) {
         mSelected = selected;
         if (selected) {
-            mMoreIcon.setVisibility(showMoreIcon ? VISIBLE : GONE);
-            mMoreIcon.setAlpha(SELECTED_ALPHA);
-            mIcon.setAlpha(SELECTED_ALPHA);
+            if (mUseMoreIcon) {
+                mMoreIcon.setVisibility(showMoreIcon ? VISIBLE : GONE);
+            }
+            mIcon.setAlpha(mSelectedAlpha);
         } else {
             mMoreIcon.setVisibility(GONE);
-            mIcon.setAlpha(UNSELECTED_ALPHA);
+            mIcon.setAlpha(mUnselectedAlpha);
+        }
+    }
+
+    public void setIcon(Drawable d) {
+        if (d != null) {
+            mIcon.setImageDrawable(d);
+        } else {
+            mIcon.setImageResource(mIconResourceId);
         }
     }
 }

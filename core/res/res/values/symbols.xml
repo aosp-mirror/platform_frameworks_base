@@ -545,14 +545,23 @@
   <java-symbol type="string" name="undo" />
   <java-symbol type="string" name="redo" />
   <java-symbol type="string" name="email" />
+  <java-symbol type="string" name="email_desc" />
   <java-symbol type="string" name="dial" />
+  <java-symbol type="string" name="dial_desc" />
   <java-symbol type="string" name="map" />
+  <java-symbol type="string" name="map_desc" />
   <java-symbol type="string" name="browse" />
+  <java-symbol type="string" name="browse_desc" />
   <java-symbol type="string" name="sms" />
+  <java-symbol type="string" name="sms_desc" />
   <java-symbol type="string" name="add_contact" />
+  <java-symbol type="string" name="add_contact_desc" />
   <java-symbol type="string" name="view_calendar" />
+  <java-symbol type="string" name="view_calendar_desc" />
   <java-symbol type="string" name="add_calendar_event" />
+  <java-symbol type="string" name="add_calendar_event_desc" />
   <java-symbol type="string" name="view_flight" />
+  <java-symbol type="string" name="view_flight_desc" />
   <java-symbol type="string" name="textSelectionCABTitle" />
   <java-symbol type="string" name="BaMmi" />
   <java-symbol type="string" name="CLIRDefaultOffNextCallOff" />
@@ -1610,6 +1619,8 @@
   <java-symbol type="anim" name="task_open_enter" />
   <java-symbol type="anim" name="cross_profile_apps_thumbnail_enter" />
   <java-symbol type="anim" name="task_open_enter_cross_profile_apps" />
+  <java-symbol type="anim" name="activity_translucent_open_enter" />
+  <java-symbol type="anim" name="activity_translucent_close_exit" />
 
   <java-symbol type="array" name="config_autoRotationTiltTolerance" />
   <java-symbol type="array" name="config_keyboardTapVibePattern" />
@@ -1659,6 +1670,7 @@
   <java-symbol type="dimen" name="navigation_bar_height_landscape_car_mode" />
   <java-symbol type="dimen" name="navigation_bar_width_car_mode" />
   <java-symbol type="dimen" name="status_bar_height" />
+  <java-symbol type="dimen" name="quick_qs_offset_height" />
   <java-symbol type="dimen" name="quick_qs_total_height" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_off" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_on" />
@@ -3018,10 +3030,14 @@
   <java-symbol type="layout" name="autofill_save"/>
   <java-symbol type="layout" name="autofill_dataset_picker"/>
   <java-symbol type="layout" name="autofill_dataset_picker_fullscreen"/>
+  <java-symbol type="layout" name="autofill_dataset_picker_header_footer"/>
+  <java-symbol type="layout" name="autofill_dataset_picker_header_footer_fullscreen"/>
+  <java-symbol type="id" name="autofill" />
   <java-symbol type="id" name="autofill_dataset_container"/>
+  <java-symbol type="id" name="autofill_dataset_footer"/>
+  <java-symbol type="id" name="autofill_dataset_header"/>
   <java-symbol type="id" name="autofill_dataset_list"/>
   <java-symbol type="id" name="autofill_dataset_picker"/>
-  <java-symbol type="id" name="autofill" />
   <java-symbol type="id" name="autofill_save_custom_subtitle" />
   <java-symbol type="id" name="autofill_save_icon" />
   <java-symbol type="id" name="autofill_save_no" />
@@ -3051,6 +3067,7 @@
   <java-symbol type="dimen" name="autofill_dataset_picker_max_height"/>
   <java-symbol type="dimen" name="autofill_save_custom_subtitle_max_height"/>
   <java-symbol type="dimen" name="autofill_save_icon_max_size"/>
+  <java-symbol type="integer" name="autofill_max_visible_datasets" />
 
   <java-symbol type="dimen" name="notification_big_picture_max_height"/>
   <java-symbol type="dimen" name="notification_big_picture_max_width"/>
@@ -3310,5 +3327,7 @@
 
   <java-symbol type="string" name="notification_app_name_system" />
   <java-symbol type="string" name="notification_app_name_settings" />
+
+  <java-symbol type="integer" name="config_lowBatteryAutoTriggerDefaultLevel" />
 
 </resources>

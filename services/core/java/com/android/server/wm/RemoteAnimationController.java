@@ -16,15 +16,17 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.AnimationAdapterProto.REMOTE;
+import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.AnimationAdapterProto.REMOTE;
-import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
 
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Slog;
@@ -37,6 +39,7 @@ import android.view.SurfaceControl.Transaction;
 
 import com.android.internal.util.FastPrintWriter;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
+import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -45,7 +48,7 @@ import java.util.ArrayList;
 /**
  * Helper class to run app animations in a remote process.
  */
-class RemoteAnimationController {
+class RemoteAnimationController implements DeathRecipient {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "RemoteAnimationController" : TAG_WM;
     private static final long TIMEOUT_MS = 2000;
 
@@ -54,12 +57,10 @@ class RemoteAnimationController {
     private final ArrayList<RemoteAnimationAdapterWrapper> mPendingAnimations = new ArrayList<>();
     private final Rect mTmpRect = new Rect();
     private final Handler mHandler;
-    private FinishedCallback mFinishedCallback;
+    private final Runnable mTimeoutRunnable = this::cancelAnimation;
 
-    private final Runnable mTimeoutRunnable = () -> {
-        onAnimationFinished();
-        invokeAnimationCancelled();
-    };
+    private FinishedCallback mFinishedCallback;
+    private boolean mCanceled;
 
     RemoteAnimationController(WindowManagerService service,
             RemoteAnimationAdapter remoteAnimationAdapter, Handler handler) {
@@ -88,7 +89,7 @@ class RemoteAnimationController {
      * Called when the transition is ready to be started, and all leashes have been set up.
      */
     void goodToGo() {
-        if (mPendingAnimations.isEmpty()) {
+        if (mPendingAnimations.isEmpty() || mCanceled) {
             onAnimationFinished();
             return;
         }
@@ -105,8 +106,8 @@ class RemoteAnimationController {
         }
         mService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
             try {
-                mRemoteAnimationAdapter.getRunner().onAnimationStart(animations,
-                        mFinishedCallback);
+                mRemoteAnimationAdapter.getRunner().asBinder().linkToDeath(this, 0);
+                mRemoteAnimationAdapter.getRunner().onAnimationStart(animations, mFinishedCallback);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to start remote animation", e);
                 onAnimationFinished();
@@ -116,6 +117,17 @@ class RemoteAnimationController {
         if (DEBUG_APP_TRANSITIONS) {
             writeStartDebugStatement();
         }
+    }
+
+    private void cancelAnimation() {
+        synchronized (mService.getWindowManagerLock()) {
+            if (mCanceled) {
+                return;
+            }
+            mCanceled = true;
+        }
+        onAnimationFinished();
+        invokeAnimationCancelled();
     }
 
     private void writeStartDebugStatement() {
@@ -132,11 +144,18 @@ class RemoteAnimationController {
     private RemoteAnimationTarget[] createAnimations() {
         final ArrayList<RemoteAnimationTarget> targets = new ArrayList<>();
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
+            final RemoteAnimationAdapterWrapper wrapper = mPendingAnimations.get(i);
             final RemoteAnimationTarget target =
                     mPendingAnimations.get(i).createRemoteAppAnimation();
             if (target != null) {
                 targets.add(target);
             } else {
+
+                // We can't really start an animation but we still need to make sure to finish the
+                // pending animation that was started by SurfaceAnimator
+                if (wrapper.mCapturedFinishCallback != null) {
+                    wrapper.mCapturedFinishCallback.onAnimationFinished(wrapper);
+                }
                 mPendingAnimations.remove(i);
             }
         }
@@ -145,6 +164,7 @@ class RemoteAnimationController {
 
     private void onAnimationFinished() {
         mHandler.removeCallbacks(mTimeoutRunnable);
+        mRemoteAnimationAdapter.getRunner().asBinder().unlinkToDeath(this, 0);
         synchronized (mService.mWindowMap) {
             releaseFinishedCallback();
             mService.openSurfaceTransaction();
@@ -184,6 +204,11 @@ class RemoteAnimationController {
         mService.sendSetRunningRemoteAnimation(pid, running);
     }
 
+    @Override
+    public void binderDied() {
+        cancelAnimation();
+    }
+
     private static final class FinishedCallback extends IRemoteAnimationFinishedCallback.Stub {
 
         RemoteAnimationController mOuter;
@@ -194,12 +219,17 @@ class RemoteAnimationController {
 
         @Override
         public void onAnimationFinished() throws RemoteException {
-            if (mOuter != null) {
-                mOuter.onAnimationFinished();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                if (mOuter != null) {
+                    mOuter.onAnimationFinished();
 
-                // In case the client holds on to the finish callback, make sure we don't leak
-                // RemoteAnimationController which in turn would leak the runner on the client.
-                mOuter = null;
+                    // In case the client holds on to the finish callback, make sure we don't leak
+                    // RemoteAnimationController which in turn would leak the runner on the client.
+                    mOuter = null;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
 
@@ -235,9 +265,11 @@ class RemoteAnimationController {
                     || mCapturedLeash == null) {
                 return null;
             }
+            final Rect insets = new Rect(mainWindow.mContentInsets);
+            InsetUtils.addInsets(insets, mAppWindowToken.getLetterboxInsets());
             mTarget = new RemoteAnimationTarget(task.mTaskId, getMode(),
                     mCapturedLeash, !mAppWindowToken.fillsParent(),
-                    mainWindow.mWinAnimator.mLastClipRect, mainWindow.mContentInsets,
+                    mainWindow.mWinAnimator.mLastClipRect, insets,
                     mAppWindowToken.getPrefixOrderIndex(), mPosition, mStackBounds,
                     task.getWindowConfiguration(), false /*isNotInRecents*/);
             return mTarget;

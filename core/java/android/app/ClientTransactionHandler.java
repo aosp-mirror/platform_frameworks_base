@@ -17,6 +17,7 @@ package android.app;
 
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.PendingTransactionActions;
+import android.app.servertransaction.TransactionExecutor;
 import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -42,6 +43,22 @@ public abstract class ClientTransactionHandler {
         transaction.preExecute(this);
         sendMessage(ActivityThread.H.EXECUTE_TRANSACTION, transaction);
     }
+
+    /**
+     * Execute transaction immediately without scheduling it. This is used for local requests, so
+     * it will also recycle the transaction.
+     */
+    void executeTransaction(ClientTransaction transaction) {
+        transaction.preExecute(this);
+        getTransactionExecutor().execute(transaction);
+        transaction.recycle();
+    }
+
+    /**
+     * Get the {@link TransactionExecutor} that will be performing lifecycle transitions and
+     * callbacks for activities.
+     */
+    abstract TransactionExecutor getTransactionExecutor();
 
     abstract void sendMessage(int what, Object obj);
 

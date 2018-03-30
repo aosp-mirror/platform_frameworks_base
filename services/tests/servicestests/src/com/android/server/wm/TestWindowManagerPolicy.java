@@ -445,8 +445,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public int rotationForOrientationLw(int orientation,
-            int lastRotation) {
+    public int rotationForOrientationLw(int orientation, int lastRotation, boolean defaultDisplay) {
         return rotationToReport;
     }
 

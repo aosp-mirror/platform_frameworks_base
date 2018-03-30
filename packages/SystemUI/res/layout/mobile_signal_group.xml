@@ -50,7 +50,8 @@
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:layout_gravity="center_vertical"
-        android:paddingEnd="1dp"
+        android:paddingStart="1dp"
+        android:paddingEnd="2dp"
         android:visibility="gone" />
     <Space
         android:id="@+id/mobile_roaming_space"

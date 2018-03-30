@@ -169,7 +169,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener {
             if (group.suppressed) {
                 handleSuppressedSummaryHeadsUpped(group.summary);
             }
-            if (!mIsUpdatingUnchangedGroup) {
+            if (!mIsUpdatingUnchangedGroup && mListener != null) {
                 mListener.onGroupsChanged();
             }
         }

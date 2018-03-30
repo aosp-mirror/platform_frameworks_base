@@ -18,7 +18,9 @@ package com.android.systemui.statusbar.phone;
 
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.fail;
 
@@ -39,6 +41,7 @@ import android.app.Notification;
 import android.app.StatusBarManager;
 import android.app.trust.TrustManager;
 import android.content.Context;
+import android.content.pm.UserInfo;
 import android.hardware.fingerprint.FingerprintManager;
 import android.metrics.LogMaker;
 import android.os.Binder;
@@ -55,6 +58,8 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.SparseArray;
+import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 
 import com.android.internal.logging.MetricsLogger;
@@ -65,13 +70,17 @@ import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.UiOffloadThread;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.AppOpsListener;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.ExpandableNotificationRow;
+import com.android.systemui.statusbar.FooterView;
+import com.android.systemui.statusbar.FooterViewButton;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
@@ -84,25 +93,28 @@ import com.android.systemui.statusbar.NotificationLogger;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.KeyguardMonitorImpl;
+import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.function.Predicate;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -125,6 +137,8 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NotificationViewHierarchyManager mViewHierarchyManager;
     @Mock private VisualStabilityManager mVisualStabilityManager;
     @Mock private NotificationListener mNotificationListener;
+    @Mock private KeyguardViewMediator mKeyguardViewMediator;
+    @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
 
     private TestableStatusBar mStatusBar;
     private FakeMetricsLogger mMetricsLogger;
@@ -137,9 +151,7 @@ public class StatusBarTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mDependency.injectMockDependency(AssistManager.class);
         mDependency.injectMockDependency(DeviceProvisionedController.class);
-        mDependency.injectMockDependency(NotificationGroupManager.class);
         mDependency.injectMockDependency(NotificationGutsManager.class);
-        mDependency.injectMockDependency(NotificationRemoteInputManager.class);
         mDependency.injectMockDependency(NotificationMediaManager.class);
         mDependency.injectMockDependency(ForegroundServiceController.class);
         mDependency.injectTestDependency(NotificationViewHierarchyManager.class,
@@ -154,8 +166,8 @@ public class StatusBarTest extends SysuiTestCase {
 
         mMetricsLogger = new FakeMetricsLogger();
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
-        mNotificationLogger = new NotificationLogger();
         mDependency.injectTestDependency(NotificationLogger.class, mNotificationLogger);
+        mNotificationLogger = new NotificationLogger();
 
         IPowerManager powerManagerService = mock(IPowerManager.class);
         HandlerThread handlerThread = new HandlerThread("TestThread");
@@ -193,7 +205,12 @@ public class StatusBarTest extends SysuiTestCase {
                 mPowerManager, mNotificationPanelView, mBarService, mNotificationListener,
                 mNotificationLogger, mVisualStabilityManager, mViewHierarchyManager,
                 mEntryManager, mScrimController, mFingerprintUnlockController,
-                mock(ActivityLaunchAnimator.class));
+                mock(ActivityLaunchAnimator.class), mKeyguardViewMediator,
+                mock(NotificationRemoteInputManager.class), mock(NotificationGroupManager.class),
+                mock(FalsingManager.class), mock(StatusBarWindowManager.class),
+                mock(NotificationIconAreaController.class), mock(DozeScrimController.class),
+                mock(NotificationShelf.class), mLockscreenUserManager,
+                mock(CommandQueue.class));
         mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mContext.getComponents();
         mEntryManager.setUpForTest(mStatusBar, mStackScroller, mStatusBar, mHeadsUpManager,
@@ -507,9 +524,9 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.disable(StatusBarManager.DISABLE_NONE, StatusBarManager.DISABLE2_NONE, false);
         verify(mNotificationPanelView).setQsExpansionEnabled(true);
         mStatusBar.animateExpandNotificationsPanel();
-        verify(mNotificationPanelView).expand(anyBoolean());
+        verify(mNotificationPanelView).expandWithoutQs();
         mStatusBar.animateExpandSettingsPanel(null);
-        verify(mNotificationPanelView).expand(anyBoolean());
+        verify(mNotificationPanelView).expandWithQs();
     }
 
     @Test
@@ -520,11 +537,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Test
     @RunWithLooper(setAsMainLooper = true)
     public void testUpdateKeyguardState_DoesNotCrash() {
-        mStatusBar.mStatusBarWindow = mock(StatusBarWindowView.class);
         mStatusBar.mState = StatusBarState.KEYGUARD;
-        mStatusBar.mDozeScrimController = mock(DozeScrimController.class);
-        mStatusBar.mNotificationIconAreaController = mock(NotificationIconAreaController.class);
-        mStatusBar.mLockscreenUserManager = mock(NotificationLockscreenUserManager.class);
         when(mStatusBar.mLockscreenUserManager.getCurrentProfiles()).thenReturn(
                 new SparseArray<>());
         mStatusBar.updateKeyguardState(false, false);
@@ -532,9 +545,6 @@ public class StatusBarTest extends SysuiTestCase {
 
     @Test
     public void testFingerprintNotification_UpdatesScrims() {
-        mStatusBar.mStatusBarWindowManager = mock(StatusBarWindowManager.class);
-        mStatusBar.mDozeScrimController = mock(DozeScrimController.class);
-        mStatusBar.mNotificationIconAreaController = mock(NotificationIconAreaController.class);
         mStatusBar.notifyFpAuthModeChanged();
         verify(mScrimController).transitionTo(any(), any());
     }
@@ -558,6 +568,94 @@ public class StatusBarTest extends SysuiTestCase {
         verify(mScrimController).setKeyguardOccluded(eq(false));
     }
 
+    @Test
+    public void testInflateFooterView() {
+        mStatusBar.reevaluateStyles();
+        ArgumentCaptor<FooterView> captor = ArgumentCaptor.forClass(FooterView.class);
+        verify(mStackScroller).setFooterView(captor.capture());
+
+        assertNotNull(captor.getValue().findViewById(R.id.manage_text).hasOnClickListeners());
+        assertNotNull(captor.getValue().findViewById(R.id.dismiss_text).hasOnClickListeners());
+    }
+
+    @Test
+    public void testUpdateFooter_noNotifications() {
+        mStatusBar.setBarStateForTest(StatusBarState.SHADE);
+        assertEquals(0, mEntryManager.getNotificationData().getActiveNotifications().size());
+
+        mStatusBar.updateFooter();
+        verify(mStackScroller).updateFooterView(false, false);
+    }
+
+    @Test
+    public void testUpdateFooter_oneClearableNotification() {
+        mStatusBar.setBarStateForTest(StatusBarState.SHADE);
+        ArrayList<Entry> entries = new ArrayList<>();
+        entries.add(mock(Entry.class));
+        when(mNotificationData.getActiveNotifications()).thenReturn(entries);
+
+        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
+        when(row.canViewBeDismissed()).thenReturn(true);
+        when(mStackScroller.getChildCount()).thenReturn(1);
+        when(mStackScroller.getChildAt(anyInt())).thenReturn(row);
+
+        mStatusBar.updateFooter();
+        verify(mStackScroller).updateFooterView(true, true);
+    }
+
+    @Test
+    public void testUpdateFooter_oneNonClearableNotification() {
+        mStatusBar.setBarStateForTest(StatusBarState.SHADE);
+        ArrayList<Entry> entries = new ArrayList<>();
+        entries.add(mock(Entry.class));
+        when(mNotificationData.getActiveNotifications()).thenReturn(entries);
+
+        mStatusBar.updateFooter();
+        verify(mStackScroller).updateFooterView(true, false);
+    }
+
+    @Test
+    public void testUpdateFooter_atEnd() {
+        // add footer
+        mStatusBar.reevaluateStyles();
+
+        // add notification
+        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
+        when(row.isClearable()).thenReturn(true);
+        mStackScroller.addContainerView(row);
+
+        mStatusBar.onUpdateRowStates();
+
+        // move footer to end
+        verify(mStackScroller).changeViewPosition(any(FooterView.class), eq(-1 /* end */));
+    }
+
+    @Test
+    public void testSetState_changesIsFullScreenUserSwitcherState() {
+        mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
+        assertFalse(mStatusBar.isFullScreenUserSwitcherState());
+
+        mStatusBar.setBarStateForTest(StatusBarState.FULLSCREEN_USER_SWITCHER);
+        assertTrue(mStatusBar.isFullScreenUserSwitcherState());
+    }
+
+    @Test
+    public void testShowKeyguardImplementation_setsState() {
+        when(mLockscreenUserManager.getCurrentProfiles()).thenReturn(new SparseArray<>());
+
+        mStatusBar.setBarStateForTest(StatusBarState.SHADE);
+
+        // By default, showKeyguardImpl sets state to KEYGUARD.
+        mStatusBar.showKeyguardImpl();
+        assertTrue(mStatusBar.mState == StatusBarState.KEYGUARD);
+
+        // If useFullscreenUserSwitcher is true, state is set to FULLSCREEN_USER_SWITCHER.
+        mStatusBar.mUserSwitcherController = mock(UserSwitcherController.class);
+        when(mStatusBar.mUserSwitcherController.useFullscreenUserSwitcher()).thenReturn(true);
+        mStatusBar.showKeyguardImpl();
+        assertTrue(mStatusBar.mState == StatusBarState.FULLSCREEN_USER_SWITCHER);
+    }
+
     static class TestableStatusBar extends StatusBar {
         public TestableStatusBar(StatusBarKeyguardViewManager man,
                 UnlockMethodCache unlock, KeyguardIndicationController key,
@@ -569,7 +667,16 @@ public class StatusBarTest extends SysuiTestCase {
                 NotificationViewHierarchyManager viewHierarchyManager,
                 TestableNotificationEntryManager entryManager, ScrimController scrimController,
                 FingerprintUnlockController fingerprintUnlockController,
-                ActivityLaunchAnimator launchAnimator) {
+                ActivityLaunchAnimator launchAnimator, KeyguardViewMediator keyguardViewMediator,
+                NotificationRemoteInputManager notificationRemoteInputManager,
+                NotificationGroupManager notificationGroupManager,
+                FalsingManager falsingManager,
+                StatusBarWindowManager statusBarWindowManager,
+                NotificationIconAreaController notificationIconAreaController,
+                DozeScrimController dozeScrimController,
+                NotificationShelf notificationShelf,
+                NotificationLockscreenUserManager notificationLockscreenUserManager,
+                CommandQueue commandQueue) {
             mStatusBarKeyguardViewManager = man;
             mUnlockMethodCache = unlock;
             mKeyguardIndicationController = key;
@@ -587,6 +694,17 @@ public class StatusBarTest extends SysuiTestCase {
             mScrimController = scrimController;
             mFingerprintUnlockController = fingerprintUnlockController;
             mActivityLaunchAnimator = launchAnimator;
+            mKeyguardViewMediator = keyguardViewMediator;
+            mClearAllEnabled = true;
+            mRemoteInputManager = notificationRemoteInputManager;
+            mGroupManager = notificationGroupManager;
+            mFalsingManager = falsingManager;
+            mStatusBarWindowManager = statusBarWindowManager;
+            mNotificationIconAreaController = notificationIconAreaController;
+            mDozeScrimController = dozeScrimController;
+            mNotificationShelf = notificationShelf;
+            mLockscreenUserManager = notificationLockscreenUserManager;
+            mCommandQueue = commandQueue;
         }
 
         private WakefulnessLifecycle createAwakeWakefulnessLifecycle() {

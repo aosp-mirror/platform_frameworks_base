@@ -269,22 +269,7 @@ public class VolumeInfo implements Parcelable {
         return (mountFlags & MOUNT_FLAG_VISIBLE) != 0;
     }
 
-    public boolean isVisibleForRead(int userId) {
-        if (type == TYPE_PUBLIC) {
-            if (isPrimary() && mountUserId != userId) {
-                // Primary physical is only visible to single user
-                return false;
-            } else {
-                return isVisible();
-            }
-        } else if (type == TYPE_EMULATED) {
-            return isVisible();
-        } else {
-            return false;
-        }
-    }
-
-    public boolean isVisibleForWrite(int userId) {
+    public boolean isVisibleForUser(int userId) {
         if (type == TYPE_PUBLIC && mountUserId == userId) {
             return isVisible();
         } else if (type == TYPE_EMULATED) {
@@ -292,6 +277,14 @@ public class VolumeInfo implements Parcelable {
         } else {
             return false;
         }
+    }
+
+    public boolean isVisibleForRead(int userId) {
+        return isVisibleForUser(userId);
+    }
+
+    public boolean isVisibleForWrite(int userId) {
+        return isVisibleForUser(userId);
     }
 
     public File getPath() {
@@ -319,7 +312,7 @@ public class VolumeInfo implements Parcelable {
      * {@link android.Manifest.permission#WRITE_MEDIA_STORAGE}.
      */
     public File getInternalPathForUser(int userId) {
-        if (type == TYPE_PUBLIC) {
+        if (type == TYPE_PUBLIC && !isVisible()) {
             // TODO: plumb through cleaner path from vold
             return new File(path.replace("/storage/", "/mnt/media_rw/"));
         } else {
@@ -409,9 +402,9 @@ public class VolumeInfo implements Parcelable {
      * Build an intent to browse the contents of this volume. Only valid for
      * {@link #TYPE_EMULATED} or {@link #TYPE_PUBLIC}.
      */
-    public Intent buildBrowseIntent() {
+    public @Nullable Intent buildBrowseIntent() {
         final Uri uri;
-        if (type == VolumeInfo.TYPE_PUBLIC) {
+        if (type == VolumeInfo.TYPE_PUBLIC && mountUserId == UserHandle.myUserId()) {
             uri = DocumentsContract.buildRootUri(DOCUMENT_AUTHORITY, fsUuid);
         } else if (type == VolumeInfo.TYPE_EMULATED && isPrimary()) {
             uri = DocumentsContract.buildRootUri(DOCUMENT_AUTHORITY,

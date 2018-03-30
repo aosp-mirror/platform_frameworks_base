@@ -70,30 +70,13 @@ public final class Helper {
      */
     public static int sVisibleDatasetsMaxCount = 3;
 
+    /**
+     * When non-null, overrides whether the UI should be shown on full-screen mode.
+     */
+    public static Boolean sFullScreenMode = null;
+
     private Helper() {
         throw new UnsupportedOperationException("contains static members only");
-    }
-
-    static void append(StringBuilder builder, Bundle bundle) {
-        if (bundle == null || !sVerbose) {
-            builder.append("null");
-            return;
-        }
-        final Set<String> keySet = bundle.keySet();
-        builder.append("[Bundle with ").append(keySet.size()).append(" extras:");
-        for (String key : keySet) {
-            final Object value = bundle.get(key);
-            builder.append(' ').append(key).append('=');
-            builder.append((value instanceof Object[])
-                    ? Arrays.toString((Objects[]) value) : value);
-        }
-        builder.append(']');
-    }
-
-    static String bundleToString(Bundle bundle) {
-        final StringBuilder builder = new StringBuilder();
-        append(builder, bundle);
-        return builder.toString();
     }
 
     @Nullable

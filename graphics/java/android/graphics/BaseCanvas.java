@@ -41,13 +41,19 @@ public abstract class BaseCanvas {
     /**
      * Should only be assigned in constructors (or setBitmap if software canvas),
      * freed by NativeAllocation.
+     * @hide
      */
     protected long mNativeCanvasWrapper;
 
     /**
      * Used to determine when compatibility scaling is in effect.
+     * @hide
      */
     protected int mScreenDensity = Bitmap.DENSITY_NONE;
+
+    /**
+     * @hide
+     */
     protected int mDensity = Bitmap.DENSITY_NONE;
     private boolean mAllowHwBitmapsInSwMode = false;
 

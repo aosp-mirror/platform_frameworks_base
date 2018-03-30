@@ -31,6 +31,7 @@ class Surface;
 namespace uirenderer {
 
 class DeferredLayerUpdater;
+class ErrorHandler;
 
 namespace renderthread {
 
@@ -68,7 +69,7 @@ public:
                               const BakedOpRenderer::LightInfo& lightInfo) = 0;
     virtual TaskManager* getTaskManager() = 0;
     virtual bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
-                                     bool wideColorGamut) = 0;
+                                     bool wideColorGamut, ErrorHandler* errorHandler) = 0;
     virtual bool pinImages(std::vector<SkImage*>& mutableImages) = 0;
     virtual bool pinImages(LsaVector<sk_sp<Bitmap>>& images) = 0;
     virtual void unpinImages() = 0;

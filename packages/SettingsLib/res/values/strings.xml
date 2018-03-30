@@ -97,6 +97,12 @@
     <!-- Summary for Connected wifi network without internet -->
     <string name="wifi_connected_no_internet">Connected, no internet</string>
 
+    <!-- Wi-Fi status indicating that the current network is connected, but has no internet access. -->
+    <string name="wifi_status_no_internet">No internet</string>
+
+    <!-- Wi-Fi status indicating that the current network is connected requires sign in to access the internet. -->
+    <string name="wifi_status_sign_in_required">Sign in required</string>
+
     <!-- Summary for networks failing to connect due to association rejection status 17, AP full -->
     <string name="wifi_ap_unable_to_handle_new_sta">Access point temporarily full</string>
 
@@ -494,10 +500,10 @@
     <string name="keep_screen_on">Stay awake</string>
     <!-- setting Checkbox summary whether to keep the screen on when plugged in  -->
     <string name="keep_screen_on_summary">Screen will never sleep while charging</string>
-    <!-- Setting Checkbox title whether to enable bluetooth HCI snoop log -->
+    <!-- Setting Checkbox title whether to enable Bluetooth HCI snoop log -->
     <string name="bt_hci_snoop_log">Enable Bluetooth HCI snoop log</string>
-    <!-- setting Checkbox summary whether to capture all bluetooth HCI packets in a file -->
-    <string name="bt_hci_snoop_log_summary">Capture all bluetooth HCI packets in a file</string>
+    <!-- setting Checkbox summary whether to capture all Bluetooth HCI packets in a file -->
+    <string name="bt_hci_snoop_log_summary">Capture all Bluetooth HCI packets in a file (Toggle Bluetooth after changing this setting)</string>
     <!-- setting Checkbox title whether to enable OEM unlock [CHAR_LIMIT=35] -->
     <string name="oem_unlock_enable">OEM unlocking</string>
     <!-- setting Checkbox summary whether to enable OEM unlock [CHAR_LIMIT=50] -->

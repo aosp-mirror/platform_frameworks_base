@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -73,7 +74,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Before
     public void setup() {
         mLightBarController = mock(LightBarController.class);
-        mScrimBehind = new ScrimView(getContext());
+        mScrimBehind = spy(new ScrimView(getContext()));
         mScrimInFront = new ScrimView(getContext());
         mWakeLock = mock(WakeLock.class);
         mAlarmManager = mock(AlarmManager.class);
@@ -210,8 +211,10 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.finishAnimationsImmediately();
 
         final float scrimAlpha = mScrimBehind.getViewAlpha();
+        reset(mScrimBehind);
         mScrimController.setExpansionAffectsAlpha(false);
         mScrimController.setPanelExpansion(0.8f);
+        verifyZeroInteractions(mScrimBehind);
         Assert.assertEquals("Scrim opacity shouldn't change when setExpansionAffectsAlpha "
                 + "is false", scrimAlpha, mScrimBehind.getViewAlpha(), 0.01f);
 

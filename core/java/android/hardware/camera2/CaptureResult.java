@@ -4096,6 +4096,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * of points can be less than max (that is, the request doesn't have to
      * always provide a curve with number of points equivalent to
      * {@link CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS android.tonemap.maxCurvePoints}).</p>
+     * <p>For devices with MONOCHROME capability, only red channel is used. Green and blue channels
+     * are ignored.</p>
      * <p>A few examples, and their corresponding graphical mappings; these
      * only specify the red channel and the precision is limited to 4
      * digits, for conciseness.</p>
@@ -4158,6 +4160,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * of points can be less than max (that is, the request doesn't have to
      * always provide a curve with number of points equivalent to
      * {@link CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS android.tonemap.maxCurvePoints}).</p>
+     * <p>For devices with MONOCHROME capability, only red channel is used. Green and blue channels
+     * are ignored.</p>
      * <p>A few examples, and their corresponding graphical mappings; these
      * only specify the red channel and the precision is limited to 4
      * digits, for conciseness.</p>
@@ -4449,6 +4453,49 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
     @PublicKey
     public static final Key<Float> REPROCESS_EFFECTIVE_EXPOSURE_FACTOR =
             new Key<Float>("android.reprocess.effectiveExposureFactor", float.class);
+
+    /**
+     * <p>Mode of operation for the lens distortion correction block.</p>
+     * <p>The lens distortion correction block attempts to improve image quality by fixing
+     * radial, tangential, or other geometric aberrations in the camera device's optics.  If
+     * available, the {@link CameraCharacteristics#LENS_DISTORTION android.lens.distortion} field documents the lens's distortion parameters.</p>
+     * <p>OFF means no distortion correction is done.</p>
+     * <p>FAST/HIGH_QUALITY both mean camera device determined distortion correction will be
+     * applied. HIGH_QUALITY mode indicates that the camera device will use the highest-quality
+     * correction algorithms, even if it slows down capture rate. FAST means the camera device
+     * will not slow down capture rate when applying correction. FAST may be the same as OFF if
+     * any correction at all would slow down capture rate.  Every output stream will have a
+     * similar amount of enhancement applied.</p>
+     * <p>The correction only applies to processed outputs such as YUV, JPEG, or DEPTH16; it is not
+     * applied to any RAW output.  Metadata coordinates such as face rectangles or metering
+     * regions are also not affected by correction.</p>
+     * <p>Applications enabling distortion correction need to pay extra attention when converting
+     * image coordinates between corrected output buffers and the sensor array. For example, if
+     * the app supports tap-to-focus and enables correction, it then has to apply the distortion
+     * model described in {@link CameraCharacteristics#LENS_DISTORTION android.lens.distortion} to the image buffer tap coordinates to properly
+     * calculate the tap position on the sensor active array to be used with
+     * {@link CaptureRequest#CONTROL_AF_REGIONS android.control.afRegions}. The same applies in reverse to detected face rectangles if
+     * they need to be drawn on top of the corrected output buffers.</p>
+     * <p><b>Possible values:</b>
+     * <ul>
+     *   <li>{@link #DISTORTION_CORRECTION_MODE_OFF OFF}</li>
+     *   <li>{@link #DISTORTION_CORRECTION_MODE_FAST FAST}</li>
+     *   <li>{@link #DISTORTION_CORRECTION_MODE_HIGH_QUALITY HIGH_QUALITY}</li>
+     * </ul></p>
+     * <p><b>Available values for this device:</b><br>
+     * {@link CameraCharacteristics#DISTORTION_CORRECTION_AVAILABLE_MODES android.distortionCorrection.availableModes}</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#CONTROL_AF_REGIONS
+     * @see CameraCharacteristics#DISTORTION_CORRECTION_AVAILABLE_MODES
+     * @see CameraCharacteristics#LENS_DISTORTION
+     * @see #DISTORTION_CORRECTION_MODE_OFF
+     * @see #DISTORTION_CORRECTION_MODE_FAST
+     * @see #DISTORTION_CORRECTION_MODE_HIGH_QUALITY
+     */
+    @PublicKey
+    public static final Key<Integer> DISTORTION_CORRECTION_MODE =
+            new Key<Integer>("android.distortionCorrection.mode", int.class);
 
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code

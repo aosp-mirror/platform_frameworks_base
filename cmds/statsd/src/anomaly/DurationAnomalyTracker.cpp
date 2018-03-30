@@ -38,11 +38,10 @@ DurationAnomalyTracker::~DurationAnomalyTracker() {
 void DurationAnomalyTracker::startAlarm(const MetricDimensionKey& dimensionKey,
                                         const uint64_t& timestampNs) {
     // Alarms are stored in secs. Must round up, since if it fires early, it is ignored completely.
-    uint32_t timestampSec = static_cast<uint32_t>((timestampNs -1)/ NS_PER_SEC) + 1; // round up
+    uint32_t timestampSec = static_cast<uint32_t>((timestampNs -1) / NS_PER_SEC) + 1; // round up
     if (isInRefractoryPeriod(timestampNs, dimensionKey)) {
-        // TODO: Bug! By the refractory's end, the data might be erased and the alarm inapplicable.
-        VLOG("Setting a delayed anomaly alarm lest it fall in the refractory period");
-        timestampSec = getRefractoryPeriodEndsSec(dimensionKey) + 1;
+        VLOG("Not setting anomaly alarm since it would fall in the refractory period.");
+        return;
     }
 
     auto itr = mAlarms.find(dimensionKey);

@@ -49,7 +49,7 @@ message Atom {
     oneof pushed {
         // For StatsLog reasons, 1 is illegal and will not work. Must start at 2.
         BleScanStateChanged ble_scan_state_changed = 2;
-        BleUnoptimizedScanStateChanged ble_unoptimized_scan_state_changed = 3;
+        // TODO: 3 is blank, but need not be
         BleScanResultReceived ble_scan_result_received = 4;
         SensorStateChanged sensor_state_changed = 5;
         GpsScanStateChanged gps_scan_state_changed = 6;
@@ -111,13 +111,14 @@ message Atom {
         BluetoothEnabledStateChanged bluetooth_enabled_state_changed = 67;
         BluetoothConnectionStateChanged bluetooth_connection_state_changed = 68;
         BluetoothA2dpAudioStateChanged bluetooth_a2dp_audio_state_changed = 69;
-        UsbConnectorStateChanged usb_connector_changed = 70;
+        UsbConnectorStateChanged usb_connector_state_changed = 70;
         SpeakerImpedanceReported speaker_impedance_reported = 71;
         HardwareFailed hardware_failed = 72;
         PhysicalDropDetected physical_drop_detected = 73;
         ChargeCyclesReported charge_cycles_reported = 74;
         MobileConnectionStateChanged mobile_connection_state_changed = 75;
         MobileRadioTechnologyChanged mobile_radio_technology_changed = 76;
+        UsbDeviceAttached usb_device_attached = 77;
     }
 
     // Pulled events will start at field 10000.
@@ -244,33 +245,26 @@ message ProcessLifeCycleStateChanged {
  * Logs when the ble scan state changes.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   packages/apps/Bluetooth/src/com/android/bluetooth/gatt/AppScanStats.java
  */
+// TODO: Consider changing to tracking per-scanner-id (log from AppScanStats).
 message BleScanStateChanged {
     repeated AttributionNode attribution_node = 1;
 
     enum State {
         OFF = 0;
         ON = 1;
+        // RESET indicates all ble stopped. Used when it (re)starts (e.g. after it crashes).
+        RESET = 2;
     }
     optional State state = 2;
-}
 
-/**
- * Logs when an unoptimized ble scan state changes.
- *
- * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
- */
-// TODO: Consider changing to tracking per-scanner-id (log from AppScanStats).
-message BleUnoptimizedScanStateChanged {
-    repeated AttributionNode attribution_node = 1;
-
-    enum State {
-        OFF = 0;
-        ON = 1;
-    }
-    optional State state = 2;
+    // Does the scan have a filter.
+    optional bool is_filtered = 3;
+    // Whether the scan is a CALLBACK_TYPE_FIRST_MATCH scan. Called 'background' scan internally.
+    optional bool is_first_match = 4;
+    // Whether the scan set to piggy-back off the results of other scans (SCAN_MODE_OPPORTUNISTIC).
+    optional bool is_opportunistic = 5;
 }
 
 /**
@@ -291,7 +285,7 @@ message BleScanResultReceived {
  * Logs when a sensor state changes.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message SensorStateChanged {
     repeated AttributionNode attribution_node = 1;
@@ -329,7 +323,7 @@ message GpsScanStateChanged {
  * Logs when a sync manager sync state changes.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message SyncStateChanged {
     repeated AttributionNode attribution_node = 1;
@@ -348,7 +342,7 @@ message SyncStateChanged {
  * Logs when a job scheduler job state changes.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message ScheduledJobStateChanged {
     repeated AttributionNode attribution_node = 1;
@@ -365,7 +359,7 @@ message ScheduledJobStateChanged {
 
     // The reason a job has stopped.
     // This is only applicable when the state is FINISHED.
-    // The default value is CANCELED.
+    // The default value is STOP_REASON_UNKNOWN.
     optional android.app.job.StopReasonEnum stop_reason = 4;
 }
 
@@ -373,7 +367,7 @@ message ScheduledJobStateChanged {
  * Logs when the audio state changes.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message AudioStateChanged {
     repeated AttributionNode attribution_node = 1;
@@ -381,6 +375,8 @@ message AudioStateChanged {
     enum State {
         OFF = 0;
         ON = 1;
+        // RESET indicates all audio stopped. Used when it (re)starts (e.g. after it crashes).
+        RESET = 2;
     }
     optional State state = 2;
 }
@@ -389,7 +385,7 @@ message AudioStateChanged {
  * Logs when the video codec state changes.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message MediaCodecActivityChanged {
     repeated AttributionNode attribution_node = 1;
@@ -397,6 +393,8 @@ message MediaCodecActivityChanged {
     enum State {
         OFF = 0;
         ON = 1;
+        // RESET indicates all mediaCodec stopped. Used when it (re)starts (e.g. after it crashes).
+        RESET = 2;
     }
     optional State state = 2;
 }
@@ -405,7 +403,7 @@ message MediaCodecActivityChanged {
  * Logs when the flashlight state changes.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message FlashlightStateChanged {
     repeated AttributionNode attribution_node = 1;
@@ -413,6 +411,8 @@ message FlashlightStateChanged {
     enum State {
         OFF = 0;
         ON = 1;
+        // RESET indicates all flashlight stopped. Used when it (re)starts (e.g. after it crashes).
+        RESET = 2;
     }
     optional State state = 2;
 }
@@ -421,7 +421,7 @@ message FlashlightStateChanged {
  * Logs when the camera state changes.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message CameraStateChanged {
     repeated AttributionNode attribution_node = 1;
@@ -429,6 +429,8 @@ message CameraStateChanged {
     enum State {
         OFF = 0;
         ON = 1;
+        // RESET indicates all camera stopped. Used when it (re)starts (e.g. after it crashes).
+        RESET = 2;
     }
     optional State state = 2;
 }
@@ -966,6 +968,21 @@ message MobileRadioTechnologyChanged {
     optional int32 sim_slot_index = 2;
 }
 
+/**
+ * Logs the VID and PID of any connected USB devices.
+ *
+ * Notes if any Audio, HID (input buttons/mouse/keyboard), or Storage interfaces are present.
+ *
+ * Logged by Vendor.
+ */
+message UsbDeviceAttached {
+    optional int32 vid = 1;
+    optional int32 pid = 2;
+    optional bool has_audio = 3;
+    optional bool has_hid = 4;
+    optional bool has_storage = 5;
+}
+
 
 /**
  * Logs when Bluetooth is enabled and disabled.
@@ -1103,6 +1120,8 @@ message PhysicalDropDetected {
     optional int32 confidence_pctg = 1;
     // Peak acceleration of the drop, in 1/1000s of a g.
     optional int32 accel_peak_thousandths_g = 2;
+    // Duration of freefall in ms
+    optional int32 freefall_time_millis = 3;
 }
 
 /**
@@ -1321,10 +1340,10 @@ message AppStartChanged {
     optional string launch_token = 13;
 
     // The compiler filter used when when the package was optimized.
-    optional string package_optimization_compilation_filter = 14;
+    optional int32 package_optimization_compilation_filter = 14;
 
     // The reason why the package was optimized.
-    optional string package_optimization_compilation_reason = 15;
+    optional int32 package_optimization_compilation_reason = 15;
 }
 
 message AppStartCancelChanged {
@@ -1917,7 +1936,8 @@ message FullBatteryCapacity {
 }
 
 /**
- * Pulls the temperature of various parts of the device, in Celsius.
+ * Pulls the temperature of various parts of the device.
+ * The units are tenths of a degree Celsius. Eg: 30.3C is reported as 303.
  *
  * Pulled from:
  *   frameworks/base/cmds/statsd/src/external/ResourceThermalManagerPuller.cpp
@@ -1929,6 +1949,6 @@ message Temperature {
     // The name of the temperature source. Eg. CPU0
     optional string sensor_name = 2;
 
-    // Temperature in degrees C.
-    optional float temperature_C = 3;
+    // Temperature in tenths of a degree C.
+    optional int32 temperature_dC = 3;
 }

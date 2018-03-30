@@ -56,8 +56,8 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/qs_footer_height"
         android:elevation="4dp"
+        android:background="@android:color/transparent"
     />
-
 
     <include layout="@layout/quick_status_bar_expanded_header" />
 

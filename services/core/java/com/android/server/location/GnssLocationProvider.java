@@ -76,14 +76,14 @@ import android.telephony.TelephonyManager;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.NtpTrustedTime;
-import com.android.internal.app.IAppOpsService;
+
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.GpsNetInitiatedHandler;
 import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.internal.location.gnssmetrics.GnssMetrics;
+import com.android.server.location.NtpTimeHelper.InjectNtpTimeCallback;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -93,7 +93,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,7 +106,7 @@ import libcore.io.IoUtils;
  *
  * {@hide}
  */
-public class GnssLocationProvider implements LocationProviderInterface {
+public class GnssLocationProvider implements LocationProviderInterface, InjectNtpTimeCallback {
 
     private static final String TAG = "GnssLocationProvider";
 
@@ -208,7 +207,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private static final int UPDATE_LOCATION = 7;  // Handle external location from network listener
     private static final int ADD_LISTENER = 8;
     private static final int REMOVE_LISTENER = 9;
-    private static final int INJECT_NTP_TIME_FINISHED = 10;
     private static final int DOWNLOAD_XTRA_DATA_FINISHED = 11;
     private static final int SUBSCRIPTION_OR_SIM_CHANGED = 12;
     private static final int INITIALIZE_HANDLER = 13;
@@ -329,9 +327,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
     // Typical hot TTTF is ~5 seconds, so 10 seconds seems sane.
     private static final int GPS_POLLING_THRESHOLD_INTERVAL = 10 * 1000;
 
-    // how often to request NTP time, in milliseconds
-    // current setting 24 hours
-    private static final long NTP_INTERVAL = 24 * 60 * 60 * 1000;
     // how long to wait if we have a network error in NTP or XTRA downloading
     // the initial value of the exponential backoff
     // current setting - 5 minutes
@@ -344,8 +339,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
     // Timeout when holding wakelocks for downloading XTRA data.
     private static final long DOWNLOAD_XTRA_DATA_TIMEOUT_MS = 60 * 1000;
 
-    private BackOff mNtpBackOff = new BackOff(RETRY_INTERVAL, MAX_RETRY_INTERVAL);
-    private BackOff mXtraBackOff = new BackOff(RETRY_INTERVAL, MAX_RETRY_INTERVAL);
+    private final ExponentialBackOff mXtraBackOff = new ExponentialBackOff(RETRY_INTERVAL,
+            MAX_RETRY_INTERVAL);
 
     // true if we are enabled, protected by this
     private boolean mEnabled;
@@ -357,11 +352,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
 
     // flags to trigger NTP or XTRA data download when network becomes available
     // initialized to true so we do NTP and XTRA when the network comes up after booting
-    private int mInjectNtpTimePending = STATE_PENDING_NETWORK;
     private int mDownloadXtraDataPending = STATE_PENDING_NETWORK;
-
-    // set to true if the GPS engine requested on-demand NTP time requests
-    private boolean mOnDemandTimeInjection;
 
     // true if GPS is navigating
     private boolean mNavigating;
@@ -417,7 +408,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private boolean mSuplEsEnabled = false;
 
     private final Context mContext;
-    private final NtpTrustedTime mNtpTime;
     private final ILocationManager mILocationManager;
     private final LocationExtras mLocationExtras = new LocationExtras();
     private final GnssStatusListenerHelper mListenerHelper;
@@ -425,6 +415,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private final GnssNavigationMessageProvider mGnssNavigationMessageProvider;
     private final LocationChangeListener mNetworkLocationListener = new NetworkLocationListener();
     private final LocationChangeListener mFusedLocationListener = new FusedLocationListener();
+    private final NtpTimeHelper mNtpTimeHelper;
 
     // Handler for processing events
     private Handler mHandler;
@@ -517,9 +508,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
             new ConnectivityManager.NetworkCallback() {
                 @Override
                 public void onAvailable(Network network) {
-                    if (mInjectNtpTimePending == STATE_PENDING_NETWORK) {
-                        requestUtcTime();
-                    }
+                    mNtpTimeHelper.onNetworkAvailable();
                     if (mDownloadXtraDataPending == STATE_PENDING_NETWORK) {
                         if (mSupportsXtra) {
                             // Download only if supported, (prevents an unneccesary on-boot
@@ -762,7 +751,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
     public GnssLocationProvider(Context context, ILocationManager ilocationManager,
             Looper looper) {
         mContext = context;
-        mNtpTime = NtpTrustedTime.getInstance(context);
         mILocationManager = ilocationManager;
 
         // Create a wake lock
@@ -880,6 +868,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
             }
         };
         mGnssMetrics = new GnssMetrics(mBatteryStats);
+
+        mNtpTimeHelper = new NtpTimeHelper(mContext, Looper.myLooper(), this);
     }
 
     /**
@@ -893,6 +883,15 @@ public class GnssLocationProvider implements LocationProviderInterface {
     @Override
     public ProviderProperties getProperties() {
         return PROPERTIES;
+    }
+
+
+    /**
+     * Implements {@link InjectNtpTimeCallback#injectTime}
+     */
+    @Override
+    public void injectTime(long time, long timeReference, int uncertainty) {
+        native_inject_time(time, timeReference, uncertainty);
     }
 
     private void handleUpdateNetworkState(Network network) {
@@ -1014,79 +1013,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 Log.e(TAG, "Invalid status to release SUPL connection: " + agpsDataConnStatus);
         }
     }
-
-    private void handleInjectNtpTime() {
-        if (mInjectNtpTimePending == STATE_DOWNLOADING) {
-            // already downloading data
-            return;
-        }
-        if (!isDataNetworkConnected()) {
-            // try again when network is up
-            mInjectNtpTimePending = STATE_PENDING_NETWORK;
-            return;
-        }
-        mInjectNtpTimePending = STATE_DOWNLOADING;
-
-        // hold wake lock while task runs
-        mWakeLock.acquire();
-        Log.i(TAG, "WakeLock acquired by handleInjectNtpTime()");
-        AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
-            @Override
-            public void run() {
-                long delay;
-
-                // force refresh NTP cache when outdated
-                boolean refreshSuccess = true;
-                if (mNtpTime.getCacheAge() >= NTP_INTERVAL) {
-                    refreshSuccess = mNtpTime.forceRefresh();
-                }
-
-                // only update when NTP time is fresh
-                if (mNtpTime.getCacheAge() < NTP_INTERVAL) {
-                    long time = mNtpTime.getCachedNtpTime();
-                    long timeReference = mNtpTime.getCachedNtpTimeReference();
-                    long certainty = mNtpTime.getCacheCertainty();
-
-                    if (DEBUG) {
-                        long now = System.currentTimeMillis();
-                        Log.d(TAG, "NTP server returned: "
-                                + time + " (" + new Date(time)
-                                + ") reference: " + timeReference
-                                + " certainty: " + certainty
-                                + " system time offset: " + (time - now));
-                    }
-
-                    native_inject_time(time, timeReference, (int) certainty);
-                    delay = NTP_INTERVAL;
-                    mNtpBackOff.reset();
-                } else {
-                    Log.e(TAG, "requestTime failed");
-                    delay = mNtpBackOff.nextBackoffMillis();
-                }
-
-                sendMessage(INJECT_NTP_TIME_FINISHED, 0, null);
-
-                if (DEBUG) {
-                    String message = String.format(
-                            "onDemandTimeInjection=%s, refreshSuccess=%s, delay=%s",
-                            mOnDemandTimeInjection,
-                            refreshSuccess,
-                            delay);
-                    Log.d(TAG, message);
-                }
-                if (mOnDemandTimeInjection || !refreshSuccess) {
-                    // send delayed message for next NTP injection
-                    // since this is delayed and not urgent we do not hold a wake lock here
-                    mHandler.sendEmptyMessageDelayed(INJECT_NTP_TIME, delay);
-                }
-
-                // release wake lock held by task
-                mWakeLock.release();
-                Log.i(TAG, "WakeLock released by handleInjectNtpTime()");
-            }
-        });
-    }
-
+    
     private void handleRequestLocation(boolean independentFromGnss) {
         if (isRequestLocationRateLimited()) {
             if (DEBUG) {
@@ -2006,7 +1933,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 mEngineCapabilities = capabilities;
 
                 if (hasCapability(GPS_CAPABILITY_ON_DEMAND_TIME)) {
-                    mOnDemandTimeInjection = true;
+                    mNtpTimeHelper.enablePeriodicTimeInjection();
                     requestUtcTime();
                 }
 
@@ -2467,16 +2394,13 @@ public class GnssLocationProvider implements LocationProviderInterface {
                     handleReleaseSuplConnection(msg.arg1);
                     break;
                 case INJECT_NTP_TIME:
-                    handleInjectNtpTime();
+                    mNtpTimeHelper.retrieveAndInjectNtpTime();
                     break;
                 case REQUEST_LOCATION:
                     handleRequestLocation((boolean) msg.obj);
                     break;
                 case DOWNLOAD_XTRA_DATA:
                     handleDownloadXtraData();
-                    break;
-                case INJECT_NTP_TIME_FINISHED:
-                    mInjectNtpTimePending = STATE_IDLE;
                     break;
                 case DOWNLOAD_XTRA_DATA_FINISHED:
                     mDownloadXtraDataPending = STATE_IDLE;
@@ -2576,9 +2500,9 @@ public class GnssLocationProvider implements LocationProviderInterface {
             // register for connectivity change events, this is equivalent to the deprecated way of
             // registering for CONNECTIVITY_ACTION broadcasts
             NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
-            networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
-            networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
-            networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_BLUETOOTH);
+            networkRequestBuilder.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+            networkRequestBuilder.addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+            networkRequestBuilder.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN);
             NetworkRequest networkRequest = networkRequestBuilder.build();
             mConnMgr.registerNetworkCallback(networkRequest, mNetworkConnectivityCallback);
 
@@ -2806,8 +2730,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 return "REQUEST_LOCATION";
             case DOWNLOAD_XTRA_DATA:
                 return "DOWNLOAD_XTRA_DATA";
-            case INJECT_NTP_TIME_FINISHED:
-                return "INJECT_NTP_TIME_FINISHED";
             case DOWNLOAD_XTRA_DATA_FINISHED:
                 return "DOWNLOAD_XTRA_DATA_FINISHED";
             case UPDATE_LOCATION:
@@ -2852,36 +2774,6 @@ public class GnssLocationProvider implements LocationProviderInterface {
         s.append("  native internal state: ").append(native_get_internal_state());
         s.append("\n");
         pw.append(s);
-    }
-
-    /**
-     * A simple implementation of exponential backoff.
-     */
-    private static final class BackOff {
-        private static final int MULTIPLIER = 2;
-        private final long mInitIntervalMillis;
-        private final long mMaxIntervalMillis;
-        private long mCurrentIntervalMillis;
-
-        public BackOff(long initIntervalMillis, long maxIntervalMillis) {
-            mInitIntervalMillis = initIntervalMillis;
-            mMaxIntervalMillis = maxIntervalMillis;
-
-            mCurrentIntervalMillis = mInitIntervalMillis / MULTIPLIER;
-        }
-
-        public long nextBackoffMillis() {
-            if (mCurrentIntervalMillis > mMaxIntervalMillis) {
-                return mMaxIntervalMillis;
-            }
-
-            mCurrentIntervalMillis *= MULTIPLIER;
-            return mCurrentIntervalMillis;
-        }
-
-        public void reset() {
-            mCurrentIntervalMillis = mInitIntervalMillis / MULTIPLIER;
-        }
     }
 
     // preallocated to avoid memory allocation in reportNmea()
@@ -3018,3 +2910,4 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private static native void native_cleanup_batching();
 
 }
+

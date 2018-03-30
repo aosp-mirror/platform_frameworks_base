@@ -314,7 +314,9 @@ public class MtpDatabase implements AutoCloseable {
     public void addStorage(StorageVolume storage) {
         MtpStorage mtpStorage = mManager.addMtpStorage(storage);
         mStorageMap.put(storage.getPath(), mtpStorage);
-        mServer.addStorage(mtpStorage);
+        if (mServer != null) {
+            mServer.addStorage(mtpStorage);
+        }
     }
 
     public void removeStorage(StorageVolume storage) {
@@ -322,7 +324,9 @@ public class MtpDatabase implements AutoCloseable {
         if (mtpStorage == null) {
             return;
         }
-        mServer.removeStorage(mtpStorage);
+        if (mServer != null) {
+            mServer.removeStorage(mtpStorage);
+        }
         mManager.removeMtpStorage(mtpStorage);
         mStorageMap.remove(storage.getPath());
     }

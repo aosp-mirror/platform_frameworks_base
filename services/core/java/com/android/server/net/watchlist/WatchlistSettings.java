@@ -87,6 +87,10 @@ class WatchlistSettings {
     }
 
     public void reloadSettings() {
+        if (!mXmlFile.exists()) {
+            // No settings config
+            return;
+        }
         try (FileInputStream stream = mXmlFile.openRead()){
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(stream, StandardCharsets.UTF_8.name());
@@ -97,7 +101,7 @@ class WatchlistSettings {
                     mPrivacySecretKey = parseSecretKey(parser);
                 }
             }
-            Log.i(TAG, "Reload watchlist settings done");
+            Slog.i(TAG, "Reload watchlist settings done");
         } catch (IllegalStateException | NullPointerException | NumberFormatException |
                 XmlPullParserException | IOException | IndexOutOfBoundsException e) {
             Slog.e(TAG, "Failed parsing xml", e);

@@ -16,6 +16,8 @@
 
 package android.app.job;
 
+import static android.app.job.JobInfo.NETWORK_BYTES_UNKNOWN;
+
 import android.annotation.BytesLong;
 import android.content.Intent;
 import android.os.Parcel;
@@ -28,7 +30,8 @@ import android.os.Parcelable;
  */
 final public class JobWorkItem implements Parcelable {
     final Intent mIntent;
-    final long mNetworkBytes;
+    final long mNetworkDownloadBytes;
+    final long mNetworkUploadBytes;
     int mDeliveryCount;
     int mWorkId;
     Object mGrants;
@@ -41,22 +44,36 @@ final public class JobWorkItem implements Parcelable {
      */
     public JobWorkItem(Intent intent) {
         mIntent = intent;
-        mNetworkBytes = JobInfo.NETWORK_BYTES_UNKNOWN;
+        mNetworkDownloadBytes = NETWORK_BYTES_UNKNOWN;
+        mNetworkUploadBytes = NETWORK_BYTES_UNKNOWN;
+    }
+
+    /**
+     * @deprecated replaced by {@link #JobWorkItem(Intent, long, long)}
+     * @removed
+     */
+    @Deprecated
+    public JobWorkItem(Intent intent, @BytesLong long networkBytes) {
+        this(intent, networkBytes, NETWORK_BYTES_UNKNOWN);
     }
 
     /**
      * Create a new piece of work, which can be submitted to
      * {@link JobScheduler#enqueue JobScheduler.enqueue}.
+     * <p>
+     * See {@link JobInfo.Builder#setEstimatedNetworkBytes(long, long)} for
+     * details about how to estimate network traffic.
      *
      * @param intent The general Intent describing this work.
-     * @param networkBytes The estimated size of network traffic that will be
-     *            performed by this job work item, in bytes. See
-     *            {@link JobInfo.Builder#setEstimatedNetworkBytes(long)} for
-     *            details about how to estimate.
+     * @param downloadBytes The estimated size of network traffic that will be
+     *            downloaded by this job work item, in bytes.
+     * @param uploadBytes The estimated size of network traffic that will be
+     *            uploaded by this job work item, in bytes.
      */
-    public JobWorkItem(Intent intent, @BytesLong long networkBytes) {
+    public JobWorkItem(Intent intent, @BytesLong long downloadBytes, @BytesLong long uploadBytes) {
         mIntent = intent;
-        mNetworkBytes = networkBytes;
+        mNetworkDownloadBytes = downloadBytes;
+        mNetworkUploadBytes = uploadBytes;
     }
 
     /**
@@ -67,14 +84,44 @@ final public class JobWorkItem implements Parcelable {
     }
 
     /**
-     * Return the estimated size of network traffic that will be performed by
+     * @deprecated replaced by {@link #getEstimatedNetworkDownloadBytes()} and
+     *             {@link #getEstimatedNetworkUploadBytes()}.
+     * @removed
+     */
+    @Deprecated
+    public @BytesLong long getEstimatedNetworkBytes() {
+        if (mNetworkDownloadBytes == NETWORK_BYTES_UNKNOWN
+                && mNetworkUploadBytes == NETWORK_BYTES_UNKNOWN) {
+            return NETWORK_BYTES_UNKNOWN;
+        } else if (mNetworkDownloadBytes == NETWORK_BYTES_UNKNOWN) {
+            return mNetworkUploadBytes;
+        } else if (mNetworkUploadBytes == NETWORK_BYTES_UNKNOWN) {
+            return mNetworkDownloadBytes;
+        } else {
+            return mNetworkDownloadBytes + mNetworkUploadBytes;
+        }
+    }
+
+    /**
+     * Return the estimated size of download traffic that will be performed by
+     * this job, in bytes.
+     *
+     * @return Estimated size of download traffic, or
+     *         {@link JobInfo#NETWORK_BYTES_UNKNOWN} when unknown.
+     */
+    public @BytesLong long getEstimatedNetworkDownloadBytes() {
+        return mNetworkDownloadBytes;
+    }
+
+    /**
+     * Return the estimated size of upload traffic that will be performed by
      * this job work item, in bytes.
      *
-     * @return estimated size, or {@link JobInfo#NETWORK_BYTES_UNKNOWN} when
-     *         unknown.
+     * @return Estimated size of upload traffic, or
+     *         {@link JobInfo#NETWORK_BYTES_UNKNOWN} when unknown.
      */
-    public @BytesLong long getEstimatedNetworkBytes() {
-        return mNetworkBytes;
+    public @BytesLong long getEstimatedNetworkUploadBytes() {
+        return mNetworkUploadBytes;
     }
 
     /**
@@ -128,9 +175,13 @@ final public class JobWorkItem implements Parcelable {
         sb.append(mWorkId);
         sb.append(" intent=");
         sb.append(mIntent);
-        if (mNetworkBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
-            sb.append(" networkBytes=");
-            sb.append(mNetworkBytes);
+        if (mNetworkDownloadBytes != NETWORK_BYTES_UNKNOWN) {
+            sb.append(" downloadBytes=");
+            sb.append(mNetworkDownloadBytes);
+        }
+        if (mNetworkUploadBytes != NETWORK_BYTES_UNKNOWN) {
+            sb.append(" uploadBytes=");
+            sb.append(mNetworkUploadBytes);
         }
         if (mDeliveryCount != 0) {
             sb.append(" dcount=");
@@ -151,7 +202,8 @@ final public class JobWorkItem implements Parcelable {
         } else {
             out.writeInt(0);
         }
-        out.writeLong(mNetworkBytes);
+        out.writeLong(mNetworkDownloadBytes);
+        out.writeLong(mNetworkUploadBytes);
         out.writeInt(mDeliveryCount);
         out.writeInt(mWorkId);
     }
@@ -173,7 +225,8 @@ final public class JobWorkItem implements Parcelable {
         } else {
             mIntent = null;
         }
-        mNetworkBytes = in.readLong();
+        mNetworkDownloadBytes = in.readLong();
+        mNetworkUploadBytes = in.readLong();
         mDeliveryCount = in.readInt();
         mWorkId = in.readInt();
     }

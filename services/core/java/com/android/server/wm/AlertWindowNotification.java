@@ -37,6 +37,8 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 
 import android.net.Uri;
+import android.os.Bundle;
+
 import com.android.internal.R;
 import com.android.server.policy.IconUtilities;
 
@@ -109,6 +111,8 @@ class AlertWindowNotification {
 
         final String message = context.getString(R.string.alert_windows_notification_message,
                 appName);
+        Bundle extras = new Bundle();
+        extras.putStringArray(Notification.EXTRA_FOREGROUND_APPS, new String[] {mPackageName});
         final Notification.Builder builder = new Notification.Builder(context, mNotificationTag)
                 .setOngoing(true)
                 .setContentTitle(
@@ -118,6 +122,7 @@ class AlertWindowNotification {
                 .setColor(context.getColor(R.color.system_notification_accent_color))
                 .setStyle(new Notification.BigTextStyle().bigText(message))
                 .setLocalOnly(true)
+                .addExtras(extras)
                 .setContentIntent(getContentIntent(context, mPackageName));
 
         if (aInfo != null) {

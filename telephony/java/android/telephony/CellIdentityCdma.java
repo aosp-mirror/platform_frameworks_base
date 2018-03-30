@@ -49,23 +49,17 @@ public final class CellIdentityCdma extends CellIdentity {
      * to +90 degrees).
      */
     private final int mLatitude;
-    // long alpha Operator Name String or Enhanced Operator Name String
-    private final String mAlphaLong;
-    // short alpha Operator Name String or Enhanced Operator Name String
-    private final String mAlphaShort;
 
     /**
      * @hide
      */
     public CellIdentityCdma() {
-        super(TAG, TYPE_CDMA, null, null);
+        super(TAG, TYPE_CDMA, null, null, null, null);
         mNetworkId = Integer.MAX_VALUE;
         mSystemId = Integer.MAX_VALUE;
         mBasestationId = Integer.MAX_VALUE;
         mLongitude = Integer.MAX_VALUE;
         mLatitude = Integer.MAX_VALUE;
-        mAlphaLong = null;
-        mAlphaShort = null;
     }
 
     /**
@@ -100,7 +94,7 @@ public final class CellIdentityCdma extends CellIdentity {
      */
     public CellIdentityCdma(int nid, int sid, int bid, int lon, int lat, String alphal,
                              String alphas) {
-        super(TAG, TYPE_CDMA, null, null);
+        super(TAG, TYPE_CDMA, null, null, alphal, alphas);
         mNetworkId = nid;
         mSystemId = sid;
         mBasestationId = bid;
@@ -110,8 +104,6 @@ public final class CellIdentityCdma extends CellIdentity {
         } else {
             mLongitude = mLatitude = Integer.MAX_VALUE;
         }
-        mAlphaLong = alphal;
-        mAlphaShort = alphas;
     }
 
     private CellIdentityCdma(CellIdentityCdma cid) {
@@ -178,28 +170,10 @@ public final class CellIdentityCdma extends CellIdentity {
         return mLatitude;
     }
 
-    /**
-     * @return The long alpha tag associated with the current scan result (may be the operator
-     * name string or extended operator name string). May be null if unknown.
-     */
-    @Nullable
-    public CharSequence getOperatorAlphaLong() {
-        return mAlphaLong;
-    }
-
-    /**
-     * @return The short alpha tag associated with the current scan result (may be the operator
-     * name string or extended operator name string).  May be null if unknown.
-     */
-    @Nullable
-    public CharSequence getOperatorAlphaShort() {
-        return mAlphaShort;
-    }
-
     @Override
     public int hashCode() {
         return Objects.hash(mNetworkId, mSystemId, mBasestationId, mLatitude, mLongitude,
-                mAlphaLong, mAlphaShort);
+                super.hashCode());
     }
 
     @Override
@@ -219,8 +193,7 @@ public final class CellIdentityCdma extends CellIdentity {
                 && mBasestationId == o.mBasestationId
                 && mLatitude == o.mLatitude
                 && mLongitude == o.mLongitude
-                && TextUtils.equals(mAlphaLong, o.mAlphaLong)
-                && TextUtils.equals(mAlphaShort, o.mAlphaShort);
+                && super.equals(other);
     }
 
     @Override
@@ -246,8 +219,6 @@ public final class CellIdentityCdma extends CellIdentity {
         dest.writeInt(mBasestationId);
         dest.writeInt(mLongitude);
         dest.writeInt(mLatitude);
-        dest.writeString(mAlphaLong);
-        dest.writeString(mAlphaShort);
     }
 
     /** Construct from Parcel, type has already been processed */
@@ -258,8 +229,6 @@ public final class CellIdentityCdma extends CellIdentity {
         mBasestationId = in.readInt();
         mLongitude = in.readInt();
         mLatitude = in.readInt();
-        mAlphaLong = in.readString();
-        mAlphaShort = in.readString();
 
         if (DBG) log(toString());
     }

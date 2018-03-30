@@ -15,7 +15,6 @@ package com.android.systemui.qs.tileimpl;
 
 import static com.android.systemui.qs.tileimpl.QSIconViewImpl.QS_ANIM_LENGTH;
 
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -122,14 +121,14 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     private void setRipple(RippleDrawable tileBackground) {
         mRipple = tileBackground;
         if (getWidth() != 0) {
-            updateRippleSize(getWidth(), getHeight());
+            updateRippleSize();
         }
     }
 
-    private void updateRippleSize(int width, int height) {
+    private void updateRippleSize() {
         // center the touch feedback on the center of the icon, and dial it down a bit
-        final int cx = width / 2;
-        final int cy = mIconFrame.getMeasuredHeight() / 2;
+        final int cx = mIconFrame.getMeasuredWidth() / 2 + mIconFrame.getLeft();
+        final int cy = mIconFrame.getMeasuredHeight() / 2 + mIconFrame.getTop();
         final int rad = (int) (mIcon.getHeight() * .85f);
         mRipple.setHotspotBounds(cx - rad, cy - rad, cx + rad, cy + rad);
     }
@@ -151,11 +150,8 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
-        final int w = getMeasuredWidth();
-        final int h = getMeasuredHeight();
-
         if (mRipple != null) {
-            updateRippleSize(w, h);
+            updateRippleSize();
         }
     }
 

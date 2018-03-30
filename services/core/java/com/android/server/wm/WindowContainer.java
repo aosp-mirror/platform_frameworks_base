@@ -1125,12 +1125,15 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
+     * @param boosted If true, returns an animation layer that happens above all {@link TaskStack}s
+     *                Otherwise, the layer will be positioned above all animating
+     *                {@link TaskStack}s.
      * @return The layer on which all app animations are happening.
      */
-    SurfaceControl getAppAnimationLayer() {
+    SurfaceControl getAppAnimationLayer(boolean boosted) {
         final WindowContainer parent = getParent();
         if (parent != null) {
-            return parent.getAppAnimationLayer();
+            return parent.getAppAnimationLayer(boosted);
         }
         return null;
     }

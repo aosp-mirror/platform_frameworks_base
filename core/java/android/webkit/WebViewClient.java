@@ -152,6 +152,14 @@ public class WebViewClient {
      * will continue to load the resource as usual.  Otherwise, the return
      * response and data will be used.
      *
+     * <p>This callback is invoked for a variety of URL schemes (e.g., {@code http(s):}, {@code
+     * data:}, {@code file:}, etc.), not only those schemes which send requests over the network.
+     * This is not called for {@code javascript:} URLs, {@code blob:} URLs, or for assets accessed
+     * via {@code file:///android_asset/} or {@code file:///android_res/} URLs.
+     *
+     * <p>In the case of redirects, this is only called for the initial resource URL, not any
+     * subsequent redirect URLs.
+     *
      * <p class="note"><b>Note:</b> This method is called on a thread
      * other than the UI thread so clients should exercise caution
      * when accessing private data or the view system.
@@ -181,6 +189,14 @@ public class WebViewClient {
      * application to return the data.  If the return value is {@code null}, the WebView
      * will continue to load the resource as usual.  Otherwise, the return
      * response and data will be used.
+     *
+     * <p>This callback is invoked for a variety of URL schemes (e.g., {@code http(s):}, {@code
+     * data:}, {@code file:}, etc.), not only those schemes which send requests over the network.
+     * This is not called for {@code javascript:} URLs, {@code blob:} URLs, or for assets accessed
+     * via {@code file:///android_asset/} or {@code file:///android_res/} URLs.
+     *
+     * <p>In the case of redirects, this is only called for the initial resource URL, not any
+     * subsequent redirect URLs.
      *
      * <p class="note"><b>Note:</b> This method is called on a thread
      * other than the UI thread so clients should exercise caution

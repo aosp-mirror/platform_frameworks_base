@@ -1485,7 +1485,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (w == null || winHint != null && w != winHint) {
             return;
         }
-        final boolean surfaceReady = w.hasDrawnLw()  // Regular case
+        final boolean surfaceReady = w.isDrawnLw()  // Regular case
                 || w.mWinAnimator.mSurfaceDestroyDeferred  // The preserved surface is still ready.
                 || w.isDragResizeChanged();  // Waiting for relayoutWindow to call preserveSurface.
         final boolean needsLetterbox = w.isLetterboxedAppWindow() && fillsParent() && surfaceReady;
@@ -1658,6 +1658,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     boolean shouldUseAppThemeSnapshot() {
         return mDisablePreviewScreenshots || forAllWindows(w -> (w.mAttrs.flags & FLAG_SECURE) != 0,
                 true /* topToBottom */);
+    }
+
+    SurfaceControl getAppAnimationLayer() {
+        return getAppAnimationLayer(needsZBoost());
     }
 
     @Override
@@ -1855,7 +1859,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         leash.setLayer(layer);
 
         final DisplayContent dc = getDisplayContent();
-        dc.assignStackOrdering(t);
+        dc.assignStackOrdering();
         if (mAnimatingAppWindowTokenRegistry != null) {
             mAnimatingAppWindowTokenRegistry.notifyStarting(this);
         }

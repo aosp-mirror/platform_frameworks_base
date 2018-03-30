@@ -10,28 +10,92 @@
 
 package com.android.settingslib.wifi;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
+import android.net.NetworkKey;
+import android.net.NetworkRequest;
+import android.net.NetworkScoreManager;
+import android.net.ScoredNetwork;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WifiNetworkScoreCache;
 import android.net.wifi.WifiSsid;
+import android.os.Handler;
+import android.os.Looper;
+
+import com.android.settingslib.R;
 
 import java.util.List;
 
-public class WifiStatusTracker {
-
+public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
+    private final Context mContext;
+    private final WifiNetworkScoreCache mWifiNetworkScoreCache;
     private final WifiManager mWifiManager;
+    private final NetworkScoreManager mNetworkScoreManager;
+    private final ConnectivityManager mConnectivityManager;
+    private final WifiNetworkScoreCache.CacheListener mCacheListener =
+            new WifiNetworkScoreCache.CacheListener(new Handler(Looper.getMainLooper())) {
+                @Override
+                public void networkCacheUpdated(List<ScoredNetwork> updatedNetworks) {
+                    updateStatusLabel();
+                    mCallback.run();
+                }
+            };
+    private final NetworkRequest mNetworkRequest = new NetworkRequest.Builder()
+            .clearCapabilities()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI).build();
+    private final ConnectivityManager.NetworkCallback mNetworkCallback = new ConnectivityManager
+            .NetworkCallback() {
+        @Override
+        public void onCapabilitiesChanged(
+                Network network, NetworkCapabilities networkCapabilities) {
+            updateStatusLabel();
+            mCallback.run();
+        }
+    };
+    private final Runnable mCallback;
+
+    private WifiInfo mWifiInfo;
     public boolean enabled;
     public int state;
     public boolean connected;
-    public boolean connecting;
     public String ssid;
     public int rssi;
     public int level;
+    public String statusLabel;
 
-    public WifiStatusTracker(WifiManager wifiManager) {
+    public WifiStatusTracker(Context context, WifiManager wifiManager,
+            NetworkScoreManager networkScoreManager, ConnectivityManager connectivityManager,
+            Runnable callback) {
+        mContext = context;
         mWifiManager = wifiManager;
+        mWifiNetworkScoreCache = new WifiNetworkScoreCache(context);
+        mNetworkScoreManager = networkScoreManager;
+        mConnectivityManager = connectivityManager;
+        mCallback = callback;
+    }
+
+    public void setListening(boolean listening) {
+        if (listening) {
+            mNetworkScoreManager.registerNetworkScoreCache(NetworkKey.TYPE_WIFI,
+                    mWifiNetworkScoreCache, NetworkScoreManager.CACHE_FILTER_CURRENT_NETWORK);
+            mWifiNetworkScoreCache.registerListener(mCacheListener);
+            mConnectivityManager.registerNetworkCallback(mNetworkRequest, mNetworkCallback);
+        } else {
+            mNetworkScoreManager.unregisterNetworkScoreCache(NetworkKey.TYPE_WIFI,
+                    mWifiNetworkScoreCache);
+            mWifiNetworkScoreCache.unregisterListener();
+            mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
+        }
     }
 
     public void handleBroadcast(Intent intent) {
@@ -40,32 +104,57 @@ public class WifiStatusTracker {
             state = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
                     WifiManager.WIFI_STATE_UNKNOWN);
             enabled = state == WifiManager.WIFI_STATE_ENABLED;
-
-
-            enabled = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
-                    WifiManager.WIFI_STATE_UNKNOWN) == WifiManager.WIFI_STATE_ENABLED;
         } else if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
-            final NetworkInfo networkInfo = (NetworkInfo)
+            final NetworkInfo networkInfo =
                     intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-            connecting = networkInfo != null && !networkInfo.isConnected()
-                    && networkInfo.isConnectedOrConnecting();
             connected = networkInfo != null && networkInfo.isConnected();
-            // If Connected grab the signal strength and ssid.
+            mWifiInfo = null;
+            ssid = null;
             if (connected) {
-                WifiInfo info = mWifiManager.getConnectionInfo();
-                if (info != null) {
-                    ssid = getValidSsid(info);
-                } else {
-                    ssid = null;
+                mWifiInfo = mWifiManager.getConnectionInfo();
+                if (mWifiInfo != null) {
+                    ssid = getValidSsid(mWifiInfo);
+                    updateRssi(mWifiInfo.getRssi());
+                    maybeRequestNetworkScore();
                 }
-            } else if (!connected) {
-                ssid = null;
             }
+            updateStatusLabel();
         } else if (action.equals(WifiManager.RSSI_CHANGED_ACTION)) {
             // Default to -200 as its below WifiManager.MIN_RSSI.
-            rssi = intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200);
-            level = WifiManager.calculateSignalLevel(rssi, 5);
+            updateRssi(intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200));
+            updateStatusLabel();
         }
+    }
+
+    private void updateRssi(int newRssi) {
+        rssi = newRssi;
+        level = WifiManager.calculateSignalLevel(rssi, WifiManager.RSSI_LEVELS);
+    }
+
+    private void maybeRequestNetworkScore() {
+        NetworkKey networkKey = NetworkKey.createFromWifiInfo(mWifiInfo);
+        if (mWifiNetworkScoreCache.getScoredNetwork(networkKey) == null) {
+            mNetworkScoreManager.requestScores(new NetworkKey[]{ networkKey });
+        }
+    }
+
+    private void updateStatusLabel() {
+        final NetworkCapabilities networkCapabilities
+                = mConnectivityManager.getNetworkCapabilities(mWifiManager.getCurrentNetwork());
+        if (networkCapabilities != null) {
+            if (networkCapabilities.hasCapability(NET_CAPABILITY_CAPTIVE_PORTAL)) {
+                statusLabel = mContext.getString(R.string.wifi_status_sign_in_required);
+                return;
+            } else if (!networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED)) {
+                statusLabel = mContext.getString(R.string.wifi_status_no_internet);
+                return;
+            }
+        }
+
+        ScoredNetwork scoredNetwork =
+                mWifiNetworkScoreCache.getScoredNetwork(NetworkKey.createFromWifiInfo(mWifiInfo));
+        statusLabel = scoredNetwork == null
+                ? null : AccessPoint.getSpeedLabel(mContext, scoredNetwork, rssi);
     }
 
     private String getValidSsid(WifiInfo info) {

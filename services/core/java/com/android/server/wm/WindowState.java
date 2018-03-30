@@ -1236,7 +1236,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     void updateResizingWindowIfNeeded() {
         final WindowStateAnimator winAnimator = mWinAnimator;
-        if (!mHasSurface || mService.mLayoutSeq != mLayoutSeq || isGoneForLayoutLw()) {
+        if (!mHasSurface || getDisplayContent().mLayoutSeq != mLayoutSeq || isGoneForLayoutLw()) {
             return;
         }
 
@@ -1358,6 +1358,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     DisplayContent getDisplayContent() {
         return mToken.getDisplayContent();
+    }
+
+    @Override
+    void onDisplayChanged(DisplayContent dc) {
+        super.onDisplayChanged(dc);
+        // Window was not laid out for this display yet, so make sure mLayoutSeq does not match.
+        if (dc != null) {
+            mLayoutSeq = dc.mLayoutSeq - 1;
+        }
     }
 
     DisplayInfo getDisplayInfo() {

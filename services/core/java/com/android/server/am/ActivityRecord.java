@@ -236,7 +236,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     final IApplicationToken.Stub appToken; // window manager token
     AppWindowContainerController mWindowContainerController;
     final ActivityInfo info; // all about me
-    final ApplicationInfo appInfo; // information about activity's app
+    // TODO: This is duplicated state already contained in info.applicationInfo - remove
+    ApplicationInfo appInfo; // information about activity's app
     final int launchedFromPid; // always the pid who started the activity.
     final int launchedFromUid; // always the uid who started the activity.
     final String launchedFromPackage; // always the package who started the activity.
@@ -603,6 +604,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 pw.println(prefix + "maxAspectRatio=" + info.maxAspectRatio);
             }
         }
+    }
+
+    void updateApplicationInfo(ApplicationInfo aInfo) {
+        appInfo = aInfo;
+        info.applicationInfo = aInfo;
     }
 
     private boolean crossesHorizontalSizeThreshold(int firstDp, int secondDp) {

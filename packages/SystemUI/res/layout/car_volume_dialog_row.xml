@@ -33,13 +33,14 @@
             android:layout_width="@dimen/car_primary_icon_size"
             android:layout_height="@dimen/car_primary_icon_size"
             android:layout_marginStart="@dimen/car_keyline_1"
+            android:background="?android:attr/selectableItemBackground"
             android:tint="@color/car_tint"
             android:scaleType="fitCenter"
             android:soundEffectsEnabled="false" />
         <SeekBar
                 android:id="@+id/volume_row_slider"
                 android:clickable="true"
-                android:layout_marginStart="@dimen/car_keyline_3"
+                android:layout_marginStart="@dimen/car_keyline_1_keyline_3_diff"
                 android:layout_marginEnd="@dimen/car_keyline_3"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/car_single_line_list_item_height"/>

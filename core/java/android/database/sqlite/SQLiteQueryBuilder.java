@@ -31,7 +31,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
- * This is a convience class that helps build SQL queries to be sent to
+ * This is a convenience class that helps build SQL queries to be sent to
  * {@link SQLiteDatabase} objects.
  */
 public class SQLiteQueryBuilder

@@ -37,22 +37,16 @@ public final class CellIdentityWcdma extends CellIdentity {
     private final int mPsc;
     // 16-bit UMTS Absolute RF Channel Number
     private final int mUarfcn;
-    // long alpha Operator Name String or Enhanced Operator Name String
-    private final String mAlphaLong;
-    // short alpha Operator Name String or Enhanced Operator Name String
-    private final String mAlphaShort;
 
     /**
      * @hide
      */
     public CellIdentityWcdma() {
-        super(TAG, TYPE_TDSCDMA, null, null);
+        super(TAG, TYPE_TDSCDMA, null, null, null, null);
         mLac = Integer.MAX_VALUE;
         mCid = Integer.MAX_VALUE;
         mPsc = Integer.MAX_VALUE;
         mUarfcn = Integer.MAX_VALUE;
-        mAlphaLong = null;
-        mAlphaShort = null;
     }
     /**
      * public constructor
@@ -99,13 +93,11 @@ public final class CellIdentityWcdma extends CellIdentity {
      */
     public CellIdentityWcdma (int lac, int cid, int psc, int uarfcn,
                               String mccStr, String mncStr, String alphal, String alphas) {
-        super(TAG, TYPE_WCDMA, mccStr, mncStr);
+        super(TAG, TYPE_WCDMA, mccStr, mncStr, alphal, alphas);
         mLac = lac;
         mCid = cid;
         mPsc = psc;
         mUarfcn = uarfcn;
-        mAlphaLong = alphal;
-        mAlphaShort = alphas;
     }
 
     private CellIdentityWcdma(CellIdentityWcdma cid) {
@@ -179,27 +171,9 @@ public final class CellIdentityWcdma extends CellIdentity {
         return (mMccStr == null || mMncStr == null) ? null : mMccStr + mMncStr;
     }
 
-    /**
-     * @return The long alpha tag associated with the current scan result (may be the operator
-     * name string or extended operator name string). May be null if unknown.
-     */
-    @Nullable
-    public CharSequence getOperatorAlphaLong() {
-        return mAlphaLong;
-    }
-
-    /**
-     * @return The short alpha tag associated with the current scan result (may be the operator
-     * name string or extended operator name string).  May be null if unknown.
-     */
-    @Nullable
-    public CharSequence getOperatorAlphaShort() {
-        return mAlphaShort;
-    }
-
     @Override
     public int hashCode() {
-        return Objects.hash(mMccStr, mMncStr, mLac, mCid, mPsc, mAlphaLong, mAlphaShort);
+        return Objects.hash(mLac, mCid, mPsc, super.hashCode());
     }
 
     /**
@@ -232,8 +206,7 @@ public final class CellIdentityWcdma extends CellIdentity {
                 && mUarfcn == o.mUarfcn
                 && TextUtils.equals(mMccStr, o.mMccStr)
                 && TextUtils.equals(mMncStr, o.mMncStr)
-                && TextUtils.equals(mAlphaLong, o.mAlphaLong)
-                && TextUtils.equals(mAlphaShort, o.mAlphaShort);
+                && super.equals(other);
     }
 
     @Override
@@ -259,8 +232,6 @@ public final class CellIdentityWcdma extends CellIdentity {
         dest.writeInt(mCid);
         dest.writeInt(mPsc);
         dest.writeInt(mUarfcn);
-        dest.writeString(mAlphaLong);
-        dest.writeString(mAlphaShort);
     }
 
     /** Construct from Parcel, type has already been processed */
@@ -270,8 +241,6 @@ public final class CellIdentityWcdma extends CellIdentity {
         mCid = in.readInt();
         mPsc = in.readInt();
         mUarfcn = in.readInt();
-        mAlphaLong = in.readString();
-        mAlphaShort = in.readString();
         if (DBG) log(toString());
     }
 

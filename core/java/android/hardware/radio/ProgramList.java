@@ -263,6 +263,17 @@ public final class ProgramList implements AutoCloseable {
         /**
          * @hide for framework use only
          */
+        public Filter() {
+            mIdentifierTypes = Collections.emptySet();
+            mIdentifiers = Collections.emptySet();
+            mIncludeCategories = false;
+            mExcludeModifications = false;
+            mVendorFilter = null;
+        }
+
+        /**
+         * @hide for framework use only
+         */
         public Filter(@Nullable Map<String, String> vendorFilter) {
             mIdentifierTypes = Collections.emptySet();
             mIdentifiers = Collections.emptySet();

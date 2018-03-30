@@ -211,6 +211,7 @@ public class RadioManager {
         private final String mSerial;
         private final int mNumTuners;
         private final int mNumAudioSources;
+        private final boolean mIsInitializationRequired;
         private final boolean mIsCaptureSupported;
         private final BandDescriptor[] mBands;
         private final boolean mIsBgScanSupported;
@@ -222,7 +223,8 @@ public class RadioManager {
         /** @hide */
         public ModuleProperties(int id, String serviceName, int classId, String implementor,
                 String product, String version, String serial, int numTuners, int numAudioSources,
-                boolean isCaptureSupported, BandDescriptor[] bands, boolean isBgScanSupported,
+                boolean isInitializationRequired, boolean isCaptureSupported,
+                BandDescriptor[] bands, boolean isBgScanSupported,
                 @ProgramSelector.ProgramType int[] supportedProgramTypes,
                 @ProgramSelector.IdentifierType int[] supportedIdentifierTypes,
                 @Nullable Map<String, Integer> dabFrequencyTable,
@@ -236,6 +238,7 @@ public class RadioManager {
             mSerial = serial;
             mNumTuners = numTuners;
             mNumAudioSources = numAudioSources;
+            mIsInitializationRequired = isInitializationRequired;
             mIsCaptureSupported = isCaptureSupported;
             mBands = bands;
             mIsBgScanSupported = isBgScanSupported;
@@ -329,6 +332,18 @@ public class RadioManager {
             return mNumAudioSources;
         }
 
+        /**
+         * Checks, if BandConfig initialization (after {@link RadioManager#openTuner})
+         * is required to be done before other operations or not.
+         *
+         * If it is, the client has to wait for {@link RadioTuner.Callback#onConfigurationChanged}
+         * callback before executing any other operations. Otherwise, such operation will fail
+         * returning {@link RadioManager#STATUS_INVALID_OPERATION} error code.
+         */
+        public boolean isInitializationRequired() {
+            return mIsInitializationRequired;
+        }
+
         /** {@code true} if audio capture is possible from radio tuner output.
          * This indicates if routing to audio devices not connected to the same HAL as the FM radio
          * is possible (e.g. to USB) or DAR (Digital Audio Recorder) feature can be implemented.
@@ -419,6 +434,7 @@ public class RadioManager {
             mSerial = in.readString();
             mNumTuners = in.readInt();
             mNumAudioSources = in.readInt();
+            mIsInitializationRequired = in.readInt() == 1;
             mIsCaptureSupported = in.readInt() == 1;
             Parcelable[] tmp = in.readParcelableArray(BandDescriptor.class.getClassLoader());
             mBands = new BandDescriptor[tmp.length];
@@ -454,6 +470,7 @@ public class RadioManager {
             dest.writeString(mSerial);
             dest.writeInt(mNumTuners);
             dest.writeInt(mNumAudioSources);
+            dest.writeInt(mIsInitializationRequired ? 1 : 0);
             dest.writeInt(mIsCaptureSupported ? 1 : 0);
             dest.writeParcelableArray(mBands, flags);
             dest.writeInt(mIsBgScanSupported ? 1 : 0);
@@ -476,6 +493,7 @@ public class RadioManager {
                     + ", mVersion=" + mVersion + ", mSerial=" + mSerial
                     + ", mNumTuners=" + mNumTuners
                     + ", mNumAudioSources=" + mNumAudioSources
+                    + ", mIsInitializationRequired=" + mIsInitializationRequired
                     + ", mIsCaptureSupported=" + mIsCaptureSupported
                     + ", mIsBgScanSupported=" + mIsBgScanSupported
                     + ", mBands=" + Arrays.toString(mBands) + "]";
@@ -484,8 +502,8 @@ public class RadioManager {
         @Override
         public int hashCode() {
             return Objects.hash(mId, mServiceName, mClassId, mImplementor, mProduct, mVersion,
-                mSerial, mNumTuners, mNumAudioSources, mIsCaptureSupported, mBands,
-                mIsBgScanSupported, mDabFrequencyTable, mVendorInfo);
+                mSerial, mNumTuners, mNumAudioSources, mIsInitializationRequired,
+                mIsCaptureSupported, mBands, mIsBgScanSupported, mDabFrequencyTable, mVendorInfo);
         }
 
         @Override
@@ -503,6 +521,7 @@ public class RadioManager {
             if (!Objects.equals(mSerial, other.mSerial)) return false;
             if (mNumTuners != other.mNumTuners) return false;
             if (mNumAudioSources != other.mNumAudioSources) return false;
+            if (mIsInitializationRequired != other.mIsInitializationRequired) return false;
             if (mIsCaptureSupported != other.mIsCaptureSupported) return false;
             if (!Objects.equals(mBands, other.mBands)) return false;
             if (mIsBgScanSupported != other.mIsBgScanSupported) return false;

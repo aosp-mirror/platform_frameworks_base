@@ -51,6 +51,7 @@ public class StackStateAnimator {
             = (int) (ANIMATION_DURATION_HEADS_UP_APPEAR
                     * HeadsUpAppearInterpolator.getFractionUntilOvershoot());
     public static final int ANIMATION_DURATION_HEADS_UP_DISAPPEAR = 300;
+    public static final int ANIMATION_DURATION_BLOCKING_HELPER_FADE = 240;
     public static final int ANIMATION_DELAY_PER_ELEMENT_INTERRUPTING = 80;
     public static final int ANIMATION_DELAY_PER_ELEMENT_MANUAL = 32;
     public static final int ANIMATION_DELAY_PER_ELEMENT_GO_TO_FULL_SHADE = 48;
@@ -79,6 +80,7 @@ public class StackStateAnimator {
     private ValueAnimator mBottomOverScrollAnimator;
     private int mHeadsUpAppearHeightBottom;
     private boolean mShadeExpanded;
+    private ArrayList<ExpandableView> mTransientViewsToRemove = new ArrayList<>();
     private NotificationShelf mShelf;
     private float mStatusBarIconLocation;
     private int[] mTmpLocation = new int[2];
@@ -333,6 +335,12 @@ public class StackStateAnimator {
 
     private void onAnimationFinished() {
         mHostLayout.onChildAnimationFinished();
+
+        for (ExpandableView transientViewsToRemove : mTransientViewsToRemove) {
+            transientViewsToRemove.getTransientContainer()
+                    .removeTransientView(transientViewsToRemove);
+        }
+        mTransientViewsToRemove.clear();
     }
 
     /**
@@ -362,7 +370,7 @@ public class StackStateAnimator {
             } else if (event.animationType ==
                     NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_REMOVE) {
                 if (changingView.getVisibility() != View.VISIBLE) {
-                    removeFromOverlay(changingView);
+                    removeTransientView(changingView);
                     continue;
                 }
 
@@ -402,8 +410,7 @@ public class StackStateAnimator {
                         0, new Runnable() {
                     @Override
                     public void run() {
-                        // remove the temporary overlay
-                        removeFromOverlay(changingView);
+                        removeTransientView(changingView);
                     }
                 }, null);
             } else if (event.animationType ==
@@ -491,6 +498,12 @@ public class StackStateAnimator {
                 }
             }
             mNewEvents.add(event);
+        }
+    }
+
+    private static void removeTransientView(ExpandableView viewToRemove) {
+        if (viewToRemove.getTransientContainer() != null) {
+            viewToRemove.getTransientContainer().removeTransientView(viewToRemove);
         }
     }
 

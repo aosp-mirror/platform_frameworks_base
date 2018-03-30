@@ -39,6 +39,7 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
+import android.media.session.MediaSessionManager.RemoteUserInfo;
 import android.service.media.MediaBrowserService;
 import android.text.TextUtils;
 import android.util.Log;
@@ -102,6 +103,16 @@ public final class MediaSession {
      * @hide
      */
     public static final int FLAG_EXCLUSIVE_GLOBAL_PRIORITY = 1 << 16;
+
+    /**
+     * @hide
+     */
+    public static final int INVALID_UID = -1;
+
+    /**
+     * @hide
+     */
+    public static final int INVALID_PID = -1;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -501,6 +512,22 @@ public final class MediaSession {
     }
 
     /**
+     * Gets the controller information who sent the current request.
+     * <p>
+     * Note: This is only valid while in a request callback, such as {@link Callback#onPlay}.
+     *
+     * @throws IllegalStateException If this method is called outside of {@link Callback} methods.
+     * @see MediaSessionManager#isTrustedForMediaControl(RemoteUserInfo)
+     */
+    public final @NonNull RemoteUserInfo getCurrentControllerInfo() {
+        if (mCallback == null || mCallback.mCurrentControllerInfo == null) {
+            throw new IllegalStateException(
+                    "This should be called inside of MediaSession.Callback methods");
+        }
+        return mCallback.mCurrentControllerInfo;
+    }
+
+    /**
      * Notify the system that the remote volume changed.
      *
      * @param provider The provider that is handling volume changes.
@@ -528,16 +555,14 @@ public final class MediaSession {
      * @hide
      */
     public String getCallingPackage() {
-        try {
-            return mBinder.getCallingPackage();
-        } catch (RemoteException e) {
-            Log.wtf(TAG, "Dead object in getCallingPackage.", e);
+        if (mCallback != null) {
+            return mCallback.mCurrentControllerInfo.getPackageName();
         }
         return null;
     }
 
-    private void dispatchPrepare() {
-        postToCallback(CallbackMessageHandler.MSG_PREPARE);
+    private void dispatchPrepare(Bundle extras) {
+        postToCallback(CallbackMessageHandler.MSG_PREPARE, null, extras);
     }
 
     private void dispatchPrepareFromMediaId(String mediaId, Bundle extras) {
@@ -552,8 +577,8 @@ public final class MediaSession {
         postToCallback(CallbackMessageHandler.MSG_PREPARE_URI, uri, extras);
     }
 
-    private void dispatchPlay() {
-        postToCallback(CallbackMessageHandler.MSG_PLAY);
+    private void dispatchPlay(Bundle extras) {
+        postToCallback(CallbackMessageHandler.MSG_PLAY, null, extras);
     }
 
     private void dispatchPlayFromMediaId(String mediaId, Bundle extras) {
@@ -568,69 +593,61 @@ public final class MediaSession {
         postToCallback(CallbackMessageHandler.MSG_PLAY_URI, uri, extras);
     }
 
-    private void dispatchSkipToItem(long id) {
-        postToCallback(CallbackMessageHandler.MSG_SKIP_TO_ITEM, id);
+    private void dispatchSkipToItem(long id, Bundle extras) {
+        postToCallback(CallbackMessageHandler.MSG_SKIP_TO_ITEM, id, extras);
     }
 
-    private void dispatchPause() {
-        postToCallback(CallbackMessageHandler.MSG_PAUSE);
+    private void dispatchPause(Bundle extras) {
+        postToCallback(CallbackMessageHandler.MSG_PAUSE, null, extras);
     }
 
-    private void dispatchStop() {
-        postToCallback(CallbackMessageHandler.MSG_STOP);
+    private void dispatchStop(Bundle extras) {
+        postToCallback(CallbackMessageHandler.MSG_STOP, null, extras);
     }
 
-    private void dispatchNext() {
-        postToCallback(CallbackMessageHandler.MSG_NEXT);
+    private void dispatchNext(Bundle extras) {
+        postToCallback(CallbackMessageHandler.MSG_NEXT, null, extras);
     }
 
-    private void dispatchPrevious() {
-        postToCallback(CallbackMessageHandler.MSG_PREVIOUS);
+    private void dispatchPrevious(Bundle extras) {
+        postToCallback(CallbackMessageHandler.MSG_PREVIOUS, null, extras);
     }
 
-    private void dispatchFastForward() {
-        postToCallback(CallbackMessageHandler.MSG_FAST_FORWARD);
+    private void dispatchFastForward(Bundle extras) {
+        postToCallback(CallbackMessageHandler.MSG_FAST_FORWARD, null, extras);
     }
 
-    private void dispatchRewind() {
-        postToCallback(CallbackMessageHandler.MSG_REWIND);
+    private void dispatchRewind(Bundle extras) {
+        postToCallback(CallbackMessageHandler.MSG_REWIND, null, extras);
     }
 
-    private void dispatchSeekTo(long pos) {
-        postToCallback(CallbackMessageHandler.MSG_SEEK_TO, pos);
+    private void dispatchSeekTo(long pos, Bundle extras) {
+        postToCallback(CallbackMessageHandler.MSG_SEEK_TO, pos, extras);
     }
 
-    private void dispatchRate(Rating rating) {
-        postToCallback(CallbackMessageHandler.MSG_RATE, rating);
+    private void dispatchRate(Rating rating, Bundle extras) {
+        postToCallback(CallbackMessageHandler.MSG_RATE, rating, extras);
     }
 
-    private void dispatchCustomAction(String action, Bundle args) {
-        postToCallback(CallbackMessageHandler.MSG_CUSTOM_ACTION, action, args);
+    private void dispatchCustomAction(String action, Bundle extras) {
+        postToCallback(CallbackMessageHandler.MSG_CUSTOM_ACTION, action, extras);
     }
 
-    private void dispatchMediaButton(Intent mediaButtonIntent) {
-        postToCallback(CallbackMessageHandler.MSG_MEDIA_BUTTON, mediaButtonIntent);
+    private void dispatchMediaButton(Intent mediaButtonIntent, Bundle extras) {
+        postToCallback(CallbackMessageHandler.MSG_MEDIA_BUTTON, mediaButtonIntent, extras);
     }
 
-    private void dispatchAdjustVolume(int direction) {
-        postToCallback(CallbackMessageHandler.MSG_ADJUST_VOLUME, direction);
+    private void dispatchAdjustVolume(int direction, Bundle extras) {
+        postToCallback(CallbackMessageHandler.MSG_ADJUST_VOLUME, direction, extras);
     }
 
-    private void dispatchSetVolumeTo(int volume) {
-        postToCallback(CallbackMessageHandler.MSG_SET_VOLUME, volume);
+    private void dispatchSetVolumeTo(int volume, Bundle extras) {
+        postToCallback(CallbackMessageHandler.MSG_SET_VOLUME, volume, extras);
     }
 
-    private void postToCallback(int what) {
-        postToCallback(what, null);
-    }
-
-    private void postCommand(String command, Bundle args, ResultReceiver resultCb) {
+    private void postCommand(String command, Bundle args, ResultReceiver resultCb, Bundle extras) {
         Command cmd = new Command(command, args, resultCb);
-        postToCallback(CallbackMessageHandler.MSG_COMMAND, cmd);
-    }
-
-    private void postToCallback(int what, Object obj) {
-        postToCallback(what, obj, null);
+        postToCallback(CallbackMessageHandler.MSG_COMMAND, cmd, extras);
     }
 
     private void postToCallback(int what, Object obj, Bundle extras) {
@@ -734,9 +751,13 @@ public final class MediaSession {
      * and the system. A callback may be set using {@link #setCallback}.
      */
     public abstract static class Callback {
+
         private MediaSession mSession;
         private CallbackMessageHandler mHandler;
         private boolean mMediaPlayPauseKeyPending;
+        private String mCallingPackage;
+        private int mCallingPid;
+        private int mCallingUid;
 
         public Callback() {
         }
@@ -1023,24 +1044,26 @@ public final class MediaSession {
         private WeakReference<MediaSession> mMediaSession;
 
         public CallbackStub(MediaSession session) {
-            mMediaSession = new WeakReference<MediaSession>(session);
+            mMediaSession = new WeakReference<>(session);
         }
 
         @Override
-        public void onCommand(String command, Bundle args, ResultReceiver cb) {
+        public void onCommand(String packageName, int pid, int uid, String command, Bundle args,
+                ResultReceiver cb) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.postCommand(command, args, cb);
+                session.postCommand(command, args, cb, createExtraBundle(packageName, pid, uid));
             }
         }
 
         @Override
-        public void onMediaButton(Intent mediaButtonIntent, int sequenceNumber,
-                ResultReceiver cb) {
+        public void onMediaButton(String packageName, int pid, int uid, Intent mediaButtonIntent,
+                int sequenceNumber, ResultReceiver cb) {
             MediaSession session = mMediaSession.get();
             try {
                 if (session != null) {
-                    session.dispatchMediaButton(mediaButtonIntent);
+                    session.dispatchMediaButton(
+                            mediaButtonIntent, createExtraBundle(packageName, pid, uid));
                 }
             } finally {
                 if (cb != null) {
@@ -1050,165 +1073,191 @@ public final class MediaSession {
         }
 
         @Override
-        public void onPrepare() {
+        public void onPrepare(String packageName, int pid, int uid) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchPrepare();
+                session.dispatchPrepare(createExtraBundle(packageName, pid, uid));
             }
         }
 
         @Override
-        public void onPrepareFromMediaId(String mediaId, Bundle extras) {
+        public void onPrepareFromMediaId(String packageName, int pid, int uid, String mediaId,
+                Bundle extras) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchPrepareFromMediaId(mediaId, extras);
+                session.dispatchPrepareFromMediaId(
+                        mediaId, createExtraBundle(packageName, pid, uid, extras));
             }
         }
 
         @Override
-        public void onPrepareFromSearch(String query, Bundle extras) {
+        public void onPrepareFromSearch(String packageName, int pid, int uid, String query,
+                Bundle extras) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchPrepareFromSearch(query, extras);
+                session.dispatchPrepareFromSearch(
+                        query, createExtraBundle(packageName, pid, uid, extras));
             }
         }
 
         @Override
-        public void onPrepareFromUri(Uri uri, Bundle extras) {
+        public void onPrepareFromUri(String packageName, int pid, int uid, Uri uri, Bundle extras) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchPrepareFromUri(uri, extras);
+                session.dispatchPrepareFromUri(uri,
+                        createExtraBundle(packageName, pid, uid, extras));
             }
         }
 
         @Override
-        public void onPlay() {
+        public void onPlay(String packageName, int pid, int uid) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchPlay();
+                session.dispatchPlay(createExtraBundle(packageName, pid, uid));
             }
         }
 
         @Override
-        public void onPlayFromMediaId(String mediaId, Bundle extras) {
+        public void onPlayFromMediaId(String packageName, int pid, int uid, String mediaId,
+                Bundle extras) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchPlayFromMediaId(mediaId, extras);
+                session.dispatchPlayFromMediaId(
+                        mediaId, createExtraBundle(packageName, pid, uid, extras));
             }
         }
 
         @Override
-        public void onPlayFromSearch(String query, Bundle extras) {
+        public void onPlayFromSearch(String packageName, int pid, int uid, String query,
+                Bundle extras) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchPlayFromSearch(query, extras);
+                session.dispatchPlayFromSearch(query, createExtraBundle(packageName, pid, uid,
+                        extras));
             }
         }
 
         @Override
-        public void onPlayFromUri(Uri uri, Bundle extras) {
+        public void onPlayFromUri(String packageName, int pid, int uid, Uri uri, Bundle extras) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchPlayFromUri(uri, extras);
+                session.dispatchPlayFromUri(uri, createExtraBundle(packageName, pid, uid, extras));
             }
         }
 
         @Override
-        public void onSkipToTrack(long id) {
+        public void onSkipToTrack(String packageName, int pid, int uid, long id) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchSkipToItem(id);
+                session.dispatchSkipToItem(id, createExtraBundle(packageName, pid, uid));
             }
         }
 
         @Override
-        public void onPause() {
+        public void onPause(String packageName, int pid, int uid) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchPause();
+                session.dispatchPause(createExtraBundle(packageName, pid, uid));
             }
         }
 
         @Override
-        public void onStop() {
+        public void onStop(String packageName, int pid, int uid) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchStop();
+                session.dispatchStop(createExtraBundle(packageName, pid, uid));
             }
         }
 
         @Override
-        public void onNext() {
+        public void onNext(String packageName, int pid, int uid) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchNext();
+                session.dispatchNext(createExtraBundle(packageName, pid, uid));
             }
         }
 
         @Override
-        public void onPrevious() {
+        public void onPrevious(String packageName, int pid, int uid) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchPrevious();
+                session.dispatchPrevious(createExtraBundle(packageName, pid, uid));
             }
         }
 
         @Override
-        public void onFastForward() {
+        public void onFastForward(String packageName, int pid, int uid) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchFastForward();
+                session.dispatchFastForward(createExtraBundle(packageName, pid, uid));
             }
         }
 
         @Override
-        public void onRewind() {
+        public void onRewind(String packageName, int pid, int uid) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchRewind();
+                session.dispatchRewind(createExtraBundle(packageName, pid, uid));
             }
         }
 
         @Override
-        public void onSeekTo(long pos) {
+        public void onSeekTo(String packageName, int pid, int uid, long pos) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchSeekTo(pos);
+                session.dispatchSeekTo(pos, createExtraBundle(packageName, pid, uid));
             }
         }
 
         @Override
-        public void onRate(Rating rating) {
+        public void onRate(String packageName, int pid, int uid, Rating rating) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchRate(rating);
+                session.dispatchRate(rating, createExtraBundle(packageName, pid, uid));
             }
         }
 
         @Override
-        public void onCustomAction(String action, Bundle args) {
+        public void onCustomAction(String packageName, int pid, int uid, String action,
+                Bundle args) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchCustomAction(action, args);
+                session.dispatchCustomAction(
+                        action, createExtraBundle(packageName, pid, uid, args));
             }
         }
 
         @Override
-        public void onAdjustVolume(int direction) {
+        public void onAdjustVolume(String packageName, int pid, int uid, int direction) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchAdjustVolume(direction);
+                session.dispatchAdjustVolume(direction, createExtraBundle(packageName, pid, uid));
             }
         }
 
         @Override
-        public void onSetVolumeTo(int value) {
+        public void onSetVolumeTo(String packageName, int pid, int uid, int value) {
             MediaSession session = mMediaSession.get();
             if (session != null) {
-                session.dispatchSetVolumeTo(value);
+                session.dispatchSetVolumeTo(value, createExtraBundle(packageName, pid, uid));
             }
         }
 
+        private Bundle createExtraBundle(String packageName, int pid, int uid) {
+            return createExtraBundle(packageName, pid, uid, null);
+        }
+
+        private Bundle createExtraBundle(String packageName, int pid, int uid,
+                Bundle originalBundle) {
+            Bundle bundle = new Bundle();
+            bundle.putString(CallbackMessageHandler.EXTRA_KEY_CALLING_PACKAGE, packageName);
+            bundle.putInt(CallbackMessageHandler.EXTRA_KEY_CALLING_PID, pid);
+            bundle.putInt(CallbackMessageHandler.EXTRA_KEY_CALLING_UID, uid);
+            if (originalBundle != null) {
+                bundle.putBundle(CallbackMessageHandler.EXTRA_KEY_ORIGINAL_BUNDLE, originalBundle);
+            }
+            return bundle;
+        }
     }
 
     /**
@@ -1272,7 +1321,8 @@ public final class MediaSession {
             return 0;
         }
 
-        public static final Creator<MediaSession.QueueItem> CREATOR = new Creator<MediaSession.QueueItem>() {
+        public static final Creator<MediaSession.QueueItem> CREATOR =
+                new Creator<MediaSession.QueueItem>() {
 
             @Override
             public MediaSession.QueueItem createFromParcel(Parcel p) {
@@ -1329,6 +1379,15 @@ public final class MediaSession {
 
     private class CallbackMessageHandler extends Handler {
 
+        private static final String EXTRA_KEY_CALLING_PACKAGE =
+                "android.media.session.extra.CALLING_PACKAGE";
+        private static final String EXTRA_KEY_CALLING_PID =
+                "android.media.session.extra.CALLING_PID";
+        private static final String EXTRA_KEY_CALLING_UID =
+                "android.media.session.extra.CALLING_UID";
+        private static final String EXTRA_KEY_ORIGINAL_BUNDLE =
+                "android.media.session.extra.ORIGINAL_BUNDLE";
+
         private static final int MSG_COMMAND = 1;
         private static final int MSG_MEDIA_BUTTON = 2;
         private static final int MSG_PREPARE = 3;
@@ -1355,6 +1414,8 @@ public final class MediaSession {
 
         private MediaSession.Callback mCallback;
 
+        private RemoteUserInfo mCurrentControllerInfo;
+
         public CallbackMessageHandler(Looper looper, MediaSession.Callback callback) {
             super(looper, null, true);
             mCallback = callback;
@@ -1367,21 +1428,17 @@ public final class MediaSession {
             msg.sendToTarget();
         }
 
-        public void post(int what, Object obj) {
-            obtainMessage(what, obj).sendToTarget();
-        }
-
-        public void post(int what) {
-            post(what, null);
-        }
-
-        public void post(int what, Object obj, int arg1) {
-            obtainMessage(what, arg1, 0, obj).sendToTarget();
-        }
-
         @Override
         public void handleMessage(Message msg) {
             VolumeProvider vp;
+            Bundle bundle = msg.getData();
+            Bundle originalBundle = bundle.getBundle(EXTRA_KEY_ORIGINAL_BUNDLE);
+
+            mCurrentControllerInfo = new RemoteUserInfo(
+                    bundle.getString(EXTRA_KEY_CALLING_PACKAGE),
+                    bundle.getInt(EXTRA_KEY_CALLING_PID, INVALID_PID),
+                    bundle.getInt(EXTRA_KEY_CALLING_UID, INVALID_UID));
+
             switch (msg.what) {
                 case MSG_COMMAND:
                     Command cmd = (Command) msg.obj;
@@ -1394,25 +1451,25 @@ public final class MediaSession {
                     mCallback.onPrepare();
                     break;
                 case MSG_PREPARE_MEDIA_ID:
-                    mCallback.onPrepareFromMediaId((String) msg.obj, msg.getData());
+                    mCallback.onPrepareFromMediaId((String) msg.obj, originalBundle);
                     break;
                 case MSG_PREPARE_SEARCH:
-                    mCallback.onPrepareFromSearch((String) msg.obj, msg.getData());
+                    mCallback.onPrepareFromSearch((String) msg.obj, originalBundle);
                     break;
                 case MSG_PREPARE_URI:
-                    mCallback.onPrepareFromUri((Uri) msg.obj, msg.getData());
+                    mCallback.onPrepareFromUri((Uri) msg.obj, originalBundle);
                     break;
                 case MSG_PLAY:
                     mCallback.onPlay();
                     break;
                 case MSG_PLAY_MEDIA_ID:
-                    mCallback.onPlayFromMediaId((String) msg.obj, msg.getData());
+                    mCallback.onPlayFromMediaId((String) msg.obj, originalBundle);
                     break;
                 case MSG_PLAY_SEARCH:
-                    mCallback.onPlayFromSearch((String) msg.obj, msg.getData());
+                    mCallback.onPlayFromSearch((String) msg.obj, originalBundle);
                     break;
                 case MSG_PLAY_URI:
-                    mCallback.onPlayFromUri((Uri) msg.obj, msg.getData());
+                    mCallback.onPlayFromUri((Uri) msg.obj, originalBundle);
                     break;
                 case MSG_SKIP_TO_ITEM:
                     mCallback.onSkipToQueueItem((Long) msg.obj);
@@ -1442,7 +1499,7 @@ public final class MediaSession {
                     mCallback.onSetRating((Rating) msg.obj);
                     break;
                 case MSG_CUSTOM_ACTION:
-                    mCallback.onCustomAction((String) msg.obj, msg.getData());
+                    mCallback.onCustomAction((String) msg.obj, originalBundle);
                     break;
                 case MSG_ADJUST_VOLUME:
                     synchronized (mLock) {
@@ -1464,6 +1521,7 @@ public final class MediaSession {
                     mCallback.handleMediaPlayPauseKeySingleTapIfPending();
                     break;
             }
+            mCurrentControllerInfo = null;
         }
     }
 }

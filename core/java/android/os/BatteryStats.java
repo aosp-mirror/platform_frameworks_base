@@ -1585,6 +1585,7 @@ public abstract class BatteryStats implements Parcelable {
         public static final int STATE2_CAMERA_FLAG = 1<<21;
         public static final int STATE2_BLUETOOTH_SCAN_FLAG = 1 << 20;
         public static final int STATE2_CELLULAR_HIGH_TX_POWER_FLAG = 1 << 19;
+        public static final int STATE2_USB_DATA_LINK_FLAG = 1 << 18;
 
         public static final int MOST_INTERESTING_STATES2 =
                 STATE2_POWER_SAVE_FLAG | STATE2_WIFI_ON_FLAG | STATE2_DEVICE_IDLE_MASK
@@ -2363,8 +2364,7 @@ public abstract class BatteryStats implements Parcelable {
                 SCREEN_BRIGHTNESS_NAMES, SCREEN_BRIGHTNESS_SHORT_NAMES),
     };
 
-    public static final BitDescription[] HISTORY_STATE2_DESCRIPTIONS
-            = new BitDescription[] {
+    public static final BitDescription[] HISTORY_STATE2_DESCRIPTIONS = new BitDescription[] {
         new BitDescription(HistoryItem.STATE2_POWER_SAVE_FLAG, "power_save", "ps"),
         new BitDescription(HistoryItem.STATE2_VIDEO_ON_FLAG, "video", "v"),
         new BitDescription(HistoryItem.STATE2_WIFI_RUNNING_FLAG, "wifi_running", "Ww"),
@@ -2375,6 +2375,7 @@ public abstract class BatteryStats implements Parcelable {
                 new String[] { "off", "light", "full", "???" },
                 new String[] { "off", "light", "full", "???" }),
         new BitDescription(HistoryItem.STATE2_CHARGING_FLAG, "charging", "ch"),
+        new BitDescription(HistoryItem.STATE2_USB_DATA_LINK_FLAG, "usb_data", "Ud"),
         new BitDescription(HistoryItem.STATE2_PHONE_IN_CALL_FLAG, "phone_in_call", "Pcl"),
         new BitDescription(HistoryItem.STATE2_BLUETOOTH_ON_FLAG, "bluetooth", "b"),
         new BitDescription(HistoryItem.STATE2_WIFI_SIGNAL_STRENGTH_MASK,

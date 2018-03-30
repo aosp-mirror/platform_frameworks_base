@@ -22,6 +22,7 @@
 #include <SkOverdrawColorFilter.h>
 #include <SkPicture.h>
 #include <SkPictureRecorder.h>
+#include "TreeInfo.h"
 #include "VectorDrawable.h"
 #include "utils/TraceUtils.h"
 
@@ -158,7 +159,7 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque,
 }
 
 bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
-                                       bool wideColorGamut) {
+                                       bool wideColorGamut, ErrorHandler* errorHandler) {
     // compute the size of the surface (i.e. texture) to be allocated for this layer
     const int surfaceWidth = ceilf(node->getWidth() / float(LAYER_SIZE)) * LAYER_SIZE;
     const int surfaceHeight = ceilf(node->getHeight() / float(LAYER_SIZE)) * LAYER_SIZE;
@@ -182,6 +183,20 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator
             Matrix4 windowTransform;
             damageAccumulator.computeCurrentTransform(&windowTransform);
             node->getSkiaLayer()->inverseTransformInWindow = windowTransform;
+        } else {
+            String8 cachesOutput;
+            mRenderThread.cacheManager().dumpMemoryUsage(cachesOutput,
+                    &mRenderThread.renderState());
+            ALOGE("%s", cachesOutput.string());
+            if (errorHandler) {
+                std::ostringstream err;
+                err << "Unable to create layer for " << node->getName();
+                const int maxTextureSize = DeviceInfo::get()->maxTextureSize();
+                err << ", size " << info.width() << "x" << info.height() << " max size "
+                    << maxTextureSize << " color type " << (int)info.colorType()
+                    << " has context " << (int)(mRenderThread.getGrContext() != nullptr);
+                errorHandler->onError(err.str());
+            }
         }
         return true;
     }

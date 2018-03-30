@@ -862,6 +862,13 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA = 11;
 
+    /**
+     * <p>The camera device is a monochrome camera that doesn't contain a color filter array,
+     * and the pixel values on U and Y planes are all 128.</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME = 12;
+
     //
     // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
     //
@@ -2728,6 +2735,31 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#TONEMAP_PRESET_CURVE
      */
     public static final int TONEMAP_PRESET_CURVE_REC709 = 1;
+
+    //
+    // Enumeration values for CaptureRequest#DISTORTION_CORRECTION_MODE
+    //
+
+    /**
+     * <p>No distortion correction is applied.</p>
+     * @see CaptureRequest#DISTORTION_CORRECTION_MODE
+     */
+    public static final int DISTORTION_CORRECTION_MODE_OFF = 0;
+
+    /**
+     * <p>Lens distortion correction is applied without reducing frame rate
+     * relative to sensor output. It may be the same as OFF if distortion correction would
+     * reduce frame rate relative to sensor.</p>
+     * @see CaptureRequest#DISTORTION_CORRECTION_MODE
+     */
+    public static final int DISTORTION_CORRECTION_MODE_FAST = 1;
+
+    /**
+     * <p>High-quality distortion correction is applied, at the cost of
+     * possibly reduced frame rate relative to sensor output.</p>
+     * @see CaptureRequest#DISTORTION_CORRECTION_MODE
+     */
+    public static final int DISTORTION_CORRECTION_MODE_HIGH_QUALITY = 2;
 
     //
     // Enumeration values for CaptureResult#CONTROL_AE_STATE

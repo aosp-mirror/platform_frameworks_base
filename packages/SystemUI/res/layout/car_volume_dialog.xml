@@ -24,7 +24,7 @@
     android:clipChildren="false" >
     <LinearLayout
         android:id="@+id/volume_dialog"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|top"
         android:orientation="vertical"
@@ -53,14 +53,15 @@
         android:layout_width="wrap_content"
         android:layout_height="@dimen/car_single_line_list_item_height"
         android:gravity="center"
-        android:layout_marginEnd="@dimen/car_keyline_1">
-        <ImageButton
+        android:layout_marginEnd="@dimen/car_keyline_1"
+        android:layout_gravity="end">
+        <com.android.keyguard.AlphaOptimizedImageButton
             android:id="@+id/expand"
             android:layout_gravity="center"
             android:layout_width="@dimen/car_primary_icon_size"
             android:layout_height="@dimen/car_primary_icon_size"
-            android:layout_marginEnd="@dimen/car_keyline_1"
             android:src="@drawable/car_ic_arrow_drop_up"
+            android:background="?android:attr/selectableItemBackground"
             android:tint="@color/car_tint"
             android:scaleType="fitCenter"
         />

@@ -48,6 +48,11 @@ public class EmptyShadeView extends StackScrollerDecorView {
         return findViewById(R.id.no_notifications);
     }
 
+    @Override
+    protected View findSecondaryView() {
+        return null;
+    }
+
     public void setTextColor(@ColorInt int color) {
         mEmptyText.setTextColor(color);
     }

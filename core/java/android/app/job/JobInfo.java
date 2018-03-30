@@ -65,7 +65,6 @@ public class JobInfo implements Parcelable {
             NETWORK_TYPE_UNMETERED,
             NETWORK_TYPE_NOT_ROAMING,
             NETWORK_TYPE_CELLULAR,
-            NETWORK_TYPE_METERED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface NetworkType {}
@@ -253,7 +252,7 @@ public class JobInfo implements Parcelable {
     /**
      * @hide
      */
-    public static final int FLAG_IS_PREFETCH = 1 << 2;
+    public static final int FLAG_PREFETCH = 1 << 2;
 
     /**
      * This job needs to be exempted from the app standby throttling. Only the system (UID 1000)
@@ -296,7 +295,8 @@ public class JobInfo implements Parcelable {
     private final boolean hasEarlyConstraint;
     private final boolean hasLateConstraint;
     private final NetworkRequest networkRequest;
-    private final long networkBytes;
+    private final long networkDownloadBytes;
+    private final long networkUploadBytes;
     private final long minLatencyMillis;
     private final long maxExecutionDelayMillis;
     private final boolean isPeriodic;
@@ -317,30 +317,28 @@ public class JobInfo implements Parcelable {
     }
 
     /**
-     * Bundle of extras which are returned to your application at execution time.
+     * @see JobInfo.Builder#setExtras(PersistableBundle)
      */
     public @NonNull PersistableBundle getExtras() {
         return extras;
     }
 
     /**
-     * Bundle of transient extras which are returned to your application at execution time,
-     * but not persisted by the system.
+     * @see JobInfo.Builder#setTransientExtras(Bundle)
      */
     public @NonNull Bundle getTransientExtras() {
         return transientExtras;
     }
 
     /**
-     * ClipData of information that is returned to your application at execution time,
-     * but not persisted by the system.
+     * @see JobInfo.Builder#setClipData(ClipData, int)
      */
     public @Nullable ClipData getClipData() {
         return clipData;
     }
 
     /**
-     * Permission grants that go along with {@link #getClipData}.
+     * @see JobInfo.Builder#setClipData(ClipData, int)
      */
     public int getClipGrantFlags() {
         return clipGrantFlags;
@@ -369,32 +367,28 @@ public class JobInfo implements Parcelable {
     }
 
     /**
-     * Whether this job requires that the device be charging (or be a non-battery-powered
-     * device connected to permanent power, such as Android TV devices).
+     * @see JobInfo.Builder#setRequiresCharging(boolean)
      */
     public boolean isRequireCharging() {
         return (constraintFlags & CONSTRAINT_FLAG_CHARGING) != 0;
     }
 
     /**
-     * Whether this job needs the device's battery level to not be at below the critical threshold.
+     * @see JobInfo.Builder#setRequiresBatteryNotLow(boolean)
      */
     public boolean isRequireBatteryNotLow() {
         return (constraintFlags & CONSTRAINT_FLAG_BATTERY_NOT_LOW) != 0;
     }
 
     /**
-     * Whether this job requires that the user <em>not</em> be interacting with the device.
-     *
-     * <p class="note">This is <em>not</em> the same as "doze" or "device idle";
-     * it is purely about the user's direct interactions.</p>
+     * @see JobInfo.Builder#setRequiresDeviceIdle(boolean)
      */
     public boolean isRequireDeviceIdle() {
         return (constraintFlags & CONSTRAINT_FLAG_DEVICE_IDLE) != 0;
     }
 
     /**
-     * Whether this job needs the device's storage to not be low.
+     * @see JobInfo.Builder#setRequiresStorageNotLow(boolean)
      */
     public boolean isRequireStorageNotLow() {
         return (constraintFlags & CONSTRAINT_FLAG_STORAGE_NOT_LOW) != 0;
@@ -410,6 +404,7 @@ public class JobInfo implements Parcelable {
     /**
      * Which content: URIs must change for the job to be scheduled.  Returns null
      * if there are none required.
+     * @see JobInfo.Builder#addTriggerContentUri(TriggerContentUri)
      */
     public @Nullable TriggerContentUri[] getTriggerContentUris() {
         return triggerContentUris;
@@ -418,6 +413,7 @@ public class JobInfo implements Parcelable {
     /**
      * When triggering on content URI changes, this is the delay from when a change
      * is detected until the job is scheduled.
+     * @see JobInfo.Builder#setTriggerContentUpdateDelay(long)
      */
     public long getTriggerContentUpdateDelay() {
         return triggerContentUpdateDelay;
@@ -426,6 +422,7 @@ public class JobInfo implements Parcelable {
     /**
      * When triggering on content URI changes, this is the maximum delay we will
      * use before scheduling the job.
+     * @see JobInfo.Builder#setTriggerContentMaxDelay(long)
      */
     public long getTriggerContentMaxDelay() {
         return triggerContentMaxDelay;
@@ -466,28 +463,59 @@ public class JobInfo implements Parcelable {
     }
 
     /**
-     * Return the estimated size of network traffic that will be performed by
+     * @deprecated replaced by {@link #getEstimatedNetworkDownloadBytes()} and
+     *             {@link #getEstimatedNetworkUploadBytes()}.
+     * @removed
+     */
+    @Deprecated
+    public @BytesLong long getEstimatedNetworkBytes() {
+        if (networkDownloadBytes == NETWORK_BYTES_UNKNOWN
+                && networkUploadBytes == NETWORK_BYTES_UNKNOWN) {
+            return NETWORK_BYTES_UNKNOWN;
+        } else if (networkDownloadBytes == NETWORK_BYTES_UNKNOWN) {
+            return networkUploadBytes;
+        } else if (networkUploadBytes == NETWORK_BYTES_UNKNOWN) {
+            return networkDownloadBytes;
+        } else {
+            return networkDownloadBytes + networkUploadBytes;
+        }
+    }
+
+    /**
+     * Return the estimated size of download traffic that will be performed by
      * this job, in bytes.
      *
-     * @return Estimated size of network traffic, or
+     * @return Estimated size of download traffic, or
      *         {@link #NETWORK_BYTES_UNKNOWN} when unknown.
-     * @see Builder#setEstimatedNetworkBytes(long)
+     * @see Builder#setEstimatedNetworkBytes(long, long)
      */
-    public @BytesLong long getEstimatedNetworkBytes() {
-        return networkBytes;
+    public @BytesLong long getEstimatedNetworkDownloadBytes() {
+        return networkDownloadBytes;
+    }
+
+    /**
+     * Return the estimated size of upload traffic that will be performed by
+     * this job, in bytes.
+     *
+     * @return Estimated size of upload traffic, or
+     *         {@link #NETWORK_BYTES_UNKNOWN} when unknown.
+     * @see Builder#setEstimatedNetworkBytes(long, long)
+     */
+    public @BytesLong long getEstimatedNetworkUploadBytes() {
+        return networkUploadBytes;
     }
 
     /**
      * Set for a job that does not recur periodically, to specify a delay after which the job
      * will be eligible for execution. This value is not set if the job recurs periodically.
+     * @see JobInfo.Builder#setMinimumLatency(long)
      */
     public long getMinLatencyMillis() {
         return minLatencyMillis;
     }
 
     /**
-     * See {@link Builder#setOverrideDeadline(long)}. This value is not set if the job recurs
-     * periodically.
+     * @see JobInfo.Builder#setOverrideDeadline(long)
      */
     public long getMaxExecutionDelayMillis() {
         return maxExecutionDelayMillis;
@@ -495,13 +523,15 @@ public class JobInfo implements Parcelable {
 
     /**
      * Track whether this job will repeat with a given period.
+     * @see JobInfo.Builder#setPeriodic(long)
+     * @see JobInfo.Builder#setPeriodic(long, long)
      */
     public boolean isPeriodic() {
         return isPeriodic;
     }
 
     /**
-     * @return Whether or not this job should be persisted across device reboots.
+     * @see JobInfo.Builder#setPersisted(boolean)
      */
     public boolean isPersisted() {
         return isPersisted;
@@ -510,6 +540,8 @@ public class JobInfo implements Parcelable {
     /**
      * Set to the interval between occurrences of this job. This value is <b>not</b> set if the
      * job does not recur periodically.
+     * @see JobInfo.Builder#setPeriodic(long)
+     * @see JobInfo.Builder#setPeriodic(long, long)
      */
     public long getIntervalMillis() {
         return intervalMillis;
@@ -518,6 +550,8 @@ public class JobInfo implements Parcelable {
     /**
      * Flex time for this job. Only valid if this is a periodic job.  The job can
      * execute at any time in a window of flex length at the end of the period.
+     * @see JobInfo.Builder#setPeriodic(long)
+     * @see JobInfo.Builder#setPeriodic(long, long)
      */
     public long getFlexMillis() {
         return flexMillis;
@@ -527,6 +561,7 @@ public class JobInfo implements Parcelable {
      * The amount of time the JobScheduler will wait before rescheduling a failed job. This value
      * will be increased depending on the backoff policy specified at job creation time. Defaults
      * to 30 seconds, minimum is currently 10 seconds.
+     * @see JobInfo.Builder#setBackoffCriteria(long, int)
      */
     public long getInitialBackoffMillis() {
         return initialBackoffMillis;
@@ -534,9 +569,24 @@ public class JobInfo implements Parcelable {
 
     /**
      * Return the backoff policy of this job.
+     * @see JobInfo.Builder#setBackoffCriteria(long, int)
      */
     public @BackoffPolicy int getBackoffPolicy() {
         return backoffPolicy;
+    }
+
+    /**
+     * @see JobInfo.Builder#setImportantWhileForeground(boolean)
+     */
+    public boolean isImportantWhileForeground() {
+        return (flags & FLAG_IMPORTANT_WHILE_FOREGROUND) != 0;
+    }
+
+    /**
+     * @see JobInfo.Builder#setPrefetch(boolean)
+     */
+    public boolean isPrefetch() {
+        return (flags & FLAG_PREFETCH) != 0;
     }
 
     /**
@@ -610,7 +660,10 @@ public class JobInfo implements Parcelable {
         if (!Objects.equals(networkRequest, j.networkRequest)) {
             return false;
         }
-        if (networkBytes != j.networkBytes) {
+        if (networkDownloadBytes != j.networkDownloadBytes) {
+            return false;
+        }
+        if (networkUploadBytes != j.networkUploadBytes) {
             return false;
         }
         if (minLatencyMillis != j.minLatencyMillis) {
@@ -673,7 +726,8 @@ public class JobInfo implements Parcelable {
         if (networkRequest != null) {
             hashCode = 31 * hashCode + networkRequest.hashCode();
         }
-        hashCode = 31 * hashCode + Long.hashCode(networkBytes);
+        hashCode = 31 * hashCode + Long.hashCode(networkDownloadBytes);
+        hashCode = 31 * hashCode + Long.hashCode(networkUploadBytes);
         hashCode = 31 * hashCode + Long.hashCode(minLatencyMillis);
         hashCode = 31 * hashCode + Long.hashCode(maxExecutionDelayMillis);
         hashCode = 31 * hashCode + Boolean.hashCode(isPeriodic);
@@ -708,7 +762,8 @@ public class JobInfo implements Parcelable {
         } else {
             networkRequest = null;
         }
-        networkBytes = in.readLong();
+        networkDownloadBytes = in.readLong();
+        networkUploadBytes = in.readLong();
         minLatencyMillis = in.readLong();
         maxExecutionDelayMillis = in.readLong();
         isPeriodic = in.readInt() == 1;
@@ -737,7 +792,8 @@ public class JobInfo implements Parcelable {
         triggerContentUpdateDelay = b.mTriggerContentUpdateDelay;
         triggerContentMaxDelay = b.mTriggerContentMaxDelay;
         networkRequest = b.mNetworkRequest;
-        networkBytes = b.mNetworkBytes;
+        networkDownloadBytes = b.mNetworkDownloadBytes;
+        networkUploadBytes = b.mNetworkUploadBytes;
         minLatencyMillis = b.mMinLatencyMillis;
         maxExecutionDelayMillis = b.mMaxExecutionDelayMillis;
         isPeriodic = b.mIsPeriodic;
@@ -780,7 +836,8 @@ public class JobInfo implements Parcelable {
         } else {
             out.writeInt(0);
         }
-        out.writeLong(networkBytes);
+        out.writeLong(networkDownloadBytes);
+        out.writeLong(networkUploadBytes);
         out.writeLong(minLatencyMillis);
         out.writeLong(maxExecutionDelayMillis);
         out.writeInt(isPeriodic ? 1 : 0);
@@ -914,7 +971,8 @@ public class JobInfo implements Parcelable {
         // Requirements.
         private int mConstraintFlags;
         private NetworkRequest mNetworkRequest;
-        private long mNetworkBytes = NETWORK_BYTES_UNKNOWN;
+        private long mNetworkDownloadBytes = NETWORK_BYTES_UNKNOWN;
+        private long mNetworkUploadBytes = NETWORK_BYTES_UNKNOWN;
         private ArrayList<TriggerContentUri> mTriggerContentUris;
         private long mTriggerContentUpdateDelay = -1;
         private long mTriggerContentMaxDelay = -1;
@@ -965,6 +1023,7 @@ public class JobInfo implements Parcelable {
         /**
          * Set optional extras. This is persisted, so we only allow primitive types.
          * @param extras Bundle containing extras you want the scheduler to hold on to for you.
+         * @see JobInfo#getExtras()
          */
         public Builder setExtras(@NonNull PersistableBundle extras) {
             mExtras = extras;
@@ -979,6 +1038,7 @@ public class JobInfo implements Parcelable {
          * {@link android.app.job.JobInfo.Builder#build()} is called.</p>
          *
          * @param extras Bundle containing extras you want the scheduler to hold on to for you.
+         * @see JobInfo#getTransientExtras()
          */
         public Builder setTransientExtras(@NonNull Bundle extras) {
             mTransientExtras = extras;
@@ -1006,6 +1066,8 @@ public class JobInfo implements Parcelable {
          * a combination of {@link android.content.Intent#FLAG_GRANT_READ_URI_PERMISSION},
          * {@link android.content.Intent#FLAG_GRANT_WRITE_URI_PERMISSION}, and
          * {@link android.content.Intent#FLAG_GRANT_PREFIX_URI_PERMISSION}.
+         * @see JobInfo#getClipData()
+         * @see JobInfo#getClipGrantFlags()
          */
         public Builder setClipData(@Nullable ClipData clip, int grantFlags) {
             mClipData = clip;
@@ -1096,6 +1158,16 @@ public class JobInfo implements Parcelable {
         }
 
         /**
+         * @deprecated replaced by
+         *             {@link #setEstimatedNetworkBytes(long, long)}.
+         * @removed
+         */
+        @Deprecated
+        public Builder setEstimatedNetworkBytes(@BytesLong long networkBytes) {
+            return setEstimatedNetworkBytes(networkBytes, NETWORK_BYTES_UNKNOWN);
+        }
+
+        /**
          * Set the estimated size of network traffic that will be performed by
          * this job, in bytes.
          * <p>
@@ -1112,23 +1184,30 @@ public class JobInfo implements Parcelable {
          * <li>A job that synchronizes email could end up using an extreme range
          * of data, from under 1KB when nothing has changed, to dozens of MB
          * when there are new emails with attachments. Jobs that cannot provide
-         * reasonable estimates should leave this estimated value undefined.
+         * reasonable estimates should use the sentinel value
+         * {@link JobInfo#NETWORK_BYTES_UNKNOWN}.
          * </ul>
          * Note that the system may choose to delay jobs with large network
          * usage estimates when the device has a poor network connection, in
          * order to save battery.
+         * <p>
+         * The values provided here only reflect the traffic that will be
+         * performed by the base job; if you're using {@link JobWorkItem} then
+         * you also need to define the network traffic used by each work item
+         * when constructing them.
          *
-         * @param networkBytes The estimated size of network traffic that will
-         *            be performed by this job, in bytes. This value only
-         *            reflects the traffic that will be performed by the base
-         *            job; if you're using {@link JobWorkItem} then you also
-         *            need to define the network traffic used by each work item
-         *            when constructing them.
-         * @see JobInfo#getEstimatedNetworkBytes()
-         * @see JobWorkItem#JobWorkItem(android.content.Intent, long)
+         * @param downloadBytes The estimated size of network traffic that will
+         *            be downloaded by this job, in bytes.
+         * @param uploadBytes The estimated size of network traffic that will be
+         *            uploaded by this job, in bytes.
+         * @see JobInfo#getEstimatedNetworkDownloadBytes()
+         * @see JobInfo#getEstimatedNetworkUploadBytes()
+         * @see JobWorkItem#JobWorkItem(android.content.Intent, long, long)
          */
-        public Builder setEstimatedNetworkBytes(@BytesLong long networkBytes) {
-            mNetworkBytes = networkBytes;
+        public Builder setEstimatedNetworkBytes(@BytesLong long downloadBytes,
+                @BytesLong long uploadBytes) {
+            mNetworkDownloadBytes = downloadBytes;
+            mNetworkUploadBytes = uploadBytes;
             return this;
         }
 
@@ -1146,6 +1225,7 @@ public class JobInfo implements Parcelable {
          *
          * @param requiresCharging Pass {@code true} to require that the device be
          *     charging in order to run the job.
+         * @see JobInfo#isRequireCharging()
          */
         public Builder setRequiresCharging(boolean requiresCharging) {
             mConstraintFlags = (mConstraintFlags&~CONSTRAINT_FLAG_CHARGING)
@@ -1159,6 +1239,7 @@ public class JobInfo implements Parcelable {
          * is not low, which is generally the point where the user is given a "low battery"
          * warning.
          * @param batteryNotLow Whether or not the device's battery level must not be low.
+         * @see JobInfo#isRequireBatteryNotLow()
          */
         public Builder setRequiresBatteryNotLow(boolean batteryNotLow) {
             mConstraintFlags = (mConstraintFlags&~CONSTRAINT_FLAG_BATTERY_NOT_LOW)
@@ -1183,6 +1264,7 @@ public class JobInfo implements Parcelable {
          *
          * @param requiresDeviceIdle Pass {@code true} to prevent the job from running
          *     while the device is being used interactively.
+         * @see JobInfo#isRequireDeviceIdle()
          */
         public Builder setRequiresDeviceIdle(boolean requiresDeviceIdle) {
             mConstraintFlags = (mConstraintFlags&~CONSTRAINT_FLAG_DEVICE_IDLE)
@@ -1196,6 +1278,7 @@ public class JobInfo implements Parcelable {
          * in a low storage state, which is generally the point where the user is given a
          * "low storage" warning.
          * @param storageNotLow Whether or not the device's available storage must not be low.
+         * @see JobInfo#isRequireStorageNotLow()
          */
         public Builder setRequiresStorageNotLow(boolean storageNotLow) {
             mConstraintFlags = (mConstraintFlags&~CONSTRAINT_FLAG_STORAGE_NOT_LOW)
@@ -1228,6 +1311,7 @@ public class JobInfo implements Parcelable {
          *      job}
          *
          * @param uri The content: URI to monitor.
+         * @see JobInfo#getTriggerContentUris()
          */
         public Builder addTriggerContentUri(@NonNull TriggerContentUri uri) {
             if (mTriggerContentUris == null) {
@@ -1242,6 +1326,7 @@ public class JobInfo implements Parcelable {
          * the job is scheduled.  If there are more changes during that time, the delay
          * will be reset to start at the time of the most recent change.
          * @param durationMs Delay after most recent content change, in milliseconds.
+         * @see JobInfo#getTriggerContentUpdateDelay()
          */
         public Builder setTriggerContentUpdateDelay(long durationMs) {
             mTriggerContentUpdateDelay = durationMs;
@@ -1252,6 +1337,7 @@ public class JobInfo implements Parcelable {
          * Set the maximum total delay (in milliseconds) that is allowed from the first
          * time a content change is detected until the job is scheduled.
          * @param durationMs Delay after initial content change, in milliseconds.
+         * @see JobInfo#getTriggerContentMaxDelay()
          */
         public Builder setTriggerContentMaxDelay(long durationMs) {
             mTriggerContentMaxDelay = durationMs;
@@ -1265,6 +1351,8 @@ public class JobInfo implements Parcelable {
          * Setting this function on the builder with {@link #setMinimumLatency(long)} or
          * {@link #setOverrideDeadline(long)} will result in an error.
          * @param intervalMillis Millisecond interval for which this job will repeat.
+         * @see JobInfo#getIntervalMillis()
+         * @see JobInfo#getFlexMillis()
          */
         public Builder setPeriodic(long intervalMillis) {
             return setPeriodic(intervalMillis, intervalMillis);
@@ -1278,6 +1366,8 @@ public class JobInfo implements Parcelable {
          * @param flexMillis Millisecond flex for this job. Flex is clamped to be at least
          *                   {@link #getMinFlexMillis()} or 5 percent of the period, whichever is
          *                   higher.
+         * @see JobInfo#getIntervalMillis()
+         * @see JobInfo#getFlexMillis()
          */
         public Builder setPeriodic(long intervalMillis, long flexMillis) {
             final long minPeriod = getMinPeriodMillis();
@@ -1309,6 +1399,7 @@ public class JobInfo implements Parcelable {
          * {@link android.app.job.JobInfo.Builder#build()} is called.
          * @param minLatencyMillis Milliseconds before which this job will not be considered for
          *                         execution.
+         * @see JobInfo#getMinLatencyMillis()
          */
         public Builder setMinimumLatency(long minLatencyMillis) {
             mMinLatencyMillis = minLatencyMillis;
@@ -1322,6 +1413,7 @@ public class JobInfo implements Parcelable {
          * this property on a periodic job, doing so will throw an
          * {@link java.lang.IllegalArgumentException} when
          * {@link android.app.job.JobInfo.Builder#build()} is called.
+         * @see JobInfo#getMaxExecutionDelayMillis()
          */
         public Builder setOverrideDeadline(long maxExecutionDelayMillis) {
             mMaxExecutionDelayMillis = maxExecutionDelayMillis;
@@ -1341,6 +1433,8 @@ public class JobInfo implements Parcelable {
          * mode.
          * @param initialBackoffMillis Millisecond time interval to wait initially when job has
          *                             failed.
+         * @see JobInfo#getInitialBackoffMillis()
+         * @see JobInfo#getBackoffPolicy()
          */
         public Builder setBackoffCriteria(long initialBackoffMillis,
                 @BackoffPolicy int backoffPolicy) {
@@ -1371,6 +1465,7 @@ public class JobInfo implements Parcelable {
          *
          * @param importantWhileForeground whether to relax doze restrictions for this job when the
          *                                 app is in the foreground. False by default.
+         * @see JobInfo#isImportantWhileForeground()
          */
         public Builder setImportantWhileForeground(boolean importantWhileForeground) {
             if (importantWhileForeground) {
@@ -1379,6 +1474,15 @@ public class JobInfo implements Parcelable {
                 mFlags &= (~FLAG_IMPORTANT_WHILE_FOREGROUND);
             }
             return this;
+        }
+
+        /**
+         * @removed
+         * @deprecated replaced with {@link #setPrefetch(boolean)}
+         */
+        @Deprecated
+        public Builder setIsPrefetch(boolean isPrefetch) {
+            return setPrefetch(isPrefetch);
         }
 
         /**
@@ -1393,12 +1497,13 @@ public class JobInfo implements Parcelable {
          * network when there is a surplus of metered data available. The system
          * may also use this signal in combination with end user usage patterns
          * to ensure data is prefetched before the user launches your app.
+         * @see JobInfo#isPrefetch()
          */
-        public Builder setIsPrefetch(boolean isPrefetch) {
-            if (isPrefetch) {
-                mFlags |= FLAG_IS_PREFETCH;
+        public Builder setPrefetch(boolean prefetch) {
+            if (prefetch) {
+                mFlags |= FLAG_PREFETCH;
             } else {
-                mFlags &= (~FLAG_IS_PREFETCH);
+                mFlags &= (~FLAG_PREFETCH);
             }
             return this;
         }
@@ -1408,6 +1513,7 @@ public class JobInfo implements Parcelable {
          *
          * @param isPersisted True to indicate that the job will be written to
          *            disk and loaded at boot.
+         * @see JobInfo#isPersisted()
          */
         @RequiresPermission(android.Manifest.permission.RECEIVE_BOOT_COMPLETED)
         public Builder setPersisted(boolean isPersisted) {
@@ -1427,7 +1533,7 @@ public class JobInfo implements Parcelable {
                         "constraints, this is not allowed.");
             }
             // Check that network estimates require network type
-            if (mNetworkBytes > 0 && mNetworkRequest == null) {
+            if ((mNetworkDownloadBytes > 0 || mNetworkUploadBytes > 0) && mNetworkRequest == null) {
                 throw new IllegalArgumentException(
                         "Can't provide estimated network usage without requiring a network");
             }

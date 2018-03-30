@@ -52,8 +52,20 @@ import java.util.ArrayList;
 /**
  * {@link Drawable} for drawing animated images (like GIF).
  *
+ * <p>The framework handles decoding subsequent frames in another thread and
+ * updating when necessary. The drawable will only animate while it is being
+ * displayed.</p>
+ *
  * <p>Created by {@link ImageDecoder#decodeDrawable}. A user needs to call
  * {@link #start} to start the animation.</p>
+ *
+ * <p>It can also be defined in XML using the <code>&lt;animated-image></code>
+ * element.</p>
+ *
+ * @attr ref android.R.styleable#AnimatedImageDrawable_src
+ * @attr ref android.R.styleable#AnimatedImageDrawable_autoStart
+ * @attr ref android.R.styleable#AnimatedImageDrawable_repeatCount
+ * @attr ref android.R.styleable#AnimatedImageDrawable_autoMirrored
  */
 public class AnimatedImageDrawable extends Drawable implements Animatable2 {
     private int mIntrinsicWidth;
@@ -456,8 +468,8 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
      *  <p>Does nothing if the animation is already running. If the animation is stopped,
      *  this will reset it.</p>
      *
-     *  <p>If the animation starts, this will call
-     *  {@link Animatable2.AnimationCallback#onAnimationStart}.</p>
+     *  <p>When the drawable is drawn, starting the animation,
+     *  {@link Animatable2.AnimationCallback#onAnimationStart} will be called.</p>
      */
     @Override
     public void start() {

@@ -514,6 +514,10 @@ public class ZygoteInit {
         /* should never reach here */
     }
 
+    public static void setApiBlacklistExemptions(String[] exemptions) {
+        VMRuntime.getRuntime().setHiddenApiExemptions(exemptions);
+    }
+
     /**
      * Creates a PathClassLoader for the given class path that is associated with a shared
      * namespace, i.e., this classloader can access platform-private native libraries. The

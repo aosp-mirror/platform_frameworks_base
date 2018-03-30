@@ -52,6 +52,13 @@ public:
             unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& firedAlarms) override;
 
 protected:
+    // Returns the alarm timestamp in seconds for the query dimension if it exists. Otherwise
+    // returns 0.
+    uint32_t getAlarmTimestampSec(const MetricDimensionKey& dimensionKey) const override {
+        auto it = mAlarms.find(dimensionKey);
+        return it == mAlarms.end() ? 0 : it->second->timestampSec;
+    }
+
     // The alarms owned by this tracker. The alarm monitor also shares the alarm pointers when they
     // are still active.
     std::unordered_map<MetricDimensionKey, sp<const InternalAlarm>> mAlarms;

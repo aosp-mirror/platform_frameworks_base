@@ -130,33 +130,6 @@ public abstract class MediaPlayerBase implements AutoCloseable {
      */
     public abstract void seekTo(long pos);
 
-    /**
-     * Fast forwards playback. If playback is already fast forwarding this may increase the rate.
-     * <p>
-     * Default implementation sets the playback speed to the 2.0f
-     * @see #setPlaybackSpeed(float)
-     * @hide
-     */
-    // TODO(jaewan): Unhide (b/74724709)
-    public void fastForward() {
-        setPlaybackSpeed(2.0f);
-    }
-
-    /**
-     * Rewinds playback. If playback is already rewinding this may increase the rate.
-     * <p>
-     * Default implementation sets the playback speed to the -1.0f if
-     * {@link #isReversePlaybackSupported()} returns {@code true}.
-     * @see #setPlaybackSpeed(float)
-     * @hide
-     */
-    // TODO(jaewan): Unhide (b/74724709)
-    public void rewind() {
-        if (isReversePlaybackSupported()) {
-            setPlaybackSpeed(-1.0f);
-        }
-    }
-
     public static final long UNKNOWN_TIME = -1;
 
     /**
@@ -340,10 +313,19 @@ public abstract class MediaPlayerBase implements AutoCloseable {
 
         /**
          * Called to indicate that the playback speed has changed.
-         * @param mpb the player that is buffering
+         * @param mpb the player that has changed the playback speed.
          * @param speed the new playback speed.
          */
         public void onPlaybackSpeedChanged(@NonNull MediaPlayerBase mpb, float speed) { }
+
+        /**
+         * Called to indicate that {@link #seekTo(long)} is completed.
+         *
+         * @param mpb the player that has completed seeking.
+         * @param position the previous seeking request.
+         * @see #seekTo(long)
+         */
+        public void onSeekCompleted(@NonNull MediaPlayerBase mpb, long position) { }
     }
 
 }

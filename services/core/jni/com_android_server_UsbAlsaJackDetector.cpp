@@ -19,6 +19,7 @@
 
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
+#include "android-base/strings.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"
 
@@ -33,24 +34,36 @@
 
 #define DRIVER_NAME "/dev/usb_accessory"
 
-#define USB_IN_JACK_NAME "USB in Jack"
-#define USB_OUT_JACK_NAME "USB out Jack"
+#define USB_IN_JACK_SUFFIX "Input Jack"
+#define USB_OUT_JACK_SUFFIX "Output Jack"
 
 namespace android
 {
 
-static jboolean is_jack_connected(jint card, const char* control) {
+static struct mixer_ctl* find_mixer_with_suffix(struct mixer* card_mixer, const char* suffix) {
+    int id = 0;
+    struct mixer_ctl* ctl;
+    while ((ctl = mixer_get_ctl(card_mixer, id++)) != NULL) {
+        const char* name = mixer_ctl_get_name(ctl);
+        if (android::base::EndsWith(name, suffix)) {
+          return ctl;
+        }
+    }
+    return NULL;
+}
+
+static jboolean is_jack_connected(jint card, const char* suffix) {
   struct mixer* card_mixer = mixer_open(card);
   if (card_mixer == NULL) {
     return true;
   }
-  struct mixer_ctl* ctl = mixer_get_ctl_by_name(card_mixer, control);
+  struct mixer_ctl* ctl = find_mixer_with_suffix(card_mixer, suffix);
   if (!ctl) {
     return true;
   }
   mixer_ctl_update(ctl);
   int val = mixer_ctl_get_value(ctl, 0);
-  ALOGI("JACK %s - value %d\n", control, val);
+  ALOGI("%s - value %d\n", mixer_ctl_get_name(ctl), val);
   mixer_close(card_mixer);
 
   return val != 0;
@@ -66,33 +79,31 @@ static jboolean android_server_UsbAlsaJackDetector_hasJackDetect(JNIEnv* /* env 
     }
 
     jboolean has_jack = false;
-    if ((mixer_get_ctl_by_name(card_mixer, USB_IN_JACK_NAME) != NULL) ||
-            (mixer_get_ctl_by_name(card_mixer, USB_OUT_JACK_NAME) != NULL)) {
+    if ((find_mixer_with_suffix(card_mixer, USB_IN_JACK_SUFFIX) != NULL) ||
+            (find_mixer_with_suffix(card_mixer, USB_OUT_JACK_SUFFIX) != NULL)) {
         has_jack = true;
     }
     mixer_close(card_mixer);
     return has_jack;
 }
 
-
 static jboolean android_server_UsbAlsaJackDetector_inputJackConnected(JNIEnv* /* env */,
                                                                       jobject /* thiz */,
                                                                       jint card)
 {
-    return is_jack_connected(card, USB_IN_JACK_NAME);
+    return is_jack_connected(card, USB_IN_JACK_SUFFIX);
 }
-
 
 static jboolean android_server_UsbAlsaJackDetector_outputJackConnected(JNIEnv* /* env */,
                                                                        jobject /* thiz */,
                                                                        jint card)
 {
-    return is_jack_connected(card, USB_OUT_JACK_NAME);
+    return is_jack_connected(card, USB_OUT_JACK_SUFFIX);
 }
 
 static void android_server_UsbAlsaJackDetector_jackDetect(JNIEnv* env,
-                                                                                                        jobject thiz,
-                                                                                                        jint card) {
+                                                          jobject thiz,
+                                                          jint card) {
     jclass jdclass = env->GetObjectClass(thiz);
     jmethodID method_jackDetectCallback = env->GetMethodID(jdclass, "jackDetectCallback", "()Z");
     if (method_jackDetectCallback == NULL) {

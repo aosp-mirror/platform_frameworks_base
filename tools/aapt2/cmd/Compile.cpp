@@ -114,6 +114,7 @@ struct CompileOptions {
   std::string output_path;
   Maybe<std::string> res_dir;
   Maybe<std::string> generate_text_symbols_path;
+  Maybe<Visibility::Level> visibility;
   bool pseudolocalize = false;
   bool no_png_crunch = false;
   bool legacy_mode = false;
@@ -216,6 +217,10 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
     // If the filename includes donottranslate, then the default translatable is false.
     parser_options.translatable = path_data.name.find("donottranslate") == std::string::npos;
 
+    // If visibility was forced, we need to use it when creating a new resource and also error if
+    // we try to parse the <public>, <public-group>, <java-symbol> or <symbol> tags.
+    parser_options.visibility = options.visibility;
+
     ResourceParser res_parser(context->GetDiagnostics(), &table, path_data.source, path_data.config,
                               parser_options);
     if (!res_parser.Parse(&xml_parser)) {
@@ -258,7 +263,7 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
     ContainerWriter container_writer(&copying_adaptor, 1u);
 
     pb::ResourceTable pb_table;
-    SerializeTableToPb(table, &pb_table);
+    SerializeTableToPb(table, &pb_table, context->GetDiagnostics());
     if (!container_writer.AddResTableEntry(pb_table)) {
       context->GetDiagnostics()->Error(DiagMessage(output_path) << "failed to write");
       return false;
@@ -309,6 +314,8 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
             if (!entry->values.empty()) {
               auto styleable = static_cast<const Styleable*>(entry->values.front()->value.get());
               for (const auto& attr : styleable->entries) {
+                // The visibility of the children under the styleable does not matter as they are
+                // nested under their parent and use its visibility.
                 r_txt_printer.Print("default int styleable ");
                 r_txt_printer.Print(entry->name);
                 r_txt_printer.Print("_");
@@ -694,6 +701,7 @@ int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
   CompileOptions options;
 
   bool verbose = false;
+  Maybe<std::string> visibility;
   Flags flags =
       Flags()
           .RequiredFlag("-o", "Output path", &options.output_path)
@@ -709,12 +717,31 @@ int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
           .OptionalSwitch("--no-crunch", "Disables PNG processing", &options.no_png_crunch)
           .OptionalSwitch("--legacy", "Treat errors that used to be valid in AAPT as warnings",
                           &options.legacy_mode)
-          .OptionalSwitch("-v", "Enables verbose logging", &verbose);
+          .OptionalSwitch("-v", "Enables verbose logging", &verbose)
+          .OptionalFlag("--visibility",
+                        "Sets the visibility of the compiled resources to the specified\n"
+                        "level. Accepted levels: public, private, default",
+                        &visibility);
   if (!flags.Parse("aapt2 compile", args, &std::cerr)) {
     return 1;
   }
 
   context.SetVerbose(verbose);
+
+  if (visibility) {
+    if (visibility.value() == "public") {
+      options.visibility = Visibility::Level::kPublic;
+    } else if (visibility.value() == "private") {
+      options.visibility = Visibility::Level::kPrivate;
+    } else if (visibility.value() == "default") {
+      options.visibility = Visibility::Level::kUndefined;
+    } else {
+      context.GetDiagnostics()->Error(
+          DiagMessage() << "Unrecognized visibility level passes to --visibility: '"
+                        << visibility.value() << "'. Accepted levels: public, private, default");
+      return 1;
+    }
+  }
 
   std::unique_ptr<IArchiveWriter> archive_writer;
 

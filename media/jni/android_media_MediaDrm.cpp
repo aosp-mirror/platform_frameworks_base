@@ -729,15 +729,15 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
 
     GET_STATIC_FIELD_ID(field, clazz, "SECURITY_LEVEL_UNKNOWN", "I");
     gSecurityLevels.kSecurityLevelUnknown = env->GetStaticIntField(clazz, field);
-    GET_STATIC_FIELD_ID(field, clazz, "SW_SECURE_CRYPTO", "I");
+    GET_STATIC_FIELD_ID(field, clazz, "SECURITY_LEVEL_SW_SECURE_CRYPTO", "I");
     gSecurityLevels.kSecurityLevelSwSecureCrypto = env->GetStaticIntField(clazz, field);
-    GET_STATIC_FIELD_ID(field, clazz, "SW_SECURE_DECODE", "I");
+    GET_STATIC_FIELD_ID(field, clazz, "SECURITY_LEVEL_SW_SECURE_DECODE", "I");
     gSecurityLevels.kSecurityLevelSwSecureDecode = env->GetStaticIntField(clazz, field);
-    GET_STATIC_FIELD_ID(field, clazz, "HW_SECURE_CRYPTO", "I");
+    GET_STATIC_FIELD_ID(field, clazz, "SECURITY_LEVEL_HW_SECURE_CRYPTO", "I");
     gSecurityLevels.kSecurityLevelHwSecureCrypto = env->GetStaticIntField(clazz, field);
-    GET_STATIC_FIELD_ID(field, clazz, "HW_SECURE_DECODE", "I");
+    GET_STATIC_FIELD_ID(field, clazz, "SECURITY_LEVEL_HW_SECURE_DECODE", "I");
     gSecurityLevels.kSecurityLevelHwSecureDecode = env->GetStaticIntField(clazz, field);
-    GET_STATIC_FIELD_ID(field, clazz, "HW_SECURE_ALL", "I");
+    GET_STATIC_FIELD_ID(field, clazz, "SECURITY_LEVEL_HW_SECURE_ALL", "I");
     gSecurityLevels.kSecurityLevelHwSecureAll = env->GetStaticIntField(clazz, field);
 
     jmethodID getMaxSecurityLevel;

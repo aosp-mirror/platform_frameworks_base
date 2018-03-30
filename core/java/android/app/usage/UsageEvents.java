@@ -139,6 +139,19 @@ public final class UsageEvents implements Parcelable {
         @SystemApi
         public static final int SLICE_PINNED = 14;
 
+        /**
+         * An event type denoting that the screen has gone in to an interactive state (turned
+         * on for full user interaction, not ambient display or other non-interactive state).
+         */
+        public static final int SCREEN_INTERACTIVE = 15;
+
+        /**
+         * An event type denoting that the screen has gone in to a non-interactive state
+         * (completely turned off or turned on only in a non-interactive state like ambient
+         * display).
+         */
+        public static final int SCREEN_NON_INTERACTIVE = 16;
+
         /** @hide */
         public static final int FLAG_IS_PACKAGE_INSTANT_APP = 1 << 0;
 

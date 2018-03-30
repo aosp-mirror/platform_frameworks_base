@@ -458,7 +458,7 @@ StatsdConfig CreateDurationMetricConfig_NoLink_CombinationCondition(
 }  // namespace
 
 TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_OR_CombinationCondition) {
-    for (auto aggregationType : { DurationMetric::MAX_SPARSE}) { // DurationMetric::SUM,
+    for (auto aggregationType : { DurationMetric::MAX_SPARSE, DurationMetric::SUM}) {
         ConfigKey cfgKey;
         auto config = CreateDurationMetricConfig_NoLink_CombinationCondition(aggregationType);
         int64_t bucketStartTimeNs = 10000000000;
