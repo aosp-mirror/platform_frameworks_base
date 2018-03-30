@@ -41,21 +41,133 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * An assistant for generating {@link javax.crypto.SecretKey} instances that can be recovered by
- * other Android devices belonging to the user. The exported keychain is protected by the user's
- * lock screen.
+ * Backs up cryptographic keys to remote secure hardware, encrypted with the user's lock screen.
  *
- * <p>The RecoveryController must be paired with a recovery agent. The recovery agent is responsible
- * for transporting the keychain to remote trusted hardware. This hardware must prevent brute force
- * attempts against the user's lock screen by limiting the number of allowed guesses (to, e.g., 10).
- * After that number of incorrect guesses, the trusted hardware no longer allows access to the
- * key chain.
+ * <p>A system app with the {@link android.Manifest#RECOVER_KEYSTORE} permission may generate or
+ * import recoverable keys using this class. To generate a key, the app must call
+ * {@link #generateKey(String)} with the desired alias for the key. This returns an AndroidKeyStore
+ * reference to a 256-bit {@link javax.crypto.SecretKey}, which can be used for AES/GCM/NoPadding.
+ * In order to get the same key again at a later time, the app can call {@link #getKey(String)} with
+ * the same alias. If a key is generated in this way the key's raw material is never directly
+ * exposed to the calling app. The system app may also import key material using
+ * {@link #importKey(String, byte[])}. The app may only generate and import keys for its own
+ * {@code uid}.
  *
- * <p>Only the recovery agent itself is able to create keys, so it is expected that the recovery
- * agent is itself the system app.
+ * <p>The same system app must also register a Recovery Agent to manage syncing recoverable keys to
+ * remote secure hardware. The Recovery Agent is a service that registers itself with the controller
+ * as follows:
  *
- * <p>A recovery agent requires the privileged permission
- * {@code android.Manifest.permission#RECOVER_KEYSTORE}.
+ * <ul>
+ *     <li>Invokes {@link #initRecoveryService(String, byte[], byte[])}
+ *     <ul>
+ *         <li>The first argument is the alias of the root certificate used to verify trusted
+ *         hardware modules. Each trusted hardware module must have a public key signed with this
+ *         root of trust. Roots of trust must be shipped with the framework. The app can list all
+ *         valid roots of trust by calling {@link #getRootCertificates()}.
+ *         <li>The second argument is the UTF-8 bytes of the XML listing file. It lists the X509
+ *         certificates containing the public keys of all available remote trusted hardware modules.
+ *         Each of the X509 certificates can be validated against the chosen root of trust.
+ *         <li>The third argument is the UTF-8 bytes of the XML signing file. The file contains a
+ *         signature of the XML listing file. The signature can be validated against the chosen root
+ *         of trust.
+ *     </ul>
+ *     <p>This will cause the controller to choose a random public key from the list. From then
+ *     on the controller will attempt to sync the key chain with the trusted hardware module to whom
+ *     that key belongs.
+ *     <li>Invokes {@link #setServerParams(byte[])} with a byte string that identifies the device
+ *     to a remote server. This server may act as the front-end to the trusted hardware modules. It
+ *     is up to the Recovery Agent to decide how best to identify devices, but this could be, e.g.,
+ *     based on the <a href="https://developers.google.com/instance-id/">Instance ID</a> of the
+ *     system app.
+ *     <li>Invokes {@link #setRecoverySecretTypes(int[])} with a list of types of secret used to
+ *     secure the recoverable key chain. For now only
+ *     {@link KeyChainProtectionParams#TYPE_LOCKSCREEN} is supported.
+ *     <li>Invokes {@link #setSnapshotCreatedPendingIntent(PendingIntent)} with a
+ *     {@link PendingIntent} that is to be invoked whenever a new snapshot is created. Although the
+ *     controller can create snapshots without the Recovery Agent registering this intent, it is a
+ *     good idea to register the intent so that the Recovery Agent is able to sync this snapshot to
+ *     the trusted hardware module as soon as it is available.
+ * </ul>
+ *
+ * <p>The trusted hardware module's public key MUST be generated on secure hardware with protections
+ * equivalent to those described in the
+ * <a href="https://developer.android.com/preview/features/security/ckv-whitepaper.html">Google
+ * Cloud Key Vault Service whitepaper</a>. The trusted hardware module itself must protect the key
+ * chain from brute-forcing using the methods also described in the whitepaper: i.e., it should
+ * limit the number of allowed attempts to enter the lock screen. If the number of attempts is
+ * exceeded the key material must no longer be recoverable.
+ *
+ * <p>A recoverable key chain snapshot is considered pending if any of the following conditions
+ * are met:
+ *
+ * <ul>
+ *     <li>The system app mutates the key chain. i.e., generates, imports, or removes a key.
+ *     <li>The user changes their lock screen.
+ * </ul>
+ *
+ * <p>Whenever the user unlocks their device, if a snapshot is pending, the Recovery Controller
+ * generates a new snapshot. It follows these steps to do so:
+ *
+ * <ul>
+ *     <li>Generates a 256-bit AES key using {@link java.security.SecureRandom}. This is the
+ *     Recovery Key.
+ *     <li>Wraps the key material of all keys in the recoverable key chain with the Recovery Key.
+ *     <li>Encrypts the Recovery Key with both the public key of the trusted hardware module and a
+ *     symmetric key derived from the user's lock screen.
+ * </ul>
+ *
+ * <p>The controller then writes this snapshot to disk, and uses the {@link PendingIntent} that was
+ * set by the Recovery Agent during initialization to inform it that a new snapshot is available.
+ * The snapshot only contains keys for that Recovery Agent's {@code uid} - i.e., keys the agent's
+ * app itself generated. If multiple Recovery Agents exist on the device, each will be notified of
+ * their new snapshots, and each snapshots' keys will be only those belonging to the same
+ * {@code uid}.
+ *
+ * <p>The Recovery Agent retrieves its most recent snapshot by calling
+ * {@link #getKeyChainSnapshot()}. It syncs the snapshot to the remote server. The snapshot contains
+ * the public key used for encryption, which the server uses to forward the encrypted recovery key
+ * to the correct trusted hardware module. The snapshot also contains the server params, which are
+ * used to identify this device to the server.
+ *
+ * <p>The client uses the server params to identify a device whose key chain it wishes to restore.
+ * This may be on a different device to the device that originally synced the key chain. The client
+ * sends the server params identifying the previous device to the server. The server returns the
+ * X509 certificate identifying the trusted hardware module in which the encrypted Recovery Key is
+ * stored. It also returns some vault parameters identifying that particular Recovery Key to the
+ * trusted hardware module. And it also returns a vault challenge, which is used as part of the
+ * vault opening protocol to ensure the recovery claim is fresh. See the whitepaper for more
+ * details.
+ *
+ * <p>The key chain is recovered via a {@link RecoverySession}. A Recovery Agent creates one by
+ * invoking {@link #createRecoverySession()}. It then invokes
+ * {@link RecoverySession#start(String, CertPath, byte[], byte[], List)} with these arguments:
+ *
+ * <ul>
+ *     <li>The alias of the root of trust used to verify the trusted hardware module.
+ *     <li>The X509 certificate of the trusted hardware module.
+ *     <li>The vault parameters used to identify the Recovery Key to the trusted hardware module.
+ *     <li>The vault challenge, as issued by the trusted hardware module.
+ *     <li>A list of secrets, corresponding to the secrets used to protect the key chain. At the
+ *     moment this is a single {@link KeyChainProtectionParams} containing the lock screen of the
+ *     device whose key chain is to be recovered.
+ * </ul>
+ *
+ * <p>This method returns a byte array containing the Recovery Claim, which can be issued to the
+ * remote trusted hardware module. It is encrypted with the trusted hardware module's public key
+ * (which has itself been certified with the root of trust). It also contains an ephemeral symmetric
+ * key generated for this recovery session, which the remote trusted hardware module uses to encrypt
+ * its responses. This is the Session Key.
+ *
+ * <p>If the lock screen provided is correct, the remote trusted hardware module decrypts one of the
+ * layers of lock-screen encryption from the Recovery Key. It then returns this key, encrypted with
+ * the Session Key to the Recovery Agent. As the Recovery Agent does not know the Session Key, it
+ * must then invoke {@link RecoverySession#recoverKeyChainSnapshot(byte[], List)} with the encrypted
+ * Recovery Key and the list of wrapped application keys. The controller then decrypts the layer of
+ * encryption provided by the Session Key, and uses the lock screen to decrypt the final layer of
+ * encryption. It then uses the Recovery Key to decrypt all of the wrapped application keys, and
+ * imports them into its own KeyStore. The Recovery Agent's app may then access these keys by
+ * calling {@link #getKey(String)}. Only this app's {@code uid} may access the keys that have been
+ * recovered.
  *
  * @hide
  */
