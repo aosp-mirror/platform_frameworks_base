@@ -168,7 +168,8 @@ public class SliceManagerService extends ISliceManager.Stub {
     }
 
     @Override
-    public void pinSlice(String pkg, Uri uri, SliceSpec[] specs, IBinder token) throws RemoteException {
+    public void pinSlice(String pkg, Uri uri, SliceSpec[] specs, IBinder token)
+            throws RemoteException {
         verifyCaller(pkg);
         enforceAccess(pkg, uri);
         int user = Binder.getCallingUserHandle().getIdentifier();
@@ -210,13 +211,19 @@ public class SliceManagerService extends ISliceManager.Stub {
     }
 
     @Override
-    public int checkSlicePermission(Uri uri, String pkg, int pid, int uid) throws RemoteException {
+    public int checkSlicePermission(Uri uri, String pkg, int pid, int uid,
+            String[] autoGrantPermissions) throws RemoteException {
         if (mContext.checkUriPermission(uri, pid, uid, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                 == PERMISSION_GRANTED) {
             return SliceManager.PERMISSION_GRANTED;
         }
         if (hasFullSliceAccess(pkg, UserHandle.getUserId(uid))) {
             return SliceManager.PERMISSION_GRANTED;
+        }
+        for (String perm : autoGrantPermissions) {
+            if (mContext.checkPermission(perm, pid, uid) == PERMISSION_GRANTED) {
+                return SliceManager.PERMISSION_USER_GRANTED;
+            }
         }
         synchronized (mLock) {
             if (mUserGrants.contains(new SliceGrant(uri, pkg, UserHandle.getUserId(uid)))) {
