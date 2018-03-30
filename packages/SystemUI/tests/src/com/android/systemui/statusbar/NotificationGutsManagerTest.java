@@ -268,9 +268,10 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Test
     public void testInitializeNotificationInfoView_showBlockingHelper() throws Exception {
         NotificationInfo notificationInfoView = mock(NotificationInfo.class);
-        ExpandableNotificationRow row = mHelper.createRow();
+        ExpandableNotificationRow row = spy(mHelper.createRow());
         row.setBlockingHelperShowing(true);
         row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
+        when(row.getIsNonblockable()).thenReturn(false);
         StatusBarNotification statusBarNotification = row.getStatusBarNotification();
 
         mGutsManager.initializeNotificationInfo(row, notificationInfoView);
@@ -285,7 +286,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 any(NotificationInfo.CheckSaveListener.class),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
-                any(),
+                eq(false),
                 eq(true) /* isForBlockingHelper */,
                 eq(true) /* isUserSentimentNegative */);
     }
@@ -293,9 +294,10 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Test
     public void testInitializeNotificationInfoView_dontShowBlockingHelper() throws Exception {
         NotificationInfo notificationInfoView = mock(NotificationInfo.class);
-        ExpandableNotificationRow row = mHelper.createRow();
+        ExpandableNotificationRow row = spy(mHelper.createRow());
         row.setBlockingHelperShowing(false);
         row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
+        when(row.getIsNonblockable()).thenReturn(false);
         StatusBarNotification statusBarNotification = row.getStatusBarNotification();
 
         mGutsManager.initializeNotificationInfo(row, notificationInfoView);
@@ -310,7 +312,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 any(NotificationInfo.CheckSaveListener.class),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
-                any(),
+                eq(false),
                 eq(false) /* isForBlockingHelper */,
                 eq(true) /* isUserSentimentNegative */);
     }

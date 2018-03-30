@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,6 +31,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
+import android.app.NotificationChannel;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.ArraySet;
@@ -50,6 +53,7 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 @SmallTest
@@ -273,5 +277,25 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
         mGroupRow.setBlockingHelperShowing(false);
         assertFalse(mGroupRow.isBlockingHelperShowing());
+    }
+
+    @Test
+    public void testGetNumUniqueChildren_defaultChannel() {
+        assertEquals(1, mGroupRow.getNumUniqueChannels());
+    }
+
+    @Test
+    public void testGetNumUniqueChildren_multiChannel() {
+        List<ExpandableNotificationRow> childRows =
+                mGroupRow.getChildrenContainer().getNotificationChildren();
+        // Give each child a unique channel id/name.
+        int i = 0;
+        for (ExpandableNotificationRow childRow : childRows) {
+            childRow.getEntry().channel =
+                    new NotificationChannel("id" + i, "dinnertime" + i, IMPORTANCE_DEFAULT);
+            i++;
+        }
+
+        assertEquals(3, mGroupRow.getNumUniqueChannels());
     }
 }
