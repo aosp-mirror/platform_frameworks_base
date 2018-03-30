@@ -61,7 +61,6 @@ interface ILockSettings {
     void initRecoveryServiceWithSigFile(in String rootCertificateAlias,
             in byte[] recoveryServiceCertFile, in byte[] recoveryServiceSigFile);
     KeyChainSnapshot getKeyChainSnapshot();
-    byte[] generateAndStoreKey(String alias);
     String generateKey(String alias);
     String importKey(String alias, in byte[] keyBytes);
     String getKey(String alias);

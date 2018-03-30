@@ -78,23 +78,8 @@ public final class KeyChainSnapshot implements Parcelable {
     private byte[] mEncryptedRecoveryKeyBlob;
 
     /**
-     * @hide
-     * Deprecated, consider using builder.
+     * Use builder to create an instance of the class.
      */
-    public KeyChainSnapshot(
-            int snapshotVersion,
-            @NonNull List<KeyChainProtectionParams> keyChainProtectionParams,
-            @NonNull List<WrappedApplicationKey> wrappedApplicationKeys,
-            @NonNull byte[] encryptedRecoveryKeyBlob) {
-        mSnapshotVersion = snapshotVersion;
-        mKeyChainProtectionParams =
-                Preconditions.checkCollectionElementsNotNull(keyChainProtectionParams,
-                        "KeyChainProtectionParams");
-        mEntryRecoveryData = Preconditions.checkCollectionElementsNotNull(wrappedApplicationKeys,
-                "wrappedApplicationKeys");
-        mEncryptedRecoveryKeyBlob = Preconditions.checkNotNull(encryptedRecoveryKeyBlob);
-    }
-
     private KeyChainSnapshot() {
 
     }
@@ -108,7 +93,7 @@ public final class KeyChainSnapshot implements Parcelable {
     }
 
     /**
-     * Number of user secret guesses allowed during Keychain recovery.
+     * Number of user secret guesses allowed during KeyChain recovery.
      */
     public int getMaxAttempts() {
         return mMaxAttempts;

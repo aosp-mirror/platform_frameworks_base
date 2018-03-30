@@ -672,40 +672,6 @@ public class RecoverableKeyStoreManager {
     }
 
     /**
-     * Deprecated
-     * Generates a key named {@code alias} in the recoverable store for the calling uid. Then
-     * returns the raw key material.
-     *
-     * <p>TODO: Once AndroidKeyStore has added move api, do not return raw bytes.
-     *
-     * @deprecated
-     * @hide
-     */
-    public byte[] generateAndStoreKey(@NonNull String alias) throws RemoteException {
-        checkRecoverKeyStorePermission();
-        int uid = Binder.getCallingUid();
-        int userId = UserHandle.getCallingUserId();
-
-        PlatformEncryptionKey encryptionKey;
-        try {
-            encryptionKey = mPlatformKeyManager.getEncryptKey(userId);
-        } catch (NoSuchAlgorithmException e) {
-            // Impossible: all algorithms must be supported by AOSP
-            throw new RuntimeException(e);
-        } catch (KeyStoreException | UnrecoverableKeyException e) {
-            throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
-        } catch (InsecureUserException e) {
-            throw new ServiceSpecificException(ERROR_INSECURE_USER, e.getMessage());
-        }
-
-        try {
-            return mRecoverableKeyGenerator.generateAndStoreKey(encryptionKey, userId, uid, alias);
-        } catch (KeyStoreException | InvalidKeyException | RecoverableKeyStorageException e) {
-            throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
-        }
-    }
-
-    /**
      * Destroys the session with the given {@code sessionId}.
      */
     public void closeSession(@NonNull String sessionId) throws RemoteException {
