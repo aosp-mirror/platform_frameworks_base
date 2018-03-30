@@ -51,7 +51,7 @@ public class TestOnlyInsecureCertificateHelper {
     public @NonNull X509Certificate
             getRootCertificate(String rootCertificateAlias) throws RemoteException {
         rootCertificateAlias = getDefaultCertificateAliasIfEmpty(rootCertificateAlias);
-        if (isTestOnlyCertificate(rootCertificateAlias)) {
+        if (isTestOnlyCertificateAlias(rootCertificateAlias)) {
             return TrustedRootCertificates.getTestOnlyInsecureCertificate();
         }
 
@@ -74,12 +74,17 @@ public class TestOnlyInsecureCertificateHelper {
         return rootCertificateAlias;
     }
 
-    public boolean isTestOnlyCertificate(String rootCertificateAlias) {
+    public boolean isTestOnlyCertificateAlias(String rootCertificateAlias) {
         return TrustedRootCertificates.TEST_ONLY_INSECURE_CERTIFICATE_ALIAS
                 .equals(rootCertificateAlias);
     }
 
-    public boolean doesCredentailSupportInsecureMode(int credentialType, String credential) {
+    public boolean isValidRootCertificateAlias(String rootCertificateAlias) {
+        return TrustedRootCertificates.getRootCertificates().containsKey(rootCertificateAlias)
+                || isTestOnlyCertificateAlias(rootCertificateAlias);
+    }
+
+    public boolean doesCredentialSupportInsecureMode(int credentialType, String credential) {
         return (credentialType == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD)
             && (credential != null)
             && credential.startsWith(TrustedRootCertificates.INSECURE_PASSWORD_PREFIX);
