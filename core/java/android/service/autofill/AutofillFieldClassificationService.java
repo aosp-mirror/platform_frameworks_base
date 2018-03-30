@@ -41,11 +41,11 @@ import java.util.List;
  *
  * <p>A field classification score is a {@code float} representing how well an
  * {@link AutofillValue} filled matches a expected value predicted by an autofill service
- * &mdash;a full-match is {@code 1.0} (representing 100%), while a full mismatch is {@code 0.0}.
+ * &mdash;a full match is {@code 1.0} (representing 100%), while a full mismatch is {@code 0.0}.
  *
- * <p>The exact score depends on the algorithm used to calculate it&mdash; the service must provide
+ * <p>The exact score depends on the algorithm used to calculate it&mdash;the service must provide
  * at least one default algorithm (which is used when the algorithm is not specified or is invalid),
- * but it could provide more (in which case the algorithm name should be specifiied by the caller
+ * but it could provide more (in which case the algorithm name should be specified by the caller
  * when calculating the scores).
  *
  * {@hide}
@@ -115,15 +115,15 @@ public abstract class AutofillFieldClassificationService extends Service {
      *
      * <p>A field classification score is a {@code float} representing how well an
      * {@link AutofillValue} filled matches a expected value predicted by an autofill service
-     * &mdash;a full-match is {@code 1.0} (representing 100%), while a full mismatch is {@code 0.0}.
+     * &mdash;a full match is {@code 1.0} (representing 100%), while a full mismatch is {@code 0.0}.
      *
-     * <p>The exact score depends on the algorithm used to calculate it&mdash; the service must
+     * <p>The exact score depends on the algorithm used to calculate it&mdash;the service must
      * provide at least one default algorithm (which is used when the algorithm is not specified
      * or is invalid), but it could provide more (in which case the algorithm name should be
-     * specifiied by the caller when calculating the scores).
+     * specified by the caller when calculating the scores).
      *
      * <p>For example, if the service provides an algorithm named {@code EXACT_MATCH} that
-     * returns {@code 1.0} if all characters in match or {@code 0.0} otherwise, a call to:
+     * returns {@code 1.0} if all characters match or {@code 0.0} otherwise, a call to:
      *
      * <pre>
      * service.onGetScores("EXACT_MATCH", null,
