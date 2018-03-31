@@ -583,6 +583,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private List<Integer> mTransientIndices = null;
     private List<View> mTransientViews = null;
 
+    /**
+     * Keeps track of how many child views have UnhandledKeyEventListeners. This should only be
+     * updated on the UI thread so shouldn't require explicit synchronization.
+     */
+    int mChildUnhandledKeyListeners = 0;
 
     /**
      * Empty ActionMode used as a sentinel in recursive entries to startActionModeForChild.
@@ -5055,6 +5060,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             child.assignParent(this);
         } else {
             child.mParent = this;
+            if (child.hasUnhandledKeyListener()) {
+                incrementChildUnhandledKeyListeners();
+            }
         }
 
         final boolean childHasFocus = child.hasFocus();
@@ -5358,6 +5366,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         needGlobalAttributesUpdate(false);
 
         removeFromArray(index);
+
+        if (view.hasUnhandledKeyListener()) {
+            decrementChildUnhandledKeyListeners();
+        }
 
         if (view == mDefaultFocus) {
             clearDefaultFocus(view);
@@ -7535,6 +7547,62 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             View child = getChildAt(i);
             child.findNamedViews(namedElements);
         }
+    }
+
+    @Override
+    boolean hasUnhandledKeyListener() {
+        return (mChildUnhandledKeyListeners > 0) || super.hasUnhandledKeyListener();
+    }
+
+    void incrementChildUnhandledKeyListeners() {
+        mChildUnhandledKeyListeners += 1;
+        if (mChildUnhandledKeyListeners == 1) {
+            if (mParent instanceof ViewGroup) {
+                ((ViewGroup) mParent).incrementChildUnhandledKeyListeners();
+            }
+        }
+    }
+
+    void decrementChildUnhandledKeyListeners() {
+        mChildUnhandledKeyListeners -= 1;
+        if (mChildUnhandledKeyListeners == 0) {
+            if (mParent instanceof ViewGroup) {
+                ((ViewGroup) mParent).decrementChildUnhandledKeyListeners();
+            }
+        }
+    }
+
+    @Override
+    View dispatchUnhandledKeyEvent(KeyEvent evt) {
+        if (!hasUnhandledKeyListener()) {
+            return null;
+        }
+        ArrayList<View> orderedViews = buildOrderedChildList();
+        if (orderedViews != null) {
+            try {
+                for (int i = orderedViews.size() - 1; i >= 0; --i) {
+                    View v = orderedViews.get(i);
+                    View consumer = v.dispatchUnhandledKeyEvent(evt);
+                    if (consumer != null) {
+                        return consumer;
+                    }
+                }
+            } finally {
+                orderedViews.clear();
+            }
+        } else {
+            for (int i = getChildCount() - 1; i >= 0; --i) {
+                View v = getChildAt(i);
+                View consumer = v.dispatchUnhandledKeyEvent(evt);
+                if (consumer != null) {
+                    return consumer;
+                }
+            }
+        }
+        if (onUnhandledKeyEvent(evt)) {
+            return this;
+        }
+        return null;
     }
 
     /**

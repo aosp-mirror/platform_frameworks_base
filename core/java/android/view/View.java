@@ -4320,7 +4320,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         OnCapturedPointerListener mOnCapturedPointerListener;
 
-        private ArrayList<OnKeyFallbackListener> mKeyFallbackListeners;
+        private ArrayList<OnUnhandledKeyEventListener> mUnhandledKeyListeners;
     }
 
     ListenerInfo mListenerInfo;
@@ -25882,26 +25882,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Interface definition for a callback to be invoked when a hardware key event is
-     * dispatched to this view during the fallback phase. This means no view in the hierarchy
-     * has handled this event.
+     * Interface definition for a callback to be invoked when a hardware key event hasn't
+     * been handled by the view hierarchy.
      */
-    public interface OnKeyFallbackListener {
+    public interface OnUnhandledKeyEventListener {
         /**
-         * Called when a hardware key is dispatched to a view in the fallback phase. This allows
-         * listeners to respond to events after the view hierarchy has had a chance to respond.
-         * <p>Key presses in software keyboards will generally NOT trigger this method,
-         * although some may elect to do so in some situations. Do not assume a
-         * software input method has to be key-based; even if it is, it may use key presses
-         * in a different way than you expect, so there is no way to reliably catch soft
-         * input key presses.
+         * Called when a hardware key is dispatched to a view after being unhandled during normal
+         * {@link KeyEvent} dispatch.
          *
          * @param v The view the key has been dispatched to.
-         * @param event The KeyEvent object containing full information about
-         *        the event.
-         * @return True if the listener has consumed the event, false otherwise.
+         * @param event The KeyEvent object containing information about the event.
+         * @return {@code true} if the listener has consumed the event, {@code false} otherwise.
          */
-        boolean onKeyFallback(View v, KeyEvent event);
+        boolean onUnhandledKeyEvent(View v, KeyEvent event);
     }
 
     /**
@@ -27600,21 +27593,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return sUseDefaultFocusHighlight;
     }
 
-  /**
+    /**
+     * Dispatch a previously unhandled {@link KeyEvent} to this view. Unlike normal key dispatch,
+     * this dispatches to ALL child views until it is consumed. The dispatch order is z-order
+     * (visually on-top views first).
+     *
+     * @param evt the previously unhandled {@link KeyEvent}.
+     * @return the {@link View} which consumed the event or {@code null} if not consumed.
+     */
+    View dispatchUnhandledKeyEvent(KeyEvent evt) {
+        if (onUnhandledKeyEvent(evt)) {
+            return this;
+        }
+        return null;
+    }
+
+    /**
      * Allows this view to handle {@link KeyEvent}s which weren't handled by normal dispatch. This
      * occurs after the normal view hierarchy dispatch, but before the window callback. By default,
      * this will dispatch into all the listeners registered via
-     * {@link #addKeyFallbackListener(OnKeyFallbackListener)} in last-in-first-out order (most
-     * recently added will receive events first).
+     * {@link #addOnUnhandledKeyEventListener(OnUnhandledKeyEventListener)} in last-in-first-out
+     * order (most recently added will receive events first).
      *
-     * @param event A not-previously-handled event.
+     * @param event An unhandled event.
      * @return {@code true} if the event was handled, {@code false} otherwise.
-     * @see #addKeyFallbackListener
+     * @see #addOnUnhandledKeyEventListener
      */
-    public boolean onKeyFallback(@NonNull KeyEvent event) {
-        if (mListenerInfo != null && mListenerInfo.mKeyFallbackListeners != null) {
-            for (int i = mListenerInfo.mKeyFallbackListeners.size() - 1; i >= 0; --i) {
-                if (mListenerInfo.mKeyFallbackListeners.get(i).onKeyFallback(this, event)) {
+    boolean onUnhandledKeyEvent(@NonNull KeyEvent event) {
+        if (mListenerInfo != null && mListenerInfo.mUnhandledKeyListeners != null) {
+            for (int i = mListenerInfo.mUnhandledKeyListeners.size() - 1; i >= 0; --i) {
+                if (mListenerInfo.mUnhandledKeyListeners.get(i).onUnhandledKeyEvent(this, event)) {
                     return true;
                 }
             }
@@ -27622,31 +27630,47 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return false;
     }
 
-    /**
-     * Adds a listener which will receive unhandled {@link KeyEvent}s.
-     * @param listener the receiver of fallback {@link KeyEvent}s.
-     * @see #onKeyFallback(KeyEvent)
-     */
-    public void addKeyFallbackListener(OnKeyFallbackListener listener) {
-        ArrayList<OnKeyFallbackListener> fallbacks = getListenerInfo().mKeyFallbackListeners;
-        if (fallbacks == null) {
-            fallbacks = new ArrayList<>();
-            getListenerInfo().mKeyFallbackListeners = fallbacks;
-        }
-        fallbacks.add(listener);
+    boolean hasUnhandledKeyListener() {
+        return (mListenerInfo != null && mListenerInfo.mUnhandledKeyListeners != null
+                && !mListenerInfo.mUnhandledKeyListeners.isEmpty());
     }
 
     /**
-     * Removes a listener which will receive unhandled {@link KeyEvent}s.
-     * @param listener the receiver of fallback {@link KeyEvent}s.
-     * @see #onKeyFallback(KeyEvent)
+     * Adds a listener which will receive unhandled {@link KeyEvent}s. This must be called on the
+     * UI thread.
+     *
+     * @param listener a receiver of unhandled {@link KeyEvent}s.
+     * @see #removeOnUnhandledKeyEventListener
      */
-    public void removeKeyFallbackListener(OnKeyFallbackListener listener) {
+    public void addOnUnhandledKeyEventListener(OnUnhandledKeyEventListener listener) {
+        ArrayList<OnUnhandledKeyEventListener> listeners = getListenerInfo().mUnhandledKeyListeners;
+        if (listeners == null) {
+            listeners = new ArrayList<>();
+            getListenerInfo().mUnhandledKeyListeners = listeners;
+        }
+        listeners.add(listener);
+        if (listeners.size() == 1 && mParent instanceof ViewGroup) {
+            ((ViewGroup) mParent).incrementChildUnhandledKeyListeners();
+        }
+    }
+
+    /**
+     * Removes a listener which will receive unhandled {@link KeyEvent}s. This must be called on the
+     * UI thread.
+     *
+     * @param listener a receiver of unhandled {@link KeyEvent}s.
+     * @see #addOnUnhandledKeyEventListener
+     */
+    public void removeOnUnhandledKeyEventListener(OnUnhandledKeyEventListener listener) {
         if (mListenerInfo != null) {
-            if (mListenerInfo.mKeyFallbackListeners != null) {
-                mListenerInfo.mKeyFallbackListeners.remove(listener);
-                if (mListenerInfo.mKeyFallbackListeners.isEmpty()) {
-                    mListenerInfo.mKeyFallbackListeners = null;
+            if (mListenerInfo.mUnhandledKeyListeners != null
+                    && !mListenerInfo.mUnhandledKeyListeners.isEmpty()) {
+                mListenerInfo.mUnhandledKeyListeners.remove(listener);
+                if (mListenerInfo.mUnhandledKeyListeners.isEmpty()) {
+                    mListenerInfo.mUnhandledKeyListeners = null;
+                    if (mParent instanceof ViewGroup) {
+                        ((ViewGroup) mParent).decrementChildUnhandledKeyListeners();
+                    }
                 }
             }
         }
