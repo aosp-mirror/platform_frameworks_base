@@ -450,11 +450,9 @@ public class PackageDexOptimizer {
 
             for (String isa : dexCodeInstructionSets) {
                 try {
-                    String[] status = DexFile.getDexFileOptimizationStatus(path, isa);
-                    String compilationStatus = status[0];
-                    String compilationReason = status[1];
-                    pw.println(isa + ": [status=" + compilationStatus
-                            +"] reason=[" + compilationReason + "]");
+                    DexFile.OptimizationInfo info = DexFile.getDexFileOptimizationInfo(path, isa);
+                    pw.println(isa + ": [status=" + info.getStatus()
+                            +"] [reason=" + info.getReason() + "]");
                 } catch (IOException ioe) {
                     pw.println(isa + ": [Exception]: " + ioe.getMessage());
                 }
