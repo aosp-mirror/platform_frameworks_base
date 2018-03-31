@@ -40,6 +40,8 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Conectată prin %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Disponibilă prin %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Conectată, fără internet"</string>
+    <string name="wifi_status_no_internet" msgid="5784710974669608361">"Fără conexiune la internet"</string>
+    <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Trebuie să vă conectați"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Punctul de acces este temporar plin"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"Conectată prin %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"Disponibilă prin %1$s"</string>
@@ -63,6 +65,9 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"Conectat (fără telefon), baterie <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Conectat (fără conținut media), baterie <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Conectat (fără telefon sau conținut media), baterie <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Activ, baterie <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level" msgid="1447164613319663655">"Nivelul bateriei: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Activ"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Conținut media audio"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Apeluri telefonice"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transfer de fișiere"</string>
@@ -109,6 +114,10 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"Căști"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"Dispozitiv periferic de intrare"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
+    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"Se asociază aparatul auditiv stâng…"</string>
+    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"Se asociază aparatul auditiv drept…"</string>
+    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"Stâng - baterie <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"Drept - baterie <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi dezactivat."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi deconectat."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Semnal Wi-Fi: o bară."</string>
@@ -188,7 +197,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"Activ permanent"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Ecranul nu va fi inactiv pe durata încărcării"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Activați jurnalul de examinare HCI Bluetooth"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Înregistrați toate pachetele HCI Bluetooth într-un fișier"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Înregistrați toate pachetele HCI Bluetooth într-un fișier (Comutați Bluettoth după modificarea setării)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Deblocarea OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Permiteți deblocarea bootloaderului"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Permiteți deblocarea OEM?"</string>
@@ -207,15 +216,20 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versiunea AVRCP pentru Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Selectați versiunea AVRCP pentru Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Codec audio Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Selectați codecul audio Bluetooth"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Rată de eșantionare audio Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Selectați codecul audio Bluetooth:\nrată de eșantionare"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Biți audio Bluetooth per eșantion"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Selectați codecul audio Bluetooth:\nbiți per eșantion"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Modul canal audio Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Selectați codecul audio Bluetooth:\nmodul canal"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Codecul LDAC audio pentru Bluetooth: calitatea redării"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Selectați codecul LDAC audio pentru Bluetooth:\ncalitatea redării"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Transmitere în flux: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS privat"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Selectați modul DNS privat"</string>
@@ -223,9 +237,12 @@
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automat"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Nume de gazdă al furnizorului de DNS privat"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Introduceți numele de gazdă al furnizorului de DNS"</string>
+    <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Nu s-a putut conecta"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Afișați opțiunile pentru certificarea Ecran wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Măriți niv. de înr. prin Wi‑Fi, afișați în fcț. de SSID RSSI în Selectorul Wi‑Fi"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Afișează aleatoriu adresa MAC când te conectezi la rețele Wi‑Fi"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"Contorizat"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Necontorizat"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Dimensiunile tamponului jurnalului"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Dimensiuni jurnal / tampon jurnal"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Ștergeți stocarea permanentă a jurnalului?"</string>
@@ -360,14 +377,10 @@
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"În baza utilizării, timpul aproximativ rămas este: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"În baza utilizării, timpul rămas este de aproximativ <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Timp rămas: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_discharge_by_enhanced (2095821536747992464) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (2175151772952365149) -->
-    <skip />
-    <!-- no translation found for power_discharge_by (6453537733650125582) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only (107616694963545745) -->
-    <skip />
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"În baza utilizării, ar trebui să reziste până la aproximativ <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"În baza utilizării, ar trebui să reziste până la aproximativ <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"Ar trebui să reziste până la <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"Ar trebui să reziste până la <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"a mai rămas mai puțin de <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"A mai rămas mai puțin de <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"A mai rămas mai mult de <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -422,8 +435,7 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Înregistrat"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Neînregistrat"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Indisponibilă"</string>
-    <!-- no translation found for wifi_status_mac_randomized (5589328382467438245) -->
-    <skip />
+    <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"MAC este aleatoriu"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
       <item quantity="few">%1$d dispozitive conectate</item>
       <item quantity="other">%1$d de dispozitive conectate</item>
@@ -444,6 +456,5 @@
     <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Durată"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Întreabă de fiecare dată"</string>
-    <!-- no translation found for time_unit_just_now (6363336622778342422) -->
-    <skip />
+    <string name="time_unit_just_now" msgid="6363336622778342422">"Chiar acum"</string>
 </resources>

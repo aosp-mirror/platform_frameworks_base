@@ -40,6 +40,8 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Установена е връзка през „%1$s“"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Мрежата е достъпна през „%1$s“"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Установена е връзка – няма достъп до интернет"</string>
+    <string name="wifi_status_no_internet" msgid="5784710974669608361">"Няма връзка с интернет"</string>
+    <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Изисква се вход в профила"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Точката за достъп временно е пълна"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"Установена е връзка през %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"Мрежата е достъпна през %1$s"</string>
@@ -63,6 +65,9 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"Свързано (без телефон), батерия: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Свързано (без мултимедия), батерия: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Свързано (без телефон или мултимедия), батерия: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Активно. Батерия: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level" msgid="1447164613319663655">"Батерия: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Активно"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Мултимедийно аудио"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Телефонни обаждания"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Прехвърляне на файл"</string>
@@ -109,6 +114,10 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"Слушалки"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"Периферен вход"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
+    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"Слуховият апарат за ляво ухо се сдвоява…"</string>
+    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"Слуховият апарат за дясно ухо се сдвоява…"</string>
+    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"За ляво ухо. Батерия: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"За дясно ухо. Батерия: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi е изключен."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Няма връзка с Wi-Fi."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi е с една чертичка."</string>
@@ -188,7 +197,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"Да остане активен"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Екранът никога няма да е в спящ режим при зареждане"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Активиране на рег. файл за анализ за Bluetooth с протокола HCI"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Заснемане на всички пакети за Bluetooth с протокола HCI във файла"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Всички пакети за комуникация през Bluetooth чрез HCI да се записват във файл (превключване на Bluetooth след промяна на тази настройка)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Отключване от OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Разрешаване на първонач. зареждащата прогр. да се откл."</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Да се разреши ли отключване от OEM?"</string>
@@ -207,15 +216,20 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Версия на AVRCP за Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Избиране на версия на AVRCP за Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Аудиокодек за Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Изберете аудиокодек за Bluetooth"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Честота на дискретизация за звука през Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Изберете аудиокодек за Bluetooth:\nЧестота на дискретизация"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Битове на дискрет за звука през Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Изберете аудиокодек за Bluetooth:\nБитове на дискрет"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Режим на канала на звука през Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Изберете аудиокодек за Bluetooth:\nРежим на канала"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Кодек за звука през Bluetooth с технологията LDAC: Качество на възпроизвеждане"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Изберете кодек за звука през Bluetooth с технологията LDAC:\nКачество на възпроизвеждане"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Поточно предаване: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Частен DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Изберете режим на частния DNS"</string>
@@ -223,9 +237,12 @@
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Автоматично"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Име на хоста на доставчика на частния DNS"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Въведете името на хоста на DNS доставчика"</string>
+    <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Не можа да се установи връзка"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Показване на опциите за сертифициране на безжичния дисплей"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"По-подробно регистр. на Wi‑Fi – данни за RSSI на SSID в инстр. за избор на Wi‑Fi"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Рандомизиране на MAC адреса при свързване с Wi-Fi мрежи"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"С отчитане"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Без отчитане"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Размери на регистрац. буфери"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Размер на един рег. буфер: Избор"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Да се изчистят ли трайно съхраняваните регистрационни данни?"</string>
@@ -360,14 +377,10 @@
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Още около <xliff:g id="TIME">%1$s</xliff:g> въз основа на използването"</string>
     <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"Още около <xliff:g id="TIME">%1$s</xliff:g> въз основа на използването (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Оставащо време: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_discharge_by_enhanced (2095821536747992464) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (2175151772952365149) -->
-    <skip />
-    <!-- no translation found for power_discharge_by (6453537733650125582) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only (107616694963545745) -->
-    <skip />
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Следва да издържи приблизително до <xliff:g id="TIME">%1$s</xliff:g> въз основа на използването (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Следва да издържи приблизително до <xliff:g id="TIME">%1$s</xliff:g> въз основа на използването"</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"Следва да издържи приблизително до <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"Следва да издържи приблизително до <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Остава/т по-малко от <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Остава/т по-малко от <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Остава/т повече от <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -422,8 +435,7 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Регистрирано"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Не е регистрирано"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Няма данни"</string>
-    <!-- no translation found for wifi_status_mac_randomized (5589328382467438245) -->
-    <skip />
+    <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"MAC адресът е рандомизиран"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
       <item quantity="other">%1$d устройства са свързани</item>
       <item quantity="one">%1$d устройство е свързано</item>
@@ -443,6 +455,5 @@
     <string name="alarm_template_far" msgid="3779172822607461675">"в/ъв <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Времетраене"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Да се пита винаги"</string>
-    <!-- no translation found for time_unit_just_now (6363336622778342422) -->
-    <skip />
+    <string name="time_unit_just_now" msgid="6363336622778342422">"Току-що"</string>
 </resources>
