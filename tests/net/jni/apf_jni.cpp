@@ -34,6 +34,8 @@ static jint com_android_server_ApfTest_apfSimulate(
             env->GetArrayLength(program),
             (uint8_t*)env->GetByteArrayElements(packet, NULL),
             env->GetArrayLength(packet),
+            nullptr,
+            0,
             filter_age);
 }
 
@@ -143,7 +145,8 @@ static jboolean com_android_server_ApfTest_compareBpfApf(JNIEnv* env, jclass, js
         do {
             apf_packet = pcap_next(apf_pcap.get(), &apf_header);
         } while (apf_packet != NULL && !accept_packet(
-                apf_program, apf_program_len, apf_packet, apf_header.len, 0));
+                apf_program, apf_program_len, apf_packet, apf_header.len,
+                nullptr, 0, 0));
 
         // Make sure both filters matched the same packet.
         if (apf_packet == NULL && bpf_packet == NULL)

@@ -60,7 +60,7 @@
             style="@style/VolumeButtons"
             android:layout_width="@dimen/volume_dialog_tap_target_size"
             android:layout_height="@dimen/volume_dialog_tap_target_size"
-            android:background="?android:selectableItemBackgroundBorderless"
+            android:background="@drawable/ripple_drawable_20dp"
             android:layout_marginBottom="@dimen/volume_dialog_row_margin_bottom"
             android:tint="@color/accent_tint_color_selector"
             android:soundEffectsEnabled="false" />

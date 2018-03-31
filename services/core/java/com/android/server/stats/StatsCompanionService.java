@@ -39,6 +39,7 @@ import android.os.BatteryStatsInternal;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.IStatsCompanionService;
 import android.os.IStatsManager;
@@ -68,14 +69,21 @@ import com.android.internal.os.KernelUidCpuFreqTimeReader;
 import com.android.internal.os.KernelWakelockReader;
 import com.android.internal.os.KernelWakelockStats;
 import com.android.internal.os.PowerProfile;
+import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
+import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -89,14 +97,17 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
      * How long to wait on an individual subsystem to return its stats.
      */
     private static final long EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS = 2000;
+    private static final long MILLIS_IN_A_DAY = TimeUnit.DAYS.toMillis(1);
 
     public static final String RESULT_RECEIVER_CONTROLLER_KEY = "controller_activity";
+    public static final String CONFIG_DIR = "/data/misc/stats-service";
 
     static final String TAG = "StatsCompanionService";
     static final boolean DEBUG = false;
 
     public static final int CODE_DATA_BROADCAST = 1;
     public static final int CODE_SUBSCRIBER_BROADCAST = 1;
+    public static final int DEATH_THRESHOLD = 10;
 
     private final Context mContext;
     private final AlarmManager mAlarmManager;
@@ -119,6 +130,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             new StatFs(Environment.getRootDirectory().getAbsolutePath());
     private final StatFs mStatFsTemp =
             new StatFs(Environment.getDownloadCacheDirectory().getAbsolutePath());
+    @GuardedBy("sStatsdLock")
+    private final HashSet<Long> mDeathTimeMillis = new HashSet<>();
+    @GuardedBy("sStatsdLock")
+    private final HashMap<Long, String> mDeletedFiles = new HashMap<>();
 
     private KernelUidCpuTimeReader mKernelUidCpuTimeReader = new KernelUidCpuTimeReader();
     private KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
@@ -156,7 +171,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                         informAllUidsLocked(context);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "Failed to inform statsd latest update of all apps", e);
-                        forgetEverything();
+                        forgetEverythingLocked();
                     }
                 }
             }
@@ -658,12 +673,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullBluetoothBytesTransfer(int tagId, List<StatsLogEventWrapper> pulledData) {
         BluetoothActivityEnergyInfo info = pullBluetoothData();
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
-        for (UidTraffic traffic : info.getUidTraffic()) {
-            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 3);
-            e.writeInt(traffic.getUid());
-            e.writeLong(traffic.getRxBytes());
-            e.writeLong(traffic.getTxBytes());
-            pulledData.add(e);
+        if (info.getUidTraffic() != null) {
+            for (UidTraffic traffic : info.getUidTraffic()) {
+                StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 3);
+                e.writeInt(traffic.getUid());
+                e.writeLong(traffic.getRxBytes());
+                e.writeLong(traffic.getTxBytes());
+                pulledData.add(e);
+            }
         }
     }
 
@@ -751,7 +768,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         });
     }
 
-    private void pullWifiActivityEnergyInfo(int tagId, List<StatsLogEventWrapper> pulledData) {
+    private void pullWifiActivityInfo(int tagId, List<StatsLogEventWrapper> pulledData) {
         long token = Binder.clearCallingIdentity();
         if (mWifiManager == null) {
             mWifiManager =
@@ -919,8 +936,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 pullKernelUidCpuActiveTime(tagId, ret);
                 break;
             }
-            case StatsLog.WIFI_ACTIVITY_ENERGY_INFO: {
-                pullWifiActivityEnergyInfo(tagId, ret);
+            case StatsLog.WIFI_ACTIVITY_INFO: {
+                pullWifiActivityInfo(tagId, ret);
                 break;
             }
             case StatsLog.MODEM_ACTIVITY_INFO: {
@@ -1055,7 +1072,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     sStatsd.asBinder().linkToDeath(new StatsdDeathRecipient(), 0);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "linkToDeath(StatsdDeathRecipient) failed", e);
-                    forgetEverything();
+                    forgetEverythingLocked();
                 }
                 // Setup broadcast receiver for updates.
                 IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_REPLACED);
@@ -1087,7 +1104,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 Slog.i(TAG, "Told statsd that StatsCompanionService is alive.");
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to inform statsd that statscompanion is ready", e);
-                forgetEverything();
+                forgetEverythingLocked();
             }
         }
     }
@@ -1096,18 +1113,60 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         @Override
         public void binderDied() {
             Slog.i(TAG, "Statsd is dead - erase all my knowledge.");
-            forgetEverything();
+            synchronized (sStatsdLock) {
+                long now = SystemClock.elapsedRealtime();
+                for (Long timeMillis : mDeathTimeMillis) {
+                    long ageMillis = now - timeMillis;
+                    if (ageMillis > MILLIS_IN_A_DAY) {
+                        mDeathTimeMillis.remove(timeMillis);
+                    }
+                }
+                for (Long timeMillis : mDeletedFiles.keySet()) {
+                    long ageMillis = now - timeMillis;
+                    if (ageMillis > MILLIS_IN_A_DAY * 7) {
+                        mDeletedFiles.remove(timeMillis);
+                    }
+                }
+                mDeathTimeMillis.add(now);
+                if (mDeathTimeMillis.size() >= DEATH_THRESHOLD) {
+                    mDeathTimeMillis.clear();
+                    File[] configs = FileUtils.listFilesOrEmpty(new File(CONFIG_DIR));
+                    if (configs.length > 0) {
+                        String fileName = configs[0].getName();
+                        if (configs[0].delete()) {
+                            mDeletedFiles.put(now, fileName);
+                        }
+                    }
+                }
+                forgetEverythingLocked();
+            }
         }
     }
 
-    private void forgetEverything() {
+    private void forgetEverythingLocked() {
+        sStatsd = null;
+        mContext.unregisterReceiver(mAppUpdateReceiver);
+        mContext.unregisterReceiver(mUserUpdateReceiver);
+        mContext.unregisterReceiver(mShutdownEventReceiver);
+        cancelAnomalyAlarm();
+        cancelPullingAlarm();
+    }
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, writer)) return;
+
         synchronized (sStatsdLock) {
-            sStatsd = null;
-            mContext.unregisterReceiver(mAppUpdateReceiver);
-            mContext.unregisterReceiver(mUserUpdateReceiver);
-            mContext.unregisterReceiver(mShutdownEventReceiver);
-            cancelAnomalyAlarm();
-            cancelPullingAlarm();
+            writer.println("Number of configuration files deleted: " + mDeletedFiles.size());
+            if (mDeletedFiles.size() > 0) {
+                writer.println("  timestamp, deleted file name");
+            }
+            long lastBootMillis =
+                    SystemClock.currentThreadTimeMillis() - SystemClock.elapsedRealtime();
+            for (Long elapsedMillis : mDeletedFiles.keySet()) {
+                long deletionMillis = lastBootMillis + elapsedMillis;
+                writer.println("  " + deletionMillis + ", " + mDeletedFiles.get(elapsedMillis));
+            }
         }
     }
 

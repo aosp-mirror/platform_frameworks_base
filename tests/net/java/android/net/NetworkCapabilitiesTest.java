@@ -264,14 +264,28 @@ public class NetworkCapabilitiesTest {
     @Test
     public void testOemPaid() {
         NetworkCapabilities nc = new NetworkCapabilities();
-        nc.maybeMarkCapabilitiesRestricted();
+        // By default OEM_PAID is neither in the unwanted or required lists and the network is not
+        // restricted.
+        assertFalse(nc.hasUnwantedCapability(NET_CAPABILITY_OEM_PAID));
         assertFalse(nc.hasCapability(NET_CAPABILITY_OEM_PAID));
+        nc.maybeMarkCapabilitiesRestricted();
         assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
 
+        // Adding OEM_PAID to capability list should make network restricted.
         nc.addCapability(NET_CAPABILITY_OEM_PAID);
+        nc.addCapability(NET_CAPABILITY_INTERNET);  // Combine with unrestricted capability.
         nc.maybeMarkCapabilitiesRestricted();
         assertTrue(nc.hasCapability(NET_CAPABILITY_OEM_PAID));
         assertFalse(nc.hasCapability(NET_CAPABILITY_NOT_RESTRICTED));
+
+        // Now let's make request for OEM_PAID network.
+        NetworkCapabilities nr = new NetworkCapabilities();
+        nr.addCapability(NET_CAPABILITY_OEM_PAID);
+        nr.maybeMarkCapabilitiesRestricted();
+        assertTrue(nr.satisfiedByNetworkCapabilities(nc));
+
+        // Request fails for network with the default capabilities.
+        assertFalse(nr.satisfiedByNetworkCapabilities(new NetworkCapabilities()));
     }
 
     @Test
@@ -286,7 +300,8 @@ public class NetworkCapabilitiesTest {
         request.addUnwantedCapability(NET_CAPABILITY_WIFI_P2P);
         request.addUnwantedCapability(NET_CAPABILITY_NOT_METERED);
         assertTrue(request.satisfiedByNetworkCapabilities(network));
-        assertArrayEquals(new int[] {NET_CAPABILITY_WIFI_P2P, NET_CAPABILITY_NOT_METERED},
+        assertArrayEquals(new int[] {NET_CAPABILITY_WIFI_P2P,
+                        NET_CAPABILITY_NOT_METERED},
                 request.getUnwantedCapabilities());
 
         // This is a default capability, just want to make sure its there because we use it below.

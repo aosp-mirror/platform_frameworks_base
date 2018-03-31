@@ -1670,7 +1670,6 @@
   <java-symbol type="dimen" name="navigation_bar_height_landscape_car_mode" />
   <java-symbol type="dimen" name="navigation_bar_width_car_mode" />
   <java-symbol type="dimen" name="status_bar_height" />
-  <java-symbol type="dimen" name="quick_qs_offset_height" />
   <java-symbol type="dimen" name="quick_qs_total_height" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_off" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_on" />
@@ -2733,6 +2732,10 @@
   <java-symbol type="string" name="status_bar_alarm_clock" />
   <java-symbol type="string" name="status_bar_secure" />
   <java-symbol type="string" name="status_bar_clock" />
+  <java-symbol type="string" name="status_bar_airplane" />
+  <java-symbol type="string" name="status_bar_mobile" />
+  <java-symbol type="string" name="status_bar_ethernet" />
+  <java-symbol type="string" name="status_bar_vpn" />
 
   <!-- Locale picker -->
   <java-symbol type="id" name="locale_search_menu" />

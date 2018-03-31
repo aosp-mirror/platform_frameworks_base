@@ -270,13 +270,15 @@
     <!-- The width of the panel that holds the quick settings. -->
     <dimen name="qs_panel_width">@dimen/notification_panel_width</dimen>
 
+    <dimen name="volume_dialog_panel_transparent_padding">8dp</dimen>
+
     <!-- the amount the volume panel should be offset at the end from the view next to it (or
     the screen edge, in portrait-->
     <dimen name="volume_dialog_base_margin">8dp</dimen>
 
     <dimen name="volume_dialog_panel_width">64dp</dimen>
 
-    <dimen name="volume_dialog_slider_height">108dp</dimen>
+    <dimen name="volume_dialog_slider_height">116dp</dimen>
 
     <dimen name="volume_dialog_row_height">252dp</dimen>
 
@@ -286,13 +288,15 @@
 
     <dimen name="volume_dialog_spacer">4dp</dimen>
 
-    <dimen name="volume_dialog_slider_margin_top">22dp</dimen>
+    <dimen name="volume_dialog_slider_margin_top">14dp</dimen>
 
     <dimen name="volume_dialog_slider_margin_bottom">-2dp</dimen>
 
     <dimen name="volume_dialog_row_margin_bottom">8dp</dimen>
 
     <dimen name="volume_dialog_settings_icon_size">16dp</dimen>
+
+    <dimen name="volume_dialog_elevation">9dp</dimen>
 
     <!-- Gravity for the notification panel -->
     <integer name="notification_panel_layout_gravity">0x31</integer><!-- center_horizontal|top -->
@@ -313,8 +317,10 @@
     <dimen name="pull_span_min">25dp</dimen>
 
     <dimen name="qs_tile_height">106dp</dimen>
+    <dimen name="qs_tile_layout_margin_side">9dp</dimen>
     <dimen name="qs_tile_margin_horizontal">18dp</dimen>
     <dimen name="qs_tile_margin_vertical">24dp</dimen>
+    <dimen name="qs_tile_margin_top_bottom">12dp</dimen>
     <dimen name="qs_tile_margin_top">18dp</dimen>
     <dimen name="qs_quick_tile_size">48dp</dimen>
     <!-- Width for the spacer, used between QS tiles. -->
@@ -733,8 +739,6 @@
 
     <dimen name="volume_expander_margin_end">2dp</dimen>
     <dimen name="volume_expander_margin_top">6dp</dimen>
-
-    <dimen name="volume_panel_elevation">8dp</dimen>
 
     <!-- Padding between icon and text for managed profile toast -->
     <dimen name="managed_profile_toast_padding">4dp</dimen>

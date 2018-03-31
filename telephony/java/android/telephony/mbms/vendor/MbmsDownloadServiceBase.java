@@ -130,6 +130,10 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
             @Override
             public void onError(int errorCode, String message) {
                 try {
+                    if (errorCode == MbmsErrors.UNKNOWN) {
+                        throw new IllegalArgumentException(
+                                "Middleware cannot send an unknown error.");
+                    }
                     callback.onError(errorCode, message);
                 } catch (RemoteException e) {
                     onAppCallbackDied(uid, subscriptionId);

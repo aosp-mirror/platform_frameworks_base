@@ -76,6 +76,7 @@ const int FIELD_ID_CONFIG_STATS_MATCHER_STATS = 13;
 const int FIELD_ID_CONFIG_STATS_CONDITION_STATS = 14;
 const int FIELD_ID_CONFIG_STATS_METRIC_STATS = 15;
 const int FIELD_ID_CONFIG_STATS_ALERT_STATS = 16;
+const int FIELD_ID_CONFIG_STATS_METRIC_DIMENSION_IN_CONDITION_STATS = 17;
 
 const int FIELD_ID_MATCHER_STATS_ID = 1;
 const int FIELD_ID_MATCHER_STATS_COUNT = 2;
@@ -255,6 +256,20 @@ void StatsdStats::noteMetricDimensionSize(const ConfigKey& key, const int64_t& i
     }
 }
 
+void StatsdStats::noteMetricDimensionInConditionSize(
+        const ConfigKey& key, const int64_t& id, int size) {
+    lock_guard<std::mutex> lock(mLock);
+    // if name doesn't exist before, it will create the key with count 0.
+    auto statsIt = mConfigStats.find(key);
+    if (statsIt == mConfigStats.end()) {
+        return;
+    }
+    auto& metricsDimensionMap = statsIt->second->metric_dimension_in_condition_stats;
+    if (size > metricsDimensionMap[id]) {
+        metricsDimensionMap[id] = size;
+    }
+}
+
 void StatsdStats::noteMatcherMatched(const ConfigKey& key, const int64_t& id) {
     lock_guard<std::mutex> lock(mLock);
 
@@ -339,6 +354,7 @@ void StatsdStats::resetInternalLocked() {
         config.second->matcher_stats.clear();
         config.second->condition_stats.clear();
         config.second->metric_stats.clear();
+        config.second->metric_dimension_in_condition_stats.clear();
         config.second->alert_stats.clear();
     }
 }
@@ -500,6 +516,13 @@ void addConfigStatsToProto(const ConfigStats& configStats, ProtoOutputStream* pr
     for (const auto& pair : configStats.metric_stats) {
         uint64_t tmpToken = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
                                           FIELD_ID_CONFIG_STATS_METRIC_STATS);
+        proto->write(FIELD_TYPE_INT64 | FIELD_ID_METRIC_STATS_ID, (long long)pair.first);
+        proto->write(FIELD_TYPE_INT32 | FIELD_ID_METRIC_STATS_COUNT, pair.second);
+        proto->end(tmpToken);
+    }
+    for (const auto& pair : configStats.metric_dimension_in_condition_stats) {
+        uint64_t tmpToken = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                                         FIELD_ID_CONFIG_STATS_METRIC_DIMENSION_IN_CONDITION_STATS);
         proto->write(FIELD_TYPE_INT64 | FIELD_ID_METRIC_STATS_ID, (long long)pair.first);
         proto->write(FIELD_TYPE_INT32 | FIELD_ID_METRIC_STATS_COUNT, pair.second);
         proto->end(tmpToken);

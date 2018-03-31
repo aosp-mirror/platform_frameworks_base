@@ -14,6 +14,6 @@
     limitations under the License.
 -->
 <transition xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@color/qs_detail_transition" />
-    <item android:drawable="?android:attr/colorPrimary" />
+    <item android:drawable="@drawable/qs_customizer_background_transition" />
+    <item android:drawable="@drawable/qs_customizer_background_primary" />
 </transition>

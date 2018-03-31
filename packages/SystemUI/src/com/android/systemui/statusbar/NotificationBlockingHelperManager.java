@@ -17,11 +17,19 @@
 package com.android.systemui.statusbar;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.UserHandle;
+import android.service.notification.StatusBarNotification;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.statusbar.phone.StatusBar;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 
@@ -37,6 +45,7 @@ public class NotificationBlockingHelperManager {
     private final Context mContext;
     /** Row that the blocking helper will be shown in (via {@link NotificationGuts}. */
     private ExpandableNotificationRow mBlockingHelperRow;
+    private Set<String> mNonBlockablePkgs;
 
     /**
      * Whether the notification shade/stack is expanded - used to determine blocking helper
@@ -46,6 +55,9 @@ public class NotificationBlockingHelperManager {
 
     public NotificationBlockingHelperManager(Context context) {
         mContext = context;
+        mNonBlockablePkgs = new HashSet<>();
+        Collections.addAll(mNonBlockablePkgs, mContext.getResources().getStringArray(
+                com.android.internal.R.array.config_nonBlockableNotificationPackages));
     }
 
     /**
@@ -59,15 +71,14 @@ public class NotificationBlockingHelperManager {
      */
     boolean perhapsShowBlockingHelper(
             ExpandableNotificationRow row, NotificationMenuRowPlugin menuRow) {
-        int numChildren = row.getNumberOfNotificationChildren();
-
         // We only show the blocking helper if:
-        // - The dismissed row is a valid group (>1 or 0 children) or the only child in the group
+        // - User sentiment is negative (DEBUG flag can bypass)
         // - The notification shade is fully expanded (guarantees we're not touching a HUN).
-        // - User sentiment is negative
-        if (DEBUG
-                || row.getEntry().userSentiment == USER_SENTIMENT_NEGATIVE
+        // - The row is blockable (i.e. not non-blockable)
+        // - The dismissed row is a valid group (>1 or 0 children) or the only child in the group
+        if ((row.getEntry().userSentiment == USER_SENTIMENT_NEGATIVE || DEBUG)
                 && mIsShadeExpanded
+                && !row.getIsNonblockable()
                 && (!row.isChildInGroup() || row.isOnlyChildInGroup())) {
             // Dismiss any current blocking helper before continuing forward (only one can be shown
             // at a given time).
@@ -123,6 +134,13 @@ public class NotificationBlockingHelperManager {
      */
     public void setNotificationShadeExpanded(float expandedHeight) {
         mIsShadeExpanded = expandedHeight > 0.0f;
+    }
+
+    /**
+     * Returns whether the given package name is in the list of non-blockable packages.
+     */
+    public boolean isNonblockablePackage(String packageName) {
+        return mNonBlockablePkgs.contains(packageName);
     }
 
     @VisibleForTesting

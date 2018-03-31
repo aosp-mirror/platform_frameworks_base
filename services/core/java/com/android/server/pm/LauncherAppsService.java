@@ -364,6 +364,17 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
+        public Bundle getSuspendedPackageLauncherExtras(String packageName,
+                UserHandle user) {
+            if (!canAccessProfile(user.getIdentifier(), "Cannot get launcher extras")) {
+                return null;
+            }
+            final PackageManagerInternal pmi =
+                    LocalServices.getService(PackageManagerInternal.class);
+            return pmi.getSuspendedPackageLauncherExtras(packageName, user.getIdentifier());
+        }
+
+        @Override
         public ApplicationInfo getApplicationInfo(
                 String callingPackage, String packageName, int flags, UserHandle user)
                 throws RemoteException {
@@ -732,7 +743,7 @@ public class LauncherAppsService extends SystemService {
             }
 
             @Override
-            public void onPackagesSuspended(String[] packages) {
+            public void onPackagesSuspended(String[] packages, Bundle launcherExtras) {
                 UserHandle user = new UserHandle(getChangingUserId());
                 final int n = mListeners.beginBroadcast();
                 try {
@@ -741,7 +752,7 @@ public class LauncherAppsService extends SystemService {
                         BroadcastCookie cookie = (BroadcastCookie) mListeners.getBroadcastCookie(i);
                         if (!isEnabledProfileOf(cookie.user, user, "onPackagesSuspended")) continue;
                         try {
-                            listener.onPackagesSuspended(user, packages);
+                            listener.onPackagesSuspended(user, packages, launcherExtras);
                         } catch (RemoteException re) {
                             Slog.d(TAG, "Callback failed ", re);
                         }
@@ -750,7 +761,7 @@ public class LauncherAppsService extends SystemService {
                     mListeners.finishBroadcast();
                 }
 
-                super.onPackagesSuspended(packages);
+                super.onPackagesSuspended(packages, launcherExtras);
             }
 
             @Override

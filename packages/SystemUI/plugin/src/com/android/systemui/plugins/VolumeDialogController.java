@@ -19,6 +19,7 @@ import android.content.ComponentName;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.os.Handler;
+import android.os.VibrationEffect;
 import android.util.SparseArray;
 
 import com.android.systemui.plugins.VolumeDialogController.Callbacks;
@@ -44,7 +45,8 @@ public interface VolumeDialogController {
     void setRingerMode(int ringerModeNormal, boolean external);
 
     boolean hasVibrator();
-    void vibrate();
+    void vibrate(VibrationEffect effect);
+    void scheduleTouchFeedback();
 
     AudioManager getAudioManager();
 

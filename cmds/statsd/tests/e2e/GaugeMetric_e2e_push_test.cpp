@@ -34,7 +34,7 @@ StatsdConfig CreateStatsdConfigForPushedEvent(const GaugeMetric::SamplingType sa
     *config.add_atom_matcher() = CreateMoveToBackgroundAtomMatcher();
     *config.add_atom_matcher() = CreateMoveToForegroundAtomMatcher();
 
-    auto atomMatcher = CreateSimpleAtomMatcher("", android::util::APP_START_CHANGED);
+    auto atomMatcher = CreateSimpleAtomMatcher("", android::util::APP_START_OCCURRED);
     *config.add_atom_matcher() = atomMatcher;
 
     auto isInBackgroundPredicate = CreateIsInBackgroundPredicate();
@@ -49,18 +49,18 @@ StatsdConfig CreateStatsdConfigForPushedEvent(const GaugeMetric::SamplingType sa
     gaugeMetric->mutable_gauge_fields_filter()->set_include_all(false);
     gaugeMetric->set_sampling_type(sampling_type);
     auto fieldMatcher = gaugeMetric->mutable_gauge_fields_filter()->mutable_fields();
-    fieldMatcher->set_field(android::util::APP_START_CHANGED);
+    fieldMatcher->set_field(android::util::APP_START_OCCURRED);
     fieldMatcher->add_child()->set_field(3);  // type (enum)
     fieldMatcher->add_child()->set_field(4);  // activity_name(str)
     fieldMatcher->add_child()->set_field(7);  // activity_start_msec(int64)
     *gaugeMetric->mutable_dimensions_in_what() =
-        CreateDimensions(android::util::APP_START_CHANGED, {1 /* uid field */ });
+        CreateDimensions(android::util::APP_START_OCCURRED, {1 /* uid field */ });
     gaugeMetric->set_bucket(FIVE_MINUTES);
 
     auto links = gaugeMetric->add_links();
     links->set_condition(isInBackgroundPredicate.id());
     auto dimensionWhat = links->mutable_fields_in_what();
-    dimensionWhat->set_field(android::util::APP_START_CHANGED);
+    dimensionWhat->set_field(android::util::APP_START_OCCURRED);
     dimensionWhat->add_child()->set_field(1);  // uid field.
     auto dimensionCondition = links->mutable_fields_in_condition();
     dimensionCondition->set_field(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED);
@@ -68,12 +68,12 @@ StatsdConfig CreateStatsdConfigForPushedEvent(const GaugeMetric::SamplingType sa
     return config;
 }
 
-std::unique_ptr<LogEvent> CreateAppStartChangedEvent(
-    const int uid, const string& pkg_name, AppStartChanged::TransitionType type,
+std::unique_ptr<LogEvent> CreateAppStartOccurredEvent(
+    const int uid, const string& pkg_name, AppStartOccurred::TransitionType type,
     const string& activity_name, const string& calling_pkg_name, const bool is_instant_app,
     int64_t activity_start_msec, uint64_t timestampNs) {
     auto logEvent = std::make_unique<LogEvent>(
-        android::util::APP_START_CHANGED, timestampNs);
+        android::util::APP_START_OCCURRED, timestampNs);
     logEvent->write(uid);
     logEvent->write(pkg_name);
     logEvent->write(type);
@@ -112,32 +112,32 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
             appUid1, bucketStartTimeNs + 2 * bucketSizeNs + 100));
 
 
-        events.push_back(CreateAppStartChangedEvent(
-            appUid1, "app1", AppStartChanged::WARM, "activity_name1", "calling_pkg_name1",
+        events.push_back(CreateAppStartOccurredEvent(
+            appUid1, "app1", AppStartOccurred::WARM, "activity_name1", "calling_pkg_name1",
             true /*is_instant_app*/, 101 /*activity_start_msec*/, bucketStartTimeNs + 10));
-        events.push_back(CreateAppStartChangedEvent(
-            appUid1, "app1", AppStartChanged::HOT, "activity_name2", "calling_pkg_name2",
+        events.push_back(CreateAppStartOccurredEvent(
+            appUid1, "app1", AppStartOccurred::HOT, "activity_name2", "calling_pkg_name2",
             true /*is_instant_app*/, 102 /*activity_start_msec*/, bucketStartTimeNs + 20));
-        events.push_back(CreateAppStartChangedEvent(
-            appUid1, "app1", AppStartChanged::COLD, "activity_name3", "calling_pkg_name3",
+        events.push_back(CreateAppStartOccurredEvent(
+            appUid1, "app1", AppStartOccurred::COLD, "activity_name3", "calling_pkg_name3",
             true /*is_instant_app*/, 103 /*activity_start_msec*/, bucketStartTimeNs + 30));
-        events.push_back(CreateAppStartChangedEvent(
-            appUid1, "app1", AppStartChanged::WARM, "activity_name4", "calling_pkg_name4",
+        events.push_back(CreateAppStartOccurredEvent(
+            appUid1, "app1", AppStartOccurred::WARM, "activity_name4", "calling_pkg_name4",
             true /*is_instant_app*/, 104 /*activity_start_msec*/,
             bucketStartTimeNs + bucketSizeNs + 30));
-        events.push_back(CreateAppStartChangedEvent(
-            appUid1, "app1", AppStartChanged::COLD, "activity_name5", "calling_pkg_name5",
+        events.push_back(CreateAppStartOccurredEvent(
+            appUid1, "app1", AppStartOccurred::COLD, "activity_name5", "calling_pkg_name5",
             true /*is_instant_app*/, 105 /*activity_start_msec*/,
             bucketStartTimeNs + 2 * bucketSizeNs));
-        events.push_back(CreateAppStartChangedEvent(
-            appUid1, "app1", AppStartChanged::HOT, "activity_name6", "calling_pkg_name6",
+        events.push_back(CreateAppStartOccurredEvent(
+            appUid1, "app1", AppStartOccurred::HOT, "activity_name6", "calling_pkg_name6",
             false /*is_instant_app*/, 106 /*activity_start_msec*/,
             bucketStartTimeNs + 2 * bucketSizeNs + 10));
 
         events.push_back(CreateMoveToBackgroundEvent(
                 appUid2, bucketStartTimeNs + bucketSizeNs + 10));
-        events.push_back(CreateAppStartChangedEvent(
-            appUid2, "app2", AppStartChanged::COLD, "activity_name7", "calling_pkg_name7",
+        events.push_back(CreateAppStartOccurredEvent(
+            appUid2, "app2", AppStartOccurred::COLD, "activity_name7", "calling_pkg_name7",
             true /*is_instant_app*/, 201 /*activity_start_msec*/,
             bucketStartTimeNs + 2 * bucketSizeNs + 10));
 
@@ -159,7 +159,7 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
         EXPECT_EQ(2, gaugeMetrics.data_size());
 
         auto data = gaugeMetrics.data(0);
-        EXPECT_EQ(android::util::APP_START_CHANGED, data.dimensions_in_what().field());
+        EXPECT_EQ(android::util::APP_START_OCCURRED, data.dimensions_in_what().field());
         EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
         EXPECT_EQ(1 /* uid field */,
                   data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -171,29 +171,29 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
             EXPECT_EQ(2, data.bucket_info(0).wall_clock_timestamp_nanos_size());
             EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_nanos());
             EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_nanos());
-            EXPECT_EQ(AppStartChanged::HOT, data.bucket_info(0).atom(0).app_start_changed().type());
+            EXPECT_EQ(AppStartOccurred::HOT, data.bucket_info(0).atom(0).app_start_occurred().type());
             EXPECT_EQ("activity_name2",
-                      data.bucket_info(0).atom(0).app_start_changed().activity_name());
+                      data.bucket_info(0).atom(0).app_start_occurred().activity_name());
             EXPECT_EQ(102L,
-                      data.bucket_info(0).atom(0).app_start_changed().activity_start_millis());
-            EXPECT_EQ(AppStartChanged::COLD,
-                      data.bucket_info(0).atom(1).app_start_changed().type());
+                      data.bucket_info(0).atom(0).app_start_occurred().activity_start_millis());
+            EXPECT_EQ(AppStartOccurred::COLD,
+                      data.bucket_info(0).atom(1).app_start_occurred().type());
             EXPECT_EQ("activity_name3",
-                      data.bucket_info(0).atom(1).app_start_changed().activity_name());
+                      data.bucket_info(0).atom(1).app_start_occurred().activity_name());
             EXPECT_EQ(103L,
-                      data.bucket_info(0).atom(1).app_start_changed().activity_start_millis());
+                      data.bucket_info(0).atom(1).app_start_occurred().activity_start_millis());
 
             EXPECT_EQ(1, data.bucket_info(1).atom_size());
             EXPECT_EQ(1, data.bucket_info(1).elapsed_timestamp_nanos_size());
             EXPECT_EQ(1, data.bucket_info(1).wall_clock_timestamp_nanos_size());
             EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(1).start_bucket_nanos());
             EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs, data.bucket_info(1).end_bucket_nanos());
-            EXPECT_EQ(AppStartChanged::WARM,
-                      data.bucket_info(1).atom(0).app_start_changed().type());
+            EXPECT_EQ(AppStartOccurred::WARM,
+                      data.bucket_info(1).atom(0).app_start_occurred().type());
             EXPECT_EQ("activity_name4",
-                      data.bucket_info(1).atom(0).app_start_changed().activity_name());
+                      data.bucket_info(1).atom(0).app_start_occurred().activity_name());
             EXPECT_EQ(104L,
-                      data.bucket_info(1).atom(0).app_start_changed().activity_start_millis());
+                      data.bucket_info(1).atom(0).app_start_occurred().activity_start_millis());
 
             EXPECT_EQ(2, data.bucket_info(2).atom_size());
             EXPECT_EQ(2, data.bucket_info(2).elapsed_timestamp_nanos_size());
@@ -202,41 +202,41 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
                       data.bucket_info(2).start_bucket_nanos());
             EXPECT_EQ(bucketStartTimeNs + 3 * bucketSizeNs,
                       data.bucket_info(2).end_bucket_nanos());
-            EXPECT_EQ(AppStartChanged::COLD,
-                      data.bucket_info(2).atom(0).app_start_changed().type());
+            EXPECT_EQ(AppStartOccurred::COLD,
+                      data.bucket_info(2).atom(0).app_start_occurred().type());
             EXPECT_EQ("activity_name5",
-                      data.bucket_info(2).atom(0).app_start_changed().activity_name());
+                      data.bucket_info(2).atom(0).app_start_occurred().activity_name());
             EXPECT_EQ(105L,
-                      data.bucket_info(2).atom(0).app_start_changed().activity_start_millis());
-            EXPECT_EQ(AppStartChanged::HOT,
-                      data.bucket_info(2).atom(1).app_start_changed().type());
+                      data.bucket_info(2).atom(0).app_start_occurred().activity_start_millis());
+            EXPECT_EQ(AppStartOccurred::HOT,
+                      data.bucket_info(2).atom(1).app_start_occurred().type());
             EXPECT_EQ("activity_name6",
-                      data.bucket_info(2).atom(1).app_start_changed().activity_name());
+                      data.bucket_info(2).atom(1).app_start_occurred().activity_name());
             EXPECT_EQ(106L,
-                      data.bucket_info(2).atom(1).app_start_changed().activity_start_millis());
+                      data.bucket_info(2).atom(1).app_start_occurred().activity_start_millis());
         } else {
             EXPECT_EQ(1, data.bucket_info(0).atom_size());
             EXPECT_EQ(1, data.bucket_info(0).elapsed_timestamp_nanos_size());
             EXPECT_EQ(1, data.bucket_info(0).wall_clock_timestamp_nanos_size());
             EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_nanos());
             EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_nanos());
-            EXPECT_EQ(AppStartChanged::HOT, data.bucket_info(0).atom(0).app_start_changed().type());
+            EXPECT_EQ(AppStartOccurred::HOT, data.bucket_info(0).atom(0).app_start_occurred().type());
             EXPECT_EQ("activity_name2",
-                      data.bucket_info(0).atom(0).app_start_changed().activity_name());
+                      data.bucket_info(0).atom(0).app_start_occurred().activity_name());
             EXPECT_EQ(102L,
-                      data.bucket_info(0).atom(0).app_start_changed().activity_start_millis());
+                      data.bucket_info(0).atom(0).app_start_occurred().activity_start_millis());
 
             EXPECT_EQ(1, data.bucket_info(1).atom_size());
             EXPECT_EQ(1, data.bucket_info(1).elapsed_timestamp_nanos_size());
             EXPECT_EQ(1, data.bucket_info(1).wall_clock_timestamp_nanos_size());
             EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(1).start_bucket_nanos());
             EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs, data.bucket_info(1).end_bucket_nanos());
-            EXPECT_EQ(AppStartChanged::WARM,
-                      data.bucket_info(1).atom(0).app_start_changed().type());
+            EXPECT_EQ(AppStartOccurred::WARM,
+                      data.bucket_info(1).atom(0).app_start_occurred().type());
             EXPECT_EQ("activity_name4",
-                      data.bucket_info(1).atom(0).app_start_changed().activity_name());
+                      data.bucket_info(1).atom(0).app_start_occurred().activity_name());
             EXPECT_EQ(104L,
-                      data.bucket_info(1).atom(0).app_start_changed().activity_start_millis());
+                      data.bucket_info(1).atom(0).app_start_occurred().activity_start_millis());
 
             EXPECT_EQ(1, data.bucket_info(2).atom_size());
             EXPECT_EQ(1, data.bucket_info(2).elapsed_timestamp_nanos_size());
@@ -245,17 +245,17 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
                       data.bucket_info(2).start_bucket_nanos());
             EXPECT_EQ(bucketStartTimeNs + 3 * bucketSizeNs,
                       data.bucket_info(2).end_bucket_nanos());
-            EXPECT_EQ(AppStartChanged::COLD,
-                      data.bucket_info(2).atom(0).app_start_changed().type());
+            EXPECT_EQ(AppStartOccurred::COLD,
+                      data.bucket_info(2).atom(0).app_start_occurred().type());
             EXPECT_EQ("activity_name5",
-                      data.bucket_info(2).atom(0).app_start_changed().activity_name());
+                      data.bucket_info(2).atom(0).app_start_occurred().activity_name());
             EXPECT_EQ(105L,
-                      data.bucket_info(2).atom(0).app_start_changed().activity_start_millis());
+                      data.bucket_info(2).atom(0).app_start_occurred().activity_start_millis());
         }
 
         data = gaugeMetrics.data(1);
 
-        EXPECT_EQ(data.dimensions_in_what().field(), android::util::APP_START_CHANGED);
+        EXPECT_EQ(data.dimensions_in_what().field(), android::util::APP_START_OCCURRED);
         EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
         EXPECT_EQ(1 /* uid field */,
                   data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -266,10 +266,10 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
         EXPECT_EQ(1, data.bucket_info(0).wall_clock_timestamp_nanos_size());
         EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs, data.bucket_info(0).start_bucket_nanos());
         EXPECT_EQ(bucketStartTimeNs + 3 * bucketSizeNs, data.bucket_info(0).end_bucket_nanos());
-        EXPECT_EQ(AppStartChanged::COLD, data.bucket_info(0).atom(0).app_start_changed().type());
+        EXPECT_EQ(AppStartOccurred::COLD, data.bucket_info(0).atom(0).app_start_occurred().type());
         EXPECT_EQ("activity_name7",
-                  data.bucket_info(0).atom(0).app_start_changed().activity_name());
-        EXPECT_EQ(201L, data.bucket_info(0).atom(0).app_start_changed().activity_start_millis());
+                  data.bucket_info(0).atom(0).app_start_occurred().activity_name());
+        EXPECT_EQ(201L, data.bucket_info(0).atom(0).app_start_occurred().activity_start_millis());
     }
 }
 

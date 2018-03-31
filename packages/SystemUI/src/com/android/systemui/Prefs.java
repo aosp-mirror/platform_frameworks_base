@@ -53,7 +53,8 @@ public final class Prefs {
             Key.NUM_APPS_LAUNCHED,
             Key.HAS_SEEN_RECENTS_ONBOARDING,
             Key.SEEN_RINGER_GUIDANCE_COUNT,
-            Key.QS_HAS_TURNED_OFF_MOBILE_DATA
+            Key.QS_HAS_TURNED_OFF_MOBILE_DATA,
+            Key.TOUCHED_RINGER_TOGGLE
     })
     public @interface Key {
         @Deprecated
@@ -91,6 +92,7 @@ public final class Prefs {
         String SEEN_RINGER_GUIDANCE_COUNT = "RingerGuidanceCount";
         String QS_TILE_SPECS_REVEALED = "QsTileSpecsRevealed";
         String QS_HAS_TURNED_OFF_MOBILE_DATA = "QsHasTurnedOffMobileData";
+        String TOUCHED_RINGER_TOGGLE = "TouchedRingerToggle";
     }
 
     public static boolean getBoolean(Context context, @Key String key, boolean defaultValue) {

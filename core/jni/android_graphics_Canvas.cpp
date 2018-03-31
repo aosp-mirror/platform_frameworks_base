@@ -448,8 +448,9 @@ static void drawBitmapArray(JNIEnv* env, jobject, jlong canvasHandle,
                             jboolean hasAlpha, jlong paintHandle) {
     // Note: If hasAlpha is false, kRGB_565_SkColorType will be used, which will
     // correct the alphaType to kOpaque_SkAlphaType.
-    SkImageInfo info = SkImageInfo::MakeN32(width, height, kPremul_SkAlphaType,
-            GraphicsJNI::defaultColorSpace());
+    SkImageInfo info = SkImageInfo::Make(width, height,
+                           hasAlpha ? kN32_SkColorType : kRGB_565_SkColorType,
+                           kPremul_SkAlphaType);
     SkBitmap bitmap;
     bitmap.setInfo(info);
     sk_sp<Bitmap> androidBitmap = Bitmap::allocateHeapBitmap(&bitmap);

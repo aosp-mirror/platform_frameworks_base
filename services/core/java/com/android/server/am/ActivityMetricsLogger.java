@@ -489,7 +489,7 @@ class ActivityMetricsLogger {
         builder.addTaggedData(FIELD_CLASS_NAME, info.launchedActivity.info.name);
         mMetricsLogger.write(builder);
         StatsLog.write(
-                StatsLog.APP_START_CANCEL_CHANGED,
+                StatsLog.APP_START_CANCELED,
                 info.launchedActivity.appInfo.uid,
                 info.launchedActivity.packageName,
                 convertAppStartTransitionType(type),
@@ -561,7 +561,7 @@ class ActivityMetricsLogger {
                 packageOptimizationInfo.getCompilationFilter());
         mMetricsLogger.write(builder);
         StatsLog.write(
-                StatsLog.APP_START_CHANGED,
+                StatsLog.APP_START_OCCURRED,
                 info.applicationInfo.uid,
                 info.packageName,
                 convertAppStartTransitionType(info.type),
@@ -582,15 +582,15 @@ class ActivityMetricsLogger {
 
     private int convertAppStartTransitionType(int tronType) {
         if (tronType == TYPE_TRANSITION_COLD_LAUNCH) {
-            return StatsLog.APP_START_CHANGED__TYPE__COLD;
+            return StatsLog.APP_START_OCCURRED__TYPE__COLD;
         }
         if (tronType == TYPE_TRANSITION_WARM_LAUNCH) {
-            return StatsLog.APP_START_CHANGED__TYPE__WARM;
+            return StatsLog.APP_START_OCCURRED__TYPE__WARM;
         }
         if (tronType == TYPE_TRANSITION_HOT_LAUNCH) {
-            return StatsLog.APP_START_CHANGED__TYPE__HOT;
+            return StatsLog.APP_START_OCCURRED__TYPE__HOT;
         }
-        return StatsLog.APP_START_CHANGED__TYPE__APP_START_TRANSITION_TYPE_UNKNOWN;
+        return StatsLog.APP_START_OCCURRED__TYPE__UNKNOWN;
      }
 
     void logAppTransitionReportedDrawn(ActivityRecord r, boolean restoredFromBundle) {
@@ -611,12 +611,12 @@ class ActivityMetricsLogger {
                 info.currentTransitionProcessRunning ? 1 : 0);
         mMetricsLogger.write(builder);
         StatsLog.write(
-                StatsLog.APP_START_FULLY_DRAWN_CHANGED,
+                StatsLog.APP_START_FULLY_DRAWN,
                 info.launchedActivity.appInfo.uid,
                 info.launchedActivity.packageName,
                 restoredFromBundle
-                        ? StatsLog.APP_START_FULLY_DRAWN_CHANGED__TYPE__WITH_BUNDLE
-                        : StatsLog.APP_START_FULLY_DRAWN_CHANGED__TYPE__WITHOUT_BUNDLE,
+                        ? StatsLog.APP_START_FULLY_DRAWN__TYPE__WITH_BUNDLE
+                        : StatsLog.APP_START_FULLY_DRAWN__TYPE__WITHOUT_BUNDLE,
                 info.launchedActivity.info.name,
                 info.currentTransitionProcessRunning,
                 startupTimeMs);

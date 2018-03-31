@@ -241,6 +241,7 @@ message StatsdStatsReport {
         repeated ConditionStats condition_stats = 14;
         repeated MetricStats metric_stats = 15;
         repeated AlertStats alert_stats = 16;
+        repeated MetricStats metric_dimension_in_condition_stats = 17;
     }
 
     repeated ConfigStats config_stats = 3;

@@ -16,9 +16,8 @@
 
 package android.security.keystore;
 
-import android.util.Log;
+import android.app.ActivityManager;
 import android.hardware.fingerprint.FingerprintManager;
-import android.os.UserHandle;
 import android.security.GateKeeper;
 import android.security.KeyStore;
 import android.security.keymaster.KeymasterArguments;
@@ -102,7 +101,6 @@ public abstract class KeymasterUtils {
      *         require user authentication.
      */
     public static void addUserAuthArgs(KeymasterArguments args, UserAuthArgs spec) {
-        args.addUnsignedInt(KeymasterDefs.KM_TAG_USER_ID, UserHandle.getCallingUserId());
 
         if (spec.isUserConfirmationRequired()) {
             args.addBoolean(KeymasterDefs.KM_TAG_TRUSTED_CONFIRMATION_REQUIRED);

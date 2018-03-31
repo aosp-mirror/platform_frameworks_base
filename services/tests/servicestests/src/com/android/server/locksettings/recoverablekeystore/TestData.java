@@ -14,8 +14,12 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.CertPath;
 import java.security.spec.ECPrivateKeySpec;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+
 public final class TestData {
 
+    private static final String KEY_ALGORITHM = "AES";
     private static final long DEFAULT_SERIAL = 1000;
     private static final String CERT_PATH_ENCODING = "PkiPath";
 
@@ -307,5 +311,11 @@ public final class TestData {
         BigInteger priv = new BigInteger(/*signum=*/ 1, keyBytes);
         KeyFactory keyFactory = KeyFactory.getInstance("EC");
         return keyFactory.generatePrivate(new ECPrivateKeySpec(priv, SecureBox.EC_PARAM_SPEC));
+    }
+
+    public static SecretKey generateKey() throws Exception {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM);
+        keyGenerator.init(/*keySize=*/ 256);
+        return keyGenerator.generateKey();
     }
 }

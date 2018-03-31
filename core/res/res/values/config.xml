@@ -30,33 +30,32 @@
         <item><xliff:g id="id">@string/status_bar_rotate</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_headset</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_data_saver</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_managed_profile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_ime</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_sync_failing</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_sync_active</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_cast</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_hotspot</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_location</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_bluetooth</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_nfc</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_tty</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_speakerphone</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_zen</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_mute</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_volume</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_vpn</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_ethernet</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_wifi</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_mobile</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_airplane</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_cdma_eri</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_data_connection</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_phone_evdo_signal</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_phone_signal</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_battery</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_alarm_clock</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_secure</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_clock</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_alarm_clock</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_bluetooth</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_managed_profile</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_cast</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_vpn</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_location</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_hotspot</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_ethernet</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_wifi</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_mobile</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_airplane</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_battery</xliff:g></item>
     </string-array>
 
     <string translatable="false" name="status_bar_rotate">rotate</string>

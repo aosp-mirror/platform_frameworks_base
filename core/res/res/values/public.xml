@@ -708,23 +708,38 @@
   <public type="dimen" name="thumbnail_height" id="0x01050001" />
   <public type="dimen" name="thumbnail_width" id="0x01050002" />
 
+  <!-- Equivalent to 0xffaaaaaa -->
   <public type="color" name="darker_gray" id="0x01060000" />
+  <!-- {@deprecated Use a text color from your theme instead.} -->
   <public type="color" name="primary_text_dark" id="0x01060001" />
+  <!-- {@deprecated Use a text color from your theme instead.} -->
   <public type="color" name="primary_text_dark_nodisable" id="0x01060002" />
+  <!-- {@deprecated Use a text color from your theme instead.} -->
   <public type="color" name="primary_text_light" id="0x01060003" />
+  <!-- {@deprecated Use a text color from your theme instead.} -->
   <public type="color" name="primary_text_light_nodisable" id="0x01060004" />
+  <!-- {@deprecated Use a text color from your theme instead.} -->
   <public type="color" name="secondary_text_dark" id="0x01060005" />
+  <!-- {@deprecated Use a text color from your theme instead.} -->
   <public type="color" name="secondary_text_dark_nodisable" id="0x01060006" />
+  <!-- {@deprecated Use a text color from your theme instead.} -->
   <public type="color" name="secondary_text_light" id="0x01060007" />
+  <!-- {@deprecated Use a text color from your theme instead.} -->
   <public type="color" name="secondary_text_light_nodisable" id="0x01060008" />
+  <!-- Equivalent to 0xff808080 -->
   <public type="color" name="tab_indicator_text" id="0x01060009" />
+  <!-- Equivalent to 0xff000000 -->
   <public type="color" name="widget_edittext_dark" id="0x0106000a" />
   <public type="color" name="white" id="0x0106000b" />
   <public type="color" name="black" id="0x0106000c" />
   <public type="color" name="transparent" id="0x0106000d" />
+  <!-- Equivalent to 0xff000000 -->
   <public type="color" name="background_dark" id="0x0106000e" />
+  <!-- Equivalent to 0xffffffff -->
   <public type="color" name="background_light" id="0x0106000f" />
+  <!-- {@deprecated Use a text color from your theme instead.} -->
   <public type="color" name="tertiary_text_dark" id="0x01060010" />
+  <!-- {@deprecated Use a text color from your theme instead.} -->
   <public type="color" name="tertiary_text_light" id="0x01060011" />
 
   <public type="array" name="emailAddressTypes" id="0x01070000" />

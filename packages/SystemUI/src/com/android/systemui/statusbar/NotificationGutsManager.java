@@ -65,7 +65,6 @@ public class NotificationGutsManager implements Dumpable {
     private static final String EXTRA_FRAGMENT_ARG_KEY = ":settings:fragment_args_key";
 
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
-    private final Set<String> mNonBlockablePkgs;
     private final Context mContext;
     private final AccessibilityManager mAccessibilityManager;
 
@@ -86,10 +85,6 @@ public class NotificationGutsManager implements Dumpable {
     public NotificationGutsManager(Context context) {
         mContext = context;
         Resources res = context.getResources();
-
-        mNonBlockablePkgs = new HashSet<>();
-        Collections.addAll(mNonBlockablePkgs, res.getStringArray(
-                com.android.internal.R.array.config_nonBlockableNotificationPackages));
 
         mAccessibilityManager = (AccessibilityManager)
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
@@ -279,45 +274,17 @@ public class NotificationGutsManager implements Dumpable {
                     iNotificationManager,
                     packageName,
                     row.getEntry().channel,
-                    getNumNotificationChannels(row, packageName, userHandle),
+                    row.getNumUniqueChannels(),
                     sbn,
                     mCheckSaveListener,
                     onSettingsClick,
                     onAppSettingsClick,
-                    mNonBlockablePkgs,
+                    row.getIsNonblockable(),
                     isForBlockingHelper,
                     row.getEntry().userSentiment == USER_SENTIMENT_NEGATIVE);
         } catch (RemoteException e) {
             Log.e(TAG, e.toString());
         }
-    }
-
-    /**
-     * @return the number of channels covered by the notification row (including its children if
-     * it's a summary notification).
-     */
-    private int getNumNotificationChannels(
-            ExpandableNotificationRow row, String packageName, UserHandle userHandle) {
-        ArraySet<NotificationChannel> channels = new ArraySet<>();
-
-        channels.add(row.getEntry().channel);
-
-        // If this is a summary, then add in the children notification channels for the
-        // same user and pkg.
-        if (row.isSummaryWithChildren()) {
-            final List<ExpandableNotificationRow> childrenRows = row.getNotificationChildren();
-            final int numChildren = childrenRows.size();
-            for (int i = 0; i < numChildren; i++) {
-                final ExpandableNotificationRow childRow = childrenRows.get(i);
-                final NotificationChannel childChannel = childRow.getEntry().channel;
-                final StatusBarNotification childSbn = childRow.getStatusBarNotification();
-                if (childSbn.getUser().equals(userHandle) &&
-                        childSbn.getPackageName().equals(packageName)) {
-                    channels.add(childChannel);
-                }
-            }
-        }
-        return channels.size();
     }
 
     /**

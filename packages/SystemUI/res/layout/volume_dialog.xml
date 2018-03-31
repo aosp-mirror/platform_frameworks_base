@@ -17,9 +17,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:padding="@dimen/volume_dialog_panel_transparent_padding"
     android:background="@android:color/transparent"
     android:theme="@style/qs_theme"
-    android:clipChildren="false" >
+    android:clipChildren="false"
+    android:clipToPadding="false">
     <!-- right-aligned to be physically near volume button -->
     <LinearLayout
         android:id="@+id/volume_dialog"
@@ -30,22 +32,25 @@
         android:background="@android:color/transparent"
         android:layout_margin="@dimen/volume_dialog_base_margin"
         android:orientation="vertical"
-        android:clipChildren="false" >
+        android:clipChildren="false"
+        android:clipToPadding="false" >
 
         <FrameLayout
             android:id="@+id/ringer"
             android:layout_width="@dimen/volume_dialog_ringer_size"
             android:layout_height="@dimen/volume_dialog_ringer_size"
             android:layout_marginBottom="@dimen/volume_dialog_spacer"
-            android:elevation="@dimen/volume_panel_elevation"
+            android:translationZ="@dimen/volume_dialog_elevation"
             android:layout_gravity="right"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             android:background="@drawable/rounded_bg_full">
             <com.android.keyguard.AlphaOptimizedImageButton
                 android:id="@+id/ringer_icon"
                 style="@style/VolumeButtons"
-                android:background="?android:selectableItemBackgroundBorderless"
-                android:layout_width="@dimen/volume_dialog_tap_target_size"
-                android:layout_height="@dimen/volume_dialog_tap_target_size"
+                android:background="@drawable/rounded_ripple"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:tint="@color/accent_tint_color_selector"
                 android:layout_gravity="center"
                 android:soundEffectsEnabled="false" />
@@ -59,10 +64,10 @@
             android:minWidth="@dimen/volume_dialog_panel_width"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:translationZ="@dimen/volume_dialog_elevation"
             android:clipChildren="false"
             android:clipToPadding="false"
-            android:background="@drawable/rounded_bg_full"
-            android:elevation="@dimen/volume_panel_elevation" >
+            android:background="@drawable/rounded_bg_full" >
             <LinearLayout
                 android:id="@+id/volume_dialog_rows"
                 android:layout_width="wrap_content"
@@ -84,7 +89,7 @@
                     android:layout_height="@dimen/volume_dialog_tap_target_size"
                     android:layout_gravity="center"
                     android:contentDescription="@string/accessibility_volume_settings"
-                    android:background="?android:selectableItemBackgroundBorderless"
+                    android:background="@drawable/ripple_drawable_20dp"
                     android:tint="?android:attr/colorControlNormal"
                     android:soundEffectsEnabled="false" />
             </FrameLayout>

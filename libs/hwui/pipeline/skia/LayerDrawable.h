@@ -32,7 +32,8 @@ class LayerDrawable : public SkDrawable {
 public:
     explicit LayerDrawable(DeferredLayerUpdater* layerUpdater) : mLayerUpdater(layerUpdater) {}
 
-    static bool DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer);
+    static bool DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer,
+                          const SkRect* dstRect = nullptr);
 
 protected:
     virtual SkRect onGetBounds() override {

@@ -26,6 +26,7 @@ import android.content.pm.PackageManager.ComponentInfoFlags;
 import android.content.pm.PackageManager.PackageInfoFlags;
 import android.content.pm.PackageManager.ResolveInfoFlags;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.util.SparseArray;
 
 import java.lang.annotation.Retention;
@@ -186,6 +187,22 @@ public abstract class PackageManagerInternal {
      */
     public abstract PackageInfo getPackageInfo(String packageName,
             @PackageInfoFlags int flags, int filterCallingUid, int userId);
+
+    /**
+     * Retrieve launcher extras for a suspended package provided to the system in
+     * {@link PackageManager#setPackagesSuspended(String[], boolean, PersistableBundle,
+     * PersistableBundle, String)}
+     *
+     * @param packageName The package for which to return launcher extras.
+     * @param userId The user for which to check,
+     * @return The launcher extras.
+     *
+     * @see PackageManager#setPackagesSuspended(String[], boolean, PersistableBundle,
+     * PersistableBundle, String)
+     * @see PackageManager#isPackageSuspended()
+     */
+    public abstract Bundle getSuspendedPackageLauncherExtras(String packageName,
+            int userId);
 
     /**
      * Do a straight uid lookup for the given package/application in the given user.

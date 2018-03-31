@@ -29,5 +29,5 @@ message DisplayInfoProto {
   optional int32 logical_height = 2;
   optional int32 app_width = 3;
   optional int32 app_height = 4;
-  optional string name = 5;
+  optional string name = 5 [ (.android.privacy).dest = DEST_EXPLICIT ];
 }

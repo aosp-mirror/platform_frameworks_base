@@ -175,9 +175,9 @@ message IncidentProto {
     ];
 
     optional GZippedFileProto last_kmsg = 2007 [
-        (section).type = SECTION_NONE, // disable until selinux permission is gained
+        (section).type = SECTION_GZIP,
         (section).args = "/sys/fs/pstore/console-ramoops /sys/fs/pstore/console-ramoops-0 /proc/last_kmsg",
-        (privacy).dest = DEST_AUTOMATIC
+        (privacy).dest = DEST_EXPLICIT
     ];
 
     // System Services

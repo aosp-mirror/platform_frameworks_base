@@ -1279,5 +1279,10 @@ public class UsageStatsService extends SystemService implements
         public void onAdminDataAvailable() {
             mAppStandby.onAdminDataAvailable();
         }
+
+        @Override
+        public void reportExemptedSyncStart(String packageName, int userId) {
+            mAppStandby.postReportExemptedSyncStart(packageName, userId);
+        }
     }
 }
