@@ -786,7 +786,7 @@ public final class ContentService extends IContentService.Stub {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
                 syncManager.getSyncStorageEngine().setSyncAutomatically(account, userId,
-                        providerName, sync, syncExemptionFlag);
+                        providerName, sync, syncExemptionFlag, callingUid);
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -913,6 +913,7 @@ public final class ContentService extends IContentService.Stub {
                 "no permission to write the sync settings");
 
         syncable = normalizeSyncable(syncable);
+        final int callingUid = Binder.getCallingUid();
 
         int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();
@@ -920,7 +921,7 @@ public final class ContentService extends IContentService.Stub {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
                 syncManager.getSyncStorageEngine().setIsSyncable(
-                        account, userId, providerName, syncable);
+                        account, userId, providerName, syncable, callingUid);
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -974,7 +975,7 @@ public final class ContentService extends IContentService.Stub {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
                 syncManager.getSyncStorageEngine().setMasterSyncAutomatically(flag, userId,
-                        getSyncExemptionForCaller(callingUid));
+                        getSyncExemptionForCaller(callingUid), callingUid);
             }
         } finally {
             restoreCallingIdentity(identityToken);

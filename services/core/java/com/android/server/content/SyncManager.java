@@ -51,8 +51,8 @@ import android.content.SyncStatusInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ProviderInfo;
 import android.content.pm.RegisteredServicesCache;
 import android.content.pm.RegisteredServicesCacheListener;
@@ -88,26 +88,25 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 
-import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-import com.android.internal.notification.SystemNotificationChannels;
-import com.android.internal.util.ArrayUtils;
-import com.android.server.DeviceIdleController;
-import com.android.server.DeviceIdleController.LocalService;
-import com.android.server.LocalServices;
-import com.android.server.SystemService;
-import com.android.server.job.JobSchedulerInternal;
-import com.google.android.collect.Lists;
-import com.google.android.collect.Maps;
-
 import com.android.internal.R;
 import com.android.internal.app.IBatteryStats;
+import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.DeviceIdleController;
+import com.android.server.LocalServices;
+import com.android.server.SystemService;
 import com.android.server.accounts.AccountManagerService;
 import com.android.server.backup.AccountSyncSettingsBackupHelper;
 import com.android.server.content.SyncStorageEngine.AuthorityInfo;
 import com.android.server.content.SyncStorageEngine.EndPoint;
 import com.android.server.content.SyncStorageEngine.OnSyncRequestListener;
+import com.android.server.job.JobSchedulerInternal;
+
+import com.google.android.collect.Lists;
+import com.google.android.collect.Maps;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -1028,7 +1027,8 @@ public class SyncManager {
                 final boolean isAlwaysSyncable = syncAdapterInfo.type.isAlwaysSyncable();
                 if (!checkIfAccountReady && isSyncable < 0 && isAlwaysSyncable) {
                     mSyncStorageEngine.setIsSyncable(
-                            account.account, account.userId, authority, AuthorityInfo.SYNCABLE);
+                            account.account, account.userId, authority, AuthorityInfo.SYNCABLE,
+                            SyncLogger.CALLING_UID_SELF);
                     isSyncable = AuthorityInfo.SYNCABLE;
                 }
 
