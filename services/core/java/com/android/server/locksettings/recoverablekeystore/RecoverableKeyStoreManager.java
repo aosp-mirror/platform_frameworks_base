@@ -227,8 +227,7 @@ public class RecoverableKeyStoreManager {
             certPath = certXml.getRandomEndpointCert(rootCert);
         } catch (CertValidationException e) {
             Log.e(TAG, "Invalid endpoint cert", e);
-            throw new ServiceSpecificException(
-                    ERROR_INVALID_CERTIFICATE, "Failed to validate certificate.");
+            throw new ServiceSpecificException(ERROR_INVALID_CERTIFICATE, e.getMessage());
         }
 
         boolean wasInitialized = mDatabase.getRecoveryServiceCertPath(userId, uid,
@@ -249,8 +248,7 @@ public class RecoverableKeyStoreManager {
             }
         } catch (CertificateEncodingException e) {
             Log.e(TAG, "Failed to encode CertPath", e);
-            throw new ServiceSpecificException(
-                    ERROR_BAD_CERTIFICATE_FORMAT, "Failed to encode CertPath.");
+            throw new ServiceSpecificException(ERROR_BAD_CERTIFICATE_FORMAT, e.getMessage());
         }
     }
 
@@ -281,8 +279,7 @@ public class RecoverableKeyStoreManager {
         } catch (CertParsingException e) {
             Log.d(TAG, "Failed to parse the sig file: " + HexDump.toHexString(
                     recoveryServiceSigFile));
-            throw new ServiceSpecificException(
-                    ERROR_BAD_CERTIFICATE_FORMAT, "Failed to parse the sig file.");
+            throw new ServiceSpecificException(ERROR_BAD_CERTIFICATE_FORMAT, e.getMessage());
         }
 
         X509Certificate rootCert =
@@ -293,8 +290,7 @@ public class RecoverableKeyStoreManager {
             Log.d(TAG, "The signature over the cert file is invalid."
                     + " Cert: " + HexDump.toHexString(recoveryServiceCertFile)
                     + " Sig: " + HexDump.toHexString(recoveryServiceSigFile));
-            throw new ServiceSpecificException(
-                    ERROR_INVALID_CERTIFICATE, "The signature over the cert file is invalid.");
+            throw new ServiceSpecificException(ERROR_INVALID_CERTIFICATE, e.getMessage());
         }
 
         initRecoveryService(rootCertificateAlias, recoveryServiceCertFile);
@@ -471,8 +467,7 @@ public class RecoverableKeyStoreManager {
         try {
             publicKey = KeySyncUtils.deserializePublicKey(verifierPublicKey);
         } catch (InvalidKeySpecException e) {
-            throw new ServiceSpecificException(ERROR_BAD_CERTIFICATE_FORMAT,
-                    "Not a valid X509 key");
+            throw new ServiceSpecificException(ERROR_BAD_CERTIFICATE_FORMAT, e.getMessage());
         }
         // The raw public key bytes contained in vaultParams must match the ones given in
         // verifierPublicKey; otherwise, the user secret may be decrypted by a key that is not owned
@@ -537,8 +532,7 @@ public class RecoverableKeyStoreManager {
         try {
             certPath = verifierCertPath.getCertPath();
         } catch (CertificateException e) {
-            throw new ServiceSpecificException(ERROR_BAD_CERTIFICATE_FORMAT,
-                    "Failed decode the certificate path");
+            throw new ServiceSpecificException(ERROR_BAD_CERTIFICATE_FORMAT, e.getMessage());
         }
 
         try {

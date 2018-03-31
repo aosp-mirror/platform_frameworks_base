@@ -102,7 +102,7 @@ public class RecoverySession implements AutoCloseable {
         } catch (ServiceSpecificException e) {
             if (e.errorCode == RecoveryController.ERROR_BAD_CERTIFICATE_FORMAT
                     || e.errorCode == RecoveryController.ERROR_INVALID_CERTIFICATE) {
-                throw new CertificateException(e.getMessage());
+                throw new CertificateException("Invalid certificate for recovery session", e);
             }
             throw mRecoveryController.wrapUnexpectedServiceSpecificException(e);
         }
@@ -137,7 +137,7 @@ public class RecoverySession implements AutoCloseable {
         } catch (ServiceSpecificException e) {
             if (e.errorCode == RecoveryController.ERROR_BAD_CERTIFICATE_FORMAT
                     || e.errorCode == RecoveryController.ERROR_INVALID_CERTIFICATE) {
-                throw new CertificateException(e.getMessage());
+                throw new CertificateException("Invalid certificate for recovery session", e);
             }
             throw mRecoveryController.wrapUnexpectedServiceSpecificException(e);
         }
@@ -191,7 +191,7 @@ public class RecoverySession implements AutoCloseable {
         } catch (ServiceSpecificException e) {
             if (e.errorCode == RecoveryController.ERROR_BAD_CERTIFICATE_FORMAT
                     || e.errorCode == RecoveryController.ERROR_INVALID_CERTIFICATE) {
-                throw new CertificateException(e.getMessage());
+                throw new CertificateException("Invalid certificate for recovery session", e);
             }
             throw mRecoveryController.wrapUnexpectedServiceSpecificException(e);
         }

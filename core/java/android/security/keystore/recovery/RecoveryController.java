@@ -43,7 +43,7 @@ import java.util.Map;
 /**
  * Backs up cryptographic keys to remote secure hardware, encrypted with the user's lock screen.
  *
- * <p>A system app with the {@link android.Manifest#RECOVER_KEYSTORE} permission may generate or
+ * <p>A system app with the {@code android.permission.RECOVER_KEYSTORE} permission may generate or
  * import recoverable keys using this class. To generate a key, the app must call
  * {@link #generateKey(String)} with the desired alias for the key. This returns an AndroidKeyStore
  * reference to a 256-bit {@link javax.crypto.SecretKey}, which can be used for AES/GCM/NoPadding.
@@ -292,7 +292,7 @@ public class RecoveryController {
         } catch (ServiceSpecificException e) {
             if (e.errorCode == ERROR_BAD_CERTIFICATE_FORMAT
                     || e.errorCode == ERROR_INVALID_CERTIFICATE) {
-                throw new CertificateException(e.getMessage());
+                throw new CertificateException("Invalid certificate for recovery service", e);
             }
             throw wrapUnexpectedServiceSpecificException(e);
         }
@@ -338,7 +338,7 @@ public class RecoveryController {
         } catch (ServiceSpecificException e) {
             if (e.errorCode == ERROR_BAD_CERTIFICATE_FORMAT
                     || e.errorCode == ERROR_INVALID_CERTIFICATE) {
-                throw new CertificateException(e.getMessage());
+                throw new CertificateException("Invalid certificate for recovery service", e);
             }
             throw wrapUnexpectedServiceSpecificException(e);
         }
