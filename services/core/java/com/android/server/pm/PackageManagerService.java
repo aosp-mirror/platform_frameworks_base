@@ -13833,11 +13833,15 @@ public class PackageManagerService extends IPackageManager.Stub
         info.sendPackageRemovedBroadcasts(true /*killApp*/);
     }
 
-    private void sendPackagesSuspendedForUser(String[] pkgList, int userId, boolean suspended) {
+    private void sendPackagesSuspendedForUser(String[] pkgList, int userId, boolean suspended,
+            PersistableBundle launcherExtras) {
         if (pkgList.length > 0) {
             Bundle extras = new Bundle(1);
             extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
-
+            if (launcherExtras != null) {
+                extras.putBundle(Intent.EXTRA_LAUNCHER_EXTRAS,
+                        new Bundle(launcherExtras.deepCopy()));
+            }
             sendPackageBroadcast(
                     suspended ? Intent.ACTION_PACKAGES_SUSPENDED
                             : Intent.ACTION_PACKAGES_UNSUSPENDED,
@@ -14049,7 +14053,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!changedPackagesList.isEmpty()) {
             final String[] changedPackages = changedPackagesList.toArray(
                     new String[changedPackagesList.size()]);
-            sendPackagesSuspendedForUser(changedPackages, userId, suspended);
+            sendPackagesSuspendedForUser(changedPackages, userId, suspended, launcherExtras);
             sendMyPackageSuspendedOrUnsuspended(changedPackages, suspended, appExtras, userId);
             synchronized (mPackages) {
                 scheduleWritePackageRestrictionsLocked(userId);
@@ -23756,6 +23760,18 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             return PackageManagerService.this
                     .getPackageInfoInternal(packageName, PackageManager.VERSION_CODE_HIGHEST,
                             flags, filterCallingUid, userId);
+        }
+
+        @Override
+        public Bundle getSuspendedPackageLauncherExtras(String packageName, int userId) {
+            synchronized (mPackages) {
+                final PackageSetting ps = mSettings.mPackages.get(packageName);
+                PersistableBundle launcherExtras = null;
+                if (ps != null) {
+                    launcherExtras = ps.readUserState(userId).suspendedLauncherExtras;
+                }
+                return (launcherExtras != null) ? new Bundle(launcherExtras.deepCopy()) : null;
+            }
         }
 
         @Override
