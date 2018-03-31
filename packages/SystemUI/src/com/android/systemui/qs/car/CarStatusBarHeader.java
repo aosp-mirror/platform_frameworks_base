@@ -44,7 +44,6 @@ public class CarStatusBarHeader extends LinearLayout {
         float intensity = colorForeground == Color.WHITE ? 0f : 1f;
         Rect tintArea = new Rect(0, 0, 0, 0);
 
-        applyDarkness(R.id.signal_cluster, tintArea, intensity, colorForeground);
         applyDarkness(R.id.battery, tintArea, intensity, colorForeground);
         applyDarkness(R.id.clock, tintArea, intensity, colorForeground);
 

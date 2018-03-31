@@ -24,13 +24,9 @@
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_height="match_parent"
+        android:paddingEnd="4dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"/>
-
-    <include layout="@layout/signal_cluster_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/signal_cluster_margin_start"/>
 
     <com.android.systemui.BatteryMeterView android:id="@+id/battery"
         android:layout_height="match_parent"
