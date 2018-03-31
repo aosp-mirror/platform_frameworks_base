@@ -54,6 +54,9 @@ public class SyncLogger {
 
     private static SyncLogger sInstance;
 
+    // Special UID used for logging to denote the self process.
+    public static final int CALLING_UID_SELF = -1;
+
     SyncLogger() {
     }
 
@@ -62,8 +65,10 @@ public class SyncLogger {
      */
     public static synchronized SyncLogger getInstance() {
         if (sInstance == null) {
-            final boolean enable = "1".equals(SystemProperties.get("debug.synclog",
-                    Build.IS_DEBUGGABLE ? "1" : "0"));
+            final boolean enable =
+                    Build.IS_DEBUGGABLE
+                    || "1".equals(SystemProperties.get("debug.synclog"))
+                    || Log.isLoggable(TAG, Log.VERBOSE);
             if (enable) {
                 sInstance = new RotatingFileLogger();
             } else {
