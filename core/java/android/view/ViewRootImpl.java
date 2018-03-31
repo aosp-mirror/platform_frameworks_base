@@ -380,7 +380,7 @@ public final class ViewRootImpl implements ViewParent,
     InputStage mFirstPostImeInputStage;
     InputStage mSyntheticInputStage;
 
-    private final KeyFallbackManager mKeyFallbackManager = new KeyFallbackManager();
+    private final UnhandledKeyManager mUnhandledKeyManager = new UnhandledKeyManager();
 
     boolean mWindowAttributesChanged = false;
     int mWindowAttributesChangesFlag = 0;
@@ -4975,10 +4975,10 @@ public final class ViewRootImpl implements ViewParent,
         private int processKeyEvent(QueuedInputEvent q) {
             final KeyEvent event = (KeyEvent)q.mEvent;
 
-            mKeyFallbackManager.mDispatched = false;
+            mUnhandledKeyManager.mDispatched = false;
 
-            if (mKeyFallbackManager.hasFocus()
-                    && mKeyFallbackManager.dispatchUnique(mView, event)) {
+            if (mUnhandledKeyManager.hasFocus()
+                    && mUnhandledKeyManager.dispatchUnique(mView, event)) {
                 return FINISH_HANDLED;
             }
 
@@ -4991,7 +4991,7 @@ public final class ViewRootImpl implements ViewParent,
                 return FINISH_NOT_HANDLED;
             }
 
-            if (mKeyFallbackManager.dispatchUnique(mView, event)) {
+            if (mUnhandledKeyManager.dispatchUnique(mView, event)) {
                 return FINISH_HANDLED;
             }
 
@@ -7798,7 +7798,7 @@ public final class ViewRootImpl implements ViewParent,
      * @return {@code true} if the event was handled, {@code false} otherwise.
      */
     public boolean dispatchKeyFallbackEvent(KeyEvent event) {
-        return mKeyFallbackManager.dispatch(mView, event);
+        return mUnhandledKeyManager.dispatch(mView, event);
     }
 
     class TakenSurfaceHolder extends BaseSurfaceHolder {
@@ -8374,18 +8374,17 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private static class KeyFallbackManager {
+    private static class UnhandledKeyManager {
 
-        // This is used to ensure that key-fallback events are only dispatched once. We attempt
+        // This is used to ensure that unhandled events are only dispatched once. We attempt
         // to dispatch more than once in order to achieve a certain order. Specifically, if we
-        // are in an Activity or Dialog (and have a Window.Callback), the keyfallback events should
+        // are in an Activity or Dialog (and have a Window.Callback), the unhandled events should
         // be dispatched after the view hierarchy, but before the Activity. However, if we aren't
-        // in an activity, we still want key fallbacks to be dispatched.
+        // in an activity, we still want unhandled keys to be dispatched.
         boolean mDispatched = false;
 
         SparseBooleanArray mCapturedKeys = new SparseBooleanArray();
-        WeakReference<View> mFallbackReceiver = null;
-        int mVisitCount = 0;
+        WeakReference<View> mCurrentReceiver = null;
 
         private void updateCaptureState(KeyEvent event) {
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
@@ -8402,56 +8401,28 @@ public final class ViewRootImpl implements ViewParent,
 
             updateCaptureState(event);
 
-            if (mFallbackReceiver != null) {
-                View target = mFallbackReceiver.get();
+            if (mCurrentReceiver != null) {
+                View target = mCurrentReceiver.get();
                 if (mCapturedKeys.size() == 0) {
-                    mFallbackReceiver = null;
+                    mCurrentReceiver = null;
                 }
                 if (target != null && target.isAttachedToWindow()) {
-                    return target.onKeyFallback(event);
+                    target.onUnhandledKeyEvent(event);
                 }
                 // consume anyways so that we don't feed uncaptured key events to other views
                 return true;
             }
 
-            boolean result = dispatchInZOrder(root, event);
+            View consumer = root.dispatchUnhandledKeyEvent(event);
+            if (consumer != null) {
+                mCurrentReceiver = new WeakReference<>(consumer);
+            }
             Trace.traceEnd(Trace.TRACE_TAG_VIEW);
-            return result;
-        }
-
-        private boolean dispatchInZOrder(View view, KeyEvent evt) {
-            if (view instanceof ViewGroup) {
-                ViewGroup vg = (ViewGroup) view;
-                ArrayList<View> orderedViews = vg.buildOrderedChildList();
-                if (orderedViews != null) {
-                    try {
-                        for (int i = orderedViews.size() - 1; i >= 0; --i) {
-                            View v = orderedViews.get(i);
-                            if (dispatchInZOrder(v, evt)) {
-                                return true;
-                            }
-                        }
-                    } finally {
-                        orderedViews.clear();
-                    }
-                } else {
-                    for (int i = vg.getChildCount() - 1; i >= 0; --i) {
-                        View v = vg.getChildAt(i);
-                        if (dispatchInZOrder(v, evt)) {
-                            return true;
-                        }
-                    }
-                }
-            }
-            if (view.onKeyFallback(evt)) {
-                mFallbackReceiver = new WeakReference<>(view);
-                return true;
-            }
-            return false;
+            return consumer != null;
         }
 
         boolean hasFocus() {
-            return mFallbackReceiver != null;
+            return mCurrentReceiver != null;
         }
 
         boolean dispatchUnique(View root, KeyEvent event) {
