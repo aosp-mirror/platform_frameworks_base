@@ -30,12 +30,10 @@ class IntervalStats {
     public long beginTime;
     public long endTime;
     public long lastTimeSaved;
-    public long lastInteractiveTime;
-    public long lastNonInteractiveTime;
-    public long interactiveDuration;
-    public int interactiveCount;
-    public long nonInteractiveDuration;
-    public int nonInteractiveCount;
+    public final EventTracker interactiveTracker = new EventTracker();
+    public final EventTracker nonInteractiveTracker = new EventTracker();
+    public final EventTracker keyguardShownTracker = new EventTracker();
+    public final EventTracker keyguardHiddenTracker = new EventTracker();
     public final ArrayMap<String, UsageStats> packageStats = new ArrayMap<>();
     public final ArrayMap<Configuration, ConfigurationStats> configurations = new ArrayMap<>();
     public Configuration activeConfiguration;
@@ -46,6 +44,44 @@ class IntervalStats {
     // and only keep it if it's not in the cache. The GC will take care of the
     // strings that had identical copies in the cache.
     private final ArraySet<String> mStringCache = new ArraySet<>();
+
+    public static final class EventTracker {
+        public long curStartTime;
+        public long lastEventTime;
+        public long duration;
+        public int count;
+
+        public void commitTime(long timeStamp) {
+            if (curStartTime != 0) {
+                duration += timeStamp - duration;
+                curStartTime = 0;
+            }
+        }
+
+        public void update(long timeStamp) {
+            if (curStartTime == 0) {
+                // If we aren't already running, time to bump the count.
+                count++;
+            }
+            commitTime(timeStamp);
+            curStartTime = timeStamp;
+            lastEventTime = timeStamp;
+        }
+
+        void addToEventStats(List<EventStats> out, int event, long beginTime, long endTime) {
+            if (count != 0 || duration != 0) {
+                EventStats ev = new EventStats();
+                ev.mEventType = event;
+                ev.mCount = count;
+                ev.mTotalTime = duration;
+                ev.mLastEventTime = lastEventTime;
+                ev.mBeginTimeStamp = beginTime;
+                ev.mEndTimeStamp = endTime;
+                out.add(ev);
+            }
+        }
+
+    }
 
     /**
      * Gets the UsageStats object for the given package, or creates one and adds it internally.
@@ -180,58 +216,42 @@ class IntervalStats {
         usageStats.mAppLaunchCount += 1;
     }
 
-    private void commitInteractiveTime(long timeStamp) {
-        if (lastInteractiveTime != 0) {
-            interactiveDuration += timeStamp - lastInteractiveTime;
-            lastInteractiveTime = 0;
-        }
-        if (lastNonInteractiveTime != 0) {
-            nonInteractiveDuration += timeStamp - lastNonInteractiveTime;
-            lastNonInteractiveTime = 0;
-        }
-    }
-
     void commitTime(long timeStamp) {
-        commitInteractiveTime(timeStamp);
+        interactiveTracker.commitTime(timeStamp);
+        nonInteractiveTracker.commitTime(timeStamp);
+        keyguardShownTracker.commitTime(timeStamp);
+        keyguardHiddenTracker.commitTime(timeStamp);
     }
 
     void updateScreenInteractive(long timeStamp) {
-        if (lastInteractiveTime != 0) {
-            // Already interactive, just keep running.
-            return;
-        }
-        commitInteractiveTime(timeStamp);
-        lastInteractiveTime = timeStamp;
-        interactiveCount++;
+        interactiveTracker.update(timeStamp);
+        nonInteractiveTracker.commitTime(timeStamp);
     }
 
     void updateScreenNonInteractive(long timeStamp) {
-        if (lastNonInteractiveTime != 0) {
-            // Already non-interactive, just keep running.
-            return;
-        }
-        commitInteractiveTime(timeStamp);
-        lastNonInteractiveTime = timeStamp;
-        nonInteractiveCount++;
+        nonInteractiveTracker.update(timeStamp);
+        interactiveTracker.commitTime(timeStamp);
     }
 
-    private void addOneEventStats(List<EventStats> out, int event, int count, long duration) {
-        if (count != 0 || duration != 0) {
-            EventStats ev = new EventStats();
-            ev.mEventType = event;
-            ev.mCount = count;
-            ev.mTotalTime = duration;
-            ev.mBeginTimeStamp = beginTime;
-            ev.mEndTimeStamp = endTime;
-            out.add(ev);
-        }
+    void updateKeyguardShown(long timeStamp) {
+        keyguardShownTracker.update(timeStamp);
+        keyguardHiddenTracker.commitTime(timeStamp);
+    }
+
+    void updateKeyguardHidden(long timeStamp) {
+        keyguardHiddenTracker.update(timeStamp);
+        keyguardShownTracker.commitTime(timeStamp);
     }
 
     void addEventStatsTo(List<EventStats> out) {
-        addOneEventStats(out, UsageEvents.Event.SCREEN_INTERACTIVE, interactiveCount,
-                interactiveDuration);
-        addOneEventStats(out, UsageEvents.Event.SCREEN_NON_INTERACTIVE, nonInteractiveCount,
-                nonInteractiveDuration);
+        interactiveTracker.addToEventStats(out, UsageEvents.Event.SCREEN_INTERACTIVE,
+                beginTime, endTime);
+        nonInteractiveTracker.addToEventStats(out, UsageEvents.Event.SCREEN_NON_INTERACTIVE,
+                beginTime, endTime);
+        keyguardShownTracker.addToEventStats(out, UsageEvents.Event.KEYGUARD_SHOWN,
+                beginTime, endTime);
+        keyguardHiddenTracker.addToEventStats(out, UsageEvents.Event.KEYGUARD_HIDDEN,
+                beginTime, endTime);
     }
 
     private String getCachedStringRef(String str) {

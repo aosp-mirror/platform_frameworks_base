@@ -41,10 +41,9 @@ public final class EventStats implements Parcelable {
     public long mEndTimeStamp;
 
     /**
-     * Last time used by the user with an explicit action (notification, activity launch).
      * {@hide}
      */
-    public long mLastTimeUsed;
+    public long mLastEventTime;
 
     /**
      * {@hide}
@@ -66,7 +65,7 @@ public final class EventStats implements Parcelable {
         mEventType = stats.mEventType;
         mBeginTimeStamp = stats.mBeginTimeStamp;
         mEndTimeStamp = stats.mEndTimeStamp;
-        mLastTimeUsed = stats.mLastTimeUsed;
+        mLastEventTime = stats.mLastEventTime;
         mTotalTime = stats.mTotalTime;
         mCount = stats.mCount;
     }
@@ -100,12 +99,12 @@ public final class EventStats implements Parcelable {
     }
 
     /**
-     * Get the last time this event was used, measured in milliseconds since the epoch.
+     * Get the last time this event triggered, measured in milliseconds since the epoch.
      * <p/>
      * See {@link System#currentTimeMillis()}.
      */
-    public long getLastTimeUsed() {
-        return mLastTimeUsed;
+    public long getLastEventTime() {
+        return mLastEventTime;
     }
 
     /**
@@ -138,7 +137,7 @@ public final class EventStats implements Parcelable {
         // We use the mBeginTimeStamp due to a bug where UsageStats files can overlap with
         // regards to their mEndTimeStamp.
         if (right.mBeginTimeStamp > mBeginTimeStamp) {
-            mLastTimeUsed = Math.max(mLastTimeUsed, right.mLastTimeUsed);
+            mLastEventTime = Math.max(mLastEventTime, right.mLastEventTime);
         }
         mBeginTimeStamp = Math.min(mBeginTimeStamp, right.mBeginTimeStamp);
         mEndTimeStamp = Math.max(mEndTimeStamp, right.mEndTimeStamp);
@@ -156,7 +155,7 @@ public final class EventStats implements Parcelable {
         dest.writeInt(mEventType);
         dest.writeLong(mBeginTimeStamp);
         dest.writeLong(mEndTimeStamp);
-        dest.writeLong(mLastTimeUsed);
+        dest.writeLong(mLastEventTime);
         dest.writeLong(mTotalTime);
         dest.writeInt(mCount);
     }
@@ -168,7 +167,7 @@ public final class EventStats implements Parcelable {
             stats.mEventType = in.readInt();
             stats.mBeginTimeStamp = in.readLong();
             stats.mEndTimeStamp = in.readLong();
-            stats.mLastTimeUsed = in.readLong();
+            stats.mLastEventTime = in.readLong();
             stats.mTotalTime = in.readLong();
             stats.mCount = in.readInt();
             return stats;
