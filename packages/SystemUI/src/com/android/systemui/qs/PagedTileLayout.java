@@ -167,6 +167,13 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         }
     }
 
+    @Override
+    public void setExpansion(float expansion) {
+        for (TileRecord tr : mTiles) {
+            tr.tileView.setExpansion(expansion);
+        }
+    }
+
     public void setPageListener(PageListener listener) {
         mPageListener = listener;
     }
