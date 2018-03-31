@@ -16,8 +16,11 @@
 
 package android.telephony.mbms;
 
+import android.annotation.IntDef;
 import android.telephony.MbmsDownloadSession;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -25,6 +28,26 @@ import java.util.List;
  * cell-broadcast.
  */
 public class MbmsDownloadSessionCallback {
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+            MbmsErrors.ERROR_NO_UNIQUE_MIDDLEWARE,
+            MbmsErrors.ERROR_MIDDLEWARE_LOST,
+            MbmsErrors.ERROR_MIDDLEWARE_NOT_BOUND,
+            MbmsErrors.InitializationErrors.ERROR_APP_PERMISSIONS_NOT_GRANTED,
+            MbmsErrors.InitializationErrors.ERROR_DUPLICATE_INITIALIZE,
+            MbmsErrors.InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
+            MbmsErrors.GeneralErrors.ERROR_MIDDLEWARE_NOT_YET_READY,
+            MbmsErrors.GeneralErrors.ERROR_OUT_OF_MEMORY,
+            MbmsErrors.GeneralErrors.ERROR_MIDDLEWARE_TEMPORARILY_UNAVAILABLE,
+            MbmsErrors.GeneralErrors.ERROR_IN_E911,
+            MbmsErrors.GeneralErrors.ERROR_NOT_CONNECTED_TO_HOME_CARRIER_LTE,
+            MbmsErrors.GeneralErrors.ERROR_UNABLE_TO_READ_SIM,
+            MbmsErrors.GeneralErrors.ERROR_CARRIER_CHANGE_NOT_ALLOWED,
+            MbmsErrors.DownloadErrors.ERROR_CANNOT_CHANGE_TEMP_FILE_ROOT,
+            MbmsErrors.DownloadErrors.ERROR_UNKNOWN_DOWNLOAD_REQUEST,
+            MbmsErrors.DownloadErrors.ERROR_UNKNOWN_FILE_INFO}, prefix = { "ERROR_" })
+    private @interface DownloadError{}
 
     /**
      * Indicates that the middleware has encountered an asynchronous error.
@@ -32,7 +55,7 @@ public class MbmsDownloadSessionCallback {
      * @param message A message, intended for debugging purposes, describing the error in further
      *                detail.
      */
-    public void onError(int errorCode, String message) {
+    public void onError(@DownloadError int errorCode, String message) {
         // default implementation empty
     }
 
