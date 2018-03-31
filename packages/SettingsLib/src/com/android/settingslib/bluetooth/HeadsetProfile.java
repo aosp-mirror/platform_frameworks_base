@@ -168,6 +168,11 @@ public class HeadsetProfile implements LocalBluetoothProfile {
         return mService.isAudioOn();
     }
 
+    public int getAudioState(BluetoothDevice device) {
+        if (mService == null) return BluetoothHeadset.STATE_AUDIO_DISCONNECTED;
+        return mService.getAudioState(device);
+    }
+
     public boolean isPreferred(BluetoothDevice device) {
         if (mService == null) return false;
         return mService.getPriority(device) > BluetoothProfile.PRIORITY_OFF;
