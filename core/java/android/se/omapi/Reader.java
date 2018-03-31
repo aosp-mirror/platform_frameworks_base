@@ -37,7 +37,7 @@ import java.io.IOException;
  *
  * @see <a href="http://globalplatform.org">GlobalPlatform Open Mobile API</a>
  */
-public class Reader {
+public final class Reader {
 
     private static final String TAG = "OMAPI.Reader";
     private final String mName;
