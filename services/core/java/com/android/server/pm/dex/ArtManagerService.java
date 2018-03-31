@@ -527,9 +527,10 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             String compilationFilter;
             try {
                 String isa = VMRuntime.getInstructionSet(abi);
-                String[] stats = DexFile.getDexFileOptimizationStatus(info.getBaseCodePath(), isa);
-                compilationFilter = stats[0];
-                compilationReason = stats[1];
+                DexFile.OptimizationInfo optInfo =
+                        DexFile.getDexFileOptimizationInfo(info.getBaseCodePath(), isa);
+                compilationFilter = optInfo.getStatus();
+                compilationReason = optInfo.getReason();
             } catch (FileNotFoundException e) {
                 Slog.e(TAG, "Could not get optimizations status for " + info.getBaseCodePath(), e);
                 compilationFilter = "error";
