@@ -673,12 +673,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullBluetoothBytesTransfer(int tagId, List<StatsLogEventWrapper> pulledData) {
         BluetoothActivityEnergyInfo info = pullBluetoothData();
         long elapsedNanos = SystemClock.elapsedRealtimeNanos();
-        for (UidTraffic traffic : info.getUidTraffic()) {
-            StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 3);
-            e.writeInt(traffic.getUid());
-            e.writeLong(traffic.getRxBytes());
-            e.writeLong(traffic.getTxBytes());
-            pulledData.add(e);
+        if (info.getUidTraffic() != null) {
+            for (UidTraffic traffic : info.getUidTraffic()) {
+                StatsLogEventWrapper e = new StatsLogEventWrapper(elapsedNanos, tagId, 3);
+                e.writeInt(traffic.getUid());
+                e.writeLong(traffic.getRxBytes());
+                e.writeLong(traffic.getTxBytes());
+                pulledData.add(e);
+            }
         }
     }
 
