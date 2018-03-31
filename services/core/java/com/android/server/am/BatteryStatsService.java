@@ -337,7 +337,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         synchronized (mStats) {
             mStats.noteProcessStartLocked(name, uid);
             StatsLog.write(StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name,
-                    StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED__EVENT__PROCESS_STARTED);
+                    StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED__STATE__STARTED);
         }
     }
 
@@ -345,15 +345,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         synchronized (mStats) {
             mStats.noteProcessCrashLocked(name, uid);
             StatsLog.write(StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name,
-                    StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED__EVENT__PROCESS_CRASHED);
+                    StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED__STATE__CRASHED);
         }
     }
 
     void noteProcessAnr(String name, int uid) {
         synchronized (mStats) {
             mStats.noteProcessAnrLocked(name, uid);
-            StatsLog.write(StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name,
-                    StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED__EVENT__PROCESS_ANRED);
         }
     }
 
@@ -361,7 +359,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         synchronized (mStats) {
             mStats.noteProcessFinishLocked(name, uid);
             StatsLog.write(StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name,
-                    StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED__EVENT__PROCESS_FINISHED);
+                    StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED__STATE__FINISHED);
         }
     }
 
@@ -768,8 +766,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteVideoOnLocked(uid);
-            StatsLog.write_non_chained(StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED, uid, null,
-                    StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED__STATE__ON);
+            StatsLog.write_non_chained(StatsLog.MEDIA_CODEC_STATE_CHANGED, uid, null,
+                    StatsLog.MEDIA_CODEC_STATE_CHANGED__STATE__ON);
         }
     }
 
@@ -777,8 +775,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteVideoOffLocked(uid);
-            StatsLog.write_non_chained(StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED, uid,
-                    null, StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED__STATE__OFF);
+            StatsLog.write_non_chained(StatsLog.MEDIA_CODEC_STATE_CHANGED, uid,
+                    null, StatsLog.MEDIA_CODEC_STATE_CHANGED__STATE__OFF);
         }
     }
 
@@ -795,8 +793,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteResetVideoLocked();
-            StatsLog.write_non_chained(StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED, -1, null,
-                    StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED__STATE__RESET);
+            StatsLog.write_non_chained(StatsLog.MEDIA_CODEC_STATE_CHANGED, -1, null,
+                    StatsLog.MEDIA_CODEC_STATE_CHANGED__STATE__RESET);
         }
     }
 
