@@ -15,6 +15,8 @@
  */
 #define LOG_TAG "libprotoutil"
 
+#include <inttypes.h>
+
 #include <android/util/protobuf.h>
 #include <android/util/ProtoOutputStream.h>
 #include <cutils/log.h>
@@ -28,7 +30,7 @@ ProtoOutputStream::ProtoOutputStream()
          mCompact(false),
          mDepth(0),
          mObjectId(0),
-         mExpectedObjectToken(0ULL)
+         mExpectedObjectToken(UINT64_C(-1))
 {
 }
 
@@ -45,7 +47,7 @@ ProtoOutputStream::clear()
     mCompact = false;
     mDepth = 0;
     mObjectId = 0;
-    mExpectedObjectToken = 0ULL;
+    mExpectedObjectToken = UINT64_C(-1);
 }
 
 bool
@@ -215,48 +217,48 @@ ProtoOutputStream::write(uint64_t fieldId, const char* val, size_t size)
  *                - 3 bits, max value 7, max value needed 5
  *  Bit  60    - true if the object is repeated
  *  Bits 59-51 - depth (For error checking)
- *                - 9 bits, max value 512, when checking, value is masked (if we really
- *                  are more than 512 levels deep)
+ *                - 9 bits, max value 511, when checking, value is masked (if we really
+ *                  are more than 511 levels deep)
  *  Bits 32-50 - objectId (For error checking)
- *                - 19 bits, max value 524,288. that's a lot of objects. IDs will wrap
+ *                - 19 bits, max value 524,287. that's a lot of objects. IDs will wrap
  *                  because of the overflow, and only the tokens are compared.
  *  Bits  0-31 - offset of the first size field in the buffer.
  */
-uint64_t
-makeToken(int tagSize, bool repeated, int depth, int objectId, int sizePos) {
-    return ((0x07L & (uint64_t)tagSize) << 61)
-            | (repeated ? (1LL << 60) : 0)
-            | (0x01ffL & (uint64_t)depth) << 51
-            | (0x07ffffL & (uint64_t)objectId) << 32
-            | (0x0ffffffffL & (uint64_t)sizePos);
+static uint64_t
+makeToken(uint32_t tagSize, bool repeated, uint32_t depth, uint32_t objectId, size_t sizePos) {
+    return ((UINT64_C(0x07) & (uint64_t)tagSize) << 61)
+            | (repeated ? (UINT64_C(1) << 60) : 0)
+            | (UINT64_C(0x01ff) & (uint64_t)depth) << 51
+            | (UINT64_C(0x07ffff) & (uint64_t)objectId) << 32
+            | (UINT64_C(0x0ffffffff) & (uint64_t)sizePos);
 }
 
 /**
  * Get the encoded tag size from the token.
  */
-static int getTagSizeFromToken(uint64_t token) {
-    return (int)(0x7 & (token >> 61));
+static uint32_t getTagSizeFromToken(uint64_t token) {
+    return 0x7 & (token >> 61);
 }
 
 /**
  * Get the nesting depth of startObject calls from the token.
  */
-static int getDepthFromToken(uint64_t token) {
-    return (int)(0x01ff & (token >> 51));
+static uint32_t getDepthFromToken(uint64_t token) {
+    return 0x01ff & (token >> 51);
 }
 
 /**
  * Get the location of the childRawSize (the first 32 bit size field) in this object.
  */
-static int getSizePosFromToken(uint64_t token) {
-    return (int)token;
+static uint32_t getSizePosFromToken(uint64_t token) {
+    return (uint32_t)token;
 }
 
 uint64_t
 ProtoOutputStream::start(uint64_t fieldId)
 {
     if ((fieldId & FIELD_TYPE_MASK) != FIELD_TYPE_MESSAGE) {
-        ALOGE("Can't call start for non-message type field: 0x%llx", (long long)fieldId);
+        ALOGE("Can't call start for non-message type field: 0x%" PRIx64, fieldId);
         return 0;
     }
 
@@ -278,18 +280,18 @@ void
 ProtoOutputStream::end(uint64_t token)
 {
     if (token != mExpectedObjectToken) {
-        ALOGE("Unexpected token: 0x%llx, should be 0x%llx", (long long)token, (long long)mExpectedObjectToken);
+        ALOGE("Unexpected token: 0x%" PRIx64 ", should be 0x%" PRIx64, token, mExpectedObjectToken);
         return;
     }
 
-    int depth = getDepthFromToken(token);
+    uint32_t depth = getDepthFromToken(token);
     if (depth != (mDepth & 0x01ff)) {
-        ALOGE("Unexpected depth: %d, should be %d", depth, mDepth);
+        ALOGE("Unexpected depth: %" PRIu32 ", should be %" PRIu32, depth, mDepth);
         return;
     }
     mDepth--;
 
-    int sizePos = getSizePosFromToken(token);
+    uint32_t sizePos = getSizePosFromToken(token);
     // number of bytes written in this start-end session.
     int childRawSize = mBuffer.wp()->pos() - sizePos - 8;
 
@@ -317,7 +319,7 @@ bool
 ProtoOutputStream::compact() {
     if (mCompact) return true;
     if (mDepth != 0) {
-        ALOGE("Can't compact when depth(%d) is not zero. Missing calls to end.", mDepth);
+        ALOGE("Can't compact when depth(%" PRIu32 ") is not zero. Missing calls to end.", mDepth);
         return false;
     }
     // record the size of the original buffer.
@@ -458,7 +460,10 @@ ProtoOutputStream::compactSize(size_t rawSize)
 size_t
 ProtoOutputStream::size()
 {
-    compact();
+    if (!compact()) {
+        ALOGE("compact failed, the ProtoOutputStream data is corrupted!");
+        // TODO: handle this error
+    }
     return mBuffer.size();
 }
 
@@ -492,7 +497,10 @@ ProtoOutputStream::flush(int fd)
 EncodedBuffer::iterator
 ProtoOutputStream::data()
 {
-    compact();
+    if (!compact()) {
+        ALOGE("compact failed, the ProtoOutputStream data is corrupted!");
+        // TODO: handle this error
+    }
     return mBuffer.begin();
 }
 
