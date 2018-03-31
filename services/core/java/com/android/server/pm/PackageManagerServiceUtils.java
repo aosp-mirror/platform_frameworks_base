@@ -576,7 +576,10 @@ public class PackageManagerServiceUtils {
             PackageParser.collectCertificates(disabledPkgSetting.pkg, true /* skipVerify */);
             if (pkgSetting.signatures.mSigningDetails.checkCapability(
                     disabledPkgSetting.signatures.mSigningDetails,
-                    PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)) {
+                    PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)
+                    || disabledPkgSetting.signatures.mSigningDetails.checkCapability(
+                            pkgSetting.signatures.mSigningDetails,
+                            PackageParser.SigningDetails.CertCapabilities.ROLLBACK)) {
                 return true;
             } else {
                 logCriticalInfo(Log.ERROR, "Updated system app mismatches cert on /system: " +
@@ -616,7 +619,10 @@ public class PackageManagerServiceUtils {
             // Already existing package. Make sure signatures match
             boolean match = parsedSignatures.checkCapability(
                     pkgSetting.signatures.mSigningDetails,
-                    PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA);
+                    PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)
+                            || pkgSetting.signatures.mSigningDetails.checkCapability(
+                                    parsedSignatures,
+                                    PackageParser.SigningDetails.CertCapabilities.ROLLBACK);
             if (!match && compareCompat) {
                 match = matchSignaturesCompat(packageName, pkgSetting.signatures,
                         parsedSignatures);
@@ -627,7 +633,12 @@ public class PackageManagerServiceUtils {
                         packageName,
                         pkgSetting.signatures.mSigningDetails,
                         parsedSignatures,
-                        PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA);
+                        PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)
+                                || matchSignaturesRecover(
+                                        packageName,
+                                        parsedSignatures,
+                                        pkgSetting.signatures.mSigningDetails,
+                                        PackageParser.SigningDetails.CertCapabilities.ROLLBACK);
             }
 
             if (!match && isApkVerificationForced(disabledPkgSetting)) {
