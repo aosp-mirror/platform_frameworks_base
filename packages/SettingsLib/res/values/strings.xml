@@ -501,30 +501,30 @@
     <!-- UI debug setting: Select Bluetooth AVRCP Version -->
     <string name="bluetooth_select_avrcp_version_dialog_title">Select Bluetooth AVRCP Version</string>
 
-    <!-- UI debug setting: Select Bluetooth Audio Codec -->
+    <!-- UI debug setting: Trigger Bluetooth Audio Codec Selection -->
     <string name="bluetooth_select_a2dp_codec_type">Bluetooth Audio Codec</string>
-    <!-- UI debug setting: Select Bluetooth Audio Codec -->
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title">Select Bluetooth Audio Codec</string>
+    <!-- UI debug setting: Trigger Bluetooth Audio Codec Selection -->
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title">Trigger Bluetooth Audio Codec\u000ASelection</string>
 
-    <!-- UI debug setting: Select Bluetooth Audio Sample Rate -->
+    <!-- UI debug setting: Trigger Bluetooth Audio Sample Rate Selection -->
     <string name="bluetooth_select_a2dp_codec_sample_rate">Bluetooth Audio Sample Rate</string>
-    <!-- UI debug setting: Select Bluetooth Audio Codec: Sample Rate -->
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title">Select Bluetooth Audio Codec:\u000ASample Rate</string>
+    <!-- UI debug setting: Trigger Bluetooth Audio Codec Selection: Sample Rate -->
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title">Trigger Bluetooth Audio Codec\u000ASelection: Sample Rate</string>
 
-    <!-- UI debug setting: Select Bluetooth Audio Bits Per Sample -->
+    <!-- UI debug setting: Trigger Bluetooth Audio Bits Per Sample Selection -->
     <string name="bluetooth_select_a2dp_codec_bits_per_sample">Bluetooth Audio Bits Per Sample</string>
-    <!-- UI debug setting: Select Bluetooth Audio Codec: Bits Per Sample -->
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title">Select Bluetooth Audio Codec:\u000ABits Per Sample</string>
+    <!-- UI debug setting: Trigger Bluetooth Audio Codec Selection: Bits Per Sample -->
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title">Trigger Bluetooth Audio Codec\u000ASelection: Bits Per Sample</string>
 
-    <!-- UI debug setting: Select Bluetooth Audio Channel Mode -->
+    <!-- UI debug setting: Trigger Bluetooth Audio Channel Mode Selection -->
     <string name="bluetooth_select_a2dp_codec_channel_mode">Bluetooth Audio Channel Mode</string>
-    <!-- UI debug setting: Select Bluetooth Audio Codec: Channel Mode -->
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title">Select Bluetooth Audio Codec:\u000AChannel Mode</string>
+    <!-- UI debug setting: Trigger Bluetooth Audio Codec Selection: Channel Mode -->
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title">Trigger Bluetooth Audio Codec\u000ASelection: Channel Mode</string>
 
-    <!-- UI debug setting: Select Bluetooth Audio LDAC Playback Quality -->
+    <!-- UI debug setting: Trigger Bluetooth Audio LDAC Playback Quality Selection -->
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality">Bluetooth Audio LDAC Codec: Playback Quality</string>
     <!-- UI debug setting: Select Bluetooth Audio LDAC Codec: LDAC Playback Quality -->
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title">Select Bluetooth Audio LDAC Codec:\u000APlayback Quality</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title">Trigger Bluetooth Audio LDAC Codec\u000ASelection: Playback Quality</string>
 
     <!-- [CHAR LIMIT=NONE] Label for displaying Bluetooth Audio Codec Parameters while streaming -->
     <string name="bluetooth_select_a2dp_codec_streaming_label">Streaming: <xliff:g id="streaming_parameter">%1$s</xliff:g></string>
