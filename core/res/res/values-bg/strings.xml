@@ -82,6 +82,7 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Няма услуга за гласови обаждания"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Няма достъп до гласовата услуга, нито до спешните обаждания"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"Временно е изключено от оператора ви"</string>
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"Временно е изключено от оператора ви за SIM карта <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"Не може да се установи връзка с мобилната мрежа"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Изберете друга предпочитана мрежа. Докоснете за промяна."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Няма достъп до спешните обаждания"</string>
@@ -120,12 +121,13 @@
     <string name="roamingText11" msgid="4154476854426920970">"Банерът за роуминг е включен"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Банерът за роуминг е изключен"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Търси се покритие"</string>
-    <!-- no translation found for wfcRegErrorTitle (3855061241207182194) -->
-    <skip />
+    <string name="wfcRegErrorTitle" msgid="3855061241207182194">"Функцията за обаждания през Wi-Fi не можа да бъде настроена"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"За да извършвате обаждания и да изпращате съобщения през Wi-Fi, първо, помолете оператора си да настрои тази услуга. След това включете отново функцията за обаждания през Wi-Fi от настройките. (Код на грешката: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7372514042696663278) -->
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="7372514042696663278">"При регистрирането на функцията за обаждания през Wi-Fi с оператора ви възникна грешка: <xliff:g id="CODE">%1$s</xliff:g>"</item>
+  </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"%s – обаждания през Wi-Fi"</item>
@@ -481,6 +483,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Разрешава на приложението да комуникира с маркери, карти и четци, ползващи комуникация в близкото поле (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"деактивиране на заключването на екрана ви"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Разрешава на приложението да деактивира заключването на клавиатурата и свързаната защита с парола. Например телефонът деактивира заключването при получаване на входящо обаждане и после го активира отново, когато обаждането завърши."</string>
+    <string name="permlab_useBiometric" msgid="8837753668509919318">"използване на хардуера за биометрични данни"</string>
+    <string name="permdesc_useBiometric" msgid="8389855232721612926">"Разрешава на приложението да използва хардуера за биометрични данни с цел удостоверяване"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"управление на хардуера за отпечатъци"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Разрешава на приложението да извиква начини за добавяне и изтриване на шаблони за отпечатъци, които да се използват."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"използване на хардуера за отпечатъци"</string>
@@ -493,6 +497,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Не е разпознато"</string>
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"Отпечатъкът е удостоверен"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Хардуерът за отпечатъци не е налице."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Отпечатъкът не може да бъде съхранен. Моля, премахнете съществуващ."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Времето за изчакване за отпечатък изтече. Опитайте отново."</string>
@@ -1005,14 +1010,23 @@
     <string name="inputMethod" msgid="1653630062304567879">"Метод на въвеждане"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Действия с текста"</string>
     <string name="email" msgid="4560673117055050403">"Имейл"</string>
+    <string name="email_desc" msgid="3638665569546416795">"Изпращане на имейл до избрания адрес"</string>
     <string name="dial" msgid="1253998302767701559">"Обаждане"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"Обаждане на избрания телефонен номер"</string>
     <string name="map" msgid="6521159124535543457">"Намиране"</string>
+    <string name="map_desc" msgid="9036645769910215302">"Намиране на избрания адрес"</string>
     <string name="browse" msgid="1245903488306147205">"Отваряне"</string>
+    <string name="browse_desc" msgid="8220976549618935044">"Отваряне на избрания URL адрес"</string>
     <string name="sms" msgid="4560537514610063430">"Съобщение"</string>
+    <string name="sms_desc" msgid="7526588350969638809">"Изпращане на съобщение до избрания телефонен номер"</string>
     <string name="add_contact" msgid="7867066569670597203">"Добавяне"</string>
+    <string name="add_contact_desc" msgid="4830217847004590345">"Добавяне към контактите"</string>
     <string name="view_calendar" msgid="979609872939597838">"Преглед"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Преглед на избраната дата в календара"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"Насрочване"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Насрочване на събитие за избраната дата"</string>
     <string name="view_flight" msgid="7691640491425680214">"Проследяване"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"Проследяване на избрания полет"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Мястото в хранилището е на изчерпване"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Възможно е някои функции на системата да не работят"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"За системата няма достатъчно място в хранилището. Уверете се, че имате свободни 250 МБ, и рестартирайте."</string>
@@ -1141,8 +1155,7 @@
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Свързване с отворена Wi‑Fi мрежа"</string>
     <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Свържете се с Wi‑Fi мрежа на оператор"</string>
-    <!-- no translation found for wifi_available_title_connecting (1139126673968899002) -->
-    <skip />
+    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Установява се връзка с Wi-Fi мрежата"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Установихте връзка с Wi-Fi мрежата"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Не можа да се установи връзка с Wi‑Fi мрежата"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Докоснете, за да видите всички мрежи"</string>
@@ -1258,33 +1271,34 @@
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> се показва в/у други прилож."</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Ако не искате <xliff:g id="NAME">%s</xliff:g> да използва тази функция, докоснете, за да отворите настройките, и я изключете."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Изключване"</string>
-    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g>: Подготвя се"</string>
-    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Проверява се за грешки"</string>
-    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Открито е ново хранилище (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"<xliff:g id="NAME">%s</xliff:g> се проверява…"</string>
+    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"Текущото съдържание се преглежда"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"Ново хранилище (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"Докоснете, за да настроите"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"За прехвърляне на снимки и мултимедия"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g>: Има повреда"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"Носителят (<xliff:g id="NAME">%s</xliff:g>) е повреден. Докоснете, за да отстраните проблема."</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"Проблем с хранилището (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"Докоснете за коригиране"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"Носителят (<xliff:g id="NAME">%s</xliff:g>) е повреден. Изберете, за да отстраните проблема."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g>: Не се поддържа"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Устройството не поддържа този носител (<xliff:g id="NAME">%s</xliff:g>). Докоснете, за да настроите в поддържан формат."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Устройството не поддържа този носител (<xliff:g id="NAME">%s</xliff:g>). Изберете, за да настроите в поддържан формат."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>: Неочаквано премахване"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Спрете хранилището (<xliff:g id="NAME">%s</xliff:g>), преди да го извадите, за да не загубите данни"</string>
-    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Премахнахте <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"Хранилището (<xliff:g id="NAME">%s</xliff:g>) е премахнато. Поставете ново"</string>
-    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"<xliff:g id="NAME">%s</xliff:g>: Още се изважда…"</string>
-    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Не премахвайте"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"Спрете носителя, преди да го премахнете, за да избегнете загубата на съдържание"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"Премахнахте <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Някои функции може да не работят правилно. Поставете ново хранилище."</string>
+    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g> се спира"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"Не премахвайте"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"Настройване"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Изваждане"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Изследване"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"Липсва <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_missing_message" msgid="5761133583368750174">"Поставете отново това у-во"</string>
+    <string name="ext_media_missing_message" msgid="4012389235250987930">"Поставете отново устройството"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> се премества"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"Данните се преместват"</string>
-    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Преместването завърши"</string>
-    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Данните са преместени в/ъв <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Данните не бяха преместени"</string>
-    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Данните останаха в първоначалното местоположение"</string>
+    <string name="ext_media_move_success_title" msgid="7863652232242276066">"Прехвърлянето на съдърж. завърши"</string>
+    <string name="ext_media_move_success_message" msgid="8939137931961728009">"Съдържанието е преместено в хранилището (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"Съдърж. не можа да се премести"</string>
+    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"Опитайте да преместите съдържанието отново"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"Премахнато"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Извадено"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"Проверява се…"</string>
@@ -1676,8 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Инсталирано от администратора ви"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Актуализирано от администратора ви"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Изтрито от администратора ви"</string>
-    <!-- no translation found for battery_saver_description (4660824093877546730) -->
-    <skip />
+    <string name="battery_saver_description" msgid="4660824093877546730">"С цел удължаване на живота на батерията режимът за запазването й намалява ефективността на устройството ви и ограничава или изключва вибрирането, услугите за местоположение и преноса на данни на заден план. Приложенията за електронна поща, съобщения и др., които разчитат на синхронизиране, може да не се актуализират, освен ако не ги отворите.\n\nРежимът за запазване на батерията се изключва автоматично, когато устройството ви се зарежда."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"С цел намаляване на преноса на данни функцията за икономия на данни не позволява на някои приложения да изпращат или получават данни на заден план. Понастоящем използвано от вас приложение може да използва данни, но по-рядко. Това например може да означава, че изображенията не се показват, докато не ги докоснете."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ще вкл. ли Икономия на данни?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Включване"</string>
@@ -1728,22 +1741,14 @@
     <string name="muted_by" msgid="6147073845094180001">"Заглушено от <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Възникна вътрешен проблем с устройството ви. То може да е нестабилно, докато не възстановите фабричните настройки."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Възникна вътрешен проблем с устройството ви. За подробности се свържете с производителя."</string>
-    <!-- no translation found for stk_cc_ussd_to_dial (5214333646366591205) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_ss (4884994189414782605) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_ussd (5728637484565449312) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_dial_video (4134455726513175559) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_dial (1360775164651754978) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_dial_video (6577956662913194947) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_ussd (5614626512855868785) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_ss (7716729801537709054) -->
-    <skip />
+    <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD заявката е променена на обикновено обаждане"</string>
+    <string name="stk_cc_ussd_to_ss" msgid="4884994189414782605">"USSD заявката е променена на SS заявка"</string>
+    <string name="stk_cc_ussd_to_ussd" msgid="5728637484565449312">"Променено на нова USSD заявка"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="4134455726513175559">"USSD заявката е променена на видеообаждане"</string>
+    <string name="stk_cc_ss_to_dial" msgid="1360775164651754978">"SS заявката е променена на обикновено обаждане"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="6577956662913194947">"SS заявката е променена на видеообаждане"</string>
+    <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS заявката е променена на USSD заявка"</string>
+    <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Променено на нова SS заявка"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Служебен потребителски профил"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Разгъване"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Свиване"</string>
@@ -1841,6 +1846,10 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM картата не е обезпечена за гласови услуги"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"Гласовите услуги не са разрешени за SIM картата"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Гласовите услуги не са разрешени за телефона"</string>
+    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"SIM карта <xliff:g id="SIMNUMBER">%d</xliff:g> не е разрешена"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"SIM карта <xliff:g id="SIMNUMBER">%d</xliff:g> не е обезпечена"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"SIM карта <xliff:g id="SIMNUMBER">%d</xliff:g> не е разрешена"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"SIM карта <xliff:g id="SIMNUMBER">%d</xliff:g> не е разрешена"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Изскачащ прозорец"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Версията на приложението е понижена или не е съвместима с този пряк път"</string>

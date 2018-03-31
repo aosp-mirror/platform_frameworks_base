@@ -82,6 +82,7 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Tidak ada layanan panggilan suara"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Tidak ada layanan suara atau panggilan darurat"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"Dinonaktifkan sementara oleh operator"</string>
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"Dinonaktifkan sementara oleh operator untuk SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"Tidak dapat menjangkau jaringan seluler"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Coba ubah jaringan pilihan. Tap untuk mengubah."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Panggilan darurat tidak tersedia"</string>
@@ -120,12 +121,13 @@
     <string name="roamingText11" msgid="4154476854426920970">"Spanduk Roaming Hidup"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Spanduk Roaming Mati"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Mencari layanan"</string>
-    <!-- no translation found for wfcRegErrorTitle (3855061241207182194) -->
-    <skip />
+    <string name="wfcRegErrorTitle" msgid="3855061241207182194">"Tidak dapat menyiapkan panggilan Wi-Fi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"Untuk menelepon dan mengirim pesan melalui Wi-Fi, tanyalah ke operator Anda terlebih dahulu untuk menyiapkan layanan ini. Kemudian, aktifkan kembali panggilan Wi-Fi dari Setelan. (Kode error: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7372514042696663278) -->
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="7372514042696663278">"Terjadi masalah saat mendaftarkan panggilan Wi‑Fi dengan operator Anda: <xliff:g id="CODE">%1$s</xliff:g>"</item>
+  </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"%s Panggilan Wi-Fi"</item>
@@ -481,6 +483,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Mengizinkan apl berkomunikasi dengan tag, kartu, dan alat pembaca Komunikasi Nirkabel Jarak Dekat (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"nonaktifkan kunci layar Anda"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Memungkinkan aplikasi menonaktifkan kunci tombol dan keamanan sandi apa pun yang terkait. Misalnya, ponsel menonaktifkan kunci tombol saat menerima panggilan telepon masuk, kemudian mengaktifkan kembali kunci tombol ketika panggilan selesai."</string>
+    <string name="permlab_useBiometric" msgid="8837753668509919318">"gunakan hardware biometrik"</string>
+    <string name="permdesc_useBiometric" msgid="8389855232721612926">"Mengizinkan aplikasi menggunakan hardware biometrik untuk autentikasi"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"kelola hardware sidik jari"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Mengizinkan aplikasi memanggil metode untuk menambahkan dan menghapus template sidik jari untuk digunakan."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"gunakan hardware sidik jari"</string>
@@ -493,6 +497,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Tidak dikenali"</string>
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"Sidik jari diautentikasi"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hardware sidik jari tidak tersedia."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Sidik jari tidak dapat disimpan. Hapus sidik jari yang ada."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Waktu sidik jari habis. Coba lagi."</string>
@@ -1005,14 +1010,23 @@
     <string name="inputMethod" msgid="1653630062304567879">"Metode masukan"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Tindakan teks"</string>
     <string name="email" msgid="4560673117055050403">"Email"</string>
+    <string name="email_desc" msgid="3638665569546416795">"Mengirimkan email ke alamat yang dipilih"</string>
     <string name="dial" msgid="1253998302767701559">"Panggil"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"Panggil nomor telepon yang dipilih"</string>
     <string name="map" msgid="6521159124535543457">"Temukan"</string>
+    <string name="map_desc" msgid="9036645769910215302">"Melokalkan alamat yang dipilih"</string>
     <string name="browse" msgid="1245903488306147205">"Buka"</string>
+    <string name="browse_desc" msgid="8220976549618935044">"Buka URL yang dipilih"</string>
     <string name="sms" msgid="4560537514610063430">"Pesan"</string>
+    <string name="sms_desc" msgid="7526588350969638809">"Mengirimkan SMS ke nomor telepon yang dipilih"</string>
     <string name="add_contact" msgid="7867066569670597203">"Tambahkan"</string>
+    <string name="add_contact_desc" msgid="4830217847004590345">"Menambahkan ke kontak"</string>
     <string name="view_calendar" msgid="979609872939597838">"Lihat"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Melihat waktu yang dipilih di kalender"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"Jadwal"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Menjadwalkan acara untuk waktu yang dipilih"</string>
     <string name="view_flight" msgid="7691640491425680214">"Lacak"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"Memantau penerbangan yang dipilih"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Ruang penyimpanan hampir habis"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Beberapa fungsi sistem mungkin tidak dapat bekerja"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Penyimpanan tidak cukup untuk sistem. Pastikan Anda memiliki 250 MB ruang kosong, lalu mulai ulang."</string>
@@ -1141,8 +1155,7 @@
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Hubungkan ke jaringan Wi-Fi terbuka"</string>
     <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Hubungkan ke jaringan Wi-Fi operator"</string>
-    <!-- no translation found for wifi_available_title_connecting (1139126673968899002) -->
-    <skip />
+    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Menghubungkan ke jaringan Wi-Fi"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Terhubung ke jaringan Wi-Fi"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Tidak dapat menghubungkan ke jaringan Wi‑Fi"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tap untuk melihat semua jaringan"</string>
@@ -1258,33 +1271,34 @@
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> ditampilkan di atas aplikasi lain"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Jika Anda tidak ingin <xliff:g id="NAME">%s</xliff:g> menggunakan fitur ini, tap untuk membuka setelan dan menonaktifkannya."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Nonaktifkan"</string>
-    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Menyiapkan <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Memeriksa kesalahan"</string>
-    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"<xliff:g id="NAME">%s</xliff:g> baru terdeteksi"</string>
+    <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"Memeriksa <xliff:g id="NAME">%s</xliff:g>…"</string>
+    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"Meninjau konten saat ini"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"<xliff:g id="NAME">%s</xliff:g> baru"</string>
+    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"Tap untuk menyiapkan"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Untuk mentransfer foto dan media"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> rusak"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> sudah rusak. Ketuk untuk memperbaiki."</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"Masalah pada <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"Tap untuk memperbaiki"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> rusak. Pilih untuk memperbaikinya."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> tidak didukung"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Perangkat tidak mendukung <xliff:g id="NAME">%s</xliff:g> ini. Ketuk untuk menyiapkan dalam format yang didukung."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Perangkat ini tidak mendukung <xliff:g id="NAME">%s</xliff:g> ini. Pilih untuk menyiapkan dalam format yang didukung."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> tiba-tiba dicabut"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Lingsirkan <xliff:g id="NAME">%s</xliff:g> sebelum mencabut agar data tidak hilang"</string>
-    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> dicabut"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> dicabut; colokkan yang baru"</string>
-    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Masih mengeluarkan <xliff:g id="NAME">%s</xliff:g>…"</string>
-    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Jangan cabut"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"Keluarkan media sebelum mencabut agar konten tidak hilang"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g> dicabut"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Beberapa fungsi mungkin tidak berjalan dengan baik. Masukkan penyimpanan baru."</string>
+    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"Mengeluarkan <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"Jangan cabut"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"Siapkan"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Keluarkan"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Jelajahi"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"Tidak ada <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_missing_message" msgid="5761133583368750174">"Colokkan kembali perangkat ini"</string>
+    <string name="ext_media_missing_message" msgid="4012389235250987930">"Masukkan perangkat lagi"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Memindahkan <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"Memindahkan data"</string>
-    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Pemindahan selesai"</string>
-    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Data dipindahkan ke <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Tidak dapat memindahkan data"</string>
-    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Data tertinggal di lokasi asal"</string>
+    <string name="ext_media_move_success_title" msgid="7863652232242276066">"Transfer konten selesai"</string>
+    <string name="ext_media_move_success_message" msgid="8939137931961728009">"Konten dipindahkan ke <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"Tidak dapat memindahkan konten"</string>
+    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"Coba pindahkan konten lagi"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"Dicabut"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Dikeluarkan"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"Memeriksa…"</string>
@@ -1676,8 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Diinstal oleh admin Anda"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Diupdate oleh admin Anda"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Dihapus oleh admin Anda"</string>
-    <!-- no translation found for battery_saver_description (4660824093877546730) -->
-    <skip />
+    <string name="battery_saver_description" msgid="4660824093877546730">"Untuk memperpanjang masa pakai baterai, Penghemat Baterai mengurangi performa perangkat dan membatasi atau menonaktifkan getaran, layanan lokasi, dan data background. Email, messaging, dan aplikasi lain yang mengandalkan sinkronisasi mungkin tidak diupdate, kecuali jika dibuka.\n\nPenghemat Baterai nonaktif otomatis jika perangkat sedang diisi daya baterainya."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Untuk membantu mengurangi penggunaan data, Penghemat Kuota Internet mencegah beberapa aplikasi mengirim atau menerima data di latar belakang. Aplikasi yang sedang digunakan dapat mengakses data, tetapi frekuensinya agak lebih jarang. Misalnya saja, gambar hanya akan ditampilkan setelah disentuh."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Aktifkan Penghemat Kuota Internet?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktifkan"</string>
@@ -1728,22 +1741,14 @@
     <string name="muted_by" msgid="6147073845094180001">"Dinonaktifkan oleh <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Ada masalah dengan perangkat. Hal ini mungkin membuat perangkat jadi tidak stabil dan perlu dikembalikan ke setelan pabrik."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Ada masalah dengan perangkat. Hubungi produsen perangkat untuk informasi selengkapnya."</string>
-    <!-- no translation found for stk_cc_ussd_to_dial (5214333646366591205) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_ss (4884994189414782605) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_ussd (5728637484565449312) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_dial_video (4134455726513175559) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_dial (1360775164651754978) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_dial_video (6577956662913194947) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_ussd (5614626512855868785) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_ss (7716729801537709054) -->
-    <skip />
+    <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"Permintaan USSD diubah ke panggilan reguler"</string>
+    <string name="stk_cc_ussd_to_ss" msgid="4884994189414782605">"Permintaan USSD diubah ke permintaan SS"</string>
+    <string name="stk_cc_ussd_to_ussd" msgid="5728637484565449312">"Diubah ke permintaan USSD baru"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="4134455726513175559">"Permintaan USSD diubah ke video call"</string>
+    <string name="stk_cc_ss_to_dial" msgid="1360775164651754978">"Permintaan SS diubah ke panggilan reguler"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="6577956662913194947">"Permintaan SS diubah ke video call"</string>
+    <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"Permintaan SS diubah ke permintaan USSD"</string>
+    <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Diubah ke permintaan SS baru"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profil kerja"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Luaskan"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Ciutkan"</string>
@@ -1841,6 +1846,10 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM tidak disediakan untuk suara"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"SIM tidak diizinkan untuk suara"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Ponsel tidak diizinkan untuk suara"</string>
+    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> tidak diizinkan"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> tidak tersedia"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> tidak diizinkan"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> tidak diizinkan"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Jendela Pop-up"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Versi aplikasi di-downgrade, atau tidak kompatibel dengan pintasan ini"</string>

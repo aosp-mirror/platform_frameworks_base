@@ -82,6 +82,8 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Keine Anrufe"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Keine Anrufe oder Notrufe"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"Vorübergehend von deinem Mobilfunkanbieter deaktiviert"</string>
+    <!-- no translation found for RestrictedStateContentMsimTemplate (673416791370248176) -->
+    <skip />
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"Mobilfunknetz nicht erreichbar"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Versuche, das bevorzugte Netzwerk zu ändern. Tippe, um ein anderes auszuwählen."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Notrufe nicht möglich"</string>
@@ -120,12 +122,13 @@
     <string name="roamingText11" msgid="4154476854426920970">"Roaming-Banner ein"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Roaming-Banner aus"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Suche nach Dienst"</string>
-    <!-- no translation found for wfcRegErrorTitle (3855061241207182194) -->
-    <skip />
+    <string name="wfcRegErrorTitle" msgid="3855061241207182194">"WLAN-Telefonie konnte nicht eingerichtet werden"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"Um über WLAN telefonieren und Nachrichten senden zu können, bitte zuerst deinen Mobilfunkanbieter, diesen Dienst einzurichten. Aktiviere die Option \"Anrufe über WLAN\" dann noch einmal über die Einstellungen. (Fehlercode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7372514042696663278) -->
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="7372514042696663278">"Probleme beim Registrieren der WLAN-Telefonie bei deinem Mobilfunkanbieter: <xliff:g id="CODE">%1$s</xliff:g>"</item>
+  </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"%s Anrufe über WLAN"</item>
@@ -159,10 +162,8 @@
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Es werden zurzeit zu viele Anfragen verarbeitet. Versuche es später erneut."</string>
     <string name="notification_title" msgid="8967710025036163822">"Fehler bei Anmeldung für <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"Synchronisierung"</string>
-    <!-- no translation found for contentServiceSyncNotificationTitle (7036196943673524858) -->
-    <skip />
-    <!-- no translation found for contentServiceTooManyDeletesNotificationDesc (4884451152168188763) -->
-    <skip />
+    <string name="contentServiceSyncNotificationTitle" msgid="7036196943673524858">"Synchronisierung nicht möglich"</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Es wurde versucht, zu viele <xliff:g id="CONTENT_TYPE">%s</xliff:g> zu löschen."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Der Tablet-Speicher ist voll. Lösche Dateien, um Speicherplatz freizugeben."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Der Speicher deiner Uhr ist voll. Lösche Dateien, um Speicherplatz freizugeben."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"Der TV-Speicher ist voll. Lösche Dateien, um Speicherplatz freizugeben."</string>
@@ -272,40 +273,31 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"Zum Arbeitsprofil wechseln"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakte"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"auf deine Kontakte zugreifen"</string>
-    <!-- no translation found for permgrouprequest_contacts (6032805601881764300) -->
-    <skip />
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; Zugriff auf deine Kontakte erlauben?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Standort"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"auf den Standort deines Geräts zugreifen"</string>
-    <!-- no translation found for permgrouprequest_location (3788275734953323491) -->
-    <skip />
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; erlauben, den Gerätestandort abzurufen?"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"auf deinen Kalender zugreifen"</string>
-    <!-- no translation found for permgrouprequest_calendar (289900767793189421) -->
-    <skip />
+    <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; Zugriff auf deinen Kalender erlauben?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS senden und abrufen"</string>
-    <!-- no translation found for permgrouprequest_sms (7168124215838204719) -->
-    <skip />
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; erlauben, SMS zu senden und aufzurufen?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Speicher"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"auf Fotos, Medien und Dateien auf deinem Gerät zugreifen"</string>
-    <!-- no translation found for permgrouprequest_storage (7885942926944299560) -->
-    <skip />
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; erlauben, auf Fotos, Medien und Dateien auf deinem Gerät zuzugreifen?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"Audio aufnehmen"</string>
-    <!-- no translation found for permgrouprequest_microphone (9167492350681916038) -->
-    <skip />
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; erlauben, Audioaufnahmen zu machen?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"Bilder und Videos aufnehmen"</string>
-    <!-- no translation found for permgrouprequest_camera (1299833592069671756) -->
-    <skip />
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; erlauben, Bilder und Videos aufzunehmen?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"Telefonanrufe tätigen und verwalten"</string>
-    <!-- no translation found for permgrouprequest_phone (9166979577750581037) -->
-    <skip />
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; erlauben, Anrufe zu tätigen und zu verwalten?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Körpersensoren"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"auf Sensordaten zu deinen Vitaldaten zugreifen"</string>
-    <!-- no translation found for permgrouprequest_sensors (6349806962814556786) -->
-    <skip />
+    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; erlauben, auf Sensordaten zu deinen Vitalfunktionen zuzugreifen?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Fensterinhalte abrufen"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Die Inhalte eines Fensters, mit dem du interagierst, werden abgerufen."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"\"Tippen &amp; Entdecken\" aktivieren"</string>
@@ -492,6 +484,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Ermöglicht der App die Kommunikation mit Tags für die Nahfeldkommunikation, Karten und Readern"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"Displaysperre deaktivieren"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Ermöglicht der App, die Tastensperre sowie den damit verbundenen Passwortschutz zu deaktivieren. Das Telefon deaktiviert die Tastensperre beispielsweise, wenn ein Anruf eingeht, und aktiviert sie wieder, nachdem das Gespräch beendet wurde."</string>
+    <string name="permlab_useBiometric" msgid="8837753668509919318">"Biometrische Hardware verwenden"</string>
+    <string name="permdesc_useBiometric" msgid="8389855232721612926">"Erlaubt der App, biometrische Hardware zur Authentifizierung zu verwenden"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"Fingerabdruckhardware verwalten"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Erlaubt der App, Methoden zum Hinzufügen und Löschen zu verwendender Fingerabdruckvorlagen aufzurufen"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"Fingerabdruckhardware verwenden"</string>
@@ -504,6 +498,8 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nicht erkannt"</string>
+    <!-- no translation found for fingerprint_authenticated (5309333983002526448) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Fingerabdruckhardware nicht verfügbar"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Fingerabdruck kann nicht gespeichert werden. Entferne einen vorhandenen Fingerabdruck."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Zeitüberschreitung für Fingerabdruck. Versuche es erneut."</string>
@@ -1016,14 +1012,23 @@
     <string name="inputMethod" msgid="1653630062304567879">"Eingabemethode"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Textaktionen"</string>
     <string name="email" msgid="4560673117055050403">"E-Mail"</string>
+    <string name="email_desc" msgid="3638665569546416795">"E-Mail an ausgewählte Adresse senden"</string>
     <string name="dial" msgid="1253998302767701559">"Anrufen"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"Ausgewählte Telefonnummer anrufen"</string>
     <string name="map" msgid="6521159124535543457">"Suchen"</string>
+    <string name="map_desc" msgid="9036645769910215302">"Ausgewählte Adresse finden"</string>
     <string name="browse" msgid="1245903488306147205">"Öffnen"</string>
+    <string name="browse_desc" msgid="8220976549618935044">"Ausgewählte URL öffnen"</string>
     <string name="sms" msgid="4560537514610063430">"SMS"</string>
+    <string name="sms_desc" msgid="7526588350969638809">"SMS an ausgewählte Telefonnummer senden"</string>
     <string name="add_contact" msgid="7867066569670597203">"Hinzufügen"</string>
+    <string name="add_contact_desc" msgid="4830217847004590345">"Zu Kontakten hinzufügen"</string>
     <string name="view_calendar" msgid="979609872939597838">"Anzeigen"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Ausgewählte Zeit im Kalender anzeigen"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"Terminübersicht"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Termin für die ausgewählte Zeit planen"</string>
     <string name="view_flight" msgid="7691640491425680214">"Verfolgen"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"Ausgewählten Flug verfolgen"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Der Speicherplatz wird knapp"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Einige Systemfunktionen funktionieren möglicherweise nicht."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Der Speicherplatz reicht nicht für das System aus. Stelle sicher, dass 250 MB freier Speicherplatz vorhanden sind, und starte das Gerät dann neu."</string>
@@ -1117,8 +1122,7 @@
     <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> öffnen"</string>
     <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> wird ohne Speichern geschlossen"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"Speicherlimit für \"<xliff:g id="PROC">%1$s</xliff:g>\" überschritten"</string>
-    <!-- no translation found for dump_heap_notification_detail (3993078784053054141) -->
-    <skip />
+    <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Heap-Dump wurde erfasst. Tippe, um ihn zu teilen."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Heap-Dump teilen?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"Für den Prozess \"<xliff:g id="PROC">%1$s</xliff:g>\" wurde das Prozessspeicherlimit von <xliff:g id="SIZE">%2$s</xliff:g> überschritten. Es steht ein Heap-Dump zur Verfügung, den du mit dem Entwickler teilen kannst. Beachte jedoch unbedingt, dass der Heap-Dump personenbezogene Daten von dir enthalten kann, auf die die App zugreifen kann."</string>
     <string name="sendText" msgid="5209874571959469142">"Aktion für Text auswählen"</string>
@@ -1153,8 +1157,7 @@
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Mit offenem WLAN verbinden"</string>
     <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Mit WLAN des Mobilfunkanbieters verbinden"</string>
-    <!-- no translation found for wifi_available_title_connecting (1139126673968899002) -->
-    <skip />
+    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Verbindung zu WLAN wird hergestellt"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Mit WLAN verbunden"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"WLAN-Verbindung konnte nicht hergestellt werden"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tippen, um alle Netzwerke zu sehen"</string>
@@ -1270,33 +1273,49 @@
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> wird über anderen Apps angezeigt"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Wenn du nicht möchtest, dass <xliff:g id="NAME">%s</xliff:g> diese Funktion verwendet, tippe, um die Einstellungen zu öffnen und die Funktion zu deaktivieren."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Deaktivieren"</string>
-    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> wird vorbereitet"</string>
-    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Nach Fehlern wird gesucht"</string>
-    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"Neue <xliff:g id="NAME">%s</xliff:g> entdeckt"</string>
+    <!-- no translation found for ext_media_checking_notification_title (4411133692439308924) -->
+    <skip />
+    <!-- no translation found for ext_media_checking_notification_message (410185170877285434) -->
+    <skip />
+    <!-- no translation found for ext_media_new_notification_title (1621805083736634077) -->
+    <skip />
+    <!-- no translation found for ext_media_new_notification_message (3673685270558405087) -->
+    <skip />
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Zum Übertragen von Fotos und Medien"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> beschädigt"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> ist beschädigt. Zum Reparieren tippen."</string>
-    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> ist beschädigt. Zur Problembehebung auswählen."</string>
+    <!-- no translation found for ext_media_unmountable_notification_title (4179418065210797130) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_message (4193858924381066522) -->
+    <skip />
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> nicht unterstützt"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"<xliff:g id="NAME">%s</xliff:g> wird von diesem Gerät nicht unterstützt. Zum Einrichten in einem unterstützten Format tippen."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"<xliff:g id="NAME">%s</xliff:g> wird von diesem Gerät nicht unterstützt. Zur Einrichtung eines unterstützten Formats auswählen."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> wurde unerwartet entfernt"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Trenne die <xliff:g id="NAME">%s</xliff:g> vor dem Entfernen, um Datenverluste zu vermeiden."</string>
-    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> wurde entfernt"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> entfernt. Neuen Speicher einlegen"</string>
-    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"<xliff:g id="NAME">%s</xliff:g> wird gerade ausgeworfen…"</string>
-    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Nicht entfernen"</string>
+    <!-- no translation found for ext_media_badremoval_notification_message (8556885808951260574) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_title (6593814191061956856) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_message (2110883356419799994) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_title (5046532339291216076) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_message (1003926904442321115) -->
+    <skip />
     <string name="ext_media_init_action" msgid="7952885510091978278">"Einrichten"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Auswerfen"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Ansehen"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> fehlt"</string>
-    <string name="ext_media_missing_message" msgid="5761133583368750174">"Dieses Medium wieder einlegen"</string>
+    <!-- no translation found for ext_media_missing_message (4012389235250987930) -->
+    <skip />
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> wird verschoben"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"Daten werden verschoben"</string>
-    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Verschieben abgeschlossen"</string>
-    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Daten auf <xliff:g id="NAME">%s</xliff:g> verschoben"</string>
-    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Fehler bei Datenverschiebung"</string>
-    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Daten verbleiben am ursprünglichen Speicherort"</string>
+    <!-- no translation found for ext_media_move_success_title (7863652232242276066) -->
+    <skip />
+    <!-- no translation found for ext_media_move_success_message (8939137931961728009) -->
+    <skip />
+    <!-- no translation found for ext_media_move_failure_title (1604422634177382092) -->
+    <skip />
+    <!-- no translation found for ext_media_move_failure_message (7388950499623016135) -->
+    <skip />
     <string name="ext_media_status_removed" msgid="6576172423185918739">"Entfernt"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Ausgeworfen"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"Wird überprüft…"</string>
@@ -1355,17 +1374,14 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Verbindung zu durchgehend aktivem VPN wird hergestellt…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Mit durchgehend aktivem VPN verbunden"</string>
     <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Verbindung mit dauerhaft aktivem VPN getrennt"</string>
-    <!-- no translation found for vpn_lockdown_error (3133844445659711681) -->
-    <skip />
+    <string name="vpn_lockdown_error" msgid="3133844445659711681">"Verbindungsaufbau zu dauerhaft aktivem VPN nicht möglich"</string>
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"Netzwerk- oder VPN-Einstellungen ändern"</string>
     <string name="upload_file" msgid="2897957172366730416">"Datei auswählen"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Keine ausgewählt"</string>
     <string name="reset" msgid="2448168080964209908">"Zurücksetzen"</string>
     <string name="submit" msgid="1602335572089911941">"Senden"</string>
-    <!-- no translation found for car_mode_disable_notification_title (5704265646471239078) -->
-    <skip />
-    <!-- no translation found for car_mode_disable_notification_message (7647248420931129377) -->
-    <skip />
+    <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Fahr-App wird ausgeführt"</string>
+    <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Tippen, um die Fahr-App zu beenden."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Tethering oder Hotspot aktiv"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Zum Einrichten tippen."</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"Tethering ist deaktiviert"</string>
@@ -1691,8 +1707,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Von deinem Administrator installiert"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Von deinem Administrator aktualisiert"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Von deinem Administrator gelöscht"</string>
-    <!-- no translation found for battery_saver_description (4660824093877546730) -->
-    <skip />
+    <string name="battery_saver_description" msgid="4660824093877546730">"Der Energiesparmodus schont den Akku, indem er die Leistung des Geräts reduziert und die Vibrationsfunktion, Standortdienste sowie die Hintergrunddaten einschränkt oder deaktiviert. E-Mail, Messaging und andere Apps, die auf deinem Gerät synchronisiert werden, werden möglicherweise nur aktualisiert, wenn du sie öffnest.\n\nDer Energiesparmodus wird automatisch deaktiviert, wenn dein Gerät aufgeladen wird."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Mit dem Datensparmodus wird die Datennutzung verringert, indem verhindert wird, dass im Hintergrund Daten von Apps gesendet oder empfangen werden. Datenzugriffe sind mit einer aktiven App zwar möglich, erfolgen aber seltener. Als Folge davon könnten Bilder beispielsweise erst dann sichtbar werden, wenn sie angetippt werden."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Datensparmodus aktivieren?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivieren"</string>
@@ -1743,22 +1758,14 @@
     <string name="muted_by" msgid="6147073845094180001">"Stummgeschaltet durch <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Es liegt ein internes Problem mit deinem Gerät vor. Möglicherweise verhält es sich instabil, bis du es auf die Werkseinstellungen zurücksetzt."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Es liegt ein internes Problem mit deinem Gerät vor. Bitte wende dich diesbezüglich an den Hersteller."</string>
-    <!-- no translation found for stk_cc_ussd_to_dial (5214333646366591205) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_ss (4884994189414782605) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_ussd (5728637484565449312) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_dial_video (4134455726513175559) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_dial (1360775164651754978) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_dial_video (6577956662913194947) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_ussd (5614626512855868785) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_ss (7716729801537709054) -->
-    <skip />
+    <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD-Anfrage wurde in normalen Anruf geändert"</string>
+    <string name="stk_cc_ussd_to_ss" msgid="4884994189414782605">"USSD-Anfrage wurde in SS-Anfrage geändert"</string>
+    <string name="stk_cc_ussd_to_ussd" msgid="5728637484565449312">"In neue USSD-Anfrage geändert"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="4134455726513175559">"USSD-Anfrage wurde in Videoanruf geändert"</string>
+    <string name="stk_cc_ss_to_dial" msgid="1360775164651754978">"SS-Anfrage wurde in normalen Anruf geändert"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="6577956662913194947">"SS-Anfrage wurde in Videoanruf geändert"</string>
+    <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS-Anfrage wurde in USSD-Anfrage geändert"</string>
+    <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"In neue SS-Anfrage geändert"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Arbeitsprofil"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Maximieren"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Minimieren"</string>
@@ -1856,6 +1863,14 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM nicht für Sprachfunktion eingerichtet"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"SIM unterstützt die Sprachfunktion nicht"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Smartphone unterstützt Sprachfunktion nicht"</string>
+    <!-- no translation found for mmcc_authentication_reject_msim_template (1217031195834766479) -->
+    <skip />
+    <!-- no translation found for mmcc_imsi_unknown_in_hlr_msim_template (5636464607596778986) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_ms_msim_template (5994323296399913454) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_me_msim_template (5550259730350571826) -->
+    <skip />
     <string name="popup_window_default_title" msgid="4874318849712115433">"Pop-up-Fenster"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Die App-Version wurde zurückgestuft oder ist mit dieser Verknüpfung nicht kompatibel"</string>
@@ -1876,8 +1891,6 @@
     <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Das ist ein neues Verhalten. Tippe, um die Einstellung zu ändern."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\"Bitte nicht stören\" wurde geändert"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tippe, um zu überprüfen, welche Inhalte blockiert werden."</string>
-    <!-- no translation found for notification_app_name_system (4205032194610042794) -->
-    <skip />
-    <!-- no translation found for notification_app_name_settings (7751445616365753381) -->
-    <skip />
+    <string name="notification_app_name_system" msgid="4205032194610042794">"System"</string>
+    <string name="notification_app_name_settings" msgid="7751445616365753381">"Einstellungen"</string>
 </resources>

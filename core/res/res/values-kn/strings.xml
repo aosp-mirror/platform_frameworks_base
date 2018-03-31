@@ -82,6 +82,7 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"ಧ್ವನಿ ಸೇವೆಯಿಲ್ಲ"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"ಯಾವುದೇ ಧ್ವನಿ ಸೇವೆ ಅಥವಾ ತುರ್ತು ಕರೆಗಳಿಲ್ಲ"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"ನಿಮ್ಮ ವಾಹಕದ ಮೂಲಕ ತಾತ್ಕಾಲಿಕವಾಗಿ ಆಫ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"ಸಿಮ್ <xliff:g id="SIMNUMBER">%d</xliff:g> ಗಾಗಿ ನಿಮ್ಮ ವಾಹಕದ ಮೂಲಕ ತಾತ್ಕಾಲಿಕವಾಗಿ ಆಫ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"ಮೊಬೈಲ್‌ ನೆಟ್‌ವರ್ಕ್ ತಲುಪಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"ಆದ್ಯತೆಗೊಳಿಸಿದ ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಲು ಪ್ರಯತ್ನಿಸಿ. ಬದಲಾಯಿಸಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"ತುರ್ತು ಕರೆ ಮಾಡುವಿಕೆ ಲಭ್ಯವಿಲ್ಲ"</string>
@@ -120,12 +121,13 @@
     <string name="roamingText11" msgid="4154476854426920970">"ರೋಮಿಂಗ್ ಬ್ಯಾನರ್ ಆನ್ ಆಗಿದೆ"</string>
     <string name="roamingText12" msgid="1189071119992726320">"ರೋಮಿಂಗ್ ಬ್ಯಾನರ್ ಆಫ್ ಆಗಿದೆ"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"ಸೇವೆ ಹುಡುಕಲಾಗುತ್ತಿದೆ"</string>
-    <!-- no translation found for wfcRegErrorTitle (3855061241207182194) -->
-    <skip />
+    <string name="wfcRegErrorTitle" msgid="3855061241207182194">"ವೈ-ಫೈ ಕರೆ ಮಾಡುವಿಕೆಯನ್ನು ಸೆಟಪ್‌ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"ವೈ-ಫೈ ಮೂಲಕ ಕರೆಗಳನ್ನು ಮಾಡಲು ಮತ್ತು ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು, ಈ ಸೇವೆಯನ್ನು ಹೊಂದಿಸಲು ಮೊದಲು ನಿಮ್ಮ ವಾಹಕವನ್ನು ಕೇಳಿ. ಆ ನಂತರ ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದ ವೈ-ಫೈ ಕರೆಮಾಡುವಿಕೆಯನ್ನು ಅನ್ನು ಆನ್ ಮಾಡಿ. (ದೋಷ ಕೋಡ್: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7372514042696663278) -->
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="7372514042696663278">"ನಿಮ್ಮ ವಾಹಕದೊಂದಿಗೆ ವೈ-ಫೈ ಕರೆ ಮಾಡುವಿಕೆ ಸಮಸ್ಯೆ ನೋಂದಾಯಿಸುವಿಕೆ: <xliff:g id="CODE">%1$s</xliff:g>"</item>
+  </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"%s ವೈ-ಫೈ ಕರೆ ಮಾಡುವಿಕೆ"</item>
@@ -159,10 +161,8 @@
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"ಹಲವಾರು ವಿನಂತಿಗಳನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲಾಗುತ್ತಿದೆ. ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="notification_title" msgid="8967710025036163822">"<xliff:g id="ACCOUNT">%1$s</xliff:g> ಗಾಗಿ ಸೈನ್ ಇನ್ ದೋಷವಿದೆ"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"ಸಿಂಕ್ ಮಾಡು"</string>
-    <!-- no translation found for contentServiceSyncNotificationTitle (7036196943673524858) -->
-    <skip />
-    <!-- no translation found for contentServiceTooManyDeletesNotificationDesc (4884451152168188763) -->
-    <skip />
+    <string name="contentServiceSyncNotificationTitle" msgid="7036196943673524858">"ಸಿಂಕ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"ಅತೀ ಹೆಚ್ಚು <xliff:g id="CONTENT_TYPE">%s</xliff:g> ಅನ್ನು ಅಳಿಸಲು ಪ್ರಯತ್ನಿಸಲಾಗಿದೆ."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"ಟ್ಯಾಬ್ಲೆಟ್ ಸಂಗ್ರಹಣೆ ಪೂರ್ಣಗೊಂಡಿದೆ. ಸ್ಥಳವನ್ನು ಖಾಲಿಯಾಗಿಸಲು ಕೆಲವು ಫೈಲ್‍‍ಗಳನ್ನು ಅಳಿಸಿ."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"ವಾಚ್‌ ಸಂಗ್ರಹಣೆ ಪೂರ್ಣಗೊಂಡಿದೆ. ಸ್ಥಳವನ್ನು ಖಾಲಿಯಾಗಿಸಲು ಕೆಲವು ಫೈಲ್‍‍ಗಳನ್ನು ಅಳಿಸಿ."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"ಟಿವಿ ಸಂಗ್ರಹಣೆ ತುಂಬಿದೆ. ಸ್ಥಳವನ್ನು ಮುಕ್ತಗೊಳಿಸಲು ಕೆಲವು ಫೈಲ್‌ಗಳನ್ನು ಅಳಿಸಿ."</string>
@@ -272,40 +272,31 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ಗೆ ಬದಲಿಸಿ"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"ಸಂಪರ್ಕಗಳು"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳನ್ನು ಪ್ರವೇಶಿಸಲು"</string>
-    <!-- no translation found for permgrouprequest_contacts (6032805601881764300) -->
-    <skip />
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳನ್ನು ಪ್ರವೇಶಿಸಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"ಸ್ಥಳ"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"ಈ ಸಾಧನದ ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
-    <!-- no translation found for permgrouprequest_location (3788275734953323491) -->
-    <skip />
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"ಈ ಸಾಧನದ ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"ಕ್ಯಾಲೆಂಡರ್"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಪ್ರವೇಶಿಸಲು"</string>
-    <!-- no translation found for permgrouprequest_calendar (289900767793189421) -->
-    <skip />
+    <string name="permgrouprequest_calendar" msgid="289900767793189421">"ನಿಮ್ಮ ಕ್ಯಾಲೆಂಡರ್ ಪ್ರವೇಶಿಸಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು ಮತ್ತು ನಿರ್ವಹಿಸಲು"</string>
-    <!-- no translation found for permgrouprequest_sms (7168124215838204719) -->
-    <skip />
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"ಎಸ್‌ಎಂಎಸ್‌ ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಲು ಮತ್ತು ವೀಕ್ಷಿಸಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"ಸಂಗ್ರಹಣೆ"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"ಸಾಧನದಲ್ಲಿ ಫೋಟೋಗಳು, ಮಾಧ್ಯಮ ಮತ್ತು ಫೈಲ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಲು"</string>
-    <!-- no translation found for permgrouprequest_storage (7885942926944299560) -->
-    <skip />
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಫೋಟೋಗಳು, ಮಾಧ್ಯಮ ಮತ್ತು ಫೈಲ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"ಮೈಕ್ರೋಫೋನ್‌"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ಆಡಿಯೊ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
-    <!-- no translation found for permgrouprequest_microphone (9167492350681916038) -->
-    <skip />
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"ಆಡಿಯೋ ರೆಕಾರ್ಡ್‌ ಮಾಡಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ಕ್ಯಾಮರಾ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ಚಿತ್ರಗಳನ್ನು ತೆಗೆಯಲು, ವೀಡಿಯೊ ರೆಕಾರ್ಡ್ ಮಾಡಲು"</string>
-    <!-- no translation found for permgrouprequest_camera (1299833592069671756) -->
-    <skip />
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"ಚಿತ್ರಗಳನ್ನು ಸೆರೆಹಿಡಿಯಲು ಮತ್ತು ವೀಡಿಯೊ ರೆಕಾರ್ಡ್‌ ಮಾಡಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ಫೋನ್"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ಫೋನ್ ಕರೆ ಮಾಡಲು ಹಾಗೂ ನಿರ್ವಹಿಸಲು"</string>
-    <!-- no translation found for permgrouprequest_phone (9166979577750581037) -->
-    <skip />
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"ಫೋನ್ ಕರೆಗಳನ್ನು ಮಾಡಲು ಮತ್ತು ನಿರ್ವಹಿಸಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"ದೇಹ ಸೆನ್ಸರ್‌ಗಳು"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"ನಿಮ್ಮ ಮುಖ್ಯ ಲಕ್ಷಣಗಳ ಕುರಿತು ಸೆನ್ಸಾರ್ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
-    <!-- no translation found for permgrouprequest_sensors (6349806962814556786) -->
-    <skip />
+    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"ನಿಮ್ಮ ಮುಖ್ಯ ಲಕ್ಷಣಗಳ ಕುರಿತು ಸೆನ್ಸರ್ ಡೇಟಾವನ್ನು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಬೇಕೇ?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ವಿಂಡೋ ವಿಷಯವನ್ನು ಹಿಂಪಡೆಯುತ್ತದೆ"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"ನೀವು ಬಳಸುತ್ತಿರುವ ವಿಂಡೋದ ವಿಷಯ ಪರೀಕ್ಷಿಸುತ್ತದೆ."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"ಸ್ಪರ್ಶ-ಎಕ್ಸ್‌ಪ್ಲೋರ್ ಆನ್ ಮಾಡುತ್ತದೆ"</string>
@@ -492,6 +483,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"ಸಮೀಪದ ಕ್ಷೇತ್ರ ಸಂವಹನ (NFC) ಟ್ಯಾಗ್‌ಗಳು, ಕಾರ್ಡ್‌ಗಳು, ಮತ್ತು ಓದುಗರನ್ನು ಅಪ್ಲಿಕೇಶನ್‌ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"ಕೀಲಾಕ್ ಮತ್ತು ಯಾವುದೇ ಸಂಬಂಧಿತ ಭದ್ರತಾ ಪಾಸ್‍‍ವರ್ಡ್ ಭದ್ರತೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿ ನೀಡುತ್ತದೆ. ಉದಾಹರಣೆಗೆ, ಒಳಬರುವ ಕರೆಯನ್ನು ಸ್ವೀಕರಿಸುವಾಗ ಕೀಲಾಕ್ ಅನ್ನು ಫೋನ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ, ನಂತರ ಕರೆಯು ಅಂತ್ಯಗೊಂಡಾಗ ಕೀಲಾಕ್ ಅನ್ನು ಮರು ಸಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ."</string>
+    <!-- no translation found for permlab_useBiometric (8837753668509919318) -->
+    <skip />
+    <!-- no translation found for permdesc_useBiometric (8389855232721612926) -->
+    <skip />
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ಬೆರಳಚ್ಚು ಹಾರ್ಡ್‌ವೇರ್ ನಿರ್ವಹಿಸಿ"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ಬಳಕೆಗೆ ಬೆರಳಚ್ಚು ಟೆಂಪ್ಲೇಟ್‌ಗಳನ್ನು ಸೇರಿಸಲು ಮತ್ತು ಅಳಿಸಲು ವಿಧಾನಗಳನ್ನು ಮನವಿ ಮಾಡಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"ಬೆರಳಚ್ಚು ಹಾರ್ಡ್‌ವೇರ್ ಬಳಸಿ"</string>
@@ -504,6 +499,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಪ್ರಮಾಣೀಕರಣ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ಬೆರಳಚ್ಚು ಹಾರ್ಡ್‌ವೇರ್‌ ಲಭ್ಯವಿಲ್ಲ."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ಬೆರಳಚ್ಚು ಸಂಗ್ರಹಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಬೆರಳಚ್ಚು ತೆಗೆದುಹಾಕಿ."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ಬೆರಳಚ್ಚು ಅವಧಿ ಮೀರಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
@@ -1016,14 +1012,32 @@
     <string name="inputMethod" msgid="1653630062304567879">"ಇನ್‌ಪುಟ್ ವಿಧಾನ"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"ಪಠ್ಯದ ಕ್ರಮಗಳು"</string>
     <string name="email" msgid="4560673117055050403">"ಇಮೇಲ್"</string>
+    <!-- no translation found for email_desc (3638665569546416795) -->
+    <skip />
     <string name="dial" msgid="1253998302767701559">"ಕರೆ"</string>
+    <!-- no translation found for dial_desc (6573723404985517250) -->
+    <skip />
     <string name="map" msgid="6521159124535543457">"ಗುರುತಿಸಿ"</string>
+    <!-- no translation found for map_desc (9036645769910215302) -->
+    <skip />
     <string name="browse" msgid="1245903488306147205">"ತೆರೆ"</string>
+    <!-- no translation found for browse_desc (8220976549618935044) -->
+    <skip />
     <string name="sms" msgid="4560537514610063430">"ಸಂದೇಶ"</string>
+    <!-- no translation found for sms_desc (7526588350969638809) -->
+    <skip />
     <string name="add_contact" msgid="7867066569670597203">"ಸೇರಿಸಿ"</string>
+    <!-- no translation found for add_contact_desc (4830217847004590345) -->
+    <skip />
     <string name="view_calendar" msgid="979609872939597838">"ವೀಕ್ಷಿಸಿ"</string>
+    <!-- no translation found for view_calendar_desc (5828320291870344584) -->
+    <skip />
     <string name="add_calendar_event" msgid="1953664627192056206">"ಅವಧಿ"</string>
+    <!-- no translation found for add_calendar_event_desc (4326891793260687388) -->
+    <skip />
     <string name="view_flight" msgid="7691640491425680214">"ಟ್ರ್ಯಾಕ್"</string>
+    <!-- no translation found for view_flight_desc (3876322502674253506) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"ಸಂಗ್ರಹಣೆ ಸ್ಥಳವು ತುಂಬಿದೆ"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ಕೆಲವು ಸಿಸ್ಟಂ ಕಾರ್ಯವಿಧಾನಗಳು ಕಾರ್ಯನಿರ್ವಹಿಸದೇ ಇರಬಹುದು"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ಸಿಸ್ಟಂನಲ್ಲಿ ಸಾಕಷ್ಟು ಸಂಗ್ರಹಣೆಯಿಲ್ಲ. ನೀವು 250MB ನಷ್ಟು ಖಾಲಿ ಸ್ಥಳವನ್ನು ಹೊಂದಿರುವಿರಾ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ ಹಾಗೂ ಮರುಪ್ರಾರಂಭಿಸಿ."</string>
@@ -1117,8 +1131,7 @@
     <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> ಅನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> ಅನ್ನು ಉಳಿಸದೆಯೇ ಮುಚ್ಚಲಾಗುತ್ತದೆ"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> ಮೆಮೊರಿ ಮಿತಿಯನ್ನು ಮೀರಿದೆ"</string>
-    <!-- no translation found for dump_heap_notification_detail (3993078784053054141) -->
-    <skip />
+    <string name="dump_heap_notification_detail" msgid="3993078784053054141">"ಹೀಪ್ ಡಂಪ್ ಅನ್ನು ಸಂಗ್ರಹಿಸಲಾಗಿದೆ; ಹಂಚಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"ಹೀಪ್ ಡಂಪ್ ಹಂಚಿಕೊಳ್ಳುವುದೇ?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> ಪ್ರಕ್ರಿಯೆಯು <xliff:g id="SIZE">%2$s</xliff:g> ರ ಪ್ರಕ್ರಿಯೆ ಮೆಮೊರಿ ಮಿತಿಯನ್ನು ಮೀರಿದೆ. ನೀವು ಅದರ ಡೆವಲಪರ್ ಜೊತೆ ಹಂಚಿಕೊಳ್ಳಲು ಹೀಪ್ ಡಂಪ್ ಲಭ್ಯವಿದೆ. ಎಚ್ಚರಿಕೆ: ಈ ಹೀಪ್ ಡಂಪ್ ಅಪ್ಲಿಕೇಶನ್ ಪ್ರವೇಶ ಹೊಂದಿರುವ ನಿಮ್ಮ ಯಾವುದೇ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಯನ್ನು ಹೊಂದಿರಬಹುದು."</string>
     <string name="sendText" msgid="5209874571959469142">"ಪಠ್ಯಕ್ಕೆ ಕ್ರಿಯೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
@@ -1153,8 +1166,7 @@
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"ಮುಕ್ತ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಿಸಿ"</string>
     <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"ವಾಹಕ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಿಸಿ"</string>
-    <!-- no translation found for wifi_available_title_connecting (1139126673968899002) -->
-    <skip />
+    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಪಡಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"ಎಲ್ಲಾ ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ನೋಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
@@ -1271,33 +1283,34 @@
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> ಇತರವುಗಳ ಮೇಲೆ ಪ್ರದರ್ಶಿಸುತ್ತಿದೆ"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ಈ ವೈಶಿಷ್ಟ್ಯ ಬಳಸುವುದನ್ನು ನೀವು ಬಯಸದಿದ್ದರೆ, ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆದು, ಅದನ್ನು ಆಫ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"ಆಫ್ ಮಾಡಿ"</string>
-    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> ಅನ್ನು ಸಿದ್ಧಪಡಿಸಲಾಗುತ್ತಿದೆ"</string>
-    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"ದೋಷಗಳನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ"</string>
-    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"ಹೊಸ <xliff:g id="NAME">%s</xliff:g> ಪತ್ತೆಯಾಗಿದೆ"</string>
+    <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"<xliff:g id="NAME">%s</xliff:g> ಅನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ…"</string>
+    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"ಪ್ರಸ್ತುತ ವಿಷಯವನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"ಹೊಸ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"ಹೊಂದಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"ಫೋಟೋಗಳು ಮತ್ತು ಮಾಧ್ಯಮವನ್ನು ವರ್ಗಾಯಿಸಲು"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> ದೋಷಪೂರಿತವಾಗಿದೆ"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> ದೋಷಪೂರಿತವಾಗಿದೆ. ಸರಿಪಡಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"<xliff:g id="NAME">%s</xliff:g> ನೊಂದಿಗೆ ಸಮಸ್ಯೆ"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"ಸರಿಪಡಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> ದೋಷಪೂರಿತವಾಗಿದೆ. ಸರಿಪಡಿಸಲು ಆಯ್ಕೆ ಮಾಡಿ."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"ಬೆಂಬಲಿಸದಿರುವ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"ಈ ಸಾಧನವು <xliff:g id="NAME">%s</xliff:g> ಅನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ. ಬೆಂಬಲಿತ ಫಾರ್ಮ್ಯಾಟ್‌‌ನಲ್ಲಿ ಹೊಂದಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"ಈ ಸಾಧನವು ಈ <xliff:g id="NAME">%s</xliff:g> ಅನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ. ಬೆಂಬಲಿತ ಫಾರ್ಮ್ಯಾಟ್‌‌ನಲ್ಲಿ ಹೊಂದಿಸಲು ಆಯ್ಕೆ ಮಾಡಿ."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> ಅನಿರೀಕ್ಷಿತವಾಗಿ ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"ಡೇಟಾ ನಷ್ಟವನ್ನು ತಪ್ಪಿಸಲು ತೆಗೆದುಹಾಕುವುದಕ್ಕೂ ಮುನ್ನ <xliff:g id="NAME">%s</xliff:g> ಅಳವಡಿಕೆಯನ್ನು ತೆಗೆದುಹಾಕಿ"</string>
-    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> ತೆಗೆದುಹಾಕಲಾಗಿದೆ; ಹೊಸದನ್ನು ಸೇರಿಸಿ"</string>
-    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"<xliff:g id="NAME">%s</xliff:g> ಇನ್ನೂ ಇಜೆಕ್ಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
-    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"ತೆಗೆದುಹಾಕಬೇಡಿ"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"ವಿಷಯ ನಷ್ಟವನ್ನು ತಪ್ಪಿಸಲು ತೆಗೆದುಹಾಕುವುದಕ್ಕೂ ಮುನ್ನ ಮಾಧ್ಯಮವನ್ನು ಎಜೆಕ್ಟ್ ಮಾಡಿ"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g> ಅವರನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"ಕೆಲವು ಕಾರ್ಯಚಟುವಟಿಕೆಗಳು ಸರಿಯಾಗಿ ಕೆಲಸ ಮಾಡದಿರಬಹುದು. ಹೊಸ ಸಂಗ್ರಹಣೆ ಸೇರಿಸಿ."</string>
+    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g> ಎಜೆಕ್ಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"ತೆಗೆದುಹಾಕಬೇಡಿ"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"ಹೊಂದಿಸು"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"ಇಜೆಕ್ಟ್"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"ಎಕ್ಸ್‌ಪ್ಲೋರ್‌‌"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> ಕಾಣೆಯಾಗಿದೆ"</string>
-    <string name="ext_media_missing_message" msgid="5761133583368750174">"ಈ ಸಾಧನವನ್ನು ಮರುಸೇರಿಸಿ"</string>
+    <string name="ext_media_missing_message" msgid="4012389235250987930">"ಸಾಧನವನ್ನು ಪುನಃ ಸೇರಿಸಿ"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> ಸರಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"ಡೇಟಾ ಸರಿಸಲಾಗುತ್ತಿದೆ"</string>
-    <string name="ext_media_move_success_title" msgid="8575300932957954671">"ಸರಿಸುವಿಕೆ ಪೂರ್ಣಗೊಂಡಿದೆ"</string>
-    <string name="ext_media_move_success_message" msgid="4199002148206265426">"<xliff:g id="NAME">%s</xliff:g> ಗೆ ಡೇಟಾ ಸರಿಸಲಾಗಿದೆ"</string>
-    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"ಡೇಟಾ ಸರಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
-    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"ಮೂಲ ಸ್ಥಳದಲ್ಲಿ ಡೇಟಾ ಉಳಿದಿದೆ"</string>
+    <string name="ext_media_move_success_title" msgid="7863652232242276066">"ವಿಷಯ ವರ್ಗಾವಣೆ ಪೂರ್ಣಗೊಂಡಿದೆ"</string>
+    <string name="ext_media_move_success_message" msgid="8939137931961728009">"ವಿಷಯವನ್ನು <xliff:g id="NAME">%s</xliff:g> ಗೆ ಸರಿಸಲಾಗಿದೆ"</string>
+    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"ವಿಷಯವನ್ನು ಸರಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
+    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"ವಿಷಯವನ್ನು ಪುನಃ ಸರಿಸಲು ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"ಇಜೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ..."</string>
@@ -1356,17 +1369,14 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"ಯಾವಾಗಲೂ-ಆನ್ VPN ಸಂಪರ್ಕಗೊಳ್ಳುತ್ತಿದೆ…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"ಯಾವಾಗಲೂ-ಆನ್ VPN ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
     <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"ಯಾವಾಗಲೂ ಆನ್ ಆಗಿರುವ VPN ನಿಂದ ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಲಾಗಿದೆ"</string>
-    <!-- no translation found for vpn_lockdown_error (3133844445659711681) -->
-    <skip />
+    <string name="vpn_lockdown_error" msgid="3133844445659711681">"ಯಾವಾಗಲೂ ಆನ್ ಆಗಿರುವ VPN ಗೆ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"ನೆಟ್‌ವರ್ಕ್‌ ಅಥವಾ VPN ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಿ"</string>
     <string name="upload_file" msgid="2897957172366730416">"ಫೈಲ್ ಆಯ್ಕೆಮಾಡು"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"ಯಾವುದೇ ಫೈಲ್ ಆಯ್ಕೆ ಮಾಡಿಲ್ಲ"</string>
     <string name="reset" msgid="2448168080964209908">"ಮರುಹೊಂದಿಸು"</string>
     <string name="submit" msgid="1602335572089911941">"ಸಲ್ಲಿಸು"</string>
-    <!-- no translation found for car_mode_disable_notification_title (5704265646471239078) -->
-    <skip />
-    <!-- no translation found for car_mode_disable_notification_message (7647248420931129377) -->
-    <skip />
+    <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"ಡ್ರೈವಿಂಗ್‌ ಅಪ್ಲಿಕೇಶನ್ ಚಾಲನೆಯಲ್ಲಿದೆ"</string>
+    <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"ಡ್ರೈವಿಂಗ್‌ ಅಪ್ಲಿಕೇಶನ್ ನಿರ್ಗಮಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"ಟೆಥರಿಂಗ್ ಅಥವಾ ಹಾಟ್‌ಸ್ಪಾಟ್ ಸಕ್ರಿಯವಾಗಿದೆ"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"ಹೊಂದಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"ಟೆಥರಿಂಗ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
@@ -1692,8 +1702,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ಸ್ಥಾಪಿಸಿದ್ದಾರೆ"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರಿಂದ ಅಪ್‌ಡೇಟ್ ಮಾಡಲ್ಪಟ್ಟಿದೆ"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ಅಳಿಸಿದ್ದಾರೆ"</string>
-    <!-- no translation found for battery_saver_description (4660824093877546730) -->
-    <skip />
+    <string name="battery_saver_description" msgid="4660824093877546730">"ಬ್ಯಾಟರಿ ಬಾಳಿಕೆಯನ್ನು ಹೆಚ್ಚಿಸಲು, ಬ್ಯಾಟರಿ ಉಳಿಕೆಯು ನಿಮ್ಮ ಸಾಧನದ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತದೆ ಮತ್ತು ಕಂಪನ, ಸ್ಥಳದ ಸೇವೆಗಳು ಹಾಗೂ ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ಮಿತಿಗೊಳಿಸುತ್ತದೆ. ಸಿಂಕ್ ಮಾಡುವಿಕೆಯನ್ನು ಅವಲಂಬಿಸಿರುವಂತಹ ಇಮೇಲ್, ಸಂದೇಶ ಕಳುಹಿಸುವಿಕೆ ಮತ್ತು ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ನೀವು ಅದನ್ನು ತೆರೆಯದ ಹೊರತು ಅಪ್‌ಡೇಟ್‌‌ ಆಗುವುದಿಲ್ಲ.\n\nಸಾಧನವು ಚಾರ್ಜ್ ಆಗುತ್ತಿರುವಾಗ ಬ್ಯಾಟರಿ ಉಳಿಕೆಯು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆಫ್ ಆಗುತ್ತದೆ."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"ಡೇಟಾ ಬಳಕೆ ಕಡಿಮೆ ಮಾಡುವ ನಿಟ್ಟಿನಲ್ಲಿ, ಡೇಟಾ ಸೇವರ್ ಕೆಲವು ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಹಿನ್ನೆಲೆಯಲ್ಲಿ ಡೇಟಾ ಕಳುಹಿಸುವುದನ್ನು ಅಥವಾ ಸ್ವೀಕರಿಸುವುದನ್ನು ತಡೆಯುತ್ತದೆ. ನೀವು ಪ್ರಸ್ತುತ ಬಳಸುತ್ತಿರುವ ಅಪ್ಲಿಕೇಶನ್ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಬಹುದು ಆದರೆ ಪದೇ ಪದೇ ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ. ಇದರರ್ಥ, ಉದಾಹರಣೆಗೆ, ನೀವು ಅವುಗಳನ್ನು ಟ್ಯಾಪ್ ಮಾಡುವವರೆಗೆ ಆ ಚಿತ್ರಗಳು ಕಾಣಿಸಿಕೊಳ್ಳುವುದಿಲ್ಲ."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ಡೇಟಾ ಉಳಿಸುವಿಕೆಯನ್ನು ಆನ್ ಮಾಡುವುದೇ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ಆನ್‌ ಮಾಡಿ"</string>
@@ -1744,22 +1753,14 @@
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ಅವರಿಂದ ಮ್ಯೂಟ್‌ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆಂತರಿಕ ಸಮಸ್ಯೆಯಿದೆ ಹಾಗೂ ನೀವು ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾವನ್ನು ಮರುಹೊಂದಿಸುವರೆಗೂ ಅದು ಅಸ್ಥಿರವಾಗಬಹುದು."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆಂತರಿಕ ಸಮಸ್ಯೆಯಿದೆ. ವಿವರಗಳಿಗಾಗಿ ನಿಮ್ಮ ತಯಾರಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
-    <!-- no translation found for stk_cc_ussd_to_dial (5214333646366591205) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_ss (4884994189414782605) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_ussd (5728637484565449312) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_dial_video (4134455726513175559) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_dial (1360775164651754978) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_dial_video (6577956662913194947) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_ussd (5614626512855868785) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_ss (7716729801537709054) -->
-    <skip />
+    <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD ವಿನಂತಿಯನ್ನು ಸಾಮಾನ್ಯ ಕರೆಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ"</string>
+    <string name="stk_cc_ussd_to_ss" msgid="4884994189414782605">"USSD ವಿನಂತಿಯನ್ನು SS ವಿನಂತಿಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ"</string>
+    <string name="stk_cc_ussd_to_ussd" msgid="5728637484565449312">"ಹೊಸ USSD ವಿನಂತಿಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="4134455726513175559">"USSD ವಿನಂತಿಯನ್ನು ವೀಡಿಯೊ ಕರೆಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ"</string>
+    <string name="stk_cc_ss_to_dial" msgid="1360775164651754978">"SS ವಿನಂತಿಯನ್ನು ಸಾಮಾನ್ಯ ಕರೆಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="6577956662913194947">"SS ವಿನಂತಿಯನ್ನು ವೀಡಿಯೊ ಕರೆಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ"</string>
+    <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS ವಿನಂತಿಯನ್ನು USSD ವಿನಂತಿಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ"</string>
+    <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"ಹೊಸ SS ವಿನಂತಿಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"ವಿಸ್ತೃತಗೊಳಿಸಿ"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"ಕುಗ್ಗಿಸಿ"</string>
@@ -1857,6 +1858,10 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"ಧ್ವನಿಗಾಗಿ ಸಿಮ್ ಸಿದ್ಧವಾಗಿಲ್ಲ"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"ಧ್ವನಿಗಾಗಿ ಸಿಮ್ ಅನ್ನು ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"ಧ್ವನಿಗಾಗಿ ಫೋನ್ ಅನ್ನು ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
+    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"<xliff:g id="SIMNUMBER">%d</xliff:g> ಸಿಮ್ ಅನ್ನು ಅನುಮತಿಸಲಾಗಿಲ್ಲ"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"<xliff:g id="SIMNUMBER">%d</xliff:g> ಸಿಮ್ ಅನ್ನು ಒದಗಿಸಲಾಗಿಲ್ಲ"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"<xliff:g id="SIMNUMBER">%d</xliff:g> ಸಿಮ್ ಅನ್ನು ಅನುಮತಿಸಲಾಗಿಲ್ಲ"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"<xliff:g id="SIMNUMBER">%d</xliff:g> ಸಿಮ್ ಅನ್ನು ಅನುಮತಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"ಪಾಪ್‌ಅಪ್ ವಿಂಡೋ"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"ಅಪ್ಲಿಕೇಶನ್ ಆವೃತ್ತಿಯನ್ನು ಡೌನ್‌ಗ್ರೇಡ್‌ ಮಾಡಲಾಗಿದೆ ಅಥವಾ ಈ ಶಾರ್ಟ್‌ಕಟ್‌ಗೆ ಹೊಂದಾಣಿಕೆಯಾಗುವುದಿಲ್ಲ"</string>
@@ -1877,8 +1882,6 @@
     <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"ಇದು ವೈಶಿಷ್ಟ್ಯದ ಹೊಸ ಬದಲಾವಣೆಯ ಸೆಟ್ಟಿಂಗ್‌ ಆಗಿದೆ. ಬದಲಾಯಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ ಬದಲಾಗಿದೆ"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"ಏನನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ ಎಂಬುದನ್ನು ಪರೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
-    <!-- no translation found for notification_app_name_system (4205032194610042794) -->
-    <skip />
-    <!-- no translation found for notification_app_name_settings (7751445616365753381) -->
-    <skip />
+    <string name="notification_app_name_system" msgid="4205032194610042794">"ಸಿಸ್ಟಂ"</string>
+    <string name="notification_app_name_settings" msgid="7751445616365753381">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
 </resources>
