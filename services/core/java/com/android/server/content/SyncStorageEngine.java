@@ -43,7 +43,14 @@ import android.os.Parcel;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.util.*;
+import android.util.ArrayMap;
+import android.util.AtomicFile;
+import android.util.EventLog;
+import android.util.Log;
+import android.util.Pair;
+import android.util.Slog;
+import android.util.SparseArray;
+import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -466,11 +473,13 @@ public class SyncStorageEngine {
     private boolean mGrantSyncAdaptersAccountAccess;
 
     private final MyHandler mHandler;
+    private final SyncLogger mLogger;
 
     private SyncStorageEngine(Context context, File dataDir, Looper looper) {
         mHandler = new MyHandler(looper);
         mContext = context;
         sSyncStorageEngine = this;
+        mLogger = SyncLogger.getInstance();
 
         mCal = Calendar.getInstance(TimeZone.getTimeZone("GMT+0"));
 
@@ -494,6 +503,14 @@ public class SyncStorageEngine {
         writeAccountInfoLocked();
         writeStatusLocked();
         writeStatisticsLocked();
+
+        if (mLogger.enabled()) {
+            final int size = mAuthorities.size();
+            mLogger.log("Loaded ", size, " items");
+            for (int i = 0; i < size; i++) {
+                mLogger.log(mAuthorities.valueAt(i));
+            }
+        }
     }
 
     public static SyncStorageEngine newTestInstance(Context context) {
@@ -648,11 +665,16 @@ public class SyncStorageEngine {
     }
 
     public void setSyncAutomatically(Account account, int userId, String providerName,
-                                     boolean sync, @SyncExemption int syncExemptionFlag) {
+            boolean sync, @SyncExemption int syncExemptionFlag, int callingUid) {
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             Slog.d(TAG, "setSyncAutomatically: " + /* account + */" provider " + providerName
                     + ", user " + userId + " -> " + sync);
         }
+        mLogger.log("Set sync auto account=", account,
+                " user=", userId,
+                " authority=", providerName,
+                " value=", Boolean.toString(sync),
+                " callingUid=", callingUid);
         synchronized (mAuthorities) {
             AuthorityInfo authority =
                     getOrCreateAuthorityLocked(
@@ -709,8 +731,10 @@ public class SyncStorageEngine {
         }
     }
 
-    public void setIsSyncable(Account account, int userId, String providerName, int syncable) {
-        setSyncableStateForEndPoint(new EndPoint(account, providerName, userId), syncable);
+    public void setIsSyncable(Account account, int userId, String providerName, int syncable,
+            int callingUid) {
+        setSyncableStateForEndPoint(new EndPoint(account, providerName, userId), syncable,
+                callingUid);
     }
 
     /**
@@ -719,8 +743,10 @@ public class SyncStorageEngine {
      * @param target target to set value for.
      * @param syncable 0 indicates unsyncable, <0 unknown, >0 is active/syncable.
      */
-    private void setSyncableStateForEndPoint(EndPoint target, int syncable) {
+    private void setSyncableStateForEndPoint(EndPoint target, int syncable, int callingUid) {
         AuthorityInfo aInfo;
+        mLogger.log("Set syncable ", target, " value=", Integer.toString(syncable),
+                " callingUid=", callingUid);
         synchronized (mAuthorities) {
             aInfo = getOrCreateAuthorityLocked(target, -1, false);
             if (syncable < AuthorityInfo.NOT_INITIALIZED) {
@@ -902,7 +928,9 @@ public class SyncStorageEngine {
     }
 
     public void setMasterSyncAutomatically(boolean flag, int userId,
-            @SyncExemption int syncExemptionFlag) {
+            @SyncExemption int syncExemptionFlag, int callingUid) {
+        mLogger.log("Set master enabled=", flag, " user=", userId,
+                " caller=" + callingUid);
         synchronized (mAuthorities) {
             Boolean auto = mMasterSyncAutomatically.get(userId);
             if (auto != null && auto.equals(flag)) {
@@ -2049,7 +2077,7 @@ public class SyncStorageEngine {
                 if (name == null) continue;
                 if (name.equals("listen_for_tickles")) {
                     setMasterSyncAutomatically(value == null || Boolean.parseBoolean(value), 0,
-                            ContentResolver.SYNC_EXEMPTION_NONE);
+                            ContentResolver.SYNC_EXEMPTION_NONE, SyncLogger.CALLING_UID_SELF);
                 } else if (name.startsWith("sync_provider_")) {
                     String provider = name.substring("sync_provider_".length(),
                             name.length());
