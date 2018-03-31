@@ -40,6 +40,10 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Tengt í gegnum %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Í boði í gegnum %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Tengt, enginn netaðgangur"</string>
+    <!-- no translation found for wifi_status_no_internet (5784710974669608361) -->
+    <skip />
+    <!-- no translation found for wifi_status_sign_in_required (123517180404752756) -->
+    <skip />
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Aðgangsstaður tímabundið fullur"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"Tengt í gegnum %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"Í boði í gegnum %1$s"</string>
@@ -63,6 +67,12 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"Tengt (enginn sími), staða rafhlöðu <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Tengt (ekkert efni), staða rafhlöðu <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Tengt (enginn sími eða efni), staða rafhlöðu <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <!-- no translation found for bluetooth_active_battery_level (3149689299296462009) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level (1447164613319663655) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_no_battery_level (8380223546730241956) -->
+    <skip />
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Hljóð efnis"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Símtöl"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Skráaflutningur"</string>
@@ -109,6 +119,14 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"Heyrnartól"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"Jaðartæki með inntak"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
+    <!-- no translation found for bluetooth_hearingaid_left_pairing_message (7378813500862148102) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearingaid_right_pairing_message (1550373802309160891) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearingaid_left_battery_level (8797811465352097562) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearingaid_right_battery_level (7309476148173459677) -->
+    <skip />
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Slökkt á Wi-Fi."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi ótengt."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi: Eitt strik."</string>
@@ -188,7 +206,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"Vaka"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Skjárinn fer aldrei í hvíld við hleðslu"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Gera HCI-snuðraraskrá Bluetooth virka"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Fanga alla HCI-pakka Bluetooth í skrá"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Fanga alla HCI-pakka Bluetooth í skrá (Velja skal Bluetooth eftir að þessari stillingu er breytt)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Opnun framleiðanda"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Leyfa opnun ræsiforritsins"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Leyfa opnun framleiðanda?"</string>
@@ -207,15 +225,20 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP-útgáfa"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Velja Bluetooth AVRCP-útgáfu"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth hljóðkóðari"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Velja Bluetooth-hljóðkóðara"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth hljóðtökutíðni"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Velja hljóðkóðara Bluetooth:\ntökutíðni"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth hljóðbitar í úrtaki"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Velja hljóðkóðara Bluetooth:\nbitar í úrtaki"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Hljóðrásarstilling Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Velja hljóðkóðara Bluetooth:\nstilling rásar"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth LDAC-hljóðkóðari: gæði spilunar"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Velja Bluetooth LDAC-hljóðkóðara:\ngæði spilunar"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streymi: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Lokað DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Velja lokaða DNS-stillingu"</string>
@@ -223,9 +246,15 @@
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Sjálfvirkt"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Hýsilheiti lokaðrar DNS-veitu"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Slá inn hýsilheiti DNS-veitu"</string>
+    <!-- no translation found for private_dns_mode_provider_failure (231837290365031223) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Sýna valkosti fyrir vottun þráðlausra skjáa"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Auka skráningarstig Wi-Fi, sýna RSSI fyrir hvert SSID í Wi-Fi vali"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Velja MAC-vistfang af handahófi þegar tengst er við Wi‑Fi net"</string>
+    <!-- no translation found for wifi_metered_label (4514924227256839725) -->
+    <skip />
+    <!-- no translation found for wifi_unmetered_label (6124098729457992931) -->
+    <skip />
     <string name="select_logd_size_title" msgid="7433137108348553508">"Annálsritastærðir biðminna"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Veldu annálsritastærðir á biðminni"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Hreinsa varanlega geymslu annálsrita?"</string>
@@ -360,14 +389,10 @@
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"U.þ.b. <xliff:g id="TIME">%1$s</xliff:g> eftir miðað við notkun þína"</string>
     <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"Um það bil <xliff:g id="TIME">%1$s</xliff:g> eftir miðað við notkun þína (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> eftir"</string>
-    <!-- no translation found for power_discharge_by_enhanced (2095821536747992464) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (2175151772952365149) -->
-    <skip />
-    <!-- no translation found for power_discharge_by (6453537733650125582) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only (107616694963545745) -->
-    <skip />
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Ætti að endast til u.þ.b. <xliff:g id="TIME">%1$s</xliff:g> miðað við notkun þína (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Ætti að endast til u.þ.b. <xliff:g id="TIME">%1$s</xliff:g> miðað við notkun þína"</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"Ætti að endast til u.þ.b. <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"Ætti að endast til u.þ.b. <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Minna en <xliff:g id="THRESHOLD">%1$s</xliff:g> eftir"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Minna en <xliff:g id="THRESHOLD">%1$s</xliff:g> eftir (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Meira en <xliff:g id="TIME_REMAINING">%1$s</xliff:g> eftir (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -422,8 +447,7 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Skráð"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Ekki skráð"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Ekki tiltækt"</string>
-    <!-- no translation found for wifi_status_mac_randomized (5589328382467438245) -->
-    <skip />
+    <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"MAC-vistfang er valið af handahófi"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
       <item quantity="one">%1$d tæki tengt</item>
       <item quantity="other">%1$d tæki tengd</item>
@@ -443,6 +467,5 @@
     <string name="alarm_template_far" msgid="3779172822607461675">"á/í <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Lengd"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Spyrja í hvert skipti"</string>
-    <!-- no translation found for time_unit_just_now (6363336622778342422) -->
-    <skip />
+    <string name="time_unit_just_now" msgid="6363336622778342422">"Rétt í þessu"</string>
 </resources>

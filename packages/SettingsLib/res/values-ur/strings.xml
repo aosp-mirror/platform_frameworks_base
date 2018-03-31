@@ -40,6 +40,10 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"‏منسلک بذریعہ ‎%1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"‏دستیاب بذریعہ ‎%1$s"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"منسلک، انٹرنیٹ نہیں ہے"</string>
+    <!-- no translation found for wifi_status_no_internet (5784710974669608361) -->
+    <skip />
+    <!-- no translation found for wifi_status_sign_in_required (123517180404752756) -->
+    <skip />
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"رسائی پوائنٹ عارضی طور پر فُل ہے"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"‏منسلک بذریعہ ‎%1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"‏دستیاب بذریعہ ‎%1$s"</string>
@@ -63,6 +67,12 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"منسلک ہے (فون کے علاوہ)، بیٹری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"منسلک ہے (میڈیا کے علاوہ)، بیٹری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"منسلک ہے (فون یا میڈیا کے علاوہ)، بیٹری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <!-- no translation found for bluetooth_active_battery_level (3149689299296462009) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level (1447164613319663655) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_no_battery_level (8380223546730241956) -->
+    <skip />
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"میڈيا آڈیو"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"فون کالز"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"فائل کی منتقلی"</string>
@@ -109,6 +119,14 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"ہیڈ فون"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"ان پٹ پیریفرل"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"بلوٹوتھ"</string>
+    <!-- no translation found for bluetooth_hearingaid_left_pairing_message (7378813500862148102) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearingaid_right_pairing_message (1550373802309160891) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearingaid_left_battery_level (8797811465352097562) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearingaid_right_battery_level (7309476148173459677) -->
+    <skip />
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"‏Wifi آف ہے۔"</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"‏Wifi غیر منسلک ہو گیا۔"</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"‏Wifi ایک بار۔"</string>
@@ -188,7 +206,8 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"بیدار رکھیں"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"چارج ہوتے وقت اسکرین کبھی بھی سلیپ وضع میں نہيں جائے گی"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"‏بلوٹوتھ HCI کا جاسوسی لاگ فعال کریں"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"‏سبھی بلوٹوتھ HCI کے پیکٹس ایک فائل میں قید کریں"</string>
+    <!-- no translation found for bt_hci_snoop_log_summary (366083475849911315) -->
+    <skip />
     <string name="oem_unlock_enable" msgid="6040763321967327691">"‏OEM اَن لاکنگ"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"بوٹ لوڈر کو غیر مقفل ہونے کی اجازت دیں"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"‏OEM اَن لاکنگ کی اجازت دیں؟"</string>
@@ -207,15 +226,20 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"‏بلوٹوتھ AVRCP ورژن"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"‏بلوٹوتھ AVRCP ورژن منتخب کریں"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"بلوٹوتھ آڈیو کوڈیک"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"بلوٹوتھ آڈیو کوڈیک منتخب کریں"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"بلوٹوتھ آڈیو کے نمونے کی شرح"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"بلوٹوتھ آڈیو کوڈیک منتخب کریں:\nنمونے کی شرح"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"بلوٹوتھ آڈیو بٹس فی نمونہ"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"بلوٹوتھ آڈیو کوڈیک منتخب کریں:\nبٹس فی نمونہ"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"بلوٹوتھ آڈیو چینل موڈ"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"بلوٹوتھ آڈیو کوڈیک منتخب کریں:\nچینل موڈ"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"‏بلوٹوتھ آڈیو LDAC کوڈیک: پلے بیک کا معیار"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"‏بلوٹوتھ آڈیو LDAC کوڈیک منتخب کریں:\nپلے بیک کا معیار"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"سلسلہ بندی: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"‏نجی DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"‏نجی DNS وضع منتخب کریں"</string>
@@ -223,9 +247,15 @@
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"خودکار"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"‏نجی DNS فراہم کنندہ میزبان کا نام"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"‏DNS فراہم کنندہ کے میزبان کا نام درج کریں"</string>
+    <!-- no translation found for private_dns_mode_provider_failure (231837290365031223) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"وائرلیس ڈسپلے سرٹیفیکیشن کیلئے اختیارات دکھائیں"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏Wi‑Fi لاگنگ لیول میں اضافہ کریں، Wi‑Fi منتخب کنندہ میں فی SSID RSSI دکھائیں"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"‏Wi-Fi نیٹ ورکس سے منسلک کرتے وقت MAC پتے کو غیر مرتب کریں"</string>
+    <!-- no translation found for wifi_metered_label (4514924227256839725) -->
+    <skip />
+    <!-- no translation found for wifi_unmetered_label (6124098729457992931) -->
+    <skip />
     <string name="select_logd_size_title" msgid="7433137108348553508">"لاگر بفر کے سائز"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"فی لاگ بفر لاگر کے سائز منتخب کریں"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"لاگر مستقل اسٹوریج صاف کریں؟"</string>
@@ -360,14 +390,10 @@
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"آپ کے استعمال کی بنیاد پر تقریباً <xliff:g id="TIME">%1$s</xliff:g> باقی ہے"</string>
     <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"آپ کے استعمال کی بنیاد پر تقریباً <xliff:g id="TIME">%1$s</xliff:g> باقی ہے (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> باقی ہے"</string>
-    <!-- no translation found for power_discharge_by_enhanced (2095821536747992464) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (2175151772952365149) -->
-    <skip />
-    <!-- no translation found for power_discharge_by (6453537733650125582) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only (107616694963545745) -->
-    <skip />
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"آپ کے استعمال کی بنیاد پر تقریباً <xliff:g id="TIME">%1$s</xliff:g> تک بیٹری چلے گی (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"آپ کے استعمال کی بنیاد پر تقریباً <xliff:g id="TIME">%1$s</xliff:g> تک بیٹری چلے گی"</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"تقریباً <xliff:g id="TIME">%1$s</xliff:g> تک بیٹری چلے گی (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"تقریباً <xliff:g id="TIME">%1$s</xliff:g> تک بیٹری چلے گی"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g> سے کم باقی ہے"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"<xliff:g id="THRESHOLD">%1$s</xliff:g> سے کم باقی ہے (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> سے زیادہ باقی ہے (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -422,8 +448,7 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"رجسٹر شدہ"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"رجسٹر نہیں ہے"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"غیر دستیاب"</string>
-    <!-- no translation found for wifi_status_mac_randomized (5589328382467438245) -->
-    <skip />
+    <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"‏MAC پتہ رینڈم ہے"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
       <item quantity="other">‏%1$d آلات منسلک ہیں</item>
       <item quantity="one">‏%1$d آلہ منسلک ہے</item>
@@ -443,6 +468,5 @@
     <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g> بجے"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"مدت"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"ہر بار پوچھیں"</string>
-    <!-- no translation found for time_unit_just_now (6363336622778342422) -->
-    <skip />
+    <string name="time_unit_just_now" msgid="6363336622778342422">"ابھی ابھی"</string>
 </resources>

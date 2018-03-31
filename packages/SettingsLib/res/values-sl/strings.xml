@@ -40,6 +40,8 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"Vzpostavljena povezava prek: %1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"Na voljo prek: %1$s"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Vzpostavljena povezava, brez interneta"</string>
+    <string name="wifi_status_no_internet" msgid="5784710974669608361">"Brez internetne povezave"</string>
+    <string name="wifi_status_sign_in_required" msgid="123517180404752756">"Zahtevana je prijava"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Dostopna točka je trenutno zasedena"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"Vzpostavljena povezava prek: %1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"Na voljo prek: %1$s"</string>
@@ -63,6 +65,9 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"Povezano (brez telefona), raven napolnjenosti akumulatorja je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Povezano (brez predstavnosti), raven napolnjenosti akumulatorja je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Povezano (brez telefona ali predstavnosti), raven napolnjenosti akumulatorja je <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Aktivna, akumulator na <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level" msgid="1447164613319663655">"Akumulator na <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Aktivna"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Zvok predstavnosti"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefonski klici"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Prenos datoteke"</string>
@@ -109,6 +114,10 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"Slušalka"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"Zunanja dodatna oprema"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
+    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"Seznanjanje z levim slušnim pripomočkom …"</string>
+    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"Seznanjanje z desnim slušnim pripomočkom …"</string>
+    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"Levi – akumulator na <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"Desni – akumulator na <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi je izklopljen."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Povezava Wi-Fi je prekinjena."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Ena črtica signala Wi-Fi."</string>
@@ -188,7 +197,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"Brez zaklepanja"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Med polnjenjem se zaslon ne bo nikoli zaklenil"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Omogoči zajem dnevnika Bluetooth HCI"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Zajemi vse pakete Bluetooth HCI v datoteko"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Zajemi vse pakete Bluetooth HCI v datoteko (preklopi Bluetooth po spremembi te nastavitve)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"Odklepanje OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Dovoli odklepanje zagonskega nalagalnika"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Želite omogočiti odklepanje OEM?"</string>
@@ -207,15 +216,20 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Različica profila AVRCP za Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Izberite različico profila AVRCP za Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Zvočni kodek za Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Izberi zvočni kodek za Bluetooth"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Hitrost vzorčenja zvoka prek Bluetootha"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Izberi zvočni kodek za Bluetooth:\nHitrost vzorčenja"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Število bitov na vzorec za zvok prek Bluetootha"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Izberi zvočni kodek za Bluetooth:\nBitov na vzorec"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Način zvočnega kanala prek Bluetootha"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Izberi zvočni kodek za Bluetooth:\nNačin kanala"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Zvočni kodek LDAC za Bluetooth: kakovost predvajanja"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Izberi zvočni kodek LDAC za Bluetooth:\nKakovost predvajanja"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Pretočno predvajanje: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Zasebni strežnik DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Izbira načina zasebnega strežnika DNS"</string>
@@ -223,9 +237,12 @@
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Samodejno"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Ime gostitelja pri ponudniku zasebnega strežnika DNS"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Vnesite ime gostitelja pri ponudniku strežnika DNS"</string>
+    <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Povezave ni bilo mogoče vzpostaviti"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Pokaži možnosti za potrdilo brezžičnega zaslona"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Povečaj raven zapis. dnev. za Wi-Fi; v izbir. Wi‑Fi-ja pokaži glede na SSID RSSI"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Dodelitev naključnega naslova MAC pri povezovanju z omrežji Wi‑Fi"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"Z omejenim prenosom podatkov"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Z neomejenim prenosom podatkov"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Velikosti medpomn. zapisov. dnevnika"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Izberite velikost medpomnilnika dnevnika"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Želite izbrisati trajno shranjevanje dnevniškega orodja?"</string>
@@ -360,14 +377,10 @@
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Glede na način uporabe imate na voljo še približno <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"Približen preostali čas glede na način uporabe: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"Še <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_discharge_by_enhanced (2095821536747992464) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (2175151772952365149) -->
-    <skip />
-    <!-- no translation found for power_discharge_by (6453537733650125582) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only (107616694963545745) -->
-    <skip />
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Naprava bi morala glede na način uporabe (<xliff:g id="LEVEL">%2$s</xliff:g>) delovati do približno <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Naprava bi morala glede na način uporabe delovati do približno <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"Naprava bi morala delovati do približno <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"Naprava bi morala delovati do približno <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Preostalo manj kot <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Preostanek: manj kot <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Preostali čas delovanja: manj kot <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -422,8 +435,7 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Registrirana"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Ni registrirana"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Ni na voljo"</string>
-    <!-- no translation found for wifi_status_mac_randomized (5589328382467438245) -->
-    <skip />
+    <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"Naslov MAC je naključno izbran"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
       <item quantity="one">Povezana je %1$d naprava</item>
       <item quantity="two">Povezani sta %1$d napravi</item>
@@ -445,6 +457,5 @@
     <string name="alarm_template_far" msgid="3779172822607461675">"v <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Trajanje"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Vedno vprašaj"</string>
-    <!-- no translation found for time_unit_just_now (6363336622778342422) -->
-    <skip />
+    <string name="time_unit_just_now" msgid="6363336622778342422">"Pravkar"</string>
 </resources>
