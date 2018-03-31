@@ -264,8 +264,9 @@ status_t FileSection::Execute(ReportRequestSet* requests) const {
     }
 
     // parent process
-    status_t readStatus = buffer.readProcessedDataInStream(
-            &fd, &p2cPipe.writeFd(), &c2pPipe.readFd(), this->timeoutMs, mIsSysfs);
+    status_t readStatus = buffer.readProcessedDataInStream(fd.get(), std::move(p2cPipe.writeFd()),
+                                                           std::move(c2pPipe.readFd()),
+                                                           this->timeoutMs, mIsSysfs);
 
     if (readStatus != NO_ERROR || buffer.timedOut()) {
         ALOGW("FileSection '%s' failed to read data from incident helper: %s, timedout: %s",
@@ -356,9 +357,9 @@ status_t GZipSection::Execute(ReportRequestSet* requests) const {
     VLOG("GZipSection '%s' editPos=%zd, dataBeginAt=%zd", this->name.string(), editPos,
          dataBeginAt);
 
-    status_t readStatus =
-            buffer.readProcessedDataInStream(&fd, &p2cPipe.writeFd(), &c2pPipe.readFd(),
-                                             this->timeoutMs, isSysfs(mFilenames[index]));
+    status_t readStatus = buffer.readProcessedDataInStream(
+            fd.get(), std::move(p2cPipe.writeFd()), std::move(c2pPipe.readFd()), this->timeoutMs,
+            isSysfs(mFilenames[index]));
 
     if (readStatus != NO_ERROR || buffer.timedOut()) {
         ALOGW("GZipSection '%s' failed to read data from gzip: %s, timedout: %s",
@@ -468,7 +469,7 @@ status_t WorkerThreadSection::Execute(ReportRequestSet* requests) const {
     pthread_attr_destroy(&attr);
 
     // Loop reading until either the timeout or the worker side is done (i.e. eof).
-    err = buffer.read(&data->pipe.readFd(), this->timeoutMs);
+    err = buffer.read(data->pipe.readFd().get(), this->timeoutMs);
     if (err != NO_ERROR) {
         // TODO: Log this error into the incident report.
         ALOGW("WorkerThreadSection '%s' reader failed with error '%s'", this->name.string(),
@@ -575,7 +576,7 @@ status_t CommandSection::Execute(ReportRequestSet* requests) const {
     }
 
     cmdPipe.writeFd().reset();
-    status_t readStatus = buffer.read(&ihPipe.readFd(), this->timeoutMs);
+    status_t readStatus = buffer.read(ihPipe.readFd().get(), this->timeoutMs);
     if (readStatus != NO_ERROR || buffer.timedOut()) {
         ALOGW("CommandSection '%s' failed to read data from incident helper: %s, timedout: %s",
               this->name.string(), strerror(-readStatus), buffer.timedOut() ? "true" : "false");
@@ -894,7 +895,7 @@ status_t TombstoneSection::BlockingCall(int pipeWriteFd) const {
         // Parent process.
         // Read from the pipe concurrently to avoid blocking the child.
         FdBuffer buffer;
-        err = buffer.readFully(&dumpPipe.readFd());
+        err = buffer.readFully(dumpPipe.readFd().get());
         if (err != NO_ERROR) {
             ALOGW("TombstoneSection '%s' failed to read stack dump: %d", this->name.string(), err);
             dumpPipe.readFd().reset();
