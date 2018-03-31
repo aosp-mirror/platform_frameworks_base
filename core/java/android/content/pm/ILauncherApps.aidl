@@ -49,6 +49,7 @@ interface ILauncherApps {
             String callingPackage, in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);
     boolean isPackageEnabled(String callingPackage, String packageName, in UserHandle user);
+    Bundle getSuspendedPackageLauncherExtras(String packageName, in UserHandle user);
     boolean isActivityEnabled(
             String callingPackage, in ComponentName component, in UserHandle user);
     ApplicationInfo getApplicationInfo(
