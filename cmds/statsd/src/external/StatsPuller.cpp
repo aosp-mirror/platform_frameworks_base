@@ -60,7 +60,7 @@ bool StatsPuller::Pull(const int64_t elapsedTimeNs, std::vector<std::shared_ptr<
         data->setElapsedTimestampNs(elapsedTimeNs);
         data->setLogdWallClockTimestampNs(wallClockTimeNs);
     }
-    if (ret) {
+    if (ret && mCachedData.size() > 0) {
       mergeIsolatedUidsToHostUid(mCachedData, mUidMap, mTagId);
       (*data) = mCachedData;
     }
