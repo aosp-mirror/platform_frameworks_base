@@ -130,8 +130,12 @@ public class MbmsUtils {
      * Returns a File linked to the directory used to store temp files for this file service
      */
     public static File getEmbmsTempFileDirForService(Context context, String serviceId) {
+        // Replace all non-alphanumerics/underscores with an underscore. Some filesystems don't
+        // like special characters.
+        String sanitizedServiceId = serviceId.replaceAll("[^a-zA-Z0-9_]", "_");
+
         File embmsTempFileDir = MbmsTempFileProvider.getEmbmsTempFileDir(context);
 
-        return new File(embmsTempFileDir, serviceId);
+        return new File(embmsTempFileDir, sanitizedServiceId);
     }
 }
