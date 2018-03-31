@@ -26,6 +26,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BackgroundThread;
 import com.android.server.power.BatterySaverPolicy;
 import com.android.server.power.BatterySaverStateMachineProto;
 
@@ -124,25 +125,33 @@ public class BatterySaverStateMachine {
         if (DEBUG) {
             Slog.d(TAG, "onBootCompleted");
         }
-        synchronized (mLock) {
+        // This is called with the power manager lock held. Don't do any
+        runOnBgThread(() -> {
+            synchronized (mLock) {
 
-            final ContentResolver cr = mContext.getContentResolver();
-            cr.registerContentObserver(Settings.Global.getUriFor(
-                    Settings.Global.LOW_POWER_MODE),
-                    false, mSettingsObserver, UserHandle.USER_SYSTEM);
-            cr.registerContentObserver(Settings.Global.getUriFor(
-                    Settings.Global.LOW_POWER_MODE_STICKY),
-                    false, mSettingsObserver, UserHandle.USER_SYSTEM);
-            cr.registerContentObserver(Settings.Global.getUriFor(
-                    Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL),
-                    false, mSettingsObserver, UserHandle.USER_SYSTEM);
+                final ContentResolver cr = mContext.getContentResolver();
+                cr.registerContentObserver(Settings.Global.getUriFor(
+                        Settings.Global.LOW_POWER_MODE),
+                        false, mSettingsObserver, UserHandle.USER_SYSTEM);
+                cr.registerContentObserver(Settings.Global.getUriFor(
+                        Settings.Global.LOW_POWER_MODE_STICKY),
+                        false, mSettingsObserver, UserHandle.USER_SYSTEM);
+                cr.registerContentObserver(Settings.Global.getUriFor(
+                        Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL),
+                        false, mSettingsObserver, UserHandle.USER_SYSTEM);
 
-            mBootCompleted = true;
+                mBootCompleted = true;
 
-            refreshSettingsLocked();
+                refreshSettingsLocked();
 
-            doAutoBatterySaverLocked();
-        }
+                doAutoBatterySaverLocked();
+            }
+        });
+    }
+
+    @VisibleForTesting
+    void runOnBgThread(Runnable r) {
+        BackgroundThread.getHandler().post(r);
     }
 
     void refreshSettingsLocked() {
