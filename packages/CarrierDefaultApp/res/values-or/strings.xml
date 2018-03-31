@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5247871339820894594">"CarrierDefaultApp"</string>
+    <string name="android_system_label" msgid="2797790869522345065">"ମୋବାଇଲ୍‌ କେରିଅର୍‍"</string>
+    <string name="portal_notification_id" msgid="5155057562457079297">"ମୋବାଇଲ୍‍ ଡାଟା ଶେଷ ହୋଇଯାଇଛି"</string>
+    <string name="no_data_notification_id" msgid="668400731803969521">"ଆପଣଙ୍କ ମୋବାଇଲ୍‍ ଡାଟା ନିଷ୍କ୍ରୀୟ କରାଯାଇଛି"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"%s ୱେବସାଇଟ୍‍ ଭିଜିଟ୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ"</string>
+    <string name="no_data_notification_detail" msgid="3112125343857014825">"ଦୟାକରି ଆପଣଙ୍କ ସେବା ପ୍ରଦାନକାରୀ %sକୁ ଯୋଗାଯୋଗ କରନ୍ତୁ।"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"କୌଣସି ମୋବାଇଲ୍‍ ଡାଟା କନେକ୍ସନ୍‌ ନାହିଁ"</string>
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"%s ଜରିଆରେ ଡାଟା କିମ୍ବା ରୋମିଙ୍ଗ ପ୍ଲାନ୍‍ ଯୋଡ଼ନ୍ତୁ"</string>
+    <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"ମୋବାଇଲ୍‍ ଡାଟା ସ୍ଥିତି"</string>
+    <string name="action_bar_label" msgid="4290345990334377177">"ମୋବାଇଲ୍‍ ନେଟୱର୍କରେ ସାଇନ୍‍ ଇନ୍‍ କରନ୍ତୁ"</string>
+    <string name="ssl_error_warning" msgid="3127935140338254180">"ଆପଣ ଯୋଗ ଦେବାକୁ ଚେଷ୍ଟା କରୁଥିବା ନେଟୱର୍କର ସୁରକ୍ଷା ସମସ୍ୟା ଅଛି।"</string>
+    <string name="ssl_error_example" msgid="6188711843183058764">"ଉଦାହରଣସ୍ୱରୂପ, ଲଗଇନ୍‍ ପୃଷ୍ଠା ଦେଖାଯାଇଥିବା ସଂସ୍ଥାର ହୋଇନଥାଇପାରେ।"</string>
+    <string name="ssl_error_continue" msgid="1138548463994095584">"ବ୍ରାଉଜର୍‍ ଜରିଆରେ ଯେମିତିବି ହେଉ ଜାରି ରଖନ୍ତୁ"</string>
+</resources>
