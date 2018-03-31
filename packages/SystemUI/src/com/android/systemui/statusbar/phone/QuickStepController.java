@@ -199,7 +199,7 @@ public class QuickStepController implements GestureHelper {
                 break;
             }
             case MotionEvent.ACTION_MOVE: {
-                if (mQuickStepStarted || !mAllowGestureDetection){
+                if (mQuickStepStarted || !mAllowGestureDetection || mHomeButtonView == null){
                     break;
                 }
                 int x = (int) event.getX();
