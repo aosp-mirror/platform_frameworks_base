@@ -26,6 +26,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.PermissionResult;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Binder;
@@ -398,6 +399,65 @@ public class SliceManager {
             // Manager will kill this process shortly anyway.
             return null;
         }
+    }
+
+    /**
+     * Determine whether a particular process and user ID has been granted
+     * permission to access a specific slice URI.
+     *
+     * @param uri The uri that is being checked.
+     * @param pid The process ID being checked against.  Must be &gt; 0.
+     * @param uid The user ID being checked against.  A uid of 0 is the root
+     * user, which will pass every permission check.
+     *
+     * @return {@link PackageManager#PERMISSION_GRANTED} if the given
+     * pid/uid is allowed to access that uri, or
+     * {@link PackageManager#PERMISSION_DENIED} if it is not.
+     *
+     * @see #grantSlicePermission(String, Uri)
+     */
+    public @PermissionResult int checkSlicePermission(@NonNull Uri uri, int pid, int uid) {
+        // TODO: Switch off Uri permissions.
+        return mContext.checkUriPermission(uri, pid, uid,
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+    }
+
+    /**
+     * Grant permission to access a specific slice Uri to another package.
+     *
+     * @param toPackage The package you would like to allow to access the Uri.
+     * @param uri The Uri you would like to grant access to.
+     *
+     * @see #revokeSlicePermission
+     */
+    public void grantSlicePermission(@NonNull String toPackage, @NonNull Uri uri) {
+        // TODO: Switch off Uri permissions.
+        mContext.grantUriPermission(toPackage, uri,
+                Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                        | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
+    }
+
+    /**
+     * Remove permissions to access a particular content provider Uri
+     * that were previously added with {@link #grantSlicePermission} for a specific target
+     * package.  The given Uri will match all previously granted Uris that are the same or a
+     * sub-path of the given Uri.  That is, revoking "content://foo/target" will
+     * revoke both "content://foo/target" and "content://foo/target/sub", but not
+     * "content://foo".  It will not remove any prefix grants that exist at a
+     * higher level.
+     *
+     * @param toPackage The package you would like to allow to access the Uri.
+     * @param uri The Uri you would like to revoke access to.
+     *
+     * @see #grantSlicePermission
+     */
+    public void revokeSlicePermission(@NonNull String toPackage, @NonNull Uri uri) {
+        // TODO: Switch off Uri permissions.
+        mContext.revokeUriPermission(toPackage, uri,
+                Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+                        | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
     }
 
     /**
