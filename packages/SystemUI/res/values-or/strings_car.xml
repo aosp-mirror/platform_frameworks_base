@@ -19,8 +19,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="notification_channel_tv_pip" msgid="134047986446577723">"ଛବି-ଭିତରେ-ଛବି"</string>
-    <string name="pip_notification_unknown_title" msgid="6289156118095849438">"(କୌଣସି ଟାଇଟଲ୍‍ ପ୍ରୋଗ୍ରାମ୍‍ ନାହିଁ)"</string>
-    <string name="pip_close" msgid="3480680679023423574">"PIP ବନ୍ଦ କରନ୍ତୁ"</string>
-    <string name="pip_fullscreen" msgid="8604643018538487816">"ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନ୍‍"</string>
+    <string name="unknown_user_label" msgid="4323896111737677955">"ଅଜଣା"</string>
+    <string name="start_driving" msgid="864023351402918991">"ଗାଡ଼ି ଚଲାଇବା ଆରମ୍ଭ କରନ୍ତୁ"</string>
 </resources>

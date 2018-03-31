@@ -33,7 +33,6 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"চলতে-থাকা"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"বিজ্ঞপ্তিগুলি"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"ব্যাটারি কম"</string>
-    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"চার্জ কম। ব্যাটারি সেভার চালু করুন"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> অবশিষ্ট আছে"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> বাকি আছে, বর্তমান ব্যবহারের ভিত্তিতে আর <xliff:g id="TIME">%s</xliff:g> চলবে"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> বাকি আছে, আর <xliff:g id="TIME">%s</xliff:g> চলবে"</string>
@@ -73,11 +72,12 @@
     <string name="global_action_screenshot" msgid="8329831278085426283">"স্ক্রিনশট নিন"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"স্ক্রিনশট সেভ করা হচ্ছে..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"স্ক্রিনশট সেভ করা হচ্ছে..."</string>
-    <string name="screenshot_saving_text" msgid="2545047868936087248">"স্ক্রিনশট সেভ করা হচ্ছে"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"স্ক্রিনশট সেভ করা হয়েছে"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"স্ক্রিনশটটি দেখতে ট্যাপ করুন"</string>
-    <string name="screenshot_failed_title" msgid="9096484883063264803">"স্ক্রিনশট নেওয়া যায়নি"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"স্ক্রিনশট সেভ করার সময় সমস্যা হয়েছে"</string>
+    <!-- no translation found for screenshot_failed_title (7612509838919089748) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_to_save_unknown_text (3637758096565605541) -->
+    <skip />
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"বেশি জায়গা নেই তাই স্ক্রিনশটটি সেভ করা যাবে না৷"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"এই অ্যাপ বা আপনার প্রতিষ্ঠান স্ক্রিনশট নেওয়ার অনুমতি দেয়নি"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ফাইল স্থানান্তরের বিকল্পগুলি"</string>
@@ -273,8 +273,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"ডেজার্ট কেস"</string>
     <string name="start_dreams" msgid="5640361424498338327">"স্ক্রিন সেভার"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ইথারনেট"</string>
-    <!-- no translation found for quick_settings_header_onboarding_text (8030309023792936283) -->
-    <skip />
+    <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"আরও বিকল্পের জন্য আইকনগুলি টাচ করে ধরে থাকুন"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"বিরক্ত করবেন না"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"শুধুমাত্র অগ্রাধিকার"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"শুধুমাত্র অ্যালার্মগুলি"</string>
@@ -349,7 +348,8 @@
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"সূর্যাস্তে চালু হবে"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"সূর্যোদয় পর্যন্ত"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> এ চালু হবে"</string>
-    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"<xliff:g id="TIME">%s</xliff:g> পর্যন্ত"</string>
+    <!-- no translation found for quick_settings_secondary_label_until (2749196569462600150) -->
+    <skip />
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC অক্ষম করা আছে"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC সক্ষম করা আছে"</string>
@@ -433,7 +433,10 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> আপনার স্ক্রীনে দেখানো সব কিছু ক্যাপচার করা শুরু করবে।"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"আর দেখাবেন না"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"সবকিছু সাফ করুন"</string>
-    <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"\'বিরক্ত করবেন না\' মোড চালু আছে, তাই বিজ্ঞপ্তি লুকিয়ে ফেলা হচ্ছে"</string>
+    <!-- no translation found for manage_notifications_text (8035284146227267681) -->
+    <skip />
+    <!-- no translation found for dnd_suppressing_shade_text (5179021215370153526) -->
+    <skip />
     <string name="media_projection_action_text" msgid="8470872969457985954">"এখন শুরু করুন"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"কোনো বিজ্ঞপ্তি নেই"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"প্রোফাইল পর্যবেক্ষণ করা হতে পারে"</string>
@@ -539,7 +542,8 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s। ভাইব্রেট করতে ট্যাপ করুন।"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s। নিঃশব্দ করতে ট্যাপ করুন।"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s ভলিউম নিয়ন্ত্রণ"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"কল এবং বিজ্ঞপ্তি আসলে রিং হবে"</string>
+    <!-- no translation found for volume_dialog_ringer_guidance_ring (3360373718388509040) -->
+    <skip />
     <string name="output_title" msgid="5355078100792942802">"মিডিয়া আউটপুট"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"ফোন কল আউটপুট"</string>
     <string name="output_none_found" msgid="5544982839808921091">"কোনও ডিভাইস খুঁজে পাওয়া যায়নি"</string>
@@ -626,6 +630,8 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"বিজ্ঞপ্তির নিয়ন্ত্রণগুলি"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"বিজ্ঞপ্তি মনে করিয়ে দেওয়ার বিকল্পগুলি"</string>
+    <!-- no translation found for notification_menu_snooze_action (1112254519029621372) -->
+    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"পূর্বাবস্থায় ফিরুন"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> পরে আবার মনে করানো হবে"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
@@ -689,6 +695,8 @@
     <string name="battery" msgid="7498329822413202973">"ব্যাটারি"</string>
     <string name="clock" msgid="7416090374234785905">"ঘড়ি"</string>
     <string name="headset" msgid="4534219457597457353">"হেডসেট"</string>
+    <!-- no translation found for accessibility_long_click_tile (6687350750091842525) -->
+    <skip />
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"হেডফোনগুলি সংযুক্ত হয়েছে"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"হেডসেট সংযুক্ত হয়েছে"</string>
     <string name="data_saver" msgid="5037565123367048522">"ডেটা সেভার"</string>
@@ -723,11 +731,9 @@
     <string name="right_keycode" msgid="708447961000848163">"ডানদিকের কিকোড"</string>
     <string name="left_icon" msgid="3096287125959387541">"বাঁ দিকের আইকন"</string>
     <string name="right_icon" msgid="3952104823293824311">"ডানদিকের আইকন"</string>
-    <!-- no translation found for drag_to_add_tiles (230586591689084925) -->
-    <skip />
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"টাইল যোগ করতে ট্যাপ করে টেনে আনুন"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"সরানোর জন্য এখানে টেনে আনুন"</string>
-    <!-- no translation found for drag_to_remove_disabled (2390968976638993382) -->
-    <skip />
+    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"অন্তত ৬টি টাইল রাখতে হবে"</string>
     <string name="qs_edit" msgid="2232596095725105230">"সম্পাদনা করুন"</string>
     <string name="tuner_time" msgid="6572217313285536011">"সময়"</string>
   <string-array name="clock_options">
@@ -814,6 +820,8 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"স্ক্রীনশটস"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"সাধারণ বার্তাগুলি"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"স্টোরেজ"</string>
+    <!-- no translation found for notification_channel_hints (7323870212489152689) -->
+    <skip />
     <string name="instant_apps" msgid="6647570248119804907">"ঝটপট অ্যাপ"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"ঝটপট অ্যাপ ইনস্টল করার প্রয়োজন হয় না।"</string>
     <string name="app_info" msgid="6856026610594615344">"অ্যাপের তথ্য"</string>
@@ -831,12 +839,9 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"বদলে দিন"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"পটভূমিতে অ্যাপ চালু আছে"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"ব্যাটারি এবং ডেটার ব্যবহারের বিশদ বিবরণের জন্য ট্যাপ করুন"</string>
-    <!-- no translation found for mobile_data_disable_title (1068272097382942231) -->
-    <skip />
-    <!-- no translation found for mobile_data_disable_message (4756541658791493506) -->
-    <skip />
-    <!-- no translation found for mobile_data_disable_message_default_carrier (6078110473451946831) -->
-    <skip />
+    <string name="mobile_data_disable_title" msgid="1068272097382942231">"মোবাইল ডেটা বন্ধ করবেন?"</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"আপনি <xliff:g id="CARRIER">%s</xliff:g>-এর মাধ্যমে ডেটা অথবা ইন্টারনেট অ্যাক্সেস করতে পারবেন না। শুধুমাত্র ওয়াই-ফাইয়ের মাধ্যমেই ইন্টারনেট অ্যাক্সেস করা যাবে।"</string>
+    <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"আপনার পরিষেবা প্রদানকারী"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"একটি অ্যাপ কোনও অনুমোদনের অনুরোধকে ঢেকে দিচ্ছে, তাই সেটিংস থেকে আপনার প্রতিক্রিয়া যাচাই করা যাচ্ছে না।"</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g> অ্যাপটিকে <xliff:g id="APP_2">%2$s</xliff:g> এর অংশ দেখানোর অনুমতি দেবেন?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- এটি <xliff:g id="APP">%1$s</xliff:g> এর তথ্য অ্যাক্সেস করতে পারবে"</string>
@@ -844,4 +849,18 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"<xliff:g id="APP">%1$s</xliff:g> অ্যাপটিকে যেকোনও অ্যাপের অংশ দেখাতে দিন"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"অনুমতি দিন"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"খারিজ করুন"</string>
+    <!-- no translation found for auto_saver_title (1217959994732964228) -->
+    <skip />
+    <!-- no translation found for auto_saver_text (6324376061044218113) -->
+    <skip />
+    <!-- no translation found for no_auto_saver_action (8086002101711328500) -->
+    <skip />
+    <!-- no translation found for auto_saver_enabled_title (6726474226058316862) -->
+    <skip />
+    <!-- no translation found for auto_saver_enabled_text (874711029884777579) -->
+    <skip />
+    <!-- no translation found for open_saver_setting_action (8314624730997322529) -->
+    <skip />
+    <!-- no translation found for auto_saver_okay_action (2701221740227683650) -->
+    <skip />
 </resources>

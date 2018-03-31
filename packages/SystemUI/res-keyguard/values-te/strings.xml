@@ -28,12 +28,9 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"పాస్‌వర్డ్‌ను టైప్ చేయడానికి తాకండి"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"అన్‌లాక్ చేయడానికి పాస్‌వర్డ్‌ను టైప్ చేయండి"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"అన్‌లాక్ చేయడానికి పిన్ టైప్ చేయండి"</string>
-    <!-- no translation found for keyguard_enter_your_pin (7152989016739952871) -->
-    <skip />
-    <!-- no translation found for keyguard_enter_your_pattern (3915717164691787047) -->
-    <skip />
-    <!-- no translation found for keyguard_enter_your_password (5761514484663983731) -->
-    <skip />
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"మీ పిన్‌ని నమోదు చేయండి"</string>
+    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"మీ ఆకృతిని నమోదు చేయండి"</string>
+    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"మీ పాస్‌వర్డ్‌ను నమోదు చేయండి"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"పిన్ కోడ్ తప్పు."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"చెల్లని కార్డ్."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"ఛార్జ్ చేయబడింది"</string>
