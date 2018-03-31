@@ -17,7 +17,6 @@
 package android.telephony.mbms;
 
 import android.os.Binder;
-import android.os.RemoteException;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -36,7 +35,7 @@ public class InternalDownloadSessionCallback extends IMbmsDownloadSessionCallbac
     }
 
     @Override
-    public void onError(final int errorCode, final String message) throws RemoteException {
+    public void onError(final int errorCode, final String message) {
         if (mIsStopped) {
             return;
         }
@@ -55,7 +54,7 @@ public class InternalDownloadSessionCallback extends IMbmsDownloadSessionCallbac
     }
 
     @Override
-    public void onFileServicesUpdated(final List<FileServiceInfo> services) throws RemoteException {
+    public void onFileServicesUpdated(final List<FileServiceInfo> services) {
         if (mIsStopped) {
             return;
         }
@@ -74,7 +73,7 @@ public class InternalDownloadSessionCallback extends IMbmsDownloadSessionCallbac
     }
 
     @Override
-    public void onMiddlewareReady() throws RemoteException {
+    public void onMiddlewareReady() {
         if (mIsStopped) {
             return;
         }
