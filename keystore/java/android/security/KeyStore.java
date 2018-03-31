@@ -547,9 +547,6 @@ public class KeyStore {
         try {
             args = args != null ? args : new KeymasterArguments();
             entropy = entropy != null ? entropy : new byte[0];
-            if (!args.containsTag(KeymasterDefs.KM_TAG_USER_ID)) {
-                args.addUnsignedInt(KeymasterDefs.KM_TAG_USER_ID, ActivityManager.getCurrentUser());
-            }
             return mBinder.begin(getToken(), alias, purpose, pruneable, args, entropy, uid);
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
