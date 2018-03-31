@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -26,8 +28,8 @@ import android.content.Context;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.telephony.mbms.InternalStreamingSessionCallback;
 import android.telephony.mbms.InternalStreamingServiceCallback;
+import android.telephony.mbms.InternalStreamingSessionCallback;
 import android.telephony.mbms.MbmsErrors;
 import android.telephony.mbms.MbmsStreamingSessionCallback;
 import android.telephony.mbms.MbmsUtils;
@@ -43,8 +45,6 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 /**
  * This class provides functionality for streaming media over MBMS.
@@ -208,6 +208,11 @@ public class MbmsStreamingSession implements AutoCloseable {
         try {
             int returnCode = streamingService.requestUpdateStreamingServices(
                     mSubscriptionId, serviceClassList);
+            if (returnCode == MbmsErrors.UNKNOWN) {
+                // Unbind and throw an obvious error
+                close();
+                throw new IllegalStateException("Middleware must not return an unknown error code");
+            }
             if (returnCode != MbmsErrors.SUCCESS) {
                 sendErrorToApp(returnCode, null);
             }
@@ -255,6 +260,11 @@ public class MbmsStreamingSession implements AutoCloseable {
         try {
             int returnCode = streamingService.startStreaming(
                     mSubscriptionId, serviceInfo.getServiceId(), serviceCallback);
+            if (returnCode == MbmsErrors.UNKNOWN) {
+                // Unbind and throw an obvious error
+                close();
+                throw new IllegalStateException("Middleware must not return an unknown error code");
+            }
             if (returnCode != MbmsErrors.SUCCESS) {
                 sendErrorToApp(returnCode, null);
                 return null;
@@ -300,6 +310,12 @@ public class MbmsStreamingSession implements AutoCloseable {
                                     e.toString());
                             sIsInitialized.set(false);
                             return;
+                        }
+                        if (result == MbmsErrors.UNKNOWN) {
+                            // Unbind and throw an obvious error
+                            close();
+                            throw new IllegalStateException("Middleware must not return"
+                                    + " an unknown error code");
                         }
                         if (result != MbmsErrors.SUCCESS) {
                             sendErrorToApp(result, "Error returned during initialization");
