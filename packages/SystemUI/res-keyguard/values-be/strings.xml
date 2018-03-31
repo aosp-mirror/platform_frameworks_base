@@ -28,12 +28,9 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Дакраніцеся, каб увесці пароль"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Увядзіце пароль для разблакіравання"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Каб разблакіраваць, увядзіце PIN-код"</string>
-    <!-- no translation found for keyguard_enter_your_pin (7152989016739952871) -->
-    <skip />
-    <!-- no translation found for keyguard_enter_your_pattern (3915717164691787047) -->
-    <skip />
-    <!-- no translation found for keyguard_enter_your_password (5761514484663983731) -->
-    <skip />
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Увядзіце PIN-код"</string>
+    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"Увядзіце ўзор разблакіроўкі"</string>
+    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"Увядзіце пароль"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Няправільны PIN-код."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Несапраўдная картка."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"Зараджаны"</string>

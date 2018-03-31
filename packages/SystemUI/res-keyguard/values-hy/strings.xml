@@ -28,6 +28,9 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Հպեք` գաղտնաբառը մուտքագրելու համար"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Ապակողպելու համար մուտքագրեք գաղտնաբառը"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Ապակողպելու համար մուտքագրեք PIN կոդը"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Մուտքագրեք PIN կոդը"</string>
+    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"Մուտքագրեք նախշը"</string>
+    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"Մուտքագրեք գաղտնաբառը"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"PIN կոդը սխալ է։"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Սխալ քարտ"</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"Լիցքավորված է"</string>
