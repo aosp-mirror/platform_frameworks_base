@@ -139,6 +139,11 @@ public class BatterySaverStateMachineTest {
         protected int getGlobalSetting(String key, int defValue) {
             return mDevice.getGlobalSetting(key, defValue);
         }
+
+        @Override
+        void runOnBgThread(Runnable r) {
+            r.run();
+        }
     }
 
     @Before
