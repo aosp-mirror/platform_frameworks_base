@@ -266,9 +266,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @GuardedBy("LOCK")
         private boolean mValue;
 
-        public DebugFlag(String key) {
+        public DebugFlag(String key, boolean defaultValue) {
             mKey = key;
-            refresh();
+            mValue = SystemProperties.getBoolean(key, defaultValue);
         }
 
         void refresh() {
@@ -290,7 +290,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     private static final class DebugFlags {
         static final DebugFlag FLAG_OPTIMIZE_START_INPUT =
-                new DebugFlag("debug.optimize_startinput");
+                new DebugFlag("debug.optimize_startinput", false);
     }
 
 
