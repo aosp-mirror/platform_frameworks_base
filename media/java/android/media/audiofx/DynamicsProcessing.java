@@ -16,10 +16,11 @@
 
 package android.media.audiofx;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.media.AudioTrack;
 import android.media.MediaPlayer;
 import android.media.audiofx.AudioEffect;
-import android.media.audiofx.DynamicsProcessing.Settings;
 import android.util.Log;
 
 import java.nio.ByteBuffer;
@@ -90,66 +91,18 @@ public final class DynamicsProcessing extends AudioEffect {
 
     private final static String TAG = "DynamicsProcessing";
 
-    /**
-     * Config object used to initialize and change effect parameters at runtime.
-     */
-    private Config mConfig = null;
-
-
     // These parameter constants must be synchronized with those in
     // /system/media/audio_effects/include/audio_effects/effect_dynamicsprocessing.h
-
-    private static final int PARAM_GET_CHANNEL_COUNT = 0x0;
-    private static final int PARAM_EQ_BAND_COUNT = 0x1;
-    private static final int PARAM_MBC_BAND_COUNT = 0x2;
-    private static final int PARAM_INPUT_GAIN = 0x3;
-    private static final int PARAM_PRE_EQ_ENABLED = 0x10;
-    private static final int PARAM_PRE_EQ_BAND_ENABLED = 0x11;
-    private static final int PARAM_PRE_EQ_BAND_FREQUENCY = 0x12;
-    private static final int PARAM_PRE_EQ_BAND_GAIN = 0x13;
-    private static final int PARAM_EQ_FREQUENCY_RANGE = 0x22;
-    private static final int PARAM_EQ_GAIN_RANGE = 0x23;
-    private static final int PARAM_MBC_ENABLED = 0x30;
-    private static final int PARAM_MBC_BAND_ENABLED = 0x31;
-    private static final int PARAM_MBC_BAND_FREQUENCY = 0x32;
-    private static final int PARAM_MBC_BAND_ATTACK_TIME = 0x33;
-    private static final int PARAM_MBC_BAND_RELEASE_TIME = 0x34;
-    private static final int PARAM_MBC_BAND_RATIO = 0x35;
-    private static final int PARAM_MBC_BAND_THRESHOLD = 0x36;
-    private static final int PARAM_MBC_BAND_KNEE_WIDTH = 0x37;
-    private static final int PARAM_MBC_BAND_NOISE_GATE_THRESHOLD = 0x38;
-    private static final int PARAM_MBC_BAND_EXPANDER_RATIO = 0x39;
-    private static final int PARAM_MBC_BAND_GAIN_PRE = 0x3A;
-    private static final int PARAM_MBC_BAND_GAIN_POST = 0x3B;
-    private static final int PARAM_MBC_FREQUENCY_RANGE = 0x42;
-    private static final int PARAM_MBC_ATTACK_TIME_RANGE = 0x43;
-    private static final int PARAM_MBC_RELEASE_TIME_RANGE = 0x44;
-    private static final int PARAM_MBC_RATIO_RANGE = 0x45;
-    private static final int PARAM_MBC_THRESHOLD_RANGE = 0x46;
-    private static final int PARAM_MBC_KNEE_WIDTH_RANGE = 0x47;
-    private static final int PARAM_MBC_NOISE_GATE_THRESHOLD_RANGE = 0x48;
-    private static final int PARAM_MBC_EXPANDER_RATIO_RANGE = 0x49;
-    private static final int PARAM_MBC_GAIN_RANGE = 0x4A;
-    private static final int PARAM_POST_EQ_ENABLED = 0x50;
-    private static final int PARAM_POST_EQ_BAND_ENABLED = 0x51;
-    private static final int PARAM_POST_EQ_BAND_FREQUENCY = 0x52;
-    private static final int PARAM_POST_EQ_BAND_GAIN = 0x53;
-    private static final int PARAM_LIMITER_ENABLED = 0x60;
-    private static final int PARAM_LIMITER_LINK_GROUP = 0x61;
-    private static final int PARAM_LIMITER_ATTACK_TIME = 0x62;
-    private static final int PARAM_LIMITER_RELEASE_TIME = 0x63;
-    private static final int PARAM_LIMITER_RATIO = 0x64;
-    private static final int PARAM_LIMITER_THRESHOLD = 0x65;
-    private static final int PARAM_LIMITER_GAIN_POST = 0x66;
-    private static final int PARAM_LIMITER_ATTACK_TIME_RANGE = 0x72;
-    private static final int PARAM_LIMITER_RELEASE_TIME_RANGE = 0x73;
-    private static final int PARAM_LIMITER_RATIO_RANGE = 0x74;
-    private static final int PARAM_LIMITER_THRESHOLD_RANGE = 0x75;
-    private static final int PARAM_LIMITER_GAIN_RANGE = 0x76;
-    private static final int PARAM_VARIANT = 0x100;
-    private static final int PARAM_VARIANT_DESCRIPTION = 0x101;
-    private static final int PARAM_VARIANT_COUNT = 0x102;
-    private static final int PARAM_SET_ENGINE_ARCHITECTURE = 0x200;
+    private static final int PARAM_GET_CHANNEL_COUNT = 0x10;
+    private static final int PARAM_INPUT_GAIN = 0x20;
+    private static final int PARAM_ENGINE_ARCHITECTURE = 0x30;
+    private static final int PARAM_PRE_EQ = 0x40;
+    private static final int PARAM_PRE_EQ_BAND = 0x45;
+    private static final int PARAM_MBC = 0x50;
+    private static final int PARAM_MBC_BAND = 0x55;
+    private static final int PARAM_POST_EQ = 0x60;
+    private static final int PARAM_POST_EQ_BAND = 0x65;
+    private static final int PARAM_LIMITER = 0x70;
 
     /**
      * Index of variant that favors frequency resolution. Frequency domain based implementation.
@@ -226,12 +179,13 @@ public final class DynamicsProcessing extends AudioEffect {
      * Config object that suits your needs. A null cfg parameter will create and use a default
      * configuration for the effect
      */
-    public DynamicsProcessing(int priority, int audioSession, Config cfg) {
+    public DynamicsProcessing(int priority, int audioSession, @Nullable Config cfg) {
         super(EFFECT_TYPE_DYNAMICS_PROCESSING, EFFECT_TYPE_NULL, priority, audioSession);
         if (audioSession == 0) {
             Log.w(TAG, "WARNING: attaching a DynamicsProcessing to global output mix is"
                     + "deprecated!");
         }
+        final Config config;
         mChannelCount = getChannelCount();
         if (cfg == null) {
             //create a default configuration and effect, with the number of channels this effect has
@@ -239,21 +193,33 @@ public final class DynamicsProcessing extends AudioEffect {
                     new DynamicsProcessing.Config.Builder(
                             CONFIG_DEFAULT_VARIANT,
                             mChannelCount,
-                            true /*use preEQ*/, 6 /*pre eq bands*/,
-                            true /*use mbc*/, 6 /*mbc bands*/,
-                            true /*use postEQ*/, 6 /*postEq bands*/,
-                            true /*use Limiter*/);
-            mConfig = builder.build();
+                            CONFIG_DEFAULT_USE_PREEQ,
+                            CONFIG_DEFAULT_PREEQ_BANDS,
+                            CONFIG_DEFAULT_USE_MBC,
+                            CONFIG_DEFAULT_MBC_BANDS,
+                            CONFIG_DEFAULT_USE_POSTEQ,
+                            CONFIG_DEFAULT_POSTEQ_BANDS,
+                            CONFIG_DEFAULT_USE_LIMITER);
+            config = builder.build();
         } else {
-            //validate channels are ok. decide what to do: replicate channels if more, or fail, or
-            mConfig = new DynamicsProcessing.Config(mChannelCount, cfg);
+            //validate channels are ok. decide what to do: replicate channels if more
+            config = new DynamicsProcessing.Config(mChannelCount, cfg);
         }
 
-        setEngineArchitecture(mConfig.getVariant(),
-                mConfig.isPreEqInUse(), mConfig.getPreEqBandCount(),
-                mConfig.isMbcInUse(), mConfig.getMbcBandCount(),
-                mConfig.isPostEqInUse(), mConfig.getPostEqBandCount(),
-                mConfig.isLimiterInUse());
+        //configure engine
+        setEngineArchitecture(config.getVariant(),
+                config.getPreferredFrameDuration(),
+                config.isPreEqInUse(),
+                config.getPreEqBandCount(),
+                config.isMbcInUse(),
+                config.getMbcBandCount(),
+                config.isPostEqInUse(),
+                config.getPostEqBandCount(),
+                config.isLimiterInUse());
+        //update all the parameters
+        for (int ch = 0; ch < mChannelCount; ch++) {
+            updateEngineChannelByChannelIndex(ch, config.getChannelByChannelIndex(ch));
+        }
     }
 
     /**
@@ -261,11 +227,51 @@ public final class DynamicsProcessing extends AudioEffect {
      * @return Config Current Config object used to setup this DynamicsProcessing effect.
      */
     public Config getConfig() {
-        return mConfig;
+        //Query engine architecture to create config object
+        Number[] params = { PARAM_ENGINE_ARCHITECTURE };
+        Number[] values = { 0 /*0 variant */,
+                0.0f /* 1 preferredFrameDuration */,
+                0 /*2 preEqInUse */,
+                0 /*3 preEqBandCount */,
+                0 /*4 mbcInUse */,
+                0 /*5 mbcBandCount*/,
+                0 /*6 postEqInUse */,
+                0 /*7 postEqBandCount */,
+                0 /*8 limiterInUse */};
+        byte[] paramBytes = numberArrayToByteArray(params);
+        byte[] valueBytes = numberArrayToByteArray(values); //just interest in the byte size.
+        getParameter(paramBytes, valueBytes);
+        byteArrayToNumberArray(valueBytes, values);
+        DynamicsProcessing.Config.Builder builder =
+                new DynamicsProcessing.Config.Builder(
+                        values[0].intValue(),
+                        mChannelCount,
+                        values[2].intValue() > 0 /*use preEQ*/,
+                        values[3].intValue() /*pre eq bands*/,
+                        values[4].intValue() > 0 /*use mbc*/,
+                        values[5].intValue() /*mbc bands*/,
+                        values[6].intValue() > 0 /*use postEQ*/,
+                        values[7].intValue()/*postEq bands*/,
+                        values[8].intValue() > 0 /*use Limiter*/).
+                setPreferredFrameDuration(values[1].floatValue());
+        Config config = builder.build();
+        for (int ch = 0; ch < mChannelCount; ch++) {
+            Channel channel = queryEngineByChannelIndex(ch);
+            config.setChannelTo(ch, channel);
+        }
+        return config;
     }
 
 
-    private static final int CONFIG_DEFAULT_VARIANT = 0; //favor frequency
+    private static final int CONFIG_DEFAULT_VARIANT = VARIANT_FAVOR_FREQUENCY_RESOLUTION;
+    private static final boolean CONFIG_DEFAULT_USE_PREEQ = true;
+    private static final int CONFIG_DEFAULT_PREEQ_BANDS = 6;
+    private static final boolean CONFIG_DEFAULT_USE_MBC = true;
+    private static final int CONFIG_DEFAULT_MBC_BANDS = 6;
+    private static final boolean CONFIG_DEFAULT_USE_POSTEQ = true;
+    private static final int CONFIG_DEFAULT_POSTEQ_BANDS = 6;
+    private static final boolean CONFIG_DEFAULT_USE_LIMITER = true;
+
     private static final float CHANNEL_DEFAULT_INPUT_GAIN = 0; // dB
     private static final float CONFIG_PREFERRED_FRAME_DURATION_MS = 10.0f; //milliseconds
 
@@ -1276,7 +1282,7 @@ public final class DynamicsProcessing extends AudioEffect {
             mChannel = new Channel[mChannelCount];
             //check if channelconfig is null or has less channels than channel count.
             //options: fill the missing with default options.
-            //  or fail?
+            // or fail?
             for (int ch = 0; ch < mChannelCount; ch++) {
                 if (ch < channel.length) {
                     mChannel[ch] = new Channel(channel[ch]); //copy create
@@ -1331,7 +1337,7 @@ public final class DynamicsProcessing extends AudioEffect {
          * Class constructor for Config
          * @param cfg Configuration object copy constructor
          */
-        public Config(Config cfg) {
+        public Config(@NonNull Config cfg) {
             this(cfg.mChannelCount, cfg);
         }
 
@@ -1763,138 +1769,115 @@ public final class DynamicsProcessing extends AudioEffect {
     }
     //=== CHANNEL
     public Channel getChannelByChannelIndex(int channelIndex) {
-        return mConfig.getChannelByChannelIndex(channelIndex);
+        return queryEngineByChannelIndex(channelIndex);
     }
 
     public void setChannelTo(int channelIndex, Channel channel) {
-        mConfig.setChannelTo(channelIndex, channel);
+        updateEngineChannelByChannelIndex(channelIndex, channel);
     }
 
     public void setAllChannelsTo(Channel channel) {
-        mConfig.setAllChannelsTo(channel);
+        for (int ch = 0; ch < mChannelCount; ch++) {
+            setChannelTo(ch, channel);
+        }
     }
 
     //=== channel params
     public float getInputGainByChannelIndex(int channelIndex) {
-        //TODO: return info from engine instead of cached config
-        return mConfig.getInputGainByChannelIndex(channelIndex);
+        return getTwoFloat(PARAM_INPUT_GAIN, channelIndex);
     }
     public void setInputGainbyChannel(int channelIndex, float inputGain) {
-        mConfig.setInputGainByChannelIndex(channelIndex, inputGain);
-        //TODO: communicate change to engine
+        setTwoFloat(PARAM_INPUT_GAIN, channelIndex, inputGain);
     }
     public void setInputGainAllChannelsTo(float inputGain) {
-        mConfig.setInputGainAllChannelsTo(inputGain);
-        //TODO: communicate change to engine
+        for (int ch = 0; ch < mChannelCount; ch++) {
+            setInputGainbyChannel(ch, inputGain);
+        }
     }
 
     //=== PreEQ
     public Eq getPreEqByChannelIndex(int channelIndex) {
-        //TODO: return info from engine instead of cached config
-        return mConfig.getPreEqByChannelIndex(channelIndex);
+        return queryEngineEqByChannelIndex(PARAM_PRE_EQ, channelIndex);
     }
-
     public void setPreEqByChannelIndex(int channelIndex, Eq preEq) {
-        mConfig.setPreEqByChannelIndex(channelIndex, preEq);
-        //TODO: communicate change to engine
+        updateEngineEqByChannelIndex(PARAM_PRE_EQ, channelIndex, preEq);
     }
-
     public void setPreEqAllChannelsTo(Eq preEq) {
-        mConfig.setPreEqAllChannelsTo(preEq);
-        //TODO: communicate change to engine
+        for (int ch = 0; ch < mChannelCount; ch++) {
+            setPreEqByChannelIndex(ch, preEq);
+        }
     }
-
     public EqBand getPreEqBandByChannelIndex(int channelIndex, int band) {
-        //TODO: return info from engine instead of cached config
-        return mConfig.getPreEqBandByChannelIndex(channelIndex, band);
+        return queryEngineEqBandByChannelIndex(PARAM_PRE_EQ_BAND, channelIndex, band);
     }
-
     public void setPreEqBandByChannelIndex(int channelIndex, int band, EqBand preEqBand) {
-        mConfig.setPreEqBandByChannelIndex(channelIndex, band, preEqBand);
-        //TODO: communicate change to engine
+        updateEngineEqBandByChannelIndex(PARAM_PRE_EQ_BAND, channelIndex, band, preEqBand);
     }
-
     public void setPreEqBandAllChannelsTo(int band, EqBand preEqBand) {
-        mConfig.setPreEqBandAllChannelsTo(band, preEqBand);
-        //TODO: communicate change to engine
+        for (int ch = 0; ch < mChannelCount; ch++) {
+            setPreEqBandByChannelIndex(ch, band, preEqBand);
+        }
     }
 
     //=== MBC
     public Mbc getMbcByChannelIndex(int channelIndex) {
-        //TODO: return info from engine instead of cached config
-        return mConfig.getMbcByChannelIndex(channelIndex);
+        return queryEngineMbcByChannelIndex(channelIndex);
     }
-
     public void setMbcByChannelIndex(int channelIndex, Mbc mbc) {
-        mConfig.setMbcByChannelIndex(channelIndex, mbc);
-        //TODO: communicate change to engine
+        updateEngineMbcByChannelIndex(channelIndex, mbc);
     }
-
     public void setMbcAllChannelsTo(Mbc mbc) {
-        mConfig.setMbcAllChannelsTo(mbc);
-        //TODO: communicate change to engine
+        for (int ch = 0; ch < mChannelCount; ch++) {
+            setMbcByChannelIndex(ch, mbc);
+        }
     }
-
     public MbcBand getMbcBandByChannelIndex(int channelIndex, int band) {
-        //TODO: return info from engine instead of cached config
-        return mConfig.getMbcBandByChannelIndex(channelIndex, band);
+        return queryEngineMbcBandByChannelIndex(channelIndex, band);
     }
-
     public void setMbcBandByChannelIndex(int channelIndex, int band, MbcBand mbcBand) {
-        mConfig.setMbcBandByChannelIndex(channelIndex, band, mbcBand);
-        //TODO: communicate change to engine
+        updateEngineMbcBandByChannelIndex(channelIndex, band, mbcBand);
     }
-
     public void setMbcBandAllChannelsTo(int band, MbcBand mbcBand) {
-        mConfig.setMbcBandAllChannelsTo(band, mbcBand);
-        //TODO: communicate change to engine
+        for (int ch = 0; ch < mChannelCount; ch++) {
+            setMbcBandByChannelIndex(ch, band, mbcBand);
+        }
     }
 
     //== PostEq
     public Eq getPostEqByChannelIndex(int channelIndex) {
-        //TODO: return info from engine instead of cached config
-        return mConfig.getPostEqByChannelIndex(channelIndex);
+        return queryEngineEqByChannelIndex(PARAM_POST_EQ, channelIndex);
     }
-
     public void setPostEqByChannelIndex(int channelIndex, Eq postEq) {
-        mConfig.setPostEqByChannelIndex(channelIndex, postEq);
-        //TODO: communicate change to engine
+        updateEngineEqByChannelIndex(PARAM_POST_EQ, channelIndex, postEq);
     }
-
     public void setPostEqAllChannelsTo(Eq postEq) {
-        mConfig.setPostEqAllChannelsTo(postEq);
-        //TODO: communicate change to engine
+        for (int ch = 0; ch < mChannelCount; ch++) {
+            setPostEqByChannelIndex(ch, postEq);
+        }
     }
-
     public EqBand getPostEqBandByChannelIndex(int channelIndex, int band) {
-        //TODO: return info from engine instead of cached config
-        return mConfig.getPostEqBandByChannelIndex(channelIndex, band);
+        return queryEngineEqBandByChannelIndex(PARAM_POST_EQ_BAND, channelIndex, band);
     }
-
     public void setPostEqBandByChannelIndex(int channelIndex, int band, EqBand postEqBand) {
-        mConfig.setPostEqBandByChannelIndex(channelIndex, band, postEqBand);
-        //TODO: communicate change to engine
+        updateEngineEqBandByChannelIndex(PARAM_POST_EQ_BAND, channelIndex, band, postEqBand);
     }
-
     public void setPostEqBandAllChannelsTo(int band, EqBand postEqBand) {
-        mConfig.setPostEqBandAllChannelsTo(band, postEqBand);
-        //TODO: communicate change to engine
+        for (int ch = 0; ch < mChannelCount; ch++) {
+            setPostEqBandByChannelIndex(ch, band, postEqBand);
+        }
     }
 
     //==== Limiter
     public Limiter getLimiterByChannelIndex(int channelIndex) {
-        //TODO: return info from engine instead of cached config
-        return mConfig.getLimiterByChannelIndex(channelIndex);
+        return queryEngineLimiterByChannelIndex(channelIndex);
     }
-
     public void setLimiterByChannelIndex(int channelIndex, Limiter limiter) {
-        mConfig.setLimiterByChannelIndex(channelIndex, limiter);
-        //TODO: communicate change to engine
+        updateEngineLimiterByChannelIndex(channelIndex, limiter);
     }
-
     public void setLimiterAllChannelsTo(Limiter limiter) {
-        mConfig.setLimiterAllChannelsTo(limiter);
-        //TODO: communicate change to engine
+        for (int ch = 0; ch < mChannelCount; ch++) {
+            setLimiterByChannelIndex(ch, limiter);
+        }
     }
 
     /**
@@ -1905,165 +1888,327 @@ public final class DynamicsProcessing extends AudioEffect {
         return getOneInt(PARAM_GET_CHANNEL_COUNT);
     }
 
-    private void setEngineArchitecture(int variant, boolean preEqInUse, int preEqBandCount,
-            boolean mbcInUse, int mbcBandCount, boolean postEqInUse, int postEqBandCount,
-            boolean limiterInUse) {
-        int[] values = { variant, (preEqInUse ? 1 : 0), preEqBandCount,
-                (mbcInUse ? 1 : 0), mbcBandCount, (postEqInUse ? 1 : 0), postEqBandCount,
+    //=== Engine calls
+    private void setEngineArchitecture(int variant, float preferredFrameDuration,
+            boolean preEqInUse, int preEqBandCount, boolean mbcInUse, int mbcBandCount,
+            boolean postEqInUse, int postEqBandCount, boolean limiterInUse) {
+
+        Number[] params = { PARAM_ENGINE_ARCHITECTURE };
+        Number[] values = { variant /* variant */,
+                preferredFrameDuration,
+                (preEqInUse ? 1 : 0),
+                preEqBandCount,
+                (mbcInUse ? 1 : 0),
+                mbcBandCount,
+                (postEqInUse ? 1 : 0),
+                postEqBandCount,
                 (limiterInUse ? 1 : 0)};
-        //TODO: enable later setIntArray(PARAM_SET_ENGINE_ARCHITECTURE, values);
+        setNumberArray(params, values);
+    }
+
+    private void updateEngineEqBandByChannelIndex(int param, int channelIndex, int bandIndex,
+            @NonNull EqBand eqBand) {
+        Number[] params = {param,
+                channelIndex,
+                bandIndex};
+        Number[] values = {(eqBand.isEnabled() ? 1 : 0),
+                eqBand.getCutoffFrequency(),
+                eqBand.getGain()};
+        setNumberArray(params, values);
+    }
+    private Eq queryEngineEqByChannelIndex(int param, int channelIndex) {
+
+        Number[] params = {param == PARAM_PRE_EQ ? PARAM_PRE_EQ : PARAM_POST_EQ,
+                channelIndex};
+        Number[] values = {0 /*0 in use */,
+                            0 /*1 enabled*/,
+                            0 /*2 band count */};
+        byte[] paramBytes = numberArrayToByteArray(params);
+        byte[] valueBytes = numberArrayToByteArray(values); //just interest in the byte size.
+        getParameter(paramBytes, valueBytes);
+        byteArrayToNumberArray(valueBytes, values);
+        int bandCount = values[2].intValue();
+        Eq eq = new Eq(values[0].intValue() > 0 /* in use */,
+                values[1].intValue() > 0 /* enabled */,
+                bandCount /*band count*/);
+        for (int b = 0; b < bandCount; b++) {
+            EqBand eqBand = queryEngineEqBandByChannelIndex(param == PARAM_PRE_EQ ?
+                    PARAM_PRE_EQ_BAND : PARAM_POST_EQ_BAND, channelIndex, b);
+            eq.setBand(b, eqBand);
+        }
+        return eq;
+    }
+    private EqBand queryEngineEqBandByChannelIndex(int param, int channelIndex, int bandIndex) {
+        Number[] params = {param,
+                channelIndex,
+                bandIndex};
+        Number[] values = {0 /*0 enabled*/,
+                            0.0f /*1 cutoffFrequency */,
+                            0.0f /*2 gain */};
+
+        byte[] paramBytes = numberArrayToByteArray(params);
+        byte[] valueBytes = numberArrayToByteArray(values); //just interest in the byte size.
+        getParameter(paramBytes, valueBytes);
+
+        byteArrayToNumberArray(valueBytes, values);
+
+        return new EqBand(values[0].intValue() > 0 /* enabled */,
+                values[1].floatValue() /* cutoffFrequency */,
+                values[2].floatValue() /* gain*/);
+    }
+    private void updateEngineEqByChannelIndex(int param, int channelIndex, @NonNull Eq eq) {
+        int bandCount = eq.getBandCount();
+        Number[] params = {param,
+                channelIndex};
+        Number[] values = { (eq.isInUse() ? 1 : 0),
+                (eq.isEnabled() ? 1 : 0),
+                bandCount};
+        setNumberArray(params, values);
+        for (int b = 0; b < bandCount; b++) {
+            EqBand eqBand = eq.getBand(b);
+            updateEngineEqBandByChannelIndex(param == PARAM_PRE_EQ ?
+                    PARAM_PRE_EQ_BAND : PARAM_POST_EQ_BAND, channelIndex, b, eqBand);
+        }
+    }
+
+    private Mbc queryEngineMbcByChannelIndex(int channelIndex) {
+        Number[] params = {PARAM_MBC,
+                channelIndex};
+        Number[] values = {0 /*0 in use */,
+                            0 /*1 enabled*/,
+                            0 /*2 band count */};
+        byte[] paramBytes = numberArrayToByteArray(params);
+        byte[] valueBytes = numberArrayToByteArray(values); //just interest in the byte size.
+        getParameter(paramBytes, valueBytes);
+        byteArrayToNumberArray(valueBytes, values);
+        int bandCount = values[2].intValue();
+        Mbc mbc = new Mbc(values[0].intValue() > 0 /* in use */,
+                values[1].intValue() > 0 /* enabled */,
+                bandCount /*band count*/);
+        for (int b = 0; b < bandCount; b++) {
+            MbcBand mbcBand = queryEngineMbcBandByChannelIndex(channelIndex, b);
+            mbc.setBand(b, mbcBand);
+        }
+        return mbc;
+    }
+    private MbcBand queryEngineMbcBandByChannelIndex(int channelIndex, int bandIndex) {
+        Number[] params = {PARAM_MBC_BAND,
+                channelIndex,
+                bandIndex};
+        Number[] values = {0 /*0 enabled */,
+                0.0f /*1 cutoffFrequency */,
+                0.0f /*2 AttackTime */,
+                0.0f /*3 ReleaseTime */,
+                0.0f /*4 Ratio */,
+                0.0f /*5 Threshold */,
+                0.0f /*6 KneeWidth */,
+                0.0f /*7 NoiseGateThreshold */,
+                0.0f /*8 ExpanderRatio */,
+                0.0f /*9 PreGain */,
+                0.0f /*10 PostGain*/};
+
+        byte[] paramBytes = numberArrayToByteArray(params);
+        byte[] valueBytes = numberArrayToByteArray(values); //just interest in the byte size.
+        getParameter(paramBytes, valueBytes);
+
+        byteArrayToNumberArray(valueBytes, values);
+
+        return new MbcBand(values[0].intValue() > 0 /* enabled */,
+                values[1].floatValue() /* cutoffFrequency */,
+                values[2].floatValue()/*2 AttackTime */,
+                values[3].floatValue()/*3 ReleaseTime */,
+                values[4].floatValue()/*4 Ratio */,
+                values[5].floatValue()/*5 Threshold */,
+                values[6].floatValue()/*6 KneeWidth */,
+                values[7].floatValue()/*7 NoiseGateThreshold */,
+                values[8].floatValue()/*8 ExpanderRatio */,
+                values[9].floatValue()/*9 PreGain */,
+                values[10].floatValue()/*10 PostGain*/);
+    }
+    private void updateEngineMbcBandByChannelIndex(int channelIndex, int bandIndex,
+            @NonNull MbcBand mbcBand) {
+        Number[] params = { PARAM_MBC_BAND,
+                channelIndex,
+                bandIndex};
+        Number[] values = {(mbcBand.isEnabled() ? 1 : 0),
+                mbcBand.getCutoffFrequency(),
+                mbcBand.getAttackTime(),
+                mbcBand.getReleaseTime(),
+                mbcBand.getRatio(),
+                mbcBand.getThreshold(),
+                mbcBand.getKneeWidth(),
+                mbcBand.getNoiseGateThreshold(),
+                mbcBand.getExpanderRatio(),
+                mbcBand.getPreGain(),
+                mbcBand.getPostGain()};
+        setNumberArray(params, values);
+    }
+
+    private void updateEngineMbcByChannelIndex(int channelIndex, @NonNull Mbc mbc) {
+        int bandCount = mbc.getBandCount();
+        Number[] params = { PARAM_MBC,
+                channelIndex};
+        Number[] values = {(mbc.isInUse() ? 1 : 0),
+                (mbc.isEnabled() ? 1 : 0),
+                bandCount};
+        setNumberArray(params, values);
+        for (int b = 0; b < bandCount; b++) {
+            MbcBand mbcBand = mbc.getBand(b);
+            updateEngineMbcBandByChannelIndex(channelIndex, b, mbcBand);
+        }
+    }
+
+    private void updateEngineLimiterByChannelIndex(int channelIndex, @NonNull Limiter limiter) {
+        Number[] params = { PARAM_LIMITER,
+                channelIndex};
+        Number[] values = {(limiter.isInUse() ? 1 : 0),
+                (limiter.isEnabled() ? 1 : 0),
+                limiter.getLinkGroup(),
+                limiter.getAttackTime(),
+                limiter.getReleaseTime(),
+                limiter.getRatio(),
+                limiter.getThreshold(),
+                limiter.getPostGain()};
+        setNumberArray(params, values);
+    }
+
+    private Limiter queryEngineLimiterByChannelIndex(int channelIndex) {
+        Number[] params = {PARAM_LIMITER,
+                channelIndex};
+        Number[] values = {0 /*0 in use (int)*/,
+                0 /*1 enabled (int)*/,
+                0 /*2 link group (int)*/,
+                0.0f /*3 attack time (float)*/,
+                0.0f /*4 release time (float)*/,
+                0.0f /*5 ratio (float)*/,
+                0.0f /*6 threshold (float)*/,
+                0.0f /*7 post gain(float)*/};
+
+        byte[] paramBytes = numberArrayToByteArray(params);
+        byte[] valueBytes = numberArrayToByteArray(values); //just interest in the byte size.
+        getParameter(paramBytes, valueBytes);
+        byteArrayToNumberArray(valueBytes, values);
+
+        return new Limiter(values[0].intValue() > 0 /*in use*/,
+                values[1].intValue() > 0 /*enabled*/,
+                values[2].intValue() /*linkGroup*/,
+                values[3].floatValue() /*attackTime*/,
+                values[4].floatValue() /*releaseTime*/,
+                values[5].floatValue() /*ratio*/,
+                values[6].floatValue() /*threshold*/,
+                values[7].floatValue() /*postGain*/);
+    }
+
+    private Channel queryEngineByChannelIndex(int channelIndex) {
+        float inputGain = getTwoFloat(PARAM_INPUT_GAIN, channelIndex);
+        Eq preEq = queryEngineEqByChannelIndex(PARAM_PRE_EQ, channelIndex);
+        Mbc mbc = queryEngineMbcByChannelIndex(channelIndex);
+        Eq postEq = queryEngineEqByChannelIndex(PARAM_POST_EQ, channelIndex);
+        Limiter limiter = queryEngineLimiterByChannelIndex(channelIndex);
+
+        Channel channel = new Channel(inputGain,
+                preEq.isInUse(), preEq.getBandCount(),
+                mbc.isInUse(), mbc.getBandCount(),
+                postEq.isInUse(), postEq.getBandCount(),
+                limiter.isInUse());
+        channel.setInputGain(inputGain);
+        channel.setPreEq(preEq);
+        channel.setMbc(mbc);
+        channel.setPostEq(postEq);
+        channel.setLimiter(limiter);
+        return channel;
+    }
+
+    private void updateEngineChannelByChannelIndex(int channelIndex, @NonNull Channel channel) {
+        //send things with as few calls as possible
+        setTwoFloat(PARAM_INPUT_GAIN, channelIndex, channel.getInputGain());
+        Eq preEq = channel.getPreEq();
+        updateEngineEqByChannelIndex(PARAM_PRE_EQ, channelIndex, preEq);
+        Mbc mbc = channel.getMbc();
+        updateEngineMbcByChannelIndex(channelIndex, mbc);
+        Eq postEq = channel.getPostEq();
+        updateEngineEqByChannelIndex(PARAM_POST_EQ, channelIndex, postEq);
+        Limiter limiter = channel.getLimiter();
+        updateEngineLimiterByChannelIndex(channelIndex, limiter);
     }
 
     //****** convenience methods:
     //
-    private int getOneInt(int paramGet) {
-        int[] param = new int[1];
-        int[] result = new int[1];
+    private int getOneInt(int param) {
+        final int[] params = { param };
+        final int[] result = new int[1];
 
-        param[0] = paramGet;
-        checkStatus(getParameter(param, result));
+        checkStatus(getParameter(params, result));
         return result[0];
     }
 
-    private int getTwoInt(int paramGet, int paramA) {
-        int[] param = new int[2];
-        int[] result = new int[1];
+    private void setTwoFloat(int param, int paramA, float valueSet) {
+        final int[] params = { param, paramA };
+        final byte[] value;
 
-        param[0] = paramGet;
-        param[1] = paramA;
-        checkStatus(getParameter(param, result));
-        return result[0];
-    }
-
-    private int getThreeInt(int paramGet, int paramA, int paramB) {
-        //have to use bytearrays, with more than 2 parameters.
-        byte[] paramBytes = concatArrays(intToByteArray(paramGet),
-                intToByteArray(paramA),
-                intToByteArray(paramB));
-        byte[] resultBytes = new byte[4]; //single int
-
-        checkStatus(getParameter(paramBytes, resultBytes));
-
-        return byteArrayToInt(resultBytes);
-    }
-
-    private void setOneInt(int paramSet, int valueSet) {
-        int[] param = new int[1];
-        int[] value = new int[1];
-
-        param[0] = paramSet;
-        value[0] = valueSet;
-        checkStatus(setParameter(param, value));
-    }
-
-    private void setTwoInt(int paramSet, int paramA, int valueSet) {
-        int[] param = new int[2];
-        int[] value = new int[1];
-
-        param[0] = paramSet;
-        param[1] = paramA;
-        value[0] = valueSet;
-        checkStatus(setParameter(param, value));
-    }
-
-    private void setThreeInt(int paramSet, int paramA, int paramB, int valueSet) {
-        //have to use bytearrays, with more than 2 parameters.
-        byte[] paramBytes = concatArrays(intToByteArray(paramSet),
-                intToByteArray(paramA),
-                intToByteArray(paramB));
-        byte[] valueBytes = intToByteArray(valueSet);
-
-        checkStatus(setParameter(paramBytes, valueBytes));
-    }
-
-    private void setOneFloat(int paramSet, float valueSet) {
-        int[] param = new int[1];
-        byte[] value;
-
-        param[0] = paramSet;
         value = floatToByteArray(valueSet);
-        checkStatus(setParameter(param, value));
+        checkStatus(setParameter(params, value));
     }
 
-    private void setTwoFloat(int paramSet, int paramA, float valueSet) {
-        int[] param = new int[2];
-        byte[] value;
-
-        param[0] = paramSet;
-        param[1] = paramA;
-        value = floatToByteArray(valueSet);
-        checkStatus(setParameter(param, value));
-    }
-
-    private void setThreeFloat(int paramSet, int paramA, int paramB, float valueSet) {
-        //have to use bytearrays, with more than 2 parameters.
-        byte[] paramBytes = concatArrays(intToByteArray(paramSet),
-                intToByteArray(paramA),
-                intToByteArray(paramB));
-        byte[] valueBytes = floatToByteArray(valueSet);
-
-        checkStatus(setParameter(paramBytes, valueBytes));
-    }
-    private byte[] intArrayToByteArray(int[] values) {
-        int expectedBytes = values.length * 4;
+    private byte[] numberArrayToByteArray(Number[] values) {
+        int expectedBytes = 0;
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] instanceof Integer) {
+                expectedBytes += Integer.BYTES;
+            } else if (values[i] instanceof Float) {
+                expectedBytes += Float.BYTES;
+            } else {
+                throw new IllegalArgumentException("unknown value type " +
+                        values[i].getClass());
+            }
+        }
         ByteBuffer converter = ByteBuffer.allocate(expectedBytes);
         converter.order(ByteOrder.nativeOrder());
-        for (int k = 0; k < values.length; k++) {
-            converter.putFloat(values[k]);
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] instanceof Integer) {
+                converter.putInt(values[i].intValue());
+            } else if (values[i] instanceof Float) {
+                converter.putFloat(values[i].floatValue());
+            }
         }
         return converter.array();
     }
-    private void setIntArray(int paramSet, int[] paramArray) {
-        //have to use bytearrays, with more than 2 parameters.
-        byte[] paramBytes = intToByteArray(paramSet);
-        byte[] valueBytes = intArrayToByteArray(paramArray);
 
+    private void byteArrayToNumberArray(byte[] valuesIn, Number[] valuesOut) {
+        int inIndex = 0;
+        int outIndex = 0;
+        while (inIndex < valuesIn.length && outIndex < valuesOut.length) {
+            if (valuesOut[outIndex] instanceof Integer) {
+                valuesOut[outIndex++] = byteArrayToInt(valuesIn, inIndex);
+                inIndex += Integer.BYTES;
+            } else if (valuesOut[outIndex] instanceof Float) {
+                valuesOut[outIndex++] = byteArrayToFloat(valuesIn, inIndex);
+                inIndex += Float.BYTES;
+            } else {
+                throw new IllegalArgumentException("can't convert " +
+                        valuesOut[outIndex].getClass());
+            }
+        }
+        if (outIndex != valuesOut.length) {
+            throw new IllegalArgumentException("only converted " + outIndex +
+                    " values out of "+ valuesOut.length + " expected");
+        }
+    }
+
+    private void setNumberArray(Number[] params, Number[] values) {
+        byte[] paramBytes = numberArrayToByteArray(params);
+        byte[] valueBytes = numberArrayToByteArray(values);
         checkStatus(setParameter(paramBytes, valueBytes));
     }
 
-    private float getOneFloat(int paramGet) {
-        int[] param = new int[1];
-        byte[] result = new byte[4];
+    private float getTwoFloat(int param, int paramA) {
+        final int[] params = { param, paramA };
+        final byte[] result = new byte[4];
 
-        param[0] = paramGet;
-        checkStatus(getParameter(param, result));
+        checkStatus(getParameter(params, result));
         return byteArrayToFloat(result);
     }
 
-    private float getTwoFloat(int paramGet, int paramA) {
-        int[] param = new int[2];
-        byte[] result = new byte[4];
-
-        param[0] = paramGet;
-        param[1] = paramA;
-        checkStatus(getParameter(param, result));
-        return byteArrayToFloat(result);
-    }
-
-    private float getThreeFloat(int paramGet, int paramA, int paramB) {
-        //have to use bytearrays, with more than 2 parameters.
-        byte[] paramBytes = concatArrays(intToByteArray(paramGet),
-                intToByteArray(paramA),
-                intToByteArray(paramB));
-        byte[] resultBytes = new byte[4]; //single float
-
-        checkStatus(getParameter(paramBytes, resultBytes));
-
-        return byteArrayToFloat(resultBytes);
-    }
-
-    private float[] getOneFloatArray(int paramGet, int expectedSize) {
-        int[] param = new int[1];
-        byte[] result = new byte[4 * expectedSize];
-
-        param[0] = paramGet;
-        checkStatus(getParameter(param, result));
-        float[] returnArray = new float[expectedSize];
-        for (int k = 0; k < expectedSize; k++) {
-            returnArray[k] = byteArrayToFloat(result, 4 * k);
-        }
-        return returnArray;
-    }
     /**
      * @hide
      * The OnParameterChangeListener interface defines a method called by the DynamicsProcessing
