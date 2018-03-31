@@ -344,8 +344,37 @@ TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp) {
     tracker.noteConditionChanged(key1, true, conditionStarts2);
     EXPECT_EQ(1U, anomalyTracker->mAlarms.size());
     auto alarm = anomalyTracker->mAlarms.begin()->second;
+    uint64_t anomalyFireTimeSec = alarm->timestampSec;
     EXPECT_EQ(conditionStarts2 + 36 * NS_PER_SEC,
-              (unsigned long long)(alarm->timestampSec * NS_PER_SEC));
+            (unsigned long long)anomalyFireTimeSec * NS_PER_SEC);
+
+    // Now we test the calculation now that there's a refractory period.
+    // At the correct time, declare the anomaly. This will set a refractory period. Make sure it
+    // gets correctly taken into account in future predictAnomalyTimestampNs calculations.
+    std::unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> firedAlarms({alarm});
+    anomalyTracker->informAlarmsFired(anomalyFireTimeSec * NS_PER_SEC, firedAlarms);
+    EXPECT_EQ(0u, anomalyTracker->mAlarms.size());
+    uint64_t refractoryPeriodEndsSec = anomalyFireTimeSec + refPeriodSec;
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey), refractoryPeriodEndsSec);
+
+    // Now stop and start again. Make sure the new predictAnomalyTimestampNs takes into account
+    // the refractory period correctly.
+    uint64_t eventStopTimeNs = anomalyFireTimeSec * NS_PER_SEC + 10;
+    tracker.noteStop(key1, eventStopTimeNs, false);
+    tracker.noteStop(key2, eventStopTimeNs, false);
+    tracker.noteStart(key1, true, eventStopTimeNs + 1000000, conditionKey1);
+    // Anomaly is ongoing, but we're still in the refractory period.
+    EXPECT_EQ(1U, anomalyTracker->mAlarms.size());
+    alarm = anomalyTracker->mAlarms.begin()->second;
+    EXPECT_EQ(refractoryPeriodEndsSec, (unsigned long long)(alarm->timestampSec));
+
+    // Makes sure it is correct after the refractory period is over.
+    tracker.noteStop(key1, eventStopTimeNs + 2000000, false);
+    uint64_t justBeforeRefPeriodNs = (refractoryPeriodEndsSec - 2) * NS_PER_SEC;
+    tracker.noteStart(key1, true, justBeforeRefPeriodNs, conditionKey1);
+    alarm = anomalyTracker->mAlarms.begin()->second;
+    EXPECT_EQ(justBeforeRefPeriodNs + 40 * NS_PER_SEC,
+                (unsigned long long)(alarm->timestampSec * NS_PER_SEC));
 }
 
 // Suppose that within one tracker there are two dimensions A and B.
