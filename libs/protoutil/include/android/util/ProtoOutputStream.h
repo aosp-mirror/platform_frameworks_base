@@ -137,8 +137,8 @@ private:
     EncodedBuffer mBuffer;
     size_t mCopyBegin;
     bool mCompact;
-    int mDepth;
-    int mObjectId;
+    uint32_t mDepth;
+    uint32_t mObjectId;
     uint64_t mExpectedObjectToken;
 
     inline void writeDoubleImpl(uint32_t id, double val);
