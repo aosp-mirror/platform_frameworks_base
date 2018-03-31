@@ -8766,7 +8766,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 && !pkgSetting.isSystem()) {
 
             if (!pkg.mSigningDetails.checkCapability(pkgSetting.signatures.mSigningDetails,
-                    PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)) {
+                    PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)
+                            && !pkgSetting.signatures.mSigningDetails.checkCapability(
+                                    pkg.mSigningDetails,
+                                    PackageParser.SigningDetails.CertCapabilities.ROLLBACK)) {
                 logCriticalInfo(Log.WARN,
                         "System package signature mismatch;"
                         + " name: " + pkgSetting.name);
@@ -16217,7 +16220,10 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 // default to original signature matching
                 if (!pkg.mSigningDetails.checkCapability(oldPackage.mSigningDetails,
-                        PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)) {
+                        PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)
+                                && !oldPackage.mSigningDetails.checkCapability(
+                                        pkg.mSigningDetails,
+                                        PackageParser.SigningDetails.CertCapabilities.ROLLBACK)) {
                     res.setError(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
                             "New package has a different signature: " + pkgName);
                     return;
