@@ -1852,6 +1852,17 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_RESULT_NEEDED = "android.intent.extra.RESULT_NEEDED";
 
     /**
+     * Intent extra: A {@link Bundle} of extras supplied for the launcher when any packages on
+     * device are suspended. Will be sent with {@link #ACTION_PACKAGES_SUSPENDED}.
+     *
+     * @see PackageManager#isPackageSuspended()
+     * @see #ACTION_PACKAGES_SUSPENDED
+     *
+     * @hide
+     */
+    public static final String EXTRA_LAUNCHER_EXTRAS = "android.intent.extra.LAUNCHER_EXTRAS";
+
+    /**
      * Activity action: Launch UI to manage which apps have a given permission.
      * <p>
      * Input: {@link #EXTRA_PERMISSION_NAME} specifies the permission access
@@ -2251,8 +2262,8 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Broadcast Action: Sent to a package that has been suspended by the system. This is sent
-     * whenever a package is put into a suspended state or any of it's app extras change while
-     * in the suspended state.
+     * whenever a package is put into a suspended state or any of its app extras change while in the
+     * suspended state.
      * <p> Optionally includes the following extras:
      * <ul>
      *     <li> {@link #EXTRA_SUSPENDED_PACKAGE_EXTRAS} which is a {@link Bundle} which will contain

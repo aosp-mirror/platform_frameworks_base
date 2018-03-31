@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.os.BaseBundle;
 import android.os.Bundle;
@@ -36,9 +37,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.Log;
 
 import com.android.servicestests.apps.suspendtestapp.SuspendTestReceiver;
 
@@ -47,6 +50,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
@@ -55,6 +59,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class SuspendPackagesTest {
+    private static final String TAG = SuspendPackagesTest.class.getSimpleName();
     private static final String TEST_APP_PACKAGE_NAME = SuspendTestReceiver.PACKAGE_NAME;
     private static final String[] PACKAGES_TO_SUSPEND = new String[]{TEST_APP_PACKAGE_NAME};
 
@@ -66,9 +71,11 @@ public class SuspendPackagesTest {
 
     private Context mContext;
     private PackageManager mPackageManager;
+    private LauncherApps mLauncherApps;
     private Handler mReceiverHandler;
     private ComponentName mTestReceiverComponent;
     private AppCommunicationReceiver mAppCommsReceiver;
+    private StubbedCallback mTestCallback;
 
     private static final class AppCommunicationReceiver extends BroadcastReceiver {
         private Context context;
@@ -95,6 +102,7 @@ public class SuspendPackagesTest {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "AppCommunicationReceiver#onReceive: " + intent.getAction());
             try {
                 intentQueue.offer(intent, 5, TimeUnit.SECONDS);
             } catch (InterruptedException ie) {
@@ -121,6 +129,7 @@ public class SuspendPackagesTest {
     public void setUp() {
         mContext = InstrumentationRegistry.getTargetContext();
         mPackageManager = mContext.getPackageManager();
+        mLauncherApps = (LauncherApps) mContext.getSystemService(Context.LAUNCHER_APPS_SERVICE);
         mReceiverHandler = new Handler(Looper.getMainLooper());
         mTestReceiverComponent = new ComponentName(TEST_APP_PACKAGE_NAME,
                 SuspendTestReceiver.class.getCanonicalName());
@@ -179,15 +188,19 @@ public class SuspendPackagesTest {
     }
 
 
-    private static void assertSameExtras(String message, BaseBundle expected, BaseBundle received) {
+    private static boolean areSameExtras(BaseBundle expected, BaseBundle received) {
         if (expected != null) {
             expected.get(""); // hack to unparcel the bundles.
         }
         if (received != null) {
             received.get("");
         }
+        return BaseBundle.kindofEquals(expected, received);
+    }
+
+    private static void assertSameExtras(String message, BaseBundle expected, BaseBundle received) {
         assertTrue(message + ": [expected: " + expected + "; received: " + received + "]",
-                BaseBundle.kindofEquals(expected, received));
+                areSameExtras(expected, received));
     }
 
     @Test
@@ -260,14 +273,143 @@ public class SuspendPackagesTest {
         assertEquals(mContext.getOpPackageName(), unchangedPkgs[0]);
     }
 
+    @Test
+    public void testGetLauncherExtrasNonNull() {
+        final Bundle extrasWhenUnsuspended = mLauncherApps.getSuspendedPackageLauncherExtras(
+                TEST_APP_PACKAGE_NAME, mContext.getUser());
+        assertNull("Non null extras when package unsuspended:", extrasWhenUnsuspended);
+        final PersistableBundle launcherExtras = getExtras("testGetLauncherExtras", 1, "1", 0.1);
+        suspendTestPackage(null, launcherExtras);
+        final Bundle receivedExtras = mLauncherApps.getSuspendedPackageLauncherExtras(
+                TEST_APP_PACKAGE_NAME, mContext.getUser());
+        assertSameExtras("Received launcher extras different to the ones supplied", launcherExtras,
+                receivedExtras);
+    }
+
+    @Test
+    public void testGetLauncherExtrasNull() {
+        suspendTestPackage(null, null);
+        final Bundle extrasWhenNoneGiven = mLauncherApps.getSuspendedPackageLauncherExtras(
+                TEST_APP_PACKAGE_NAME, mContext.getUser());
+        assertNull("Non null extras when null extras provided:", extrasWhenNoneGiven);
+    }
+
+    @Test
+    public void testGetLauncherExtrasInvalidPackage() {
+        final Bundle extrasForInvalidPackage = mLauncherApps.getSuspendedPackageLauncherExtras(
+                "test.nonexistent.packagename", mContext.getUser());
+        assertNull("Non null extras for an invalid package:", extrasForInvalidPackage);
+    }
+
+    @Test
+    public void testOnPackagesSuspendedNewAndOld() throws InterruptedException {
+        final PersistableBundle suppliedExtras = getExtras(
+                "testOnPackagesSuspendedNewAndOld", 2, "2", 0.2);
+        final AtomicReference<String> overridingBothCallbackResult = new AtomicReference<>("");
+        final CountDownLatch twoCallbackLatch = new CountDownLatch(2);
+        mTestCallback = new StubbedCallback() {
+            @Override
+            public void onPackagesSuspended(String[] packageNames, UserHandle user) {
+                overridingBothCallbackResult.set(overridingBothCallbackResult.get()
+                        + "Old callback called even when the new one is overriden. ");
+                twoCallbackLatch.countDown();
+            }
+
+            @Override
+            public void onPackagesSuspended(String[] packageNames, Bundle launcherExtras,
+                    UserHandle user) {
+                final StringBuilder errorString = new StringBuilder();
+                if (!Arrays.equals(packageNames, PACKAGES_TO_SUSPEND)) {
+                    errorString.append("Received unexpected packageNames in onPackagesSuspended:");
+                    for (String packageName : packageNames) {
+                        errorString.append(" " + packageName);
+                    }
+                    errorString.append(". ");
+                }
+                if (user.getIdentifier() != mContext.getUserId()) {
+                    errorString.append("Received wrong user " + user.getIdentifier() + ". ");
+                }
+                if (!areSameExtras(launcherExtras, suppliedExtras)) {
+                    errorString.append("Unexpected launcherExtras, supplied: " + suppliedExtras
+                            + ", received: " + launcherExtras + ". ");
+                }
+                overridingBothCallbackResult.set(overridingBothCallbackResult.get()
+                        + errorString.toString());
+                twoCallbackLatch.countDown();
+            }
+        };
+        mLauncherApps.registerCallback(mTestCallback, mReceiverHandler);
+        suspendTestPackage(null, suppliedExtras);
+        assertFalse("Both callbacks were invoked", twoCallbackLatch.await(5, TimeUnit.SECONDS));
+        twoCallbackLatch.countDown();
+        assertTrue("No callback was invoked", twoCallbackLatch.await(2, TimeUnit.SECONDS));
+        final String result = overridingBothCallbackResult.get();
+        assertTrue("Callbacks did not complete as expected: " + result, result.isEmpty());
+    }
+
+    @Test
+    public void testOnPackagesSuspendedOld() throws InterruptedException {
+        final PersistableBundle suppliedExtras = getExtras(
+                "testOnPackagesSuspendedOld", 2, "2", 0.2);
+        final AtomicReference<String> overridingOneCallbackResult = new AtomicReference<>("");
+        final CountDownLatch oneCallbackLatch = new CountDownLatch(1);
+        mTestCallback = new StubbedCallback() {
+            @Override
+            public void onPackagesSuspended(String[] packageNames, UserHandle user) {
+                final StringBuilder errorString = new StringBuilder();
+                if (!Arrays.equals(packageNames, PACKAGES_TO_SUSPEND)) {
+                    errorString.append("Received unexpected packageNames in onPackagesSuspended:");
+                    for (String packageName : packageNames) {
+                        errorString.append(" " + packageName);
+                    }
+                    errorString.append(". ");
+                }
+                if (user.getIdentifier() != mContext.getUserId()) {
+                    errorString.append("Received wrong user " + user.getIdentifier() + ". ");
+                }
+                overridingOneCallbackResult.set(overridingOneCallbackResult.get()
+                        + errorString.toString());
+                oneCallbackLatch.countDown();
+            }
+        };
+        mLauncherApps.registerCallback(mTestCallback, mReceiverHandler);
+        suspendTestPackage(null, suppliedExtras);
+        assertTrue("Callback not invoked", oneCallbackLatch.await(5, TimeUnit.SECONDS));
+        final String result = overridingOneCallbackResult.get();
+        assertTrue("Callback did not complete as expected: " + result, result.isEmpty());
+    }
+
     @After
     public void tearDown() throws Exception {
         mAppCommsReceiver.unregister();
+        if (mTestCallback != null) {
+            mLauncherApps.unregisterCallback(mTestCallback);
+        }
         Thread.sleep(250); // To prevent any race with the next registerReceiver
     }
 
-    @FunctionalInterface
-    interface Condition {
-        boolean isTrue();
+    private static abstract class StubbedCallback extends LauncherApps.Callback {
+
+        @Override
+        public void onPackageRemoved(String packageName, UserHandle user) {
+        }
+
+        @Override
+        public void onPackageAdded(String packageName, UserHandle user) {
+        }
+
+        @Override
+        public void onPackageChanged(String packageName, UserHandle user) {
+        }
+
+        @Override
+        public void onPackagesAvailable(String[] packageNames, UserHandle user, boolean replacing) {
+
+        }
+
+        @Override
+        public void onPackagesUnavailable(String[] packageNames, UserHandle user,
+                boolean replacing) {
+        }
     }
 }
