@@ -195,6 +195,7 @@ cc_library_shared {
         "android_content_res_ObbScanner.cpp",
         "android_content_res_Configuration.cpp",
         "android_animation_PropertyValuesHolder.cpp",
+        "android_security_Scrypt.cpp",
         "com_android_internal_net_NetworkStatsFactory.cpp",
         "com_android_internal_os_ClassLoaderFactory.cpp",
         "com_android_internal_os_FuseAppLoop.cpp",
@@ -228,6 +229,7 @@ cc_library_shared {
         "libseccomp_policy",
         "libselinux",
         "libgrallocusage",
+        "libscrypt_static",
     ],
 
     shared_libs: [
