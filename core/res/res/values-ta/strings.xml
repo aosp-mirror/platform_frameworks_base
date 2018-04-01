@@ -82,6 +82,8 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"குரல் சேவை இல்லை"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"குரல் சேவையைப் பயன்படுத்த முடியாது அல்லது அவசர அழைப்பைச் செய்ய முடியாது"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"உங்கள் மொபைல் நிறுவனம் தற்காலிகமாக ஆஃப் செய்துள்ளது"</string>
+    <!-- no translation found for RestrictedStateContentMsimTemplate (673416791370248176) -->
+    <skip />
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"மொபைல் நெட்வொர்க் கிடைக்கவில்லை"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"விருப்ப நெட்வொர்க்கை மாற்றவும். மாற்ற, தட்டவும்."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"அவசர அழைப்பைச் செய்ய முடியாது"</string>
@@ -159,10 +161,8 @@
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"மிக அதிகமான கோரிக்கைகள் செயல்படுத்தப்படுகின்றன. பிறகு முயற்சிக்கவும்."</string>
     <string name="notification_title" msgid="8967710025036163822">"<xliff:g id="ACCOUNT">%1$s</xliff:g> க்கான உள்நுழைவு பிழை"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"ஒத்திசை"</string>
-    <!-- no translation found for contentServiceSyncNotificationTitle (7036196943673524858) -->
-    <skip />
-    <!-- no translation found for contentServiceTooManyDeletesNotificationDesc (4884451152168188763) -->
-    <skip />
+    <string name="contentServiceSyncNotificationTitle" msgid="7036196943673524858">"ஒத்திசைக்க முடியவில்லை"</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"அதிகளவிலான <xliff:g id="CONTENT_TYPE">%s</xliff:g> உள்ளடக்க வகைகளை நீக்க முயன்றுள்ளீர்கள்."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"டேப்லெட் சேமிப்பிடம் நிரம்பியது. இடத்தைக் காலியாக்க சில கோப்புகளை அழிக்கவும்."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"வாட்ச் சேமிப்பிடம் நிரம்பியது. இடத்தைக் காலியாக்க சில கோப்புகளை நீக்கவும்."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"டிவி சேமிப்பகம் நிரம்பியது. இடத்தை உருவாக்க, சில கோப்புகளை நீக்கவும்."</string>
@@ -272,40 +272,31 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"பணிச் சுயவிவரத்திற்கு மாற்றவும்"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"தொடர்புகள்"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"தொடர்புகளை அணுக வேண்டும்"</string>
-    <!-- no translation found for permgrouprequest_contacts (6032805601881764300) -->
-    <skip />
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"தொடர்புகளை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"இருப்பிடம்"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"இந்தச் சாதனத்தின் இருப்பிடத்தை அறிந்து கொள்ளலாம்"</string>
-    <!-- no translation found for permgrouprequest_location (3788275734953323491) -->
-    <skip />
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"இந்தச் சாதனத்தின் இருப்பிடத்தை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"கேலெண்டர்"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"கேலெண்டரை அணுகலாம்"</string>
-    <!-- no translation found for permgrouprequest_calendar (289900767793189421) -->
-    <skip />
+    <string name="permgrouprequest_calendar" msgid="289900767793189421">"கேலெண்டரை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS அனுப்பலாம், வந்த SMSகளைப் பார்க்கலாம்"</string>
-    <!-- no translation found for permgrouprequest_sms (7168124215838204719) -->
-    <skip />
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"மெசேஜ்களை அனுப்பவும், அவற்றைப் பார்க்கவும் &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"சேமிப்பிடம்"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"உங்கள் சாதனத்தில் உள்ள படங்கள், மீடியா மற்றும் கோப்புகளை அணுக வேண்டும்"</string>
-    <!-- no translation found for permgrouprequest_storage (7885942926944299560) -->
-    <skip />
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"உங்கள் சாதனத்திலுள்ள படங்கள், மீடியா, ஃபைல்கள் ஆகியவற்றை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"மைக்ரோஃபோன்"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ஒலிப் பதிவு செய்யலாம்"</string>
-    <!-- no translation found for permgrouprequest_microphone (9167492350681916038) -->
-    <skip />
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"ஆடியோவைப் பதிவு செய்ய &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"கேமரா"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"படங்கள் மற்றும் வீடியோக்கள் எடுக்கலாம்"</string>
-    <!-- no translation found for permgrouprequest_camera (1299833592069671756) -->
-    <skip />
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"படங்கள் எடுக்கவும், வீடியோ பதிவு செய்யவும் &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"ஃபோன்"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"யாரையும் தொலைபேசியில் அழைக்கலாம்"</string>
-    <!-- no translation found for permgrouprequest_phone (9166979577750581037) -->
-    <skip />
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"மொபைல் அழைப்புகள் செய்யவும், அவற்றை நிர்வகிக்கவும், &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"உடல் சென்சார்கள்"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"உங்கள் உடல் இயக்கம் பற்றி உணர்விகள் கூறும் தகவலைப் பார்க்கலாம்"</string>
-    <!-- no translation found for permgrouprequest_sensors (6349806962814556786) -->
-    <skip />
+    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"உங்கள் உடலியக்கக் குறிகள் பற்றிய சென்சார் தரவை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; பயன்பாட்டை அனுமதிக்கவா?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"சாளர உள்ளடக்கத்தைப் பெறும்"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"நீங்கள் பணியாற்றி கொண்டிருக்கும் சாளரத்தின் உள்ளடக்கத்தைப் பார்க்கலாம்."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"தொடுவதன் மூலம் அறிவதை இயக்கும்"</string>
@@ -492,6 +483,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"குறுகிய இடைவெளி தகவல்பரிமாற்றம் (NFC), குறிகள், கார்டுகள் மற்றும் ரீடர்கள் ஆகியவற்றுடன் தொடர்புகொள்ள, பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"உங்கள் திரைப் பூட்டை முடக்குதல்"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"விசைப்பூட்டையும், தொடர்புடைய கடவுச்சொல் பாதுகாப்பையும் முடக்கப் பயன்பாட்டை அனுமதிக்கிறது. எடுத்துக்காட்டாக, உள்வரும் மொபைல் அழைப்பைப் பெறும்போது மொபைல் விசைப்பூட்டை முடக்குகிறது, பிறகு அழைப்பு முடிந்தவுடன் விசைப்பூட்டை மீண்டும் இயக்குகிறது."</string>
+    <!-- no translation found for permlab_useBiometric (8837753668509919318) -->
+    <skip />
+    <!-- no translation found for permdesc_useBiometric (8389855232721612926) -->
+    <skip />
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"கைரேகை வன்பொருளை நிர்வகி"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"பயன்படுத்துவதற்காக, கைரேகை டெம்ப்ளேட்களைச் சேர்க்க மற்றும் நீக்குவதற்கான செயல்முறைகளை இயக்குவதற்குப் பயன்பாட்டை அனுமதிக்கும்."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"கைரேகை வன்பொருளைப் பயன்படுத்து"</string>
@@ -504,6 +499,8 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"அறியப்படவில்லை"</string>
+    <!-- no translation found for fingerprint_authenticated (5309333983002526448) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"கைரேகை வன்பொருள் இல்லை."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"கைரேகையைச் சேமிக்க முடியவில்லை. ஏற்கனவே உள்ள கைரேகையை அகற்றவும்."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"கைரேகைக்கான நேரம் முடிந்தது. மீண்டும் முயலவும்."</string>
@@ -1016,14 +1013,32 @@
     <string name="inputMethod" msgid="1653630062304567879">"உள்ளீட்டு முறை"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"உரை நடவடிக்கைகள்"</string>
     <string name="email" msgid="4560673117055050403">"மின்னஞ்சல்"</string>
+    <!-- no translation found for email_desc (3638665569546416795) -->
+    <skip />
     <string name="dial" msgid="1253998302767701559">"அழை"</string>
+    <!-- no translation found for dial_desc (6573723404985517250) -->
+    <skip />
     <string name="map" msgid="6521159124535543457">"கண்டுபிடி"</string>
+    <!-- no translation found for map_desc (9036645769910215302) -->
+    <skip />
     <string name="browse" msgid="1245903488306147205">"திற"</string>
+    <!-- no translation found for browse_desc (8220976549618935044) -->
+    <skip />
     <string name="sms" msgid="4560537514610063430">"செய்தி"</string>
+    <!-- no translation found for sms_desc (7526588350969638809) -->
+    <skip />
     <string name="add_contact" msgid="7867066569670597203">"சேர்"</string>
+    <!-- no translation found for add_contact_desc (4830217847004590345) -->
+    <skip />
     <string name="view_calendar" msgid="979609872939597838">"காண்பி"</string>
+    <!-- no translation found for view_calendar_desc (5828320291870344584) -->
+    <skip />
     <string name="add_calendar_event" msgid="1953664627192056206">"திட்டமிடுதல்"</string>
+    <!-- no translation found for add_calendar_event_desc (4326891793260687388) -->
+    <skip />
     <string name="view_flight" msgid="7691640491425680214">"கண்கானி"</string>
+    <!-- no translation found for view_flight_desc (3876322502674253506) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"சேமிப்பிடம் குறைகிறது"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"சில அமைப்பு செயல்பாடுகள் வேலை செய்யாமல் போகலாம்"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"முறைமையில் போதுமான சேமிப்பகம் இல்லை. 250மெ.பை. அளவு காலி இடவசதி இருப்பதை உறுதிசெய்து மீண்டும் தொடங்கவும்."</string>
@@ -1117,8 +1132,7 @@
     <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> பயன்பாட்டைத் திற"</string>
     <string name="new_app_description" msgid="5894852887817332322">"சேமிக்கப்படாமலேயே <xliff:g id="OLD_APP">%1$s</xliff:g> மூடப்படும்"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"நினைவக வரம்பை <xliff:g id="PROC">%1$s</xliff:g> மீறியது"</string>
-    <!-- no translation found for dump_heap_notification_detail (3993078784053054141) -->
-    <skip />
+    <string name="dump_heap_notification_detail" msgid="3993078784053054141">"ஹீப் டம்ப் சேகரிக்கப்பட்டது. பகிர, தட்டவும்."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"ஹீப் டம்பைப் பகிரவா?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="SIZE">%2$s</xliff:g> அளவான தனது செயலாக்க நினைவக வரம்பை <xliff:g id="PROC">%1$s</xliff:g> செயலாக்கம் மீறியது. உங்களுக்கான ஹீப் டம்பினை அதன் டெவெலப்பருடன் பகிரலாம். கவனம்: பயன்பாடு அணுகும் விதத்தில், உங்களைப் பற்றிய எந்தத் தனிப்பட்ட தகவலும் இந்த ஹீப் டம்பில் இருக்கலாம் என்பதை நினைவில்கொள்ளவும்."</string>
     <string name="sendText" msgid="5209874571959469142">"உரைக்கான செயலைத் தேர்வுசெய்யவும்"</string>
@@ -1271,33 +1285,49 @@
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> பிற ஆப்ஸின் மீது தோன்றுகிறது"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> இந்த அம்சத்தைப் பயன்படுத்த வேண்டாம் என நினைத்தால், அமைப்புகளைத் திறந்து அதை முடக்க, தட்டவும்."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"ஆஃப் செய்"</string>
-    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> தயாராகிறது"</string>
-    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"பிழைகள் உள்ளதா எனப் பார்க்கிறது"</string>
-    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"புதிய <xliff:g id="NAME">%s</xliff:g> கண்டறியப்பட்டது"</string>
+    <!-- no translation found for ext_media_checking_notification_title (4411133692439308924) -->
+    <skip />
+    <!-- no translation found for ext_media_checking_notification_message (410185170877285434) -->
+    <skip />
+    <!-- no translation found for ext_media_new_notification_title (1621805083736634077) -->
+    <skip />
+    <!-- no translation found for ext_media_new_notification_message (3673685270558405087) -->
+    <skip />
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"படங்களையும் மீடியாவையும் மாற்றலாம்"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> சிதைந்துள்ளது"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> சிதைந்துள்ளது. சரிசெய்ய, தட்டவும்."</string>
-    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> சிதைந்துள்ளது. சரிசெய்ய, தேர்ந்தெடுக்கவும்."</string>
+    <!-- no translation found for ext_media_unmountable_notification_title (4179418065210797130) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_message (4193858924381066522) -->
+    <skip />
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"ஆதரிக்கப்படாத <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"சாதனம் இந்த <xliff:g id="NAME">%s</xliff:g>ஐ ஆதரிக்கவில்லை. ஆதரிக்கப்படும் வடிவமைப்பில் அமைக்க, தட்டவும்."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"சாதனம் இந்த <xliff:g id="NAME">%s</xliff:g>ஐ ஆதரிக்கவில்லை. ஆதரிக்கப்படும் வடிவமைப்பில் அமைக்க, தேர்ந்தெடுக்கவும்."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> அகற்றப்பட்டது"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"தரவு இழப்பைத் தவிர்க்க, <xliff:g id="NAME">%s</xliff:g>ஐ அகற்றுவதற்கு முன் இணைப்பு நீக்கவும்"</string>
-    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> அகற்றப்பட்டது"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> அகற்றப்பட்டது. புதியதைச் செருகவும்"</string>
-    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"இன்னும் <xliff:g id="NAME">%s</xliff:g>ஐ வெளியேற்றுகிறது…"</string>
-    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"அகற்ற வேண்டாம்"</string>
+    <!-- no translation found for ext_media_badremoval_notification_message (8556885808951260574) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_title (6593814191061956856) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_message (2110883356419799994) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_title (5046532339291216076) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_message (1003926904442321115) -->
+    <skip />
     <string name="ext_media_init_action" msgid="7952885510091978278">"அமை"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"வெளியேற்று"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"உலாவுக"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> இல்லை"</string>
-    <string name="ext_media_missing_message" msgid="5761133583368750174">"சாதனத்தை மீண்டும் செருகவும்"</string>
+    <!-- no translation found for ext_media_missing_message (4012389235250987930) -->
+    <skip />
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g>ஐ நகர்த்துகிறது"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"தரவு நகர்த்தப்படுகிறது"</string>
-    <string name="ext_media_move_success_title" msgid="8575300932957954671">"நகர்த்தப்பட்டது"</string>
-    <string name="ext_media_move_success_message" msgid="4199002148206265426">"<xliff:g id="NAME">%s</xliff:g>க்குத் தரவு நகர்த்தப்பட்டது"</string>
-    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"தரவை நகர்த்த முடியவில்லை"</string>
-    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"அசல் இடத்திலிருந்து தரவு நகர்த்தப்படவில்லை"</string>
+    <!-- no translation found for ext_media_move_success_title (7863652232242276066) -->
+    <skip />
+    <!-- no translation found for ext_media_move_success_message (8939137931961728009) -->
+    <skip />
+    <!-- no translation found for ext_media_move_failure_title (1604422634177382092) -->
+    <skip />
+    <!-- no translation found for ext_media_move_failure_message (7388950499623016135) -->
+    <skip />
     <string name="ext_media_status_removed" msgid="6576172423185918739">"அகற்றப்பட்டது"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"வெளியேற்றப்பட்டது"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"சரிபார்க்கிறது..."</string>
@@ -1356,17 +1386,14 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"எப்போதும் இயங்கும் VPN உடன் இணைக்கிறது…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"எப்போதும் இயங்கும் VPN இணைக்கப்பட்டது"</string>
     <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"எப்போதும் இயக்கத்தில் இருக்கும்படி அமைத்த VPN இலிருந்து துண்டிக்கப்பட்டது"</string>
-    <!-- no translation found for vpn_lockdown_error (3133844445659711681) -->
-    <skip />
+    <string name="vpn_lockdown_error" msgid="3133844445659711681">"எப்போதும் ஆனில் இருக்கும்படி அமைத்த VPN உடன் இணைக்க முடியவில்லை"</string>
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"நெட்வொர்க் அல்லது VPN அமைப்புகளை மாற்றவும்"</string>
     <string name="upload_file" msgid="2897957172366730416">"கோப்பைத் தேர்வுசெய்"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"எந்தக் கோப்பும் தேர்வுசெய்யப்படவில்லை"</string>
     <string name="reset" msgid="2448168080964209908">"மீட்டமை"</string>
     <string name="submit" msgid="1602335572089911941">"சமர்ப்பி"</string>
-    <!-- no translation found for car_mode_disable_notification_title (5704265646471239078) -->
-    <skip />
-    <!-- no translation found for car_mode_disable_notification_message (7647248420931129377) -->
-    <skip />
+    <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"\'வாகனம் ஓட்டும் பயன்முறை’ ஆனில் உள்ளது"</string>
+    <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"வாகனம் ஓட்டும் பயன்முறையிலிருந்து வெளியேற, தட்டவும்."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"டெதெரிங்/ஹாட்ஸ்பாட் இயங்குகிறது"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"அமைக்க, தட்டவும்."</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"இணைப்பு முறை முடக்கப்பட்டுள்ளது"</string>
@@ -1692,8 +1719,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"உங்கள் நிர்வாகி நிறுவியுள்ளார்"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"உங்கள் நிர்வாகி புதுப்பித்துள்ளார்"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"உங்கள் நிர்வாகி நீக்கியுள்ளார்"</string>
-    <!-- no translation found for battery_saver_description (4660824093877546730) -->
-    <skip />
+    <string name="battery_saver_description" msgid="4660824093877546730">"சாதனத்தின் பேட்டரி ஆயுளை அதிகரிப்பதற்காக, பேட்டரி சேமிப்பான் உங்கள் சாதனத்தின் செயல்திறனைக் குறைத்து, அதிர்வு, இருப்பிடச் சேவைகள் மற்றும் பின்புலத் தரவு போன்றவற்றைக் கட்டுப்படுத்துகிறது அல்லது ஆஃப் செய்கிறது. ஒத்திசைவைச் சார்ந்திருக்கும் மின்னஞ்சல், செய்தியிடல் மற்றும் பிற ஆப்ஸைத் திறக்காதவரை, அவை ஒத்திசைக்கப்படாமல் இருக்கும்.\n\nசாதனம் சார்ஜ் ஆகும் போது பேட்டரி சேமிப்பான் தானாகவே ஆஃப் ஆகிவிடும்."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"டேட்டா பயன்பாட்டைக் குறைப்பதற்கு உதவ, பின்புலத்தில் டேட்டாவை அனுப்புவது அல்லது பெறுவதிலிருந்து சில பயன்பாடுகளை டேட்டா சேமிப்பான் தடுக்கும். தற்போது பயன்படுத்தும் பயன்பாடானது எப்போதாவது டேட்டாவை அணுகலாம். எடுத்துக்காட்டாக, படங்களை நீங்கள் தட்டும் வரை அவை காட்டப்படாது."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"டேட்டா சேமிப்பானை இயக்கவா?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"இயக்கு"</string>
@@ -1744,22 +1770,14 @@
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ஒலியடக்கினார்"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"சாதனத்தில் அகச் சிக்கல் இருக்கிறது, அதனை ஆரம்பநிலைக்கு மீட்டமைக்கும் வரை நிலையற்று இயங்கலாம்."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"சாதனத்தில் அகச் சிக்கல் இருக்கிறது. விவரங்களுக்கு சாதன தயாரிப்பாளரைத் தொடர்புகொள்ளவும்."</string>
-    <!-- no translation found for stk_cc_ussd_to_dial (5214333646366591205) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_ss (4884994189414782605) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_ussd (5728637484565449312) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_dial_video (4134455726513175559) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_dial (1360775164651754978) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_dial_video (6577956662913194947) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_ussd (5614626512855868785) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_ss (7716729801537709054) -->
-    <skip />
+    <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD கோரிக்கை, வழக்கமான அழைப்பிற்கு மாற்றப்பட்டது"</string>
+    <string name="stk_cc_ussd_to_ss" msgid="4884994189414782605">"USSD கோரிக்கை, SS கோரிக்கைக்கு மாற்றப்பட்டது"</string>
+    <string name="stk_cc_ussd_to_ussd" msgid="5728637484565449312">"புதிய USSD கோரிக்கைக்கு மாற்றப்பட்டது"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="4134455726513175559">"USSD கோரிக்கை, வீடியோ அழைப்பிற்கு மாற்றப்பட்டது"</string>
+    <string name="stk_cc_ss_to_dial" msgid="1360775164651754978">"SS கோரிக்கை, வழக்கமான அழைப்பிற்கு மாற்றப்பட்டது"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="6577956662913194947">"SS கோரிக்கை, வீடியோ அழைப்பிற்கு மாற்றப்பட்டது"</string>
+    <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS கோரிக்கை, USSD கோரிக்கைக்கு மாற்றப்பட்டது"</string>
+    <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"புதிய SS கோரிக்கைக்கு மாற்றப்பட்டது"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"பணி சுயவிவரம்"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"விரிவாக்கும்"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"சுருக்கும்"</string>
@@ -1857,6 +1875,14 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"குரல் அழைப்பை மேற்கொள்ளும் வசதி இந்த சிம்மிற்கு இல்லை"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"குரல் அழைப்பை மேற்கொள்ள இந்த சிம்மிற்கு அனுமதி இல்லை"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"குரல் அழைப்பை மேற்கொள்ள இந்த ஃபோனுக்கு அனுமதி இல்லை"</string>
+    <!-- no translation found for mmcc_authentication_reject_msim_template (1217031195834766479) -->
+    <skip />
+    <!-- no translation found for mmcc_imsi_unknown_in_hlr_msim_template (5636464607596778986) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_ms_msim_template (5994323296399913454) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_me_msim_template (5550259730350571826) -->
+    <skip />
     <string name="popup_window_default_title" msgid="4874318849712115433">"பாப்அப் சாளரம்"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"பயன்பாடு முந்தையப் பதிப்பிற்கு மாற்றப்பட்டது, அல்லது இந்தக் குறுக்குவழி வேலை செய்யவில்லை"</string>
@@ -1877,8 +1903,6 @@
     <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"இது புதிய செயல்பாடாகும். மாற்ற, தட்டவும்."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"தொந்தரவு செய்ய வேண்டாம் அமைப்புகள் மாற்றப்பட்டன"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"எவற்றையெல்லாம் தடுக்கிறது என்பதைப் பார்க்க, தட்டவும்."</string>
-    <!-- no translation found for notification_app_name_system (4205032194610042794) -->
-    <skip />
-    <!-- no translation found for notification_app_name_settings (7751445616365753381) -->
-    <skip />
+    <string name="notification_app_name_system" msgid="4205032194610042794">"சிஸ்டம்"</string>
+    <string name="notification_app_name_settings" msgid="7751445616365753381">"அமைப்புகள்"</string>
 </resources>

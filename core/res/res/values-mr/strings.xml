@@ -82,6 +82,8 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"व्हॉइस सेवा नाही"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"व्‍हॉइस सेवा किंवा आणीबाणी कॉलिंग नाही"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"तुमच्‍या वाहकाने तात्‍पुरते बंद केले आहे"</string>
+    <!-- no translation found for RestrictedStateContentMsimTemplate (673416791370248176) -->
+    <skip />
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"मोबाइल नेटवर्क उपलब्ध नाही"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"प्राधान्य दिलेले नेटवर्क बदलण्याचा प्रयत्न करा. बदलण्यासाठी टॅप करा."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"आणीबाणी कॉलिंग अनुपलब्ध"</string>
@@ -120,12 +122,13 @@
     <string name="roamingText11" msgid="4154476854426920970">"रोमिंग बॅनर चालू"</string>
     <string name="roamingText12" msgid="1189071119992726320">"रोमिंग बॅनर बंद"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"सेवा शोधत आहे"</string>
-    <!-- no translation found for wfcRegErrorTitle (3855061241207182194) -->
-    <skip />
+    <string name="wfcRegErrorTitle" msgid="3855061241207182194">"वाय-फाय कॉलिंग सेट करता आले नाही"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"वाय-फायवरून कॉल करण्यासाठी आणि संदेश पाठवण्यासाठी आधी तुमच्या कॅरियरला ही सेवा सेट अप करण्यास सांगा. नंतर सेटिंग्जमधून वाय-फाय वापरून कॉल करणे पुन्हा चालू करा. (एरर कोड <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7372514042696663278) -->
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="7372514042696663278">"तुमच्या या वाहकासह वाय-फाय कॉलिंग नोंदणी करताना समस्या आली आहे:<xliff:g id="CODE">%1$s</xliff:g>"</item>
+  </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"%s वाय-फाय कॉलिंग"</item>
@@ -159,10 +162,8 @@
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"बर्‍याच विनंत्यांवर प्रक्रिया होत आहे. नंतर पुन्हा प्रयत्न करा."</string>
     <string name="notification_title" msgid="8967710025036163822">"<xliff:g id="ACCOUNT">%1$s</xliff:g> साठी साइन इन एरर"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"संकालन करा"</string>
-    <!-- no translation found for contentServiceSyncNotificationTitle (7036196943673524858) -->
-    <skip />
-    <!-- no translation found for contentServiceTooManyDeletesNotificationDesc (4884451152168188763) -->
-    <skip />
+    <string name="contentServiceSyncNotificationTitle" msgid="7036196943673524858">"सिंक करू शकत नाही"</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"खूप जास्त <xliff:g id="CONTENT_TYPE">%s</xliff:g> हटवण्याचा प्रयत्न केला."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"टॅबलेट संचयन पूर्ण भरले आहे. स्थान मोकळे करण्यासाठी काही फाईल हटवा."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"पाहण्याचे संचयन पूर्ण भरले आहे. स्थान मोकळे करण्यासाठी काही फायली हटवा."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"टीव्ही संचयन भरले आहे. स्थान मोकळे करण्यासाठी काही फायली हटवा."</string>
@@ -272,40 +273,31 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"कार्य प्रोफाइलवर स्विच करा"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"संपर्क"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"आपल्या संपर्कांवर प्रवेश"</string>
-    <!-- no translation found for permgrouprequest_contacts (6032805601881764300) -->
-    <skip />
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमचे संपर्क अॅक्सेस करू द्यायचे?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"स्थान"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"या डिव्हाइसच्या स्थानावर प्रवेश"</string>
-    <!-- no translation found for permgrouprequest_location (3788275734953323491) -->
-    <skip />
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला या डिव्हाइसचे स्थान अॅक्सेस करू द्यायचे?"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"कॅलेंडर"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"आपल्या कॅलेंडरवर प्रवेश"</string>
-    <!-- no translation found for permgrouprequest_calendar (289900767793189421) -->
-    <skip />
+    <string name="permgrouprequest_calendar" msgid="289900767793189421">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमचे कॅलेंडर अॅक्सेस करू द्यायचे?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS संदेश पाठवणे आणि पाहणे हे"</string>
-    <!-- no translation found for permgrouprequest_sms (7168124215838204719) -->
-    <skip />
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला एसएमएस पाठवू आणि पाहू द्यायचे?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"संचयन"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"तुमच्या डिव्हाइस वरील फोटो, मीडिया आणि फायलींमध्‍ये अॅक्सेस"</string>
-    <!-- no translation found for permgrouprequest_storage (7885942926944299560) -->
-    <skip />
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमच्या डिव्हाइसवरील फोटो, मीडिया आणि फायली अॅक्सेस करू द्यायचे?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"मायक्रोफोन"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ऑडिओ रेकॉर्ड"</string>
-    <!-- no translation found for permgrouprequest_microphone (9167492350681916038) -->
-    <skip />
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला ऑडिओ रेकॉर्ड करू द्यायचे?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"कॅमेरा"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"चित्रे घेण्याची आणि व्हिडिओ रेकॉर्ड"</string>
-    <!-- no translation found for permgrouprequest_camera (1299833592069671756) -->
-    <skip />
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला फोटो घेऊ आणि व्हिडिओ रेकॉर्ड करू द्यायचे?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"फोन"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"फोन कॉल आणि व्यवस्थापित"</string>
-    <!-- no translation found for permgrouprequest_phone (9166979577750581037) -->
-    <skip />
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला फोन कॉल करू आणि ते व्यवस्थापित करू द्यायचे?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"शरीर सेन्सर"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"आपल्‍या महत्त्वाच्या मापनांविषयी सेंसर डेटा अॅक्सेस करा"</string>
-    <!-- no translation found for permgrouprequest_sensors (6349806962814556786) -->
-    <skip />
+    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ला तुमच्या महत्त्वाच्या लक्षणांविषयीचा सेन्सर डेटा अॅक्सेस करू द्यायचे?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"विंडो सामग्री पुनर्प्राप्त करा"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"आपण परस्‍परसंवाद करीत असलेल्‍या विंडोची सामग्री तपासा."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"स्पर्श करून अन्वेषण चालू करा"</string>
@@ -492,6 +484,10 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"फील्ड जवळील कम्युनिकेशन (NFC) टॅग, कार्डे आणि वाचक यांच्यासह संवाद करण्यासाठी अॅपला अनुमती देते."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"आपले स्क्रीन लॉक अक्षम करा"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"कीलॉक आणि कोणतीही संबद्ध पासवर्ड सुरक्षितता अक्षम करण्यासाठी अॅप ला अनुमती देते. उदाहरणार्थ, येणारा फोन कॉल प्राप्त करताना फोन कीलॉक अक्षम करतो, नंतर जेव्हा कॉल समाप्त होतो तेव्हा तो कीलॉक पुन्हा-सक्षम करतो."</string>
+    <!-- no translation found for permlab_useBiometric (8837753668509919318) -->
+    <skip />
+    <!-- no translation found for permdesc_useBiometric (8389855232721612926) -->
+    <skip />
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"फिंगरप्रिंट हार्डवेअर व्यवस्थापित करा"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"वापर करण्याकरिता फिंगरप्रिंट टेम्पलेट जोडण्यासाठी आणि हटविण्यासाठी पद्धती रद्द करण्यास अॅपला अनुमती देते."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"फिंगरप्रिंट हार्डवेअर वापरा"</string>
@@ -504,6 +500,8 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"ओळखले नाही"</string>
+    <!-- no translation found for fingerprint_authenticated (5309333983002526448) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"फिंगरप्रिंट हार्डवेअर उपलब्‍ध नाही."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"फिंगरप्रिंट स्टोअर केले जाऊ शकत नाही. कृपया विद्यमान फिंगरप्रिंट काढा."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"फिंगरप्रिंट टाइमआउट झाले. पुन्हा प्रयत्न करा."</string>
@@ -1016,14 +1014,32 @@
     <string name="inputMethod" msgid="1653630062304567879">"इनपुट पद्धत"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"मजकूर क्रिया"</string>
     <string name="email" msgid="4560673117055050403">"ईमेल"</string>
+    <!-- no translation found for email_desc (3638665569546416795) -->
+    <skip />
     <string name="dial" msgid="1253998302767701559">"कॉल करा"</string>
+    <!-- no translation found for dial_desc (6573723404985517250) -->
+    <skip />
     <string name="map" msgid="6521159124535543457">"शोधा"</string>
+    <!-- no translation found for map_desc (9036645769910215302) -->
+    <skip />
     <string name="browse" msgid="1245903488306147205">"उघडा"</string>
+    <!-- no translation found for browse_desc (8220976549618935044) -->
+    <skip />
     <string name="sms" msgid="4560537514610063430">"संदेश"</string>
+    <!-- no translation found for sms_desc (7526588350969638809) -->
+    <skip />
     <string name="add_contact" msgid="7867066569670597203">"जोडा"</string>
+    <!-- no translation found for add_contact_desc (4830217847004590345) -->
+    <skip />
     <string name="view_calendar" msgid="979609872939597838">"पहा"</string>
+    <!-- no translation found for view_calendar_desc (5828320291870344584) -->
+    <skip />
     <string name="add_calendar_event" msgid="1953664627192056206">"शेड्यूल"</string>
+    <!-- no translation found for add_calendar_event_desc (4326891793260687388) -->
+    <skip />
     <string name="view_flight" msgid="7691640491425680214">"ट्रॅक"</string>
+    <!-- no translation found for view_flight_desc (3876322502674253506) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"संचयन स्थान संपत आहे"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"काही सिस्टम कार्ये कार्य करू शकत नाहीत"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"सिस्टीमसाठी पुरेसे संचयन नाही. आपल्याकडे 250MB मोकळे स्थान असल्याचे सुनिश्चित करा आणि रीस्टार्ट करा."</string>
@@ -1117,8 +1133,7 @@
     <string name="new_app_action" msgid="6694851182870774403">"<xliff:g id="NEW_APP">%1$s</xliff:g> उघडा"</string>
     <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> सेव्ह न करता बंद होईल"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> ने मेमेरी मर्यादा वाढविली"</string>
-    <!-- no translation found for dump_heap_notification_detail (3993078784053054141) -->
-    <skip />
+    <string name="dump_heap_notification_detail" msgid="3993078784053054141">"हीप डंप गोळा केले. शेअर करण्यासाठी टॅप करा."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"हीप डंप सामायिक करायचे?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g> प्रक्रियेने त्याची <xliff:g id="SIZE">%2$s</xliff:g> ची प्रक्रिया मेमरी मर्यादा ओलांडली आहे. त्याच्या विकासकासह सामायिक करण्यासाठी तुमच्यासाठी हीप डंप उपलब्ध आहे. सावधगिरी बाळगा: या हीप डंपमध्ये आपली कोणतीही वैयक्तिक माहिती असू शकते ज्यात अॅप्लिकेशन प्रवेश करू शकतो."</string>
     <string name="sendText" msgid="5209874571959469142">"मजकुरासाठी क्रिया निवडा"</string>
@@ -1153,8 +1168,7 @@
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"खुल्या वाय-फाय नेटवर्कशी कनेक्ट करा"</string>
     <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"वाहक वाय-फाय नेटवर्कशी कनेक्ट करा"</string>
-    <!-- no translation found for wifi_available_title_connecting (1139126673968899002) -->
-    <skip />
+    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"वाय-फाय नेटवर्कशी कनेक्ट करत आहे"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"वाय-फाय नेटवर्कशी कनेक्ट केले"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"वाय-फाय नेटवर्कशी कनेक्ट करू शकत नाही"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"सर्व नेटवर्क पाहण्यासाठी टॅप करा"</string>
@@ -1271,33 +1285,49 @@
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> अन्‍य अॅप्सवर प्रदर्शित करत आहे"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g> ने हे वैशिष्ट्य वापरू नये असे आपण इच्छित असल्यास, सेटिंग्ज उघडण्यासाठी टॅप करा आणि ते बंद करा."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"बंद करा"</string>
-    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"<xliff:g id="NAME">%s</xliff:g> तयार करत आहे"</string>
-    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"त्रुटींसाठी तपासत आहे"</string>
-    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"नवीन <xliff:g id="NAME">%s</xliff:g> आढळले"</string>
+    <!-- no translation found for ext_media_checking_notification_title (4411133692439308924) -->
+    <skip />
+    <!-- no translation found for ext_media_checking_notification_message (410185170877285434) -->
+    <skip />
+    <!-- no translation found for ext_media_new_notification_title (1621805083736634077) -->
+    <skip />
+    <!-- no translation found for ext_media_new_notification_message (3673685270558405087) -->
+    <skip />
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"फोटो आणि मीडिया स्थानांतरित करण्‍यासाठी"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"<xliff:g id="NAME">%s</xliff:g> दूषित झालेले"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> दूषित आहे. निराकरण करण्यासाठी टॅप करा."</string>
-    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> दूषित आहे. निश्चित करण्यासाठी निवडा."</string>
+    <!-- no translation found for ext_media_unmountable_notification_title (4179418065210797130) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_message (4193858924381066522) -->
+    <skip />
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> असमर्थित"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"हे डिव्हाइस <xliff:g id="NAME">%s</xliff:g> ला सपोर्ट करत नाही. सपोर्ट असलेल्या फॉरमॅटमध्ये सेट करण्यासाठी टॅप करा."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"हे डिव्हाइस <xliff:g id="NAME">%s</xliff:g> ला सपोर्ट करत नाही. सपोर्ट असलेल्या फॉरमॅटमध्ये सेट करण्यासाठी निवडा."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> अनपेक्षितरित्या काढले"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"डेटा गमावणे टाळण्‍यासाठी काढण्‍यापूर्वी <xliff:g id="NAME">%s</xliff:g> अनमाउंट करा"</string>
-    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> काढले"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> काढले; एक नवीन घाला"</string>
-    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"अद्याप <xliff:g id="NAME">%s</xliff:g> ला बाहेर काढत आहे…"</string>
-    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"काढू नका"</string>
+    <!-- no translation found for ext_media_badremoval_notification_message (8556885808951260574) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_title (6593814191061956856) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_message (2110883356419799994) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_title (5046532339291216076) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_message (1003926904442321115) -->
+    <skip />
     <string name="ext_media_init_action" msgid="7952885510091978278">"सेट करा"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"बाहेर काढा"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"एक्सप्लोर करा"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> गहाळ आहे"</string>
-    <string name="ext_media_missing_message" msgid="5761133583368750174">"हे डिव्हाइस पुन्हा घाला"</string>
+    <!-- no translation found for ext_media_missing_message (4012389235250987930) -->
+    <skip />
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> हलवित आहे"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"डेटा हलवित आहे"</string>
-    <string name="ext_media_move_success_title" msgid="8575300932957954671">"हलविणे पूर्ण"</string>
-    <string name="ext_media_move_success_message" msgid="4199002148206265426">"<xliff:g id="NAME">%s</xliff:g> वर डेटा हलविला"</string>
-    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"डेटा हलविणे शक्य झाले नाही"</string>
-    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"मूळ स्थानावर डेटा सोडला"</string>
+    <!-- no translation found for ext_media_move_success_title (7863652232242276066) -->
+    <skip />
+    <!-- no translation found for ext_media_move_success_message (8939137931961728009) -->
+    <skip />
+    <!-- no translation found for ext_media_move_failure_title (1604422634177382092) -->
+    <skip />
+    <!-- no translation found for ext_media_move_failure_message (7388950499623016135) -->
+    <skip />
     <string name="ext_media_status_removed" msgid="6576172423185918739">"काढले"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"बाहेर काढले"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"तपासत आहे..."</string>
@@ -1356,17 +1386,14 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"VPN कनेक्ट करणे नेहमी-चालू…"</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"VPN कनेक्ट केलेले नेहमी-चालू"</string>
     <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"कायम चालू असलेल्या VPN मधून डिस्कनेक्ट केले"</string>
-    <!-- no translation found for vpn_lockdown_error (3133844445659711681) -->
-    <skip />
+    <string name="vpn_lockdown_error" msgid="3133844445659711681">"कायम चालू असलेल्या VPN शी कनेक्ट करता आले नाही"</string>
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"नेटवर्क किंवा VPN सेटिंग्ज बदला"</string>
     <string name="upload_file" msgid="2897957172366730416">"फाईल निवडा"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"फाईल निवडली नाही"</string>
     <string name="reset" msgid="2448168080964209908">"रीसेट करा"</string>
     <string name="submit" msgid="1602335572089911941">"सबमिट करा"</string>
-    <!-- no translation found for car_mode_disable_notification_title (5704265646471239078) -->
-    <skip />
-    <!-- no translation found for car_mode_disable_notification_message (7647248420931129377) -->
-    <skip />
+    <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"ड्रायव्हिंग अॅप चालू आहे"</string>
+    <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"ड्रायव्हिंग अॅपमधून बाहेर पाडण्यासाठी टॅप करा."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"टेदरिंग किंवा हॉटस्पॉट सक्रिय"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"सेट करण्यासाठी टॅप करा."</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"टेदरिंग बंद आहे"</string>
@@ -1692,8 +1719,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"आपल्या प्रशासकाने इंस्टॉल केले"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"आपल्या प्रशासकाने अपडेट केले"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"आपल्या प्रशासकाने हटवले"</string>
-    <!-- no translation found for battery_saver_description (4660824093877546730) -->
-    <skip />
+    <string name="battery_saver_description" msgid="4660824093877546730">"बॅटरीचे आयुष्य वाढवण्यासाठी, बॅटरी बचतकर्ता तुमच्या डिव्हाइसचे कार्यप्रदर्शन कमी करतो आणि कंपन, स्थान सेवा आणि बराच पार्श्वभूमी डेटा मर्यादित करतो. संकालनावर अवलंबून असणारे ईमेल, संदेशन आणि इतर अॅप्स तुम्ही उघडल्याशिवाय अपडेट होऊ शकत नाहीत.\n\nतुमचे डिव्हाइस चार्ज होत असते तेव्हा बॅटरी बचतकर्ता स्वयंचलितपणे बंद होतो."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"डेटा वापर कमी करण्यात मदत करण्यासाठी, डेटा सर्व्हर काही अॅप्सना पार्श्वभूमीमध्ये डेटा पाठविण्यास किंवा प्राप्त करण्यास प्रतिबंधित करतो. आपण सध्या वापरत असलेला अॅप डेटामध्ये प्रवेश करू शकतो परंतु तसे तो खूप कमी वेळा करू शकतो. याचा अर्थ, उदाहरणार्थ, आपण इमेज टॅप करेपर्यंत त्या प्रदर्शित करणार नाहीत असा असू शकतो."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा बचतकर्ता चालू करायचा?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"चालू करा"</string>
@@ -1744,22 +1770,14 @@
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> द्वारे नि:शब्द केले"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"आपल्‍या डिव्‍हाइसमध्‍ये अंतर्गत समस्‍या आहे आणि आपला फॅक्‍टरी डेटा रीसेट होईपर्यंत ती अस्‍थिर असू शकते."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"आपल्‍या डिव्‍हाइसमध्‍ये अंतर्गत समस्‍या आहे. तपशीलांसाठी आपल्‍या निर्मात्याशी संपर्क साधा."</string>
-    <!-- no translation found for stk_cc_ussd_to_dial (5214333646366591205) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_ss (4884994189414782605) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_ussd (5728637484565449312) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_dial_video (4134455726513175559) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_dial (1360775164651754978) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_dial_video (6577956662913194947) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_ussd (5614626512855868785) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_ss (7716729801537709054) -->
-    <skip />
+    <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD विनंती नियमित कॉलवर बदलली"</string>
+    <string name="stk_cc_ussd_to_ss" msgid="4884994189414782605">"USSD विनंती SS विनंतीवर बदलली"</string>
+    <string name="stk_cc_ussd_to_ussd" msgid="5728637484565449312">"नवीन USSD विनंतीवर बदलली"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="4134455726513175559">"USSD विनंती व्हिडिओ कॉलवर बदलली"</string>
+    <string name="stk_cc_ss_to_dial" msgid="1360775164651754978">"SS विनंती नियमित कॉलवर बदलली"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="6577956662913194947">"SS विनंती व्हिडिओ कॉलवर बदलली"</string>
+    <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS विनंती USSD विनंतीवर बदलली"</string>
+    <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"नवीन SS विनंतीवर बदलली"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"कार्य प्रोफाईल"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"विस्तृत करा"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"संकुचित करा"</string>
@@ -1857,6 +1875,14 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"सिममध्‍ये व्‍हॉइसची तरतूद नाही"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"व्‍हॉइसची सिमला अनुमती नाही"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"व्‍हॉइसची फोनला अनुमती नाही"</string>
+    <!-- no translation found for mmcc_authentication_reject_msim_template (1217031195834766479) -->
+    <skip />
+    <!-- no translation found for mmcc_imsi_unknown_in_hlr_msim_template (5636464607596778986) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_ms_msim_template (5994323296399913454) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_me_msim_template (5550259730350571826) -->
+    <skip />
     <string name="popup_window_default_title" msgid="4874318849712115433">"पॉपअप विंडो"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"अ‍ॅपची आवृत्ती डाउनग्रेड केली, किंवा ती या शॉर्टकटशी कंपॅटिबल नाही"</string>
@@ -1877,8 +1903,6 @@
     <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"हे नवीन वर्तन आहे. बदलण्यासाठी टॅप करा."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"व्यत्यय आणू नका बदलले आहे"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"काय ब्लॉक केले आहे हे तपासण्यासाठी टॅप करा."</string>
-    <!-- no translation found for notification_app_name_system (4205032194610042794) -->
-    <skip />
-    <!-- no translation found for notification_app_name_settings (7751445616365753381) -->
-    <skip />
+    <string name="notification_app_name_system" msgid="4205032194610042794">"सिस्टम"</string>
+    <string name="notification_app_name_settings" msgid="7751445616365753381">"सेटिंग्ज"</string>
 </resources>

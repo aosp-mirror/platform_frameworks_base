@@ -82,6 +82,8 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Ingen taletjeneste"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Ingen taletjeneste eller nødanrop"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"Midlertidig deaktivert av operatøren din"</string>
+    <!-- no translation found for RestrictedStateContentMsimTemplate (673416791370248176) -->
+    <skip />
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"Får ikke kontakt med mobilnettverket"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Prøv å endre foretrukket nettverk. Trykk for å endre."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Nødanrop er utilgjengelig"</string>
@@ -120,12 +122,13 @@
     <string name="roamingText11" msgid="4154476854426920970">"Roaming-banner på"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Roaming-banner av"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Leter etter tjeneste"</string>
-    <!-- no translation found for wfcRegErrorTitle (3855061241207182194) -->
-    <skip />
+    <string name="wfcRegErrorTitle" msgid="3855061241207182194">"Kunne ikke konfigurere Wi-Fi-anrop"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"For å ringe og sende meldinger over Wi-Fi, må du først be operatøren om å konfigurere denne tjenesten. Deretter slår du på Wi-Fi-anrop igjen fra Innstillinger. (Feilkode: <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7372514042696663278) -->
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="7372514042696663278">"Problem med å registrere Wi-Fi-anrop med operatøren din: <xliff:g id="CODE">%1$s</xliff:g>"</item>
+  </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"%s Wi-Fi-anrop"</item>
@@ -159,10 +162,8 @@
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"For mange forespørsler blir behandlet. Prøv igjen senere."</string>
     <string name="notification_title" msgid="8967710025036163822">"Påloggingsfeil for <xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"Synkronisering"</string>
-    <!-- no translation found for contentServiceSyncNotificationTitle (7036196943673524858) -->
-    <skip />
-    <!-- no translation found for contentServiceTooManyDeletesNotificationDesc (4884451152168188763) -->
-    <skip />
+    <string name="contentServiceSyncNotificationTitle" msgid="7036196943673524858">"Kan ikke synkronisere"</string>
+    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"Forsøkte å slette for mange <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
     <string name="low_memory" product="tablet" msgid="6494019234102154896">"Nettbrettlageret er fullt. Slett noen filer for å frigjøre lagringsplass."</string>
     <string name="low_memory" product="watch" msgid="4415914910770005166">"Klokkens lagringsplass er full. Slett filer for å frigjøre plass."</string>
     <string name="low_memory" product="tv" msgid="516619861191025923">"TV-ens lagringsplass er full. Slett noen filer for å frigjøre mer plass."</string>
@@ -272,40 +273,31 @@
     <string name="managed_profile_label" msgid="8947929265267690522">"Bytt til jobbprofil"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakter"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"se kontaktene dine"</string>
-    <!-- no translation found for permgrouprequest_contacts (6032805601881764300) -->
-    <skip />
+    <string name="permgrouprequest_contacts" msgid="6032805601881764300">"Vil du gi &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tilgang til kontaktene dine?"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"Posisjon"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"få tilgang til enhetens plassering"</string>
-    <!-- no translation found for permgrouprequest_location (3788275734953323491) -->
-    <skip />
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"Vil du gi &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tilgang til denne enhetens posisjon?"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"Kalender"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"åpne kalenderen din"</string>
-    <!-- no translation found for permgrouprequest_calendar (289900767793189421) -->
-    <skip />
+    <string name="permgrouprequest_calendar" msgid="289900767793189421">"Vil du gi &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tilgang til kalenderen din?"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="4656988620100940350">"sende og lese SMS-meldinger"</string>
-    <!-- no translation found for permgrouprequest_sms (7168124215838204719) -->
-    <skip />
+    <string name="permgrouprequest_sms" msgid="7168124215838204719">"Vil du la &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; sende og se SMS-meldinger?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Lagring"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"åpne bilder, medieinnhold og filer på enheten din"</string>
-    <!-- no translation found for permgrouprequest_storage (7885942926944299560) -->
-    <skip />
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Vil du gi &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tilgang til bilder, medier og filer på enheten din?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ta opp lyd"</string>
-    <!-- no translation found for permgrouprequest_microphone (9167492350681916038) -->
-    <skip />
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Vil du la &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ta opp lyd?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ta bilder og ta opp video"</string>
-    <!-- no translation found for permgrouprequest_camera (1299833592069671756) -->
-    <skip />
+    <string name="permgrouprequest_camera" msgid="1299833592069671756">"Vil du la &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ta bilder og spille inn video?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"ring og administrer anrop"</string>
-    <!-- no translation found for permgrouprequest_phone (9166979577750581037) -->
-    <skip />
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"Vil du la &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ringe og administrere telefonsamtaler?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Kroppssensorer"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"få tilgang til sensordata om de vitale tegnene dine"</string>
-    <!-- no translation found for permgrouprequest_sensors (6349806962814556786) -->
-    <skip />
+    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Vil du gi &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tilgang til sensordata om de vitale tegnene dine?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"hente innhold i vinduer"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Appen analyserer innholdet i vinduer du samhandler med."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"slå på berøringsutforsking"</string>
@@ -492,6 +484,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Lar appen kommunisere med etiketter, kort og lesere som benytter NFC-teknologi."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"deaktivere skjermlåsen"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Lar appen deaktivere tastelåsen og eventuell tilknyttet passordsikkerhet. Et eksempel er at telefonen deaktiverer tastelåsen når du mottar et innkommende anrop, og deretter aktiverer tastelåsen igjen når samtalen er ferdig."</string>
+    <string name="permlab_useBiometric" msgid="8837753668509919318">"bruke biometrisk maskinvare"</string>
+    <string name="permdesc_useBiometric" msgid="8389855232721612926">"Lar appen bruke biometrisk maskinvare til godkjenning"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"administrere fingeravtrykkmaskinvare"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Lar appen fremkalle metoder for å legge til og slette fingeravtrykkmaler for bruk."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"bruke fingeravtrykkmaskinvare"</string>
@@ -504,6 +498,8 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Ikke gjenkjent"</string>
+    <!-- no translation found for fingerprint_authenticated (5309333983002526448) -->
+    <skip />
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Maskinvare for fingeravtrykk er ikke tilgjengelig."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Fingeravtrykket kan ikke lagres. Fjern et eksisterende fingeravtrykk."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Tidsavbrudd for fingeravtrykk er nådd. Prøv på nytt."</string>
@@ -1016,14 +1012,23 @@
     <string name="inputMethod" msgid="1653630062304567879">"Inndatametode"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Teksthandlinger"</string>
     <string name="email" msgid="4560673117055050403">"E-post"</string>
+    <string name="email_desc" msgid="3638665569546416795">"Send e-post til den valgte adressen"</string>
     <string name="dial" msgid="1253998302767701559">"Ring"</string>
+    <string name="dial_desc" msgid="6573723404985517250">"Ring det valgte telefonnummeret"</string>
     <string name="map" msgid="6521159124535543457">"Finn"</string>
+    <string name="map_desc" msgid="9036645769910215302">"Finn den valgte adressen"</string>
     <string name="browse" msgid="1245903488306147205">"Åpne"</string>
+    <string name="browse_desc" msgid="8220976549618935044">"Åpne den valgte nettadressen"</string>
     <string name="sms" msgid="4560537514610063430">"Melding"</string>
+    <string name="sms_desc" msgid="7526588350969638809">"Send melding til det valgte telefonnummeret"</string>
     <string name="add_contact" msgid="7867066569670597203">"Legg til"</string>
+    <string name="add_contact_desc" msgid="4830217847004590345">"Legg til i kontakter"</string>
     <string name="view_calendar" msgid="979609872939597838">"Se"</string>
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Se det valgte klokkeslettet i kalenderen"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"Oversikt"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Planlegg aktivitet for valgt klokkeslett"</string>
     <string name="view_flight" msgid="7691640491425680214">"Spor"</string>
+    <string name="view_flight_desc" msgid="3876322502674253506">"Spor den valgte flyvningen"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Lite ledig lagringsplass"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Enkelte systemfunksjoner fungerer muligens ikke slik de skal"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Det er ikke nok lagringsplass for systemet. Kontrollér at du har 250 MB ledig plass, og start på nytt."</string>
@@ -1117,8 +1122,7 @@
     <string name="new_app_action" msgid="6694851182870774403">"Åpne <xliff:g id="NEW_APP">%1$s</xliff:g>"</string>
     <string name="new_app_description" msgid="5894852887817332322">"<xliff:g id="OLD_APP">%1$s</xliff:g> lukkes uten å lagre"</string>
     <string name="dump_heap_notification" msgid="2618183274836056542">"<xliff:g id="PROC">%1$s</xliff:g> er over minnegrensen"</string>
-    <!-- no translation found for dump_heap_notification_detail (3993078784053054141) -->
-    <skip />
+    <string name="dump_heap_notification_detail" msgid="3993078784053054141">"Minnedumpen er samlet inn. Trykk for å dele."</string>
     <string name="dump_heap_title" msgid="5864292264307651673">"Vil du dele minnedumpen («heap dump»)?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g>-prosessen er <xliff:g id="SIZE">%2$s</xliff:g> over grensen for prosessminne. En minnedump («heap dump») er tilgjengelig for deling med utvikleren. Vær forsiktig – denne minnedumpen kan inneholde noen av de personlige opplysningene dine som appen har tilgang til."</string>
     <string name="sendText" msgid="5209874571959469142">"Velg handling for tekst"</string>
@@ -1153,8 +1157,7 @@
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Koble til et åpent Wi‑Fi-nettverk"</string>
     <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Koble til operatørens Wi-Fi-nettverk"</string>
-    <!-- no translation found for wifi_available_title_connecting (1139126673968899002) -->
-    <skip />
+    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"Kobler til Wi-Fi-nettverket"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Koblet til Wi-Fi-nettverk"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Kunne ikke koble til Wi-Fi-nettverket"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Trykk for å se alle nettverkene"</string>
@@ -1270,33 +1273,49 @@
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> vises over andre apper"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Hvis du ikke vil at <xliff:g id="NAME">%s</xliff:g> skal bruke denne funksjonen, kan du trykke for å åpne innstillingene og slå den av."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Slå av"</string>
-    <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Forbereder <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Sjekker for feil"</string>
-    <string name="ext_media_new_notification_message" msgid="7589986898808506239">"<xliff:g id="NAME">%s</xliff:g> ble oppdaget"</string>
+    <!-- no translation found for ext_media_checking_notification_title (4411133692439308924) -->
+    <skip />
+    <!-- no translation found for ext_media_checking_notification_message (410185170877285434) -->
+    <skip />
+    <!-- no translation found for ext_media_new_notification_title (1621805083736634077) -->
+    <skip />
+    <!-- no translation found for ext_media_new_notification_message (3673685270558405087) -->
+    <skip />
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"For overføring av bilder og medier"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Skadet <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"<xliff:g id="NAME">%s</xliff:g> er skadet. Trykk for å løse problemet."</string>
-    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> er skadet. Velg for å fikse."</string>
+    <!-- no translation found for ext_media_unmountable_notification_title (4179418065210797130) -->
+    <skip />
+    <!-- no translation found for ext_media_unmountable_notification_message (4193858924381066522) -->
+    <skip />
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> som ikke støttes"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Denne enheten støtter ikke <xliff:g id="NAME">%s</xliff:g>. Trykk for å konfigurere i et støttet format."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Denne enheten støtter ikke dette <xliff:g id="NAME">%s</xliff:g>. Velg for å konfigurere i et støttet format."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> ble uventet fjernet"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Løs ut <xliff:g id="NAME">%s</xliff:g> før du fjerner den for å unngå tap av data"</string>
-    <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"<xliff:g id="NAME">%s</xliff:g> ble fjernet."</string>
-    <string name="ext_media_nomedia_notification_message" msgid="6471542972147056586">"<xliff:g id="NAME">%s</xliff:g> ble fjernet – sett inn et nytt et"</string>
-    <string name="ext_media_unmounting_notification_title" msgid="640674168454809372">"Løser ut <xliff:g id="NAME">%s</xliff:g> fremdeles …"</string>
-    <string name="ext_media_unmounting_notification_message" msgid="4182843895023357756">"Ikke fjern"</string>
+    <!-- no translation found for ext_media_badremoval_notification_message (8556885808951260574) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_title (6593814191061956856) -->
+    <skip />
+    <!-- no translation found for ext_media_nomedia_notification_message (2110883356419799994) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_title (5046532339291216076) -->
+    <skip />
+    <!-- no translation found for ext_media_unmounting_notification_message (1003926904442321115) -->
+    <skip />
     <string name="ext_media_init_action" msgid="7952885510091978278">"Konfigurer"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Løs ut"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Utforsk"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> mangler"</string>
-    <string name="ext_media_missing_message" msgid="5761133583368750174">"Sett inn enheten på nytt"</string>
+    <!-- no translation found for ext_media_missing_message (4012389235250987930) -->
+    <skip />
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Flytter <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"Flytter dataene"</string>
-    <string name="ext_media_move_success_title" msgid="8575300932957954671">"Flyttingen er fullført"</string>
-    <string name="ext_media_move_success_message" msgid="4199002148206265426">"Dataene er flyttet til <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_move_failure_title" msgid="7613189040358789908">"Kunne ikke flytte dataene"</string>
-    <string name="ext_media_move_failure_message" msgid="1978096440816403360">"Dataene er fremdeles på det opprinnelige stedet"</string>
+    <!-- no translation found for ext_media_move_success_title (7863652232242276066) -->
+    <skip />
+    <!-- no translation found for ext_media_move_success_message (8939137931961728009) -->
+    <skip />
+    <!-- no translation found for ext_media_move_failure_title (1604422634177382092) -->
+    <skip />
+    <!-- no translation found for ext_media_move_failure_message (7388950499623016135) -->
+    <skip />
     <string name="ext_media_status_removed" msgid="6576172423185918739">"Fjernet"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Løst ut"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"Kontrollerer …"</string>
@@ -1355,17 +1374,14 @@
     <string name="vpn_lockdown_connecting" msgid="6443438964440960745">"Alltid-på VPN kobler til ..."</string>
     <string name="vpn_lockdown_connected" msgid="8202679674819213931">"Alltid-på VPN er tilkoblet"</string>
     <string name="vpn_lockdown_disconnected" msgid="735805531187559719">"Koble fra alltid på-VPN"</string>
-    <!-- no translation found for vpn_lockdown_error (3133844445659711681) -->
-    <skip />
+    <string name="vpn_lockdown_error" msgid="3133844445659711681">"Kunne ikke koble til alltid på-VPN"</string>
     <string name="vpn_lockdown_config" msgid="8151951501116759194">"Endre nettverks- eller VPN-innstillingene"</string>
     <string name="upload_file" msgid="2897957172366730416">"Velg fil"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Ingen fil er valgt"</string>
     <string name="reset" msgid="2448168080964209908">"Tilbakestill"</string>
     <string name="submit" msgid="1602335572089911941">"Send inn"</string>
-    <!-- no translation found for car_mode_disable_notification_title (5704265646471239078) -->
-    <skip />
-    <!-- no translation found for car_mode_disable_notification_message (7647248420931129377) -->
-    <skip />
+    <string name="car_mode_disable_notification_title" msgid="5704265646471239078">"Kjøreappen kjører"</string>
+    <string name="car_mode_disable_notification_message" msgid="7647248420931129377">"Trykk for å lukke kjøreappen."</string>
     <string name="tethered_notification_title" msgid="3146694234398202601">"Internettdeling eller trådløs sone er aktiv"</string>
     <string name="tethered_notification_message" msgid="2113628520792055377">"Trykk for å konfigurere."</string>
     <string name="disable_tether_notification_title" msgid="7526977944111313195">"Internettdeling er slått av"</string>
@@ -1691,8 +1707,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Installert av administratoren din"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Oppdatert av administratoren din"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Slettet av administratoren din"</string>
-    <!-- no translation found for battery_saver_description (4660824093877546730) -->
-    <skip />
+    <string name="battery_saver_description" msgid="4660824093877546730">"Med Batterisparing reduseres enhetens ytelse, og vibrering, posisjonstjenester og bakgrunnsdata begrenses eller slås av. Apper for e-post, meldinger og andre funksjoner som er avhengige av synkronisering, oppdateres kanskje ikke med mindre du åpner dem.\n\nBatterisparing slås av automatisk når enheten lades."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Datasparing hindrer at apper kan sende og motta data i bakgrunnen. Apper du bruker i øyeblikket, bruker ikke data i like stor grad – for eksempel vises ikke bilder før du trykker på dem."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Vil du slå på Datasparing?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Slå på"</string>
@@ -1743,22 +1758,14 @@
     <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> har kuttet lyden"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"Det har oppstått et internt problem på enheten din, og den kan være ustabil til du tilbakestiller den til fabrikkdata."</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"Det har oppstått et internt problem på enheten din. Ta kontakt med produsenten for mer informasjon."</string>
-    <!-- no translation found for stk_cc_ussd_to_dial (5214333646366591205) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_ss (4884994189414782605) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_ussd (5728637484565449312) -->
-    <skip />
-    <!-- no translation found for stk_cc_ussd_to_dial_video (4134455726513175559) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_dial (1360775164651754978) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_dial_video (6577956662913194947) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_ussd (5614626512855868785) -->
-    <skip />
-    <!-- no translation found for stk_cc_ss_to_ss (7716729801537709054) -->
-    <skip />
+    <string name="stk_cc_ussd_to_dial" msgid="5214333646366591205">"USSD-forespørsel endret til vanlig anrop"</string>
+    <string name="stk_cc_ussd_to_ss" msgid="4884994189414782605">"USSD-forespørsel endret til SS-forespørsel"</string>
+    <string name="stk_cc_ussd_to_ussd" msgid="5728637484565449312">"Endret til ny USSD-forespørsel"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="4134455726513175559">"USSD-forespørsel endret til videoanrop"</string>
+    <string name="stk_cc_ss_to_dial" msgid="1360775164651754978">"SS-forespørsel endret til vanlig anrop"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="6577956662913194947">"SS-forespørsel endret til videoanrop"</string>
+    <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS-forespørsel endret til USSD-forespørsel"</string>
+    <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Endret til ny SS-forespørsel"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Arbeidsprofil"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Vis"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Skjul"</string>
@@ -1856,6 +1863,14 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM-kortet er ikke klargjort for tale"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"SIM-kortet har ikke tillatelse til tale"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Telefonen har ikke tillatelse til tale"</string>
+    <!-- no translation found for mmcc_authentication_reject_msim_template (1217031195834766479) -->
+    <skip />
+    <!-- no translation found for mmcc_imsi_unknown_in_hlr_msim_template (5636464607596778986) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_ms_msim_template (5994323296399913454) -->
+    <skip />
+    <!-- no translation found for mmcc_illegal_me_msim_template (5550259730350571826) -->
+    <skip />
     <string name="popup_window_default_title" msgid="4874318849712115433">"Forgrunnsvindu"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Appversjonen er nedgradert eller ikke kompatibel med denne snarveien"</string>
@@ -1876,8 +1891,6 @@
     <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Dette er ny atferd. Trykk for å endre."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Ikke forstyrr er endret"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Trykk for å sjekke hva som er blokkert."</string>
-    <!-- no translation found for notification_app_name_system (4205032194610042794) -->
-    <skip />
-    <!-- no translation found for notification_app_name_settings (7751445616365753381) -->
-    <skip />
+    <string name="notification_app_name_system" msgid="4205032194610042794">"System"</string>
+    <string name="notification_app_name_settings" msgid="7751445616365753381">"Innstillinger"</string>
 </resources>
