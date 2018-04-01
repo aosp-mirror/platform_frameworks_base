@@ -285,17 +285,7 @@ public class RecoveryController {
     public void initRecoveryService(
             @NonNull String rootCertificateAlias, @NonNull byte[] signedPublicKeyList)
             throws CertificateException, InternalRecoveryServiceException {
-        try {
-            mBinder.initRecoveryService(rootCertificateAlias, signedPublicKeyList);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ERROR_BAD_CERTIFICATE_FORMAT
-                    || e.errorCode == ERROR_INVALID_CERTIFICATE) {
-                throw new CertificateException("Invalid certificate for recovery service", e);
-            }
-            throw wrapUnexpectedServiceSpecificException(e);
-        }
+        throw new CertificateException("Deprecated initRecoveryService method called");
     }
 
     /**
