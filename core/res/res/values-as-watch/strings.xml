@@ -20,7 +20,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for android_upgrading_apk (1090732262010398759) -->
-    <skip />
+    <string name="android_upgrading_apk" msgid="1090732262010398759">"<xliff:g id="NUMBER_1">%2$d</xliff:g>টা এপৰ ভিতৰত <xliff:g id="NUMBER_0">%1$d</xliff:g>টা"</string>
     <string name="permgrouplab_sensors" msgid="202675452368612754">"ছেন্সৰসমূহ"</string>
 </resources>

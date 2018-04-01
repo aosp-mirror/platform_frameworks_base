@@ -16,13 +16,14 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.Dependency;
@@ -30,7 +31,9 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.statusbar.StatusIconDisplayable;
+import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
+import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.IconLogger;
@@ -40,8 +43,9 @@ import com.android.systemui.tuner.TunerService.Tunable;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
-import static com.android.systemui.statusbar.phone.CollapsedStatusBarFragment.STATUS_BAR_ICON_MANAGER_TAG;
+import static com.android.systemui.statusbar.phone.StatusBarIconController.TAG_PRIMARY;
 
 /**
  * Receives the callbacks from CommandQueue related to icons and tracks the state of
@@ -50,20 +54,25 @@ import static com.android.systemui.statusbar.phone.CollapsedStatusBarFragment.ST
  */
 public class StatusBarIconControllerImpl extends StatusBarIconList implements Tunable,
         ConfigurationListener, Dumpable, CommandQueue.Callbacks, StatusBarIconController {
+
     private static final String TAG = "StatusBarIconController";
 
     private final ArrayList<IconManager> mIconGroups = new ArrayList<>();
     private final ArraySet<String> mIconBlacklist = new ArraySet<>();
     private final IconLogger mIconLogger = Dependency.get(IconLogger.class);
 
+    // Points to light or dark context depending on the... context?
     private Context mContext;
-    private DemoStatusIcons mDemoStatusIcons;
-    private IconManager mStatusBarIconManager;
+    private Context mLightContext;
+    private Context mDarkContext;
+
+    private boolean mIsDark = false;
 
     public StatusBarIconControllerImpl(Context context) {
         super(context.getResources().getStringArray(
                 com.android.internal.R.array.config_statusBarIcons));
         Dependency.get(ConfigurationController.class).addCallback(this);
+
         mContext = context;
 
         loadDimens();
@@ -76,12 +85,16 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
     @Override
     public void addIconGroup(IconManager group) {
         mIconGroups.add(group);
-        for (int i = 0; i < mIcons.size(); i++) {
-            StatusBarIcon icon = mIcons.get(i);
-            if (icon != null) {
-                String slot = mSlots.get(i);
-                boolean blocked = mIconBlacklist.contains(slot);
-                group.onIconAdded(getViewIndex(getSlotIndex(slot)), slot, blocked, icon);
+        List<Slot> allSlots = getSlots();
+        for (int i = 0; i < allSlots.size(); i++) {
+            Slot slot = allSlots.get(i);
+            List<StatusBarIconHolder> holders = slot.getHolderList();
+            boolean blocked = mIconBlacklist.contains(slot.getName());
+
+            for (StatusBarIconHolder holder : holders) {
+                int tag = holder.getTag();
+                int viewIndex = getViewIndex(getSlotIndex(slot.getName()), holder.getTag());
+                group.onIconAdded(viewIndex, slot.getName(), blocked, holder);
             }
         }
     }
@@ -99,104 +112,209 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         }
         mIconBlacklist.clear();
         mIconBlacklist.addAll(StatusBarIconController.getIconBlacklist(newValue));
-        ArrayList<StatusBarIcon> current = new ArrayList<>(mIcons);
-        ArrayList<String> currentSlots = new ArrayList<>(mSlots);
+        ArrayList<Slot> currentSlots = getSlots();
+        ArrayMap<Slot, List<StatusBarIconHolder>> slotsToReAdd = new ArrayMap<>();
+
+        // This is a little hacky... Peel off all of the holders on all of the slots
+        // but keep them around so they can be re-added
+
         // Remove all the icons.
-        for (int i = current.size() - 1; i >= 0; i--) {
-            removeIcon(currentSlots.get(i));
+        for (int i = currentSlots.size() - 1; i >= 0; i--) {
+            Slot s = currentSlots.get(i);
+            slotsToReAdd.put(s, s.getHolderList());
+            removeAllIconsForSlot(s.getName());
         }
+
         // Add them all back
-        for (int i = 0; i < current.size(); i++) {
-            setIcon(currentSlots.get(i), current.get(i));
+        for (int i = 0; i < currentSlots.size(); i++) {
+            Slot item = currentSlots.get(i);
+            List<StatusBarIconHolder> iconsForSlot = slotsToReAdd.get(item);
+            if (iconsForSlot == null) continue;
+            for (StatusBarIconHolder holder : iconsForSlot) {
+                setIcon(getSlotIndex(item.getName()), holder);
+            }
         }
     }
 
     private void loadDimens() {
     }
 
-    private void addSystemIcon(int index, StatusBarIcon icon) {
-        String slot = getSlot(index);
-        int viewIndex = getViewIndex(index);
+    private void addSystemIcon(int index, StatusBarIconHolder holder) {
+        String slot = getSlotName(index);
+        int viewIndex = getViewIndex(index, holder.getTag());
         boolean blocked = mIconBlacklist.contains(slot);
 
-        mIconLogger.onIconVisibility(getSlot(index), icon.visible);
-        mIconGroups.forEach(l -> l.onIconAdded(viewIndex, slot, blocked, icon));
+        mIconLogger.onIconVisibility(getSlotName(index), holder.isVisible());
+        mIconGroups.forEach(l -> l.onIconAdded(viewIndex, slot, blocked, holder));
     }
 
     @Override
     public void setIcon(String slot, int resourceId, CharSequence contentDescription) {
         int index = getSlotIndex(slot);
-        StatusBarIcon icon = getIcon(index);
-        if (icon == null) {
-            icon = new StatusBarIcon(UserHandle.SYSTEM, mContext.getPackageName(),
-                    Icon.createWithResource(mContext, resourceId), 0, 0, contentDescription);
-            setIcon(slot, icon);
+        StatusBarIconHolder holder = getIcon(index, 0);
+        if (holder == null) {
+            StatusBarIcon icon = new StatusBarIcon(UserHandle.SYSTEM, mContext.getPackageName(),
+                    Icon.createWithResource(
+                            mContext, resourceId), 0, 0, contentDescription);
+            holder = StatusBarIconHolder.fromIcon(icon);
+            setIcon(index, holder);
         } else {
-            icon.icon = Icon.createWithResource(mContext, resourceId);
-            icon.contentDescription = contentDescription;
-            handleSet(index, icon);
+            holder.getIcon().icon = Icon.createWithResource(mContext, resourceId);
+            holder.getIcon().contentDescription = contentDescription;
+            handleSet(index, holder);
+        }
+    }
+
+    /**
+     * Signal icons need to be handled differently, because they can be
+     * composite views
+     */
+    @Override
+    public void setSignalIcon(String slot, WifiIconState state) {
+
+        int index = getSlotIndex(slot);
+
+        if (state == null) {
+            removeIcon(index, 0);
+            return;
+        }
+
+        StatusBarIconHolder holder = getIcon(index, 0);
+        if (holder == null) {
+            holder = StatusBarIconHolder.fromWifiIconState(state);
+            setIcon(index, holder);
+        } else {
+            holder.setWifiState(state);
+            handleSet(index, holder);
+        }
+    }
+
+    /**
+     * Accept a list of MobileIconStates, which all live in the same slot(?!), and then are sorted
+     * by subId. Don't worry this definitely makes sense and works.
+     * @param slot da slot
+     * @param iconStates All of the mobile icon states
+     */
+    @Override
+    public void setMobileIcons(String slot, List<MobileIconState> iconStates) {
+        Slot mobileSlot = getSlot(slot);
+        int slotIndex = getSlotIndex(slot);
+
+        for (MobileIconState state : iconStates) {
+            StatusBarIconHolder holder = mobileSlot.getHolderForTag(state.subId);
+            if (holder == null) {
+                holder = StatusBarIconHolder.fromMobileIconState(state);
+                setIcon(slotIndex, holder);
+            } else {
+                holder.setMobileState(state);
+                handleSet(slotIndex, holder);
+            }
         }
     }
 
     @Override
     public void setExternalIcon(String slot) {
-        int viewIndex = getViewIndex(getSlotIndex(slot));
+        int viewIndex = getViewIndex(getSlotIndex(slot), 0);
         int height = mContext.getResources().getDimensionPixelSize(
                 R.dimen.status_bar_icon_drawing_size);
         mIconGroups.forEach(l -> l.onIconExternal(viewIndex, height));
     }
 
+    //TODO: remove this (used in command queue and for 3rd party tiles?)
     @Override
     public void setIcon(String slot, StatusBarIcon icon) {
         setIcon(getSlotIndex(slot), icon);
     }
 
+    /**
+     * For backwards compatibility, in the event that someone gives us a slot and a status bar icon
+     */
+    private void setIcon(int index, StatusBarIcon icon) {
+        if (icon == null) {
+            removeAllIconsForSlot(getSlotName(index));
+            return;
+        }
+
+        StatusBarIconHolder holder = StatusBarIconHolder.fromIcon(icon);
+        setIcon(index, holder);
+    }
+
     @Override
-    public void removeIcon(String slot) {
-        int index = getSlotIndex(slot);
-        removeIcon(index);
+    public void setIcon(int index, @NonNull StatusBarIconHolder holder) {
+        boolean isNew = getIcon(index, holder.getTag()) == null;
+        super.setIcon(index, holder);
+
+        if (isNew) {
+            addSystemIcon(index, holder);
+        } else {
+            handleSet(index, holder);
+        }
     }
 
     public void setIconVisibility(String slot, boolean visibility) {
         int index = getSlotIndex(slot);
-        StatusBarIcon icon = getIcon(index);
-        if (icon == null || icon.visible == visibility) {
+        StatusBarIconHolder holder = getIcon(index, 0);
+        if (holder == null || holder.isVisible() == visibility) {
             return;
         }
-        icon.visible = visibility;
-        handleSet(index, icon);
+
+        holder.setVisible(visibility);
+        handleSet(index, holder);
+    }
+
+    public void removeIcon(String slot) {
+        removeAllIconsForSlot(slot);
     }
 
     @Override
-    public void removeIcon(int index) {
-        if (getIcon(index) == null) {
+    public void removeIcon(String slot, int tag) {
+        removeIcon(getSlotIndex(slot), tag);
+    }
+
+    @Override
+    public void removeAllIconsForSlot(String slotName) {
+        Slot slot = getSlot(slotName);
+        if (!slot.hasIconsInSlot()) {
             return;
         }
-        mIconLogger.onIconHidden(getSlot(index));
-        super.removeIcon(index);
-        int viewIndex = getViewIndex(index);
+
+        mIconLogger.onIconHidden(slotName);
+
+        int slotIndex = getSlotIndex(slotName);
+        List<StatusBarIconHolder> iconsToRemove = slot.getHolderList();
+        for (StatusBarIconHolder holder : iconsToRemove) {
+            int viewIndex = getViewIndex(slotIndex, holder.getTag());
+            slot.removeForTag(holder.getTag());
+            mIconGroups.forEach(l -> l.onRemoveIcon(viewIndex));
+        }
+    }
+
+    @Override
+    public void removeIcon(int index, int tag) {
+        if (getIcon(index, tag) == null) {
+            return;
+        }
+        mIconLogger.onIconHidden(getSlotName(index));
+        super.removeIcon(index, tag);
+        int viewIndex = getViewIndex(index, 0);
         mIconGroups.forEach(l -> l.onRemoveIcon(viewIndex));
     }
 
-    @Override
-    public void setIcon(int index, StatusBarIcon icon) {
-        if (icon == null) {
-            removeIcon(index);
-            return;
-        }
-        boolean isNew = getIcon(index) == null;
-        super.setIcon(index, icon);
-        if (isNew) {
-            addSystemIcon(index, icon);
-        } else {
-            handleSet(index, icon);
-        }
+    private void handleSet(int index, StatusBarIconHolder holder) {
+        int viewIndex = getViewIndex(index, holder.getTag());
+        mIconLogger.onIconVisibility(getSlotName(index), holder.isVisible());
+        mIconGroups.forEach(l -> l.onSetIconHolder(viewIndex, holder));
     }
 
-    private void handleSet(int index, StatusBarIcon icon) {
-        int viewIndex = getViewIndex(index);
-        mIconLogger.onIconVisibility(getSlot(index), icon.visible);
-        mIconGroups.forEach(l -> l.onSetIcon(viewIndex, icon));
+    /**
+     * For mobile essentially (an array of holders in one slot)
+     */
+    private void handleSet(int slotIndex, List<StatusBarIconHolder> holders) {
+        for (StatusBarIconHolder holder : holders) {
+            int viewIndex = getViewIndex(slotIndex, holder.getTag());
+            mIconLogger.onIconVisibility(getSlotName(slotIndex), holder.isVisible());
+            mIconGroups.forEach(l -> l.onSetIconHolder(viewIndex, holder));
+        }
     }
 
     @Override
@@ -208,7 +326,7 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
                 int N = group.getChildCount();
                 pw.println("  icon views: " + N);
                 for (int i = 0; i < N; i++) {
-                    StatusBarIconView ic = (StatusBarIconView) group.getChildAt(i);
+                    StatusIconDisplayable ic = (StatusIconDisplayable) group.getChildAt(i);
                     pw.println("    [" + i + "] icon=" + ic);
                 }
             }

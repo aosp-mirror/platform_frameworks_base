@@ -79,10 +79,6 @@ interface IDevicePolicyManager {
 
     long getPasswordExpiration(in ComponentName who, int userHandle, boolean parent);
 
-    boolean setPasswordBlacklist(in ComponentName who, String name, in List<String> blacklist, boolean parent);
-    String getPasswordBlacklistName(in ComponentName who, int userId, boolean parent);
-    boolean isPasswordBlacklisted(int userId, String password);
-
     boolean isActivePasswordSufficient(int userHandle, boolean parent);
     boolean isProfileActivePasswordSufficientForParent(int userHandle);
     boolean isUsingUnifiedPassword(in ComponentName admin);

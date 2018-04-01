@@ -4,13 +4,9 @@
     <string name="app_name" msgid="5934709770924185752">"CaptivePortalLogin"</string>
     <string name="action_use_network" msgid="6076184727448466030">"এই নেটৱৰ্কটো এইদৰে ব্যৱহাৰ কৰক"</string>
     <string name="action_do_not_use_network" msgid="4577366536956516683">"এই নেটৱৰ্কটো ব্যৱহাৰ নকৰিব"</string>
-    <!-- no translation found for action_bar_label (917235635415966620) -->
-    <skip />
+    <string name="action_bar_label" msgid="917235635415966620">"নেটৱৰ্কত ছাইন ইন কৰক"</string>
     <string name="action_bar_title" msgid="5645564790486983117">"%1$st ছাইন ইন কৰক"</string>
-    <!-- no translation found for ssl_error_warning (6653188881418638872) -->
-    <skip />
-    <!-- no translation found for ssl_error_example (647898534624078900) -->
-    <skip />
-    <!-- no translation found for ssl_error_continue (6492718244923937110) -->
-    <skip />
+    <string name="ssl_error_warning" msgid="6653188881418638872">"আপুনি সংযোগ কৰিবলৈ চেষ্টা কৰি থকা নেটৱৰ্কটোত সুৰক্ষাজনিত সমস্যা আছে।"</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"উদাহৰণস্বৰূপে, আপোনাক দেখুওৱা লগ ইনৰ পৃষ্ঠাটো প্ৰতিষ্ঠানটোৰ নিজা নহ\'বও পাৰে।"</string>
+    <string name="ssl_error_continue" msgid="6492718244923937110">"তথাপি ব্ৰাউজাৰৰ জৰিয়তে অব্যাহত ৰাখক"</string>
 </resources>

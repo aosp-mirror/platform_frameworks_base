@@ -60,6 +60,7 @@ class TunerAdapter extends RadioTuner {
                 mLegacyListProxy.close();
                 mLegacyListProxy = null;
             }
+            mCallback.close();
         }
         try {
             mTuner.close();
@@ -278,6 +279,7 @@ class TunerAdapter extends RadioTuner {
             try {
                 mTuner.startProgramListUpdates(filter);
             } catch (UnsupportedOperationException ex) {
+                Log.i(TAG, "Program list is not supported with this hardware");
                 return null;
             } catch (RemoteException ex) {
                 mCallback.setProgramListObserver(null, () -> { });

@@ -1350,7 +1350,7 @@
 
     <string name="volume_dialog_title">%s volume controls</string>
 
-    <string name="volume_dialog_ringer_guidance_ring">Calls and notifications will ring</string>
+    <string name="volume_dialog_ringer_guidance_ring">Calls and notifications will ring (<xliff:g id="volume level" example="56">%1$s</xliff:g>)</string>
 
     <string name="output_title">Media output</string>
     <string name="output_calls_title">Phone call output</string>
@@ -1747,6 +1747,10 @@
 
     <!-- Name of the headset in status bar [CHAR LIMIT=30] -->
     <string name="headset">Headset</string>
+
+    <!-- Accessibility description for long click on a quick settings tile - this is used in the
+         context of the sentence "double tap and hold to _Open settings_" [CHAR LIMIT=NONE] -->
+    <string name="accessibility_long_click_tile">Open settings</string>
 
     <!-- Accessibility description of headphones icon [CHAR LIMIT=NONE] -->
     <string name="accessibility_status_bar_headphones">Headphones connected</string>

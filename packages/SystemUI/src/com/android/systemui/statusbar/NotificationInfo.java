@@ -31,7 +31,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
@@ -49,13 +48,11 @@ import android.widget.TextView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * The guts of a notification revealed when performing a long press.
@@ -74,7 +71,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private int mStartingUserImportance;
     private int mChosenImportance;
     private boolean mIsSingleDefaultChannel;
-    private boolean mNonblockable;
+    private boolean mIsNonblockable;
     private StatusBarNotification mSbn;
     private AnimatorSet mExpandAnimation;
     private boolean mIsForeground;
@@ -128,10 +125,10 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             final CheckSaveListener checkSaveListener,
             final OnSettingsClickListener onSettingsClick,
             final OnAppSettingsClickListener onAppSettingsClick,
-            final Set<String> nonBlockablePkgs)
+            boolean isNonblockable)
             throws RemoteException {
         bindNotification(pm, iNotificationManager, pkg, notificationChannel, numChannels, sbn,
-                checkSaveListener, onSettingsClick, onAppSettingsClick, nonBlockablePkgs,
+                checkSaveListener, onSettingsClick, onAppSettingsClick, isNonblockable,
                 false /* isBlockingHelper */,
                 false /* isUserSentimentNegative */);
     }
@@ -146,7 +143,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             CheckSaveListener checkSaveListener,
             OnSettingsClickListener onSettingsClick,
             OnAppSettingsClickListener onAppSettingsClick,
-            Set<String> nonBlockablePkgs,
+            boolean isNonblockable,
             boolean isForBlockingHelper,
             boolean isUserSentimentNegative)
             throws RemoteException {
@@ -162,6 +159,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         mSingleNotificationChannel = notificationChannel;
         mStartingUserImportance = mChosenImportance = mSingleNotificationChannel.getImportance();
         mNegativeUserSentiment = isUserSentimentNegative;
+        mIsNonblockable = isNonblockable;
         mIsForeground =
                 (mSbn.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
         mIsForBlockingHelper = isForBlockingHelper;
@@ -178,22 +176,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                             NotificationChannel.DEFAULT_CHANNEL_ID)
                     && numTotalChannels == 1;
         }
-
-        try {
-            final PackageInfo pkgInfo = pm.getPackageInfo(pkg, PackageManager.GET_SIGNATURES);
-            if (Utils.isSystemPackage(getResources(), pm, pkgInfo)) {
-                if (mSingleNotificationChannel != null
-                        && !mSingleNotificationChannel.isBlockableSystem()) {
-                    mNonblockable = true;
-                }
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            // unlikely.
-        }
-        if (nonBlockablePkgs != null) {
-            mNonblockable |= nonBlockablePkgs.contains(pkg);
-        }
-        mNonblockable |= (mNumNotificationChannels > 1);
 
         bindHeader();
         bindPrompt();
@@ -261,7 +243,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private void bindPrompt() {
         final TextView blockPrompt = findViewById(R.id.block_prompt);
         bindName();
-        if (mNonblockable) {
+        if (mIsNonblockable) {
             blockPrompt.setText(R.string.notification_unblockable_desc);
         } else {
             if (mNegativeUserSentiment) {
@@ -288,7 +270,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     }
 
     private void saveImportance() {
-        if (mNonblockable) {
+        if (mIsNonblockable) {
             return;
         }
         MetricsLogger.action(mContext, MetricsEvent.ACTION_SAVE_IMPORTANCE,
@@ -314,7 +296,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         keep.setOnClickListener(mOnKeepShowing);
         minimize.setOnClickListener(mOnStopMinNotifications);
 
-        if (mNonblockable) {
+        if (mIsNonblockable) {
             keep.setText(R.string.notification_done);
             block.setVisibility(GONE);
             minimize.setVisibility(GONE);

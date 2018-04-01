@@ -19,7 +19,6 @@ package com.android.server.backup.fullbackup;
 import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP_WAIT;
 import static com.android.server.backup.BackupManagerService.TAG;
-import static com.android.server.backup.BackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL;
 
 import android.app.backup.IBackupManager;
 import android.content.ComponentName;
@@ -33,6 +32,8 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.backup.IObbBackupService;
+import com.android.internal.util.Preconditions;
+import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.utils.FullBackupUtils;
 
@@ -46,10 +47,14 @@ public class FullBackupObbConnection implements ServiceConnection {
 
     private BackupManagerService backupManagerService;
     volatile IObbBackupService mService;
+    private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
 
     public FullBackupObbConnection(BackupManagerService backupManagerService) {
         this.backupManagerService = backupManagerService;
         mService = null;
+        mAgentTimeoutParameters = Preconditions.checkNotNull(
+                backupManagerService.getAgentTimeoutParameters(),
+                "Timeout parameters cannot be null");
     }
 
     public void establish() {
@@ -75,8 +80,10 @@ public class FullBackupObbConnection implements ServiceConnection {
         try {
             pipes = ParcelFileDescriptor.createPipe();
             int token = backupManagerService.generateRandomIntegerToken();
+            long fullBackupAgentTimeoutMillis =
+                    mAgentTimeoutParameters.getFullBackupAgentTimeoutMillis();
             backupManagerService.prepareOperationTimeout(
-                    token, TIMEOUT_FULL_BACKUP_INTERVAL, null, OP_TYPE_BACKUP_WAIT);
+                    token, fullBackupAgentTimeoutMillis, null, OP_TYPE_BACKUP_WAIT);
             mService.backupObbs(pkg.packageName, pipes[1], token,
                     backupManagerService.getBackupManagerBinder());
             FullBackupUtils.routeSocketDataToOutput(pipes[0], out);

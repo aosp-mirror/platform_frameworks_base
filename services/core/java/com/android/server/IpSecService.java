@@ -931,7 +931,7 @@ public class IpSecService extends IIpSecService.Stub {
             return mPort;
         }
 
-        public FileDescriptor getSocket() {
+        public FileDescriptor getFileDescriptor() {
             return mSocket;
         }
 
@@ -1065,7 +1065,10 @@ public class IpSecService extends IIpSecService.Stub {
     public synchronized IpSecSpiResponse allocateSecurityParameterIndex(
             String destinationAddress, int requestedSpi, IBinder binder) throws RemoteException {
         checkInetAddress(destinationAddress);
-        /* requestedSpi can be anything in the int range, so no check is needed. */
+        // RFC 4303 Section 2.1 - 0=local, 1-255=reserved.
+        if (requestedSpi > 0 && requestedSpi < 256) {
+            throw new IllegalArgumentException("ESP SPI must not be in the range of 0-255.");
+        }
         checkNotNull(binder, "Null Binder passed to allocateSecurityParameterIndex");
 
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());

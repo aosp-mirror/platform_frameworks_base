@@ -112,7 +112,8 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
 
     // Kicks off the puller immediately.
     if (mPullTagId != -1 && mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
-        mStatsPullerManager->RegisterReceiver(mPullTagId, this, bucketSizeMills);
+        mStatsPullerManager->RegisterReceiver(
+                mPullTagId, this, mCurrentBucketStartTimeNs + mBucketSizeNs, mBucketSizeNs);
     }
 
     VLOG("Gauge metric %lld created. bucket size %lld start_time: %lld sliced %d",
@@ -255,7 +256,7 @@ void GaugeMetricProducer::pullLocked() {
     }
 
     vector<std::shared_ptr<LogEvent>> allData;
-    if (!mStatsPullerManager->Pull(mPullTagId, &allData)) {
+    if (!mStatsPullerManager->Pull(mPullTagId, getElapsedRealtimeNs(), &allData)) {
         ALOGE("Gauge Stats puller failed for tag: %d", mPullTagId);
         return;
     }

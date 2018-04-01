@@ -1713,6 +1713,9 @@ class ContextImpl extends Context {
                 Slog.w(TAG, "Missing ActivityManager; assuming " + uid + " holds " + permission);
                 return PackageManager.PERMISSION_GRANTED;
             }
+            Slog.w(TAG, "Missing ActivityManager; assuming " + uid + " does not hold "
+                    + permission);
+            return PackageManager.PERMISSION_DENIED;
         }
 
         try {

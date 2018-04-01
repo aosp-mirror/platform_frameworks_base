@@ -26,6 +26,8 @@ import android.util.proto.ProtoOutputStream;
 import com.android.okhttp.internalandroidapi.Dns;
 import com.android.okhttp.internalandroidapi.HttpURLConnectionFactory;
 
+import libcore.io.IoUtils;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.net.DatagramSocket;
@@ -77,6 +79,11 @@ public class Network implements Parcelable {
             httpKeepAlive ? Integer.parseInt(System.getProperty("http.maxConnections", "5")) : 0;
     private static final long httpKeepAliveDurationMs =
             Long.parseLong(System.getProperty("http.keepAliveDuration", "300000"));  // 5 minutes.
+    // Value used to obfuscate network handle longs.
+    // The HANDLE_MAGIC value MUST be kept in sync with the corresponding
+    // value in the native/android/net.c NDK implementation.
+    private static final long HANDLE_MAGIC = 0xcafed00dL;
+    private static final int HANDLE_MAGIC_SIZE = 32;
 
     /**
      * @hide
@@ -137,9 +144,15 @@ public class Network implements Parcelable {
             for (int i = 0; i < hostAddresses.length; i++) {
                 try {
                     Socket socket = createSocket();
-                    if (localAddress != null) socket.bind(localAddress);
-                    socket.connect(new InetSocketAddress(hostAddresses[i], port));
-                    return socket;
+                    boolean failed = true;
+                    try {
+                        if (localAddress != null) socket.bind(localAddress);
+                        socket.connect(new InetSocketAddress(hostAddresses[i], port));
+                        failed = false;
+                        return socket;
+                    } finally {
+                        if (failed) IoUtils.closeQuietly(socket);
+                    }
                 } catch (IOException e) {
                     if (i == (hostAddresses.length - 1)) throw e;
                 }
@@ -156,15 +169,27 @@ public class Network implements Parcelable {
         public Socket createSocket(InetAddress address, int port, InetAddress localAddress,
                 int localPort) throws IOException {
             Socket socket = createSocket();
-            socket.bind(new InetSocketAddress(localAddress, localPort));
-            socket.connect(new InetSocketAddress(address, port));
+            boolean failed = true;
+            try {
+                socket.bind(new InetSocketAddress(localAddress, localPort));
+                socket.connect(new InetSocketAddress(address, port));
+                failed = false;
+            } finally {
+                if (failed) IoUtils.closeQuietly(socket);
+            }
             return socket;
         }
 
         @Override
         public Socket createSocket(InetAddress host, int port) throws IOException {
             Socket socket = createSocket();
-            socket.connect(new InetSocketAddress(host, port));
+            boolean failed = true;
+            try {
+                socket.connect(new InetSocketAddress(host, port));
+                failed = false;
+            } finally {
+                if (failed) IoUtils.closeQuietly(socket);
+            }
             return socket;
         }
 
@@ -176,7 +201,13 @@ public class Network implements Parcelable {
         @Override
         public Socket createSocket() throws IOException {
             Socket socket = new Socket();
-            bindSocket(socket);
+            boolean failed = true;
+            try {
+                bindSocket(socket);
+                failed = false;
+            } finally {
+                if (failed) IoUtils.closeQuietly(socket);
+            }
             return socket;
         }
     }
@@ -335,6 +366,25 @@ public class Network implements Parcelable {
     }
 
     /**
+     * Returns a {@link Network} object given a handle returned from {@link #getNetworkHandle}.
+     *
+     * @param networkHandle a handle returned from {@link #getNetworkHandle}.
+     * @return A {@link Network} object derived from {@code networkHandle}.
+     */
+    public static Network fromNetworkHandle(long networkHandle) {
+        if (networkHandle == 0) {
+            throw new IllegalArgumentException(
+                    "Network.fromNetworkHandle refusing to instantiate NETID_UNSET Network.");
+        }
+        if ((networkHandle & ((1L << HANDLE_MAGIC_SIZE) - 1)) != HANDLE_MAGIC
+                || networkHandle < 0) {
+            throw new IllegalArgumentException(
+                    "Value passed to fromNetworkHandle() is not a network handle.");
+        }
+        return new Network((int) (networkHandle >> HANDLE_MAGIC_SIZE));
+    }
+
+    /**
      * Returns a handle representing this {@code Network}, for use with the NDK API.
      */
     public long getNetworkHandle() {
@@ -356,14 +406,10 @@ public class Network implements Parcelable {
         // At some future date it may be desirable to realign the handle with
         // Multiple Provisioning Domains API recommendations, as made by the
         // IETF mif working group.
-        //
-        // The handleMagic value MUST be kept in sync with the corresponding
-        // value in the native/android/net.c NDK implementation.
         if (netId == 0) {
             return 0L;  // make this zero condition obvious for debugging
         }
-        final long handleMagic = 0xcafed00dL;
-        return (((long) netId) << 32) | handleMagic;
+        return (((long) netId) << HANDLE_MAGIC_SIZE) | HANDLE_MAGIC;
     }
 
     // implement the Parcelable interface

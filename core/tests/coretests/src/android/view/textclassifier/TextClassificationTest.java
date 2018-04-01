@@ -37,9 +37,10 @@ import android.view.View;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Calendar;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Locale;
-import java.util.TimeZone;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -163,8 +164,9 @@ public class TextClassificationTest {
 
     @Test
     public void testParcelOptions() {
-        Calendar referenceTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.US);
-        referenceTime.setTimeInMillis(946771200000L);  // 2000-01-02
+        ZonedDateTime referenceTime = ZonedDateTime.ofInstant(
+                Instant.ofEpochMilli(946771200000L),  // 2000-01-02
+                ZoneId.of("UTC"));
 
         TextClassification.Options reference = new TextClassification.Options();
         reference.setDefaultLocales(new LocaleList(Locale.US, Locale.GERMANY));

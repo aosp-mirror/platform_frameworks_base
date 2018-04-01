@@ -18,6 +18,8 @@ package com.android.server.locksettings.recoverablekeystore;
 
 import static android.security.keystore.recovery.KeyChainProtectionParams.TYPE_LOCKSCREEN;
 import static android.security.keystore.recovery.KeyChainProtectionParams.UI_FORMAT_PASSWORD;
+import static android.security.keystore.recovery.RecoveryController.ERROR_BAD_CERTIFICATE_FORMAT;
+import static android.security.keystore.recovery.RecoveryController.ERROR_INVALID_CERTIFICATE;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
@@ -27,6 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -67,6 +70,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -93,6 +97,8 @@ public class RecoverableKeyStoreManagerTest {
     private static final String ROOT_CERTIFICATE_ALIAS = "";
     private static final String DEFAULT_ROOT_CERT_ALIAS =
             TrustedRootCertificates.GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_ALIAS;
+    private static final String INSECURE_CERTIFICATE_ALIAS =
+            TrustedRootCertificates.TEST_ONLY_INSECURE_CERTIFICATE_ALIAS;
     private static final String TEST_SESSION_ID = "karlin";
     private static final byte[] TEST_PUBLIC_KEY = new byte[] {
         (byte) 0x30, (byte) 0x59, (byte) 0x30, (byte) 0x13, (byte) 0x06, (byte) 0x07, (byte) 0x2a,
@@ -160,6 +166,7 @@ public class RecoverableKeyStoreManagerTest {
     @Mock private KeyguardManager mKeyguardManager;
     @Mock private PlatformKeyManager mPlatformKeyManager;
     @Mock private ApplicationKeyStorage mApplicationKeyStorage;
+    @Spy private TestOnlyInsecureCertificateHelper mTestOnlyInsecureCertificateHelper;
 
     private RecoverableKeyStoreDb mRecoverableKeyStoreDb;
     private File mDatabaseFile;
@@ -189,38 +196,20 @@ public class RecoverableKeyStoreManagerTest {
 
         mRecoverableKeyStoreManager = new RecoverableKeyStoreManager(
                 mMockContext,
-                KeyStore.getInstance(),
                 mRecoverableKeyStoreDb,
                 mRecoverySessionStorage,
                 Executors.newSingleThreadExecutor(),
                 mRecoverySnapshotStorage,
                 mMockListenersStorage,
                 mPlatformKeyManager,
-                mApplicationKeyStorage);
+                mApplicationKeyStorage,
+                mTestOnlyInsecureCertificateHelper);
     }
 
     @After
     public void tearDown() {
         mRecoverableKeyStoreDb.close();
         mDatabaseFile.delete();
-    }
-
-    @Test
-    public void generateAndStoreKey_storesTheKey() throws Exception {
-        int uid = Binder.getCallingUid();
-        int userId = UserHandle.getCallingUserId();
-
-        mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS);
-
-        assertThat(mRecoverableKeyStoreDb.getKey(uid, TEST_ALIAS)).isNotNull();
-
-        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
-    }
-
-    @Test
-    public void generateAndStoreKey_returnsAKeyOfAppropriateSize() throws Exception {
-        assertThat(mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS))
-                .hasLength(RECOVERABLE_KEY_SIZE_BYTES);
     }
 
     @Test
@@ -260,7 +249,7 @@ public class RecoverableKeyStoreManagerTest {
     @Test
     public void removeKey_removesAKey() throws Exception {
         int uid = Binder.getCallingUid();
-        mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS);
+        mRecoverableKeyStoreManager.generateKey(TEST_ALIAS);
 
         mRecoverableKeyStoreManager.removeKey(TEST_ALIAS);
 
@@ -271,7 +260,7 @@ public class RecoverableKeyStoreManagerTest {
     public void removeKey_updatesShouldCreateSnapshot() throws Exception {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
-        mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS);
+        mRecoverableKeyStoreManager.generateKey(TEST_ALIAS);
         // Pretend that key was synced
         mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
 
@@ -301,12 +290,76 @@ public class RecoverableKeyStoreManagerTest {
         mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
                 TestData.getCertXmlWithSerial(certSerial));
 
+        verify(mTestOnlyInsecureCertificateHelper, atLeast(1))
+                .getDefaultCertificateAliasIfEmpty(ROOT_CERTIFICATE_ALIAS);
+
         assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isFalse();
         assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid,
                 DEFAULT_ROOT_CERT_ALIAS)).isEqualTo(TestData.CERT_PATH_1);
         assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid,
                 DEFAULT_ROOT_CERT_ALIAS)).isEqualTo(certSerial);
         assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isNull();
+    }
+
+    @Test
+    public void initRecoveryService_triesToFilterRootAlias() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        long certSerial = 1000L;
+        mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
+
+        mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
+                TestData.getCertXmlWithSerial(certSerial));
+
+        verify(mTestOnlyInsecureCertificateHelper, atLeast(1))
+                .getDefaultCertificateAliasIfEmpty(eq(ROOT_CERTIFICATE_ALIAS));
+
+        verify(mTestOnlyInsecureCertificateHelper, atLeast(1))
+                .getRootCertificate(eq(DEFAULT_ROOT_CERT_ALIAS));
+
+        String activeRootAlias = mRecoverableKeyStoreDb.getActiveRootOfTrust(userId, uid);
+        assertThat(activeRootAlias).isEqualTo(DEFAULT_ROOT_CERT_ALIAS);
+
+    }
+
+    @Test
+    public void initRecoveryService_usesProdCertificateForEmptyRootAlias() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        long certSerial = 1000L;
+        mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
+
+        mRecoverableKeyStoreManager.initRecoveryService(/*rootCertificateAlias=*/ "",
+                TestData.getCertXmlWithSerial(certSerial));
+
+        verify(mTestOnlyInsecureCertificateHelper, atLeast(1))
+                .getDefaultCertificateAliasIfEmpty(eq(""));
+
+        verify(mTestOnlyInsecureCertificateHelper, atLeast(1))
+                .getRootCertificate(eq(DEFAULT_ROOT_CERT_ALIAS));
+
+        String activeRootAlias = mRecoverableKeyStoreDb.getActiveRootOfTrust(userId, uid);
+        assertThat(activeRootAlias).isEqualTo(DEFAULT_ROOT_CERT_ALIAS);
+    }
+
+    @Test
+    public void initRecoveryService_usesProdCertificateForNullRootAlias() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        long certSerial = 1000L;
+        mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
+
+        mRecoverableKeyStoreManager.initRecoveryService(/*rootCertificateAlias=*/ null,
+                TestData.getCertXmlWithSerial(certSerial));
+
+        verify(mTestOnlyInsecureCertificateHelper, atLeast(1))
+                .getDefaultCertificateAliasIfEmpty(null);
+
+        verify(mTestOnlyInsecureCertificateHelper, atLeast(1))
+                .getRootCertificate(eq(DEFAULT_ROOT_CERT_ALIAS));
+
+        String activeRootAlias = mRecoverableKeyStoreDb.getActiveRootOfTrust(userId, uid);
+        assertThat(activeRootAlias).isEqualTo(DEFAULT_ROOT_CERT_ALIAS);
     }
 
     @Test
@@ -335,7 +388,7 @@ public class RecoverableKeyStoreManagerTest {
                     modifiedCertXml);
             fail("should have thrown");
         } catch (ServiceSpecificException e) {
-            assertThat(e.getMessage()).contains("validate cert");
+            assertThat(e.errorCode).isEqualTo(ERROR_INVALID_CERTIFICATE);
         }
     }
 
@@ -418,6 +471,24 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
+    public void initRecoveryServiceWithSigFile_usesProdCertificateForNullRootAlias()
+            throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        long certSerial = 1000L;
+        mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
+
+        mRecoverableKeyStoreManager.initRecoveryServiceWithSigFile(
+                /*rootCertificateAlias=*/null, TestData.getCertXml(), TestData.getSigXml());
+
+        verify(mTestOnlyInsecureCertificateHelper, atLeast(1))
+                .getDefaultCertificateAliasIfEmpty(null);
+
+        verify(mTestOnlyInsecureCertificateHelper, atLeast(1))
+                .getRootCertificate(eq(DEFAULT_ROOT_CERT_ALIAS));
+    }
+
+    @Test
     public void initRecoveryServiceWithSigFile_throwsIfNullCertFile() throws Exception {
         try {
             mRecoverableKeyStoreManager.initRecoveryServiceWithSigFile(
@@ -449,7 +520,19 @@ public class RecoverableKeyStoreManagerTest {
                     getUtf8Bytes("wrong-sig-file-format"));
             fail("should have thrown");
         } catch (ServiceSpecificException e) {
-            assertThat(e.getMessage()).contains("parse the sig file");
+            assertThat(e.errorCode).isEqualTo(ERROR_BAD_CERTIFICATE_FORMAT);
+        }
+    }
+
+    @Test
+    public void initRecoveryServiceWithSigFile_throwsIfTestAliasUsedWithProdCert()
+            throws Exception {
+        try {
+        mRecoverableKeyStoreManager.initRecoveryServiceWithSigFile(
+                INSECURE_CERTIFICATE_ALIAS, TestData.getCertXml(), TestData.getSigXml());
+            fail("should have thrown");
+        } catch (ServiceSpecificException e) {
+            assertThat(e.errorCode).isEqualTo(ERROR_INVALID_CERTIFICATE);
         }
     }
 
@@ -713,7 +796,8 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
-    public void recoverKeyChainSnapshot_throwsIfFailedToDecryptAllApplicationKeys() throws Exception {
+    public void recoverKeyChainSnapshot_throwsIfFailedToDecryptAllApplicationKeys()
+            throws Exception {
         mRecoverableKeyStoreManager.startRecoverySession(
                 TEST_SESSION_ID,
                 TEST_PUBLIC_KEY,
@@ -793,7 +877,8 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
-    public void recoverKeyChainSnapshot_worksOnOtherApplicationKeysIfOneDecryptionFails() throws Exception {
+    public void recoverKeyChainSnapshot_worksOnOtherApplicationKeysIfOneDecryptionFails()
+            throws Exception {
         mRecoverableKeyStoreManager.startRecoverySession(
                 TEST_SESSION_ID,
                 TEST_PUBLIC_KEY,
@@ -955,7 +1040,7 @@ public class RecoverableKeyStoreManagerTest {
         int userId = UserHandle.getCallingUserId();
         mRecoverableKeyStoreManager.setRecoverySecretTypes(new int[] { 1 });
 
-        mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS);
+        mRecoverableKeyStoreManager.generateKey(TEST_ALIAS);
         // Pretend that key was synced
         mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
         mRecoverableKeyStoreManager.setRecoverySecretTypes(new int[] { 2 });

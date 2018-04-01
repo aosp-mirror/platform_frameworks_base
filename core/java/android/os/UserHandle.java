@@ -158,7 +158,7 @@ public final class UserHandle implements Parcelable {
      * @hide
      */
     public static boolean isCore(int uid) {
-        if (uid > 0) {
+        if (uid >= 0) {
             final int appId = getAppId(uid);
             return appId < Process.FIRST_APPLICATION_UID;
         } else {

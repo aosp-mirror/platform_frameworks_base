@@ -4099,8 +4099,8 @@ public class MediaPlayer extends PlayerBase
 
     /** The player was started because it was used as the next player for another
      * player, which just completed playback.
+     * @see android.media.MediaPlayer#setNextMediaPlayer(MediaPlayer)
      * @see android.media.MediaPlayer.OnInfoListener
-     * @hide
      */
     public static final int MEDIA_INFO_STARTED_AS_NEXT = 2;
 

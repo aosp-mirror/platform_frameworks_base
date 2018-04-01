@@ -145,6 +145,7 @@ message SecureSettingsProto {
         optional SettingProto transport = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto manager_constants = 5;
         optional SettingProto local_transport_parameters = 6;
+        optional SettingProto packages_to_clear_data_before_full_restore = 7;
     }
     optional Backup backup = 10;
 

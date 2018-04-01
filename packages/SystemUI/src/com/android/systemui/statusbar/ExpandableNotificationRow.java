@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 import static com.android.systemui.statusbar.notification.NotificationInflater.InflationCallback;
 
@@ -25,7 +24,10 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.Nullable;
+import android.app.NotificationChannel;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Path;
@@ -39,6 +41,7 @@ import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
+import android.util.Log;
 import android.util.MathUtils;
 import android.util.Property;
 import android.view.KeyEvent;
@@ -90,12 +93,17 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
+/**
+ * View representing a notification item - this can be either the individual child notification or
+ * the group summary (which contains 1 or more child notifications).
+ */
 public class ExpandableNotificationRow extends ActivatableNotificationView
         implements PluginListener<NotificationMenuRowPlugin> {
 
     private static final int DEFAULT_DIVIDER_ALPHA = 0x29;
     private static final int COLORED_DIVIDER_ALPHA = 0x7B;
     private static final int MENU_VIEW_INDEX = 0;
+    private static final String TAG = "ExpandableNotifRow";
 
     public interface LayoutListener {
         public void onLayout();
@@ -166,6 +174,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private NotificationGuts mGuts;
     private NotificationData.Entry mEntry;
     private StatusBarNotification mStatusBarNotification;
+    private PackageManager mCachedPackageManager;
+    private PackageInfo mCachedPackageInfo;
     private String mAppName;
     private boolean mIsHeadsUp;
     private boolean mLastChronometerRunning = true;
@@ -372,6 +382,53 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mEntry = entry;
         mStatusBarNotification = entry.notification;
         mNotificationInflater.inflateNotificationViews();
+
+        perhapsCachePackageInfo();
+    }
+
+    /**
+     * Caches the package manager and info objects which are expensive to obtain.
+     */
+    private void perhapsCachePackageInfo() {
+        if (mCachedPackageInfo == null) {
+            mCachedPackageManager = StatusBar.getPackageManagerForUser(
+                    mContext, mStatusBarNotification.getUser().getIdentifier());
+            try {
+                mCachedPackageInfo = mCachedPackageManager.getPackageInfo(
+                        mStatusBarNotification.getPackageName(), PackageManager.GET_SIGNATURES);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.e(TAG, "perhapsCachePackageInfo: Could not find package info");
+            }
+        }
+    }
+
+    /**
+     * Returns whether this row is considered non-blockable (e.g. it's a non-blockable system notif,
+     * covers multiple channels, or is in a whitelist).
+     */
+    public boolean getIsNonblockable() {
+        boolean isNonblockable;
+
+        isNonblockable = Dependency.get(NotificationBlockingHelperManager.class)
+                .isNonblockablePackage(mStatusBarNotification.getPackageName());
+
+        // Only bother with going through the children if the row is still blockable based on the
+        // number of unique channels.
+        if (!isNonblockable) {
+            isNonblockable = getNumUniqueChannels() > 1;
+        }
+
+        // Only bother with IPC if the package is still blockable.
+        if (!isNonblockable && mCachedPackageManager != null && mCachedPackageInfo != null) {
+            if (com.android.settingslib.Utils.isSystemPackage(
+                    mContext.getResources(), mCachedPackageManager, mCachedPackageInfo)) {
+                if (mEntry.channel != null
+                        && !mEntry.channel.isBlockableSystem()) {
+                    isNonblockable = true;
+                }
+            }
+        }
+        return isNonblockable;
     }
 
     public void onNotificationUpdated() {
@@ -2018,6 +2075,32 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         updateChildrenHeaderAppearance();
         updateChildrenVisibility();
         applyChildrenRoundness();
+    }
+    /**
+     * Returns the number of channels covered by the notification row (including its children if
+     * it's a summary notification).
+     */
+    public int getNumUniqueChannels() {
+        ArraySet<NotificationChannel> channels = new ArraySet<>();
+
+        channels.add(mEntry.channel);
+
+        // If this is a summary, then add in the children notification channels for the
+        // same user and pkg.
+        if (mIsSummaryWithChildren) {
+            final List<ExpandableNotificationRow> childrenRows = getNotificationChildren();
+            final int numChildren = childrenRows.size();
+            for (int i = 0; i < numChildren; i++) {
+                final ExpandableNotificationRow childRow = childrenRows.get(i);
+                final NotificationChannel childChannel = childRow.getEntry().channel;
+                final StatusBarNotification childSbn = childRow.getStatusBarNotification();
+                if (childSbn.getUser().equals(mStatusBarNotification.getUser()) &&
+                        childSbn.getPackageName().equals(mStatusBarNotification.getPackageName())) {
+                    channels.add(childChannel);
+                }
+            }
+        }
+        return channels.size();
     }
 
     public void updateChildrenHeaderAppearance() {

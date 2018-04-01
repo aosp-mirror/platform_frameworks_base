@@ -3454,18 +3454,19 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 dpm.setSystemSetting(admin1, Settings.System.SCREEN_BRIGHTNESS_FOR_VR, "0"));
     }
 
-    public void testSetSystemSettingFailWithPO() throws Exception {
-        setupProfileOwner();
-        assertExpectException(SecurityException.class, null, () ->
-                dpm.setSystemSetting(admin1, Settings.System.SCREEN_BRIGHTNESS, "0"));
-    }
-
-    public void testSetSystemSetting() throws Exception {
+    public void testSetSystemSettingWithDO() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
         dpm.setSystemSetting(admin1, Settings.System.SCREEN_BRIGHTNESS, "0");
-        verify(getServices().settings).settingsSystemPutString(
-                Settings.System.SCREEN_BRIGHTNESS, "0");
+        verify(getServices().settings).settingsSystemPutStringForUser(
+                Settings.System.SCREEN_BRIGHTNESS, "0", UserHandle.USER_SYSTEM);
+    }
+
+    public void testSetSystemSettingWithPO() throws Exception {
+        setupProfileOwner();
+        dpm.setSystemSetting(admin1, Settings.System.SCREEN_BRIGHTNESS, "0");
+        verify(getServices().settings).settingsSystemPutStringForUser(
+            Settings.System.SCREEN_BRIGHTNESS, "0", DpmMockContext.CALLER_USER_HANDLE);
     }
 
     public void testSetTime() throws Exception {
@@ -3719,7 +3720,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     private void verifyLockTaskState(int userId) throws Exception {
-        verifyLockTaskState(userId, new String[0], DevicePolicyManager.LOCK_TASK_FEATURE_NONE);
+        verifyLockTaskState(userId, new String[0],
+                DevicePolicyManager.LOCK_TASK_FEATURE_GLOBAL_ACTIONS);
     }
 
     private void verifyLockTaskState(int userId, String[] packages, int flags) throws Exception {
@@ -4188,36 +4190,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().lockPatternUtils.removeEscrowToken(eq(handle), eq(UserHandle.USER_SYSTEM)))
                 .thenReturn(true);
         assertTrue(dpm.clearResetPasswordToken(admin1));
-    }
-
-    public void testSetPasswordBlacklistCannotBeCalledByNonAdmin() throws Exception {
-        assertExpectException(SecurityException.class, /* messageRegex= */ null,
-                () -> dpm.setPasswordBlacklist(admin1, null, null));
-        verifyZeroInteractions(getServices().passwordBlacklist);
-    }
-
-    public void testClearingPasswordBlacklistDoesNotCreateNewBlacklist() throws Exception {
-        setupProfileOwner();
-        dpm.setPasswordBlacklist(admin1, null, null);
-        verifyZeroInteractions(getServices().passwordBlacklist);
-    }
-
-    public void testSetPasswordBlacklistCreatesNewBlacklist() throws Exception {
-        final String name = "myblacklist";
-        final List<String> explicit = Arrays.asList("password", "letmein");
-        setupProfileOwner();
-        dpm.setPasswordBlacklist(admin1, name, explicit);
-        verify(getServices().passwordBlacklist).savePasswordBlacklist(name, explicit);
-    }
-
-    public void testSetPasswordBlacklistOnlyConvertsExplicitToLowerCase() throws Exception {
-        final List<String> mixedCase = Arrays.asList("password", "LETMEIN", "FooTBAll");
-        final List<String> lowerCase = Arrays.asList("password", "letmein", "football");
-        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
-        setupDeviceOwner();
-        final String name = "Name of the Blacklist";
-        dpm.setPasswordBlacklist(admin1, name, mixedCase);
-        verify(getServices().passwordBlacklist).savePasswordBlacklist(name, lowerCase);
     }
 
     public void testIsActivePasswordSufficient() throws Exception {

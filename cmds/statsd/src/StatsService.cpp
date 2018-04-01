@@ -595,7 +595,7 @@ status_t StatsService::cmd_log_app_breadcrumb(FILE* out, const Vector<String8>& 
 status_t StatsService::cmd_print_pulled_metrics(FILE* out, const Vector<String8>& args) {
     int s = atoi(args[1].c_str());
     vector<shared_ptr<LogEvent> > stats;
-    if (mStatsPullerManager.Pull(s, &stats)) {
+    if (mStatsPullerManager.Pull(s, getElapsedRealtimeNs(), &stats)) {
         for (const auto& it : stats) {
             fprintf(out, "Pull from %d: %s\n", s, it->ToString().c_str());
         }
@@ -698,7 +698,7 @@ Status StatsService::informAlarmForSubscriberTriggeringFired() {
                 "Only system uid can call informAlarmForSubscriberTriggeringFired");
     }
 
-    uint64_t currentTimeSec = time(nullptr);
+    uint64_t currentTimeSec = getElapsedRealtimeSec();
     std::unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet =
             mPeriodicAlarmMonitor->popSoonerThan(static_cast<uint32_t>(currentTimeSec));
     if (alarmSet.size() > 0) {

@@ -28,15 +28,15 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"পাছৱৰ্ড লিখিবলৈ স্পৰ্শ কৰক"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"আনলক কৰিবলৈ পাছৱৰ্ড লিখক"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"আনলক কৰিবলৈ পিন লিখক"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"আপোনাৰ পিন দিয়ক"</string>
+    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"আপোনাৰ আৰ্হি দিয়ক"</string>
+    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"আপোনাৰ পাছৱৰ্ড দিয়ক"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ভুল পিন ক\'ড।"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"ব্যৱহাৰৰ অযোগ্য ছিম কাৰ্ড"</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"চ্চার্জ কৰা হ\'ল"</string>
-    <!-- no translation found for keyguard_plugged_in (3161102098900158923) -->
-    <skip />
-    <!-- no translation found for keyguard_plugged_in_charging_fast (3684592786276709342) -->
-    <skip />
-    <!-- no translation found for keyguard_plugged_in_charging_slowly (509533586841478405) -->
-    <skip />
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • চ্চার্জ কৰি থকা হৈছে"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • দ্ৰুত গতিৰে চ্চাৰ্জ কৰি থকা হৈছে"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • লাহে লাহে চ্চাৰ্জ কৰি থকা হৈছে"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"আপোনাৰ চ্চার্জাৰ সংযোগ কৰক।"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"আনলক কৰিবলৈ মেনু টিপক।"</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"নেটৱর্ক লক কৰা অৱস্থাত আছে"</string>
@@ -56,10 +56,8 @@
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"পৰৱৰ্তী এলাৰ্ম <xliff:g id="ALARM">%1$s</xliff:g> বজাত ছেট কৰা হৈছে"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"মচক"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"ই-ছিম অক্ষম কৰক"</string>
-    <!-- no translation found for error_disable_esim_title (4852978431156228006) -->
-    <skip />
-    <!-- no translation found for error_disable_esim_msg (676694908770135639) -->
-    <skip />
+    <string name="error_disable_esim_title" msgid="4852978431156228006">"ই-ছিম অক্ষম কৰিব পৰা নাযায়"</string>
+    <string name="error_disable_esim_msg" msgid="676694908770135639">"এটা আসোঁৱাহৰ কাৰণে ই-ছিম অক্ষম কৰিব পৰা নাযায়।"</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"এণ্টাৰ বুটাম"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"আৰ্হি পাহৰিলে নেকি"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"ভুল আৰ্হি"</string>
@@ -72,8 +70,7 @@
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"আপোনাৰ আৰ্হি আঁকক"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"ছিমৰ পিন দিয়ক।"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\"ৰ ছিমৰ পিন দিয়ক।"</string>
-    <!-- no translation found for kg_sim_lock_esim_instructions (4416732549172148542) -->
-    <skip />
+    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> ম\'বাইল সেৱা অবিহনে ডিভাইচ ব্যৱহাৰ কৰিবলৈ ই-ছিম অক্ষম কৰক।"</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"পিন দিয়ক"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"পাছৱৰ্ড দিয়ক"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"ছিমখন বর্তমান অক্ষম অৱস্থাত আছে। অব্যাহত ৰাখিবলৈ PUK ক\'ড লিখক। সবিশেষ জানিবলৈ বাহকৰ সৈতে যোগাযোগ কৰক।"</string>

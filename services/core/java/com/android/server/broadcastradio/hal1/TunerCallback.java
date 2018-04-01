@@ -17,6 +17,7 @@
 package com.android.server.broadcastradio.hal1;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.ProgramList;
@@ -87,8 +88,9 @@ class TunerCallback implements ITunerCallback {
         mTuner.close();
     }
 
-    void startProgramListUpdates(@NonNull ProgramList.Filter filter) {
-        mProgramListFilter.set(Objects.requireNonNull(filter));
+    void startProgramListUpdates(@Nullable ProgramList.Filter filter) {
+        if (filter == null) filter = new ProgramList.Filter();
+        mProgramListFilter.set(filter);
         sendProgramListUpdate();
     }
 

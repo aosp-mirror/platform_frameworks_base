@@ -78,23 +78,6 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
         return false;
     }
 
-    @Override
-    public boolean setPasswordBlacklist(ComponentName who, String name, List<String> blacklist,
-            boolean parent) {
-        return false;
-    }
-
-    @Override
-    public String getPasswordBlacklistName(ComponentName who, @UserIdInt int userId,
-            boolean parent) {
-        return null;
-    }
-
-    @Override
-    public boolean isPasswordBlacklisted(@UserIdInt int userId, String password) {
-        return false;
-    }
-
     public boolean isUsingUnifiedPassword(ComponentName who) {
         return true;
     }

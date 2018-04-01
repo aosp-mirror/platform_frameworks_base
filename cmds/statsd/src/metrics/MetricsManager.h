@@ -48,11 +48,11 @@ public:
     void onLogEvent(const LogEvent& event);
 
     void onAnomalyAlarmFired(
-        const uint64_t timestampNs,
+        const uint64_t& timestampNs,
         unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& alarmSet);
 
     void onPeriodicAlarmFired(
-        const uint64_t timestampNs,
+        const uint64_t& timestampNs,
         unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& alarmSet);
 
     void notifyAppUpgrade(const uint64_t& eventTimeNs, const string& apk, const int uid,
@@ -184,6 +184,7 @@ private:
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_multiple_buckets);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_long_refractory_period);
 
+    FRIEND_TEST(AlarmE2eTest, TestMultipleAlarms);
 };
 
 }  // namespace statsd

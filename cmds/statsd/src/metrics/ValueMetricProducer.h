@@ -53,7 +53,7 @@ public:
 
         if (mPullTagId != -1) {
             vector<shared_ptr<LogEvent>> allData;
-            mStatsPullerManager->Pull(mPullTagId, &allData);
+            mStatsPullerManager->Pull(mPullTagId, eventTimeNs, &allData);
             if (allData.size() == 0) {
                 // This shouldn't happen since this valuemetric is not useful now.
             }
@@ -159,6 +159,10 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade);
     FRIEND_TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestAnomalyDetection);
+    FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundaryNoCondition);
+    FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition);
+    FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition2);
+    FRIEND_TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition3);
 };
 
 }  // namespace statsd

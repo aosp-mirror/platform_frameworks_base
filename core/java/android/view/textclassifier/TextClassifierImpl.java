@@ -16,6 +16,8 @@
 
 package android.view.textclassifier;
 
+import static java.time.temporal.ChronoUnit.MILLIS;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
@@ -45,9 +47,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -119,7 +122,7 @@ public final class TextClassifierImpl implements TextClassifier {
                     && rangeLength <= mSettings.getSuggestSelectionMaxRangeLength()) {
                 final LocaleList locales = (options == null) ? null : options.getDefaultLocales();
                 final String localesString = concatenateLocales(locales);
-                final Calendar refTime = Calendar.getInstance();
+                final ZonedDateTime refTime = ZonedDateTime.now();
                 final boolean darkLaunchAllowed = options != null && options.isDarkLaunchAllowed();
                 final TextClassifierImplNative nativeImpl = getNative(locales);
                 final String string = text.toString();
@@ -143,8 +146,8 @@ public final class TextClassifierImpl implements TextClassifier {
                             nativeImpl.classifyText(
                                     string, start, end,
                                     new TextClassifierImplNative.ClassificationOptions(
-                                            refTime.getTimeInMillis(),
-                                            refTime.getTimeZone().getID(),
+                                            refTime.toInstant().toEpochMilli(),
+                                            refTime.getZone().getId(),
                                             localesString));
                     final int size = results.length;
                     for (int i = 0; i < size; i++) {
@@ -183,19 +186,20 @@ public final class TextClassifierImpl implements TextClassifier {
                 final String string = text.toString();
                 final LocaleList locales = (options == null) ? null : options.getDefaultLocales();
                 final String localesString = concatenateLocales(locales);
-                final Calendar refTime = (options != null && options.getReferenceTime() != null)
-                        ? options.getReferenceTime() : Calendar.getInstance();
+                final ZonedDateTime refTime =
+                        (options != null && options.getReferenceTime() != null)
+                                ? options.getReferenceTime() : ZonedDateTime.now();
 
                 final TextClassifierImplNative.ClassificationResult[] results =
                         getNative(locales)
                                 .classifyText(string, startIndex, endIndex,
                                         new TextClassifierImplNative.ClassificationOptions(
-                                                refTime.getTimeInMillis(),
-                                                refTime.getTimeZone().getID(),
+                                                refTime.toInstant().toEpochMilli(),
+                                                refTime.getZone().getId(),
                                                 localesString));
                 if (results.length > 0) {
                     return createClassificationResult(
-                            results, string, startIndex, endIndex, refTime);
+                            results, string, startIndex, endIndex, refTime.toInstant());
                 }
             }
         } catch (Throwable t) {
@@ -224,7 +228,7 @@ public final class TextClassifierImpl implements TextClassifier {
         try {
             final long startTimeMs = System.currentTimeMillis();
             final LocaleList defaultLocales = options != null ? options.getDefaultLocales() : null;
-            final Calendar refTime = Calendar.getInstance();
+            final ZonedDateTime refTime = ZonedDateTime.now();
             final Collection<String> entitiesToIdentify =
                     options != null && options.getEntityConfig() != null
                             ? options.getEntityConfig().resolveEntityListModifications(
@@ -236,8 +240,8 @@ public final class TextClassifierImpl implements TextClassifier {
                     nativeImpl.annotate(
                         textString,
                         new TextClassifierImplNative.AnnotationOptions(
-                                refTime.getTimeInMillis(),
-                                refTime.getTimeZone().getID(),
+                                refTime.toInstant().toEpochMilli(),
+                                refTime.getZone().getId(),
                                 concatenateLocales(defaultLocales)));
             for (TextClassifierImplNative.AnnotatedSpan span : annotations) {
                 final TextClassifierImplNative.ClassificationResult[] results =
@@ -416,7 +420,7 @@ public final class TextClassifierImpl implements TextClassifier {
 
     private TextClassification createClassificationResult(
             TextClassifierImplNative.ClassificationResult[] classifications,
-            String text, int start, int end, @Nullable Calendar referenceTime) {
+            String text, int start, int end, @Nullable Instant referenceTime) {
         final String classifiedText = text.substring(start, end);
         final TextClassification.Builder builder = new TextClassification.Builder()
                 .setText(classifiedText);
@@ -646,7 +650,7 @@ public final class TextClassifierImpl implements TextClassifier {
         @NonNull
         public static List<LabeledIntent> create(
                 Context context,
-                @Nullable Calendar referenceTime,
+                @Nullable Instant referenceTime,
                 TextClassifierImplNative.ClassificationResult classification,
                 String text) {
             final String type = classification.getCollection().trim().toLowerCase(Locale.ENGLISH);
@@ -663,10 +667,9 @@ public final class TextClassifierImpl implements TextClassifier {
                 case TextClassifier.TYPE_DATE:
                 case TextClassifier.TYPE_DATE_TIME:
                     if (classification.getDatetimeResult() != null) {
-                        Calendar eventTime = Calendar.getInstance();
-                        eventTime.setTimeInMillis(
+                        final Instant parsedTime = Instant.ofEpochMilli(
                                 classification.getDatetimeResult().getTimeMsUtc());
-                        return createForDatetime(context, type, referenceTime, eventTime);
+                        return createForDatetime(context, type, referenceTime, parsedTime);
                     } else {
                         return new ArrayList<>();
                     }
@@ -758,18 +761,17 @@ public final class TextClassifierImpl implements TextClassifier {
 
         @NonNull
         private static List<LabeledIntent> createForDatetime(
-                Context context, String type, @Nullable Calendar referenceTime,
-                Calendar eventTime) {
+                Context context, String type, @Nullable Instant referenceTime,
+                Instant parsedTime) {
             if (referenceTime == null) {
                 // If no reference time was given, use now.
-                referenceTime = Calendar.getInstance();
+                referenceTime = Instant.now();
             }
             List<LabeledIntent> actions = new ArrayList<>();
-            actions.add(createCalendarViewIntent(context, eventTime));
-            final long millisSinceReference =
-                    eventTime.getTimeInMillis() - referenceTime.getTimeInMillis();
-            if (millisSinceReference > MIN_EVENT_FUTURE_MILLIS) {
-                actions.add(createCalendarCreateEventIntent(context, eventTime, type));
+            actions.add(createCalendarViewIntent(context, parsedTime));
+            final long millisUntilEvent = referenceTime.until(parsedTime, MILLIS);
+            if (millisUntilEvent > MIN_EVENT_FUTURE_MILLIS) {
+                actions.add(createCalendarCreateEventIntent(context, parsedTime, type));
             }
             return actions;
         }
@@ -784,10 +786,10 @@ public final class TextClassifierImpl implements TextClassifier {
         }
 
         @NonNull
-        private static LabeledIntent createCalendarViewIntent(Context context, Calendar eventTime) {
+        private static LabeledIntent createCalendarViewIntent(Context context, Instant parsedTime) {
             Uri.Builder builder = CalendarContract.CONTENT_URI.buildUpon();
             builder.appendPath("time");
-            ContentUris.appendId(builder, eventTime.getTimeInMillis());
+            ContentUris.appendId(builder, parsedTime.toEpochMilli());
             return new LabeledIntent(
                     context.getString(com.android.internal.R.string.view_calendar),
                     context.getString(com.android.internal.R.string.view_calendar_desc),
@@ -796,7 +798,7 @@ public final class TextClassifierImpl implements TextClassifier {
 
         @NonNull
         private static LabeledIntent createCalendarCreateEventIntent(
-                Context context, Calendar eventTime, @EntityType String type) {
+                Context context, Instant parsedTime, @EntityType String type) {
             final boolean isAllDay = TextClassifier.TYPE_DATE.equals(type);
             return new LabeledIntent(
                     context.getString(com.android.internal.R.string.add_calendar_event),
@@ -805,9 +807,9 @@ public final class TextClassifierImpl implements TextClassifier {
                             .setData(CalendarContract.Events.CONTENT_URI)
                             .putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, isAllDay)
                             .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME,
-                                    eventTime.getTimeInMillis())
+                                    parsedTime.toEpochMilli())
                             .putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
-                                    eventTime.getTimeInMillis() + DEFAULT_EVENT_DURATION));
+                                    parsedTime.toEpochMilli() + DEFAULT_EVENT_DURATION));
         }
     }
 }

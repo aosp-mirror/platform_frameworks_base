@@ -853,11 +853,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (mSecurityPolicy.findA11yWindowInfoById(windowId) == null) {
                 return null;
             }
-            IBinder token = mGlobalWindowTokens.get(windowId);
-            if (token != null) {
-                return token;
-            }
-            return getCurrentUserStateLocked().mWindowTokens.get(windowId);
+            return findWindowTokenLocked(windowId);
         }
     }
 
@@ -2527,6 +2523,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         getInteractionBridge().clearAccessibilityFocusNotLocked(windowId);
     }
 
+    private IBinder findWindowTokenLocked(int windowId) {
+        IBinder token = mGlobalWindowTokens.get(windowId);
+        if (token != null) {
+            return token;
+        }
+        return getCurrentUserStateLocked().mWindowTokens.get(windowId);
+    }
+
     private int findWindowIdLocked(IBinder token) {
         final int globalIndex = mGlobalWindowTokens.indexOfValue(token);
         if (globalIndex >= 0) {
@@ -2986,7 +2990,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 // the accessibility layer reports which are windows
                 // that a sighted user can touch.
                 default: {
-                    return isRetrievalAllowingWindow(event.getWindowId());
+                    return isRetrievalAllowingWindowLocked(event.getWindowId());
                 }
             }
         }
@@ -3438,7 +3442,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         public boolean canGetAccessibilityNodeInfoLocked(
                 AbstractAccessibilityServiceConnection service, int windowId) {
-            return canRetrieveWindowContentLocked(service) && isRetrievalAllowingWindow(windowId);
+            return canRetrieveWindowContentLocked(service)
+                    && isRetrievalAllowingWindowLocked(windowId);
         }
 
         public boolean canRetrieveWindowsLocked(AbstractAccessibilityServiceConnection service) {
@@ -3523,15 +3528,38 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     || userId == UserHandle.USER_CURRENT_OR_SELF);
         }
 
-        private boolean isRetrievalAllowingWindow(int windowId) {
+        private boolean isRetrievalAllowingWindowLocked(int windowId) {
             // The system gets to interact with any window it wants.
             if (Binder.getCallingUid() == Process.SYSTEM_UID) {
                 return true;
+            }
+            if (Binder.getCallingUid() == Process.SHELL_UID) {
+                if (!isShellAllowedToRetrieveWindowLocked(windowId)) {
+                    return false;
+                }
             }
             if (windowId == mActiveWindowId) {
                 return true;
             }
             return findA11yWindowInfoById(windowId) != null;
+        }
+
+        private boolean isShellAllowedToRetrieveWindowLocked(int windowId) {
+            long token = Binder.clearCallingIdentity();
+            try {
+                IBinder windowToken = findWindowTokenLocked(windowId);
+                if (windowToken == null) {
+                    return false;
+                }
+                int userId = mWindowManagerService.getWindowOwnerUserId(windowToken);
+                if (userId == UserHandle.USER_NULL) {
+                    return false;
+                }
+                return !mUserManager.hasUserRestriction(
+                        UserManager.DISALLOW_DEBUGGING_FEATURES, UserHandle.of(userId));
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
 
         public AccessibilityWindowInfo findA11yWindowInfoById(int windowId) {

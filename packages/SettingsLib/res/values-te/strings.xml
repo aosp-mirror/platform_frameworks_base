@@ -40,6 +40,10 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s ద్వారా కనెక్ట్ చేయబడింది"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s ద్వారా అందుబాటులో ఉంది"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"కనెక్ట్ చేయబడింది, ఇంటర్నెట్ లేదు"</string>
+    <!-- no translation found for wifi_status_no_internet (5784710974669608361) -->
+    <skip />
+    <!-- no translation found for wifi_status_sign_in_required (123517180404752756) -->
+    <skip />
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"యాక్సెస్ పాయింట్ తాత్కాలికంగా నిండుకుంది"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s ద్వారా కనెక్ట్ చేయబడింది"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s ద్వారా అందుబాటులో ఉంది"</string>
@@ -63,6 +67,12 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"కనెక్ట్ చేయబడింది (ఫోన్ కాదు), బ్యాటరీ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"కనెక్ట్ చేయబడింది (మీడియా కాదు), బ్యాటరీ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"కనెక్ట్ చేయబడింది (ఫోన్ లేదా మీడియా కాదు), బ్యాటరీ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <!-- no translation found for bluetooth_active_battery_level (3149689299296462009) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level (1447164613319663655) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_no_battery_level (8380223546730241956) -->
+    <skip />
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"మీడియా ఆడియో"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"ఫోన్ కాల్‌లు"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ఫైల్ బదిలీ"</string>
@@ -109,6 +119,14 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"హెడ్‌ఫోన్"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"ఇన్‌పుట్ అనుబంధ పరికరం"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"బ్లూటూత్"</string>
+    <!-- no translation found for bluetooth_hearingaid_left_pairing_message (7378813500862148102) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearingaid_right_pairing_message (1550373802309160891) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearingaid_left_battery_level (8797811465352097562) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearingaid_right_battery_level (7309476148173459677) -->
+    <skip />
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wifi ఆఫ్‌లో ఉంది."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wifi డిస్‌కనెక్ట్ చేయబడింది."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wifi సిగ్నల్ ఒక బార్ ఉంది."</string>
@@ -188,7 +206,8 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"సక్రియంగా ఉంచు"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"ఛార్జ్ చేస్తున్నప్పుడు స్క్రీన్ ఎప్పటికీ నిద్రావస్థలోకి వెళ్లదు"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"బ్లూటూత్ HCI రహస్య లాగ్‌ను ప్రారంభించు"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"ఫైల్‌లో అన్ని బ్లూటూత్ HCI ప్యాకెట్‌లను క్యాప్చర్ చేయి"</string>
+    <!-- no translation found for bt_hci_snoop_log_summary (366083475849911315) -->
+    <skip />
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM అన్‌లాకింగ్"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"బూట్‌లోడర్ అన్‌లాక్ కావడానికి అనుమతించు"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM అన్‌లాకింగ్‌ను అనుమతించాలా?"</string>
@@ -207,15 +226,20 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"బ్లూటూత్ AVRCP వెర్షన్"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"బ్లూటూత్ AVRCP సంస్కరణను ఎంచుకోండి"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"బ్లూటూత్ ఆడియో కోడెక్"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"బ్లూటూత్ ఆడియో కోడెక్‌ని ఎంచుకోండి"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"బ్లూటూత్ ఆడియో నమూనా రేట్"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"బ్లూటూత్ ఆడియో కోడెక్‌ని ఎంచుకోండి:\nనమూనా రేటు"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"ఒక్కో నమూనాకు బ్లూటూత్ ఆడియో బిట్‌లు"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"బ్లూటూత్ ఆడియో కోడెక్‌ని ఎంచుకోండి:\nఒక్కో నమూనాలో బిట్‌లు"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"బ్లూటూత్ ఆడియో ఛానెల్ మోడ్"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"బ్లూటూత్ ఆడియో కోడెక్‌ని ఎంచుకోండి:\nఛానెల్ మోడ్"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"బ్లూటూత్ ఆడియో LDAC కోడెక్: ప్లేబ్యాక్ నాణ్యత"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"బ్లూటూత్ ఆడియో LDAC కోడెక్‌ని ఎంచుకోండి:\nప్లేబ్యాక్ నాణ్యత"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ప్రసారం చేస్తోంది: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"ప్రైవేట్ DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"ప్రైవేట్ DNS మోడ్‌ను ఎంచుకోండి"</string>
@@ -223,9 +247,15 @@
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"ఆటోమేటిక్"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"ప్రైవేట్ DNS ప్రదాత హోస్ట్‌పేరు"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS ప్రదాత యొక్క హోస్ట్‌పేరును నమోదు చేయండి"</string>
+    <!-- no translation found for private_dns_mode_provider_failure (231837290365031223) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"వైర్‌లెస్ ప్రదర్శన సర్టిఫికెట్ కోసం ఎంపికలను చూపు"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ఎంపికలో SSID RSSI ప్రకారం చూపబడే Wi‑Fi లాగింగ్ స్థాయిని పెంచండి"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Wi-Fi నెట్‌వర్క్‌కు కనెక్ట్ చేస్తున్నప్పుడు MAC చిరునామాను యాదృచ్ఛికం చేయండి"</string>
+    <!-- no translation found for wifi_metered_label (4514924227256839725) -->
+    <skip />
+    <!-- no translation found for wifi_unmetered_label (6124098729457992931) -->
+    <skip />
     <string name="select_logd_size_title" msgid="7433137108348553508">"లాగర్ బఫర్ పరిమాణాలు"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"లాగ్ బఫర్‌కి లాగర్ పరిమా. ఎంచుకోండి"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"లాగర్ నిరంతర నిల్వలోని డేటాను తీసివేయాలా?"</string>
@@ -360,14 +390,10 @@
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"మీ వినియోగం ఆధారంగా సుమారు <xliff:g id="TIME">%1$s</xliff:g> సమయం మిగిలి ఉంది"</string>
     <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"మీ వినియోగం ఆధారంగా దాదాపు <xliff:g id="TIME">%1$s</xliff:g> ఉండవచ్చు (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> మిగిలి ఉంది"</string>
-    <!-- no translation found for power_discharge_by_enhanced (2095821536747992464) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (2175151772952365149) -->
-    <skip />
-    <!-- no translation found for power_discharge_by (6453537733650125582) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only (107616694963545745) -->
-    <skip />
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"మీ వినియోగం ఆధారంగా <xliff:g id="TIME">%1$s</xliff:g> వరకు ఉండాలి (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"మీ వినియోగం ఆధారంగా దాదాపు <xliff:g id="TIME">%1$s</xliff:g> వరకు ఉండాలి"</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"దాదాపు <xliff:g id="TIME">%1$s</xliff:g> వరకు ఉండాలి (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"దాదాపు <xliff:g id="TIME">%1$s</xliff:g> వరకు ఉండాలి"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g> కంటే తక్కువ సమయం మిగిలి ఉంది"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"<xliff:g id="THRESHOLD">%1$s</xliff:g> కంటే తక్కువ సమయం మిగిలి ఉంది (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> కంటే ఎక్కువ సమయం మిగిలి ఉంది (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -422,8 +448,7 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"నమోదు చేయబడింది"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"నమోదు కాలేదు"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"అందుబాటులో లేదు"</string>
-    <!-- no translation found for wifi_status_mac_randomized (5589328382467438245) -->
-    <skip />
+    <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"MAC యాదృచ్ఛికంగా ఉంది"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
       <item quantity="other">%1$d పరికరాలు కనెక్ట్ చేయబడ్డాయి</item>
       <item quantity="one">%1$d పరికరం కనెక్ట్ చేయబడింది</item>
@@ -443,6 +468,5 @@
     <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g>కి"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"వ్యవధి"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"ప్రతిసారి అడుగు"</string>
-    <!-- no translation found for time_unit_just_now (6363336622778342422) -->
-    <skip />
+    <string name="time_unit_just_now" msgid="6363336622778342422">"ఇప్పుడే"</string>
 </resources>

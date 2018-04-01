@@ -449,13 +449,13 @@ public class PackageDexOptimizer {
             pw.increaseIndent();
 
             for (String isa : dexCodeInstructionSets) {
-                String status = null;
                 try {
-                    status = DexFile.getDexFileStatus(path, isa);
+                    DexFile.OptimizationInfo info = DexFile.getDexFileOptimizationInfo(path, isa);
+                    pw.println(isa + ": [status=" + info.getStatus()
+                            +"] [reason=" + info.getReason() + "]");
                 } catch (IOException ioe) {
-                     status = "[Exception]: " + ioe.getMessage();
+                    pw.println(isa + ": [Exception]: " + ioe.getMessage());
                 }
-                pw.println(isa + ": " + status);
             }
 
             if (useInfo.isUsedByOtherApps(path)) {

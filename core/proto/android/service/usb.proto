@@ -80,7 +80,7 @@ message UsbAccessoryProto {
     optional string model = 2;
     optional string description = 3;
     optional string version = 4;
-    optional string uri = 5;
+    optional string uri = 5 [ (android.privacy).dest = DEST_EXPLICIT ];
     optional string serial = 6 [ (android.privacy).dest = DEST_EXPLICIT ];
 }
 
@@ -155,6 +155,7 @@ message UsbEndPointProto {
 message UsbConnectionRecordProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
+    // usb device's address, e.g. 001/002, nothing about the phone
     optional string device_address = 1;
     optional android.service.UsbConnectionRecordMode mode = 2;
     optional int64 timestamp = 3;
@@ -251,6 +252,7 @@ message UsbAlsaDeviceProto {
     optional string name = 3;
     optional bool has_playback = 4;
     optional bool has_capture = 5;
+    // usb device's address, e.g. 001/002, nothing about the phone
     optional string address = 6;
 }
 
@@ -259,6 +261,7 @@ message UsbMidiDeviceProto {
 
     optional int32 card = 1;
     optional int32 device = 2;
+    // usb device's address, e.g. 001/002, nothing about the phone
     optional string device_address = 3;
 }
 

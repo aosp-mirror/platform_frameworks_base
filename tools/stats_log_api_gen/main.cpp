@@ -211,7 +211,7 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
         signature != atoms.signatures.end(); signature++) {
         int argIndex;
 
-        fprintf(out, "void\n");
+        fprintf(out, "int\n");
         fprintf(out, "stats_write(int32_t code");
         argIndex = 1;
         for (vector<java_type_t>::const_iterator arg = signature->begin();
@@ -251,7 +251,7 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
                             " diff length: %s vs %s\");\n",
                             attributionDecl.fields.front().name.c_str(),
                             chainField.name.c_str());
-                        fprintf(out, "        return;\n");
+                        fprintf(out, "        return -EINVAL;\n");
                         fprintf(out, "    }\n");
                     }
                 }
@@ -284,7 +284,7 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
             argIndex++;
         }
 
-        fprintf(out, "    event.write(LOG_ID_STATS);\n");
+        fprintf(out, "    return event.write(LOG_ID_STATS);\n");
         fprintf(out, "}\n");
         fprintf(out, "\n");
     }
@@ -293,7 +293,7 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
         signature != atoms.non_chained_signatures.end(); signature++) {
         int argIndex;
 
-        fprintf(out, "void\n");
+        fprintf(out, "int\n");
         fprintf(out, "stats_write_non_chained(int32_t code");
         argIndex = 1;
         for (vector<java_type_t>::const_iterator arg = signature->begin();
@@ -327,7 +327,7 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
             argIndex++;
         }
 
-        fprintf(out, "    event.write(LOG_ID_STATS);\n");
+        fprintf(out, "    return event.write(LOG_ID_STATS);\n");
         fprintf(out, "}\n");
         fprintf(out, "\n");
     }
@@ -377,7 +377,7 @@ static void write_cpp_method_header(
     const AtomDecl &attributionDecl) {
     for (set<vector<java_type_t>>::const_iterator signature = signatures.begin();
             signature != signatures.end(); signature++) {
-        fprintf(out, "void %s(int32_t code ", method_name.c_str());
+        fprintf(out, "int %s(int32_t code ", method_name.c_str());
         int argIndex = 1;
         for (vector<java_type_t>::const_iterator arg = signature->begin();
             arg != signature->end(); arg++) {
@@ -522,7 +522,7 @@ static void write_java_method(
     const AtomDecl &attributionDecl) {
     for (set<vector<java_type_t>>::const_iterator signature = signatures.begin();
         signature != signatures.end(); signature++) {
-        fprintf(out, "    public static native void %s(int code", method_name.c_str());
+        fprintf(out, "    public static native int %s(int code", method_name.c_str());
         int argIndex = 1;
         for (vector<java_type_t>::const_iterator arg = signature->begin();
             arg != signature->end(); arg++) {
@@ -719,7 +719,7 @@ jni_function_signature(const vector<java_type_t>& signature, const AtomDecl &att
             result += java_type_signature(*arg);
         }
     }
-    result += ")V";
+    result += ")I";
     return result;
 }
 
@@ -732,7 +732,7 @@ write_stats_log_jni(FILE* out, const string& java_method_name, const string& cpp
         signature != signatures.end(); signature++) {
         int argIndex;
 
-        fprintf(out, "static void\n");
+        fprintf(out, "static int\n");
         fprintf(out, "%s(JNIEnv* env, jobject clazz UNUSED, jint code",
                 jni_function_name(java_method_name, *signature).c_str());
         argIndex = 1;
@@ -779,7 +779,7 @@ write_stats_log_jni(FILE* out, const string& java_method_name, const string& cpp
                             "\"java/lang/IllegalArgumentException\", "
                             "\"invalid attribution field(%s) length.\");\n",
                             chainField.name.c_str());
-                        fprintf(out, "        return;\n");
+                        fprintf(out, "        return -EINVAL;\n");
                         fprintf(out, "    }\n");
                     }
                     if (chainField.javaType == JAVA_TYPE_INT) {
@@ -822,7 +822,7 @@ write_stats_log_jni(FILE* out, const string& java_method_name, const string& cpp
 
         // stats_write call
         argIndex = 1;
-        fprintf(out, "    android::util::%s(code", cpp_method_name.c_str());
+        fprintf(out, "   int ret =  android::util::%s(code", cpp_method_name.c_str());
         for (vector<java_type_t>::const_iterator arg = signature->begin();
                 arg != signature->end(); arg++) {
             if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {
@@ -868,6 +868,7 @@ write_stats_log_jni(FILE* out, const string& java_method_name, const string& cpp
             }
             argIndex++;
         }
+        fprintf(out, "    return ret;\n");
 
         fprintf(out, "}\n");
         fprintf(out, "\n");

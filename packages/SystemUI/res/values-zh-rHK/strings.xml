@@ -33,7 +33,6 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"持續進行"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"通知"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"電量低"</string>
-    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"電量不足。請開啟省電模式"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"剩餘 <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"電量剩餘 <xliff:g id="PERCENTAGE">%s</xliff:g>，根據您的使用情況，剩餘時間大約 <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"電量剩餘 <xliff:g id="PERCENTAGE">%s</xliff:g>，剩餘時間大約 <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -73,11 +72,10 @@
     <string name="global_action_screenshot" msgid="8329831278085426283">"擷取螢幕畫面"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"正在儲存螢幕擷取畫面..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"正在儲存螢幕擷取畫面..."</string>
-    <string name="screenshot_saving_text" msgid="2545047868936087248">"正在儲存螢幕擷取畫面"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"螢幕擷取畫面已儲存"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"輕按即可查看螢幕擷取畫面"</string>
-    <string name="screenshot_failed_title" msgid="9096484883063264803">"無法擷取螢幕畫面"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"儲存螢幕擷取畫面時發生問題"</string>
+    <string name="screenshot_failed_title" msgid="7612509838919089748">"無法儲存螢幕擷取畫面"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"請再次嘗試拍攝螢幕擷取畫面"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"由於儲存空間有限，因此無法儲存螢幕擷取畫面"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"應用程式或您的機構不允許擷取螢幕畫面"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB 檔案傳輸選項"</string>
@@ -275,8 +273,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"Dessert Case"</string>
     <string name="start_dreams" msgid="5640361424498338327">"螢幕保護程式"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"以太網"</string>
-    <!-- no translation found for quick_settings_header_onboarding_text (8030309023792936283) -->
-    <skip />
+    <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"按住圖示即可查看更多選項"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"請勿騷擾"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"只限優先"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"只限鬧鐘"</string>
@@ -351,7 +348,7 @@
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"在日落時開啟"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"在日出時關閉"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"在<xliff:g id="TIME">%s</xliff:g>開啟"</string>
-    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"在<xliff:g id="TIME">%s</xliff:g>關閉"</string>
+    <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"結束時間：<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC 已停用"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC 已啟用"</string>
@@ -435,7 +432,8 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> 將開始擷取您的螢幕上顯示的內容。"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"不用再顯示"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"全部清除"</string>
-    <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"「請勿騷擾」模式目前隱藏通知"</string>
+    <string name="manage_notifications_text" msgid="8035284146227267681">"管理通知"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"「請勿騷擾」模式目前隱藏通知"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"立即開始"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"沒有通知"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"個人檔案可能受到監控"</string>
@@ -541,7 +539,8 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s。輕按即可設為震動。"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s。輕按即可設為靜音。"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s音量控制項"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"有來電和通知時會發出鈴聲"</string>
+    <!-- no translation found for volume_dialog_ringer_guidance_ring (3360373718388509040) -->
+    <skip />
     <string name="output_title" msgid="5355078100792942802">"媒體輸出"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"通話輸出"</string>
     <string name="output_none_found" msgid="5544982839808921091">"找不到裝置"</string>
@@ -628,6 +627,7 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"通知控制項"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"通知延後選項"</string>
+    <string name="notification_menu_snooze_action" msgid="1112254519029621372">"延後"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"復原"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"已延後 <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
@@ -691,6 +691,8 @@
     <string name="battery" msgid="7498329822413202973">"電池"</string>
     <string name="clock" msgid="7416090374234785905">"時鐘"</string>
     <string name="headset" msgid="4534219457597457353">"耳機"</string>
+    <!-- no translation found for accessibility_long_click_tile (6687350750091842525) -->
+    <skip />
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"已連接至耳機"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"已連接至耳機"</string>
     <string name="data_saver" msgid="5037565123367048522">"數據節省模式"</string>
@@ -814,6 +816,7 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"螢幕擷取畫面"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"一般訊息"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"儲存空間"</string>
+    <string name="notification_channel_hints" msgid="7323870212489152689">"提示"</string>
     <string name="instant_apps" msgid="6647570248119804907">"即時應用程式"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"即時應用程式無需安裝即可使用。"</string>
     <string name="app_info" msgid="6856026610594615344">"應用程式資料"</string>
@@ -841,4 +844,11 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"允許「<xliff:g id="APP">%1$s</xliff:g>」顯示任何應用程式的快訊"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"允許"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"拒絕"</string>
+    <string name="auto_saver_title" msgid="1217959994732964228">"輕按即可預定省電模式自動開啟時間"</string>
+    <string name="auto_saver_text" msgid="6324376061044218113">"在電量為 <xliff:g id="PERCENTAGE">%d</xliff:g>%% 時自動開啟"</string>
+    <string name="no_auto_saver_action" msgid="8086002101711328500">"不用了，謝謝"</string>
+    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"已預定省電模式開啟時間"</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"省電模式將會在電量低於 <xliff:g id="PERCENTAGE">%d</xliff:g>%% 時自動開啟。"</string>
+    <string name="open_saver_setting_action" msgid="8314624730997322529">"設定"</string>
+    <string name="auto_saver_okay_action" msgid="2701221740227683650">"知道了"</string>
 </resources>

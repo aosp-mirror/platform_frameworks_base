@@ -145,7 +145,9 @@ public final class NotificationChannelGroup implements Parcelable {
 
     /**
      * Returns whether or not notifications posted to {@link NotificationChannel channels} belonging
-     * to this group are blocked.
+     * to this group are blocked. This value is independent of
+     * {@link NotificationManager#areNotificationsEnabled()} and
+     * {@link NotificationChannel#getImportance()}.
      */
     public boolean isBlocked() {
         return mBlocked;

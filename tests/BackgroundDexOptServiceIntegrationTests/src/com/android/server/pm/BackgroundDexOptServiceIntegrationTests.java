@@ -173,7 +173,7 @@ public final class BackgroundDexOptServiceIntegrationTests {
     private static String getCompilerFilter(String pkg) throws IOException {
         String cmd = String.format("dumpsys package %s", pkg);
         String[] lines = runShellCommandSplitLines(cmd);
-        final String substr = "compilation_filter=";
+        final String substr = "[status=";
         for (String line : lines) {
             int startIndex = line.indexOf(substr);
             if (startIndex < 0) {

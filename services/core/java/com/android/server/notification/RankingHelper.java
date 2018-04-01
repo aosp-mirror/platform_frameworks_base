@@ -569,7 +569,7 @@ public class RankingHelper implements RankingConfig {
 
     @Override
     public void createNotificationChannel(String pkg, int uid, NotificationChannel channel,
-            boolean fromTargetApp) {
+            boolean fromTargetApp, boolean hasDndAccess) {
         Preconditions.checkNotNull(pkg);
         Preconditions.checkNotNull(channel);
         Preconditions.checkNotNull(channel.getId());
@@ -610,8 +610,9 @@ public class RankingHelper implements RankingConfig {
                 existing.setImportance(channel.getImportance());
             }
 
-            // system apps can bypass dnd if the user hasn't changed any fields on the channel yet
-            if (existing.getUserLockedFields() == 0 & isSystemApp) {
+            // system apps and dnd access apps can bypass dnd if the user hasn't changed any
+            // fields on the channel yet
+            if (existing.getUserLockedFields() == 0 && (isSystemApp || hasDndAccess)) {
                 existing.setBypassDnd(channel.canBypassDnd());
             }
 
@@ -624,7 +625,7 @@ public class RankingHelper implements RankingConfig {
         }
 
         // Reset fields that apps aren't allowed to set.
-        if (fromTargetApp && !isSystemApp) {
+        if (fromTargetApp && !(isSystemApp || hasDndAccess)) {
             channel.setBypassDnd(r.priority == Notification.PRIORITY_MAX);
         }
         if (fromTargetApp) {

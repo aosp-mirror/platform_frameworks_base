@@ -47,10 +47,10 @@ interface IStatsCompanionService {
       * Uses AlarmManager.setRepeating API, so if the timestamp is in past, alarm fires immediately,
       * and alarm is inexact.
       */
-    oneway void setPullingAlarms(long timestampMs, long intervalMs);
+    oneway void setPullingAlarm(long nextPullTimeMs);
 
     /** Cancel any repeating pulling alarm. */
-    oneway void cancelPullingAlarms();
+    oneway void cancelPullingAlarm();
 
     /**
       * Register an alarm when we want to trigger subscribers at the given

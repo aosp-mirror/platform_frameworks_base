@@ -2873,13 +2873,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * Encapsulates the globla setting "hidden_api_blacklist_exemptions", including tracking the
+     * Encapsulates the global setting "hidden_api_blacklist_exemptions", including tracking the
      * latest value via a content observer.
      */
     static class HiddenApiBlacklist extends ContentObserver {
 
         private final Context mContext;
         private boolean mBlacklistDisabled;
+        private String mExemptionsStr;
+        private List<String> mExemptions = Collections.emptyList();
 
         public HiddenApiBlacklist(Handler handler, Context context) {
             super(handler);
@@ -2895,8 +2897,22 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         private void update() {
-            mBlacklistDisabled = "*".equals(Settings.Global.getString(mContext.getContentResolver(),
-                    Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS));
+            String exemptions = Settings.Global.getString(mContext.getContentResolver(),
+                    Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS);
+            if (!TextUtils.equals(exemptions, mExemptionsStr)) {
+                mExemptionsStr = exemptions;
+                if ("*".equals(exemptions)) {
+                    mBlacklistDisabled = true;
+                    mExemptions = Collections.emptyList();
+                } else {
+                    mBlacklistDisabled = false;
+                    mExemptions = TextUtils.isEmpty(exemptions)
+                            ? Collections.emptyList()
+                            : Arrays.asList(exemptions.split(","));
+                }
+                zygoteProcess.setApiBlacklistExemptions(mExemptions);
+            }
+
         }
 
         boolean isDisabled() {
@@ -4477,8 +4493,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         StatsLog.write(StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED,
             component.app.uid, component.realActivity.getPackageName(),
             component.realActivity.getShortClassName(), resumed ?
-                        StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__ACTIVITY__MOVE_TO_FOREGROUND :
-                        StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__ACTIVITY__MOVE_TO_BACKGROUND);
+                        StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__STATE__FOREGROUND :
+                        StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__STATE__BACKGROUND);
         if (resumed) {
             if (mUsageStatsService != null) {
                 mUsageStatsService.reportEvent(component.realActivity, component.userId,
@@ -13163,10 +13179,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     + android.Manifest.permission.SHUTDOWN);
         }
 
-        // TODO: Where should the corresponding '1' (start) write go?
-        StatsLog.write(StatsLog.DEVICE_ON_STATUS_CHANGED,
-                StatsLog.DEVICE_ON_STATUS_CHANGED__STATE__OFF);
-
         boolean timedout = false;
 
         synchronized(this) {
@@ -14814,7 +14826,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     .setPackage("android")
                     .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             broadcastIntent(null, intent, null, null, 0, null, null, null,
-                    OP_NONE, null, true, false, UserHandle.USER_ALL);
+                    OP_NONE, null, false, false, UserHandle.USER_ALL);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -15181,6 +15193,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 crashInfo.throwFileName,
                 crashInfo.throwLineNumber);
 
+        StatsLog.write(StatsLog.APP_CRASH_OCCURRED,
+                Binder.getCallingUid(),
+                eventType,
+                processName,
+                Binder.getCallingPid());
+
         addErrorToDropBox(eventType, r, processName, null, null, null, null, null, crashInfo);
 
         mAppErrors.crashApplication(r, crashInfo);
@@ -15351,6 +15369,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         EventLog.writeEvent(EventLogTags.AM_WTF, UserHandle.getUserId(callingUid), callingPid,
                 processName, r == null ? -1 : r.info.flags, tag, crashInfo.exceptionMessage);
 
+        StatsLog.write(StatsLog.WTF_OCCURRED, callingUid, tag, processName,
+                callingPid);
+
         addErrorToDropBox("wtf", r, processName, null, null, tag, null, null, crashInfo);
 
         return r;
@@ -15471,19 +15492,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Exit early if the dropbox isn't configured to accept this report type.
         final String dropboxTag = processClass(process) + "_" + eventType;
         if (dbox == null || !dbox.isTagEnabled(dropboxTag)) return;
-
-        // Log to StatsLog before the rate-limiting.
-        // The logging below is adapated from appendDropboxProcessHeaders.
-        StatsLog.write(StatsLog.DROPBOX_ERROR_CHANGED,
-                process != null ? process.uid : -1,
-                dropboxTag,
-                processName,
-                process != null ? process.pid : -1,
-                (process != null && process.info != null) ?
-                        (process.info.isInstantApp() ? 1 : 0) : -1,
-                activity != null ? activity.shortComponentName : null,
-                activity != null ? activity.packageName : null,
-                process != null ? (process.isInterestingToUserLocked() ? 1 : 0) : -1);
 
         // Rate-limit how often we're willing to do the heavy lifting below to
         // collect and record logs; currently 5 logs per 10 second period.
@@ -19764,6 +19772,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             catPw.flush();
         }
         dropBuilder.append(catSw.toString());
+        StatsLog.write(StatsLog.LOW_MEM_REPORTED);
         addErrorToDropBox("lowmem", null, "system_server", null,
                 null, tag.toString(), dropBuilder.toString(), null, null);
         //Slog.i(TAG, "Sent to dropbox:");
@@ -20920,8 +20929,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         // explicitly list each action as a protected broadcast, so we will check for that
         // one safe case and allow it: an explicit broadcast, only being received by something
         // that has protected itself.
-        if (receivers != null && receivers.size() > 0
-                && (intent.getPackage() != null || intent.getComponent() != null)) {
+        if (intent.getPackage() != null || intent.getComponent() != null) {
+            if (receivers == null || receivers.size() == 0) {
+                // Intent is explicit and there's no receivers.
+                // This happens, e.g. , when a system component sends a broadcast to
+                // its own runtime receiver, and there's no manifest receivers for it,
+                // because this method is called twice for each broadcast,
+                // for runtime receivers and manifest receivers and the later check would find
+                // no receivers.
+                return;
+            }
             boolean allProtected = true;
             for (int i = receivers.size()-1; i >= 0; i--) {
                 Object target = receivers.get(i);

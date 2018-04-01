@@ -15,8 +15,10 @@
 package com.android.server.slice;
 
 import static android.content.ContentProvider.maybeAddUserId;
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -35,9 +37,11 @@ import android.content.pm.PackageManagerInternal;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableContext;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
@@ -63,6 +67,7 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
     private SliceManagerService mService;
     private PinnedSliceState mCreatedSliceState;
     private IBinder mToken = new Binder();
+    private TestableContext mContextSpy;
 
     @Before
     public void setup() {
@@ -72,7 +77,8 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
         mContext.addMockSystemService(AppOpsManager.class, mock(AppOpsManager.class));
         mContext.getTestablePermissions().setPermission(TEST_URI, PERMISSION_GRANTED);
 
-        mService = spy(new SliceManagerService(mContext, TestableLooper.get(this).getLooper()));
+        mContextSpy = spy(mContext);
+        mService = spy(new SliceManagerService(mContextSpy, TestableLooper.get(this).getLooper()));
         mCreatedSliceState = mock(PinnedSliceState.class);
         doReturn(mCreatedSliceState).when(mService).createPinnedSlice(eq(TEST_URI), anyString());
     }
@@ -101,6 +107,25 @@ public class SliceManagerServiceTest extends UiServiceTestCase {
         when(mCreatedSliceState.unpin(eq("pkg"), eq(mToken))).thenReturn(false);
         mService.unpinSlice("pkg", TEST_URI, mToken);
         verify(mCreatedSliceState, never()).destroy();
+    }
+
+    @Test
+    public void testCheckAutoGrantPermissions() throws RemoteException {
+        String[] testPerms = new String[] {
+                "perm1",
+                "perm2",
+        };
+        when(mContextSpy.checkUriPermission(any(), anyInt(), anyInt(), anyInt()))
+                .thenReturn(PERMISSION_DENIED);
+        when(mContextSpy.checkPermission("perm1", Process.myPid(), Process.myUid()))
+                .thenReturn(PERMISSION_DENIED);
+        when(mContextSpy.checkPermission("perm2", Process.myPid(), Process.myUid()))
+                .thenReturn(PERMISSION_GRANTED);
+        mService.checkSlicePermission(TEST_URI, mContext.getPackageName(), Process.myPid(),
+                Process.myUid(), testPerms);
+
+        verify(mContextSpy).checkPermission(eq("perm1"), eq(Process.myPid()), eq(Process.myUid()));
+        verify(mContextSpy).checkPermission(eq("perm2"), eq(Process.myPid()), eq(Process.myUid()));
     }
 
 }

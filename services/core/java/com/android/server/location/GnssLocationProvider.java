@@ -2513,6 +2513,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
          * this handler.
          */
         private void handleInitialize() {
+            native_init_once();
+
             /*
              * A cycle of native_init() and native_cleanup() is needed so that callbacks are
              * registered after bootup even when location is disabled.
@@ -2576,9 +2578,9 @@ public class GnssLocationProvider implements LocationProviderInterface {
             // register for connectivity change events, this is equivalent to the deprecated way of
             // registering for CONNECTIVITY_ACTION broadcasts
             NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
-            networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
-            networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
-            networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_BLUETOOTH);
+            networkRequestBuilder.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
+            networkRequestBuilder.addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+            networkRequestBuilder.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN);
             NetworkRequest networkRequest = networkRequestBuilder.build();
             mConnMgr.registerNetworkCallback(networkRequest, mNetworkConnectivityCallback);
 
@@ -2898,6 +2900,8 @@ public class GnssLocationProvider implements LocationProviderInterface {
     private static native boolean native_is_agps_ril_supported();
 
     private static native boolean native_is_gnss_configuration_supported();
+
+    private static native void native_init_once();
 
     private native boolean native_init();
 

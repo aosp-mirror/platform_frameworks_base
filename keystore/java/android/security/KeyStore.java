@@ -16,6 +16,7 @@
 
 package android.security;
 
+import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.Application;
 import android.app.KeyguardManager;
@@ -66,6 +67,7 @@ public class KeyStore {
     public static final int VALUE_CORRUPTED = 8;
     public static final int UNDEFINED_ACTION = 9;
     public static final int WRONG_PASSWORD = 10;
+    public static final int CANNOT_ATTEST_IDS = -66;
     public static final int HARDWARE_TYPE_UNAVAILABLE = -68;
 
     /**
@@ -278,7 +280,7 @@ public class KeyStore {
     /**
      * Attempt to lock the keystore for {@code user}.
      *
-     * @param user Android user to lock.
+     * @param userId Android user to lock.
      * @return whether {@code user}'s keystore was locked.
      */
     public boolean lock(int userId) {
@@ -299,7 +301,7 @@ public class KeyStore {
      * This is required before keystore entries created with FLAG_ENCRYPTED can be accessed or
      * created.
      *
-     * @param user Android user ID to operate on
+     * @param userId Android user ID to operate on
      * @param password user's keystore password. Should be the most recent value passed to
      * {@link #onUserPasswordChanged} for the user.
      *

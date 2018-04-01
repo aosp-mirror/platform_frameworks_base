@@ -16,64 +16,78 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
+
+import static com.android.systemui.statusbar.phone.StatusBarIconController.TAG_PRIMARY;
 
 public class StatusBarIconList {
-    protected ArrayList<String> mSlots = new ArrayList<>();
-    protected ArrayList<StatusBarIcon> mIcons = new ArrayList<>();
+    private ArrayList<Slot> mSlots = new ArrayList<>();
 
     public StatusBarIconList(String[] slots) {
         final int N = slots.length;
         for (int i=0; i < N; i++) {
-            mSlots.add(slots[i]);
-            mIcons.add(null);
+            mSlots.add(new Slot(slots[i], null));
         }
     }
 
     public int getSlotIndex(String slot) {
         final int N = mSlots.size();
         for (int i=0; i<N; i++) {
-            if (slot.equals(mSlots.get(i))) {
+            Slot item = mSlots.get(i);
+            if (item.getName().equals(slot)) {
                 return i;
             }
         }
         // Auto insert new items at the beginning.
-        mSlots.add(0, slot);
-        mIcons.add(0, null);
+        mSlots.add(0, new Slot(slot, null));
         return 0;
+    }
+
+    protected ArrayList<Slot> getSlots() {
+        return new ArrayList<>(mSlots);
+    }
+
+    protected Slot getSlot(String name) {
+        return mSlots.get(getSlotIndex(name));
     }
 
     public int size() {
         return mSlots.size();
     }
 
-    public void setIcon(int index, StatusBarIcon icon) {
-        mIcons.set(index, icon);
+    public void setIcon(int index, @NonNull StatusBarIconHolder holder) {
+        mSlots.get(index).addHolder(holder);
     }
 
-    public void removeIcon(int index) {
-        mIcons.set(index, null);
+    public void removeIcon(int index, int tag) {
+        mSlots.get(index).removeForTag(tag);
     }
 
-    public String getSlot(int index) {
-        return mSlots.get(index);
+    public String getSlotName(int index) {
+        return mSlots.get(index).getName();
     }
 
-    public StatusBarIcon getIcon(int index) {
-        return mIcons.get(index);
+    public StatusBarIconHolder getIcon(int index, int tag) {
+        return mSlots.get(index).getHolderForTag(tag);
     }
 
-    public int getViewIndex(int index) {
+    public int getViewIndex(int slotIndex, int tag) {
         int count = 0;
-        for (int i = 0; i < index; i++) {
-            if (mIcons.get(i) != null) {
-                count++;
+        for (int i = 0; i < slotIndex; i++) {
+            Slot item = mSlots.get(i);
+            if (item.hasIconsInSlot()) {
+                count += item.numberOfIcons();
             }
         }
-        return count;
+
+        Slot viewItem = mSlots.get(slotIndex);
+        return count + viewItem.viewIndexOffsetForTag(tag);
     }
 
     public void dump(PrintWriter pw) {
@@ -81,7 +95,163 @@ public class StatusBarIconList {
         final int N = mSlots.size();
         pw.println("  icon slots: " + N);
         for (int i=0; i<N; i++) {
-            pw.printf("    %2d: (%s) %s\n", i, mSlots.get(i), mIcons.get(i));
+            pw.printf("    %2d:%s\n", i, mSlots.get(i).toString());
+        }
+    }
+
+    public static class Slot {
+        private final String mName;
+        private StatusBarIconHolder mHolder;
+        /**
+         * Only used if multiple icons are added to the same slot.
+         *
+         * If there are mSubSlots, then these are structured like:
+         *      [ First item | (the rest) ]
+         *
+         * The tricky thing to keep in mind here is that the list [mHolder, mSubSlots] is ordered
+         * ascending, but for view logic we should go backwards through the list. I.e., the first
+         * element (mHolder) should be the highest index, because higher priority items go to the
+         * right of lower priority items
+         */
+        private ArrayList<StatusBarIconHolder> mSubSlots;
+
+        public Slot(String name, StatusBarIconHolder iconHolder) {
+            mName = name;
+            mHolder = iconHolder;
+        }
+
+        public String getName() {
+            return mName;
+        }
+
+        @Nullable
+        public StatusBarIconHolder getHolderForTag(int tag) {
+            if (tag == TAG_PRIMARY) {
+                return mHolder;
+            }
+
+            if (mSubSlots != null) {
+                for (StatusBarIconHolder holder : mSubSlots) {
+                    if (holder.getTag() == tag) {
+                        return holder;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        public void addHolder(StatusBarIconHolder holder) {
+            int tag = holder.getTag();
+            if (tag == TAG_PRIMARY) {
+                mHolder = holder;
+            } else {
+                setSubSlot(holder, tag);
+            }
+        }
+
+        public void removeForTag(int tag) {
+            if (tag == TAG_PRIMARY) {
+                mHolder = null;
+            } else {
+                int index = getIndexForTag(tag);
+                if (index != -1) {
+                    mSubSlots.remove(index);
+                }
+            }
+        }
+
+        @VisibleForTesting
+        public void clear() {
+            mHolder = null;
+            if (mSubSlots != null) {
+                mSubSlots = null;
+            }
+        }
+
+        private void setSubSlot(StatusBarIconHolder holder, int tag) {
+            if (mSubSlots == null) {
+                mSubSlots = new ArrayList<>();
+                mSubSlots.add(holder);
+                return;
+            }
+
+            if (getIndexForTag(tag) != -1) {
+                // Holder exists for tag; no-op
+                return;
+            }
+
+            // These holders get added to the end. Confused yet?
+            mSubSlots.add(holder);
+        }
+
+        private int getIndexForTag(int tag) {
+            for (int i = 0; i < mSubSlots.size(); i++) {
+                StatusBarIconHolder h = mSubSlots.get(i);
+                if (h.getTag() == tag) {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        public boolean hasIconsInSlot() {
+            if (mHolder != null) return true;
+            if (mSubSlots == null) return false;
+
+            return mSubSlots.size() > 0;
+        }
+
+        public int numberOfIcons() {
+            int num = mHolder == null ? 0 : 1;
+            if (mSubSlots == null) return num;
+
+            return num + mSubSlots.size();
+        }
+
+        /**
+         * View index is backwards from regular index
+         * @param tag the tag of the holder being viewed
+         * @return (1 + mSubSlots.size() - indexOfTag)
+         */
+        public int viewIndexOffsetForTag(int tag) {
+            if (mSubSlots == null) {
+                return 0;
+            }
+
+            int subSlots = mSubSlots.size();
+            if (tag == TAG_PRIMARY) {
+                return subSlots;
+            }
+
+            return subSlots - getIndexForTag(tag) - 1;
+        }
+
+        public List<StatusBarIconHolder> getHolderList() {
+            ArrayList<StatusBarIconHolder> holders = new ArrayList<>();
+            if (mHolder != null) {
+                holders.add(mHolder);
+            }
+
+            if (mSubSlots != null) {
+                holders.addAll(mSubSlots);
+            }
+
+            return holders;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("(%s) %s", mName, subSlotsString());
+        }
+
+        private String subSlotsString() {
+            if (mSubSlots == null) {
+                return "";
+            }
+
+            return "" + mSubSlots.size() + " subSlots";
         }
     }
 }

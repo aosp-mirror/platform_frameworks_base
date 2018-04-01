@@ -57,6 +57,7 @@ package android {
     field public static final java.lang.String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
     field public static final java.lang.String CONNECTIVITY_INTERNAL = "android.permission.CONNECTIVITY_INTERNAL";
     field public static final java.lang.String CONNECTIVITY_USE_RESTRICTED_NETWORKS = "android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS";
+    field public static final java.lang.String CONTROL_DISPLAY_SATURATION = "android.permission.CONTROL_DISPLAY_SATURATION";
     field public static final java.lang.String CONTROL_INCALL_EXPERIENCE = "android.permission.CONTROL_INCALL_EXPERIENCE";
     field public static final java.lang.String CONTROL_LOCATION_UPDATES = "android.permission.CONTROL_LOCATION_UPDATES";
     field public static final java.lang.String CONTROL_VPN = "android.permission.CONTROL_VPN";
@@ -1252,6 +1253,7 @@ package android.hardware.display {
     method public android.hardware.display.BrightnessConfiguration getDefaultBrightnessConfiguration();
     method public android.graphics.Point getStableDisplaySize();
     method public void setBrightnessConfiguration(android.hardware.display.BrightnessConfiguration);
+    method public void setSaturationLevel(float);
   }
 
 }
@@ -2101,6 +2103,7 @@ package android.hardware.radio {
     method public java.lang.String getVersion();
     method public boolean isBackgroundScanningSupported();
     method public boolean isCaptureSupported();
+    method public boolean isInitializationRequired();
     method public boolean isProgramIdentifierSupported(int);
     method public boolean isProgramTypeSupported(int);
     method public void writeToParcel(android.os.Parcel, int);
@@ -3100,6 +3103,10 @@ package android.net {
     field public static final int ERROR_HARDWARE_ERROR = 3; // 0x3
     field public static final int ERROR_HARDWARE_UNSUPPORTED = 2; // 0x2
     field public static final int ERROR_INVALID_NETWORK = 1; // 0x1
+  }
+
+  public final class NetworkCapabilities implements android.os.Parcelable {
+    field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
   }
 
   public class NetworkKey implements android.os.Parcelable {
@@ -5549,6 +5556,7 @@ package android.telephony.euicc {
 package android.telephony.ims {
 
   public final class ImsCallForwardInfo implements android.os.Parcelable {
+    ctor public ImsCallForwardInfo(int, int, int, int, java.lang.String, int);
     method public int describeContents();
     method public int getCondition();
     method public java.lang.String getNumber();
@@ -5863,7 +5871,7 @@ package android.telephony.ims {
   }
 
   public final class ImsSsData implements android.os.Parcelable {
-    ctor public ImsSsData();
+    ctor public ImsSsData(int, int, int, int, int);
     method public int describeContents();
     method public boolean isTypeBarring();
     method public boolean isTypeCf();
@@ -5914,7 +5922,7 @@ package android.telephony.ims {
   }
 
   public final class ImsSsInfo implements android.os.Parcelable {
-    ctor public ImsSsInfo();
+    ctor public ImsSsInfo(int, java.lang.String);
     method public int describeContents();
     method public java.lang.String getIcbNum();
     method public int getStatus();

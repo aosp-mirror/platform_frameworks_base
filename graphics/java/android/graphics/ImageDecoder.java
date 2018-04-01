@@ -21,10 +21,12 @@ import static android.system.OsConstants.SEEK_SET;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import android.annotation.AnyThread;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.annotation.WorkerThread;
 import android.content.ContentResolver;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
@@ -65,6 +67,16 @@ public final class ImageDecoder implements AutoCloseable {
 
     /**
      *  Source of the encoded image data.
+     *
+     *  <p>This object references the data that will be used to decode a
+     *  Drawable or Bitmap in {@link #decodeDrawable} or {@link #decodeBitmap}.
+     *  Constructing a {@code Source} (with one of the overloads of
+     *  {@code createSource}) can be done on any thread because the construction
+     *  simply captures values. The real work is done in decodeDrawable or
+     *  decodeBitmap.</p>
+     *
+     *  <p>Further, a Source object can be reused with different settings, or
+     *  even used simultaneously in multiple threads.</p>
      */
     public static abstract class Source {
         private Source() {}
@@ -120,7 +132,8 @@ public final class ImageDecoder implements AutoCloseable {
                 int length = mBuffer.limit() - mBuffer.position();
                 return nCreate(mBuffer.array(), offset, length, this);
             }
-            return nCreate(mBuffer, mBuffer.position(), mBuffer.limit(), this);
+            ByteBuffer buffer = mBuffer.slice();
+            return nCreate(buffer, buffer.position(), buffer.limit(), this);
         }
     }
 
@@ -232,6 +245,8 @@ public final class ImageDecoder implements AutoCloseable {
 
     /**
      * For backwards compatibility, this does *not* close the InputStream.
+     *
+     * Further, unlike other Sources, this one is not reusable.
      */
     private static class InputStreamSource extends Source {
         InputStreamSource(Resources res, InputStream is, int inputDensity) {
@@ -322,12 +337,17 @@ public final class ImageDecoder implements AutoCloseable {
         final Resources mResources;
         final int       mResId;
         int             mResDensity;
+        private Object  mLock = new Object();
 
         @Override
         public Resources getResources() { return mResources; }
 
         @Override
-        public int getDensity() { return mResDensity; }
+        public int getDensity() {
+            synchronized (mLock) {
+                return mResDensity;
+            }
+        }
 
         @Override
         public ImageDecoder createImageDecoder() throws IOException {
@@ -336,10 +356,12 @@ public final class ImageDecoder implements AutoCloseable {
             // keep it alive.
             InputStream is = mResources.openRawResource(mResId, value);
 
-            if (value.density == TypedValue.DENSITY_DEFAULT) {
-                mResDensity = DisplayMetrics.DENSITY_DEFAULT;
-            } else if (value.density != TypedValue.DENSITY_NONE) {
-                mResDensity = value.density;
+            synchronized (mLock) {
+                if (value.density == TypedValue.DENSITY_DEFAULT) {
+                    mResDensity = DisplayMetrics.DENSITY_DEFAULT;
+                } else if (value.density != TypedValue.DENSITY_NONE) {
+                    mResDensity = value.density;
+                }
             }
 
             return createFromAsset((AssetInputStream) is, this);
@@ -432,6 +454,18 @@ public final class ImageDecoder implements AutoCloseable {
         public boolean isAnimated() {
             return mDecoder.mAnimated;
         }
+
+        /**
+         * If known, the color space the decoded bitmap will have. Note that the
+         * output color space is not guaranteed to be the color space the bitmap
+         * is encoded with. If not known (when the config is
+         * {@link Bitmap.Config#ALPHA_8} for instance), or there is an error,
+         * it is set to null.
+         */
+        @Nullable
+        public ColorSpace getColorSpace() {
+            return mDecoder.getColorSpace();
+        }
     };
 
     /** @removed
@@ -443,6 +477,9 @@ public final class ImageDecoder implements AutoCloseable {
     /**
      *  Optional listener supplied to {@link #decodeDrawable} or
      *  {@link #decodeBitmap}.
+     *
+     *  <p>This is necessary in order to change the default settings of the
+     *  decode.</p>
      */
     public static interface OnHeaderDecodedListener {
         /**
@@ -534,6 +571,9 @@ public final class ImageDecoder implements AutoCloseable {
 
         /**
          *  Retrieve the {@link Source} that was interrupted.
+         *
+         *  <p>This can be used for equality checking to find the Source which
+         *  failed to completely decode.</p>
          */
         @NonNull
         public Source getSource() {
@@ -582,16 +622,17 @@ public final class ImageDecoder implements AutoCloseable {
     private final int     mHeight;
     private final boolean mAnimated;
 
-    private int     mDesiredWidth;
-    private int     mDesiredHeight;
-    private int     mAllocator = ALLOCATOR_DEFAULT;
-    private boolean mRequireUnpremultiplied = false;
-    private boolean mMutable = false;
-    private boolean mConserveMemory = false;
-    private boolean mDecodeAsAlphaMask = false;
-    private Rect    mCropRect;
-    private Rect    mOutPaddingRect;
-    private Source  mSource;
+    private int        mDesiredWidth;
+    private int        mDesiredHeight;
+    private int        mAllocator = ALLOCATOR_DEFAULT;
+    private boolean    mUnpremultipliedRequired = false;
+    private boolean    mMutable = false;
+    private boolean    mConserveMemory = false;
+    private boolean    mDecodeAsAlphaMask = false;
+    private ColorSpace mDesiredColorSpace = null;
+    private Rect       mCropRect;
+    private Rect       mOutPaddingRect;
+    private Source     mSource;
 
     private PostProcessor          mPostProcessor;
     private OnPartialImageListener mOnPartialImageListener;
@@ -645,6 +686,7 @@ public final class ImageDecoder implements AutoCloseable {
      * @return a new Source object, which can be passed to
      *      {@link #decodeDrawable} or {@link #decodeBitmap}.
      */
+    @AnyThread
     @NonNull
     public static Source createSource(@NonNull Resources res, int resId)
     {
@@ -659,6 +701,7 @@ public final class ImageDecoder implements AutoCloseable {
      * @return a new Source object, which can be passed to
      *      {@link #decodeDrawable} or {@link #decodeBitmap}.
      */
+    @AnyThread
     @NonNull
     public static Source createSource(@NonNull ContentResolver cr,
             @NonNull Uri uri) {
@@ -670,6 +713,7 @@ public final class ImageDecoder implements AutoCloseable {
      *
      * @hide
      */
+    @AnyThread
     @NonNull
     public static Source createSource(@NonNull ContentResolver cr,
             @NonNull Uri uri, @Nullable Resources res) {
@@ -679,6 +723,7 @@ public final class ImageDecoder implements AutoCloseable {
     /**
      * Create a new {@link Source} from a file in the "assets" directory.
      */
+    @AnyThread
     @NonNull
     public static Source createSource(@NonNull AssetManager assets, @NonNull String fileName) {
         return new AssetSource(assets, fileName);
@@ -696,6 +741,7 @@ public final class ImageDecoder implements AutoCloseable {
      *      not within data.
      * @hide
      */
+    @AnyThread
     @NonNull
     public static Source createSource(@NonNull byte[] data, int offset,
             int length) throws ArrayIndexOutOfBoundsException {
@@ -714,6 +760,7 @@ public final class ImageDecoder implements AutoCloseable {
      * See {@link #createSource(byte[], int, int).
      * @hide
      */
+    @AnyThread
     @NonNull
     public static Source createSource(@NonNull byte[] data) {
         return createSource(data, 0, data.length);
@@ -731,24 +778,35 @@ public final class ImageDecoder implements AutoCloseable {
      * be modified, even after the {@code AnimatedImageDrawable} is returned.
      * {@code buffer}'s contents should never be modified during decode.</p>
      */
+    @AnyThread
     @NonNull
     public static Source createSource(@NonNull ByteBuffer buffer) {
-        return new ByteBufferSource(buffer.slice());
+        return new ByteBufferSource(buffer);
     }
 
     /**
      * Internal API used to generate bitmaps for use by Drawables (i.e. BitmapDrawable)
+     *
+     * <p>Unlike other Sources, this one cannot be reused.</p>
+     *
      * @hide
      */
+    @AnyThread
+    @NonNull
     public static Source createSource(Resources res, InputStream is) {
         return new InputStreamSource(res, is, Bitmap.getDefaultDensity());
     }
 
     /**
      * Internal API used to generate bitmaps for use by Drawables (i.e. BitmapDrawable)
+     *
+     * <p>Unlike other Sources, this one cannot be reused.</p>
+     *
      * @hide
      */
+    @AnyThread
     @TestApi
+    @NonNull
     public static Source createSource(Resources res, InputStream is, int density) {
         return new InputStreamSource(res, is, density);
     }
@@ -756,6 +814,7 @@ public final class ImageDecoder implements AutoCloseable {
     /**
      * Create a new {@link Source} from a {@link java.io.File}.
      */
+    @AnyThread
     @NonNull
     public static Source createSource(@NonNull File file) {
         return new FileSource(file);
@@ -766,14 +825,16 @@ public final class ImageDecoder implements AutoCloseable {
      *
      *  <p>This takes an input that functions like
      *  {@link BitmapFactory.Options#inSampleSize}. It returns a width and
-     *  height that can be acheived by sampling the encoded image. Other widths
+     *  height that can be achieved by sampling the encoded image. Other widths
      *  and heights may be supported, but will require an additional (internal)
      *  scaling step. Such internal scaling is *not* supported with
-     *  {@link #setRequireUnpremultiplied} set to {@code true}.</p>
+     *  {@link #setUnpremultipliedRequired} set to {@code true}.</p>
      *
      *  @param sampleSize Sampling rate of the encoded image.
      *  @return {@link android.util.Size} of the width and height after
      *      sampling.
+     *
+     *  @hide
      */
     @NonNull
     public Size getSampledSize(int sampleSize) {
@@ -789,14 +850,32 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     // Modifiers
+    /** @removed
+     * @deprecated Renamed to {@link #setTargetSize}.
+     */
+    @java.lang.Deprecated
+    public ImageDecoder setResize(int width, int height) {
+        this.setTargetSize(width, height);
+        return this;
+    }
+
     /**
-     *  Resize the output to have the following size.
+     *  Specify the size of the output {@link Drawable} or {@link Bitmap}.
+     *
+     *  <p>By default, the output size will match the size of the encoded
+     *  image, which can be retrieved from the {@link ImageInfo} in
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
+     *
+     *  <p>Only the last call to this or {@link #setTargetSampleSize} is
+     *  respected.</p>
+     *
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      *
      *  @param width must be greater than 0.
      *  @param height must be greater than 0.
-     *  @return this object for chaining.
      */
-    public ImageDecoder setResize(int width, int height) {
+    public void setTargetSize(int width, int height) {
         if (width <= 0 || height <= 0) {
             throw new IllegalArgumentException("Dimensions must be positive! "
                     + "provided (" + width + ", " + height + ")");
@@ -804,21 +883,70 @@ public final class ImageDecoder implements AutoCloseable {
 
         mDesiredWidth = width;
         mDesiredHeight = height;
+    }
+
+    /** @removed
+     * @deprecated Renamed to {@link #setTargetSampleSize}.
+     */
+    @java.lang.Deprecated
+    public ImageDecoder setResize(int sampleSize) {
+        this.setTargetSampleSize(sampleSize);
         return this;
     }
 
+    private int getTargetDimension(int original, int sampleSize, int computed) {
+        // Sampling will never result in a smaller size than 1.
+        if (sampleSize >= original) {
+            return 1;
+        }
+
+        // Use integer divide to find the desired size. If that is what
+        // getSampledSize computed, that is the size to use.
+        int target = original / sampleSize;
+        if (computed == target) {
+            return computed;
+        }
+
+        // If sampleSize does not divide evenly into original, the decoder
+        // may round in either direction. It just needs to get a result that
+        // is close.
+        int reverse = computed * sampleSize;
+        if (Math.abs(reverse - original) < sampleSize) {
+            // This is the size that can be decoded most efficiently.
+            return computed;
+        }
+
+        // The decoder could not get close (e.g. it is a DNG image).
+        return target;
+    }
+
     /**
-     *  Resize based on a sample size.
+     *  Set the target size with a sampleSize.
      *
-     *  <p>This has the same effect as passing the result of
-     *  {@link #getSampledSize} to {@link #setResize(int, int)}.</p>
+     *  <p>By default, the output size will match the size of the encoded
+     *  image, which can be retrieved from the {@link ImageInfo} in
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
+     *
+     *  <p>Requests the decoder to subsample the original image, returning a
+     *  smaller image to save memory. The sample size is the number of pixels
+     *  in either dimension that correspond to a single pixel in the output.
+     *  For example, sampleSize == 4 returns an image that is 1/4 the
+     *  width/height of the original, and 1/16 the number of pixels.</p>
+     *
+     *  <p>Must be greater than or equal to 1.</p>
+     *
+     *  <p>Only the last call to this or {@link #setTargetSize} is respected.</p>
+     *
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      *
      *  @param sampleSize Sampling rate of the encoded image.
-     *  @return this object for chaining.
      */
-    public ImageDecoder setResize(int sampleSize) {
+    public void setTargetSampleSize(int sampleSize) {
         Size size = this.getSampledSize(sampleSize);
-        return this.setResize(size.getWidth(), size.getHeight());
+        int targetWidth = getTargetDimension(mWidth, sampleSize, size.getWidth());
+        int targetHeight = getTargetDimension(mHeight, sampleSize, size.getHeight());
+        this.setTargetSize(targetWidth, targetHeight);
     }
 
     private boolean requestedResize() {
@@ -832,7 +960,7 @@ public final class ImageDecoder implements AutoCloseable {
      *  Will typically result in a {@link Bitmap.Config#HARDWARE}
      *  allocation, but may be software for small images. In addition, this will
      *  switch to software when HARDWARE is incompatible, e.g.
-     *  {@link #setMutable}, {@link #setDecodeAsAlphaMask}.
+     *  {@link #setMutableRequired}, {@link #setDecodeAsAlphaMaskEnabled}.
      */
     public static final int ALLOCATOR_DEFAULT = 0;
 
@@ -855,8 +983,8 @@ public final class ImageDecoder implements AutoCloseable {
      *  Require a {@link Bitmap.Config#HARDWARE} {@link Bitmap}.
      *
      *  When this is combined with incompatible options, like
-     *  {@link #setMutable} or {@link #setDecodeAsAlphaMask}, {@link #decodeDrawable}
-     *  / {@link #decodeBitmap} will throw an
+     *  {@link #setMutableRequired} or {@link #setDecodeAsAlphaMaskEnabled},
+     *  {@link #decodeDrawable} / {@link #decodeBitmap} will throw an
      *  {@link java.lang.IllegalStateException}.
      */
     public static final int ALLOCATOR_HARDWARE = 3;
@@ -871,17 +999,18 @@ public final class ImageDecoder implements AutoCloseable {
     /**
      *  Choose the backing for the pixel memory.
      *
-     *  This is ignored for animated drawables.
+     *  <p>This is ignored for animated drawables.</p>
+     *
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      *
      *  @param allocator Type of allocator to use.
-     *  @return this object for chaining.
      */
-    public ImageDecoder setAllocator(@Allocator int allocator) {
+    public void setAllocator(@Allocator int allocator) {
         if (allocator < ALLOCATOR_DEFAULT || allocator > ALLOCATOR_HARDWARE) {
             throw new IllegalArgumentException("invalid allocator " + allocator);
         }
         mAllocator = allocator;
-        return this;
     }
 
     /**
@@ -905,18 +1034,35 @@ public final class ImageDecoder implements AutoCloseable {
      *  {@link Drawable} will throw an {@link java.lang.IllegalStateException}.
      *  </p>
      *
-     *  @return this object for chaining.
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      */
-    public ImageDecoder setRequireUnpremultiplied(boolean requireUnpremultiplied) {
-        mRequireUnpremultiplied = requireUnpremultiplied;
+    public void setUnpremultipliedRequired(boolean unpremultipliedRequired) {
+        mUnpremultipliedRequired = unpremultipliedRequired;
+    }
+
+    /** @removed
+     * @deprecated Renamed to {@link #setUnpremultipliedRequired}.
+     */
+    @java.lang.Deprecated
+    public ImageDecoder setRequireUnpremultiplied(boolean unpremultipliedRequired) {
+        this.setUnpremultipliedRequired(unpremultipliedRequired);
         return this;
     }
 
     /**
      *  Return whether the {@link Bitmap} will have unpremultiplied pixels.
      */
+    public boolean isUnpremultipliedRequired() {
+        return mUnpremultipliedRequired;
+    }
+
+    /** @removed
+     * @deprecated Renamed to {@link #isUnpremultipliedRequired}.
+     */
+    @java.lang.Deprecated
     public boolean getRequireUnpremultiplied() {
-        return mRequireUnpremultiplied;
+        return this.isUnpremultipliedRequired();
     }
 
     /**
@@ -932,11 +1078,12 @@ public final class ImageDecoder implements AutoCloseable {
      *  {@link Canvas} will be recorded immediately and then applied to each
      *  frame.</p>
      *
-     *  @return this object for chaining.
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
+     *
      */
-    public ImageDecoder setPostProcessor(@Nullable PostProcessor p) {
+    public void setPostProcessor(@Nullable PostProcessor p) {
         mPostProcessor = p;
-        return this;
     }
 
     /**
@@ -953,11 +1100,12 @@ public final class ImageDecoder implements AutoCloseable {
      *  <p>Will be called if there is an error in the input. Without one, an
      *  error will result in an Exception being thrown.</p>
      *
-     *  @return this object for chaining.
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
+     *
      */
-    public ImageDecoder setOnPartialImageListener(@Nullable OnPartialImageListener l) {
+    public void setOnPartialImageListener(@Nullable OnPartialImageListener l) {
         mOnPartialImageListener = l;
-        return this;
     }
 
     /**
@@ -972,19 +1120,20 @@ public final class ImageDecoder implements AutoCloseable {
      *  Crop the output to {@code subset} of the (possibly) scaled image.
      *
      *  <p>{@code subset} must be contained within the size set by
-     *  {@link #setResize} or the bounds of the image if setResize was not
-     *  called. Otherwise an {@link IllegalStateException} will be thrown by
+     *  {@link #setTargetSize} or the bounds of the image if setTargetSize was
+     *  not called. Otherwise an {@link IllegalStateException} will be thrown by
      *  {@link #decodeDrawable}/{@link #decodeBitmap}.</p>
      *
      *  <p>NOT intended as a replacement for
      *  {@link BitmapRegionDecoder#decodeRegion}. This supports all formats,
      *  but merely crops the output.</p>
      *
-     *  @return this object for chaining.
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
+     *
      */
-    public ImageDecoder setCrop(@Nullable Rect subset) {
+    public void setCrop(@Nullable Rect subset) {
         mCropRect = subset;
-        return this;
     }
 
     /**
@@ -1001,13 +1150,13 @@ public final class ImageDecoder implements AutoCloseable {
      *  If the image is a nine patch, this Rect will be set to the padding
      *  rectangle during decode. Otherwise it will not be modified.
      *
-     *  @return this object for chaining.
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      *
      *  @hide
      */
-    public ImageDecoder setOutPaddingRect(@NonNull Rect outPadding) {
+    public void setOutPaddingRect(@NonNull Rect outPadding) {
         mOutPaddingRect = outPadding;
-        return this;
     }
 
     /**
@@ -1026,18 +1175,35 @@ public final class ImageDecoder implements AutoCloseable {
      *  order to modify. Attempting to decode a mutable {@link Drawable} will
      *  throw an {@link java.lang.IllegalStateException}.</p>
      *
-     *  @return this object for chaining.
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      */
-    public ImageDecoder setMutable(boolean mutable) {
+    public void setMutableRequired(boolean mutable) {
         mMutable = mutable;
+    }
+
+    /** @removed
+     * @deprecated Renamed to {@link #setMutableRequired}.
+     */
+    @java.lang.Deprecated
+    public ImageDecoder setMutable(boolean mutable) {
+        this.setMutableRequired(mutable);
         return this;
     }
 
     /**
      *  Return whether the {@link Bitmap} will be mutable.
      */
-    public boolean getMutable() {
+    public boolean isMutableRequired() {
         return mMutable;
+    }
+
+    /** @removed
+     * @deprecated Renamed to {@link #isMutableRequired}.
+     */
+    @java.lang.Deprecated
+    public boolean getMutable() {
+        return this.isMutableRequired();
     }
 
     /**
@@ -1052,11 +1218,11 @@ public final class ImageDecoder implements AutoCloseable {
      *  This necessarily lowers the quality of the output, but saves half
      *  the memory used.</p>
      *
-     *  @return this object for chaining.
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      */
-    public ImageDecoder setConserveMemory(boolean conserveMemory) {
+    public void setConserveMemory(boolean conserveMemory) {
         mConserveMemory = conserveMemory;
-        return this;
     }
 
     /**
@@ -1077,43 +1243,95 @@ public final class ImageDecoder implements AutoCloseable {
      *  with only one channel, treat that channel as alpha. Otherwise this call has
      *  no effect.</p>
      *
-     *  <p>setDecodeAsAlphaMask is incompatible with {@link #ALLOCATOR_HARDWARE}. Trying to
+     *  <p>This is incompatible with {@link #ALLOCATOR_HARDWARE}. Trying to
      *  combine them will result in {@link #decodeDrawable}/
      *  {@link #decodeBitmap} throwing an
      *  {@link java.lang.IllegalStateException}.</p>
      *
-     *  @return this object for chaining.
+     *  <p>Like all setters on ImageDecoder, this must be called inside
+     *  {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
      */
-    public ImageDecoder setDecodeAsAlphaMask(boolean decodeAsAlphaMask) {
-        mDecodeAsAlphaMask = decodeAsAlphaMask;
+    public void setDecodeAsAlphaMaskEnabled(boolean enabled) {
+        mDecodeAsAlphaMask = enabled;
+    }
+
+    /** @removed
+     * @deprecated Renamed to {@link #setDecodeAsAlphaMaskEnabled}.
+     */
+    @java.lang.Deprecated
+    public ImageDecoder setDecodeAsAlphaMask(boolean enabled) {
+        this.setDecodeAsAlphaMaskEnabled(enabled);
         return this;
     }
 
     /** @removed
-     * @deprecated Call {@link #setDecodeAsAlphaMask} instead.
+     * @deprecated Renamed to {@link #setDecodeAsAlphaMaskEnabled}.
      */
     @java.lang.Deprecated
     public ImageDecoder setAsAlphaMask(boolean asAlphaMask) {
-        return this.setDecodeAsAlphaMask(asAlphaMask);
+        this.setDecodeAsAlphaMask(asAlphaMask);
+        return this;
     }
 
     /**
      *  Return whether to treat single channel input as alpha.
      *
-     *  <p>This returns whether {@link #setDecodeAsAlphaMask} was set to {@code true}.
-     *  It may still return {@code true} even if the image has more than one
-     *  channel and therefore will not be treated as an alpha mask.</p>
+     *  <p>This returns whether {@link #setDecodeAsAlphaMaskEnabled} was set to
+     *  {@code true}. It may still return {@code true} even if the image has
+     *  more than one channel and therefore will not be treated as an alpha
+     *  mask.</p>
      */
+    public boolean isDecodeAsAlphaMaskEnabled() {
+        return mDecodeAsAlphaMask;
+    }
+
+    /** @removed
+     * @deprecated Renamed to {@link #isDecodeAsAlphaMaskEnabled}.
+     */
+    @java.lang.Deprecated
     public boolean getDecodeAsAlphaMask() {
         return mDecodeAsAlphaMask;
     }
 
     /** @removed
-     * @deprecated Call {@link #getDecodeAsAlphaMask} instead.
+     * @deprecated Renamed to {@link #isDecodeAsAlphaMaskEnabled}.
      */
     @java.lang.Deprecated
     public boolean getAsAlphaMask() {
         return this.getDecodeAsAlphaMask();
+    }
+
+    /**
+     * Specify the desired {@link ColorSpace} for the output.
+     *
+     * <p>If non-null, the decoder will try to decode into this
+     * color space. If it is null, which is the default, or the request cannot
+     * be met, the decoder will pick either the color space embedded in the
+     * image or the color space best suited for the requested image
+     * configuration (for instance {@link ColorSpace.Named#SRGB sRGB} for
+     * the {@link Bitmap.Config#ARGB_8888} configuration).</p>
+     *
+     * <p>{@link Bitmap.Config#RGBA_F16} always uses the
+     * {@link ColorSpace.Named#LINEAR_EXTENDED_SRGB scRGB} color space).
+     * Bitmaps in other configurations without an embedded color space are
+     * assumed to be in the {@link ColorSpace.Named#SRGB sRGB} color space.</p>
+     *
+     * <p class="note">Only {@link ColorSpace.Model#RGB} color spaces are
+     * currently supported. An <code>IllegalArgumentException</code> will
+     * be thrown by the decode methods when setting a non-RGB color space
+     * such as {@link ColorSpace.Named#CIE_LAB Lab}.</p>
+     *
+     * <p class="note">The specified color space's transfer function must be
+     * an {@link ColorSpace.Rgb.TransferParameters ICC parametric curve}. An
+     * <code>IllegalArgumentException</code> will be thrown by the decode methods
+     * if calling {@link ColorSpace.Rgb#getTransferParameters()} on the
+     * specified color space returns null.</p>
+     *
+     * <p>Like all setters on ImageDecoder, this must be called inside
+     * {@link OnHeaderDecodedListener#onHeaderDecoded}.</p>
+     */
+    public void setTargetColorSpace(ColorSpace colorSpace) {
+        mDesiredColorSpace = colorSpace;
     }
 
     @Override
@@ -1151,8 +1369,19 @@ public final class ImageDecoder implements AutoCloseable {
             }
         }
 
-        if (mPostProcessor != null && mRequireUnpremultiplied) {
+        if (mPostProcessor != null && mUnpremultipliedRequired) {
             throw new IllegalStateException("Cannot draw to unpremultiplied pixels!");
+        }
+
+        if (mDesiredColorSpace != null) {
+            if (!(mDesiredColorSpace instanceof ColorSpace.Rgb)) {
+                throw new IllegalArgumentException("The target color space must use the "
+                            + "RGB color model - provided: " + mDesiredColorSpace);
+            }
+            if (((ColorSpace.Rgb) mDesiredColorSpace).getTransferParameters() == null) {
+                throw new IllegalArgumentException("The target color space must use an "
+                            + "ICC parametric transfer function - provided: " + mDesiredColorSpace);
+            }
         }
     }
 
@@ -1166,13 +1395,14 @@ public final class ImageDecoder implements AutoCloseable {
         }
     }
 
+    @WorkerThread
     @NonNull
     private Bitmap decodeBitmapInternal() throws IOException {
         checkState();
         return nDecodeBitmap(mNativePtr, this, mPostProcessor != null,
                 mDesiredWidth, mDesiredHeight, mCropRect,
-                mMutable, mAllocator, mRequireUnpremultiplied,
-                mConserveMemory, mDecodeAsAlphaMask);
+                mMutable, mAllocator, mUnpremultipliedRequired,
+                mConserveMemory, mDecodeAsAlphaMask, mDesiredColorSpace);
     }
 
     private void callHeaderDecoded(@Nullable OnHeaderDecodedListener listener,
@@ -1194,10 +1424,12 @@ public final class ImageDecoder implements AutoCloseable {
      *  @param listener for learning the {@link ImageInfo} and changing any
      *      default settings on the {@code ImageDecoder}. This will be called on
      *      the same thread as {@code decodeDrawable} before that method returns.
+     *      This is required in order to change any of the default settings.
      *  @return Drawable for displaying the image.
      *  @throws IOException if {@code src} is not found, is an unsupported
      *      format, or cannot be decoded for any reason.
      */
+    @WorkerThread
     @NonNull
     public static Drawable decodeDrawable(@NonNull Source src,
             @NonNull OnHeaderDecodedListener listener) throws IOException {
@@ -1208,6 +1440,7 @@ public final class ImageDecoder implements AutoCloseable {
         return decodeDrawableImpl(src, listener);
     }
 
+    @WorkerThread
     @NonNull
     private static Drawable decodeDrawableImpl(@NonNull Source src,
             @Nullable OnHeaderDecodedListener listener) throws IOException {
@@ -1215,7 +1448,7 @@ public final class ImageDecoder implements AutoCloseable {
             decoder.mSource = src;
             decoder.callHeaderDecoded(listener, src);
 
-            if (decoder.mRequireUnpremultiplied) {
+            if (decoder.mUnpremultipliedRequired) {
                 // Though this could be supported (ignored) for opaque images,
                 // it seems better to always report this error.
                 throw new IllegalStateException("Cannot decode a Drawable " +
@@ -1268,8 +1501,18 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     /**
-     * See {@link #decodeDrawable(Source, OnHeaderDecodedListener)}.
+     *  Create a {@link Drawable} from a {@code Source}.
+     *
+     *  <p>Since there is no {@link OnHeaderDecodedListener}, the default
+     *  settings will be used. In order to change any settings, call
+     *  {@link #decodeDrawable(Source, OnHeaderDecodedListener)} instead.</p>
+     *
+     *  @param src representing the encoded image.
+     *  @return Drawable for displaying the image.
+     *  @throws IOException if {@code src} is not found, is an unsupported
+     *      format, or cannot be decoded for any reason.
      */
+    @WorkerThread
     @NonNull
     public static Drawable decodeDrawable(@NonNull Source src)
             throws IOException {
@@ -1283,10 +1526,12 @@ public final class ImageDecoder implements AutoCloseable {
      *  @param listener for learning the {@link ImageInfo} and changing any
      *      default settings on the {@code ImageDecoder}. This will be called on
      *      the same thread as {@code decodeBitmap} before that method returns.
+     *      This is required in order to change any of the default settings.
      *  @return Bitmap containing the image.
      *  @throws IOException if {@code src} is not found, is an unsupported
      *      format, or cannot be decoded for any reason.
      */
+    @WorkerThread
     @NonNull
     public static Bitmap decodeBitmap(@NonNull Source src,
             @NonNull OnHeaderDecodedListener listener) throws IOException {
@@ -1297,6 +1542,7 @@ public final class ImageDecoder implements AutoCloseable {
         return decodeBitmapImpl(src, listener);
     }
 
+    @WorkerThread
     @NonNull
     private static Bitmap decodeBitmapImpl(@NonNull Source src,
             @Nullable OnHeaderDecodedListener listener) throws IOException {
@@ -1353,7 +1599,7 @@ public final class ImageDecoder implements AutoCloseable {
         float scale = (float) dstDensity / srcDensity;
         int scaledWidth = (int) (decoder.mWidth * scale + 0.5f);
         int scaledHeight = (int) (decoder.mHeight * scale + 0.5f);
-        decoder.setResize(scaledWidth, scaledHeight);
+        decoder.setTargetSize(scaledWidth, scaledHeight);
         return dstDensity;
     }
 
@@ -1362,9 +1608,24 @@ public final class ImageDecoder implements AutoCloseable {
         return nGetMimeType(mNativePtr);
     }
 
+    @Nullable
+    private ColorSpace getColorSpace() {
+        return nGetColorSpace(mNativePtr);
+    }
+
     /**
-     *  See {@link #decodeBitmap(Source, OnHeaderDecodedListener)}.
+     *  Create a {@link Bitmap} from a {@code Source}.
+     *
+     *  <p>Since there is no {@link OnHeaderDecodedListener}, the default
+     *  settings will be used. In order to change any settings, call
+     *  {@link #decodeBitmap(Source, OnHeaderDecodedListener)} instead.</p>
+     *
+     *  @param src representing the encoded image.
+     *  @return Bitmap containing the image.
+     *  @throws IOException if {@code src} is not found, is an unsupported
+     *      format, or cannot be decoded for any reason.
      */
+    @WorkerThread
     @NonNull
     public static Bitmap decodeBitmap(@NonNull Source src) throws IOException {
         return decodeBitmapImpl(src, null);
@@ -1410,12 +1671,14 @@ public final class ImageDecoder implements AutoCloseable {
             boolean doPostProcess,
             int width, int height,
             @Nullable Rect cropRect, boolean mutable,
-            int allocator, boolean requireUnpremul,
-            boolean conserveMemory, boolean decodeAsAlphaMask)
+            int allocator, boolean unpremulRequired,
+            boolean conserveMemory, boolean decodeAsAlphaMask,
+            @Nullable ColorSpace desiredColorSpace)
         throws IOException;
     private static native Size nGetSampledSize(long nativePtr,
                                                int sampleSize);
     private static native void nGetPadding(long nativePtr, @NonNull Rect outRect);
     private static native void nClose(long nativePtr);
     private static native String nGetMimeType(long nativePtr);
+    private static native ColorSpace nGetColorSpace(long nativePtr);
 }

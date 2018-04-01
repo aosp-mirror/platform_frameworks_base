@@ -33,7 +33,6 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ऑनगोइंग"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"सूचनाएं"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"बैटरी कम है"</string>
-    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"बैटरी कम बची है. बैटरी सेवर चालू करें"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> शेष"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> बची है, आपके इस्तेमाल करने के तरीके के हिसाब से बैटरी लगभग <xliff:g id="TIME">%s</xliff:g> चलेगी"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> बची है, बैटरी लगभग <xliff:g id="TIME">%s</xliff:g> चलेगी"</string>
@@ -73,11 +72,12 @@
     <string name="global_action_screenshot" msgid="8329831278085426283">"स्क्रीनशॉट"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"स्क्रीनशॉट सहेजा जा रहा है..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"स्क्रीनशॉट सहेजा जा रहा है..."</string>
-    <string name="screenshot_saving_text" msgid="2545047868936087248">"स्क्रीनशॉट सेव किया जा रहा है"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"स्क्रीनशॉट सेव किया गया"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"अपना स्क्रीनशॉट देखने के लिए टैप करें"</string>
-    <string name="screenshot_failed_title" msgid="9096484883063264803">"स्क्रीनशॉट नहीं लिया जा सका"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"स्क्रीनशॉट सेव करते समय एक समस्या आई"</string>
+    <!-- no translation found for screenshot_failed_title (7612509838919089748) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_to_save_unknown_text (3637758096565605541) -->
+    <skip />
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"मेमोरी कम होने की वजह से स्क्रीनशॉट सेव नहीं किया जा सका"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"ऐप्लिकेशन या आपका संगठन स्क्रीनशॉट लेने की अनुमति नहीं देता"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB फ़ाइल स्थानांतरण विकल्प"</string>
@@ -273,8 +273,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"मिठाई का डिब्बा"</string>
     <string name="start_dreams" msgid="5640361424498338327">"स्क्रीन सेवर"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ईथरनेट"</string>
-    <!-- no translation found for quick_settings_header_onboarding_text (8030309023792936283) -->
-    <skip />
+    <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"ज़्यादा विकल्प देखने के लिए आइकॉन को दबाकर रखें"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"परेशान ना करें"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"सिर्फ़ प्राथमिकता"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"सिर्फ़ अलार्म"</string>
@@ -349,7 +348,8 @@
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"शाम को चालू की जाएगी"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"सुबह तक चालू रहेगी"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> पर चालू की जाएगी"</string>
-    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"<xliff:g id="TIME">%s</xliff:g> तक"</string>
+    <!-- no translation found for quick_settings_secondary_label_until (2749196569462600150) -->
+    <skip />
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC बंद है"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC चालू है"</string>
@@ -433,7 +433,10 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> आपके स्क्रीन पर दिखाई देने वाली हर सामग्री को कैप्चर करना शुरू कर देगी."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"फिर से न दिखाएं"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"सभी साफ़ करें"</string>
-    <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"परेशान न करें सुविधा की वजह से सूचनाएं नहीं दिखाई जा रही हैं"</string>
+    <!-- no translation found for manage_notifications_text (8035284146227267681) -->
+    <skip />
+    <!-- no translation found for dnd_suppressing_shade_text (5179021215370153526) -->
+    <skip />
     <string name="media_projection_action_text" msgid="8470872969457985954">"अब शुरू करें"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"कोई सूचना नहीं मिली"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"प्रोफ़ाइल को मॉनीटर किया जा सकता है"</string>
@@ -539,7 +542,8 @@
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. कंपन (वाइब्रेशन) पर सेट करने के लिए छूएं."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. म्यूट करने के लिए टैप करें."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s की आवाज़ कम या ज़्यादा करने की सुविधा"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"कॉल अाैर सूचनाओं के लिए डिवाइस की घंटी बजेगी"</string>
+    <!-- no translation found for volume_dialog_ringer_guidance_ring (3360373718388509040) -->
+    <skip />
     <string name="output_title" msgid="5355078100792942802">"मीडिया आउटपुट"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"फ़ोन कॉल का आउटपुट"</string>
     <string name="output_none_found" msgid="5544982839808921091">"कोई डिवाइस नहीं मि‍ला"</string>
@@ -626,6 +630,8 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"सूचना नियंत्रण"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"सूचना को स्नूज़ (थोड़ी देर के लिए चुप करना) करने के विकल्प"</string>
+    <!-- no translation found for notification_menu_snooze_action (1112254519029621372) -->
+    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"पहले जैसा करें"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> के लिए याद दिलाया गया"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
@@ -689,6 +695,8 @@
     <string name="battery" msgid="7498329822413202973">"बैटरी"</string>
     <string name="clock" msgid="7416090374234785905">"घड़ी"</string>
     <string name="headset" msgid="4534219457597457353">"हेडसेट"</string>
+    <!-- no translation found for accessibility_long_click_tile (6687350750091842525) -->
+    <skip />
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"हेडफ़ोन कनेक्‍ट किए गए"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"हेडसेट कनेक्‍ट किया गया"</string>
     <string name="data_saver" msgid="5037565123367048522">"डेटा बचाने की सेटिंग"</string>
@@ -723,11 +731,9 @@
     <string name="right_keycode" msgid="708447961000848163">"दायां कुंजी कोड"</string>
     <string name="left_icon" msgid="3096287125959387541">"बायां आइकॉन"</string>
     <string name="right_icon" msgid="3952104823293824311">"दायां आइकॉन"</string>
-    <!-- no translation found for drag_to_add_tiles (230586591689084925) -->
-    <skip />
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"टाइल जोड़ने के लिए दबाएं और खींचें"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"हटाने के लिए यहां खींचें और छोड़ें"</string>
-    <!-- no translation found for drag_to_remove_disabled (2390968976638993382) -->
-    <skip />
+    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"आपके पास कम से कम 6 टाइल होनी चाहिए"</string>
     <string name="qs_edit" msgid="2232596095725105230">"बदलाव करें"</string>
     <string name="tuner_time" msgid="6572217313285536011">"समय"</string>
   <string-array name="clock_options">
@@ -814,6 +820,8 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"स्‍क्रीनशॉट"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"सामान्य संदेश"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"जगह"</string>
+    <!-- no translation found for notification_channel_hints (7323870212489152689) -->
+    <skip />
     <string name="instant_apps" msgid="6647570248119804907">"झटपट ऐप्स"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"झटपट ऐप्स के लिए इंस्टॉलेशन ज़रूरी नहीं है."</string>
     <string name="app_info" msgid="6856026610594615344">"ऐप की जानकारी"</string>
@@ -831,12 +839,9 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"बदलें"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"बैकग्राउंड में चल रहे ऐप्लिकेशन"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"बैटरी और डेटा खर्च की जानकारी के लिए छूएं"</string>
-    <!-- no translation found for mobile_data_disable_title (1068272097382942231) -->
-    <skip />
-    <!-- no translation found for mobile_data_disable_message (4756541658791493506) -->
-    <skip />
-    <!-- no translation found for mobile_data_disable_message_default_carrier (6078110473451946831) -->
-    <skip />
+    <string name="mobile_data_disable_title" msgid="1068272097382942231">"मोबाइल डेटा बंद करना चाहते हैं?"</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"आप <xliff:g id="CARRIER">%s</xliff:g> के ज़रिए डेटा या इंटरनेट इस्तेमाल नहीं कर पाएंगे. इंटरनेट सिर्फ़ वाई-फ़ाई का इस्तेमाल करके चलेगा."</string>
+    <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"आपको मोबाइल और इंटरनेट सेवा देने वाली कंपनी"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"ऐप की वजह से मंज़ूरी के अनुरोध को समझने में दिक्कत हो रही है, इसलिए सेटिंग से आपके जवाब की पुष्टि नहीं हो पा रही है."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g> को <xliff:g id="APP_2">%2$s</xliff:g> के हिस्से (स्लाइस) दिखाने की मंज़ूरी दें?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- यह <xliff:g id="APP">%1$s</xliff:g> से सूचना पढ़ सकता है"</string>
@@ -844,4 +849,18 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"<xliff:g id="APP">%1$s</xliff:g> को किसी भी ऐप्लिकेशन के हिस्से (स्लाइस) दिखाने की मंज़ूरी दें"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"मंज़ूरी दें"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"नामंज़ूर करें"</string>
+    <!-- no translation found for auto_saver_title (1217959994732964228) -->
+    <skip />
+    <!-- no translation found for auto_saver_text (6324376061044218113) -->
+    <skip />
+    <!-- no translation found for no_auto_saver_action (8086002101711328500) -->
+    <skip />
+    <!-- no translation found for auto_saver_enabled_title (6726474226058316862) -->
+    <skip />
+    <!-- no translation found for auto_saver_enabled_text (874711029884777579) -->
+    <skip />
+    <!-- no translation found for open_saver_setting_action (8314624730997322529) -->
+    <skip />
+    <!-- no translation found for auto_saver_okay_action (2701221740227683650) -->
+    <skip />
 </resources>

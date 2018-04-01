@@ -35,6 +35,22 @@ import java.lang.annotation.RetentionPolicy;
  */
 @SystemApi
 public final class KeyDerivationParams implements Parcelable {
+
+    // IMPORTANT! PLEASE READ!
+    // -----------------------
+    // If you edit this file (e.g., to add new fields), please MAKE SURE to also do the following:
+    // - Update the #writeToParcel(Parcel) method below
+    // - Update the #(Parcel) constructor below
+    // - Update android.security.keystore.recovery.KeyChainSnapshotTest to make sure nobody
+    //     accidentally breaks your fields in the Parcel in the future.
+    // - Update com.android.server.locksettings.recoverablekeystore.serialization
+    //     .KeyChainSnapshotSerializer to correctly serialize your new field
+    // - Update com.android.server.locksettings.recoverablekeystore.serialization
+    //     .KeyChainSnapshotSerializer to correctly deserialize your new field
+    // - Update com.android.server.locksettings.recoverablekeystore.serialization
+    //     .KeychainSnapshotSerializerTest to make sure nobody breaks serialization of your field
+    //     in the future.
+
     private final int mAlgorithm;
     private final byte[] mSalt;
     private final int mMemoryDifficulty;
@@ -59,7 +75,7 @@ public final class KeyDerivationParams implements Parcelable {
      * Creates instance of the class to to derive keys using salted SHA256 hash.
      *
      * <p>The salted SHA256 hash is computed over the concatenation of four byte strings, salt_len +
-     * salt + key_material_len + key_material, where salt_len and key_material_len are one-byte, and
+     * salt + key_material_len + key_material, where salt_len and key_material_len are 4-byte, and
      * denote the number of bytes for salt and key_material, respectively.
      */
     public static @NonNull KeyDerivationParams createSha256Params(@NonNull byte[] salt) {
@@ -90,7 +106,7 @@ public final class KeyDerivationParams implements Parcelable {
     /**
      * @hide
      */
-    KeyDerivationParams(@KeyDerivationAlgorithm int algorithm, @NonNull byte[] salt,
+    private KeyDerivationParams(@KeyDerivationAlgorithm int algorithm, @NonNull byte[] salt,
             int memoryDifficulty) {
         mAlgorithm = algorithm;
         mSalt = Preconditions.checkNotNull(salt);

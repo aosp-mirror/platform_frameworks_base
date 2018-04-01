@@ -96,7 +96,6 @@ public class MockSystemServices {
     public final IBackupManager ibackupManager;
     public final IAudioService iaudioService;
     public final LockPatternUtils lockPatternUtils;
-    public final PasswordBlacklist passwordBlacklist;
     public final StorageManagerForMock storageManager;
     public final WifiManager wifiManager;
     public final SettingsForMock settings;
@@ -135,7 +134,6 @@ public class MockSystemServices {
         ibackupManager = mock(IBackupManager.class);
         iaudioService = mock(IAudioService.class);
         lockPatternUtils = mock(LockPatternUtils.class);
-        passwordBlacklist = mock(PasswordBlacklist.class);
         storageManager = mock(StorageManagerForMock.class);
         wifiManager = mock(WifiManager.class);
         settings = mock(SettingsForMock.class);
@@ -419,7 +417,7 @@ public class MockSystemServices {
         public void settingsGlobalPutString(String name, String value) {
         }
 
-        public void settingsSystemPutString(String name, String value) {
+        public void settingsSystemPutStringForUser(String name, String value, int callingUserId) {
         }
 
         public int settingsGlobalGetInt(String name, int value) {

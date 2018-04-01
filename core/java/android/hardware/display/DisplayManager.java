@@ -535,6 +535,19 @@ public final class DisplayManager {
     }
 
     /**
+     * Set the level of color saturation to apply to the display.
+     * @param level The amount of saturation to apply, between 0 and 1 inclusive.
+     * 0 produces a grayscale image, 1 is normal.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_SATURATION)
+    public void setSaturationLevel(float level) {
+        mGlobal.setSaturationLevel(level);
+    }
+
+    /**
      * Creates a virtual display.
      *
      * @see #createVirtualDisplay(String, int, int, int, Surface, int,

@@ -492,6 +492,13 @@ public class Recents extends SystemUI
                     }
                 }
                 mDraggingInRecentsCurrentUser = currentUser;
+
+                if (mOverviewProxyService.getProxy() != null) {
+                    // The overview service is handling split screen, so just skip the wait for the
+                    // first draw and notify the divider to start animating now
+                    EventBus.getDefault().post(new RecentsDrawnEvent());
+                }
+
                 return true;
             } else {
                 EventBus.getDefault().send(new ShowUserToastEvent(

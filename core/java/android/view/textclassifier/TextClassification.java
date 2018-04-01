@@ -43,8 +43,8 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -512,7 +512,7 @@ public final class TextClassification implements Parcelable {
     public static final class Options implements Parcelable {
 
         private @Nullable LocaleList mDefaultLocales;
-        private @Nullable Calendar mReferenceTime;
+        private @Nullable ZonedDateTime mReferenceTime;
 
         public Options() {}
 
@@ -531,7 +531,7 @@ public final class TextClassification implements Parcelable {
          *      be interpreted. This should usually be the time when the text was originally
          *      composed. If no reference time is set, now is used.
          */
-        public Options setReferenceTime(Calendar referenceTime) {
+        public Options setReferenceTime(ZonedDateTime referenceTime) {
             mReferenceTime = referenceTime;
             return this;
         }
@@ -550,7 +550,7 @@ public final class TextClassification implements Parcelable {
          *      interpreted.
          */
         @Nullable
-        public Calendar getReferenceTime() {
+        public ZonedDateTime getReferenceTime() {
             return mReferenceTime;
         }
 
@@ -567,7 +567,7 @@ public final class TextClassification implements Parcelable {
             }
             dest.writeInt(mReferenceTime != null ? 1 : 0);
             if (mReferenceTime != null) {
-                dest.writeSerializable(mReferenceTime);
+                dest.writeString(mReferenceTime.toString());
             }
         }
 
@@ -589,7 +589,7 @@ public final class TextClassification implements Parcelable {
                 mDefaultLocales = LocaleList.CREATOR.createFromParcel(in);
             }
             if (in.readInt() > 0) {
-                mReferenceTime = (Calendar) in.readSerializable();
+                mReferenceTime = ZonedDateTime.parse(in.readString());
             }
         }
     }

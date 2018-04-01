@@ -182,6 +182,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.util.ArrayUtils;
@@ -898,6 +899,8 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_LOCALE_CHANGED.equals(intent.getAction())) {
+                // update system notification channels
+                SystemNotificationChannels.createAll(context);
                 mZenModeHelper.updateDefaultZenRules();
                 mRankingHelper.onLocaleChanged(context, ActivityManager.getCurrentUser());
             }
@@ -2149,7 +2152,8 @@ public class NotificationManagerService extends SystemService {
                 final NotificationChannel channel = channels.get(i);
                 Preconditions.checkNotNull(channel, "channel in list is null");
                 mRankingHelper.createNotificationChannel(pkg, uid, channel,
-                        true /* fromTargetApp */);
+                        true /* fromTargetApp */, mConditionProviders.isPackageOrComponentAllowed(
+                                pkg, UserHandle.getUserId(uid)));
                 mListeners.notifyNotificationChannelChanged(pkg,
                         UserHandle.getUserHandleForUid(uid),
                         mRankingHelper.getNotificationChannel(pkg, uid, channel.getId(), false),
@@ -4691,11 +4695,12 @@ public class NotificationManagerService extends SystemService {
 
     private boolean playSound(final NotificationRecord record, Uri soundUri) {
         boolean looping = (record.getNotification().flags & Notification.FLAG_INSISTENT) != 0;
-        // do not play notifications if there is a user of exclusive audio focus
-        // or the device is in vibrate mode
-        if (!mAudioManager.isAudioFocusExclusive() && (mAudioManager.getRingerModeInternal()
-                != AudioManager.RINGER_MODE_VIBRATE || mAudioManager.getStreamVolume(
-                AudioAttributes.toLegacyStreamType(record.getAudioAttributes())) != 0)) {
+        // play notifications if there is no user of exclusive audio focus
+        // and the stream volume is not 0 (non-zero volume implies not silenced by SILENT or
+        //   VIBRATE ringer mode)
+        if (!mAudioManager.isAudioFocusExclusive()
+                && (mAudioManager.getStreamVolume(
+                        AudioAttributes.toLegacyStreamType(record.getAudioAttributes())) != 0)) {
             final long identity = Binder.clearCallingIdentity();
             try {
                 final IRingtonePlayer player = mAudioManager.getRingtonePlayer();

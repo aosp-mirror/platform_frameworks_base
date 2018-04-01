@@ -348,6 +348,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected boolean mBouncerShowing;
 
     private PhoneStatusBarPolicy mIconPolicy;
+    private StatusBarSignalPolicy mSignalPolicy;
 
     private VolumeComponent mVolumeComponent;
     private BrightnessMirrorController mBrightnessMirrorController;
@@ -562,7 +563,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     };
 
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
-    private UserSwitcherController mUserSwitcherController;
+    protected UserSwitcherController mUserSwitcherController;
     private NetworkController mNetworkController;
     private KeyguardMonitorImpl mKeyguardMonitor
             = (KeyguardMonitorImpl) Dependency.get(KeyguardMonitor.class);
@@ -588,7 +589,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     };
     private boolean mNoAnimationOnNextBarModeChange;
-    private FalsingManager mFalsingManager;
+    protected FalsingManager mFalsingManager;
 
     private final KeyguardUpdateMonitorCallback mUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -747,6 +748,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy = new PhoneStatusBarPolicy(mContext, mIconController);
+        mSignalPolicy = new StatusBarSignalPolicy(mContext, mIconController);
 
         mUnlockMethodCache = UnlockMethodCache.getInstance(mContext);
         mUnlockMethodCache.addListener(this);
@@ -1131,7 +1133,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     protected void reevaluateStyles() {
-        inflateSignalClusters();
         inflateFooterView();
         updateFooter();
         inflateEmptyShadeView();
@@ -1143,36 +1144,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.onOverlayChanged();
         }
-    }
-
-    private void inflateSignalClusters() {
-        if (mKeyguardStatusBar != null) reinflateSignalCluster(mKeyguardStatusBar);
-    }
-
-    public static SignalClusterView reinflateSignalCluster(View view) {
-        Context context = view.getContext();
-        SignalClusterView signalCluster = view.findViewById(R.id.signal_cluster);
-        if (signalCluster != null) {
-            ViewParent parent = signalCluster.getParent();
-            if (parent instanceof ViewGroup) {
-                ViewGroup viewParent = (ViewGroup) parent;
-                int index = viewParent.indexOfChild(signalCluster);
-                viewParent.removeView(signalCluster);
-                SignalClusterView newCluster = (SignalClusterView) LayoutInflater.from(context)
-                        .inflate(R.layout.signal_cluster_view, viewParent, false);
-                ViewGroup.MarginLayoutParams layoutParams =
-                        (ViewGroup.MarginLayoutParams) viewParent.getLayoutParams();
-                layoutParams.setMarginsRelative(
-                        context.getResources().getDimensionPixelSize(
-                                R.dimen.signal_cluster_margin_start),
-                        0, 0, 0);
-                newCluster.setLayoutParams(layoutParams);
-                viewParent.addView(newCluster, index);
-                return newCluster;
-            }
-            return signalCluster;
-        }
-        return null;
     }
 
     private void inflateEmptyShadeView() {
@@ -3446,6 +3417,13 @@ public class StatusBar extends SystemUI implements DemoMode,
     public boolean hideKeyguard() {
         mKeyguardRequested = false;
         return updateIsKeyguard();
+    }
+
+    /**
+     * @return True if StatusBar state is FULLSCREEN_USER_SWITCHER.
+     */
+    public boolean isFullScreenUserSwitcherState() {
+        return mState == StatusBarState.FULLSCREEN_USER_SWITCHER;
     }
 
     private boolean updateIsKeyguard() {

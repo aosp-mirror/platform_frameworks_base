@@ -149,9 +149,30 @@ public abstract class SliceProvider extends ContentProvider {
     private static final boolean DEBUG = false;
 
     private static final long SLICE_BIND_ANR = 2000;
+    private final String[] mAutoGrantPermissions;
 
     private String mCallback;
     private SliceManager mSliceManager;
+
+    /**
+     * A version of constructing a SliceProvider that allows autogranting slice permissions
+     * to apps that hold specific platform permissions.
+     * <p>
+     * When an app tries to bind a slice from this provider that it does not have access to,
+     * This provider will check if the caller holds permissions to any of the autoGrantPermissions
+     * specified, if they do they will be granted persisted uri access to all slices of this
+     * provider.
+     *
+     * @param autoGrantPermissions List of permissions that holders are auto-granted access
+     *                             to slices.
+     */
+    public SliceProvider(@NonNull String... autoGrantPermissions) {
+        mAutoGrantPermissions = autoGrantPermissions;
+    }
+
+    public SliceProvider() {
+        mAutoGrantPermissions = new String[0];
+    }
 
     @Override
     public void attachInfo(Context context, ProviderInfo info) {
@@ -402,7 +423,7 @@ public abstract class SliceProvider extends ContentProvider {
                 : getContext().getPackageManager().getNameForUid(callingUid);
         try {
             mSliceManager.enforceSlicePermission(sliceUri, pkg,
-                    callingPid, callingUid);
+                    callingPid, callingUid, mAutoGrantPermissions);
         } catch (SecurityException e) {
             return createPermissionSlice(getContext(), sliceUri, pkg);
         }
@@ -428,15 +449,17 @@ public abstract class SliceProvider extends ContentProvider {
         } finally {
             Handler.getMain().removeCallbacks(mAnr);
         }
-        return new Slice.Builder(sliceUri)
-                .addAction(action,
-                        new Slice.Builder(sliceUri.buildUpon().appendPath("permission").build())
-                                .addText(getPermissionString(context, callingPackage), null,
-                                        Collections.emptyList())
-                                .build(),
-                        null)
-                .addHints(Arrays.asList(Slice.HINT_LIST_ITEM))
-                .build();
+        Slice.Builder parent = new Slice.Builder(sliceUri);
+        Slice.Builder childAction = new Slice.Builder(parent)
+                .addHints(Arrays.asList(Slice.HINT_TITLE, Slice.HINT_SHORTCUT))
+                .addAction(action, new Slice.Builder(parent).build(), null);
+
+        parent.addSubSlice(new Slice.Builder(sliceUri.buildUpon().appendPath("permission").build())
+                .addText(getPermissionString(context, callingPackage), null,
+                        Collections.emptyList())
+                .addSubSlice(childAction.build(), null)
+                .build(), null);
+        return parent.addHints(Arrays.asList(Slice.HINT_PERMISSION_REQUEST)).build();
     }
 
     /**

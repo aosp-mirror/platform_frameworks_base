@@ -48,6 +48,22 @@ import java.util.List;
  */
 @SystemApi
 public final class KeyChainSnapshot implements Parcelable {
+
+    // IMPORTANT! PLEASE READ!
+    // -----------------------
+    // If you edit this file (e.g., to add new fields), please MAKE SURE to also do the following:
+    // - Update the #writeToParcel(Parcel) method below
+    // - Update the #(Parcel) constructor below
+    // - Update android.security.keystore.recovery.KeyChainSnapshotTest to make sure nobody
+    //     accidentally breaks your fields in the Parcel in the future.
+    // - Update com.android.server.locksettings.recoverablekeystore.serialization
+    //     .KeyChainSnapshotSerializer to correctly serialize your new field
+    // - Update com.android.server.locksettings.recoverablekeystore.serialization
+    //     .KeyChainSnapshotSerializer to correctly deserialize your new field
+    // - Update com.android.server.locksettings.recoverablekeystore.serialization
+    //     .KeychainSnapshotSerializerTest to make sure nobody breaks serialization of your field
+    //     in the future.
+
     private static final int DEFAULT_MAX_ATTEMPTS = 10;
     private static final long DEFAULT_COUNTER_ID = 1L;
 
@@ -62,23 +78,8 @@ public final class KeyChainSnapshot implements Parcelable {
     private byte[] mEncryptedRecoveryKeyBlob;
 
     /**
-     * @hide
-     * Deprecated, consider using builder.
+     * Use builder to create an instance of the class.
      */
-    public KeyChainSnapshot(
-            int snapshotVersion,
-            @NonNull List<KeyChainProtectionParams> keyChainProtectionParams,
-            @NonNull List<WrappedApplicationKey> wrappedApplicationKeys,
-            @NonNull byte[] encryptedRecoveryKeyBlob) {
-        mSnapshotVersion = snapshotVersion;
-        mKeyChainProtectionParams =
-                Preconditions.checkCollectionElementsNotNull(keyChainProtectionParams,
-                        "KeyChainProtectionParams");
-        mEntryRecoveryData = Preconditions.checkCollectionElementsNotNull(wrappedApplicationKeys,
-                "wrappedApplicationKeys");
-        mEncryptedRecoveryKeyBlob = Preconditions.checkNotNull(encryptedRecoveryKeyBlob);
-    }
-
     private KeyChainSnapshot() {
 
     }
@@ -92,7 +93,7 @@ public final class KeyChainSnapshot implements Parcelable {
     }
 
     /**
-     * Number of user secret guesses allowed during Keychain recovery.
+     * Number of user secret guesses allowed during KeyChain recovery.
      */
     public int getMaxAttempts() {
         return mMaxAttempts;

@@ -22,7 +22,6 @@
     android:layout_height="0dp"
     android:elevation="4dp"
     android:orientation="vertical"
-    android:background="@drawable/qs_customizer_background"
     android:gravity="center_horizontal">
 
 </com.android.systemui.qs.customize.QSCustomizer>

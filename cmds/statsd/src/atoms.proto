@@ -16,7 +16,6 @@
 
 syntax = "proto2";
 
-// TODO: Not the right package and class name
 package android.os.statsd;
 option java_package = "com.android.os";
 option java_outer_classname = "AtomsProto";
@@ -49,7 +48,7 @@ message Atom {
     oneof pushed {
         // For StatsLog reasons, 1 is illegal and will not work. Must start at 2.
         BleScanStateChanged ble_scan_state_changed = 2;
-        // TODO: 3 is blank, but need not be
+        // 3 is available for use
         BleScanResultReceived ble_scan_result_received = 4;
         SensorStateChanged sensor_state_changed = 5;
         GpsScanStateChanged gps_scan_state_changed = 6;
@@ -60,12 +59,12 @@ message Atom {
         LongPartialWakelockStateChanged long_partial_wakelock_state_changed = 11;
         MobileRadioPowerStateChanged mobile_radio_power_state_changed = 12;
         WifiRadioPowerStateChanged wifi_radio_power_state_changed = 13;
-        // TODO: 14-19 are blank, but need not be
+        // 14 - 19 are available
         BatterySaverModeStateChanged battery_saver_mode_state_changed = 20;
         DeviceIdleModeStateChanged device_idle_mode_state_changed = 21;
         DeviceIdlingModeStateChanged device_idling_mode_state_changed = 22;
         AudioStateChanged audio_state_changed = 23;
-        MediaCodecActivityChanged media_codec_activity_changed = 24;
+        MediaCodecStateChanged media_codec_state_changed = 24;
         CameraStateChanged camera_state_changed = 25;
         FlashlightStateChanged flashlight_state_changed = 26;
         UidProcessStateChanged uid_process_state_changed = 27;
@@ -74,8 +73,7 @@ message Atom {
         BatteryLevelChanged battery_level_changed = 30;
         ChargingStateChanged charging_state_changed = 31;
         PluggedStateChanged plugged_state_changed = 32;
-        // TODO: 33 is blank, but is available for use.
-        DeviceOnStatusChanged device_on_status_changed = 34;
+        // 33 - 34 are available
         WakeupAlarmOccurred wakeup_alarm_occurred = 35;
         KernelWakeupReported kernel_wakeup_reported = 36;
         WifiLockStateChanged wifi_lock_state_changed = 37;
@@ -86,12 +84,12 @@ message Atom {
         ActivityForegroundStateChanged activity_foreground_state_changed = 42;
         IsolatedUidChanged isolated_uid_changed = 43;
         PacketWakeupOccurred packet_wakeup_occurred = 44;
-        DropboxErrorChanged dropbox_error_changed = 45;
+        // 45 is available
         AnomalyDetected anomaly_detected = 46;
         AppBreadcrumbReported app_breadcrumb_reported = 47;
-        AppStartChanged app_start_changed = 48;
-        AppStartCancelChanged app_start_cancel_changed = 49;
-        AppStartFullyDrawnChanged app_start_fully_drawn_changed = 50;
+        AppStartOccurred app_start_occurred = 48;
+        AppStartCanceled app_start_canceled = 49;
+        AppStartFullyDrawn app_start_fully_drawn = 50;
         LmkKillOccurred lmk_kill_occurred = 51;
         PictureInPictureStateChanged picture_in_picture_state_changed = 52;
         WifiMulticastLockStateChanged wifi_multicast_lock_state_changed = 53;
@@ -106,7 +104,7 @@ message Atom {
         KeyguardStateChanged keyguard_state_changed = 62;
         KeyguardBouncerStateChanged keyguard_bouncer_state_changed = 63;
         KeyguardBouncerPasswordEntered keyguard_bouncer_password_entered = 64;
-        AppDied app_died=65;
+        AppDied app_died = 65;
         ResourceConfigurationChanged resource_configuration_changed = 66;
         BluetoothEnabledStateChanged bluetooth_enabled_state_changed = 67;
         BluetoothConnectionStateChanged bluetooth_connection_state_changed = 68;
@@ -119,6 +117,12 @@ message Atom {
         MobileConnectionStateChanged mobile_connection_state_changed = 75;
         MobileRadioTechnologyChanged mobile_radio_technology_changed = 76;
         UsbDeviceAttached usb_device_attached = 77;
+        AppCrashOccurred app_crash_occurred = 78;
+        ANROccurred anr_occurred = 79;
+        WTFOccurred wtf_occurred = 80;
+        LowMemReported low_mem_reported = 81;
+
+
     }
 
     // Pulled events will start at field 10000.
@@ -134,7 +138,7 @@ message Atom {
         CpuTimePerFreq cpu_time_per_freq = 10008;
         CpuTimePerUid cpu_time_per_uid = 10009;
         CpuTimePerUidFreq cpu_time_per_uid_freq = 10010;
-        WifiActivityEnergyInfo wifi_activity_energy_info = 10011;
+        WifiActivityInfo wifi_activity_info = 10011;
         ModemActivityInfo modem_activity_info = 10012;
         BluetoothActivityInfo bluetooth_activity_info = 10007;
         ProcessMemoryState process_memory_state = 10013;
@@ -224,30 +228,27 @@ message UidProcessStateChanged {
  *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message ProcessLifeCycleStateChanged {
-    // TODO: should be a string tagged w/ uid annotation
     optional int32 uid = 1 [(is_uid) = true];
 
     // The process name (usually same as the app name).
-    optional string name = 2;
+    optional string process_name = 2;
 
     // What lifecycle state the process changed to.
     // This enum is specific to atoms.proto.
-    enum Event {
-        PROCESS_FINISHED = 0;
-        PROCESS_STARTED = 1;
-        PROCESS_CRASHED = 2;
-        PROCESS_ANRED = 3;
+    enum State {
+        FINISHED = 0;
+        STARTED = 1;
+        CRASHED = 2;
     }
-    optional Event event = 3;
+    optional State state = 3;
 }
 
 /**
  * Logs when the ble scan state changes.
  *
  * Logged from:
- *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ *   packages/apps/Bluetooth/src/com/android/bluetooth/gatt/AppScanStats.java
  */
-// TODO: Consider changing to tracking per-scanner-id (log from AppScanStats).
 message BleScanStateChanged {
     repeated AttributionNode attribution_node = 1;
 
@@ -278,7 +279,7 @@ message BleScanResultReceived {
     repeated AttributionNode attribution_node = 1;
 
     // Number of ble scan results returned.
-    optional int32 num_of_results = 2;
+    optional int32 num_results = 2;
 }
 
 /**
@@ -290,7 +291,6 @@ message BleScanResultReceived {
 message SensorStateChanged {
     repeated AttributionNode attribution_node = 1;
 
-    // TODO: Is there a way to get the actual name of the sensor?
     // The id (int) of the sensor.
     optional int32 sensor_id = 2;
 
@@ -329,7 +329,7 @@ message SyncStateChanged {
     repeated AttributionNode attribution_node = 1;
 
     // Name of the sync (as named in the app). Can be chosen at run-time.
-    optional string name = 2;
+    optional string sync_name = 2;
 
     enum State {
         OFF = 0;
@@ -348,7 +348,7 @@ message ScheduledJobStateChanged {
     repeated AttributionNode attribution_node = 1;
 
     // Name of the job (as named in the app)
-    optional string name = 2;
+    optional string job_name = 2;
 
     enum State {
         FINISHED = 0;
@@ -387,7 +387,7 @@ message AudioStateChanged {
  * Logged from:
  *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
-message MediaCodecActivityChanged {
+message MediaCodecStateChanged {
     repeated AttributionNode attribution_node = 1;
 
     enum State {
@@ -561,22 +561,6 @@ message PluggedStateChanged {
     optional android.os.BatteryPluggedStateEnum state = 1;
 }
 
-// TODO: Define this more precisely.
-// TODO: Log the ON state somewhere. It isn't currently logged anywhere.
-/**
- * Logs when the device turns off or on.
- *
- * Logged from:
- *   frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
- */
-message DeviceOnStatusChanged {
-    enum State {
-        OFF = 0;
-        ON = 1;
-    }
-    optional State state = 1;
-}
-
 /**
  * Logs when an app's wakeup alarm fires.
  *
@@ -598,8 +582,7 @@ message WakeupAlarmOccurred {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message MobileRadioPowerStateChanged {
-    // TODO: Add attribution instead of uid?
-    optional int32 uid = 1 [(is_uid) = true];
+    repeated AttributionNode attribution_node = 1;
 
     // Power state, from frameworks/base/core/proto/android/telephony/enums.proto.
     optional android.telephony.DataConnectionPowerStateEnum state = 2;
@@ -613,8 +596,7 @@ message MobileRadioPowerStateChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message WifiRadioPowerStateChanged {
-    // TODO: Add attribution instead of uid?
-    optional int32 uid = 1 [(is_uid) = true];
+    repeated AttributionNode attribution_node = 1;
 
     // Power state, from frameworks/base/core/proto/android/telephony/enums.proto.
     optional android.telephony.DataConnectionPowerStateEnum state = 2;
@@ -1154,7 +1136,6 @@ message ChargeCyclesReported {
 message DaveyOccurred {
     // The UID that logged this atom.
     optional int32 uid = 1 [(is_uid) = true];
-    ;
 
     // Amount of time it took to render the frame. Should be >=700ms.
     optional int64 jank_duration_millis = 2;
@@ -1221,42 +1202,70 @@ message ActivityForegroundStateChanged {
     optional string pkg_name = 2;
     optional string class_name = 3;
 
-    enum Activity {
-        MOVE_TO_BACKGROUND = 0;
-        MOVE_TO_FOREGROUND = 1;
+    enum State {
+        BACKGROUND = 0;
+        FOREGROUND = 1;
     }
-    optional Activity activity = 4;
+    optional State state = 4;
 }
 
 /**
- * Logs when an error is written to dropbox.
+ * Logs when an app crashes.
  * Logged from:
  *      frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
  */
-message DropboxErrorChanged {
-    // The uid if available. -1 means not available.
+message AppCrashOccurred {
     optional int32 uid = 1 [(is_uid) = true];
 
-    // Tag used when recording this error to dropbox. Contains data_ or system_ prefix.
-    optional string tag = 2;
+    optional string event_type = 2;
 
     // The name of the process.
+    // system_server if it is not by an app
     optional string process_name = 3;
 
     // The pid if available. -1 means not available.
     optional sint32 pid = 4;
+}
 
-    // 1 indicates is instant app. -1 indicates Not applicable.
-    optional sint32 is_instant_app = 5;
+/**
+ * Logs when a WTF (What a Terrible Failure) happened.
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message WTFOccurred {
+    optional int32 uid = 1 [(is_uid) = true];
 
-    // The activity name if available.
-    optional string activity_name = 6;
+    optional string tag = 2;
 
-    // The package name if available.
-    optional string package_name = 7;
+    // The name of the process.
+    // system_server if it is not by an app
+    optional string process_name = 3;
 
-    // 1 indicates in foreground. -1 indicates not available.
-    optional sint32 is_foreground = 8;
+    // The pid if available. -1 means not available.
+    optional sint32 pid = 4;
+}
+
+/**
+ * Logs when system server reports low memory.
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message LowMemReported {
+}
+
+/**
+ * Logs when an app ANR (App Not Responding) occurs.
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/am/AppErrors.java
+ */
+message ANROccurred {
+    optional int32 uid = 1 [(is_uid) = true];
+
+    optional string process_name = 2;
+
+    optional string short_component_name = 3;
+
+    optional string reason = 4;
 }
 
 /*
@@ -1299,7 +1308,7 @@ message AnomalyDetected {
     optional int64 alert_id = 3;
 }
 
-message AppStartChanged {
+message AppStartOccurred {
     // The uid if available. -1 means not available.
     optional int32 uid = 1 [(is_uid) = true];
 
@@ -1307,7 +1316,7 @@ message AppStartChanged {
     optional string pkg_name = 2;
 
     enum TransitionType {
-        APP_START_TRANSITION_TYPE_UNKNOWN = 0;
+        UNKNOWN = 0;
         WARM = 1;
         HOT = 2;
         COLD = 3;
@@ -1346,7 +1355,7 @@ message AppStartChanged {
     optional int32 package_optimization_compilation_reason = 15;
 }
 
-message AppStartCancelChanged {
+message AppStartCanceled {
     // The uid if available. -1 means not available.
     optional int32 uid = 1 [(is_uid) = true];
 
@@ -1354,7 +1363,7 @@ message AppStartCancelChanged {
     optional string pkg_name = 2;
 
     enum TransitionType {
-        APP_START_TRANSITION_TYPE_UNKNOWN = 0;
+        UNKNOWN = 0;
         WARM = 1;
         HOT = 2;
         COLD = 3;
@@ -1366,7 +1375,7 @@ message AppStartCancelChanged {
     optional string activity_name = 4;
 }
 
-message AppStartFullyDrawnChanged {
+message AppStartFullyDrawn {
     // The uid if available. -1 means not available.
     optional int32 uid = 1 [(is_uid) = true];
 
@@ -1374,7 +1383,7 @@ message AppStartFullyDrawnChanged {
     optional string pkg_name = 2;
 
     enum TransitionType {
-        APP_START_TRANSITION_TYPE_UNKNOWN = 0;
+        UNKNOWN = 0;
         WITH_BUNDLE = 1;
         WITHOUT_BUNDLE = 2;
     }
@@ -1459,8 +1468,8 @@ message ForegroundServiceStateChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message IsolatedUidChanged {
-    // NOTE: DO NOT annotate uid field in this atom. This atom is specially handled in statsd.
     // The host UID. Generally, we should attribute metrics from the isolated uid to the host uid.
+    // NOTE: DO NOT annotate uid field in this atom. This atom is specially handled in statsd.
     optional int32 parent_uid = 1;
 
     optional int32 isolated_uid = 2;
@@ -1621,9 +1630,8 @@ message WifiBytesTransfer {
 message WifiBytesTransferByFgBg {
     optional int32 uid = 1 [(is_uid) = true];
 
-    // 1 denotes foreground and 0 denotes background. This is called Set in
-    // NetworkStats.
-    optional int32 is_foreground = 2;
+    // 1 denotes foreground and 0 denotes background. This is called Set in NetworkStats.
+    optional bool is_foreground = 2;
 
     optional int64 rx_bytes = 3;
 
@@ -1663,7 +1671,7 @@ message MobileBytesTransferByFgBg {
 
     // 1 denotes foreground and 0 denotes background. This is called Set in
     // NetworkStats.
-    optional int32 is_foreground = 2;
+    optional bool is_foreground = 2;
 
     optional int64 rx_bytes = 3;
 
@@ -1760,7 +1768,7 @@ message CpuTimePerUidFreq {
 /**
  * Pulls Wifi Controller Activity Energy Info
  */
-message WifiActivityEnergyInfo {
+message WifiActivityInfo {
     // timestamp(wall clock) of record creation
     optional uint64 timestamp_millis = 1;
     // stack reported state

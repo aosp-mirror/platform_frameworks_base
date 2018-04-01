@@ -211,11 +211,31 @@ public class LauncherApps {
          * example, this can happen when a Device Administrator suspends
          * an applicaton.
          *
+         * <p>Note: On devices running {@link android.os.Build.VERSION_CODES#P Android P} or higher,
+         * any apps that override {@link #onPackagesSuspended(String[], Bundle, UserHandle)} will
+         * not receive this callback.
+         *
          * @param packageNames The names of the packages that have just been
          *            suspended.
          * @param user The UserHandle of the profile that generated the change.
          */
         public void onPackagesSuspended(String[] packageNames, UserHandle user) {
+        }
+
+        /**
+         * Indicates that one or more packages have been suspended. A device administrator or an app
+         * with {@code android.permission.SUSPEND_APPS} can do this.
+         *
+         * @param packageNames The names of the packages that have just been suspended.
+         * @param launcherExtras A {@link Bundle} of extras for the launcher.
+         * @param user the user for which the given packages were suspended.
+         *
+         * @see PackageManager#isPackageSuspended()
+         * @see #getSuspendedPackageLauncherExtras(String, UserHandle)
+         */
+        public void onPackagesSuspended(String[] packageNames, @Nullable Bundle launcherExtras,
+                UserHandle user) {
+            onPackagesSuspended(packageNames, user);
         }
 
         /**
@@ -638,6 +658,31 @@ public class LauncherApps {
     }
 
     /**
+     * Gets the launcher extras supplied to the system when the given package was suspended via
+     * {@code PackageManager#setPackagesSuspended(String[], boolean, PersistableBundle,
+     * PersistableBundle, String)}.
+     *
+     * <p>Note: This just returns whatever extras were provided to the system, <em>which might
+     * even be {@code null}.</em>
+     *
+     * @param packageName The package for which to fetch the launcher extras.
+     * @param user The {@link UserHandle} of the profile.
+     * @return A {@link Bundle} of launcher extras. Or {@code null} if the package is not currently
+     *         suspended.
+     *
+     * @see Callback#onPackagesSuspended(String[], Bundle, UserHandle)
+     * @see PackageManager#isPackageSuspended()
+     */
+    public @Nullable Bundle getSuspendedPackageLauncherExtras(String packageName, UserHandle user) {
+        logErrorForInvalidProfileAccess(user);
+        try {
+            return mService.getSuspendedPackageLauncherExtras(packageName, user);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns {@link ApplicationInfo} about an application installed for a specific user profile.
      *
      * @param packageName The package name of the application
@@ -652,7 +697,7 @@ public class LauncherApps {
             @ApplicationInfoFlags int flags, @NonNull UserHandle user)
             throws PackageManager.NameNotFoundException {
         Preconditions.checkNotNull(packageName, "packageName");
-        Preconditions.checkNotNull(packageName, "user");
+        Preconditions.checkNotNull(user, "user");
         logErrorForInvalidProfileAccess(user);
         try {
             final ApplicationInfo ai = mService
@@ -1163,14 +1208,15 @@ public class LauncherApps {
         }
 
         @Override
-        public void onPackagesSuspended(UserHandle user, String[] packageNames)
+        public void onPackagesSuspended(UserHandle user, String[] packageNames,
+                Bundle launcherExtras)
                 throws RemoteException {
             if (DEBUG) {
                 Log.d(TAG, "onPackagesSuspended " + user.getIdentifier() + "," + packageNames);
             }
             synchronized (LauncherApps.this) {
                 for (CallbackMessageHandler callback : mCallbacks) {
-                    callback.postOnPackagesSuspended(packageNames, user);
+                    callback.postOnPackagesSuspended(packageNames, launcherExtras, user);
                 }
             }
         }
@@ -1218,6 +1264,7 @@ public class LauncherApps {
         private static class CallbackInfo {
             String[] packageNames;
             String packageName;
+            Bundle launcherExtras;
             boolean replacing;
             UserHandle user;
             List<ShortcutInfo> shortcuts;
@@ -1251,7 +1298,8 @@ public class LauncherApps {
                     mCallback.onPackagesUnavailable(info.packageNames, info.user, info.replacing);
                     break;
                 case MSG_SUSPENDED:
-                    mCallback.onPackagesSuspended(info.packageNames, info.user);
+                    mCallback.onPackagesSuspended(info.packageNames, info.launcherExtras,
+                            info.user);
                     break;
                 case MSG_UNSUSPENDED:
                     mCallback.onPackagesUnsuspended(info.packageNames, info.user);
@@ -1301,10 +1349,12 @@ public class LauncherApps {
             obtainMessage(MSG_UNAVAILABLE, info).sendToTarget();
         }
 
-        public void postOnPackagesSuspended(String[] packageNames, UserHandle user) {
+        public void postOnPackagesSuspended(String[] packageNames, Bundle launcherExtras,
+                UserHandle user) {
             CallbackInfo info = new CallbackInfo();
             info.packageNames = packageNames;
             info.user = user;
+            info.launcherExtras = launcherExtras;
             obtainMessage(MSG_SUSPENDED, info).sendToTarget();
         }
 

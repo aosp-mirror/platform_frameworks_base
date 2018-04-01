@@ -35,27 +35,32 @@ void StatsPuller::SetUidMap(const sp<UidMap>& uidMap) { mUidMap = uidMap; }
 // ValueMetric has a minimum bucket size of 10min so that we don't pull too frequently
 StatsPuller::StatsPuller(const int tagId)
     : mTagId(tagId) {
-    mCoolDownSec = StatsPullerManagerImpl::kAllPullAtomInfo.find(tagId)->second.coolDownSec;
-    VLOG("Puller for tag %d created. Cooldown set to %ld", mTagId, mCoolDownSec);
+    mCoolDownNs = StatsPullerManagerImpl::kAllPullAtomInfo.find(tagId)->second.coolDownNs;
+    VLOG("Puller for tag %d created. Cooldown set to %lld", mTagId, (long long)mCoolDownNs);
 }
 
-bool StatsPuller::Pull(std::vector<std::shared_ptr<LogEvent>>* data) {
+bool StatsPuller::Pull(const int64_t elapsedTimeNs, std::vector<std::shared_ptr<LogEvent>>* data) {
     lock_guard<std::mutex> lock(mLock);
+    int64_t wallClockTimeNs = getWallClockNs();
     StatsdStats::getInstance().notePull(mTagId);
-    long curTime = getElapsedRealtimeSec();
-    if (curTime - mLastPullTimeSec < mCoolDownSec) {
+    if (elapsedTimeNs - mLastPullTimeNs < mCoolDownNs) {
         (*data) = mCachedData;
         StatsdStats::getInstance().notePullFromCache(mTagId);
         return true;
     }
-    if (mMinPullIntervalSec > curTime - mLastPullTimeSec) {
-        mMinPullIntervalSec = curTime - mLastPullTimeSec;
-        StatsdStats::getInstance().updateMinPullIntervalSec(mTagId, mMinPullIntervalSec);
+    if (mMinPullIntervalNs > elapsedTimeNs - mLastPullTimeNs) {
+        mMinPullIntervalNs = elapsedTimeNs - mLastPullTimeNs;
+        StatsdStats::getInstance().updateMinPullIntervalSec(mTagId,
+                                                            mMinPullIntervalNs / NS_PER_SEC);
     }
     mCachedData.clear();
-    mLastPullTimeSec = curTime;
+    mLastPullTimeNs = elapsedTimeNs;
     bool ret = PullInternal(&mCachedData);
-    if (ret) {
+    for (const shared_ptr<LogEvent>& data : mCachedData) {
+        data->setElapsedTimestampNs(elapsedTimeNs);
+        data->setLogdWallClockTimestampNs(wallClockTimeNs);
+    }
+    if (ret && mCachedData.size() > 0) {
       mergeIsolatedUidsToHostUid(mCachedData, mUidMap, mTagId);
       (*data) = mCachedData;
     }
@@ -70,12 +75,12 @@ int StatsPuller::clearCache() {
     lock_guard<std::mutex> lock(mLock);
     int ret = mCachedData.size();
     mCachedData.clear();
-    mLastPullTimeSec = 0;
+    mLastPullTimeNs = 0;
     return ret;
 }
 
-int StatsPuller::ClearCacheIfNecessary(long timestampSec) {
-    if (timestampSec - mLastPullTimeSec > mCoolDownSec) {
+int StatsPuller::ClearCacheIfNecessary(int64_t timestampNs) {
+    if (timestampNs - mLastPullTimeNs > mCoolDownNs) {
         return clearCache();
     } else {
         return 0;

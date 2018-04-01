@@ -1470,6 +1470,8 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
             proto.end(userToken);
         }
         proto.flush();
+        mPerformanceMap.clear();
+        mCryptoPerformanceMap.clear();
     }
 
     @Override

@@ -808,7 +808,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         final String[] getStaticOverlayPaths(List<PackageParser.Package> overlayPackages,
-                String targetPath, Object installLock) {
+                String targetPath) {
             if (overlayPackages == null || overlayPackages.isEmpty()) {
                 return null;
             }
@@ -828,20 +828,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     //
                     // OverlayManagerService will update each of them with a correct gid from its
                     // target package app id.
-                    if (installLock != null) {
-                        synchronized (installLock) {
-                            mInstaller.idmap(targetPath, overlayPackage.baseCodePath,
-                                    UserHandle.getSharedAppGid(
-                                            UserHandle.getUserGid(UserHandle.USER_SYSTEM)));
-                        }
-                    } else {
-                        // We can call mInstaller without holding mInstallLock because mInstallLock
-                        // is held before running parallel parsing.
-                        // Moreover holding mInstallLock on each parsing thread causes dead-lock.
-                        mInstaller.idmap(targetPath, overlayPackage.baseCodePath,
-                                UserHandle.getSharedAppGid(
-                                        UserHandle.getUserGid(UserHandle.USER_SYSTEM)));
-                    }
+                    mInstaller.idmap(targetPath, overlayPackage.baseCodePath,
+                            UserHandle.getSharedAppGid(
+                                    UserHandle.getUserGid(UserHandle.USER_SYSTEM)));
                     if (overlayPathList == null) {
                         overlayPathList = new ArrayList<String>();
                     }
@@ -856,13 +845,15 @@ public class PackageManagerService extends IPackageManager.Stub
 
         String[] getStaticOverlayPaths(String targetPackageName, String targetPath) {
             List<PackageParser.Package> overlayPackages;
-            synchronized (mPackages) {
-                overlayPackages = getStaticOverlayPackages(
-                        mPackages.values(), targetPackageName);
+            synchronized (mInstallLock) {
+                synchronized (mPackages) {
+                    overlayPackages = getStaticOverlayPackages(
+                            mPackages.values(), targetPackageName);
+                }
+                // It is safe to keep overlayPackages without holding mPackages because static overlay
+                // packages can't be uninstalled or disabled.
+                return getStaticOverlayPaths(overlayPackages, targetPath);
             }
-            // It is safe to keep overlayPackages without holding mPackages because static overlay
-            // packages can't be uninstalled or disabled.
-            return getStaticOverlayPaths(overlayPackages, targetPath, mInstallLock);
         }
 
         @Override public final String[] getOverlayApks(String targetPackageName) {
@@ -895,11 +886,13 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized String[] getStaticOverlayPaths(String targetPackageName, String targetPath) {
             // We can trust mOverlayPackages without holding mPackages because package uninstall
             // can't happen while running parallel parsing.
-            // Moreover holding mPackages on each parsing thread causes dead-lock.
+            // And we can call mInstaller inside getStaticOverlayPaths without holding mInstallLock
+            // because mInstallLock is held before running parallel parsing.
+            // Moreover holding mPackages or mInstallLock on each parsing thread causes dead-lock.
             return mOverlayPackages == null ? null :
                     getStaticOverlayPaths(
                             getStaticOverlayPackages(mOverlayPackages, targetPackageName),
-                            targetPath, null);
+                            targetPath);
         }
     }
 
@@ -13825,11 +13818,15 @@ public class PackageManagerService extends IPackageManager.Stub
         info.sendPackageRemovedBroadcasts(true /*killApp*/);
     }
 
-    private void sendPackagesSuspendedForUser(String[] pkgList, int userId, boolean suspended) {
+    private void sendPackagesSuspendedForUser(String[] pkgList, int userId, boolean suspended,
+            PersistableBundle launcherExtras) {
         if (pkgList.length > 0) {
             Bundle extras = new Bundle(1);
             extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST, pkgList);
-
+            if (launcherExtras != null) {
+                extras.putBundle(Intent.EXTRA_LAUNCHER_EXTRAS,
+                        new Bundle(launcherExtras.deepCopy()));
+            }
             sendPackageBroadcast(
                     suspended ? Intent.ACTION_PACKAGES_SUSPENDED
                             : Intent.ACTION_PACKAGES_UNSUSPENDED,
@@ -14041,7 +14038,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!changedPackagesList.isEmpty()) {
             final String[] changedPackages = changedPackagesList.toArray(
                     new String[changedPackagesList.size()]);
-            sendPackagesSuspendedForUser(changedPackages, userId, suspended);
+            sendPackagesSuspendedForUser(changedPackages, userId, suspended, launcherExtras);
             sendMyPackageSuspendedOrUnsuspended(changedPackages, suspended, appExtras, userId);
             synchronized (mPackages) {
                 scheduleWritePackageRestrictionsLocked(userId);
@@ -16810,12 +16807,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (userId != UserHandle.USER_ALL) {
                     ps.setInstalled(true, userId);
                     ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, userId, installerPackageName);
-                } else {
-                    for (int currentUserId : sUserManager.getUserIds()) {
-                        ps.setInstalled(true, currentUserId);
-                        ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, currentUserId,
-                                installerPackageName);
-                    }
                 }
 
                 // When replacing an existing package, preserve the original install reason for all
@@ -17335,8 +17326,11 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (Build.IS_DEBUGGABLE) Slog.i(TAG, "Enabling apk verity to " + apkPath);
                     FileDescriptor fd = result.getUnownedFileDescriptor();
                     try {
-                        mInstaller.installApkVerity(apkPath, fd);
-                    } catch (InstallerException e) {
+                        final byte[] signedRootHash = VerityUtils.generateFsverityRootHash(apkPath);
+                        mInstaller.installApkVerity(apkPath, fd, result.getContentSize());
+                        mInstaller.assertFsverityRootHashMatches(apkPath, signedRootHash);
+                    } catch (InstallerException | IOException | DigestException |
+                             NoSuchAlgorithmException e) {
                         res.setError(INSTALL_FAILED_INTERNAL_ERROR,
                                 "Failed to set up verity: " + e);
                         return;
@@ -23751,6 +23745,18 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             return PackageManagerService.this
                     .getPackageInfoInternal(packageName, PackageManager.VERSION_CODE_HIGHEST,
                             flags, filterCallingUid, userId);
+        }
+
+        @Override
+        public Bundle getSuspendedPackageLauncherExtras(String packageName, int userId) {
+            synchronized (mPackages) {
+                final PackageSetting ps = mSettings.mPackages.get(packageName);
+                PersistableBundle launcherExtras = null;
+                if (ps != null) {
+                    launcherExtras = ps.readUserState(userId).suspendedLauncherExtras;
+                }
+                return (launcherExtras != null) ? new Bundle(launcherExtras.deepCopy()) : null;
+            }
         }
 
         @Override

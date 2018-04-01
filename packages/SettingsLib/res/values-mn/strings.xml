@@ -40,6 +40,10 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s-р холбогдсон"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s-р боломжтой"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"Холбогдсон хэдий ч интернет алга"</string>
+    <!-- no translation found for wifi_status_no_internet (5784710974669608361) -->
+    <skip />
+    <!-- no translation found for wifi_status_sign_in_required (123517180404752756) -->
+    <skip />
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"Хандах цэг түр хугацаанд дүүрсэн байна"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s-р холбогдсон"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s-р боломжтой"</string>
@@ -63,6 +67,12 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"Холбогдсон (утас байхгүй), батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Холбогдсон (медиа байхгүй), батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Холбогдсон (утас эсвэл медиа байхгүй), батерей <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <!-- no translation found for bluetooth_active_battery_level (3149689299296462009) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level (1447164613319663655) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_no_battery_level (8380223546730241956) -->
+    <skip />
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Медиа аудио"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Утасны дуудлага"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Файл дамжуулалт"</string>
@@ -109,6 +119,14 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"Чихэвч"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"Нэмэлт оролт"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
+    <!-- no translation found for bluetooth_hearingaid_left_pairing_message (7378813500862148102) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearingaid_right_pairing_message (1550373802309160891) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearingaid_left_battery_level (8797811465352097562) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearingaid_right_battery_level (7309476148173459677) -->
+    <skip />
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wifi унтраалттай байна."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wifi холбогдоогүй байна."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wifi сүлжээний дохио нэг баганатай байна."</string>
@@ -188,7 +206,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"Идэвхтэй байлгах"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Цэнэглэж байх үед дэлгэц хэзээ ч амрахгүй"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Bluetooth HCI снүүп логыг идэвхжүүлэх"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"Файл доторх бүх блютүүт HCI пакетуудыг унших"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Файлд Bluetooth HCI-н бүх багцыг авах (Энэ тохиргоог өөрчилсний дараа Bluetooth-г унтраах/асаах)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM түгжээ тайлагч"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Bootloader-н түгжээг тайлахыг зөвшөөрөх"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM түгжээ тайлагчийг зөвшөөрөх үү?"</string>
@@ -207,15 +225,20 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP хувилбар"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Bluetooth AVRCP хувилбарыг сонгох"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth аудио кодлогч"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"Bluetooth аудио кодлогч сонгох"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth аудио жишээний үнэлгээ"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"Bluetooth аудио кодлогч сонгох:\nЖишээний хэмжээ"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Жишээ тутмын Bluetooth аудионы бит"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"Bluetooth аудио кодлогч сонгох:\nЖишээ бүрт бит"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetooth аудио сувгийн горим"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"Bluetooth аудио кодлогч сонгох:\nСувгийн горим"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth Аудио LDAC Кодлогч: Тоглуулагчийн чанар"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"Bluetooth Аудио LDAC Кодлогч сонгох:\nТоглуулагчийн чанар"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Дамжуулж байна: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Хувийн DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Хувийн DNS Горимыг сонгох"</string>
@@ -223,9 +246,15 @@
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Автомат"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Хувийн DNS-н үйлчилгээ үзүүлэгчийн хостын нэр"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS-н үйлчилгээ үзүүлэгчийн хостын нэрийг оруулах"</string>
+    <!-- no translation found for private_dns_mode_provider_failure (231837290365031223) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Утасгүй дэлгэцийн сертификатын сонголтыг харуулах"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi лог-н түвшинг нэмэгдүүлэх, Wi‑Fi Сонгогч дээрх SSID-д ногдох RSSI-г харуулах"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Wi‑Fi сүлжээнд холбогдох үедээ шинэ дурын (random) MAC хаяг үүсгэх"</string>
+    <!-- no translation found for wifi_metered_label (4514924227256839725) -->
+    <skip />
+    <!-- no translation found for wifi_unmetered_label (6124098729457992931) -->
+    <skip />
     <string name="select_logd_size_title" msgid="7433137108348553508">"Логгерын буферын хэмжээ"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Лог буфер бүрт ногдох логгерын хэмжээг сонгоно уу"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Нэвтрэгчийн тогтмол санг устгах уу?"</string>
@@ -360,14 +389,10 @@
     <string name="power_remaining_duration_only_enhanced" msgid="5992456722677973678">"Таны хэрэглээнд тулгуурлан <xliff:g id="TIME">%1$s</xliff:g> орчмын хугацаа үлдсэн байна"</string>
     <string name="power_discharging_duration_enhanced" msgid="5726302316642148671">"Таны хэрэглээнд тулгуурлан ойролцоогоор <xliff:g id="TIME">%1$s</xliff:g> үлдсэн (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="5329694252258605547">"<xliff:g id="TIME">%1$s</xliff:g> үлдсэн"</string>
-    <!-- no translation found for power_discharge_by_enhanced (2095821536747992464) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only_enhanced (2175151772952365149) -->
-    <skip />
-    <!-- no translation found for power_discharge_by (6453537733650125582) -->
-    <skip />
-    <!-- no translation found for power_discharge_by_only (107616694963545745) -->
-    <skip />
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Таны хэрэглээнд (<xliff:g id="LEVEL">%2$s</xliff:g>) тулгуурлан ойролцоогоор <xliff:g id="TIME">%1$s</xliff:g> хүртэл барих ёстой"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Таны хэрэглээнд тулгуурлан ойролцоогоор <xliff:g id="TIME">%1$s</xliff:g> хүртэл барих ёстой"</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"Ойролцоогоор <xliff:g id="TIME">%1$s</xliff:g> хүртэл барих ёстой (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"Ойролцоогоор <xliff:g id="TIME">%1$s</xliff:g> хүртэл барих ёстой"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"<xliff:g id="THRESHOLD">%1$s</xliff:g>-с бага хугацаа үлдсэн"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"<xliff:g id="THRESHOLD">%1$s</xliff:g>-с бага хугацаа үлдсэн (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>-с их хугацаа үлдсэн (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -422,8 +447,7 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Бүртгэсэн"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Бүртгээгүй"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Байхгүй"</string>
-    <!-- no translation found for wifi_status_mac_randomized (5589328382467438245) -->
-    <skip />
+    <string name="wifi_status_mac_randomized" msgid="5589328382467438245">"MAC хаягийг үүсгэсэн"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
       <item quantity="other">%1$d төхөөрөмж холбосон</item>
       <item quantity="one">%1$d төхөөрөмж холбосон</item>
@@ -443,6 +467,5 @@
     <string name="alarm_template_far" msgid="3779172822607461675">"<xliff:g id="WHEN">%1$s</xliff:g>-д"</string>
     <string name="zen_mode_duration_settings_title" msgid="229547412251222757">"Хугацаа"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="6478923750878945501">"Тухай бүрт асуух"</string>
-    <!-- no translation found for time_unit_just_now (6363336622778342422) -->
-    <skip />
+    <string name="time_unit_just_now" msgid="6363336622778342422">"Дөнгөж сая"</string>
 </resources>

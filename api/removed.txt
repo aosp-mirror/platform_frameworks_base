@@ -183,7 +183,15 @@ package android.graphics {
 
   public final class ImageDecoder implements java.lang.AutoCloseable {
     method public deprecated boolean getAsAlphaMask();
+    method public deprecated boolean getDecodeAsAlphaMask();
+    method public deprecated boolean getMutable();
+    method public deprecated boolean getRequireUnpremultiplied();
     method public deprecated android.graphics.ImageDecoder setAsAlphaMask(boolean);
+    method public deprecated android.graphics.ImageDecoder setDecodeAsAlphaMask(boolean);
+    method public deprecated android.graphics.ImageDecoder setMutable(boolean);
+    method public deprecated android.graphics.ImageDecoder setRequireUnpremultiplied(boolean);
+    method public deprecated android.graphics.ImageDecoder setResize(int, int);
+    method public deprecated android.graphics.ImageDecoder setResize(int);
     field public static final deprecated int ERROR_SOURCE_ERROR = 3; // 0x3
     field public static final deprecated int ERROR_SOURCE_EXCEPTION = 1; // 0x1
     field public static final deprecated int ERROR_SOURCE_INCOMPLETE = 2; // 0x2

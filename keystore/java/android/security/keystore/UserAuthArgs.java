@@ -33,5 +33,6 @@ public interface UserAuthArgs {
     boolean isUserConfirmationRequired();
     long getBoundToSpecificSecureUserId();
     boolean isTrustedUserPresenceRequired();
+    boolean isUnlockedDeviceRequired();
 
 }
