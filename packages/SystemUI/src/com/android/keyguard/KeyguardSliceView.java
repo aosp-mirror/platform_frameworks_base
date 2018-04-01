@@ -16,6 +16,9 @@
 
 package com.android.keyguard;
 
+import android.animation.LayoutTransition;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.annotation.ColorInt;
 import android.app.PendingIntent;
 import android.arch.lifecycle.LiveData;
@@ -31,6 +34,7 @@ import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -39,9 +43,11 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.tuner.TunerService;
+import com.android.systemui.util.wakelock.WakeLock;
 
 import java.util.HashMap;
 import java.util.List;
@@ -158,10 +164,9 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
                 button = new KeyguardSliceButton(mContext);
                 button.setTextColor(blendedColor);
                 button.setTag(itemTag);
-            } else {
-                mRow.removeView(button);
+                final int viewIndex = i - (mHasHeader ? 1 : 0);
+                mRow.addView(button, viewIndex);
             }
-            mRow.addView(button);
 
             PendingIntent pendingIntent = null;
             if (rc.getPrimaryAction() != null) {
@@ -335,20 +340,77 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
 
     public static class Row extends LinearLayout {
 
+        private static final long ROW_ANIM_DURATION = 350;
+        private final WakeLock mAnimationWakeLock;
+
         public Row(Context context) {
-            super(context);
+            this(context, null);
         }
 
         public Row(Context context, AttributeSet attrs) {
-            super(context, attrs);
+            this(context, attrs, 0);
         }
 
         public Row(Context context, AttributeSet attrs, int defStyleAttr) {
-            super(context, attrs, defStyleAttr);
+            this(context, attrs, defStyleAttr, 0);
         }
 
         public Row(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
             super(context, attrs, defStyleAttr, defStyleRes);
+            mAnimationWakeLock = WakeLock.createPartial(context, "slice animation");
+        }
+
+        @Override
+        protected void onFinishInflate() {
+            LayoutTransition transition = new LayoutTransition();
+            transition.setDuration(ROW_ANIM_DURATION);
+            transition.setStagger(LayoutTransition.CHANGING, ROW_ANIM_DURATION);
+            transition.setStagger(LayoutTransition.CHANGE_APPEARING, ROW_ANIM_DURATION);
+            transition.setStagger(LayoutTransition.CHANGE_DISAPPEARING, ROW_ANIM_DURATION);
+
+            PropertyValuesHolder left = PropertyValuesHolder.ofInt("left", 0, 1);
+            PropertyValuesHolder right = PropertyValuesHolder.ofInt("right", 0, 1);
+            ObjectAnimator changeAnimator = ObjectAnimator.ofPropertyValuesHolder((Object) null,
+                    left, right);
+            transition.setAnimator(LayoutTransition.CHANGE_APPEARING, changeAnimator);
+            transition.setAnimator(LayoutTransition.CHANGE_DISAPPEARING, changeAnimator);
+            transition.setInterpolator(LayoutTransition.CHANGE_APPEARING,
+                    Interpolators.ACCELERATE_DECELERATE);
+            transition.setInterpolator(LayoutTransition.CHANGE_DISAPPEARING,
+                    Interpolators.ACCELERATE_DECELERATE);
+            transition.setStartDelay(LayoutTransition.CHANGE_APPEARING, ROW_ANIM_DURATION);
+
+            ObjectAnimator appearAnimator = ObjectAnimator.ofFloat(null, "alpha", 0f, 1f);
+            transition.setAnimator(LayoutTransition.APPEARING, appearAnimator);
+            transition.setInterpolator(LayoutTransition.APPEARING, Interpolators.ALPHA_IN);
+
+            ObjectAnimator disappearAnimator = ObjectAnimator.ofFloat(null, "alpha", 1f, 0f);
+            transition.setInterpolator(LayoutTransition.DISAPPEARING, Interpolators.ALPHA_OUT);
+            transition.setDuration(LayoutTransition.DISAPPEARING, ROW_ANIM_DURATION / 2);
+            transition.setAnimator(LayoutTransition.DISAPPEARING, disappearAnimator);
+
+            transition.setAnimateParentHierarchy(false);
+            setLayoutTransition(transition);
+
+            // This view is visible in AOD, which means that the device will sleep if we
+            // don't hold a wake lock. We want to enter doze only after all views have reached
+            // their desired positions.
+            setLayoutAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    mAnimationWakeLock.acquire();
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    mAnimationWakeLock.release();
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
         }
 
         @Override
