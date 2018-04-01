@@ -87,6 +87,7 @@ public final class Slice implements Parcelable {
             SUBTYPE_SOURCE,
             SUBTYPE_TOGGLE,
             SUBTYPE_VALUE,
+            SUBTYPE_LAYOUT_DIRECTION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SliceSubtype {}
@@ -189,6 +190,12 @@ public final class Slice implements Parcelable {
      * slices.
      */
     public static final String HINT_PERMISSION_REQUEST = "permission_request";
+    /**
+     * Subtype to indicate that this item indicates the layout direction for content
+     * in the slice.
+     * Expected to be an item of format {@link SliceItem#FORMAT_INT}.
+     */
+    public static final String SUBTYPE_LAYOUT_DIRECTION = "layout_direction";
     /**
      * Key to retrieve an extra added to an intent when a control is changed.
      */
