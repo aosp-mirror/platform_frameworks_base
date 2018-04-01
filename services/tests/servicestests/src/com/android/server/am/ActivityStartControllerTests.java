@@ -77,8 +77,8 @@ public class ActivityStartControllerTests extends ActivityTestsBase {
         final int startFlags = random.nextInt();
         final ActivityStack stack = mService.mStackSupervisor.getDefaultDisplay().createStack(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final ProcessRecord process= new ProcessRecord(null, mService.mContext.getApplicationInfo(),
-                "name", 12345);
+        final ProcessRecord process= new ProcessRecord(null, null,
+                mService.mContext.getApplicationInfo(), "name", 12345);
 
         mController.addPendingActivityLaunch(
                 new PendingActivityLaunch(activity, source, startFlags, stack, process));
