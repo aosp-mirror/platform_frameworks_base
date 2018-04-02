@@ -596,7 +596,7 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid) {
   const ResTable_map* const map_entry_end = map_entry + dtohl(map->count);
 
   uint32_t parent_resid = dtohl(map->parent.ident);
-  if (parent_resid == 0) {
+  if (parent_resid == 0 || parent_resid == resid) {
     // There is no parent, meaning there is nothing to inherit and we can do a simple
     // copy of the entries in the map.
     const size_t entry_count = map_entry_end - map_entry;
