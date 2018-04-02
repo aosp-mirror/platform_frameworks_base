@@ -206,7 +206,8 @@ public class RecoverableKeyStoreManager {
         // Check serial number
         long newSerial = certXml.getSerial();
         Long oldSerial = mDatabase.getRecoveryServiceCertSerial(userId, uid, rootCertificateAlias);
-        if (oldSerial != null && oldSerial >= newSerial) {
+        if (oldSerial != null && oldSerial >= newSerial
+                && !mTestCertHelper.isTestOnlyCertificateAlias(rootCertificateAlias)) {
             if (oldSerial == newSerial) {
                 Log.i(TAG, "The cert file serial number is the same, so skip updating.");
             } else {
