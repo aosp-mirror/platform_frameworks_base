@@ -263,20 +263,31 @@ public class NetworkStatsManager {
     /**
      * Query network usage statistics details for a given uid.
      *
-     * #see queryDetailsForUidTag(int, String, long, long, int, int)
+     * #see queryDetailsForUidTagState(int, String, long, long, int, int, int)
      */
     public NetworkStats queryDetailsForUid(int networkType, String subscriberId,
-            long startTime, long endTime, int uid) throws SecurityException, RemoteException {
-        return queryDetailsForUidTag(networkType, subscriberId, startTime, endTime, uid,
-            NetworkStats.Bucket.TAG_NONE);
+            long startTime, long endTime, int uid) throws SecurityException {
+        return queryDetailsForUidTagState(networkType, subscriberId, startTime, endTime, uid,
+            NetworkStats.Bucket.TAG_NONE, NetworkStats.Bucket.STATE_ALL);
     }
 
     /**
-     * Query network usage statistics details for a given uid and tag. Only usable for uids
-     * belonging to calling user. Result is aggregated over state but not aggregated over time.
-     * This means buckets' start and end timestamps are going to be between 'startTime' and
-     * 'endTime' parameters. State is going to be {@link NetworkStats.Bucket#STATE_ALL}, uid the
-     * same as the 'uid' parameter and tag the same as 'tag' parameter.
+     * Query network usage statistics details for a given uid and tag.
+     *
+     * #see queryDetailsForUidTagState(int, String, long, long, int, int, int)
+     */
+    public NetworkStats queryDetailsForUidTag(int networkType, String subscriberId,
+            long startTime, long endTime, int uid, int tag) throws SecurityException {
+        return queryDetailsForUidTagState(networkType, subscriberId, startTime, endTime, uid,
+            tag, NetworkStats.Bucket.STATE_ALL);
+    }
+
+    /**
+     * Query network usage statistics details for a given uid, tag, and state. Only usable for uids
+     * belonging to calling user. Result is not aggregated over time. This means buckets' start and
+     * end timestamps are going to be between 'startTime' and 'endTime' parameters. The uid is going
+     * to be the same as the 'uid' parameter, the tag the same as the 'tag' parameter, and the state
+     * the same as the 'state' parameter.
      * defaultNetwork is going to be {@link NetworkStats.Bucket#DEFAULT_NETWORK_ALL},
      * metered is going to be {@link NetworkStats.Bucket#METERED_ALL}, and
      * roaming is going to be {@link NetworkStats.Bucket#ROAMING_ALL}.
@@ -297,17 +308,18 @@ public class NetworkStatsManager {
      * @return Statistics object or null if an error happened during statistics collection.
      * @throws SecurityException if permissions are insufficient to read network statistics.
      */
-    public NetworkStats queryDetailsForUidTag(int networkType, String subscriberId,
-            long startTime, long endTime, int uid, int tag) throws SecurityException {
+    public NetworkStats queryDetailsForUidTagState(int networkType, String subscriberId,
+            long startTime, long endTime, int uid, int tag, int state) throws SecurityException {
         NetworkTemplate template;
         template = createTemplate(networkType, subscriberId);
 
         NetworkStats result;
         try {
             result = new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
-            result.startHistoryEnumeration(uid, tag);
+            result.startHistoryEnumeration(uid, tag, state);
         } catch (RemoteException e) {
-            Log.e(TAG, "Error while querying stats for uid=" + uid + " tag=" + tag, e);
+            Log.e(TAG, "Error while querying stats for uid=" + uid + " tag=" + tag
+                    + " state=" + state, e);
             return null;
         }
 
