@@ -87,7 +87,7 @@ public final class DefaultLogger extends Logger {
                 .addTaggedData(INDEX, event.getEventIndex())
                 .addTaggedData(WIDGET_TYPE, event.getWidgetType())
                 .addTaggedData(WIDGET_VERSION, event.getWidgetVersion())
-                .addTaggedData(MODEL_NAME, SignatureParser.getModelName(event.getSignature()))
+                .addTaggedData(MODEL_NAME, SignatureParser.getModelName(event.getResultId()))
                 .addTaggedData(ENTITY_TYPE, event.getEntityType())
                 .addTaggedData(SMART_START, event.getSmartStart())
                 .addTaggedData(SMART_END, event.getSmartEnd())
@@ -231,9 +231,9 @@ public final class DefaultLogger extends Logger {
     }
 
     /**
-     * Creates a signature string that may be used to tag TextClassifier results.
+     * Creates a string id that may be used to identify a TextClassifier result.
      */
-    public static String createSignature(
+    public static String createId(
             String text, int start, int end, Context context, int modelVersion,
             List<Locale> locales) {
         Preconditions.checkNotNull(text);
@@ -250,7 +250,7 @@ public final class DefaultLogger extends Logger {
     }
 
     /**
-     * Helper for creating and parsing signature strings for
+     * Helper for creating and parsing string ids for
      * {@link android.view.textclassifier.TextClassifierImpl}.
      */
     @VisibleForTesting
