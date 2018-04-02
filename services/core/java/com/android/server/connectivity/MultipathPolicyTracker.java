@@ -44,6 +44,7 @@ import android.util.Slog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.net.NetworkPolicyManagerInternal;
+import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsManagerInternal;
 
 import java.util.Calendar;
@@ -191,7 +192,7 @@ public class MultipathPolicyTracker {
                     .getSubscriptionOpportunisticQuota(this.network, QUOTA_TYPE_MULTIPATH);
             if (DBG) Slog.d(TAG, "Opportunistic quota from data plan: " + quota + " bytes");
 
-            if (quota == 0) {
+            if (quota == NetworkPolicyManagerService.OPPORTUNISTIC_QUOTA_UNKNOWN) {
                 // STOPSHIP: replace this with a configurable mechanism.
                 quota = DEFAULT_DAILY_MULTIPATH_QUOTA;
                 if (DBG) Slog.d(TAG, "Setting quota: " + quota + " bytes");
