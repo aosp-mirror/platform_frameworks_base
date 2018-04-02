@@ -5583,6 +5583,11 @@ message MetricsEvent {
     // OS: P
     SETTINGS_GESTURE_SWIPE_UP = 1374;
 
+    // OPEN: Settings > Storage > Dialog to format a storage volume
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_VOLUME_FORMAT = 1375;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
