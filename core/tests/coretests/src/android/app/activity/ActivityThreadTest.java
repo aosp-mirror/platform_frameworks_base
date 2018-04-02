@@ -16,7 +16,10 @@
 
 package android.app.activity;
 
+import static org.junit.Assert.assertNull;
+
 import android.app.Activity;
+import android.app.ActivityThread;
 import android.app.IApplicationThread;
 import android.app.servertransaction.ActivityRelaunchItem;
 import android.app.servertransaction.ClientTransaction;
@@ -74,6 +77,21 @@ public class ActivityThreadTest {
         appThread.scheduleSleeping(activity.getActivityToken(), true /* sleeping */);
         appThread.scheduleTransaction(newStopTransaction(activity));
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+    }
+
+    /** Verify that repeated resume requests to activity will be ignored. */
+    @Test
+    public void testRepeatedResume() throws Exception {
+        final Activity activity = mActivityTestRule.launchActivity(new Intent());
+        final ActivityThread activityThread = activity.getActivityThread();
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+            activityThread.executeTransaction(newResumeTransaction(activity));
+            assertNull(activityThread.performResumeActivity(activity.getActivityToken(),
+                    true /* finalStateRequest */, "test"));
+
+            assertNull(activityThread.performResumeActivity(activity.getActivityToken(),
+                    false /* finalStateRequest */, "test"));
+        });
     }
 
     private static ClientTransaction newRelaunchResumeTransaction(Activity activity) {
