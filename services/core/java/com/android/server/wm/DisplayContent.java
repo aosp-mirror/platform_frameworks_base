@@ -2664,6 +2664,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // wallpaper, don't bother waiting for it
         boolean wallpaperEnabled = mService.mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableWallpaperService)
+                && mService.mContext.getResources().getBoolean(
+                        com.android.internal.R.bool.config_checkWallpaperAtBoot)
                 && !mService.mOnlyCore;
 
         if (DEBUG_SCREEN_ON || DEBUG_BOOT) Slog.i(TAG_WM,
