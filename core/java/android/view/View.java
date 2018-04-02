@@ -20224,22 +20224,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         int solidColor = getSolidColor();
         if (solidColor == 0) {
-            final int flags = Canvas.HAS_ALPHA_LAYER_SAVE_FLAG;
-
             if (drawTop) {
-                canvas.saveLayer(left, top, right, top + length, null, flags);
+                canvas.saveUnclippedLayer(left, top, right, top + length);
             }
 
             if (drawBottom) {
-                canvas.saveLayer(left, bottom - length, right, bottom, null, flags);
+                canvas.saveUnclippedLayer(left, bottom - length, right, bottom);
             }
 
             if (drawLeft) {
-                canvas.saveLayer(left, top, left + length, bottom, null, flags);
+                canvas.saveUnclippedLayer(left, top, left + length, bottom);
             }
 
             if (drawRight) {
-                canvas.saveLayer(right - length, top, right, bottom, null, flags);
+                canvas.saveUnclippedLayer(right - length, top, right, bottom);
             }
         } else {
             scrollabilityCache.setFadeColor(solidColor);
