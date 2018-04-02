@@ -25,10 +25,9 @@ import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.Spannable;
+import android.text.method.MovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
-import android.text.util.Linkify;
-import android.text.util.Linkify.LinkifyMask;
 import android.view.View;
 import android.view.textclassifier.TextClassifier.EntityType;
 import android.widget.TextView;
@@ -43,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -79,15 +79,15 @@ public final class TextLinks implements Parcelable {
     public @interface ApplyStrategy {}
 
     /**
-      * Do not replace {@link ClickableSpan}s that exist where the {@link TextLinkSpan} needs to
-      * be applied to. Do not apply the TextLinkSpan.
-      */
+     * Do not replace {@link ClickableSpan}s that exist where the {@link TextLinkSpan} needs to
+     * be applied to. Do not apply the TextLinkSpan.
+     */
     public static final int APPLY_STRATEGY_IGNORE = 0;
 
     /**
-      * Replace any {@link ClickableSpan}s that exist where the {@link TextLinkSpan} needs to be
-      * applied to.
-      */
+     * Replace any {@link ClickableSpan}s that exist where the {@link TextLinkSpan} needs to be
+     * applied to.
+     */
     public static final int APPLY_STRATEGY_REPLACE = 1;
 
     private final String mFullText;
@@ -99,70 +99,54 @@ public final class TextLinks implements Parcelable {
     }
 
     /**
+     * Returns the text that was used to generate these links.
+     * @hide
+     */
+    @NonNull
+    public String getText() {
+        return mFullText;
+    }
+
+    /**
      * Returns an unmodifiable Collection of the links.
      */
+    @NonNull
     public Collection<TextLink> getLinks() {
         return mLinks;
     }
 
     /**
      * Annotates the given text with the generated links. It will fail if the provided text doesn't
-     * match the original text used to crete the TextLinks.
+     * match the original text used to create the TextLinks.
+     *
+     * <p><strong>NOTE: </strong>It may be necessary to set a LinkMovementMethod on the TextView
+     * widget to properly handle links. See {@link TextView#setMovementMethod(MovementMethod)}
      *
      * @param text the text to apply the links to. Must match the original text
-     * @param applyStrategy strategy for resolving link conflicts
-     * @param spanFactory a factory to generate spans from TextLinks. Will use a default if null
-     * @param allowPrefix whether to allow applying links only to a prefix of the text.
+     * @param applyStrategy the apply strategy used to determine how to apply links to text.
+     *      e.g {@link TextLinks#APPLY_STRATEGY_IGNORE}
+     * @param spanFactory a custom span factory for converting TextLinks to TextLinkSpans.
+     *      Set to {@code null} to use the default span factory.
      *
      * @return a status code indicating whether or not the links were successfully applied
-     *
-     * @hide
+     *      e.g. {@link #STATUS_LINKS_APPLIED}
      */
     @Status
     public int apply(
             @NonNull Spannable text,
             @ApplyStrategy int applyStrategy,
-            @Nullable Function<TextLink, TextLinkSpan> spanFactory,
-            boolean allowPrefix) {
+            @Nullable Function<TextLink, TextLinkSpan> spanFactory) {
         Preconditions.checkNotNull(text);
-        checkValidApplyStrategy(applyStrategy);
-        final String textString = text.toString();
-        if (!mFullText.equals(textString) && !(allowPrefix && textString.startsWith(mFullText))) {
-            return STATUS_DIFFERENT_TEXT;
-        }
-        if (mLinks.isEmpty()) {
-            return STATUS_NO_LINKS_FOUND;
-        }
+        return new TextLinksParams.Builder()
+                .setApplyStrategy(applyStrategy)
+                .setSpanFactory(spanFactory)
+                .build()
+                .apply(text, this);
+    }
 
-        if (spanFactory == null) {
-            spanFactory = DEFAULT_SPAN_FACTORY;
-        }
-        int applyCount = 0;
-        for (TextLink link : mLinks) {
-            final TextLinkSpan span = spanFactory.apply(link);
-            if (span != null) {
-                final ClickableSpan[] existingSpans = text.getSpans(
-                        link.getStart(), link.getEnd(), ClickableSpan.class);
-                if (existingSpans.length > 0) {
-                    if (applyStrategy == APPLY_STRATEGY_REPLACE) {
-                        for (ClickableSpan existingSpan : existingSpans) {
-                            text.removeSpan(existingSpan);
-                        }
-                        text.setSpan(span, link.getStart(), link.getEnd(),
-                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        applyCount++;
-                    }
-                } else {
-                    text.setSpan(span, link.getStart(), link.getEnd(),
-                            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    applyCount++;
-                }
-            }
-        }
-        if (applyCount == 0) {
-            return STATUS_NO_LINKS_APPLIED;
-        }
-        return STATUS_LINKS_APPLIED;
+    @Override
+    public String toString() {
+        return String.format(Locale.US, "TextLinks{fullText=%s, links=%s}", mFullText, mLinks);
     }
 
     @Override
@@ -271,6 +255,13 @@ public final class TextLinks implements Parcelable {
         }
 
         @Override
+        public String toString() {
+            return String.format(Locale.US,
+                    "TextLink{start=%s, end=%s, entityScores=%s, urlSpan=%s}",
+                    mStart, mEnd, mEntityScores, mUrlSpan);
+        }
+
+        @Override
         public int describeContents() {
             return 0;
         }
@@ -304,108 +295,35 @@ public final class TextLinks implements Parcelable {
     }
 
     /**
-     * Optional input parameters for generating TextLinks.
+     * A request object for generating TextLinks.
      */
-    public static final class Options implements Parcelable {
+    public static final class Request implements Parcelable {
 
-        private LocaleList mDefaultLocales;
-        private TextClassifier.EntityConfig mEntityConfig;
-        private boolean mLegacyFallback;
-
-        private @ApplyStrategy int mApplyStrategy;
-        private Function<TextLink, TextLinkSpan> mSpanFactory;
-
+        private final CharSequence mText;
+        @Nullable private final LocaleList mDefaultLocales;
+        @Nullable private final TextClassifier.EntityConfig mEntityConfig;
+        private final boolean mLegacyFallback;
         private String mCallingPackageName;
 
-        /**
-         * Returns a new options object based on the specified link mask.
-         */
-        public static Options fromLinkMask(@LinkifyMask int mask) {
-            final List<String> entitiesToFind = new ArrayList<>();
-
-            if ((mask & Linkify.WEB_URLS) != 0) {
-                entitiesToFind.add(TextClassifier.TYPE_URL);
-            }
-            if ((mask & Linkify.EMAIL_ADDRESSES) != 0) {
-                entitiesToFind.add(TextClassifier.TYPE_EMAIL);
-            }
-            if ((mask & Linkify.PHONE_NUMBERS) != 0) {
-                entitiesToFind.add(TextClassifier.TYPE_PHONE);
-            }
-            if ((mask & Linkify.MAP_ADDRESSES) != 0) {
-                entitiesToFind.add(TextClassifier.TYPE_ADDRESS);
-            }
-
-            return new Options().setEntityConfig(
-                    TextClassifier.EntityConfig.createWithEntityList(entitiesToFind));
-        }
-
-        public Options() {}
-
-        /**
-         * @param defaultLocales ordered list of locale preferences that may be used to
-         *                       disambiguate the provided text. If no locale preferences exist,
-         *                       set this to null or an empty locale list.
-         */
-        public Options setDefaultLocales(@Nullable LocaleList defaultLocales) {
+        private Request(
+                CharSequence text,
+                LocaleList defaultLocales,
+                TextClassifier.EntityConfig entityConfig,
+                boolean legacyFallback,
+                String callingPackageName) {
+            mText = text;
             mDefaultLocales = defaultLocales;
-            return this;
-        }
-
-        /**
-         * Sets the entity configuration to use. This determines what types of entities the
-         * TextClassifier will look for.
-         *
-         * @param entityConfig EntityConfig to use
-         */
-        public Options setEntityConfig(@Nullable TextClassifier.EntityConfig entityConfig) {
             mEntityConfig = entityConfig;
-            return this;
-        }
-
-        /**
-         * Sets whether the TextClassifier can fallback to legacy links if smart linkify is
-         * disabled.
-         * <strong>Note: </strong>This is not parcelled.
-         * @hide
-         */
-        public Options setLegacyFallback(boolean legacyFallback) {
             mLegacyFallback = legacyFallback;
-            return this;
-        }
-
-        /**
-         * Sets a strategy for resolving conflicts when applying generated links to text that
-         * already have links.
-         *
-         * @throws IllegalArgumentException if applyStrategy is not valid
-         *
-         * @see #APPLY_STRATEGY_IGNORE
-         * @see #APPLY_STRATEGY_REPLACE
-         */
-        public Options setApplyStrategy(@ApplyStrategy int applyStrategy) {
-            checkValidApplyStrategy(applyStrategy);
-            mApplyStrategy = applyStrategy;
-            return this;
-        }
-
-        /**
-         * Sets a factory for converting a TextLink to a TextLinkSpan.
-         *
-         * <p><strong>Note: </strong>This is not parceled over IPC.
-         */
-        public Options setSpanFactory(@Nullable Function<TextLink, TextLinkSpan> spanFactory) {
-            mSpanFactory = spanFactory;
-            return this;
-        }
-
-        /**
-         * Sets the name of the package that requested the links to get generated.
-         * @hide
-         */
-        public Options setCallingPackageName(@Nullable String callingPackageName) {
             mCallingPackageName = callingPackageName;
-            return this;
+        }
+
+        /**
+         * Returns the text to generate links for.
+         */
+        @NonNull
+        public CharSequence getText() {
+            return mText;
         }
 
         /**
@@ -437,26 +355,91 @@ public final class TextLinks implements Parcelable {
         }
 
         /**
-         * @return the strategy for resolving conflictswhen applying generated links to text that
-         * already have links
-         *
-         * @see #APPLY_STRATEGY_IGNORE
-         * @see #APPLY_STRATEGY_REPLACE
+         * Sets the name of the package that requested the links to get generated.
          */
-        @ApplyStrategy
-        public int getApplyStrategy() {
-            return mApplyStrategy;
+        void setCallingPackageName(@Nullable String callingPackageName) {
+            mCallingPackageName = callingPackageName;
         }
 
         /**
-         * Returns a factory for converting a TextLink to a TextLinkSpan.
-         *
-         * <p><strong>Note: </strong>This is not parcelable and will always return null if read
-         *      from a parcel
+         * A builder for building TextLinks requests.
          */
-        @Nullable
-        public Function<TextLink, TextLinkSpan> getSpanFactory() {
-            return mSpanFactory;
+        public static final class Builder {
+
+            private final CharSequence mText;
+
+            @Nullable private LocaleList mDefaultLocales;
+            @Nullable private TextClassifier.EntityConfig mEntityConfig;
+            private boolean mLegacyFallback = true; // Use legacy fall back by default.
+            private String mCallingPackageName;
+
+            public Builder(@NonNull CharSequence text) {
+                mText = Preconditions.checkNotNull(text);
+            }
+
+            /**
+             * @param defaultLocales ordered list of locale preferences that may be used to
+             *                       disambiguate the provided text. If no locale preferences exist,
+             *                       set this to null or an empty locale list.
+             * @return this builder
+             */
+            @NonNull
+            public Builder setDefaultLocales(@Nullable LocaleList defaultLocales) {
+                mDefaultLocales = defaultLocales;
+                return this;
+            }
+
+            /**
+             * Sets the entity configuration to use. This determines what types of entities the
+             * TextClassifier will look for.
+             * Set to {@code null} for the default entity config and teh TextClassifier will
+             * automatically determine what links to generate.
+             *
+             * @return this builder
+             */
+            @NonNull
+            public Builder setEntityConfig(@Nullable TextClassifier.EntityConfig entityConfig) {
+                mEntityConfig = entityConfig;
+                return this;
+            }
+
+            /**
+             * Sets whether the TextClassifier can fallback to legacy links if smart linkify is
+             * disabled.
+             *
+             * <p><strong>Note: </strong>This is not parcelled.
+             *
+             * @return this builder
+             * @hide
+             */
+            @NonNull
+            public Builder setLegacyFallback(boolean legacyFallback) {
+                mLegacyFallback = legacyFallback;
+                return this;
+            }
+
+            /**
+             * Sets the name of the package that requested the links to get generated.
+             *
+             * @return this builder
+             * @hide
+             */
+            @NonNull
+            public Builder setCallingPackageName(@Nullable String callingPackageName) {
+                mCallingPackageName = callingPackageName;
+                return this;
+            }
+
+            /**
+             * Builds and returns the request object.
+             */
+            @NonNull
+            public Request build() {
+                return new Request(
+                        mText, mDefaultLocales, mEntityConfig,
+                        mLegacyFallback, mCallingPackageName);
+            }
+
         }
 
         /**
@@ -476,6 +459,7 @@ public final class TextLinks implements Parcelable {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(mText.toString());
             dest.writeInt(mDefaultLocales != null ? 1 : 0);
             if (mDefaultLocales != null) {
                 mDefaultLocales.writeToParcel(dest, flags);
@@ -484,40 +468,31 @@ public final class TextLinks implements Parcelable {
             if (mEntityConfig != null) {
                 mEntityConfig.writeToParcel(dest, flags);
             }
-            dest.writeInt(mApplyStrategy);
             dest.writeString(mCallingPackageName);
         }
 
-        public static final Parcelable.Creator<Options> CREATOR =
-                new Parcelable.Creator<Options>() {
+        public static final Parcelable.Creator<Request> CREATOR =
+                new Parcelable.Creator<Request>() {
                     @Override
-                    public Options createFromParcel(Parcel in) {
-                        return new Options(in);
+                    public Request createFromParcel(Parcel in) {
+                        return new Request(in);
                     }
 
                     @Override
-                    public Options[] newArray(int size) {
-                        return new Options[size];
+                    public Request[] newArray(int size) {
+                        return new Request[size];
                     }
                 };
 
-        private Options(Parcel in) {
-            if (in.readInt() > 0) {
-                mDefaultLocales = LocaleList.CREATOR.createFromParcel(in);
-            }
-            if (in.readInt() > 0) {
-                mEntityConfig = TextClassifier.EntityConfig.CREATOR.createFromParcel(in);
-            }
-            mApplyStrategy = in.readInt();
+        private Request(Parcel in) {
+            mText = in.readString();
+            mDefaultLocales = in.readInt() == 0 ? null : LocaleList.CREATOR.createFromParcel(in);
+            mEntityConfig = in.readInt() == 0
+                    ? null : TextClassifier.EntityConfig.CREATOR.createFromParcel(in);
+            mLegacyFallback = true;
             mCallingPackageName = in.readString();
         }
     }
-
-    /**
-     * A function to create spans from TextLinks.
-     */
-    private static final Function<TextLink, TextLinkSpan> DEFAULT_SPAN_FACTORY =
-            textLink -> new TextLinkSpan(textLink);
 
     /**
      * A ClickableSpan for a TextLink.
@@ -596,6 +571,7 @@ public final class TextLinks implements Parcelable {
          *
          * @throws IllegalArgumentException if entityScores is null or empty.
          */
+        @NonNull
         public Builder addLink(int start, int end, Map<String, Float> entityScores) {
             mLinks.add(new TextLink(start, end, entityScores, null));
             return this;
@@ -605,6 +581,7 @@ public final class TextLinks implements Parcelable {
          * @see #addLink(int, int, Map)
          * @param urlSpan An optional URLSpan to delegate to. NOTE: Not parcelled.
          */
+        @NonNull
         Builder addLink(int start, int end, Map<String, Float> entityScores,
                 @Nullable URLSpan urlSpan) {
             mLinks.add(new TextLink(start, end, entityScores, urlSpan));
@@ -614,6 +591,7 @@ public final class TextLinks implements Parcelable {
         /**
          * Removes all {@link TextLink}s.
          */
+        @NonNull
         public Builder clearTextLinks() {
             mLinks.clear();
             return this;
@@ -624,18 +602,9 @@ public final class TextLinks implements Parcelable {
          *
          * @return the constructed TextLinks
          */
+        @NonNull
         public TextLinks build() {
             return new TextLinks(mFullText, mLinks);
-        }
-    }
-
-    /**
-     * @throws IllegalArgumentException if the value is invalid
-     */
-    private static void checkValidApplyStrategy(int applyStrategy) {
-        if (applyStrategy != APPLY_STRATEGY_IGNORE && applyStrategy != APPLY_STRATEGY_REPLACE) {
-            throw new IllegalArgumentException(
-                    "Invalid apply strategy. See TextLinks.ApplyStrategy for options.");
         }
     }
 }

@@ -36,6 +36,7 @@ import android.annotation.StringRes;
 import android.annotation.StyleRes;
 import android.annotation.XmlRes;
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.app.assist.AssistStructure;
 import android.content.ClipData;
 import android.content.ClipDescription;
@@ -11541,6 +11542,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Returns a session-aware text classifier.
+     * This method creates one if none already exists or the current one is destroyed.
      */
     @NonNull
     TextClassifier getTextClassificationSession() {
@@ -11623,15 +11625,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final int start = spanned.getSpanStart(clickedSpan);
             final int end = spanned.getSpanEnd(clickedSpan);
             if (start >= 0 && end <= mText.length() && start < end) {
-                final TextClassification.Options options = new TextClassification.Options()
-                        .setDefaultLocales(getTextLocales());
+                final TextClassification.Request request = new TextClassification.Request.Builder(
+                        mText, start, end)
+                        .setDefaultLocales(getTextLocales())
+                        .build();
                 final Supplier<TextClassification> supplier = () ->
-                        getTextClassifier().classifyText(mText, start, end, options);
+                        getTextClassifier().classifyText(request);
                 final Consumer<TextClassification> consumer = classification -> {
                     if (classification != null) {
-                        final Intent intent = classification.getIntent();
-                        if (intent != null) {
-                            TextClassification.fireIntent(mContext, intent);
+                        if (!classification.getActions().isEmpty()) {
+                            try {
+                                classification.getActions().get(0).getActionIntent().send();
+                            } catch (PendingIntent.CanceledException e) {
+                                Log.e(LOG_TAG, "Error sending PendingIntent", e);
+                            }
                         } else {
                             Log.d(LOG_TAG, "No link action to perform");
                         }

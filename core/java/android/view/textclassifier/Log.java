@@ -35,6 +35,10 @@ final class Log {
         Slog.d(tag, msg);
     }
 
+    public static void w(String tag, String msg) {
+        Slog.w(tag, msg);
+    }
+
     public static void e(String tag, String msg, Throwable tr) {
         if (ENABLE_FULL_LOGGING) {
             Slog.e(tag, msg, tr);
