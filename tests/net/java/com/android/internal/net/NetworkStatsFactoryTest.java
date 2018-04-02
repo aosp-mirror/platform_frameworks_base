@@ -184,7 +184,7 @@ public class NetworkStatsFactoryTest {
         assertStatsEntry(stats, "dummy0", 0, SET_DEFAULT, 0x0, 0L, 168L);
         assertStatsEntry(stats, "lo", 0, SET_DEFAULT, 0x0, 1288L, 1288L);
 
-        NetworkStatsFactory.noteStackedIface("v4-wlan0", null);
+        NetworkStatsFactory.clearStackedIfaces();
     }
 
     @Test
@@ -212,7 +212,7 @@ public class NetworkStatsFactoryTest {
         assertStatsEntry(stats, "v4-wlan0", 10106, SET_FOREGROUND, 0x0, appRxBytesAfter, 7867488L);
         assertStatsEntry(stats, "wlan0", 0, SET_DEFAULT, 0x0, rootRxBytesAfter, 647587L);
 
-        NetworkStatsFactory.noteStackedIface("v4-wlan0", null);
+        NetworkStatsFactory.clearStackedIfaces();
     }
 
     /**
