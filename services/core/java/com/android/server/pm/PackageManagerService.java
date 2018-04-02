@@ -10227,7 +10227,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         if (changedAbiCodePath != null && changedAbiCodePath.size() > 0) {
-            for (int i = changedAbiCodePath.size() - 1; i <= 0; --i) {
+            for (int i = changedAbiCodePath.size() - 1; i >= 0; --i) {
                 final String codePathString = changedAbiCodePath.get(i);
                 try {
                     mInstaller.rmdex(codePathString,
