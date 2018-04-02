@@ -107,6 +107,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
     static public final String SYSTEM_DIALOG_REASON_KEY = "reason";
     static public final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
+    static public final String SYSTEM_DIALOG_REASON_DREAM = "dream";
 
     private static final String TAG = "GlobalActionsDialog";
 
@@ -376,17 +377,13 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         mAdapter = new MyAdapter();
 
-        OnItemLongClickListener onItemLongClickListener = new OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position,
-                    long id) {
-                final Action action = mAdapter.getItem(position);
-                if (action instanceof LongPressAction) {
-                    mDialog.dismiss();
-                    return ((LongPressAction) action).onLongPress();
-                }
-                return false;
+        OnItemLongClickListener onItemLongClickListener = (parent, view, position, id) -> {
+            final Action action = mAdapter.getItem(position);
+            if (action instanceof LongPressAction) {
+                mDialog.dismiss();
+                return ((LongPressAction) action).onLongPress();
             }
+            return false;
         };
         ActionsDialog dialog = new ActionsDialog(mContext, this, mAdapter, onItemLongClickListener);
         dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
@@ -1236,7 +1233,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     || Intent.ACTION_SCREEN_OFF.equals(action)) {
                 String reason = intent.getStringExtra(SYSTEM_DIALOG_REASON_KEY);
                 if (!SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS.equals(reason)) {
-                    mHandler.sendEmptyMessage(MESSAGE_DISMISS);
+                    mHandler.sendMessage(mHandler.obtainMessage(MESSAGE_DISMISS, reason));
                 }
             } else if (TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED.equals(action)) {
                 // Airplane mode can be changed after ECM exits if airplane toggle button
@@ -1287,7 +1284,11 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             switch (msg.what) {
                 case MESSAGE_DISMISS:
                     if (mDialog != null) {
-                        mDialog.dismiss();
+                        if (SYSTEM_DIALOG_REASON_DREAM.equals(msg.obj)) {
+                            mDialog.dismissImmediately();
+                        } else {
+                            mDialog.dismiss();
+                        }
                         mDialog = null;
                     }
                     break;
@@ -1466,6 +1467,10 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                         mGradientDrawable.setAlpha(alpha);
                     })
                     .start();
+        }
+
+        void dismissImmediately() {
+            super.dismiss();
         }
 
         private float getAnimTranslation() {
