@@ -83,6 +83,8 @@ public class NetworkServiceCallback {
             } catch (RemoteException e) {
                 Rlog.e(mTag, "Failed to onGetNetworkRegistrationStateComplete on the remote");
             }
+        } else {
+            Rlog.e(mTag, "Weak reference of callback is null.");
         }
     }
 }
