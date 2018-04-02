@@ -29,8 +29,9 @@
 
 #include <vector>
 
-using namespace android;
-using namespace std;
+namespace android {
+namespace os {
+namespace incidentd {
 
 status_t create_directory(const char* directory) {
     struct stat st;
@@ -89,8 +90,8 @@ done:
     return err;
 }
 
-static bool stat_mtime_cmp(const pair<String8, struct stat>& a,
-                           const pair<String8, struct stat>& b) {
+static bool stat_mtime_cmp(const std::pair<String8, struct stat>& a,
+                           const std::pair<String8, struct stat>& b) {
     return a.second.st_mtime < b.second.st_mtime;
 }
 
@@ -99,7 +100,7 @@ void clean_directory(const char* directory, off_t maxSize, size_t maxCount) {
     struct dirent* entry;
     struct stat st;
 
-    vector<pair<String8, struct stat>> files;
+    std::vector<std::pair<String8, struct stat>> files;
 
     if ((dir = opendir(directory)) == NULL) {
         ALOGE("Couldn't open incident directory: %s", directory);
@@ -125,7 +126,7 @@ void clean_directory(const char* directory, off_t maxSize, size_t maxCount) {
         if (!S_ISREG(st.st_mode)) {
             continue;
         }
-        files.push_back(pair<String8, struct stat>(filename, st));
+        files.push_back(std::pair<String8, struct stat>(filename, st));
 
         totalSize += st.st_size;
         totalCount++;
@@ -142,10 +143,14 @@ void clean_directory(const char* directory, off_t maxSize, size_t maxCount) {
     sort(files.begin(), files.end(), stat_mtime_cmp);
 
     // Remove files until we're under our limits.
-    for (vector<pair<String8, struct stat>>::iterator it = files.begin();
+    for (std::vector<std::pair<String8, struct stat>>::iterator it = files.begin();
          it != files.end() && totalSize >= maxSize && totalCount >= maxCount; it++) {
         remove(it->first.string());
         totalSize -= it->second.st_size;
         totalCount--;
     }
 }
+
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android

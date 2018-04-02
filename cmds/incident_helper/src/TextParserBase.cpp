@@ -21,7 +21,6 @@
 #include <android-base/file.h>
 
 using namespace android::base;
-using namespace std;
 
 // ================================================================================
 status_t NoopParser::Parse(const int in, const int out) const

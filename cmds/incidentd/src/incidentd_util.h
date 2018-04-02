@@ -26,7 +26,10 @@
 
 #include "Privacy.h"
 
-using namespace android;
+namespace android {
+namespace os {
+namespace incidentd {
+
 using namespace android::base;
 
 /**
@@ -74,5 +77,9 @@ uint64_t Nanotime();
  */
 status_t kill_child(pid_t pid);
 status_t wait_child(pid_t pid);
+
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android
 
 #endif  // INCIDENTD_UTIL_H

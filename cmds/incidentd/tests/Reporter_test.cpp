@@ -30,6 +30,7 @@ using namespace android;
 using namespace android::base;
 using namespace android::binder;
 using namespace android::os;
+using namespace android::os::incidentd;
 using namespace std;
 using ::testing::StrEq;
 using ::testing::Test;

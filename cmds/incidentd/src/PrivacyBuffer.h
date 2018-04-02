@@ -25,7 +25,10 @@
 #include <stdint.h>
 #include <utils/Errors.h>
 
-using namespace android;
+namespace android {
+namespace os {
+namespace incidentd {
+
 using namespace android::util;
 
 /**
@@ -68,5 +71,9 @@ private:
     status_t stripField(const Privacy* parentPolicy, const PrivacySpec& spec, int depth);
     void writeFieldOrSkip(uint32_t fieldTag, bool skip);
 };
+
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android
 
 #endif  // PRIVACY_BUFFER_H

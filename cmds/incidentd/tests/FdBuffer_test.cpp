@@ -24,14 +24,15 @@
 #include <signal.h>
 #include <string.h>
 
+using namespace android;
+using namespace android::base;
+using namespace android::os::incidentd;
+using ::testing::Test;
+
 const int READ_TIMEOUT = 5 * 1000;
 const int BUFFER_SIZE = 16 * 1024;
 const int QUICK_TIMEOUT_MS = 100;
 const std::string HEAD = "[OK]";
-
-using namespace android;
-using namespace android::base;
-using ::testing::Test;
 
 class FdBufferTest : public Test {
 public:
