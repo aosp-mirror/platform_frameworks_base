@@ -1165,9 +1165,6 @@ void API_ENTRY(glDrawRangeElementsBaseVertexOES)(GLenum mode, GLuint start, GLui
 void API_ENTRY(glDrawElementsInstancedBaseVertexOES)(GLenum mode, GLsizei count, GLenum type, const void *indices, GLsizei instancecount, GLint basevertex) {
     CALL_GL_API(glDrawElementsInstancedBaseVertexOES, mode, count, type, indices, instancecount, basevertex);
 }
-void API_ENTRY(glMultiDrawElementsBaseVertexOES)(GLenum mode, const GLsizei *count, GLenum type, const void *const*indices, GLsizei primcount, const GLint *basevertex) {
-    CALL_GL_API(glMultiDrawElementsBaseVertexOES, mode, count, type, indices, primcount, basevertex);
-}
 void API_ENTRY(glFramebufferTextureOES)(GLenum target, GLenum attachment, GLuint texture, GLint level) {
     CALL_GL_API(glFramebufferTextureOES, target, attachment, texture, level);
 }
