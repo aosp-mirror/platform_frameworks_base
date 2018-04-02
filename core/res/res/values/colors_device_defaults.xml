@@ -38,4 +38,8 @@
     <color name="background_device_default_light">@color/background_material_light</color>
     <color name="background_floating_device_default_dark">@color/background_floating_material_dark</color>
     <color name="background_floating_device_default_light">@color/background_floating_material_light</color>
+
+    <!-- Error color -->
+    <color name="error_color_device_default_dark">@color/error_color_material_dark</color>
+    <color name="error_color_device_default_light">@color/error_color_material_light</color>
 </resources>
