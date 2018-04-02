@@ -878,7 +878,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private Tethering makeTethering() {
         // TODO: Move other elements into @Overridden getters.
-        final TetheringDependencies deps = new TetheringDependencies();
+        final TetheringDependencies deps = new TetheringDependencies() {
+            @Override
+            public boolean isTetheringSupported() {
+                return ConnectivityService.this.isTetheringSupported();
+            }
+        };
         return new Tethering(mContext, mNetd, mStatsService, mPolicyManager,
                 IoThread.get().getLooper(), new MockableSystemProperties(),
                 deps);
