@@ -19,8 +19,14 @@ package com.android.server.connectivity;
 import static android.hardware.usb.UsbManager.USB_CONFIGURED;
 import static android.hardware.usb.UsbManager.USB_CONNECTED;
 import static android.hardware.usb.UsbManager.USB_FUNCTION_RNDIS;
+import static android.net.ConnectivityManager.ACTION_TETHER_STATE_CHANGED;
+import static android.net.ConnectivityManager.EXTRA_ACTIVE_LOCAL_ONLY;
+import static android.net.ConnectivityManager.EXTRA_ACTIVE_TETHER;
+import static android.net.ConnectivityManager.EXTRA_AVAILABLE_TETHER;
+import static android.net.ConnectivityManager.TETHER_ERROR_UNKNOWN_IFACE;
 import static android.net.ConnectivityManager.TETHERING_WIFI;
 import static android.net.ConnectivityManager.TETHERING_USB;
+import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.wifi.WifiManager.IFACE_IP_MODE_LOCAL_ONLY;
 import static android.net.wifi.WifiManager.IFACE_IP_MODE_TETHERED;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_INTERFACE_NAME;
@@ -54,7 +60,6 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
-import android.net.ConnectivityManager;
 import android.net.INetd;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
@@ -125,7 +130,6 @@ public class TetheringTest {
 
     @Mock private ApplicationInfo mApplicationInfo;
     @Mock private Context mContext;
-    @Mock private ConnectivityManager mConnectivityManager;
     @Mock private INetworkManagementService mNMService;
     @Mock private INetworkStatsService mStatsService;
     @Mock private INetworkPolicyManager mPolicyManager;
@@ -173,7 +177,6 @@ public class TetheringTest {
 
         @Override
         public Object getSystemService(String name) {
-            if (Context.CONNECTIVITY_SERVICE.equals(name)) return mConnectivityManager;
             if (Context.WIFI_SERVICE.equals(name)) return mWifiManager;
             if (Context.USB_SERVICE.equals(name)) return mUsbManager;
             return super.getSystemService(name);
@@ -181,8 +184,15 @@ public class TetheringTest {
     }
 
     public class MockTetheringDependencies extends TetheringDependencies {
-        private StateMachine upstreamNetworkMonitorMasterSM;
-        private ArrayList<TetherInterfaceStateMachine> ipv6CoordinatorNotifyList;
+        StateMachine upstreamNetworkMonitorMasterSM;
+        ArrayList<TetherInterfaceStateMachine> ipv6CoordinatorNotifyList;
+        int isTetheringSupportedCalls;
+
+        public void reset() {
+            upstreamNetworkMonitorMasterSM = null;
+            ipv6CoordinatorNotifyList = null;
+            isTetheringSupportedCalls = 0;
+        }
 
         @Override
         public OffloadHardwareInterface getOffloadHardwareInterface(Handler h, SharedLog log) {
@@ -222,11 +232,17 @@ public class TetheringTest {
             return new InterfaceParams(ifName, index + IFINDEX_OFFSET,
                     MacAddress.ALL_ZEROS_ADDRESS);
         }
+
+        @Override
+        public boolean isTetheringSupported() {
+            isTetheringSupportedCalls++;
+            return true;
+        }
     }
 
     private static NetworkState buildMobileUpstreamState(boolean withIPv4, boolean withIPv6,
             boolean with464xlat) {
-        final NetworkInfo info = new NetworkInfo(ConnectivityManager.TYPE_MOBILE, 0, null, null);
+        final NetworkInfo info = new NetworkInfo(TYPE_MOBILE, 0, null, null);
         info.setDetailedState(NetworkInfo.DetailedState.CONNECTED, null, null);
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TEST_MOBILE_IFNAME);
@@ -308,7 +324,8 @@ public class TetheringTest {
             }
         };
         mServiceContext.registerReceiver(mBroadcastReceiver,
-                new IntentFilter(ConnectivityManager.ACTION_TETHER_STATE_CHANGED));
+                new IntentFilter(ACTION_TETHER_STATE_CHANGED));
+        mTetheringDependencies.reset();
         mTethering = new Tethering(mServiceContext, mNMService, mStatsService, mPolicyManager,
                                    mLooper.getLooper(), mSystemProperties,
                                    mTetheringDependencies);
@@ -404,7 +421,7 @@ public class TetheringTest {
     private void verifyTetheringBroadcast(String ifname, String whichExtra) {
         // Verify that ifname is in the whichExtra array of the tether state changed broadcast.
         final Intent bcast = mIntents.get(0);
-        assertEquals(ConnectivityManager.ACTION_TETHER_STATE_CHANGED, bcast.getAction());
+        assertEquals(ACTION_TETHER_STATE_CHANGED, bcast.getAction());
         final ArrayList<String> ifnames = bcast.getStringArrayListExtra(whichExtra);
         assertTrue(ifnames.contains(ifname));
         mIntents.remove(bcast);
@@ -412,8 +429,6 @@ public class TetheringTest {
 
     public void failingLocalOnlyHotspotLegacyApBroadcast(
             boolean emulateInterfaceStatusChanged) throws Exception {
-        when(mConnectivityManager.isTetheringSupported()).thenReturn(true);
-
         // Emulate externally-visible WifiManager effects, causing the
         // per-interface state machine to start up, and telling us that
         // hotspot mode is to be started.
@@ -427,16 +442,14 @@ public class TetheringTest {
         // then it creates a TetherInterfaceStateMachine and sends out a
         // broadcast indicating that the interface is "available".
         if (emulateInterfaceStatusChanged) {
-            verify(mConnectivityManager, atLeastOnce()).isTetheringSupported();
-            verifyTetheringBroadcast(TEST_WLAN_IFNAME, ConnectivityManager.EXTRA_AVAILABLE_TETHER);
+            assertEquals(1, mTetheringDependencies.isTetheringSupportedCalls);
+            verifyTetheringBroadcast(TEST_WLAN_IFNAME, EXTRA_AVAILABLE_TETHER);
         }
-        verifyNoMoreInteractions(mConnectivityManager);
         verifyNoMoreInteractions(mNMService);
         verifyNoMoreInteractions(mWifiManager);
     }
 
     private void prepareUsbTethering(NetworkState upstreamState) {
-        when(mConnectivityManager.isTetheringSupported()).thenReturn(true);
         when(mUpstreamNetworkMonitor.selectPreferredUpstreamType(any()))
                 .thenReturn(upstreamState);
 
@@ -454,7 +467,6 @@ public class TetheringTest {
         prepareUsbTethering(upstreamState);
 
         // This should produce no activity of any kind.
-        verifyNoMoreInteractions(mConnectivityManager);
         verifyNoMoreInteractions(mNMService);
 
         // Pretend we then receive USB configured broadcast.
@@ -481,8 +493,6 @@ public class TetheringTest {
 
     public void workingLocalOnlyHotspotEnrichedApBroadcast(
             boolean emulateInterfaceStatusChanged) throws Exception {
-        when(mConnectivityManager.isTetheringSupported()).thenReturn(true);
-
         // Emulate externally-visible WifiManager effects, causing the
         // per-interface state machine to start up, and telling us that
         // hotspot mode is to be started.
@@ -493,18 +503,17 @@ public class TetheringTest {
         mLooper.dispatchAll();
 
         verifyInterfaceServingModeStarted();
-        verifyTetheringBroadcast(TEST_WLAN_IFNAME, ConnectivityManager.EXTRA_AVAILABLE_TETHER);
+        verifyTetheringBroadcast(TEST_WLAN_IFNAME, EXTRA_AVAILABLE_TETHER);
         verify(mNMService, times(1)).setIpForwardingEnabled(true);
         verify(mNMService, times(1)).startTethering(any(String[].class));
         verifyNoMoreInteractions(mNMService);
         verify(mWifiManager).updateInterfaceIpState(
                 TEST_WLAN_IFNAME, WifiManager.IFACE_IP_MODE_LOCAL_ONLY);
         verifyNoMoreInteractions(mWifiManager);
-        verifyTetheringBroadcast(TEST_WLAN_IFNAME, ConnectivityManager.EXTRA_ACTIVE_LOCAL_ONLY);
+        verifyTetheringBroadcast(TEST_WLAN_IFNAME, EXTRA_ACTIVE_LOCAL_ONLY);
         verify(mUpstreamNetworkMonitor, times(1)).start();
         // TODO: Figure out why this isn't exactly once, for sendTetherStateChangedBroadcast().
-        verify(mConnectivityManager, atLeastOnce()).isTetheringSupported();
-        verifyNoMoreInteractions(mConnectivityManager);
+        assertTrue(1 <= mTetheringDependencies.isTetheringSupportedCalls);
 
         // Emulate externally-visible WifiManager effects, when hotspot mode
         // is being torn down.
@@ -523,8 +532,7 @@ public class TetheringTest {
         verifyNoMoreInteractions(mWifiManager);
         // Asking for the last error after the per-interface state machine
         // has been reaped yields an unknown interface error.
-        assertEquals(ConnectivityManager.TETHER_ERROR_UNKNOWN_IFACE,
-                mTethering.getLastTetherError(TEST_WLAN_IFNAME));
+        assertEquals(TETHER_ERROR_UNKNOWN_IFACE, mTethering.getLastTetherError(TEST_WLAN_IFNAME));
     }
 
     /**
@@ -652,7 +660,6 @@ public class TetheringTest {
     // TODO: Test with and without interfaceStatusChanged().
     @Test
     public void failingWifiTetheringLegacyApBroadcast() throws Exception {
-        when(mConnectivityManager.isTetheringSupported()).thenReturn(true);
         when(mWifiManager.startSoftAp(any(WifiConfiguration.class))).thenReturn(true);
 
         // Emulate pressing the WiFi tethering button.
@@ -660,7 +667,6 @@ public class TetheringTest {
         mLooper.dispatchAll();
         verify(mWifiManager, times(1)).startSoftAp(null);
         verifyNoMoreInteractions(mWifiManager);
-        verifyNoMoreInteractions(mConnectivityManager);
         verifyNoMoreInteractions(mNMService);
 
         // Emulate externally-visible WifiManager effects, causing the
@@ -670,9 +676,8 @@ public class TetheringTest {
         sendWifiApStateChanged(WIFI_AP_STATE_ENABLED);
         mLooper.dispatchAll();
 
-        verify(mConnectivityManager, atLeastOnce()).isTetheringSupported();
-        verifyTetheringBroadcast(TEST_WLAN_IFNAME, ConnectivityManager.EXTRA_AVAILABLE_TETHER);
-        verifyNoMoreInteractions(mConnectivityManager);
+        assertEquals(1, mTetheringDependencies.isTetheringSupportedCalls);
+        verifyTetheringBroadcast(TEST_WLAN_IFNAME, EXTRA_AVAILABLE_TETHER);
         verifyNoMoreInteractions(mNMService);
         verifyNoMoreInteractions(mWifiManager);
     }
@@ -680,7 +685,6 @@ public class TetheringTest {
     // TODO: Test with and without interfaceStatusChanged().
     @Test
     public void workingWifiTetheringEnrichedApBroadcast() throws Exception {
-        when(mConnectivityManager.isTetheringSupported()).thenReturn(true);
         when(mWifiManager.startSoftAp(any(WifiConfiguration.class))).thenReturn(true);
 
         // Emulate pressing the WiFi tethering button.
@@ -688,7 +692,6 @@ public class TetheringTest {
         mLooper.dispatchAll();
         verify(mWifiManager, times(1)).startSoftAp(null);
         verifyNoMoreInteractions(mWifiManager);
-        verifyNoMoreInteractions(mConnectivityManager);
         verifyNoMoreInteractions(mNMService);
 
         // Emulate externally-visible WifiManager effects, causing the
@@ -699,21 +702,20 @@ public class TetheringTest {
         mLooper.dispatchAll();
 
         verifyInterfaceServingModeStarted();
-        verifyTetheringBroadcast(TEST_WLAN_IFNAME, ConnectivityManager.EXTRA_AVAILABLE_TETHER);
+        verifyTetheringBroadcast(TEST_WLAN_IFNAME, EXTRA_AVAILABLE_TETHER);
         verify(mNMService, times(1)).setIpForwardingEnabled(true);
         verify(mNMService, times(1)).startTethering(any(String[].class));
         verifyNoMoreInteractions(mNMService);
         verify(mWifiManager).updateInterfaceIpState(
                 TEST_WLAN_IFNAME, WifiManager.IFACE_IP_MODE_TETHERED);
         verifyNoMoreInteractions(mWifiManager);
-        verifyTetheringBroadcast(TEST_WLAN_IFNAME, ConnectivityManager.EXTRA_ACTIVE_TETHER);
+        verifyTetheringBroadcast(TEST_WLAN_IFNAME, EXTRA_ACTIVE_TETHER);
         verify(mUpstreamNetworkMonitor, times(1)).start();
         // In tethering mode, in the default configuration, an explicit request
         // for a mobile network is also made.
         verify(mUpstreamNetworkMonitor, times(1)).registerMobileNetworkRequest();
         // TODO: Figure out why this isn't exactly once, for sendTetherStateChangedBroadcast().
-        verify(mConnectivityManager, atLeastOnce()).isTetheringSupported();
-        verifyNoMoreInteractions(mConnectivityManager);
+        assertTrue(1 <= mTetheringDependencies.isTetheringSupportedCalls);
 
         /////
         // We do not currently emulate any upstream being found.
@@ -727,7 +729,6 @@ public class TetheringTest {
         mLooper.dispatchAll();
         verify(mWifiManager, times(1)).stopSoftAp();
         verifyNoMoreInteractions(mWifiManager);
-        verifyNoMoreInteractions(mConnectivityManager);
         verifyNoMoreInteractions(mNMService);
 
         // Emulate externally-visible WifiManager effects, when tethering mode
@@ -747,14 +748,12 @@ public class TetheringTest {
         verifyNoMoreInteractions(mWifiManager);
         // Asking for the last error after the per-interface state machine
         // has been reaped yields an unknown interface error.
-        assertEquals(ConnectivityManager.TETHER_ERROR_UNKNOWN_IFACE,
-                mTethering.getLastTetherError(TEST_WLAN_IFNAME));
+        assertEquals(TETHER_ERROR_UNKNOWN_IFACE, mTethering.getLastTetherError(TEST_WLAN_IFNAME));
     }
 
     // TODO: Test with and without interfaceStatusChanged().
     @Test
     public void failureEnablingIpForwarding() throws Exception {
-        when(mConnectivityManager.isTetheringSupported()).thenReturn(true);
         when(mWifiManager.startSoftAp(any(WifiConfiguration.class))).thenReturn(true);
         doThrow(new RemoteException()).when(mNMService).setIpForwardingEnabled(true);
 
@@ -763,7 +762,6 @@ public class TetheringTest {
         mLooper.dispatchAll();
         verify(mWifiManager, times(1)).startSoftAp(null);
         verifyNoMoreInteractions(mWifiManager);
-        verifyNoMoreInteractions(mConnectivityManager);
         verifyNoMoreInteractions(mNMService);
 
         // Emulate externally-visible WifiManager effects, causing the
@@ -782,8 +780,9 @@ public class TetheringTest {
         verify(mNMService, times(1)).tetherInterface(TEST_WLAN_IFNAME);
         verify(mWifiManager).updateInterfaceIpState(
                 TEST_WLAN_IFNAME, WifiManager.IFACE_IP_MODE_TETHERED);
-        verify(mConnectivityManager, atLeastOnce()).isTetheringSupported();
-        verifyTetheringBroadcast(TEST_WLAN_IFNAME, ConnectivityManager.EXTRA_AVAILABLE_TETHER);
+        // TODO: Figure out why this isn't exactly once, for sendTetherStateChangedBroadcast().
+        assertTrue(1 <= mTetheringDependencies.isTetheringSupportedCalls);
+        verifyTetheringBroadcast(TEST_WLAN_IFNAME, EXTRA_AVAILABLE_TETHER);
         // This is called, but will throw.
         verify(mNMService, times(1)).setIpForwardingEnabled(true);
         // This never gets called because of the exception thrown above.
@@ -796,7 +795,6 @@ public class TetheringTest {
                 TEST_WLAN_IFNAME, WifiManager.IFACE_IP_MODE_CONFIGURATION_ERROR);
 
         verifyNoMoreInteractions(mWifiManager);
-        verifyNoMoreInteractions(mConnectivityManager);
         verifyNoMoreInteractions(mNMService);
     }
 
