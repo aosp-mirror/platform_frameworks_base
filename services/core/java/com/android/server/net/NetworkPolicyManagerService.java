@@ -230,9 +230,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -1749,11 +1751,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final Pair<ZonedDateTime, ZonedDateTime> cycle = plan.cycleIterator().next();
                 final long start = cycle.first.toInstant().toEpochMilli();
                 final long end = cycle.second.toInstant().toEpochMilli();
+                final Instant now = mClock.instant();
+                final long startOfDay = ZonedDateTime.ofInstant(now, cycle.first.getZone())
+                        .truncatedTo(ChronoUnit.DAYS)
+                        .toInstant().toEpochMilli();
                 final long totalBytes = getTotalBytes(
-                        NetworkTemplate.buildTemplateMobileAll(state.subscriberId), start, end);
+                        NetworkTemplate.buildTemplateMobileAll(state.subscriberId),
+                        start, startOfDay);
                 final long remainingBytes = limitBytes - totalBytes;
-                final long remainingDays = Math.max(1, (end - mClock.millis())
-                        / TimeUnit.DAYS.toMillis(1));
+                // Number of remaining days including current day
+                final long remainingDays =
+                        1 + ((end - now.toEpochMilli() - 1) / TimeUnit.DAYS.toMillis(1));
 
                 quotaBytes = Math.max(0, (remainingBytes / remainingDays) / 10);
             }
