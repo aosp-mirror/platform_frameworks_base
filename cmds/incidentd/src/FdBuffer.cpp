@@ -238,11 +238,11 @@ status_t FdBuffer::readProcessedDataInStream(int fd, unique_fd toFd, unique_fd f
         ssize_t amt = ::read(fromFd.get(), mBuffer.writeBuffer(), mBuffer.currentToWrite());
         if (amt < 0) {
             if (!(errno == EAGAIN || errno == EWOULDBLOCK)) {
-                VLOG("Fail to read fromFd.get() %d: %s", fromFd.get(), strerror(errno));
+                VLOG("Fail to read fromFd %d: %s", fromFd.get(), strerror(errno));
                 return -errno;
             }  // otherwise just continue
         } else if (amt == 0) {
-            VLOG("Reached EOF of fromFd.get() %d", fromFd.get());
+            VLOG("Reached EOF of fromFd %d", fromFd.get());
             break;
         } else {
             mBuffer.wp()->move(amt);
