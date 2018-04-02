@@ -274,6 +274,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final boolean LOGD = NetworkPolicyLogger.LOGD;
     private static final boolean LOGV = NetworkPolicyLogger.LOGV;
 
+    /**
+     * No opportunistic quota could be calculated from user data plan or data settings.
+     */
+    public static final int OPPORTUNISTIC_QUOTA_UNKNOWN = -1;
+
     private static final int VERSION_INIT = 1;
     private static final int VERSION_ADDED_SNOOZE = 2;
     private static final int VERSION_ADDED_RESTRICT_BACKGROUND = 3;
@@ -1732,12 +1737,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final SubscriptionPlan plan = getPrimarySubscriptionPlanLocked(subId);
             if (plan == null) continue;
 
-            // By default assume we have no quota
-            long quotaBytes = 0;
-
+            final long quotaBytes;
             final long limitBytes = plan.getDataLimitBytes();
             if (limitBytes == SubscriptionPlan.BYTES_UNKNOWN) {
-                // Ignore missing limits
+                quotaBytes = OPPORTUNISTIC_QUOTA_UNKNOWN;
             } else if (limitBytes == SubscriptionPlan.BYTES_UNLIMITED) {
                 // Unlimited data; let's use 20MiB/day (600MiB/month)
                 quotaBytes = DataUnit.MEBIBYTES.toBytes(20);
@@ -1751,9 +1754,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final long remainingBytes = limitBytes - totalBytes;
                 final long remainingDays = Math.max(1, (end - mClock.millis())
                         / TimeUnit.DAYS.toMillis(1));
-                if (remainingBytes > 0) {
-                    quotaBytes = (remainingBytes / remainingDays) / 10;
-                }
+
+                quotaBytes = Math.max(0, (remainingBytes / remainingDays) / 10);
             }
 
             mSubscriptionOpportunisticQuota.put(subId, quotaBytes);
@@ -4663,7 +4665,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         public long getSubscriptionOpportunisticQuota(Network network, int quotaType) {
             synchronized (mNetworkPoliciesSecondLock) {
                 // TODO: handle splitting quota between use-cases
-                return mSubscriptionOpportunisticQuota.get(getSubIdLocked(network));
+                return mSubscriptionOpportunisticQuota.get(getSubIdLocked(network),
+                        OPPORTUNISTIC_QUOTA_UNKNOWN);
             }
         }
 
