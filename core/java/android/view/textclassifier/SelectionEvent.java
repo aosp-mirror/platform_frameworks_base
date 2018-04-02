@@ -126,7 +126,7 @@ public final class SelectionEvent implements Parcelable {
     private String mWidgetType = TextClassifier.WIDGET_TYPE_UNKNOWN;
     private @InvocationMethod int mInvocationMethod;
     @Nullable private String mWidgetVersion;
-    private String mSignature;  // TODO: Rename to resultId.
+    @Nullable private String mResultId;
     private long mEventTime;
     private long mDurationSinceSessionStart;
     private long mDurationSincePreviousEvent;
@@ -140,21 +140,22 @@ public final class SelectionEvent implements Parcelable {
     SelectionEvent(
             int start, int end,
             @EventType int eventType, @EntityType String entityType,
-            @InvocationMethod int invocationMethod, String signature) {
+            @InvocationMethod int invocationMethod, @Nullable String resultId) {
         Preconditions.checkArgument(end >= start, "end cannot be less than start");
         mAbsoluteStart = start;
         mAbsoluteEnd = end;
         mEventType = eventType;
         mEntityType = Preconditions.checkNotNull(entityType);
-        mSignature = Preconditions.checkNotNull(signature);
+        mResultId = resultId;
         mInvocationMethod = invocationMethod;
     }
 
     SelectionEvent(
             int start, int end,
             @EventType int eventType, @EntityType String entityType,
-            @InvocationMethod int invocationMethod, String signature, Logger.Config config) {
-        this(start, end, eventType, entityType, invocationMethod, signature);
+            @InvocationMethod int invocationMethod, @Nullable String resultId,
+            Logger.Config config) {
+        this(start, end, eventType, entityType, invocationMethod, resultId);
         Preconditions.checkNotNull(config);
         setTextClassificationSessionContext(
                 new TextClassificationContext.Builder(
@@ -172,7 +173,7 @@ public final class SelectionEvent implements Parcelable {
         mPackageName = in.readString();
         mWidgetType = in.readString();
         mInvocationMethod = in.readInt();
-        mSignature = in.readString();
+        mResultId = in.readString();
         mEventTime = in.readLong();
         mDurationSinceSessionStart = in.readLong();
         mDurationSincePreviousEvent = in.readLong();
@@ -198,7 +199,7 @@ public final class SelectionEvent implements Parcelable {
         dest.writeString(mPackageName);
         dest.writeString(mWidgetType);
         dest.writeInt(mInvocationMethod);
-        dest.writeString(mSignature);
+        dest.writeString(mResultId);
         dest.writeLong(mEventTime);
         dest.writeLong(mDurationSinceSessionStart);
         dest.writeLong(mDurationSincePreviousEvent);
@@ -270,7 +271,7 @@ public final class SelectionEvent implements Parcelable {
                 : TextClassifier.TYPE_UNKNOWN;
         return new SelectionEvent(
                 start, end, SelectionEvent.EVENT_SELECTION_MODIFIED,
-                entityType, INVOCATION_UNKNOWN, classification.getSignature());
+                entityType, INVOCATION_UNKNOWN, classification.getId());
     }
 
     /**
@@ -294,7 +295,7 @@ public final class SelectionEvent implements Parcelable {
                 : TextClassifier.TYPE_UNKNOWN;
         return new SelectionEvent(
                 start, end, SelectionEvent.EVENT_AUTO_SELECTION,
-                entityType, INVOCATION_UNKNOWN, selection.getSignature());
+                entityType, INVOCATION_UNKNOWN, selection.getId());
     }
 
     /**
@@ -342,7 +343,7 @@ public final class SelectionEvent implements Parcelable {
                 ? classification.getEntity(0)
                 : TextClassifier.TYPE_UNKNOWN;
         return new SelectionEvent(start, end, actionType, entityType, INVOCATION_UNKNOWN,
-                classification.getSignature());
+                classification.getId());
     }
 
     /**
@@ -450,14 +451,15 @@ public final class SelectionEvent implements Parcelable {
     }
 
     /**
-     * Returns the signature of the text classifier result associated with this event.
+     * Returns the id of the text classifier result associated with this event.
      */
-    public String getSignature() {
-        return mSignature;
+    @Nullable
+    public String getResultId() {
+        return mResultId;
     }
 
-    SelectionEvent setSignature(String signature) {
-        mSignature = Preconditions.checkNotNull(signature);
+    SelectionEvent setResultId(@Nullable String resultId) {
+        mResultId = resultId;
         return this;
     }
 
@@ -604,7 +606,7 @@ public final class SelectionEvent implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mAbsoluteStart, mAbsoluteEnd, mEventType, mEntityType,
-                mWidgetVersion, mPackageName, mWidgetType, mInvocationMethod, mSignature,
+                mWidgetVersion, mPackageName, mWidgetType, mInvocationMethod, mResultId,
                 mEventTime, mDurationSinceSessionStart, mDurationSincePreviousEvent,
                 mEventIndex, mSessionId, mStart, mEnd, mSmartStart, mSmartEnd);
     }
@@ -627,7 +629,7 @@ public final class SelectionEvent implements Parcelable {
                 && Objects.equals(mPackageName, other.mPackageName)
                 && Objects.equals(mWidgetType, other.mWidgetType)
                 && mInvocationMethod == other.mInvocationMethod
-                && Objects.equals(mSignature, other.mSignature)
+                && Objects.equals(mResultId, other.mResultId)
                 && mEventTime == other.mEventTime
                 && mDurationSinceSessionStart == other.mDurationSinceSessionStart
                 && mDurationSincePreviousEvent == other.mDurationSincePreviousEvent
@@ -642,15 +644,16 @@ public final class SelectionEvent implements Parcelable {
     @Override
     public String toString() {
         return String.format(Locale.US,
-        "SelectionEvent {absoluteStart=%d, absoluteEnd=%d, eventType=%d, entityType=%s, "
-                + "widgetVersion=%s, packageName=%s, widgetType=%s, invocationMethod=%s, "
-                + "signature=%s, eventTime=%d, durationSinceSessionStart=%d, "
-                + "durationSincePreviousEvent=%d, eventIndex=%d, sessionId=%s, start=%d, end=%d, "
-                + "smartStart=%d, smartEnd=%d}",
+                "SelectionEvent {absoluteStart=%d, absoluteEnd=%d, eventType=%d, entityType=%s, "
+                        + "widgetVersion=%s, packageName=%s, widgetType=%s, invocationMethod=%s, "
+                        + "resultId=%s, eventTime=%d, durationSinceSessionStart=%d, "
+                        + "durationSincePreviousEvent=%d, eventIndex=%d,"
+                        + "sessionId=%s, start=%d, end=%d, smartStart=%d, smartEnd=%d}",
                 mAbsoluteStart, mAbsoluteEnd, mEventType, mEntityType,
-                mWidgetVersion, mPackageName, mWidgetType, mInvocationMethod, mSignature,
-                mEventTime, mDurationSinceSessionStart, mDurationSincePreviousEvent,
-                mEventIndex, mSessionId, mStart, mEnd, mSmartStart, mSmartEnd);
+                mWidgetVersion, mPackageName, mWidgetType, mInvocationMethod,
+                mResultId, mEventTime, mDurationSinceSessionStart,
+                mDurationSincePreviousEvent, mEventIndex,
+                mSessionId, mStart, mEnd, mSmartStart, mSmartEnd);
     }
 
     public static final Creator<SelectionEvent> CREATOR = new Creator<SelectionEvent>() {

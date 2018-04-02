@@ -20,12 +20,10 @@ import static org.junit.Assert.assertEquals;
 
 import android.os.LocaleList;
 import android.os.Parcel;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.ArrayMap;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -39,17 +37,6 @@ import java.util.Map;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TextLinksTest {
-
-    private TextClassificationManager mTcm;
-    private TextClassifier mClassifier;
-
-    @Before
-    public void setup() {
-        mTcm = InstrumentationRegistry.getTargetContext()
-                .getSystemService(TextClassificationManager.class);
-        mTcm.setTextClassifier(null);
-        mClassifier = mTcm.getTextClassifier();
-    }
 
     private Map<String, Float> getEntityScores(float address, float phone, float other) {
         final Map<String, Float> result = new ArrayMap<>();
@@ -99,20 +86,22 @@ public class TextLinksTest {
 
     @Test
     public void testParcelOptions() {
-        TextClassifier.EntityConfig entityConfig = TextClassifier.EntityConfig.create(
+        final TextClassifier.EntityConfig entityConfig = TextClassifier.EntityConfig.create(
                 Arrays.asList(TextClassifier.HINT_TEXT_IS_EDITABLE),
                 Arrays.asList("a", "b", "c"),
                 Arrays.asList("b"));
-        TextLinks.Options reference = new TextLinks.Options();
-        reference.setDefaultLocales(new LocaleList(Locale.US, Locale.GERMANY));
-        reference.setEntityConfig(entityConfig);
+        final TextLinks.Request reference = new TextLinks.Request.Builder("text")
+                .setDefaultLocales(new LocaleList(Locale.US, Locale.GERMANY))
+                .setEntityConfig(entityConfig)
+                .build();
 
         // Parcel and unparcel.
         final Parcel parcel = Parcel.obtain();
         reference.writeToParcel(parcel, reference.describeContents());
         parcel.setDataPosition(0);
-        TextLinks.Options result = TextLinks.Options.CREATOR.createFromParcel(parcel);
+        final TextLinks.Request result = TextLinks.Request.CREATOR.createFromParcel(parcel);
 
+        assertEquals("text", result.getText());
         assertEquals("en-US,de-DE", result.getDefaultLocales().toLanguageTags());
         assertEquals(new String[]{TextClassifier.HINT_TEXT_IS_EDITABLE},
                 result.getEntityConfig().getHints().toArray());
