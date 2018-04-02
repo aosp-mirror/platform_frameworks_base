@@ -1053,9 +1053,9 @@
     <!-- Hint text for the IP address -->
     <string name="wifi_ip_address_hint" translatable="false">192.168.1.128</string>
     <!-- Hint text for DNS -->
-    <string name="wifi_dns1_hint" translatable="false">8.8.8.8</string>
+    <string name="wifi_dns1_hint" translatable="false">84.200.69.80</string>
     <!-- Hint text for DNS -->
-    <string name="wifi_dns2_hint" translatable="false">8.8.4.4</string>
+    <string name="wifi_dns2_hint" translatable="false">84.200.70.40</string>
     <!-- Hint text for the gateway -->
     <string name="wifi_gateway_hint" translatable="false">192.168.1.1</string>
     <!-- Hint text for network prefix length -->
