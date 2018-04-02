@@ -836,8 +836,6 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
             lastPlayTime = duration - lastPlayTime;
             inReverse = false;
         }
-        // Skip all values to start, and iterate mEvents to get animations to the right fraction.
-        skipToStartValue(false);
 
         ArrayList<Node> unfinishedNodes = new ArrayList<>();
         // Assumes forward playing from here on.
@@ -872,6 +870,16 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
             }
             node.mAnimation.animateBasedOnPlayTime(playTime, lastPlayTime, inReverse);
         }
+
+        // Seek not yet started animations.
+        for (int i = 0; i < mEvents.size(); i++) {
+            AnimationEvent event = mEvents.get(i);
+            if (event.getTime() > currentPlayTime
+                    && event.mEvent == AnimationEvent.ANIMATION_DELAY_ENDED) {
+                event.mNode.mAnimation.skipToEndValue(true);
+            }
+        }
+
     }
 
     @Override
@@ -923,7 +931,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
 
         initAnimation();
 
-        if (!isStarted()) {
+        if (!isStarted() || isPaused()) {
             if (mReversing) {
                 throw new UnsupportedOperationException("Error: Something went wrong. mReversing"
                         + " should not be set when AnimatorSet is not started.");
@@ -932,7 +940,6 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
                 findLatestEventIdForTime(0);
                 // Set all the values to start values.
                 initChildren();
-                skipToStartValue(mReversing);
                 mSeekState.setPlayTime(0, mReversing);
             }
             animateBasedOnPlayTime(playTime, 0, mReversing);
