@@ -24,6 +24,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
+import static android.net.NetworkPolicy.WARNING_DISABLED;
 import static android.provider.Settings.Global.NETWORK_DEFAULT_DAILY_MULTIPATH_QUOTA_BYTES;
 
 import static com.android.server.net.NetworkPolicyManagerInternal.QUOTA_TYPE_MULTIPATH;
@@ -61,6 +62,7 @@ import android.util.Range;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.net.NetworkPolicyManagerInternal;
@@ -71,6 +73,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -96,8 +99,10 @@ public class MultipathPolicyTracker {
     private final Clock mClock;
     private final Dependencies mDeps;
     private final ContentResolver mResolver;
-    private final SettingsObserver mSettingsObserver;
     private final ConfigChangeReceiver mConfigChangeReceiver;
+
+    @VisibleForTesting
+    final ContentObserver mSettingsObserver;
 
     private ConnectivityManager mCM;
     private NetworkPolicyManager mNPM;
@@ -288,12 +293,16 @@ public class MultipathPolicyTracker {
 
             final NetworkPolicy[] policies = mNPM.getNetworkPolicies();
             for (NetworkPolicy policy : policies) {
-                if (hasActiveCycle(policy) && policy.template.matches(identity)) {
+                if (policy.hasCycle() && policy.template.matches(identity)) {
+                    final long cycleStart = policy.cycleIterator().next().getLower()
+                            .toInstant().toEpochMilli();
                     // Prefer user-defined warning, otherwise use hard limit
-                    final long policyBytes = (policy.warningBytes == LIMIT_DISABLED)
-                            ? policy.limitBytes : policy.warningBytes;
+                    final long activeWarning = getActiveWarning(policy, cycleStart);
+                    final long policyBytes = (activeWarning == WARNING_DISABLED)
+                            ? getActiveLimit(policy, cycleStart)
+                            : activeWarning;
 
-                    if (policyBytes != LIMIT_DISABLED) {
+                    if (policyBytes != LIMIT_DISABLED && policyBytes != WARNING_DISABLED) {
                         final long policyBudget = getRemainingDailyBudget(policyBytes,
                                 policy.cycleIterator().next());
                         minQuota = Math.min(minQuota, policyBudget);
@@ -388,9 +397,16 @@ public class MultipathPolicyTracker {
         }
     }
 
-    private static boolean hasActiveCycle(NetworkPolicy policy) {
-        return policy.hasCycle() && policy.lastLimitSnooze <
-                policy.cycleIterator().next().getLower().toInstant().toEpochMilli();
+    private static long getActiveWarning(NetworkPolicy policy, long cycleStart) {
+        return policy.lastWarningSnooze < cycleStart
+                ? policy.warningBytes
+                : WARNING_DISABLED;
+    }
+
+    private static long getActiveLimit(NetworkPolicy policy, long cycleStart) {
+        return policy.lastLimitSnooze < cycleStart
+                ? policy.limitBytes
+                : LIMIT_DISABLED;
     }
 
     // Only ever updated on the handler thread. Accessed from other binder threads to retrieve
