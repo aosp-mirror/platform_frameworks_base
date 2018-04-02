@@ -60,4 +60,8 @@ public class TetheringDependencies {
     public INetd getNetdService() {
         return NetdService.getInstance();
     }
+
+    public boolean isTetheringSupported() {
+        return true;
+    }
 }
