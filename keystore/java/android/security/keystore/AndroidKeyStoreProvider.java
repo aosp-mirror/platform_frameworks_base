@@ -67,6 +67,8 @@ public class AndroidKeyStoreProvider extends Provider {
     public AndroidKeyStoreProvider() {
         super(PROVIDER_NAME, 1.0, "Android KeyStore security provider");
 
+        boolean supports3DES = "true".equals(System.getProperty("supports3DES"));
+
         // java.security.KeyStore
         put("KeyStore.AndroidKeyStore", PACKAGE_NAME + ".AndroidKeyStoreSpi");
 
@@ -80,16 +82,21 @@ public class AndroidKeyStoreProvider extends Provider {
 
         // javax.crypto.KeyGenerator
         put("KeyGenerator.AES", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$AES");
-        put("KeyGenerator.DESede", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$DESede");
         put("KeyGenerator.HmacSHA1", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$HmacSHA1");
         put("KeyGenerator.HmacSHA224", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$HmacSHA224");
         put("KeyGenerator.HmacSHA256", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$HmacSHA256");
         put("KeyGenerator.HmacSHA384", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$HmacSHA384");
         put("KeyGenerator.HmacSHA512", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$HmacSHA512");
 
+        if (supports3DES) {
+            put("KeyGenerator.DESede", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$DESede");
+        }
+
         // java.security.SecretKeyFactory
         putSecretKeyFactoryImpl("AES");
-        putSecretKeyFactoryImpl("DESede");
+        if (supports3DES) {
+            putSecretKeyFactoryImpl("DESede");
+        }
         putSecretKeyFactoryImpl("HmacSHA1");
         putSecretKeyFactoryImpl("HmacSHA224");
         putSecretKeyFactoryImpl("HmacSHA256");
