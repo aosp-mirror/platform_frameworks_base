@@ -16,21 +16,21 @@
 
 package android.net.apf;
 
+import static android.net.util.NetworkConstants.*;
 import static android.system.OsConstants.*;
-
 import static com.android.internal.util.BitUtils.bytesToBEInt;
 import static com.android.internal.util.BitUtils.getUint16;
 import static com.android.internal.util.BitUtils.getUint32;
 import static com.android.internal.util.BitUtils.getUint8;
-import static com.android.internal.util.BitUtils.uint16;
 import static com.android.internal.util.BitUtils.uint32;
-import static com.android.internal.util.BitUtils.uint8;
 
-import android.os.SystemClock;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkUtils;
-import android.net.apf.ApfGenerator;
 import android.net.apf.ApfGenerator.IllegalInstructionException;
 import android.net.apf.ApfGenerator.Register;
 import android.net.ip.IpClient;
@@ -39,31 +39,29 @@ import android.net.metrics.ApfStats;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.RaEvent;
 import android.net.util.InterfaceParams;
+import android.os.PowerManager;
+import android.os.SystemClock;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.PacketSocketAddress;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Pair;
-
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
-
 import java.io.FileDescriptor;
 import java.io.IOException;
-import java.lang.Thread;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import libcore.io.IoBridge;
 
 /**
@@ -215,10 +213,6 @@ public class ApfFilter {
             { (byte) 0xff, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 };
 
     private static final int ICMP6_TYPE_OFFSET = ETH_HEADER_LEN + IPV6_HEADER_LEN;
-    private static final int ICMP6_ROUTER_SOLICITATION = 133;
-    private static final int ICMP6_ROUTER_ADVERTISEMENT = 134;
-    private static final int ICMP6_NEIGHBOR_SOLICITATION = 135;
-    private static final int ICMP6_NEIGHBOR_ANNOUNCEMENT = 136;
 
     // NOTE: this must be added to the IPv4 header length in IPV4_HEADER_SIZE_MEMORY_SLOT
     private static final int UDP_DESTINATION_PORT_OFFSET = ETH_HEADER_LEN + 2;
@@ -258,8 +252,25 @@ public class ApfFilter {
     private long mUniqueCounter;
     @GuardedBy("this")
     private boolean mMulticastFilter;
+    @GuardedBy("this")
+    private boolean mInDozeMode;
     private final boolean mDrop802_3Frames;
     private final int[] mEthTypeBlackList;
+
+    // Detects doze mode state transitions.
+    private final BroadcastReceiver mDeviceIdleReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED)) {
+                PowerManager powerManager =
+                        (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+                final boolean deviceIdle = powerManager.isDeviceIdleMode();
+                setDozeMode(deviceIdle);
+            }
+        }
+    };
+    private final Context mContext;
 
     // Our IPv4 address, if we have just one, otherwise null.
     @GuardedBy("this")
@@ -269,13 +280,14 @@ public class ApfFilter {
     private int mIPv4PrefixLength;
 
     @VisibleForTesting
-    ApfFilter(ApfConfiguration config, InterfaceParams ifParams,
+    ApfFilter(Context context, ApfConfiguration config, InterfaceParams ifParams,
             IpClient.Callback ipClientCallback, IpConnectivityLog log) {
         mApfCapabilities = config.apfCapabilities;
         mIpClientCallback = ipClientCallback;
         mInterfaceParams = ifParams;
         mMulticastFilter = config.multicastFilter;
         mDrop802_3Frames = config.ieee802_3Filter;
+        mContext = context;
 
         // Now fill the black list from the passed array
         mEthTypeBlackList = filterEthTypeBlackList(config.ethTypeBlackList);
@@ -284,6 +296,10 @@ public class ApfFilter {
 
         // TODO: ApfFilter should not generate programs until IpClient sends provisioning success.
         maybeStartFilter();
+
+        // Listen for doze-mode transition changes to enable/disable the IPv6 multicast filter.
+        mContext.registerReceiver(mDeviceIdleReceiver,
+                new IntentFilter(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED));
     }
 
     private void log(String s) {
@@ -522,7 +538,7 @@ public class ApfFilter {
             // to our packet socket. b/29586253
             if (getUint16(mPacket, ETH_ETHERTYPE_OFFSET) != ETH_P_IPV6 ||
                     getUint8(mPacket, IPV6_NEXT_HEADER_OFFSET) != IPPROTO_ICMPV6 ||
-                    getUint8(mPacket, ICMP6_TYPE_OFFSET) != ICMP6_ROUTER_ADVERTISEMENT) {
+                    getUint8(mPacket, ICMP6_TYPE_OFFSET) != ICMPV6_ROUTER_ADVERTISEMENT) {
                 throw new InvalidRaException("Not an ICMP6 router advertisement");
             }
 
@@ -889,10 +905,11 @@ public class ApfFilter {
     private void generateIPv6FilterLocked(ApfGenerator gen) throws IllegalInstructionException {
         // Here's a basic summary of what the IPv6 filter program does:
         //
-        // if it's not ICMPv6:
-        //   if it's multicast and we're dropping multicast:
-        //     drop
-        //   pass
+        // if we're dropping multicast
+        //   if it's not IPCMv6 or it's ICMPv6 but we're in doze mode:
+        //     if it's multicast:
+        //       drop
+        //     pass
         // if it's ICMPv6 RS to any:
         //   drop
         // if it's ICMPv6 NA to ff02::1:
@@ -902,28 +919,44 @@ public class ApfFilter {
 
         // Drop multicast if the multicast filter is enabled.
         if (mMulticastFilter) {
-            // Don't touch ICMPv6 multicast here, we deal with it in more detail later.
-            String skipIpv6MulticastFilterLabel = "skipIPv6MulticastFilter";
-            gen.addJumpIfR0Equals(IPPROTO_ICMPV6, skipIpv6MulticastFilterLabel);
+            final String skipIPv6MulticastFilterLabel = "skipIPv6MulticastFilter";
+            final String dropAllIPv6MulticastsLabel = "dropAllIPv6Multicast";
 
-            // Drop all other packets sent to ff00::/8.
+            // While in doze mode, drop ICMPv6 multicast pings, let the others pass.
+            // While awake, let all ICMPv6 multicasts through.
+            if (mInDozeMode) {
+                // Not ICMPv6? -> Proceed to multicast filtering
+                gen.addJumpIfR0NotEquals(IPPROTO_ICMPV6, dropAllIPv6MulticastsLabel);
+
+                // ICMPv6 but not ECHO? -> Skip the multicast filter.
+                // (ICMPv6 ECHO requests will go through the multicast filter below).
+                gen.addLoad8(Register.R0, ICMP6_TYPE_OFFSET);
+                gen.addJumpIfR0NotEquals(ICMPV6_ECHO_REQUEST_TYPE, skipIPv6MulticastFilterLabel);
+            } else {
+                gen.addJumpIfR0Equals(IPPROTO_ICMPV6, skipIPv6MulticastFilterLabel);
+            }
+
+            // Drop all other packets sent to ff00::/8 (multicast prefix).
+            gen.defineLabel(dropAllIPv6MulticastsLabel);
             gen.addLoad8(Register.R0, IPV6_DEST_ADDR_OFFSET);
             gen.addJumpIfR0Equals(0xff, gen.DROP_LABEL);
-            // Not multicast and not ICMPv6. Pass.
+            // Not multicast. Pass.
             gen.addJump(gen.PASS_LABEL);
-            gen.defineLabel(skipIpv6MulticastFilterLabel);
+            gen.defineLabel(skipIPv6MulticastFilterLabel);
         } else {
             // If not ICMPv6, pass.
             gen.addJumpIfR0NotEquals(IPPROTO_ICMPV6, gen.PASS_LABEL);
         }
 
+        // If we got this far, the packet is ICMPv6.  Drop some specific types.
+
         // Add unsolicited multicast neighbor announcements filter
         String skipUnsolicitedMulticastNALabel = "skipUnsolicitedMulticastNA";
         gen.addLoad8(Register.R0, ICMP6_TYPE_OFFSET);
         // Drop all router solicitations (b/32833400)
-        gen.addJumpIfR0Equals(ICMP6_ROUTER_SOLICITATION, gen.DROP_LABEL);
+        gen.addJumpIfR0Equals(ICMPV6_ROUTER_SOLICITATION, gen.DROP_LABEL);
         // If not neighbor announcements, skip filter.
-        gen.addJumpIfR0NotEquals(ICMP6_NEIGHBOR_ANNOUNCEMENT, skipUnsolicitedMulticastNALabel);
+        gen.addJumpIfR0NotEquals(ICMPV6_NEIGHBOR_ADVERTISEMENT, skipUnsolicitedMulticastNALabel);
         // If to ff02::1, drop.
         // TODO: Drop only if they don't contain the address of on-link neighbours.
         gen.addLoadImmediate(Register.R0, IPV6_DEST_ADDR_OFFSET);
@@ -1168,9 +1201,9 @@ public class ApfFilter {
      * Create an {@link ApfFilter} if {@code apfCapabilities} indicates support for packet
      * filtering using APF programs.
      */
-    public static ApfFilter maybeCreate(ApfConfiguration config,
+    public static ApfFilter maybeCreate(Context context, ApfConfiguration config,
             InterfaceParams ifParams, IpClient.Callback ipClientCallback) {
-        if (config == null || ifParams == null) return null;
+        if (context == null || config == null || ifParams == null) return null;
         ApfCapabilities apfCapabilities =  config.apfCapabilities;
         if (apfCapabilities == null) return null;
         if (apfCapabilities.apfVersionSupported == 0) return null;
@@ -1187,7 +1220,8 @@ public class ApfFilter {
             Log.e(TAG, "Unsupported APF version: " + apfCapabilities.apfVersionSupported);
             return null;
         }
-        return new ApfFilter(config, ifParams, ipClientCallback, new IpConnectivityLog());
+
+        return new ApfFilter(context, config, ifParams, ipClientCallback, new IpConnectivityLog());
     }
 
     public synchronized void shutdown() {
@@ -1197,16 +1231,22 @@ public class ApfFilter {
             mReceiveThread = null;
         }
         mRas.clear();
+        mContext.unregisterReceiver(mDeviceIdleReceiver);
     }
 
     public synchronized void setMulticastFilter(boolean isEnabled) {
-        if (mMulticastFilter == isEnabled) {
-            return;
-        }
+        if (mMulticastFilter == isEnabled) return;
         mMulticastFilter = isEnabled;
         if (!isEnabled) {
             mNumProgramUpdatesAllowingMulticast++;
         }
+        installNewProgramLocked();
+    }
+
+    @VisibleForTesting
+    public synchronized void setDozeMode(boolean isEnabled) {
+        if (mInDozeMode == isEnabled) return;
+        mInDozeMode = isEnabled;
         installNewProgramLocked();
     }
 
