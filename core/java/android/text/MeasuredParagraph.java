@@ -540,9 +540,6 @@ public class MeasuredParagraph {
     private void applyStyleRun(@IntRange(from = 0) int start,  // inclusive, in copied buffer
                                @IntRange(from = 0) int end,  // exclusive, in copied buffer
                                /* Maybe Zero */ long nativeBuilderPtr) {
-        if (nativeBuilderPtr != 0) {
-            mCachedPaint.getFontMetricsInt(mCachedFm);
-        }
 
         if (mLtrWithoutBidi) {
             // If the whole text is LTR direction, just apply whole region.
@@ -613,6 +610,10 @@ public class MeasuredParagraph {
 
         final int startInCopiedBuffer = start - mTextStart;
         final int endInCopiedBuffer = end - mTextStart;
+
+        if (nativeBuilderPtr != 0) {
+            mCachedPaint.getFontMetricsInt(mCachedFm);
+        }
 
         if (replacement != null) {
             applyReplacementRun(replacement, startInCopiedBuffer, endInCopiedBuffer,
