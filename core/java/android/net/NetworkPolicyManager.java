@@ -107,6 +107,9 @@ public class NetworkPolicyManager {
 
     private static final boolean ALLOW_PLATFORM_APP_POLICY = true;
 
+    public static final int FOREGROUND_THRESHOLD_STATE =
+            ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+
     /**
      * {@link Intent} extra that indicates which {@link NetworkTemplate} rule it
      * applies to.
@@ -331,7 +334,7 @@ public class NetworkPolicyManager {
      * to access network when the device is idle or in battery saver mode. Otherwise, false.
      */
     public static boolean isProcStateAllowedWhileIdleOrPowerSaveMode(int procState) {
-        return procState <= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+        return procState <= FOREGROUND_THRESHOLD_STATE;
     }
 
     /**
@@ -339,7 +342,7 @@ public class NetworkPolicyManager {
      * to access network when the device is in data saver mode. Otherwise, false.
      */
     public static boolean isProcStateAllowedWhileOnRestrictBackground(int procState) {
-        return procState <= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+        return procState <= FOREGROUND_THRESHOLD_STATE;
     }
 
     public static String resolveNetworkId(WifiConfiguration config) {
