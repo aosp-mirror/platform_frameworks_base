@@ -22,26 +22,24 @@ import android.security.KeyStoreException;
 import java.security.ProviderException;
 
 /**
- * Indicates that an operation could not be performed because the requested security hardware
- * is not available.
+ * Indicates that the Keystore does not support securely importing wrapped keys.
  */
-public class StrongBoxUnavailableException extends ProviderException {
+public class SecureKeyImportUnavailableException extends ProviderException {
 
-    public StrongBoxUnavailableException() {
+    public SecureKeyImportUnavailableException() {
         super();
     }
 
-    public StrongBoxUnavailableException(String message) {
-        super(message,
-                new KeyStoreException(KeyStore.HARDWARE_TYPE_UNAVAILABLE, "No StrongBox available")
-        );
+    public SecureKeyImportUnavailableException(String message) {
+        super(message, new KeyStoreException(KeyStore.HARDWARE_TYPE_UNAVAILABLE,
+                "Secure Key Import not available"));
     }
 
-    public StrongBoxUnavailableException(String message, Throwable cause) {
+    public SecureKeyImportUnavailableException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public StrongBoxUnavailableException(Throwable cause) {
+    public SecureKeyImportUnavailableException(Throwable cause) {
         super(cause);
     }
 }
