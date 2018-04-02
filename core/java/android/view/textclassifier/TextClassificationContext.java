@@ -18,6 +18,8 @@ package android.view.textclassifier;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.textclassifier.TextClassifier.WidgetType;
 
 import com.android.internal.util.Preconditions;
@@ -28,7 +30,7 @@ import java.util.Locale;
  * A representation of the context in which text classification would be performed.
  * @see TextClassificationManager#createTextClassificationSession(TextClassificationContext)
  */
-public final class TextClassificationContext {
+public final class TextClassificationContext implements Parcelable {
 
     private final String mPackageName;
     private final String mWidgetType;
@@ -120,4 +122,35 @@ public final class TextClassificationContext {
             return new TextClassificationContext(mPackageName, mWidgetType, mWidgetVersion);
         }
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeString(mPackageName);
+        parcel.writeString(mWidgetType);
+        parcel.writeString(mWidgetVersion);
+    }
+
+    private TextClassificationContext(Parcel in) {
+        mPackageName = in.readString();
+        mWidgetType = in.readString();
+        mWidgetVersion = in.readString();
+    }
+
+    public static final Parcelable.Creator<TextClassificationContext> CREATOR =
+            new Parcelable.Creator<TextClassificationContext>() {
+                @Override
+                public TextClassificationContext createFromParcel(Parcel parcel) {
+                    return new TextClassificationContext(parcel);
+                }
+
+                @Override
+                public TextClassificationContext[] newArray(int size) {
+                    return new TextClassificationContext[size];
+                }
+            };
 }

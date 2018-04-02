@@ -21,30 +21,41 @@ import android.service.textclassifier.ITextLinksCallback;
 import android.service.textclassifier.ITextSelectionCallback;
 import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.TextClassification;
+import android.view.textclassifier.TextClassificationContext;
+import android.view.textclassifier.TextClassificationSessionId;
 import android.view.textclassifier.TextLinks;
 import android.view.textclassifier.TextSelection;
 
 /**
  * TextClassifierService binder interface.
- * See TextClassifier (and TextClassifier.Logger) for interface documentation.
+ * See TextClassifier for interface documentation.
  * {@hide}
  */
 oneway interface ITextClassifierService {
 
     void onSuggestSelection(
-            in CharSequence text, int selectionStartIndex, int selectionEndIndex,
-            in TextSelection.Options options,
-            in ITextSelectionCallback c);
+            in TextClassificationSessionId sessionId,
+            in TextSelection.Request request,
+            in ITextSelectionCallback callback);
 
     void onClassifyText(
-            in CharSequence text, int startIndex, int endIndex,
-            in TextClassification.Options options,
-            in ITextClassificationCallback c);
+            in TextClassificationSessionId sessionId,
+            in TextClassification.Request request,
+            in ITextClassificationCallback callback);
 
     void onGenerateLinks(
-            in CharSequence text,
-            in TextLinks.Options options,
-            in ITextLinksCallback c);
+            in TextClassificationSessionId sessionId,
+            in TextLinks.Request request,
+            in ITextLinksCallback callback);
 
-    void onSelectionEvent(in SelectionEvent event);
+    void onSelectionEvent(
+            in TextClassificationSessionId sessionId,
+            in SelectionEvent event);
+
+    void onCreateTextClassificationSession(
+            in TextClassificationContext context,
+            in TextClassificationSessionId sessionId);
+
+    void onDestroyTextClassificationSession(
+            in TextClassificationSessionId sessionId);
 }

@@ -112,35 +112,32 @@ public final class TextClassifierImpl implements TextClassifier {
     /** @inheritDoc */
     @Override
     @WorkerThread
-    public TextSelection suggestSelection(
-            @NonNull CharSequence text, int selectionStartIndex, int selectionEndIndex,
-            @Nullable TextSelection.Options options) {
-        Utils.validate(text, selectionStartIndex, selectionEndIndex, false /* allowInMainThread */);
+    public TextSelection suggestSelection(TextSelection.Request request) {
+        Preconditions.checkNotNull(request);
+        Utils.checkMainThread();
         try {
-            final int rangeLength = selectionEndIndex - selectionStartIndex;
-            if (text.length() > 0
+            final int rangeLength = request.getEndIndex() - request.getStartIndex();
+            final String string = request.getText().toString();
+            if (string.length() > 0
                     && rangeLength <= mSettings.getSuggestSelectionMaxRangeLength()) {
-                final LocaleList locales = (options == null) ? null : options.getDefaultLocales();
-                final String localesString = concatenateLocales(locales);
+                final String localesString = concatenateLocales(request.getDefaultLocales());
                 final ZonedDateTime refTime = ZonedDateTime.now();
-                final boolean darkLaunchAllowed = options != null && options.isDarkLaunchAllowed();
-                final TextClassifierImplNative nativeImpl = getNative(locales);
-                final String string = text.toString();
+                final TextClassifierImplNative nativeImpl = getNative(request.getDefaultLocales());
                 final int start;
                 final int end;
-                if (mSettings.isModelDarkLaunchEnabled() && !darkLaunchAllowed) {
-                    start = selectionStartIndex;
-                    end = selectionEndIndex;
+                if (mSettings.isModelDarkLaunchEnabled() && !request.isDarkLaunchAllowed()) {
+                    start = request.getStartIndex();
+                    end = request.getEndIndex();
                 } else {
                     final int[] startEnd = nativeImpl.suggestSelection(
-                            string, selectionStartIndex, selectionEndIndex,
+                            string, request.getStartIndex(), request.getEndIndex(),
                             new TextClassifierImplNative.SelectionOptions(localesString));
                     start = startEnd[0];
                     end = startEnd[1];
                 }
                 if (start < end
                         && start >= 0 && end <= string.length()
-                        && start <= selectionStartIndex && end >= selectionEndIndex) {
+                        && start <= request.getStartIndex() && end >= request.getEndIndex()) {
                     final TextSelection.Builder tsBuilder = new TextSelection.Builder(start, end);
                     final TextClassifierImplNative.ClassificationResult[] results =
                             nativeImpl.classifyText(
@@ -153,9 +150,8 @@ public final class TextClassifierImpl implements TextClassifier {
                     for (int i = 0; i < size; i++) {
                         tsBuilder.setEntityType(results[i].getCollection(), results[i].getScore());
                     }
-                    return tsBuilder
-                            .setSignature(
-                                    getSignature(string, selectionStartIndex, selectionEndIndex))
+                    return tsBuilder.setId(createId(
+                            string, request.getStartIndex(), request.getEndIndex()))
                             .build();
                 } else {
                     // We can not trust the result. Log the issue and ignore the result.
@@ -169,37 +165,34 @@ public final class TextClassifierImpl implements TextClassifier {
                     t);
         }
         // Getting here means something went wrong, return a NO_OP result.
-        return mFallback.suggestSelection(
-                text, selectionStartIndex, selectionEndIndex, options);
+        return mFallback.suggestSelection(request);
     }
 
     /** @inheritDoc */
     @Override
     @WorkerThread
-    public TextClassification classifyText(
-            @NonNull CharSequence text, int startIndex, int endIndex,
-            @Nullable TextClassification.Options options) {
-        Utils.validate(text, startIndex, endIndex, false /* allowInMainThread */);
+    public TextClassification classifyText(TextClassification.Request request) {
+        Preconditions.checkNotNull(request);
+        Utils.checkMainThread();
         try {
-            final int rangeLength = endIndex - startIndex;
-            if (text.length() > 0 && rangeLength <= mSettings.getClassifyTextMaxRangeLength()) {
-                final String string = text.toString();
-                final LocaleList locales = (options == null) ? null : options.getDefaultLocales();
-                final String localesString = concatenateLocales(locales);
-                final ZonedDateTime refTime =
-                        (options != null && options.getReferenceTime() != null)
-                                ? options.getReferenceTime() : ZonedDateTime.now();
-
+            final int rangeLength = request.getEndIndex() - request.getStartIndex();
+            final String string = request.getText().toString();
+            if (string.length() > 0 && rangeLength <= mSettings.getClassifyTextMaxRangeLength()) {
+                final String localesString = concatenateLocales(request.getDefaultLocales());
+                final ZonedDateTime refTime = request.getReferenceTime() != null
+                        ? request.getReferenceTime() : ZonedDateTime.now();
                 final TextClassifierImplNative.ClassificationResult[] results =
-                        getNative(locales)
-                                .classifyText(string, startIndex, endIndex,
+                        getNative(request.getDefaultLocales())
+                                .classifyText(
+                                        string, request.getStartIndex(), request.getEndIndex(),
                                         new TextClassifierImplNative.ClassificationOptions(
                                                 refTime.toInstant().toEpochMilli(),
                                                 refTime.getZone().getId(),
                                                 localesString));
                 if (results.length > 0) {
                     return createClassificationResult(
-                            results, string, startIndex, endIndex, refTime.toInstant());
+                            results, string,
+                            request.getStartIndex(), request.getEndIndex(), refTime.toInstant());
                 }
             }
         } catch (Throwable t) {
@@ -207,42 +200,40 @@ public final class TextClassifierImpl implements TextClassifier {
             Log.e(LOG_TAG, "Error getting text classification info.", t);
         }
         // Getting here means something went wrong, return a NO_OP result.
-        return mFallback.classifyText(text, startIndex, endIndex, options);
+        return mFallback.classifyText(request);
     }
 
     /** @inheritDoc */
     @Override
     @WorkerThread
-    public TextLinks generateLinks(
-            @NonNull CharSequence text, @Nullable TextLinks.Options options) {
-        Utils.validate(text, getMaxGenerateLinksTextLength(), false /* allowInMainThread */);
+    public TextLinks generateLinks(@NonNull TextLinks.Request request) {
+        Preconditions.checkNotNull(request);
+        Utils.checkTextLength(request.getText(), getMaxGenerateLinksTextLength());
+        Utils.checkMainThread();
 
-        final boolean legacyFallback = options != null && options.isLegacyFallback();
-        if (!mSettings.isSmartLinkifyEnabled() && legacyFallback) {
-            return Utils.generateLegacyLinks(text, options);
+        if (!mSettings.isSmartLinkifyEnabled() && request.isLegacyFallback()) {
+            return Utils.generateLegacyLinks(request);
         }
 
-        final String textString = text.toString();
+        final String textString = request.getText().toString();
         final TextLinks.Builder builder = new TextLinks.Builder(textString);
 
         try {
             final long startTimeMs = System.currentTimeMillis();
-            final LocaleList defaultLocales = options != null ? options.getDefaultLocales() : null;
             final ZonedDateTime refTime = ZonedDateTime.now();
-            final Collection<String> entitiesToIdentify =
-                    options != null && options.getEntityConfig() != null
-                            ? options.getEntityConfig().resolveEntityListModifications(
-                                    getEntitiesForHints(options.getEntityConfig().getHints()))
-                            : mSettings.getEntityListDefault();
+            final Collection<String> entitiesToIdentify = request.getEntityConfig() != null
+                    ? request.getEntityConfig().resolveEntityListModifications(
+                            getEntitiesForHints(request.getEntityConfig().getHints()))
+                    : mSettings.getEntityListDefault();
             final TextClassifierImplNative nativeImpl =
-                    getNative(defaultLocales);
+                    getNative(request.getDefaultLocales());
             final TextClassifierImplNative.AnnotatedSpan[] annotations =
                     nativeImpl.annotate(
                         textString,
                         new TextClassifierImplNative.AnnotationOptions(
                                 refTime.toInstant().toEpochMilli(),
-                                refTime.getZone().getId(),
-                                concatenateLocales(defaultLocales)));
+                                        refTime.getZone().getId(),
+                                concatenateLocales(request.getDefaultLocales())));
             for (TextClassifierImplNative.AnnotatedSpan span : annotations) {
                 final TextClassifierImplNative.ClassificationResult[] results =
                         span.getClassification();
@@ -258,18 +249,17 @@ public final class TextClassifierImpl implements TextClassifier {
             }
             final TextLinks links = builder.build();
             final long endTimeMs = System.currentTimeMillis();
-            final String callingPackageName =
-                    options == null || options.getCallingPackageName() == null
-                            ? mContext.getPackageName()  // local (in process) TC.
-                            : options.getCallingPackageName();
+            final String callingPackageName = request.getCallingPackageName() == null
+                    ? mContext.getPackageName()  // local (in process) TC.
+                    : request.getCallingPackageName();
             mGenerateLinksLogger.logGenerateLinks(
-                    text, links, callingPackageName, endTimeMs - startTimeMs);
+                    request.getText(), links, callingPackageName, endTimeMs - startTimeMs);
             return links;
         } catch (Throwable t) {
             // Avoid throwing from this method. Log the error.
             Log.e(LOG_TAG, "Error getting links info.", t);
         }
-        return mFallback.generateLinks(text, options);
+        return mFallback.generateLinks(request);
     }
 
     /** @inheritDoc */
@@ -339,9 +329,9 @@ public final class TextClassifierImpl implements TextClassifier {
         }
     }
 
-    private String getSignature(String text, int start, int end) {
+    private String createId(String text, int start, int end) {
         synchronized (mLock) {
-            return DefaultLogger.createSignature(text, start, end, mContext, mModel.getVersion(),
+            return DefaultLogger.createId(text, start, end, mContext, mModel.getVersion(),
                     mModel.getSupportedLocales());
         }
     }
@@ -455,7 +445,7 @@ public final class TextClassifierImpl implements TextClassifier {
             builder.addAction(action);
         }
 
-        return builder.setSignature(getSignature(text, start, end)).build();
+        return builder.setId(createId(text, start, end)).build();
     }
 
     /**
@@ -512,7 +502,7 @@ public final class TextClassifierImpl implements TextClassifier {
             return mPath;
         }
 
-        /** A name to use for signature generation. Effectively the name of the model file. */
+        /** A name to use for id generation. Effectively the name of the model file. */
         String getName() {
             return mName;
         }

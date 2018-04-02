@@ -17,7 +17,6 @@
 package android.view.textclassifier;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import android.os.LocaleList;
 import android.os.Parcel;
@@ -37,12 +36,12 @@ public class TextSelectionTest {
     public void testParcel() {
         final int startIndex = 13;
         final int endIndex = 37;
-        final String signature = "signature";
+        final String id = "id";
         final TextSelection reference = new TextSelection.Builder(startIndex, endIndex)
                 .setEntityType(TextClassifier.TYPE_ADDRESS, 0.3f)
                 .setEntityType(TextClassifier.TYPE_PHONE, 0.7f)
                 .setEntityType(TextClassifier.TYPE_URL, 0.1f)
-                .setSignature(signature)
+                .setId(id)
                 .build();
 
         // Parcel and unparcel
@@ -53,7 +52,7 @@ public class TextSelectionTest {
 
         assertEquals(startIndex, result.getSelectionStartIndex());
         assertEquals(endIndex, result.getSelectionEndIndex());
-        assertEquals(signature, result.getSignature());
+        assertEquals(id, result.getId());
 
         assertEquals(3, result.getEntityCount());
         assertEquals(TextClassifier.TYPE_PHONE, result.getEntity(0));
@@ -65,18 +64,22 @@ public class TextSelectionTest {
     }
 
     @Test
-    public void testParcelOptions() {
-        TextSelection.Options reference = new TextSelection.Options();
-        reference.setDefaultLocales(new LocaleList(Locale.US, Locale.GERMANY));
-        reference.setDarkLaunchAllowed(true);
+    public void testParcelRequest() {
+        final String text = "text";
+        final TextSelection.Request reference =
+                new TextSelection.Request.Builder(text, 0, text.length())
+                        .setDefaultLocales(new LocaleList(Locale.US, Locale.GERMANY))
+                        .build();
 
         // Parcel and unparcel.
         final Parcel parcel = Parcel.obtain();
         reference.writeToParcel(parcel, reference.describeContents());
         parcel.setDataPosition(0);
-        TextSelection.Options result = TextSelection.Options.CREATOR.createFromParcel(parcel);
+        final TextSelection.Request result = TextSelection.Request.CREATOR.createFromParcel(parcel);
 
+        assertEquals(text, result.getText());
+        assertEquals(0, result.getStartIndex());
+        assertEquals(text.length(), result.getEndIndex());
         assertEquals("en-US,de-DE", result.getDefaultLocales().toLanguageTags());
-        assertTrue(result.isDarkLaunchAllowed());
     }
 }
