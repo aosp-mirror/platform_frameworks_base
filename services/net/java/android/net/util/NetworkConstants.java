@@ -136,6 +136,8 @@ public final class NetworkConstants {
      *     - https://tools.ietf.org/html/rfc4861
      */
     public static final int ICMPV6_HEADER_MIN_LEN = 4;
+    public static final int ICMPV6_ECHO_REQUEST_TYPE = 128;
+    public static final int ICMPV6_ECHO_REPLY_TYPE = 129;
     public static final int ICMPV6_ROUTER_SOLICITATION    = 133;
     public static final int ICMPV6_ROUTER_ADVERTISEMENT   = 134;
     public static final int ICMPV6_NEIGHBOR_SOLICITATION  = 135;
@@ -147,7 +149,6 @@ public final class NetworkConstants {
     public static final int ICMPV6_ND_OPTION_TLLA = 2;
     public static final int ICMPV6_ND_OPTION_MTU  = 5;
 
-    public static final int ICMPV6_ECHO_REQUEST_TYPE = 128;
 
     /**
      * UDP constants.
