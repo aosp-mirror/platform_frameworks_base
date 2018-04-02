@@ -424,13 +424,16 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             mRecentIcon = getDrawable(ctx,
                     R.drawable.ic_sysbar_recent, R.drawable.ic_sysbar_recent_dark);
             mMenuIcon = getDrawable(ctx, R.drawable.ic_sysbar_menu, R.drawable.ic_sysbar_menu_dark);
-            mAccessibilityIcon = getDrawable(ctx, R.drawable.ic_sysbar_accessibility_button,
-                    R.drawable.ic_sysbar_accessibility_button_dark);
 
             int dualToneDarkTheme = Utils.getThemeAttr(ctx, R.attr.darkIconTheme);
             int dualToneLightTheme = Utils.getThemeAttr(ctx, R.attr.lightIconTheme);
             Context darkContext = new ContextThemeWrapper(ctx, dualToneDarkTheme);
             Context lightContext = new ContextThemeWrapper(ctx, dualToneLightTheme);
+
+            mAccessibilityIcon = getDrawable(darkContext, lightContext,
+                    R.drawable.ic_sysbar_accessibility_button,
+                    R.drawable.ic_sysbar_accessibility_button);
+
             mImeIcon = getDrawable(darkContext, lightContext,
                     R.drawable.ic_ime_switcher_default, R.drawable.ic_ime_switcher_default);
 
