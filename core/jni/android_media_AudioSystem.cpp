@@ -269,8 +269,11 @@ static sp<JNIAudioPortCallback> setJniCallback(JNIEnv* env,
     return old;
 }
 
-static int check_AudioSystem_Command(status_t status)
+#define check_AudioSystem_Command(status) _check_AudioSystem_Command(__func__, (status))
+
+static int _check_AudioSystem_Command(const char* caller, status_t status)
 {
+    ALOGE_IF(status, "Command failed for %s: %d", caller, status);
     switch (status) {
     case DEAD_OBJECT:
         return kAudioStatusMediaServerDied;
