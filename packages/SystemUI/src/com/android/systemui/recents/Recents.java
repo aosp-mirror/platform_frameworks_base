@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static com.android.systemui.statusbar.phone.StatusBar.SYSTEM_DIALOG_REASON_RECENT_APPS;
 
 import android.app.ActivityManager;
+import android.app.trust.TrustManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -51,6 +52,7 @@ import com.android.systemui.EventLogTags;
 import com.android.systemui.OverviewProxyService;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
+import com.android.systemui.SystemUIApplication;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.SystemUI;
 import com.android.systemui.recents.events.EventBus;
@@ -70,6 +72,7 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 
+import com.android.systemui.statusbar.phone.StatusBar;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -107,6 +110,7 @@ public class Recents extends SystemUI
 
     private Handler mHandler;
     private RecentsImpl mImpl;
+    private TrustManager mTrustManager;
     private int mDraggingInRecentsCurrentUser;
 
     // Only For system user, this is the callbacks instance we return to each secondary user
@@ -235,6 +239,8 @@ public class Recents extends SystemUI
             registerWithSystemUser();
         }
         putComponent(Recents.class, this);
+
+        mTrustManager = (TrustManager) mContext.getSystemService(Context.TRUST_SERVICE);
     }
 
     @Override
@@ -342,12 +348,28 @@ public class Recents extends SystemUI
         // If connected to launcher service, let it handle the toggle logic
         IOverviewProxy overviewProxy = mOverviewProxyService.getProxy();
         if (overviewProxy != null) {
-            try {
-                overviewProxy.onOverviewToggle();
-                return;
-            } catch (RemoteException e) {
-                Log.e(TAG, "Cannot send toggle recents through proxy service.", e);
+            final Runnable toggleRecents = () -> {
+                try {
+                    if (mOverviewProxyService.getProxy() != null) {
+                        mOverviewProxyService.getProxy().onOverviewToggle();
+                    }
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Cannot send toggle recents through proxy service.", e);
+                }
+            };
+            // Preload only if device for current user is unlocked
+            final StatusBar statusBar = getComponent(StatusBar.class);
+            if (statusBar != null && statusBar.isKeyguardShowing()) {
+                statusBar.executeRunnableDismissingKeyguard(() -> {
+                        // Flush trustmanager before checking device locked per user
+                        mTrustManager.reportKeyguardShowingChanged();
+                        mHandler.post(toggleRecents);
+                    }, null,  true /* dismissShade */, false /* afterKeyguardGone */,
+                    true /* deferred */);
+            } else {
+                toggleRecents.run();
             }
+            return;
         }
 
         int growTarget = getComponent(Divider.class).getView().growsRecents();
