@@ -2767,10 +2767,10 @@
     <string name="dial_desc">Call selected phone number</string>
 
     <!-- Label for item in the text selection menu to trigger a Map app [CHAR LIMIT=20] -->
-    <string name="map">Locate</string>
+    <string name="map">Map</string>
 
     <!-- Accessibility description for an item in the text selection menu to open maps for an address [CHAR LIMIT=NONE] -->
-    <string name="map_desc">Locale selected address</string>
+    <string name="map_desc">Locate selected address</string>
 
     <!-- Label for item in the text selection menu to trigger a Browser app [CHAR LIMIT=20] -->
     <string name="browse">Open</string>
