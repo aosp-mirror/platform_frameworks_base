@@ -54,7 +54,6 @@ public class KeyguardStatusView extends GridLayout {
     private static final int MARQUEE_DELAY_MS = 2000;
 
     private final LockPatternUtils mLockPatternUtils;
-    private final AlarmManager mAlarmManager;
     private final IActivityManager mIActivityManager;
     private final float mSmallClockScale;
     private final float mWidgetPadding;
@@ -123,7 +122,6 @@ public class KeyguardStatusView extends GridLayout {
 
     public KeyguardStatusView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mIActivityManager = ActivityManager.getService();
         mLockPatternUtils = new LockPatternUtils(getContext());
         mHandler = new Handler(Looper.myLooper());
@@ -223,10 +221,7 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     private void refresh() {
-        AlarmManager.AlarmClockInfo nextAlarm =
-                mAlarmManager.getNextAlarmClock(UserHandle.USER_CURRENT);
-        Patterns.update(mContext, nextAlarm != null);
-
+        Patterns.update(mContext);
         refreshTime();
     }
 
@@ -301,20 +296,16 @@ public class KeyguardStatusView extends GridLayout {
     // DateFormat.getBestDateTimePattern is extremely expensive, and refresh is called often.
     // This is an optimization to ensure we only recompute the patterns when the inputs change.
     private static final class Patterns {
-        static String dateViewSkel;
         static String clockView12;
         static String clockView24;
         static String cacheKey;
 
-        static void update(Context context, boolean hasAlarm) {
+        static void update(Context context) {
             final Locale locale = Locale.getDefault();
             final Resources res = context.getResources();
-            dateViewSkel = res.getString(hasAlarm
-                    ? R.string.abbrev_wday_month_day_no_year_alarm
-                    : R.string.abbrev_wday_month_day_no_year);
             final String clockView12Skel = res.getString(R.string.clock_12hr_format);
             final String clockView24Skel = res.getString(R.string.clock_24hr_format);
-            final String key = locale.toString() + dateViewSkel + clockView12Skel + clockView24Skel;
+            final String key = locale.toString() + clockView12Skel + clockView24Skel;
             if (key.equals(cacheKey)) return;
 
             clockView12 = DateFormat.getBestDateTimePattern(locale, clockView12Skel);
