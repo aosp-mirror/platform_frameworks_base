@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.util.Log;
 
@@ -99,12 +98,11 @@ public class RecoveryController {
     }
 
     /**
+     * Deprecated.
      * Gets a new instance of the class.
      */
     public static RecoveryController getInstance() {
-        ILockSettings lockSettings =
-                ILockSettings.Stub.asInterface(ServiceManager.getService("lock_settings"));
-        return new RecoveryController(lockSettings);
+        throw new UnsupportedOperationException("using Deprecated RecoveryController version");
     }
 
     /**
@@ -128,16 +126,8 @@ public class RecoveryController {
     public void initRecoveryService(
             @NonNull String rootCertificateAlias, @NonNull byte[] signedPublicKeyList)
             throws BadCertificateFormatException, InternalRecoveryServiceException {
-        try {
-            mBinder.initRecoveryService(rootCertificateAlias, signedPublicKeyList);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ERROR_BAD_CERTIFICATE_FORMAT) {
-                throw new BadCertificateFormatException(e.getMessage());
-            }
-            throw wrapUnexpectedServiceSpecificException(e);
-        }
+        throw new UnsupportedOperationException("Deprecated initRecoveryService method called");
+
     }
 
     /**
