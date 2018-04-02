@@ -301,8 +301,8 @@ public class KeySyncTaskTest {
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
 
         // Enter test mode with whitelisted credentials
-        when(mTestOnlyInsecureCertificateHelper.isTestOnlyCertificate(any())).thenReturn(true);
-        when(mTestOnlyInsecureCertificateHelper.doesCredentailSupportInsecureMode(anyInt(), any()))
+        when(mTestOnlyInsecureCertificateHelper.isTestOnlyCertificateAlias(any())).thenReturn(true);
+        when(mTestOnlyInsecureCertificateHelper.doesCredentialSupportInsecureMode(anyInt(), any()))
                 .thenReturn(true);
         mKeySyncTask.run();
 
@@ -311,7 +311,7 @@ public class KeySyncTaskTest {
 
         // run whitelist checks
         verify(mTestOnlyInsecureCertificateHelper)
-                .doesCredentailSupportInsecureMode(anyInt(), any());
+                .doesCredentialSupportInsecureMode(anyInt(), any());
         verify(mTestOnlyInsecureCertificateHelper)
                 .keepOnlyWhitelistedInsecureKeys(any());
 
@@ -331,8 +331,8 @@ public class KeySyncTaskTest {
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_ROOT_CERT_ALIAS, TestData.CERT_PATH_1);
 
         // Enter test mode with non whitelisted credentials
-        when(mTestOnlyInsecureCertificateHelper.isTestOnlyCertificate(any())).thenReturn(true);
-        when(mTestOnlyInsecureCertificateHelper.doesCredentailSupportInsecureMode(anyInt(), any()))
+        when(mTestOnlyInsecureCertificateHelper.isTestOnlyCertificateAlias(any())).thenReturn(true);
+        when(mTestOnlyInsecureCertificateHelper.doesCredentialSupportInsecureMode(anyInt(), any()))
                 .thenReturn(false);
         mKeySyncTask.run();
 
@@ -340,7 +340,7 @@ public class KeySyncTaskTest {
         verify(mTestOnlyInsecureCertificateHelper)
                 .getDefaultCertificateAliasIfEmpty(eq(TEST_ROOT_CERT_ALIAS));
         verify(mTestOnlyInsecureCertificateHelper)
-                .doesCredentailSupportInsecureMode(anyInt(), any());
+                .doesCredentialSupportInsecureMode(anyInt(), any());
     }
 
     @Test
@@ -358,11 +358,11 @@ public class KeySyncTaskTest {
         verify(mTestOnlyInsecureCertificateHelper)
                 .getDefaultCertificateAliasIfEmpty(eq(TEST_ROOT_CERT_ALIAS));
         verify(mTestOnlyInsecureCertificateHelper, atLeast(1))
-                .isTestOnlyCertificate(eq(TEST_ROOT_CERT_ALIAS));
+                .isTestOnlyCertificateAlias(eq(TEST_ROOT_CERT_ALIAS));
 
         // no whitelists check
         verify(mTestOnlyInsecureCertificateHelper, never())
-                .doesCredentailSupportInsecureMode(anyInt(), any());
+                .doesCredentialSupportInsecureMode(anyInt(), any());
         verify(mTestOnlyInsecureCertificateHelper, never())
                 .keepOnlyWhitelistedInsecureKeys(any());
     }

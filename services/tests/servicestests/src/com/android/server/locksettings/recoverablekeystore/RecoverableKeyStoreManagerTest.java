@@ -456,6 +456,17 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
+    public void initRecoveryService_throwsIfUnknownRootCertAlias() throws Exception {
+        try {
+            mRecoverableKeyStoreManager.initRecoveryService(
+                    "unknown-root-cert-alias", TestData.getCertXml());
+            fail("should have thrown");
+        } catch (ServiceSpecificException e) {
+            assertThat(e.errorCode).isEqualTo(ERROR_INVALID_CERTIFICATE);
+        }
+    }
+
+    @Test
     public void initRecoveryServiceWithSigFile_succeeds() throws Exception {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
@@ -562,8 +573,6 @@ public class RecoverableKeyStoreManagerTest {
                 .enforceCallingOrSelfPermission(
                         eq(Manifest.permission.RECOVER_KEYSTORE), any());
     }
-
-    // TODO: Add tests for non-existing cert alias
 
     @Test
     public void startRecoverySessionWithCertPath_storesTheSessionInfo() throws Exception {
