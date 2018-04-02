@@ -1869,10 +1869,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
-    public NetworkStats getNetworkStatsUidDetail(int uid) {
+    public NetworkStats getNetworkStatsUidDetail(int uid, String[] ifaces) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            return mStatsFactory.readNetworkStatsDetail(uid, null, TAG_ALL, null);
+            return mStatsFactory.readNetworkStatsDetail(uid, ifaces, TAG_ALL, null);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

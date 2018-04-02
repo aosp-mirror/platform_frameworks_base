@@ -174,9 +174,13 @@ public class RecoverableKeyStoreManager {
         checkRecoverKeyStorePermission();
         int userId = UserHandle.getCallingUserId();
         int uid = Binder.getCallingUid();
+
         rootCertificateAlias
                 = mTestCertHelper.getDefaultCertificateAliasIfEmpty(rootCertificateAlias);
-
+        if (!mTestCertHelper.isValidRootCertificateAlias(rootCertificateAlias)) {
+            throw new ServiceSpecificException(
+                    ERROR_INVALID_CERTIFICATE, "Invalid root certificate alias");
+        }
         // Always set active alias to the argument of the last call to initRecoveryService method,
         // even if cert file is incorrect.
         String activeRootAlias = mDatabase.getActiveRootOfTrust(userId, uid);
@@ -194,21 +198,16 @@ public class RecoverableKeyStoreManager {
         try {
             certXml = CertXml.parse(recoveryServiceCertFile);
         } catch (CertParsingException e) {
-            // TODO: Do not use raw key bytes anymore once the other components are updated
             Log.d(TAG, "Failed to parse the input as a cert file: " + HexDump.toHexString(
                     recoveryServiceCertFile));
-            PublicKey publicKey = parseEcPublicKey(recoveryServiceCertFile);
-            if (mDatabase.setRecoveryServicePublicKey(userId, uid, publicKey) > 0) {
-                mDatabase.setShouldCreateSnapshot(userId, uid, true);
-            }
-            Log.d(TAG, "Successfully set the input as the raw public key");
-            return;
+            throw new ServiceSpecificException(ERROR_BAD_CERTIFICATE_FORMAT, e.getMessage());
         }
 
         // Check serial number
         long newSerial = certXml.getSerial();
         Long oldSerial = mDatabase.getRecoveryServiceCertSerial(userId, uid, rootCertificateAlias);
-        if (oldSerial != null && oldSerial >= newSerial) {
+        if (oldSerial != null && oldSerial >= newSerial
+                && !mTestCertHelper.isTestOnlyCertificateAlias(rootCertificateAlias)) {
             if (oldSerial == newSerial) {
                 Log.i(TAG, "The cert file serial number is the same, so skip updating.");
             } else {

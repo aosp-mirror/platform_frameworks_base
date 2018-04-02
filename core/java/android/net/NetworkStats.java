@@ -64,6 +64,9 @@ public class NetworkStats implements Parcelable {
     /** Debug {@link #set} value when the VPN stats are moved out of a vpn UID. */
     public static final int SET_DBG_VPN_OUT = 1002;
 
+    /** Include all interfaces when filtering */
+    public static final String[] INTERFACES_ALL = null;
+
     /** {@link #tag} value for total data across all tags. */
     // TODO: Rename TAG_NONE to TAG_ALL.
     public static final int TAG_NONE = 0;
@@ -366,21 +369,25 @@ public class NetworkStats implements Parcelable {
             capacity = newLength;
         }
 
-        iface[size] = entry.iface;
-        uid[size] = entry.uid;
-        set[size] = entry.set;
-        tag[size] = entry.tag;
-        metered[size] = entry.metered;
-        roaming[size] = entry.roaming;
-        defaultNetwork[size] = entry.defaultNetwork;
-        rxBytes[size] = entry.rxBytes;
-        rxPackets[size] = entry.rxPackets;
-        txBytes[size] = entry.txBytes;
-        txPackets[size] = entry.txPackets;
-        operations[size] = entry.operations;
+        setValues(size, entry);
         size++;
 
         return this;
+    }
+
+    private void setValues(int i, Entry entry) {
+        iface[i] = entry.iface;
+        uid[i] = entry.uid;
+        set[i] = entry.set;
+        tag[i] = entry.tag;
+        metered[i] = entry.metered;
+        roaming[i] = entry.roaming;
+        defaultNetwork[i] = entry.defaultNetwork;
+        rxBytes[i] = entry.rxBytes;
+        rxPackets[i] = entry.rxPackets;
+        txBytes[i] = entry.txBytes;
+        txPackets[i] = entry.txPackets;
+        operations[i] = entry.operations;
     }
 
     /**
@@ -829,6 +836,39 @@ public class NetworkStats implements Parcelable {
         }
 
         return stats;
+    }
+
+    /**
+     * Only keep entries that match all specified filters.
+     *
+     * <p>This mutates the original structure in place. After this method is called,
+     * size is the number of matching entries, and capacity is the previous capacity.
+     * @param limitUid UID to filter for, or {@link #UID_ALL}.
+     * @param limitIfaces Interfaces to filter for, or {@link #INTERFACES_ALL}.
+     * @param limitTag Tag to filter for, or {@link #TAG_ALL}.
+     */
+    public void filter(int limitUid, String[] limitIfaces, int limitTag) {
+        if (limitUid == UID_ALL && limitTag == TAG_ALL && limitIfaces == INTERFACES_ALL) {
+            return;
+        }
+
+        Entry entry = new Entry();
+        int nextOutputEntry = 0;
+        for (int i = 0; i < size; i++) {
+            entry = getValues(i, entry);
+            final boolean matches =
+                    (limitUid == UID_ALL || limitUid == entry.uid)
+                    && (limitTag == TAG_ALL || limitTag == entry.tag)
+                    && (limitIfaces == INTERFACES_ALL
+                            || ArrayUtils.contains(limitIfaces, entry.iface));
+
+            if (matches) {
+                setValues(nextOutputEntry, entry);
+                nextOutputEntry++;
+            }
+        }
+
+        size = nextOutputEntry;
     }
 
     public void dump(String prefix, PrintWriter pw) {

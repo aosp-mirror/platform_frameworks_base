@@ -27,6 +27,7 @@ import static android.net.ConnectivityManager.ACTION_TETHER_STATE_CHANGED;
 import static android.net.ConnectivityManager.isNetworkTypeMobile;
 import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
 import static android.net.NetworkStats.IFACE_ALL;
+import static android.net.NetworkStats.INTERFACES_ALL;
 import static android.net.NetworkStats.METERED_ALL;
 import static android.net.NetworkStats.ROAMING_ALL;
 import static android.net.NetworkStats.SET_ALL;
@@ -34,6 +35,7 @@ import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.SET_FOREGROUND;
 import static android.net.NetworkStats.STATS_PER_IFACE;
 import static android.net.NetworkStats.STATS_PER_UID;
+import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkStatsHistory.FIELD_ALL;
@@ -127,6 +129,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.net.VpnInfo;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -145,6 +148,7 @@ import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Collect and persist detailed network statistics, and provide this data to
@@ -739,7 +743,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final long token = Binder.clearCallingIdentity();
         final NetworkStats networkLayer;
         try {
-            networkLayer = mNetworkManager.getNetworkStatsUidDetail(uid);
+            networkLayer = mNetworkManager.getNetworkStatsUidDetail(uid,
+                    NetworkStats.INTERFACES_ALL);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -758,6 +763,18 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         return dataLayer;
+    }
+
+    @Override
+    public NetworkStats getDetailedUidStats(String[] requiredIfaces) {
+        try {
+            final String[] ifacesToQuery =
+                    NetworkStatsFactory.augmentWithStackedInterfacesLocked(requiredIfaces);
+            return getNetworkStatsUidDetail(ifacesToQuery);
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Error compiling UID stats", e);
+            return new NetworkStats(0L, 0);
+        }
     }
 
     @Override
@@ -1119,6 +1136,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                         if (isMobile) {
                             mobileIfaces.add(stackedIface);
                         }
+
+                        NetworkStatsFactory.noteStackedIface(stackedIface, baseIface);
                     }
                 }
             }
@@ -1141,7 +1160,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private void recordSnapshotLocked(long currentTime) throws RemoteException {
         // snapshot and record current counters; read UID stats first to
         // avoid over counting dev stats.
-        final NetworkStats uidSnapshot = getNetworkStatsUidDetail();
+        final NetworkStats uidSnapshot = getNetworkStatsUidDetail(INTERFACES_ALL);
         final NetworkStats xtSnapshot = getNetworkStatsXt();
         final NetworkStats devSnapshot = mNetworkManager.getNetworkStatsSummaryDev();
 
@@ -1501,12 +1520,19 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * Return snapshot of current UID statistics, including any
      * {@link TrafficStats#UID_TETHERING}, video calling data usage, and {@link #mUidOperations}
      * values.
+     *
+     * @param ifaces A list of interfaces the stats should be restricted to, or
+     *               {@link NetworkStats#INTERFACES_ALL}.
      */
-    private NetworkStats getNetworkStatsUidDetail() throws RemoteException {
-        final NetworkStats uidSnapshot = mNetworkManager.getNetworkStatsUidDetail(UID_ALL);
+    private NetworkStats getNetworkStatsUidDetail(String[] ifaces)
+            throws RemoteException {
+
+        final NetworkStats uidSnapshot = mNetworkManager.getNetworkStatsUidDetail(UID_ALL,
+                ifaces);
 
         // fold tethering stats and operations into uid snapshot
         final NetworkStats tetherSnapshot = getNetworkStatsTethering(STATS_PER_UID);
+        tetherSnapshot.filter(UID_ALL, ifaces, TAG_ALL);
         uidSnapshot.combineAllValues(tetherSnapshot);
 
         final TelephonyManager telephonyManager = (TelephonyManager) mContext.getSystemService(
@@ -1515,9 +1541,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // fold video calling data usage stats into uid snapshot
         final NetworkStats vtStats = telephonyManager.getVtDataUsage(STATS_PER_UID);
         if (vtStats != null) {
+            vtStats.filter(UID_ALL, ifaces, TAG_ALL);
             uidSnapshot.combineAllValues(vtStats);
         }
+
         uidSnapshot.combineAllValues(mUidOperations);
+
+        // TODO: apply tethering & VC 464xlat adjustments here
 
         return uidSnapshot;
     }

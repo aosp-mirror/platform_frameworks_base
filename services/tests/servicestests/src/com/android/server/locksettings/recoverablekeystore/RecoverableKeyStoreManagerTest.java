@@ -425,6 +425,52 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
+    public void initRecoveryService_alwaysUpdatesCertsWhenTestRootCertIsUsed() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        int certSerial = 3333;
+
+        String testRootCertAlias = TrustedRootCertificates.TEST_ONLY_INSECURE_CERTIFICATE_ALIAS;
+
+        mRecoverableKeyStoreManager.initRecoveryService(testRootCertAlias,
+                TestData.getInsecureCertXmlBytesWithEndpoint1(certSerial));
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid,
+                testRootCertAlias)).isEqualTo(certSerial);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid,
+                testRootCertAlias)).isEqualTo(TestData.getInsecureCertPathForEndpoint1());
+
+        mRecoverableKeyStoreManager.initRecoveryService(testRootCertAlias,
+                TestData.getInsecureCertXmlBytesWithEndpoint2(certSerial - 1));
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid,
+                testRootCertAlias)).isEqualTo(certSerial - 1);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid,
+                testRootCertAlias)).isEqualTo(TestData.getInsecureCertPathForEndpoint2());
+    }
+
+    @Test
+    public void initRecoveryService_updatesCertsIndependentlyForDifferentRoots() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+
+        mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
+                TestData.getCertXmlWithSerial(1111L));
+        mRecoverableKeyStoreManager.initRecoveryService(
+                TrustedRootCertificates.TEST_ONLY_INSECURE_CERTIFICATE_ALIAS,
+                TestData.getInsecureCertXmlBytesWithEndpoint1(2222));
+
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid,
+                ROOT_CERTIFICATE_ALIAS)).isEqualTo(1111L);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid,
+                TrustedRootCertificates.TEST_ONLY_INSECURE_CERTIFICATE_ALIAS)).isEqualTo(2222L);
+
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid,
+                ROOT_CERTIFICATE_ALIAS)).isEqualTo(TestData.CERT_PATH_1);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid,
+                TrustedRootCertificates.TEST_ONLY_INSECURE_CERTIFICATE_ALIAS)).isEqualTo(
+                        TestData.getInsecureCertPathForEndpoint1());
+    }
+
+    @Test
     public void initRecoveryService_ignoresTheSameSerial() throws Exception {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
@@ -440,19 +486,36 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
-    public void initRecoveryService_succeedsWithRawPublicKey() throws Exception {
+    public void initRecoveryService_throwsIfRawPublicKey() throws Exception {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
         mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
 
-        mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS, TEST_PUBLIC_KEY);
+        try {
+            mRecoverableKeyStoreManager
+                    .initRecoveryService(ROOT_CERTIFICATE_ALIAS, TEST_PUBLIC_KEY);
+            fail("should have thrown");
+        } catch (ServiceSpecificException e) {
+            assertThat(e.errorCode).isEqualTo(ERROR_BAD_CERTIFICATE_FORMAT);
+        }
 
-        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isFalse();
         assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid,
                 DEFAULT_ROOT_CERT_ALIAS)).isNull();
         assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid,
                 DEFAULT_ROOT_CERT_ALIAS)).isNull();
-        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isNotNull();
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isNull();
+    }
+
+    @Test
+    public void initRecoveryService_throwsIfUnknownRootCertAlias() throws Exception {
+        try {
+            mRecoverableKeyStoreManager.initRecoveryService(
+                    "unknown-root-cert-alias", TestData.getCertXml());
+            fail("should have thrown");
+        } catch (ServiceSpecificException e) {
+            assertThat(e.errorCode).isEqualTo(ERROR_INVALID_CERTIFICATE);
+        }
     }
 
     @Test
@@ -562,8 +625,6 @@ public class RecoverableKeyStoreManagerTest {
                 .enforceCallingOrSelfPermission(
                         eq(Manifest.permission.RECOVER_KEYSTORE), any());
     }
-
-    // TODO: Add tests for non-existing cert alias
 
     @Test
     public void startRecoverySessionWithCertPath_storesTheSessionInfo() throws Exception {
