@@ -258,7 +258,7 @@ public class ActivityManagerServiceTest {
         uidRec.hasInternetPermission = true;
         mAms.mActiveUids.put(uid, uidRec);
 
-        final ProcessRecord appRec = new ProcessRecord(mBatteryStatsImpl,
+        final ProcessRecord appRec = new ProcessRecord(null, mBatteryStatsImpl,
                 new ApplicationInfo(), TAG, uid);
         appRec.thread = Mockito.mock(IApplicationThread.class);
         mAms.mLruProcesses.add(appRec);
