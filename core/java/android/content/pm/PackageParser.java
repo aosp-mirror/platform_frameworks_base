@@ -5701,7 +5701,8 @@ public class PackageParser {
                 flag = true,
                 value = {CertCapabilities.INSTALLED_DATA,
                         CertCapabilities.SHARED_USER_ID,
-                        CertCapabilities.PERMISSION })
+                        CertCapabilities.PERMISSION,
+                        CertCapabilities.ROLLBACK})
         public @interface CertCapabilities {
 
             /** accept data from already installed pkg with this cert */
@@ -5712,6 +5713,9 @@ public class PackageParser {
 
             /** grant SIGNATURE permissions to pkgs with this cert */
             int PERMISSION = 4;
+
+            /** allow pkg to update to one signed by this certificate */
+            int ROLLBACK = 8;
         }
 
         /**
