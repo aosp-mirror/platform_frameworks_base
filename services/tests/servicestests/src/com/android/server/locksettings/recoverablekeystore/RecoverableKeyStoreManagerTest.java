@@ -440,19 +440,25 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
-    public void initRecoveryService_succeedsWithRawPublicKey() throws Exception {
+    public void initRecoveryService_throwsIfRawPublicKey() throws Exception {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
         mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
 
-        mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS, TEST_PUBLIC_KEY);
+        try {
+            mRecoverableKeyStoreManager
+                    .initRecoveryService(ROOT_CERTIFICATE_ALIAS, TEST_PUBLIC_KEY);
+            fail("should have thrown");
+        } catch (ServiceSpecificException e) {
+            assertThat(e.errorCode).isEqualTo(ERROR_BAD_CERTIFICATE_FORMAT);
+        }
 
-        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isFalse();
         assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid,
                 DEFAULT_ROOT_CERT_ALIAS)).isNull();
         assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid,
                 DEFAULT_ROOT_CERT_ALIAS)).isNull();
-        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isNotNull();
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isNull();
     }
 
     @Test
