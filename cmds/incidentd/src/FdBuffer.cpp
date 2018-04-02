@@ -26,6 +26,10 @@
 #include <unistd.h>
 #include <wait.h>
 
+namespace android {
+namespace os {
+namespace incidentd {
+
 const ssize_t BUFFER_SIZE = 16 * 1024;  // 16 KB
 const ssize_t MAX_BUFFER_COUNT = 256;   // 4 MB max
 
@@ -206,7 +210,7 @@ status_t FdBuffer::readProcessedDataInStream(int fd, unique_fd toFd, unique_fd f
             }
             if (amt < 0) {
                 if (!(errno == EAGAIN || errno == EWOULDBLOCK)) {
-                    VLOG("Fail to write toFd.get() %d: %s", toFd.get(), strerror(errno));
+                    VLOG("Fail to write toFd %d: %s", toFd.get(), strerror(errno));
                     return -errno;
                 }  // otherwise just continue
             } else {
@@ -252,3 +256,7 @@ status_t FdBuffer::readProcessedDataInStream(int fd, unique_fd toFd, unique_fd f
 size_t FdBuffer::size() const { return mBuffer.size(); }
 
 EncodedBuffer::iterator FdBuffer::data() const { return mBuffer.begin(); }
+
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android

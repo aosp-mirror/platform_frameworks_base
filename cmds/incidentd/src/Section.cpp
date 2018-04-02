@@ -43,9 +43,12 @@
 #include "frameworks/base/core/proto/android/util/log.proto.h"
 #include "incidentd_util.h"
 
+namespace android {
+namespace os {
+namespace incidentd {
+
 using namespace android::base;
 using namespace android::util;
-using namespace std;
 
 // special section ids
 const int FIELD_ID_INCIDENT_HEADER = 1;
@@ -321,8 +324,8 @@ status_t GZipSection::Execute(ReportRequestSet* requests) const {
     }
     VLOG("GZipSection is using file %s, fd=%d", mFilenames[index], fd.get());
     if (fd.get() == -1) {
-      ALOGW("GZipSection %s can't open all the files", this->name.string());
-      return NO_ERROR; // e.g. LAST_KMSG will reach here in user build.
+        ALOGW("GZipSection %s can't open all the files", this->name.string());
+        return NO_ERROR;  // e.g. LAST_KMSG will reach here in user build.
     }
     FdBuffer buffer;
     Fpipe p2cPipe;
@@ -909,7 +912,7 @@ status_t TombstoneSection::BlockingCall(int pipeWriteFd) const {
             dump[i] = iterator.next();
             i++;
         }
-        long long token = proto.start(android::os::BackTraceProto::TRACES);
+        uint64_t token = proto.start(android::os::BackTraceProto::TRACES);
         proto.write(android::os::BackTraceProto::Stack::PID, pid);
         proto.write(android::os::BackTraceProto::Stack::DUMP, dump.get(), i);
         proto.write(android::os::BackTraceProto::Stack::DUMP_DURATION_NS,
@@ -921,3 +924,7 @@ status_t TombstoneSection::BlockingCall(int pipeWriteFd) const {
     proto.flush(pipeWriteFd);
     return err;
 }
+
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android

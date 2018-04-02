@@ -21,7 +21,15 @@
 #include <sys/types.h>
 #include <utils/Errors.h>
 
+namespace android {
+namespace os {
+namespace incidentd {
+
 android::status_t create_directory(const char* directory);
 void clean_directory(const char* directory, off_t maxSize, size_t maxCount);
+
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android
 
 #endif  // DIRECTORY_CLEANER_H
