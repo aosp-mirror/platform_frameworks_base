@@ -4456,7 +4456,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             buf.append(" ");
             buf.append(app.hostingNameStr);
         }
-        Slog.i(TAG, buf.toString());
+        reportUidInfoMessageLocked(TAG, buf.toString(), app.startUid);
         app.setPid(pid);
         app.usingWrapper = usingWrapper;
         app.pendingStart = false;
@@ -4943,6 +4943,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (mCurOomAdjObserver != null) {
             mUiHandler.obtainMessage(DISPATCH_OOM_ADJ_OBSERVER_MSG, msg).sendToTarget();
         }
+    }
+
+    void reportUidInfoMessageLocked(String tag, String msg, int uid) {
+        Slog.i(TAG, msg);
+        if (mCurOomAdjObserver != null && uid == mCurOomAdjUid) {
+            mUiHandler.obtainMessage(DISPATCH_OOM_ADJ_OBSERVER_MSG, msg).sendToTarget();
+        }
+
     }
 
     @Override
@@ -5937,9 +5945,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             boolean doLowMem = app.instr == null;
             boolean doOomAdj = doLowMem;
             if (!app.killedByAm) {
-                Slog.i(TAG, "Process " + app.processName + " (pid " + pid + ") has died: "
-                        + ProcessList.makeOomAdjString(app.setAdj)
-                        + ProcessList.makeProcStateString(app.setProcState));
+                reportUidInfoMessageLocked(TAG,
+                        "Process " + app.processName + " (pid " + pid + ") has died: "
+                                + ProcessList.makeOomAdjString(app.setAdj)
+                                + ProcessList.makeProcStateString(app.setProcState), app.info.uid);
                 mAllowLowerMemLevel = true;
             } else {
                 // Note that we always want to do oom adj to update our state with the
@@ -5961,8 +5970,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         } else if (app.pid != pid) {
             // A new process has already been started.
-            Slog.i(TAG, "Process " + app.processName + " (pid " + pid
-                    + ") has died and restarted (pid " + app.pid + ").");
+            reportUidInfoMessageLocked(TAG,
+                    "Process " + app.processName + " (pid " + pid
+                            + ") has died and restarted (pid " + app.pid + ").", app.info.uid);
             EventLog.writeEvent(EventLogTags.AM_PROC_DIED, app.userId, app.pid, app.processName);
         } else if (DEBUG_PROCESSES) {
             Slog.d(TAG_PROCESSES, "Received spurious death notification for thread "
@@ -12514,8 +12524,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             // As far as we're concerned, this is just like receiving a
             // death notification...  just a bit prematurely.
-            Slog.i(TAG, "Process " + proc.processName + " (pid " + proc.pid
-                    + ") early provider death");
+            reportUidInfoMessageLocked(TAG,
+                    "Process " + proc.processName + " (pid " + proc.pid
+                            + ") early provider death",
+                    proc.info.uid);
             final long ident = Binder.clearCallingIdentity();
             try {
                 appDiedLocked(proc);
@@ -12763,7 +12775,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // owning application.
             mBatteryStatsService.addIsolatedUid(uid, info.uid);
         }
-        final ProcessRecord r = new ProcessRecord(stats, info, proc, uid);
+        final ProcessRecord r = new ProcessRecord(this, stats, info, proc, uid);
         if (!mBooted && !mBooting
                 && userId == UserHandle.USER_SYSTEM
                 && (info.flags & PERSISTENT_MASK) == PERSISTENT_MASK) {
@@ -22738,11 +22750,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         app.cached = false;
 
         final int activitiesSize = app.activities.size();
+        final int appUid = app.info.uid;
+        final int logUid = mCurOomAdjUid;
 
         if (app.maxAdj <= ProcessList.FOREGROUND_APP_ADJ) {
             // The max adjustment doesn't allow this app to be anything
             // below foreground, so it is not worth doing work for it.
-            if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Making fixed: " + app);
+            if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                reportOomAdjMessageLocked(TAG_OOM_ADJ, "Making fixed: " + app);
+            }
             app.adjType = "fixed";
             app.adjSeq = mAdjSeq;
             app.curRawAdj = app.maxAdj;
@@ -22794,20 +22810,26 @@ public class ActivityManagerService extends IActivityManager.Stub
             app.adjType = "top-activity";
             foregroundActivities = true;
             procState = PROCESS_STATE_CUR_TOP;
-            if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Making top: " + app);
+            if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                reportOomAdjMessageLocked(TAG_OOM_ADJ, "Making top: " + app);
+            }
         } else if (app.runningRemoteAnimation) {
             adj = ProcessList.VISIBLE_APP_ADJ;
             schedGroup = ProcessList.SCHED_GROUP_TOP_APP;
             app.adjType = "running-remote-anim";
             procState = PROCESS_STATE_CUR_TOP;
-            if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Making running remote anim: " + app);
+            if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                reportOomAdjMessageLocked(TAG_OOM_ADJ, "Making running remote anim: " + app);
+            }
         } else if (app.instr != null) {
             // Don't want to kill running instrumentation.
             adj = ProcessList.FOREGROUND_APP_ADJ;
             schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
             app.adjType = "instrumentation";
             procState = ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
-            if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Making instrumentation: " + app);
+            if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                reportOomAdjMessageLocked(TAG_OOM_ADJ, "Making instrumentation: " + app);
+            }
         } else if (isReceivingBroadcastLocked(app, mTmpBroadcastQueue)) {
             // An app that is currently receiving a broadcast also
             // counts as being in the foreground for OOM killer purposes.
@@ -22818,7 +22840,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     ? ProcessList.SCHED_GROUP_DEFAULT : ProcessList.SCHED_GROUP_BACKGROUND;
             app.adjType = "broadcast";
             procState = ActivityManager.PROCESS_STATE_RECEIVER;
-            if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Making broadcast: " + app);
+            if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                reportOomAdjMessageLocked(TAG_OOM_ADJ, "Making broadcast: " + app);
+            }
         } else if (app.executingServices.size() > 0) {
             // An app that is currently executing a service callback also
             // counts as being in the foreground.
@@ -22827,7 +22851,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     ProcessList.SCHED_GROUP_DEFAULT : ProcessList.SCHED_GROUP_BACKGROUND;
             app.adjType = "exec-service";
             procState = ActivityManager.PROCESS_STATE_SERVICE;
-            if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Making exec-service: " + app);
+            if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                reportOomAdjMessageLocked(TAG_OOM_ADJ, "Making exec-service: " + app);
+            }
             //Slog.i(TAG, "EXEC " + (app.execServicesFg ? "FG" : "BG") + ": " + app);
         } else if (app == TOP_APP) {
             adj = ProcessList.FOREGROUND_APP_ADJ;
@@ -22835,7 +22861,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             app.adjType = "top-sleeping";
             foregroundActivities = true;
             procState = PROCESS_STATE_CUR_TOP;
-            if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Making top: " + app);
+            if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                reportOomAdjMessageLocked(TAG_OOM_ADJ, "Making top (sleeping): " + app);
+            }
         } else {
             // As far as we know the process is empty.  We may change our mind later.
             schedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
@@ -22846,7 +22874,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             app.cached = true;
             app.empty = true;
             app.adjType = "cch-empty";
-            if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Making empty: " + app);
+            if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                reportOomAdjMessageLocked(TAG_OOM_ADJ, "Making empty: " + app);
+            }
         }
 
         // Examine all activities if not already foreground.
@@ -22869,12 +22899,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (adj > ProcessList.VISIBLE_APP_ADJ) {
                         adj = ProcessList.VISIBLE_APP_ADJ;
                         app.adjType = "vis-activity";
-                        if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to vis-activity: " + app);
+                        if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                            reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                                    "Raise adj to vis-activity: " + app);
+                        }
                     }
                     if (procState > PROCESS_STATE_CUR_TOP) {
                         procState = PROCESS_STATE_CUR_TOP;
                         app.adjType = "vis-activity";
-                        if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to vis-activity: " + app);
+                        if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                            reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                                    "Raise procstate to vis-activity (top): " + app);
+                        }
                     }
                     if (schedGroup < ProcessList.SCHED_GROUP_DEFAULT) {
                         schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
@@ -22894,12 +22930,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
                         adj = ProcessList.PERCEPTIBLE_APP_ADJ;
                         app.adjType = "pause-activity";
-                        if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to pause-activity: " + app);
+                        if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                            reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                                    "Raise adj to pause-activity: "  + app);
+                        }
                     }
                     if (procState > PROCESS_STATE_CUR_TOP) {
                         procState = PROCESS_STATE_CUR_TOP;
                         app.adjType = "pause-activity";
-                        if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to pause-activity: " + app);
+                        if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                            reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                                    "Raise procstate to pause-activity (top): "  + app);
+                        }
                     }
                     if (schedGroup < ProcessList.SCHED_GROUP_DEFAULT) {
                         schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
@@ -22911,7 +22953,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (adj > ProcessList.PERCEPTIBLE_APP_ADJ) {
                         adj = ProcessList.PERCEPTIBLE_APP_ADJ;
                         app.adjType = "stop-activity";
-                        if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to stop-activity: " + app);
+                        if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                            reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                                    "Raise adj to stop-activity: "  + app);
+                        }
                     }
                     // For the process state, we will at this point consider the
                     // process to be cached.  It will be cached either as an activity
@@ -22924,7 +22969,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                         if (procState > ActivityManager.PROCESS_STATE_LAST_ACTIVITY) {
                             procState = ActivityManager.PROCESS_STATE_LAST_ACTIVITY;
                             app.adjType = "stop-activity";
-                            if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to stop-activity: " + app);
+                            if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                                reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                                        "Raise procstate to stop-activity: " + app);
+                            }
                         }
                     }
                     app.cached = false;
@@ -22934,7 +22982,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (procState > ActivityManager.PROCESS_STATE_CACHED_ACTIVITY) {
                         procState = ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
                         app.adjType = "cch-act";
-                        if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to cached activity: " + app);
+                        if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                            reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                                    "Raise procstate to cached activity: " + app);
+                        }
                     }
                 }
             }
@@ -22945,7 +22996,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (procState > ActivityManager.PROCESS_STATE_CACHED_RECENT && app.recentTasks.size() > 0) {
             procState = ActivityManager.PROCESS_STATE_CACHED_RECENT;
             app.adjType = "cch-rec";
-            if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to cached recent: " + app);
+            if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise procstate to cached recent: " + app);
+            }
         }
 
         if (adj > ProcessList.PERCEPTIBLE_APP_ADJ
@@ -22957,7 +23010,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.cached = false;
                 app.adjType = "fg-service";
                 schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
-                if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to fg service: " + app);
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise to fg service: " + app);
+                }
             } else if (app.hasOverlayUi) {
                 // The process is display an overlay UI.
                 adj = ProcessList.PERCEPTIBLE_APP_ADJ;
@@ -22965,7 +23020,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.cached = false;
                 app.adjType = "has-overlay-ui";
                 schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
-                if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to overlay ui: " + app);
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise to overlay ui: " + app);
+                }
             }
         }
 
@@ -22981,7 +23038,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.adjType = "force-imp";
                 app.adjSource = app.forcingToImportant;
                 schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
-                if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to force imp: " + app);
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise to force imp: " + app);
+                }
             }
         }
 
@@ -22992,12 +23051,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                 schedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
                 app.cached = false;
                 app.adjType = "heavy";
-                if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to heavy: " + app);
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise adj to heavy: " + app);
+                }
             }
             if (procState > ActivityManager.PROCESS_STATE_HEAVY_WEIGHT) {
                 procState = ActivityManager.PROCESS_STATE_HEAVY_WEIGHT;
                 app.adjType = "heavy";
-                if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to heavy: " + app);
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise procstate to heavy: " + app);
+                }
             }
         }
 
@@ -23009,12 +23072,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                 schedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
                 app.cached = false;
                 app.adjType = "home";
-                if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to home: " + app);
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise adj to home: " + app);
+                }
             }
             if (procState > ActivityManager.PROCESS_STATE_HOME) {
                 procState = ActivityManager.PROCESS_STATE_HOME;
                 app.adjType = "home";
-                if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to home: " + app);
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise procstate to home: " + app);
+                }
             }
         }
 
@@ -23027,12 +23094,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                 schedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
                 app.cached = false;
                 app.adjType = "previous";
-                if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to prev: " + app);
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise adj to prev: " + app);
+                }
             }
             if (procState > ActivityManager.PROCESS_STATE_LAST_ACTIVITY) {
                 procState = ActivityManager.PROCESS_STATE_LAST_ACTIVITY;
                 app.adjType = "previous";
-                if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to prev: " + app);
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise procstate to prev: " + app);
+                }
             }
         }
 
@@ -23056,13 +23127,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                     procState = ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
                 }
                 app.adjType = "backup";
-                if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to backup: " + app);
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise adj to backup: " + app);
+                }
                 app.cached = false;
             }
             if (procState > ActivityManager.PROCESS_STATE_BACKUP) {
                 procState = ActivityManager.PROCESS_STATE_BACKUP;
                 app.adjType = "backup";
-                if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to backup: " + app);
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise procstate to backup: " + app);
+                }
             }
         }
 
@@ -23082,7 +23157,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (procState > ActivityManager.PROCESS_STATE_SERVICE) {
                     procState = ActivityManager.PROCESS_STATE_SERVICE;
                     app.adjType = "started-services";
-                    if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to started service: " + app);
+                    if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                        reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                                "Raise procstate to started service: " + app);
+                    }
                 }
                 if (app.hasShownUi && app != mHomeProcess) {
                     // If this process has shown some UI, let it immediately
@@ -23100,7 +23178,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                         if (adj > ProcessList.SERVICE_ADJ) {
                             adj = ProcessList.SERVICE_ADJ;
                             app.adjType = "started-services";
-                            if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to started service: " + app);
+                            if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                                reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                                        "Raise adj to started service: " + app);
+                            }
                             app.cached = false;
                         }
                     }
@@ -23291,9 +23372,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                             app.adjSource = cr.binding.client;
                             app.adjSourceProcState = clientProcState;
                             app.adjTarget = s.name;
-                            if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to " + adjType
-                                    + ": " + app + ", due to " + cr.binding.client
-                                    + " adj=" + adj + " procState=" + procState);
+                            if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                                reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise to " + adjType
+                                        + ": " + app + ", due to " + cr.binding.client
+                                        + " adj=" + adj + " procState="
+                                        + ProcessList.makeProcStateString(procState));
+                            }
                         }
                     }
                     if ((cr.flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
@@ -23318,8 +23402,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                             app.adjSource = a;
                             app.adjSourceProcState = procState;
                             app.adjTarget = s.name;
-                            if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to service w/activity: "
-                                    + app);
+                            if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                                reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                                        "Raise to service w/activity: " + app);
+                            }
                         }
                     }
                 }
@@ -23403,9 +23489,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                     app.adjSource = client;
                     app.adjSourceProcState = clientProcState;
                     app.adjTarget = cpr.name;
-                    if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to " + adjType
-                            + ": " + app + ", due to " + client
-                            + " adj=" + adj + " procState=" + procState);
+                    if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                        reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise to " + adjType
+                                + ": " + app + ", due to " + client
+                                + " adj=" + adj + " procState="
+                                + ProcessList.makeProcStateString(procState));
+                    }
                 }
             }
             // If the provider has external (non-framework) process
@@ -23418,10 +23507,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                     app.cached = false;
                     app.adjType = "ext-provider";
                     app.adjTarget = cpr.name;
-                    if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to external provider: " + app);
+                    if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                        reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                                "Raise adj to external provider: " + app);
+                    }
                 }
                 if (procState > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
                     procState = ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                            "Raise procstate to external provider: " + app);
                 }
             }
         }
@@ -23433,12 +23527,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                 schedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
                 app.cached = false;
                 app.adjType = "recent-provider";
-                if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to recent provider: " + app);
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                            "Raise adj to recent provider: " + app);
+                }
             }
             if (procState > ActivityManager.PROCESS_STATE_LAST_ACTIVITY) {
                 procState = ActivityManager.PROCESS_STATE_LAST_ACTIVITY;
                 app.adjType = "recent-provider";
-                if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "Raise to recent provider: " + app);
+                if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                    reportOomAdjMessageLocked(TAG_OOM_ADJ,
+                            "Raise procstate to recent provider: " + app);
+                }
             }
         }
 
@@ -23464,9 +23564,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                     app.adjType = mayBeTopType;
                     app.adjSource = mayBeTopSource;
                     app.adjTarget = mayBeTopTarget;
-                    if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "May be top raise to " + mayBeTopType
-                            + ": " + app + ", due to " + mayBeTopSource
-                            + " adj=" + adj + " procState=" + procState);
+                    if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                        reportOomAdjMessageLocked(TAG_OOM_ADJ, "May be top raise to " + mayBeTopType
+                                + ": " + app + ", due to " + mayBeTopSource
+                                + " adj=" + adj + " procState="
+                                + ProcessList.makeProcStateString(procState));
+                    }
                     break;
                 default:
                     // Otherwise, top is a better choice, so take it.
@@ -23474,9 +23577,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                     app.adjType = mayBeTopType;
                     app.adjSource = mayBeTopSource;
                     app.adjTarget = mayBeTopTarget;
-                    if (DEBUG_OOM_ADJ_REASON) Slog.d(TAG, "May be top raise to " + mayBeTopType
-                            + ": " + app + ", due to " + mayBeTopSource
-                            + " adj=" + adj + " procState=" + procState);
+                    if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
+                        reportOomAdjMessageLocked(TAG_OOM_ADJ, "May be top raise to " + mayBeTopType
+                                + ": " + app + ", due to " + mayBeTopSource
+                                + " adj=" + adj + " procState="
+                                + ProcessList.makeProcStateString(procState));
+                    }
                     break;
             }
         }
@@ -23938,7 +24044,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             app.setSchedGroup = app.curSchedGroup;
             if (DEBUG_SWITCH || DEBUG_OOM_ADJ || mCurOomAdjUid == app.uid) {
                 String msg = "Setting sched group of " + app.processName
-                        + " to " + app.curSchedGroup;
+                        + " to " + app.curSchedGroup + ": " + app.adjType;
                 reportOomAdjMessageLocked(TAG_OOM_ADJ, msg);
             }
             if (app.waitingToKill != null && app.curReceivers.isEmpty()
@@ -24091,7 +24197,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (app.setProcState != app.curProcState) {
             if (DEBUG_SWITCH || DEBUG_OOM_ADJ || mCurOomAdjUid == app.uid) {
                 String msg = "Proc state change of " + app.processName
-                        + " to " + app.curProcState;
+                        + " to " + ProcessList.makeProcStateString(app.curProcState)
+                        + " (" + app.curProcState + ")" + ": " + app.adjType;
                 reportOomAdjMessageLocked(TAG_OOM_ADJ, msg);
             }
             boolean setImportant = app.setProcState < ActivityManager.PROCESS_STATE_SERVICE;
