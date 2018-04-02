@@ -34,7 +34,8 @@ namespace statsd {
 
 class AlarmTracker : public virtual RefBase {
 public:
-    AlarmTracker(uint64_t startMillis,
+    AlarmTracker(const uint64_t startMillis,
+                 const uint64_t currentMillis,
                  const Alarm& alarm, const ConfigKey& configKey,
                  const sp<AlarmMonitor>& subscriberAlarmMonitor);
 
@@ -53,13 +54,13 @@ protected:
         return mInternalAlarm == nullptr ? 0 : mInternalAlarm->timestampSec;
     }
 
-    uint64_t findNextAlarmSec(uint64_t currentTimeMillis);
+    int64_t findNextAlarmSec(int64_t currentTimeMillis);
 
     // statsd_config.proto Alarm message that defines this tracker.
     const Alarm mAlarmConfig;
 
     // A reference to the Alarm's config key.
-    const ConfigKey& mConfigKey;
+    const ConfigKey mConfigKey;
 
     // The subscriptions that depend on this alarm.
     std::vector<Subscription> mSubscriptions;
@@ -68,7 +69,7 @@ protected:
     sp<AlarmMonitor> mAlarmMonitor;
 
     // The current expected alarm time in seconds.
-    uint64_t mAlarmSec;
+    int64_t mAlarmSec;
 
     // The current alarm.
     sp<const InternalAlarm> mInternalAlarm;

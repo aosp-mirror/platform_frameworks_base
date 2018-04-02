@@ -191,11 +191,12 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event) {
     }
 }
 
-void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig& config) {
+void StatsLogProcessor::OnConfigUpdated(const int64_t timestampNs, const ConfigKey& key,
+                                        const StatsdConfig& config) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
     VLOG("Updated configuration for key %s", key.ToString().c_str());
     sp<MetricsManager> newMetricsManager =
-        new MetricsManager(key, config, mTimeBaseSec, mUidMap,
+        new MetricsManager(key, config, mTimeBaseSec, (timestampNs - 1) / NS_PER_SEC + 1, mUidMap,
                            mAnomalyAlarmMonitor, mPeriodicAlarmMonitor);
 
     if (newMetricsManager->isConfigValid()) {

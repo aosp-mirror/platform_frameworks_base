@@ -127,7 +127,7 @@ protected:
     std::vector<Subscription> mSubscriptions;
 
     // A reference to the Alert's config key.
-    const ConfigKey& mConfigKey;
+    const ConfigKey mConfigKey;
 
     // Number of past buckets. One less than the total number of buckets needed
     // for the anomaly detection (since the current bucket is not in the past).
