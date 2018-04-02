@@ -56,11 +56,6 @@ public class NetworkStatsFactory {
     private static final boolean USE_NATIVE_PARSING = true;
     private static final boolean SANITY_CHECK_NATIVE = false;
 
-    private static final String CLATD_INTERFACE_PREFIX = "v4-";
-    // Delta between IPv4 header (20b) and IPv6 header (40b).
-    // Used for correct stats accounting on clatd interfaces.
-    private static final int IPV4V6_HEADER_DELTA = 20;
-
     /** Path to {@code /proc/net/dev}. */
     private final File mStatsIfaceDev;
     /** Path to {@code /proc/net/xt_qtaguid/iface_stat_all}. */
@@ -96,7 +91,7 @@ public class NetworkStatsFactory {
      * {@link #noteStackedIface(String, String)}, but only interfaces noted before this method
      * is called are guaranteed to be included.
      */
-    public static String[] augmentWithStackedInterfacesLocked(@Nullable String[] requiredIfaces) {
+    public static String[] augmentWithStackedInterfaces(@Nullable String[] requiredIfaces) {
         if (requiredIfaces == NetworkStats.INTERFACES_ALL) {
             return null;
         }
@@ -116,6 +111,15 @@ public class NetworkStatsFactory {
 
         String[] outArray = new String[relatedIfaces.size()];
         return relatedIfaces.toArray(outArray);
+    }
+
+    /**
+     * Applies 464xlat adjustments with ifaces noted with {@link #noteStackedIface(String, String)}.
+     * @see NetworkStats#apply464xlatAdjustments(NetworkStats, NetworkStats, Map)
+     */
+    public static void apply464xlatAdjustments(NetworkStats baseTraffic,
+            NetworkStats stackedTraffic) {
+        NetworkStats.apply464xlatAdjustments(baseTraffic, stackedTraffic, sStackedIfaces);
     }
 
     @VisibleForTesting
@@ -289,48 +293,10 @@ public class NetworkStatsFactory {
             NetworkStats lastStats) throws IOException {
         final NetworkStats stats =
               readNetworkStatsDetailInternal(limitUid, limitIfaces, limitTag, lastStats);
-        // Total 464xlat traffic to subtract from uid 0 on all base interfaces.
-        // sStackedIfaces may grow afterwards, but NetworkStats will just be resized automatically.
-        final NetworkStats adjustments = new NetworkStats(0, sStackedIfaces.size());
 
-        NetworkStats.Entry entry = null; // For recycling
-
-        // For 464xlat traffic, xt_qtaguid sees every IPv4 packet twice, once as a native IPv4
-        // packet on the stacked interface, and once as translated to an IPv6 packet on the
-        // base interface. For correct stats accounting on the base interface, every 464xlat
-        // packet needs to be subtracted from the root UID on the base interface both for tx
-        // and rx traffic (http://b/12249687, http:/b/33681750).
-        for (int i = 0; i < stats.size(); i++) {
-            entry = stats.getValues(i, entry);
-            if (entry.iface == null || !entry.iface.startsWith(CLATD_INTERFACE_PREFIX)) {
-                continue;
-            }
-            final String baseIface = sStackedIfaces.get(entry.iface);
-            if (baseIface == null) {
-                continue;
-            }
-
-            NetworkStats.Entry adjust =
-                    new NetworkStats.Entry(baseIface, 0, 0, 0, 0, 0, 0, 0L, 0L, 0L, 0L, 0L);
-            // Subtract any 464lat traffic seen for the root UID on the current base interface.
-            adjust.rxBytes -= (entry.rxBytes + entry.rxPackets * IPV4V6_HEADER_DELTA);
-            adjust.txBytes -= (entry.txBytes + entry.txPackets * IPV4V6_HEADER_DELTA);
-            adjust.rxPackets -= entry.rxPackets;
-            adjust.txPackets -= entry.txPackets;
-            adjustments.combineValues(adjust);
-
-            // For 464xlat traffic, xt_qtaguid only counts the bytes of the native IPv4 packet sent
-            // on the stacked interface with prefix "v4-" and drops the IPv6 header size after
-            // unwrapping. To account correctly for on-the-wire traffic, add the 20 additional bytes
-            // difference for all packets (http://b/12249687, http:/b/33681750).
-            entry.rxBytes = entry.rxPackets * IPV4V6_HEADER_DELTA;
-            entry.txBytes = entry.txPackets * IPV4V6_HEADER_DELTA;
-            entry.rxPackets = 0;
-            entry.txPackets = 0;
-            stats.combineValues(entry);
-        }
-
-        stats.combineAllValues(adjustments);
+        // No locking here: apply464xlatAdjustments behaves fine with an add-only ConcurrentHashMap.
+        // TODO: remove this and only apply adjustments in NetworkStatsService.
+        stats.apply464xlatAdjustments(sStackedIfaces);
 
         return stats;
     }
