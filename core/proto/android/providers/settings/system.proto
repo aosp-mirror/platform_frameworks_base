@@ -151,10 +151,7 @@ message SystemSettingsProto {
     }
     optional Rotation rotation = 20;
 
-    // User-selected RTT mode. When on, outgoing and incoming calls will be
-    // answered as RTT calls when supported by the device and carrier. Boolean
-    // value.
-    optional SettingProto rtt_calling_mode = 21 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    reserved 21; // rtt_calling_mode moved to Settings.Secure
 
     message Screen {
         option (android.msg_privacy).dest = DEST_EXPLICIT;

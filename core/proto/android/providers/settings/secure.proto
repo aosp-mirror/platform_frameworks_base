@@ -340,6 +340,11 @@ message SecureSettingsProto {
     }
     optional Rotation rotation = 46;
 
+    // User-selected RTT mode. When on, outgoing and incoming calls will be
+    // answered as RTT calls when supported by the device and carrier. Boolean
+    // value.
+    optional SettingProto rtt_calling_mode = 69 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     message Screensaver {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -474,5 +479,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 69;
+    // Next tag = 70;
 }
