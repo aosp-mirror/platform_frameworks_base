@@ -62,14 +62,14 @@ public class LegacyExceptionUtils {
      * exceptions.</p>
      *
      * @param errorFlag error to throw as an exception.
-     * @throws {@link BufferQueueAbandonedException} for -ENODEV.
+     * @throws {@link BufferQueueAbandonedException} for BAD_VALUE.
      * @throws {@link UnsupportedOperationException} for an unknown negative error code.
      * @return {@code errorFlag} if the value was non-negative, throws otherwise.
      */
     public static int throwOnError(int errorFlag) throws BufferQueueAbandonedException {
         if (errorFlag == NO_ERROR) {
             return NO_ERROR;
-        } else if (errorFlag == -ENODEV) {
+        } else if (errorFlag == BAD_VALUE) {
             throw new BufferQueueAbandonedException();
         }
 
