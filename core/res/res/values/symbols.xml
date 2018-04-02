@@ -294,6 +294,7 @@
   <java-symbol type="bool" name="split_action_bar_is_narrow" />
   <java-symbol type="bool" name="config_useVolumeKeySounds" />
   <java-symbol type="bool" name="config_enableWallpaperService" />
+  <java-symbol type="bool" name="config_checkWallpaperAtBoot" />
   <java-symbol type="string" name="config_wallpaperManagerServiceName" />
   <java-symbol type="bool" name="config_enableUpdateableTimeZoneRules" />
   <java-symbol type="bool" name="config_timeZoneRulesUpdateTrackingEnabled" />
