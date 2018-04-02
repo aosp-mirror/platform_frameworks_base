@@ -474,6 +474,8 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
 
         public boolean isInputMethodWindow();
 
+        public boolean isInputMethodTarget();
+
         public int getDisplayId();
 
         /**
