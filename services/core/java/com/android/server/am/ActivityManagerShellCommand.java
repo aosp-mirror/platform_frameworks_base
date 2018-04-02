@@ -2962,7 +2962,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("  monitor [--gdb <port>]");
             pw.println("      Start monitoring for crashes or ANRs.");
             pw.println("      --gdb: start gdbserv on the given port at crash/ANR");
-            pw.println("  watch-uids [--oom <uid>");
+            pw.println("  watch-uids [--oom <uid>]");
             pw.println("      Start watching for and reporting uid state changes.");
             pw.println("      --oom: specify a uid for which to report detailed change messages.");
             pw.println("  hang [--allow-restart]");
