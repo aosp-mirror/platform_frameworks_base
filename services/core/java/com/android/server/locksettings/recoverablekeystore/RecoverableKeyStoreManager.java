@@ -174,9 +174,13 @@ public class RecoverableKeyStoreManager {
         checkRecoverKeyStorePermission();
         int userId = UserHandle.getCallingUserId();
         int uid = Binder.getCallingUid();
+
         rootCertificateAlias
                 = mTestCertHelper.getDefaultCertificateAliasIfEmpty(rootCertificateAlias);
-
+        if (!mTestCertHelper.isValidRootCertificateAlias(rootCertificateAlias)) {
+            throw new ServiceSpecificException(
+                    ERROR_INVALID_CERTIFICATE, "Invalid root certificate alias");
+        }
         // Always set active alias to the argument of the last call to initRecoveryService method,
         // even if cert file is incorrect.
         String activeRootAlias = mDatabase.getActiveRootOfTrust(userId, uid);

@@ -2,12 +2,9 @@ package com.android.server.locksettings.recoverablekeystore;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.os.RemoteException;
-import android.os.ServiceSpecificException;
 import android.security.keystore.recovery.TrustedRootCertificates;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.util.Log;
 
 import com.android.internal.widget.LockPatternUtils;
 
@@ -15,7 +12,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.HashMap;
-import java.security.cert.X509Certificate;
 import java.util.Map;
 import javax.crypto.SecretKey;
 
@@ -27,40 +23,40 @@ public class TestOnlyInsecureCertificateHelperTest {
 
     @Test
     public void testDoesCredentailSupportInsecureMode_forNonWhitelistedPassword() throws Exception {
-        assertThat(mHelper.doesCredentailSupportInsecureMode(
+        assertThat(mHelper.doesCredentialSupportInsecureMode(
                 LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, "secret12345")).isFalse();
-        assertThat(mHelper.doesCredentailSupportInsecureMode(
+        assertThat(mHelper.doesCredentialSupportInsecureMode(
                 LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, "1234")).isFalse();
     }
 
     @Test
     public void testDoesCredentailSupportInsecureMode_forWhitelistedPassword() throws Exception {
-        assertThat(mHelper.doesCredentailSupportInsecureMode(
+        assertThat(mHelper.doesCredentialSupportInsecureMode(
                 LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
                 TrustedRootCertificates.INSECURE_PASSWORD_PREFIX)).isTrue();
 
-        assertThat(mHelper.doesCredentailSupportInsecureMode(
+        assertThat(mHelper.doesCredentialSupportInsecureMode(
                 LockPatternUtils.CREDENTIAL_TYPE_PASSWORD,
                 TrustedRootCertificates.INSECURE_PASSWORD_PREFIX + "12")).isTrue();
     }
 
     @Test
     public void testDoesCredentailSupportInsecureMode_Pattern() throws Exception {
-        assertThat(mHelper.doesCredentailSupportInsecureMode(
+        assertThat(mHelper.doesCredentialSupportInsecureMode(
                 LockPatternUtils.CREDENTIAL_TYPE_PATTERN,
                 TrustedRootCertificates.INSECURE_PASSWORD_PREFIX)).isFalse();
-        assertThat(mHelper.doesCredentailSupportInsecureMode(
+        assertThat(mHelper.doesCredentialSupportInsecureMode(
                 LockPatternUtils.CREDENTIAL_TYPE_NONE,
                 TrustedRootCertificates.INSECURE_PASSWORD_PREFIX)).isFalse();
     }
 
     @Test
     public void testIsTestOnlyCertificate() throws Exception {
-        assertThat(mHelper.isTestOnlyCertificate(
+        assertThat(mHelper.isTestOnlyCertificateAlias(
                 TrustedRootCertificates.GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_ALIAS)).isFalse();
-        assertThat(mHelper.isTestOnlyCertificate(
+        assertThat(mHelper.isTestOnlyCertificateAlias(
                 TrustedRootCertificates.TEST_ONLY_INSECURE_CERTIFICATE_ALIAS)).isTrue();
-        assertThat(mHelper.isTestOnlyCertificate(
+        assertThat(mHelper.isTestOnlyCertificateAlias(
                 "UNKNOWN_ALIAS")).isFalse();
     }
 
@@ -124,5 +120,32 @@ public class TestOnlyInsecureCertificateHelperTest {
                 mHelper.keepOnlyWhitelistedInsecureKeys(rawKeys);
         assertThat(filteredKeys.entrySet()).containsExactlyElementsIn(expectedResult.entrySet());
         assertThat(rawKeys.entrySet()).containsAllIn(filteredKeys.entrySet());
+    }
+
+    @Test
+    public void testIsValidRootCertificateAlias_googleCertAlias() {
+        assertThat(mHelper.isValidRootCertificateAlias(
+                TrustedRootCertificates.GOOGLE_CLOUD_KEY_VAULT_SERVICE_V1_ALIAS)).isTrue();
+    }
+
+    @Test
+    public void testIsValidRootCertificateAlias_testOnlyCertAlias() {
+        assertThat(mHelper.isValidRootCertificateAlias(
+                TrustedRootCertificates.TEST_ONLY_INSECURE_CERTIFICATE_ALIAS)).isTrue();
+    }
+
+    @Test
+    public void testIsValidRootCertificateAlias_emptyCertAlias() {
+        assertThat(mHelper.isValidRootCertificateAlias("")).isFalse();
+    }
+
+    @Test
+    public void testIsValidRootCertificateAlias_nullCertAlias() {
+        assertThat(mHelper.isValidRootCertificateAlias(null)).isFalse();
+    }
+
+    @Test
+    public void testIsValidRootCertificateAlias_unknownCertAlias() {
+        assertThat(mHelper.isValidRootCertificateAlias("unknown-root-certifiate-alias")).isFalse();
     }
 }

@@ -40,7 +40,7 @@ public final class TrustedRootCertificates {
     /**
      * Certificate used for client-side end-to-end encryption tests.
      * When recovery controller is initialized with the certificate, recovery snapshots will only
-     * contain application keys started with {@link INSECURE_KEY_ALIAS}.
+     * contain application keys started with {@link #INSECURE_KEY_ALIAS_PREFIX}.
      * Recovery snapshot will only be created if device is unlocked with password started with
      * {@link #INSECURE_PASSWORD_PREFIX}.
      *
