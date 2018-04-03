@@ -393,6 +393,12 @@ public final class Magnifier {
         private int mWindowPositionY;
         private boolean mPendingWindowPositionUpdate;
 
+        // The lock used to synchronize the UI and render threads when a #destroy
+        // is performed on the UI thread and a frame callback on the render thread.
+        // When both mLock and mDestroyLock need to be held at the same time,
+        // mDestroyLock should be acquired before mLock in order to avoid deadlocks.
+        private final Object mDestroyLock = new Object();
+
         InternalPopupWindow(final Context context, final Display display,
                 final Surface parentSurface,
                 final int width, final int height, final float elevation, final float cornerRadius,
@@ -517,9 +523,11 @@ public final class Magnifier {
          * Destroys this instance.
          */
         public void destroy() {
+            synchronized (mDestroyLock) {
+                mSurface.destroy();
+            }
             synchronized (mLock) {
                 mRenderer.destroy();
-                mSurface.destroy();
                 mSurfaceControl.destroy();
                 mSurfaceSession.kill();
                 mBitmapRenderNode.destroy();
@@ -567,21 +575,23 @@ public final class Magnifier {
                     final int pendingY = mWindowPositionY;
 
                     callback = frame -> {
-                        synchronized (mLock) {
+                        synchronized (mDestroyLock) {
                             if (!mSurface.isValid()) {
                                 return;
                             }
-                            mRenderer.setLightCenter(mDisplay, pendingX, pendingY);
-                            // Show or move the window at the content draw frame.
-                            SurfaceControl.openTransaction();
-                            mSurfaceControl.deferTransactionUntil(mSurface, frame);
-                            if (updateWindowPosition) {
-                                mSurfaceControl.setPosition(pendingX, pendingY);
+                            synchronized (mLock) {
+                                mRenderer.setLightCenter(mDisplay, pendingX, pendingY);
+                                // Show or move the window at the content draw frame.
+                                SurfaceControl.openTransaction();
+                                mSurfaceControl.deferTransactionUntil(mSurface, frame);
+                                if (updateWindowPosition) {
+                                    mSurfaceControl.setPosition(pendingX, pendingY);
+                                }
+                                if (firstDraw) {
+                                    mSurfaceControl.show();
+                                }
+                                SurfaceControl.closeTransaction();
                             }
-                            if (firstDraw) {
-                                mSurfaceControl.show();
-                            }
-                            SurfaceControl.closeTransaction();
                         }
                     };
                 } else {
