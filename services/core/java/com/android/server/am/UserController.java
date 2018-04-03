@@ -1593,6 +1593,7 @@ class UserController implements Handler.Callback {
 
     void onSystemReady() {
         updateCurrentProfileIds();
+        mInjector.reportCurWakefulnessUsageEvent();
     }
 
     /**
