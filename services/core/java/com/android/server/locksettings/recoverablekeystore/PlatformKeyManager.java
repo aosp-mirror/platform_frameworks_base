@@ -375,6 +375,8 @@ public class PlatformKeyManager {
             throws NoSuchAlgorithmException, KeyStoreException {
         String encryptAlias = getEncryptAlias(userId, generationId);
         String decryptAlias = getDecryptAlias(userId, generationId);
+        // SecretKey implementation doesn't provide reliable way to destroy the secret
+        // so it may live in memory for some time.
         SecretKey secretKey = generateAesKey();
 
         // Store decryption key first since it is more likely to fail.
@@ -398,8 +400,6 @@ public class PlatformKeyManager {
                     .build());
 
         setGenerationId(userId, generationId);
-
-        // TODO: Use a reliable way to destroy the temporary secretKey in memory.
     }
 
     /**

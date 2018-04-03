@@ -291,7 +291,7 @@ public class RecoverableKeyStoreDb {
     }
 
     /**
-     * Sets the {@code generationId} of the platform key for the account owned by {@code userId}.
+     * Sets the {@code generationId} of the platform key for user {@code userId}.
      *
      * @return The primary key ID of the relation.
      */
@@ -630,7 +630,6 @@ public class RecoverableKeyStoreDb {
      * @hide
      */
     public long setActiveRootOfTrust(int userId, int uid, @Nullable String rootAlias) {
-        // TODO: Call getDefaultCertificateAliasIfEmpty() here too?
         SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(RecoveryServiceMetadataEntry.COLUMN_NAME_ACTIVE_ROOT_OF_TRUST, rootAlias);

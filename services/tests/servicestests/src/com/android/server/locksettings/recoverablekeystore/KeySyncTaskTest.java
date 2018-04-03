@@ -17,11 +17,9 @@
 package com.android.server.locksettings.recoverablekeystore;
 
 import static android.security.keystore.recovery.KeyChainProtectionParams.TYPE_LOCKSCREEN;
-
 import static android.security.keystore.recovery.KeyChainProtectionParams.UI_FORMAT_PASSWORD;
 import static android.security.keystore.recovery.KeyChainProtectionParams.UI_FORMAT_PATTERN;
 import static android.security.keystore.recovery.KeyChainProtectionParams.UI_FORMAT_PIN;
-
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
 

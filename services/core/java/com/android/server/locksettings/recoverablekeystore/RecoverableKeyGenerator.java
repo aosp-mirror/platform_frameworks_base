@@ -29,7 +29,6 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-// TODO: Rename RecoverableKeyGenerator to RecoverableKeyManager as it can import a key too now
 /**
  * Generates/imports keys and stores them both in AndroidKeyStore and on disk, in wrapped form.
  *
