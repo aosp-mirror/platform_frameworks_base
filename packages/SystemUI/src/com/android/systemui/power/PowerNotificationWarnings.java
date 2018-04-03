@@ -229,10 +229,11 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         // Bump the notification when the bucket dropped.
                         .setWhen(mWarningTriggerTimeMs)
                         .setShowWhen(false)
-                        .setContentTitle(title)
                         .setContentText(contentText)
+                        .setContentTitle(title)
                         .setOnlyAlertOnce(true)
                         .setDeleteIntent(pendingBroadcast(ACTION_DISMISSED_WARNING))
+                        .setStyle(new Notification.BigTextStyle().bigText(contentText))
                         .setVisibility(Notification.VISIBILITY_PUBLIC);
         if (hasBatterySettings()) {
             nb.setContentIntent(pendingBroadcast(ACTION_SHOW_BATTERY_SETTINGS));
