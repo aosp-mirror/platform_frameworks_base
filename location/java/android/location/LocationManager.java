@@ -1249,40 +1249,11 @@ public class LocationManager {
     @SystemApi
     @RequiresPermission(WRITE_SECURE_SETTINGS)
     public void setLocationEnabledForUser(boolean enabled, UserHandle userHandle) {
-        final List<String> allProvidersList = getAllProviders();
-        // Update all providers on device plus gps and network provider when disabling location.
-        Set<String> allProvidersSet = new ArraySet<>(allProvidersList.size() + 2);
-        allProvidersSet.addAll(allProvidersList);
-        // When disabling location, disable gps and network provider that could have been enabled by
-        // location mode api.
-        if (enabled == false) {
-            allProvidersSet.add(GPS_PROVIDER);
-            allProvidersSet.add(NETWORK_PROVIDER);
+        try {
+            mService.setLocationEnabledForUser(enabled, userHandle.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        if (allProvidersSet.isEmpty()) {
-            return;
-        }
-        // to ensure thread safety, we write the provider name with a '+' or '-'
-        // and let the SettingsProvider handle it rather than reading and modifying
-        // the list of enabled providers.
-        final String prefix = enabled ? "+" : "-";
-        StringBuilder locationProvidersAllowed = new StringBuilder();
-        for (String provider : allProvidersSet) {
-            checkProvider(provider);
-            if (provider.equals(PASSIVE_PROVIDER)) {
-                continue;
-            }
-            locationProvidersAllowed.append(prefix);
-            locationProvidersAllowed.append(provider);
-            locationProvidersAllowed.append(",");
-        }
-        // Remove the trailing comma
-        locationProvidersAllowed.setLength(locationProvidersAllowed.length() - 1);
-        Settings.Secure.putStringForUser(
-                mContext.getContentResolver(),
-                Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                locationProvidersAllowed.toString(),
-                userHandle.getIdentifier());
     }
 
     /**
@@ -1295,22 +1266,11 @@ public class LocationManager {
      */
     @SystemApi
     public boolean isLocationEnabledForUser(UserHandle userHandle) {
-        final String allowedProviders = Settings.Secure.getStringForUser(
-                mContext.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                userHandle.getIdentifier());
-        if (allowedProviders == null) {
-            return false;
+        try {
+            return mService.isLocationEnabledForUser(userHandle.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        final List<String> providerList = Arrays.asList(allowedProviders.split(","));
-        for(String provider : getAllProviders()) {
-            if (provider.equals(PASSIVE_PROVIDER)) {
-                continue;
-            }
-            if (providerList.contains(provider)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -1362,9 +1322,12 @@ public class LocationManager {
     @SystemApi
     public boolean isProviderEnabledForUser(String provider, UserHandle userHandle) {
         checkProvider(provider);
-        String allowedProviders = Settings.Secure.getStringForUser(mContext.getContentResolver(),
-                Settings.Secure.LOCATION_PROVIDERS_ALLOWED, userHandle.getIdentifier());
-        return TextUtils.delimitedStringContains(allowedProviders, ',', provider);
+
+        try {
+            return mService.isProviderEnabledForUser(provider, userHandle.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -1383,16 +1346,13 @@ public class LocationManager {
     public boolean setProviderEnabledForUser(
             String provider, boolean enabled, UserHandle userHandle) {
         checkProvider(provider);
-        // to ensure thread safety, we write the provider name with a '+' or '-'
-        // and let the SettingsProvider handle it rather than reading and modifying
-        // the list of enabled providers.
-        if (enabled) {
-            provider = "+" + provider;
-        } else {
-            provider = "-" + provider;
+
+        try {
+            return mService.setProviderEnabledForUser(
+                    provider, enabled, userHandle.getIdentifier());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                Settings.Secure.LOCATION_PROVIDERS_ALLOWED, provider, userHandle.getIdentifier());
     }
 
     /**
