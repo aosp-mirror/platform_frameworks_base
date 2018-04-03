@@ -346,6 +346,7 @@ class WatchlistLoggingHandler extends Handler {
      * @param ipAddresses Ip address that you want to search in watchlist.
      * @return Ip address that exists in watchlist, null if it does not match anything.
      */
+    @Nullable
     private String searchIpInWatchlist(String[] ipAddresses) {
         for (String ipAddress : ipAddresses) {
             if (isIpInWatchlist(ipAddress)) {
@@ -377,6 +378,7 @@ class WatchlistLoggingHandler extends Handler {
      * @param host Host that we want to search.
      * @return Domain that exists in watchlist, null if it does not match anything.
      */
+    @Nullable
     private String searchAllSubDomainsInWatchlist(String host) {
         if (host == null) {
             return null;
@@ -392,6 +394,7 @@ class WatchlistLoggingHandler extends Handler {
 
     /** Get all sub-domains in a host */
     @VisibleForTesting
+    @Nullable
     static String[] getAllSubDomains(String host) {
         if (host == null) {
             return null;

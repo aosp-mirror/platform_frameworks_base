@@ -49,6 +49,7 @@ class ReportEncoder {
      * Apply DP on watchlist results, and generate a serialized watchlist report ready to store
      * in DropBox.
      */
+    @Nullable
     static byte[] encodeWatchlistReport(WatchlistConfig config, byte[] userSecret,
             List<String> appDigestList, WatchlistReportDbHelper.AggregatedResult aggregatedResult) {
         Map<String, Boolean> resultMap = PrivacyUtils.createDpEncodedReportMap(
