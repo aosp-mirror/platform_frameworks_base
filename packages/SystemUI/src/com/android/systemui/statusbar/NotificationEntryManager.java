@@ -43,6 +43,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.NotificationMessagingUtil;
@@ -665,6 +666,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         }
         // Add the expanded view and icon.
         mNotificationData.add(entry);
+        tagForeground(entry.notification);
         updateNotifications();
     }
 
@@ -726,6 +728,19 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         mPendingNotifications.put(key, shadeEntry);
     }
 
+    @VisibleForTesting
+    protected void tagForeground(StatusBarNotification notification) {
+        ArraySet<Integer> activeOps = mForegroundServiceController.getAppOps(
+                notification.getUserId(), notification.getPackageName());
+        if (activeOps != null) {
+            int N = activeOps.size();
+            for (int i = 0; i < N; i++) {
+                updateNotificationsForAppOp(activeOps.valueAt(i), notification.getUid(),
+                        notification.getPackageName(), true);
+            }
+        }
+    }
+
     @Override
     public void addNotification(StatusBarNotification notification,
             NotificationListenerService.RankingMap ranking) {
@@ -736,10 +751,11 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         }
     }
 
-    public void updateNotificationsForAppOps(int appOp, int uid, String pkg, boolean showIcon) {
-        if (mForegroundServiceController.getStandardLayoutKey(
-                UserHandle.getUserId(uid), pkg) != null) {
-            mNotificationData.updateAppOp(appOp, uid, pkg, showIcon);
+    public void updateNotificationsForAppOp(int appOp, int uid, String pkg, boolean showIcon) {
+        String foregroundKey = mForegroundServiceController.getStandardLayoutKey(
+                UserHandle.getUserId(uid), pkg);
+        if (foregroundKey != null) {
+            mNotificationData.updateAppOp(appOp, uid, pkg, foregroundKey, showIcon);
             updateNotifications();
         }
     }
