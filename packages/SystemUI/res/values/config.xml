@@ -93,6 +93,9 @@
     <integer name="navigation_bar_deadzone_hold">333</integer>
     <integer name="navigation_bar_deadzone_decay">333</integer>
 
+    <!-- orientation of the dead zone when touches have recently occurred elsewhere on screen -->
+    <integer name="navigation_bar_deadzone_orientation">0</integer>
+
     <bool name="config_dead_zone_flash">false</bool>
 
     <!-- Whether to enable dimming navigation buttons when wallpaper is not visible, should be
