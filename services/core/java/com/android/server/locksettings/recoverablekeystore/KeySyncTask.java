@@ -20,6 +20,7 @@ import static android.security.keystore.recovery.KeyChainProtectionParams.TYPE_L
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.security.Scrypt;
 import android.security.keystore.recovery.KeyChainProtectionParams;
 import android.security.keystore.recovery.KeyChainSnapshot;
 import android.security.keystore.recovery.KeyDerivationParams;
@@ -69,6 +70,17 @@ public class KeySyncTask implements Runnable {
     private static final String LOCK_SCREEN_HASH_ALGORITHM = "SHA-256";
     private static final int TRUSTED_HARDWARE_MAX_ATTEMPTS = 10;
 
+    // TODO: Reduce the minimal length once all other components are updated
+    private static final int MIN_CREDENTIAL_LEN_TO_USE_SCRYPT = 24;
+    @VisibleForTesting
+    static final int SCRYPT_PARAM_N = 4096;
+    @VisibleForTesting
+    static final int SCRYPT_PARAM_R = 8;
+    @VisibleForTesting
+    static final int SCRYPT_PARAM_P = 1;
+    @VisibleForTesting
+    static final int SCRYPT_PARAM_OUTLEN_BYTES = 32;
+
     private final RecoverableKeyStoreDb mRecoverableKeyStoreDb;
     private final int mUserId;
     private final int mCredentialType;
@@ -78,6 +90,7 @@ public class KeySyncTask implements Runnable {
     private final RecoverySnapshotStorage mRecoverySnapshotStorage;
     private final RecoverySnapshotListenersStorage mSnapshotListenersStorage;
     private final TestOnlyInsecureCertificateHelper mTestOnlyInsecureCertificateHelper;
+    private final Scrypt mScrypt;
 
     public static KeySyncTask newInstance(
             Context context,
@@ -98,7 +111,8 @@ public class KeySyncTask implements Runnable {
                 credential,
                 credentialUpdated,
                 PlatformKeyManager.getInstance(context, recoverableKeyStoreDb),
-                new TestOnlyInsecureCertificateHelper());
+                new TestOnlyInsecureCertificateHelper(),
+                new Scrypt());
     }
 
     /**
@@ -110,7 +124,7 @@ public class KeySyncTask implements Runnable {
      * @param credential The credential, encoded as a {@link String}.
      * @param credentialUpdated signals weather credentials were updated.
      * @param platformKeyManager platform key manager
-     * @param TestOnlyInsecureCertificateHelper utility class used for end-to-end tests
+     * @param testOnlyInsecureCertificateHelper utility class used for end-to-end tests
      */
     @VisibleForTesting
     KeySyncTask(
@@ -122,7 +136,8 @@ public class KeySyncTask implements Runnable {
             String credential,
             boolean credentialUpdated,
             PlatformKeyManager platformKeyManager,
-            TestOnlyInsecureCertificateHelper TestOnlyInsecureCertificateHelper) {
+            TestOnlyInsecureCertificateHelper testOnlyInsecureCertificateHelper,
+            Scrypt scrypt) {
         mSnapshotListenersStorage = recoverySnapshotListenersStorage;
         mRecoverableKeyStoreDb = recoverableKeyStoreDb;
         mUserId = userId;
@@ -131,7 +146,8 @@ public class KeySyncTask implements Runnable {
         mCredentialUpdated = credentialUpdated;
         mPlatformKeyManager = platformKeyManager;
         mRecoverySnapshotStorage = snapshotStorage;
-        mTestOnlyInsecureCertificateHelper = TestOnlyInsecureCertificateHelper;
+        mTestOnlyInsecureCertificateHelper = testOnlyInsecureCertificateHelper;
+        mScrypt = scrypt;
     }
 
     @Override
@@ -230,8 +246,14 @@ public class KeySyncTask implements Runnable {
             }
         }
 
+        boolean useScryptToHashCredential = shouldUseScryptToHashCredential(rootCertAlias);
         byte[] salt = generateSalt();
-        byte[] localLskfHash = hashCredentials(salt, mCredential);
+        byte[] localLskfHash;
+        if (useScryptToHashCredential) {
+            localLskfHash = hashCredentialsByScrypt(salt, mCredential);
+        } else {
+            localLskfHash = hashCredentialsBySaltedSha256(salt, mCredential);
+        }
 
         Map<String, SecretKey> rawKeys;
         try {
@@ -303,10 +325,17 @@ public class KeySyncTask implements Runnable {
             Log.e(TAG,"Could not encrypt with recovery key", e);
             return;
         }
+        KeyDerivationParams keyDerivationParams;
+        if (useScryptToHashCredential) {
+            keyDerivationParams = KeyDerivationParams.createScryptParams(
+                    salt, /*memoryDifficulty=*/ SCRYPT_PARAM_N);
+        } else {
+            keyDerivationParams = KeyDerivationParams.createSha256Params(salt);
+        }
         KeyChainProtectionParams metadata = new KeyChainProtectionParams.Builder()
                 .setUserSecretType(TYPE_LOCKSCREEN)
                 .setLockScreenUiFormat(getUiFormat(mCredentialType, mCredential))
-                .setKeyDerivationParams(KeyDerivationParams.createSha256Params(salt))
+                .setKeyDerivationParams(keyDerivationParams)
                 .setSecret(new byte[0])
                 .build();
 
@@ -443,7 +472,7 @@ public class KeySyncTask implements Runnable {
      * @return The SHA-256 hash.
      */
     @VisibleForTesting
-    static byte[] hashCredentials(byte[] salt, String credentials) {
+    static byte[] hashCredentialsBySaltedSha256(byte[] salt, String credentials) {
         byte[] credentialsBytes = credentials.getBytes(StandardCharsets.UTF_8);
         ByteBuffer byteBuffer = ByteBuffer.allocate(
                 salt.length + credentialsBytes.length + LENGTH_PREFIX_BYTES * 2);
@@ -462,6 +491,12 @@ public class KeySyncTask implements Runnable {
         }
     }
 
+    private byte[] hashCredentialsByScrypt(byte[] salt, String credentials) {
+        return mScrypt.scrypt(
+                credentials.getBytes(StandardCharsets.UTF_8), salt,
+                SCRYPT_PARAM_N, SCRYPT_PARAM_R, SCRYPT_PARAM_P, SCRYPT_PARAM_OUTLEN_BYTES);
+    }
+
     private static SecretKey generateRecoveryKey() throws NoSuchAlgorithmException {
         KeyGenerator keyGenerator = KeyGenerator.getInstance(RECOVERY_KEY_ALGORITHM);
         keyGenerator.init(RECOVERY_KEY_SIZE_BITS);
@@ -478,5 +513,12 @@ public class KeySyncTask implements Runnable {
                     .build());
         }
         return keyEntries;
+    }
+
+    private boolean shouldUseScryptToHashCredential(String rootCertAlias) {
+        return mCredentialType == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD
+                && mCredential.length() >= MIN_CREDENTIAL_LEN_TO_USE_SCRYPT
+                // TODO: Remove the test cert check once all other components are updated
+                && mTestOnlyInsecureCertificateHelper.isTestOnlyCertificateAlias(rootCertAlias);
     }
 }
