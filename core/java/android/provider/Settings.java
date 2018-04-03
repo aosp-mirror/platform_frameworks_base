@@ -11749,6 +11749,29 @@ public final class Settings {
                 "hidden_api_blacklist_exemptions";
 
         /**
+         * Hidden API enforcement policy for apps targeting SDK versions prior to the latest
+         * version.
+         *
+         * Values correspond to @{@link
+         * android.content.pm.ApplicationInfo.HiddenApiEnforcementPolicy}
+         *
+         * @hide
+         */
+        public static final String HIDDEN_API_POLICY_PRE_P_APPS =
+                "hidden_api_policy_pre_p_apps";
+
+        /**
+         * Hidden API enforcement policy for apps targeting the current SDK version.
+         *
+         * Values correspond to @{@link
+         * android.content.pm.ApplicationInfo.HiddenApiEnforcementPolicy}
+         *
+         * @hide
+         */
+        public static final String HIDDEN_API_POLICY_P_APPS =
+                "hidden_api_policy_p_apps";
+
+        /**
          * Timeout for a single {@link android.media.soundtrigger.SoundTriggerDetectionService}
          * operation (in ms).
          *
