@@ -124,7 +124,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private TintedKeyButtonDrawable mRotateSuggestionIcon;
 
     private GestureHelper mGestureHelper;
-    private DeadZone mDeadZone;
+    private final DeadZone mDeadZone;
     private final NavigationBarTransitions mBarTransitions;
     private final OverviewProxyService mOverviewProxyService;
 
@@ -263,6 +263,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 new ButtonDispatcher(R.id.accessibility_button));
         mButtonDispatchers.put(R.id.rotate_suggestion,
                 new ButtonDispatcher(R.id.rotate_suggestion));
+        mDeadZone = new DeadZone(this);
     }
 
     public BarTransitions getBarTransitions() {
@@ -297,6 +298,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (mDeadZone.onTouchEvent(event)) {
+            // Consumed the touch event
+            return true;
+        }
         switch (event.getActionMasked()) {
             case ACTION_DOWN:
                 int x = (int) event.getX();
@@ -319,6 +324,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (mDeadZone.onTouchEvent(event)) {
+            // Consumed the touch event
+            return true;
+        }
         if (mGestureHelper.onTouchEvent(event)) {
             return true;
         }
@@ -818,6 +827,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     @Override
     protected void onDraw(Canvas canvas) {
         mGestureHelper.onDraw(canvas);
+        mDeadZone.onDraw(canvas);
         super.onDraw(canvas);
     }
 
@@ -889,10 +899,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     public void reorient() {
         updateCurrentView();
 
-        mDeadZone = (DeadZone) mCurrentView.findViewById(R.id.deadzone);
-
         ((NavigationBarFrame) getRootView()).setDeadZone(mDeadZone);
-        mDeadZone.setDisplayRotation(mCurrentRotation);
+        mDeadZone.onConfigurationChanged(mCurrentRotation);
 
         // force the low profile & disabled states into compliance
         mBarTransitions.init();
