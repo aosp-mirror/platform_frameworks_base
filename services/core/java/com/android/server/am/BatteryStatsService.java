@@ -19,16 +19,10 @@ package com.android.server.am;
 import android.app.ActivityManager;
 import android.app.job.JobProtoEnums;
 import android.bluetooth.BluetoothActivityEnergyInfo;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.hardware.usb.UsbManager;
 import android.net.wifi.WifiActivityEnergyInfo;
-import android.os.PowerManager.ServiceType;
-import android.os.PowerSaveState;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.Binder;
@@ -37,18 +31,18 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFormatException;
+import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
+import android.os.PowerSaveState;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.os.WorkSource;
-import android.os.WorkSource.WorkChain;
 import android.os.connectivity.CellularBatteryStats;
-import android.os.connectivity.WifiBatteryStats;
 import android.os.connectivity.GpsBatteryStats;
+import android.os.connectivity.WifiBatteryStats;
 import android.os.health.HealthStatsParceler;
 import android.os.health.HealthStatsWriter;
 import android.os.health.UidHealthStats;
@@ -57,6 +51,7 @@ import android.telephony.ModemActivityInfo;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
+import android.util.StatsLog;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BatteryStatsHelper;
@@ -65,7 +60,6 @@ import com.android.internal.os.PowerProfile;
 import com.android.internal.os.RpmStats;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
-import android.util.StatsLog;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -701,13 +695,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    public void noteUsbConnectionState(boolean connected) {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteUsbConnectionStateLocked(connected);
-        }
-    }
-
     public void notePhoneSignalStrength(SignalStrength signalStrength) {
         enforceCallingPermission();
         synchronized (mStats) {
@@ -1162,35 +1149,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
         mContext.enforcePermission(android.Manifest.permission.UPDATE_DEVICE_STATS,
                 Binder.getCallingPid(), Binder.getCallingUid(), null);
-    }
-
-    public final static class UsbConnectionReceiver extends BroadcastReceiver {
-        private static final String TAG = UsbConnectionReceiver.class.getSimpleName();
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
-                final Intent usbState = context.registerReceiver(null, new IntentFilter(UsbManager.ACTION_USB_STATE));
-                if (usbState != null) {
-                    handleUsbState(usbState);
-                }
-            } else if (UsbManager.ACTION_USB_STATE.equals(action)) {
-                handleUsbState(intent);
-            }
-        }
-        private void handleUsbState(Intent intent) {
-            IBatteryStats bs = getService();
-            if (bs == null) {
-                Slog.w(TAG, "Could not access batterystats");
-                return;
-            }
-            boolean connected = intent.getExtras().getBoolean(UsbManager.USB_CONNECTED);
-            try {
-                bs.noteUsbConnectionState(connected);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "Could not access batterystats: ", e);
-            }
-        }
     }
 
     final class WakeupReasonThread extends Thread {
