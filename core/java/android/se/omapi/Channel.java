@@ -39,7 +39,7 @@ import java.io.IOException;
  *
  * @see <a href="http://globalplatform.org">GlobalPlatform Open Mobile API</a>
  */
-public class Channel {
+public final class Channel implements java.nio.channels.Channel {
 
     private static final String TAG = "OMAPI.Channel";
     private Session mSession;
@@ -64,7 +64,7 @@ public class Channel {
      * before closing the channel.
      */
     public void close() {
-        if (!isClosed()) {
+        if (isOpen()) {
             synchronized (mLock) {
                 try {
                     mChannel.close();
@@ -76,21 +76,21 @@ public class Channel {
     }
 
     /**
-     * Tells if this channel is closed.
+     * Tells if this channel is open.
      *
-     * @return <code>true</code> if the channel is closed or in case of an error.
-     *         <code>false</code> otherwise.
+     * @return <code>false</code> if the channel is closed or in case of an error.
+     *         <code>true</code> otherwise.
      */
-    public boolean isClosed() {
+    public boolean isOpen() {
         if (!mService.isConnected()) {
             Log.e(TAG, "service not connected to system");
-            return true;
+            return false;
         }
         try {
-            return mChannel.isClosed();
+            return !mChannel.isClosed();
         } catch (RemoteException e) {
             Log.e(TAG, "Exception in isClosed()");
-            return true;
+            return false;
         }
     }
 

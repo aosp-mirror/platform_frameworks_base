@@ -32,6 +32,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.HashMap;
+import java.util.concurrent.Executor;
 
 /**
  * The SEService realises the communication to available Secure Elements on the
@@ -40,7 +41,7 @@ import java.util.HashMap;
  *
  * @see <a href="http://simalliance.org">SIMalliance Open Mobile API  v3.0</a>
  */
-public class SEService {
+public final class SEService {
 
     /**
      * Error code used with ServiceSpecificException.
@@ -62,11 +63,11 @@ public class SEService {
     /**
      * Interface to send call-backs to the application when the service is connected.
      */
-    public interface SecureElementListener {
+    public interface OnConnectedListener {
         /**
          * Called by the framework when the service is connected.
          */
-        void onServiceConnected();
+        void onConnected();
     }
 
     /**
@@ -74,16 +75,22 @@ public class SEService {
      * SEService could be bound to the backend.
      */
     private class SEListener extends ISecureElementListener.Stub {
-        public SecureElementListener mListener = null;
+        public OnConnectedListener mListener = null;
+        public Executor mExecutor = null;
 
         @Override
         public IBinder asBinder() {
             return this;
         }
 
-        public void onServiceConnected() {
-            if (mListener != null) {
-                mListener.onServiceConnected();
+        public void onConnected() {
+            if (mListener != null && mExecutor != null) {
+                mExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mListener.onConnected();
+                    }
+                });
             }
         }
     }
@@ -116,22 +123,26 @@ public class SEService {
      * the specified listener is called or if isConnected() returns
      * <code>true</code>. <br>
      * The call-back object passed as a parameter will have its
-     * onServiceConnected() method called when the connection actually happen.
+     * onConnected() method called when the connection actually happen.
      *
      * @param context
      *            the context of the calling application. Cannot be
      *            <code>null</code>.
      * @param listener
-     *            a SecureElementListener object.
+     *            a OnConnectedListener object.
+     * @param executor
+     *            an Executor which will be used when invoking the callback.
      */
-    public SEService(@NonNull Context context, @NonNull SecureElementListener listener) {
+    public SEService(@NonNull Context context, @NonNull Executor executor,
+            @NonNull OnConnectedListener listener) {
 
-        if (context == null) {
-            throw new NullPointerException("context must not be null");
+        if (context == null || listener == null || executor == null) {
+            throw new NullPointerException("Arguments must not be null");
         }
 
         mContext = context;
         mSEListener.mListener = listener;
+        mSEListener.mExecutor = executor;
 
         mConnection = new ServiceConnection() {
 
@@ -140,7 +151,7 @@ public class SEService {
 
                 mSecureElementService = ISecureElementService.Stub.asInterface(service);
                 if (mSEListener != null) {
-                    mSEListener.onServiceConnected();
+                    mSEListener.onConnected();
                 }
                 Log.i(TAG, "Service onServiceConnected");
             }
@@ -171,12 +182,12 @@ public class SEService {
     }
 
     /**
-     * Returns the list of available Secure Element readers.
+     * Returns an array of available Secure Element readers.
      * There must be no duplicated objects in the returned list.
      * All available readers shall be listed even if no card is inserted.
      *
-     * @return The readers list, as an array of Readers. If there are no
-     * readers the returned array is of length 0.
+     * @return An array of Readers. If there are no readers the returned array
+     * is of length 0.
      */
     public @NonNull Reader[] getReaders() {
         if (mSecureElementService == null) {
@@ -212,7 +223,8 @@ public class SEService {
      * (including any binding to an underlying service).
      * As a result isConnected() will return false after shutdown() was called.
      * After this method call, the SEService object is not connected.
-     * It is recommended to call this method in the termination method of the calling application
+     * This method should be called when connection to the Secure Element is not needed
+     * or in the termination method of the calling application
      * (or part of this application) which is bound to this SEService.
      */
     public void shutdown() {
