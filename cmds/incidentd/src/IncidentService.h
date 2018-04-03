@@ -28,11 +28,14 @@
 
 #include "Throttler.h"
 
+namespace android {
+namespace os {
+namespace incidentd {
+
 using namespace android;
 using namespace android::base;
 using namespace android::binder;
 using namespace android::os;
-using namespace std;
 
 // ================================================================================
 class ReportRequestQueue : public virtual RefBase {
@@ -125,5 +128,9 @@ private:
      */
     status_t cmd_privacy(FILE* in, FILE* out, FILE* err, Vector<String8>& args);
 };
+
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android
 
 #endif  // INCIDENT_SERVICE_H

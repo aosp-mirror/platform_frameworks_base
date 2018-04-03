@@ -27,7 +27,9 @@
 #include <utils/String8.h>
 #include <utils/Vector.h>
 
-using namespace android;
+namespace android {
+namespace os {
+namespace incidentd {
 
 const int64_t REMOTE_CALL_TIMEOUT_MS = 10 * 1000;  // 10 seconds
 
@@ -174,5 +176,9 @@ public:
 private:
     std::string mType;
 };
+
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android
 
 #endif  // SECTIONS_H

@@ -20,6 +20,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+using namespace android::os::incidentd;
+
 TEST(ThrottlerTest, DataSizeExceeded) {
     Throttler t(100, 100000);
     EXPECT_FALSE(t.shouldThrottle());

@@ -150,9 +150,9 @@ public:
     // Return false if the given name can't be found.
     bool insertField(ProtoOutputStream* proto, const std::string& name, const std::string& value);
 private:
-    map<std::string, uint64_t> mFields;
-    map<std::string, map<std::string, int>> mEnums;
-    map<std::string, int> mEnumValuesByName;
+    std::map<std::string, uint64_t> mFields;
+    std::map<std::string, std::map<std::string, int>> mEnums;
+    std::map<std::string, int> mEnumValuesByName;
 };
 
 /**
@@ -187,15 +187,15 @@ public:
     bool insertField(ProtoOutputStream* proto, const std::string& name, const std::string& value);
 
     // Starts a new message field proto session.
-    void startSession(ProtoOutputStream* proto, const string& name);
+    void startSession(ProtoOutputStream* proto, const std::string& name);
 
     // Ends the previous message field proto session.
     void endSession(ProtoOutputStream* proto);
 private:
     Table* mTable;
     std::string mPreviousField;
-    stack<uint64_t> mTokens;
-    map<std::string, Message*> mSubMessages;
+    std::stack<uint64_t> mTokens;
+    std::map<std::string, Message*> mSubMessages;
 };
 
 #endif  // INCIDENT_HELPER_UTIL_H

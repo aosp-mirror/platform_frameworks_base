@@ -21,6 +21,7 @@
 #include <utils/String8.h>
 
 using namespace android;
+using namespace std;
 
 /**
  * Base class for text parser

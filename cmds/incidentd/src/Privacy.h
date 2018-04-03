@@ -20,6 +20,10 @@
 
 #include <stdint.h>
 
+namespace android {
+namespace os {
+namespace incidentd {
+
 // This is the default value of DEST enum, sync with privacy.proto
 const uint8_t DEST_UNSET = 255;  // DEST_UNSET is not exposed to libincident
 const uint8_t DEST_DEFAULT_VALUE = DEST_UNSET;
@@ -81,5 +85,9 @@ public:
 private:
     PrivacySpec(uint8_t dest) : dest(dest) {}
 };
+
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android
 
 #endif  // PRIVACY_H

@@ -29,6 +29,7 @@
 #include <sys/types.h>
 
 using namespace android;
+using namespace android::os::incidentd;
 
 // ================================================================================
 int main(int /*argc*/, char** /*argv*/) {
@@ -43,7 +44,7 @@ int main(int /*argc*/, char** /*argv*/) {
     IPCThreadState::self()->disableBackgroundScheduling(true);
 
     // Create the service
-    android::sp<IncidentService> service = new IncidentService(looper);
+    sp<IncidentService> service = new IncidentService(looper);
     if (defaultServiceManager()->addService(String16("incident"), service) != 0) {
         ALOGE("Failed to add service");
         return -1;
