@@ -16,6 +16,7 @@
 
 package com.android.server.net.watchlist;
 
+import android.annotation.Nullable;
 import android.os.FileUtils;
 import android.util.AtomicFile;
 import android.util.Log;
@@ -54,9 +55,6 @@ class WatchlistConfig {
             "/data/misc/network_watchlist/network_watchlist.xml";
     private static final String NETWORK_WATCHLIST_DB_FOR_TEST_PATH =
             "/data/misc/network_watchlist/network_watchlist_for_test.xml";
-
-    // Hash for null / unknown config, a 32 byte array filled with content 0x00
-    private static final byte[] UNKNOWN_CONFIG_HASH = new byte[32];
 
     private static class XmlTags {
         private static final String WATCHLIST_CONFIG = "watchlist-config";
@@ -228,16 +226,21 @@ class WatchlistConfig {
         return mIsSecureConfig;
     }
 
+    @Nullable
+    /**
+     * Get watchlist config SHA-256 digest.
+     * Return null if watchlist config does not exist.
+     */
     public byte[] getWatchlistConfigHash() {
         if (!mXmlFile.exists()) {
-            return UNKNOWN_CONFIG_HASH;
+            return null;
         }
         try {
             return DigestUtils.getSha256Hash(mXmlFile);
         } catch (IOException | NoSuchAlgorithmException e) {
             Log.e(TAG, "Unable to get watchlist config hash", e);
         }
-        return UNKNOWN_CONFIG_HASH;
+        return null;
     }
 
     /**
@@ -271,8 +274,10 @@ class WatchlistConfig {
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println("Watchlist config hash: " + HexDump.toHexString(getWatchlistConfigHash()));
+        final byte[] hash = getWatchlistConfigHash();
+        pw.println("Watchlist config hash: " + (hash != null ? HexDump.toHexString(hash) : null));
         pw.println("Domain CRC32 digest list:");
+        // mDomainDigests won't go from non-null to null so it's safe
         if (mDomainDigests != null) {
             mDomainDigests.crc32Digests.dump(fd, pw, args);
         }
@@ -281,6 +286,7 @@ class WatchlistConfig {
             mDomainDigests.sha256Digests.dump(fd, pw, args);
         }
         pw.println("Ip CRC32 digest list:");
+        // mIpDigests won't go from non-null to null so it's safe
         if (mIpDigests != null) {
             mIpDigests.crc32Digests.dump(fd, pw, args);
         }
