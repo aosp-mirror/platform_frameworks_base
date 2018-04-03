@@ -205,6 +205,15 @@ public abstract class PackageManagerInternal {
             int userId);
 
     /**
+     * Internal api to query the suspended state of a package.
+     * @param packageName The package to check.
+     * @param userId The user id to check for.
+     * @return {@code true} if the package is suspended, {@code false} otherwise.
+     * @see PackageManager#isPackageSuspended(String)
+     */
+    public abstract boolean isPackageSuspended(String packageName, int userId);
+
+    /**
      * Do a straight uid lookup for the given package/application in the given user.
      * @see PackageManager#getPackageUidAsUser(String, int, int)
      * @return The app's uid, or < 0 if the package was not found in that user
