@@ -5562,6 +5562,16 @@ message MetricsEvent {
     // OS: P
     PREVIOUSLY_CONNECTED_DEVICES = 1370;
 
+    // ACTION: A Settings Slice is requested
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_SETTINGS_SLICE_REQUESTED = 1371;
+
+    // ACTION: A Settings Slice is updated with new value
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_SETTINGS_SLICE_CHANGED = 1372;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
