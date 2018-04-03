@@ -666,13 +666,16 @@ public class DockedStackDividerController {
         }
         final TaskStack topSecondaryStack = mDisplayContent.getTopStackInWindowingMode(
                 WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+        final RecentsAnimationController recentsAnim = mService.getRecentsAnimationController();
+        final boolean minimizedForRecentsAnimation = recentsAnim != null &&
+                recentsAnim.isSplitScreenMinimized();
         boolean homeVisible = homeTask.getTopVisibleAppToken() != null;
         if (homeVisible && topSecondaryStack != null) {
             // Home should only be considered visible if it is greater or equal to the top secondary
             // stack in terms of z-order.
             homeVisible = homeStack.compareTo(topSecondaryStack) >= 0;
         }
-        setMinimizedDockedStack(homeVisible, animate);
+        setMinimizedDockedStack(homeVisible || minimizedForRecentsAnimation, animate);
     }
 
     private boolean isWithinDisplay(Task task) {

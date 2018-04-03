@@ -159,6 +159,11 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
         }
 
         @Override
+        public boolean shouldDeferStartOnMoveToFullscreen() {
+            return true;
+        }
+
+        @Override
         public boolean setPinnedStackSize(Rect stackBounds, Rect taskBounds) {
             // TODO: Once we break the runs apart, we should fail() here if this is called outside
             //       of onAnimationStart() and onAnimationEnd()

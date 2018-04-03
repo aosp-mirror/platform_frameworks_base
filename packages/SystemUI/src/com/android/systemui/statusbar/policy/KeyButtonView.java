@@ -52,6 +52,7 @@ import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider.ButtonI
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.VibratorHelper;
 
+import static android.view.KeyEvent.KEYCODE_HOME;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
@@ -270,8 +271,12 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 if (mCode != 0) {
                     if (doIt) {
                         // If there was a pending remote recents animation, then we need to
-                        // cancel the animation now before we handle the button itself
-                        ActivityManagerWrapper.getInstance().cancelRecentsAnimation();
+                        // cancel the animation now before we handle the button itself. In the case
+                        // where we are going home and the recents animation has already started,
+                        // just cancel the recents animation, leaving the home stack in place
+                        boolean isHomeKey = mCode == KEYCODE_HOME;
+                        ActivityManagerWrapper.getInstance().cancelRecentsAnimation(!isHomeKey);
+
                         sendEvent(KeyEvent.ACTION_UP, 0);
                         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
                     } else {
