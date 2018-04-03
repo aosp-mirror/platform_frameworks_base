@@ -152,6 +152,13 @@ interface IPhoneSubInfo {
     in ImsiEncryptionInfo imsiEncryptionInfo);
 
     /**
+     * Resets the Carrier Keys in the database. This involves 2 steps:
+     *  1. Delete the keys from the database.
+     *  2. Send an intent to download new Certificates.
+     */
+    void resetCarrierKeysForImsiEncryption(int subId, String callingPackage);
+
+    /**
      * Retrieves the alpha identifier associated with the voice mail number.
      */
     String getVoiceMailAlphaTag(String callingPackage);
