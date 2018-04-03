@@ -24,6 +24,7 @@ import android.content.res.Configuration;
 import android.os.IBinder;
 import android.util.MergedConfiguration;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
 
 import java.io.PrintWriter;
@@ -48,7 +49,8 @@ public abstract class ClientTransactionHandler {
      * Execute transaction immediately without scheduling it. This is used for local requests, so
      * it will also recycle the transaction.
      */
-    void executeTransaction(ClientTransaction transaction) {
+    @VisibleForTesting
+    public void executeTransaction(ClientTransaction transaction) {
         transaction.preExecute(this);
         getTransactionExecutor().execute(transaction);
         transaction.recycle();
