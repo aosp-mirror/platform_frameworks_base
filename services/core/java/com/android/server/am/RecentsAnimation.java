@@ -186,6 +186,11 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
                     // No reason to wait for the pausing activity in this case, as the hiding of
                     // surfaces needs to be done immediately.
                     mWindowManager.executeAppTransition();
+
+                    // After reordering the stacks, reset the minimized state. At this point, either
+                    // home is now top-most and we will stay minimized (if in split-screen), or we
+                    // will have returned to the app, and the minimized state should be reset
+                    mWindowManager.checkSplitScreenMinimizedChanged(true /* animate */);
                 } finally {
                     mWindowManager.continueSurfaceLayout();
                     Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
