@@ -108,7 +108,7 @@ message Atom {
         ResourceConfigurationChanged resource_configuration_changed = 66;
         BluetoothEnabledStateChanged bluetooth_enabled_state_changed = 67;
         BluetoothConnectionStateChanged bluetooth_connection_state_changed = 68;
-        BluetoothA2dpAudioStateChanged bluetooth_a2dp_audio_state_changed = 69;
+        // 69 is blank but need not be.
         UsbConnectorStateChanged usb_connector_state_changed = 70;
         SpeakerImpedanceReported speaker_impedance_reported = 71;
         HardwareFailed hardware_failed = 72;
@@ -1005,22 +1005,6 @@ message BluetoothConnectionStateChanged {
     // The profile that is connected. Eg. GATT, A2DP, HEADSET.
     // From android.bluetooth.BluetoothAdapter.java
     optional int32 bt_profile = 3;
-}
-
-/**
- * Logs when Bluetooth A2dp audio streaming state changes.
- *
- * Logged from:
- *    TODO(b/73971848)
- */
-message BluetoothA2dpAudioStateChanged {
-    // Whether or not audio is being played using Bluetooth A2dp.
-    enum State {
-        UNKNOWN = 0;
-        PLAY = 1;
-        STOP = 2;
-    }
-    optional State state = 1;
 }
 
 /**
