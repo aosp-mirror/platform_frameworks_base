@@ -1425,11 +1425,15 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public void addQsTile(ComponentName tile) {
-        mQSPanel.getHost().addTile(tile);
+        if (mQSPanel.getHost() != null) {
+            mQSPanel.getHost().addTile(tile);
+        }
     }
 
     public void remQsTile(ComponentName tile) {
-        mQSPanel.getHost().removeTile(tile);
+        if (mQSPanel.getHost() != null) {
+            mQSPanel.getHost().removeTile(tile);
+        }
     }
 
     public void clickTile(ComponentName tile) {
