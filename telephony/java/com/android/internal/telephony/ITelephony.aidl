@@ -823,6 +823,16 @@ interface ITelephony {
     boolean isResolvingImsBinding();
 
     /**
+    *  @return true if the ImsService to bind to for the slot id specified was set, false otherwise.
+    */
+    boolean setImsService(int slotId, boolean isCarrierImsService, String packageName);
+
+    /**
+    * @return the package name of the carrier/device ImsService associated with this slot.
+    */
+    String getImsService(int slotId, boolean isCarrierImsService);
+
+    /**
      * Set the network selection mode to automatic.
      *
      * @param subId the id of the subscription to update.
