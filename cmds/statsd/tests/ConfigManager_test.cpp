@@ -44,7 +44,8 @@ static ostream& operator<<(ostream& os, const StatsdConfig& config) {
  */
 class MockListener : public ConfigListener {
 public:
-    MOCK_METHOD2(OnConfigUpdated, void(const ConfigKey& key, const StatsdConfig& config));
+    MOCK_METHOD3(OnConfigUpdated, void(const int64_t timestampNs, const ConfigKey& key,
+                                       const StatsdConfig& config));
     MOCK_METHOD1(OnConfigRemoved, void(const ConfigKey& key));
 };
 
@@ -88,25 +89,25 @@ TEST(ConfigManagerTest, TestAddUpdateRemove) {
         manager->StartupForTest();
 
         // Add another one
-        EXPECT_CALL(*(listener.get()), OnConfigUpdated(ConfigKeyEq(1, StringToId("zzz")),
+        EXPECT_CALL(*(listener.get()), OnConfigUpdated(_, ConfigKeyEq(1, StringToId("zzz")),
             StatsdConfigEq(91)))
                 .RetiresOnSaturation();
         manager->UpdateConfig(ConfigKey(1, StringToId("zzz")), config91);
 
         // Update It
-        EXPECT_CALL(*(listener.get()), OnConfigUpdated(ConfigKeyEq(1, StringToId("zzz")),
+        EXPECT_CALL(*(listener.get()), OnConfigUpdated(_, ConfigKeyEq(1, StringToId("zzz")),
             StatsdConfigEq(92)))
                 .RetiresOnSaturation();
         manager->UpdateConfig(ConfigKey(1, StringToId("zzz")), config92);
 
         // Add one with the same uid but a different name
-        EXPECT_CALL(*(listener.get()), OnConfigUpdated(ConfigKeyEq(1, StringToId("yyy")),
+        EXPECT_CALL(*(listener.get()), OnConfigUpdated(_, ConfigKeyEq(1, StringToId("yyy")),
             StatsdConfigEq(93)))
                 .RetiresOnSaturation();
         manager->UpdateConfig(ConfigKey(1, StringToId("yyy")), config93);
 
         // Add one with the same name but a different uid
-        EXPECT_CALL(*(listener.get()), OnConfigUpdated(ConfigKeyEq(2, StringToId("zzz")),
+        EXPECT_CALL(*(listener.get()), OnConfigUpdated(_, ConfigKeyEq(2, StringToId("zzz")),
             StatsdConfigEq(94)))
                 .RetiresOnSaturation();
         manager->UpdateConfig(ConfigKey(2, StringToId("zzz")), config94);
@@ -142,7 +143,7 @@ TEST(ConfigManagerTest, TestRemoveUid) {
 
     StatsdConfig config;
 
-    EXPECT_CALL(*(listener.get()), OnConfigUpdated(_, _)).Times(5);
+    EXPECT_CALL(*(listener.get()), OnConfigUpdated(_, _, _)).Times(5);
     EXPECT_CALL(*(listener.get()), OnConfigRemoved(ConfigKeyEq(2, StringToId("xxx"))));
     EXPECT_CALL(*(listener.get()), OnConfigRemoved(ConfigKeyEq(2, StringToId("yyy"))));
     EXPECT_CALL(*(listener.get()), OnConfigRemoved(ConfigKeyEq(2, StringToId("zzz"))));

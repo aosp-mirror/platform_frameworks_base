@@ -4248,6 +4248,11 @@
                   android:exported="false">
         </receiver>
 
+        <receiver android:name="com.android.server.stats.StatsCompanionService$PeriodicAlarmReceiver"
+                  android:permission="android.permission.STATSCOMPANION"
+                  android:exported="false">
+        </receiver>
+
         <receiver android:name="com.android.server.am.BatteryStatsService$UsbConnectionReceiver"
                   android:exported="false">
             <intent-filter>
