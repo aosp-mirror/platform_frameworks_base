@@ -30,6 +30,7 @@ import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.net.Proxy;
 import android.net.Uri;
+import android.net.dns.ResolvUtil;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
@@ -119,6 +120,8 @@ public class CaptivePortalLoginActivity extends Activity {
 
         // Also initializes proxy system properties.
         mCm.bindProcessToNetwork(mNetwork);
+        mCm.setProcessDefaultNetworkForHostResolution(
+                ResolvUtil.getNetworkWithUseLocalNameserversFlag(mNetwork));
 
         // Proxy system properties must be initialized before setContentView is called because
         // setContentView initializes the WebView logic which in turn reads the system properties.
