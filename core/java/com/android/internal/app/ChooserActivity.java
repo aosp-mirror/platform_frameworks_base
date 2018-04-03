@@ -389,6 +389,10 @@ public class ChooserActivity extends ResolverActivity {
 
     @Override
     public void showTargetDetails(ResolveInfo ri) {
+        if (ri == null) {
+            return;
+        }
+
         ComponentName name = ri.activityInfo.getComponentName();
         boolean pinned = mPinnedSharedPrefs.getBoolean(name.flattenToString(), false);
         ResolverTargetActionsDialogFragment f =
