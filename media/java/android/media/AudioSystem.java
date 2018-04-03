@@ -23,6 +23,7 @@ import android.media.audiopolicy.AudioMix;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 /* IF YOU CHANGE ANY OF THE CONSTANTS IN THIS FILE, DO NOT FORGET
  * TO UPDATE THE CORRESPONDING NATIVE GLUE AND AudioManager.java.
@@ -715,7 +716,8 @@ public class AudioSystem
     public static final int FORCE_HDMI_SYSTEM_AUDIO_ENFORCED = 12;
     public static final int FORCE_ENCODED_SURROUND_NEVER = 13;
     public static final int FORCE_ENCODED_SURROUND_ALWAYS = 14;
-    public static final int NUM_FORCE_CONFIG = 15;
+    public static final int FORCE_ENCODED_SURROUND_MANUAL = 15;
+    public static final int NUM_FORCE_CONFIG = 16;
     public static final int FORCE_DEFAULT = FORCE_NONE;
 
     public static String forceUseConfigToString(int config) {
@@ -735,6 +737,7 @@ public class AudioSystem
             case FORCE_HDMI_SYSTEM_AUDIO_ENFORCED: return "FORCE_HDMI_SYSTEM_AUDIO_ENFORCED";
             case FORCE_ENCODED_SURROUND_NEVER: return "FORCE_ENCODED_SURROUND_NEVER";
             case FORCE_ENCODED_SURROUND_ALWAYS: return "FORCE_ENCODED_SURROUND_ALWAYS";
+            case FORCE_ENCODED_SURROUND_MANUAL: return "FORCE_ENCODED_SURROUND_MANUAL";
             default: return "unknown config (" + config + ")" ;
         }
     }
@@ -835,6 +838,11 @@ public class AudioSystem
             int channelMask, int channelIndexMask);
 
     public static native int getMicrophones(ArrayList<MicrophoneInfo> microphonesInfo);
+
+    public static native int getSurroundFormats(Map<Integer, Boolean> surroundFormats,
+                                                boolean reported);
+
+    public static native int setSurroundFormatEnabled(int audioFormat, boolean enabled);
 
     // Items shared with audio service
 

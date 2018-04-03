@@ -66,6 +66,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
@@ -5013,6 +5014,66 @@ public class AudioManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * @hide
+     * Returns all surround formats.
+     * @return a map where the key is a surround format and
+     * the value indicates the surround format is enabled or not
+     */
+    public Map<Integer, Boolean> getSurroundFormats() {
+        Map<Integer, Boolean> surroundFormats = new HashMap<>();
+        int status = AudioSystem.getSurroundFormats(surroundFormats, false);
+        if (status != AudioManager.SUCCESS) {
+            // fail and bail!
+            Log.e(TAG, "getSurroundFormats failed:" + status);
+            return new HashMap<Integer, Boolean>(); // Always return a map.
+        }
+        return surroundFormats;
+    }
+
+    /**
+     * @hide
+     * Set a certain surround format as enabled or not.
+     * @param audioFormat a surround format, the value is one of
+     *        {@link AudioFormat#ENCODING_AC3}, {@link AudioFormat#ENCODING_E_AC3},
+     *        {@link AudioFormat#ENCODING_DTS}, {@link AudioFormat#ENCODING_DTS_HD},
+     *        {@link AudioFormat#ENCODING_AAC_LC}, {@link AudioFormat#ENCODING_DOLBY_TRUEHD},
+     *        {@link AudioFormat#ENCODING_E_AC3_JOC}. Once {@link AudioFormat#ENCODING_AAC_LC} is
+     *        set as enabled, {@link AudioFormat#ENCODING_AAC_LC},
+     *        {@link AudioFormat#ENCODING_AAC_HE_V1}, {@link AudioFormat#ENCODING_AAC_HE_V2},
+     *        {@link AudioFormat#ENCODING_AAC_ELD}, {@link AudioFormat#ENCODING_AAC_XHE} are
+     *        all enabled.
+     * @param enabled the required surround format state, true for enabled, false for disabled
+     * @return true if successful, otherwise false
+     */
+    public boolean setSurroundFormatEnabled(
+            @AudioFormat.SurroundSoundEncoding int audioFormat, boolean enabled) {
+        int status = AudioSystem.setSurroundFormatEnabled(audioFormat, enabled);
+        return status == AudioManager.SUCCESS;
+    }
+
+    /**
+     * @hide
+     * Returns all surround formats that are reported by the connected HDMI device.
+     * The keys are not affected by calling setSurroundFormatEnabled(), and the values
+     * are not affected by calling setSurroundFormatEnabled() when in AUTO mode.
+     * This information can used to show the AUTO setting for SurroundSound.
+     *
+     * @return a map where the key is a surround format and
+     * the value indicates the surround format is enabled or not
+     */
+    public Map<Integer, Boolean> getReportedSurroundFormats() {
+        Map<Integer, Boolean> reportedSurroundFormats = new HashMap<>();
+        int status = AudioSystem.getSurroundFormats(reportedSurroundFormats, true);
+        if (status != AudioManager.SUCCESS) {
+            // fail and bail!
+            Log.e(TAG, "getReportedSurroundFormats failed:" + status);
+            return new HashMap<Integer, Boolean>(); // Always return a map.
+        }
+        return reportedSurroundFormats;
+    }
+
 
     //---------------------------------------------------------
     // Inner classes
