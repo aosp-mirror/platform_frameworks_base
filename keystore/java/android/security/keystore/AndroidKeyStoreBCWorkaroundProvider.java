@@ -93,15 +93,17 @@ class AndroidKeyStoreBCWorkaroundProvider extends Provider {
         putSymmetricCipherImpl("AES/CTR/NoPadding",
                 PACKAGE_NAME + ".AndroidKeyStoreUnauthenticatedAESCipherSpi$CTR$NoPadding");
 
-        putSymmetricCipherImpl("DESede/CBC/NoPadding",
+        if ("true".equals(System.getProperty("supports3DES"))) {
+            putSymmetricCipherImpl("DESede/CBC/NoPadding",
                 PACKAGE_NAME + ".AndroidKeyStore3DESCipherSpi$CBC$NoPadding");
-        putSymmetricCipherImpl("DESede/CBC/PKCS7Padding",
+            putSymmetricCipherImpl("DESede/CBC/PKCS7Padding",
                 PACKAGE_NAME + ".AndroidKeyStore3DESCipherSpi$CBC$PKCS7Padding");
 
-        putSymmetricCipherImpl("DESede/ECB/NoPadding",
+            putSymmetricCipherImpl("DESede/ECB/NoPadding",
                 PACKAGE_NAME + ".AndroidKeyStore3DESCipherSpi$ECB$NoPadding");
-        putSymmetricCipherImpl("DESede/ECB/PKCS7Padding",
+            putSymmetricCipherImpl("DESede/ECB/PKCS7Padding",
                 PACKAGE_NAME + ".AndroidKeyStore3DESCipherSpi$ECB$PKCS7Padding");
+        }
 
         putSymmetricCipherImpl("AES/GCM/NoPadding",
                 PACKAGE_NAME + ".AndroidKeyStoreAuthenticatedAESCipherSpi$GCM$NoPadding");

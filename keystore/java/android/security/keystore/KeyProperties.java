@@ -689,7 +689,11 @@ public abstract class KeyProperties {
      */
     public static final int ORIGIN_UNKNOWN = 1 << 2;
 
-    /** Key was imported into the AndroidKeyStore in an encrypted wrapper */
+    /**
+     * Key was imported into the AndroidKeyStore in an encrypted wrapper. Unlike imported keys,
+     * securely imported keys can be imported without appearing as plaintext in the device's host
+     * memory.
+     */
     public static final int ORIGIN_SECURELY_IMPORTED = 1 << 3;
 
 
