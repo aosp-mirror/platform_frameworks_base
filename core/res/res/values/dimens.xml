@@ -207,6 +207,9 @@
     <!-- The bottom padding for the notification header -->
     <dimen name="notification_header_padding_bottom">16dp</dimen>
 
+    <!-- The margin at the top of the notification header when dozing. -->
+    <dimen name="notification_header_margin_top_ambient">3dp</dimen>
+
     <!-- The margin at the bottom of the notification header. -->
     <dimen name="notification_header_margin_bottom">0dp</dimen>
 

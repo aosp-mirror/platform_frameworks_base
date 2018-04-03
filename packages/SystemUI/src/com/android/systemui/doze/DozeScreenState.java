@@ -80,7 +80,9 @@ public class DozeScreenState implements DozeMachine.Part {
         }
 
         boolean messagePending = mHandler.hasCallbacks(mApplyPendingScreenState);
-        if (messagePending || oldState == DozeMachine.State.INITIALIZED) {
+        boolean pulseEnding = oldState  == DozeMachine.State.DOZE_PULSE_DONE
+                && newState == DozeMachine.State.DOZE_AOD;
+        if (messagePending || oldState == DozeMachine.State.INITIALIZED || pulseEnding) {
             // During initialization, we hide the navigation bar. That is however only applied after
             // a traversal; setting the screen state here is immediate however, so it can happen
             // that the screen turns on again before the navigation bar is hidden. To work around
