@@ -52,6 +52,7 @@ public final class SharedUserSetting extends SettingBase {
         uidFlags =  _pkgFlags;
         uidPrivateFlags = _pkgPrivateFlags;
         name = _name;
+        seInfoTargetSdkVersion = android.os.Build.VERSION_CODES.CUR_DEVELOPMENT;
     }
 
     @Override
