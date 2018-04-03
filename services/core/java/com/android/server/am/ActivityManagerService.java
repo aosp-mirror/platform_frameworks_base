@@ -22063,6 +22063,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             activeInstr.mUiAutomationConnection = uiAutomationConnection;
             activeInstr.mResultClass = className;
 
+            boolean disableHiddenApiChecks =
+                    (flags & INSTRUMENTATION_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
+            if (disableHiddenApiChecks) {
+                enforceCallingPermission(android.Manifest.permission.DISABLE_HIDDEN_API_CHECKS,
+                        "disable hidden API checks");
+            }
+
             final long origId = Binder.clearCallingIdentity();
             // Instrumentation can kill and relaunch even persistent processes
             forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true, false, userId,
@@ -22072,9 +22079,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mUsageStatsService.reportEvent(ii.targetPackage, userId,
                         UsageEvents.Event.SYSTEM_INTERACTION);
             }
-            boolean disableHiddenApiChecks =
-                    (flags & INSTRUMENTATION_FLAG_DISABLE_HIDDEN_API_CHECKS) != 0;
-
             // TODO: Temporary whitelist of packages which need to be exempt from hidden API
             //       checks. Remove this as soon as the testing infrastructure allows to set
             //       the flag in AndroidTest.xml.
