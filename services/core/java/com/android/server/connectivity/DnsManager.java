@@ -34,22 +34,19 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkUtils;
 import android.net.Uri;
+import android.net.dns.ResolvUtil;
 import android.os.Binder;
 import android.os.INetworkManagementService;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.system.GaiException;
-import android.system.OsConstants;
-import android.system.StructAddrinfo;
 import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.server.connectivity.MockableSystemProperties;
 
-import libcore.io.Libcore;
-
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -126,28 +123,19 @@ public class DnsManager {
     }
 
     public static PrivateDnsConfig tryBlockingResolveOf(Network network, String name) {
-        final StructAddrinfo hints = new StructAddrinfo();
-        // Unnecessary, but expressly no AI_ADDRCONFIG.
-        hints.ai_flags = 0;
-        // Fetch all IP addresses at once to minimize re-resolution.
-        hints.ai_family = OsConstants.AF_UNSPEC;
-        hints.ai_socktype = OsConstants.SOCK_DGRAM;
-
         try {
-            final InetAddress[] ips = Libcore.os.android_getaddrinfo(name, hints, network.netId);
-            if (ips != null && ips.length > 0) {
-                return new PrivateDnsConfig(name, ips);
-            }
-        } catch (GaiException ignored) {}
-
-        return null;
+            final InetAddress[] ips = ResolvUtil.blockingResolveAllLocally(network, name);
+            return new PrivateDnsConfig(name, ips);
+        } catch (UnknownHostException uhe) {
+            return new PrivateDnsConfig(name, null);
+        }
     }
 
     public static Uri[] getPrivateDnsSettingsUris() {
-        final Uri[] uris = new Uri[2];
-        uris[0] = Settings.Global.getUriFor(PRIVATE_DNS_MODE);
-        uris[1] = Settings.Global.getUriFor(PRIVATE_DNS_SPECIFIER);
-        return uris;
+        return new Uri[]{
+            Settings.Global.getUriFor(PRIVATE_DNS_MODE),
+            Settings.Global.getUriFor(PRIVATE_DNS_SPECIFIER),
+        };
     }
 
     private final Context mContext;
@@ -203,7 +191,7 @@ public class DnsManager {
         // NetworkMonitor to decide which networks need validation and runs the
         // blocking calls to resolve Private DNS strict mode hostnames.
         //
-        // At this time we do attempt to enable Private DNS on non-Internet
+        // At this time we do not attempt to enable Private DNS on non-Internet
         // networks like IMS.
         final PrivateDnsConfig privateDnsCfg = mPrivateDnsMap.get(netId);
 
