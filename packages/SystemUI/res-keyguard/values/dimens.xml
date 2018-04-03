@@ -41,14 +41,14 @@
          Should be 0 on devices with plenty of room (e.g. tablets) -->
     <dimen name="eca_overlap">-10dip</dimen>
 
-    <!-- Default clock parameters -->
-    <dimen name="bottom_text_spacing_digital">-24dp</dimen>
     <!-- Slice header -->
-    <dimen name="widget_title_font_size">24sp</dimen>
-    <!-- Slice subtitle  -->
-    <dimen name="widget_label_font_size">16sp</dimen>
+    <dimen name="widget_title_font_size">24dp</dimen>
+    <dimen name="widget_title_bottom_margin">7dp</dimen>
+    <dimen name="bottom_text_spacing_digital">0dp</dimen>
+    <!-- Slice subtitle -->
+    <dimen name="widget_label_font_size">16dp</dimen>
     <!-- Slice offset when pulsing -->
-    <dimen name="widget_pulsing_bottom_padding">24dp</dimen>
+    <dimen name="widget_pulsing_bottom_padding">48dp</dimen>
     <!-- Clock without header -->
     <dimen name="widget_big_font_size">64dp</dimen>
     <!-- Clock with header -->

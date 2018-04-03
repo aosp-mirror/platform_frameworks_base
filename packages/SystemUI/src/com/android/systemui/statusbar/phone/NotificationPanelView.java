@@ -1866,7 +1866,7 @@ public class NotificationPanelView extends PanelView implements
         if (view == null && mQsExpanded) {
             return;
         }
-        if (needsAnimation) {
+        if (needsAnimation && mDarkAmount == 0) {
             mAnimateNextPositionUpdate = true;
         }
         ExpandableView firstChildNotGone = mNotificationStackScroller.getFirstChildNotGone();
@@ -2652,10 +2652,13 @@ public class NotificationPanelView extends PanelView implements
 
     public void setPulsing(boolean pulsing) {
         mPulsing = pulsing;
-        mKeyguardStatusView.setPulsing(pulsing);
-        positionClockAndNotifications();
-        mNotificationStackScroller.setPulsing(pulsing, mKeyguardStatusView.getLocationOnScreen()[1]
-                + mKeyguardStatusView.getClockBottom());
+        final boolean canAnimatePulse =
+                !DozeParameters.getInstance(mContext).getDisplayNeedsBlanking();
+        if (canAnimatePulse) {
+            mAnimateNextPositionUpdate = true;
+        }
+        mNotificationStackScroller.setPulsing(pulsing, canAnimatePulse);
+        mKeyguardStatusView.setPulsing(pulsing, canAnimatePulse);
     }
 
     public void setAmbientIndicationBottomPadding(int ambientIndicationBottomPadding) {
