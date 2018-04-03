@@ -18,6 +18,22 @@
     xmlns:sysui="http://schemas.android.com/apk/res-auto"
     android:title="@string/system_ui_tuner">
 
+    <PreferenceScreen
+        android:key="quick_settings"
+        android:title="@string/quick_settings" >
+
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="qs_show_brightness"
+            android:title="@string/tuner_show_brightness_new"
+            sysui:defValue="true" />
+
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="qs_brightness_position_bottom"
+            android:title="@string/tuner_brightness_position_bottom"
+            sysui:defValue="false" />
+
+    </PreferenceScreen>
+
     <Preference
         android:key="status_bar"
         android:title="@string/status_bar"

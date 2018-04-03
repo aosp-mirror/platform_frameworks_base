@@ -1,5 +1,5 @@
 <!--
-     Copyright (C) 2019 Magma
+     Copyright (C) 2020 The AospLime Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -87,4 +87,8 @@
 	<!-- Hide lock icon -->
     <string name="tuner_keyguard_show_lock_icon_title">Show lock status</string>
     <string name="tuner_keyguard_show_lock_icon_summary">Show current lock status icon on top</string>
+
+    <string name="tuner_quick_settings">Quick settings</string>
+    <string name="tuner_show_brightness_new">Show brightness slider</string>
+    <string name="tuner_brightness_position_bottom">Brightness slider on bottom</string>
 </resources>
