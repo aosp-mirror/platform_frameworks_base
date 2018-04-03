@@ -508,7 +508,9 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
     }
 
     /**
-     * Returns {@code true} if the key cannot be used unless the device screen is unlocked.
+     * Returns {@code true} if the screen must be unlocked for this key to be used for encryption or
+     * signing. Decryption and signature verification will still be available when the screen is
+     * locked.
      *
      * @see Builder#setUnlockedDeviceRequired(boolean)
      */
@@ -929,9 +931,10 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
 
         /**
          * Sets whether the keystore requires the screen to be unlocked before allowing decryption
-         * using this key. If this is set to {@code true}, any attempt to decrypt using this key
-         * while the screen is locked will fail. A locked device requires a PIN, password,
-         * fingerprint, or other trusted factor to access.
+         * using this key. If this is set to {@code true}, any attempt to decrypt or sign using this
+         * key while the screen is locked will fail. A locked device requires a PIN, password,
+         * fingerprint, or other trusted factor to access. While the screen is locked, the key can
+         * still be used for encryption or signature verification.
          */
         @NonNull
         public Builder setUnlockedDeviceRequired(boolean unlockedDeviceRequired) {
