@@ -20,6 +20,8 @@
 #include "renderthread/EglManager.h"
 #include "tests/common/TestUtils.h"
 
+#include <SkImagePriv.h>
+
 using namespace android;
 using namespace android::uirenderer;
 using namespace android::uirenderer::renderthread;
@@ -49,7 +51,12 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, trimMemory) {
         surfaces.push_back(surface);
     }
 
-    ASSERT_TRUE(1 < surfaces.size());
+    // create an image and pin it so that we have something with a unique key in the cache
+    sk_sp<Bitmap> bitmap =
+            Bitmap::allocateHeapBitmap(SkImageInfo::MakeA8(displayInfo.w, displayInfo.h));
+    sk_sp<SkColorFilter> filter;
+    sk_sp<SkImage> image = bitmap->makeImage(&filter);
+    ASSERT_TRUE(SkImage_pinAsTexture(image.get(), grContext));
 
     // attempt to trim all memory while we still hold strong refs
     renderThread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::Complete);
@@ -61,11 +68,14 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(CacheManager, trimMemory) {
         surfaces[i].reset();
     }
 
+    // unpin the image which should add a unique purgeable key to the cache
+    SkImage_unpinAsTexture(image.get(), grContext);
+
     // verify that we have enough purgeable bytes
     const size_t purgeableBytes = grContext->getResourceCachePurgeableBytes();
     ASSERT_TRUE(renderThread.cacheManager().getBackgroundCacheSize() < purgeableBytes);
 
-    // UI hidden and make sure only some got purged
+    // UI hidden and make sure only some got purged (unique should remain)
     renderThread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::UiHidden);
     ASSERT_TRUE(0 < grContext->getResourceCachePurgeableBytes());
     ASSERT_TRUE(renderThread.cacheManager().getBackgroundCacheSize() > getCacheUsage(grContext));
