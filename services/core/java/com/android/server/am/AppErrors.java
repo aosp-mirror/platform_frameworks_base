@@ -1041,7 +1041,15 @@ class AppErrors {
         }
 
         StatsLog.write(StatsLog.ANR_OCCURRED, app.uid, app.processName,
-                activity == null ? "unknown": activity.shortComponentName, annotation);
+                activity == null ? "unknown": activity.shortComponentName, annotation,
+                (app.info != null) ? (app.info.isInstantApp()
+                        ? StatsLog.ANROCCURRED__IS_INSTANT_APP__TRUE
+                        : StatsLog.ANROCCURRED__IS_INSTANT_APP__FALSE)
+                        : StatsLog.ANROCCURRED__IS_INSTANT_APP__UNAVAILABLE,
+                app != null ? (app.isInterestingToUserLocked()
+                        ? StatsLog.ANROCCURRED__FOREGROUND_STATE__FOREGROUND
+                        : StatsLog.ANROCCURRED__FOREGROUND_STATE__BACKGROUND)
+                        : StatsLog.ANROCCURRED__FOREGROUND_STATE__UNKNOWN);
         mService.addErrorToDropBox("anr", app, app.processName, activity, parent, annotation,
                 cpuInfo, tracesFile, null);
 
