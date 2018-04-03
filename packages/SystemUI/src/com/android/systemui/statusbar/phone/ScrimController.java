@@ -807,7 +807,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     @VisibleForTesting
     protected WakeLock createWakeLock() {
          return new DelayedWakeLock(getHandler(),
-                WakeLock.createPartial(mContext, "Doze"));
+                WakeLock.createPartial(mContext, "Scrims"));
     }
 
     @Override
