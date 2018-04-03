@@ -178,6 +178,7 @@ import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
+import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
@@ -1366,6 +1367,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Window was not laid out for this display yet, so make sure mLayoutSeq does not match.
         if (dc != null) {
             mLayoutSeq = dc.mLayoutSeq - 1;
+            mInputWindowHandle.displayId = dc.getDisplayId();
         }
     }
 
@@ -1378,7 +1380,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     public int getDisplayId() {
         final DisplayContent displayContent = getDisplayContent();
         if (displayContent == null) {
-            return -1;
+            return Display.INVALID_DISPLAY;
         }
         return displayContent.getDisplayId();
     }
