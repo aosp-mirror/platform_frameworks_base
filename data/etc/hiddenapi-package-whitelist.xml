@@ -55,6 +55,7 @@ which apps should be allowed to access the entire private API.
   <hidden-api-whitelisted-app package="com.android.companiondevicemanager" />
   <hidden-api-whitelisted-app package="com.android.customlocale2" />
   <hidden-api-whitelisted-app package="com.android.defcontainer" />
+  <hidden-api-whitelisted-app package="com.android.development" />
   <hidden-api-whitelisted-app package="com.android.documentsui" />
   <hidden-api-whitelisted-app package="com.android.dreams.basic" />
   <hidden-api-whitelisted-app package="com.android.egg" />
