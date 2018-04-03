@@ -2104,6 +2104,8 @@ Landroid/util/Slog;->w(Ljava/lang/String;Ljava/lang/String;)I
 Landroid/util/SparseIntArray;->mKeys:[I
 Landroid/util/SparseIntArray;->mSize:I
 Landroid/util/SparseIntArray;->mValues:[I
+Landroid/view/accessibility/AccessibilityInteractionClient;->clearCache()V
+Landroid/view/accessibility/AccessibilityInteractionClient;->getInstance()Landroid/view/accessibility/AccessibilityInteractionClient;
 Landroid/view/accessibility/AccessibilityManager;->getInstance(Landroid/content/Context;)Landroid/view/accessibility/AccessibilityManager;
 Landroid/view/accessibility/AccessibilityManager;->isHighTextContrastEnabled()Z
 Landroid/view/accessibility/AccessibilityManager;->mAccessibilityStateChangeListeners:Landroid/util/ArrayMap;
