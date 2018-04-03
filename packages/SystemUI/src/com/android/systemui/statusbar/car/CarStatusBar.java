@@ -182,27 +182,6 @@ public class CarStatusBar extends StatusBar implements
             // By default, the BatteryMeterView should not be visible. It will be toggled
             // when a device has connected by bluetooth.
             mBatteryMeterView.setVisibility(View.GONE);
-
-            ViewStub stub = fragment.getView().findViewById(R.id.connected_device_signals_stub);
-            View signalsView = stub.inflate();
-
-            // When a ViewStub if inflated, it does not respect the margins on the
-            // inflated view.
-            // As a result, manually add the ending margin.
-            ((LinearLayout.LayoutParams) signalsView.getLayoutParams()).setMarginEnd(
-                    mContext.getResources().getDimensionPixelOffset(
-                            R.dimen.status_bar_connected_device_signal_margin_end));
-
-            if (mConnectedDeviceSignalController != null) {
-                mConnectedDeviceSignalController.stopListening();
-            }
-            mConnectedDeviceSignalController = new ConnectedDeviceSignalController(mContext,
-                    signalsView);
-            mConnectedDeviceSignalController.startListening();
-
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "makeStatusBarView(). mBatteryMeterView: " + mBatteryMeterView);
-            }
         });
     }
 
