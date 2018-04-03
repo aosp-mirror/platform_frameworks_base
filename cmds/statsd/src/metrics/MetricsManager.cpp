@@ -49,7 +49,7 @@ namespace statsd {
 const int FIELD_ID_METRICS = 1;
 
 MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
-                               const long timeBaseSec,
+                               const long timeBaseSec, const long currentTimeSec,
                                const sp<UidMap> &uidMap,
                                const sp<AlarmMonitor>& anomalyAlarmMonitor,
                                const sp<AlarmMonitor>& periodicAlarmMonitor)
@@ -58,7 +58,7 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
       mLastReportWallClockNs(getWallClockNs()) {
     mConfigValid =
             initStatsdConfig(key, config, *uidMap, anomalyAlarmMonitor, periodicAlarmMonitor,
-                             timeBaseSec, mTagIds, mAllAtomMatchers,
+                             timeBaseSec, currentTimeSec, mTagIds, mAllAtomMatchers,
                              mAllConditionTrackers, mAllMetricProducers, mAllAnomalyTrackers,
                              mAllPeriodicAlarmTrackers, mConditionToMetricMap, mTrackerToMetricMap,
                              mTrackerToConditionMap, mNoReportMetricIds);

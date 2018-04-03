@@ -36,7 +36,8 @@ namespace statsd {
 // A MetricsManager is responsible for managing metrics from one single config source.
 class MetricsManager : public PackageInfoListener {
 public:
-    MetricsManager(const ConfigKey& configKey, const StatsdConfig& config, const long timeBaseSec,
+    MetricsManager(const ConfigKey& configKey, const StatsdConfig& config,
+                   const long timeBaseSec, const long currentTimeSec,
                    const sp<UidMap>& uidMap, const sp<AlarmMonitor>& anomalyAlarmMonitor,
                    const sp<AlarmMonitor>& periodicAlarmMonitor);
 

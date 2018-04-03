@@ -43,7 +43,7 @@ using android::util::ProtoOutputStream;
 class MockMetricsManager : public MetricsManager {
 public:
     MockMetricsManager() : MetricsManager(
-        ConfigKey(1, 12345), StatsdConfig(), 1000,
+        ConfigKey(1, 12345), StatsdConfig(), 1000, 1000,
         new UidMap(),
         new AlarmMonitor(10, [](const sp<IStatsCompanionService>&, int64_t){},
                          [](const sp<IStatsCompanionService>&){}),
@@ -135,7 +135,7 @@ TEST(StatsLogProcessorTest, TestUidMapHasSnapshot) {
     ConfigKey key(3, 4);
     StatsdConfig config;
     config.add_allowed_log_source("AID_ROOT");
-    p.OnConfigUpdated(key, config);
+    p.OnConfigUpdated(0, key, config);
 
     // Expect to get no metrics, but snapshot specified above in uidmap.
     vector<uint8_t> bytes;
