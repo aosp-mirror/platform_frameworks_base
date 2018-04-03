@@ -75,7 +75,7 @@ message PrintSpoolerInternalStateProto {
     repeated PrintJobInfoProto print_jobs = 1;
 
     // Files used by these print jobs
-    repeated string print_job_files = 2;
+    repeated string print_job_files = 2 [ (android.privacy).dest = DEST_EXPLICIT ];
 
     // Approved print services
     repeated android.content.ComponentNameProto approved_services = 3;
@@ -101,7 +101,7 @@ message PrinterCapabilitiesProto {
 }
 
 message PrinterInfoProto {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (android.msg_privacy).dest = DEST_EXPLICIT;
 
     // The id of the printer
     optional PrinterIdProto id = 1;
@@ -123,7 +123,7 @@ message PrinterInfoProto {
         STATUS_UNAVAILABLE = 3;
     }
     // The status of the printer
-    optional Status status = 3;
+    optional Status status = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     // The description of the printer
     optional string description = 4;
@@ -171,13 +171,13 @@ message InstalledPrintServiceProto {
 }
 
 message PrinterIdProto {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (android.msg_privacy).dest = DEST_EXPLICIT;
 
     // Component name of the service that reported the printer
-    optional android.content.ComponentNameProto service_name = 1;
+    optional android.content.ComponentNameProto service_name = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     // Local id of the printer
-    optional string local_id = 2 [ (android.privacy).dest = DEST_EXPLICIT ];
+    optional string local_id = 2;
 }
 
 message ActivePrintServiceProto {
@@ -331,7 +331,7 @@ message PrintJobInfoProto {
     optional string label = 1 [ (android.privacy).dest = DEST_EXPLICIT ];
 
     // Id of the job
-    optional string print_job_id = 2;
+    optional string print_job_id = 2 [ (android.privacy).dest = DEST_EXPLICIT ];
 
     enum State {
         // Unknown state
@@ -366,7 +366,7 @@ message PrintJobInfoProto {
     optional PrinterIdProto printer = 4;
 
     // Tag assigned to the job
-    optional string tag = 5;
+    optional string tag = 5 [ (android.privacy).dest = DEST_EXPLICIT ];
 
     // Time the job was created
     optional int64 creation_time = 6;

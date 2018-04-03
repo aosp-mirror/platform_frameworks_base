@@ -17,7 +17,6 @@
 package android.service.textclassifier;
 
 import android.Manifest;
-import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -35,10 +34,14 @@ import android.text.TextUtils;
 import android.util.Slog;
 import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.TextClassification;
+import android.view.textclassifier.TextClassificationContext;
 import android.view.textclassifier.TextClassificationManager;
+import android.view.textclassifier.TextClassificationSessionId;
 import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextLinks;
 import android.view.textclassifier.TextSelection;
+
+import com.android.internal.util.Preconditions;
 
 /**
  * Abstract base class for the TextClassifier service.
@@ -88,11 +91,13 @@ public abstract class TextClassifierService extends Service {
         /** {@inheritDoc} */
         @Override
         public void onSuggestSelection(
-                CharSequence text, int selectionStartIndex, int selectionEndIndex,
-                TextSelection.Options options, ITextSelectionCallback callback)
+                TextClassificationSessionId sessionId,
+                TextSelection.Request request, ITextSelectionCallback callback)
                 throws RemoteException {
+            Preconditions.checkNotNull(request);
+            Preconditions.checkNotNull(callback);
             TextClassifierService.this.onSuggestSelection(
-                    text, selectionStartIndex, selectionEndIndex, options, mCancellationSignal,
+                    sessionId, request, mCancellationSignal,
                     new Callback<TextSelection>() {
                         @Override
                         public void onSuccess(TextSelection result) {
@@ -119,11 +124,13 @@ public abstract class TextClassifierService extends Service {
         /** {@inheritDoc} */
         @Override
         public void onClassifyText(
-                CharSequence text, int startIndex, int endIndex,
-                TextClassification.Options options, ITextClassificationCallback callback)
+                TextClassificationSessionId sessionId,
+                TextClassification.Request request, ITextClassificationCallback callback)
                 throws RemoteException {
+            Preconditions.checkNotNull(request);
+            Preconditions.checkNotNull(callback);
             TextClassifierService.this.onClassifyText(
-                    text, startIndex, endIndex, options, mCancellationSignal,
+                    sessionId, request, mCancellationSignal,
                     new Callback<TextClassification>() {
                         @Override
                         public void onSuccess(TextClassification result) {
@@ -148,10 +155,13 @@ public abstract class TextClassifierService extends Service {
         /** {@inheritDoc} */
         @Override
         public void onGenerateLinks(
-                CharSequence text, TextLinks.Options options, ITextLinksCallback callback)
+                TextClassificationSessionId sessionId,
+                TextLinks.Request request, ITextLinksCallback callback)
                 throws RemoteException {
+            Preconditions.checkNotNull(request);
+            Preconditions.checkNotNull(callback);
             TextClassifierService.this.onGenerateLinks(
-                    text, options, mCancellationSignal,
+                    sessionId, request, mCancellationSignal,
                     new Callback<TextLinks>() {
                         @Override
                         public void onSuccess(TextLinks result) {
@@ -175,8 +185,28 @@ public abstract class TextClassifierService extends Service {
 
         /** {@inheritDoc} */
         @Override
-        public void onSelectionEvent(SelectionEvent event) throws RemoteException {
-            TextClassifierService.this.onSelectionEvent(event);
+        public void onSelectionEvent(
+                TextClassificationSessionId sessionId,
+                SelectionEvent event) throws RemoteException {
+            Preconditions.checkNotNull(event);
+            TextClassifierService.this.onSelectionEvent(sessionId, event);
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void onCreateTextClassificationSession(
+                TextClassificationContext context, TextClassificationSessionId sessionId)
+                throws RemoteException {
+            Preconditions.checkNotNull(context);
+            Preconditions.checkNotNull(sessionId);
+            TextClassifierService.this.onCreateTextClassificationSession(context, sessionId);
+        }
+
+        /** {@inheritDoc} */
+        @Override
+        public void onDestroyTextClassificationSession(TextClassificationSessionId sessionId)
+                throws RemoteException {
+            TextClassifierService.this.onDestroyTextClassificationSession(sessionId);
         }
     };
 
@@ -193,19 +223,14 @@ public abstract class TextClassifierService extends Service {
      * Returns suggested text selection start and end indices, recognized entity types, and their
      * associated confidence scores. The entity types are ordered from highest to lowest scoring.
      *
-     * @param text text providing context for the selected text (which is specified
-     *      by the sub sequence starting at selectionStartIndex and ending at selectionEndIndex)
-     * @param selectionStartIndex start index of the selected part of text
-     * @param selectionEndIndex end index of the selected part of text
-     * @param options optional input parameters
+     * @param sessionId the session id
+     * @param request the text selection request
      * @param cancellationSignal object to watch for canceling the current operation
      * @param callback the callback to return the result to
      */
     public abstract void onSuggestSelection(
-            @NonNull CharSequence text,
-            @IntRange(from = 0) int selectionStartIndex,
-            @IntRange(from = 0) int selectionEndIndex,
-            @Nullable TextSelection.Options options,
+            @Nullable TextClassificationSessionId sessionId,
+            @NonNull TextSelection.Request request,
             @NonNull CancellationSignal cancellationSignal,
             @NonNull Callback<TextSelection> callback);
 
@@ -213,19 +238,14 @@ public abstract class TextClassifierService extends Service {
      * Classifies the specified text and returns a {@link TextClassification} object that can be
      * used to generate a widget for handling the classified text.
      *
-     * @param text text providing context for the text to classify (which is specified
-     *      by the sub sequence starting at startIndex and ending at endIndex)
-     * @param startIndex start index of the text to classify
-     * @param endIndex end index of the text to classify
-     * @param options optional input parameters
+     * @param sessionId the session id
+     * @param request the text classification request
      * @param cancellationSignal object to watch for canceling the current operation
      * @param callback the callback to return the result to
      */
     public abstract void onClassifyText(
-            @NonNull CharSequence text,
-            @IntRange(from = 0) int startIndex,
-            @IntRange(from = 0) int endIndex,
-            @Nullable TextClassification.Options options,
+            @Nullable TextClassificationSessionId sessionId,
+            @NonNull TextClassification.Request request,
             @NonNull CancellationSignal cancellationSignal,
             @NonNull Callback<TextClassification> callback);
 
@@ -233,14 +253,14 @@ public abstract class TextClassifierService extends Service {
      * Generates and returns a {@link TextLinks} that may be applied to the text to annotate it with
      * links information.
      *
-     * @param text the text to generate annotations for
-     * @param options configuration for link generation
+     * @param sessionId the session id
+     * @param request the text classification request
      * @param cancellationSignal object to watch for canceling the current operation
      * @param callback the callback to return the result to
      */
     public abstract void onGenerateLinks(
-            @NonNull CharSequence text,
-            @Nullable TextLinks.Options options,
+            @Nullable TextClassificationSessionId sessionId,
+            @NonNull TextLinks.Request request,
             @NonNull CancellationSignal cancellationSignal,
             @NonNull Callback<TextLinks> callback);
 
@@ -250,8 +270,30 @@ public abstract class TextClassifierService extends Service {
      * happened.
      *
      * <p>The default implementation ignores the event.
+     *
+     * @param sessionId the session id
+     * @param event the selection event
      */
-    public void onSelectionEvent(@NonNull SelectionEvent event) {}
+    public void onSelectionEvent(
+            @Nullable TextClassificationSessionId sessionId, @NonNull SelectionEvent event) {}
+
+    /**
+     * Creates a new text classification session for the specified context.
+     *
+     * @param context the text classification context
+     * @param sessionId the session's Id
+     */
+    public abstract void onCreateTextClassificationSession(
+            @NonNull TextClassificationContext context,
+            @NonNull TextClassificationSessionId sessionId);
+
+    /**
+     * Destroys the text classification session identified by the specified sessionId.
+     *
+     * @param sessionId the id of the session to destroy
+     */
+    public abstract void onDestroyTextClassificationSession(
+            @NonNull TextClassificationSessionId sessionId);
 
     /**
      * Returns a TextClassifier that runs in this service's process.

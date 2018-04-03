@@ -367,11 +367,18 @@ public class Canvas extends BaseCanvas {
      * call to <code>saveLayer()</code> and <code>saveLayerAlpha()</code>
      * variants.
      *
-     * @removed There are no visible methods remaining that use this flag
      * <p class="note"><strong>Note:</strong> all methods that accept this flag
      * have flagless versions that are equivalent to passing this flag.
      */
     public static final int ALL_SAVE_FLAG = 0x1F;
+
+    private static void checkValidSaveFlags(int saveFlags) {
+        if (sCompatiblityVersion >= Build.VERSION_CODES.P
+                && saveFlags != ALL_SAVE_FLAG) {
+            throw new IllegalArgumentException(
+                    "Invalid Layer Save Flag - only ALL_SAVE_FLAGS is allowed");
+        }
+    }
 
     /**
      * Saves the current matrix and clip onto a private stack.
@@ -414,10 +421,8 @@ public class Canvas extends BaseCanvas {
      * redirects drawing to an offscreen bitmap.
      * <p class="note"><strong>Note:</strong> this method is very expensive,
      * incurring more than double rendering cost for contained content. Avoid
-     * using this method, especially if the bounds provided are large, or if
-     * the {@link #CLIP_TO_LAYER_SAVE_FLAG} is omitted from the
-     * {@code saveFlags} parameter. It is recommended to use a
-     * {@link android.view.View#LAYER_TYPE_HARDWARE hardware layer} on a View
+     * using this method, especially if the bounds provided are large. It is
+     * recommended to use a {@link android.view.View#LAYER_TYPE_HARDWARE hardware layer} on a View
      * to apply an xfermode, color filter, or alpha, as it will perform much
      * better than this method.
      * <p>
@@ -431,7 +436,9 @@ public class Canvas extends BaseCanvas {
      * {@link Paint#getColorFilter() ColorFilter} are applied when the
      * offscreen bitmap is drawn back when restore() is called.
      *
-     * @removed
+     * As of API Level API level {@value Build.VERSION_CODES#P} the only valid
+     * {@code saveFlags} is {@link #ALL_SAVE_FLAG}.  All other flags are ignored.
+     *
      * @deprecated Use {@link #saveLayer(RectF, Paint)} instead.
      * @param bounds May be null. The maximum size the offscreen bitmap
      *               needs to be (in local coordinates)
@@ -445,7 +452,9 @@ public class Canvas extends BaseCanvas {
         if (bounds == null) {
             bounds = new RectF(getClipBounds());
         }
-        return saveLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, paint, saveFlags);
+        checkValidSaveFlags(saveFlags);
+        return saveLayer(bounds.left, bounds.top, bounds.right, bounds.bottom, paint,
+                ALL_SAVE_FLAG);
     }
 
     /**
@@ -479,17 +488,26 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
+     * @hide
+     */
+    public int saveUnclippedLayer(int left, int top, int right, int bottom) {
+        return nSaveLayer(mNativeCanvasWrapper, left, top, right, bottom, 0, 0);
+    }
+
+    /**
      * Helper version of saveLayer() that takes 4 values rather than a RectF.
      *
-     * @removed
+     * As of API Level API level {@value Build.VERSION_CODES#P} the only valid
+     * {@code saveFlags} is {@link #ALL_SAVE_FLAG}.  All other flags are ignored.
+     *
      * @deprecated Use {@link #saveLayer(float, float, float, float, Paint)} instead.
      */
-    @Deprecated
     public int saveLayer(float left, float top, float right, float bottom, @Nullable Paint paint,
             @Saveflags int saveFlags) {
+        checkValidSaveFlags(saveFlags);
         return nSaveLayer(mNativeCanvasWrapper, left, top, right, bottom,
                 paint != null ? paint.getNativeInstance() : 0,
-                saveFlags);
+                ALL_SAVE_FLAG);
     }
 
     /**
@@ -505,10 +523,8 @@ public class Canvas extends BaseCanvas {
      * redirects drawing to an offscreen bitmap.
      * <p class="note"><strong>Note:</strong> this method is very expensive,
      * incurring more than double rendering cost for contained content. Avoid
-     * using this method, especially if the bounds provided are large, or if
-     * the {@link #CLIP_TO_LAYER_SAVE_FLAG} is omitted from the
-     * {@code saveFlags} parameter. It is recommended to use a
-     * {@link android.view.View#LAYER_TYPE_HARDWARE hardware layer} on a View
+     * using this method, especially if the bounds provided are large. It is
+     * recommended to use a {@link android.view.View#LAYER_TYPE_HARDWARE hardware layer} on a View
      * to apply an xfermode, color filter, or alpha, as it will perform much
      * better than this method.
      * <p>
@@ -520,7 +536,9 @@ public class Canvas extends BaseCanvas {
      * The {@code alpha} parameter is applied when the offscreen bitmap is
      * drawn back when restore() is called.
      *
-     * @removed
+     * As of API Level API level {@value Build.VERSION_CODES#P} the only valid
+     * {@code saveFlags} is {@link #ALL_SAVE_FLAG}.  All other flags are ignored.
+     *
      * @deprecated Use {@link #saveLayerAlpha(RectF, int)} instead.
      * @param bounds    The maximum size the offscreen bitmap needs to be
      *                  (in local coordinates)
@@ -534,7 +552,9 @@ public class Canvas extends BaseCanvas {
         if (bounds == null) {
             bounds = new RectF(getClipBounds());
         }
-        return saveLayerAlpha(bounds.left, bounds.top, bounds.right, bounds.bottom, alpha, saveFlags);
+        checkValidSaveFlags(saveFlags);
+        return saveLayerAlpha(bounds.left, bounds.top, bounds.right, bounds.bottom, alpha,
+                ALL_SAVE_FLAG);
     }
 
     /**
@@ -553,15 +573,17 @@ public class Canvas extends BaseCanvas {
     /**
      * Helper for saveLayerAlpha() that takes 4 values instead of a RectF.
      *
-     * @removed
+     * As of API Level API level {@value Build.VERSION_CODES#P} the only valid
+     * {@code saveFlags} is {@link #ALL_SAVE_FLAG}.  All other flags are ignored.
+     *
      * @deprecated Use {@link #saveLayerAlpha(float, float, float, float, int)} instead.
      */
-    @Deprecated
     public int saveLayerAlpha(float left, float top, float right, float bottom, int alpha,
             @Saveflags int saveFlags) {
+        checkValidSaveFlags(saveFlags);
         alpha = Math.min(255, Math.max(0, alpha));
         return nSaveLayerAlpha(mNativeCanvasWrapper, left, top, right, bottom,
-                                     alpha, saveFlags);
+                                     alpha, ALL_SAVE_FLAG);
     }
 
     /**

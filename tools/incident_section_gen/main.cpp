@@ -393,6 +393,11 @@ static bool generatePrivacyFlags(const Descriptor* descriptor, const Destination
 static bool generateSectionListCpp(Descriptor const* descriptor) {
     generateHead("section_list");
 
+    // generate namespaces
+    printf("namespace android {\n");
+    printf("namespace os {\n");
+    printf("namespace incidentd {\n");
+
     // generates SECTION_LIST
     printf("// Generate SECTION_LIST.\n\n");
 
@@ -502,6 +507,10 @@ static bool generateSectionListCpp(Descriptor const* descriptor) {
         printf("const Privacy** PRIVACY_POLICY_LIST = createList();\n\n");
         printf("const int PRIVACY_POLICY_COUNT = %d;\n", policyCount);
     }
+
+    printf("}  // incidentd\n");
+    printf("}  // os\n");
+    printf("}  // android\n");
     return true;
 }
 

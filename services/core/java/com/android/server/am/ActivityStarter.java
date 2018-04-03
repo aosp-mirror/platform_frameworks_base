@@ -46,6 +46,7 @@ import static android.content.Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED;
 import static android.content.Intent.FLAG_ACTIVITY_RETAIN_IN_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP;
 import static android.content.pm.ActivityInfo.DOCUMENT_LAUNCH_ALWAYS;
+import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
@@ -1205,9 +1206,20 @@ class ActivityStarter {
                 return START_RETURN_LOCK_TASK_MODE_VIOLATION;
             }
 
-            if (mStartActivity.getTask() == null) {
+            // True if we are clearing top and resetting of a standard (default) launch mode
+            // ({@code LAUNCH_MULTIPLE}) activity. The existing activity will be finished.
+            final boolean clearTopAndResetStandardLaunchMode =
+                    (mLaunchFlags & (FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_RESET_TASK_IF_NEEDED))
+                            == (FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_RESET_TASK_IF_NEEDED)
+                    && mLaunchMode == LAUNCH_MULTIPLE;
+
+            // If mStartActivity does not have a task associated with it, associate it with the
+            // reused activity's task. Do not do so if we're clearing top and resetting for a
+            // standard launchMode activity.
+            if (mStartActivity.getTask() == null && !clearTopAndResetStandardLaunchMode) {
                 mStartActivity.setTask(reusedActivity.getTask());
             }
+
             if (reusedActivity.getTask().intent == null) {
                 // This task was started because of movement of the activity based on affinity...
                 // Now that we are actually launching it, we can assign the base intent.
@@ -1266,17 +1278,21 @@ class ActivityStarter {
                 resumeTargetStackIfNeeded();
                 return START_RETURN_INTENT_TO_CALLER;
             }
-            setTaskFromIntentActivity(reusedActivity);
 
-            if (!mAddingToTask && mReuseTask == null) {
-                // We didn't do anything...  but it was needed (a.k.a., client don't use that
-                // intent!)  And for paranoia, make sure we have correctly resumed the top activity.
-                resumeTargetStackIfNeeded();
-                if (outActivity != null && outActivity.length > 0) {
-                    outActivity[0] = reusedActivity;
+            if (reusedActivity != null) {
+                setTaskFromIntentActivity(reusedActivity);
+
+                if (!mAddingToTask && mReuseTask == null) {
+                    // We didn't do anything...  but it was needed (a.k.a., client don't use that
+                    // intent!)  And for paranoia, make sure we have correctly resumed the top activity.
+
+                    resumeTargetStackIfNeeded();
+                    if (outActivity != null && outActivity.length > 0) {
+                        outActivity[0] = reusedActivity;
+                    }
+
+                    return mMovedToFront ? START_TASK_TO_FRONT : START_DELIVERED_TO_TOP;
                 }
-
-                return mMovedToFront ? START_TASK_TO_FRONT : START_DELIVERED_TO_TOP;
             }
         }
 

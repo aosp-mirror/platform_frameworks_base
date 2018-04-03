@@ -33,6 +33,7 @@ import android.util.Patterns;
 import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextLinks;
 import android.view.textclassifier.TextLinks.TextLinkSpan;
+import android.view.textclassifier.TextLinksParams;
 import android.webkit.WebView;
 import android.widget.TextView;
 
@@ -55,7 +56,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -502,15 +502,16 @@ public class Linkify {
      * calling thread.
      *
      * @param textView TextView whose text is to be marked-up with links
-     * @param options optional parameters to specify how to generate the links
+     * @param params optional parameters to specify how to generate the links
      *
      * @return a future that may be used to interrupt or query the background task
+     * @hide
      */
     @UiThread
     public static Future<Void> addLinksAsync(
             @NonNull TextView textView,
-            @Nullable TextLinks.Options options) {
-        return addLinksAsync(textView, options, null /* executor */, null /* callback */);
+            @Nullable TextLinksParams params) {
+        return addLinksAsync(textView, params, null /* executor */, null /* callback */);
     }
 
     /**
@@ -525,16 +526,42 @@ public class Linkify {
      * calling thread.
      *
      * @param textView TextView whose text is to be marked-up with links
-     * @param options optional parameters to specify how to generate the links
-     * @param executor Executor that runs the background task
-     * @param callback Callback that receives the final status of the background task execution
+     * @param mask mask to define which kinds of links will be generated
      *
      * @return a future that may be used to interrupt or query the background task
+     * @hide
      */
     @UiThread
     public static Future<Void> addLinksAsync(
             @NonNull TextView textView,
-            @Nullable TextLinks.Options options,
+            @LinkifyMask int mask) {
+        return addLinksAsync(textView, TextLinksParams.fromLinkMask(mask),
+                null /* executor */, null /* callback */);
+    }
+
+    /**
+     * Scans the text of the provided TextView and turns all occurrences of the entity types
+     * specified by {@code options} into clickable links. If links are found, this method
+     * removes any pre-existing {@link TextLinkSpan} attached to the text (to avoid
+     * problems if you call it repeatedly on the same text) and sets the movement method for the
+     * TextView to LinkMovementMethod.
+     *
+     * <p><strong>Note:</strong> This method returns immediately but generates the links with
+     * the specified classifier on a background thread. The generated links are applied on the
+     * calling thread.
+     *
+     * @param textView TextView whose text is to be marked-up with links
+     * @param params optional parameters to specify how to generate the links
+     * @param executor Executor that runs the background task
+     * @param callback Callback that receives the final status of the background task execution
+     *
+     * @return a future that may be used to interrupt or query the background task
+     * @hide
+     */
+    @UiThread
+    public static Future<Void> addLinksAsync(
+            @NonNull TextView textView,
+            @Nullable TextLinksParams params,
             @Nullable Executor executor,
             @Nullable Consumer<Integer> callback) {
         Preconditions.checkNotNull(textView);
@@ -548,7 +575,7 @@ public class Linkify {
             }
         };
         return addLinksAsync(spannable, textView.getTextClassifier(),
-                options, executor, callback, modifyTextView);
+                params, executor, callback, modifyTextView);
     }
 
     /**
@@ -566,15 +593,16 @@ public class Linkify {
      *
      * @param text Spannable whose text is to be marked-up with links
      * @param classifier the TextClassifier to use to generate the links
-     * @param options optional parameters to specify how to generate the links
+     * @param params optional parameters to specify how to generate the links
      *
      * @return a future that may be used to interrupt or query the background task
+     * @hide
      */
     public static Future<Void> addLinksAsync(
             @NonNull Spannable text,
             @NonNull TextClassifier classifier,
-            @Nullable TextLinks.Options options) {
-        return addLinksAsync(text, classifier, options, null /* executor */, null /* callback */);
+            @Nullable TextLinksParams params) {
+        return addLinksAsync(text, classifier, params, null /* executor */, null /* callback */);
     }
 
     /**
@@ -595,12 +623,13 @@ public class Linkify {
      * @param mask mask to define which kinds of links will be generated
      *
      * @return a future that may be used to interrupt or query the background task
+     * @hide
      */
     public static Future<Void> addLinksAsync(
             @NonNull Spannable text,
             @NonNull TextClassifier classifier,
             @LinkifyMask int mask) {
-        return addLinksAsync(text, classifier, TextLinks.Options.fromLinkMask(mask),
+        return addLinksAsync(text, classifier, TextLinksParams.fromLinkMask(mask),
                 null /* executor */, null /* callback */);
     }
 
@@ -619,39 +648,46 @@ public class Linkify {
      *
      * @param text Spannable whose text is to be marked-up with links
      * @param classifier the TextClassifier to use to generate the links
-     * @param options optional parameters to specify how to generate the links
+     * @param params optional parameters to specify how to generate the links
      * @param executor Executor that runs the background task
      * @param callback Callback that receives the final status of the background task execution
      *
      * @return a future that may be used to interrupt or query the background task
+     * @hide
      */
     public static Future<Void> addLinksAsync(
             @NonNull Spannable text,
             @NonNull TextClassifier classifier,
-            @Nullable TextLinks.Options options,
+            @Nullable TextLinksParams params,
             @Nullable Executor executor,
             @Nullable Consumer<Integer> callback) {
-        return addLinksAsync(text, classifier, options, executor, callback,
+        return addLinksAsync(text, classifier, params, executor, callback,
                 null /* modifyTextView */);
     }
 
     private static Future<Void> addLinksAsync(
             @NonNull Spannable text,
             @NonNull TextClassifier classifier,
-            @Nullable TextLinks.Options options,
+            @Nullable TextLinksParams params,
             @Nullable Executor executor,
             @Nullable Consumer<Integer> callback,
             @Nullable Runnable modifyTextView) {
         Preconditions.checkNotNull(text);
         Preconditions.checkNotNull(classifier);
 
+        // TODO: This is a bug. We shouldnot call getMaxGenerateLinksTextLength() on the UI thread.
         // The input text may exceed the maximum length the text classifier can handle. In such
         // cases, we process the text up to the maximum length.
         final CharSequence truncatedText = text.subSequence(
                 0, Math.min(text.length(), classifier.getMaxGenerateLinksTextLength()));
 
-        final Supplier<TextLinks> supplier = () ->
-                classifier.generateLinks(truncatedText, options.setLegacyFallback(true));
+        final TextClassifier.EntityConfig entityConfig = (params == null)
+                ? null : params.getEntityConfig();
+        final TextLinks.Request request = new TextLinks.Request.Builder(truncatedText)
+                .setLegacyFallback(true)
+                .setEntityConfig(entityConfig)
+                .build();
+        final Supplier<TextLinks> supplier = () -> classifier.generateLinks(request);
         final Consumer<TextLinks> consumer = links -> {
             if (links.getLinks().isEmpty()) {
                 if (callback != null) {
@@ -661,17 +697,13 @@ public class Linkify {
             }
 
             // Remove spans only for the part of the text we generated links for.
-            final TextLinkSpan[] old = text.getSpans(0, truncatedText.length(), TextLinkSpan.class);
+            final TextLinkSpan[] old =
+                    text.getSpans(0, truncatedText.length(), TextLinkSpan.class);
             for (int i = old.length - 1; i >= 0; i--) {
                 text.removeSpan(old[i]);
             }
 
-            final Function<TextLinks.TextLink, TextLinkSpan> spanFactory = (options == null)
-                    ? null : options.getSpanFactory();
-            final @TextLinks.ApplyStrategy int applyStrategy = (options == null)
-                    ? TextLinks.APPLY_STRATEGY_IGNORE : options.getApplyStrategy();
-            final @TextLinks.Status int result = links.apply(text, applyStrategy, spanFactory,
-                    true /*allowPrefix*/);
+            final @TextLinks.Status int result = params.apply(text, links);
             if (result == TextLinks.STATUS_LINKS_APPLIED) {
                 if (modifyTextView != null) {
                     modifyTextView.run();

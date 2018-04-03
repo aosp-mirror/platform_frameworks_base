@@ -319,6 +319,8 @@ public final class UsageStatsManager {
      * <ul>
      *     <li>{@link UsageEvents.Event#SCREEN_INTERACTIVE}</li>
      *     <li>{@link UsageEvents.Event#SCREEN_NON_INTERACTIVE}</li>
+     *     <li>{@link UsageEvents.Event#KEYGUARD_SHOWN}</li>
+     *     <li>{@link UsageEvents.Event#KEYGUARD_HIDDEN}</li>
      * </ul>
      *
      * <p> The caller must have {@link android.Manifest.permission#PACKAGE_USAGE_STATS} </p>

@@ -690,10 +690,6 @@ Landroid/graphics/Camera;->native_instance:J
 Landroid/graphics/Canvas;-><init>(J)V
 Landroid/graphics/Canvas;->release()V
 Landroid/graphics/Canvas;->save(I)I
-Landroid/graphics/Canvas;->saveLayerAlpha(FFFFII)I
-Landroid/graphics/Canvas;->saveLayerAlpha(Landroid/graphics/RectF;II)I
-Landroid/graphics/Canvas;->saveLayer(FFFFLandroid/graphics/Paint;I)I
-Landroid/graphics/Canvas;->saveLayer(Landroid/graphics/RectF;Landroid/graphics/Paint;I)I
 Landroid/graphics/ColorMatrixColorFilter;->setColorMatrix(Landroid/graphics/ColorMatrix;)V
 Landroid/graphics/drawable/AnimatedImageDrawable;->onAnimationEnd()V
 Landroid/graphics/drawable/AnimatedStateListDrawable$AnimatedStateListState;->mStateIds:Landroid/util/SparseIntArray;

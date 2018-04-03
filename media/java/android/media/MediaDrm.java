@@ -993,6 +993,9 @@ public final class MediaDrm implements AutoCloseable {
      * active. The license server returns a secure stop release response
      * message to the app which then deletes the secure stop from persistent
      * memory using {@link #releaseSecureStops}.
+     * <p>
+     * Each secure stop has a unique ID that can be used to identify it during
+     * enumeration, access and removal.
      * @return a list of all secure stops from secure persistent memory
      */
     @NonNull
@@ -1000,6 +1003,8 @@ public final class MediaDrm implements AutoCloseable {
 
     /**
      * Return a list of all secure stop IDs currently in persistent memory.
+     * The secure stop ID can be used to access or remove the corresponding
+     * secure stop.
      *
      * @return a list of secure stop IDs
      */
@@ -1008,6 +1013,7 @@ public final class MediaDrm implements AutoCloseable {
 
     /**
      * Access a specific secure stop given its secure stop ID.
+     * Each secure stop has a unique ID.
      *
      * @param ssid the ID of the secure stop to return
      * @return the secure stop identified by ssid

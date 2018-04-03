@@ -86,7 +86,7 @@ public final class UserManagerHelper {
      * @return List of {@code UserInfo} for each user that is not the current user.
      */
     public List<UserInfo> getAllUsersExcludesCurrentUser() {
-        List<UserInfo> others = mUserManager.getUsers(true);
+        List<UserInfo> others = getAllUsers();
 
         for (Iterator<UserInfo> iterator = others.iterator(); iterator.hasNext(); ) {
             UserInfo userInfo = iterator.next();
@@ -96,6 +96,31 @@ public final class UserManagerHelper {
             }
         }
         return others;
+    }
+
+    /**
+     * Gets all the other users on the system that are not the system user.
+     *
+     * @return List of {@code UserInfo} for each user that is not the system user.
+     */
+    public List<UserInfo> getAllUsersExcludesSystemUser() {
+        List<UserInfo> others = getAllUsers();
+
+        for (Iterator<UserInfo> iterator = others.iterator(); iterator.hasNext(); ) {
+            UserInfo userInfo = iterator.next();
+            if (userIsSystemUser(userInfo)) {
+                // Remove system user from the list.
+                iterator.remove();
+            }
+        }
+        return others;
+    }
+
+    /**
+     * Gets all the users on the system that are not currently being removed.
+     */
+    public List<UserInfo> getAllUsers() {
+        return mUserManager.getUsers(true /* excludeDying */);
     }
 
     // User information accessors
@@ -224,7 +249,7 @@ public final class UserManagerHelper {
      * @return {@code true} if user is successfully removed, {@code false} otherwise.
      */
     public boolean removeUser(UserInfo userInfo) {
-        if (userInfo.id == UserHandle.USER_SYSTEM) {
+        if (userIsSystemUser(userInfo)) {
             Log.w(TAG, "User " + userInfo.id + " is system user, could not be removed.");
             return false;
         }

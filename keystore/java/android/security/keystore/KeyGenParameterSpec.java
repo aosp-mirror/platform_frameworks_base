@@ -259,7 +259,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     private final boolean mRandomizedEncryptionRequired;
     private final boolean mUserAuthenticationRequired;
     private final int mUserAuthenticationValidityDurationSeconds;
-    private final boolean mTrustedUserPresenceRequred;
+    private final boolean mUserPresenceRequired;
     private final byte[] mAttestationChallenge;
     private final boolean mUniqueIdIncluded;
     private final boolean mUserAuthenticationValidWhileOnBody;
@@ -291,7 +291,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
             boolean randomizedEncryptionRequired,
             boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds,
-            boolean trustedUserPresenceRequired,
+            boolean userPresenceRequired,
             byte[] attestationChallenge,
             boolean uniqueIdIncluded,
             boolean userAuthenticationValidWhileOnBody,
@@ -339,7 +339,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         mBlockModes = ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(blockModes));
         mRandomizedEncryptionRequired = randomizedEncryptionRequired;
         mUserAuthenticationRequired = userAuthenticationRequired;
-        mTrustedUserPresenceRequred = trustedUserPresenceRequired;
+        mUserPresenceRequired = userPresenceRequired;
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
         mAttestationChallenge = Utils.cloneIfNotNull(attestationChallenge);
         mUniqueIdIncluded = uniqueIdIncluded;
@@ -595,8 +595,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
      * Returns {@code true} if the key is authorized to be used only if a test of user presence has
      * been performed between the {@code Signature.initSign()} and {@code Signature.sign()} calls.
      */
-    public boolean isTrustedUserPresenceRequired() {
-        return mTrustedUserPresenceRequred;
+    public boolean isUserPresenceRequired() {
+        return mUserPresenceRequired;
     }
 
     /**
@@ -673,7 +673,9 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     }
 
     /**
-     * Returns {@code true} if the key cannot be used unless the device screen is unlocked.
+     * Returns {@code true} if the screen must be unlocked for this key to be used for encryption or
+     * signing. Decryption and signature verification will still be available when the screen is
+     * locked.
      *
      * @see Builder#setUnlockedDeviceRequired(boolean)
      */
@@ -712,7 +714,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         private boolean mRandomizedEncryptionRequired = true;
         private boolean mUserAuthenticationRequired;
         private int mUserAuthenticationValidityDurationSeconds = -1;
-        private boolean mTrustedUserPresenceRequired = false;
+        private boolean mUserPresenceRequired = false;
         private byte[] mAttestationChallenge = null;
         private boolean mUniqueIdIncluded = false;
         private boolean mUserAuthenticationValidWhileOnBody;
@@ -775,7 +777,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
             mUserAuthenticationRequired = sourceSpec.isUserAuthenticationRequired();
             mUserAuthenticationValidityDurationSeconds =
                 sourceSpec.getUserAuthenticationValidityDurationSeconds();
-            mTrustedUserPresenceRequired = sourceSpec.isTrustedUserPresenceRequired();
+            mUserPresenceRequired = sourceSpec.isUserPresenceRequired();
             mAttestationChallenge = sourceSpec.getAttestationChallenge();
             mUniqueIdIncluded = sourceSpec.isUniqueIdIncluded();
             mUserAuthenticationValidWhileOnBody = sourceSpec.isUserAuthenticationValidWhileOnBody();
@@ -1180,8 +1182,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          * {@code Signature.initSign()} and {@code Signature.sign()} method calls.
          */
         @NonNull
-        public Builder setTrustedUserPresenceRequired(boolean required) {
-            mTrustedUserPresenceRequired = required;
+        public Builder setUserPresenceRequired(boolean required) {
+            mUserPresenceRequired = required;
             return this;
         }
 
@@ -1289,9 +1291,10 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
 
         /**
          * Sets whether the keystore requires the screen to be unlocked before allowing decryption
-         * using this key. If this is set to {@code true}, any attempt to decrypt using this key
-         * while the screen is locked will fail. A locked device requires a PIN, password,
-         * fingerprint, or other trusted factor to access.
+         * using this key. If this is set to {@code true}, any attempt to decrypt or sign using this
+         * key while the screen is locked will fail. A locked device requires a PIN, password,
+         * fingerprint, or other trusted factor to access. While the screen is locked, the key can
+         * still be used for encryption or signature verification.
          */
         @NonNull
         public Builder setUnlockedDeviceRequired(boolean unlockedDeviceRequired) {
@@ -1324,7 +1327,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
                     mRandomizedEncryptionRequired,
                     mUserAuthenticationRequired,
                     mUserAuthenticationValidityDurationSeconds,
-                    mTrustedUserPresenceRequired,
+                    mUserPresenceRequired,
                     mAttestationChallenge,
                     mUniqueIdIncluded,
                     mUserAuthenticationValidWhileOnBody,

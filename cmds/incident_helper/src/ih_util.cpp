@@ -98,9 +98,9 @@ bool getColumnIndices(std::vector<int>& indices, const char** headerNames, const
     size_t lastIndex = 0;
     int i = 0;
     while (headerNames[i] != NULL) {
-        string s = headerNames[i];
+        std::string s = headerNames[i];
         lastIndex = line.find(s, lastIndex);
-        if (lastIndex == string::npos) {
+        if (lastIndex == std::string::npos) {
             fprintf(stderr, "Bad Task Header: %s\n", line.c_str());
             return false;
         }
@@ -271,7 +271,7 @@ Table::Table(const char* names[], const uint64_t ids[], const int count)
         :mEnums(),
          mEnumValuesByName()
 {
-    map<std::string, uint64_t> fields;
+    std::map<std::string, uint64_t> fields;
     for (int i = 0; i < count; i++) {
         fields[names[i]] = ids[i];
     }
@@ -286,11 +286,11 @@ void
 Table::addEnumTypeMap(const char* field, const char* enumNames[], const int enumValues[], const int enumSize)
 {
     if (mFields.find(field) == mFields.end()) {
-        fprintf(stderr, "Field '%s' not found", string(field).c_str());
+        fprintf(stderr, "Field '%s' not found", field);
         return;
     }
 
-    map<std::string, int> enu;
+    std::map<std::string, int> enu;
     for (int i = 0; i < enumSize; i++) {
         enu[enumNames[i]] = enumValues[i];
     }
@@ -420,10 +420,10 @@ Message::insertField(ProtoOutputStream* proto, const std::string& name, const st
 
     // Try to find the message field which is the prefix of name, so the value would be inserted
     // recursively into the submessage.
-    string mutableName = name;
+    std::string mutableName = name;
     for (auto iter = mSubMessages.begin(); iter != mSubMessages.end(); iter++) {
-        string fieldName = iter->first;
-        string prefix = fieldName + "_"; // underscore is the delimiter in the name
+        std::string fieldName = iter->first;
+        std::string prefix = fieldName + "_"; // underscore is the delimiter in the name
         if (stripPrefix(&mutableName, prefix.c_str())) {
             if (mPreviousField != fieldName) {
                 endSession(proto);
@@ -437,7 +437,7 @@ Message::insertField(ProtoOutputStream* proto, const std::string& name, const st
 }
 
 void
-Message::startSession(ProtoOutputStream* proto, const string& name)
+Message::startSession(ProtoOutputStream* proto, const std::string& name)
 {
     uint64_t fieldId = mTable->mFields[name];
     uint64_t token = proto->start(fieldId);

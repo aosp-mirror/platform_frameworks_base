@@ -80,6 +80,7 @@ import android.view.MenuItem;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextLinks;
+import android.view.textclassifier.TextLinksParams;
 import android.widget.espresso.CustomViewActions.RelativeCoordinatesProvider;
 
 import com.android.frameworks.coretests.R;
@@ -381,8 +382,12 @@ public class TextViewActivityTest {
                 mActivity.getSystemService(TextClassificationManager.class);
         TextClassifier textClassifier = textClassificationManager.getTextClassifier();
         Spannable content = new SpannableString("Call me at +19148277737");
-        TextLinks links = textClassifier.generateLinks(content);
-        links.apply(content, TextLinks.APPLY_STRATEGY_REPLACE, null, false /* allowPrefix */);
+        TextLinks.Request request = new TextLinks.Request.Builder(content).build();
+        TextLinks links = textClassifier.generateLinks(request);
+        TextLinksParams applyParams = new TextLinksParams.Builder()
+                .setApplyStrategy(TextLinks.APPLY_STRATEGY_REPLACE)
+                .build();
+        applyParams.apply(content, links);
 
         mActivityRule.runOnUiThread(() -> {
             textView.setText(content);

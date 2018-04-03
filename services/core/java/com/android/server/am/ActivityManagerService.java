@@ -1530,6 +1530,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     private int mWakefulness = PowerManagerInternal.WAKEFULNESS_AWAKE;
 
     /**
+     * State of external calls telling us if the device is awake or asleep.
+     */
+    private boolean mKeyguardShown = false;
+
+    /**
      * Set if we are shutting down the system, similar to sleeping.
      */
     boolean mShuttingDown = false;
@@ -13094,6 +13099,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 : UsageEvents.Event.SCREEN_NON_INTERACTIVE);
     }
 
+    void reportCurKeyguardUsageEventLocked() {
+        reportGlobalUsageEventLocked(mKeyguardShown
+                ? UsageEvents.Event.KEYGUARD_SHOWN
+                : UsageEvents.Event.KEYGUARD_HIDDEN);
+    }
+
     void onWakefulnessChanged(int wakefulness) {
         synchronized(this) {
             boolean wasAwake = mWakefulness == PowerManagerInternal.WAKEFULNESS_AWAKE;
@@ -13257,6 +13268,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         synchronized(this) {
             long ident = Binder.clearCallingIdentity();
+            if (mKeyguardShown != keyguardShowing) {
+                mKeyguardShown = keyguardShowing;
+                reportCurKeyguardUsageEventLocked();
+            }
             try {
                 mKeyguardController.setKeyguardShown(keyguardShowing, aodShowing,
                         secondaryDisplayShowing);
@@ -15209,7 +15224,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Binder.getCallingUid(),
                 eventType,
                 processName,
-                Binder.getCallingPid());
+                Binder.getCallingPid(),
+                (r != null && r.info != null) ? r.info.packageName : "",
+                (r != null && r.info != null) ? (r.info.isInstantApp()
+                        ? StatsLog.APP_CRASH_OCCURRED__IS_INSTANT_APP__TRUE
+                        : StatsLog.APP_CRASH_OCCURRED__IS_INSTANT_APP__FALSE)
+                        : StatsLog.APP_CRASH_OCCURRED__IS_INSTANT_APP__UNAVAILABLE,
+                r != null ? (r.isInterestingToUserLocked()
+                        ? StatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__FOREGROUND
+                        : StatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__BACKGROUND)
+                        : StatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__UNKNOWN
+        );
 
         addErrorToDropBox(eventType, r, processName, null, null, null, null, null, crashInfo);
 

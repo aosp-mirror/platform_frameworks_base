@@ -30,9 +30,9 @@
 #include "Throttler.h"
 #include "frameworks/base/libs/incident/proto/android/os/metadata.pb.h"
 
-using namespace android;
-using namespace android::os;
-using namespace std;
+namespace android {
+namespace os {
+namespace incidentd {
 
 // ================================================================================
 struct ReportRequest : public virtual RefBase {
@@ -109,5 +109,9 @@ private:
 
     bool isTest = true;  // default to true for testing
 };
+
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android
 
 #endif  // REPORTER_H

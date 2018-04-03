@@ -4976,13 +4976,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private void setAttachedWindowFrames(WindowState win, int fl, int adjust, WindowState attached,
             boolean insetDecors, Rect pf, Rect df, Rect of, Rect cf, Rect vf,
             DisplayFrames displayFrames) {
-        if (win.getSurfaceLayer() > mDockLayer && attached.getSurfaceLayer() < mDockLayer) {
-            // Here's a special case: if this attached window is a panel that is above the dock
-            // window, and the window it is attached to is below the dock window, then the frames we
-            // computed for the window it is attached to can not be used because the dock is
-            // effectively part of the underlying window and the attached window is floating on top
-            // of the whole thing. So, we ignore the attached window and explicitly compute the
-            // frames that would be appropriate without the dock.
+        if (!win.isInputMethodTarget() && attached.isInputMethodTarget()) {
+            // Here's a special case: if the child window is not the 'dock window'
+            // or input method target, and the window it is attached to is below
+            // the dock window, then the frames we computed for the window it is
+            // attached to can not be used because the dock is effectively part
+            // of the underlying window and the attached window is floating on top
+            // of the whole thing. So, we ignore the attached window and explicitly
+            // compute the frames that would be appropriate without the dock.
             vf.set(displayFrames.mDock);
             cf.set(displayFrames.mDock);
             of.set(displayFrames.mDock);
@@ -5009,7 +5010,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 cf.set(attached.getContentFrameLw());
                 if (attached.isVoiceInteraction()) {
                     cf.intersectUnchecked(displayFrames.mVoiceContent);
-                } else if (attached.getSurfaceLayer() < mDockLayer) {
+                } else if (win.isInputMethodTarget() || attached.isInputMethodTarget()) {
                     cf.intersectUnchecked(displayFrames.mContent);
                 }
             }
@@ -5500,7 +5501,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         win.computeFrameLw(pf, df, of, cf, vf, dcf, sf, osf, displayFrames.mDisplayCutout,
                 parentFrameWasClippedByDisplayCutout);
-
         // Dock windows carve out the bottom of the screen, so normal windows
         // can't appear underneath them.
         if (type == TYPE_INPUT_METHOD && win.isVisibleLw()
