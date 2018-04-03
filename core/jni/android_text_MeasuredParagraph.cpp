@@ -111,20 +111,13 @@ static jfloat nGetWidth(jlong ptr, jint start, jint end) {
 }
 
 // Regular JNI
-static void nGetBounds(JNIEnv* env, jobject, jlong ptr, jcharArray javaText, jlong paintPtr,
-                           jint start, jint end, jint bidiFlags, jobject bounds) {
+static void nGetBounds(JNIEnv* env, jobject, jlong ptr, jcharArray javaText, jint start, jint end,
+                       jobject bounds) {
     ScopedCharArrayRO text(env, javaText);
     const minikin::U16StringPiece textBuffer(text.get(), text.size());
+    const minikin::Range range(start, end);
 
-    minikin::MeasuredText* mt = toMeasuredParagraph(ptr);
-    Paint* paint = toPaint(paintPtr);
-    const Typeface* typeface = Typeface::resolveDefault(paint->getAndroidTypeface());
-    minikin::Layout layout = MinikinUtils::doLayout(paint,
-            static_cast<minikin::Bidi>(bidiFlags), typeface, textBuffer.data(), start, end - start,
-            textBuffer.size(), mt);
-
-    minikin::MinikinRect rect;
-    layout.getBounds(&rect);
+    minikin::MinikinRect rect = toMeasuredParagraph(ptr)->getBounds(textBuffer, range);
 
     SkRect r;
     r.fLeft = rect.mLeft;
@@ -156,7 +149,7 @@ static const JNINativeMethod gMethods[] = {
 
     // MeasuredParagraph native functions.
     {"nGetWidth", "(JII)F", (void*) nGetWidth},  // Critical Natives
-    {"nGetBounds", "(J[CJIIILandroid/graphics/Rect;)V", (void*) nGetBounds},  // Regular JNI
+    {"nGetBounds", "(J[CIILandroid/graphics/Rect;)V", (void*) nGetBounds},  // Regular JNI
     {"nGetReleaseFunc", "()J", (void*) nGetReleaseFunc},  // Critical Natives
     {"nGetMemoryUsage", "(J)I", (void*) nGetMemoryUsage},  // Critical Native
 };
