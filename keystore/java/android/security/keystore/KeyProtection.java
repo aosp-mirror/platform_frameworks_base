@@ -224,7 +224,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
     private final boolean mRandomizedEncryptionRequired;
     private final boolean mUserAuthenticationRequired;
     private final int mUserAuthenticationValidityDurationSeconds;
-    private final boolean mTrustedUserPresenceRequired;
+    private final boolean mUserPresenceRequred;
     private final boolean mUserAuthenticationValidWhileOnBody;
     private final boolean mInvalidatedByBiometricEnrollment;
     private final long mBoundToSecureUserId;
@@ -244,7 +244,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
             boolean randomizedEncryptionRequired,
             boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds,
-            boolean trustedUserPresenceRequired,
+            boolean userPresenceRequred,
             boolean userAuthenticationValidWhileOnBody,
             boolean invalidatedByBiometricEnrollment,
             long boundToSecureUserId,
@@ -264,7 +264,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
         mRandomizedEncryptionRequired = randomizedEncryptionRequired;
         mUserAuthenticationRequired = userAuthenticationRequired;
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
-        mTrustedUserPresenceRequired = trustedUserPresenceRequired;
+        mUserPresenceRequred = userPresenceRequred;
         mUserAuthenticationValidWhileOnBody = userAuthenticationValidWhileOnBody;
         mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
         mBoundToSecureUserId = boundToSecureUserId;
@@ -446,8 +446,8 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
      * Returns {@code true} if the key is authorized to be used only if a test of user presence has
      * been performed between the {@code Signature.initSign()} and {@code Signature.sign()} calls.
      */
-    public boolean isTrustedUserPresenceRequired() {
-        return mTrustedUserPresenceRequired;
+    public boolean isUserPresenceRequired() {
+        return mUserPresenceRequred;
     }
 
     /**
@@ -532,7 +532,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
         private boolean mRandomizedEncryptionRequired = true;
         private boolean mUserAuthenticationRequired;
         private int mUserAuthenticationValidityDurationSeconds = -1;
-        private boolean mTrustedUserPresenceRequired = false;
+        private boolean mUserPresenceRequired = false;
         private boolean mUserAuthenticationValidWhileOnBody;
         private boolean mInvalidatedByBiometricEnrollment = true;
         private boolean mUserConfirmationRequired;
@@ -841,8 +841,8 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
          * {@code Signature.initSign()} and {@code Signature.sign()} method calls.
          */
         @NonNull
-        public Builder setTrustedUserPresenceRequired(boolean required) {
-            mTrustedUserPresenceRequired = required;
+        public Builder setUserPresenceRequired(boolean required) {
+            mUserPresenceRequired = required;
             return this;
         }
 
@@ -958,7 +958,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
                     mRandomizedEncryptionRequired,
                     mUserAuthenticationRequired,
                     mUserAuthenticationValidityDurationSeconds,
-                    mTrustedUserPresenceRequired,
+                    mUserPresenceRequired,
                     mUserAuthenticationValidWhileOnBody,
                     mInvalidatedByBiometricEnrollment,
                     mBoundToSecureUserId,
