@@ -3218,18 +3218,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 this, in, out, err, args, callback, resultReceiver);
     }
 
-    @Override
+    @VisibleForTesting
     public boolean isUidForeground(int uid) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
-
         synchronized (mUidRulesFirstLock) {
-            return isUidForegroundUL(uid);
+            return isUidStateForeground(
+                    mUidState.get(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY));
         }
-    }
-
-    private boolean isUidForegroundUL(int uid) {
-        return isUidStateForegroundUL(
-                mUidState.get(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY));
     }
 
     private boolean isUidForegroundOnRestrictBackgroundUL(int uid) {
@@ -3242,9 +3236,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return isProcStateAllowedWhileIdleOrPowerSaveMode(procState);
     }
 
-    private boolean isUidStateForegroundUL(int state) {
+    private boolean isUidStateForeground(int state) {
         // only really in foreground when screen is also on
-        return state <= ActivityManager.PROCESS_STATE_TOP;
+        return state <= NetworkPolicyManager.FOREGROUND_THRESHOLD_STATE;
     }
 
     /**
@@ -3271,7 +3265,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     }
                     updateRulesForPowerRestrictionsUL(uid);
                 }
-                updateNetworkStats(uid, isUidStateForegroundUL(uidState));
+                updateNetworkStats(uid, isUidStateForeground(uidState));
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
