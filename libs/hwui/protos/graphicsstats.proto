@@ -15,25 +15,20 @@
  */
 
 syntax = "proto2";
-package android.service;
 
-option java_multiple_files = true;
-option java_outer_classname = "GraphicsStatsServiceProto";
+package android.uirenderer.protos;
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
+option optimize_for = LITE_RUNTIME;
 
-// This file is based on frameworks/base/libs/hwui/protos/graphicsstats.proto.
-// Please try to keep the two files in sync.
+// frameworks/base/core/proto/android/service/graphicsstats.proto is based on
+// this proto. Please only make valid protobuf changes to these messages, and
+// keep the other file in sync with this one.
 
 message GraphicsStatsServiceDumpProto {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
     repeated GraphicsStatsProto stats = 1;
 }
 
 message GraphicsStatsProto {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
     // The package name of the app
     optional string package_name = 1;
 
@@ -54,8 +49,6 @@ message GraphicsStatsProto {
 }
 
 message GraphicsStatsJankSummaryProto {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
     // Distinct frame count.
     optional int32 total_frames = 1;
 
@@ -83,8 +76,6 @@ message GraphicsStatsJankSummaryProto {
 }
 
 message GraphicsStatsHistogramBucketProto {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
     // Lower bound of render time in milliseconds.
     optional int32 render_millis = 1;
     // Number of frames in the bucket.
