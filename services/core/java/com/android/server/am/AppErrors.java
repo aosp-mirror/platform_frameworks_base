@@ -741,8 +741,8 @@ class AppErrors {
             }
             mService.mStackSupervisor.resumeFocusedStackTopActivityLocked();
         } else {
-            TaskRecord affectedTask =
-                    mService.mStackSupervisor.finishTopRunningActivityLocked(app, reason);
+            final TaskRecord affectedTask =
+                    mService.mStackSupervisor.finishTopCrashedActivitiesLocked(app, reason);
             if (data != null) {
                 data.task = affectedTask;
             }
