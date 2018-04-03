@@ -52,7 +52,7 @@
     <!-- Clock with header -->
     <dimen name="widget_small_font_size">24dp</dimen>
     <!-- Dash between clock and header -->
-    <dimen name="widget_separator_width">16dp</dimen>
+    <dimen name="widget_separator_width">12dp</dimen>
     <dimen name="widget_separator_thickness">1dp</dimen>
     <dimen name="widget_vertical_padding">26dp</dimen>
     <dimen name="widget_icon_bottom_padding">14dp</dimen>
