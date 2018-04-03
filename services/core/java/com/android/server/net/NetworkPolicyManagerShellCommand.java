@@ -21,7 +21,6 @@ import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
 
 import android.content.Context;
-import android.net.INetworkPolicyManager;
 import android.net.NetworkPolicyManager;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
@@ -33,10 +32,10 @@ import java.util.List;
 
 class NetworkPolicyManagerShellCommand extends ShellCommand {
 
-    private final INetworkPolicyManager mInterface;
+    private final NetworkPolicyManagerService mInterface;
     private final WifiManager mWifiManager;
 
-    NetworkPolicyManagerShellCommand(Context context, INetworkPolicyManager service) {
+    NetworkPolicyManagerShellCommand(Context context, NetworkPolicyManagerService service) {
         mInterface = service;
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
     }
@@ -97,6 +96,8 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
         pw.println("    Toggles whether the given wi-fi network is metered.");
         pw.println("  set restrict-background BOOLEAN");
         pw.println("    Sets the global restrict background usage status.");
+        pw.println("  set sub-plan-owner subId [packageName]");
+        pw.println("    Sets the data plan owner package for subId.");
     }
 
     private int runGet() throws RemoteException {
@@ -126,6 +127,8 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
                 return setMeteredWifiNetwork();
             case "restrict-background":
                 return setRestrictBackground();
+            case "sub-plan-owner":
+                return setSubPlanOwner();
         }
         pw.println("Error: unknown set type '" + type + "'");
         return -1;
@@ -224,6 +227,13 @@ class NetworkPolicyManagerShellCommand extends ShellCommand {
             return enabled;
         }
         mInterface.setRestrictBackground(enabled > 0);
+        return 0;
+    }
+
+    private int setSubPlanOwner() throws RemoteException {
+        final int subId = Integer.parseInt(getNextArgRequired());
+        final String packageName = getNextArg();
+        mInterface.setSubscriptionPlansOwner(subId, packageName);
         return 0;
     }
 
