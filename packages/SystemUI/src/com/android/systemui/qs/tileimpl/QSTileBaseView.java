@@ -179,7 +179,7 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
     protected void handleStateChanged(QSTile.State state) {
         int circleColor = getCircleColor(state.state);
         if (circleColor != mCircleColor) {
-            if (mBg.isShown()) {
+            if (mBg.isShown() && animationsEnabled()) {
                 ValueAnimator animator = ValueAnimator.ofArgb(mCircleColor, circleColor)
                         .setDuration(QS_ANIM_LENGTH);
                 animator.addUpdateListener(animation -> mBg.setImageTintList(ColorStateList.valueOf(
@@ -203,6 +203,10 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
                 mTileState = newState;
             }
         }
+    }
+
+    protected boolean animationsEnabled() {
+        return true;
     }
 
     private int getCircleColor(int state) {

@@ -159,13 +159,13 @@ public class QSIconViewImpl extends QSIconView {
         return getColorForState(getContext(), state);
     }
 
-    public static void animateGrayScale(int fromColor, int toColor, ImageView iv,
-            final Runnable endRunnable) {
+    private void animateGrayScale(int fromColor, int toColor, ImageView iv,
+        final Runnable endRunnable) {
         if (iv instanceof AlphaControlledSlashImageView) {
             ((AlphaControlledSlashImageView)iv)
                     .setFinalImageTintList(ColorStateList.valueOf(toColor));
         }
-        if (ValueAnimator.areAnimatorsEnabled()) {
+        if (mAnimationEnabled && ValueAnimator.areAnimatorsEnabled()) {
             final float fromAlpha = Color.alpha(fromColor);
             final float toAlpha = Color.alpha(toColor);
             final float fromChannel = Color.red(fromColor);
