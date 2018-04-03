@@ -5692,6 +5692,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
         dispatchVisibilityAggregated(isAttachedToWindow() && getWindowVisibility() == VISIBLE
                 && isShown());
+        notifySubtreeAccessibilityStateChangedIfNeeded();
     }
 
     /**
