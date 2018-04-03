@@ -321,16 +321,20 @@ public class Dialog implements DialogInterface, Window.Callback,
         }
 
         WindowManager.LayoutParams l = mWindow.getAttributes();
+        boolean restoreSoftInputMode = false;
         if ((l.softInputMode
                 & WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) == 0) {
-            WindowManager.LayoutParams nl = new WindowManager.LayoutParams();
-            nl.copyFrom(l);
-            nl.softInputMode |=
+            l.softInputMode |=
                     WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
-            l = nl;
+            restoreSoftInputMode = true;
         }
 
         mWindowManager.addView(mDecor, l);
+        if (restoreSoftInputMode) {
+            l.softInputMode &=
+                    ~WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION;
+        }
+
         mShowing = true;
 
         sendShowMessage();
