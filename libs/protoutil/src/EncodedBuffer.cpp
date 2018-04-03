@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#define LOG_TAG "libprotoutil"
+
+#include <stdlib.h>
 
 #include <android/util/EncodedBuffer.h>
 #include <android/util/protobuf.h>
-
-#include <stdlib.h>
+#include <cutils/log.h>
 
 namespace android {
 namespace util {
@@ -228,7 +230,7 @@ EncodedBuffer::readRawVarint()
     size_t start = mEp.pos();
     while (true) {
         uint8_t byte = readRawByte();
-        val += (byte & 0x7F) << shift;
+        val |= (UINT64_C(0x7F) & byte) << shift;
         if ((byte & 0x80) == 0) break;
         shift += 7;
     }
@@ -345,7 +347,7 @@ EncodedBuffer::iterator::readRawVarint()
     uint64_t val = 0, shift = 0;
     while (true) {
         uint8_t byte = next();
-        val += (byte & 0x7F) << shift;
+        val |= (INT64_C(0x7F) & byte) << shift;
         if ((byte & 0x80) == 0) break;
         shift += 7;
     }
