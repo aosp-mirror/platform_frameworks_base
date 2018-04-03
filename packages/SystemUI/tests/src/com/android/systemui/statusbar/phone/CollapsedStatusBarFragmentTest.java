@@ -89,14 +89,10 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         assertEquals(View.INVISIBLE, mFragment.getView().findViewById(R.id.system_icon_area)
                 .getVisibility());
-        assertEquals(View.INVISIBLE, mFragment.getView().findViewById(R.id.clock)
-                .getVisibility());
 
         fragment.disable(0, 0, false);
 
         assertEquals(View.VISIBLE, mFragment.getView().findViewById(R.id.system_icon_area)
-                .getVisibility());
-        assertEquals(View.VISIBLE, mFragment.getView().findViewById(R.id.clock)
                 .getVisibility());
     }
 
@@ -114,5 +110,21 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         fragment.disable(0, 0, false);
 
         Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
+    }
+
+    @Test
+    public void testDisableClock() throws Exception {
+        mFragments.dispatchResume();
+        processAllMessages();
+
+        CollapsedStatusBarFragment fragment = (CollapsedStatusBarFragment) mFragment;
+        fragment.initNotificationIconArea(mMockNotificiationAreaController);
+        fragment.disable(StatusBarManager.DISABLE_CLOCK, 0, false);
+
+        assertEquals(View.INVISIBLE, mFragment.getView().findViewById(R.id.clock).getVisibility());
+
+        fragment.disable(0, 0, false);
+
+        assertEquals(View.VISIBLE, mFragment.getView().findViewById(R.id.clock).getVisibility());
     }
 }
