@@ -23,6 +23,8 @@ import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_HOME_TO_ORIGINAL_POSITION;
+import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_HOME_TO_TOP;
 
 import android.app.ActivityOptions;
 import android.content.ComponentName;
@@ -32,6 +34,7 @@ import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Slog;
 import android.view.IRecentsAnimationRunner;
+import com.android.server.wm.RecentsAnimationController;
 import com.android.server.wm.RecentsAnimationController.RecentsAnimationCallbacks;
 import com.android.server.wm.WindowManagerService;
 
@@ -123,7 +126,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
 
             // Fetch all the surface controls and pass them to the client to get the animation
             // started
-            mWindowManager.cancelRecentsAnimation();
+            mWindowManager.cancelRecentsAnimation(REORDER_MOVE_HOME_TO_ORIGINAL_POSITION);
             mWindowManager.initializeRecentsAnimation(recentsAnimationRunner, this,
                     display.mDisplayId, mStackSupervisor.mRecentTasks.getRecentTaskIds());
 
@@ -140,7 +143,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
     }
 
     @Override
-    public void onAnimationFinished(boolean moveHomeToTop) {
+    public void onAnimationFinished(@RecentsAnimationController.ReorderMode int reorderMode) {
         synchronized (mService) {
             if (mWindowManager.getRecentsAnimationController() == null) return;
 
@@ -151,9 +154,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
                         "RecentsAnimation#onAnimationFinished_inSurfaceTransaction");
                 mWindowManager.deferSurfaceLayout();
                 try {
-                    mWindowManager.cleanupRecentsAnimation(moveHomeToTop);
+                    mWindowManager.cleanupRecentsAnimation(reorderMode);
 
-                    // Move the home stack to the front
                     final ActivityRecord homeActivity = mStackSupervisor.getHomeActivity();
                     if (homeActivity == null) {
                         return;
@@ -162,15 +164,19 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
                     // Restore the launched-behind state
                     homeActivity.mLaunchTaskBehind = false;
 
-                    if (moveHomeToTop) {
+                    if (reorderMode == REORDER_MOVE_HOME_TO_TOP) {
                         // Bring the home stack to the front
                         final ActivityStack homeStack = homeActivity.getStack();
                         mStackSupervisor.mNoAnimActivities.add(homeActivity);
                         homeStack.moveToFront("RecentsAnimation.onAnimationFinished()");
-                    } else {
+                    } else if (reorderMode == REORDER_MOVE_HOME_TO_ORIGINAL_POSITION){
                         // Restore the home stack to its previous position
                         final ActivityDisplay display = homeActivity.getDisplay();
                         display.moveHomeStackBehindStack(mRestoreHomeBehindStack);
+                    } else {
+                        // Keep home stack in place, nothing changes, so ignore the transition logic
+                        // below
+                        return;
                     }
 
                     mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
