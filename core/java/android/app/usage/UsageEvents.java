@@ -152,6 +152,18 @@ public final class UsageEvents implements Parcelable {
          */
         public static final int SCREEN_NON_INTERACTIVE = 16;
 
+        /**
+         * An event type denoting that the screen's keyguard has been shown, whether or not
+         * the screen is off.
+         */
+        public static final int KEYGUARD_SHOWN = 17;
+
+        /**
+         * An event type denoting that the screen's keyguard has been hidden.  This typically
+         * happens when the user unlocks their phone after turning it on.
+         */
+        public static final int KEYGUARD_HIDDEN = 18;
+
         /** @hide */
         public static final int FLAG_IS_PACKAGE_INSTANT_APP = 1 << 0;
 

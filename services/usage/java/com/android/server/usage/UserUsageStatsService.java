@@ -211,6 +211,12 @@ class UserUsageStatsService {
                 case UsageEvents.Event.SCREEN_NON_INTERACTIVE: {
                     stats.updateScreenNonInteractive(event.mTimeStamp);
                 } break;
+                case UsageEvents.Event.KEYGUARD_SHOWN: {
+                    stats.updateKeyguardShown(event.mTimeStamp);
+                } break;
+                case UsageEvents.Event.KEYGUARD_HIDDEN: {
+                    stats.updateKeyguardHidden(event.mTimeStamp);
+                } break;
                 default: {
                     stats.update(event.mPackage, event.mTimeStamp, event.mEventType);
                     if (incrementAppLaunch) {
@@ -665,14 +671,19 @@ class UserUsageStatsService {
         }
     }
 
-    void printEventAggregation(IndentingPrintWriter pw, String label, int count, long duration,
-            boolean prettyDates) {
-        if (count != 0 || duration != 0) {
+    void printEventAggregation(IndentingPrintWriter pw, String label,
+            IntervalStats.EventTracker tracker, boolean prettyDates) {
+        if (tracker.count != 0 || tracker.duration != 0) {
             pw.print(label);
             pw.print(": ");
-            pw.print(count);
+            pw.print(tracker.count);
             pw.print("x for ");
-            pw.print(formatElapsedTime(duration, prettyDates));
+            pw.print(formatElapsedTime(tracker.duration, prettyDates));
+            if (tracker.curStartTime != 0) {
+                pw.print(" (now running, started at ");
+                formatDateTime(tracker.curStartTime, prettyDates);
+                pw.print(")");
+            }
             pw.println();
         }
     }
@@ -752,10 +763,14 @@ class UserUsageStatsService {
             pw.decreaseIndent();
             pw.println("event aggregations");
             pw.increaseIndent();
-            printEventAggregation(pw, "screen-interactive", stats.interactiveCount,
-                    stats.interactiveDuration, prettyDates);
-            printEventAggregation(pw, "screen-non-interactive", stats.nonInteractiveCount,
-                    stats.nonInteractiveDuration, prettyDates);
+            printEventAggregation(pw, "screen-interactive", stats.interactiveTracker,
+                    prettyDates);
+            printEventAggregation(pw, "screen-non-interactive", stats.nonInteractiveTracker,
+                    prettyDates);
+            printEventAggregation(pw, "keyguard-shown", stats.keyguardShownTracker,
+                    prettyDates);
+            printEventAggregation(pw, "keyguard-hidden", stats.keyguardHiddenTracker,
+                    prettyDates);
             pw.decreaseIndent();
         }
 
