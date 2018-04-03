@@ -34,6 +34,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.time.Period;
 import java.time.ZonedDateTime;
 import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * Description of a billing relationship plan between a carrier and a specific
@@ -122,6 +123,27 @@ public final class SubscriptionPlan implements Parcelable {
                 .append(" dataUsageBytes=").append(dataUsageBytes)
                 .append(" dataUsageTime=").append(dataUsageTime)
                 .append("}").toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(cycleRule, title, summary, dataLimitBytes, dataLimitBehavior,
+                dataUsageBytes, dataUsageTime);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof SubscriptionPlan) {
+            final SubscriptionPlan other = (SubscriptionPlan) obj;
+            return Objects.equals(cycleRule, other.cycleRule)
+                    && Objects.equals(title, other.title)
+                    && Objects.equals(summary, other.summary)
+                    && dataLimitBytes == other.dataLimitBytes
+                    && dataLimitBehavior == other.dataLimitBehavior
+                    && dataUsageBytes == other.dataUsageBytes
+                    && dataUsageTime == other.dataUsageTime;
+        }
+        return false;
     }
 
     public static final Parcelable.Creator<SubscriptionPlan> CREATOR = new Parcelable.Creator<SubscriptionPlan>() {
