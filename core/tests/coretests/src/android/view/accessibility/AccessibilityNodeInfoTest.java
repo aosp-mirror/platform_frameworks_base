@@ -38,6 +38,16 @@ import java.util.ArrayList;
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityNodeInfoTest {
+    // The number of fields tested in the corresponding CTS AccessibilityNodeInfoTest:
+    // See fullyPopulateAccessibilityNodeInfo, assertEqualsAccessibilityNodeInfo,
+    // and assertAccessibilityNodeInfoCleared in that class.
+    private static final int NUM_MARSHALLED_PROPERTIES = 35;
+
+    /**
+     * The number of properties that are purposely not marshalled
+     * mOriginalText - Used when resolving clickable spans; intentionally not parceled
+     */
+    private static final int NUM_NONMARSHALLED_PROPERTIES = 1;
 
     @Test
     public void testStandardActions_serializationFlagIsValid() {
@@ -113,5 +123,11 @@ public class AccessibilityNodeInfoTest {
                 AccessibilityNodeInfo.CREATOR.createFromParcel(parcel);
         assertThat(unparceledNode.getActionList(), emptyCollectionOf(AccessibilityAction.class));
         assertThat(unparceledNode.getText(), equalTo(text));
+    }
+
+    @Test
+    public void dontForgetToUpdateCtsParcelingTestWhenYouAddNewFields() {
+        AccessibilityEventTest.assertNoNewNonStaticFieldsAdded(AccessibilityNodeInfo.class,
+                NUM_MARSHALLED_PROPERTIES + NUM_NONMARSHALLED_PROPERTIES);
     }
 }
