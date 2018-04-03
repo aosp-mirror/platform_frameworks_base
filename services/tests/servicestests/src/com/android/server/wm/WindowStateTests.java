@@ -326,6 +326,17 @@ public class WindowStateTests extends WindowTestsBase {
         assertThat(app.mLayoutSeq, not(is(mDisplayContent.mLayoutSeq)));
     }
 
+    @Test
+    public void testDisplayIdUpdatedOnReparent() throws Exception {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        // fake a different display
+        app.mInputWindowHandle.displayId = mDisplayContent.getDisplayId() + 1;
+        app.onDisplayChanged(mDisplayContent);
+
+        assertThat(app.mInputWindowHandle.displayId, is(mDisplayContent.getDisplayId()));
+        assertThat(app.getDisplayId(), is(mDisplayContent.getDisplayId()));
+    }
+
     private void testPrepareWindowToDisplayDuringRelayout(boolean wasVisible) {
         reset(mPowerManagerWrapper);
         final WindowState root = createWindow(null, TYPE_APPLICATION, "root");
