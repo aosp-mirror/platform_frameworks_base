@@ -19,6 +19,7 @@ package com.android.server.net.watchlist;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -114,10 +115,16 @@ public class WatchlistConfigTests {
     }
 
     @Test
-    public void testWatchlistConfig_getWatchlistConfigHash() throws Exception {
+    public void testWatchlistConfig_getWatchlistConfigHash_hasConfig() throws Exception {
         copyWatchlistConfigXml(mContext, TEST_XML_1, mTestXmlFile);
         WatchlistConfig config = new WatchlistConfig(mTestXmlFile);
         assertEquals(TEST_XML_1_HASH, HexDump.toHexString(config.getWatchlistConfigHash()));
+    }
+
+    @Test
+    public void testWatchlistConfig_getWatchlistConfigHash_withoutConfig() throws Exception {
+        WatchlistConfig config = new WatchlistConfig(mTestXmlFile);
+        assertNull(config.getWatchlistConfigHash());
     }
 
     @Test

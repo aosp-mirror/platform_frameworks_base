@@ -144,6 +144,7 @@ class WatchlistReportDbHelper extends SQLiteOpenHelper {
      * Aggregate all records in database before input timestamp, and return a
      * rappor encoded result.
      */
+    @Nullable
     public AggregatedResult getAggregatedRecords(long untilTimestamp) {
         final String selectStatement = WhiteListReportContract.TIMESTAMP + " < ?";
 
