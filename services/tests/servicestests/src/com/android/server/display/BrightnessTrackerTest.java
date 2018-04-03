@@ -30,9 +30,11 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ParceledListSlice;
 import android.database.ContentObserver;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
 import android.os.BatteryManager;
 import android.os.Handler;
@@ -569,6 +571,19 @@ public class BrightnessTrackerTest {
         parcel.setDataPosition(0);
         event2 = BrightnessChangeEvent.CREATOR.createFromParcel(parcel);
         assertEquals(event.batteryLevel, event2.batteryLevel, FLOAT_DELTA);
+    }
+
+    @Test
+    public void testNonNullAmbientStats() {
+        // getAmbientBrightnessStats should return an empty list rather than null when
+        // tracker isn't started or hasn't collected any data.
+        ParceledListSlice<AmbientBrightnessDayStats> slice = mTracker.getAmbientBrightnessStats(0);
+        assertNotNull(slice);
+        assertTrue(slice.getList().isEmpty());
+        startTracker(mTracker);
+        slice = mTracker.getAmbientBrightnessStats(0);
+        assertNotNull(slice);
+        assertTrue(slice.getList().isEmpty());
     }
 
     private InputStream getInputStream(String data) {
