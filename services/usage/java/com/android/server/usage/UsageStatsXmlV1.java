@@ -40,6 +40,8 @@ final class UsageStatsXmlV1 {
 
     private static final String INTERACTIVE_TAG = "interactive";
     private static final String NON_INTERACTIVE_TAG = "non-interactive";
+    private static final String KEYGUARD_SHOWN_TAG = "keyguard-shown";
+    private static final String KEYGUARD_HIDDEN_TAG = "keyguard-hidden";
 
     private static final String PACKAGES_TAG = "packages";
     private static final String PACKAGE_TAG = "package";
@@ -103,12 +105,12 @@ final class UsageStatsXmlV1 {
         }
     }
 
-    private static Pair<Integer, Long> loadCountAndTime(XmlPullParser parser)
+    private static void loadCountAndTime(XmlPullParser parser,
+            IntervalStats.EventTracker tracker)
             throws IOException, XmlPullParserException {
-        int count = XmlUtils.readIntAttribute(parser, COUNT_ATTR, 0);
-        long time = XmlUtils.readLongAttribute(parser, TIME_ATTR, 0);
+        tracker.count = XmlUtils.readIntAttribute(parser, COUNT_ATTR, 0);
+        tracker.duration = XmlUtils.readLongAttribute(parser, TIME_ATTR, 0);
         XmlUtils.skipCurrentTag(parser);
-        return new Pair<>(count, time);
     }
 
     private static void loadChooserCounts(
@@ -340,17 +342,21 @@ final class UsageStatsXmlV1 {
 
             final String tag = parser.getName();
             switch (tag) {
-                case INTERACTIVE_TAG: {
-                    Pair<Integer, Long> result = loadCountAndTime(parser);
-                    statsOut.interactiveCount = result.first;
-                    statsOut.interactiveDuration = result.second;
-                } break;
+                case INTERACTIVE_TAG:
+                    loadCountAndTime(parser, statsOut.interactiveTracker);
+                    break;
 
-                case NON_INTERACTIVE_TAG: {
-                    Pair<Integer, Long> result = loadCountAndTime(parser);
-                    statsOut.nonInteractiveCount = result.first;
-                    statsOut.nonInteractiveDuration = result.second;
-                } break;
+                case NON_INTERACTIVE_TAG:
+                    loadCountAndTime(parser, statsOut.nonInteractiveTracker);
+                    break;
+
+                case KEYGUARD_SHOWN_TAG:
+                    loadCountAndTime(parser, statsOut.keyguardShownTracker);
+                    break;
+
+                case KEYGUARD_HIDDEN_TAG:
+                    loadCountAndTime(parser, statsOut.keyguardHiddenTracker);
+                    break;
 
                 case PACKAGE_TAG:
                     loadUsageStats(parser, statsOut);
@@ -378,10 +384,14 @@ final class UsageStatsXmlV1 {
     public static void write(XmlSerializer xml, IntervalStats stats) throws IOException {
         XmlUtils.writeLongAttribute(xml, END_TIME_ATTR, stats.endTime - stats.beginTime);
 
-        writeCountAndTime(xml, INTERACTIVE_TAG, stats.interactiveCount, stats.interactiveDuration);
-
-        writeCountAndTime(xml, NON_INTERACTIVE_TAG, stats.nonInteractiveCount,
-                stats.nonInteractiveDuration);
+        writeCountAndTime(xml, INTERACTIVE_TAG, stats.interactiveTracker.count,
+                stats.interactiveTracker.duration);
+        writeCountAndTime(xml, NON_INTERACTIVE_TAG, stats.nonInteractiveTracker.count,
+                stats.nonInteractiveTracker.duration);
+        writeCountAndTime(xml, KEYGUARD_SHOWN_TAG, stats.keyguardShownTracker.count,
+                stats.keyguardShownTracker.duration);
+        writeCountAndTime(xml, KEYGUARD_HIDDEN_TAG, stats.keyguardHiddenTracker.count,
+                stats.keyguardHiddenTracker.duration);
 
         xml.startTag(null, PACKAGES_TAG);
         final int statsCount = stats.packageStats.size();
