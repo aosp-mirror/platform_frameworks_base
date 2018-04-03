@@ -27,7 +27,7 @@
 using namespace android;
 using namespace android::base;
 using namespace android::os;
-using namespace std;
+using namespace android::os::incidentd;
 using ::testing::StrEq;
 using ::testing::Test;
 using ::testing::internal::CaptureStdout;
@@ -36,12 +36,12 @@ using ::testing::internal::GetCapturedStdout;
 const uint8_t OTHER_TYPE = 1;
 const uint8_t STRING_TYPE = 9;
 const uint8_t MESSAGE_TYPE = 11;
-const string STRING_FIELD_0 = "\x02\viamtestdata";
-const string VARINT_FIELD_1 = "\x08\x96\x01";  // 150
-const string STRING_FIELD_2 = "\x12\vandroidwins";
-const string FIX64_FIELD_3 = "\x19\xff\xff\xff\xff\xff\xff\xff\xff";  // -1
-const string FIX32_FIELD_4 = "\x25\xff\xff\xff\xff";                  // -1
-const string MESSAGE_FIELD_5 = "\x2a\x10" + VARINT_FIELD_1 + STRING_FIELD_2;
+const std::string STRING_FIELD_0 = "\x02\viamtestdata";
+const std::string VARINT_FIELD_1 = "\x08\x96\x01";  // 150
+const std::string STRING_FIELD_2 = "\x12\vandroidwins";
+const std::string FIX64_FIELD_3 = "\x19\xff\xff\xff\xff\xff\xff\xff\xff";  // -1
+const std::string FIX32_FIELD_4 = "\x25\xff\xff\xff\xff";                  // -1
+const std::string MESSAGE_FIELD_5 = "\x2a\x10" + VARINT_FIELD_1 + STRING_FIELD_2;
 
 class PrivacyBufferTest : public Test {
 public:
@@ -56,20 +56,20 @@ public:
 
     virtual void SetUp() override { ASSERT_NE(tf.fd, -1); }
 
-    void writeToFdBuffer(string str) {
+    void writeToFdBuffer(std::string str) {
         ASSERT_TRUE(WriteStringToFile(str, tf.path));
         ASSERT_EQ(NO_ERROR, buffer.read(tf.fd, 10000));
         ASSERT_EQ(str.size(), buffer.size());
     }
 
-    void assertBuffer(PrivacyBuffer& buf, string expected) {
+    void assertBuffer(PrivacyBuffer& buf, std::string expected) {
         ASSERT_EQ(buf.size(), expected.size());
         CaptureStdout();
         ASSERT_EQ(buf.flush(STDOUT_FILENO), NO_ERROR);
         ASSERT_THAT(GetCapturedStdout(), StrEq(expected));
     }
 
-    void assertStrip(uint8_t dest, string expected, Privacy* policy) {
+    void assertStrip(uint8_t dest, std::string expected, Privacy* policy) {
         PrivacySpec spec = PrivacySpec::new_spec(dest);
         EncodedBuffer::iterator bufData = buffer.data();
         PrivacyBuffer privacyBuf(policy, bufData);
@@ -77,7 +77,7 @@ public:
         assertBuffer(privacyBuf, expected);
     }
 
-    void assertStripByFields(uint8_t dest, string expected, int size, Privacy* privacy, ...) {
+    void assertStripByFields(uint8_t dest, std::string expected, int size, Privacy* privacy, ...) {
         Privacy* list[size + 1];
         list[0] = privacy;
         va_list args;
@@ -194,7 +194,7 @@ TEST_F(PrivacyBufferTest, NoStripLengthDelimitedField_Message) {
 TEST_F(PrivacyBufferTest, StripVarintAndString) {
     writeToFdBuffer(STRING_FIELD_0 + VARINT_FIELD_1 + STRING_FIELD_2 + FIX64_FIELD_3 +
                     FIX32_FIELD_4);
-    string expected = STRING_FIELD_0 + FIX64_FIELD_3 + FIX32_FIELD_4;
+    std::string expected = STRING_FIELD_0 + FIX64_FIELD_3 + FIX32_FIELD_4;
     assertStripByFields(DEST_EXPLICIT, expected, 2, create_privacy(1, OTHER_TYPE, DEST_LOCAL),
                         create_privacy(2, STRING_TYPE, DEST_LOCAL));
 }
@@ -202,7 +202,7 @@ TEST_F(PrivacyBufferTest, StripVarintAndString) {
 TEST_F(PrivacyBufferTest, StripVarintAndFixed64) {
     writeToFdBuffer(STRING_FIELD_0 + VARINT_FIELD_1 + STRING_FIELD_2 + FIX64_FIELD_3 +
                     FIX32_FIELD_4);
-    string expected = STRING_FIELD_0 + STRING_FIELD_2 + FIX32_FIELD_4;
+    std::string expected = STRING_FIELD_0 + STRING_FIELD_2 + FIX32_FIELD_4;
     assertStripByFields(DEST_EXPLICIT, expected, 2, create_privacy(1, OTHER_TYPE, DEST_LOCAL),
                         create_privacy(3, OTHER_TYPE, DEST_LOCAL));
 }
@@ -210,14 +210,14 @@ TEST_F(PrivacyBufferTest, StripVarintAndFixed64) {
 TEST_F(PrivacyBufferTest, StripVarintInNestedMessage) {
     writeToFdBuffer(STRING_FIELD_0 + MESSAGE_FIELD_5);
     Privacy* list[] = {create_privacy(1, OTHER_TYPE, DEST_LOCAL), NULL};
-    string expected = STRING_FIELD_0 + "\x2a\xd" + STRING_FIELD_2;
+    std::string expected = STRING_FIELD_0 + "\x2a\xd" + STRING_FIELD_2;
     assertStripByFields(DEST_EXPLICIT, expected, 1, create_message_privacy(5, list));
 }
 
 TEST_F(PrivacyBufferTest, StripFix64AndVarintInNestedMessage) {
     writeToFdBuffer(STRING_FIELD_0 + FIX64_FIELD_3 + MESSAGE_FIELD_5);
     Privacy* list[] = {create_privacy(1, OTHER_TYPE, DEST_LOCAL), NULL};
-    string expected = STRING_FIELD_0 + "\x2a\xd" + STRING_FIELD_2;
+    std::string expected = STRING_FIELD_0 + "\x2a\xd" + STRING_FIELD_2;
     assertStripByFields(DEST_EXPLICIT, expected, 2, create_privacy(3, OTHER_TYPE, DEST_LOCAL),
                         create_message_privacy(5, list));
 }
@@ -262,7 +262,7 @@ TEST_F(PrivacyBufferTest, SelfRecursionMessage) {
     Privacy* field5 = create_message_privacy(5, NULL);
     Privacy* list[] = {create_privacy(1, OTHER_TYPE, DEST_LOCAL), field5, NULL};
     field5->children = list;
-    string expected = "\x2a\x1c" + STRING_FIELD_2 + "\x2a\xd" + STRING_FIELD_2;
+    std::string expected = "\x2a\x1c" + STRING_FIELD_2 + "\x2a\xd" + STRING_FIELD_2;
     assertStrip(DEST_EXPLICIT, expected, field5);
 }
 
@@ -271,6 +271,6 @@ TEST_F(PrivacyBufferTest, AutoMessage) {
     Privacy* list[] = {create_privacy(1, OTHER_TYPE, DEST_LOCAL), NULL};
     Privacy* autoMsg = create_privacy(5, MESSAGE_TYPE, DEST_AUTOMATIC);
     autoMsg->children = list;
-    string expected = "\x2a\xd" + STRING_FIELD_2;
+    std::string expected = "\x2a\xd" + STRING_FIELD_2;
     assertStripByFields(DEST_AUTOMATIC, expected, 1, autoMsg);
 }

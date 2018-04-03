@@ -473,7 +473,7 @@ public final class SmartSelectionEventTracker {
             final String entityType = classification.getEntityCount() > 0
                     ? classification.getEntity(0)
                     : TextClassifier.TYPE_UNKNOWN;
-            final String versionTag = getVersionInfo(classification.getSignature());
+            final String versionTag = getVersionInfo(classification.getId());
             return new SelectionEvent(
                     start, end, EventType.SELECTION_MODIFIED, entityType, versionTag);
         }
@@ -489,7 +489,7 @@ public final class SmartSelectionEventTracker {
          */
         public static SelectionEvent selectionModified(
                 int start, int end, @NonNull TextSelection selection) {
-            final boolean smartSelection = getSourceClassifier(selection.getSignature())
+            final boolean smartSelection = getSourceClassifier(selection.getId())
                     .equals(TextClassifier.DEFAULT_LOG_TAG);
             final int eventType;
             if (smartSelection) {
@@ -503,7 +503,7 @@ public final class SmartSelectionEventTracker {
             final String entityType = selection.getEntityCount() > 0
                     ? selection.getEntity(0)
                     : TextClassifier.TYPE_UNKNOWN;
-            final String versionTag = getVersionInfo(selection.getSignature());
+            final String versionTag = getVersionInfo(selection.getId());
             return new SelectionEvent(start, end, eventType, entityType, versionTag);
         }
 
@@ -538,7 +538,7 @@ public final class SmartSelectionEventTracker {
             final String entityType = classification.getEntityCount() > 0
                     ? classification.getEntity(0)
                     : TextClassifier.TYPE_UNKNOWN;
-            final String versionTag = getVersionInfo(classification.getSignature());
+            final String versionTag = getVersionInfo(classification.getId());
             return new SelectionEvent(start, end, actionType, entityType, versionTag);
         }
 

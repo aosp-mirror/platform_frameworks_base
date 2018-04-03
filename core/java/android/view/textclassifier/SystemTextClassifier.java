@@ -16,7 +16,6 @@
 
 package android.view.textclassifier;
 
-import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.WorkerThread;
@@ -56,6 +55,8 @@ public final class SystemTextClassifier implements TextClassifier {
     private Logger.Config mLoggerConfig;
     @GuardedBy("mLoggerLock")
     private Logger mLogger;
+    @GuardedBy("mLoggerLock")
+    private TextClassificationSessionId mSessionId;
 
     public SystemTextClassifier(Context context, TextClassificationConstants settings)
                 throws ServiceManager.ServiceNotFoundException {
@@ -71,26 +72,20 @@ public final class SystemTextClassifier implements TextClassifier {
      */
     @Override
     @WorkerThread
-    public TextSelection suggestSelection(
-            @NonNull CharSequence text,
-            @IntRange(from = 0) int selectionStartIndex,
-            @IntRange(from = 0) int selectionEndIndex,
-            @Nullable TextSelection.Options options) {
-        Utils.validate(text, selectionStartIndex, selectionEndIndex, false /* allowInMainThread */);
+    public TextSelection suggestSelection(TextSelection.Request request) {
+        Preconditions.checkNotNull(request);
+        Utils.checkMainThread();
         try {
             final TextSelectionCallback callback = new TextSelectionCallback();
-            mManagerService.onSuggestSelection(
-                    text, selectionStartIndex, selectionEndIndex, options, callback);
+            mManagerService.onSuggestSelection(mSessionId, request, callback);
             final TextSelection selection = callback.mReceiver.get();
             if (selection != null) {
                 return selection;
             }
-        } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
-        } catch (InterruptedException e) {
-            Log.d(LOG_TAG, e.getMessage());
+        } catch (RemoteException | InterruptedException e) {
+            Log.e(LOG_TAG, "Error suggesting selection for text. Using fallback.", e);
         }
-        return mFallback.suggestSelection(text, selectionStartIndex, selectionEndIndex, options);
+        return mFallback.suggestSelection(request);
     }
 
     /**
@@ -98,25 +93,20 @@ public final class SystemTextClassifier implements TextClassifier {
      */
     @Override
     @WorkerThread
-    public TextClassification classifyText(
-            @NonNull CharSequence text,
-            @IntRange(from = 0) int startIndex,
-            @IntRange(from = 0) int endIndex,
-            @Nullable TextClassification.Options options) {
-        Utils.validate(text, startIndex, endIndex, false /* allowInMainThread */);
+    public TextClassification classifyText(TextClassification.Request request) {
+        Preconditions.checkNotNull(request);
+        Utils.checkMainThread();
         try {
             final TextClassificationCallback callback = new TextClassificationCallback();
-            mManagerService.onClassifyText(text, startIndex, endIndex, options, callback);
+            mManagerService.onClassifyText(mSessionId, request, callback);
             final TextClassification classification = callback.mReceiver.get();
             if (classification != null) {
                 return classification;
             }
-        } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
-        } catch (InterruptedException e) {
-            Log.d(LOG_TAG, e.getMessage());
+        } catch (RemoteException | InterruptedException e) {
+            Log.e(LOG_TAG, "Error classifying text. Using fallback.", e);
         }
-        return mFallback.classifyText(text, startIndex, endIndex, options);
+        return mFallback.classifyText(request);
     }
 
     /**
@@ -124,33 +114,26 @@ public final class SystemTextClassifier implements TextClassifier {
      */
     @Override
     @WorkerThread
-    public TextLinks generateLinks(
-            @NonNull CharSequence text, @Nullable TextLinks.Options options) {
-        Utils.validate(text, false /* allowInMainThread */);
+    public TextLinks generateLinks(@NonNull TextLinks.Request request) {
+        Preconditions.checkNotNull(request);
+        Utils.checkMainThread();
 
-        final boolean legacyFallback = options != null && options.isLegacyFallback();
-        if (!mSettings.isSmartLinkifyEnabled() && legacyFallback) {
-            return Utils.generateLegacyLinks(text, options);
+        if (!mSettings.isSmartLinkifyEnabled() && request.isLegacyFallback()) {
+            return Utils.generateLegacyLinks(request);
         }
 
         try {
-            if (options == null) {
-                options = new TextLinks.Options().setCallingPackageName(mPackageName);
-            } else if (!mPackageName.equals(options.getCallingPackageName())) {
-                options.setCallingPackageName(mPackageName);
-            }
+            request.setCallingPackageName(mPackageName);
             final TextLinksCallback callback = new TextLinksCallback();
-            mManagerService.onGenerateLinks(text, options, callback);
+            mManagerService.onGenerateLinks(mSessionId, request, callback);
             final TextLinks links = callback.mReceiver.get();
             if (links != null) {
                 return links;
             }
-        } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
-        } catch (InterruptedException e) {
-            Log.d(LOG_TAG, e.getMessage());
+        } catch (RemoteException | InterruptedException e) {
+            Log.e(LOG_TAG, "Error generating links. Using fallback.", e);
         }
-        return mFallback.generateLinks(text, options);
+        return mFallback.generateLinks(request);
     }
 
     /**
@@ -173,15 +156,43 @@ public final class SystemTextClassifier implements TextClassifier {
                     @Override
                     public void writeEvent(SelectionEvent event) {
                         try {
-                            mManagerService.onSelectionEvent(event);
+                            mManagerService.onSelectionEvent(mSessionId, event);
                         } catch (RemoteException e) {
-                            e.rethrowAsRuntimeException();
+                            Log.e(LOG_TAG, "Error reporting selection event.", e);
                         }
                     }
                 };
             }
         }
         return mLogger;
+    }
+
+    @Override
+    public void destroy() {
+        try {
+            if (mSessionId != null) {
+                mManagerService.onDestroyTextClassificationSession(mSessionId);
+            }
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Error destroying classification session.", e);
+        }
+    }
+
+    /**
+     * Attempts to initialize a new classification session.
+     *
+     * @param classificationContext the classification context
+     * @param sessionId the session's id
+     */
+    void initializeRemoteSession(
+            @NonNull TextClassificationContext classificationContext,
+            @NonNull TextClassificationSessionId sessionId) {
+        mSessionId = Preconditions.checkNotNull(sessionId);
+        try {
+            mManagerService.onCreateTextClassificationSession(classificationContext, mSessionId);
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Error starting a new classification session.", e);
+        }
     }
 
     private static final class TextSelectionCallback extends ITextSelectionCallback.Stub {

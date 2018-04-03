@@ -475,6 +475,12 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
             success = true;
             return keyPair;
+        } catch (ProviderException e) {
+          if ((mSpec.getPurposes() & KeyProperties.PURPOSE_WRAP_KEY) != 0) {
+              throw new SecureKeyImportUnavailableException(e);
+          } else {
+              throw e;
+          }
         } finally {
             if (!success) {
                 Credentials.deleteAllTypesForAlias(mKeyStore, mEntryAlias, mEntryUid);

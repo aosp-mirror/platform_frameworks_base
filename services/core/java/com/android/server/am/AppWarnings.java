@@ -122,11 +122,15 @@ class AppWarnings {
             return;
         }
 
+        final int platformSdk = Build.VERSION.SDK_INT;
+
         if (ActivityManager.isRunningInTestHarness()
-                && !mAlwaysShowUnsupportedCompileSdkWarningActivities.contains(r.realActivity)) {
-            // Don't show warning if we are running in a test harness and we don't have to always
-            // show for this activity.
-            return;
+                || platformSdk == Build.VERSION_CODES.CUR_DEVELOPMENT) {
+            // Don't show warning if we are running in a test harness or the platform is currently
+            // in development, expect if we were requested to always show it for this activity.
+            if (!mAlwaysShowUnsupportedCompileSdkWarningActivities.contains(r.realActivity)) {
+                return;
+            }
         }
 
         // If the application was built against an pre-release SDK that's older than the current
@@ -135,7 +139,6 @@ class AppWarnings {
         // codenames (e.g. simultaneous pre-release development), then we're likely to run into
         // compatibility issues. Warn the user and offer to check for an update.
         final int compileSdk = r.appInfo.compileSdkVersion;
-        final int platformSdk = Build.VERSION.SDK_INT;
         final boolean isCompileSdkPreview = !"REL".equals(r.appInfo.compileSdkVersionCodename);
         final boolean isPlatformSdkPreview = !"REL".equals(Build.VERSION.CODENAME);
         if ((isCompileSdkPreview && compileSdk < platformSdk)

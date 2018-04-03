@@ -19,6 +19,10 @@
 #include <android/os/IncidentReportArgs.h>
 #include <stdlib.h>
 
+namespace android {
+namespace os {
+namespace incidentd {
+
 uint64_t encode_field_id(const Privacy* p) { return (uint64_t)p->type << 32 | p->field_id; }
 
 const Privacy* lookup(const Privacy* p, uint32_t fieldId) {
@@ -65,3 +69,7 @@ PrivacySpec PrivacySpec::new_spec(int dest) {
             return PrivacySpec(android::os::DEST_AUTOMATIC);
     }
 }
+
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android

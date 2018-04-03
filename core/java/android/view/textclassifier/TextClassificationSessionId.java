@@ -22,6 +22,7 @@ import android.os.Parcelable;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -74,6 +75,11 @@ public final class TextClassificationSessionId implements Parcelable {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(Locale.US, "TextClassificationSessionId {%s}", mValue);
     }
 
     @Override

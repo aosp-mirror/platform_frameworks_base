@@ -168,6 +168,7 @@ cc_defaults {
         "pipeline/skia/ReorderBarrierDrawables.cpp",
         "pipeline/skia/ShaderCache.cpp",
         "pipeline/skia/SkiaDisplayList.cpp",
+        "pipeline/skia/SkiaMemoryTracer.cpp",
         "pipeline/skia/SkiaOpenGLPipeline.cpp",
         "pipeline/skia/SkiaOpenGLReadback.cpp",
         "pipeline/skia/SkiaPipeline.cpp",

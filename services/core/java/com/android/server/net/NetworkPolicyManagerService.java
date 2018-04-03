@@ -149,7 +149,6 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.BestClock;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -230,9 +229,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -273,6 +274,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     static final String TAG = NetworkPolicyLogger.TAG;
     private static final boolean LOGD = NetworkPolicyLogger.LOGD;
     private static final boolean LOGV = NetworkPolicyLogger.LOGV;
+
+    /**
+     * No opportunistic quota could be calculated from user data plan or data settings.
+     */
+    public static final int OPPORTUNISTIC_QUOTA_UNKNOWN = -1;
 
     private static final int VERSION_INIT = 1;
     private static final int VERSION_ADDED_SNOOZE = 2;
@@ -359,6 +365,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private static final int UID_MSG_STATE_CHANGED = 100;
     private static final int UID_MSG_GONE = 101;
+
+    private static final String PROP_SUB_PLAN_OWNER = "persist.sys.sub_plan_owner";
 
     private final Context mContext;
     private final IActivityManager mActivityManager;
@@ -1732,12 +1740,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final SubscriptionPlan plan = getPrimarySubscriptionPlanLocked(subId);
             if (plan == null) continue;
 
-            // By default assume we have no quota
-            long quotaBytes = 0;
-
+            final long quotaBytes;
             final long limitBytes = plan.getDataLimitBytes();
             if (limitBytes == SubscriptionPlan.BYTES_UNKNOWN) {
-                // Ignore missing limits
+                quotaBytes = OPPORTUNISTIC_QUOTA_UNKNOWN;
             } else if (limitBytes == SubscriptionPlan.BYTES_UNLIMITED) {
                 // Unlimited data; let's use 20MiB/day (600MiB/month)
                 quotaBytes = DataUnit.MEBIBYTES.toBytes(20);
@@ -1746,14 +1752,19 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final Pair<ZonedDateTime, ZonedDateTime> cycle = plan.cycleIterator().next();
                 final long start = cycle.first.toInstant().toEpochMilli();
                 final long end = cycle.second.toInstant().toEpochMilli();
+                final Instant now = mClock.instant();
+                final long startOfDay = ZonedDateTime.ofInstant(now, cycle.first.getZone())
+                        .truncatedTo(ChronoUnit.DAYS)
+                        .toInstant().toEpochMilli();
                 final long totalBytes = getTotalBytes(
-                        NetworkTemplate.buildTemplateMobileAll(state.subscriberId), start, end);
+                        NetworkTemplate.buildTemplateMobileAll(state.subscriberId),
+                        start, startOfDay);
                 final long remainingBytes = limitBytes - totalBytes;
-                final long remainingDays = Math.max(1, (end - mClock.millis())
-                        / TimeUnit.DAYS.toMillis(1));
-                if (remainingBytes > 0) {
-                    quotaBytes = (remainingBytes / remainingDays) / 10;
-                }
+                // Number of remaining days including current day
+                final long remainingDays =
+                        1 + ((end - now.toEpochMilli() - 1) / TimeUnit.DAYS.toMillis(1));
+
+                quotaBytes = Math.max(0, (remainingBytes / remainingDays) / 10);
             }
 
             mSubscriptionOpportunisticQuota.put(subId, quotaBytes);
@@ -2786,10 +2797,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             return;
         }
 
-        // Fourth check: is caller a testing app on a debug build?
-        final boolean enableDebug = Build.IS_USERDEBUG || Build.IS_ENG;
-        if (enableDebug && callingPackage
-                .equals(SystemProperties.get("fw.sub_plan_owner." + subId, null))) {
+        // Fourth check: is caller a testing app?
+        final String testPackage = SystemProperties.get(PROP_SUB_PLAN_OWNER + "." + subId, null);
+        if (!TextUtils.isEmpty(testPackage)
+                && Objects.equals(testPackage, callingPackage)) {
+            return;
+        }
+
+        // Fifth check: is caller a legacy testing app?
+        final String legacyTestPackage = SystemProperties.get("fw.sub_plan_owner." + subId, null);
+        if (!TextUtils.isEmpty(legacyTestPackage)
+                && Objects.equals(legacyTestPackage, callingPackage)) {
             return;
         }
 
@@ -2988,6 +3006,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+    }
+
+    /**
+     * Only visible for testing purposes. This doesn't give any access to
+     * existing plans; it simply lets the debug package define new plans.
+     */
+    void setSubscriptionPlansOwner(int subId, String packageName) {
+        SystemProperties.set(PROP_SUB_PLAN_OWNER + "." + subId, packageName);
     }
 
     @Override
@@ -3208,18 +3234,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 this, in, out, err, args, callback, resultReceiver);
     }
 
-    @Override
+    @VisibleForTesting
     public boolean isUidForeground(int uid) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
-
         synchronized (mUidRulesFirstLock) {
-            return isUidForegroundUL(uid);
+            return isUidStateForeground(
+                    mUidState.get(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY));
         }
-    }
-
-    private boolean isUidForegroundUL(int uid) {
-        return isUidStateForegroundUL(
-                mUidState.get(uid, ActivityManager.PROCESS_STATE_CACHED_EMPTY));
     }
 
     private boolean isUidForegroundOnRestrictBackgroundUL(int uid) {
@@ -3232,9 +3252,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return isProcStateAllowedWhileIdleOrPowerSaveMode(procState);
     }
 
-    private boolean isUidStateForegroundUL(int state) {
+    private boolean isUidStateForeground(int state) {
         // only really in foreground when screen is also on
-        return state <= ActivityManager.PROCESS_STATE_TOP;
+        return state <= NetworkPolicyManager.FOREGROUND_THRESHOLD_STATE;
     }
 
     /**
@@ -3261,7 +3281,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     }
                     updateRulesForPowerRestrictionsUL(uid);
                 }
-                updateNetworkStats(uid, isUidStateForegroundUL(uidState));
+                updateNetworkStats(uid, isUidStateForeground(uidState));
             }
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
@@ -4663,7 +4683,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         public long getSubscriptionOpportunisticQuota(Network network, int quotaType) {
             synchronized (mNetworkPoliciesSecondLock) {
                 // TODO: handle splitting quota between use-cases
-                return mSubscriptionOpportunisticQuota.get(getSubIdLocked(network));
+                return mSubscriptionOpportunisticQuota.get(getSubIdLocked(network),
+                        OPPORTUNISTIC_QUOTA_UNKNOWN);
             }
         }
 

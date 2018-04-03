@@ -1225,6 +1225,22 @@ message AppCrashOccurred {
 
     // The pid if available. -1 means not available.
     optional sint32 pid = 4;
+
+    optional string package_name = 5;
+
+    enum InstantApp {
+        UNAVAILABLE = 0;
+        FALSE = 1;
+        TRUE = 2;
+    }
+    optional InstantApp is_instant_app = 6;
+
+    enum ForegroundState {
+        UNKNOWN = 0;
+        BACKGROUND = 1;
+        FOREGROUND = 2;
+    }
+    optional ForegroundState foreground_state = 7;
 }
 
 /**
@@ -1266,6 +1282,20 @@ message ANROccurred {
     optional string short_component_name = 3;
 
     optional string reason = 4;
+
+    enum InstantApp {
+        UNAVAILABLE = 0;
+        FALSE = 1;
+        TRUE = 2;
+    }
+    optional InstantApp is_instant_app = 5;
+
+    enum ForegroundState {
+        UNKNOWN = 0;
+        BACKGROUND = 1;
+        FOREGROUND = 2;
+    }
+    optional ForegroundState foreground_state = 6;
 }
 
 /*

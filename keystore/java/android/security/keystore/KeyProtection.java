@@ -224,7 +224,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
     private final boolean mRandomizedEncryptionRequired;
     private final boolean mUserAuthenticationRequired;
     private final int mUserAuthenticationValidityDurationSeconds;
-    private final boolean mTrustedUserPresenceRequired;
+    private final boolean mUserPresenceRequred;
     private final boolean mUserAuthenticationValidWhileOnBody;
     private final boolean mInvalidatedByBiometricEnrollment;
     private final long mBoundToSecureUserId;
@@ -244,7 +244,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
             boolean randomizedEncryptionRequired,
             boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds,
-            boolean trustedUserPresenceRequired,
+            boolean userPresenceRequred,
             boolean userAuthenticationValidWhileOnBody,
             boolean invalidatedByBiometricEnrollment,
             long boundToSecureUserId,
@@ -264,7 +264,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
         mRandomizedEncryptionRequired = randomizedEncryptionRequired;
         mUserAuthenticationRequired = userAuthenticationRequired;
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
-        mTrustedUserPresenceRequired = trustedUserPresenceRequired;
+        mUserPresenceRequred = userPresenceRequred;
         mUserAuthenticationValidWhileOnBody = userAuthenticationValidWhileOnBody;
         mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
         mBoundToSecureUserId = boundToSecureUserId;
@@ -446,8 +446,8 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
      * Returns {@code true} if the key is authorized to be used only if a test of user presence has
      * been performed between the {@code Signature.initSign()} and {@code Signature.sign()} calls.
      */
-    public boolean isTrustedUserPresenceRequired() {
-        return mTrustedUserPresenceRequired;
+    public boolean isUserPresenceRequired() {
+        return mUserPresenceRequred;
     }
 
     /**
@@ -508,7 +508,9 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
     }
 
     /**
-     * Returns {@code true} if the key cannot be used unless the device screen is unlocked.
+     * Returns {@code true} if the screen must be unlocked for this key to be used for encryption or
+     * signing. Decryption and signature verification will still be available when the screen is
+     * locked.
      *
      * @see Builder#setUnlockedDeviceRequired(boolean)
      */
@@ -532,7 +534,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
         private boolean mRandomizedEncryptionRequired = true;
         private boolean mUserAuthenticationRequired;
         private int mUserAuthenticationValidityDurationSeconds = -1;
-        private boolean mTrustedUserPresenceRequired = false;
+        private boolean mUserPresenceRequired = false;
         private boolean mUserAuthenticationValidWhileOnBody;
         private boolean mInvalidatedByBiometricEnrollment = true;
         private boolean mUserConfirmationRequired;
@@ -841,8 +843,8 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
          * {@code Signature.initSign()} and {@code Signature.sign()} method calls.
          */
         @NonNull
-        public Builder setTrustedUserPresenceRequired(boolean required) {
-            mTrustedUserPresenceRequired = required;
+        public Builder setUserPresenceRequired(boolean required) {
+            mUserPresenceRequired = required;
             return this;
         }
 
@@ -929,9 +931,10 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
 
         /**
          * Sets whether the keystore requires the screen to be unlocked before allowing decryption
-         * using this key. If this is set to {@code true}, any attempt to decrypt using this key
-         * while the screen is locked will fail. A locked device requires a PIN, password,
-         * fingerprint, or other trusted factor to access.
+         * using this key. If this is set to {@code true}, any attempt to decrypt or sign using this
+         * key while the screen is locked will fail. A locked device requires a PIN, password,
+         * fingerprint, or other trusted factor to access. While the screen is locked, the key can
+         * still be used for encryption or signature verification.
          */
         @NonNull
         public Builder setUnlockedDeviceRequired(boolean unlockedDeviceRequired) {
@@ -958,7 +961,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
                     mRandomizedEncryptionRequired,
                     mUserAuthenticationRequired,
                     mUserAuthenticationValidityDurationSeconds,
-                    mTrustedUserPresenceRequired,
+                    mUserPresenceRequired,
                     mUserAuthenticationValidWhileOnBody,
                     mInvalidatedByBiometricEnrollment,
                     mBoundToSecureUserId,

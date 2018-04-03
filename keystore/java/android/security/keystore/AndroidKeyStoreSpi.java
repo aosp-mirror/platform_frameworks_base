@@ -26,6 +26,7 @@ import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
+import android.security.keystore.SecureKeyImportUnavailableException;
 import android.security.keystore.WrappedKeyEntry;
 import android.util.Log;
 
@@ -755,7 +756,9 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             0, // FIXME fingerprint id?
             mUid,
             new KeyCharacteristics());
-        if (errorCode != KeyStore.NO_ERROR) {
+        if (errorCode == KeymasterDefs.KM_ERROR_UNIMPLEMENTED) {
+          throw new SecureKeyImportUnavailableException("Could not import wrapped key");
+        } else if (errorCode != KeyStore.NO_ERROR) {
             throw new KeyStoreException("Failed to import wrapped key. Keystore error code: "
                 + errorCode);
         }

@@ -34,9 +34,6 @@
 
 #include <unistd.h>
 
-using namespace android;
-using namespace android::base;
-
 enum { WHAT_RUN_REPORT = 1, WHAT_SEND_BACKLOG_TO_DROPBOX = 2 };
 
 #define DEFAULT_BACKLOG_DELAY_NS (1000000000LL)
@@ -44,7 +41,10 @@ enum { WHAT_RUN_REPORT = 1, WHAT_SEND_BACKLOG_TO_DROPBOX = 2 };
 #define DEFAULT_BYTES_SIZE_LIMIT (20 * 1024 * 1024)        // 20MB
 #define DEFAULT_REFACTORY_PERIOD_MS (24 * 60 * 60 * 1000)  // 1 Day
 
-// ================================================================================
+namespace android {
+namespace os {
+namespace incidentd {
+
 String16 const DUMP_PERMISSION("android.permission.DUMP");
 String16 const USAGE_STATS_PERMISSION("android.permission.PACKAGE_USAGE_STATS");
 
@@ -94,6 +94,7 @@ static Status checkIncidentPermissions(const IncidentReportArgs& args) {
     }
     return Status::ok();
 }
+
 // ================================================================================
 ReportRequestQueue::ReportRequestQueue() {}
 
@@ -373,3 +374,7 @@ status_t IncidentService::cmd_privacy(FILE* in, FILE* out, FILE* err, Vector<Str
     }
     return NO_ERROR;
 }
+
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android

@@ -22,10 +22,12 @@
 #include <android/util/EncodedBuffer.h>
 #include <utils/Errors.h>
 
-using namespace android;
+namespace android {
+namespace os {
+namespace incidentd {
+
 using namespace android::base;
 using namespace android::util;
-using namespace std;
 
 /**
  * Reads data from fd into a buffer, fd must be closed explicitly.
@@ -103,5 +105,9 @@ private:
     bool mTimedOut;
     bool mTruncated;
 };
+
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android
 
 #endif  // FD_BUFFER_H

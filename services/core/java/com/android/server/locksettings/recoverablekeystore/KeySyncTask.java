@@ -19,12 +19,10 @@ package com.android.server.locksettings.recoverablekeystore;
 import static android.security.keystore.recovery.KeyChainProtectionParams.TYPE_LOCKSCREEN;
 
 import android.annotation.Nullable;
-import android.annotation.NonNull;
 import android.content.Context;
 import android.security.keystore.recovery.KeyChainProtectionParams;
 import android.security.keystore.recovery.KeyChainSnapshot;
 import android.security.keystore.recovery.KeyDerivationParams;
-import android.security.keystore.recovery.TrustedRootCertificates;
 import android.security.keystore.recovery.WrappedApplicationKey;
 import android.util.Log;
 
@@ -218,10 +216,10 @@ public class KeySyncTask implements Runnable {
             return;
         }
 
-        if (mTestOnlyInsecureCertificateHelper.isTestOnlyCertificate(rootCertAlias)) {
+        if (mTestOnlyInsecureCertificateHelper.isTestOnlyCertificateAlias(rootCertAlias)) {
             Log.w(TAG, "Insecure root certificate is used by recovery agent "
                     + recoveryAgentUid);
-            if (mTestOnlyInsecureCertificateHelper.doesCredentailSupportInsecureMode(
+            if (mTestOnlyInsecureCertificateHelper.doesCredentialSupportInsecureMode(
                     mCredentialType, mCredential)) {
                 Log.w(TAG, "Whitelisted credential is used to generate snapshot by "
                         + "recovery agent "+ recoveryAgentUid);
@@ -252,7 +250,7 @@ public class KeySyncTask implements Runnable {
         }
 
         // Only include insecure key material for test
-        if (mTestOnlyInsecureCertificateHelper.isTestOnlyCertificate(rootCertAlias)) {
+        if (mTestOnlyInsecureCertificateHelper.isTestOnlyCertificateAlias(rootCertAlias)) {
             rawKeys = mTestOnlyInsecureCertificateHelper.keepOnlyWhitelistedInsecureKeys(rawKeys);
         }
         SecretKey recoveryKey;

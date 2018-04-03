@@ -33,32 +33,42 @@ final class TextClassificationSession implements TextClassifier {
 
     private final TextClassifier mDelegate;
     private final SelectionEventHelper mEventHelper;
+    private final TextClassificationSessionId mSessionId;
+    private final TextClassificationContext mClassificationContext;
 
     private boolean mDestroyed;
 
     TextClassificationSession(TextClassificationContext context, TextClassifier delegate) {
+        mClassificationContext = Preconditions.checkNotNull(context);
         mDelegate = Preconditions.checkNotNull(delegate);
-        mEventHelper = new SelectionEventHelper(new TextClassificationSessionId(), context);
+        mSessionId = new TextClassificationSessionId();
+        mEventHelper = new SelectionEventHelper(mSessionId, mClassificationContext);
+        initializeRemoteSession();
     }
 
     @Override
-    public TextSelection suggestSelection(CharSequence text, int selectionStartIndex,
-            int selectionEndIndex, TextSelection.Options options) {
+    public TextSelection suggestSelection(TextSelection.Request request) {
         checkDestroyed();
-        return mDelegate.suggestSelection(text, selectionStartIndex, selectionEndIndex, options);
+        return mDelegate.suggestSelection(request);
+    }
+
+    private void initializeRemoteSession() {
+        if (mDelegate instanceof SystemTextClassifier) {
+            ((SystemTextClassifier) mDelegate).initializeRemoteSession(
+                    mClassificationContext, mSessionId);
+        }
     }
 
     @Override
-    public TextClassification classifyText(CharSequence text, int startIndex, int endIndex,
-            TextClassification.Options options) {
+    public TextClassification classifyText(TextClassification.Request request) {
         checkDestroyed();
-        return mDelegate.classifyText(text, startIndex, endIndex, options);
+        return mDelegate.classifyText(request);
     }
 
     @Override
-    public TextLinks generateLinks(CharSequence text, TextLinks.Options options) {
+    public TextLinks generateLinks(TextLinks.Request request) {
         checkDestroyed();
-        return mDelegate.generateLinks(text, options);
+        return mDelegate.generateLinks(request);
     }
 
     @Override
@@ -73,6 +83,7 @@ final class TextClassificationSession implements TextClassifier {
     @Override
     public void destroy() {
         mEventHelper.endSession();
+        mDelegate.destroy();
         mDestroyed = true;
     }
 
@@ -162,7 +173,7 @@ final class TextClassificationSession implements TextClassifier {
                         .setEnd(event.getAbsoluteEnd() - mStartEvent.getAbsoluteStart());
             }
             if (mSmartEvent != null) {
-                event.setSignature(mSmartEvent.getSignature())
+                event.setResultId(mSmartEvent.getResultId())
                         .setSmartStart(
                                 mSmartEvent.getAbsoluteStart() - mStartEvent.getAbsoluteStart())
                         .setSmartEnd(mSmartEvent.getAbsoluteEnd() - mStartEvent.getAbsoluteStart());
@@ -195,7 +206,7 @@ final class TextClassificationSession implements TextClassifier {
                 case SelectionEvent.EVENT_SMART_SELECTION_SINGLE:  // fall through
                 case SelectionEvent.EVENT_SMART_SELECTION_MULTI:  // fall through
                 case SelectionEvent.EVENT_AUTO_SELECTION:
-                    if (isPlatformLocalTextClassifierSmartSelection(event.getSignature())) {
+                    if (isPlatformLocalTextClassifierSmartSelection(event.getResultId())) {
                         if (event.getAbsoluteEnd() - event.getAbsoluteStart() > 1) {
                             event.setEventType(SelectionEvent.EVENT_SMART_SELECTION_MULTI);
                         } else {

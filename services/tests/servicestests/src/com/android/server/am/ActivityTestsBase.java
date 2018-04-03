@@ -187,8 +187,8 @@ public class ActivityTestsBase {
                 mTaskRecord.addActivityToTop(activity);
             }
 
-            activity.setProcess(new ProcessRecord(null, mService.mContext.getApplicationInfo(),
-                    "name", 12345));
+            activity.setProcess(new ProcessRecord(null, null,
+                    mService.mContext.getApplicationInfo(), "name", 12345));
             activity.app.thread = mock(IApplicationThread.class);
 
             return activity;

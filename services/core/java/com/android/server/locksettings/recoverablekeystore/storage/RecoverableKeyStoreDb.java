@@ -26,6 +26,7 @@ import android.security.keystore.recovery.RecoveryController;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.server.locksettings.recoverablekeystore.TestOnlyInsecureCertificateHelper;
 import com.android.server.locksettings.recoverablekeystore.WrappedKey;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.KeysEntry;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.RecoveryServiceMetadataEntry;
@@ -62,6 +63,7 @@ public class RecoverableKeyStoreDb {
     private static final String CERT_PATH_ENCODING = "PkiPath";
 
     private final RecoverableKeyStoreDbHelper mKeyStoreDbHelper;
+    private final TestOnlyInsecureCertificateHelper mTestOnlyInsecureCertificateHelper;
 
     /**
      * A new instance, storing the database in the user directory of {@code context}.
@@ -77,6 +79,7 @@ public class RecoverableKeyStoreDb {
 
     private RecoverableKeyStoreDb(RecoverableKeyStoreDbHelper keyStoreDbHelper) {
         this.mKeyStoreDbHelper = keyStoreDbHelper;
+        this.mTestOnlyInsecureCertificateHelper = new TestOnlyInsecureCertificateHelper();
     }
 
     /**
@@ -627,6 +630,7 @@ public class RecoverableKeyStoreDb {
      * @hide
      */
     public long setActiveRootOfTrust(int userId, int uid, @Nullable String rootAlias) {
+        // TODO: Call getDefaultCertificateAliasIfEmpty() here too?
         SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(RecoveryServiceMetadataEntry.COLUMN_NAME_ACTIVE_ROOT_OF_TRUST, rootAlias);
@@ -988,6 +992,7 @@ public class RecoverableKeyStoreDb {
      * @hide
      */
     private byte[] getBytes(int userId, int uid, String rootAlias, String key) {
+        rootAlias = mTestOnlyInsecureCertificateHelper.getDefaultCertificateAliasIfEmpty(rootAlias);
         SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
 
         String[] projection = {
@@ -1046,6 +1051,7 @@ public class RecoverableKeyStoreDb {
      * @hide
      */
     private long setBytes(int userId, int uid, String rootAlias, String key, byte[] value) {
+        rootAlias = mTestOnlyInsecureCertificateHelper.getDefaultCertificateAliasIfEmpty(rootAlias);
         SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(key, value);
@@ -1072,6 +1078,7 @@ public class RecoverableKeyStoreDb {
      * @hide
      */
     private Long getLong(int userId, int uid, String rootAlias, String key) {
+        rootAlias = mTestOnlyInsecureCertificateHelper.getDefaultCertificateAliasIfEmpty(rootAlias);
         SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
 
         String[] projection = {
@@ -1131,6 +1138,7 @@ public class RecoverableKeyStoreDb {
      */
 
     private long setLong(int userId, int uid, String rootAlias, String key, long value) {
+        rootAlias = mTestOnlyInsecureCertificateHelper.getDefaultCertificateAliasIfEmpty(rootAlias);
         SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(key, value);

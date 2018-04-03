@@ -95,6 +95,7 @@ package android.app {
     field public static final java.lang.String OPSTR_REQUEST_INSTALL_PACKAGES = "android:request_install_packages";
     field public static final java.lang.String OPSTR_RUN_ANY_IN_BACKGROUND = "android:run_any_in_background";
     field public static final java.lang.String OPSTR_RUN_IN_BACKGROUND = "android:run_in_background";
+    field public static final java.lang.String OPSTR_START_FOREGROUND = "android:start_foreground";
     field public static final java.lang.String OPSTR_TAKE_AUDIO_FOCUS = "android:take_audio_focus";
     field public static final java.lang.String OPSTR_TAKE_MEDIA_BUTTONS = "android:take_media_buttons";
     field public static final java.lang.String OPSTR_TOAST_WINDOW = "android:toast_window";
@@ -776,6 +777,12 @@ package android.telephony {
 
   public class ServiceState implements android.os.Parcelable {
     method public void setCdmaSystemAndNetworkId(int, int);
+  }
+
+  public class TelephonyManager {
+    method public int getCarrierIdListVersion();
+    method public void setCarrierTestOverride(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String);
+    field public static final int UNKNOWN_CARRIER_ID_LIST_VERSION = -1; // 0xffffffff
   }
 
 }

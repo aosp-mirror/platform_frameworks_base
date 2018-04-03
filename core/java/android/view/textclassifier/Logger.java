@@ -35,8 +35,6 @@ public abstract class Logger {
     private static final String LOG_TAG = "Logger";
     /* package */ static final boolean DEBUG_LOG_ENABLED = true;
 
-    private static final String NO_SIGNATURE = "";
-
     private @SelectionEvent.InvocationMethod int mInvocationMethod;
     private SelectionEvent mPrevEvent;
     private SelectionEvent mSmartEvent;
@@ -68,12 +66,12 @@ public abstract class Logger {
     public abstract void writeEvent(@NonNull SelectionEvent event);
 
     /**
-     * Returns true if the signature matches that of a smart selection event (i.e.
+     * Returns true if the resultId matches that of a smart selection event (i.e.
      * {@link SelectionEvent#EVENT_SMART_SELECTION_SINGLE} or
      * {@link SelectionEvent#EVENT_SMART_SELECTION_MULTI}).
      * Returns false otherwise.
      */
-    public boolean isSmartSelection(@NonNull String signature) {
+    public boolean isSmartSelection(@NonNull String resultId) {
         return false;
     }
 
@@ -99,7 +97,7 @@ public abstract class Logger {
         mInvocationMethod = invocationMethod;
         logEvent(new SelectionEvent(
                 start, start + 1, SelectionEvent.EVENT_SELECTION_STARTED,
-                TextClassifier.TYPE_UNKNOWN, mInvocationMethod, NO_SIGNATURE, mConfig));
+                TextClassifier.TYPE_UNKNOWN, mInvocationMethod, null, mConfig));
     }
 
     /**
@@ -118,7 +116,7 @@ public abstract class Logger {
 
         logEvent(new SelectionEvent(
                 start, end, SelectionEvent.EVENT_SELECTION_MODIFIED,
-                TextClassifier.TYPE_UNKNOWN, mInvocationMethod, NO_SIGNATURE, mConfig));
+                TextClassifier.TYPE_UNKNOWN, mInvocationMethod, null, mConfig));
     }
 
     /**
@@ -142,10 +140,9 @@ public abstract class Logger {
         final String entityType = classification.getEntityCount() > 0
                 ? classification.getEntity(0)
                 : TextClassifier.TYPE_UNKNOWN;
-        final String signature = classification.getSignature();
         logEvent(new SelectionEvent(
                 start, end, SelectionEvent.EVENT_SELECTION_MODIFIED,
-                entityType, mInvocationMethod, signature, mConfig));
+                entityType, mInvocationMethod, classification.getId(), mConfig));
     }
 
     /**
@@ -167,7 +164,7 @@ public abstract class Logger {
         }
 
         final int eventType;
-        if (isSmartSelection(selection.getSignature())) {
+        if (isSmartSelection(selection.getId())) {
             eventType = end - start > 1
                     ? SelectionEvent.EVENT_SMART_SELECTION_MULTI
                     : SelectionEvent.EVENT_SMART_SELECTION_SINGLE;
@@ -178,9 +175,8 @@ public abstract class Logger {
         final String entityType = selection.getEntityCount() > 0
                 ? selection.getEntity(0)
                 : TextClassifier.TYPE_UNKNOWN;
-        final String signature = selection.getSignature();
-        logEvent(new SelectionEvent(start, end, eventType, entityType, mInvocationMethod, signature,
-                mConfig));
+        logEvent(new SelectionEvent(start, end, eventType, entityType, mInvocationMethod,
+                selection.getId(), mConfig));
     }
 
     /**
@@ -202,7 +198,7 @@ public abstract class Logger {
 
         logEvent(new SelectionEvent(
                 start, end, actionType, TextClassifier.TYPE_UNKNOWN, mInvocationMethod,
-                NO_SIGNATURE, mConfig));
+                null, mConfig));
     }
 
     /**
@@ -232,9 +228,8 @@ public abstract class Logger {
         final String entityType = classification.getEntityCount() > 0
                 ? classification.getEntity(0)
                 : TextClassifier.TYPE_UNKNOWN;
-        final String signature = classification.getSignature();
         logEvent(new SelectionEvent(start, end, actionType, entityType, mInvocationMethod,
-                signature, mConfig));
+                classification.getId(), mConfig));
     }
 
     private void logEvent(@NonNull SelectionEvent event) {
@@ -280,7 +275,7 @@ public abstract class Logger {
                     .setEnd(event.getAbsoluteEnd() - mStartEvent.getAbsoluteStart());
         }
         if (mSmartEvent != null) {
-            event.setSignature(mSmartEvent.getSignature())
+            event.setResultId(mSmartEvent.getResultId())
                     .setSmartStart(mSmartEvent.getAbsoluteStart() - mStartEvent.getAbsoluteStart())
                     .setSmartEnd(mSmartEvent.getAbsoluteEnd() - mStartEvent.getAbsoluteStart());
         }

@@ -538,6 +538,9 @@ private:
     uint32_t                    mStringPoolSize;    // number of uint16_t
     const uint32_t*             mStyles;
     uint32_t                    mStylePoolSize;    // number of uint32_t
+
+    const char* stringDecodeAt(size_t idx, const uint8_t* str, const size_t encLen,
+                               size_t* outLen) const;
 };
 
 /**

@@ -20,6 +20,10 @@
 
 #include <utils/SystemClock.h>
 
+namespace android {
+namespace os {
+namespace incidentd {
+
 Throttler::Throttler(size_t limit, int64_t refractoryPeriodMs)
     : mSizeLimit(limit),
       mRefractoryPeriodMs(refractoryPeriodMs),
@@ -48,3 +52,7 @@ void Throttler::dump(FILE* out) {
     fprintf(out, "mRefractoryPeriodMs=%d\n", (int)mRefractoryPeriodMs);
     fprintf(out, "mLastRefractoryMs=%d\n", (int)mLastRefractoryMs);
 }
+
+}  // namespace incidentd
+}  // namespace os
+}  // namespace android

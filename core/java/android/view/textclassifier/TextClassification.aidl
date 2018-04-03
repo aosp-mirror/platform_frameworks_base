@@ -17,4 +17,4 @@
 package android.view.textclassifier;
 
 parcelable TextClassification;
-parcelable TextClassification.Options;
+parcelable TextClassification.Request;

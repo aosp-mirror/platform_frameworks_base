@@ -106,7 +106,7 @@ public abstract class KeymasterUtils {
             args.addBoolean(KeymasterDefs.KM_TAG_TRUSTED_CONFIRMATION_REQUIRED);
         }
 
-        if (spec.isTrustedUserPresenceRequired()) {
+        if (spec.isUserPresenceRequired()) {
             args.addBoolean(KeymasterDefs.KM_TAG_TRUSTED_USER_PRESENCE_REQUIRED);
         }
 
