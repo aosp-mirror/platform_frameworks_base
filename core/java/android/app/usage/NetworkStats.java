@@ -68,6 +68,11 @@ public final class NetworkStats implements AutoCloseable {
     private int mTag = android.net.NetworkStats.TAG_NONE;
 
     /**
+     * State in case it was not specified in the query.
+     */
+    private int mState = Bucket.STATE_ALL;
+
+    /**
      * The session while the query requires it, null if all the stats have been collected or close()
      * has been called.
      */
@@ -266,6 +271,15 @@ public final class NetworkStats implements AutoCloseable {
         private long mRxPackets;
         private long mTxBytes;
         private long mTxPackets;
+
+        private static int convertSet(@State int state) {
+            switch (state) {
+                case STATE_ALL: return android.net.NetworkStats.SET_ALL;
+                case STATE_DEFAULT: return android.net.NetworkStats.SET_DEFAULT;
+                case STATE_FOREGROUND: return android.net.NetworkStats.SET_FOREGROUND;
+            }
+            return 0;
+        }
 
         private static @State int convertState(int networkStatsSet) {
             switch (networkStatsSet) {
@@ -527,20 +541,13 @@ public final class NetworkStats implements AutoCloseable {
     /**
      * Collects history results for uid and resets history enumeration index.
      */
-    void startHistoryEnumeration(int uid) {
-        startHistoryEnumeration(uid, android.net.NetworkStats.TAG_NONE);
-    }
-
-    /**
-     * Collects history results for uid and resets history enumeration index.
-     */
-    void startHistoryEnumeration(int uid, int tag) {
+    void startHistoryEnumeration(int uid, int tag, int state) {
         mHistory = null;
         try {
             mHistory = mSession.getHistoryIntervalForUid(mTemplate, uid,
-                    android.net.NetworkStats.SET_ALL, tag,
-                    NetworkStatsHistory.FIELD_ALL, mStartTimeStamp, mEndTimeStamp);
-            setSingleUidTag(uid, tag);
+                    Bucket.convertSet(state), tag, NetworkStatsHistory.FIELD_ALL,
+                    mStartTimeStamp, mEndTimeStamp);
+            setSingleUidTagState(uid, tag, state);
         } catch (RemoteException e) {
             Log.w(TAG, e);
             // Leaving mHistory null
@@ -636,6 +643,7 @@ public final class NetworkStats implements AutoCloseable {
         fillBucketFromSummaryEntry(bucket);
         return bucket;
     }
+
     /**
      * Getting the next item in a history enumeration.
      * @param bucketOut Next item will be set here.
@@ -648,7 +656,7 @@ public final class NetworkStats implements AutoCloseable {
                         mRecycledHistoryEntry);
                 bucketOut.mUid = Bucket.convertUid(getUid());
                 bucketOut.mTag = Bucket.convertTag(mTag);
-                bucketOut.mState = Bucket.STATE_ALL;
+                bucketOut.mState = mState;
                 bucketOut.mDefaultNetwork = Bucket.DEFAULT_NETWORK_ALL;
                 bucketOut.mMetered = Bucket.METERED_ALL;
                 bucketOut.mRoaming = Bucket.ROAMING_ALL;
@@ -691,9 +699,10 @@ public final class NetworkStats implements AutoCloseable {
         return mUidOrUidIndex;
     }
 
-    private void setSingleUidTag(int uid, int tag) {
+    private void setSingleUidTagState(int uid, int tag, int state) {
         mUidOrUidIndex = uid;
         mTag = tag;
+        mState = state;
     }
 
     private void stepUid() {
