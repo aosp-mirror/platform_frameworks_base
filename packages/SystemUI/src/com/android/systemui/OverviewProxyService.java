@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Handler;
@@ -39,6 +40,7 @@ import com.android.systemui.recents.events.activity.DockedFirstAnimationFrameEve
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.GraphicBufferCompat;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.CallbackController;
@@ -71,11 +73,13 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final DeviceProvisionedController mDeviceProvisionedController
             = Dependency.get(DeviceProvisionedController.class);
     private final List<OverviewProxyListener> mConnectionCallbacks = new ArrayList<>();
+    private final Intent mQuickStepIntent;
 
     private IOverviewProxy mOverviewProxy;
     private int mConnectionBackoffAttempts;
     private CharSequence mOnboardingText;
     private @InteractionType int mInteractionFlags;
+    private boolean mIsEnabled;
 
     private ISystemUiProxy mSysUiProxy = new ISystemUiProxy.Stub() {
 
@@ -130,14 +134,23 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                     });
                 }
             } finally {
+                Prefs.putInt(mContext, Prefs.Key.QUICK_STEP_INTERACTION_FLAGS, mInteractionFlags);
                 Binder.restoreCallingIdentity(token);
             }
         }
     };
 
-    private final BroadcastReceiver mLauncherAddedReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mLauncherStateChangedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            updateEnabledState();
+
+            // When launcher service is disabled, reset interaction flags because it is inactive
+            if (!isEnabled()) {
+                mInteractionFlags = 0;
+                Prefs.remove(mContext, Prefs.Key.QUICK_STEP_INTERACTION_FLAGS);
+            }
+
             // Reconnect immediately, instead of waiting for resume to arrive.
             startConnectionToCurrentUser();
         }
@@ -196,17 +209,21 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         mConnectionBackoffAttempts = 0;
         mRecentsComponentName = ComponentName.unflattenFromString(context.getString(
                 com.android.internal.R.string.config_recentsComponentName));
+        mQuickStepIntent = new Intent(ACTION_QUICKSTEP)
+                .setPackage(mRecentsComponentName.getPackageName());
+        mInteractionFlags = Prefs.getInt(mContext, Prefs.Key.QUICK_STEP_INTERACTION_FLAGS, 0);
 
         // Listen for the package update changes.
         if (SystemServicesProxy.getInstance(context)
                 .isSystemUser(mDeviceProvisionedController.getCurrentUser())) {
+            updateEnabledState();
             mDeviceProvisionedController.addCallback(mDeviceProvisionedCallback);
             IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
             filter.addDataScheme("package");
             filter.addDataSchemeSpecificPart(mRecentsComponentName.getPackageName(),
                     PatternMatcher.PATTERN_LITERAL);
             filter.addAction(Intent.ACTION_PACKAGE_CHANGED);
-            mContext.registerReceiver(mLauncherAddedReceiver, filter);
+            mContext.registerReceiver(mLauncherStateChangedReceiver, filter);
         }
     }
 
@@ -222,7 +239,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         disconnectFromLauncherService();
 
         // If user has not setup yet or already connected, do not try to connect
-        if (!mDeviceProvisionedController.isCurrentUserSetup()) {
+        if (!mDeviceProvisionedController.isCurrentUserSetup() || !isEnabled()) {
             return;
         }
         mHandler.removeCallbacks(mConnectionRunnable);
@@ -248,6 +265,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     public void addCallback(OverviewProxyListener listener) {
         mConnectionCallbacks.add(listener);
         listener.onConnectionChanged(mOverviewProxy != null);
+        listener.onInteractionFlagsChanged(mInteractionFlags);
     }
 
     @Override
@@ -256,7 +274,11 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     }
 
     public boolean shouldShowSwipeUpUI() {
-        return getProxy() != null && ((mInteractionFlags & FLAG_DISABLE_SWIPE_UP) == 0);
+        return isEnabled() && ((mInteractionFlags & FLAG_DISABLE_SWIPE_UP) == 0);
+    }
+
+    public boolean isEnabled() {
+        return mIsEnabled;
     }
 
     public IOverviewProxy getProxy() {
@@ -290,6 +312,11 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
             mConnectionCallbacks.get(i).onQuickStepStarted();
         }
+    }
+
+    private void updateEnabledState() {
+        mIsEnabled = mContext.getPackageManager().resolveServiceAsUser(mQuickStepIntent, 0,
+                ActivityManagerWrapper.getInstance().getCurrentUserId()) != null;
     }
 
     @Override
