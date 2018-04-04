@@ -65,6 +65,8 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         mBlockingHelperManager = new NotificationBlockingHelperManager(mContext);
+        // By default, have the shade visible/expanded.
+        mBlockingHelperManager.setNotificationShadeExpanded(1f);
 
         mHelper = new NotificationTestHelper(mContext);
         when(mGutsManager.openGuts(
@@ -115,7 +117,6 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
     public void testPerhapsShowBlockingHelper_shown() throws Exception {
         ExpandableNotificationRow row = createBlockableRowSpy();
         row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
-        mBlockingHelperManager.setNotificationShadeExpanded(1f);
 
         assertTrue(mBlockingHelperManager.perhapsShowBlockingHelper(row, mMenuRow));
 
@@ -127,7 +128,6 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
     public void testPerhapsShowBlockingHelper_shownForLargeGroup() throws Exception {
         ExpandableNotificationRow groupRow = createBlockableGroupRowSpy(10);
         groupRow.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
-        mBlockingHelperManager.setNotificationShadeExpanded(1f);
 
         assertTrue(mBlockingHelperManager.perhapsShowBlockingHelper(groupRow, mMenuRow));
 
@@ -143,7 +143,6 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
         // of the child row.
         ExpandableNotificationRow childRow = groupRow.getChildrenContainer().getViewAtPosition(0);
         childRow.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
-        mBlockingHelperManager.setNotificationShadeExpanded(1f);
 
         assertTrue(mBlockingHelperManager.perhapsShowBlockingHelper(childRow, mMenuRow));
 
@@ -154,7 +153,6 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
     public void testPerhapsShowBlockingHelper_notShownDueToNeutralUserSentiment() throws Exception {
         ExpandableNotificationRow row = createBlockableRowSpy();
         row.getEntry().userSentiment = USER_SENTIMENT_NEUTRAL;
-        mBlockingHelperManager.setNotificationShadeExpanded(1f);
 
         assertFalse(mBlockingHelperManager.perhapsShowBlockingHelper(row, mMenuRow));
     }
@@ -164,7 +162,6 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
             throws Exception {
         ExpandableNotificationRow row = createBlockableRowSpy();
         row.getEntry().userSentiment = USER_SENTIMENT_POSITIVE;
-        mBlockingHelperManager.setNotificationShadeExpanded(1f);
 
         assertFalse(mBlockingHelperManager.perhapsShowBlockingHelper(row, mMenuRow));
     }
@@ -184,7 +181,6 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
         ExpandableNotificationRow row = createBlockableRowSpy();
         when(row.getIsNonblockable()).thenReturn(true);
         row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
-        mBlockingHelperManager.setNotificationShadeExpanded(1f);
 
         assertFalse(mBlockingHelperManager.perhapsShowBlockingHelper(row, mMenuRow));
     }
@@ -198,7 +194,6 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
         // of the child row.
         ExpandableNotificationRow childRow = groupRow.getChildrenContainer().getViewAtPosition(0);
         childRow.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
-        mBlockingHelperManager.setNotificationShadeExpanded(1f);
 
         assertFalse(mBlockingHelperManager.perhapsShowBlockingHelper(childRow, mMenuRow));
     }
@@ -208,7 +203,6 @@ public class NotificationBlockingHelperManagerTest extends SysuiTestCase {
         ExpandableNotificationRow row = spy(createBlockableRowSpy());
         row.getEntry().userSentiment = USER_SENTIMENT_NEGATIVE;
         when(row.isAttachedToWindow()).thenReturn(true);
-        mBlockingHelperManager.setNotificationShadeExpanded(1f);
 
         // Show check
         assertTrue(mBlockingHelperManager.perhapsShowBlockingHelper(row, mMenuRow));
