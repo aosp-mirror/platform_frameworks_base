@@ -2687,20 +2687,20 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void cancelRecentsAnimation() {
+    public void cancelRecentsAnimation(@RecentsAnimationController.ReorderMode int reorderMode) {
         // Note: Do not hold the WM lock, this will lock appropriately in the call which also
         // calls through to AM/RecentsAnimation.onAnimationFinished()
         if (mRecentsAnimationController != null) {
             // This call will call through to cleanupAnimation() below after the animation is
             // canceled
-            mRecentsAnimationController.cancelAnimation();
+            mRecentsAnimationController.cancelAnimation(reorderMode);
         }
     }
 
-    public void cleanupRecentsAnimation(boolean moveHomeToTop) {
+    public void cleanupRecentsAnimation(@RecentsAnimationController.ReorderMode int reorderMode) {
         synchronized (mWindowMap) {
             if (mRecentsAnimationController != null) {
-                mRecentsAnimationController.cleanupAnimation(moveHomeToTop);
+                mRecentsAnimationController.cleanupAnimation(reorderMode);
                 mRecentsAnimationController = null;
                 mAppTransition.updateBooster();
             }

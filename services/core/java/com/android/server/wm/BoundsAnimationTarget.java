@@ -34,6 +34,12 @@ interface BoundsAnimationTarget {
     void onAnimationStart(boolean schedulePipModeChangedCallback, boolean forceUpdate);
 
     /**
+     * @return Whether the animation should be paused waiting for the windows to draw before
+     *         entering PiP.
+     */
+    boolean shouldDeferStartOnMoveToFullscreen();
+
+    /**
      * Sets the size of the target (without any intermediate steps, like scheduling animation)
      * but freezes the bounds of any tasks in the target at taskBounds, to allow for more
      * flexibility during resizing. Only works for the pinned stack at the moment.  This will

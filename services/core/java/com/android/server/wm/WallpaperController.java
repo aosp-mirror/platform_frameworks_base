@@ -26,6 +26,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
+import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_HOME_TO_ORIGINAL_POSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
@@ -618,7 +619,8 @@ class WallpaperController {
 
             // If there was a recents animation in progress, cancel that animation
             if (mService.getRecentsAnimationController() != null) {
-                mService.getRecentsAnimationController().cancelAnimation();
+                mService.getRecentsAnimationController().cancelAnimation(
+                        REORDER_MOVE_HOME_TO_ORIGINAL_POSITION);
             }
             return true;
         }
