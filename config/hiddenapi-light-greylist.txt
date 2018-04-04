@@ -2007,6 +2007,7 @@ Landroid/telephony/TelephonyManager;-><init>()V
 Landroid/telephony/TelephonyManager;->isMultiSimEnabled()Z
 Landroid/telephony/TelephonyManager;->isNetworkRoaming(I)Z
 Landroid/telephony/TelephonyManager;->isVolteAvailable()Z
+Landroid/telephony/TelephonyManager;->isWifiCallingAvailable()Z
 Landroid/telephony/TelephonyManager;->mSubscriptionManager:Landroid/telephony/SubscriptionManager;
 Landroid/text/AndroidBidi;->bidi(I[C[B)I
 Landroid/text/DynamicLayout;-><init>(Ljava/lang/CharSequence;Ljava/lang/CharSequence;Landroid/text/TextPaint;ILandroid/text/Layout$Alignment;Landroid/text/TextDirectionHeuristic;FFZIIILandroid/text/TextUtils$TruncateAt;I)V
