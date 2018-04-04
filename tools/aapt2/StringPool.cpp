@@ -332,6 +332,25 @@ static T* EncodeLength(T* data, size_t length) {
   return data;
 }
 
+/**
+ * Returns the maximum possible string length that can be successfully encoded
+ * using 2 units of the specified T.
+ *    EncodeLengthMax<char> -> maximum unit length of 0x7FFF
+ *    EncodeLengthMax<char16_t> -> maximum unit length of 0x7FFFFFFF
+ **/
+template <typename T>
+static size_t EncodeLengthMax() {
+  static_assert(std::is_integral<T>::value, "wat.");
+
+  constexpr size_t kMask = 1 << ((sizeof(T) * 8 * 2) - 1);
+  constexpr size_t max = kMask - 1;
+  return max;
+}
+
+/**
+ * Returns the number of units (1 or 2) needed to encode the string length
+ * before writing the string.
+ */
 template <typename T>
 static size_t EncodedLengthUnits(size_t length) {
   static_assert(std::is_integral<T>::value, "wat.");
@@ -341,15 +360,30 @@ static size_t EncodedLengthUnits(size_t length) {
   return length > kMaxSize ? 2 : 1;
 }
 
-static void EncodeString(const std::string& str, const bool utf8, BigBuffer* out) {
+const std::string kStringTooLarge = "STRING_TOO_LARGE";
+
+static bool EncodeString(const std::string& str, const bool utf8, BigBuffer* out,
+                         IDiagnostics* diag) {
   if (utf8) {
     const std::string& encoded = str;
-    const ssize_t utf16_length =
-        utf8_to_utf16_length(reinterpret_cast<const uint8_t*>(str.data()), str.size());
+    const ssize_t utf16_length = utf8_to_utf16_length(
+        reinterpret_cast<const uint8_t*>(encoded.data()), encoded.size());
     CHECK(utf16_length >= 0);
 
-    const size_t total_size = EncodedLengthUnits<char>(utf16_length) +
-                              EncodedLengthUnits<char>(encoded.length()) + encoded.size() + 1;
+    // Make sure the lengths to be encoded do not exceed the maximum length that
+    // can be encoded using chars
+    if ((((size_t)encoded.size()) > EncodeLengthMax<char>())
+        || (((size_t)utf16_length) > EncodeLengthMax<char>())) {
+
+      diag->Error(DiagMessage() << "string too large to encode using UTF-8 "
+          << "written instead as '" << kStringTooLarge << "'");
+
+      EncodeString(kStringTooLarge, utf8, out, diag);
+      return false;
+    }
+
+    const size_t total_size = EncodedLengthUnits<char>(utf16_length)
+        + EncodedLengthUnits<char>(encoded.size()) + encoded.size() + 1;
 
     char* data = out->NextBlock<char>(total_size);
 
@@ -357,32 +391,47 @@ static void EncodeString(const std::string& str, const bool utf8, BigBuffer* out
     data = EncodeLength(data, utf16_length);
 
     // Now encode the size of the real UTF8 string.
-    data = EncodeLength(data, encoded.length());
+    data = EncodeLength(data, encoded.size());
     strncpy(data, encoded.data(), encoded.size());
 
-    } else {
-      const std::u16string encoded = util::Utf8ToUtf16(str);
-      const ssize_t utf16_length = encoded.size();
+  } else {
+    const std::u16string encoded = util::Utf8ToUtf16(str);
+    const ssize_t utf16_length = encoded.size();
 
-      // Total number of 16-bit words to write.
-      const size_t total_size = EncodedLengthUnits<char16_t>(utf16_length) + encoded.size() + 1;
+    // Make sure the length to be encoded does not exceed the maximum possible
+    // length that can be encoded
+    if (((size_t)utf16_length) > EncodeLengthMax<char16_t>()) {
+      diag->Error(DiagMessage() << "string too large to encode using UTF-16 "
+          << "written instead as '" << kStringTooLarge << "'");
 
-      char16_t* data = out->NextBlock<char16_t>(total_size);
-
-      // Encode the actual UTF16 string length.
-      data = EncodeLength(data, utf16_length);
-      const size_t byte_length = encoded.size() * sizeof(char16_t);
-
-      // NOTE: For some reason, strncpy16(data, entry->value.data(),
-      // entry->value.size()) truncates the string.
-      memcpy(data, encoded.data(), byte_length);
-
-      // The null-terminating character is already here due to the block of data
-      // being set to 0s on allocation.
+      EncodeString(kStringTooLarge, utf8, out, diag);
+      return false;
     }
+
+    // Total number of 16-bit words to write.
+    const size_t total_size = EncodedLengthUnits<char16_t>(utf16_length)
+        + encoded.size() + 1;
+
+    char16_t* data = out->NextBlock<char16_t>(total_size);
+
+    // Encode the actual UTF16 string length.
+    data = EncodeLength(data, utf16_length);
+    const size_t byte_length = encoded.size() * sizeof(char16_t);
+
+    // NOTE: For some reason, strncpy16(data, entry->value.data(),
+    // entry->value.size()) truncates the string.
+    memcpy(data, encoded.data(), byte_length);
+
+    // The null-terminating character is already here due to the block of data
+    // being set to 0s on allocation.
+  }
+
+  return true;
 }
 
-bool StringPool::Flatten(BigBuffer* out, const StringPool& pool, bool utf8) {
+bool StringPool::Flatten(BigBuffer* out, const StringPool& pool, bool utf8,
+                         IDiagnostics* diag) {
+  bool no_error = true;
   const size_t start_index = out->size();
   android::ResStringPool_header* header = out->NextBlock<android::ResStringPool_header>();
   header->header.type = util::HostToDevice16(android::RES_STRING_POOL_TYPE);
@@ -403,12 +452,12 @@ bool StringPool::Flatten(BigBuffer* out, const StringPool& pool, bool utf8) {
   // Styles always come first.
   for (const std::unique_ptr<StyleEntry>& entry : pool.styles_) {
     *indices++ = out->size() - before_strings_index;
-    EncodeString(entry->value, utf8, out);
+    no_error = EncodeString(entry->value, utf8, out, diag) && no_error;
   }
 
   for (const std::unique_ptr<Entry>& entry : pool.strings_) {
     *indices++ = out->size() - before_strings_index;
-    EncodeString(entry->value, utf8, out);
+    no_error = EncodeString(entry->value, utf8, out, diag) && no_error;
   }
 
   out->Align4();
@@ -446,15 +495,15 @@ bool StringPool::Flatten(BigBuffer* out, const StringPool& pool, bool utf8) {
     out->Align4();
   }
   header->header.size = util::HostToDevice32(out->size() - start_index);
-  return true;
+  return no_error;
 }
 
-bool StringPool::FlattenUtf8(BigBuffer* out, const StringPool& pool) {
-  return Flatten(out, pool, true);
+bool StringPool::FlattenUtf8(BigBuffer* out, const StringPool& pool, IDiagnostics* diag) {
+  return Flatten(out, pool, true, diag);
 }
 
-bool StringPool::FlattenUtf16(BigBuffer* out, const StringPool& pool) {
-  return Flatten(out, pool, false);
+bool StringPool::FlattenUtf16(BigBuffer* out, const StringPool& pool, IDiagnostics* diag) {
+  return Flatten(out, pool, false, diag);
 }
 
 }  // namespace aapt

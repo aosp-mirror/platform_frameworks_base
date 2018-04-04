@@ -20,6 +20,7 @@
 
 #include "androidfw/StringPiece.h"
 
+#include "Diagnostics.h"
 #include "test/Test.h"
 #include "util/Util.h"
 
@@ -188,10 +189,11 @@ TEST(StringPoolTest, StylesAndStringsAreSeparateAfterSorting) {
 
 TEST(StringPoolTest, FlattenEmptyStringPoolUtf8) {
   using namespace android;  // For NO_ERROR on Windows.
+  StdErrDiagnostics diag;
 
   StringPool pool;
   BigBuffer buffer(1024);
-  StringPool::FlattenUtf8(&buffer, pool);
+  StringPool::FlattenUtf8(&buffer, pool, &diag);
 
   std::unique_ptr<uint8_t[]> data = util::Copy(buffer);
   ResStringPool test;
@@ -200,11 +202,12 @@ TEST(StringPoolTest, FlattenEmptyStringPoolUtf8) {
 
 TEST(StringPoolTest, FlattenOddCharactersUtf16) {
   using namespace android;  // For NO_ERROR on Windows.
+  StdErrDiagnostics diag;
 
   StringPool pool;
   pool.MakeRef("\u093f");
   BigBuffer buffer(1024);
-  StringPool::FlattenUtf16(&buffer, pool);
+  StringPool::FlattenUtf16(&buffer, pool, &diag);
 
   std::unique_ptr<uint8_t[]> data = util::Copy(buffer);
   ResStringPool test;
@@ -225,6 +228,7 @@ constexpr const char* sLongString =
 
 TEST(StringPoolTest, Flatten) {
   using namespace android;  // For NO_ERROR on Windows.
+  StdErrDiagnostics diag;
 
   StringPool pool;
 
@@ -244,8 +248,8 @@ TEST(StringPoolTest, Flatten) {
   EXPECT_THAT(ref_d.index(), Eq(4u));
 
   BigBuffer buffers[2] = {BigBuffer(1024), BigBuffer(1024)};
-  StringPool::FlattenUtf8(&buffers[0], pool);
-  StringPool::FlattenUtf16(&buffers[1], pool);
+  StringPool::FlattenUtf8(&buffers[0], pool, &diag);
+  StringPool::FlattenUtf16(&buffers[1], pool, &diag);
 
   // Test both UTF-8 and UTF-16 buffers.
   for (const BigBuffer& buffer : buffers) {
@@ -286,6 +290,55 @@ TEST(StringPoolTest, Flatten) {
 
     EXPECT_THAT(span->name.index, Eq(ResStringPool_span::END));
   }
+}
+
+
+TEST(StringPoolTest, MaxEncodingLength) {
+  StdErrDiagnostics diag;
+  using namespace android;  // For NO_ERROR on Windows.
+  ResStringPool test;
+
+  StringPool pool;
+  pool.MakeRef("aaaaaaaaaa");
+  BigBuffer buffers[2] = {BigBuffer(1024), BigBuffer(1024)};
+
+  // Make sure a UTF-8 string under the maximum length does not produce an error
+  EXPECT_THAT(StringPool::FlattenUtf8(&buffers[0], pool, &diag), Eq(true));
+  std::unique_ptr<uint8_t[]> data = util::Copy(buffers[0]);
+  test.setTo(data.get(), buffers[0].size());
+  EXPECT_THAT(util::GetString(test, 0), Eq("aaaaaaaaaa"));
+
+  // Make sure a UTF-16 string under the maximum length does not produce an error
+  EXPECT_THAT(StringPool::FlattenUtf16(&buffers[1], pool, &diag), Eq(true));
+  data = util::Copy(buffers[1]);
+  test.setTo(data.get(), buffers[1].size());
+  EXPECT_THAT(util::GetString16(test, 0), Eq(u"aaaaaaaaaa"));
+
+  StringPool pool2;
+  std::string longStr(50000, 'a');
+  pool2.MakeRef("this fits1");
+  pool2.MakeRef(longStr);
+  pool2.MakeRef("this fits2");
+  BigBuffer buffers2[2] = {BigBuffer(1024), BigBuffer(1024)};
+
+  // Make sure a string that exceeds the maximum length of UTF-8 produces an
+  // error and writes a shorter error string instead
+  EXPECT_THAT(StringPool::FlattenUtf8(&buffers2[0], pool2, &diag), Eq(false));
+  data = util::Copy(buffers2[0]);
+  test.setTo(data.get(), buffers2[0].size());
+  EXPECT_THAT(util::GetString(test, 0), "this fits1");
+  EXPECT_THAT(util::GetString(test, 1), "STRING_TOO_LARGE");
+  EXPECT_THAT(util::GetString(test, 2), "this fits2");
+
+  // Make sure a string that a string that exceeds the maximum length of UTF-8
+  // but not UTF-16 does not error for UTF-16
+  StringPool pool3;
+  std::u16string longStr16(50000, 'a');
+  pool3.MakeRef(longStr);
+  EXPECT_THAT(StringPool::FlattenUtf16(&buffers2[1], pool3, &diag), Eq(true));
+  data = util::Copy(buffers2[1]);
+  test.setTo(data.get(), buffers2[1].size());
+  EXPECT_THAT(util::GetString16(test, 0), Eq(longStr16));
 }
 
 }  // namespace aapt
