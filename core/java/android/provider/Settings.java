@@ -9309,6 +9309,15 @@ public final class Settings {
                "network_metered_multipath_preference";
 
         /**
+         * Default daily multipath budget used by ConnectivityManager.getMultipathPreference()
+         * on metered networks. This default quota is only used if quota could not be determined
+         * from data plan or data limit/warning set by the user.
+         * @hide
+         */
+        public static final String NETWORK_DEFAULT_DAILY_MULTIPATH_QUOTA_BYTES =
+                "network_default_daily_multipath_quota_bytes";
+
+        /**
          * Network watchlist last report time.
          * @hide
          */
