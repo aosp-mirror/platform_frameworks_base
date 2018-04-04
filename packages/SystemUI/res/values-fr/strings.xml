@@ -74,10 +74,8 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Enregistrement de la capture d\'écran…"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"Capture d\'écran enregistrée"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"Appuyez pour afficher votre capture d\'écran"</string>
-    <!-- no translation found for screenshot_failed_title (7612509838919089748) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_to_save_unknown_text (3637758096565605541) -->
-    <skip />
+    <string name="screenshot_failed_title" msgid="7612509838919089748">"Impossible d\'enregistrer la capture d\'écran"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Essayez de nouveau de faire une capture d\'écran"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Impossible d\'enregistrer la capture d\'écran, car l\'espace de stockage est limité"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Les captures d\'écran ne sont pas autorisées par l\'application ni par votre organisation"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Options transfert fichiers USB"</string>
@@ -350,8 +348,7 @@
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Activé au crépuscule"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Jusqu\'à l\'aube"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Activé à <xliff:g id="TIME">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_secondary_label_until (2749196569462600150) -->
-    <skip />
+    <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"Jusqu\'à <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"La technologie NFC est désactivée"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"La technologie NFC est activée"</string>
@@ -399,9 +396,9 @@
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Aucune\ninterruption"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Priorité\nuniquement"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Alarmes\nuniquement"</string>
-    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Rechargement… (rechargé à 100 % dans <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Rechargement rapide… (à 100 % dans <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
-    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Rechargement lent… (à 100 % dans <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time" msgid="2056340799276374421">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Rechargement… (rechargé à 100 %% dans <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="7767562163577492332">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Rechargement rapide… (à 100 %% dans <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
+    <string name="keyguard_indication_charging_time_slowly" msgid="3769655133567307069">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Rechargement lent… (à 100 %% dans <xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="7305948938141024937">"Changer d\'utilisateur"</string>
     <string name="accessibility_multi_user_switch_switcher_with_current" msgid="8434880595284601601">"Changer d\'utilisateur (utilisateur actuel : <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>)"</string>
     <string name="accessibility_multi_user_switch_inactive" msgid="1424081831468083402">"Utilisateur actuel : <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
@@ -435,9 +432,8 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> va commencer à capturer tous les contenus affichés à l\'écran."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Ne plus afficher"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Tout effacer"</string>
-    <!-- no translation found for manage_notifications_text (8035284146227267681) -->
-    <skip />
-    <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"Le mode Ne pas déranger masque les notifications"</string>
+    <string name="manage_notifications_text" msgid="8035284146227267681">"Gérer les notifications"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"Le mode Ne pas déranger masque les notifications"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Commencer"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Aucune notification"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Le profil peut être contrôlé."</string>
@@ -537,13 +533,18 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Sonnerie"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Vibreur"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Silencieux"</string>
+    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
+    <skip />
+    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Appuyez pour ne plus ignorer."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Appuyez pour mettre en mode vibreur. Vous pouvez ignorer les services d\'accessibilité."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Appuyez pour ignorer. Vous pouvez ignorer les services d\'accessibilité."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Appuyez pour mettre en mode vibreur."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Appuyez pour ignorer."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"Commandes de volume %s"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"Sonnerie pour les appels et les notifications"</string>
+    <!-- no translation found for volume_dialog_ringer_guidance_ring (3360373718388509040) -->
+    <skip />
     <string name="output_title" msgid="5355078100792942802">"Sortie multimédia"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Sortie de l\'appel téléphonique"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Aucun appareil détecté"</string>
@@ -630,8 +631,7 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> : <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"paramètres des notifications"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"options de répétition des notifications"</string>
-    <!-- no translation found for notification_menu_snooze_action (1112254519029621372) -->
-    <skip />
+    <string name="notification_menu_snooze_action" msgid="1112254519029621372">"Répéter"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ANNULER"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Répétée après <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
@@ -695,6 +695,8 @@
     <string name="battery" msgid="7498329822413202973">"Batterie"</string>
     <string name="clock" msgid="7416090374234785905">"Horloge"</string>
     <string name="headset" msgid="4534219457597457353">"Casque"</string>
+    <!-- no translation found for accessibility_long_click_tile (6687350750091842525) -->
+    <skip />
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Casque connecté"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Casque connecté"</string>
     <string name="data_saver" msgid="5037565123367048522">"Économiseur de données"</string>
@@ -818,8 +820,7 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Captures d\'écran"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Nouveaux messages"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Espace de stockage"</string>
-    <!-- no translation found for notification_channel_hints (7323870212489152689) -->
-    <skip />
+    <string name="notification_channel_hints" msgid="7323870212489152689">"Astuces"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Applis instantanées"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Les applis instantanées ne nécessitent pas d\'installation."</string>
     <string name="app_info" msgid="6856026610594615344">"Infos sur l\'appli"</string>
@@ -847,18 +848,11 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"Autoriser <xliff:g id="APP">%1$s</xliff:g> à afficher des éléments de n\'importe quelle application"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"Autoriser"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Refuser"</string>
-    <!-- no translation found for auto_saver_title (1217959994732964228) -->
-    <skip />
-    <!-- no translation found for auto_saver_text (6324376061044218113) -->
-    <skip />
-    <!-- no translation found for no_auto_saver_action (8086002101711328500) -->
-    <skip />
-    <!-- no translation found for auto_saver_enabled_title (6726474226058316862) -->
-    <skip />
-    <!-- no translation found for auto_saver_enabled_text (874711029884777579) -->
-    <skip />
-    <!-- no translation found for open_saver_setting_action (8314624730997322529) -->
-    <skip />
-    <!-- no translation found for auto_saver_okay_action (2701221740227683650) -->
-    <skip />
+    <string name="auto_saver_title" msgid="1217959994732964228">"Appuyez ici pour planifier l\'activation de l\'économiseur de batterie"</string>
+    <string name="auto_saver_text" msgid="6324376061044218113">"Activer automatiquement lorsque l\'autonomie de la batterie atteint <xliff:g id="PERCENTAGE">%d</xliff:g> %%"</string>
+    <string name="no_auto_saver_action" msgid="8086002101711328500">"Non, merci"</string>
+    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Programmation de l\'économiseur de batterie activée"</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"L\'économiseur de batterie s\'active automatiquement lorsque l\'autonomie de la batterie est inférieure à <xliff:g id="PERCENTAGE">%d</xliff:g> %%."</string>
+    <string name="open_saver_setting_action" msgid="8314624730997322529">"Paramètres"</string>
+    <string name="auto_saver_okay_action" msgid="2701221740227683650">"OK"</string>
 </resources>

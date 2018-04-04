@@ -28,12 +28,9 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Thinta ukuze uthayiphe iphasiwedi"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Bhala iphasiwedi ukuze kuvuleke"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Faka i-PIN ukuvula"</string>
-    <!-- no translation found for keyguard_enter_your_pin (7152989016739952871) -->
-    <skip />
-    <!-- no translation found for keyguard_enter_your_pattern (3915717164691787047) -->
-    <skip />
-    <!-- no translation found for keyguard_enter_your_password (5761514484663983731) -->
-    <skip />
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Faka iPHINIKHODI yakho"</string>
+    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"Faka iphethini yakho"</string>
+    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"Faka iphasiwedi yakho"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Ikhodi ye-PIN engalungile!"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Ikhadi elingavumelekile."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"Kushajiwe"</string>

@@ -28,6 +28,9 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"触摸即可输入密码"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"输入密码即可解锁"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"输入 PIN 码即可解锁"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"输入您的 PIN 码"</string>
+    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"绘制您的图案"</string>
+    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"输入您的密码"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"PIN 码有误。"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"SIM 卡无效。"</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"已充满电"</string>

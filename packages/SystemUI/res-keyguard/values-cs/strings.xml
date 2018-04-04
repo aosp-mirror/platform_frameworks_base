@@ -28,12 +28,15 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Klepnutím zadáte heslo"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Zadejte heslo pro odemknutí"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Zadejte kód PIN pro odemknutí"</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Zadejte PIN"</string>
+    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"Zadejte gesto"</string>
+    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"Zadejte heslo"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"Nesprávný kód PIN."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Neplatná karta."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"Nabito"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"Nabíjení"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"Rychlé nabíjení"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"Pomalé nabíjení"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Nabíjení"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Rychlé nabíjení"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Pomalé nabíjení"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Připojte dobíjecí zařízení."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Klávesy odemknete stisknutím tlačítka nabídky."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Síť je blokována"</string>

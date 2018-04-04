@@ -33,7 +33,6 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"진행 중"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"알림"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"배터리 부족"</string>
-    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"배터리가 부족합니다. 배터리 세이버를 사용 설정하세요"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> 남았습니다."</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> 남음, 내 사용량을 기준으로 약 <xliff:g id="TIME">%s</xliff:g> 남음"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> 남음, 약 <xliff:g id="TIME">%s</xliff:g> 남음"</string>
@@ -73,11 +72,10 @@
     <string name="global_action_screenshot" msgid="8329831278085426283">"스크린샷"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"캡쳐화면 저장 중..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"캡쳐화면 저장 중..."</string>
-    <string name="screenshot_saving_text" msgid="2545047868936087248">"스크린샷을 저장하는 중입니다"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"스크린샷 저장됨"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"스크린샷을 확인하려면 탭하세요"</string>
-    <string name="screenshot_failed_title" msgid="9096484883063264803">"스크린샷을 캡쳐하지 못함"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"스크린샷을 저장하는 중 문제가 발생했습니다"</string>
+    <string name="screenshot_failed_title" msgid="7612509838919089748">"스크린샷을 저장할 수 없음"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"스크린샷을 다시 찍어 보세요."</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"저장용량이 부족하여 스크린샷을 저장할 수 없습니다"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"앱이나 조직에서 스크린샷 촬영을 허용하지 않습니다."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB 파일 전송 옵션"</string>
@@ -275,8 +273,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"디저트 케이스"</string>
     <string name="start_dreams" msgid="5640361424498338327">"화면 보호기"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"이더넷"</string>
-    <!-- no translation found for quick_settings_header_onboarding_text (8030309023792936283) -->
-    <skip />
+    <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"추가 옵션을 보려면 아이콘을 길게 터치하세요."</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"알림 일시중지"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"중요 알림만"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"알람만"</string>
@@ -351,7 +348,7 @@
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"일몰에"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"일출까지"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g>에"</string>
-    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"<xliff:g id="TIME">%s</xliff:g>까지"</string>
+    <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g>까지"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC 사용 중지됨"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC 사용 설정됨"</string>
@@ -435,7 +432,8 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>에서 화면에 표시된 모든 것을 캡처하기 시작합니다."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"다시 표시 안함"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"모두 지우기"</string>
-    <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"알림 일시중지 기능으로 알림 숨기는 중"</string>
+    <string name="manage_notifications_text" msgid="8035284146227267681">"알림 관리"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"알림 일시중지 기능으로 알림 숨기는 중"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"시작하기"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"알림 없음"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"프로필이 모니터링될 수 있음"</string>
@@ -535,13 +533,18 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"벨소리"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"진동"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"음소거"</string>
+    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
+    <skip />
+    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. 탭하여 음소거를 해제하세요."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. 탭하여 진동으로 설정하세요. 접근성 서비스가 음소거될 수 있습니다."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. 탭하여 음소거로 설정하세요. 접근성 서비스가 음소거될 수 있습니다."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. 탭하여 진동으로 설정하세요."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. 탭하여 음소거로 설정하세요."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s 볼륨 컨트롤"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"전화 및 알림 소리가 울립니다."</string>
+    <!-- no translation found for volume_dialog_ringer_guidance_ring (3360373718388509040) -->
+    <skip />
     <string name="output_title" msgid="5355078100792942802">"미디어 출력"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"전화 통화 출력"</string>
     <string name="output_none_found" msgid="5544982839808921091">"기기를 찾을 수 없음"</string>
@@ -628,6 +631,7 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"알림 관리"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"알림 일시 중지 옵션"</string>
+    <string name="notification_menu_snooze_action" msgid="1112254519029621372">"일시 중지"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"실행취소"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> 동안 일시 중지됨"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
@@ -691,6 +695,8 @@
     <string name="battery" msgid="7498329822413202973">"배터리"</string>
     <string name="clock" msgid="7416090374234785905">"시계"</string>
     <string name="headset" msgid="4534219457597457353">"헤드셋"</string>
+    <!-- no translation found for accessibility_long_click_tile (6687350750091842525) -->
+    <skip />
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"헤드폰 연결됨"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"헤드셋 연결됨"</string>
     <string name="data_saver" msgid="5037565123367048522">"데이터 절약 모드"</string>
@@ -814,6 +820,7 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"스크린샷"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"일반 메시지"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"저장공간"</string>
+    <string name="notification_channel_hints" msgid="7323870212489152689">"힌트"</string>
     <string name="instant_apps" msgid="6647570248119804907">"인스턴트 앱"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"인스턴트 앱은 설치가 필요하지 않습니다."</string>
     <string name="app_info" msgid="6856026610594615344">"앱 정보"</string>
@@ -841,4 +848,15 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"<xliff:g id="APP">%1$s</xliff:g>에서 모든 앱의 슬라이스를 표시하도록 허용"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"허용"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"거부"</string>
+    <string name="auto_saver_title" msgid="1217959994732964228">"탭하여 배터리 세이버 예약"</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for auto_saver_text (6324376061044218113) -->
+    <skip />
+    <string name="no_auto_saver_action" msgid="8086002101711328500">"사용 안함"</string>
+    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"배터리 세이버 예약 사용 설정됨"</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for auto_saver_enabled_text (874711029884777579) -->
+    <skip />
+    <string name="open_saver_setting_action" msgid="8314624730997322529">"설정"</string>
+    <string name="auto_saver_okay_action" msgid="2701221740227683650">"확인"</string>
 </resources>
