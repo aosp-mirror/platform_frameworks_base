@@ -53,6 +53,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.function.Consumer;
 
 @RunWith(AndroidTestingRunner.class)
@@ -435,6 +437,22 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController.transitionTo(ScrimState.PULSING);
         mScrimController.finishAnimationsImmediately();
         assertScrimVisibility(VISIBILITY_FULLY_TRANSPARENT, VISIBILITY_FULLY_OPAQUE);
+    }
+
+    @Test
+    public void testEatsTouchEvent() {
+        HashSet<ScrimState> eatsTouches =
+                new HashSet<>(Arrays.asList(ScrimState.AOD, ScrimState.PULSING));
+        for (ScrimState state : ScrimState.values()) {
+            if (state == ScrimState.UNINITIALIZED) {
+                continue;
+            }
+            mScrimController.transitionTo(state);
+            mScrimController.finishAnimationsImmediately();
+            Assert.assertEquals("Should be clickable unless AOD or PULSING, was: " + state,
+                    mScrimBehind.getViewAlpha() != 0 && !eatsTouches.contains(state),
+                    mScrimBehind.isClickable());
+        }
     }
 
     /**
