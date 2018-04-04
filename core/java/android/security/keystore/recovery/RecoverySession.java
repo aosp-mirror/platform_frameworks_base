@@ -78,7 +78,7 @@ public class RecoverySession implements AutoCloseable {
     }
 
     /**
-     * @deprecated Use {@link #start(String, CertPath, byte[], byte[], List)} instead.
+     * @removed Use {@link #start(String, CertPath, byte[], byte[], List)} instead.
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -109,7 +109,7 @@ public class RecoverySession implements AutoCloseable {
     }
 
     /**
-     * @deprecated Use {@link #start(String, CertPath, byte[], byte[], List)} instead.
+     * @removed Use {@link #start(String, CertPath, byte[], byte[], List)} instead.
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -198,7 +198,7 @@ public class RecoverySession implements AutoCloseable {
     }
 
     /**
-     * @deprecated Use {@link #recoverKeyChainSnapshot(byte[], List)} instead.
+     * @removed Use {@link #recoverKeyChainSnapshot(byte[], List)} instead.
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
