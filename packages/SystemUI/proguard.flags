@@ -41,3 +41,4 @@
 -keep class com.android.systemui.plugins.** {
     public protected *;
 }
+-keep class android.support.v4.app.CoreComponentFactory
