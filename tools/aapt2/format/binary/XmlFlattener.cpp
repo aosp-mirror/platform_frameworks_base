@@ -333,9 +333,9 @@ bool XmlFlattener::Flatten(IAaptContext* context, const xml::Node* node) {
 
   // Flatten the StringPool.
   if (options_.use_utf16) {
-    StringPool::FlattenUtf16(buffer_, visitor.pool);
+    StringPool::FlattenUtf16(buffer_, visitor.pool, context->GetDiagnostics());
   } else {
-    StringPool::FlattenUtf8(buffer_, visitor.pool);
+    StringPool::FlattenUtf8(buffer_, visitor.pool, context->GetDiagnostics());
   }
 
   {
