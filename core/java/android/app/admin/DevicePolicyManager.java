@@ -1173,6 +1173,13 @@ public class DevicePolicyManager {
     public static final String POLICY_MANDATORY_BACKUPS = "policy_mandatory_backups";
 
     /**
+     * Constant to indicate the feature of suspending app. Use it as the value of
+     * {@link #EXTRA_RESTRICTION}.
+     * @hide
+     */
+    public static final String POLICY_SUSPEND_PACKAGES = "policy_suspend_packages";
+
+    /**
      * A String indicating a specific restricted feature. Can be a user restriction from the
      * {@link UserManager}, e.g. {@link UserManager#DISALLOW_ADJUST_VOLUME}, or one of the values
      * {@link #POLICY_DISABLE_CAMERA}, {@link #POLICY_DISABLE_SCREEN_CAPTURE} or
