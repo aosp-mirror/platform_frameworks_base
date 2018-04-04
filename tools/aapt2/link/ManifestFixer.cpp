@@ -354,6 +354,14 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   uses_static_library_action.Action(RequiredAndroidAttribute("version"));
   uses_static_library_action.Action(RequiredAndroidAttribute("certDigest"));
 
+  if (options_.debug_mode) {
+    application_action.Action([&](xml::Element* el) -> bool {
+      xml::Attribute *attr = el->FindOrCreateAttribute(xml::kSchemaAndroid, "debuggable");
+      attr->value = "true";
+      return true;
+    });
+  }
+
   application_action["meta-data"] = meta_data_action;
 
   application_action["activity"] = component_action;
