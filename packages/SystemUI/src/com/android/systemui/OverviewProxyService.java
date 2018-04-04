@@ -52,6 +52,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_DISABLE_SWIPE_UP;
 import static com.android.systemui.shared.system.NavigationBarCompat.InteractionType;
 
@@ -315,7 +316,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     }
 
     private void updateEnabledState() {
-        mIsEnabled = mContext.getPackageManager().resolveServiceAsUser(mQuickStepIntent, 0,
+        mIsEnabled = mContext.getPackageManager().resolveServiceAsUser(mQuickStepIntent,
+                MATCH_DIRECT_BOOT_UNAWARE,
                 ActivityManagerWrapper.getInstance().getCurrentUserId()) != null;
     }
 
