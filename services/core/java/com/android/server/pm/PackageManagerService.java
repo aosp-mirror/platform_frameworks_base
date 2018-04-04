@@ -23786,6 +23786,14 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
 
         @Override
+        public boolean isPackageSuspended(String packageName, int userId) {
+            synchronized (mPackages) {
+                final PackageSetting ps = mSettings.mPackages.get(packageName);
+                return (ps != null) ? ps.getSuspended(userId) : false;
+            }
+        }
+
+        @Override
         public int getPackageUid(String packageName, int flags, int userId) {
             return PackageManagerService.this
                     .getPackageUid(packageName, flags, userId);
