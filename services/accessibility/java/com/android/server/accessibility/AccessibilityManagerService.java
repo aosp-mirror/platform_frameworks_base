@@ -2721,7 +2721,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
         }
 
-        private AccessibilityWindowInfo populateReportedWindow(WindowInfo window) {
+        private AccessibilityWindowInfo populateReportedWindowLocked(WindowInfo window) {
             final int windowId = findWindowIdLocked(window.token);
             if (windowId < 0) {
                 return null;
@@ -3140,10 +3140,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     mAccessibilityFocusedWindowId != INVALID_WINDOW_ID;
             if (windowCount > 0) {
                 for (int i = 0; i < windowCount; i++) {
-                    WindowInfo windowInfo = windows.get(i);
-                    AccessibilityWindowInfo window = (mWindowsForAccessibilityCallback != null)
-                            ? mWindowsForAccessibilityCallback.populateReportedWindow(windowInfo)
-                            : null;
+                    final WindowInfo windowInfo = windows.get(i);
+                    final AccessibilityWindowInfo window;
+                    if (mWindowsForAccessibilityCallback != null) {
+                        window = mWindowsForAccessibilityCallback
+                                .populateReportedWindowLocked(windowInfo);
+                    } else {
+                        window = null;
+                    }
                     if (window != null) {
 
                         // Flip layers in list to be consistent with AccessibilityService#getWindows
@@ -3173,7 +3177,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 // active window once we decided which it is.
                 final int accessibilityWindowCount = mWindows.size();
                 for (int i = 0; i < accessibilityWindowCount; i++) {
-                    AccessibilityWindowInfo window = mWindows.get(i);
+                    final AccessibilityWindowInfo window = mWindows.get(i);
                     if (window.getId() == mActiveWindowId) {
                         window.setActive(true);
                     }
@@ -3192,7 +3196,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
 
             if (shouldClearAccessibilityFocus) {
-                clearAccessibilityFocus(mAccessibilityFocusedWindowId);
+                mMainHandler.sendMessage(obtainMessage(
+                        AccessibilityManagerService::clearAccessibilityFocus,
+                        AccessibilityManagerService.this,
+                        box(mAccessibilityFocusedWindowId)));
             }
         }
 
