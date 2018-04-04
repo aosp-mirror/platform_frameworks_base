@@ -631,7 +631,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
         HearingAidProfile hearingAidProfile = mProfileManager.getHearingAidProfile();
         if (hearingAidProfile != null) {
-            mIsActiveDeviceHearingAid = hearingAidProfile.isActiveDevice(mDevice);
+            mIsActiveDeviceHearingAid = hearingAidProfile.getActiveDevices().contains(mDevice);
         }
     }
 
