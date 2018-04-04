@@ -3544,7 +3544,15 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mService.updateOomAdjLocked();
     }
 
-    final TaskRecord finishTopRunningActivityLocked(ProcessRecord app, String reason) {
+    /**
+     * Finish the topmost activity that belongs to the crashed app. We may also finish the activity
+     * that requested launch of the crashed one to prevent launch-crash loop.
+     * @param app The app that crashed.
+     * @param reason Reason to perform this action.
+     * @return The task that was finished in this stack, {@code null} if top running activity does
+     *         not belong to the crashed app.
+     */
+    final TaskRecord finishTopCrashedActivityLocked(ProcessRecord app, String reason) {
         ActivityRecord r = topRunningActivityLocked();
         TaskRecord finishedTask = null;
         if (r == null || r.app != app) {
