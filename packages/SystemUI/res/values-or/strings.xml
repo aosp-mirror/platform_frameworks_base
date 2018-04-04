@@ -435,8 +435,7 @@
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ସମସ୍ତ ଖାଲି କରନ୍ତୁ"</string>
     <!-- no translation found for manage_notifications_text (8035284146227267681) -->
     <skip />
-    <!-- no translation found for dnd_suppressing_shade_text (5179021215370153526) -->
-    <skip />
+    <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ମୋଡ୍‌ ଅନ୍‌ ଥିବାଯୋଗୁଁ ବିଜ୍ଞପ୍ତି ଲୁଚାଇ ଦିଆଯାଉଛି"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ବର୍ତ୍ତମାନ ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"କୌଣସି ବିଜ୍ଞପ୍ତି ନାହିଁ"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"ପ୍ରୋଫାଇଲ୍ ନିରୀକ୍ଷଣ କରାଯାଇପାରେ।"</string>
@@ -536,6 +535,10 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"ରିଙ୍ଗ"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"ଭାଇବ୍ରେଟ୍‌"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"ମ୍ୟୁଟ୍"</string>
+    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
+    <skip />
+    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s। ଅନମ୍ୟୁଟ୍‍ କରିବା ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s। ଭାଇବ୍ରେଟ୍‍ ସେଟ୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ। ଆକ୍ସେସିବିଲିଟୀ ସର୍ଭିସ୍‌ ମ୍ୟୁଟ୍‍ କରାଯାଇପାରେ।"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s। ମ୍ୟୁଟ୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ। ଆକ୍ସେସିବିଲିଟୀ ସର୍ଭିସ୍‌ ମ୍ୟୁଟ୍‍ କରାଯାଇପାରେ।"</string>
@@ -820,8 +823,7 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"ସ୍କ୍ରୀନଶଟ୍‍"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"ସାଧାରଣ ମେସେଜ୍"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"ଷ୍ଟୋରେଜ୍‌"</string>
-    <!-- no translation found for notification_channel_hints (7323870212489152689) -->
-    <skip />
+    <string name="notification_channel_hints" msgid="7323870212489152689">"ହିଣ୍ଟ"</string>
     <string name="instant_apps" msgid="6647570248119804907">"ଇନଷ୍ଟାଣ୍ଟ ଆପ୍‌"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"ଇନଷ୍ଟାଣ୍ଟ ଆପ୍‌ ଇନଷ୍ଟଲ୍‍ କରିବାର ଆବଶ୍ୟକତା ନାହିଁ"</string>
     <string name="app_info" msgid="6856026610594615344">"ଆପ୍‍ ସୂଚନା"</string>
@@ -849,18 +851,11 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"ଯେକୌଣସି ଆପ୍‌ରେ ସ୍ଲାଇସ୍‌କୁ ଦେଖାଇବା ପାଇଁ <xliff:g id="APP">%1$s</xliff:g>କୁ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"ଅସ୍ଵୀକାର କରନ୍ତୁ"</string>
-    <!-- no translation found for auto_saver_title (1217959994732964228) -->
-    <skip />
-    <!-- no translation found for auto_saver_text (6324376061044218113) -->
-    <skip />
-    <!-- no translation found for no_auto_saver_action (8086002101711328500) -->
-    <skip />
-    <!-- no translation found for auto_saver_enabled_title (6726474226058316862) -->
-    <skip />
-    <!-- no translation found for auto_saver_enabled_text (874711029884777579) -->
-    <skip />
-    <!-- no translation found for open_saver_setting_action (8314624730997322529) -->
-    <skip />
-    <!-- no translation found for auto_saver_okay_action (2701221740227683650) -->
-    <skip />
+    <string name="auto_saver_title" msgid="1217959994732964228">"ବ୍ୟାଟେରୀ ସେଭର୍‌ ଅନ୍‌ ହେବାର ସମୟ ସେଟ୍‌ କରିବାକୁ ଟାପ୍‌ କରନ୍ତୁ"</string>
+    <string name="auto_saver_text" msgid="6324376061044218113">"ବ୍ୟାଟେରୀ <xliff:g id="PERCENTAGE">%d</xliff:g>%%ରୁ କମ୍‌ ହେଲେ ଆପେ ଅନ୍‌ ହୋଇଯିବ"</string>
+    <string name="no_auto_saver_action" msgid="8086002101711328500">"ନାହିଁ, ଥାଉ"</string>
+    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"ଆଗରୁ ସେଟ୍‌ କରିଥିବା ସମୟ ଅନୁସାରେ ବ୍ୟାଟେରୀ ସେଭର୍‌ ଅନ୍‌ ହୋଇଛି"</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"ଚାର୍ଜ <xliff:g id="PERCENTAGE">%d</xliff:g>%%ରୁ କମ୍‌ ହେଲେ ବ୍ୟାଟେରୀ ସେଭର୍‌ ଆପେ ଅନ୍‌ ହୋଇଯିବ।"</string>
+    <string name="open_saver_setting_action" msgid="8314624730997322529">"ସେଟିଙ୍ଗ"</string>
+    <string name="auto_saver_okay_action" msgid="2701221740227683650">"ବୁଝିଲି"</string>
 </resources>

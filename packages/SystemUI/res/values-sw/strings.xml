@@ -531,6 +531,10 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Piga"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Tetema"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Zima sauti"</string>
+    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
+    <skip />
+    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Gusa ili urejeshe."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Gusa ili uweke mtetemo. Huenda ikakomesha huduma za zana za walio na matatizo ya kuona au kusikia."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Gusa ili ukomeshe. Huenda ikakomesha huduma za zana za walio na matatizo ya kuona au kusikia."</string>
@@ -843,9 +847,9 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Ruhusu"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Kataa"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Gusa ili uratibu wakati wa kuwasha Kiokoa Betri"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"Weka kiokoa betri kiwake kiotomatiki wakati chaji ya betri imefika <xliff:g id="PERCENTAGE">%d</xliff:g>%%"</string>
+    <string name="auto_saver_text" msgid="6324376061044218113">"Washa kiokoa betri kiotomatiki chaji ya betri inapofika <xliff:g id="PERCENTAGE">%d</xliff:g>%%"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Hapana, asante"</string>
-    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Imewasha Kiokoa Betri kilichoratibiwa"</string>
+    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Ratiba ya Kiokoa Betri imewashwa"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Kiokoa Betri kitawaka kiotomatiki baada ya chaji ya betri kufika chini ya <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Mipangilio"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Nimeelewa"</string>

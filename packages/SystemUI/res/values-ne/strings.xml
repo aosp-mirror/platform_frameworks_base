@@ -358,7 +358,7 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"सुरु गर्न सकिएन <xliff:g id="APP">%s</xliff:g>।"</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> लाई सुरक्षित-मोडमा असक्षम गरिएको छ।"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"सबै हटाउनुहोस्"</string>
-    <string name="recents_drag_hint_message" msgid="2649739267073203985">"विभाजित स्क्रिनको प्रयोग गर्नका लागि यहाँ तान्नुहोस्"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"विभाजित स्क्रिनको प्रयोग गर्नाका लागि यहाँ तान्नुहोस्"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"तेर्सो रूपमा विभाजन गर्नुहोस्"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ठाडो रूपमा विभाजन गर्नुहोस्"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"आफू अनुकूल विभाजन गर्नुहोस्"</string>
@@ -431,8 +431,7 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"फेरि नदेखाउनुहोस्"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"सबै हटाउनुहोस्"</string>
     <string name="manage_notifications_text" msgid="8035284146227267681">"सूचनाहरू व्यवस्थापन गर्नुहोस्"</string>
-    <!-- no translation found for dnd_suppressing_shade_text (5179021215370153526) -->
-    <skip />
+    <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"बाधा नपुर्‍याउनुहोस् नामक मोडले सूचनाहरू लुकाइरहेको छ"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"अहिले सुरु गर्नुहोस्"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"कुनै सूचनाहरू छैनन्"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"प्रोफाइल अनुगमन हुन सक्छ"</string>
@@ -532,9 +531,13 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"घन्टी"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"कम्पन"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"म्युट गर्नुहोस्"</string>
-    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s। अनम्यूट गर्नका लागि ट्याप गर्नुहोस्।"</string>
-    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s। कम्पनमा सेट गर्नका लागि ट्याप गर्नुहोस्। पहुँच सम्बन्धी सेवाहरू म्यूट हुन सक्छन्।"</string>
-    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s। म्यूट गर्नका लागि ट्याप गर्नुहोस्। पहुँच सम्बन्धी सेवाहरू म्यूट हुन सक्छन्।"</string>
+    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
+    <skip />
+    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
+    <skip />
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s। अनम्यूट गर्नाका लागि ट्याप गर्नुहोस्।"</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s। कम्पनमा सेट गर्नाका लागि ट्याप गर्नुहोस्। पहुँच सम्बन्धी सेवाहरू म्यूट हुन सक्छन्।"</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s। म्यूट गर्नाका लागि ट्याप गर्नुहोस्। पहुँच सम्बन्धी सेवाहरू म्यूट हुन सक्छन्।"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s। कम्पन मोडमा सेट गर्न ट्याप गर्नुहोस्।"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s। म्यूट गर्न ट्याप गर्नुहोस्।"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s भोल्युमका नियन्त्रणहरू"</string>
@@ -753,9 +756,9 @@
     <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"माथिल्लो भाग ५०%"</string>
     <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"माथिल्लो भाग ३०%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"तल्लो भाग पूर्ण स्क्रिन"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"स्थिति <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>। सम्पादन गर्नका लागि डबल ट्याप गर्नुहोस्।"</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"स्थिति <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>। सम्पादन गर्नाका लागि डबल ट्याप गर्नुहोस्।"</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>। थप्नका लागि डबल ट्याप गर्नुहोस्।"</string>
-    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"स्थिति <xliff:g id="POSITION">%1$d</xliff:g>। चयन गर्नका लागि डबल ट्याप गर्नुहोस्।"</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"स्थिति <xliff:g id="POSITION">%1$d</xliff:g>। चयन गर्नाका लागि डबल ट्याप गर्नुहोस्।"</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"<xliff:g id="TILE_NAME">%1$s</xliff:g> लाई सार्नुहोस्"</string>
     <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"<xliff:g id="TILE_NAME">%1$s</xliff:g> लाई हटाउनुहोस्"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="TILE_NAME">%1$s</xliff:g> लाई स्थिति <xliff:g id="POSITION">%2$d</xliff:g> मा थपियो"</string>
@@ -815,8 +818,7 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"स्क्रिनशटहरू"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"सामान्य सन्देशहरू"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"भण्डारण"</string>
-    <!-- no translation found for notification_channel_hints (7323870212489152689) -->
-    <skip />
+    <string name="notification_channel_hints" msgid="7323870212489152689">"सङ्केतहरू"</string>
     <string name="instant_apps" msgid="6647570248119804907">"तात्कालिक अनुप्रयोगहरू"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"तात्कालिक अनुप्रयोगहरूलाई स्थापना गर्नु पर्दैन|"</string>
     <string name="app_info" msgid="6856026610594615344">"अनुप्रयोगका बारे जानकारी"</string>
@@ -844,18 +846,11 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"अन्य अनुप्रयोगबाट <xliff:g id="APP">%1$s</xliff:g> मा स्लाइसहरू देखाउन अनुमति दिनुहोस्"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"अनुमति दिनुहोस्"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"अस्वीकार गर्नु…"</string>
-    <!-- no translation found for auto_saver_title (1217959994732964228) -->
-    <skip />
-    <!-- no translation found for auto_saver_text (6324376061044218113) -->
-    <skip />
-    <!-- no translation found for no_auto_saver_action (8086002101711328500) -->
-    <skip />
-    <!-- no translation found for auto_saver_enabled_title (6726474226058316862) -->
-    <skip />
-    <!-- no translation found for auto_saver_enabled_text (874711029884777579) -->
-    <skip />
-    <!-- no translation found for open_saver_setting_action (8314624730997322529) -->
-    <skip />
-    <!-- no translation found for auto_saver_okay_action (2701221740227683650) -->
-    <skip />
+    <string name="auto_saver_title" msgid="1217959994732964228">"ब्याट्री सेभरको समयतालिका बनाउन ट्याप गर्नुहोस्"</string>
+    <string name="auto_saver_text" msgid="6324376061044218113">"ब्याट्री <xliff:g id="PERCENTAGE">%d</xliff:g>%% भएको बेला ब्याट्री सेभर स्वतः सक्रिय गर्नुहोस्‌"</string>
+    <string name="no_auto_saver_action" msgid="8086002101711328500">"पर्दैन धन्यवाद"</string>
+    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"ब्याट्री सेभरको समयतालिका सक्रिय गरियो"</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"ब्याट्री <xliff:g id="PERCENTAGE">%d</xliff:g>%% भन्दा कम भएको बेला ब्याट्री सेभर स्वतः सक्रिय हुने छ।"</string>
+    <string name="open_saver_setting_action" msgid="8314624730997322529">"सेटिङहरू"</string>
+    <string name="auto_saver_okay_action" msgid="2701221740227683650">"बुझेँ"</string>
 </resources>

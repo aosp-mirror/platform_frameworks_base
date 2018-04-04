@@ -75,7 +75,7 @@
     <string name="screenshot_saved_title" msgid="5637073968117370753">"บันทึกภาพหน้าจอแล้ว"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"แตะเพื่อดูภาพหน้าจอ"</string>
     <string name="screenshot_failed_title" msgid="7612509838919089748">"บันทึกภาพหน้าจอไม่ได้"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"ลองถ่ายภาพหน้าจออีกครั้ง"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"ลองบันทึกภาพหน้าจออีกครั้ง"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"บันทึกภาพหน้าจอไม่ได้เนื่องจากพื้นที่เก็บข้อมูลมีจำกัด"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"แอปหรือองค์กรของคุณไม่อนุญาตให้จับภาพหน้าจอ"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"ตัวเลือกการถ่ายโอนไฟล์ USB"</string>
@@ -531,6 +531,10 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"ทำให้ส่งเสียง"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"สั่น"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"ปิดเสียง"</string>
+    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
+    <skip />
+    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s แตะเพื่อเปิดเสียง"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s แตะเพื่อตั้งค่าให้สั่น อาจมีการปิดเสียงบริการการเข้าถึง"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s แตะเพื่อปิดเสียง อาจมีการปิดเสียงบริการการเข้าถึง"</string>
