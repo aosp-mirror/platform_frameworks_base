@@ -484,10 +484,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"অ্যাপ্লিকেশানকে নিয়ার ফিল্ড কমিউনিকেশন (NFC) ট্যাগ, কার্ড এবং রিডারগুলির সাথে যোগাযোগ করতে দেয়৷"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"আপনার স্ক্রিন লক অক্ষম করুন"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"কী-লক এবং যেকোনো সংশ্লিষ্ট পাসওয়ার্ড সুরক্ষা অক্ষম করতে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ উদাহরণস্বরূপ, একটি ইনকামিং ফোন কল গ্রহণ করার সময়ে ফোনটি কী-লক অক্ষম করে, তারপরে কল শেষ হয়ে গেলে কী-লকটিকে আবার সক্ষম করে৷"</string>
-    <!-- no translation found for permlab_useBiometric (8837753668509919318) -->
-    <skip />
-    <!-- no translation found for permdesc_useBiometric (8389855232721612926) -->
-    <skip />
+    <string name="permlab_useBiometric" msgid="8837753668509919318">"বায়োমেট্রিক হার্ডওয়্যার ব্যবহার করুন"</string>
+    <string name="permdesc_useBiometric" msgid="8389855232721612926">"অ্যাপটিকে যাচাইকরণের জন্য বায়োমেট্রিক হার্ডওয়্যার ব্যবহার করার অনুমতি দেয়"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"আঙ্গুলের ছাপ নেওয়ার হার্ডওয়্যার পরিচালনা করুন"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ব্যবহার করার জন্য আঙ্গুলের ছাপের টেম্প্লেটগুলি যোগ করা এবং মোছার পদ্ধতিগুলি গ্রহন করতে অ্যাপ্লিকেশানটিতে অমুমতি দেয়৷"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"আঙ্গুলের ছাপ নেওয়ার হার্ডওয়্যার ব্যবহার করুন"</string>
@@ -1014,32 +1012,24 @@
     <string name="inputMethod" msgid="1653630062304567879">"ইনপুট পদ্ধতি"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"পাঠ্য ক্রিয়াগুলি"</string>
     <string name="email" msgid="4560673117055050403">"ইমেল"</string>
-    <!-- no translation found for email_desc (3638665569546416795) -->
-    <skip />
+    <string name="email_desc" msgid="3638665569546416795">"বেছে নেওয়া আইডিতে ইমেল পাঠান"</string>
     <string name="dial" msgid="1253998302767701559">"কল"</string>
-    <!-- no translation found for dial_desc (6573723404985517250) -->
-    <skip />
-    <string name="map" msgid="6521159124535543457">"অবস্থান নির্ণয় করুন"</string>
-    <!-- no translation found for map_desc (9036645769910215302) -->
+    <string name="dial_desc" msgid="6573723404985517250">"বেছে নেওয়া ফোন নম্বরে কল করুন"</string>
+    <string name="map" msgid="5441053548030107189">"ম্যাপ"</string>
+    <!-- no translation found for map_desc (1836995341943772348) -->
     <skip />
     <string name="browse" msgid="1245903488306147205">"খুলুন"</string>
-    <!-- no translation found for browse_desc (8220976549618935044) -->
-    <skip />
+    <string name="browse_desc" msgid="8220976549618935044">"বেছে নেওয়া ইউআরএলে যান"</string>
     <string name="sms" msgid="4560537514610063430">"মেসেজ"</string>
-    <!-- no translation found for sms_desc (7526588350969638809) -->
-    <skip />
+    <string name="sms_desc" msgid="7526588350969638809">"বেছে নেওয়া ফোন নম্বরে মেসেজ পাঠান"</string>
     <string name="add_contact" msgid="7867066569670597203">"যোগ করুন"</string>
-    <!-- no translation found for add_contact_desc (4830217847004590345) -->
-    <skip />
+    <string name="add_contact_desc" msgid="4830217847004590345">"পরিচিতিতে যোগ করুন"</string>
     <string name="view_calendar" msgid="979609872939597838">"দেখুন"</string>
-    <!-- no translation found for view_calendar_desc (5828320291870344584) -->
-    <skip />
+    <string name="view_calendar_desc" msgid="5828320291870344584">"বেছে নেওয়া দিনটি ক্যালেন্ডারে দেখুন"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"সময়সূচী"</string>
-    <!-- no translation found for add_calendar_event_desc (4326891793260687388) -->
-    <skip />
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"বেছে নেওয়া সময়ে ইভেন্ট সেট করুন"</string>
     <string name="view_flight" msgid="7691640491425680214">"ট্র্যাক"</string>
-    <!-- no translation found for view_flight_desc (3876322502674253506) -->
-    <skip />
+    <string name="view_flight_desc" msgid="3876322502674253506">"বেছে নেওয়া ফ্লাইট ট্র্যাক করুন"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"স্টোরেজ পূর্ণ হতে চলেছে"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"কিছু কিছু সিস্টেম ক্রিয়াকলাপ কাজ নাও করতে পারে"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"সিস্টেমের জন্য যথেষ্ট স্টোরেজ নেই৷ আপনার কাছে ২৫০এমবি ফাঁকা স্থান রয়েছে কিনা সে বিষয়ে নিশ্চিত হন এবং সিস্টেম চালু করুন৷"</string>

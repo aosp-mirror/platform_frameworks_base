@@ -82,7 +82,7 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"沒有語音服務"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"無法使用語音服務或撥打緊急電話"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"已由流動網絡供應商暫時關閉"</string>
-    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"SIM 卡 <xliff:g id="SIMNUMBER">%d</xliff:g> 暫時遭電信業者停用"</string>
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"SIM 卡 <xliff:g id="SIMNUMBER">%d</xliff:g> 暫時被流動網絡供應商停用"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"無法連線至流動網絡"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"請嘗試變更偏好的網絡。輕按即可變更。"</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"無法撥打緊急電話"</string>
@@ -497,7 +497,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"未能辨別"</string>
-    <string name="fingerprint_authenticated" msgid="5309333983002526448">"指紋驗證成功"</string>
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"驗證咗指紋"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"無法使用指紋軟件。"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"指紋無法儲存。請移除現有指紋。"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"指紋已逾時。請再試一次。"</string>
@@ -1013,8 +1013,9 @@
     <string name="email_desc" msgid="3638665569546416795">"Send email 去指定地址"</string>
     <string name="dial" msgid="1253998302767701559">"通話"</string>
     <string name="dial_desc" msgid="6573723404985517250">"打指定電話號碼"</string>
-    <string name="map" msgid="6521159124535543457">"尋找"</string>
-    <string name="map_desc" msgid="9036645769910215302">"搵出指定地址"</string>
+    <string name="map" msgid="5441053548030107189">"地圖"</string>
+    <!-- no translation found for map_desc (1836995341943772348) -->
+    <skip />
     <string name="browse" msgid="1245903488306147205">"開啟"</string>
     <string name="browse_desc" msgid="8220976549618935044">"打開指定網址"</string>
     <string name="sms" msgid="4560537514610063430">"短訊"</string>
@@ -1273,17 +1274,17 @@
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"關閉"</string>
     <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"正在檢查 <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="410185170877285434">"正在檢查目前的內容"</string>
-    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"新的 <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"輕觸即可進行設定"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"新 <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"輕按即可設定"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"用於轉移相片和媒體"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"<xliff:g id="NAME">%s</xliff:g>發生問題"</string>
-    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"輕觸即可修正問題"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"輕按即可修正問題"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g>已損毀。選取即可修正。"</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"不支援的 <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"此裝置並不支援此 <xliff:g id="NAME">%s</xliff:g>。輕按即可在支援的格式設定。"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"這部裝置不支援此 <xliff:g id="NAME">%s</xliff:g>。選取即可使用支援的格式設定。"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>被意外移除"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"請先退出媒體，再將其移除，以免內容遺失"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"請先退出媒體，再將其移除，以免內容遺失。"</string>
     <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"已移除 <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"部分功能可能無法正常運作。請插入新的儲存空間。"</string>
     <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"正在退出 <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1292,13 +1293,13 @@
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"移除"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"探索"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"找不到<xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_missing_message" msgid="4012389235250987930">"請再次插入裝置"</string>
+    <string name="ext_media_missing_message" msgid="4012389235250987930">"請再插入裝置"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"正在轉移<xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"正在轉移資料"</string>
-    <string name="ext_media_move_success_title" msgid="7863652232242276066">"內容轉移作業已完成"</string>
+    <string name="ext_media_move_success_title" msgid="7863652232242276066">"內容轉移操作已完成"</string>
     <string name="ext_media_move_success_message" msgid="8939137931961728009">"已將內容移至 <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_failure_title" msgid="1604422634177382092">"無法移動內容"</string>
-    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"請再次嘗試移動內容"</string>
+    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"請再嘗試移動內容"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"已移除"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"已卸載"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"正在檢查…"</string>
