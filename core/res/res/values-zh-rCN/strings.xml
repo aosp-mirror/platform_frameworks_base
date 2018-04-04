@@ -82,8 +82,7 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"无法使用语音通话服务"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"无法使用语音服务或紧急呼救服务"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"已由运营商暂时关闭"</string>
-    <!-- no translation found for RestrictedStateContentMsimTemplate (673416791370248176) -->
-    <skip />
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"SIM 卡 <xliff:g id="SIMNUMBER">%d</xliff:g> 已由运营商暂时关闭"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"无法连接到移动网络"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"请尝试更改首选网络。点按即可更改。"</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"无法使用紧急呼救服务"</string>
@@ -484,10 +483,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"允许应用与近距离无线通信(NFC)标签、卡和读取器通信。"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"停用屏幕锁定"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"允许该应用停用键锁以及任何关联的密码安全措施。例如，让手机在接听来电时停用键锁，在通话结束后重新启用键锁。"</string>
-    <!-- no translation found for permlab_useBiometric (8837753668509919318) -->
-    <skip />
-    <!-- no translation found for permdesc_useBiometric (8389855232721612926) -->
-    <skip />
+    <string name="permlab_useBiometric" msgid="8837753668509919318">"使用生物特征硬件"</string>
+    <string name="permdesc_useBiometric" msgid="8389855232721612926">"允许该应用使用生物特征硬件进行身份验证"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"管理指纹硬件"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"允许该应用调用方法来添加和删除可用的指纹模板。"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"使用指纹硬件"</string>
@@ -500,8 +497,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"无法识别"</string>
-    <!-- no translation found for fingerprint_authenticated (5309333983002526448) -->
-    <skip />
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"已验证指纹"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"指纹硬件无法使用。"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"无法存储指纹。请移除一个现有的指纹。"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"指纹录入操作超时，请重试。"</string>
@@ -1014,32 +1010,24 @@
     <string name="inputMethod" msgid="1653630062304567879">"输入法"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"文字操作"</string>
     <string name="email" msgid="4560673117055050403">"电子邮件"</string>
-    <!-- no translation found for email_desc (3638665569546416795) -->
-    <skip />
+    <string name="email_desc" msgid="3638665569546416795">"将电子邮件发送至所选地址"</string>
     <string name="dial" msgid="1253998302767701559">"拨打电话"</string>
-    <!-- no translation found for dial_desc (6573723404985517250) -->
-    <skip />
-    <string name="map" msgid="6521159124535543457">"定位"</string>
-    <!-- no translation found for map_desc (9036645769910215302) -->
+    <string name="dial_desc" msgid="6573723404985517250">"拨打所选电话号码"</string>
+    <string name="map" msgid="5441053548030107189">"地图"</string>
+    <!-- no translation found for map_desc (1836995341943772348) -->
     <skip />
     <string name="browse" msgid="1245903488306147205">"打开"</string>
-    <!-- no translation found for browse_desc (8220976549618935044) -->
-    <skip />
+    <string name="browse_desc" msgid="8220976549618935044">"打开所选网址"</string>
     <string name="sms" msgid="4560537514610063430">"发短信"</string>
-    <!-- no translation found for sms_desc (7526588350969638809) -->
-    <skip />
+    <string name="sms_desc" msgid="7526588350969638809">"将短信发送至所选电话号码"</string>
     <string name="add_contact" msgid="7867066569670597203">"添加"</string>
-    <!-- no translation found for add_contact_desc (4830217847004590345) -->
-    <skip />
+    <string name="add_contact_desc" msgid="4830217847004590345">"添加到通讯录"</string>
     <string name="view_calendar" msgid="979609872939597838">"查看"</string>
-    <!-- no translation found for view_calendar_desc (5828320291870344584) -->
-    <skip />
+    <string name="view_calendar_desc" msgid="5828320291870344584">"在日历中查看所选时间"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"排定时间"</string>
-    <!-- no translation found for add_calendar_event_desc (4326891793260687388) -->
-    <skip />
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"将活动安排在所选时间"</string>
     <string name="view_flight" msgid="7691640491425680214">"跟踪"</string>
-    <!-- no translation found for view_flight_desc (3876322502674253506) -->
-    <skip />
+    <string name="view_flight_desc" msgid="3876322502674253506">"跟踪所选航班"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"存储空间不足"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"某些系统功能可能无法正常使用"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"系统存储空间不足。请确保您有250MB的可用空间，然后重新启动。"</string>
@@ -1284,49 +1272,34 @@
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"“<xliff:g id="NAME">%s</xliff:g>”正在其他应用的上层显示内容"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"如果您不想让<xliff:g id="NAME">%s</xliff:g>使用此功能，请点按以打开设置，然后关闭此功能。"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"关闭"</string>
-    <!-- no translation found for ext_media_checking_notification_title (4411133692439308924) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (410185170877285434) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_title (1621805083736634077) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_message (3673685270558405087) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"正在检查<xliff:g id="NAME">%s</xliff:g>…"</string>
+    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"正在检查当前内容"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"新的<xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"点按即可进行设置"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"可用于传输照片和媒体文件"</string>
-    <!-- no translation found for ext_media_unmountable_notification_title (4179418065210797130) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (4193858924381066522) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"<xliff:g id="NAME">%s</xliff:g>出现问题"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"点按即可修正问题"</string>
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g>已损坏。选择即可进行修正。"</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g>不受支持"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"该设备不支持此<xliff:g id="NAME">%s</xliff:g>。点按即可使用支持的格式进行设置。"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"此设备不支持该<xliff:g id="NAME">%s</xliff:g>。选择即可使用支持的格式进行设置。"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>已意外移除"</string>
-    <!-- no translation found for ext_media_badremoval_notification_message (8556885808951260574) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (6593814191061956856) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (2110883356419799994) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (5046532339291216076) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (1003926904442321115) -->
-    <skip />
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"请先弹出媒体，再将其移除，以防内容丢失"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g>已被移除"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"部分功能可能无法正常运行。请插入新的存储设备。"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"正在弹出<xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"请勿移除"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"设置"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"弹出"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"浏览"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"缺少<xliff:g id="NAME">%s</xliff:g>"</string>
-    <!-- no translation found for ext_media_missing_message (4012389235250987930) -->
-    <skip />
+    <string name="ext_media_missing_message" msgid="4012389235250987930">"请再次插入设备"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"正在移动<xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"正在移动数据"</string>
-    <!-- no translation found for ext_media_move_success_title (7863652232242276066) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (8939137931961728009) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (1604422634177382092) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (7388950499623016135) -->
-    <skip />
+    <string name="ext_media_move_success_title" msgid="7863652232242276066">"内容转移操作已完成"</string>
+    <string name="ext_media_move_success_message" msgid="8939137931961728009">"已将内容移至<xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"无法移动内容"</string>
+    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"请再次尝试移动内容"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"已移除"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"已弹出"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"正在检查…"</string>
@@ -1874,14 +1847,10 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"未配置支持语音的 SIM 卡"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"SIM 卡不支持语音"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"手机不支持语音"</string>
-    <!-- no translation found for mmcc_authentication_reject_msim_template (1217031195834766479) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr_msim_template (5636464607596778986) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms_msim_template (5994323296399913454) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me_msim_template (5550259730350571826) -->
-    <skip />
+    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"不允许使用 SIM 卡 <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"未配置 SIM 卡 <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"不允许使用 SIM 卡 <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"不允许使用 SIM 卡 <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"弹出式窗口"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"应用版本已降级或与此快捷方式不兼容"</string>

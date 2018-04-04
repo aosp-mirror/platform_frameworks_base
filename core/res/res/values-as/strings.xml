@@ -176,7 +176,6 @@
     <string name="ssl_ca_cert_noti_by_administrator" msgid="3541729986326153557">"আপোনাৰ কৰ্মস্থানৰ প্ৰ\'ফাইলৰ প্ৰশাসকে পৰ্যবেক্ষণ কৰি আছে"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="4030263497686867141">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>ৰ দ্বাৰা"</string>
     <string name="work_profile_deleted" msgid="5005572078641980632">"কৰ্মস্থানৰ প্ৰ\'ফাইল মচা হ\'ল"</string>
-    <string name="work_profile_deleted_description" msgid="1100529432509639864">"প্ৰশাসক এপ্ নথকাৰ বাবে কৰ্মস্থানৰ প্ৰ\'ফাইল মচা হ\'ল"</string>
     <string name="work_profile_deleted_details" msgid="6307630639269092360">"কৰ্মস্থানৰ প্ৰ\'ফাইলৰ প্ৰশাসক এপ্ নাই বা ব্যৱহাৰযোগ্য হৈ থকা নাই। যাৰ ফলত আপোনাৰ কৰ্মস্থানৰ প্ৰ\'ফাইল আৰু ইয়াৰ লগত জড়িত অন্য ডেটাসমূহ মচা হৈছে। সহায়ৰ বাবে আপোনাৰ প্ৰশাসকৰ সৈতে সম্পর্ক কৰক।"</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="8823792115612348820">"আপোনাৰ কৰ্মস্থানৰ প্ৰ\'ফাইল এই ডিভাইচটোত আৰু উপলব্ধ নহয়"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="8986903510053359694">"বহুতবাৰ ভুলকৈ পাছৱৰ্ড দিয়া হৈছে"</string>
@@ -485,10 +484,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"এপটোক নিয়েৰ ফিল্ড কমিউনিকেশ্বন (NFC) টেগ, কাৰ্ড আৰু ৰিডাৰসমূহৰ সৈতে যোগাযোগ কৰিবলৈ অনুমতি দিয়ে।"</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"আপোনাৰ স্ক্ৰীণ ল\'ক অক্ষম কৰক"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"এপটোক কী ল\'ক আৰু জড়িত হোৱা যিকোনো পাছৱৰ্ডৰ সুৰক্ষা অক্ষম কৰিব দিয়ে৷ উদাহৰণ স্বৰূপে, কোনো অন্তৰ্গামী ফ\'ন কল উঠোৱাৰ সময়ত ফ\'নটোৱে কী-লকটো অক্ষম কৰে, তাৰপিছত কল শেষ হ\'লেই কী লকটো পুনৰ সক্ষম কৰে৷"</string>
-    <!-- no translation found for permlab_useBiometric (8837753668509919318) -->
-    <skip />
-    <!-- no translation found for permdesc_useBiometric (8389855232721612926) -->
-    <skip />
+    <string name="permlab_useBiometric" msgid="8837753668509919318">"বায়োমেট্ৰিক হাৰ্ডৱেৰ ব্য়ৱহাৰ কৰক"</string>
+    <string name="permdesc_useBiometric" msgid="8389855232721612926">"বিশ্বাসযোগ্য়তা প্ৰমাণীকৰণৰ বাবে এপক বায়োমেট্ৰিক হাৰ্ডৱেৰ ব্য়ৱহাৰ কৰিবলৈ অনুমতি দিয়ে"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ফিংগাৰপ্ৰিণ্ট হাৰ্ডৱেৰ পৰিচালনা কৰিব পাৰে"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"ফিংগাৰপ্ৰিণ্ট টেম্প্লেটসমূহ যোগ কৰা বা মচাৰ পদ্ধতিসমূহ কামত লগাবলৈ নিৰ্দেশ দিবলৈ এপটোক অনুমতি দিয়ে।"</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"ফিংগাৰপ্ৰিণ্ট হাৰ্ডৱেৰ ব্যৱহাৰ কৰিব পাৰে"</string>
@@ -1015,32 +1012,25 @@
     <string name="inputMethod" msgid="1653630062304567879">"ইনপুট পদ্ধতি"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"পাঠ বিষয়ক কাৰ্য"</string>
     <string name="email" msgid="4560673117055050403">"ইমেইল"</string>
-    <!-- no translation found for email_desc (3638665569546416795) -->
-    <skip />
+    <string name="email_desc" msgid="3638665569546416795">"বাছনি কৰা ঠিকনাত ইমেইল কৰক"</string>
     <string name="dial" msgid="1253998302767701559">"কল কৰক"</string>
-    <!-- no translation found for dial_desc (6573723404985517250) -->
+    <string name="dial_desc" msgid="6573723404985517250">"বাছনি কৰা ফ\'ন নাম্বাৰত কল কৰক"</string>
+    <!-- no translation found for map (5441053548030107189) -->
     <skip />
-    <string name="map" msgid="6521159124535543457">"অৱস্থান নিৰূপণ কৰক"</string>
-    <!-- no translation found for map_desc (9036645769910215302) -->
+    <!-- no translation found for map_desc (1836995341943772348) -->
     <skip />
     <string name="browse" msgid="1245903488306147205">"খোলক"</string>
-    <!-- no translation found for browse_desc (8220976549618935044) -->
-    <skip />
+    <string name="browse_desc" msgid="8220976549618935044">"বাছনি কৰা URL খোলক"</string>
     <string name="sms" msgid="4560537514610063430">"বাৰ্তা"</string>
-    <!-- no translation found for sms_desc (7526588350969638809) -->
-    <skip />
+    <string name="sms_desc" msgid="7526588350969638809">"বাছনি কৰা ফ\'ন নাম্বাৰত বাৰ্তা পঠিয়াওক"</string>
     <string name="add_contact" msgid="7867066569670597203">"যোগ দিয়ক"</string>
-    <!-- no translation found for add_contact_desc (4830217847004590345) -->
-    <skip />
+    <string name="add_contact_desc" msgid="4830217847004590345">"সর্ম্পকসূচীত যোগ কৰক"</string>
     <string name="view_calendar" msgid="979609872939597838">"চাওক"</string>
-    <!-- no translation found for view_calendar_desc (5828320291870344584) -->
-    <skip />
+    <string name="view_calendar_desc" msgid="5828320291870344584">"কেলেণ্ডাৰত বাছনি কৰা সময় চাওক"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"সূচী"</string>
-    <!-- no translation found for add_calendar_event_desc (4326891793260687388) -->
-    <skip />
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"বাছনি কৰা সময়ৰ বাবে কাৰ্যক্ৰমৰ তালিকা বনাওক"</string>
     <string name="view_flight" msgid="7691640491425680214">"ট্ৰেক কৰক"</string>
-    <!-- no translation found for view_flight_desc (3876322502674253506) -->
-    <skip />
+    <string name="view_flight_desc" msgid="3876322502674253506">"বাছনি কৰা বিমানটো ট্ৰেক কৰক"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"সঞ্চয়াগাৰৰ খালী ঠাই শেষ হৈ আছে"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ছিষ্টেমৰ কিছুমান কাৰ্যকলাপে কাম নকৰিবও পাৰে"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ছিষ্টেমৰ বাবে পৰ্যাপ্ত খালী ঠাই নাই। আপোনাৰ ২৫০এম. বি. খালী ঠাই থকাটো নিশ্চিত কৰক আৰু ৰিষ্টাৰ্ট কৰক।"</string>

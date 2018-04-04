@@ -1013,8 +1013,9 @@
     <string name="email_desc" msgid="3638665569546416795">"Испраќа е-порака на избраната адреса"</string>
     <string name="dial" msgid="1253998302767701559">"Повикај"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Го повикува избраниот телефонски број"</string>
-    <string name="map" msgid="6521159124535543457">"Лоцирај"</string>
-    <string name="map_desc" msgid="9036645769910215302">"Ја лоцира избраната адреса"</string>
+    <string name="map" msgid="5441053548030107189">"Карта"</string>
+    <!-- no translation found for map_desc (1836995341943772348) -->
+    <skip />
     <string name="browse" msgid="1245903488306147205">"Отвори"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Ја отвора избраната URL"</string>
     <string name="sms" msgid="4560537514610063430">"Порака"</string>

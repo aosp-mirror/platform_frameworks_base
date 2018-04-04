@@ -84,8 +84,7 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"אין אפשרות לבצע שיחות רגילות"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"אין שירות קולי או שיחות חירום"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"הושבת באופן זמני על ידי הספק"</string>
-    <!-- no translation found for RestrictedStateContentMsimTemplate (673416791370248176) -->
-    <skip />
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"‏הושבת באופן זמני על ידי הספק עבור SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"לא ניתן להתחבר לרשת הסלולרית"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"יש לנסות לשנות את הרשת המועדפת. ניתן להקיש כדי לשנות."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"שיחות חירום לא זמינות"</string>
@@ -490,10 +489,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"מאפשר לאפליקציה נהל תקשורת עם תגים, כרטיסים וקוראים מסוג \'תקשורת מטווח קצר\'."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"ביטול נעילת המסך שלך"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"מאפשר לאפליקציה להשבית את נעילת המקשים וכל אמצעי אבטחה משויך המבוסס על סיסמה. לדוגמה, הטלפון משבית את נעילת המקשים בעת קבלה של שיחת טלפון נכנסת, ולאחר מכן מפעיל מחדש את נעילת המקשים עם סיום השיחה."</string>
-    <!-- no translation found for permlab_useBiometric (8837753668509919318) -->
-    <skip />
-    <!-- no translation found for permdesc_useBiometric (8389855232721612926) -->
-    <skip />
+    <string name="permlab_useBiometric" msgid="8837753668509919318">"שימוש בחומרה ביומטרית"</string>
+    <string name="permdesc_useBiometric" msgid="8389855232721612926">"מאפשרת לאפליקציה להשתמש בחומרה ביומטרית לצורך אימות"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"ניהול חומרה של טביעות אצבעות"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"מאפשר לאפליקציה להפעיל שיטות להוספה ומחיקה של תבניות טביעות אצבעות שבהן ייעשה שימוש."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"חומרה של טביעות אצבעות"</string>
@@ -506,8 +503,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"לא זוהתה"</string>
-    <!-- no translation found for fingerprint_authenticated (5309333983002526448) -->
-    <skip />
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"טביעת האצבע אומתה"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"החומרה בשביל טביעת אצבע אינה זמינה."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"לא ניתן לאחסן טביעת אצבע. הסר טביעת אצבע קיימת."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"חלף הזמן הקצוב לטביעת אצבע. נסה שוב."</string>
@@ -1054,32 +1050,24 @@
     <string name="inputMethod" msgid="1653630062304567879">"שיטת קלט"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"פעולות טקסט"</string>
     <string name="email" msgid="4560673117055050403">"אימייל"</string>
-    <!-- no translation found for email_desc (3638665569546416795) -->
-    <skip />
+    <string name="email_desc" msgid="3638665569546416795">"שליחת אימייל לכתובת שנבחרה"</string>
     <string name="dial" msgid="1253998302767701559">"שיחה"</string>
-    <!-- no translation found for dial_desc (6573723404985517250) -->
-    <skip />
-    <string name="map" msgid="6521159124535543457">"איתור"</string>
-    <!-- no translation found for map_desc (9036645769910215302) -->
+    <string name="dial_desc" msgid="6573723404985517250">"התקשרות למספר הטלפון שנבחר"</string>
+    <string name="map" msgid="5441053548030107189">"מפה"</string>
+    <!-- no translation found for map_desc (1836995341943772348) -->
     <skip />
     <string name="browse" msgid="1245903488306147205">"פתיחה"</string>
-    <!-- no translation found for browse_desc (8220976549618935044) -->
-    <skip />
+    <string name="browse_desc" msgid="8220976549618935044">"פתיחה של כתובת האתר שנבחרה"</string>
     <string name="sms" msgid="4560537514610063430">"הודעה"</string>
-    <!-- no translation found for sms_desc (7526588350969638809) -->
-    <skip />
+    <string name="sms_desc" msgid="7526588350969638809">"שליחת הודעה למספר הטלפון שנבחר"</string>
     <string name="add_contact" msgid="7867066569670597203">"הוספה"</string>
-    <!-- no translation found for add_contact_desc (4830217847004590345) -->
-    <skip />
+    <string name="add_contact_desc" msgid="4830217847004590345">"הוספה לאנשי הקשר"</string>
     <string name="view_calendar" msgid="979609872939597838">"תצוגה"</string>
-    <!-- no translation found for view_calendar_desc (5828320291870344584) -->
-    <skip />
+    <string name="view_calendar_desc" msgid="5828320291870344584">"הצגת הזמן שנבחר ביומן"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"לוח זמנים"</string>
-    <!-- no translation found for add_calendar_event_desc (4326891793260687388) -->
-    <skip />
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"תזמון אירוע לזמן שנבחר"</string>
     <string name="view_flight" msgid="7691640491425680214">"מעקב"</string>
-    <!-- no translation found for view_flight_desc (3876322502674253506) -->
-    <skip />
+    <string name="view_flight_desc" msgid="3876322502674253506">"ניהול מעקב אחר הטיסה שנבחרה"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"שטח האחסון אוזל"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ייתכן שפונקציות מערכת מסוימות לא יפעלו"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"‏אין מספיק שטח אחסון עבור המערכת. ודא שיש לך שטח פנוי בגודל 250MB התחל שוב."</string>
@@ -1328,49 +1316,34 @@
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> מוצגת מעל אפליקציות אחרות"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"אם אינך רוצה ש-<xliff:g id="NAME">%s</xliff:g> תשתמש בתכונה הזו, הקש כדי לפתוח את ההגדרות ולכבות אותה."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"כיבוי"</string>
-    <!-- no translation found for ext_media_checking_notification_title (4411133692439308924) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (410185170877285434) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_title (1621805083736634077) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_message (3673685270558405087) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"בתהליך בדיקה של <xliff:g id="NAME">%s</xliff:g>…"</string>
+    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"מתבצעת בדיקה של התוכן הנוכחי"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"<xliff:g id="NAME">%s</xliff:g> חדש"</string>
+    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"צריך להקיש כדי להגדיר"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"להעברת תמונות ומדיה"</string>
-    <!-- no translation found for ext_media_unmountable_notification_title (4179418065210797130) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (4193858924381066522) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"בעיה עם <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"יש להקיש כדי לתקן את הבעיה"</string>
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> פגום. בחר כדי לטפל בבעיה."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> לא נתמך"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"מכשיר זה אינו תומך ב-<xliff:g id="NAME">%s</xliff:g> זה. הקש כדי להגדיר בפורמט נתמך."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"<xliff:g id="NAME">%s</xliff:g> לא נתמך במכשיר הזה. בחר כדי להגדיר בפורמט שנתמך."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> הוסר באופן בלתי צפוי"</string>
-    <!-- no translation found for ext_media_badremoval_notification_message (8556885808951260574) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (6593814191061956856) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (2110883356419799994) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (5046532339291216076) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (1003926904442321115) -->
-    <skip />
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"יש לבחור באפשרות להוצאת מדיה לפני ההסרה, כדי לא לאבד תוכן"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g> הוסר"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"ייתכן שפונקציונליות מסוימת לא תפעל כראוי. יש להכניס אמצעי אחסון חדש."</string>
+    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"הוצאה של <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"אין להסיר"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"הגדר"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"הוצא"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"גלה"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> חסר"</string>
-    <!-- no translation found for ext_media_missing_message (4012389235250987930) -->
-    <skip />
+    <string name="ext_media_missing_message" msgid="4012389235250987930">"יש להכניס שוב את ההתקן"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"מעביר את <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"מעביר נתונים"</string>
-    <!-- no translation found for ext_media_move_success_title (7863652232242276066) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (8939137931961728009) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (1604422634177382092) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (7388950499623016135) -->
-    <skip />
+    <string name="ext_media_move_success_title" msgid="7863652232242276066">"העברת התוכן הסתיימה"</string>
+    <string name="ext_media_move_success_message" msgid="8939137931961728009">"התוכן הועבר אל <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"לא ניתן היה להעביר תוכן"</string>
+    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"יש לנסות שוב להעביר את התוכן"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"הוסר"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"הוצא"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"בודק…"</string>
@@ -1944,14 +1917,10 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"‏ניהול התצורה של כרטיס ה-SIM לא מתאים לזיהוי קולי"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"‏כרטיס ה-SIM לא מורשה לזיהוי קולי"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"הטלפון לא מורשה לזיהוי קולי"</string>
-    <!-- no translation found for mmcc_authentication_reject_msim_template (1217031195834766479) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr_msim_template (5636464607596778986) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms_msim_template (5994323296399913454) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me_msim_template (5550259730350571826) -->
-    <skip />
+    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"‏SIM <xliff:g id="SIMNUMBER">%d</xliff:g> אינו מאושר לשימוש ברשת"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"‏אין ניהול תצורה עבור SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"‏SIM <xliff:g id="SIMNUMBER">%d</xliff:g> אינו מאושר לשימוש ברשת"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"‏SIM <xliff:g id="SIMNUMBER">%d</xliff:g> אינו מאושר לשימוש ברשת"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"חלון קופץ"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"גרסת האפליקציה שודרגה לאחור או שאינה תואמת לקיצור דרך זה"</string>

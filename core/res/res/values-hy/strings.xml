@@ -82,8 +82,7 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Ձայնային ծառայությունն անհասանելի է"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Ձայնային ծառայությունն ու շտապ կանչերն արգելափակված են"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"Ձեր օպերատորը ժամանակավորապես անջատել է"</string>
-    <!-- no translation found for RestrictedStateContentMsimTemplate (673416791370248176) -->
-    <skip />
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> քարտի օպերատորը ժամանակավորապես անջատել է"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"Չհաջողվեց միանալ բջջային ցանցին"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Փորձեք այլ ցանցի միանալ: Հպեք՝ նախընտրած ցանցը փոխելու համար:"</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Շտապ կանչերը հասանելի չեն"</string>
@@ -498,8 +497,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Չճանաչվեց"</string>
-    <!-- no translation found for fingerprint_authenticated (5309333983002526448) -->
-    <skip />
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"Մատնահետքը նույնականացվեց"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Մատնահետքի սարքն անհասանելի է:"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Հնարավոր չէ պահել մատնահետքը: Հեռացրեք առկա մատնահետքը:"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Մատնահետքի գրանցման ժամանակը սպառվել է: Փորձեք նորից:"</string>
@@ -833,7 +831,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Գործողության հաստատում"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Լքել այս էջը"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Մնալ այս էջում"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nՎստա՞հ եք, որ ցանկանում եք հեռանալ այս էջից:"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nԻսկապե՞ս ուզում եք հեռանալ այս էջից:"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Հաստատել"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Հուշակ` կրկնակի հպեք` մեծացնելու և փոքրացնելու համար:"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Ինքնալրացում"</string>
@@ -1015,8 +1013,9 @@
     <string name="email_desc" msgid="3638665569546416795">"Նամակ ուղարկել ընտրված հասցեին"</string>
     <string name="dial" msgid="1253998302767701559">"Զանգել"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Զանգել ընտրված հեռախոսահամարին"</string>
-    <string name="map" msgid="6521159124535543457">"Գտնել քարտեզում"</string>
-    <string name="map_desc" msgid="9036645769910215302">"Ցույց տալ ընտրված հասցեն քարտեզի վրա"</string>
+    <string name="map" msgid="5441053548030107189">"Քարտեզ"</string>
+    <!-- no translation found for map_desc (1836995341943772348) -->
+    <skip />
     <string name="browse" msgid="1245903488306147205">"Բացել"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Բացել ընտրված URL-ը"</string>
     <string name="sms" msgid="4560537514610063430">"SMS գրել"</string>
@@ -1273,49 +1272,34 @@
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> հավելվածը ցուցադրվում է այլ հավելվածների վերևում"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Եթե չեք ցանկանում, որ <xliff:g id="NAME">%s</xliff:g>-ն օգտագործի այս գործառույթը, հպեք՝ կարգավորումները բացելու և այն անջատելու համար։"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Անջատել"</string>
-    <!-- no translation found for ext_media_checking_notification_title (4411133692439308924) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (410185170877285434) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_title (1621805083736634077) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_message (3673685270558405087) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"<xliff:g id="NAME">%s</xliff:g> հիշասարքի ստուգում…"</string>
+    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"Բովանդակության ստուգում"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"Նոր հիշասարք (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"Հպեք՝ կարգավորելու համար"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Լուսանկարներ և մեդիա ֆայլեր տեղափոխելու համար"</string>
-    <!-- no translation found for ext_media_unmountable_notification_title (4179418065210797130) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (4193858924381066522) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"<xliff:g id="NAME">%s</xliff:g> հիշասարքի հետ կապված խնդիր կա"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"Հպեք՝ շտկելու համար"</string>
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g>-ը վնասված է: Ընտրեք՝ շտկելու համար:"</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Չապահովվող <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Այս սարքը չի աջակցում այս <xliff:g id="NAME">%s</xliff:g>-ը: Հպեք՝ աջակցվող ձևաչափով կարգավորելու համար:"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Այս սարքը չի աջակցում այս <xliff:g id="NAME">%s</xliff:g>-ը: Ընտրեք՝ աջակցվող ձևաչափով կարգավորելու համար:"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>-ը հեռացվել է առանց անջատելու"</string>
-    <!-- no translation found for ext_media_badremoval_notification_message (8556885808951260574) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (6593814191061956856) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (2110883356419799994) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (5046532339291216076) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (1003926904442321115) -->
-    <skip />
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"Տվյալներ չկորցնելու համար կրիչը հեռացնելուց առաջ անջատեք այն"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g> հիշասարքը հեռացվել է"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Հնարավոր է՝ որոշ գործառույթներ չաշխատեն։ Նոր հիշասարք տեղադրեք։"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g> հիշասարքն անջատվում է"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"Չհեռացնեք սարքը"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"Կարգավորել"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Անջատել"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Ուսումնասիրել"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g>-ը տեղադրված չէ"</string>
-    <!-- no translation found for ext_media_missing_message (4012389235250987930) -->
-    <skip />
+    <string name="ext_media_missing_message" msgid="4012389235250987930">"Նորից տեղադրեք սարքը"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g>-ի տեղափոխում"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"Տվյալների տեղափոխում"</string>
-    <!-- no translation found for ext_media_move_success_title (7863652232242276066) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (8939137931961728009) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (1604422634177382092) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (7388950499623016135) -->
-    <skip />
+    <string name="ext_media_move_success_title" msgid="7863652232242276066">"Բովանդակությունը տեղափոխվեց"</string>
+    <string name="ext_media_move_success_message" msgid="8939137931961728009">"Բովանդակությունը տեղափոխվեց <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"Չհաջողվեց տեղափոխել"</string>
+    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"Փորձեք նորից"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"Հեռացված է"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Անջատված է"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"Ստուգում…"</string>
@@ -1863,14 +1847,10 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"Այս SIM քարտը նախապատրաստված չէ զանգելու համար"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"Այս SIM քարտով չեք կարող զանգել"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Այս հեռախոսով չեք կարող զանգել"</string>
-    <!-- no translation found for mmcc_authentication_reject_msim_template (1217031195834766479) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr_msim_template (5636464607596778986) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms_msim_template (5994323296399913454) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me_msim_template (5550259730350571826) -->
-    <skip />
+    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> քարտը չի թույլատրվում օգտագործել"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> քարտը ակտիվացված չէ"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> քարտը չի թույլատրվում օգտագործել"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> քարտը չի թույլատրվում օգտագործել"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Հայտնվող պատուհան"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Սա հավելվածի ավելի հին տարբերակն է կամ համատեղելի չէ այս դյուրանցման հետ"</string>

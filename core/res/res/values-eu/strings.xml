@@ -82,8 +82,7 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Ez dago ahots-deien zerbitzurik"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Ez dago ahozko zerbitzurik eta ezin da egin larrialdi-deirik"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"Operadoreak desaktibatu egin du aldi baterako"</string>
-    <!-- no translation found for RestrictedStateContentMsimTemplate (673416791370248176) -->
-    <skip />
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"Operadoreak <xliff:g id="SIMNUMBER">%d</xliff:g> SIM txartela desaktibatu egin du aldi baterako"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"Ezin da konektatu sare mugikorrera"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Aldatu sare hobetsia. Sakatu aldatzeko."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Ezin da egin larrialdi-deirik"</string>
@@ -147,7 +146,7 @@
     <string name="httpErrorOk" msgid="1191919378083472204">"Ados"</string>
     <string name="httpError" msgid="7956392511146698522">"Sareko errore bat gertatu da."</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"Ezin izan da URLa aurkitu."</string>
-    <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Gunearen autentifikazio-eskema ez da onartzen."</string>
+    <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"Webgunearen autentifikazio-eskema ez da onartzen."</string>
     <string name="httpErrorAuth" msgid="1435065629438044534">"Ezin izan da autentifikatu."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Proxy zerbitzariaren bidezko autentifikazioak huts egin du."</string>
     <string name="httpErrorConnect" msgid="8714273236364640549">"Ezin izan da zerbitzarira konektatu."</string>
@@ -498,8 +497,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Ez da ezagutzen"</string>
-    <!-- no translation found for fingerprint_authenticated (5309333983002526448) -->
-    <skip />
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"Autentifikatu da hatz-marka"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hatz-markaren hardwarea ez dago erabilgarri."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Ezin da gorde hatz-marka digitala. Kendu lehendik gordeta duzunetako bat."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Hatz-marka digitalak prozesatzeko denbora-muga gainditu da. Saiatu berriro."</string>
@@ -866,7 +864,7 @@
     <string name="permlab_addVoicemail" msgid="5525660026090959044">"gehitu erantzungailua"</string>
     <string name="permdesc_addVoicemail" msgid="6604508651428252437">"Erantzungailuko sarrera-ontzian mezuak gehitzea baimentzen die aplikazioei."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="5962224158955273932">"aldatu arakatzailearen geokokapenaren baimenak"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Arakatzailearen geokokapenaren baimenak aldatzea baimentzen die aplikazioei. Aplikazio gaiztoek hori erabil dezakete kokapenari buruzko informazioa haiek hautatutako web-orrietara bidaltzeko."</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="1083743234522638747">"Arakatzailearen geokokapenaren baimenak aldatzea baimentzen die aplikazioei. Aplikazio gaiztoek hori erabil dezakete kokapenari buruzko informazioa haiek hautatutako webguneetara bidaltzeko."</string>
     <string name="save_password_message" msgid="767344687139195790">"Arakatzaileak pasahitza gogoratzea nahi duzu?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ez une honetan"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Gogoratu"</string>
@@ -1015,8 +1013,9 @@
     <string name="email_desc" msgid="3638665569546416795">"Bidali mezu elektroniko bat hautatutako helbidera"</string>
     <string name="dial" msgid="1253998302767701559">"Deitu"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Deitu hautatutako telefono-zenbakira"</string>
-    <string name="map" msgid="6521159124535543457">"Aurkitu"</string>
-    <string name="map_desc" msgid="9036645769910215302">"Bilatu hautatutako helbidea"</string>
+    <string name="map" msgid="5441053548030107189">"Mapa"</string>
+    <!-- no translation found for map_desc (1836995341943772348) -->
+    <skip />
     <string name="browse" msgid="1245903488306147205">"Ireki"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Ireki hautatutako URLa"</string>
     <string name="sms" msgid="4560537514610063430">"Bidali mezua"</string>
@@ -1274,49 +1273,34 @@
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"Besteen gainean agertzen da <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Ez baduzu nahi <xliff:g id="NAME">%s</xliff:g> zerbitzuak eginbide hori erabiltzea, sakatu hau ezarpenak ireki eta aukera desaktibatzeko."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Desaktibatu"</string>
-    <!-- no translation found for ext_media_checking_notification_title (4411133692439308924) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (410185170877285434) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_title (1621805083736634077) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_message (3673685270558405087) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"<xliff:g id="NAME">%s</xliff:g> egiaztatzen…"</string>
+    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"Uneko edukia berrikusten"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"Euskarri berria: <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"Sakatu konfiguratzeko"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Argazkiak eta multimedia-fitxategiak transferitzeko"</string>
-    <!-- no translation found for ext_media_unmountable_notification_title (4179418065210797130) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (4193858924381066522) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"Arazo bat dago honekin: <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"Sakatu konpontzeko"</string>
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"Hondatuta dago <xliff:g id="NAME">%s</xliff:g>. Hauta ezazu konpontzeko."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Ez da onartzen <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Gailuak ez du <xliff:g id="NAME">%s</xliff:g> onartzen. Sakatu onartzen den formatu batean konfiguratzeko."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Gailuak ez du <xliff:g id="NAME">%s</xliff:g> onartzen. Hauta ezazu onartzen den formatu batean konfiguratzeko."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> ustekabean kendu da"</string>
-    <!-- no translation found for ext_media_badremoval_notification_message (8556885808951260574) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (6593814191061956856) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (2110883356419799994) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (5046532339291216076) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (1003926904442321115) -->
-    <skip />
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"Kendu aurretik, kanporatu euskarria edukirik ez galtzeko"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"Kendu egin da <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Funtzio batzuk agian ez dira behar bezala ibiliko. Sartu memoria-gailu berria."</string>
+    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g> kanporatzen"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"Ez kendu"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"Konfiguratu"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Atera"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Arakatu"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"Ez dago <xliff:g id="NAME">%s</xliff:g>"</string>
-    <!-- no translation found for ext_media_missing_message (4012389235250987930) -->
-    <skip />
+    <string name="ext_media_missing_message" msgid="4012389235250987930">"Sartu gailua berriro"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> mugitzen"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"Datuak mugitzen"</string>
-    <!-- no translation found for ext_media_move_success_title (7863652232242276066) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (8939137931961728009) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (1604422634177382092) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (7388950499623016135) -->
-    <skip />
+    <string name="ext_media_move_success_title" msgid="7863652232242276066">"Transferitu da edukia"</string>
+    <string name="ext_media_move_success_message" msgid="8939137931961728009">"Eraman da edukia <xliff:g id="NAME">%s</xliff:g> gailura"</string>
+    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"Ezin izan da mugitu edukia"</string>
+    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"Saiatu berriro edukia mugitzen"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"Kendu egin da"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Kanporatu egin da"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"Egiaztatzen…"</string>
@@ -1864,14 +1848,10 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM txartela ez dago hornituta ahotsa erabiltzeko"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"SIM txartela ezin da erabili ahotsa erabiltzeko"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Telefonoa ezin da erabili ahotsa erabiltzeko"</string>
-    <!-- no translation found for mmcc_authentication_reject_msim_template (1217031195834766479) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr_msim_template (5636464607596778986) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms_msim_template (5994323296399913454) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me_msim_template (5550259730350571826) -->
-    <skip />
+    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"Ezin da erabili <xliff:g id="SIMNUMBER">%d</xliff:g> SIM txartela"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"Ez dago <xliff:g id="SIMNUMBER">%d</xliff:g> SIM txartelik"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"Ezin da erabili <xliff:g id="SIMNUMBER">%d</xliff:g> SIM txartela"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"Ezin da erabili <xliff:g id="SIMNUMBER">%d</xliff:g> SIM txartela"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Leiho gainerakorra"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"Beste <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Aplikazioaren bertsio zaharrago batera aldatu da, edo aplikazioa ez da lasterbide honekin bateragarria"</string>

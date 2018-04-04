@@ -84,8 +84,7 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Brak usługi połączeń głosowych"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Brak usługi połączeń głosowych i alarmowych"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"Tymczasowo wyłączone przez operatora"</string>
-    <!-- no translation found for RestrictedStateContentMsimTemplate (673416791370248176) -->
-    <skip />
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"Tymczasowo wyłączone przez operatora karty SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"Brak zasięgu sieci komórkowej"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Spróbuj zmienić preferowaną sieć. Kliknij, by zmienić."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Połączenia alarmowe są niedostępne"</string>
@@ -504,8 +503,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nie rozpoznano odcisku palca."</string>
-    <!-- no translation found for fingerprint_authenticated (5309333983002526448) -->
-    <skip />
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"Uwierzytelniono odciskiem palca"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Czytnik linii papilarnych nie jest dostępny."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Nie można zapisać odcisku palca. Usuń istniejący odcisk palca."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Osiągnięto limit czasu odczytu linii papilarnych. Spróbuj ponownie."</string>
@@ -1055,8 +1053,9 @@
     <string name="email_desc" msgid="3638665569546416795">"Wyślij e-maila na wybrany adres"</string>
     <string name="dial" msgid="1253998302767701559">"Zadzwoń"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Zadzwoń pod wybrany numer telefonu"</string>
-    <string name="map" msgid="6521159124535543457">"Zlokalizuj"</string>
-    <string name="map_desc" msgid="9036645769910215302">"Pokaż wybrany adres na mapie"</string>
+    <string name="map" msgid="5441053548030107189">"Mapa"</string>
+    <!-- no translation found for map_desc (1836995341943772348) -->
+    <skip />
     <string name="browse" msgid="1245903488306147205">"Otwórz"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Otwórz wybrany adres URL"</string>
     <string name="sms" msgid="4560537514610063430">"Wyślij SMS-a"</string>
@@ -1317,49 +1316,34 @@
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"Aplikacja <xliff:g id="NAME">%s</xliff:g> jest nad innymi"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Jeśli nie chcesz, by aplikacja <xliff:g id="NAME">%s</xliff:g> korzystała z tej funkcji, otwórz ustawienia i wyłącz ją."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Wyłącz"</string>
-    <!-- no translation found for ext_media_checking_notification_title (4411133692439308924) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (410185170877285434) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_title (1621805083736634077) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_message (3673685270558405087) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"Sprawdzam: <xliff:g id="NAME">%s</xliff:g>…"</string>
+    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"Sprawdzam bieżącą zawartość"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"Nowy nośnik: <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"Kliknij, by skonfigurować"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Do przenoszenia zdjęć i multimediów"</string>
-    <!-- no translation found for ext_media_unmountable_notification_title (4179418065210797130) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (4193858924381066522) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"Wystąpił problem z: <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"Kliknij, by naprawić"</string>
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"Nośnik <xliff:g id="NAME">%s</xliff:g> jest uszkodzony. Wybierz, by rozwiązać problem."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Nośnik <xliff:g id="NAME">%s</xliff:g> nieobsługiwany"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"To urządzenie nie obsługuje <xliff:g id="NAME">%s</xliff:g>. Kliknij, by użyć obsługiwanego formatu."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"To urządzenie nie obsługuje nośnika <xliff:g id="NAME">%s</xliff:g>. Wybierz, by skonfigurować obsługiwany format."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>: nieoczekiwane wyjęcie"</string>
-    <!-- no translation found for ext_media_badremoval_notification_message (8556885808951260574) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (6593814191061956856) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (2110883356419799994) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (5046532339291216076) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (1003926904442321115) -->
-    <skip />
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"Zanim wyjmiesz nośnik, odłącz go, by uniknąć utraty danych"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g> – odłączono"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Niektóre funkcje mogą nie działać prawidłowo. Włóż nowy nośnik."</string>
+    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"Odłączam: <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"Nie wyjmuj"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"Skonfiguruj"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Odłącz"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Przeglądaj"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"Brak: <xliff:g id="NAME">%s</xliff:g>"</string>
-    <!-- no translation found for ext_media_missing_message (4012389235250987930) -->
-    <skip />
+    <string name="ext_media_missing_message" msgid="4012389235250987930">"Włóż nośnik ponownie"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Przenoszę <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"Przenoszę dane"</string>
-    <!-- no translation found for ext_media_move_success_title (7863652232242276066) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (8939137931961728009) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (1604422634177382092) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (7388950499623016135) -->
-    <skip />
+    <string name="ext_media_move_success_title" msgid="7863652232242276066">"Zakończono przenoszenie danych"</string>
+    <string name="ext_media_move_success_message" msgid="8939137931961728009">"Dane przeniesione na: <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"Nie można przenieść danych"</string>
+    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"Spróbuj ponownie przenieść dane"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"Usunięto"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Odłączone"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"Sprawdzam…"</string>
@@ -1933,14 +1917,10 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"Karta SIM nie jest obsługiwana w przypadku usług głosowych"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"Karta SIM jest niedozwolona w przypadku usług głosowych"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Telefon jest niedozwolony w przypadku usług głosowych"</string>
-    <!-- no translation found for mmcc_authentication_reject_msim_template (1217031195834766479) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr_msim_template (5636464607596778986) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms_msim_template (5994323296399913454) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me_msim_template (5550259730350571826) -->
-    <skip />
+    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"Niedozwolona karta SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"Nieobsługiwana karta SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"Niedozwolona karta SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"Niedozwolona karta SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Wyskakujące okienko"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Zmieniono wersję aplikacji na starszą lub aplikacja nie jest zgodna z tym skrótem"</string>

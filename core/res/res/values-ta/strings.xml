@@ -483,10 +483,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"குறுகிய இடைவெளி தகவல்பரிமாற்றம் (NFC), குறிகள், கார்டுகள் மற்றும் ரீடர்கள் ஆகியவற்றுடன் தொடர்புகொள்ள, பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"உங்கள் திரைப் பூட்டை முடக்குதல்"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"விசைப்பூட்டையும், தொடர்புடைய கடவுச்சொல் பாதுகாப்பையும் முடக்கப் பயன்பாட்டை அனுமதிக்கிறது. எடுத்துக்காட்டாக, உள்வரும் மொபைல் அழைப்பைப் பெறும்போது மொபைல் விசைப்பூட்டை முடக்குகிறது, பிறகு அழைப்பு முடிந்தவுடன் விசைப்பூட்டை மீண்டும் இயக்குகிறது."</string>
-    <!-- no translation found for permlab_useBiometric (8837753668509919318) -->
-    <skip />
-    <!-- no translation found for permdesc_useBiometric (8389855232721612926) -->
-    <skip />
+    <string name="permlab_useBiometric" msgid="8837753668509919318">"பயோமெட்ரிக் வன்பொருளைப் பயன்படுத்து"</string>
+    <string name="permdesc_useBiometric" msgid="8389855232721612926">"பயோமெட்ரிக் வன்பொருளைப் பயன்படுத்தி அங்கீகரிப்பதற்கு, பயன்பாட்டை அனுமதிக்கும்"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"கைரேகை வன்பொருளை நிர்வகி"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"பயன்படுத்துவதற்காக, கைரேகை டெம்ப்ளேட்களைச் சேர்க்க மற்றும் நீக்குவதற்கான செயல்முறைகளை இயக்குவதற்குப் பயன்பாட்டை அனுமதிக்கும்."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"கைரேகை வன்பொருளைப் பயன்படுத்து"</string>
@@ -1013,32 +1011,24 @@
     <string name="inputMethod" msgid="1653630062304567879">"உள்ளீட்டு முறை"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"உரை நடவடிக்கைகள்"</string>
     <string name="email" msgid="4560673117055050403">"மின்னஞ்சல்"</string>
-    <!-- no translation found for email_desc (3638665569546416795) -->
-    <skip />
+    <string name="email_desc" msgid="3638665569546416795">"தேர்ந்தெடுத்த முகவரிக்கு மின்னஞ்சல் அனுப்பும்"</string>
     <string name="dial" msgid="1253998302767701559">"அழை"</string>
-    <!-- no translation found for dial_desc (6573723404985517250) -->
-    <skip />
-    <string name="map" msgid="6521159124535543457">"கண்டுபிடி"</string>
-    <!-- no translation found for map_desc (9036645769910215302) -->
+    <string name="dial_desc" msgid="6573723404985517250">"தேர்ந்தெடுத்த ஃபோன் எண்ணை அழைக்கும்"</string>
+    <string name="map" msgid="5441053548030107189">"வரைபடம்"</string>
+    <!-- no translation found for map_desc (1836995341943772348) -->
     <skip />
     <string name="browse" msgid="1245903488306147205">"திற"</string>
-    <!-- no translation found for browse_desc (8220976549618935044) -->
-    <skip />
+    <string name="browse_desc" msgid="8220976549618935044">"தேர்ந்தெடுத்த URLஐத் திறக்கும்"</string>
     <string name="sms" msgid="4560537514610063430">"செய்தி"</string>
-    <!-- no translation found for sms_desc (7526588350969638809) -->
-    <skip />
+    <string name="sms_desc" msgid="7526588350969638809">"தேர்ந்தெடுத்த ஃபோன் எண்ணிற்குச் செய்தி அனுப்பும்"</string>
     <string name="add_contact" msgid="7867066569670597203">"சேர்"</string>
-    <!-- no translation found for add_contact_desc (4830217847004590345) -->
-    <skip />
+    <string name="add_contact_desc" msgid="4830217847004590345">"தொடர்புகளில் சேர்க்கும்"</string>
     <string name="view_calendar" msgid="979609872939597838">"காண்பி"</string>
-    <!-- no translation found for view_calendar_desc (5828320291870344584) -->
-    <skip />
+    <string name="view_calendar_desc" msgid="5828320291870344584">"கேலெண்டரில் தேர்ந்தெடுத்த நேரத்தைக் காட்டும்"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"திட்டமிடுதல்"</string>
-    <!-- no translation found for add_calendar_event_desc (4326891793260687388) -->
-    <skip />
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"தேர்ந்தெடுத்த நேரத்திற்கு நிகழ்வைத் திட்டமிடும்"</string>
     <string name="view_flight" msgid="7691640491425680214">"கண்கானி"</string>
-    <!-- no translation found for view_flight_desc (3876322502674253506) -->
-    <skip />
+    <string name="view_flight_desc" msgid="3876322502674253506">"தேர்ந்தெடுத்த விமானத்தைக் கண்காணிக்கும்"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"சேமிப்பிடம் குறைகிறது"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"சில அமைப்பு செயல்பாடுகள் வேலை செய்யாமல் போகலாம்"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"முறைமையில் போதுமான சேமிப்பகம் இல்லை. 250மெ.பை. அளவு காலி இடவசதி இருப்பதை உறுதிசெய்து மீண்டும் தொடங்கவும்."</string>

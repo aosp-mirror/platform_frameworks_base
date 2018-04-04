@@ -486,8 +486,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Dozvoljava aplikaciji komuniciranje sa NFC (komunikacija bliskog polja) oznakama, karticama i čitačima."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"deaktivacija zaključavanja ekrana"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Omogućava aplikaciji deaktivaciju zaključane tastature i svih povezanih zaštita. Naprimjer, telefon deaktivira zaključavanje tastature kod dolaznog telefonskog poziva, a zatim ponovo aktivira zaključavanje tastature kada je poziv završen."</string>
-    <string name="permlab_useBiometric" msgid="8837753668509919318">"koristi hardver za otiske prstiju"</string>
-    <string name="permdesc_useBiometric" msgid="8389855232721612926">"Omogućava aplikaciji da za autentifikaciju koristi hardver za otiske prstiju"</string>
+    <string name="permlab_useBiometric" msgid="8837753668509919318">"koristi biometrijski hardver za otiske prstij"</string>
+    <string name="permdesc_useBiometric" msgid="8389855232721612926">"Omogućava aplikaciji da za autentifikaciju koristi biometrijski hardver"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"upravljanje hardverom za otiske prstiju"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Omogućava aplikaciji da koristi metode za dodavanje i brisanje šablona otisaka prstiju za upotrebu."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"korištenje hardvera za otiske prstiju"</string>
@@ -1033,8 +1033,9 @@
     <string name="email_desc" msgid="3638665569546416795">"E-pošta odabrane adrese"</string>
     <string name="dial" msgid="1253998302767701559">"Pozovite"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Pozovite odabrani broj telefona"</string>
-    <string name="map" msgid="6521159124535543457">"Odredite lokaciju"</string>
-    <string name="map_desc" msgid="9036645769910215302">"Lokacija odabrane adrese"</string>
+    <string name="map" msgid="5441053548030107189">"Mapa"</string>
+    <!-- no translation found for map_desc (1836995341943772348) -->
+    <skip />
     <string name="browse" msgid="1245903488306147205">"Otvorite"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Otvorite odabrani URL"</string>
     <string name="sms" msgid="4560537514610063430">"Poruka"</string>
@@ -1309,7 +1310,7 @@
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Neočekivano uklonjen uređaj <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"Izbacite medij prije uklanjanja da izbjegnete gubitak sadržaja"</string>
     <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"Medij <xliff:g id="NAME">%s</xliff:g> je uklonjen"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Neke funkcionalnosti možda neće raditi ispravno. Ubacite novu memoriju."</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Neke funkcionalnosti možda neće raditi ispravno. Ubacite novu pohranu."</string>
     <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"Izbacivanje medija <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"Nemojte uklanjati"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"Postavi"</string>

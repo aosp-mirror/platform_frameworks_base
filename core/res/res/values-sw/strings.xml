@@ -481,8 +481,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Inaruhusu programu kuwasiliana na lebo, kadi na wasomaji wa Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"zima kufuli la skrini yako"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Inaruhusu programu kulemaza ufunguo wa vitufe na usalama mwingine ambata wa nenosiri. Kwa mfano, simu inalemaza ufunguo wa viitufe inapopokea simu inayoingia, kisha inawezesha upya ufunguo wa vitufe wakati simu inapokamilika."</string>
-    <string name="permlab_useBiometric" msgid="8837753668509919318">"tumia maunzi ya kibaolojia"</string>
-    <string name="permdesc_useBiometric" msgid="8389855232721612926">"Huruhusu programu itumie maunzi ya kibaolojia katika uthibitishaji"</string>
+    <string name="permlab_useBiometric" msgid="8837753668509919318">"tumia maunzi ya kibiolojia"</string>
+    <string name="permdesc_useBiometric" msgid="8389855232721612926">"Huruhusu programu itumie maunzi ya kibiolojia katika uthibitishaji"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"dhibiti maunzi ya kitambulisho"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Huruhusu programu kuomba njia za kuongeza na kufuta violezo vya kitambulisho kwa matumizi."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"tumia maunzi ya kitambulisho"</string>
@@ -1011,8 +1011,9 @@
     <string name="email_desc" msgid="3638665569546416795">"Tuma barua pepe kwa anwani uliyochagua"</string>
     <string name="dial" msgid="1253998302767701559">"Simu"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Piga simu kwa nambari uliyochagua"</string>
-    <string name="map" msgid="6521159124535543457">"Tafuta"</string>
-    <string name="map_desc" msgid="9036645769910215302">"Fungua ramani za anwani uliyochagua"</string>
+    <string name="map" msgid="5441053548030107189">"Ramani"</string>
+    <!-- no translation found for map_desc (1836995341943772348) -->
+    <skip />
     <string name="browse" msgid="1245903488306147205">"Fungua"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Fungua URL uliyochagua"</string>
     <string name="sms" msgid="4560537514610063430">"Ujumbe"</string>
