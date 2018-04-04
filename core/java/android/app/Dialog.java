@@ -264,7 +264,7 @@ public class Dialog implements DialogInterface, Window.Callback,
      * @return Whether the dialog is currently showing.
      */
     public boolean isShowing() {
-        return mShowing;
+        return mDecor == null ? false : mDecor.getVisibility() == View.VISIBLE;
     }
 
     /**
