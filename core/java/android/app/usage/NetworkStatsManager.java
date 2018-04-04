@@ -35,6 +35,7 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
+import android.util.DataUnit;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -94,6 +95,15 @@ public class NetworkStatsManager {
     public static final int CALLBACK_LIMIT_REACHED = 0;
     /** @hide */
     public static final int CALLBACK_RELEASED = 1;
+
+    /**
+     * Minimum data usage threshold for registering usage callbacks.
+     *
+     * Requests registered with a threshold lower than this will only be triggered once this minimum
+     * is reached.
+     * @hide
+     */
+    public static final long MIN_THRESHOLD_BYTES = DataUnit.MEBIBYTES.toBytes(2);
 
     private final Context mContext;
     private final INetworkStatsService mService;
