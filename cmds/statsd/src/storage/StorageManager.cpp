@@ -252,8 +252,13 @@ void StorageManager::readConfigFromDisk(map<ConfigKey, StatsdConfig>& configsMap
     }
 }
 
-bool StorageManager::hasIdenticalConfig(const ConfigKey& key,
-                                        const vector<uint8_t>& config) {
+bool StorageManager::readConfigFromDisk(const ConfigKey& key, StatsdConfig* config) {
+    string content;
+    return config != nullptr &&
+        StorageManager::readConfigFromDisk(key, &content) && config->ParseFromString(content);
+}
+
+bool StorageManager::readConfigFromDisk(const ConfigKey& key, string* content) {
     unique_ptr<DIR, decltype(&closedir)> dir(opendir(STATS_SERVICE_DIR),
                                              closedir);
     if (dir == NULL) {
@@ -262,7 +267,6 @@ bool StorageManager::hasIdenticalConfig(const ConfigKey& key,
     }
 
     string suffix = StringPrintf("%d_%lld", key.GetUid(), (long long)key.GetId());
-
     dirent* de;
     while ((de = readdir(dir.get()))) {
         char* name = de->d_name;
@@ -277,16 +281,23 @@ bool StorageManager::hasIdenticalConfig(const ConfigKey& key,
             int fd = open(StringPrintf("%s/%s", STATS_SERVICE_DIR, name).c_str(),
                                   O_RDONLY | O_CLOEXEC);
             if (fd != -1) {
-                string content;
-                if (android::base::ReadFdToString(fd, &content)) {
-                    vector<uint8_t> vec(content.begin(), content.end());
-                    if (vec == config) {
-                        close(fd);
-                        return true;
-                    }
+                if (android::base::ReadFdToString(fd, content)) {
+                    return true;
                 }
                 close(fd);
             }
+        }
+    }
+    return false;
+}
+
+bool StorageManager::hasIdenticalConfig(const ConfigKey& key,
+                                        const vector<uint8_t>& config) {
+    string content;
+    if (StorageManager::readConfigFromDisk(key, &content)) {
+        vector<uint8_t> vec(content.begin(), content.end());
+        if (vec == config) {
+            return true;
         }
     }
     return false;

@@ -34,8 +34,8 @@ namespace statsd {
 
 class AlarmTracker : public virtual RefBase {
 public:
-    AlarmTracker(const uint64_t startMillis,
-                 const uint64_t currentMillis,
+    AlarmTracker(const int64_t startMillis,
+                 const int64_t currentMillis,
                  const Alarm& alarm, const ConfigKey& configKey,
                  const sp<AlarmMonitor>& subscriberAlarmMonitor);
 
@@ -45,12 +45,12 @@ public:
 
     void addSubscription(const Subscription& subscription);
 
-    void informAlarmsFired(const uint64_t& timestampNs,
+    void informAlarmsFired(const int64_t& timestampNs,
             unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& firedAlarms);
 
 protected:
     // For test only. Returns the alarm timestamp in seconds. Otherwise returns 0.
-    inline uint32_t getAlarmTimestampSec() const {
+    inline int32_t getAlarmTimestampSec() const {
         return mInternalAlarm == nullptr ? 0 : mInternalAlarm->timestampSec;
     }
 

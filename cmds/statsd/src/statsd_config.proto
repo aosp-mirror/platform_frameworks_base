@@ -354,6 +354,8 @@ message StatsdConfig {
   }
   repeated Annotation annotation = 14;
 
+  optional int64 ttl_in_seconds = 15;
+
   // Field number 1000 is reserved for later use.
   reserved 1000;
 }

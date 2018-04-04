@@ -234,7 +234,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade) {
 
     valueProducer.notifyAppUpgrade(eventUpgradeTimeNs, "ANY.APP", 1, 1);
     EXPECT_EQ(1UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
-    EXPECT_EQ((uint64_t)eventUpgradeTimeNs, valueProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(eventUpgradeTimeNs, valueProducer.mCurrentBucketStartTimeNs);
 
     shared_ptr<LogEvent> event2 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 59 * NS_PER_SEC);
     event2->write(1);
@@ -242,7 +242,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade) {
     event2->init();
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event2);
     EXPECT_EQ(1UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
-    EXPECT_EQ((uint64_t)eventUpgradeTimeNs, valueProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(eventUpgradeTimeNs, valueProducer.mCurrentBucketStartTimeNs);
 
     // Next value should create a new bucket.
     shared_ptr<LogEvent> event3 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 65 * NS_PER_SEC);
@@ -251,7 +251,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade) {
     event3->init();
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event3);
     EXPECT_EQ(2UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
-    EXPECT_EQ((uint64_t)bucketStartTimeNs + bucketSizeNs, valueProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, valueProducer.mCurrentBucketStartTimeNs);
 }
 
 TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade) {
@@ -294,7 +294,7 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade) {
 
     valueProducer.notifyAppUpgrade(eventUpgradeTimeNs, "ANY.APP", 1, 1);
     EXPECT_EQ(1UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
-    EXPECT_EQ((uint64_t)eventUpgradeTimeNs, valueProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(eventUpgradeTimeNs, valueProducer.mCurrentBucketStartTimeNs);
     EXPECT_EQ(20L, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].mValue);
 
     allData.clear();
@@ -305,7 +305,7 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade) {
     allData.push_back(event);
     valueProducer.onDataPulled(allData);
     EXPECT_EQ(2UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
-    EXPECT_EQ((uint64_t)bucket2StartTimeNs, valueProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(bucket2StartTimeNs, valueProducer.mCurrentBucketStartTimeNs);
     EXPECT_EQ(30L, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][1].mValue);
 }
 
