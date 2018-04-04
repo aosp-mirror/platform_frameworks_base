@@ -110,7 +110,7 @@ abstract public class ManagedServices {
     protected final Object mMutex;
     private final UserProfiles mUserProfiles;
     private final IPackageManager mPm;
-    private final UserManager mUm;
+    protected final UserManager mUm;
     private final Config mConfig;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
