@@ -128,6 +128,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -264,6 +265,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.net.Socket;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 /** {@hide} */
@@ -426,6 +428,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final ActivityManagerInternal mAmInternal;
 
     final AppOpsManager mAppOps;
+    final PackageManagerInternal mPmInternal;
 
     final DisplaySettings mDisplaySettings;
 
@@ -1006,6 +1009,22 @@ public class WindowManagerService extends IWindowManager.Stub
         mAppOps.startWatchingMode(OP_SYSTEM_ALERT_WINDOW, null, opListener);
         mAppOps.startWatchingMode(AppOpsManager.OP_TOAST_WINDOW, null, opListener);
 
+        mPmInternal = LocalServices.getService(PackageManagerInternal.class);
+        final IntentFilter suspendPackagesFilter = new IntentFilter();
+        suspendPackagesFilter.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
+        suspendPackagesFilter.addAction(Intent.ACTION_PACKAGES_UNSUSPENDED);
+        context.registerReceiverAsUser(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final String[] affectedPackages =
+                        intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                final boolean suspended =
+                        Intent.ACTION_PACKAGES_SUSPENDED.equals(intent.getAction());
+                updateHiddenWhileSuspendedState(new ArraySet<>(Arrays.asList(affectedPackages)),
+                        suspended);
+            }
+        }, UserHandle.ALL, suspendPackagesFilter, null, null);
+
         // Get persisted window scale setting
         mWindowAnimationScaleSetting = Settings.Global.getFloat(context.getContentResolver(),
                 Settings.Global.WINDOW_ANIMATION_SCALE, mWindowAnimationScaleSetting);
@@ -1360,6 +1379,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
             win.initAppOpsState();
 
+            final boolean suspended = mPmInternal.isPackageSuspended(win.getOwningPackage(),
+                    UserHandle.getUserId(win.getOwningUid()));
+            win.setHiddenWhileSuspended(suspended);
+
             final boolean hideSystemAlertWindows = !mHidingNonSystemOverlayWindows.isEmpty();
             win.setForceHideNonSystemOverlayWindowIfNeeded(hideSystemAlertWindows);
 
@@ -1681,6 +1704,12 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayContent dc = win != null
                 ? win.getDisplayContent() : getDefaultDisplayContentLocked();
         dc.computeImeTarget(true /* updateImeTarget */);
+    }
+
+    private void updateHiddenWhileSuspendedState(ArraySet<String> packages, boolean suspended) {
+        synchronized (mWindowMap) {
+            mRoot.updateHiddenWhileSuspendedState(packages, suspended);
+        }
     }
 
     private void updateAppOpsState() {
