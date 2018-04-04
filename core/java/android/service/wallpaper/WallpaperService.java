@@ -813,7 +813,7 @@ public abstract class WallpaperService extends Service {
                     }
                     final int relayoutResult = mSession.relayout(
                         mWindow, mWindow.mSeq, mLayout, mWidth, mHeight,
-                            View.VISIBLE, 0, mWinFrame, mOverscanInsets, mContentInsets,
+                            View.VISIBLE, 0, -1, mWinFrame, mOverscanInsets, mContentInsets,
                             mVisibleInsets, mStableInsets, mOutsets, mBackdropFrame,
                             mDisplayCutout, mMergedConfiguration, mSurfaceHolder.mSurface);
 

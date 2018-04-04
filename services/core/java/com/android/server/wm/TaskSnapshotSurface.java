@@ -215,8 +215,8 @@ class TaskSnapshotSurface implements StartingSurface {
                 currentOrientation);
         window.setOuter(snapshotSurface);
         try {
-            session.relayout(window, window.mSeq, layoutParams, -1, -1, View.VISIBLE, 0, tmpFrame,
-                    tmpRect, tmpContentInsets, tmpRect, tmpStableInsets, tmpRect, tmpRect,
+            session.relayout(window, window.mSeq, layoutParams, -1, -1, View.VISIBLE, 0, -1,
+                    tmpFrame, tmpRect, tmpContentInsets, tmpRect, tmpStableInsets, tmpRect, tmpRect,
                     tmpCutout, tmpMergedConfiguration, surface);
         } catch (RemoteException e) {
             // Local call.

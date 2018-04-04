@@ -4752,30 +4752,32 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mTmpBounds.clear();
         mTmpInsetBounds.clear();
 
-        for (int i = mTaskHistory.size() - 1; i >= 0; i--) {
-            final TaskRecord task = mTaskHistory.get(i);
-            if (task.isResizeable()) {
-                if (inFreeformWindowingMode()) {
-                    // TODO: Can be removed now since each freeform task is in its own stack.
-                    // For freeform stack we don't adjust the size of the tasks to match that
-                    // of the stack, but we do try to make sure the tasks are still contained
-                    // with the bounds of the stack.
-                    mTmpRect2.set(task.getOverrideBounds());
-                    fitWithinBounds(mTmpRect2, bounds);
-                    task.updateOverrideConfiguration(mTmpRect2);
-                } else {
-                    task.updateOverrideConfiguration(taskBounds, insetBounds);
+        synchronized (mWindowManager.getWindowManagerLock()) {
+            for (int i = mTaskHistory.size() - 1; i >= 0; i--) {
+                final TaskRecord task = mTaskHistory.get(i);
+                if (task.isResizeable()) {
+                    if (inFreeformWindowingMode()) {
+                        // TODO: Can be removed now since each freeform task is in its own stack.
+                        // For freeform stack we don't adjust the size of the tasks to match that
+                        // of the stack, but we do try to make sure the tasks are still contained
+                        // with the bounds of the stack.
+                        mTmpRect2.set(task.getOverrideBounds());
+                        fitWithinBounds(mTmpRect2, bounds);
+                        task.updateOverrideConfiguration(mTmpRect2);
+                    } else {
+                        task.updateOverrideConfiguration(taskBounds, insetBounds);
+                    }
+                }
+
+                mTmpBounds.put(task.taskId, task.getOverrideBounds());
+                if (tempTaskInsetBounds != null) {
+                    mTmpInsetBounds.put(task.taskId, tempTaskInsetBounds);
                 }
             }
 
-            mTmpBounds.put(task.taskId, task.getOverrideBounds());
-            if (tempTaskInsetBounds != null) {
-                mTmpInsetBounds.put(task.taskId, tempTaskInsetBounds);
-            }
+            mWindowContainerController.resize(bounds, mTmpBounds, mTmpInsetBounds);
+            setBounds(bounds);
         }
-
-        mWindowContainerController.resize(bounds, mTmpBounds, mTmpInsetBounds);
-        setBounds(bounds);
     }
 
 
