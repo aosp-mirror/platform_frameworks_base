@@ -180,6 +180,7 @@ public final class AudioAttributes implements Parcelable {
      * IMPORTANT: when adding new usage types, add them to SDK_USAGES and update SUPPRESSIBLE_USAGES
      *            if applicable, as well as audioattributes.proto.
      *            Also consider adding them to <aaudio/AAudio.h> for the NDK.
+     *            Also consider adding them to UsageTypeConverter for service dump and etc.
      */
 
     /**
