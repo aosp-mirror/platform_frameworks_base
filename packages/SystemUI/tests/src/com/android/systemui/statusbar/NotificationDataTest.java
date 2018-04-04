@@ -139,32 +139,7 @@ public class NotificationDataTest extends SysuiTestCase {
         Assert.assertTrue(mRow.getEntry().channel != null);
     }
 
-    @Test
-    public void testAdd_appOpsAdded() {
-        ArraySet<Integer> expected = new ArraySet<>();
-        expected.add(3);
-        expected.add(235);
-        expected.add(1);
-        when(mFsc.getAppOps(mRow.getEntry().notification.getUserId(),
-                mRow.getEntry().notification.getPackageName())).thenReturn(expected);
 
-        mNotificationData.add(mRow.getEntry());
-        assertEquals(expected.size(),
-                mNotificationData.get(mRow.getEntry().key).mActiveAppOps.size());
-        for (int op : expected) {
-            assertTrue(" entry missing op " + op,
-                    mNotificationData.get(mRow.getEntry().key).mActiveAppOps.contains(op));
-        }
-    }
-
-    @Test
-    public void testAdd_noExistingAppOps() {
-        when(mFsc.getAppOps(mRow.getEntry().notification.getUserId(),
-                mRow.getEntry().notification.getPackageName())).thenReturn(null);
-
-        mNotificationData.add(mRow.getEntry());
-        assertEquals(0, mNotificationData.get(mRow.getEntry().key).mActiveAppOps.size());
-    }
 
     @Test
     public void testAllRelevantNotisTaggedWithAppOps() throws Exception {
@@ -181,7 +156,9 @@ public class NotificationDataTest extends SysuiTestCase {
 
         for (int op : expectedOps) {
             mNotificationData.updateAppOp(op, NotificationTestHelper.UID,
-                    NotificationTestHelper.PKG, true);
+                    NotificationTestHelper.PKG, mRow.getEntry().key, true);
+            mNotificationData.updateAppOp(op, NotificationTestHelper.UID,
+                    NotificationTestHelper.PKG, row2.getEntry().key, true);
         }
         for (int op : expectedOps) {
             assertTrue(mRow.getEntry().key + " doesn't have op " + op,
@@ -205,12 +182,12 @@ public class NotificationDataTest extends SysuiTestCase {
 
         for (int op : expectedOps) {
             mNotificationData.updateAppOp(op, NotificationTestHelper.UID,
-                    NotificationTestHelper.PKG, true);
+                    NotificationTestHelper.PKG, row2.getEntry().key, true);
         }
 
         expectedOps.remove(OP_ACCEPT_HANDOVER);
         mNotificationData.updateAppOp(OP_ACCEPT_HANDOVER, NotificationTestHelper.UID,
-                NotificationTestHelper.PKG, false);
+                NotificationTestHelper.PKG, row2.getEntry().key, false);
 
         assertTrue(mRow.getEntry().key + " doesn't have op " + OP_CAMERA,
                 mNotificationData.get(mRow.getEntry().key).mActiveAppOps.contains(OP_CAMERA));
