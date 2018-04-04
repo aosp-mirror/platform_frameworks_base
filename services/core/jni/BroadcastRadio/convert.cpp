@@ -510,19 +510,16 @@ JavaRef<jobject> MetadataFromHal(JNIEnv *env, const hidl_vec<V1_0::MetaData> &me
         jint status = 0;
         switch (item.type) {
             case MetadataType::INT:
-                ALOGV("metadata INT %d", key);
                 status = env->CallIntMethod(jMetadata.get(), gjni.RadioMetadata.putIntFromNative,
                         key, item.intValue);
                 break;
             case MetadataType::TEXT: {
-                ALOGV("metadata TEXT %d", key);
                 auto value = make_javastr(env, item.stringValue);
                 status = env->CallIntMethod(jMetadata.get(), gjni.RadioMetadata.putStringFromNative,
                         key, value.get());
                 break;
             }
             case MetadataType::RAW: {
-                ALOGV("metadata RAW %d", key);
                 auto len = item.rawValue.size();
                 if (len == 0) break;
                 auto value = make_javaref(env, env->NewByteArray(len));
@@ -537,7 +534,6 @@ JavaRef<jobject> MetadataFromHal(JNIEnv *env, const hidl_vec<V1_0::MetaData> &me
                 break;
             }
             case MetadataType::CLOCK:
-                ALOGV("metadata CLOCK %d", key);
                 status = env->CallIntMethod(jMetadata.get(), gjni.RadioMetadata.putClockFromNative,
                         key, item.clockValue.utcSecondsSinceEpoch,
                         item.clockValue.timezoneOffsetInMinutes);
