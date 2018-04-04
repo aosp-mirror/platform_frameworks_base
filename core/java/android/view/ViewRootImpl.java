@@ -3719,7 +3719,7 @@ public final class ViewRootImpl implements ViewParent,
         checkThread();
         if (mView != null) {
             if (!mView.hasFocus()) {
-                if (sAlwaysAssignFocus || !isInTouchMode()) {
+                if (sAlwaysAssignFocus || !mAttachInfo.mInTouchMode) {
                     v.requestFocus();
                 }
             } else {
