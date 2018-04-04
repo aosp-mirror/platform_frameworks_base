@@ -66,7 +66,7 @@ import libcore.io.Streams;
 /**
  * This is a class for reading and writing Exif tags in a JPEG file or a RAW image file.
  * <p>
- * Supported formats are: JPEG, DNG, CR2, NEF, NRW, ARW, RW2, ORF, PEF, SRW and RAF.
+ * Supported formats are: JPEG, DNG, CR2, NEF, NRW, ARW, RW2, ORF, PEF, SRW, RAF and HEIF.
  * <p>
  * Attribute mutation is supported for JPEG image files.
  */
@@ -2524,46 +2524,46 @@ public class ExifInterface {
     private void getHeifAttributes(ByteOrderedDataInputStream in) throws IOException {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         try {
-            if (mSeekableFileDescriptor != null) {
-                retriever.setDataSource(mSeekableFileDescriptor);
-            } else {
-                retriever.setDataSource(new MediaDataSource() {
-                    long mPosition;
+            retriever.setDataSource(new MediaDataSource() {
+                long mPosition;
 
-                    @Override
-                    public void close() throws IOException {}
+                @Override
+                public void close() throws IOException {}
 
-                    @Override
-                    public int readAt(long position, byte[] buffer, int offset, int size)
-                            throws IOException {
-                        if (size == 0) {
-                            return 0;
-                        }
-                        if (position < 0) {
-                            return -1;
-                        }
-                        if (mPosition != position) {
-                            in.seek(position);
-                            mPosition = position;
-                        }
-
-                        int bytesRead = in.read(buffer, offset, size);
-                        if (bytesRead < 0) {
-                            mPosition = -1; // need to seek on next read
-                            return -1;
-                        }
-
-                        mPosition += bytesRead;
-                        return bytesRead;
+                @Override
+                public int readAt(long position, byte[] buffer, int offset, int size)
+                        throws IOException {
+                    if (size == 0) {
+                        return 0;
                     }
-
-                    @Override
-                    public long getSize() throws IOException {
+                    if (position < 0) {
                         return -1;
                     }
-                });
-            }
+                    if (mPosition != position) {
+                        in.seek(position);
+                        mPosition = position;
+                    }
 
+                    int bytesRead = in.read(buffer, offset, size);
+                    if (bytesRead < 0) {
+                        mPosition = -1; // need to seek on next read
+                        return -1;
+                    }
+
+                    mPosition += bytesRead;
+                    return bytesRead;
+                }
+
+                @Override
+                public long getSize() throws IOException {
+                    return -1;
+                }
+            });
+
+            String exifOffsetStr = retriever.extractMetadata(
+                    MediaMetadataRetriever.METADATA_KEY_EXIF_OFFSET);
+            String exifLengthStr = retriever.extractMetadata(
+                    MediaMetadataRetriever.METADATA_KEY_EXIF_LENGTH);
             String hasImage = retriever.extractMetadata(
                     MediaMetadataRetriever.METADATA_KEY_HAS_IMAGE);
             String hasVideo = retriever.extractMetadata(
@@ -2620,6 +2620,30 @@ public class ExifInterface {
 
                 mAttributes[IFD_TYPE_PRIMARY].put(TAG_ORIENTATION,
                         ExifAttribute.createUShort(orientation, mExifByteOrder));
+            }
+
+            if (exifOffsetStr != null && exifLengthStr != null) {
+                int offset = Integer.parseInt(exifOffsetStr);
+                int length = Integer.parseInt(exifLengthStr);
+                if (length <= 6) {
+                    throw new IOException("Invalid exif length");
+                }
+                in.seek(offset);
+                byte[] identifier = new byte[6];
+                if (in.read(identifier) != 6) {
+                    throw new IOException("Can't read identifier");
+                }
+                offset += 6;
+                length -= 6;
+                if (!Arrays.equals(identifier, IDENTIFIER_EXIF_APP1)) {
+                    throw new IOException("Invalid identifier");
+                }
+
+                byte[] bytes = new byte[length];
+                if (in.read(bytes) != length) {
+                    throw new IOException("Can't read exif");
+                }
+                readExifSegment(bytes, IFD_TYPE_PRIMARY);
             }
 
             if (DEBUG) {
