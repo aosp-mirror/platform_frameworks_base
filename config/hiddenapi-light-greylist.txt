@@ -2231,7 +2231,6 @@ Landroid/view/SurfaceView;->mRequestedFormat:I
 Landroid/view/SurfaceView;->mSurfaceHolder:Landroid/view/SurfaceHolder;
 Landroid/view/SurfaceView;->surfacePositionLost_uiRtSync(J)V
 Landroid/view/SurfaceView;->updateSurfacePosition_renderWorker(JIIII)V
-Landroid/view/textclassifier/Logger;->DISABLED:Landroid/view/textclassifier/Logger;
 Landroid/view/textclassifier/logging/SmartSelectionEventTracker;-><init>(Landroid/content/Context;I)V
 Landroid/view/textclassifier/logging/SmartSelectionEventTracker;->logEvent(Landroid/view/textclassifier/logging/SmartSelectionEventTracker$SelectionEvent;)V
 Landroid/view/textclassifier/logging/SmartSelectionEventTracker$SelectionEvent;->selectionAction(III)Landroid/view/textclassifier/logging/SmartSelectionEventTracker$SelectionEvent;

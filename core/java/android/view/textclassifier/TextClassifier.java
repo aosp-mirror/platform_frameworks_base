@@ -349,18 +349,6 @@ public interface TextClassifier {
     }
 
     /**
-     * Returns a helper for logging TextClassifier related events.
-     *
-     * @param config logger configuration
-     * @hide
-     */
-    @WorkerThread
-    default Logger getLogger(@NonNull Logger.Config config) {
-        Preconditions.checkNotNull(config);
-        return Logger.DISABLED;
-    }
-
-    /**
      * Reports a selection event.
      *
      * <strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should

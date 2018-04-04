@@ -33,9 +33,9 @@ import android.text.Spannable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.ActionMode;
-import android.view.textclassifier.Logger;
 import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.SelectionEvent.InvocationMethod;
+import android.view.textclassifier.SelectionSessionLogger;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationConstants;
 import android.view.textclassifier.TextClassificationManager;
@@ -663,7 +663,6 @@ public final class SelectionActionModeHelper {
         private static final String LOG_TAG = "SelectionMetricsLogger";
         private static final Pattern PATTERN_WHITESPACE = Pattern.compile("\\s+");
 
-        private final Logger mLogger;
         private final boolean mEditTextLogger;
         private final BreakIterator mTokenIterator;
 
@@ -673,10 +672,8 @@ public final class SelectionActionModeHelper {
 
         SelectionMetricsLogger(TextView textView) {
             Preconditions.checkNotNull(textView);
-            mLogger = textView.getTextClassifier().getLogger(
-                    new Logger.Config(textView.getContext(), getWidetType(textView), null));
             mEditTextLogger = textView.isTextEditable();
-            mTokenIterator = mLogger.getTokenIterator(textView.getTextLocale());
+            mTokenIterator = SelectionSessionLogger.getTokenIterator(textView.getTextLocale());
         }
 
         @TextClassifier.WidgetType
@@ -702,8 +699,6 @@ public final class SelectionActionModeHelper {
                 }
                 mTokenIterator.setText(mText);
                 mStartIndex = index;
-                mLogger.logSelectionStartedEvent(invocationMethod, 0);
-                // TODO: Remove the above legacy logging.
                 mClassificationSession = classificationSession;
                 mClassificationSession.onSelectionEvent(
                         SelectionEvent.createSelectionStartedEvent(invocationMethod, 0));
@@ -720,27 +715,18 @@ public final class SelectionActionModeHelper {
                 Preconditions.checkArgumentInRange(end, start, mText.length(), "end");
                 int[] wordIndices = getWordDelta(start, end);
                 if (selection != null) {
-                    mLogger.logSelectionModifiedEvent(
-                            wordIndices[0], wordIndices[1], selection);
-                    // TODO: Remove the above legacy logging.
                     if (mClassificationSession != null) {
                         mClassificationSession.onSelectionEvent(
                                 SelectionEvent.createSelectionModifiedEvent(
                                         wordIndices[0], wordIndices[1], selection));
                     }
                 } else if (classification != null) {
-                    mLogger.logSelectionModifiedEvent(
-                            wordIndices[0], wordIndices[1], classification);
-                    // TODO: Remove the above legacy logging.
                     if (mClassificationSession != null) {
                         mClassificationSession.onSelectionEvent(
                                 SelectionEvent.createSelectionModifiedEvent(
                                         wordIndices[0], wordIndices[1], classification));
                     }
                 } else {
-                    mLogger.logSelectionModifiedEvent(
-                            wordIndices[0], wordIndices[1]);
-                    // TODO: Remove the above legacy logging.
                     if (mClassificationSession != null) {
                         mClassificationSession.onSelectionEvent(
                                 SelectionEvent.createSelectionModifiedEvent(
@@ -762,18 +748,12 @@ public final class SelectionActionModeHelper {
                 Preconditions.checkArgumentInRange(end, start, mText.length(), "end");
                 int[] wordIndices = getWordDelta(start, end);
                 if (classification != null) {
-                    mLogger.logSelectionActionEvent(
-                            wordIndices[0], wordIndices[1], action, classification);
-                    // TODO: Remove the above legacy logging.
                     if (mClassificationSession != null) {
                         mClassificationSession.onSelectionEvent(
                                 SelectionEvent.createSelectionActionEvent(
                                         wordIndices[0], wordIndices[1], action, classification));
                     }
                 } else {
-                    mLogger.logSelectionActionEvent(
-                            wordIndices[0], wordIndices[1], action);
-                    // TODO: Remove the above legacy logging.
                     if (mClassificationSession != null) {
                         mClassificationSession.onSelectionEvent(
                                 SelectionEvent.createSelectionActionEvent(
