@@ -200,7 +200,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     }
 
     public boolean onTouchEvent(MotionEvent ev) {
-        final boolean showSwipeUI = mOverviewProxyService.shouldShowSwipeUpUI();
+        final boolean isProxyConnected = mOverviewProxyService.getProxy() != null;
         final int action = ev.getAction();
         int x, y;
         if (action == MotionEvent.ACTION_DOWN) {
@@ -226,7 +226,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                     // Provide the same haptic feedback that the system offers for virtual keys.
                     performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                 }
-                if (!showSwipeUI) {
+                if (!isProxyConnected) {
                     playSoundEffect(SoundEffectConstants.CLICK);
                 }
                 removeCallbacks(mCheckLongPress);
@@ -255,7 +255,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 final boolean doIt = isPressed() && !mLongClicked;
                 setPressed(false);
                 final boolean doHapticFeedback = (SystemClock.uptimeMillis() - mDownTime) > 150;
-                if (showSwipeUI) {
+                if (isProxyConnected) {
                     if (doIt) {
                         if (doHapticFeedback) {
                             mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
