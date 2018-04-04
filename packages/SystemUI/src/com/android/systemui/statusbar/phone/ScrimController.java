@@ -528,8 +528,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         if (alpha == 0f) {
             scrim.setClickable(false);
         } else {
-            // Eat touch events (unless dozing).
-            scrim.setClickable(!mState.isLowPowerState());
+            // Eat touch events (unless dozing or pulsing).
+            scrim.setClickable(mState != ScrimState.AOD && mState != ScrimState.PULSING);
         }
         updateScrim(scrim, alpha);
     }
