@@ -2126,15 +2126,22 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
-    TaskRecord finishTopRunningActivityLocked(ProcessRecord app, String reason) {
+    /**
+     * Finish the topmost activities in all stacks that belong to the crashed app.
+     * @param app The app that crashed.
+     * @param reason Reason to perform this action.
+     * @return The task that was finished in this stack, {@code null} if haven't found any.
+     */
+    TaskRecord finishTopCrashedActivitiesLocked(ProcessRecord app, String reason) {
         TaskRecord finishedTask = null;
         ActivityStack focusedStack = getFocusedStack();
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ActivityDisplay display = mActivityDisplays.valueAt(displayNdx);
-            final int numStacks = display.getChildCount();
-            for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
+            // It is possible that request to finish activity might also remove its task and stack,
+            // so we need to be careful with indexes in the loop and check child count every time.
+            for (int stackNdx = 0; stackNdx < display.getChildCount(); ++stackNdx) {
                 final ActivityStack stack = display.getChildAt(stackNdx);
-                TaskRecord t = stack.finishTopRunningActivityLocked(app, reason);
+                final TaskRecord t = stack.finishTopCrashedActivityLocked(app, reason);
                 if (stack == focusedStack || finishedTask == null) {
                     finishedTask = t;
                 }
