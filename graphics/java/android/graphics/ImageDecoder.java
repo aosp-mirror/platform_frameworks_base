@@ -581,7 +581,7 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Subsumed by {@link #DecodeException}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public static class IncompleteException extends IOException {};
 
     /**
@@ -613,19 +613,19 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Replaced by {@link #DecodeException#SOURCE_EXCEPTION}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public static final int ERROR_SOURCE_EXCEPTION  = 1;
 
     /** @removed
      * @deprecated Replaced by {@link #DecodeException#SOURCE_INCOMPLETE}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public static final int ERROR_SOURCE_INCOMPLETE = 2;
 
     /** @removed
      * @deprecated Replaced by {@link #DecodeException#SOURCE_MALFORMED_DATA}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public static final int ERROR_SOURCE_ERROR      = 3;
 
     /**
@@ -1000,7 +1000,7 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Renamed to {@link #setTargetSize}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public ImageDecoder setResize(int width, int height) {
         this.setTargetSize(width, height);
         return this;
@@ -1039,7 +1039,7 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Renamed to {@link #setTargetSampleSize}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public ImageDecoder setResize(int sampleSize) {
         this.setTargetSampleSize(sampleSize);
         return this;
@@ -1125,7 +1125,7 @@ public final class ImageDecoder implements AutoCloseable {
     /**
      *  Use a software allocation for the pixel memory.
      *
-     *  Useful for drawing to a software {@link Canvas} or for
+     *  <p>Useful for drawing to a software {@link Canvas} or for
      *  accessing the pixels on the final output.
      */
     public static final int ALLOCATOR_SOFTWARE = 1;
@@ -1133,14 +1133,14 @@ public final class ImageDecoder implements AutoCloseable {
     /**
      *  Use shared memory for the pixel memory.
      *
-     *  Useful for sharing across processes.
+     *  <p>Useful for sharing across processes.
      */
     public static final int ALLOCATOR_SHARED_MEMORY = 2;
 
     /**
      *  Require a {@link Bitmap.Config#HARDWARE} {@link Bitmap}.
      *
-     *  When this is combined with incompatible options, like
+     *  <p>When this is combined with incompatible options, like
      *  {@link #setMutableRequired setMutableRequired(true)} or
      *  {@link #setDecodeAsAlphaMaskEnabled setDecodeAsAlphaMaskEnabled(true)},
      *  {@link #decodeDrawable decodeDrawable} or {@link #decodeBitmap decodeBitmap}
@@ -1203,7 +1203,7 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Renamed to {@link #setUnpremultipliedRequired}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public ImageDecoder setRequireUnpremultiplied(boolean unpremultipliedRequired) {
         this.setUnpremultipliedRequired(unpremultipliedRequired);
         return this;
@@ -1219,7 +1219,7 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Renamed to {@link #isUnpremultipliedRequired}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public boolean getRequireUnpremultiplied() {
         return this.isUnpremultipliedRequired();
     }
@@ -1348,7 +1348,7 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Renamed to {@link #setMutableRequired}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public ImageDecoder setMutable(boolean mutable) {
         this.setMutableRequired(mutable);
         return this;
@@ -1364,37 +1364,68 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Renamed to {@link #isMutableRequired}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public boolean getMutable() {
         return this.isMutableRequired();
     }
 
     /**
-     *  Specify whether to potentially save RAM at the expense of quality.
+     * Save memory if possible by using a denser {@link Bitmap.Config} at the
+     * cost of some image quality.
      *
-     *  <p>Setting this to {@code true} may result in a {@link Bitmap} with a
-     *  denser {@link Bitmap.Config}, depending on the image. For example, an
-     *  opaque {@link Bitmap} with 8 bits or precision for each of its red,
-     *  green and blue components would decode to
-     *  {@link Bitmap.Config#ARGB_8888} by default, but setting this to
-     *  {@code true} will result in decoding to {@link Bitmap.Config#RGB_565}.
-     *  This necessarily lowers the quality of the output, but saves half
-     *  the memory used.</p>
+     * <p>For example an opaque 8-bit image may be compressed into an
+     * {@link Bitmap.Config#RGB_565} configuration, sacrificing image
+     * quality to save memory.
+     */
+    public static final int MEMORY_POLICY_LOW_RAM = 0;
+
+    /**
+     * Use the most natural {@link Bitmap.Config} for the internal {@link Bitmap}.
+     *
+     * <p>This is the recommended default for most applications and usages. This
+     * will use the closest {@link Bitmap.Config} for the encoded source. If the
+     * encoded source does not exactly match any {@link Bitmap.Config}, the next
+     * highest quality {@link Bitmap.Config} will be used avoiding any loss in
+     * image quality.
+     */
+    public static final int MEMORY_POLICY_DEFAULT  = 1;
+
+    /** @hide **/
+    @Retention(SOURCE)
+    @IntDef(value = { MEMORY_POLICY_DEFAULT, MEMORY_POLICY_LOW_RAM },
+              prefix = {"MEMORY_POLICY_"})
+    public @interface MemoryPolicy {};
+
+    /**
+     *  Specify the memory policy for the decoded {@link Bitmap}.
      *
      *  <p>Like all setters on ImageDecoder, this must be called inside
      *  {@link OnHeaderDecodedListener#onHeaderDecoded onHeaderDecoded}.</p>
      */
+    public void setMemorySizePolicy(@MemoryPolicy int policy) {
+        mConserveMemory = (policy == MEMORY_POLICY_LOW_RAM);
+    }
+
+    /**
+     *  Retrieve the memory policy for the decoded {@link Bitmap}.
+     */
+    @MemoryPolicy
+    public int getMemorySizePolicy() {
+        return mConserveMemory ? MEMORY_POLICY_LOW_RAM : MEMORY_POLICY_DEFAULT;
+    }
+
+    /** @removed
+     * @deprecated Replaced by {@link #setMemorySizePolicy}.
+     */
+    @Deprecated
     public void setConserveMemory(boolean conserveMemory) {
         mConserveMemory = conserveMemory;
     }
 
-    /**
-     *  Return whether this object will try to save RAM at the expense of quality.
-     *
-     *  <p>This returns whether {@link #setConserveMemory} was set to {@code true}.
-     *  It may still return {@code true} even if the {@code ImageDecoder} does not
-     *  have a way to save RAM at the expense of quality for this image.</p>
+    /** @removed
+     * @deprecated Replaced by {@link #getMemorySizePolicy}.
      */
+    @Deprecated
     public boolean getConserveMemory() {
         return mConserveMemory;
     }
@@ -1421,7 +1452,7 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Renamed to {@link #setDecodeAsAlphaMaskEnabled}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public ImageDecoder setDecodeAsAlphaMask(boolean enabled) {
         this.setDecodeAsAlphaMaskEnabled(enabled);
         return this;
@@ -1430,7 +1461,7 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Renamed to {@link #setDecodeAsAlphaMaskEnabled}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public ImageDecoder setAsAlphaMask(boolean asAlphaMask) {
         this.setDecodeAsAlphaMask(asAlphaMask);
         return this;
@@ -1451,7 +1482,7 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Renamed to {@link #isDecodeAsAlphaMaskEnabled}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public boolean getDecodeAsAlphaMask() {
         return mDecodeAsAlphaMask;
     }
@@ -1459,7 +1490,7 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Renamed to {@link #isDecodeAsAlphaMaskEnabled}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public boolean getAsAlphaMask() {
         return this.getDecodeAsAlphaMask();
     }
