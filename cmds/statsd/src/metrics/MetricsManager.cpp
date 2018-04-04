@@ -190,14 +190,16 @@ void MetricsManager::dropData(const int64_t dropTimeNs) {
     }
 }
 
-void MetricsManager::onDumpReport(const int64_t dumpTimeStampNs, ProtoOutputStream* protoOutput) {
+void MetricsManager::onDumpReport(const int64_t dumpTimeStampNs,
+                                  const bool include_current_partial_bucket,
+                                  ProtoOutputStream* protoOutput) {
     VLOG("=========================Metric Reports Start==========================");
     // one StatsLogReport per MetricProduer
     for (const auto& producer : mAllMetricProducers) {
         if (mNoReportMetricIds.find(producer->getMetricId()) == mNoReportMetricIds.end()) {
             uint64_t token =
                     protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_METRICS);
-            producer->onDumpReport(dumpTimeStampNs, protoOutput);
+            producer->onDumpReport(dumpTimeStampNs, include_current_partial_bucket, protoOutput);
             protoOutput->end(token);
         }
     }

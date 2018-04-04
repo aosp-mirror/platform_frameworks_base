@@ -62,6 +62,7 @@ private:
                           bool condition, const LogEvent& event);
 
     void onDumpReportLocked(const int64_t dumpTimeNs,
+                            const bool include_current_partial_bucket,
                             android::util::ProtoOutputStream* protoOutput) override;
 
     // Internal interface to handle condition change.

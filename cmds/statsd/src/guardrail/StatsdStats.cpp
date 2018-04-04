@@ -76,7 +76,8 @@ const int FIELD_ID_CONFIG_STATS_ALERT_COUNT = 8;
 const int FIELD_ID_CONFIG_STATS_VALID = 9;
 const int FIELD_ID_CONFIG_STATS_BROADCAST = 10;
 const int FIELD_ID_CONFIG_STATS_DATA_DROP = 11;
-const int FIELD_ID_CONFIG_STATS_DUMP_REPORT = 12;
+const int FIELD_ID_CONFIG_STATS_DUMP_REPORT_TIME = 12;
+const int FIELD_ID_CONFIG_STATS_DUMP_REPORT_BYTES = 20;
 const int FIELD_ID_CONFIG_STATS_MATCHER_STATS = 13;
 const int FIELD_ID_CONFIG_STATS_CONDITION_STATS = 14;
 const int FIELD_ID_CONFIG_STATS_METRIC_STATS = 15;
@@ -215,21 +216,22 @@ void StatsdStats::noteDataDropped(const ConfigKey& key, int32_t timeSec) {
     it->second->data_drop_time_sec.push_back(timeSec);
 }
 
-void StatsdStats::noteMetricsReportSent(const ConfigKey& key) {
-    noteMetricsReportSent(key, getWallClockSec());
+void StatsdStats::noteMetricsReportSent(const ConfigKey& key, const size_t num_bytes) {
+    noteMetricsReportSent(key, num_bytes, getWallClockSec());
 }
 
-void StatsdStats::noteMetricsReportSent(const ConfigKey& key, int32_t timeSec) {
+void StatsdStats::noteMetricsReportSent(const ConfigKey& key, const size_t num_bytes,
+                                        int32_t timeSec) {
     lock_guard<std::mutex> lock(mLock);
     auto it = mConfigStats.find(key);
     if (it == mConfigStats.end()) {
         ALOGE("Config key %s not found!", key.ToString().c_str());
         return;
     }
-    if (it->second->dump_report_time_sec.size() == kMaxTimestampCount) {
-        it->second->dump_report_time_sec.pop_front();
+    if (it->second->dump_report_stats.size() == kMaxTimestampCount) {
+        it->second->dump_report_stats.pop_front();
     }
-    it->second->dump_report_time_sec.push_back(timeSec);
+    it->second->dump_report_stats.push_back(std::make_pair(timeSec, num_bytes));
 }
 
 void StatsdStats::noteUidMapDropped(int deltas) {
@@ -383,7 +385,7 @@ void StatsdStats::resetInternalLocked() {
     for (auto& config : mConfigStats) {
         config.second->broadcast_sent_time_sec.clear();
         config.second->data_drop_time_sec.clear();
-        config.second->dump_report_time_sec.clear();
+        config.second->dump_report_stats.clear();
         config.second->annotations.clear();
         config.second->matcher_stats.clear();
         config.second->condition_stats.clear();
@@ -442,8 +444,8 @@ void StatsdStats::dumpStats(FILE* out) const {
             fprintf(out, "\tdata drop time: %d\n", dataDropTime);
         }
 
-        for (const auto& dumpTime : configStats->dump_report_time_sec) {
-            fprintf(out, "\tdump report time: %d\n", dumpTime);
+        for (const auto& dump : configStats->dump_report_stats) {
+            fprintf(out, "\tdump report time: %d bytes: %lld\n", dump.first, (long long)dump.second);
         }
 
         for (const auto& stats : pair.second->matcher_stats) {
@@ -536,9 +538,16 @@ void addConfigStatsToProto(const ConfigStats& configStats, ProtoOutputStream* pr
                      drop);
     }
 
-    for (const auto& dump : configStats.dump_report_time_sec) {
-        proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_STATS_DUMP_REPORT | FIELD_COUNT_REPEATED,
-                     dump);
+    for (const auto& dump : configStats.dump_report_stats) {
+        proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_STATS_DUMP_REPORT_TIME |
+                     FIELD_COUNT_REPEATED,
+                     dump.first);
+    }
+
+    for (const auto& dump : configStats.dump_report_stats) {
+        proto->write(FIELD_TYPE_INT64 | FIELD_ID_CONFIG_STATS_DUMP_REPORT_BYTES |
+                     FIELD_COUNT_REPEATED,
+                     (long long)dump.second);
     }
 
     for (const auto& annotation : configStats.annotations) {
