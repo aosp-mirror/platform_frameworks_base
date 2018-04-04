@@ -514,7 +514,6 @@ Landroid/telephony/TelephonyManager;->getServiceStateForSubscriber(I)Landroid/te
 Landroid/telephony/TelephonyManager;->getVoiceMessageCount()I
 Landroid/telephony/TelephonyManager;->getVoiceNetworkType(I)I
 Landroid/telephony/TelephonyManager;->isImsRegistered()Z
-Landroid/telephony/TelephonyManager;->isWifiCallingAvailable()Z
 Landroid/telephony/TelephonyManager$MultiSimVariants;->DSDA:Landroid/telephony/TelephonyManager$MultiSimVariants;
 Landroid/telephony/TelephonyManager$MultiSimVariants;->DSDS:Landroid/telephony/TelephonyManager$MultiSimVariants;
 Landroid/telephony/TelephonyManager;->nvResetConfig(I)Z
