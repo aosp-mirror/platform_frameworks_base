@@ -721,4 +721,67 @@ public final class TextClassification implements Parcelable {
         mEntityConfidence = EntityConfidence.CREATOR.createFromParcel(in);
         mId = in.readString();
     }
+
+    // TODO: Remove once apps can build against the latest sdk.
+    /**
+     * Optional input parameters for generating TextClassification.
+     * @hide
+     */
+    public static final class Options {
+
+        @Nullable private final TextClassificationSessionId mSessionId;
+        @Nullable private final Request mRequest;
+        @Nullable private LocaleList mDefaultLocales;
+        @Nullable private ZonedDateTime mReferenceTime;
+
+        public Options() {
+            this(null, null);
+        }
+
+        private Options(
+                @Nullable TextClassificationSessionId sessionId, @Nullable Request request) {
+            mSessionId = sessionId;
+            mRequest = request;
+        }
+
+        /** Helper to create Options from a Request. */
+        public static Options from(TextClassificationSessionId sessionId, Request request) {
+            final Options options = new Options(sessionId, request);
+            options.setDefaultLocales(request.getDefaultLocales());
+            options.setReferenceTime(request.getReferenceTime());
+            return options;
+        }
+
+        /** @param defaultLocales ordered list of locale preferences. */
+        public Options setDefaultLocales(@Nullable LocaleList defaultLocales) {
+            mDefaultLocales = defaultLocales;
+            return this;
+        }
+
+        /** @param referenceTime refrence time used for interpreting relatives dates */
+        public Options setReferenceTime(@Nullable ZonedDateTime referenceTime) {
+            mReferenceTime = referenceTime;
+            return this;
+        }
+
+        @Nullable
+        public LocaleList getDefaultLocales() {
+            return mDefaultLocales;
+        }
+
+        @Nullable
+        public ZonedDateTime getReferenceTime() {
+            return mReferenceTime;
+        }
+
+        @Nullable
+        public Request getRequest() {
+            return mRequest;
+        }
+
+        @Nullable
+        public TextClassificationSessionId getSessionId() {
+            return mSessionId;
+        }
+    }
 }
