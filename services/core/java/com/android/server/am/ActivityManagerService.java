@@ -2902,6 +2902,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         private boolean mBlacklistDisabled;
         private String mExemptionsStr;
         private List<String> mExemptions = Collections.emptyList();
+        private int mLogSampleRate = -1;
         @HiddenApiEnforcementPolicy private int mPolicyPreP = HIDDEN_API_ENFORCEMENT_DEFAULT;
         @HiddenApiEnforcementPolicy private int mPolicyP = HIDDEN_API_ENFORCEMENT_DEFAULT;
 
@@ -2913,6 +2914,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void registerObserver() {
             mContext.getContentResolver().registerContentObserver(
                     Settings.Global.getUriFor(Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS),
+                    false,
+                    this);
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.HIDDEN_API_ACCESS_LOG_SAMPLING_RATE),
                     false,
                     this);
             mContext.getContentResolver().registerContentObserver(
@@ -2941,6 +2946,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                             : Arrays.asList(exemptions.split(","));
                 }
                 zygoteProcess.setApiBlacklistExemptions(mExemptions);
+            }
+            int logSampleRate = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.HIDDEN_API_ACCESS_LOG_SAMPLING_RATE, -1);
+            if (logSampleRate < 0 || logSampleRate > 0x10000) {
+                logSampleRate = -1;
+            }
+            if (logSampleRate != -1 && logSampleRate != mLogSampleRate) {
+                mLogSampleRate = logSampleRate;
+                zygoteProcess.setHiddenApiAccessLogSampleRate(mLogSampleRate);
             }
             mPolicyPreP = getValidEnforcementPolicy(Settings.Global.HIDDEN_API_POLICY_PRE_P_APPS);
             mPolicyP = getValidEnforcementPolicy(Settings.Global.HIDDEN_API_POLICY_P_APPS);
