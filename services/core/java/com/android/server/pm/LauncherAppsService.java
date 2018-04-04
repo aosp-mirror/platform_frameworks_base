@@ -39,6 +39,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.ShortcutServiceInternal.ShortcutChangeListener;
+import android.content.pm.UserInfo;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
@@ -49,6 +50,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.util.Log;
@@ -101,6 +103,7 @@ public class LauncherAppsService extends SystemService {
         private static final boolean DEBUG = false;
         private static final String TAG = "LauncherAppsService";
         private final Context mContext;
+        private final UserManager mUm;
         private final UserManagerInternal mUserManagerInternal;
         private final ActivityManagerInternal mActivityManagerInternal;
         private final ShortcutServiceInternal mShortcutServiceInternal;
@@ -113,6 +116,7 @@ public class LauncherAppsService extends SystemService {
 
         public LauncherAppsImpl(Context context) {
             mContext = context;
+            mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
             mUserManagerInternal = Preconditions.checkNotNull(
                     LocalServices.getService(UserManagerInternal.class));
             mActivityManagerInternal = Preconditions.checkNotNull(
@@ -233,6 +237,22 @@ public class LauncherAppsService extends SystemService {
          * group.
          */
         private boolean canAccessProfile(int targetUserId, String message) {
+            final int callingUserId = injectCallingUserId();
+
+            if (targetUserId == callingUserId) return true;
+
+            long ident = injectClearCallingIdentity();
+            try {
+                final UserInfo callingUserInfo = mUm.getUserInfo(callingUserId);
+                if (callingUserInfo != null && callingUserInfo.isManagedProfile()) {
+                    Slog.w(TAG, message + " for another profile "
+                            + targetUserId + " from " + callingUserId + " not allowed");
+                    return false;
+                }
+            } finally {
+                injectRestoreCallingIdentity(ident);
+            }
+
             return mUserManagerInternal.isProfileAccessible(injectCallingUserId(), targetUserId,
                     message, true);
         }
