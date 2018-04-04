@@ -18,6 +18,7 @@ import static android.view.View.MeasureSpec;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
@@ -34,8 +35,12 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.After;
 import org.junit.Before;
@@ -65,6 +70,8 @@ public class SmartReplyViewTest extends SysuiTestCase {
     public void setUp() {
         mReceiver = new BlockingQueueIntentReceiver();
         mContext.registerReceiver(mReceiver, new IntentFilter(TEST_ACTION));
+        mDependency.get(KeyguardDismissUtil.class).setDismissHandler(
+            (action, cancelAction, afterKeyguardGone) -> action.onDismiss());
 
         mView = SmartReplyView.inflate(mContext, null);
 
@@ -88,6 +95,42 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
         mView.getChildAt(2).performClick();
 
+        Intent resultIntent = mReceiver.waitForIntent();
+        assertEquals(TEST_CHOICES[2],
+                RemoteInput.getResultsFromIntent(resultIntent).get(TEST_RESULT_KEY));
+        assertEquals(RemoteInput.SOURCE_CHOICE, RemoteInput.getResultsSource(resultIntent));
+    }
+
+    @Test
+    public void testSendSmartReply_keyguardCancelled() throws InterruptedException {
+        mDependency.get(KeyguardDismissUtil.class).setDismissHandler(
+            (action, cancelAction, afterKeyguardGone) -> {
+                if (cancelAction != null) {
+                    cancelAction.run();
+                }
+            });
+        setRepliesFromRemoteInput(TEST_CHOICES);
+
+        mView.getChildAt(2).performClick();
+
+        assertNull(mReceiver.waitForIntent());
+    }
+
+    @Test
+    public void testSendSmartReply_waitsForKeyguard() throws InterruptedException {
+        AtomicReference<OnDismissAction> actionRef = new AtomicReference<>();
+        mDependency.get(KeyguardDismissUtil.class).setDismissHandler(
+            (action, cancelAction, afterKeyguardGone) -> actionRef.set(action));
+        setRepliesFromRemoteInput(TEST_CHOICES);
+
+        mView.getChildAt(2).performClick();
+
+        // No intent until the screen is unlocked.
+        assertNull(mReceiver.waitForIntent());
+
+        actionRef.get().onDismiss();
+
+        // Now the intent should arrive.
         Intent resultIntent = mReceiver.waitForIntent();
         assertEquals(TEST_CHOICES[2],
                 RemoteInput.getResultsFromIntent(resultIntent).get(TEST_RESULT_KEY));
@@ -301,7 +344,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
 
         Button previous = null;
         for (CharSequence choice : choices) {
-            Button current = SmartReplyView.inflateReplyButton(mContext, mView, choice, null, null);
+            Button current = mView.inflateReplyButton(mContext, mView, choice, null, null);
             current.setPadding(paddingHorizontal, current.getPaddingTop(), paddingHorizontal,
                     current.getPaddingBottom());
             if (previous != null) {
