@@ -1014,7 +1014,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         pi.applicationInfo.flags = ApplicationInfo.FLAG_INSTALLED
                 | ApplicationInfo.FLAG_ALLOW_BACKUP;
         pi.versionCode = version;
-        pi.applicationInfo.versionCode = version;
+        pi.applicationInfo.setVersionCode(version);
         pi.signatures = null;
         pi.signingCertificateHistory = new Signature[][] {genSignatures(signatures)};
 
@@ -1032,7 +1032,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected void updatePackageVersion(String packageName, int increment) {
         updatePackageInfo(packageName, pi -> {
             pi.versionCode += increment;
-            pi.applicationInfo.versionCode += increment;
+            pi.applicationInfo.setVersionCode(pi.applicationInfo.longVersionCode + increment);
         });
     }
 

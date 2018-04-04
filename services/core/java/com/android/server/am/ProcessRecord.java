@@ -496,7 +496,7 @@ final class ProcessRecord {
         uid = _uid;
         userId = UserHandle.getUserId(_uid);
         processName = _processName;
-        pkgList.put(_info.packageName, new ProcessStats.ProcessStateHolder(_info.versionCode));
+        pkgList.put(_info.packageName, new ProcessStats.ProcessStateHolder(_info.longVersionCode));
         maxAdj = ProcessList.UNKNOWN_ADJ;
         curRawAdj = setRawAdj = ProcessList.INVALID_ADJ;
         curAdj = setAdj = verifiedAdj = ProcessList.INVALID_ADJ;
@@ -521,7 +521,7 @@ final class ProcessRecord {
                 origBase.makeInactive();
             }
             baseProcessTracker = tracker.getProcessStateLocked(info.packageName, uid,
-                    info.versionCode, processName);
+                    info.longVersionCode, processName);
             baseProcessTracker.makeActive();
             for (int i=0; i<pkgList.size(); i++) {
                 ProcessStats.ProcessStateHolder holder = pkgList.valueAt(i);
@@ -529,7 +529,7 @@ final class ProcessRecord {
                     holder.state.makeInactive();
                 }
                 holder.state = tracker.getProcessStateLocked(pkgList.keyAt(i), uid,
-                        info.versionCode, processName);
+                        info.longVersionCode, processName);
                 if (holder.state != baseProcessTracker) {
                     holder.state.makeActive();
                 }
@@ -828,9 +828,9 @@ final class ProcessRecord {
                 }
                 pkgList.clear();
                 ProcessState ps = tracker.getProcessStateLocked(
-                        info.packageName, uid, info.versionCode, processName);
+                        info.packageName, uid, info.longVersionCode, processName);
                 ProcessStats.ProcessStateHolder holder = new ProcessStats.ProcessStateHolder(
-                        info.versionCode);
+                        info.longVersionCode);
                 holder.state = ps;
                 pkgList.put(info.packageName, holder);
                 if (ps != baseProcessTracker) {
@@ -839,7 +839,7 @@ final class ProcessRecord {
             }
         } else if (N != 1) {
             pkgList.clear();
-            pkgList.put(info.packageName, new ProcessStats.ProcessStateHolder(info.versionCode));
+            pkgList.put(info.packageName, new ProcessStats.ProcessStateHolder(info.longVersionCode));
         }
     }
 
