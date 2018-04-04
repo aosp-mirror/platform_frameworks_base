@@ -302,6 +302,7 @@ public class SettingsBackupTest {
                     Settings.Global.NETSTATS_UID_TAG_PERSIST_BYTES,
                     Settings.Global.NETSTATS_UID_TAG_ROTATE_AGE,
                     Settings.Global.NETWORK_AVOID_BAD_WIFI,
+                    Settings.Global.NETWORK_DEFAULT_DAILY_MULTIPATH_QUOTA_BYTES,
                     Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE,
                     Settings.Global.NETWORK_WATCHLIST_LAST_REPORT_TIME,
                     Settings.Global.NETWORK_PREFERENCE,
