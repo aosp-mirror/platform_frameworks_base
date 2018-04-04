@@ -98,11 +98,15 @@ public class RecentsAnimationController implements DeathRecipient {
     private boolean mPendingStart = true;
 
     // Set when the animation has been canceled
-    private boolean mCanceled = false;
+    private boolean mCanceled;
 
     // Whether or not the input consumer is enabled. The input consumer must be both registered and
     // enabled for it to start intercepting touch events.
     private boolean mInputConsumerEnabled;
+
+    // Whether or not the recents animation should cause the primary split-screen stack to be
+    // minimized
+    private boolean mSplitScreenMinimized;
 
     private Rect mTmpRect = new Rect();
 
@@ -116,7 +120,7 @@ public class RecentsAnimationController implements DeathRecipient {
         @Override
         public TaskSnapshot screenshotTask(int taskId) {
             if (DEBUG) Log.d(TAG, "screenshotTask(" + taskId + "): mCanceled=" + mCanceled);
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mService.getWindowManagerLock()) {
                     if (mCanceled) {
@@ -145,7 +149,7 @@ public class RecentsAnimationController implements DeathRecipient {
         @Override
         public void finish(boolean moveHomeToTop) {
             if (DEBUG) Log.d(TAG, "finish(" + moveHomeToTop + "): mCanceled=" + mCanceled);
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mService.getWindowManagerLock()) {
                     if (mCanceled) {
@@ -166,7 +170,7 @@ public class RecentsAnimationController implements DeathRecipient {
         @Override
         public void setAnimationTargetsBehindSystemBars(boolean behindSystemBars)
                 throws RemoteException {
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mService.getWindowManagerLock()) {
                     for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
@@ -183,7 +187,7 @@ public class RecentsAnimationController implements DeathRecipient {
         public void setInputConsumerEnabled(boolean enabled) {
             if (DEBUG) Log.d(TAG, "setInputConsumerEnabled(" + enabled + "): mCanceled="
                     + mCanceled);
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mService.getWindowManagerLock()) {
                     if (mCanceled) {
@@ -193,6 +197,23 @@ public class RecentsAnimationController implements DeathRecipient {
                     mInputConsumerEnabled = enabled;
                     mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
                     mService.scheduleAnimationLocked();
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void setSplitScreenMinimized(boolean minimized) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mService.getWindowManagerLock()) {
+                    if (mCanceled) {
+                        return;
+                    }
+
+                    mSplitScreenMinimized = minimized;
+                    mService.checkSplitScreenMinimizedChanged(true /* animate */);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -330,6 +351,7 @@ public class RecentsAnimationController implements DeathRecipient {
                 Slog.e(TAG, "Failed to cancel recents animation", e);
             }
         }
+
         // Clean up and return to the previous app
         // Don't hold the WM lock here as it calls back to AM/RecentsAnimation
         mCallbacks.onAnimationFinished(reorderMode);
@@ -350,7 +372,7 @@ public class RecentsAnimationController implements DeathRecipient {
         mPendingAnimations.clear();
 
         mRunner.asBinder().unlinkToDeath(this, 0);
-
+        // Clear associated input consumers
         mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
         mService.destroyInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
     }
@@ -373,6 +395,10 @@ public class RecentsAnimationController implements DeathRecipient {
                 mService.getRecentsAnimationController().startAnimation();
             }
         }
+    }
+
+    boolean isSplitScreenMinimized() {
+        return mSplitScreenMinimized;
     }
 
     boolean isWallpaperVisible(WindowState w) {

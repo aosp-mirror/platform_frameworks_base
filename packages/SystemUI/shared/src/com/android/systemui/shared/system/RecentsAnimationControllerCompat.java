@@ -61,6 +61,14 @@ public class RecentsAnimationControllerCompat {
         }
     }
 
+    public void setSplitScreenMinimized(boolean minimized) {
+        try {
+            mAnimationController.setSplitScreenMinimized(minimized);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to set minimize dock", e);
+        }
+    }
+
     public void finish(boolean toHome) {
         try {
             mAnimationController.finish(toHome);

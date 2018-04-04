@@ -59,4 +59,9 @@ interface IRecentsAnimationController {
     * taken.
     */
     void setAnimationTargetsBehindSystemBars(boolean behindSystemBars);
+
+    /**
+     * Informs the system that the primary split-screen stack should be minimized.
+     */
+    void setSplitScreenMinimized(boolean minimized);
 }
