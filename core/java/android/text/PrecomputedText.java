@@ -16,6 +16,7 @@
 
 package android.text;
 
+import android.annotation.FloatRange;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -44,13 +45,17 @@ import java.util.Objects;
  * <pre>
  * An example usage is:
  * <code>
- *  void asyncSetText(final TextView textView, final String longString, Handler bgThreadHandler) {
+ *  static void asyncSetText(TextView textView, final String longString, Executor bgExecutor) {
  *      // construct precompute related parameters using the TextView that we will set the text on.
- *      final PrecomputedText.Params params = textView.getTextParams();
- *      bgThreadHandler.post(() -> {
- *          final PrecomputedText precomputedText =
- *                  PrecomputedText.create(expensiveLongString, params);
+ *      final PrecomputedText.Params params = textView.getTextMetricsParams();
+ *      final Reference textViewRef = new WeakReference<>(textView);
+ *      bgExecutor.submit(() -> {
+ *          TextView textView = textViewRef.get();
+ *          if (textView == null) return;
+ *          final PrecomputedText precomputedText = PrecomputedText.create(longString, params);
  *          textView.post(() -> {
+ *              TextView textView = textViewRef.get();
+ *              if (textView == null) return;
  *              textView.setText(precomputedText);
  *          });
  *      });
@@ -363,6 +368,7 @@ public class PrecomputedText implements Spannable {
 
     /**
      * Return the underlying text.
+     * @hide
      */
     public @NonNull CharSequence getText() {
         return mText;
@@ -451,27 +457,61 @@ public class PrecomputedText implements Spannable {
             + ", gave " + pos);
     }
 
-    /** @hide */
-    public float getWidth(@IntRange(from = 0) int start, @IntRange(from = 0) int end) {
+    /**
+     * Returns text width for the given range.
+     * Both {@code start} and {@code end} offset need to be in the same paragraph, otherwise
+     * IllegalArgumentException will be thrown.
+     *
+     * @param start the inclusive start offset in the text
+     * @param end the exclusive end offset in the text
+     * @return the text width
+     * @throws IllegalArgumentException if start and end offset are in the different paragraph.
+     */
+    public @FloatRange(from = 0) float getWidth(@IntRange(from = 0) int start,
+            @IntRange(from = 0) int end) {
+        Preconditions.checkArgument(0 <= start && start <= mText.length(), "invalid start offset");
+        Preconditions.checkArgument(0 <= end && end <= mText.length(), "invalid end offset");
+        Preconditions.checkArgument(start <= end, "start offset can not be larger than end offset");
+
+        if (start == end) {
+            return 0;
+        }
         final int paraIndex = findParaIndex(start);
         final int paraStart = getParagraphStart(paraIndex);
         final int paraEnd = getParagraphEnd(paraIndex);
         if (start < paraStart || paraEnd < end) {
-            throw new RuntimeException("Cannot measured across the paragraph:"
+            throw new IllegalArgumentException("Cannot measured across the paragraph:"
                 + "para: (" + paraStart + ", " + paraEnd + "), "
                 + "request: (" + start + ", " + end + ")");
         }
         return getMeasuredParagraph(paraIndex).getWidth(start - paraStart, end - paraStart);
     }
 
-    /** @hide */
+    /**
+     * Retrieves the text bounding box for the given range.
+     * Both {@code start} and {@code end} offset need to be in the same paragraph, otherwise
+     * IllegalArgumentException will be thrown.
+     *
+     * @param start the inclusive start offset in the text
+     * @param end the exclusive end offset in the text
+     * @param bounds the output rectangle
+     * @throws IllegalArgumentException if start and end offset are in the different paragraph.
+     */
     public void getBounds(@IntRange(from = 0) int start, @IntRange(from = 0) int end,
             @NonNull Rect bounds) {
+        Preconditions.checkArgument(0 <= start && start <= mText.length(), "invalid start offset");
+        Preconditions.checkArgument(0 <= end && end <= mText.length(), "invalid end offset");
+        Preconditions.checkArgument(start <= end, "start offset can not be larger than end offset");
+        Preconditions.checkNotNull(bounds);
+        if (start == end) {
+            bounds.set(0, 0, 0, 0);
+            return;
+        }
         final int paraIndex = findParaIndex(start);
         final int paraStart = getParagraphStart(paraIndex);
         final int paraEnd = getParagraphEnd(paraIndex);
         if (start < paraStart || paraEnd < end) {
-            throw new RuntimeException("Cannot measured across the paragraph:"
+            throw new IllegalArgumentException("Cannot measured across the paragraph:"
                 + "para: (" + paraStart + ", " + paraEnd + "), "
                 + "request: (" + start + ", " + end + ")");
         }

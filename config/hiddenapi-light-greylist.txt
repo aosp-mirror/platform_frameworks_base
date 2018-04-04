@@ -296,6 +296,7 @@ Landroid/app/job/IJobScheduler$Stub;->asInterface(Landroid/os/IBinder;)Landroid/
 Landroid/app/job/IJobScheduler$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/app/LoadedApk;->getAssets()Landroid/content/res/AssetManager;
 Landroid/app/LoadedApk;->getClassLoader()Ljava/lang/ClassLoader;
+Landroid/app/LoadedApk;->getCompatibilityInfo()Landroid/content/res/CompatibilityInfo;
 Landroid/app/LoadedApk;->getDataDirFile()Ljava/io/File;
 Landroid/app/LoadedApk;->getResources()Landroid/content/res/Resources;
 Landroid/app/LoadedApk;->mActivityThread:Landroid/app/ActivityThread;
@@ -377,8 +378,10 @@ Landroid/app/Vr2dDisplayProperties$Builder;-><init>()V
 Landroid/app/Vr2dDisplayProperties$Builder;->setEnabled(Z)Landroid/app/Vr2dDisplayProperties$Builder;
 Landroid/app/Vr2dDisplayProperties;-><init>(III)V
 Landroid/app/VrManager;->getPersistentVrModeEnabled()Z
+Landroid/app/VrManager;->mService:Landroid/service/vr/IVrManager;
 Landroid/app/VrManager;->registerVrStateCallback(Landroid/app/VrStateCallback;Landroid/os/Handler;)V
 Landroid/app/VrManager;->setVr2dDisplayProperties(Landroid/app/Vr2dDisplayProperties;)V
+Landroid/app/VrManager;->unregisterVrStateCallback(Landroid/app/VrStateCallback;)V
 Landroid/app/WallpaperColors;->getColorHints()I
 Landroid/app/WallpaperManager;->getBitmap()Landroid/graphics/Bitmap;
 Landroid/app/WallpaperManager;->getBitmap(Z)Landroid/graphics/Bitmap;
@@ -447,6 +450,7 @@ Landroid/content/ContentResolver;->releaseUnstableProvider(Landroid/content/ICon
 Landroid/content/ContentResolver;->unstableProviderDied(Landroid/content/IContentProvider;)V
 Landroid/content/ContentValues;-><init>(Ljava/util/HashMap;)V
 Landroid/content/ContentValues;->mValues:Ljava/util/HashMap;
+Landroid/content/Context;->getBasePackageName()Ljava/lang/String;
 Landroid/content/Context;->getSharedPrefsFile(Ljava/lang/String;)Ljava/io/File;
 Landroid/content/Context;->getThemeResId()I
 Landroid/content/Context;->sendBroadcastAsUser(Landroid/content/Intent;Landroid/os/UserHandle;Ljava/lang/String;I)V
@@ -469,6 +473,7 @@ Landroid/content/IntentFilter;->mActions:Ljava/util/ArrayList;
 Landroid/content/Intent;->mExtras:Landroid/os/Bundle;
 Landroid/content/Intent;->putExtra(Ljava/lang/String;Landroid/os/IBinder;)Landroid/content/Intent;
 Landroid/content/pm/ActivityInfo;->resizeMode:I
+Landroid/content/pm/ActivityInfo;->supportsPictureInPicture()Z
 Landroid/content/pm/ApplicationInfo;->enabledSetting:I
 Landroid/content/pm/ApplicationInfo;->getBaseResourcePath()Ljava/lang/String;
 Landroid/content/pm/ApplicationInfo;->installLocation:I
@@ -2099,6 +2104,8 @@ Landroid/util/Slog;->w(Ljava/lang/String;Ljava/lang/String;)I
 Landroid/util/SparseIntArray;->mKeys:[I
 Landroid/util/SparseIntArray;->mSize:I
 Landroid/util/SparseIntArray;->mValues:[I
+Landroid/view/accessibility/AccessibilityInteractionClient;->clearCache()V
+Landroid/view/accessibility/AccessibilityInteractionClient;->getInstance()Landroid/view/accessibility/AccessibilityInteractionClient;
 Landroid/view/accessibility/AccessibilityManager;->getInstance(Landroid/content/Context;)Landroid/view/accessibility/AccessibilityManager;
 Landroid/view/accessibility/AccessibilityManager;->isHighTextContrastEnabled()Z
 Landroid/view/accessibility/AccessibilityManager;->mAccessibilityStateChangeListeners:Landroid/util/ArrayMap;

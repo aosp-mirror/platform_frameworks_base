@@ -1335,6 +1335,11 @@
     <string name="volume_ringer_status_vibrate">Vibrate</string>
     <string name="volume_ringer_status_silent">Mute</string>
 
+    <!-- Shown in the header of quick settings to indicate to the user that their phone ringer is on vibrate. [CHAR_LIMIT=NONE] -->
+    <string name="qs_status_phone_vibrate">Phone on vibrate</string>
+    <!-- Shown in the header of quick settings to indicate to the user that their phone ringer is on silent (muted). [CHAR_LIMIT=NONE] -->
+    <string name="qs_status_phone_muted">Phone muted</string>
+
     <string name="volume_stream_muted" translatable="false">%s silent</string>
     <string name="volume_stream_vibrate" translatable="false">%s vibrate</string>
     <string name="volume_stream_suppressed" translatable="false">%1$s silent — %2$s</string>

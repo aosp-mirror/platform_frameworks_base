@@ -686,10 +686,15 @@ public class BrightnessTracker {
     }
 
     public ParceledListSlice<AmbientBrightnessDayStats> getAmbientBrightnessStats(int userId) {
-        ArrayList<AmbientBrightnessDayStats> stats = mAmbientBrightnessStatsTracker.getUserStats(
-                userId);
-        return (stats != null) ? new ParceledListSlice<>(stats) : new ParceledListSlice<>(
-                Collections.EMPTY_LIST);
+        if (mAmbientBrightnessStatsTracker != null) {
+            ArrayList<AmbientBrightnessDayStats> stats =
+                    mAmbientBrightnessStatsTracker.getUserStats(
+                            userId);
+            if (stats != null) {
+                return new ParceledListSlice<>(stats);
+            }
+        }
+        return ParceledListSlice.emptyList();
     }
 
     // Not allowed to keep the SensorEvent so used to copy the data we care about.

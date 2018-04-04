@@ -20,7 +20,7 @@ Landroid/app/AppOpsManager$PackageOps;->getOps()Ljava/util/List;
 Landroid/app/AppOpsManager$PackageOps;->getPackageName()Ljava/lang/String;
 Landroid/app/AppOpsManager$PackageOps;->getUid()I
 Landroid/app/IActivityController$Stub;-><init>()V
-Landroid/app/IActivityManager;->cancelRecentsAnimation()V
+Landroid/app/IActivityManager;->cancelRecentsAnimation(Z)V
 Landroid/app/IActivityManager;->cancelTaskWindowTransition(I)V
 Landroid/app/IActivityManager;->closeSystemDialogs(Ljava/lang/String;)V
 Landroid/app/IActivityManager;->getCurrentUser()Landroid/content/pm/UserInfo;

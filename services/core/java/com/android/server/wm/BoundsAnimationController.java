@@ -161,7 +161,10 @@ public class BoundsAnimationController {
 
         // Timeout callback to ensure we continue the animation if waiting for resuming or app
         // windows drawn fails
-        private final Runnable mResumeRunnable = () -> resume();
+        private final Runnable mResumeRunnable = () -> {
+            if (DEBUG) Slog.d(TAG, "pause: timed out waiting for windows drawn");
+            resume();
+        };
 
         BoundsAnimator(BoundsAnimationTarget target, Rect from, Rect to,
                 @SchedulePipModeChangedState int schedulePipModeChangedState,
@@ -213,7 +216,7 @@ public class BoundsAnimationController {
 
                 // When starting an animation from fullscreen, pause here and wait for the
                 // windows-drawn signal before we start the rest of the transition down into PiP.
-                if (mMoveFromFullscreen) {
+                if (mMoveFromFullscreen && mTarget.shouldDeferStartOnMoveToFullscreen()) {
                     pause();
                 }
             } else if (mPrevSchedulePipModeChangedState == SCHEDULE_PIP_MODE_CHANGED_ON_END &&

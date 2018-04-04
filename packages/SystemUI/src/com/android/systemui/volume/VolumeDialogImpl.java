@@ -213,7 +213,7 @@ public class VolumeDialogImpl implements VolumeDialog {
                     .setInterpolator(new SystemUIInterpolators.LogDecelerateInterpolator())
                     .withEndAction(() -> {
                         mWindow.getDecorView().requestAccessibilityFocus();
-                        if (!Prefs.getBoolean(mContext, Prefs.Key.TOUCHED_RINGER_TOGGLE, true)) {
+                        if (!Prefs.getBoolean(mContext, Prefs.Key.TOUCHED_RINGER_TOGGLE, false)) {
                             mRingerIcon.postOnAnimationDelayed(mSinglePress, 1500);
                         }
                     })

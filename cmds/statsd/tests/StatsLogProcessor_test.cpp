@@ -43,7 +43,7 @@ using android::util::ProtoOutputStream;
 class MockMetricsManager : public MetricsManager {
 public:
     MockMetricsManager() : MetricsManager(
-        ConfigKey(1, 12345), StatsdConfig(), 1000,
+        ConfigKey(1, 12345), StatsdConfig(), 1000, 1000,
         new UidMap(),
         new AlarmMonitor(10, [](const sp<IStatsCompanionService>&, int64_t){},
                          [](const sp<IStatsCompanionService>&){}),
@@ -135,7 +135,7 @@ TEST(StatsLogProcessorTest, TestUidMapHasSnapshot) {
     ConfigKey key(3, 4);
     StatsdConfig config;
     config.add_allowed_log_source("AID_ROOT");
-    p.OnConfigUpdated(key, config);
+    p.OnConfigUpdated(0, key, config);
 
     // Expect to get no metrics, but snapshot specified above in uidmap.
     vector<uint8_t> bytes;
@@ -147,6 +147,35 @@ TEST(StatsLogProcessorTest, TestUidMapHasSnapshot) {
     auto uidmap = output.reports(0).uid_map();
     EXPECT_TRUE(uidmap.snapshots_size() > 0);
     EXPECT_EQ(2, uidmap.snapshots(0).package_info_size());
+}
+
+TEST(StatsLogProcessorTest, TestReportIncludesSubConfig) {
+    // Setup simple config key corresponding to empty config.
+    sp<UidMap> m = new UidMap();
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    sp<AlarmMonitor> subscriberAlarmMonitor;
+    int broadcastCount = 0;
+    StatsLogProcessor p(m, anomalyAlarmMonitor, subscriberAlarmMonitor, 0,
+                        [&broadcastCount](const ConfigKey& key) { broadcastCount++; });
+    ConfigKey key(3, 4);
+    StatsdConfig config;
+    auto annotation = config.add_annotation();
+    annotation->set_field_int64(1);
+    annotation->set_field_int32(2);
+    config.add_allowed_log_source("AID_ROOT");
+    p.OnConfigUpdated(1, key, config);
+
+    // Expect to get no metrics, but snapshot specified above in uidmap.
+    vector<uint8_t> bytes;
+    p.onDumpReport(key, 1, &bytes);
+
+    ConfigMetricsReportList output;
+    output.ParseFromArray(bytes.data(), bytes.size());
+    EXPECT_TRUE(output.reports_size() > 0);
+    auto report = output.reports(0);
+    EXPECT_EQ(1, report.annotation_size());
+    EXPECT_EQ(1, report.annotation(0).field_int64());
+    EXPECT_EQ(2, report.annotation(0).field_int32());
 }
 
 #else

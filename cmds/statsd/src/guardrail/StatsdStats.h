@@ -66,6 +66,9 @@ struct ConfigStats {
     // Stores the number of times an anomaly detection alert has been declared.
     // The map size is capped by kMaxConfigCount.
     std::map<const int64_t, int> alert_stats;
+
+    // Stores the config ID for each sub-config used.
+    std::list<std::pair<const int64_t, const int32_t>> annotations;
 };
 
 struct UidMapStats {
@@ -142,7 +145,9 @@ public:
      * If the config is not valid, this config stats will be put into icebox immediately.
      */
     void noteConfigReceived(const ConfigKey& key, int metricsCount, int conditionsCount,
-                            int matchersCount, int alertCount, bool isValid);
+                            int matchersCount, int alertCount,
+                            const std::list<std::pair<const int64_t, const int32_t>>& annotations,
+                            bool isValid);
     /**
      * Report a config has been removed.
      */

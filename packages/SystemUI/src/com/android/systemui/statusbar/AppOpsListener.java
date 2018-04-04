@@ -62,7 +62,7 @@ public class AppOpsListener implements AppOpsManager.OnOpActiveChangedListener {
     public void onOpActiveChanged(int code, int uid, String packageName, boolean active) {
         mFsc.onAppOpChanged(code, uid, packageName, active);
         mPresenter.getHandler().post(() -> {
-          mEntryManager.updateNotificationsForAppOps(code, uid, packageName, active);
+          mEntryManager.updateNotificationsForAppOp(code, uid, packageName, active);
         });
     }
 }

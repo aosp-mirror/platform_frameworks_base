@@ -237,12 +237,7 @@ final class ViewState {
         }
         pw.print(prefix); pw.print("state:" ); pw.println(getStateAsString());
         if (mResponse != null) {
-            pw.print(prefix); pw.print("response:");
-            if (sVerbose) {
-                pw.println(mResponse);
-            } else {
-                pw.print("id=");pw.println(mResponse.getRequestId());
-            }
+            pw.print(prefix); pw.print("response id:");pw.println(mResponse.getRequestId());
         }
         if (mCurrentValue != null) {
             pw.print(prefix); pw.print("currentValue:" ); pw.println(mCurrentValue);

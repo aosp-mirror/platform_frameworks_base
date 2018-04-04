@@ -36,7 +36,8 @@ namespace statsd {
 // A MetricsManager is responsible for managing metrics from one single config source.
 class MetricsManager : public PackageInfoListener {
 public:
-    MetricsManager(const ConfigKey& configKey, const StatsdConfig& config, const long timeBaseSec,
+    MetricsManager(const ConfigKey& configKey, const StatsdConfig& config,
+                   const long timeBaseSec, const long currentTimeSec,
                    const sp<UidMap>& uidMap, const sp<AlarmMonitor>& anomalyAlarmMonitor,
                    const sp<AlarmMonitor>& periodicAlarmMonitor);
 
@@ -105,6 +106,9 @@ private:
     // The combined uid sources (after translating pkg name to uid).
     // Logs from uids that are not in the list will be ignored to avoid spamming.
     std::set<int32_t> mAllowedLogSources;
+
+    // Contains the annotations passed in with StatsdConfig.
+    std::list<std::pair<const int64_t, const int32_t>> mAnnotations;
 
     // To guard access to mAllowedLogSources
     mutable std::mutex mAllowedLogSourcesMutex;

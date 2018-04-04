@@ -32,6 +32,7 @@ import android.net.NetworkRequest;
 import android.net.Proxy;
 import android.net.TrafficStats;
 import android.net.Uri;
+import android.net.dns.ResolvUtil;
 import android.net.http.SslError;
 import android.os.Bundle;
 import android.telephony.CarrierConfigManager;
@@ -115,6 +116,8 @@ public class CaptivePortalLoginActivity extends Activity {
             requestNetworkForCaptivePortal();
         } else {
             mCm.bindProcessToNetwork(mNetwork);
+            mCm.setProcessDefaultNetworkForHostResolution(
+                    ResolvUtil.getNetworkWithUseLocalNameserversFlag(mNetwork));
             // Start initial page load so WebView finishes loading proxy settings.
             // Actual load of mUrl is initiated by MyWebViewClient.
             mWebView.loadData("", "text/html", null);

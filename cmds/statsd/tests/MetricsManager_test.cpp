@@ -287,7 +287,7 @@ TEST(MetricsManagerTest, TestGoodConfig) {
 
     EXPECT_TRUE(initStatsdConfig(kConfigKey, config, uidMap,
                                  anomalyAlarmMonitor, periodicAlarmMonitor,
-                                 timeBaseSec, allTagIds, allAtomMatchers,
+                                 timeBaseSec, timeBaseSec, allTagIds, allAtomMatchers,
                                  allConditionTrackers, allMetricProducers, allAnomalyTrackers,
                                  allAlarmTrackers,
                                  conditionToMetricMap, trackerToMetricMap, trackerToConditionMap,
@@ -315,7 +315,7 @@ TEST(MetricsManagerTest, TestDimensionMetricsWithMultiTags) {
 
     EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap,
                                   anomalyAlarmMonitor, periodicAlarmMonitor,
-                                  timeBaseSec, allTagIds, allAtomMatchers,
+                                  timeBaseSec, timeBaseSec, allTagIds, allAtomMatchers,
                                   allConditionTrackers, allMetricProducers, allAnomalyTrackers,
                                   allAlarmTrackers,
                                   conditionToMetricMap, trackerToMetricMap, trackerToConditionMap,
@@ -340,7 +340,7 @@ TEST(MetricsManagerTest, TestCircleLogMatcherDependency) {
 
     EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap,
                                   anomalyAlarmMonitor, periodicAlarmMonitor,
-                                  timeBaseSec, allTagIds, allAtomMatchers,
+                                  timeBaseSec, timeBaseSec, allTagIds, allAtomMatchers,
                                   allConditionTrackers, allMetricProducers, allAnomalyTrackers,
                                   allAlarmTrackers,
                                   conditionToMetricMap, trackerToMetricMap, trackerToConditionMap,
@@ -364,7 +364,7 @@ TEST(MetricsManagerTest, TestMissingMatchers) {
     std::set<int64_t> noReportMetricIds;
     EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap,
                                   anomalyAlarmMonitor, periodicAlarmMonitor,
-                                  timeBaseSec, allTagIds, allAtomMatchers,
+                                  timeBaseSec, timeBaseSec, allTagIds, allAtomMatchers,
                                   allConditionTrackers, allMetricProducers, allAnomalyTrackers,
                                   allAlarmTrackers,
                                   conditionToMetricMap, trackerToMetricMap, trackerToConditionMap,
@@ -388,7 +388,7 @@ TEST(MetricsManagerTest, TestMissingPredicate) {
     std::set<int64_t> noReportMetricIds;
     EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap,
                                   anomalyAlarmMonitor, periodicAlarmMonitor,
-                                  timeBaseSec, allTagIds, allAtomMatchers,
+                                  timeBaseSec, timeBaseSec, allTagIds, allAtomMatchers,
                                   allConditionTrackers, allMetricProducers, allAnomalyTrackers,
                                   allAlarmTrackers,
                                   conditionToMetricMap, trackerToMetricMap, trackerToConditionMap,
@@ -413,7 +413,7 @@ TEST(MetricsManagerTest, TestCirclePredicateDependency) {
 
     EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap,
                                   anomalyAlarmMonitor, periodicAlarmMonitor,
-                                  timeBaseSec, allTagIds, allAtomMatchers,
+                                  timeBaseSec, timeBaseSec, allTagIds, allAtomMatchers,
                                   allConditionTrackers, allMetricProducers, allAnomalyTrackers,
                                   allAlarmTrackers,
                                   conditionToMetricMap, trackerToMetricMap, trackerToConditionMap,
@@ -438,7 +438,7 @@ TEST(MetricsManagerTest, testAlertWithUnknownMetric) {
 
     EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap,
                                   anomalyAlarmMonitor, periodicAlarmMonitor,
-                                  timeBaseSec, allTagIds, allAtomMatchers,
+                                  timeBaseSec, timeBaseSec, allTagIds, allAtomMatchers,
                                   allConditionTrackers, allMetricProducers, allAnomalyTrackers,
                                   allAlarmTrackers,
                                   conditionToMetricMap, trackerToMetricMap, trackerToConditionMap,

@@ -86,7 +86,7 @@ public class AppOpsListenerTest extends SysuiTestCase {
         mListener.onOpActiveChanged(
                 AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
         waitForIdleSync(mHandler);
-        verify(mEntryManager, times(1)).updateNotificationsForAppOps(
+        verify(mEntryManager, times(1)).updateNotificationsForAppOp(
                 AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true);
     }
 

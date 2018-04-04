@@ -17,12 +17,12 @@
 package com.android.server.pm;
 
 import static android.Manifest.permission.DELETE_PACKAGES;
-import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
-import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.Manifest.permission.INSTALL_PACKAGES;
+import static android.Manifest.permission.MANAGE_DEVICE_ADMINS;
 import static android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.REQUEST_DELETE_PACKAGES;
+import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.CERT_INPUT_RAW_X509;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
@@ -167,8 +167,8 @@ import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageList;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManager.LegacyPackageDeleteObserver;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackageListObserver;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ActivityIntentInfo;
@@ -310,10 +310,10 @@ import com.android.server.pm.dex.DexoptOptions;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.permission.BasePermission;
 import com.android.server.pm.permission.DefaultPermissionGrantPolicy;
-import com.android.server.pm.permission.PermissionManagerService;
-import com.android.server.pm.permission.PermissionManagerInternal;
 import com.android.server.pm.permission.DefaultPermissionGrantPolicy.DefaultPermissionGrantedCallback;
+import com.android.server.pm.permission.PermissionManagerInternal;
 import com.android.server.pm.permission.PermissionManagerInternal.PermissionCallback;
+import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionsState;
 import com.android.server.pm.permission.PermissionsState.PermissionState;
 import com.android.server.security.VerityUtils;
@@ -1326,6 +1326,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int INTENT_FILTER_VERIFIED = 18;
     static final int WRITE_PACKAGE_LIST = 19;
     static final int INSTANT_APP_RESOLUTION_PHASE_TWO = 20;
+    static final int DEF_CONTAINER_BIND = 21;
 
     static final int WRITE_SETTINGS_DELAY = 10*1000;  // 10 seconds
 
@@ -1417,8 +1418,7 @@ public class PackageManagerService extends IPackageManager.Stub
             new ArrayList<HandlerParams>();
 
         private boolean connectToService() {
-            if (DEBUG_SD_INSTALL) Log.i(TAG, "Trying to bind to" +
-                    " DefaultContainerService");
+            if (DEBUG_INSTALL) Log.i(TAG, "Trying to bind to DefaultContainerService");
             Intent service = new Intent().setComponent(DEFAULT_CONTAINER_COMPONENT);
             Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
             if (mContext.bindServiceAsUser(service, mDefContainerConn,
@@ -1453,6 +1453,17 @@ public class PackageManagerService extends IPackageManager.Stub
 
         void doHandleMessage(Message msg) {
             switch (msg.what) {
+                case DEF_CONTAINER_BIND:
+                    if (!mBound) {
+                        Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "earlyBindingMCS",
+                                System.identityHashCode(mHandler));
+                        if (!connectToService()) {
+                            Slog.e(TAG, "Failed to bind to media container service");
+                        }
+                        Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "earlyBindingMCS",
+                                System.identityHashCode(mHandler));
+                    }
+                    break;
                 case INIT_COPY: {
                     HandlerParams params = (HandlerParams) msg.obj;
                     int idx = mPendingInstalls.size();
@@ -8185,33 +8196,20 @@ public class PackageManagerService extends IPackageManager.Stub
     private ProviderInfo resolveContentProviderInternal(String name, int flags, int userId) {
         if (!sUserManager.exists(userId)) return null;
         flags = updateFlagsForComponent(flags, userId, name);
-        final String instantAppPkgName = getInstantAppPackageName(Binder.getCallingUid());
-        // reader
+        final int callingUid = Binder.getCallingUid();
         synchronized (mPackages) {
             final PackageParser.Provider provider = mProvidersByAuthority.get(name);
             PackageSetting ps = provider != null
                     ? mSettings.mPackages.get(provider.owner.packageName)
                     : null;
             if (ps != null) {
-                final boolean isInstantApp = ps.getInstantApp(userId);
-                // normal application; filter out instant application provider
-                if (instantAppPkgName == null && isInstantApp) {
-                    return null;
-                }
-                // instant application; filter out other instant applications
-                if (instantAppPkgName != null
-                        && isInstantApp
-                        && !provider.owner.packageName.equals(instantAppPkgName)) {
-                    return null;
-                }
-                // instant application; filter out non-exposed provider
-                if (instantAppPkgName != null
-                        && !isInstantApp
-                        && (provider.info.flags & ProviderInfo.FLAG_VISIBLE_TO_INSTANT_APP) == 0) {
-                    return null;
-                }
                 // provider not enabled
                 if (!mSettings.isEnabledAndMatchLPr(provider.info, flags, userId)) {
+                    return null;
+                }
+                final ComponentName component =
+                        new ComponentName(provider.info.packageName, provider.info.name);
+                if (filterAppAccessLPr(ps, callingUid, component, TYPE_PROVIDER, userId)) {
                     return null;
                 }
                 return PackageParser.generateProviderInfo(
@@ -13632,6 +13630,14 @@ public class PackageManagerService extends IPackageManager.Stub
         // If the install is being performed by a regular app and the install reason was set to any
         // value but enterprise policy, leave the install reason unchanged.
         return installReason;
+    }
+
+    /**
+     * Attempts to bind to the default container service explicitly instead of doing so lazily on
+     * install commit.
+     */
+    void earlyBindToDefContainer() {
+        mHandler.sendMessage(mHandler.obtainMessage(DEF_CONTAINER_BIND));
     }
 
     void installStage(String packageName, File stagedDir,

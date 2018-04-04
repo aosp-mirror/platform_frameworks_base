@@ -18,6 +18,7 @@ package com.android.server.locksettings.recoverablekeystore;
 
 import static android.security.keystore.recovery.RecoveryController.ERROR_BAD_CERTIFICATE_FORMAT;
 import static android.security.keystore.recovery.RecoveryController.ERROR_DECRYPTION_FAILED;
+import static android.security.keystore.recovery.RecoveryController.ERROR_DOWNGRADE_CERTIFICATE;
 import static android.security.keystore.recovery.RecoveryController.ERROR_INSECURE_USER;
 import static android.security.keystore.recovery.RecoveryController.ERROR_INVALID_KEY_FORMAT;
 import static android.security.keystore.recovery.RecoveryController.ERROR_INVALID_CERTIFICATE;
@@ -212,6 +213,8 @@ public class RecoverableKeyStoreManager {
                 Log.i(TAG, "The cert file serial number is the same, so skip updating.");
             } else {
                 Log.e(TAG, "The cert file serial number is older than the one in database.");
+                throw new ServiceSpecificException(ERROR_DOWNGRADE_CERTIFICATE,
+                        "The cert file serial number is older than the one in database.");
             }
             return;
         }

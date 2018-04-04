@@ -114,6 +114,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.media.AudioAttributes;
@@ -492,8 +493,8 @@ public class NotificationManagerService extends SystemService {
                                     | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId);
             for (ComponentName cn : approvedAssistants) {
                 try {
-                    getBinderService().setNotificationAssistantAccessGrantedForUser(cn,
-                            userId, true);
+                    getBinderService().setNotificationAssistantAccessGrantedForUser(
+                            cn, userId, true);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
@@ -535,6 +536,8 @@ public class NotificationManagerService extends SystemService {
             mConditionProviders.migrateToXml();
             savePolicyFile();
         }
+
+        mAssistants.ensureAssistant();
     }
 
     private void loadPolicyFile() {
@@ -2283,6 +2286,12 @@ public class NotificationManagerService extends SystemService {
         public int getDeletedChannelCount(String pkg, int uid) {
             enforceSystemOrSystemUI("getDeletedChannelCount");
             return mRankingHelper.getDeletedChannelCount(pkg, uid);
+        }
+
+        @Override
+        public int getBlockedChannelCount(String pkg, int uid) {
+            enforceSystemOrSystemUI("getBlockedChannelCount");
+            return mRankingHelper.getBlockedChannelCount(pkg, uid);
         }
 
         @Override
@@ -6134,11 +6143,14 @@ public class NotificationManagerService extends SystemService {
             return !getServices().isEmpty();
         }
 
-        protected void upgradeXml(final int xmlVersion, final int userId) {
-            if (xmlVersion == 0) {
-                // one time approval of the OOB assistant
-                Slog.d(TAG, "Approving default notification assistant for user " + userId);
-                readDefaultAssistant(userId);
+        protected void ensureAssistant() {
+            final List<UserInfo> activeUsers = mUm.getUsers(true);
+            for (UserInfo userInfo : activeUsers) {
+                int userId = userInfo.getUserHandle().getIdentifier();
+                if (getAllowedPackages(userId).isEmpty()) {
+                    Slog.d(TAG, "Approving default notification assistant for user " + userId);
+                    readDefaultAssistant(userId);
+                }
             }
         }
     }

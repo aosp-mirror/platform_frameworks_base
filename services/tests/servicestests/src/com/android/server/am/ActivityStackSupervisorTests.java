@@ -265,4 +265,26 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         // Supervisor should skip over the non-existent display.
         assertEquals(null, mSupervisor.topRunningActivityLocked());
     }
+
+    /**
+     * Verifies that removal of activity with task and stack is done correctly.
+     */
+    @Test
+    public void testRemovingStackOnAppCrash() throws Exception {
+        final ActivityDisplay defaultDisplay = mService.mStackSupervisor.getDefaultDisplay();
+        final int originalStackCount = defaultDisplay.getChildCount();
+        final ActivityStack stack = mService.mStackSupervisor.getDefaultDisplay().createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
+        final ActivityRecord firstActivity = new ActivityBuilder(mService).setCreateTask(true)
+                .setStack(stack).build();
+
+        assertEquals(originalStackCount + 1, defaultDisplay.getChildCount());
+
+        // Let's pretend that the app has crashed.
+        firstActivity.app.thread = null;
+        mService.mStackSupervisor.finishTopCrashedActivitiesLocked(firstActivity.app, "test");
+
+        // Verify that the stack was removed.
+        assertEquals(originalStackCount, defaultDisplay.getChildCount());
+    }
 }

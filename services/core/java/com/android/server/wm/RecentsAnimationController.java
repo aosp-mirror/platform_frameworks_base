@@ -29,6 +29,7 @@ import static com.android.server.wm.WindowManagerService.H.NOTIFY_APP_TRANSITION
 import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
 import static com.android.server.wm.AnimationAdapterProto.REMOTE;
 
+import android.annotation.IntDef;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.WindowConfiguration;
 import android.graphics.Point;
@@ -67,12 +68,25 @@ public class RecentsAnimationController implements DeathRecipient {
     private static final boolean DEBUG = false;
     private static final long FAILSAFE_DELAY = 1000;
 
+    public static final int REORDER_KEEP_HOME_IN_PLACE = 0;
+    public static final int REORDER_MOVE_HOME_TO_TOP = 1;
+    public static final int REORDER_MOVE_HOME_TO_ORIGINAL_POSITION = 2;
+
+    @IntDef(prefix = { "REORDER_MODE_" }, value = {
+            REORDER_KEEP_HOME_IN_PLACE,
+            REORDER_MOVE_HOME_TO_TOP,
+            REORDER_MOVE_HOME_TO_ORIGINAL_POSITION
+    })
+    public @interface ReorderMode {}
+
     private final WindowManagerService mService;
     private final IRecentsAnimationRunner mRunner;
     private final RecentsAnimationCallbacks mCallbacks;
     private final ArrayList<TaskAnimationAdapter> mPendingAnimations = new ArrayList<>();
     private final int mDisplayId;
-    private final Runnable mFailsafeRunnable = this::cancelAnimation;
+    private final Runnable mFailsafeRunnable = () -> {
+        cancelAnimation(REORDER_MOVE_HOME_TO_ORIGINAL_POSITION);
+    };
 
     // The recents component app token that is shown behind the visibile tasks
     private AppWindowToken mHomeAppToken;
@@ -84,16 +98,20 @@ public class RecentsAnimationController implements DeathRecipient {
     private boolean mPendingStart = true;
 
     // Set when the animation has been canceled
-    private boolean mCanceled = false;
+    private boolean mCanceled;
 
     // Whether or not the input consumer is enabled. The input consumer must be both registered and
     // enabled for it to start intercepting touch events.
     private boolean mInputConsumerEnabled;
 
+    // Whether or not the recents animation should cause the primary split-screen stack to be
+    // minimized
+    private boolean mSplitScreenMinimized;
+
     private Rect mTmpRect = new Rect();
 
     public interface RecentsAnimationCallbacks {
-        void onAnimationFinished(boolean moveHomeToTop);
+        void onAnimationFinished(@ReorderMode int reorderMode);
     }
 
     private final IRecentsAnimationController mController =
@@ -102,7 +120,7 @@ public class RecentsAnimationController implements DeathRecipient {
         @Override
         public TaskSnapshot screenshotTask(int taskId) {
             if (DEBUG) Log.d(TAG, "screenshotTask(" + taskId + "): mCanceled=" + mCanceled);
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mService.getWindowManagerLock()) {
                     if (mCanceled) {
@@ -131,7 +149,7 @@ public class RecentsAnimationController implements DeathRecipient {
         @Override
         public void finish(boolean moveHomeToTop) {
             if (DEBUG) Log.d(TAG, "finish(" + moveHomeToTop + "): mCanceled=" + mCanceled);
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mService.getWindowManagerLock()) {
                     if (mCanceled) {
@@ -141,7 +159,9 @@ public class RecentsAnimationController implements DeathRecipient {
 
                 // Note, the callback will handle its own synchronization, do not lock on WM lock
                 // prior to calling the callback
-                mCallbacks.onAnimationFinished(moveHomeToTop);
+                mCallbacks.onAnimationFinished(moveHomeToTop
+                        ? REORDER_MOVE_HOME_TO_TOP
+                        : REORDER_MOVE_HOME_TO_ORIGINAL_POSITION);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -150,7 +170,7 @@ public class RecentsAnimationController implements DeathRecipient {
         @Override
         public void setAnimationTargetsBehindSystemBars(boolean behindSystemBars)
                 throws RemoteException {
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mService.getWindowManagerLock()) {
                     for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
@@ -167,7 +187,7 @@ public class RecentsAnimationController implements DeathRecipient {
         public void setInputConsumerEnabled(boolean enabled) {
             if (DEBUG) Log.d(TAG, "setInputConsumerEnabled(" + enabled + "): mCanceled="
                     + mCanceled);
-            long token = Binder.clearCallingIdentity();
+            final long token = Binder.clearCallingIdentity();
             try {
                 synchronized (mService.getWindowManagerLock()) {
                     if (mCanceled) {
@@ -177,6 +197,23 @@ public class RecentsAnimationController implements DeathRecipient {
                     mInputConsumerEnabled = enabled;
                     mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
                     mService.scheduleAnimationLocked();
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void setSplitScreenMinimized(boolean minimized) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mService.getWindowManagerLock()) {
+                    if (mCanceled) {
+                        return;
+                    }
+
+                    mSplitScreenMinimized = minimized;
+                    mService.checkSplitScreenMinimizedChanged(true /* animate */);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);
@@ -222,14 +259,14 @@ public class RecentsAnimationController implements DeathRecipient {
 
         // Skip the animation if there is nothing to animate
         if (mPendingAnimations.isEmpty()) {
-            cancelAnimation();
+            cancelAnimation(REORDER_MOVE_HOME_TO_ORIGINAL_POSITION);
             return;
         }
 
         try {
             mRunner.asBinder().linkToDeath(this, 0);
         } catch (RemoteException e) {
-            cancelAnimation();
+            cancelAnimation(REORDER_MOVE_HOME_TO_ORIGINAL_POSITION);
             return;
         }
 
@@ -299,7 +336,7 @@ public class RecentsAnimationController implements DeathRecipient {
                 reasons).sendToTarget();
     }
 
-    void cancelAnimation() {
+    void cancelAnimation(@ReorderMode int reorderMode) {
         if (DEBUG) Log.d(TAG, "cancelAnimation()");
         synchronized (mService.getWindowManagerLock()) {
             if (mCanceled) {
@@ -314,18 +351,20 @@ public class RecentsAnimationController implements DeathRecipient {
                 Slog.e(TAG, "Failed to cancel recents animation", e);
             }
         }
+
         // Clean up and return to the previous app
         // Don't hold the WM lock here as it calls back to AM/RecentsAnimation
-        mCallbacks.onAnimationFinished(false /* moveHomeToTop */);
+        mCallbacks.onAnimationFinished(reorderMode);
     }
 
-    void cleanupAnimation(boolean moveHomeToTop) {
+    void cleanupAnimation(@ReorderMode int reorderMode) {
         if (DEBUG) Log.d(TAG, "cleanupAnimation(): mPendingAnimations="
                 + mPendingAnimations.size());
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final TaskAnimationAdapter adapter = mPendingAnimations.get(i);
             adapter.mTask.setCanAffectSystemUiFlags(true);
-            if (moveHomeToTop) {
+            if (reorderMode == REORDER_MOVE_HOME_TO_TOP
+                    || reorderMode == REORDER_KEEP_HOME_IN_PLACE) {
                 adapter.mTask.dontAnimateDimExit();
             }
             adapter.mCapturedFinishCallback.onAnimationFinished(adapter);
@@ -333,7 +372,7 @@ public class RecentsAnimationController implements DeathRecipient {
         mPendingAnimations.clear();
 
         mRunner.asBinder().unlinkToDeath(this, 0);
-
+        // Clear associated input consumers
         mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
         mService.destroyInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
     }
@@ -344,7 +383,7 @@ public class RecentsAnimationController implements DeathRecipient {
 
     @Override
     public void binderDied() {
-        cancelAnimation();
+        cancelAnimation(REORDER_MOVE_HOME_TO_ORIGINAL_POSITION);
     }
 
     void checkAnimationReady(WallpaperController wallpaperController) {
@@ -356,6 +395,10 @@ public class RecentsAnimationController implements DeathRecipient {
                 mService.getRecentsAnimationController().startAnimation();
             }
         }
+    }
+
+    boolean isSplitScreenMinimized() {
+        return mSplitScreenMinimized;
     }
 
     boolean isWallpaperVisible(WindowState w) {
@@ -389,6 +432,15 @@ public class RecentsAnimationController implements DeathRecipient {
         return mHomeAppToken.windowsCanBeWallpaperTarget();
     }
 
+    boolean isAnimatingTask(Task task) {
+        for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
+            if (task == mPendingAnimations.get(i).mTask) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean isAnimatingApp(AppWindowToken appToken) {
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final Task task = mPendingAnimations.get(i).mTask;
@@ -409,18 +461,18 @@ public class RecentsAnimationController implements DeathRecipient {
         private OnAnimationFinishedCallback mCapturedFinishCallback;
         private final boolean mIsRecentTaskInvisible;
         private RemoteAnimationTarget mTarget;
+        private final Point mPosition = new Point();
+        private final Rect mBounds = new Rect();
 
         TaskAnimationAdapter(Task task, boolean isRecentTaskInvisible) {
             mTask = task;
             mIsRecentTaskInvisible = isRecentTaskInvisible;
+            final WindowContainer container = mTask.getParent();
+            container.getRelativePosition(mPosition);
+            container.getBounds(mBounds);
         }
 
         RemoteAnimationTarget createRemoteAnimationApp() {
-            final Point position = new Point();
-            final Rect bounds = new Rect();
-            final WindowContainer container = mTask.getParent();
-            container.getRelativePosition(position);
-            container.getBounds(bounds);
             final WindowState mainWindow = mTask.getTopVisibleAppMainWindow();
             if (mainWindow == null) {
                 return null;
@@ -429,7 +481,7 @@ public class RecentsAnimationController implements DeathRecipient {
             InsetUtils.addInsets(insets, mainWindow.mAppToken.getLetterboxInsets());
             mTarget = new RemoteAnimationTarget(mTask.mTaskId, MODE_CLOSING, mCapturedLeash,
                     !mTask.fillsParent(), mainWindow.mWinAnimator.mLastClipRect,
-                    insets, mTask.getPrefixOrderIndex(), position, bounds,
+                    insets, mTask.getPrefixOrderIndex(), mPosition, mBounds,
                     mTask.getWindowConfiguration(), mIsRecentTaskInvisible);
             return mTarget;
         }
@@ -452,13 +504,14 @@ public class RecentsAnimationController implements DeathRecipient {
         @Override
         public void startAnimation(SurfaceControl animationLeash, Transaction t,
                 OnAnimationFinishedCallback finishCallback) {
+            t.setPosition(animationLeash, mPosition.x, mPosition.y);
             mCapturedLeash = animationLeash;
             mCapturedFinishCallback = finishCallback;
         }
 
         @Override
         public void onAnimationCancelled(SurfaceControl animationLeash) {
-            cancelAnimation();
+            cancelAnimation(REORDER_MOVE_HOME_TO_ORIGINAL_POSITION);
         }
 
         @Override

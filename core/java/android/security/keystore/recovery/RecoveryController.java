@@ -250,6 +250,16 @@ public class RecoveryController {
      */
     public static final int ERROR_INVALID_CERTIFICATE = 28;
 
+
+    /**
+     * Failed because the provided certificate contained serial version which is lower that the
+     * version device is already initialized with. It is not possible to downgrade serial version of
+     * the provided certificate.
+     *
+     * @hide
+     */
+    public static final int ERROR_DOWNGRADE_CERTIFICATE = 29;
+
     private final ILockSettings mBinder;
     private final KeyStore mKeyStore;
 
@@ -339,6 +349,10 @@ public class RecoveryController {
             if (e.errorCode == ERROR_BAD_CERTIFICATE_FORMAT
                     || e.errorCode == ERROR_INVALID_CERTIFICATE) {
                 throw new CertificateException("Invalid certificate for recovery service", e);
+            }
+            if (e.errorCode == ERROR_DOWNGRADE_CERTIFICATE) {
+                throw new CertificateException(
+                        "Downgrading certificate serial version isn't supported.", e);
             }
             throw wrapUnexpectedServiceSpecificException(e);
         }

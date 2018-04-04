@@ -450,7 +450,7 @@ interface IActivityManager {
             in Intent intent, in String resolvedType, in Bundle options, int userId);
     void startRecentsActivity(in Intent intent, in IAssistDataReceiver assistDataReceiver,
             in IRecentsAnimationRunner recentsAnimationRunner);
-    void cancelRecentsAnimation();
+    void cancelRecentsAnimation(boolean restoreHomeStackPosition);
     int startActivityFromRecents(int taskId, in Bundle options);
     Bundle getActivityOptions(in IBinder token);
     List<IBinder> getAppTasks(in String callingPackage);

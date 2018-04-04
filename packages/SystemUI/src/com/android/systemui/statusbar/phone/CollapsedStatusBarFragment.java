@@ -14,6 +14,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.StatusBarManager.DISABLE_CLOCK;
 import static android.app.StatusBarManager.DISABLE_NOTIFICATION_ICONS;
 import static android.app.StatusBarManager.DISABLE_SYSTEM_INFO;
 
@@ -96,6 +97,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mSystemIconArea = mStatusBar.findViewById(R.id.system_icon_area);
         mClockView = mStatusBar.findViewById(R.id.clock);
         showSystemIconArea(false);
+        showClock(false);
         initEmergencyCryptkeeperText();
         initOperatorName();
     }
@@ -163,6 +165,13 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                 showNotificationIconArea(animate);
             }
         }
+        if ((diff1 & DISABLE_CLOCK) != 0) {
+            if ((state1 & DISABLE_CLOCK) != 0) {
+                hideClock(animate);
+            } else {
+                showClock(animate);
+            }
+        }
     }
 
     protected int adjustDisableFlags(int state) {
@@ -171,6 +180,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                 && shouldHideNotificationIcons()) {
             state |= DISABLE_NOTIFICATION_ICONS;
             state |= DISABLE_SYSTEM_INFO;
+            state |= DISABLE_CLOCK;
         }
         if (mNetworkController != null && EncryptionHelper.IS_DATA_ENCRYPTED) {
             if (mNetworkController.hasEmergencyCryptKeeperText()) {
@@ -195,11 +205,17 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     public void hideSystemIconArea(boolean animate) {
         animateHide(mSystemIconArea, animate);
-        animateHide(mClockView, animate);
     }
 
     public void showSystemIconArea(boolean animate) {
         animateShow(mSystemIconArea, animate);
+    }
+
+    public void hideClock(boolean animate) {
+        animateHide(mClockView, animate);
+    }
+
+    public void showClock(boolean animate) {
         animateShow(mClockView, animate);
     }
 

@@ -86,7 +86,7 @@ class WatchlistSettings {
         }
     }
 
-    public void reloadSettings() {
+    private void reloadSettings() {
         if (!mXmlFile.exists()) {
             // No settings config
             return;
