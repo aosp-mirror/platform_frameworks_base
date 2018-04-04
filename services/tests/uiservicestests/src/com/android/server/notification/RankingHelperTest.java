@@ -1093,7 +1093,7 @@ public class RankingHelperTest extends UiServiceTestCase {
         NotificationChannel channel2 =
                 new NotificationChannel("id4", "a", NotificationManager.IMPORTANCE_HIGH);
         NotificationChannel channel3 =
-                new NotificationChannel("id4", "a", NotificationManager.IMPORTANCE_HIGH);
+                new NotificationChannel("id5", "a", NotificationManager.IMPORTANCE_HIGH);
         mHelper.createNotificationChannel(PKG, UID, channel, true, false);
         mHelper.createNotificationChannel(PKG, UID, channel2, true, false);
         mHelper.createNotificationChannel(PKG, UID, channel3, true, false);
@@ -1103,6 +1103,24 @@ public class RankingHelperTest extends UiServiceTestCase {
 
         assertEquals(2, mHelper.getDeletedChannelCount(PKG, UID));
         assertEquals(0, mHelper.getDeletedChannelCount("pkg2", UID2));
+    }
+
+    @Test
+    public void testGetBlockedChannelCount() throws Exception {
+        NotificationChannel channel =
+                new NotificationChannel("id2", "name2", IMPORTANCE_LOW);
+        NotificationChannel channel2 =
+                new NotificationChannel("id4", "a", NotificationManager.IMPORTANCE_NONE);
+        NotificationChannel channel3 =
+                new NotificationChannel("id5", "a", NotificationManager.IMPORTANCE_NONE);
+        mHelper.createNotificationChannel(PKG, UID, channel, true, false);
+        mHelper.createNotificationChannel(PKG, UID, channel2, true, false);
+        mHelper.createNotificationChannel(PKG, UID, channel3, true, false);
+
+        mHelper.deleteNotificationChannel(PKG, UID, channel3.getId());
+
+        assertEquals(1, mHelper.getBlockedChannelCount(PKG, UID));
+        assertEquals(0, mHelper.getBlockedChannelCount("pkg2", UID2));
     }
 
     @Test
