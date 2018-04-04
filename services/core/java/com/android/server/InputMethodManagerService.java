@@ -263,17 +263,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final class DebugFlag {
         private static final Object LOCK = new Object();
         private final String mKey;
+        private final boolean mDefaultValue;
         @GuardedBy("LOCK")
         private boolean mValue;
 
         public DebugFlag(String key, boolean defaultValue) {
             mKey = key;
+            mDefaultValue = defaultValue;
             mValue = SystemProperties.getBoolean(key, defaultValue);
         }
 
         void refresh() {
             synchronized (LOCK) {
-                mValue = SystemProperties.getBoolean(mKey, true);
+                mValue = SystemProperties.getBoolean(mKey, mDefaultValue);
             }
         }
 
