@@ -5,7 +5,7 @@
     <string name="android_system_label" msgid="2797790869522345065">"Telefonia mugikorreko operadorea"</string>
     <string name="portal_notification_id" msgid="5155057562457079297">"Agortu egin dira datu mugikorrak"</string>
     <string name="no_data_notification_id" msgid="668400731803969521">"Desaktibatu da datu-konexioa"</string>
-    <string name="portal_notification_detail" msgid="2295729385924660881">"Sakatu hau %s gunera joateko"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"Sakatu hau %s webgunera joateko"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"Jarri harremanetan %s operadorearekin"</string>
     <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Ez dago datu-konexiorik"</string>
     <string name="no_mobile_data_connection" msgid="544980465184147010">"Gehitu datuak eta ibiltaritza-plana %s bidez"</string>
