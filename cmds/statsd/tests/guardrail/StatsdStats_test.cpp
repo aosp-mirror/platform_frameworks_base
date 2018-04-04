@@ -34,7 +34,7 @@ TEST(StatsdStatsTest, TestValidConfigAdd) {
     const int conditionsCount = 20;
     const int matchersCount = 30;
     const int alertsCount = 10;
-    stats.noteConfigReceived(key, metricsCount, conditionsCount, matchersCount, alertsCount,
+    stats.noteConfigReceived(key, metricsCount, conditionsCount, matchersCount, alertsCount, {},
                              true /*valid config*/);
     vector<uint8_t> output;
     stats.dumpStats(&output, false /*reset stats*/);
@@ -61,7 +61,7 @@ TEST(StatsdStatsTest, TestInvalidConfigAdd) {
     const int conditionsCount = 20;
     const int matchersCount = 30;
     const int alertsCount = 10;
-    stats.noteConfigReceived(key, metricsCount, conditionsCount, matchersCount, alertsCount,
+    stats.noteConfigReceived(key, metricsCount, conditionsCount, matchersCount, alertsCount, {},
                              false /*bad config*/);
     vector<uint8_t> output;
     stats.dumpStats(&output, false);
@@ -82,7 +82,8 @@ TEST(StatsdStatsTest, TestConfigRemove) {
     const int conditionsCount = 20;
     const int matchersCount = 30;
     const int alertsCount = 10;
-    stats.noteConfigReceived(key, metricsCount, conditionsCount, matchersCount, alertsCount, true);
+    stats.noteConfigReceived(key, metricsCount, conditionsCount, matchersCount, alertsCount, {},
+                             true);
     vector<uint8_t> output;
     stats.dumpStats(&output, false);
     StatsdStatsReport report;
@@ -104,7 +105,7 @@ TEST(StatsdStatsTest, TestConfigRemove) {
 TEST(StatsdStatsTest, TestSubStats) {
     StatsdStats stats;
     ConfigKey key(0, 12345);
-    stats.noteConfigReceived(key, 2, 3, 4, 5, true);
+    stats.noteConfigReceived(key, 2, 3, 4, 5, {std::make_pair(123, 456)}, true);
 
     stats.noteMatcherMatched(key, StringToId("matcher1"));
     stats.noteMatcherMatched(key, StringToId("matcher1"));
@@ -142,6 +143,9 @@ TEST(StatsdStatsTest, TestSubStats) {
     EXPECT_EQ(2, configReport.broadcast_sent_time_sec_size());
     EXPECT_EQ(1, configReport.data_drop_time_sec_size());
     EXPECT_EQ(3, configReport.dump_report_time_sec_size());
+    EXPECT_EQ(1, configReport.annotation_size());
+    EXPECT_EQ(123, configReport.annotation(0).field_int64());
+    EXPECT_EQ(456, configReport.annotation(0).field_int32());
 
     EXPECT_EQ(2, configReport.matcher_stats_size());
     // matcher1 is the first in the list
@@ -259,7 +263,7 @@ TEST(StatsdStatsTest, TestTimestampThreshold) {
         timestamps.push_back(i);
     }
     ConfigKey key(0, 12345);
-    stats.noteConfigReceived(key, 2, 3, 4, 5, true);
+    stats.noteConfigReceived(key, 2, 3, 4, 5, {}, true);
 
     for (int i = 0; i < StatsdStats::kMaxTimestampCount; i++) {
         stats.noteDataDropped(key, timestamps[i]);
