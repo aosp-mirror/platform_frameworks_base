@@ -677,7 +677,7 @@ Status StatsService::informAnomalyAlarmFired() {
                                          "Only system uid can call informAnomalyAlarmFired");
     }
 
-    uint64_t currentTimeSec = getElapsedRealtimeSec();
+    int64_t currentTimeSec = getElapsedRealtimeSec();
     std::unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet =
             mAnomalyAlarmMonitor->popSoonerThan(static_cast<uint32_t>(currentTimeSec));
     if (alarmSet.size() > 0) {
@@ -698,7 +698,7 @@ Status StatsService::informAlarmForSubscriberTriggeringFired() {
                 "Only system uid can call informAlarmForSubscriberTriggeringFired");
     }
 
-    uint64_t currentTimeSec = getElapsedRealtimeSec();
+    int64_t currentTimeSec = getElapsedRealtimeSec();
     std::unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet =
             mPeriodicAlarmMonitor->popSoonerThan(static_cast<uint32_t>(currentTimeSec));
     if (alarmSet.size() > 0) {

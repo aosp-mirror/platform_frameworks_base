@@ -45,7 +45,7 @@ const HashableDimensionKey eventKey = getMockedDimensionKey(TagId, 0, "1");
 const HashableDimensionKey conditionKey = getMockedDimensionKey(TagId, 4, "1");
 const HashableDimensionKey key1 = getMockedDimensionKey(TagId, 1, "1");
 const HashableDimensionKey key2 = getMockedDimensionKey(TagId, 1, "2");
-const uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+const int64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
 TEST(MaxDurationTrackerTest, TestSimpleMaxDuration) {
     const MetricDimensionKey eventKey = getMockedMetricDimensionKey(TagId, 0, "1");
@@ -58,9 +58,9 @@ TEST(MaxDurationTrackerTest, TestSimpleMaxDuration) {
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
 
-    uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
-    uint64_t bucketNum = 0;
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
+    int64_t bucketNum = 0;
 
     int64_t metricId = 1;
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, dimensionInCondition,
@@ -80,7 +80,7 @@ TEST(MaxDurationTrackerTest, TestSimpleMaxDuration) {
     tracker.flushIfNeeded(bucketStartTimeNs + bucketSizeNs + 1, &buckets);
     EXPECT_TRUE(buckets.find(eventKey) != buckets.end());
     EXPECT_EQ(1u, buckets[eventKey].size());
-    EXPECT_EQ(20ULL, buckets[eventKey][0].mDuration);
+    EXPECT_EQ(20LL, buckets[eventKey][0].mDuration);
 }
 
 TEST(MaxDurationTrackerTest, TestStopAll) {
@@ -93,10 +93,10 @@ TEST(MaxDurationTrackerTest, TestStopAll) {
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
 
-    uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
-    uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
-    uint64_t bucketNum = 0;
+    int64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
+    int64_t bucketNum = 0;
 
     int64_t metricId = 1;
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, dimensionInCondition,
@@ -129,10 +129,10 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary) {
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
 
-    uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
-    uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
-    uint64_t bucketNum = 0;
+    int64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
+    int64_t bucketNum = 0;
 
     int64_t metricId = 1;
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, dimensionInCondition,
@@ -170,10 +170,10 @@ TEST(MaxDurationTrackerTest, TestCrossBucketBoundary_nested) {
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
 
-    uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
-    uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
-    uint64_t bucketNum = 0;
+    int64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
+    int64_t bucketNum = 0;
 
     int64_t metricId = 1;
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, -1, dimensionInCondition,
@@ -213,14 +213,14 @@ TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
     Start in first bucket, stop in second bucket. Condition turns on and off in the first bucket
     and again turns on and off in the second bucket.
     */
-    uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
-    uint64_t eventStartTimeNs = bucketStartTimeNs + 1 * NS_PER_SEC;
-    uint64_t conditionStarts1 = bucketStartTimeNs + 11 * NS_PER_SEC;
-    uint64_t conditionStops1 = bucketStartTimeNs + 14 * NS_PER_SEC;
-    uint64_t conditionStarts2 = bucketStartTimeNs + bucketSizeNs + 5 * NS_PER_SEC;
-    uint64_t conditionStops2 = conditionStarts2 + 10 * NS_PER_SEC;
-    uint64_t eventStopTimeNs = conditionStops2 + 8 * NS_PER_SEC;
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
+    int64_t eventStartTimeNs = bucketStartTimeNs + 1 * NS_PER_SEC;
+    int64_t conditionStarts1 = bucketStartTimeNs + 11 * NS_PER_SEC;
+    int64_t conditionStops1 = bucketStartTimeNs + 14 * NS_PER_SEC;
+    int64_t conditionStarts2 = bucketStartTimeNs + bucketSizeNs + 5 * NS_PER_SEC;
+    int64_t conditionStops2 = conditionStarts2 + 10 * NS_PER_SEC;
+    int64_t eventStopTimeNs = conditionStops2 + 8 * NS_PER_SEC;
 
     int64_t metricId = 1;
     MaxDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
@@ -242,7 +242,7 @@ TEST(MaxDurationTrackerTest, TestMaxDurationWithCondition) {
     EXPECT_EQ(1U, buckets.size());
     vector<DurationBucket> item = buckets.begin()->second;
     EXPECT_EQ(1UL, item.size());
-    EXPECT_EQ(13ULL * NS_PER_SEC, item[0].mDuration);
+    EXPECT_EQ((int64_t)(13LL * NS_PER_SEC), item[0].mDuration);
 }
 
 TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
@@ -255,11 +255,11 @@ TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
 
     unordered_map<MetricDimensionKey, vector<DurationBucket>> buckets;
 
-    uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
-    uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
-    uint64_t bucketNum = 0;
-    uint64_t eventStartTimeNs = 13000000000;
+    int64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
+    int64_t bucketNum = 0;
+    int64_t eventStartTimeNs = 13000000000;
     int64_t durationTimeNs = 2 * 1000;
 
     int64_t metricId = 1;
@@ -312,15 +312,15 @@ TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp) {
      * dimension has already been running for 4 seconds. Thus, we have 40-4=36 seconds remaining
      * before we trigger the anomaly.
      */
-    uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
-    uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
-    uint64_t bucketNum = 0;
-    uint64_t eventStartTimeNs = bucketStartTimeNs + 5 * NS_PER_SEC;  // Condition is off at start.
-    uint64_t conditionStarts1 = bucketStartTimeNs + 11 * NS_PER_SEC;
-    uint64_t conditionStops1 = bucketStartTimeNs + 14 * NS_PER_SEC;
-    uint64_t conditionStarts2 = bucketStartTimeNs + 20 * NS_PER_SEC;
-    uint64_t eventStartTimeNs2 = conditionStarts2 - 4 * NS_PER_SEC;
+    int64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
+    int64_t bucketNum = 0;
+    int64_t eventStartTimeNs = bucketStartTimeNs + 5 * NS_PER_SEC;  // Condition is off at start.
+    int64_t conditionStarts1 = bucketStartTimeNs + 11 * NS_PER_SEC;
+    int64_t conditionStops1 = bucketStartTimeNs + 14 * NS_PER_SEC;
+    int64_t conditionStarts2 = bucketStartTimeNs + 20 * NS_PER_SEC;
+    int64_t eventStartTimeNs2 = conditionStarts2 - 4 * NS_PER_SEC;
 
     int64_t metricId = 1;
     Alert alert;
@@ -344,9 +344,9 @@ TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp) {
     tracker.noteConditionChanged(key1, true, conditionStarts2);
     EXPECT_EQ(1U, anomalyTracker->mAlarms.size());
     auto alarm = anomalyTracker->mAlarms.begin()->second;
-    uint64_t anomalyFireTimeSec = alarm->timestampSec;
+    int64_t anomalyFireTimeSec = alarm->timestampSec;
     EXPECT_EQ(conditionStarts2 + 36 * NS_PER_SEC,
-            (unsigned long long)anomalyFireTimeSec * NS_PER_SEC);
+            (long long)anomalyFireTimeSec * NS_PER_SEC);
 
     // Now we test the calculation now that there's a refractory period.
     // At the correct time, declare the anomaly. This will set a refractory period. Make sure it
@@ -354,23 +354,23 @@ TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp) {
     std::unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> firedAlarms({alarm});
     anomalyTracker->informAlarmsFired(anomalyFireTimeSec * NS_PER_SEC, firedAlarms);
     EXPECT_EQ(0u, anomalyTracker->mAlarms.size());
-    uint64_t refractoryPeriodEndsSec = anomalyFireTimeSec + refPeriodSec;
+    int64_t refractoryPeriodEndsSec = anomalyFireTimeSec + refPeriodSec;
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey), refractoryPeriodEndsSec);
 
     // Now stop and start again. Make sure the new predictAnomalyTimestampNs takes into account
     // the refractory period correctly.
-    uint64_t eventStopTimeNs = anomalyFireTimeSec * NS_PER_SEC + 10;
+    int64_t eventStopTimeNs = anomalyFireTimeSec * NS_PER_SEC + 10;
     tracker.noteStop(key1, eventStopTimeNs, false);
     tracker.noteStop(key2, eventStopTimeNs, false);
     tracker.noteStart(key1, true, eventStopTimeNs + 1000000, conditionKey1);
     // Anomaly is ongoing, but we're still in the refractory period.
     EXPECT_EQ(1U, anomalyTracker->mAlarms.size());
     alarm = anomalyTracker->mAlarms.begin()->second;
-    EXPECT_EQ(refractoryPeriodEndsSec, (unsigned long long)(alarm->timestampSec));
+    EXPECT_EQ(refractoryPeriodEndsSec, (long long)(alarm->timestampSec));
 
     // Makes sure it is correct after the refractory period is over.
     tracker.noteStop(key1, eventStopTimeNs + 2000000, false);
-    uint64_t justBeforeRefPeriodNs = (refractoryPeriodEndsSec - 2) * NS_PER_SEC;
+    int64_t justBeforeRefPeriodNs = (refractoryPeriodEndsSec - 2) * NS_PER_SEC;
     tracker.noteStart(key1, true, justBeforeRefPeriodNs, conditionKey1);
     alarm = anomalyTracker->mAlarms.begin()->second;
     EXPECT_EQ(justBeforeRefPeriodNs + 40 * NS_PER_SEC,
@@ -397,13 +397,13 @@ TEST(MaxDurationTrackerTest, TestAnomalyPredictedTimestamp_UpdatedOnStop) {
      * nested dimensions, are started for 8 seconds. When we stop, the other nested dimension has
      * been started for 5 seconds. So we can only allow 35 more seconds from now.
      */
-    uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
-    uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
-    uint64_t bucketNum = 0;
-    uint64_t eventStartTimeNs1 = bucketStartTimeNs + 5 * NS_PER_SEC;  // Condition is off at start.
-    uint64_t eventStopTimeNs1 = bucketStartTimeNs + 13 * NS_PER_SEC;
-    uint64_t eventStartTimeNs2 = bucketStartTimeNs + 8 * NS_PER_SEC;
+    int64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketEndTimeNs = bucketStartTimeNs + bucketSizeNs;
+    int64_t bucketNum = 0;
+    int64_t eventStartTimeNs1 = bucketStartTimeNs + 5 * NS_PER_SEC;  // Condition is off at start.
+    int64_t eventStopTimeNs1 = bucketStartTimeNs + 13 * NS_PER_SEC;
+    int64_t eventStartTimeNs2 = bucketStartTimeNs + 8 * NS_PER_SEC;
 
     int64_t metricId = 1;
     Alert alert;

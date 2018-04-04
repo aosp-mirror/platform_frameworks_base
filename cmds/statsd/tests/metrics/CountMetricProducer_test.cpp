@@ -203,9 +203,9 @@ TEST(CountMetricProducerTest, TestEventsWithSlicedCondition) {
 
 TEST(CountMetricProducerTest, TestEventWithAppUpgrade) {
     sp<AlarmMonitor> alarmMonitor;
-    uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
-    uint64_t eventUpgradeTimeNs = bucketStartTimeNs + 15 * NS_PER_SEC;
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
+    int64_t eventUpgradeTimeNs = bucketStartTimeNs + 15 * NS_PER_SEC;
 
     int tagId = 1;
     int conditionTagId = 2;
@@ -244,7 +244,7 @@ TEST(CountMetricProducerTest, TestEventWithAppUpgrade) {
     // Anomaly tracker only contains full buckets.
     EXPECT_EQ(0, anomalyTracker->getSumOverPastBuckets(DEFAULT_METRIC_DIMENSION_KEY));
 
-    uint64_t lastEndTimeNs = countProducer.getCurrentBucketEndTimeNs();
+    int64_t lastEndTimeNs = countProducer.getCurrentBucketEndTimeNs();
     // Next event occurs in same bucket as partial bucket created.
     LogEvent event2(tagId, bucketStartTimeNs + 59 * NS_PER_SEC + 10);
     event2.write("222");  // uid
@@ -265,9 +265,9 @@ TEST(CountMetricProducerTest, TestEventWithAppUpgrade) {
 }
 
 TEST(CountMetricProducerTest, TestEventWithAppUpgradeInNextBucket) {
-    uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
-    uint64_t eventUpgradeTimeNs = bucketStartTimeNs + 65 * NS_PER_SEC;
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
+    int64_t eventUpgradeTimeNs = bucketStartTimeNs + 65 * NS_PER_SEC;
 
     int tagId = 1;
     int conditionTagId = 2;
@@ -294,7 +294,7 @@ TEST(CountMetricProducerTest, TestEventWithAppUpgradeInNextBucket) {
     EXPECT_EQ((int64_t)bucketStartTimeNs,
               countProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].mBucketStartNs);
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs,
-              (uint64_t)countProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].mBucketEndNs);
+              countProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].mBucketEndNs);
     EXPECT_EQ(eventUpgradeTimeNs, countProducer.mCurrentBucketStartTimeNs);
 
     // Next event occurs in same bucket as partial bucket created.
@@ -313,7 +313,7 @@ TEST(CountMetricProducerTest, TestEventWithAppUpgradeInNextBucket) {
     EXPECT_EQ((int64_t)eventUpgradeTimeNs,
               countProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][1].mBucketStartNs);
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
-              (uint64_t)countProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][1].mBucketEndNs);
+              countProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][1].mBucketEndNs);
 }
 
 TEST(CountMetricProducerTest, TestAnomalyDetectionUnSliced) {

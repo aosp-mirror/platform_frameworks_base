@@ -30,8 +30,8 @@ namespace android {
 namespace os {
 namespace statsd {
 
-AlarmTracker::AlarmTracker(const uint64_t startMillis,
-                           const uint64_t currentMillis,
+AlarmTracker::AlarmTracker(const int64_t startMillis,
+                           const int64_t currentMillis,
                            const Alarm& alarm, const ConfigKey& configKey,
                            const sp<AlarmMonitor>& alarmMonitor)
     : mAlarmConfig(alarm),
@@ -70,7 +70,7 @@ int64_t AlarmTracker::findNextAlarmSec(int64_t currentTimeSec) {
 }
 
 void AlarmTracker::informAlarmsFired(
-        const uint64_t& timestampNs,
+        const int64_t& timestampNs,
         unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& firedAlarms) {
     if (firedAlarms.empty() || mInternalAlarm == nullptr ||
         firedAlarms.find(mInternalAlarm) == firedAlarms.end()) {
