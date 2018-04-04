@@ -2612,10 +2612,10 @@ package android.net {
   }
 
   public static final class IpSecManager.IpSecTunnelInterface implements java.lang.AutoCloseable {
-    method public void addAddress(android.net.LinkAddress) throws java.io.IOException;
+    method public void addAddress(java.net.InetAddress, int) throws java.io.IOException;
     method public void close();
     method public java.lang.String getInterfaceName();
-    method public void removeAddress(android.net.LinkAddress) throws java.io.IOException;
+    method public void removeAddress(java.net.InetAddress, int) throws java.io.IOException;
   }
 
   public final class IpSecTransform implements java.lang.AutoCloseable {
