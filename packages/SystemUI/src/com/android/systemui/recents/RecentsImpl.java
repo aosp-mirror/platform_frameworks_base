@@ -126,7 +126,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         @Override
         public void onTaskStackChangedBackground() {
             // Skip background preloading recents in SystemUI if the overview services is bound
-            if (Dependency.get(OverviewProxyService.class).getProxy() != null) {
+            if (Dependency.get(OverviewProxyService.class).isEnabled()) {
                 return;
             }
 
@@ -300,7 +300,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
     public void onBootCompleted() {
         // Skip preloading tasks if we are already bound to the service
-        if (Dependency.get(OverviewProxyService.class).getProxy() != null) {
+        if (Dependency.get(OverviewProxyService.class).isEnabled()) {
             return;
         }
 

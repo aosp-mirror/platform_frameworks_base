@@ -172,8 +172,8 @@ public class QuickStepController implements GestureHelper {
     }
 
     private boolean handleTouchEvent(MotionEvent event) {
-        if (!mNavigationBarView.isQuickScrubEnabled()
-                && !mNavigationBarView.isQuickStepSwipeUpEnabled()) {
+        if (mOverviewEventSender.getProxy() == null || (!mNavigationBarView.isQuickScrubEnabled()
+                && !mNavigationBarView.isQuickStepSwipeUpEnabled())) {
             mNavigationBarView.getHomeButton().setDelayTouchFeedback(false /* delay */);
             return false;
         }
