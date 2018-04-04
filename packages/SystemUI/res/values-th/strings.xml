@@ -33,7 +33,6 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ดำเนินอยู่"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"การแจ้งเตือน"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"แบตเตอรี่เหลือน้อย"</string>
-    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"แบตเตอรี่เหลือน้อย โปรดเปิดโหมดประหยัดแบตเตอรี่"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"เหลืออีก <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"เหลือ <xliff:g id="PERCENTAGE">%s</xliff:g> หรืออีกราว <xliff:g id="TIME">%s</xliff:g> ขึ้นอยู่กับการใช้งานของคุณ"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"เหลือ <xliff:g id="PERCENTAGE">%s</xliff:g> หรืออีกราว <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -73,11 +72,10 @@
     <string name="global_action_screenshot" msgid="8329831278085426283">"ภาพหน้าจอ"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"กำลังบันทึกภาพหน้าจอ..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"กำลังบันทึกภาพหน้าจอ..."</string>
-    <string name="screenshot_saving_text" msgid="2545047868936087248">"กำลังบันทึกภาพหน้าจอ"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"บันทึกภาพหน้าจอแล้ว"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"แตะเพื่อดูภาพหน้าจอ"</string>
-    <string name="screenshot_failed_title" msgid="9096484883063264803">"จับภาพหน้าจอไม่ได้"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"พบปัญหาขณะบันทึกภาพหน้าจอ"</string>
+    <string name="screenshot_failed_title" msgid="7612509838919089748">"บันทึกภาพหน้าจอไม่ได้"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"ลองบันทึกภาพหน้าจออีกครั้ง"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"บันทึกภาพหน้าจอไม่ได้เนื่องจากพื้นที่เก็บข้อมูลมีจำกัด"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"แอปหรือองค์กรของคุณไม่อนุญาตให้จับภาพหน้าจอ"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"ตัวเลือกการถ่ายโอนไฟล์ USB"</string>
@@ -273,8 +271,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"ชั้นแสดงของหวาน"</string>
     <string name="start_dreams" msgid="5640361424498338327">"โปรแกรมรักษาหน้าจอ"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"อีเทอร์เน็ต"</string>
-    <!-- no translation found for quick_settings_header_onboarding_text (8030309023792936283) -->
-    <skip />
+    <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"แตะไอคอนค้างไว้เพื่อดูตัวเลือกอื่นๆ"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"ห้ามรบกวน"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"เฉพาะเรื่องสำคัญ"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"เฉพาะปลุกเท่านั้น"</string>
@@ -349,7 +346,7 @@
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"เปิดตอนพระอาทิตย์ตก"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"จนพระอาทิตย์ขึ้น"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"เปิดเวลา <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"จนถึง <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"จนถึง <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC ถูกปิดใช้งาน"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"เปิดใช้งาน NFC แล้ว"</string>
@@ -433,7 +430,8 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> จะเริ่มจับภาพทุกอย่างที่แสดงบนหน้าจอ"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ไม่ต้องแสดงข้อความนี้อีก"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ล้างทั้งหมด"</string>
-    <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"โหมดห้ามรบกวนซ่อนการแจ้งเตือนอยู่"</string>
+    <string name="manage_notifications_text" msgid="8035284146227267681">"จัดการการแจ้งเตือน"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"โหมดห้ามรบกวนซ่อนการแจ้งเตือนอยู่"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"เริ่มเลย"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"ไม่มีการแจ้งเตือน"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"อาจมีการตรวจสอบโปรไฟล์"</string>
@@ -533,13 +531,18 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"ทำให้ส่งเสียง"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"สั่น"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"ปิดเสียง"</string>
+    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
+    <skip />
+    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s แตะเพื่อเปิดเสียง"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s แตะเพื่อตั้งค่าให้สั่น อาจมีการปิดเสียงบริการการเข้าถึง"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s แตะเพื่อปิดเสียง อาจมีการปิดเสียงบริการการเข้าถึง"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s แตะเพื่อตั้งค่าให้สั่น"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s แตะเพื่อปิดเสียง"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"ตัวควบคุมระดับเสียง %s"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"สายเรียกเข้าและการแจ้งเตือนจะส่งเสียง"</string>
+    <!-- no translation found for volume_dialog_ringer_guidance_ring (3360373718388509040) -->
+    <skip />
     <string name="output_title" msgid="5355078100792942802">"เอาต์พุตสื่อ"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"เอาต์พุตการโทรออก"</string>
     <string name="output_none_found" msgid="5544982839808921091">"ไม่พบอุปกรณ์"</string>
@@ -626,6 +629,7 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"ส่วนควบคุมการแจ้งเตือน"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"ตัวเลือกการปิดเสียงแจ้งเตือนชั่วคราว"</string>
+    <string name="notification_menu_snooze_action" msgid="1112254519029621372">"ปิดเสียงเตือนชั่วคราว"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"เลิกทำ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"ปิดเสียงเตือนชั่วคราวไว้เป็นเวลา <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
@@ -689,6 +693,8 @@
     <string name="battery" msgid="7498329822413202973">"แบตเตอรี่"</string>
     <string name="clock" msgid="7416090374234785905">"นาฬิกา"</string>
     <string name="headset" msgid="4534219457597457353">"ชุดหูฟัง"</string>
+    <!-- no translation found for accessibility_long_click_tile (6687350750091842525) -->
+    <skip />
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"เชื่อมต่อหูฟังแล้ว"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"เชื่อมต่อชุดหูฟังแล้ว"</string>
     <string name="data_saver" msgid="5037565123367048522">"โปรแกรมประหยัดอินเทอร์เน็ต"</string>
@@ -812,6 +818,7 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"ภาพหน้าจอ"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"ข้อความทั่วไป"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"พื้นที่เก็บข้อมูล"</string>
+    <string name="notification_channel_hints" msgid="7323870212489152689">"คำแนะนำ"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Instant App"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Instant Apps ไม่ต้องใช้การติดตั้ง"</string>
     <string name="app_info" msgid="6856026610594615344">"ข้อมูลแอป"</string>
@@ -839,4 +846,11 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"อนุญาตให้ <xliff:g id="APP">%1$s</xliff:g> แสดงส่วนต่างๆ จากแอปใดก็ได้"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"อนุญาต"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"ปฏิเสธ"</string>
+    <string name="auto_saver_title" msgid="1217959994732964228">"แตะเพื่อตั้งเวลาโหมดประหยัดแบตเตอรี่"</string>
+    <string name="auto_saver_text" msgid="6324376061044218113">"เปิดโดยอัตโนมัติเมื่อแบตเตอรี่เหลือ <xliff:g id="PERCENTAGE">%d</xliff:g>%%"</string>
+    <string name="no_auto_saver_action" msgid="8086002101711328500">"ไม่เป็นไร"</string>
+    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"เปิดใช้กำหนดเวลาโหมดประหยัดแบตเตอรี่อยู่"</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"โหมดประหยัดแบตเตอรี่จะเปิดโดยอัตโนมัติเมื่อแบตเตอรี่เหลือไม่ถึง <xliff:g id="PERCENTAGE">%d</xliff:g>%%"</string>
+    <string name="open_saver_setting_action" msgid="8314624730997322529">"การตั้งค่า"</string>
+    <string name="auto_saver_okay_action" msgid="2701221740227683650">"รับทราบ"</string>
 </resources>

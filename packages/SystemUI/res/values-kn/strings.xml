@@ -33,7 +33,6 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ಚಾಲ್ತಿಯಲ್ಲಿರುವ"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"ಅಧಿಸೂಚನೆಗಳು"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"ಬ್ಯಾಟರಿ ಕಡಿಮೆ ಇದೆ"</string>
-    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"ಬ್ಯಾಟರಿ ಕಡಿಮೆ ಇದೆ. ಬ್ಯಾಟರಿ ಸೇವರ್ ಆನ್ ಮಾಡಿ"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> ಉಳಿದಿದೆ"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> ಬಾಕಿ ಉಳಿದಿದೆ, ನಿಮ್ಮ ಬಳಕೆಯ ಆಧಾರದ ಮೇಲೆ <xliff:g id="TIME">%s</xliff:g> ಉಳಿದಿದೆ"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> ಬಾಕಿ ಉಳಿದಿದೆ, <xliff:g id="TIME">%s</xliff:g> ಉಳಿದಿದೆ"</string>
@@ -73,11 +72,10 @@
     <string name="global_action_screenshot" msgid="8329831278085426283">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
-    <string name="screenshot_saving_text" msgid="2545047868936087248">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ಅನ್ನು ಉಳಿಸಲಾಗಿದೆ"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ವೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
-    <string name="screenshot_failed_title" msgid="9096484883063264803">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಸೆರೆಹಿಡಿಯಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸುವಲ್ಲಿ ಸಮಸ್ಯೆ ಎದುರಾಗಿದೆ"</string>
+    <string name="screenshot_failed_title" msgid="7612509838919089748">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ಉಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ಪುನಃ ತೆಗೆದುಕೊಳ್ಳಲು ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"ಪರಿಮಿತ ಸಂಗ್ರಹಣೆ ಸ್ಥಳದ ಕಾರಣದಿಂದಾಗಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"ಅಪ್ಲಿಕೇಶನ್ ಅಥವಾ ಸಂಸ್ಥೆಯು ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆಯುವುದನ್ನು ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ಫೈಲ್ ವರ್ಗಾವಣೆ ಆಯ್ಕೆಗಳು"</string>
@@ -273,8 +271,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"ಡೆಸರ್ಟ್ ಕೇಸ್"</string>
     <string name="start_dreams" msgid="5640361424498338327">"ಸ್ಕ್ರೀನ್ ಸೇವರ್"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ಇಥರ್ನೆಟ್"</string>
-    <!-- no translation found for quick_settings_header_onboarding_text (8030309023792936283) -->
-    <skip />
+    <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"ಹೆಚ್ಚಿನ ಆಯ್ಕೆಗಳಿಗಾಗಿ ಐಕಾನ್‌ಗಳನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಒತ್ತಿಹಿಡಿಯಿರಿ"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"ಅಡಚಣೆ ಮಾಡಬೇಡಿ"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"ಆದ್ಯತೆ ಮಾತ್ರ"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"ಅಲಾರಮ್‌ಗಳು ಮಾತ್ರ"</string>
@@ -349,7 +346,7 @@
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"ಸೂರ್ಯಾಸ್ತದಲ್ಲಿ"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"ಸೂರ್ಯೋದಯದ ತನಕ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> ಸಮಯದಲ್ಲಿ"</string>
-    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"<xliff:g id="TIME">%s</xliff:g> ವರೆಗೂ"</string>
+    <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> ವರೆಗೂ"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC ನಿಷ್ಕ್ರಿಯಗೊಂಡಿದೆ"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC ಸಕ್ರಿಯಗೊಂಡಿದೆ"</string>
@@ -433,7 +430,8 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"ನಿಮ್ಮ ಪರದೆಯ ಮೇಲೆ ಪ್ರದರ್ಶಿಸಲಾಗುವ ಎಲ್ಲವನ್ನೂ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ಯು ಸೆರೆಹಿಡಿಯಲು ಪ್ರಾರಂಭಿಸುತ್ತದೆ."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ಮತ್ತೊಮ್ಮೆ ತೋರಿಸದಿರು"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ಎಲ್ಲವನ್ನೂ ತೆರವುಗೊಳಿಸು"</string>
-    <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"\"ಅಡಚಣೆ ಮಾಡಬೇಡ\" ಮೋಡ್ ಅಧಿಸೂಚನೆಗಳನ್ನು ಮರೆಮಾಡುತ್ತಿದೆ"</string>
+    <string name="manage_notifications_text" msgid="8035284146227267681">"ಅಧಿಸೂಚನೆಗಳನ್ನು ನಿರ್ವಹಿಸಿ"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"\"ಅಡಚಣೆ ಮಾಡಬೇಡಿ\" ಮೋಡ್ ಅಧಿಸೂಚನೆಗಳನ್ನು ಮರೆಮಾಡುತ್ತಿದೆ"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ಈಗ ಪ್ರಾರಂಭಿಸಿ"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"ಯಾವುದೇ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"ಪ್ರೊಫೈಲ್ ಅನ್ನು ಪರಿವೀಕ್ಷಿಸಬಹುದಾಗಿದೆ"</string>
@@ -533,13 +531,18 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"ರಿಂಗ್"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"ವೈಬ್ರೇಟ್‌"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"ಮ್ಯೂಟ್"</string>
+    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
+    <skip />
+    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. ಅನ್‌ಮ್ಯೂಟ್‌ ಮಾಡುವುದಕ್ಕಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. ಕಂಪನಕ್ಕೆ ಹೊಂದಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ. ಪ್ರವೇಶಿಸುವಿಕೆ ಸೇವೆಗಳನ್ನು ಮ್ಯೂಟ್‌ ಮಾಡಬಹುದು."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. ಮ್ಯೂಟ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ. ಪ್ರವೇಶಿಸುವಿಕೆ ಸೇವೆಗಳನ್ನು ಮ್ಯೂಟ್‌ ಮಾಡಬಹುದು."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. ವೈಬ್ರೇಟ್ ಮಾಡಲು ಹೊಂದಿಸುವುದಕ್ಕಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. ಮ್ಯೂಟ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s ವಾಲ್ಯೂಮ್ ನಿಯಂತ್ರಕಗಳು"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"ಕರೆಗಳು ಮತ್ತು ಅಧಿಸೂಚನೆಗಳು ರಿಂಗ್ ಆಗುತ್ತವೆ"</string>
+    <!-- no translation found for volume_dialog_ringer_guidance_ring (3360373718388509040) -->
+    <skip />
     <string name="output_title" msgid="5355078100792942802">"ಮೀಡಿಯಾ ಔಟ್‌ಪುಟ್"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"ಫೋನ್ ಕರೆ ಔಟ್‌ಪುಟ್"</string>
     <string name="output_none_found" msgid="5544982839808921091">"ಯಾವ ಸಾಧನಗಳೂ ಕಂಡುಬಂದಿಲ್ಲ"</string>
@@ -626,6 +629,7 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"ಅಧಿಸೂಚನೆ ನಿಯಂತ್ರಣಗಳು"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"ಅಧಿಸೂಚನೆ ಸ್ನೂಜ್ ಆಯ್ಕೆಗಳು"</string>
+    <string name="notification_menu_snooze_action" msgid="1112254519029621372">"ಸ್ನೂಜ್"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ರದ್ದುಮಾಡಿ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> ಗೆ ಸ್ನೂಜ್ ಮಾಡಲಾಗಿದೆ"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
@@ -689,6 +693,8 @@
     <string name="battery" msgid="7498329822413202973">"ಬ್ಯಾಟರಿ"</string>
     <string name="clock" msgid="7416090374234785905">"ಗಡಿಯಾರ"</string>
     <string name="headset" msgid="4534219457597457353">"ಹೆಡ್‌ಸೆಟ್"</string>
+    <!-- no translation found for accessibility_long_click_tile (6687350750091842525) -->
+    <skip />
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"ಹೆಡ್‌ಫೋನ್ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"ಹೆಡ್‌ಸೆಟ್ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ"</string>
     <string name="data_saver" msgid="5037565123367048522">"ಡೇಟಾ ಸೇವರ್"</string>
@@ -723,11 +729,9 @@
     <string name="right_keycode" msgid="708447961000848163">"ಬಲ ಕೀಕೋಡ್"</string>
     <string name="left_icon" msgid="3096287125959387541">"ಎಡ ಐಕಾನ್"</string>
     <string name="right_icon" msgid="3952104823293824311">"ಬಲ ಐಕಾನ್"</string>
-    <!-- no translation found for drag_to_add_tiles (230586591689084925) -->
-    <skip />
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"ಟೈಲ್‌ಗಳನ್ನು ಸೇರಿಸಲು ಹೋಲ್ಡ್‌ ಮಾಡಿ ಮತ್ತು ಡ್ರ್ಯಾಗ್‌ ಮಾಡಿ"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"ತೆಗೆದುಹಾಕಲು ಇಲ್ಲಿ ಡ್ರ್ಯಾಗ್‌ ಮಾಡಿ"</string>
-    <!-- no translation found for drag_to_remove_disabled (2390968976638993382) -->
-    <skip />
+    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"ನಿಮಗೆ ಕನಿಷ್ಠ 6 ಟೈಲ್‌ಗಳ ಅಗತ್ಯವಿದೆ"</string>
     <string name="qs_edit" msgid="2232596095725105230">"ಎಡಿಟ್"</string>
     <string name="tuner_time" msgid="6572217313285536011">"ಸಮಯ"</string>
   <string-array name="clock_options">
@@ -814,6 +818,7 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳು"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"ಸಾಮಾನ್ಯ ಸಂದೇಶಗಳು"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"ಸಂಗ್ರಹಣೆ"</string>
+    <string name="notification_channel_hints" msgid="7323870212489152689">"ಸುಳಿವುಗಳು"</string>
     <string name="instant_apps" msgid="6647570248119804907">"ತತ್‌ಕ್ಷಣ ಆಪ್‌ಗಳು"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"ತತ್‌ಕ್ಷಣ ಆಪ್‌ಗಳಿಗೆ ಸ್ಥಾಪನೆಯ ಅಗತ್ಯವಿಲ್ಲ."</string>
     <string name="app_info" msgid="6856026610594615344">"ಅಪ್ಲಿಕೇಶನ್ ಮಾಹಿತಿ"</string>
@@ -831,12 +836,9 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"ಬದಲಿಸಿ"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಹಿನ್ನೆಲೆಯಲ್ಲಿ ರನ್ ಆಗುತ್ತಿವೆ"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"ಬ್ಯಾಟರಿ,ಡೇಟಾ ಬಳಕೆಯ ವಿವರಗಳಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
-    <!-- no translation found for mobile_data_disable_title (1068272097382942231) -->
-    <skip />
-    <!-- no translation found for mobile_data_disable_message (4756541658791493506) -->
-    <skip />
-    <!-- no translation found for mobile_data_disable_message_default_carrier (6078110473451946831) -->
-    <skip />
+    <string name="mobile_data_disable_title" msgid="1068272097382942231">"ಮೊಬೈಲ್ ಡೇಟಾ ಆಫ್ ಮಾಡಬೇಕೆ?"</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"ನೀವು <xliff:g id="CARRIER">%s</xliff:g> ಮೂಲಕ ಡೇಟಾ ಅಥವಾ ಇಂಟರ್ನೆಟ್‌ಗೆ ಪ್ರವೇಶವನ್ನು ಹೊಂದಿಲ್ಲ. ಇಂಟರ್ನೆಟ್ ವೈ-ಫೈ ಮೂಲಕ ಮಾತ್ರ ಲಭ್ಯವಿರುತ್ತದೆ."</string>
+    <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"ನಿಮ್ಮ ವಾಹಕ"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"ಅನುಮತಿ ವಿನಂತಿಯನ್ನು ಅಪ್ಲಿಕೇಶನ್ ಮರೆಮಾಚುತ್ತಿರುವ ಕಾರಣ, ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ಪರಿಶೀಲಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_2">%2$s</xliff:g> ಸ್ಲೈಸ್‌ಗಳನ್ನು ತೋರಿಸಲು <xliff:g id="APP_0">%1$s</xliff:g> ಅನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- ಇದು <xliff:g id="APP">%1$s</xliff:g> ನಿಂದ ಮಾಹಿತಿಯನ್ನು ಓದಬಹುದು"</string>
@@ -844,4 +846,11 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"ಯಾವುದೇ ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ ಸ್ಲೈಸ್‌ಗಳನ್ನು ತೋರಿಸಲು <xliff:g id="APP">%1$s</xliff:g> ಅನ್ನು ಅನುಮತಿಸಿ"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"ಅನುಮತಿಸಿ"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"ನಿರಾಕರಿಸಿ"</string>
+    <string name="auto_saver_title" msgid="1217959994732964228">"ಬ್ಯಾಟರಿ ಸೇವರ್‌ ಅನ್ನು ನಿಗದಿಗೊಳಿಸಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
+    <string name="auto_saver_text" msgid="6324376061044218113">"ಬ್ಯಾಟರಿ <xliff:g id="PERCENTAGE">%d</xliff:g>%% ರಷ್ಟು ಇರುವಾಗ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆನ್‌ ಆಗುತ್ತದೆ"</string>
+    <string name="no_auto_saver_action" msgid="8086002101711328500">"ಬೇಡ ಧನ್ಯವಾದಗಳು"</string>
+    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"ಬ್ಯಾಟರಿ ಸೇವರ್ ನಿಗದಿಯನ್ನು ಆನ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"ಬ್ಯಾಟರಿ <xliff:g id="PERCENTAGE">%d</xliff:g>%% ಗಿಂತ ಕಡಿಮೆ ಆದಾಗ ಬ್ಯಾಟರಿ ಸೇವರ್‌ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆನ್‌ ಆಗುತ್ತದೆ."</string>
+    <string name="open_saver_setting_action" msgid="8314624730997322529">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <string name="auto_saver_okay_action" msgid="2701221740227683650">"ಅರ್ಥವಾಯಿತು"</string>
 </resources>

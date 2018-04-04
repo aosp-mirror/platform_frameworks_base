@@ -28,12 +28,15 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"Touchez ici pour entrer le mot de passe"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"Entrez le mot de passe pour déverrouiller le clavier."</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"Entrez le NIP pour déverrouiller le clavier."</string>
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"Entrez votre NIP"</string>
+    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"Entrez votre schéma"</string>
+    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"Entrez votre mot de passe"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"NIP erroné."</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"Cette carte n\'est pas valide."</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"Chargé"</string>
-    <string name="keyguard_plugged_in" msgid="89308975354638682">"Pile en cours de charge"</string>
-    <string name="keyguard_plugged_in_charging_fast" msgid="8869226755413795173">"Charge rapide"</string>
-    <string name="keyguard_plugged_in_charging_slowly" msgid="6637043106038550407">"Charge lente"</string>
+    <string name="keyguard_plugged_in" msgid="3161102098900158923">"En recharge : <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="keyguard_plugged_in_charging_fast" msgid="3684592786276709342">"En recharge rapide : <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="keyguard_plugged_in_charging_slowly" msgid="509533586841478405">"En recharge lente : <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="keyguard_low_battery" msgid="9218432555787624490">"Branchez votre chargeur."</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8566679946700751371">"Appuyez sur la touche Menu pour déverrouiller l\'appareil."</string>
     <string name="keyguard_network_locked_message" msgid="6743537524631420759">"Réseau verrouillé"</string>

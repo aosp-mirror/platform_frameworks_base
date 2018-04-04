@@ -28,12 +28,9 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"पासवर्ड टाइप गर्न छुनुहोस्"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"अनलक गर्न पासवर्ड टाइप गर्नुहोस्"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"अनलक गर्न PIN कोड टाइप गर्नुहोस्"</string>
-    <!-- no translation found for keyguard_enter_your_pin (7152989016739952871) -->
-    <skip />
-    <!-- no translation found for keyguard_enter_your_pattern (3915717164691787047) -->
-    <skip />
-    <!-- no translation found for keyguard_enter_your_password (5761514484663983731) -->
-    <skip />
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"आफ्नो PIN प्रविष्ट गर्नुहोस्"</string>
+    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"आफ्नो ढाँचा प्रविष्ट गर्नुहोस्"</string>
+    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"आफ्नो पासवर्ड प्रविष्ट गर्ने"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"PIN कोड गलत छ।"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"अमान्य कार्ड।"</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"चार्ज भयो"</string>
@@ -145,7 +142,7 @@
     <string name="fingerprint_not_recognized" msgid="348813995267914625">"पहिचान भएन"</string>
     <plurals name="kg_password_default_pin_message" formatted="false" msgid="6203676909479972943">
       <item quantity="other">SIM को PIN प्रविष्ट गर्नुहोस् तपाईंसँग <xliff:g id="NUMBER_1">%d</xliff:g>  प्रयासहरू बाँकी छन्।</item>
-      <item quantity="one">SIM को PIN प्रविष्ट गर्नुहोस्, तपाईंसँग <xliff:g id="NUMBER_0">%d</xliff:g> प्रयास बाँकी छ, त्यसपछि भने आफ्नो यन्त्र अनलक गर्नका लागि तपाईंले अनिवार्य रूपमा आफ्नो सेवा प्रदायकलाई सम्पर्क गर्नपर्ने हुन्छ।</item>
+      <item quantity="one">SIM को PIN प्रविष्ट गर्नुहोस्, तपाईंसँग <xliff:g id="NUMBER_0">%d</xliff:g> प्रयास बाँकी छ, त्यसपछि भने आफ्नो यन्त्र अनलक गर्नाका लागि तपाईंले अनिवार्य रूपमा आफ्नो सेवा प्रदायकलाई सम्पर्क गर्नपर्ने हुन्छ।</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
       <item quantity="other">SIM लाई असक्षम पारिएको छ। जारी राख्न PUK कोड प्रविष्ट गर्नुहोस्। तपाईंसँग <xliff:g id="_NUMBER_1">%d</xliff:g> प्रयासहरू बाँकी छन्, त्यसपछि SIM सदाका लागि प्रयोग गर्न नमिल्ने हुन्छ। विवरणहरूका लागि सेवा प्रदायकलाई सम्पर्क गर्नुहोस्।</item>

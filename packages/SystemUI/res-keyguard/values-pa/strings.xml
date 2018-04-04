@@ -28,12 +28,9 @@
     <string name="keyguard_password_entry_touch_hint" msgid="5790410752696806482"><font size="17">"ਪਾਸਵਰਡ ਟਾਈਪ ਕਰਨ ਲਈ ਸਪਰਸ਼ ਕਰੋ"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="595980919238127672">"ਅਣਲਾਕ ਕਰਨ ਲਈ ਪਾਸਵਰਡ ਟਾਈਪ ਕਰੋ"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="7504123374204446086">"ਅਣਲਾਕ ਕਰਨ ਲਈ ਪਿੰਨ ਟਾਈਪ ਕਰੋ"</string>
-    <!-- no translation found for keyguard_enter_your_pin (7152989016739952871) -->
-    <skip />
-    <!-- no translation found for keyguard_enter_your_pattern (3915717164691787047) -->
-    <skip />
-    <!-- no translation found for keyguard_enter_your_password (5761514484663983731) -->
-    <skip />
+    <string name="keyguard_enter_your_pin" msgid="7152989016739952871">"ਆਪਣਾ ਪਿੰਨ ਦਾਖਲ ਕਰੋ"</string>
+    <string name="keyguard_enter_your_pattern" msgid="3915717164691787047">"ਆਪਣਾ ਪੈਟਰਨ ਦਾਖਲ ਕਰੋ"</string>
+    <string name="keyguard_enter_your_password" msgid="5761514484663983731">"ਆਪਣਾ ਪਾਸਵਰਡ ਦਾਖਲ ਕਰੋ"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="6535018036285012028">"ਗਲਤ ਪਿੰਨ ਕੋਡ।"</string>
     <string name="keyguard_sim_error_message_short" msgid="592109500618448312">"ਅਵੈਧ ਕਾਰਡ।"</string>
     <string name="keyguard_charged" msgid="2222329688813033109">"ਚਾਰਜ ਹੋ ਗਿਆ"</string>

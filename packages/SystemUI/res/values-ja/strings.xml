@@ -33,7 +33,6 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"実行中"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"通知"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"電池残量が少なくなっています"</string>
-    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"電池残量が少なくなっています。バッテリー セーバーを ON にしてください"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"残量が<xliff:g id="PERCENTAGE">%s</xliff:g>です"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"残量 <xliff:g id="PERCENTAGE">%s</xliff:g>、約 <xliff:g id="TIME">%s</xliff:g>（使用状況に基づく）"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"残量 <xliff:g id="PERCENTAGE">%s</xliff:g>、約 <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -73,11 +72,10 @@
     <string name="global_action_screenshot" msgid="8329831278085426283">"スクリーンショット"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"スクリーンショットを保存中..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"スクリーンショットを保存しています..."</string>
-    <string name="screenshot_saving_text" msgid="2545047868936087248">"スクリーンショットを保存しています"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"スクリーンショットを保存しました"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"タップするとスクリーンショットが表示されます"</string>
-    <string name="screenshot_failed_title" msgid="9096484883063264803">"スクリーンショットを撮影できませんでした"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"スクリーンショットの保存中に問題が発生しました"</string>
+    <string name="screenshot_failed_title" msgid="7612509838919089748">"スクリーンショット保存エラー"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"スクリーンショットを撮り直してください"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"空き容量が足りないため、スクリーンショットを保存できません"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"スクリーンショットの作成はアプリまたは組織で許可されていません"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USBファイル転送オプション"</string>
@@ -275,8 +273,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"デザートケース"</string>
     <string name="start_dreams" msgid="5640361424498338327">"スクリーン セーバー"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"イーサネット"</string>
-    <!-- no translation found for quick_settings_header_onboarding_text (8030309023792936283) -->
-    <skip />
+    <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"アイコンを押し続けると、その他の項目が表示されます"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"マナーモード"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"優先する通知のみ"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"アラームのみ"</string>
@@ -351,7 +348,7 @@
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"日の入りに ON"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"日の出まで"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> に ON"</string>
-    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"<xliff:g id="TIME">%s</xliff:g> まで"</string>
+    <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> まで"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC は無効です"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC は有効です"</string>
@@ -435,7 +432,8 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>で、画面に表示されているコンテンツのキャプチャを開始します。"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"次回から表示しない"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"すべて消去"</string>
-    <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"マナーモードでは通知が非表示になります"</string>
+    <string name="manage_notifications_text" msgid="8035284146227267681">"通知を管理する"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"マナーモードでは通知が非表示になります"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"今すぐ開始"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"通知はありません"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"プロファイルが監視されている可能性があります"</string>
@@ -535,13 +533,18 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"着信音"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"バイブレーション"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"ミュート"</string>
+    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
+    <skip />
+    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s。タップしてミュートを解除します。"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s。タップしてバイブレーションに設定します。ユーザー補助機能サービスがミュートされる場合があります。"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s。タップしてミュートします。ユーザー補助機能サービスがミュートされる場合があります。"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s。タップしてバイブレーションに設定します。"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s。タップしてミュートします。"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s の音量調節"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"着信音と通知音が鳴ります"</string>
+    <!-- no translation found for volume_dialog_ringer_guidance_ring (3360373718388509040) -->
+    <skip />
     <string name="output_title" msgid="5355078100792942802">"メディア出力"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"通話の出力"</string>
     <string name="output_none_found" msgid="5544982839808921091">"デバイスが見つかりません"</string>
@@ -628,6 +631,7 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"通知管理"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"通知スヌーズ設定"</string>
+    <string name="notification_menu_snooze_action" msgid="1112254519029621372">"スヌーズ"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"元に戻す"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"スヌーズ: <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
@@ -691,6 +695,8 @@
     <string name="battery" msgid="7498329822413202973">"電池"</string>
     <string name="clock" msgid="7416090374234785905">"時計"</string>
     <string name="headset" msgid="4534219457597457353">"ヘッドセット"</string>
+    <!-- no translation found for accessibility_long_click_tile (6687350750091842525) -->
+    <skip />
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"ヘッドホンを接続しました"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"ヘッドセットを接続しました"</string>
     <string name="data_saver" msgid="5037565123367048522">"データセーバー"</string>
@@ -814,6 +820,7 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"スクリーンショット"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"一般メッセージ"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"ストレージ"</string>
+    <string name="notification_channel_hints" msgid="7323870212489152689">"ヒント"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Instant Apps"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Instant Apps はインストールせずに利用できます。"</string>
     <string name="app_info" msgid="6856026610594615344">"アプリ情報"</string>
@@ -841,4 +848,11 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"すべてのアプリのスライスを表示することを「<xliff:g id="APP">%1$s</xliff:g>」に許可する"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"許可"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"拒否"</string>
+    <string name="auto_saver_title" msgid="1217959994732964228">"タップしてバッテリー セーバーのスケジュールを設定"</string>
+    <string name="auto_saver_text" msgid="6324376061044218113">"電池が <xliff:g id="PERCENTAGE">%d</xliff:g>%% になったら自動的に ON にする"</string>
+    <string name="no_auto_saver_action" msgid="8086002101711328500">"いいえ"</string>
+    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"バッテリー セーバーのスケジュール設定 ON"</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"電池が <xliff:g id="PERCENTAGE">%d</xliff:g>%% を下回ると、バッテリー セーバーが自動的に ON になります。"</string>
+    <string name="open_saver_setting_action" msgid="8314624730997322529">"設定"</string>
+    <string name="auto_saver_okay_action" msgid="2701221740227683650">"OK"</string>
 </resources>
