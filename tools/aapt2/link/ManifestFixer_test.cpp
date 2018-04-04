@@ -416,6 +416,68 @@ TEST_F(ManifestFixerTest, UsesFeatureMustHaveNameOrGlEsVersion) {
   EXPECT_THAT(Verify(input), IsNull());
 }
 
+TEST_F(ManifestFixerTest, ApplicationInjectDebuggable) {
+  ManifestFixerOptions options;
+  options.debug_mode = true;
+
+  std::string no_d = R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android">
+        <application>
+        </application>
+      </manifest>)";
+
+  std::string false_d = R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android">
+        <application android:debuggable="false">
+        </application>
+      </manifest>)";
+
+  std::string true_d = R"(
+      <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="android">
+        <application android:debuggable="true">
+        </application>
+      </manifest>)";
+
+  // Inject the debuggable attribute when the attribute is not present and the
+  // flag is present
+  std::unique_ptr<xml::XmlResource> manifest = VerifyWithOptions(no_d, options);
+  EXPECT_THAT(manifest->root.get()->FindChildWithAttribute(
+      {}, "application", xml::kSchemaAndroid, "debuggable", "true"), NotNull());
+
+  // Set the debuggable flag to true if the attribute is false and the flag is
+  // present
+  manifest = VerifyWithOptions(false_d, options);
+  EXPECT_THAT(manifest->root.get()->FindChildWithAttribute(
+      {}, "application", xml::kSchemaAndroid, "debuggable", "true"), NotNull());
+
+  // Keep debuggable flag true if the attribute is true and the flag is present
+  manifest = VerifyWithOptions(true_d, options);
+  EXPECT_THAT(manifest->root.get()->FindChildWithAttribute(
+      {}, "application", xml::kSchemaAndroid, "debuggable", "true"), NotNull());
+
+  // Do not inject the debuggable attribute when the attribute is not present
+  // and the flag is not present
+  manifest = Verify(no_d);
+  EXPECT_THAT(manifest->root.get()->FindChildWithAttribute(
+      {}, "application", xml::kSchemaAndroid, "debuggable", "true"), IsNull());
+
+  // Do not set the debuggable flag to true if the attribute is false and the
+  // flag is not present
+  manifest = Verify(false_d);
+  EXPECT_THAT(manifest->root.get()->FindChildWithAttribute(
+      {}, "application", xml::kSchemaAndroid, "debuggable", "true"), IsNull());
+
+  // Keep debuggable flag true if the attribute is true and the flag is not
+  // present
+  manifest = Verify(true_d);
+  EXPECT_THAT(manifest->root.get()->FindChildWithAttribute(
+      {}, "application", xml::kSchemaAndroid, "debuggable", "true"), NotNull());
+}
+
+
 TEST_F(ManifestFixerTest, IgnoreNamespacedElements) {
   std::string input = R"EOF(
       <manifest xmlns:android="http://schemas.android.com/apk/res/android"
