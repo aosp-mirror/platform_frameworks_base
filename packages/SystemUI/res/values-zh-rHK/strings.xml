@@ -75,7 +75,7 @@
     <string name="screenshot_saved_title" msgid="5637073968117370753">"螢幕擷取畫面已儲存"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"輕按即可查看螢幕擷取畫面"</string>
     <string name="screenshot_failed_title" msgid="7612509838919089748">"無法儲存螢幕擷取畫面"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"請再次嘗試拍攝螢幕擷取畫面"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"請再嘗試拍攝螢幕擷取畫面"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"由於儲存空間有限，因此無法儲存螢幕擷取畫面"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"應用程式或您的機構不允許擷取螢幕畫面"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB 檔案傳輸選項"</string>
@@ -348,7 +348,7 @@
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"在日落時開啟"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"在日出時關閉"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"在<xliff:g id="TIME">%s</xliff:g>開啟"</string>
-    <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"結束時間：<xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"在<xliff:g id="TIME">%s</xliff:g>關閉"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC 已停用"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC 已啟用"</string>
@@ -533,6 +533,10 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"鈴聲"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"震動"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"靜音"</string>
+    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
+    <skip />
+    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s。輕按即可取消靜音。"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s。輕按即可設為震動。無障礙功能服務可能已經設為靜音。"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s。輕按即可設為靜音。無障礙功能服務可能已經設為靜音。"</string>

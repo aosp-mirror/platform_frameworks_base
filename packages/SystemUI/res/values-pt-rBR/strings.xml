@@ -533,6 +533,10 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Tocar"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Vibrar"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Ignorar"</string>
+    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
+    <skip />
+    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Toque para ativar o som."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Toque para configurar para vibrar. É possível que os serviços de acessibilidade sejam silenciados."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Toque para silenciar. É possível que os serviços de acessibilidade sejam silenciados."</string>
