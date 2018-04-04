@@ -158,8 +158,8 @@
     <color name="fingerprint_dialog_text_dark_color">#dd000000</color> <!-- 87% black -->
     <color name="fingerprint_dialog_text_light_color">#89000000</color> <!-- 54% black -->
     <color name="fingerprint_dialog_dim_color">#80000000</color> <!-- 50% black -->
-    <color name="fingerprint_dialog_error_message_color">#ffd93025</color> <!-- google red 600 -->
-    <color name="fingerprint_dialog_fingerprint_color">#ff008577</color> <!-- google blue 600 -->
+    <color name="fingerprint_dialog_error_color">#fff44336</color> <!-- red -->
+    <color name="fingerprint_dialog_fingerprint_color">#ff008577</color> <!-- teal -->
 
     <!-- Logout button -->
     <color name="logout_button_bg_color">#ccffffff</color>
