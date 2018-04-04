@@ -197,8 +197,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"ಎಚ್ಚರವಾಗಿರು"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"ಚಾರ್ಜ್ ಮಾಡುವಾಗ ಪರದೆಯು ಎಂದಿಗೂ ನಿದ್ರಾವಸ್ಥೆಗೆ ಹೋಗುವುದಿಲ್ಲ"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ಬ್ಲೂಟೂತ್‌‌ HCI ಸ್ನೂಪ್‌ಲಾಗ್"</string>
-    <!-- no translation found for bt_hci_snoop_log_summary (366083475849911315) -->
-    <skip />
+    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"ಫೈಲ್‌ನಲ್ಲಿ ಎಲ್ಲ ಬ್ಲೂಟೂತ್ HCI ಪ್ಯಾಕೆಟ್‌ಗಳನ್ನು ಸೆರೆಹಿಡಿಯಿರಿ (ಈ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಬದಲಾಯಿಸಿದ ನಂತರ ಬ್ಲೂಟೂತ್ ಟಾಗಲ್ ಮಾಡಿ)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM ಅನ್‌ಲಾಕ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"ಬೂಟ್‌ಲೋಡರ್‌ ಅನ್‌ಲಾಕ್‌ ಮಾಡಲು ಅನುಮತಿಸಿ"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM ಅನ್‌ಲಾಕ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>

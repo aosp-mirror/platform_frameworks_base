@@ -40,7 +40,7 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"已透過 %1$s 連線"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"可透過 %1$s 連線"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"已連線，但沒有互聯網"</string>
-    <string name="wifi_status_no_internet" msgid="5784710974669608361">"沒有網際網路連線"</string>
+    <string name="wifi_status_no_internet" msgid="5784710974669608361">"沒有互聯網連線"</string>
     <string name="wifi_status_sign_in_required" msgid="123517180404752756">"必須登入"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"存取點暫時已滿"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"已透過 %1$s 連線"</string>
@@ -114,10 +114,10 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"耳機"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"輸入周邊設備"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"藍牙"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"正在配對左側助聽器…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"正在配對右側助聽器…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"左側 - 電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"右側 - 電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"正在配對左邊的助聽器…"</string>
+    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"正在配對右邊的助聽器…"</string>
+    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"左邊 - 電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"右邊 - 電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi 已關閉。"</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi 連線已中斷。"</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi 訊號一格。"</string>
@@ -241,8 +241,8 @@
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"顯示無線螢幕分享認證的選項"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"讓 Wi‑Fi 記錄功能升級，在 Wi‑Fi 選擇器中依每個 SSID RSSI 顯示 Wi‑Fi 詳細紀錄"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"連線至 Wi‑Fi 網絡時隨機產生 MAC 位址"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"計量付費"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"非計量付費"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"按用量收費"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"不限數據用量收費"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"記錄器緩衝區空間"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"選取每個記錄緩衝區的記錄器空間"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"要清除記錄器的持久儲存空間嗎？"</string>
