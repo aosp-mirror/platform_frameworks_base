@@ -3922,12 +3922,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         requestChildrenUpdate();
         applyCurrentBackgroundBounds();
         updateWillNotDraw();
-        updateAntiBurnInTranslation();
         notifyHeightChangeListener(mShelf);
     }
 
     private void updateAntiBurnInTranslation() {
-        setTranslationX(mAmbientState.isDark() ? mAntiBurnInOffsetX : 0);
+        setTranslationX(mAntiBurnInOffsetX * mDarkAmount);
     }
 
     /**
@@ -3948,6 +3947,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             updateContentHeight();
         }
         updateBackgroundDimming();
+        updateAntiBurnInTranslation();
     }
 
     public float getDarkAmount() {
