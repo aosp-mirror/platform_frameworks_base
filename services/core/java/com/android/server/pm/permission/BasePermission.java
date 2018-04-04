@@ -411,17 +411,23 @@ public final class BasePermission {
     }
 
     public @NonNull PermissionInfo generatePermissionInfo(int adjustedProtectionLevel, int flags) {
-        final boolean protectionLevelChanged = protectionLevel != adjustedProtectionLevel;
-        // if we return different protection level, don't use the cached info
-        if (perm != null && !protectionLevelChanged) {
-            return PackageParser.generatePermissionInfo(perm, flags);
+        PermissionInfo permissionInfo;
+        if (perm != null) {
+            final boolean protectionLevelChanged = protectionLevel != adjustedProtectionLevel;
+            permissionInfo = PackageParser.generatePermissionInfo(perm, flags);
+            if (protectionLevelChanged && permissionInfo == perm.info) {
+                // if we return different protection level, don't use the cached info
+                permissionInfo = new PermissionInfo(permissionInfo);
+                permissionInfo.protectionLevel = adjustedProtectionLevel;
+            }
+            return permissionInfo;
         }
-        final PermissionInfo pi = new PermissionInfo();
-        pi.name = name;
-        pi.packageName = sourcePackageName;
-        pi.nonLocalizedLabel = name;
-        pi.protectionLevel = protectionLevelChanged ? adjustedProtectionLevel : protectionLevel;
-        return pi;
+        permissionInfo = new PermissionInfo();
+        permissionInfo.name = name;
+        permissionInfo.packageName = sourcePackageName;
+        permissionInfo.nonLocalizedLabel = name;
+        permissionInfo.protectionLevel = protectionLevel;
+        return permissionInfo;
     }
 
     public static boolean readLPw(@NonNull Map<String, BasePermission> out,
