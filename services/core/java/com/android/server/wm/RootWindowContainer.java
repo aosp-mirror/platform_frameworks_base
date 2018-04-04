@@ -417,6 +417,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         }, true /* traverseTopToBottom */);
     }
 
+    void updateHiddenWhileSuspendedState(final ArraySet<String> packages, final boolean suspended) {
+        forAllWindows((w) -> {
+            if (packages.contains(w.getOwningPackage())) {
+                w.setHiddenWhileSuspended(suspended);
+            }
+        }, false);
+    }
+
     void updateAppOpsState() {
         forAllWindows((w) -> {
             w.updateAppOpsState();
