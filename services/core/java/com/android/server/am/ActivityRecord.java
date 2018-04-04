@@ -93,8 +93,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SWITCH;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILITY;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
-import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.am.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.am.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
@@ -154,6 +152,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Debug;
@@ -2880,7 +2879,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
         final ActivityManagerService service = stackSupervisor.mService;
         final ActivityInfo aInfo = stackSupervisor.resolveActivity(intent, resolvedType, 0, null,
-                userId);
+                userId, Binder.getCallingUid());
         if (aInfo == null) {
             throw new XmlPullParserException("restoreActivity resolver error. Intent=" + intent +
                     " resolvedType=" + resolvedType);

@@ -429,7 +429,7 @@ public abstract class PackageManagerInternal {
      * Resolves an activity intent, allowing instant apps to be resolved.
      */
     public abstract ResolveInfo resolveIntent(Intent intent, String resolvedType,
-            int flags, int userId, boolean resolveForStart);
+            int flags, int userId, boolean resolveForStart, int filterCallingUid);
 
     /**
     * Resolves a service intent, allowing instant apps to be resolved.
