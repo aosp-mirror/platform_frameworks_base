@@ -16,9 +16,9 @@
 package com.android.test.uibench;
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.ListFragment;
-import android.support.v7.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.ListFragment;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
 

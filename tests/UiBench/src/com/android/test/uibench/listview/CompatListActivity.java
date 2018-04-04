@@ -16,9 +16,9 @@
 package com.android.test.uibench.listview;
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.ListFragment;
-import android.support.v7.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.ListFragment;
+import androidx.appcompat.app.AppCompatActivity;
 import android.widget.ListAdapter;
 
 public abstract class CompatListActivity extends AppCompatActivity {

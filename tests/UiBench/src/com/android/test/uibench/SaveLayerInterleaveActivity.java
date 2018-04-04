@@ -23,7 +23,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 
 /**
  * Test Canvas.saveLayer performance by interleaving drawText/drawRect with saveLayer.
