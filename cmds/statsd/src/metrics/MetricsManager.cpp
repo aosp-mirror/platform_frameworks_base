@@ -59,8 +59,13 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
                                const sp<AlarmMonitor>& anomalyAlarmMonitor,
                                const sp<AlarmMonitor>& periodicAlarmMonitor)
     : mConfigKey(key), mUidMap(uidMap),
+      mTtlNs(config.has_ttl_in_seconds() ? config.ttl_in_seconds() * NS_PER_SEC : -1),
+      mTtlEndNs(-1),
       mLastReportTimeNs(timeBaseSec * NS_PER_SEC),
       mLastReportWallClockNs(getWallClockNs()) {
+    // Init the ttl end timestamp.
+    refreshTtl(timeBaseSec * NS_PER_SEC);
+
     mConfigValid =
             initStatsdConfig(key, config, *uidMap, anomalyAlarmMonitor, periodicAlarmMonitor,
                              timeBaseSec, currentTimeSec, mTagIds, mAllAtomMatchers,
@@ -136,7 +141,7 @@ bool MetricsManager::isConfigValid() const {
     return mConfigValid;
 }
 
-void MetricsManager::notifyAppUpgrade(const uint64_t& eventTimeNs, const string& apk, const int uid,
+void MetricsManager::notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk, const int uid,
                                       const int64_t version) {
     // check if we care this package
     if (std::find(mAllowedPkg.begin(), mAllowedPkg.end(), apk) == mAllowedPkg.end()) {
@@ -147,7 +152,7 @@ void MetricsManager::notifyAppUpgrade(const uint64_t& eventTimeNs, const string&
     initLogSourceWhiteList();
 }
 
-void MetricsManager::notifyAppRemoved(const uint64_t& eventTimeNs, const string& apk,
+void MetricsManager::notifyAppRemoved(const int64_t& eventTimeNs, const string& apk,
                                       const int uid) {
     // check if we care this package
     if (std::find(mAllowedPkg.begin(), mAllowedPkg.end(), apk) == mAllowedPkg.end()) {
@@ -158,7 +163,7 @@ void MetricsManager::notifyAppRemoved(const uint64_t& eventTimeNs, const string&
     initLogSourceWhiteList();
 }
 
-void MetricsManager::onUidMapReceived(const uint64_t& eventTimeNs) {
+void MetricsManager::onUidMapReceived(const int64_t& eventTimeNs) {
     if (mAllowedPkg.size() == 0) {
         return;
     }
@@ -179,13 +184,13 @@ void MetricsManager::dumpStates(FILE* out, bool verbose) {
     }
 }
 
-void MetricsManager::dropData(const uint64_t dropTimeNs) {
+void MetricsManager::dropData(const int64_t dropTimeNs) {
     for (const auto& producer : mAllMetricProducers) {
         producer->dropData(dropTimeNs);
     }
 }
 
-void MetricsManager::onDumpReport(const uint64_t dumpTimeStampNs, ProtoOutputStream* protoOutput) {
+void MetricsManager::onDumpReport(const int64_t dumpTimeStampNs, ProtoOutputStream* protoOutput) {
     VLOG("=========================Metric Reports Start==========================");
     // one StatsLogReport per MetricProduer
     for (const auto& producer : mAllMetricProducers) {
@@ -288,7 +293,7 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
     }
 
     int tagId = event.GetTagId();
-    uint64_t eventTime = event.GetElapsedTimestampNs();
+    int64_t eventTime = event.GetElapsedTimestampNs();
     if (mTagIds.find(tagId) == mTagIds.end()) {
         // not interesting...
         return;
@@ -367,7 +372,7 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
 }
 
 void MetricsManager::onAnomalyAlarmFired(
-        const uint64_t& timestampNs,
+        const int64_t& timestampNs,
         unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& alarmSet) {
     for (const auto& itr : mAllAnomalyTrackers) {
         itr->informAlarmsFired(timestampNs, alarmSet);
@@ -375,7 +380,7 @@ void MetricsManager::onAnomalyAlarmFired(
 }
 
 void MetricsManager::onPeriodicAlarmFired(
-        const uint64_t& timestampNs,
+        const int64_t& timestampNs,
         unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& alarmSet) {
     for (const auto& itr : mAllPeriodicAlarmTrackers) {
         itr->informAlarmsFired(timestampNs, alarmSet);

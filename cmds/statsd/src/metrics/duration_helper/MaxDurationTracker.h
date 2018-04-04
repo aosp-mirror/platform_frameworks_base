@@ -31,30 +31,30 @@ public:
     MaxDurationTracker(const ConfigKey& key, const int64_t& id, const MetricDimensionKey& eventKey,
                        sp<ConditionWizard> wizard, int conditionIndex,
                        const std::vector<Matcher>& dimensionInCondition, bool nesting,
-                       uint64_t currentBucketStartNs, uint64_t currentBucketNum,
-                       uint64_t startTimeNs, uint64_t bucketSizeNs, bool conditionSliced,
+                       int64_t currentBucketStartNs, int64_t currentBucketNum,
+                       int64_t startTimeNs, int64_t bucketSizeNs, bool conditionSliced,
                        bool fullLink,
                        const std::vector<sp<DurationAnomalyTracker>>& anomalyTrackers);
 
     MaxDurationTracker(const MaxDurationTracker& tracker) = default;
 
-    unique_ptr<DurationTracker> clone(const uint64_t eventTime) override;
+    unique_ptr<DurationTracker> clone(const int64_t eventTime) override;
 
-    void noteStart(const HashableDimensionKey& key, bool condition, const uint64_t eventTime,
+    void noteStart(const HashableDimensionKey& key, bool condition, const int64_t eventTime,
                    const ConditionKey& conditionKey) override;
-    void noteStop(const HashableDimensionKey& key, const uint64_t eventTime,
+    void noteStop(const HashableDimensionKey& key, const int64_t eventTime,
                   const bool stopAll) override;
-    void noteStopAll(const uint64_t eventTime) override;
+    void noteStopAll(const int64_t eventTime) override;
 
     bool flushIfNeeded(
-            uint64_t timestampNs,
+            int64_t timestampNs,
             std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>>* output) override;
     bool flushCurrentBucket(
-            const uint64_t& eventTimeNs,
+            const int64_t& eventTimeNs,
             std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>>*) override;
 
-    void onSlicedConditionMayChange(bool overallCondition, const uint64_t timestamp) override;
-    void onConditionChanged(bool condition, const uint64_t timestamp) override;
+    void onSlicedConditionMayChange(bool overallCondition, const int64_t timestamp) override;
+    void onConditionChanged(bool condition, const int64_t timestamp) override;
 
     int64_t predictAnomalyTimestampNs(const DurationAnomalyTracker& anomalyTracker,
                                       const int64_t currentTimestamp) const override;
@@ -67,7 +67,7 @@ private:
     std::unordered_map<HashableDimensionKey, DurationInfo> mInfos;
 
     void noteConditionChanged(const HashableDimensionKey& key, bool conditionMet,
-                              const uint64_t timestamp);
+                              const int64_t timestamp);
 
     // return true if we should not allow newKey to be tracked because we are above the threshold
     bool hitGuardRail(const HashableDimensionKey& newKey);

@@ -53,7 +53,7 @@ public:
 
     MOCK_METHOD0(byteSize, size_t());
 
-    MOCK_METHOD1(dropData, void(const uint64_t dropTimeNs));
+    MOCK_METHOD1(dropData, void(const int64_t dropTimeNs));
 };
 
 TEST(StatsLogProcessorTest, TestRateLimitByteSize) {

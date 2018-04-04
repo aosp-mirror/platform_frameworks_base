@@ -52,9 +52,9 @@ struct DurationInfo {
 };
 
 struct DurationBucket {
-    uint64_t mBucketStartNs;
-    uint64_t mBucketEndNs;
-    uint64_t mDuration;
+    int64_t mBucketStartNs;
+    int64_t mBucketEndNs;
+    int64_t mDuration;
 };
 
 class DurationTracker {
@@ -62,8 +62,8 @@ public:
     DurationTracker(const ConfigKey& key, const int64_t& id, const MetricDimensionKey& eventKey,
                     sp<ConditionWizard> wizard, int conditionIndex,
                     const std::vector<Matcher>& dimensionInCondition, bool nesting,
-                    uint64_t currentBucketStartNs, uint64_t currentBucketNum, uint64_t startTimeNs,
-                    uint64_t bucketSizeNs, bool conditionSliced, bool fullLink,
+                    int64_t currentBucketStartNs, int64_t currentBucketNum, int64_t startTimeNs,
+                    int64_t bucketSizeNs, bool conditionSliced, bool fullLink,
                     const std::vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
         : mConfigKey(key),
           mTrackerId(id),
@@ -84,27 +84,27 @@ public:
 
     virtual ~DurationTracker(){};
 
-    virtual unique_ptr<DurationTracker> clone(const uint64_t eventTime) = 0;
+    virtual unique_ptr<DurationTracker> clone(const int64_t eventTime) = 0;
 
     virtual void noteStart(const HashableDimensionKey& key, bool condition,
-                           const uint64_t eventTime, const ConditionKey& conditionKey) = 0;
-    virtual void noteStop(const HashableDimensionKey& key, const uint64_t eventTime,
+                           const int64_t eventTime, const ConditionKey& conditionKey) = 0;
+    virtual void noteStop(const HashableDimensionKey& key, const int64_t eventTime,
                           const bool stopAll) = 0;
-    virtual void noteStopAll(const uint64_t eventTime) = 0;
+    virtual void noteStopAll(const int64_t eventTime) = 0;
 
-    virtual void onSlicedConditionMayChange(bool overallCondition, const uint64_t timestamp) = 0;
-    virtual void onConditionChanged(bool condition, const uint64_t timestamp) = 0;
+    virtual void onSlicedConditionMayChange(bool overallCondition, const int64_t timestamp) = 0;
+    virtual void onConditionChanged(bool condition, const int64_t timestamp) = 0;
 
     // Flush stale buckets if needed, and return true if the tracker has no on-going duration
     // events, so that the owner can safely remove the tracker.
     virtual bool flushIfNeeded(
-            uint64_t timestampNs,
+            int64_t timestampNs,
             std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>>* output) = 0;
 
     // Should only be called during an app upgrade or from this tracker's flushIfNeeded. If from
     // an app upgrade, we assume that we're trying to form a partial bucket.
     virtual bool flushCurrentBucket(
-            const uint64_t& eventTimeNs,
+            const int64_t& eventTimeNs,
             std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>>* output) = 0;
 
     // Predict the anomaly timestamp given the current status.
@@ -118,15 +118,15 @@ public:
     }
 
 protected:
-    uint64_t getCurrentBucketEndTimeNs() const {
+    int64_t getCurrentBucketEndTimeNs() const {
         return mStartTimeNs + (mCurrentBucketNum + 1) * mBucketSizeNs;
     }
 
     // Starts the anomaly alarm.
-    void startAnomalyAlarm(const uint64_t eventTime) {
+    void startAnomalyAlarm(const int64_t eventTime) {
         for (auto& anomalyTracker : mAnomalyTrackers) {
             if (anomalyTracker != nullptr) {
-                const uint64_t alarmTimestampNs =
+                const int64_t alarmTimestampNs =
                     predictAnomalyTimestampNs(*anomalyTracker, eventTime);
                 if (alarmTimestampNs > 0) {
                     anomalyTracker->startAlarm(mEventKey, alarmTimestampNs);
@@ -136,7 +136,7 @@ protected:
     }
 
     // Stops the anomaly alarm. If it should have already fired, declare the anomaly now.
-    void stopAnomalyAlarm(const uint64_t timestamp) {
+    void stopAnomalyAlarm(const int64_t timestamp) {
         for (auto& anomalyTracker : mAnomalyTrackers) {
             if (anomalyTracker != nullptr) {
                 anomalyTracker->stopAlarm(mEventKey, timestamp);
@@ -152,7 +152,7 @@ protected:
         }
     }
 
-    void detectAndDeclareAnomaly(const uint64_t& timestamp, const int64_t& currBucketNum,
+    void detectAndDeclareAnomaly(const int64_t& timestamp, const int64_t& currBucketNum,
                                  const int64_t& currentBucketValue) {
         for (auto& anomalyTracker : mAnomalyTrackers) {
             if (anomalyTracker != nullptr) {
@@ -164,7 +164,7 @@ protected:
 
     // Convenience to compute the current bucket's end time, which is always aligned with the
     // start time of the metric.
-    uint64_t getCurrentBucketEndTimeNs() {
+    int64_t getCurrentBucketEndTimeNs() {
         return mStartTimeNs + (mCurrentBucketNum + 1) * mBucketSizeNs;
     }
 
@@ -185,15 +185,15 @@ protected:
 
     const bool mNested;
 
-    uint64_t mCurrentBucketStartTimeNs;
+    int64_t mCurrentBucketStartTimeNs;
 
     int64_t mDuration;  // current recorded duration result (for partial bucket)
 
     int64_t mDurationFullBucket;  // Sum of past partial buckets in current full bucket.
 
-    uint64_t mCurrentBucketNum;
+    int64_t mCurrentBucketNum;
 
-    const uint64_t mStartTimeNs;
+    const int64_t mStartTimeNs;
 
     const bool mConditionSliced;
 

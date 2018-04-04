@@ -28,8 +28,8 @@ MaxDurationTracker::MaxDurationTracker(const ConfigKey& key, const int64_t& id,
                                        const MetricDimensionKey& eventKey,
                                        sp<ConditionWizard> wizard, int conditionIndex,
                                        const vector<Matcher>& dimensionInCondition, bool nesting,
-                                       uint64_t currentBucketStartNs, uint64_t currentBucketNum,
-                                       uint64_t startTimeNs, uint64_t bucketSizeNs,
+                                       int64_t currentBucketStartNs, int64_t currentBucketNum,
+                                       int64_t startTimeNs, int64_t bucketSizeNs,
                                        bool conditionSliced, bool fullLink,
                                        const vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
     : DurationTracker(key, id, eventKey, wizard, conditionIndex, dimensionInCondition, nesting,
@@ -41,7 +41,7 @@ MaxDurationTracker::MaxDurationTracker(const ConfigKey& key, const int64_t& id,
     }
 }
 
-unique_ptr<DurationTracker> MaxDurationTracker::clone(const uint64_t eventTime) {
+unique_ptr<DurationTracker> MaxDurationTracker::clone(const int64_t eventTime) {
     auto clonedTracker = make_unique<MaxDurationTracker>(*this);
     for (auto it = clonedTracker->mInfos.begin(); it != clonedTracker->mInfos.end();) {
         if (it->second.state  != kStopped) {
@@ -80,7 +80,7 @@ bool MaxDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
 }
 
 void MaxDurationTracker::noteStart(const HashableDimensionKey& key, bool condition,
-                                   const uint64_t eventTime, const ConditionKey& conditionKey) {
+                                   const int64_t eventTime, const ConditionKey& conditionKey) {
     // this will construct a new DurationInfo if this key didn't exist.
     if (hitGuardRail(key)) {
         return;
@@ -114,7 +114,7 @@ void MaxDurationTracker::noteStart(const HashableDimensionKey& key, bool conditi
 }
 
 
-void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_t eventTime,
+void MaxDurationTracker::noteStop(const HashableDimensionKey& key, const int64_t eventTime,
                                   bool forceStop) {
     VLOG("MaxDuration: key %s stop", key.toString().c_str());
     if (mInfos.find(key) == mInfos.end()) {
@@ -175,7 +175,7 @@ bool MaxDurationTracker::anyStarted() {
     return false;
 }
 
-void MaxDurationTracker::noteStopAll(const uint64_t eventTime) {
+void MaxDurationTracker::noteStopAll(const int64_t eventTime) {
     std::set<HashableDimensionKey> keys;
     for (const auto& pair : mInfos) {
         keys.insert(pair.first);
@@ -186,14 +186,14 @@ void MaxDurationTracker::noteStopAll(const uint64_t eventTime) {
 }
 
 bool MaxDurationTracker::flushCurrentBucket(
-        const uint64_t& eventTimeNs,
+        const int64_t& eventTimeNs,
         std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>>* output) {
     VLOG("MaxDurationTracker flushing.....");
 
     // adjust the bucket start time
     int numBucketsForward = 0;
-    uint64_t fullBucketEnd = getCurrentBucketEndTimeNs();
-    uint64_t currentBucketEndTimeNs;
+    int64_t fullBucketEnd = getCurrentBucketEndTimeNs();
+    int64_t currentBucketEndTimeNs;
     if (eventTimeNs >= fullBucketEnd) {
         numBucketsForward = 1 + (eventTimeNs - fullBucketEnd) / mBucketSizeNs;
         currentBucketEndTimeNs = fullBucketEnd;
@@ -238,7 +238,7 @@ bool MaxDurationTracker::flushCurrentBucket(
 }
 
 bool MaxDurationTracker::flushIfNeeded(
-        uint64_t eventTimeNs, unordered_map<MetricDimensionKey, vector<DurationBucket>>* output) {
+        int64_t eventTimeNs, unordered_map<MetricDimensionKey, vector<DurationBucket>>* output) {
     if (eventTimeNs < getCurrentBucketEndTimeNs()) {
         return false;
     }
@@ -246,7 +246,7 @@ bool MaxDurationTracker::flushIfNeeded(
 }
 
 void MaxDurationTracker::onSlicedConditionMayChange(bool overallCondition,
-                                                    const uint64_t timestamp) {
+                                                    const int64_t timestamp) {
     // Now for each of the on-going event, check if the condition has changed for them.
     for (auto& pair : mInfos) {
         if (pair.second.state == kStopped) {
@@ -268,14 +268,14 @@ void MaxDurationTracker::onSlicedConditionMayChange(bool overallCondition,
     }
 }
 
-void MaxDurationTracker::onConditionChanged(bool condition, const uint64_t timestamp) {
+void MaxDurationTracker::onConditionChanged(bool condition, const int64_t timestamp) {
     for (auto& pair : mInfos) {
         noteConditionChanged(pair.first, condition, timestamp);
     }
 }
 
 void MaxDurationTracker::noteConditionChanged(const HashableDimensionKey& key, bool conditionMet,
-                                              const uint64_t timestamp) {
+                                              const int64_t timestamp) {
     auto it = mInfos.find(key);
     if (it == mInfos.end()) {
         return;

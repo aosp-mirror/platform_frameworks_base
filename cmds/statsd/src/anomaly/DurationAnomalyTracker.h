@@ -34,12 +34,12 @@ public:
 
     // Sets an alarm for the given timestamp.
     // Replaces previous alarm if one already exists.
-    void startAlarm(const MetricDimensionKey& dimensionKey, const uint64_t& eventTime);
+    void startAlarm(const MetricDimensionKey& dimensionKey, const int64_t& eventTime);
 
     // Stops the alarm.
     // If it should have already fired, but hasn't yet (e.g. because the AlarmManager is delayed),
     // declare the anomaly now.
-    void stopAlarm(const MetricDimensionKey& dimensionKey, const uint64_t& timestampNs);
+    void stopAlarm(const MetricDimensionKey& dimensionKey, const int64_t& timestampNs);
 
     // Stop all the alarms owned by this tracker. Does not declare any anomalies.
     void cancelAllAlarms();
@@ -48,7 +48,7 @@ public:
     // and removes it from firedAlarms. The AlarmMonitor is not informed.
     // Note that this will generally be called from a different thread from the other functions;
     // the caller is responsible for thread safety.
-    void informAlarmsFired(const uint64_t& timestampNs,
+    void informAlarmsFired(const int64_t& timestampNs,
             unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& firedAlarms) override;
 
 protected:

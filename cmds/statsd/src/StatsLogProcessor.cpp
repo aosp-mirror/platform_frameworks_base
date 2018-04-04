@@ -65,6 +65,7 @@ const int FIELD_ID_CURRENT_REPORT_ELAPSED_NANOS = 4;
 const int FIELD_ID_LAST_REPORT_WALL_CLOCK_NANOS = 5;
 const int FIELD_ID_CURRENT_REPORT_WALL_CLOCK_NANOS = 6;
 
+#define NS_PER_HOUR 3600 * NS_PER_SEC
 
 #define STATS_DATA_DIR "/data/misc/stats-data"
 
@@ -85,7 +86,7 @@ StatsLogProcessor::~StatsLogProcessor() {
 }
 
 void StatsLogProcessor::onAnomalyAlarmFired(
-        const uint64_t& timestampNs,
+        const int64_t& timestampNs,
         unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
     for (const auto& itr : mMetricsManagers) {
@@ -93,7 +94,7 @@ void StatsLogProcessor::onAnomalyAlarmFired(
     }
 }
 void StatsLogProcessor::onPeriodicAlarmFired(
-        const uint64_t& timestampNs,
+        const int64_t& timestampNs,
         unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet) {
 
     std::lock_guard<std::mutex> lock(mMetricsMutex);
@@ -156,10 +157,14 @@ void StatsLogProcessor::onIsolatedUidChangedEventLocked(const LogEvent& event) {
 
 void StatsLogProcessor::OnLogEvent(LogEvent* event) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
-    if (event->GetElapsedTimestampNs() < mLastLogTimestamp) {
+    const int64_t currentTimestampNs = event->GetElapsedTimestampNs();
+    if (currentTimestampNs < mLastLogTimestamp) {
         return;
     }
-    mLastLogTimestamp = event->GetElapsedTimestampNs();
+
+    resetIfConfigTtlExpiredLocked(currentTimestampNs);
+
+    mLastLogTimestamp = currentTimestampNs;
     StatsdStats::getInstance().noteAtomLogged(
         event->GetTagId(), event->GetElapsedTimestampNs() / NS_PER_SEC);
 
@@ -173,11 +178,12 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event) {
         return;
     }
 
-    uint64_t curTimeSec = getElapsedRealtimeSec();
+    int64_t curTimeSec = getElapsedRealtimeSec();
     if (curTimeSec - mLastPullerCacheClearTimeSec > StatsdStats::kPullerCacheClearIntervalSec) {
         mStatsPullerManager.ClearPullerCacheIfNecessary(curTimeSec * NS_PER_SEC);
         mLastPullerCacheClearTimeSec = curTimeSec;
     }
+
 
     if (event->GetTagId() != android::util::ISOLATED_UID_CHANGED) {
         // Map the isolated uid to host uid if necessary.
@@ -194,6 +200,11 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event) {
 void StatsLogProcessor::OnConfigUpdated(const int64_t timestampNs, const ConfigKey& key,
                                         const StatsdConfig& config) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
+    OnConfigUpdatedLocked(timestampNs, key, config);
+}
+
+void StatsLogProcessor::OnConfigUpdatedLocked(
+        const int64_t timestampNs, const ConfigKey& key, const StatsdConfig& config) {
     VLOG("Updated configuration for key %s", key.ToString().c_str());
     sp<MetricsManager> newMetricsManager =
         new MetricsManager(key, config, mTimeBaseSec, (timestampNs - 1) / NS_PER_SEC + 1, mUidMap,
@@ -206,6 +217,7 @@ void StatsLogProcessor::OnConfigUpdated(const int64_t timestampNs, const ConfigK
             // not safe to create wp or sp from this pointer inside its constructor.
             mUidMap->addListener(newMetricsManager.get());
         }
+        newMetricsManager->refreshTtl(timestampNs);
         mMetricsManagers[key] = newMetricsManager;
         VLOG("StatsdConfig valid");
     } else {
@@ -235,7 +247,7 @@ void StatsLogProcessor::dumpStates(FILE* out, bool verbose) {
 /*
  * onDumpReport dumps serialized ConfigMetricsReportList into outData.
  */
-void StatsLogProcessor::onDumpReport(const ConfigKey& key, const uint64_t dumpTimeStampNs,
+void StatsLogProcessor::onDumpReport(const ConfigKey& key, const int64_t dumpTimeStampNs,
                                      vector<uint8_t>* outData) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
 
@@ -290,7 +302,7 @@ void StatsLogProcessor::onDumpReport(const ConfigKey& key, const uint64_t dumpTi
  * onConfigMetricsReportLocked dumps serialized ConfigMetricsReport into outData.
  */
 void StatsLogProcessor::onConfigMetricsReportLocked(const ConfigKey& key,
-                                                    const uint64_t dumpTimeStampNs,
+                                                    const int64_t dumpTimeStampNs,
                                                     ProtoOutputStream* proto) {
     // We already checked whether key exists in mMetricsManagers in
     // WriteDataToDisk.
@@ -317,7 +329,29 @@ void StatsLogProcessor::onConfigMetricsReportLocked(const ConfigKey& key,
     proto->write(FIELD_TYPE_INT64 | FIELD_ID_CURRENT_REPORT_WALL_CLOCK_NANOS,
                 (long long)getWallClockNs());
 
+}
 
+void StatsLogProcessor::resetIfConfigTtlExpiredLocked(const int64_t timestampNs) {
+    std::vector<ConfigKey> configKeysTtlExpired;
+    for (auto it = mMetricsManagers.begin(); it != mMetricsManagers.end(); it++) {
+        if (it->second != nullptr && !it->second->isInTtl(timestampNs)) {
+            configKeysTtlExpired.push_back(it->first);
+        }
+    }
+
+    for (const auto& key : configKeysTtlExpired) {
+        StatsdConfig config;
+        if (StorageManager::readConfigFromDisk(key, &config)) {
+            OnConfigUpdatedLocked(timestampNs, key, config);
+            StatsdStats::getInstance().noteConfigReset(key);
+        } else {
+            ALOGE("Failed to read backup config from disk for : %s", key.ToString().c_str());
+            auto it = mMetricsManagers.find(key);
+            if (it != mMetricsManagers.end()) {
+                it->second->refreshTtl(timestampNs);
+            }
+        }
+    }
 }
 
 void StatsLogProcessor::OnConfigRemoved(const ConfigKey& key) {
@@ -337,7 +371,7 @@ void StatsLogProcessor::OnConfigRemoved(const ConfigKey& key) {
 }
 
 void StatsLogProcessor::flushIfNecessaryLocked(
-    uint64_t timestampNs, const ConfigKey& key, MetricsManager& metricsManager) {
+    int64_t timestampNs, const ConfigKey& key, MetricsManager& metricsManager) {
     auto lastCheckTime = mLastByteSizeTimes.find(key);
     if (lastCheckTime != mLastByteSizeTimes.end()) {
         if (timestampNs - lastCheckTime->second < StatsdStats::kMinByteSizeCheckPeriodNs) {
