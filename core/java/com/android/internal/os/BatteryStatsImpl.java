@@ -21,10 +21,13 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.UidTraffic;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.ContentObserver;
+import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkStats;
 import android.net.Uri;
@@ -766,7 +769,10 @@ public class BatteryStatsImpl extends BatteryStats {
     int mCameraOnNesting;
     StopwatchTimer mCameraOnTimer;
 
-    int mUsbDataState; // 0: unknown, 1: disconnected, 2: connected
+    private static final int USB_DATA_UNKNOWN = 0;
+    private static final int USB_DATA_DISCONNECTED = 1;
+    private static final int USB_DATA_CONNECTED = 2;
+    int mUsbDataState = USB_DATA_UNKNOWN;
 
     int mGpsSignalQualityBin = -1;
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
@@ -5241,8 +5247,30 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    public void noteUsbConnectionStateLocked(boolean connected) {
-        int newState = connected ? 2 : 1;
+    private void registerUsbStateReceiver(Context context) {
+        final IntentFilter usbStateFilter = new IntentFilter();
+        usbStateFilter.addAction(UsbManager.ACTION_USB_STATE);
+        context.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final boolean state = intent.getBooleanExtra(UsbManager.USB_CONNECTED, false);
+                synchronized (BatteryStatsImpl.this) {
+                    noteUsbConnectionStateLocked(state);
+                }
+            }
+        }, usbStateFilter);
+        synchronized (this) {
+            if (mUsbDataState == USB_DATA_UNKNOWN) {
+                final Intent usbState = context.registerReceiver(null, usbStateFilter);
+                final boolean initState = usbState != null && usbState.getBooleanExtra(
+                        UsbManager.USB_CONNECTED, false);
+                noteUsbConnectionStateLocked(initState);
+            }
+        }
+    }
+
+    private void noteUsbConnectionStateLocked(boolean connected) {
+        int newState = connected ? USB_DATA_CONNECTED : USB_DATA_DISCONNECTED;
         if (mUsbDataState != newState) {
             mUsbDataState = newState;
             if (connected) {
@@ -13218,6 +13246,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public void systemServicesReady(Context context) {
         mConstants.startObserving(context.getContentResolver());
+        registerUsbStateReceiver(context);
     }
 
     @VisibleForTesting
