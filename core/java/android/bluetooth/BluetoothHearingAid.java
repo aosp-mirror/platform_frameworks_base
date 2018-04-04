@@ -421,29 +421,29 @@ public final class BluetoothHearingAid implements BluetoothProfile {
     }
 
     /**
-     * Check whether the device is active.
+     * Get the connected physical Hearing Aid devices that are active
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      * permission.
      *
-     * @return the connected device that is active or null if no device
-     * is active
+     * @return the list of active devices. The first element is the left active
+     * device; the second element is the right active device. If either or both side
+     * is not active, it will be null on that position. Returns empty list on error.
      * @hide
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public boolean isActiveDevice(@Nullable BluetoothDevice device) {
-        if (VDBG) log("isActiveDevice()");
+    public List<BluetoothDevice> getActiveDevices() {
+        if (VDBG) log("getActiveDevices()");
         try {
             mServiceLock.readLock().lock();
-            if (mService != null && isEnabled()
-                    && ((device == null) || isValidDevice(device))) {
-                return mService.isActiveDevice(device);
+            if (mService != null && isEnabled()) {
+                return mService.getActiveDevices();
             }
             if (mService == null) Log.w(TAG, "Proxy not attached to service");
-            return false;
+            return new ArrayList<>();
         } catch (RemoteException e) {
             Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-            return false;
+            return new ArrayList<>();
         } finally {
             mServiceLock.readLock().unlock();
         }
