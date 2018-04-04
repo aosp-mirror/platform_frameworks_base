@@ -77,6 +77,9 @@ const int FIELD_ID_CONFIG_STATS_CONDITION_STATS = 14;
 const int FIELD_ID_CONFIG_STATS_METRIC_STATS = 15;
 const int FIELD_ID_CONFIG_STATS_ALERT_STATS = 16;
 const int FIELD_ID_CONFIG_STATS_METRIC_DIMENSION_IN_CONDITION_STATS = 17;
+const int FIELD_ID_CONFIG_STATS_ANNOTATION = 18;
+const int FIELD_ID_CONFIG_STATS_ANNOTATION_INT64 = 1;
+const int FIELD_ID_CONFIG_STATS_ANNOTATION_INT32 = 2;
 
 const int FIELD_ID_MATCHER_STATS_ID = 1;
 const int FIELD_ID_MATCHER_STATS_COUNT = 2;
@@ -116,8 +119,10 @@ void StatsdStats::addToIceBoxLocked(shared_ptr<ConfigStats>& stats) {
     mIceBox.push_back(stats);
 }
 
-void StatsdStats::noteConfigReceived(const ConfigKey& key, int metricsCount, int conditionsCount,
-                                     int matchersCount, int alertsCount, bool isValid) {
+void StatsdStats::noteConfigReceived(
+        const ConfigKey& key, int metricsCount, int conditionsCount, int matchersCount,
+        int alertsCount, const std::list<std::pair<const int64_t, const int32_t>>& annotations,
+        bool isValid) {
     lock_guard<std::mutex> lock(mLock);
     int32_t nowTimeSec = getWallClockSec();
 
@@ -133,6 +138,9 @@ void StatsdStats::noteConfigReceived(const ConfigKey& key, int metricsCount, int
     configStats->matcher_count = matchersCount;
     configStats->alert_count = alertsCount;
     configStats->is_valid = isValid;
+    for (auto& v : annotations) {
+        configStats->annotations.emplace_back(v);
+    }
 
     if (isValid) {
         mConfigStats[key] = configStats;
@@ -351,6 +359,7 @@ void StatsdStats::resetInternalLocked() {
         config.second->broadcast_sent_time_sec.clear();
         config.second->data_drop_time_sec.clear();
         config.second->dump_report_time_sec.clear();
+        config.second->annotations.clear();
         config.second->matcher_stats.clear();
         config.second->condition_stats.clear();
         config.second->metric_stats.clear();
@@ -394,6 +403,11 @@ void StatsdStats::dumpStats(FILE* out) const {
                 configStats->deletion_time_sec, configStats->metric_count,
                 configStats->condition_count, configStats->matcher_count, configStats->alert_count,
                 configStats->is_valid);
+        for (const auto& annotation : configStats->annotations) {
+            fprintf(out, "\tannotation: %lld, %d\n", (long long)annotation.first,
+                    annotation.second);
+        }
+
         for (const auto& broadcastTime : configStats->broadcast_sent_time_sec) {
             fprintf(out, "\tbroadcast time: %d\n", broadcastTime);
         }
@@ -495,6 +509,15 @@ void addConfigStatsToProto(const ConfigStats& configStats, ProtoOutputStream* pr
     for (const auto& dump : configStats.dump_report_time_sec) {
         proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_STATS_DUMP_REPORT | FIELD_COUNT_REPEATED,
                      dump);
+    }
+
+    for (const auto& annotation : configStats.annotations) {
+        uint64_t token = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                                      FIELD_ID_CONFIG_STATS_ANNOTATION);
+        proto->write(FIELD_TYPE_INT64 | FIELD_ID_CONFIG_STATS_ANNOTATION_INT64,
+                     (long long)annotation.first);
+        proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_STATS_ANNOTATION_INT32, annotation.second);
+        proto->end(token);
     }
 
     for (const auto& pair : configStats.matcher_stats) {

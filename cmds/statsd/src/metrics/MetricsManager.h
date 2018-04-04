@@ -107,6 +107,9 @@ private:
     // Logs from uids that are not in the list will be ignored to avoid spamming.
     std::set<int32_t> mAllowedLogSources;
 
+    // Contains the annotations passed in with StatsdConfig.
+    std::list<std::pair<const int64_t, const int32_t>> mAnnotations;
+
     // To guard access to mAllowedLogSources
     mutable std::mutex mAllowedLogSourcesMutex;
 
