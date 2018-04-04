@@ -44,6 +44,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import java.util.HashSet;
 
 import androidx.slice.SliceItem;
 import androidx.slice.SliceProvider;
@@ -66,7 +67,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mProvider = new TestableKeyguardSliceProvider();
         mProvider.attachInfo(getContext(), null);
-        SliceProvider.setSpecs(Arrays.asList(SliceSpecs.LIST));
+        SliceProvider.setSpecs(new HashSet<>(Arrays.asList(SliceSpecs.LIST)));
     }
 
     @Test
