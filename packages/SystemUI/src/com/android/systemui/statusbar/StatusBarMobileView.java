@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import static com.android.systemui.statusbar.policy.DarkIconDispatcher.getTint;
+import static com.android.systemui.statusbar.policy.DarkIconDispatcher.isInArea;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -161,6 +162,9 @@ public class StatusBarMobileView extends AlphaOptimizedLinearLayout implements D
 
     @Override
     public void onDarkChanged(Rect area, float darkIntensity, int tint) {
+        if (!isInArea(area, this)) {
+            return;
+        }
         mMobileDrawable.setDarkIntensity(darkIntensity);
         ColorStateList color = ColorStateList.valueOf(getTint(area, this, tint));
         mIn.setImageTintList(color);
