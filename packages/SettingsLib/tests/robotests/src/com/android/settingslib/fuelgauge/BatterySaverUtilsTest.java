@@ -16,7 +16,9 @@
 
 package com.android.settingslib.fuelgauge;
 
+import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
@@ -28,6 +30,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.PowerManager;
+import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
@@ -41,6 +44,9 @@ import org.mockito.MockitoAnnotations;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
 public class BatterySaverUtilsTest {
+    final int BATTERY_SAVER_THRESHOLD_1 = 15;
+    final int BATTERY_SAVER_THRESHOLD_2 = 20;
+
     @Mock
     Context mMockContext;
 
@@ -148,5 +154,38 @@ public class BatterySaverUtilsTest {
         assertEquals(-1, Secure.getInt(mMockResolver, Secure.LOW_POWER_WARNING_ACKNOWLEDGED, -1));
         assertEquals(-2,
                 Secure.getInt(mMockResolver, Secure.LOW_POWER_MANUAL_ACTIVATION_COUNT, -2));
+    }
+
+    @Test
+    public void testEnsureAutoBatterysaver_setNewPositiveValue_doNotOverwrite() throws Exception {
+        Global.putString(mMockResolver, Global.LOW_POWER_MODE_TRIGGER_LEVEL, "null");
+
+        BatterySaverUtils.ensureAutoBatterySaver(mMockContext, BATTERY_SAVER_THRESHOLD_1);
+
+        assertThat(Secure.getInt(mMockResolver, Global.LOW_POWER_MODE_TRIGGER_LEVEL, -1))
+                .isEqualTo(BATTERY_SAVER_THRESHOLD_1);
+
+        // Once a positive number is set, ensureAutoBatterySaver() won't overwrite it.
+        BatterySaverUtils.ensureAutoBatterySaver(mMockContext, BATTERY_SAVER_THRESHOLD_2);
+        assertThat(Secure.getInt(mMockResolver, Global.LOW_POWER_MODE_TRIGGER_LEVEL, -1))
+                .isEqualTo(BATTERY_SAVER_THRESHOLD_1);
+    }
+
+    @Test
+    public void testSetAutoBatterySaverTriggerLevel_setSuppressSuggestion() throws Exception {
+        Global.putString(mMockResolver, Global.LOW_POWER_MODE_TRIGGER_LEVEL, "null");
+        Secure.putString(mMockResolver, Secure.SUPPRESS_AUTO_BATTERY_SAVER_SUGGESTION, "null");
+
+        BatterySaverUtils.setAutoBatterySaverTriggerLevel(mMockContext, 0);
+        assertThat(Global.getInt(mMockResolver, Global.LOW_POWER_MODE_TRIGGER_LEVEL, -1))
+                .isEqualTo(0);
+        assertThat(Secure.getInt(mMockResolver, Secure.SUPPRESS_AUTO_BATTERY_SAVER_SUGGESTION, -1))
+                .isEqualTo(-1); // not set.
+
+        BatterySaverUtils.setAutoBatterySaverTriggerLevel(mMockContext, BATTERY_SAVER_THRESHOLD_1 );
+        assertThat( Global.getInt(mMockResolver, Global.LOW_POWER_MODE_TRIGGER_LEVEL, -1))
+                .isEqualTo(BATTERY_SAVER_THRESHOLD_1);
+        assertThat(Secure.getInt(mMockResolver, Secure.SUPPRESS_AUTO_BATTERY_SAVER_SUGGESTION, -1))
+                .isEqualTo(1);
     }
 }
