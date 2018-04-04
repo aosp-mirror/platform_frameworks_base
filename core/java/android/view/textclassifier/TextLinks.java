@@ -28,6 +28,8 @@ import android.text.Spannable;
 import android.text.method.MovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
+import android.text.util.Linkify;
+import android.text.util.Linkify.LinkifyMask;
 import android.view.View;
 import android.view.textclassifier.TextClassifier.EntityType;
 import android.widget.TextView;
@@ -605,6 +607,126 @@ public final class TextLinks implements Parcelable {
         @NonNull
         public TextLinks build() {
             return new TextLinks(mFullText, mLinks);
+        }
+    }
+
+    // TODO: Remove once apps can build against the latest sdk.
+    /**
+     * Optional input parameters for generating TextLinks.
+     * @hide
+     */
+    public static final class Options {
+
+        @Nullable private final TextClassificationSessionId mSessionId;
+        @Nullable private final Request mRequest;
+        @Nullable private LocaleList mDefaultLocales;
+        @Nullable private TextClassifier.EntityConfig mEntityConfig;
+        private boolean mLegacyFallback;
+
+        private @ApplyStrategy int mApplyStrategy;
+        private Function<TextLink, TextLinkSpan> mSpanFactory;
+
+        private String mCallingPackageName;
+
+        public Options() {
+            this(null, null);
+        }
+
+        private Options(
+                @Nullable TextClassificationSessionId sessionId, @Nullable Request request) {
+            mSessionId = sessionId;
+            mRequest = request;
+        }
+
+        /** Helper to create Options from a Request. */
+        public static Options from(TextClassificationSessionId sessionId, Request request) {
+            final Options options = new Options(sessionId, request);
+            options.setDefaultLocales(request.getDefaultLocales());
+            options.setEntityConfig(request.getEntityConfig());
+            return options;
+        }
+
+        /** Returns a new options object based on the specified link mask. */
+        public static Options fromLinkMask(@LinkifyMask int mask) {
+            final List<String> entitiesToFind = new ArrayList<>();
+
+            if ((mask & Linkify.WEB_URLS) != 0) {
+                entitiesToFind.add(TextClassifier.TYPE_URL);
+            }
+            if ((mask & Linkify.EMAIL_ADDRESSES) != 0) {
+                entitiesToFind.add(TextClassifier.TYPE_EMAIL);
+            }
+            if ((mask & Linkify.PHONE_NUMBERS) != 0) {
+                entitiesToFind.add(TextClassifier.TYPE_PHONE);
+            }
+            if ((mask & Linkify.MAP_ADDRESSES) != 0) {
+                entitiesToFind.add(TextClassifier.TYPE_ADDRESS);
+            }
+
+            return new Options().setEntityConfig(
+                    TextClassifier.EntityConfig.createWithEntityList(entitiesToFind));
+        }
+
+        /** @param defaultLocales ordered list of locale preferences. */
+        public Options setDefaultLocales(@Nullable LocaleList defaultLocales) {
+            mDefaultLocales = defaultLocales;
+            return this;
+        }
+
+        /** @param entityConfig definition of which entity types to look for. */
+        public Options setEntityConfig(@Nullable TextClassifier.EntityConfig entityConfig) {
+            mEntityConfig = entityConfig;
+            return this;
+        }
+
+        /** @param applyStrategy strategy to use when resolving conflicts. */
+        public Options setApplyStrategy(@ApplyStrategy int applyStrategy) {
+            checkValidApplyStrategy(applyStrategy);
+            mApplyStrategy = applyStrategy;
+            return this;
+        }
+
+        /** @param spanFactory factory for converting TextLink to TextLinkSpan. */
+        public Options setSpanFactory(@Nullable Function<TextLink, TextLinkSpan> spanFactory) {
+            mSpanFactory = spanFactory;
+            return this;
+        }
+
+        @Nullable
+        public LocaleList getDefaultLocales() {
+            return mDefaultLocales;
+        }
+
+        @Nullable
+        public TextClassifier.EntityConfig getEntityConfig() {
+            return mEntityConfig;
+        }
+
+        @ApplyStrategy
+        public int getApplyStrategy() {
+            return mApplyStrategy;
+        }
+
+        @Nullable
+        public Function<TextLink, TextLinkSpan> getSpanFactory() {
+            return mSpanFactory;
+        }
+
+        @Nullable
+        public Request getRequest() {
+            return mRequest;
+        }
+
+        @Nullable
+        public TextClassificationSessionId getSessionId() {
+            return mSessionId;
+        }
+
+        private static void checkValidApplyStrategy(int applyStrategy) {
+            if (applyStrategy != APPLY_STRATEGY_IGNORE && applyStrategy != APPLY_STRATEGY_REPLACE) {
+                throw new IllegalArgumentException(
+                        "Invalid apply strategy. See TextLinks.ApplyStrategy for options.");
+            }
         }
     }
 }

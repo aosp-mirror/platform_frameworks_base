@@ -208,6 +208,22 @@ public interface TextClassifier {
         return suggestSelection(request);
     }
 
+    // TODO: Remove once apps can build against the latest sdk.
+    /** @hide */
+    default TextSelection suggestSelection(
+            @NonNull CharSequence text,
+            @IntRange(from = 0) int selectionStartIndex,
+            @IntRange(from = 0) int selectionEndIndex,
+            @Nullable TextSelection.Options options) {
+        final TextSelection.Request request = options.getRequest() != null
+                ? options.getRequest()
+                : new TextSelection.Request.Builder(
+                        text, selectionStartIndex, selectionEndIndex)
+                        .setDefaultLocales(options.getDefaultLocales())
+                        .build();
+        return suggestSelection(request);
+    }
+
     /**
      * Classifies the specified text and returns a {@link TextClassification} object that can be
      * used to generate a widget for handling the classified text.
@@ -267,6 +283,23 @@ public interface TextClassifier {
         return classifyText(request);
     }
 
+    // TODO: Remove once apps can build against the latest sdk.
+    /** @hide */
+    default TextClassification classifyText(
+            @NonNull CharSequence text,
+            @IntRange(from = 0) int startIndex,
+            @IntRange(from = 0) int endIndex,
+            @Nullable TextClassification.Options options) {
+        final TextClassification.Request request = options.getRequest() != null
+                ? options.getRequest()
+                : new TextClassification.Request.Builder(
+                        text, startIndex, endIndex)
+                        .setDefaultLocales(options.getDefaultLocales())
+                        .setReferenceTime(options.getReferenceTime())
+                        .build();
+        return classifyText(request);
+    }
+
     /**
      * Generates and returns a {@link TextLinks} that may be applied to the text to annotate it with
      * links information.
@@ -286,6 +319,19 @@ public interface TextClassifier {
         Preconditions.checkNotNull(request);
         Utils.checkMainThread();
         return new TextLinks.Builder(request.getText().toString()).build();
+    }
+
+    // TODO: Remove once apps can build against the latest sdk.
+    /** @hide */
+    default TextLinks generateLinks(
+            @NonNull CharSequence text, @Nullable TextLinks.Options options) {
+        final TextLinks.Request request = options.getRequest() != null
+                ? options.getRequest()
+                : new TextLinks.Request.Builder(text)
+                        .setDefaultLocales(options.getDefaultLocales())
+                        .setEntityConfig(options.getEntityConfig())
+                        .build();
+        return generateLinks(request);
     }
 
     /**
@@ -377,6 +423,12 @@ public interface TextClassifier {
                     /* includedEntityTypes */null, /* excludedEntityTypes */ null);
         }
 
+        // TODO: Remove once apps can build against the latest sdk.
+        /** @hide */
+        public static EntityConfig create(@Nullable Collection<String> hints) {
+            return createWithHints(hints);
+        }
+
         /**
          * Creates an EntityConfig.
          *
@@ -404,6 +456,12 @@ public interface TextClassifier {
                 @Nullable Collection<String> entityTypes) {
             return new EntityConfig(/* useHints */ false, /* hints */ null,
                     /* includedEntityTypes */ entityTypes, /* excludedEntityTypes */ null);
+        }
+
+        // TODO: Remove once apps can build against the latest sdk.
+        /** @hide */
+        public static EntityConfig createWithEntityList(@Nullable Collection<String> entityTypes) {
+            return createWithExplicitEntityList(entityTypes);
         }
 
         /**
