@@ -327,6 +327,13 @@
          This is the default value of that setting. -->
     <integer translatable="false" name="config_networkMeteredMultipathPreference">0</integer>
 
+    <!-- Default daily multipath budget used by ConnectivityManager.getMultipathPreference()
+         on metered networks. This default quota only used if quota could not be determined from
+         data plan or data limit/warning set by the user. The value that is actually used is
+         controlled by Settings.Global.NETWORK_DEFAULT_DAILY_MULTIPATH_QUOTA_BYTES. This is the
+         default value of that setting. -->
+    <integer translatable="false" name="config_networkDefaultDailyMultipathQuotaBytes">2500000</integer>
+
     <!-- List of regexpressions describing the interface (if any) that represent tetherable
          USB interfaces.  If the device doesn't want to support tethering over USB this should
          be empty.  An example would be "usb.*" -->
