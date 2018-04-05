@@ -71,6 +71,9 @@ public class ActivityManagerWrapper {
 
     private static final ActivityManagerWrapper sInstance = new ActivityManagerWrapper();
 
+    // Should match the values in PhoneWindowManager
+    public static final String CLOSE_SYSTEM_WINDOWS_REASON_RECENTS = "recentapps";
+
     private final PackageManager mPackageManager;
     private final BackgroundExecutor mBackgroundExecutor;
     private final TaskStackChangeListeners mTaskStackChangeListeners;
