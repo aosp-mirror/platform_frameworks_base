@@ -3,6 +3,7 @@ Landroid/accounts/IAccountAuthenticatorResponse$Stub;-><init>()V
 Landroid/accounts/IAccountManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/accounts/IAccountManager;
 Landroid/accounts/IAccountManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/animation/LayoutTransition;->cancel()V
+Landroid/animation/LayoutTransition;->cancel(I)V
 Landroid/animation/ValueAnimator;->animateValue(F)V
 Landroid/animation/ValueAnimator;->sDurationScale:F
 Landroid/app/Activity;->getActivityOptions()Landroid/app/ActivityOptions;
@@ -393,6 +394,7 @@ Landroid/appwidget/AppWidgetManager;->bindAppWidgetIdIfAllowed(IILandroid/conten
 Landroid/appwidget/AppWidgetManager;->bindAppWidgetId(ILandroid/content/ComponentName;Landroid/os/Bundle;)V
 Landroid/appwidget/AppWidgetManager;->bindAppWidgetId(ILandroid/content/ComponentName;)V
 Landroid/appwidget/AppWidgetManager;->mService:Lcom/android/internal/appwidget/IAppWidgetService;
+Landroid/appwidget/AppWidgetProviderInfo;->providerInfo:Landroid/content/pm/ActivityInfo;
 Landroid/bluetooth/BluetoothA2dp;->connect(Landroid/bluetooth/BluetoothDevice;)Z
 Landroid/bluetooth/BluetoothAdapter;->disable(Z)Z
 Landroid/bluetooth/BluetoothAdapter;->factoryReset()Z
@@ -2263,6 +2265,7 @@ Landroid/view/View;->computeFitSystemWindows(Landroid/graphics/Rect;Landroid/gra
 Landroid/view/View;->computeOpaqueFlags()V
 Landroid/view/ViewConfiguration;->getDeviceGlobalActionKeyTimeout()J
 Landroid/view/ViewConfiguration;->getDoubleTapMinTime()I
+Landroid/view/ViewConfiguration;->getScaledScrollFactor()I
 Landroid/view/ViewConfiguration;->mFadingMarqueeEnabled:Z
 Landroid/view/ViewConfiguration;->sHasPermanentMenuKeySet:Z
 Landroid/view/ViewConfiguration;->sHasPermanentMenuKey:Z
