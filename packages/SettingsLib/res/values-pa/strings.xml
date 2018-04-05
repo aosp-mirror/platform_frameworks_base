@@ -40,10 +40,8 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s ਰਾਹੀਂ ਕਨੈਕਟ ਕੀਤਾ"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s ਰਾਹੀਂ ਉਪਲਬਧ"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"ਕਨੈਕਟ ਕੀਤਾ, ਕੋਈ ਇੰਟਰਨੈੱਟ ਨਹੀਂ"</string>
-    <!-- no translation found for wifi_status_no_internet (5784710974669608361) -->
-    <skip />
-    <!-- no translation found for wifi_status_sign_in_required (123517180404752756) -->
-    <skip />
+    <string name="wifi_status_no_internet" msgid="5784710974669608361">"ਇੰਟਰਨੈੱਟ ਨਹੀਂ"</string>
+    <string name="wifi_status_sign_in_required" msgid="123517180404752756">"ਸਾਈਨ-ਇਨ ਲੋੜੀਂਦਾ ਹੈ"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"ਐਕਸੈੱਸ ਪੁਆਇੰਟ ਅਸਥਾਈ ਤੌਰ \'ਤੇ ਸੰਪੂਰਨ ਰੁਝੇਂਵੇਂ ਵਿੱਚ ਹੈ"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s ਰਾਹੀਂ ਕਨੈਕਟ ਕੀਤਾ"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s ਰਾਹੀਂ ਉਪਲਬਧ"</string>
@@ -67,12 +65,9 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"ਕਨੈਕਟ ਕੀਤਾ ਹੋਇਆ (ਕੋਈ ਫ਼ੋਨ ਨਹੀਂ), ਬੈਟਰੀ ਦਾ ਪੱਧਰ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"ਕਨੈਕਟ ਕੀਤਾ ਹੋਇਆ (ਕੋਈ ਮੀਡੀਆ ਨਹੀਂ), ਬੈਟਰੀ ਦਾ ਪੱਧਰ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"ਕਨੈਕਟ ਕੀਤਾ ਹੋਇਆ (ਕੋਈ ਫ਼ੋਨ ਜਾਂ ਮੀਡੀਆ ਨਹੀਂ), ਬੈਟਰੀ ਦਾ ਪੱਧਰ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_active_battery_level (3149689299296462009) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level (1447164613319663655) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_no_battery_level (8380223546730241956) -->
-    <skip />
+    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"ਕਿਰਿਆਸ਼ੀਲ, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ਬੈਟਰੀ"</string>
+    <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ਬੈਟਰੀ"</string>
+    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"ਕਿਰਿਆਸ਼ੀਲ"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"ਮੀਡੀਆ  ਆਡੀਓ"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"ਫ਼ੋਨ ਕਾਲਾਂ"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ਫਾਈਲ ਟ੍ਰਾਂਸਫਰ"</string>
@@ -119,14 +114,10 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"ਹੈੱਡਫੋਨ"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"ਇਨਪੁੱਟ ਪੈਰਿਫੈਰਲ"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"ਬਲੂਟੁੱਥ"</string>
-    <!-- no translation found for bluetooth_hearingaid_left_pairing_message (7378813500862148102) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearingaid_right_pairing_message (1550373802309160891) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearingaid_left_battery_level (8797811465352097562) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearingaid_right_battery_level (7309476148173459677) -->
-    <skip />
+    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"ਖੱਬੇ ਪਾਸੇ ਦਾ ਸੁਣਨ ਦਾ ਸਾਧਨ ਜੋੜਾਬੱਧ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
+    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"ਸੱਜੇ ਪਾਸੇ ਦਾ ਸੁਣਨ ਦਾ ਸਾਧਨ ਜੋੜਾਬੱਧ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
+    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"ਖੱਬੇ ਪਾਸੇ - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ਬੈਟਰੀ"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"ਸੱਜੇ ਪਾਸੇ - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ਬੈਟਰੀ"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wifi ਬੰਦ।"</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wifi ਡਿਸਕਨੈਕਟ ਕੀਤਾ।"</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wifi ਇੱਕ ਬਾਰ।"</string>
@@ -206,8 +197,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"ਸਕਿਰਿਆ ਰੱਖੋ"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"ਸਕ੍ਰੀਨ ਚਾਰਜਿੰਗ ਦੇ ਸਮੇਂ ਕਦੇ ਵੀ ਸਲੀਪ ਨਹੀਂ ਹੋਵੇਗੀ"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ਬਲੂਟੁੱਥ HCI ਸਨੂਪ ਲੌਗ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
-    <!-- no translation found for bt_hci_snoop_log_summary (366083475849911315) -->
-    <skip />
+    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"ਇੱਕ ਫ਼ਾਈਲ ਵਿੱਚ ਸਾਰੇ ਬਲੂਟੁੱਥ HCI ਪੈਕੇਟਾਂ ਨੂੰ ਕੈਪਚਰ ਕਰੋ (ਇਹ ਸੈਟਿੰਗ ਬਦਲਣ ਤੋਂ ਬਾਅਦ ਬਲੂਟੁੱਥ ਟੌਗਲ ਕਰੋ)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM ਅਣਲਾਕ ਕਰਨਾ"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"ਬੂਟਲੋਡਰ ਨੂੰ ਅਣਲਾਕ ਕੀਤੇ ਜਾਣ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"ਕੀ OEM ਨੂੰ ਅਣਲਾਕ ਕਰਨ ਦੀ ਆਗਿਆ ਦੇਣੀ ਹੈ?"</string>
@@ -247,15 +237,12 @@
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"ਸਵੈਚਲਿਤ"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"ਨਿੱਜੀ DNS ਪ੍ਰਦਾਨਕ ਹੋਸਟਨਾਮ"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS ਪ੍ਰਦਾਨਕ ਦਾ ਹੋਸਟਨਾਮ ਦਾਖਲ ਕਰੋ"</string>
-    <!-- no translation found for private_dns_mode_provider_failure (231837290365031223) -->
-    <skip />
+    <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"ਕਨੈਕਟ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ਵਾਇਰਲੈੱਸ ਡਿਸਪਲੇ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਚੋਣਾਂ ਪ੍ਰਦਰਸ਼ਿਤ ਕਰੋ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ਵਾਈ‑ਫਾਈ ਲੌਗਿੰਗ ਪੱਧਰ ਵਧਾਓ, ਵਾਈ‑ਫਾਈ Picker ਵਿੱਚ ਪ੍ਰਤੀ SSID RSSI ਦਿਖਾਓ"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕਾਂ ਨਾਲ ਕਨੈਕਟ ਹੋਣ \'ਤੇ MAC ਪਤਾ ਬੇਤਰਤੀਬਵਾਰ ਚੁਣੋ"</string>
-    <!-- no translation found for wifi_metered_label (4514924227256839725) -->
-    <skip />
-    <!-- no translation found for wifi_unmetered_label (6124098729457992931) -->
-    <skip />
+    <string name="wifi_metered_label" msgid="4514924227256839725">"ਮੀਟਰਬੱਧ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"ਗੈਰ-ਮੀਟਰਬੱਧ ਕੀਤਾ ਗਿਆ"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ਲੌਗਰ ਬਫ਼ਰ ਆਕਾਰ"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ਪ੍ਰਤੀ ਲੌਗ ਬਫ਼ਰ ਲੌਗਰ ਆਕਾਰ ਚੁਣੋ"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"ਕੀ ਲੌਗਰ ਪ੍ਰਸਿੱਸਟੈਂਟ ਸਟੋਰੇਜ ਨੂੰ ਸਾਫ਼ ਕਰਨਾ ਹੈ?"</string>

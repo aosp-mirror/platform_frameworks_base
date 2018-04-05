@@ -206,8 +206,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"জাগিয়ে রাখুন"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"চার্জ হওয়ার স্ক্রীন কখনই নিদ্রা মোডে যাবে না"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ব্লুটুথ HCI স্নুপ লগ সক্ষম করুন"</string>
-    <!-- no translation found for bt_hci_snoop_log_summary (366083475849911315) -->
-    <skip />
+    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"সমস্ত ব্লুটুথ HCI প্যাকেট একটি ফাইলে ক্যাপচার করে রাখুন (এই সেটিং পরিবর্তন করার পরে ব্লুটুথ চালু অথবা বন্ধ করুন)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM আনলক করা হচ্ছে"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"বুট-লোডার আনলক করার অনুমতি দিন"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM আনলক করার অনুমতি দিতে চান?"</string>

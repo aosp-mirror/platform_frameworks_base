@@ -206,8 +206,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"स्क्रीन को चालू रखें"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"चार्ज करते समय स्‍क्रीन कभी भी कम बैटरी मोड में नहीं जाएगी"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ब्लूटूथ HCI स्‍नूप लॉग चालू करें"</string>
-    <!-- no translation found for bt_hci_snoop_log_summary (366083475849911315) -->
-    <skip />
+    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"सभी ब्लूटूथ एचसीआई पैकेट एक फ़ाइल में कैप्चर करें (यह सेटिंग बदलने के बाद ब्लूटूथ टॉगल करें)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM अनलॉक करना"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"बूटलोडर को अनलाॅक किए जाने की अनुमति दें"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM अनलॉक करने की अनुमति दें?"</string>

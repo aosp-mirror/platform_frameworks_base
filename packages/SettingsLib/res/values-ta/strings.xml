@@ -206,8 +206,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"செயலில் வைத்திரு"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"சார்ஜ் ஏறும்போது திரை எப்போதும் உறக்கநிலைக்குச் செல்லாது"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"புளூடூத் HCI ஸ்னுப் பதிவை இயக்கு"</string>
-    <!-- no translation found for bt_hci_snoop_log_summary (366083475849911315) -->
-    <skip />
+    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"கோப்பில் உள்ள புளூடூத் HCI பாக்கெட்டுகள் அனைத்தையும் படமெடுக்கும் (இந்த அமைப்பை மாற்றிய பிறகு, புளூடூத் நிலைமாற்றப்படும்)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM திறத்தல்"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"பூட்லோடரைத் திறக்க அனுமதி"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM திறத்தலை அனுமதிக்கவா?"</string>
