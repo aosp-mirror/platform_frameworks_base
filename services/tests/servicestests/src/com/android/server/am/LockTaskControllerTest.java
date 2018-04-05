@@ -55,6 +55,7 @@ import android.provider.Settings;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.telecom.TelecomManager;
+import android.testing.DexmakerShareClassLoaderRule;
 import android.util.Pair;
 
 import com.android.internal.statusbar.IStatusBarService;
@@ -65,6 +66,7 @@ import com.android.server.wm.WindowManagerService;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -85,6 +87,10 @@ public class LockTaskControllerTest {
     private static final int TEST_USER_ID = 123;
     private static final int TEST_UID = 10467;
 
+    @Rule
+    public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
+            new DexmakerShareClassLoaderRule();
+
     @Mock private ActivityStackSupervisor mSupervisor;
     @Mock private IDevicePolicyManager mDevicePolicyManager;
     @Mock private IStatusBarService mStatusBarService;
@@ -100,9 +106,6 @@ public class LockTaskControllerTest {
 
     @Before
     public void setUp() throws Exception {
-        // This property is used to allow mocking of package private classes with mockito
-        System.setProperty("dexmaker.share_classloader", "true");
-
         MockitoAnnotations.initMocks(this);
 
         mContext = InstrumentationRegistry.getTargetContext();

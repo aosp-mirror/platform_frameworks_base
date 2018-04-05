@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Set;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.testing.DexmakerShareClassLoaderRule.runWithDexmakerShareClassLoader;
 import static com.android.server.am.UserController.CONTINUE_USER_SWITCH_MSG;
 import static com.android.server.am.UserController.REPORT_LOCKED_BOOT_COMPLETE_MSG;
 import static com.android.server.am.UserController.REPORT_USER_SWITCH_COMPLETE_MSG;
@@ -102,13 +103,15 @@ public class UserControllerTest extends AndroidTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        mInjector = Mockito.spy(new TestInjector(getContext()));
-        doNothing().when(mInjector).clearAllLockedTasks(anyString());
-        doNothing().when(mInjector).startHomeActivity(anyInt(), anyString());
-        doReturn(false).when(mInjector).stackSupervisorSwitchUser(anyInt(), any());
-        doNothing().when(mInjector).stackSupervisorResumeFocusedStackTopActivity();
-        mUserController = new UserController(mInjector);
-        setUpUser(TEST_USER_ID, 0);
+        runWithDexmakerShareClassLoader(() -> {
+            mInjector = Mockito.spy(new TestInjector(getContext()));
+            doNothing().when(mInjector).clearAllLockedTasks(anyString());
+            doNothing().when(mInjector).startHomeActivity(anyInt(), anyString());
+            doReturn(false).when(mInjector).stackSupervisorSwitchUser(anyInt(), any());
+            doNothing().when(mInjector).stackSupervisorResumeFocusedStackTopActivity();
+            mUserController = new UserController(mInjector);
+            setUpUser(TEST_USER_ID, 0);
+        });
     }
 
     @Override
