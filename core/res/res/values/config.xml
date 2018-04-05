@@ -2249,6 +2249,10 @@
          mirror the content of the default display. -->
     <bool name="config_localDisplaysMirrorContent">true</bool>
 
+    <!-- Indicates whether local non-default displays are private.
+         {@see android.view.Display#FLAG_PRIVATE} -->
+    <bool name="config_localDisplaysPrivate">false</bool>
+
     <!-- The default mode for the default display. One of the following values (See Display.java):
              0 - COLOR_MODE_DEFAULT
              7 - COLOR_MODE_SRGB
