@@ -748,6 +748,7 @@ public final class ImageDecoder implements AutoCloseable {
     private final int     mWidth;
     private final int     mHeight;
     private final boolean mAnimated;
+    private final boolean mIsNinePatch;
 
     private int        mDesiredWidth;
     private int        mDesiredHeight;
@@ -778,13 +779,14 @@ public final class ImageDecoder implements AutoCloseable {
      */
     @SuppressWarnings("unused")
     private ImageDecoder(long nativePtr, int width, int height,
-            boolean animated) {
+            boolean animated, boolean isNinePatch) {
         mNativePtr = nativePtr;
         mWidth = width;
         mHeight = height;
         mDesiredWidth = width;
         mDesiredHeight = height;
         mAnimated = animated;
+        mIsNinePatch = isNinePatch;
         mCloseGuard.open("close");
     }
 
@@ -1665,7 +1667,7 @@ public final class ImageDecoder implements AutoCloseable {
 
             // this call potentially manipulates the decoder so it must be performed prior to
             // decoding the bitmap and after decode set the density on the resulting bitmap
-            final int srcDensity = computeDensity(src, decoder);
+            final int srcDensity = decoder.computeDensity(src);
             if (decoder.mAnimated) {
                 // AnimatedImageDrawable calls postProcessAndRelease only if
                 // mPostProcessor exists.
@@ -1755,7 +1757,7 @@ public final class ImageDecoder implements AutoCloseable {
 
             // this call potentially manipulates the decoder so it must be performed prior to
             // decoding the bitmap
-            final int srcDensity = computeDensity(src, decoder);
+            final int srcDensity = decoder.computeDensity(src);
             Bitmap bm = decoder.decodeBitmapInternal();
             bm.setDensity(srcDensity);
 
@@ -1772,10 +1774,24 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     // This method may modify the decoder so it must be called prior to performing the decode
-    private static int computeDensity(@NonNull Source src, @NonNull ImageDecoder decoder) {
+    private int computeDensity(@NonNull Source src) {
         // if the caller changed the size then we treat the density as unknown
-        if (decoder.requestedResize()) {
+        if (this.requestedResize()) {
             return Bitmap.DENSITY_NONE;
+        }
+
+        final int srcDensity = src.getDensity();
+        if (srcDensity == Bitmap.DENSITY_NONE) {
+            return srcDensity;
+        }
+
+        // Scaling up nine-patch divs is imprecise and is better handled
+        // at draw time. An app won't be relying on the internal Bitmap's
+        // size, so it is safe to let NinePatchDrawable handle scaling.
+        // mPostProcessor disables nine-patching, so behave normally if
+        // it is present.
+        if (mIsNinePatch && mPostProcessor == null) {
+            return srcDensity;
         }
 
         // Special stuff for compatibility mode: if the target density is not
@@ -1786,23 +1802,25 @@ public final class ImageDecoder implements AutoCloseable {
         // to the compatibility density only to have them scaled back up when
         // drawn to the screen.
         Resources res = src.getResources();
-        final int srcDensity = src.getDensity();
         if (res != null && res.getDisplayMetrics().noncompatDensityDpi == srcDensity) {
+            return srcDensity;
+        }
+
+        final int dstDensity = src.computeDstDensity();
+        if (srcDensity == dstDensity) {
             return srcDensity;
         }
 
         // For P and above, only resize if it would be a downscale. Scale up prior
         // to P in case the app relies on the Bitmap's size without considering density.
-        final int dstDensity = src.computeDstDensity();
-        if (srcDensity == Bitmap.DENSITY_NONE || srcDensity == dstDensity
-                || (srcDensity < dstDensity && sApiLevel >= Build.VERSION_CODES.P)) {
+        if (srcDensity < dstDensity && sApiLevel >= Build.VERSION_CODES.P) {
             return srcDensity;
         }
 
         float scale = (float) dstDensity / srcDensity;
-        int scaledWidth = (int) (decoder.mWidth * scale + 0.5f);
-        int scaledHeight = (int) (decoder.mHeight * scale + 0.5f);
-        decoder.setTargetSize(scaledWidth, scaledHeight);
+        int scaledWidth = (int) (mWidth * scale + 0.5f);
+        int scaledHeight = (int) (mHeight * scale + 0.5f);
+        this.setTargetSize(scaledWidth, scaledHeight);
         return dstDensity;
     }
 

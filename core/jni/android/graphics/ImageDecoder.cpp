@@ -116,9 +116,10 @@ static jobject native_create(JNIEnv* env, std::unique_ptr<SkStream> stream, jobj
     const auto& info = decoder->mCodec->getInfo();
     const int width = info.width();
     const int height = info.height();
+    const bool isNinePatch = decoder->mPeeker->mPatch != nullptr;
     return env->NewObject(gImageDecoder_class, gImageDecoder_constructorMethodID,
                           reinterpret_cast<jlong>(decoder.release()), width, height,
-                          animated);
+                          animated, isNinePatch);
 }
 
 static jobject ImageDecoder_nCreateFd(JNIEnv* env, jobject /*clazz*/,
@@ -332,13 +333,6 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
         }
     }
 
-    float scaleX = 1.0f;
-    float scaleY = 1.0f;
-    if (scale) {
-        scaleX = (float) desiredWidth  / decodeInfo.width();
-        scaleY = (float) desiredHeight / decodeInfo.height();
-    }
-
     jbyteArray ninePatchChunk = nullptr;
     jobject ninePatchInsets = nullptr;
 
@@ -346,9 +340,6 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
     if (!jpostProcess) {
         // FIXME: Share more code with BitmapFactory.cpp.
         if (decoder->mPeeker->mPatch != nullptr) {
-            if (scale) {
-                decoder->mPeeker->scale(scaleX, scaleY, desiredWidth, desiredHeight);
-            }
             size_t ninePatchArraySize = decoder->mPeeker->mPatch->serializedSize();
             ninePatchChunk = env->NewByteArray(ninePatchArraySize);
             if (ninePatchChunk == nullptr) {
@@ -408,7 +399,12 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
 
         SkCanvas canvas(scaledBm, SkCanvas::ColorBehavior::kLegacy);
         canvas.translate(translateX, translateY);
-        canvas.scale(scaleX, scaleY);
+        if (scale) {
+            float scaleX = (float) desiredWidth  / decodeInfo.width();
+            float scaleY = (float) desiredHeight / decodeInfo.height();
+            canvas.scale(scaleX, scaleY);
+        }
+
         canvas.drawBitmap(bm, 0.0f, 0.0f, &paint);
 
         bm.swap(scaledBm);
@@ -532,7 +528,7 @@ static const JNINativeMethod gImageDecoderMethods[] = {
 
 int register_android_graphics_ImageDecoder(JNIEnv* env) {
     gImageDecoder_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/ImageDecoder"));
-    gImageDecoder_constructorMethodID = GetMethodIDOrDie(env, gImageDecoder_class, "<init>", "(JIIZ)V");
+    gImageDecoder_constructorMethodID = GetMethodIDOrDie(env, gImageDecoder_class, "<init>", "(JIIZZ)V");
     gImageDecoder_postProcessMethodID = GetMethodIDOrDie(env, gImageDecoder_class, "postProcessAndRelease", "(Landroid/graphics/Canvas;)I");
 
     gSize_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/util/Size"));
