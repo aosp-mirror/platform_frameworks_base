@@ -414,7 +414,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
 
         @Override public String toString() {
             return "MobileIconState(subId=" + subId + ", strengthId=" + strengthId + ", roaming="
-                    + roaming + ", visible=" + visible + ")";
+                    + roaming + ", typeId=" + typeId + ", visible=" + visible + ")";
         }
     }
 }
