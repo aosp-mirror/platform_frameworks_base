@@ -80,11 +80,13 @@ public:
     };
 
     void notifyAppRemoved(const int64_t& eventTimeNs, const string& apk, const int uid) override{
-            // TODO: Implement me.
+        // Force buckets to split on removal also.
+        notifyAppUpgrade(eventTimeNs, apk, uid, 0);
     };
 
     void onUidMapReceived(const int64_t& eventTimeNs) override{
-            // TODO: Implement me.
+            // Purposefully don't flush partial buckets on a new snapshot.
+            // This occurs if a new user is added/removed or statsd crashes.
     };
 
     // Consume the parsed stats log entry that already matched the "what" of the metric.

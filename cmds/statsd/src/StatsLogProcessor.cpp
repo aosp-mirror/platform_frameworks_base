@@ -319,7 +319,7 @@ void StatsLogProcessor::onConfigMetricsReportLocked(const ConfigKey& key,
 
     // Fill in UidMap.
     uint64_t uidMapToken = proto->start(FIELD_TYPE_MESSAGE | FIELD_ID_UID_MAP);
-    mUidMap->appendUidMap(key, proto);
+    mUidMap->appendUidMap(dumpTimeStampNs, key, proto);
     proto->end(uidMapToken);
 
     // Fill in the timestamps.

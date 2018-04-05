@@ -262,6 +262,10 @@ private:
     FRIEND_TEST(StatsServiceTest, TestAddConfig_simple);
     FRIEND_TEST(StatsServiceTest, TestAddConfig_empty);
     FRIEND_TEST(StatsServiceTest, TestAddConfig_invalid);
+    FRIEND_TEST(PartialBucketE2eTest, TestCountMetricNoSplitOnNewApp);
+    FRIEND_TEST(PartialBucketE2eTest, TestCountMetricSplitOnUpgrade);
+    FRIEND_TEST(PartialBucketE2eTest, TestCountMetricSplitOnRemoval);
+    FRIEND_TEST(PartialBucketE2eTest, TestCountMetricWithoutSplit);
 };
 
 }  // namespace statsd
