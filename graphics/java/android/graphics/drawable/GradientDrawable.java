@@ -392,6 +392,7 @@ public class GradientDrawable extends Drawable {
             e = new DashPathEffect(new float[] { dashWidth, dashGap }, 0);
         }
         mStrokePaint.setPathEffect(e);
+        mGradientIsDirty = true;
         invalidateSelf();
     }
 
