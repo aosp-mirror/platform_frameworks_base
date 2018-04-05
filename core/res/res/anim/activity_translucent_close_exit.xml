@@ -20,6 +20,6 @@
     <translate
         android:fromYDelta="0%"
         android:toYDelta="100%"
-        android:interpolator="@interpolator/fast_out_linear_in"
-        android:duration="300"/>
+        android:interpolator="@interpolator/accelerate_quad"
+        android:duration="250"/>
 </set>
