@@ -323,8 +323,7 @@ public class NotificationViewHierarchyManager {
             boolean showOnKeyguard = mLockscreenUserManager.shouldShowOnKeyguard(entry
                     .notification);
             if (suppressedSummary
-                    || (mLockscreenUserManager.isLockscreenPublicMode(userId)
-                    && !mLockscreenUserManager.shouldShowLockscreenNotifications())
+                    || mLockscreenUserManager.shouldHideNotifications(userId)
                     || (isLocked && !showOnKeyguard)) {
                 entry.row.setVisibility(View.GONE);
             } else {
