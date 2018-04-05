@@ -98,4 +98,13 @@ public final class MediaTimestamp
                 && (this.nanoTime == that.nanoTime)
                 && (this.clockRate == that.clockRate);
     }
+
+    @Override
+    public String toString() {
+        return getClass().getName()
+                + "{AnchorMediaTimeUs=" + mediaTimeUs
+                + " AnchorSystemNanoTime=" + nanoTime
+                + " clockRate=" + clockRate
+                + "}";
+    }
 }
