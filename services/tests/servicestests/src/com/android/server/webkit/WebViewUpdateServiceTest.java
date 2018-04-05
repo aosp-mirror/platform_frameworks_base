@@ -21,7 +21,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.Signature;
@@ -206,7 +205,7 @@ public class WebViewUpdateServiceTest {
         PackageInfo p = createPackageInfo(packageName, enabled, valid, installed, signatures,
                 updateTime, hidden);
         p.setLongVersionCode(versionCode);
-        p.applicationInfo.versionCode = versionCode;
+        p.applicationInfo.setVersionCode(versionCode);
         if (isSystemApp) p.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
         return p;
     }
