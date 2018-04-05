@@ -30,7 +30,6 @@
 #include "util/Files.h"
 #include "util/Util.h"
 
-using ::aapt::text::IsWhitespace;
 using ::aapt::text::Utf8Iterator;
 using ::android::StringPiece;
 using ::android::StringPiece16;
@@ -807,7 +806,7 @@ StringBuilder& StringBuilder::AppendText(const std::string& text) {
   Utf8Iterator iter(text);
   while (iter.HasNext()) {
     char32_t codepoint = iter.Next();
-    if (!quote_ && text::IsWhitespace(codepoint)) {
+    if (!quote_ && iswspace(codepoint)) {
       if (!last_codepoint_was_space_) {
         // Emit a space if it's the first.
         xml_string_.text += ' ';
