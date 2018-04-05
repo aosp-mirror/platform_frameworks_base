@@ -19,9 +19,9 @@ import android.os.Bundle;
 import android.os.UserHandle;
 
 /**
- * Communication channel from the BiometricDialog (SysUI) back to AuthenticationClient.
+ * Communication channel from the BiometricPrompt (SysUI) back to AuthenticationClient.
  * @hide
  */
-oneway interface IBiometricDialogReceiver {
+oneway interface IBiometricPromptReceiver {
     void onDialogDismissed(int reason);
 }

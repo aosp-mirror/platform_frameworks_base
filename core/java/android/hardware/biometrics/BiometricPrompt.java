@@ -38,7 +38,7 @@ import javax.crypto.Mac;
 /**
  * A class that manages a system-provided biometric dialog.
  */
-public class BiometricDialog implements BiometricAuthenticator, BiometricConstants {
+public class BiometricPrompt implements BiometricAuthenticator, BiometricConstants {
 
     /**
      * @hide
@@ -190,11 +190,11 @@ public class BiometricDialog implements BiometricAuthenticator, BiometricConstan
         }
 
         /**
-         * Creates a {@link BiometricDialog}.
-         * @return a {@link BiometricDialog}
+         * Creates a {@link BiometricPrompt}.
+         * @return a {@link BiometricPrompt}
          * @throws IllegalArgumentException if any of the required fields are not set.
          */
-        public BiometricDialog build() {
+        public BiometricPrompt build() {
             final CharSequence title = mBundle.getCharSequence(KEY_TITLE);
             final CharSequence negative = mBundle.getCharSequence(KEY_NEGATIVE_TEXT);
 
@@ -203,7 +203,7 @@ public class BiometricDialog implements BiometricAuthenticator, BiometricConstan
             } else if (TextUtils.isEmpty(negative)) {
                 throw new IllegalArgumentException("Negative text must be set and non-empty");
             }
-            return new BiometricDialog(mContext, mBundle, mPositiveButtonInfo, mNegativeButtonInfo);
+            return new BiometricPrompt(mContext, mBundle, mPositiveButtonInfo, mNegativeButtonInfo);
         }
     }
 
@@ -213,7 +213,7 @@ public class BiometricDialog implements BiometricAuthenticator, BiometricConstan
     private ButtonInfo mPositiveButtonInfo;
     private ButtonInfo mNegativeButtonInfo;
 
-    IBiometricDialogReceiver mDialogReceiver = new IBiometricDialogReceiver.Stub() {
+    IBiometricPromptReceiver mDialogReceiver = new IBiometricPromptReceiver.Stub() {
         @Override
         public void onDialogDismissed(int reason) {
             // Check the reason and invoke OnClickListener(s) if necessary
@@ -229,7 +229,7 @@ public class BiometricDialog implements BiometricAuthenticator, BiometricConstan
         }
     };
 
-    private BiometricDialog(Context context, Bundle bundle,
+    private BiometricPrompt(Context context, Bundle bundle,
             ButtonInfo positiveButtonInfo, ButtonInfo negativeButtonInfo) {
         mBundle = bundle;
         mPositiveButtonInfo = positiveButtonInfo;
@@ -239,7 +239,7 @@ public class BiometricDialog implements BiometricAuthenticator, BiometricConstan
     }
 
     /**
-     * A wrapper class for the crypto objects supported by BiometricDialog. Currently the framework
+     * A wrapper class for the crypto objects supported by BiometricPrompt. Currently the framework
      * supports {@link Signature}, {@link Cipher} and {@link Mac} objects.
      */
     public static final class CryptoObject extends android.hardware.biometrics.CryptoObject {
@@ -308,8 +308,8 @@ public class BiometricDialog implements BiometricAuthenticator, BiometricConstan
     }
 
     /**
-     * Callback structure provided to {@link BiometricDialog#authenticate(CancellationSignal,
-     * Executor, AuthenticationCallback)} or {@link BiometricDialog#authenticate(CryptoObject,
+     * Callback structure provided to {@link BiometricPrompt#authenticate(CancellationSignal,
+     * Executor, AuthenticationCallback)} or {@link BiometricPrompt#authenticate(CryptoObject,
      * CancellationSignal, Executor, AuthenticationCallback)}. Users must provide an implementation
      * of this for listening to authentication events.
      */
@@ -378,7 +378,7 @@ public class BiometricDialog implements BiometricAuthenticator, BiometricConstan
             @NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull BiometricAuthenticator.AuthenticationCallback callback) {
-        if (!(callback instanceof BiometricDialog.AuthenticationCallback)) {
+        if (!(callback instanceof BiometricPrompt.AuthenticationCallback)) {
             throw new IllegalArgumentException("Callback cannot be casted");
         }
         authenticate(crypto, cancel, executor, (AuthenticationCallback) callback);
@@ -395,7 +395,7 @@ public class BiometricDialog implements BiometricAuthenticator, BiometricConstan
     public void authenticate(@NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull BiometricAuthenticator.AuthenticationCallback callback) {
-        if (!(callback instanceof BiometricDialog.AuthenticationCallback)) {
+        if (!(callback instanceof BiometricPrompt.AuthenticationCallback)) {
             throw new IllegalArgumentException("Callback cannot be casted");
         }
         authenticate(cancel, executor, (AuthenticationCallback) callback);
@@ -410,8 +410,8 @@ public class BiometricDialog implements BiometricAuthenticator, BiometricConstan
      * operation can be canceled by using the provided cancel object. The application will receive
      * authentication errors through {@link AuthenticationCallback}, and button events through the
      * corresponding callback set in {@link Builder#setNegativeButton(CharSequence, Executor,
-     * DialogInterface.OnClickListener)}. It is safe to reuse the {@link BiometricDialog} object,
-     * and calling {@link BiometricDialog#authenticate( CancellationSignal, Executor,
+     * DialogInterface.OnClickListener)}. It is safe to reuse the {@link BiometricPrompt} object,
+     * and calling {@link BiometricPrompt#authenticate( CancellationSignal, Executor,
      * AuthenticationCallback)} while an existing authentication attempt is occurring will stop the
      * previous client and start a new authentication. The interrupted client will receive a
      * cancelled notification through {@link AuthenticationCallback#onAuthenticationError(int,
@@ -445,8 +445,8 @@ public class BiometricDialog implements BiometricAuthenticator, BiometricConstan
      * provided cancel object. The application will receive authentication errors through {@link
      * AuthenticationCallback}, and button events through the corresponding callback set in {@link
      * Builder#setNegativeButton(CharSequence, Executor, DialogInterface.OnClickListener)}.  It is
-     * safe to reuse the {@link BiometricDialog} object, and calling {@link
-     * BiometricDialog#authenticate(CancellationSignal, Executor, AuthenticationCallback)} while
+     * safe to reuse the {@link BiometricPrompt} object, and calling {@link
+     * BiometricPrompt#authenticate(CancellationSignal, Executor, AuthenticationCallback)} while
      * an existing authentication attempt is occurring will stop the previous client and start a new
      * authentication. The interrupted client will receive a cancelled notification through {@link
      * AuthenticationCallback#onAuthenticationError(int, CharSequence)}.
@@ -470,15 +470,15 @@ public class BiometricDialog implements BiometricAuthenticator, BiometricConstan
     private boolean handlePreAuthenticationErrors(AuthenticationCallback callback,
             Executor executor) {
         if (!mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
-            sendError(BiometricDialog.BIOMETRIC_ERROR_HW_NOT_PRESENT, callback,
+            sendError(BiometricPrompt.BIOMETRIC_ERROR_HW_NOT_PRESENT, callback,
                       executor);
             return true;
         } else if (!mFingerprintManager.isHardwareDetected()) {
-            sendError(BiometricDialog.BIOMETRIC_ERROR_HW_UNAVAILABLE, callback,
+            sendError(BiometricPrompt.BIOMETRIC_ERROR_HW_UNAVAILABLE, callback,
                       executor);
             return true;
         } else if (!mFingerprintManager.hasEnrolledFingerprints()) {
-            sendError(BiometricDialog.BIOMETRIC_ERROR_NO_BIOMETRICS, callback,
+            sendError(BiometricPrompt.BIOMETRIC_ERROR_NO_BIOMETRICS, callback,
                       executor);
             return true;
         }
