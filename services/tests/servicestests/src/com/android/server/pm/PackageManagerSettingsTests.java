@@ -199,13 +199,13 @@ public class PackageManagerSettingsTests {
                 PACKAGE_NAME_1, 1L, 0.01, true, "appString1");
         final PersistableBundle launcherExtras1 = getPersistableBundle(
                 PACKAGE_NAME_1, 10L, 0.1, false, "launcherString1");
-        ps1.setSuspended(true, "suspendingPackage1", appExtras1, launcherExtras1, 0);
+        ps1.setSuspended(true, "suspendingPackage1", "dialogMsg1", appExtras1, launcherExtras1, 0);
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, ps1);
 
-        ps2.setSuspended(true, "suspendingPackage2", null, null, 0);
+        ps2.setSuspended(true, "suspendingPackage2", "dialogMsg2", null, null, 0);
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
 
-        ps3.setSuspended(false, "irrelevant", null, null, 0);
+        ps3.setSuspended(false, "irrelevant", "irrevelant2", null, null, 0);
         settingsUnderTest.mPackages.put(PACKAGE_NAME_3, ps3);
 
         settingsUnderTest.writePackageRestrictionsLPr(0);
@@ -220,6 +220,7 @@ public class PackageManagerSettingsTests {
                 readUserState(0);
         assertThat(readPus1.suspended, is(true));
         assertThat(readPus1.suspendingPackage, equalTo("suspendingPackage1"));
+        assertThat(readPus1.dialogMessage, equalTo("dialogMsg1"));
         assertThat(BaseBundle.kindofEquals(readPus1.suspendedAppExtras, appExtras1), is(true));
         assertThat(BaseBundle.kindofEquals(readPus1.suspendedLauncherExtras, launcherExtras1),
                 is(true));
@@ -228,12 +229,17 @@ public class PackageManagerSettingsTests {
                 readUserState(0);
         assertThat(readPus2.suspended, is(true));
         assertThat(readPus2.suspendingPackage, equalTo("suspendingPackage2"));
+        assertThat(readPus2.dialogMessage, equalTo("dialogMsg2"));
         assertThat(readPus2.suspendedAppExtras, is(nullValue()));
         assertThat(readPus2.suspendedLauncherExtras, is(nullValue()));
 
         final PackageUserState readPus3 = settingsUnderTest.mPackages.get(PACKAGE_NAME_3).
                 readUserState(0);
         assertThat(readPus3.suspended, is(false));
+        assertThat(readPus3.suspendingPackage, is(nullValue()));
+        assertThat(readPus3.dialogMessage, is(nullValue()));
+        assertThat(readPus3.suspendedAppExtras, is(nullValue()));
+        assertThat(readPus3.suspendedLauncherExtras, is(nullValue()));
     }
 
     @Test
