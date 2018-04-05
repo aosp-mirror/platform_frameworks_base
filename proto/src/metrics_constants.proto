@@ -5572,6 +5572,12 @@ message MetricsEvent {
     // OS: P
     ACTION_SETTINGS_SLICE_CHANGED = 1372;
 
+    // OPEN: Settings > Network & Internet > Wi-Fi > Wi-Fi Preferences > Turn on Wi-Fi automatically
+    //       note: Wifi Scanning must be off for this dialog to show
+    // CATEGORY: SETTINGS
+    // OS: P
+    WIFI_SCANNING_NEEDED_DIALOG = 1373;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
