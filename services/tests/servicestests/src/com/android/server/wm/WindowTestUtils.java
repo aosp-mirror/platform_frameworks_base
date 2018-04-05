@@ -48,13 +48,6 @@ public class WindowTestUtils {
     public static int sNextTaskId = 0;
 
     /**
-     * Retrieves an instance of {@link WindowManagerService}, creating it if necessary.
-     */
-    public static WindowManagerService getWindowManagerService(Context context) {
-        return TestWindowManagerPolicy.getWindowManagerService(context);
-    }
-
-    /**
      * Retrieves an instance of a mock {@link WindowManagerService}.
      */
     public static WindowManagerService getMockWindowManagerService() {
