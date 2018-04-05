@@ -1642,6 +1642,8 @@ public class WindowManagerService extends IWindowManager.Stub
         if (DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "postWindowRemoveCleanupLocked: " + win);
         mWindowMap.remove(win.mClient.asBinder());
 
+        markForSeamlessRotation(win, false);
+
         win.resetAppOpsState();
 
         if (mCurrentFocus == null) {
