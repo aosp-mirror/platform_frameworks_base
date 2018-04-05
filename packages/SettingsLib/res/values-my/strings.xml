@@ -114,7 +114,7 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"နားကြပ်"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"ချိတ်ဆက်အသုံးပြုရသည့် စက်ပစ္စည်းများ"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"ဘလူးတုသ်"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"ဘယ်ဘက် နားကြီးကိရိယာကို တွဲချိတ်နေသည်…"</string>
+    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"ဘယ်ဘက် နားကြားကိရိယာကို တွဲချိတ်နေသည်…"</string>
     <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"ညာဘက် နားကြားကိရိယာကို တွဲချိတ်နေသည်…"</string>
     <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"ဘယ်ဘက် − ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"ညာဘက် − ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
@@ -241,8 +241,8 @@
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ကြိုးမဲ့ အခင်းအကျင်း အသိအမှတ်ပြုလက်မှတ်အတွက် ရွေးချယ်စရာများပြရန်"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi မှတ်တမ်းတင်ခြင်း နှုန်းအားမြင့်ကာ၊ Wi‑Fi ရွေးရာတွင် SSID RSSI ဖြင့်ပြပါ"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Wi‑Fi ကွန်ရက်များသို့ ချိတ်ဆက်သည့်အခါ MAC လိပ်စာ ကျပန်းပြုလုပ်ခြင်း"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"မိမိအသုံးပြုမှုအလိုက် ကောက်ခံထားသည်"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"မိမိအသုံးပြုမှုအလိုက် ကောက်ခံခြင်းမရှိပါ"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"အခမဲ့ မဟုတ်ပါ"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"အခမဲ့"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"လော့ဂါး ဘာဖား ဆိုက်များ"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"လော့ ဘာဖားတွက် လော့ဂါးဆိုက် ရွေး"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"မှတ်တမ်းထိန်းသိမ်းပေးသည့် သိုလှောင်ခန်းကို ရှင်းလင်းမလား။"</string>

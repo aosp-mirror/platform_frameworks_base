@@ -65,9 +65,9 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen telefon) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen medier) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Tilsluttet <xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> (ingen telefon eller medier) – batteriniveau <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Aktiv, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
+    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Aktivt, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri"</string>
-    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Aktiv"</string>
+    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Aktivt"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Medielyd"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Telefonopkald"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Filoverførsel"</string>

@@ -40,10 +40,8 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s દ્વારા કનેક્ટ થયેલ"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s દ્વારા ઉપલબ્ધ"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"કનેક્ટ કર્યું, કોઈ ઇન્ટરનેટ નથી"</string>
-    <!-- no translation found for wifi_status_no_internet (5784710974669608361) -->
-    <skip />
-    <!-- no translation found for wifi_status_sign_in_required (123517180404752756) -->
-    <skip />
+    <string name="wifi_status_no_internet" msgid="5784710974669608361">"ઇન્ટરનેટ ઍક્સેસ નથી"</string>
+    <string name="wifi_status_sign_in_required" msgid="123517180404752756">"સાઇન ઇન આવશ્યક"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"ઍક્સેસ પૉઇન્ટ અસ્થાયીરૂપે ભરાયેલ છે"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s દ્વારા કનેક્ટ થયેલ"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s દ્વારા ઉપલબ્ધ"</string>
@@ -67,12 +65,9 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> સાથે કનેક્ટ થયેલ (કોઈ ફોન નથી), બૅટરી <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> સાથે કનેક્ટ થયેલ (કોઈ મીડિયા નથી), બૅટરી <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> સાથે કનેક્ટ થયેલ (કોઈ ફોન અથવા મીડિયા નથી), બૅટરી <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_active_battery_level (3149689299296462009) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level (1447164613319663655) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_no_battery_level (8380223546730241956) -->
-    <skip />
+    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"સક્રિય, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> બૅટરી"</string>
+    <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> બૅટરી"</string>
+    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"સક્રિય"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"મીડિયા ઑડિઓ"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"ફોન કૉલ"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ફાઇલ સ્થાનાંતરણ"</string>
@@ -119,14 +114,10 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"હેડફોન"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"ઇનપુટ પેરિફેરલ"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"બ્લૂટૂથ"</string>
-    <!-- no translation found for bluetooth_hearingaid_left_pairing_message (7378813500862148102) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearingaid_right_pairing_message (1550373802309160891) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearingaid_left_battery_level (8797811465352097562) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearingaid_right_battery_level (7309476148173459677) -->
-    <skip />
+    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"ડાબી બાજુના શ્રવણ યંત્ર સાથે જોડાણ કરી રહ્યાં છીએ…"</string>
+    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"જમણી બાજુના શ્રવણ યંત્ર સાથે જોડાણ કરી રહ્યાં છીએ…"</string>
+    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"ડાબે - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> બૅટરી"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"જમણી બાજુની - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> બૅટરી"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wifi બંધ."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wifi ડિસ્કનેક્ટ થયું."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wifi એક બાર."</string>
@@ -246,15 +237,12 @@
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"આપમેળે"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"ખાનગી DNS પ્રદાતા હોસ્ટનું નામ"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS પ્રદાતાના હોસ્ટનું નામ દાખલ કરો"</string>
-    <!-- no translation found for private_dns_mode_provider_failure (231837290365031223) -->
-    <skip />
+    <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"કનેક્ટ કરી શકાયું નથી"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"વાયરલેસ ડિસ્પ્લે પ્રમાણપત્ર માટેના વિકલ્પો બતાવો"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"વાઇ-ફાઇ લોગિંગ સ્તર વધારો, વાઇ-ફાઇ પીકરમાં SSID RSSI દીઠ બતાવો"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"વાઇ-ફાઇ નેટવર્ક સાથે જ્યારે કનેક્ટ કરી રહ્યાં હોય ત્યારે MAC ઍડ્રેસને રેન્ડમાઇઝ કરો"</string>
-    <!-- no translation found for wifi_metered_label (4514924227256839725) -->
-    <skip />
-    <!-- no translation found for wifi_unmetered_label (6124098729457992931) -->
-    <skip />
+    <string name="wifi_metered_label" msgid="4514924227256839725">"મીટર કરેલ"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"મીટર ન કરેલ"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"લોગર બફર કદ"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"લૉગ દીઠ લૉગર કદ બફર પસંદ કરો"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"લૉગર નિરંતર સ્ટોરેજ સાફ કરીએ?"</string>
