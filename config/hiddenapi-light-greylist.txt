@@ -763,7 +763,6 @@ Landroid/graphics/GraphicBuffer;->createFromExisting(IIIIJ)Landroid/graphics/Gra
 Landroid/graphics/GraphicBuffer;->CREATOR:Landroid/os/Parcelable$Creator;
 Landroid/graphics/GraphicBuffer;-><init>(IIIIJ)V
 Landroid/graphics/GraphicBuffer;->mNativeObject:J
-Landroid/graphics/ImageDecoder;-><init>(JIIZ)V
 Landroid/graphics/ImageDecoder;->postProcessAndRelease(Landroid/graphics/Canvas;)I
 Landroid/graphics/LinearGradient;->mColors:[I
 Landroid/graphics/Matrix;->native_instance:J
