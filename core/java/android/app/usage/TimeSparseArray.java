@@ -88,7 +88,7 @@ public class TimeSparseArray<E> extends LongSparseArray<E> {
                 key++;
                 keyIndex++;
             }
-            if (key >= origKey + 10) {
+            if (key >= origKey + 100) {
                 Slog.w(TAG, "Value " + value + " supposed to be inserted at " + origKey
                         + " displaced to " + key);
             }
