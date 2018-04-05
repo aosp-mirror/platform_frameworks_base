@@ -144,7 +144,8 @@ public class PowerUtil {
                         FIFTEEN_MINUTES_MILLIS);
 
         // convert the time to a properly formatted string.
-        DateFormat fmt = DateFormat.getTimeInstance(DateFormat.SHORT);
+        String skeleton = android.text.format.DateFormat.getTimeFormatString(context);
+        DateFormat fmt = DateFormat.getInstanceForSkeleton(skeleton);
         Date date = Date.from(Instant.ofEpochMilli(roundedTimeOfDayMs));
         CharSequence timeString = fmt.format(date);
 
