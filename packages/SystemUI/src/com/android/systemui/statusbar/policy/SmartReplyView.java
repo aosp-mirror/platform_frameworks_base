@@ -20,8 +20,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 
 import java.text.BreakIterator;
 import java.util.Comparator;
@@ -42,6 +44,7 @@ public class SmartReplyView extends ViewGroup {
     private static final int SQUEEZE_FAILED = -1;
 
     private final SmartReplyConstants mConstants;
+    private final KeyguardDismissUtil mKeyguardDismissUtil;
 
     /** Spacing to be applied between views. */
     private final int mSpacing;
@@ -62,6 +65,7 @@ public class SmartReplyView extends ViewGroup {
     public SmartReplyView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mConstants = Dependency.get(SmartReplyConstants.class);
+        mKeyguardDismissUtil = Dependency.get(KeyguardDismissUtil.class);
 
         int spacing = 0;
         int singleLineButtonPaddingHorizontal = 0;
@@ -126,12 +130,13 @@ public class SmartReplyView extends ViewGroup {
     }
 
     @VisibleForTesting
-    static Button inflateReplyButton(Context context, ViewGroup root, CharSequence choice,
+    Button inflateReplyButton(Context context, ViewGroup root, CharSequence choice,
             RemoteInput remoteInput, PendingIntent pendingIntent) {
         Button b = (Button) LayoutInflater.from(context).inflate(
                 R.layout.smart_reply_button, root, false);
         b.setText(choice);
-        b.setOnClickListener(view -> {
+
+        OnDismissAction action = () -> {
             Bundle results = new Bundle();
             results.putString(remoteInput.getResultKey(), choice.toString());
             Intent intent = new Intent().addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
@@ -142,6 +147,12 @@ public class SmartReplyView extends ViewGroup {
             } catch (PendingIntent.CanceledException e) {
                 Log.w(TAG, "Unable to send smart reply", e);
             }
+            return false; // do not defer
+        };
+
+        b.setOnClickListener(view -> {
+            mKeyguardDismissUtil.dismissKeyguardThenExecute(
+                    action, null /* cancelAction */, false /* afterKeyguardGone */);
         });
         return b;
     }
