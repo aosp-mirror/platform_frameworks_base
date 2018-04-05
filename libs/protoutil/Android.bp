@@ -37,3 +37,20 @@ cc_library {
         "liblog",
     ],
 }
+
+cc_test {
+    name: "libprotoutil_test",
+
+    srcs: [
+        "tests/EncodedBuffer_test.cpp",
+    ],
+
+    shared_libs: [
+        "libcutils",
+        "libprotoutil",
+    ],
+
+    static_libs: [
+        "libgmock",
+    ],
+}

@@ -170,7 +170,7 @@ message IncidentProto {
     ];
 
     optional BatteryTypeProto battery_type = 2006 [
-        (section).type = SECTION_FILE,
+        (section).type = SECTION_NONE, // disabled since the path is device specific!
         (section).args = "/sys/class/power_supply/bms/battery_type"
     ];
 
