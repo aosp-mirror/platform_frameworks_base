@@ -78,7 +78,7 @@ public:
     bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& dmgAccumulator,
                              ErrorHandler* errorHandler) {
         return mRenderPipeline->createOrUpdateLayer(node, dmgAccumulator, mWideColorGamut,
-                errorHandler);
+                                                    errorHandler);
     }
 
     /**
@@ -190,6 +190,8 @@ public:
 
     IRenderPipeline* getRenderPipeline() { return mRenderPipeline.get(); }
 
+    void setRenderAheadDepth(int renderAhead);
+
 private:
     CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
                   IContextFactory* contextFactory, std::unique_ptr<IRenderPipeline> renderPipeline);
@@ -202,6 +204,7 @@ private:
     void freePrefetchedLayers();
 
     bool isSwapChainStuffed();
+    void updateBufferCount();
 
     SkRect computeDirtyRect(const Frame& frame, SkRect* dirty);
 
@@ -227,6 +230,7 @@ private:
 
     RingBuffer<SwapHistory, 3> mSwapHistory;
     int64_t mFrameNumber = -1;
+    int mRenderAheadDepth = 0;
 
     // last vsync for a dropped frame due to stuffed queue
     nsecs_t mLastDropVsync = 0;

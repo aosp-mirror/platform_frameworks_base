@@ -17,6 +17,7 @@
 #include "CanvasContext.h"
 #include <GpuMemoryTracker.h>
 
+#include "../Properties.h"
 #include "AnimationContext.h"
 #include "Caches.h"
 #include "EglManager.h"
@@ -34,7 +35,6 @@
 #include "renderstate/Stencil.h"
 #include "utils/GLUtils.h"
 #include "utils/TimeUtils.h"
-#include "../Properties.h"
 
 #include <cutils/properties.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
@@ -194,6 +194,7 @@ void CanvasContext::setSurface(sp<Surface>&& surface) {
     if (hasSurface) {
         mHaveNewSurface = true;
         mSwapHistory.clear();
+        updateBufferCount();
     } else {
         mRenderThread.removeFrameCallback(this);
     }
@@ -426,6 +427,9 @@ void CanvasContext::draw() {
                                       mRenderNodes, &(profiler()));
 
     waitOnFences();
+
+    frame.setPresentTime(mCurrentFrameInfo->get(FrameInfoIndex::Vsync) +
+                         (mRenderThread.timeLord().frameIntervalNanos() * (mRenderAheadDepth + 1)));
 
     bool requireSwap = false;
     bool didSwap =
@@ -703,6 +707,26 @@ int64_t CanvasContext::getFrameNumber() {
         mFrameNumber = static_cast<int64_t>(mNativeSurface->getNextFrameNumber());
     }
     return mFrameNumber;
+}
+
+void overrideBufferCount(const sp<Surface>& surface, int bufferCount) {
+    struct SurfaceExposer : Surface {
+        using Surface::setBufferCount;
+    };
+    // Protected is just a sign, not a cop
+    ((*surface.get()).*&SurfaceExposer::setBufferCount)(bufferCount);
+}
+
+void CanvasContext::updateBufferCount() {
+    overrideBufferCount(mNativeSurface, 3 + mRenderAheadDepth);
+}
+
+void CanvasContext::setRenderAheadDepth(int renderAhead) {
+    if (renderAhead < 0 || renderAhead > 2 || renderAhead == mRenderAheadDepth) {
+        return;
+    }
+    mRenderAheadDepth = renderAhead;
+    updateBufferCount();
 }
 
 SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {
