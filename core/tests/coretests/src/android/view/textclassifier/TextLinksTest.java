@@ -30,6 +30,7 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -105,7 +106,7 @@ public class TextLinksTest {
         assertEquals("en-US,de-DE", result.getDefaultLocales().toLanguageTags());
         assertEquals(new String[]{TextClassifier.HINT_TEXT_IS_EDITABLE},
                 result.getEntityConfig().getHints().toArray());
-        assertEquals(Arrays.asList("a", "c"),
+        assertEquals(new HashSet<String>(Arrays.asList("a", "c")),
                 result.getEntityConfig().resolveEntityListModifications(Collections.emptyList()));
     }
 }
