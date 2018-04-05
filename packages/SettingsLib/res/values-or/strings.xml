@@ -40,6 +40,10 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"%1$s ମାଧ୍ୟମରେ ସଂଯୁକ୍ତ"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"%1$s ମାଧ୍ୟମରେ ଉପଲବ୍ଧ"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"ସଂଯୁକ୍ତ, ଇଣ୍ଟର୍‌ନେଟ୍‌ ନାହିଁ"</string>
+    <!-- no translation found for wifi_status_no_internet (5784710974669608361) -->
+    <skip />
+    <!-- no translation found for wifi_status_sign_in_required (123517180404752756) -->
+    <skip />
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"ଆକ୍ସେସ୍ ପଏଣ୍ଟ ସାମୟିକ ଭାବେ ପୂର୍ଣ୍ଣ"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"%1$s ମାଧ୍ୟମରେ ସଂଯୁକ୍ତ"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"%1$s ମାଧ୍ୟମରେ ଉପଲବ୍ଧ"</string>
@@ -63,6 +67,12 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"ସଂଯୁକ୍ତ ନାହିଁ (ଫୋନ୍ ନୁହେଁ), ବ୍ୟାଟେରୀ<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"ସଂଯୁକ୍ତ ହେଲା (ମିଡିଆ ନୁହେଁ), ବ୍ୟାଟେରୀ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"ସଂଯୁକ୍ତ ହେଲା (ଫୋନ୍ କିମ୍ବା ମେଡିଆ ନୁହେଁ), ବ୍ୟାଟେରୀ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
+    <!-- no translation found for bluetooth_active_battery_level (3149689299296462009) -->
+    <skip />
+    <!-- no translation found for bluetooth_battery_level (1447164613319663655) -->
+    <skip />
+    <!-- no translation found for bluetooth_active_no_battery_level (8380223546730241956) -->
+    <skip />
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"ମିଡିଆ ଅଡିଓ"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"ଫୋନ୍‌ କଲ୍‌‌ଗୁଡ଼ିକ"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"ଫାଇଲ୍‌ ଟ୍ରାନ୍ସଫର୍‌"</string>
@@ -109,6 +119,14 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"ହେଡ୍‌ଫୋନ୍‌"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"ଇନ୍‌ପୁଟ୍‌ ଉପକରଣ"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"ବ୍ଲୁଟୂଥ୍‌"</string>
+    <!-- no translation found for bluetooth_hearingaid_left_pairing_message (7378813500862148102) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearingaid_right_pairing_message (1550373802309160891) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearingaid_left_battery_level (8797811465352097562) -->
+    <skip />
+    <!-- no translation found for bluetooth_hearingaid_right_battery_level (7309476148173459677) -->
+    <skip />
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"ୱାଇ-ଫାଇ ବନ୍ଦ।"</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"ୱାଇଫାଇ ବିଚ୍ଛିନ୍ନ କରାଗଲା।"</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wifiର 1 ବାର"</string>
@@ -188,7 +206,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"ଜାଗ୍ରତ ରଖନ୍ତୁ"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"ଚାର୍ଜ ହେବାବେଳେ ସ୍କ୍ରୀନ୍‌ ଆଦୌ ବନ୍ଦ ହେବନାହିଁ"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ବ୍ଲୁଟୁଥ୍‌ HCI ସ୍ନୁପ୍‌ ଲଗ୍‌ ସକ୍ଷମ କରନ୍ତୁ"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="730247028210113851">"ଗୋଟିଏ ଫାଇଲ୍‌ରେ ସମସ୍ତ ବ୍ଲୁଟୂଥ୍‌ HCI ପ୍ୟାକେଟ୍‌ଗୁଡିକୁ କ୍ୟାପଚର୍‌ କରନ୍ତୁ"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"ଗୋଟିଏ ଫାଇଲ୍‌ରେ ସମସ୍ତ ବ୍ଲୁ-ଟୁଥ୍‌ HCI ପ୍ୟାକେଟ୍‌ଗୁଡିକୁ କ୍ୟାପଚର୍‌ କରନ୍ତୁ (ଏହି ସେଟିଙ୍ଗ ବଦଳାଇବା ପରେ ବ୍ଲୁ-ଟୁଥ୍‌କୁ ଅନ୍‌ କିମ୍ବା ଅଫ୍‌ କରନ୍ତୁ)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM ଅନଲକ୍‌ କରିବା"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"bootloaderକୁ ଅନ୍‌ଲକ୍‌ ହେବାର ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM ଅନଲକ୍‌ କରିବା ଅନୁମତି ଦେବେ?"</string>
@@ -207,15 +225,20 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ବ୍ଲୁଟୂଥ୍‌ AVRCP ଭର୍ସନ୍"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ବ୍ଲୁଟୂଥ୍‌ AVRCP ଭର୍ସନ୍‌"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ବ୍ଲୁଟୁଥ୍‌ ଅଡିଓ କୋଡେକ୍‌"</string>
-    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="4558347981670553665">"ବ୍ଲୁଟୁଥ୍‌ ଅଡିଓ କୋଡେକ୍‌ ଚୟନ କରନ୍ତୁ"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"ବ୍ଲୁଟୂଥ୍‌ ଅଡିଓ ସାମ୍ପଲ୍‌ ରେଟ୍‌"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5628790207448471613">"ବ୍ଲୁଟୁଥ୍‌ ଅଡିଓ କୋଡେକ୍ ଚୟନ କରନ୍ତୁ: \n ନମୁନା ଦର"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"ନମୁନା ପିଛା ବ୍ଲୁଟୁଥ୍‌ ଅଡିଓ ବିଟ୍ସ"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4546131401358681321">"ବ୍ଲୁଟୂଥ ଅଡିଓ କୋଡେକ୍‌ ବାଛନ୍ତୁ:\nନମୂନା ପ୍ରତି ବିଟସ୍‌"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"ବ୍ଲୁଟୂଥ୍‌ ଅଡିଓ ଚ୍ୟାନେଲ୍‌ ମୋଡ୍"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="9133545781346216071">"ବ୍ଲୁଟୂଥ୍‌ ଅଡ଼ିଓ କୋଡେକ୍‌:\nଚାନେଲ୍‌ ମୋଡ୍‌ ବାଛନ୍ତୁ"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ବ୍ଲୁଟୁଥ୍‌ ଅଡିଓ LDAC କୋଡେକ୍‌: ପ୍ଲେବ୍ୟାକ୍‌ ଗୁଣବତ୍ତା"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="3181967377574368400">"ବ୍ଲୁଟୂଥ୍‌ ଅଡିଓ LDAC କୋଡେକ୍‌ ବାଛନ୍ତୁ:\nପ୍ଲେବ୍ୟାକ୍‌ କ୍ୱାଲିଟୀ"</string>
+    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
+    <skip />
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"ଷ୍ଟ୍ରିମ୍ କରୁଛି: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"ବ୍ୟକ୍ତିଗତ DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"ବ୍ୟକ୍ତିଗତ DNS ମୋଡ୍‌ ବାଛନ୍ତୁ"</string>
@@ -223,9 +246,15 @@
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"ସ୍ଵଚାଳିତ"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"ବ୍ୟକ୍ତିଗତ DNS ପ୍ରଦାତା ହୋଷ୍ଟନାମ"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS ପ୍ରଦାନକାରୀଙ୍କ ହୋଷ୍ଟନାମ ପ୍ରବେଶ କରନ୍ତୁ"</string>
+    <!-- no translation found for private_dns_mode_provider_failure (231837290365031223) -->
+    <skip />
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ୱେୟାରଲେସ୍‌ ପ୍ରଦର୍ଶନ ସାର୍ଟିଫିକେସନ୍‌ ପାଇଁ ବିକଳ୍ପଗୁଡିକ ଦେଖାନ୍ତୁ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ୱାଇ-ଫାଇ ଲଗିଙ୍ଗ ସ୍ତର ବଢ଼ାନ୍ତୁ, ୱାଇ-ଫାଇ ପିକର୍‌ରେ ପ୍ରତି SSID RSSI ଦେଖାନ୍ତୁ"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"ୱାଇ-ଫାଇ ନେଟ୍‌ୱର୍କଗୁଡ଼ିକ ସହିତ କନେକ୍ଟ କରିବାବେଳେ MAC ଠିକଣାକୁ ରେଣ୍ଡୋମାଇଜ୍ କରନ୍ତୁ"</string>
+    <!-- no translation found for wifi_metered_label (4514924227256839725) -->
+    <skip />
+    <!-- no translation found for wifi_unmetered_label (6124098729457992931) -->
+    <skip />
     <string name="select_logd_size_title" msgid="7433137108348553508">"ଲଗର୍‌ ବଫର୍‌ ଆକାରଗୁଡ଼ିକ"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ଲଗ୍‌ ବଫର୍‌ ପିଛା ଲଗର୍‌ ଆକାରଗୁଡିକର ଚୟନ କରନ୍ତୁ"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"ଲଗର୍‌ ରୋଧି ଷ୍ଟୋରେଜ୍‌ ଖାଲି କରିବେ?"</string>
