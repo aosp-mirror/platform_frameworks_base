@@ -81,6 +81,14 @@ public class BatteryMeterView extends LinearLayout implements
     private float mDarkIntensity;
     private int mUser;
 
+    /**
+     * Whether we should use colors that adapt based on wallpaper/the scrim behind quick settings.
+     */
+    private boolean mUseWallpaperTextColors;
+
+    private int mNonAdaptedForegroundColor;
+    private int mNonAdaptedBackgroundColor;
+
     public BatteryMeterView(Context context) {
         this(context, null, 0);
     }
@@ -140,6 +148,29 @@ public class BatteryMeterView extends LinearLayout implements
         updateShowPercent();
     }
 
+    /**
+     * Sets whether the battery meter view uses the wallpaperTextColor. If we're not using it, we'll
+     * revert back to dark-mode-based/tinted colors.
+     *
+     * @param shouldUseWallpaperTextColor whether we should use wallpaperTextColor for all
+     *                                    components
+     */
+    public void useWallpaperTextColor(boolean shouldUseWallpaperTextColor) {
+        if (shouldUseWallpaperTextColor == mUseWallpaperTextColors) {
+            return;
+        }
+
+        mUseWallpaperTextColors = shouldUseWallpaperTextColor;
+
+        if (mUseWallpaperTextColors) {
+            updateColors(
+                    Utils.getColorAttr(mContext, R.attr.wallpaperTextColor),
+                    Utils.getColorAttr(mContext, R.attr.wallpaperTextColorSecondary));
+        } else {
+            updateColors(mNonAdaptedForegroundColor, mNonAdaptedBackgroundColor);
+        }
+    }
+
     public void setColorsFromContext(Context context) {
         if (context == null) {
             return;
@@ -179,7 +210,8 @@ public class BatteryMeterView extends LinearLayout implements
         getContext().getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(SHOW_BATTERY_PERCENT), false, mSettingObserver, mUser);
         updateShowPercent();
-        Dependency.get(TunerService.class).addTunable(this, StatusBarIconController.ICON_BLACKLIST);
+        Dependency.get(TunerService.class)
+                .addTunable(this, StatusBarIconController.ICON_BLACKLIST);
         Dependency.get(ConfigurationController.class).addCallback(this);
         mUserTracker.startTracking();
     }
@@ -273,19 +305,23 @@ public class BatteryMeterView extends LinearLayout implements
     @Override
     public void onDarkChanged(Rect area, float darkIntensity, int tint) {
         mDarkIntensity = darkIntensity;
+
         float intensity = DarkIconDispatcher.isInArea(area, this) ? darkIntensity : 0;
-        int foreground = getColorForDarkIntensity(intensity, mLightModeFillColor,
-                mDarkModeFillColor);
-        int background = getColorForDarkIntensity(intensity, mLightModeBackgroundColor,
-                mDarkModeBackgroundColor);
-        mDrawable.setColors(foreground, background);
-        setTextColor(foreground);
+        mNonAdaptedForegroundColor = getColorForDarkIntensity(
+                intensity, mLightModeFillColor, mDarkModeFillColor);
+        mNonAdaptedBackgroundColor = getColorForDarkIntensity(
+                intensity, mLightModeBackgroundColor,mDarkModeBackgroundColor);
+
+        if (!mUseWallpaperTextColors) {
+            updateColors(mNonAdaptedForegroundColor, mNonAdaptedBackgroundColor);
+        }
     }
 
-    public void setTextColor(int color) {
-        mTextColor = color;
+    private void updateColors(int foregroundColor, int backgroundColor) {
+        mDrawable.setColors(foregroundColor, backgroundColor);
+        mTextColor = foregroundColor;
         if (mBatteryPercentView != null) {
-            mBatteryPercentView.setTextColor(color);
+            mBatteryPercentView.setTextColor(foregroundColor);
         }
     }
 
