@@ -28,7 +28,6 @@ import android.metrics.LogMaker;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.os.VibrationEffect;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.HapticFeedbackConstants;
@@ -50,7 +49,6 @@ import com.android.systemui.OverviewProxyService;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider.ButtonInterface;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.statusbar.VibratorHelper;
 
 import static android.view.KeyEvent.KEYCODE_HOME;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
@@ -75,7 +73,6 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     private OnClickListener mOnClickListener;
     private final KeyButtonRipple mRipple;
     private final OverviewProxyService mOverviewProxyService;
-    private final VibratorHelper mVibratorHelper;
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
 
     private final Runnable mCheckLongPress = new Runnable() {
@@ -121,7 +118,6 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
 
         mRipple = new KeyButtonRipple(context, this);
-        mVibratorHelper = Dependency.get(VibratorHelper.class);
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
         setBackground(mRipple);
     }
@@ -262,9 +258,8 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 final boolean doHapticFeedback = (SystemClock.uptimeMillis() - mDownTime) > 150;
                 if (showSwipeUI) {
                     if (doIt) {
-                        if (doHapticFeedback) {
-                            mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
-                        }
+                        // Apply haptic feedback on touch up since there is none on touch down
+                        performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
                         playSoundEffect(SoundEffectConstants.CLICK);
                     }
                 } else if (doHapticFeedback && !mLongClicked) {
