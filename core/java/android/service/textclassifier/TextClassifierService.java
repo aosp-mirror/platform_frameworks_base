@@ -343,17 +343,17 @@ public abstract class TextClassifierService extends Service {
      * @param context the text classification context
      * @param sessionId the session's Id
      */
-    public abstract void onCreateTextClassificationSession(
+    public void onCreateTextClassificationSession(
             @NonNull TextClassificationContext context,
-            @NonNull TextClassificationSessionId sessionId);
+            @NonNull TextClassificationSessionId sessionId) {}
 
     /**
      * Destroys the text classification session identified by the specified sessionId.
      *
      * @param sessionId the id of the session to destroy
      */
-    public abstract void onDestroyTextClassificationSession(
-            @NonNull TextClassificationSessionId sessionId);
+    public void onDestroyTextClassificationSession(
+            @NonNull TextClassificationSessionId sessionId) {}
 
     /**
      * Returns a TextClassifier that runs in this service's process.
