@@ -49,16 +49,20 @@ const int FIELD_ID_UIDMAP_STATS = 8;
 const int FIELD_ID_ANOMALY_ALARM_STATS = 9;
 // const int FIELD_ID_PULLED_ATOM_STATS = 10; // The proto is written in stats_log_util.cpp
 const int FIELD_ID_LOGGER_ERROR_STATS = 11;
-const int FIELD_ID_SUBSCRIBER_ALARM_STATS = 12;
+const int FIELD_ID_PERIODIC_ALARM_STATS = 12;
+const int FIELD_ID_SKIPPED_LOG_EVENT_STATS = 13;
 
 const int FIELD_ID_ATOM_STATS_TAG = 1;
 const int FIELD_ID_ATOM_STATS_COUNT = 2;
 
 const int FIELD_ID_ANOMALY_ALARMS_REGISTERED = 1;
-const int FIELD_ID_SUBSCRIBER_ALARMS_REGISTERED = 1;
+const int FIELD_ID_PERIODIC_ALARMS_REGISTERED = 1;
 
 const int FIELD_ID_LOGGER_STATS_TIME = 1;
 const int FIELD_ID_LOGGER_STATS_ERROR_CODE = 2;
+
+const int FIELD_ID_SKIPPED_LOG_EVENT_STATS_TAG = 1;
+const int FIELD_ID_SKIPPED_LOG_EVENT_STATS_TIMESTAMP = 2;
 
 const int FIELD_ID_CONFIG_STATS_UID = 1;
 const int FIELD_ID_CONFIG_STATS_ID = 2;
@@ -346,6 +350,15 @@ void StatsdStats::noteAtomLogged(int atomId, int32_t timeSec) {
     mPushedAtomStats[atomId]++;
 }
 
+void StatsdStats::noteLogEventSkipped(int tag, int64_t timestamp) {
+    lock_guard<std::mutex> lock(mLock);
+    // grows strictly one at a time. so it won't > kMaxSkippedLogEvents
+    if (mSkippedLogEvents.size() == kMaxSkippedLogEvents) {
+        mSkippedLogEvents.pop_front();
+    }
+    mSkippedLogEvents.push_back(std::make_pair(tag, timestamp));
+}
+
 void StatsdStats::noteLoggerError(int error) {
     lock_guard<std::mutex> lock(mLock);
     // grows strictly one at a time. so it won't > kMaxLoggerErrors
@@ -368,6 +381,7 @@ void StatsdStats::resetInternalLocked() {
     mAnomalyAlarmRegisteredStats = 0;
     mPeriodicAlarmRegisteredStats = 0;
     mLoggerErrors.clear();
+    mSkippedLogEvents.clear();
     for (auto& config : mConfigStats) {
         config.second->broadcast_sent_time_sec.clear();
         config.second->data_drop_time_sec.clear();
@@ -490,6 +504,9 @@ void StatsdStats::dumpStats(FILE* out) const {
         char buffer[80];
         strftime(buffer, sizeof(buffer), "%Y-%m-%d %I:%M%p\n", error_tm);
         fprintf(out, "Logger error %d at %s\n", error.second, buffer);
+    }
+    for (const auto& skipped : mSkippedLogEvents) {
+        fprintf(out, "Log event (%d) skipped at %lld\n", skipped.first, (long long)skipped.second);
     }
 }
 
@@ -617,8 +634,8 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
     }
 
     if (mPeriodicAlarmRegisteredStats > 0) {
-        uint64_t token = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_SUBSCRIBER_ALARM_STATS);
-        proto.write(FIELD_TYPE_INT32 | FIELD_ID_SUBSCRIBER_ALARMS_REGISTERED,
+        uint64_t token = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_PERIODIC_ALARM_STATS);
+        proto.write(FIELD_TYPE_INT32 | FIELD_ID_PERIODIC_ALARMS_REGISTERED,
                     mPeriodicAlarmRegisteredStats);
         proto.end(token);
     }
@@ -637,6 +654,15 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
                                       FIELD_COUNT_REPEATED);
         proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOGGER_STATS_TIME, error.first);
         proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOGGER_STATS_ERROR_CODE, error.second);
+        proto.end(token);
+    }
+
+    for (const auto& skipped : mSkippedLogEvents) {
+        uint64_t token = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_SKIPPED_LOG_EVENT_STATS |
+                                      FIELD_COUNT_REPEATED);
+        proto.write(FIELD_TYPE_INT32 | FIELD_ID_SKIPPED_LOG_EVENT_STATS_TAG, skipped.first);
+        proto.write(FIELD_TYPE_INT64 | FIELD_ID_SKIPPED_LOG_EVENT_STATS_TIMESTAMP,
+                    (long long)skipped.second);
         proto.end(token);
     }
 

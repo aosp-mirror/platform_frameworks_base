@@ -292,4 +292,15 @@ message StatsdStatsReport {
         optional int32 error_code = 2;
     }
     repeated LoggerErrorStats logger_error_stats = 11;
+
+    message PeriodicAlarmStats {
+        optional int32 alarms_registered = 1;
+    }
+    optional PeriodicAlarmStats periodic_alarm_stats = 12;
+
+    message  SkippedLogEventStats {
+        optional int32 tag = 1;
+        optional int64 elapsed_timestamp_nanos = 2;
+    }
+    repeated SkippedLogEventStats skipped_log_event_stats = 13;
 }
