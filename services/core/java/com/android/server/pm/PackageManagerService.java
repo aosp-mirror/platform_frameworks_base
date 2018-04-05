@@ -3946,7 +3946,7 @@ public class PackageManagerService extends IPackageManager.Stub
             ai.uid = UserHandle.getUid(userId, ps.appId);
             ai.primaryCpuAbi = ps.primaryCpuAbiString;
             ai.secondaryCpuAbi = ps.secondaryCpuAbiString;
-            ai.versionCode = ps.versionCode;
+            ai.setVersionCode(ps.versionCode);
             ai.flags = ps.pkgFlags;
             ai.privateFlags = ps.pkgPrivateFlags;
             pi.applicationInfo = PackageParser.generateApplicationInfo(ai, flags, state, userId);
@@ -6773,7 +6773,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // the instant application, we'll do the right thing.
                 final ApplicationInfo ai = localInstantApp.activityInfo.applicationInfo;
                 auxiliaryResponse = new AuxiliaryResolveInfo(null /* failureActivity */,
-                                        ai.packageName, ai.versionCode, null /* splitName */);
+                                        ai.packageName, ai.longVersionCode, null /* splitName */);
             }
         }
         if (intent.isWebIntent() && auxiliaryResponse == null) {
@@ -6957,7 +6957,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 installerInfo.auxiliaryInfo = new AuxiliaryResolveInfo(
                         installFailureActivity,
                         info.activityInfo.packageName,
-                        info.activityInfo.applicationInfo.versionCode,
+                        info.activityInfo.applicationInfo.longVersionCode,
                         info.activityInfo.splitName);
                 // add a non-generic filter
                 installerInfo.filter = new IntentFilter();
@@ -7703,7 +7703,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     installerInfo.auxiliaryInfo = new AuxiliaryResolveInfo(
                             null /* installFailureActivity */,
                             info.serviceInfo.packageName,
-                            info.serviceInfo.applicationInfo.versionCode,
+                            info.serviceInfo.applicationInfo.longVersionCode,
                             info.serviceInfo.splitName);
                     // add a non-generic filter
                     installerInfo.filter = new IntentFilter();
@@ -7821,7 +7821,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     installerInfo.auxiliaryInfo = new AuxiliaryResolveInfo(
                             null /*failureActivity*/,
                             info.providerInfo.packageName,
-                            info.providerInfo.applicationInfo.versionCode,
+                            info.providerInfo.applicationInfo.longVersionCode,
                             info.providerInfo.splitName);
                     // add a non-generic filter
                     installerInfo.filter = new IntentFilter();
