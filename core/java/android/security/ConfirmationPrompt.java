@@ -68,7 +68,7 @@ import java.util.concurrent.Executor;
  * {@link #presentPrompt presentPrompt()} method. The <i>Relying Party</i> stores the nonce locally
  * since it'll use it in a later step.
  * <li> If the user approves the prompt a <i>Confirmation Response</i> is returned in the
- * {@link ConfirmationCallback#onConfirmedByUser onConfirmedByUser(byte[])} callback as the
+ * {@link ConfirmationCallback#onConfirmed onConfirmed(byte[])} callback as the
  * <code>dataThatWasConfirmed</code> parameter. This blob contains the text that was shown to the
  * user, the <code>extraData</code> parameter, and possibly other data.
  * <li> The application signs the <i>Confirmation Response</i> with the previously created key and
@@ -82,8 +82,8 @@ import java.util.concurrent.Executor;
  * last bullet, is to have the <i>Relying Party</i> generate <code>promptText</code> and store it
  * along the nonce in the <code>extraData</code> blob.
  */
-public class ConfirmationDialog {
-    private static final String TAG = "ConfirmationDialog";
+public class ConfirmationPrompt {
+    private static final String TAG = "ConfirmationPrompt";
 
     private CharSequence mPromptText;
     private byte[] mExtraData;
@@ -97,15 +97,15 @@ public class ConfirmationDialog {
             ConfirmationCallback callback) {
         switch (responseCode) {
             case KeyStore.CONFIRMATIONUI_OK:
-                callback.onConfirmedByUser(dataThatWasConfirmed);
+                callback.onConfirmed(dataThatWasConfirmed);
                 break;
 
             case KeyStore.CONFIRMATIONUI_CANCELED:
-                callback.onDismissedByUser();
+                callback.onDismissed();
                 break;
 
             case KeyStore.CONFIRMATIONUI_ABORTED:
-                callback.onDismissedByApplication();
+                callback.onCanceled();
                 break;
 
             case KeyStore.CONFIRMATIONUI_SYSTEM_ERROR:
@@ -145,21 +145,25 @@ public class ConfirmationDialog {
             };
 
     /**
-     * A builder that collects arguments, to be shown on the system-provided confirmation dialog.
+     * A builder that collects arguments, to be shown on the system-provided confirmation prompt.
      */
-    public static class Builder {
+    public static final class Builder {
 
+        private Context mContext;
         private CharSequence mPromptText;
         private byte[] mExtraData;
 
         /**
-         * Creates a builder for the confirmation dialog.
+         * Creates a builder for the confirmation prompt.
+         *
+         * @param context the application context
          */
-        public Builder() {
+        public Builder(Context context) {
+            mContext = context;
         }
 
         /**
-         * Sets the prompt text for the dialog.
+         * Sets the prompt text for the prompt.
          *
          * @param promptText the text to present in the prompt.
          * @return the builder.
@@ -170,7 +174,7 @@ public class ConfirmationDialog {
         }
 
         /**
-         * Sets the extra data for the dialog.
+         * Sets the extra data for the prompt.
          *
          * @param extraData data to include in the response data.
          * @return the builder.
@@ -181,24 +185,23 @@ public class ConfirmationDialog {
         }
 
         /**
-         * Creates a {@link ConfirmationDialog} with the arguments supplied to this builder.
+         * Creates a {@link ConfirmationPrompt} with the arguments supplied to this builder.
          *
-         * @param context the application context
-         * @return a {@link ConfirmationDialog}
+         * @return a {@link ConfirmationPrompt}
          * @throws IllegalArgumentException if any of the required fields are not set.
          */
-        public ConfirmationDialog build(Context context) {
+        public ConfirmationPrompt build() {
             if (TextUtils.isEmpty(mPromptText)) {
                 throw new IllegalArgumentException("prompt text must be set and non-empty");
             }
             if (mExtraData == null) {
                 throw new IllegalArgumentException("extraData must be set");
             }
-            return new ConfirmationDialog(context, mPromptText, mExtraData);
+            return new ConfirmationPrompt(mContext, mPromptText, mExtraData);
         }
     }
 
-    private ConfirmationDialog(Context context, CharSequence promptText, byte[] extraData) {
+    private ConfirmationPrompt(Context context, CharSequence promptText, byte[] extraData) {
         mContext = context;
         mPromptText = promptText;
         mExtraData = extraData;
@@ -227,10 +230,10 @@ public class ConfirmationDialog {
         return uiOptionsAsFlags;
     }
 
-    private boolean isAccessibilityServiceRunning() {
+    private static boolean isAccessibilityServiceRunning(Context context) {
         boolean serviceRunning = false;
         try {
-            ContentResolver contentResolver = mContext.getContentResolver();
+            ContentResolver contentResolver = context.getContentResolver();
             int a11yEnabled = Settings.Secure.getInt(contentResolver,
                     Settings.Secure.ACCESSIBILITY_ENABLED);
             if (a11yEnabled == 1) {
@@ -249,12 +252,12 @@ public class ConfirmationDialog {
      * When the prompt is no longer being presented, one of the methods in
      * {@link ConfirmationCallback} is called on the supplied callback object.
      *
-     * Confirmation dialogs may not be available when accessibility services are running so this
+     * Confirmation prompts may not be available when accessibility services are running so this
      * may fail with a {@link ConfirmationNotAvailableException} exception even if
      * {@link #isSupported} returns {@code true}.
      *
      * @param executor the executor identifying the thread that will receive the callback.
-     * @param callback the callback to use when the dialog is done showing.
+     * @param callback the callback to use when the prompt is done showing.
      * @throws IllegalArgumentException if the prompt text is too long or malfomed.
      * @throws ConfirmationAlreadyPresentingException if another prompt is being presented.
      * @throws ConfirmationNotAvailableException if confirmation prompts are not supported.
@@ -265,7 +268,7 @@ public class ConfirmationDialog {
         if (mCallback != null) {
             throw new ConfirmationAlreadyPresentingException();
         }
-        if (isAccessibilityServiceRunning()) {
+        if (isAccessibilityServiceRunning(mContext)) {
             throw new ConfirmationNotAvailableException();
         }
         mCallback = callback;
@@ -301,7 +304,7 @@ public class ConfirmationDialog {
      * Cancels a prompt currently being displayed.
      *
      * On success, the
-     * {@link ConfirmationCallback#onDismissedByApplication onDismissedByApplication()} method on
+     * {@link ConfirmationCallback#onCanceled onCanceled()} method on
      * the supplied callback object will be called asynchronously.
      *
      * @throws IllegalStateException if no prompt is currently being presented.
@@ -324,9 +327,13 @@ public class ConfirmationDialog {
     /**
      * Checks if the device supports confirmation prompts.
      *
+     * @param context the application context.
      * @return true if confirmation prompts are supported by the device.
      */
-    public static boolean isSupported() {
+    public static boolean isSupported(Context context) {
+        if (isAccessibilityServiceRunning(context)) {
+            return false;
+        }
         return KeyStore.getInstance().isConfirmationPromptSupported();
     }
 }
