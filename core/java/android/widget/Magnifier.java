@@ -233,6 +233,17 @@ public final class Magnifier {
         return mZoom;
     }
 
+    /**
+     * @hide
+     */
+    @Nullable
+    public Point getWindowCoords() {
+        if (mWindow == null) {
+            return null;
+        }
+        return new Point(mWindow.mLastDrawContentPositionX, mWindow.mLastDrawContentPositionY);
+    }
+
     @Nullable
     private Surface getValidViewSurface() {
         // TODO: deduplicate this against the first part of #performPixelCopy
@@ -374,8 +385,11 @@ public final class Magnifier {
         private final Runnable mMagnifierUpdater;
         // The handler where the magnifier updater jobs will be post'd.
         private final Handler mHandler;
-        // The callback to be run after the next draw. Only used for testing.
+        // The callback to be run after the next draw.
         private Callback mCallback;
+        // The position of the magnifier content when the last draw was requested.
+        private int mLastDrawContentPositionX;
+        private int mLastDrawContentPositionY;
 
         // Members below describe the state of the magnifier. Reads/writes to them
         // have to be synchronized between the UI thread and the thread that handles
@@ -598,6 +612,8 @@ public final class Magnifier {
                     callback = null;
                 }
 
+                mLastDrawContentPositionX = mWindowPositionX + mOffsetX;
+                mLastDrawContentPositionY = mWindowPositionY + mOffsetY;
                 mFrameDrawScheduled = false;
             }
 
