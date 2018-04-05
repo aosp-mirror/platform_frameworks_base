@@ -16,7 +16,7 @@
 package android.hardware.fingerprint;
 
 import android.os.Bundle;
-import android.hardware.biometrics.IBiometricDialogReceiver;
+import android.hardware.biometrics.IBiometricPromptReceiver;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.IFingerprintServiceLockoutResetCallback;
@@ -31,7 +31,7 @@ interface IFingerprintService {
     // Authenticate the given sessionId with a fingerprint
     void authenticate(IBinder token, long sessionId, int userId,
             IFingerprintServiceReceiver receiver, int flags, String opPackageName,
-            in Bundle bundle, IBiometricDialogReceiver dialogReceiver);
+            in Bundle bundle, IBiometricPromptReceiver dialogReceiver);
 
     // Cancel authentication for the given sessionId
     void cancelAuthentication(IBinder token, String opPackageName);
