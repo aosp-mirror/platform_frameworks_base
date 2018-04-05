@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
+import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.LockscreenWallpaper;
@@ -142,5 +143,6 @@ public class SystemUIFactory {
         providers.put(NotificationViewHierarchyManager.class,
                 () -> new NotificationViewHierarchyManager(context));
         providers.put(NotificationEntryManager.class, () -> new NotificationEntryManager(context));
+        providers.put(KeyguardDismissUtil.class, KeyguardDismissUtil::new);
     }
 }
