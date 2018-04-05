@@ -362,6 +362,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int MSG_RESET_FIREWALL_RULES_BY_UID = 15;
     private static final int MSG_SUBSCRIPTION_OVERRIDE = 16;
     private static final int MSG_METERED_RESTRICTED_PACKAGES_CHANGED = 17;
+    private static final int MSG_SET_NETWORK_TEMPLATE_ENABLED = 18;
 
     private static final int UID_MSG_STATE_CHANGED = 100;
     private static final int UID_MSG_GONE = 101;
@@ -1566,6 +1567,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * {@link NetworkTemplate}.
      */
     private void setNetworkTemplateEnabled(NetworkTemplate template, boolean enabled) {
+        // Don't call setNetworkTemplateEnabledInner() directly because we may have a lock
+        // held. Call it via the handler.
+        mHandler.obtainMessage(MSG_SET_NETWORK_TEMPLATE_ENABLED, enabled ? 1 : 0, 0, template)
+                .sendToTarget();
+    }
+
+    private void setNetworkTemplateEnabledInner(NetworkTemplate template, boolean enabled) {
         // TODO: reach into ConnectivityManager to proactively disable bringing
         // up this network, since we know that traffic will be blocked.
 
@@ -4180,6 +4188,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     final int userId = msg.arg1;
                     final Set<String> packageNames = (Set<String>) msg.obj;
                     setMeteredRestrictedPackagesInternal(packageNames, userId);
+                    return true;
+                }
+                case MSG_SET_NETWORK_TEMPLATE_ENABLED: {
+                    final NetworkTemplate template = (NetworkTemplate) msg.obj;
+                    final boolean enabled = msg.arg1 != 0;
+                    setNetworkTemplateEnabledInner(template, enabled);
                     return true;
                 }
                 default: {
