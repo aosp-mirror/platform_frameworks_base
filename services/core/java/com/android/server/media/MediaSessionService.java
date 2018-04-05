@@ -1515,6 +1515,24 @@ public class MediaSessionService extends SystemService implements Monitor {
             final int uid = Binder.getCallingUid();
             final long token = Binder.clearCallingIdentity();
             try {
+                int controllerUserId = UserHandle.getUserId(controllerUid);
+                int controllerUidFromPackageName;
+                try {
+                    controllerUidFromPackageName = getContext().getPackageManager()
+                            .getPackageUidAsUser(controllerPackageName, controllerUserId);
+                } catch (NameNotFoundException e) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Package " + controllerPackageName + " doesn't exist");
+                    }
+                    return false;
+                }
+                if (controllerUidFromPackageName != controllerUid) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Package name " + controllerPackageName
+                                + " doesn't match with the uid " + controllerUid);
+                    }
+                    return false;
+                }
                 return hasMediaControlPermission(UserHandle.getUserId(uid), controllerPackageName,
                         controllerPid, controllerUid);
             } finally {
