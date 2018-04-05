@@ -588,7 +588,7 @@ public class AudioService extends IAudioService.Stub
             AudioSystem.DEVICE_OUT_HDMI_ARC |
             AudioSystem.DEVICE_OUT_SPDIF |
             AudioSystem.DEVICE_OUT_AUX_LINE;
-    int mFullVolumeDevices = AudioSystem.DEVICE_OUT_HEARING_AID;
+    int mFullVolumeDevices = 0;
 
     private final boolean mMonitorRotation;
 
@@ -4778,6 +4778,8 @@ public class AudioService extends IAudioService.Stub
                 index = getAbsoluteVolumeIndex((getIndex(device) + 5)/10);
             } else if ((device & mFullVolumeDevices) != 0) {
                 index = (mIndexMax + 5)/10;
+            } else if ((device & AudioSystem.DEVICE_OUT_HEARING_AID) != 0) {
+                index = (mIndexMax + 5)/10;
             } else {
                 index = (getIndex(device) + 5)/10;
             }
@@ -4797,6 +4799,8 @@ public class AudioService extends IAudioService.Stub
                                 mAvrcpAbsVolSupported) {
                             index = getAbsoluteVolumeIndex((getIndex(device) + 5)/10);
                         } else if ((device & mFullVolumeDevices) != 0) {
+                            index = (mIndexMax + 5)/10;
+                        } else if ((device & AudioSystem.DEVICE_OUT_HEARING_AID) != 0) {
                             index = (mIndexMax + 5)/10;
                         } else {
                             index = (mIndexMap.valueAt(i) + 5)/10;
