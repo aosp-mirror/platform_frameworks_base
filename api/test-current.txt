@@ -467,6 +467,14 @@ package android.location {
 
 }
 
+package android.media.audiofx {
+
+  public class AudioEffect {
+    field public static final java.util.UUID EFFECT_TYPE_NULL;
+  }
+
+}
+
 package android.net {
 
   public final class IpSecManager {
