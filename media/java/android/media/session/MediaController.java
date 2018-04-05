@@ -531,7 +531,7 @@ public final class MediaController {
          *
          * @param state The new playback state of the session
          */
-        public void onPlaybackStateChanged(@NonNull PlaybackState state) {
+        public void onPlaybackStateChanged(@Nullable PlaybackState state) {
         }
 
         /**
