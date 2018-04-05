@@ -23,8 +23,10 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.AnyThread;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Px;
 import android.annotation.TestApi;
 import android.annotation.WorkerThread;
 import android.content.ContentResolver;
@@ -1020,10 +1022,11 @@ public final class ImageDecoder implements AutoCloseable {
      *  <p>Like all setters on ImageDecoder, this must be called inside
      *  {@link OnHeaderDecodedListener#onHeaderDecoded onHeaderDecoded}.</p>
      *
-     *  @param width must be greater than 0.
-     *  @param height must be greater than 0.
+     *  @param width width in pixels of the output, must be greater than 0
+     *  @param height height in pixels of the output, must be greater than 0
      */
-    public void setTargetSize(int width, int height) {
+    public void setTargetSize(@Px @IntRange(from = 1) int width,
+                              @Px @IntRange(from = 1) int height) {
         if (width <= 0 || height <= 0) {
             throw new IllegalArgumentException("Dimensions must be positive! "
                     + "provided (" + width + ", " + height + ")");
@@ -1083,14 +1086,20 @@ public final class ImageDecoder implements AutoCloseable {
      *
      *  <p>Must be greater than or equal to 1.</p>
      *
+     *  <p>This has the same effect as calling {@link #setTargetSize} with
+     *  dimensions based on the {@code sampleSize}. Unlike dividing the original
+     *  width and height by the {@code sampleSize} manually, calling this method
+     *  allows {@code ImageDecoder} to round in the direction that it can do most
+     *  efficiently.</p>
+     *
      *  <p>Only the last call to this or {@link #setTargetSize} is respected.</p>
      *
      *  <p>Like all setters on ImageDecoder, this must be called inside
      *  {@link OnHeaderDecodedListener#onHeaderDecoded onHeaderDecoded}.</p>
      *
-     *  @param sampleSize Sampling rate of the encoded image.
+     *  @param sampleSize sampling rate of the encoded image.
      */
-    public void setTargetSampleSize(int sampleSize) {
+    public void setTargetSampleSize(@IntRange(from = 1) int sampleSize) {
         Size size = this.getSampledSize(sampleSize);
         int targetWidth = getTargetDimension(mWidth, sampleSize, size.getWidth());
         int targetHeight = getTargetDimension(mHeight, sampleSize, size.getHeight());
