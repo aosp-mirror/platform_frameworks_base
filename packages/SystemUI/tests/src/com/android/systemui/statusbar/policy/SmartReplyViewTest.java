@@ -22,11 +22,16 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+
 import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.service.notification.StatusBarNotification;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -38,6 +43,8 @@ import android.widget.LinearLayout;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.SmartReplyLogger;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -46,6 +53,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -66,8 +75,12 @@ public class SmartReplyViewTest extends SysuiTestCase {
     private int mDoubleLinePaddingHorizontal;
     private int mSpacing;
 
+    @Mock private SmartReplyLogger mLogger;
+    private NotificationData.Entry mEntry;
+
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
         mReceiver = new BlockingQueueIntentReceiver();
         mContext.registerReceiver(mReceiver, new IntentFilter(TEST_ACTION));
         mDependency.get(KeyguardDismissUtil.class).setDismissHandler(
@@ -82,6 +95,10 @@ public class SmartReplyViewTest extends SysuiTestCase {
         mDoubleLinePaddingHorizontal = res.getDimensionPixelSize(
                 R.dimen.smart_reply_button_padding_horizontal_double_line);
         mSpacing = res.getDimensionPixelSize(R.dimen.smart_reply_button_spacing);
+
+        StatusBarNotification notification = mock(StatusBarNotification.class);
+        when(notification.getKey()).thenReturn("akey");
+        mEntry = new NotificationData.Entry(notification);
     }
 
     @After
@@ -135,6 +152,13 @@ public class SmartReplyViewTest extends SysuiTestCase {
         assertEquals(TEST_CHOICES[2],
                 RemoteInput.getResultsFromIntent(resultIntent).get(TEST_RESULT_KEY));
         assertEquals(RemoteInput.SOURCE_CHOICE, RemoteInput.getResultsSource(resultIntent));
+    }
+
+    @Test
+    public void testSendSmartReply_LoggerCall() {
+        setRepliesFromRemoteInput(TEST_CHOICES);
+        mView.getChildAt(2).performClick();
+        verify(mLogger).smartReplySent(mEntry, 2);
     }
 
     @Test
@@ -316,7 +340,7 @@ public class SmartReplyViewTest extends SysuiTestCase {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
                 new Intent(TEST_ACTION), 0);
         RemoteInput input = new RemoteInput.Builder(TEST_RESULT_KEY).setChoices(choices).build();
-        mView.setRepliesFromRemoteInput(input, pendingIntent);
+        mView.setRepliesFromRemoteInput(input, pendingIntent, mLogger, mEntry);
     }
 
     /** Builds a {@link ViewGroup} whose measures and layout mirror a {@link SmartReplyView}. */
@@ -343,8 +367,9 @@ public class SmartReplyViewTest extends SysuiTestCase {
         }
 
         Button previous = null;
-        for (CharSequence choice : choices) {
-            Button current = mView.inflateReplyButton(mContext, mView, choice, null, null);
+        for (int i = 0; i < choices.length; ++i) {
+            Button current = mView.inflateReplyButton(mContext, mView, i, choices[i],
+                    null, null, null, null);
             current.setPadding(paddingHorizontal, current.getPaddingTop(), paddingHorizontal,
                     current.getPaddingBottom());
             if (previous != null) {

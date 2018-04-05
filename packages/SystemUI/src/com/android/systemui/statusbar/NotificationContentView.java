@@ -80,7 +80,7 @@ public class NotificationContentView extends FrameLayout {
     private RemoteInputView mHeadsUpRemoteInput;
 
     private SmartReplyConstants mSmartReplyConstants;
-    private SmartReplyView mExpandedSmartReplyView;
+    private SmartReplyLogger mSmartReplyLogger;
 
     private NotificationViewWrapper mContractedWrapper;
     private NotificationViewWrapper mExpandedWrapper;
@@ -153,6 +153,7 @@ public class NotificationContentView extends FrameLayout {
         super(context, attrs);
         mHybridGroupManager = new HybridGroupManager(getContext(), this);
         mSmartReplyConstants = Dependency.get(SmartReplyConstants.class);
+        mSmartReplyLogger = Dependency.get(SmartReplyLogger.class);
         initView();
     }
 
@@ -1243,7 +1244,7 @@ public class NotificationContentView extends FrameLayout {
         }
 
         applyRemoteInput(entry, hasRemoteInput);
-        applySmartReplyView(remoteInputWithChoices, pendingIntentWithChoices);
+        applySmartReplyView(remoteInputWithChoices, pendingIntentWithChoices, entry);
     }
 
     private void applyRemoteInput(NotificationData.Entry entry, boolean hasRemoteInput) {
@@ -1344,13 +1345,21 @@ public class NotificationContentView extends FrameLayout {
         return null;
     }
 
-    private void applySmartReplyView(RemoteInput remoteInput, PendingIntent pendingIntent) {
-        mExpandedSmartReplyView = mExpandedChild == null ?
-                null : applySmartReplyView(mExpandedChild, remoteInput, pendingIntent);
+    private void applySmartReplyView(RemoteInput remoteInput, PendingIntent pendingIntent,
+            NotificationData.Entry entry) {
+        if (mExpandedChild != null) {
+            SmartReplyView view =
+                    applySmartReplyView(mExpandedChild, remoteInput, pendingIntent, entry);
+            if (view != null && remoteInput != null && remoteInput.getChoices() != null
+                    && remoteInput.getChoices().length > 0) {
+                mSmartReplyLogger.smartRepliesAdded(entry, remoteInput.getChoices().length);
+            }
+        }
     }
 
     private SmartReplyView applySmartReplyView(
-            View view, RemoteInput remoteInput, PendingIntent pendingIntent) {
+            View view, RemoteInput remoteInput, PendingIntent pendingIntent,
+            NotificationData.Entry entry) {
         View smartReplyContainerCandidate = view.findViewById(
                 com.android.internal.R.id.smart_reply_container);
         if (!(smartReplyContainerCandidate instanceof LinearLayout)) {
@@ -1372,7 +1381,8 @@ public class NotificationContentView extends FrameLayout {
             }
         }
         if (smartReplyView != null) {
-            smartReplyView.setRepliesFromRemoteInput(remoteInput, pendingIntent);
+            smartReplyView.setRepliesFromRemoteInput(remoteInput, pendingIntent,
+                    mSmartReplyLogger, entry);
             smartReplyContainer.setVisibility(View.VISIBLE);
         }
         return smartReplyView;
