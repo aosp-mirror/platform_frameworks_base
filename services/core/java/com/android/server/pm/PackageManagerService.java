@@ -8700,7 +8700,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             disabledPkgSetting /* pkgSetting */, null /* disabledPkgSetting */,
                             null /* originalPkgSetting */, null, parseFlags, scanFlags,
                             (pkg == mPlatformPackage), user);
-                    applyPolicy(pkg, parseFlags, scanFlags);
+                    applyPolicy(pkg, parseFlags, scanFlags, mPlatformPackage);
                     scanPackageOnlyLI(request, mFactoryTest, -1L);
                 }
             }
@@ -10019,7 +10019,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         scanFlags = adjustScanFlags(scanFlags, pkgSetting, disabledPkgSetting, user, pkg);
         synchronized (mPackages) {
-            applyPolicy(pkg, parseFlags, scanFlags);
+            applyPolicy(pkg, parseFlags, scanFlags, mPlatformPackage);
             assertPackageIsValid(pkg, parseFlags, scanFlags);
 
             SharedUserSetting sharedUserSetting = null;
@@ -10699,7 +10699,7 @@ public class PackageManagerService extends IPackageManager.Stub
      * ideally be static, but, it requires locks to read system state.
      */
     private static void applyPolicy(PackageParser.Package pkg, final @ParseFlags int parseFlags,
-            final @ScanFlags int scanFlags) {
+            final @ScanFlags int scanFlags, PackageParser.Package platformPkg) {
         if ((scanFlags & SCAN_AS_SYSTEM) != 0) {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_SYSTEM;
             if (pkg.applicationInfo.isDirectBootAware()) {
@@ -10783,6 +10783,15 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if ((scanFlags & SCAN_AS_PRODUCT) != 0) {
             pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_PRODUCT;
+        }
+
+        // Check if the package is signed with the same key as the platform package.
+        if (PLATFORM_PACKAGE_NAME.equals(pkg.packageName) ||
+                (platformPkg != null && compareSignatures(
+                        platformPkg.mSigningDetails.signatures,
+                        pkg.mSigningDetails.signatures) == PackageManager.SIGNATURE_MATCH)) {
+            pkg.applicationInfo.privateFlags |=
+                ApplicationInfo.PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY;
         }
 
         if (!isSystemApp(pkg)) {

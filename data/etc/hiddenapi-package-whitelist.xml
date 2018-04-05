@@ -17,66 +17,28 @@
 
 <!--
 This XML file declares which system apps should be exempted from the hidden API blacklisting, i.e.
-which apps should be allowed to access the entire private API.
+which apps should be allowed to access the entire private API. Only apps NOT signed with the
+platform cert need to be included, as apps signed with the platform cert are exempted by default.
 -->
 
 <config>
-  <hidden-api-whitelisted-app package="android.car.cluster.loggingrenderer" />
-  <hidden-api-whitelisted-app package="android.car.input.service" />
-  <hidden-api-whitelisted-app package="android.car.usb.handler" />
   <hidden-api-whitelisted-app package="android.ext.services" />
   <hidden-api-whitelisted-app package="com.android.apps.tag" />
-  <hidden-api-whitelisted-app package="com.android.backupconfirm" />
   <hidden-api-whitelisted-app package="com.android.basicsmsreceiver" />
-  <hidden-api-whitelisted-app package="com.android.bluetooth" />
-  <hidden-api-whitelisted-app package="com.android.bluetoothdebug" />
-  <hidden-api-whitelisted-app package="com.android.bluetoothmidiservice" />
   <hidden-api-whitelisted-app package="com.android.bookmarkprovider" />
   <hidden-api-whitelisted-app package="com.android.calllogbackup" />
   <hidden-api-whitelisted-app package="com.android.camera" />
-  <hidden-api-whitelisted-app package="com.android.captiveportallogin" />
-  <hidden-api-whitelisted-app package="com.android.car" />
   <hidden-api-whitelisted-app package="com.android.car.dialer" />
-  <hidden-api-whitelisted-app package="com.android.car.hvac" />
-  <hidden-api-whitelisted-app package="com.android.car.mapsplaceholder" />
-  <hidden-api-whitelisted-app package="com.android.car.media" />
-  <hidden-api-whitelisted-app package="com.android.car.media.localmediaplayer" />
   <hidden-api-whitelisted-app package="com.android.car.messenger" />
   <hidden-api-whitelisted-app package="com.android.car.overview" />
-  <hidden-api-whitelisted-app package="com.android.car.radio" />
-  <hidden-api-whitelisted-app package="com.android.car.settings" />
   <hidden-api-whitelisted-app package="com.android.car.stream" />
-  <hidden-api-whitelisted-app package="com.android.car.systemupdater" />
-  <hidden-api-whitelisted-app package="com.android.car.trust" />
-  <hidden-api-whitelisted-app package="com.android.carrierconfig" />
-  <hidden-api-whitelisted-app package="com.android.carrierdefaultapp" />
-  <hidden-api-whitelisted-app package="com.android.cellbroadcastreceiver" />
-  <hidden-api-whitelisted-app package="com.android.certinstaller" />
   <hidden-api-whitelisted-app package="com.android.companiondevicemanager" />
-  <hidden-api-whitelisted-app package="com.android.customlocale2" />
-  <hidden-api-whitelisted-app package="com.android.defcontainer" />
-  <hidden-api-whitelisted-app package="com.android.development" />
-  <hidden-api-whitelisted-app package="com.android.documentsui" />
   <hidden-api-whitelisted-app package="com.android.dreams.basic" />
-  <hidden-api-whitelisted-app package="com.android.egg" />
-  <hidden-api-whitelisted-app package="com.android.emergency" />
-  <hidden-api-whitelisted-app package="com.android.externalstorage" />
-  <hidden-api-whitelisted-app package="com.android.fakeoemfeatures" />
   <hidden-api-whitelisted-app package="com.android.gallery" />
-  <hidden-api-whitelisted-app package="com.android.hotspot2" />
-  <hidden-api-whitelisted-app package="com.android.keychain" />
   <hidden-api-whitelisted-app package="com.android.launcher3" />
-  <hidden-api-whitelisted-app package="com.android.location.fused" />
-  <hidden-api-whitelisted-app package="com.android.managedprovisioning" />
-  <hidden-api-whitelisted-app package="com.android.mms.service" />
   <hidden-api-whitelisted-app package="com.android.mtp" />
   <hidden-api-whitelisted-app package="com.android.musicfx" />
-  <hidden-api-whitelisted-app package="com.android.nfc" />
-  <hidden-api-whitelisted-app package="com.android.osu" />
   <hidden-api-whitelisted-app package="com.android.packageinstaller" />
-  <hidden-api-whitelisted-app package="com.android.pacprocessor" />
-  <hidden-api-whitelisted-app package="com.android.phone" />
-  <hidden-api-whitelisted-app package="com.android.pmc" />
   <hidden-api-whitelisted-app package="com.android.printservice.recommendation" />
   <hidden-api-whitelisted-app package="com.android.printspooler" />
   <hidden-api-whitelisted-app package="com.android.providers.blockednumber" />
@@ -85,36 +47,13 @@ which apps should be allowed to access the entire private API.
   <hidden-api-whitelisted-app package="com.android.providers.downloads" />
   <hidden-api-whitelisted-app package="com.android.providers.downloads.ui" />
   <hidden-api-whitelisted-app package="com.android.providers.media" />
-  <hidden-api-whitelisted-app package="com.android.providers.settings" />
-  <hidden-api-whitelisted-app package="com.android.providers.telephony" />
   <hidden-api-whitelisted-app package="com.android.providers.tv" />
   <hidden-api-whitelisted-app package="com.android.providers.userdictionary" />
-  <hidden-api-whitelisted-app package="com.android.provision" />
-  <hidden-api-whitelisted-app package="com.android.proxyhandler" />
-  <hidden-api-whitelisted-app package="com.android.sdksetup" />
-  <hidden-api-whitelisted-app package="com.android.se" />
-  <hidden-api-whitelisted-app package="com.android.server.telecom" />
-  <hidden-api-whitelisted-app package="com.android.service.ims" />
-  <hidden-api-whitelisted-app package="com.android.service.ims.presence" />
-  <hidden-api-whitelisted-app package="com.android.settings" />
-  <hidden-api-whitelisted-app package="com.android.sharedstoragebackup" />
-  <hidden-api-whitelisted-app package="com.android.shell" />
   <hidden-api-whitelisted-app package="com.android.smspush" />
   <hidden-api-whitelisted-app package="com.android.spare_parts" />
   <hidden-api-whitelisted-app package="com.android.statementservice" />
-  <hidden-api-whitelisted-app package="com.android.stk" />
   <hidden-api-whitelisted-app package="com.android.storagemanager" />
-  <hidden-api-whitelisted-app package="com.android.support.car.lenspicker" />
-  <hidden-api-whitelisted-app package="com.android.systemui" />
   <hidden-api-whitelisted-app package="com.android.systemui.plugins" />
   <hidden-api-whitelisted-app package="com.android.terminal" />
-  <hidden-api-whitelisted-app package="com.android.timezone.updater" />
-  <hidden-api-whitelisted-app package="com.android.traceur" />
-  <hidden-api-whitelisted-app package="com.android.tv.settings" />
-  <hidden-api-whitelisted-app package="com.android.vpndialogs" />
-  <hidden-api-whitelisted-app package="com.android.wallpaper.livepicker" />
-  <hidden-api-whitelisted-app package="com.android.wallpaperbackup" />
-  <hidden-api-whitelisted-app package="com.android.wallpapercropper" />
-  <hidden-api-whitelisted-app package="com.googlecode.android_scripting" />
   <hidden-api-whitelisted-app package="jp.co.omronsoft.openwnn" />
 </config>
