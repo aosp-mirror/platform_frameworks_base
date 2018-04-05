@@ -142,12 +142,14 @@ public class StatusBarMobileView extends AlphaOptimizedLinearLayout implements D
         if (mState.strengthId != state.strengthId) {
             mMobileDrawable.setLevel(state.strengthId);
         }
-        if (mState.typeId != state.typeId && state.typeId != 0) {
-            mMobileType.setContentDescription(state.typeContentDescription);
-            mMobileType.setImageResource(state.typeId);
-            mMobileType.setVisibility(View.VISIBLE);
-        } else {
-            mMobileType.setVisibility(View.GONE);
+        if (mState.typeId != state.typeId) {
+            if (state.typeId != 0) {
+                mMobileType.setContentDescription(state.typeContentDescription);
+                mMobileType.setImageResource(state.typeId);
+                mMobileType.setVisibility(View.VISIBLE);
+            } else {
+                mMobileType.setVisibility(View.GONE);
+            }
         }
 
         mMobileRoaming.setVisibility(state.roaming ? View.VISIBLE : View.GONE);
