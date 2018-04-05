@@ -111,6 +111,7 @@ public enum ScrimState {
             mCurrentInFrontAlpha = alwaysOnEnabled ? mAodFrontScrimAlpha : 1f;
             mCurrentInFrontTint = Color.BLACK;
             mCurrentBehindTint = Color.BLACK;
+            mAnimationDuration = ScrimController.ANIMATION_DURATION_LONG;
             // DisplayPowerManager will blank the screen for us, we just need
             // to set our state.
             mAnimateChange = !mDisplayRequiresBlanking;
