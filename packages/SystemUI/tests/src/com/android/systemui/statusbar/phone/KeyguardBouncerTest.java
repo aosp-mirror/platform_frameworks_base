@@ -167,8 +167,16 @@ public class KeyguardBouncerTest extends SysuiTestCase {
 
     @Test
     public void testOnFullyShown_notifiesFalsingManager() {
+        mBouncer.ensureView();
         mBouncer.onFullyShown();
         verify(mFalsingManager).onBouncerShown();
+    }
+
+    @Test
+    public void testOnFullyShown_notifiesKeyguardView() {
+        mBouncer.ensureView();
+        mBouncer.onFullyShown();
+        verify(mKeyguardHostView).onResume();
     }
 
     @Test
