@@ -18,7 +18,7 @@ package com.android.systemui.statusbar;
 
 import android.content.ComponentName;
 import android.graphics.Rect;
-import android.hardware.biometrics.IBiometricDialogReceiver;
+import android.hardware.biometrics.IBiometricPromptReceiver;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -160,7 +160,7 @@ public class CommandQueue extends IStatusBar.Stub {
 
         default void onRotationProposal(int rotation, boolean isValid) { }
 
-        default void showFingerprintDialog(Bundle bundle, IBiometricDialogReceiver receiver) { }
+        default void showFingerprintDialog(Bundle bundle, IBiometricPromptReceiver receiver) { }
         default void onFingerprintAuthenticated() { }
         default void onFingerprintHelp(String message) { }
         default void onFingerprintError(String error) { }
@@ -513,7 +513,7 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     @Override
-    public void showFingerprintDialog(Bundle bundle, IBiometricDialogReceiver receiver) {
+    public void showFingerprintDialog(Bundle bundle, IBiometricPromptReceiver receiver) {
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = bundle;
@@ -759,7 +759,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).showFingerprintDialog(
                                 (Bundle)((SomeArgs)msg.obj).arg1,
-                                (IBiometricDialogReceiver)((SomeArgs)msg.obj).arg2);
+                                (IBiometricPromptReceiver)((SomeArgs)msg.obj).arg2);
                     }
                     break;
                 case MSG_FINGERPRINT_AUTHENTICATED:
