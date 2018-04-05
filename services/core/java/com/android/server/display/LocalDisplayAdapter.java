@@ -436,6 +436,10 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                                 com.android.internal.R.bool.config_localDisplaysMirrorContent)) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_OWN_CONTENT_ONLY;
                     }
+
+                    if (res.getBoolean(com.android.internal.R.bool.config_localDisplaysPrivate)) {
+                        mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE;
+                    }
                 }
             }
             return mInfo;
