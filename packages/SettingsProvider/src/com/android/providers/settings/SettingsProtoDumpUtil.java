@@ -742,6 +742,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.LOCATION_GLOBAL_KILL_SWITCH,
                 GlobalSettingsProto.Location.GLOBAL_KILL_SWITCH);
+        dumpSetting(s, p,
+                Settings.Global.GNSS_SATELLITE_BLACKLIST,
+                GlobalSettingsProto.Location.GNSS_SATELLITE_BLACKLIST);
         p.end(locationToken);
 
         final long lpmToken = p.start(GlobalSettingsProto.LOW_POWER_MODE);
