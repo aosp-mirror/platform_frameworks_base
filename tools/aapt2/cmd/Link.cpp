@@ -1073,7 +1073,7 @@ class LinkCommand {
 
       case OutputFormat::kProto: {
         pb::ResourceTable pb_table;
-        SerializeTableToPb(*table, &pb_table);
+        SerializeTableToPb(*table, &pb_table, context_->GetDiagnostics());
         return io::CopyProtoToArchive(context_, &pb_table, kProtoResourceTablePath,
                                       ArchiveEntry::kCompress, writer);
       } break;
@@ -2159,7 +2159,11 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
                             "Syntax: path/to/output.apk:<config>[,<config>[...]].\n"
                             "On Windows, use a semicolon ';' separator instead.",
                             &split_args)
-          .OptionalSwitch("-v", "Enables verbose logging.", &verbose);
+          .OptionalSwitch("-v", "Enables verbose logging.", &verbose)
+          .OptionalSwitch("--debug-mode",
+                          "Inserts android:debuggable=\"true\" in to the application node of the\n"
+                          "manifest, making the application debuggable even on production devices.",
+                          &options.manifest_fixer_options.debug_mode);
 
   if (!flags.Parse("aapt2 link", args, &std::cerr)) {
     return 1;

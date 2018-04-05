@@ -531,6 +531,10 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Khalisa"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Dlidlizela"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Thulisa"</string>
+    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
+    <skip />
+    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Thepha ukuze ususe ukuthula."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Thepha ukuze usethe ukudlidliza. Amasevisi okufinyelela angathuliswa."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Thepha ukuze uthulise. Amasevisi okufinyelela angathuliswa."</string>

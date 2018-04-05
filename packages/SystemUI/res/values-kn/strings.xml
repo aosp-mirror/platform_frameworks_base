@@ -431,8 +431,7 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ಮತ್ತೊಮ್ಮೆ ತೋರಿಸದಿರು"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ಎಲ್ಲವನ್ನೂ ತೆರವುಗೊಳಿಸು"</string>
     <string name="manage_notifications_text" msgid="8035284146227267681">"ಅಧಿಸೂಚನೆಗಳನ್ನು ನಿರ್ವಹಿಸಿ"</string>
-    <!-- no translation found for dnd_suppressing_shade_text (5179021215370153526) -->
-    <skip />
+    <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"\"ಅಡಚಣೆ ಮಾಡಬೇಡಿ\" ಮೋಡ್ ಅಧಿಸೂಚನೆಗಳನ್ನು ಮರೆಮಾಡುತ್ತಿದೆ"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ಈಗ ಪ್ರಾರಂಭಿಸಿ"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"ಯಾವುದೇ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"ಪ್ರೊಫೈಲ್ ಅನ್ನು ಪರಿವೀಕ್ಷಿಸಬಹುದಾಗಿದೆ"</string>
@@ -532,6 +531,10 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"ರಿಂಗ್"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"ವೈಬ್ರೇಟ್‌"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"ಮ್ಯೂಟ್"</string>
+    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
+    <skip />
+    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. ಅನ್‌ಮ್ಯೂಟ್‌ ಮಾಡುವುದಕ್ಕಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. ಕಂಪನಕ್ಕೆ ಹೊಂದಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ. ಪ್ರವೇಶಿಸುವಿಕೆ ಸೇವೆಗಳನ್ನು ಮ್ಯೂಟ್‌ ಮಾಡಬಹುದು."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. ಮ್ಯೂಟ್ ಮಾಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ. ಪ್ರವೇಶಿಸುವಿಕೆ ಸೇವೆಗಳನ್ನು ಮ್ಯೂಟ್‌ ಮಾಡಬಹುದು."</string>
@@ -815,8 +818,7 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳು"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"ಸಾಮಾನ್ಯ ಸಂದೇಶಗಳು"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"ಸಂಗ್ರಹಣೆ"</string>
-    <!-- no translation found for notification_channel_hints (7323870212489152689) -->
-    <skip />
+    <string name="notification_channel_hints" msgid="7323870212489152689">"ಸುಳಿವುಗಳು"</string>
     <string name="instant_apps" msgid="6647570248119804907">"ತತ್‌ಕ್ಷಣ ಆಪ್‌ಗಳು"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"ತತ್‌ಕ್ಷಣ ಆಪ್‌ಗಳಿಗೆ ಸ್ಥಾಪನೆಯ ಅಗತ್ಯವಿಲ್ಲ."</string>
     <string name="app_info" msgid="6856026610594615344">"ಅಪ್ಲಿಕೇಶನ್ ಮಾಹಿತಿ"</string>
@@ -844,18 +846,11 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"ಯಾವುದೇ ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ ಸ್ಲೈಸ್‌ಗಳನ್ನು ತೋರಿಸಲು <xliff:g id="APP">%1$s</xliff:g> ಅನ್ನು ಅನುಮತಿಸಿ"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"ಅನುಮತಿಸಿ"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"ನಿರಾಕರಿಸಿ"</string>
-    <!-- no translation found for auto_saver_title (1217959994732964228) -->
-    <skip />
-    <!-- no translation found for auto_saver_text (6324376061044218113) -->
-    <skip />
-    <!-- no translation found for no_auto_saver_action (8086002101711328500) -->
-    <skip />
-    <!-- no translation found for auto_saver_enabled_title (6726474226058316862) -->
-    <skip />
-    <!-- no translation found for auto_saver_enabled_text (874711029884777579) -->
-    <skip />
-    <!-- no translation found for open_saver_setting_action (8314624730997322529) -->
-    <skip />
-    <!-- no translation found for auto_saver_okay_action (2701221740227683650) -->
-    <skip />
+    <string name="auto_saver_title" msgid="1217959994732964228">"ಬ್ಯಾಟರಿ ಸೇವರ್‌ ಅನ್ನು ನಿಗದಿಗೊಳಿಸಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
+    <string name="auto_saver_text" msgid="6324376061044218113">"ಬ್ಯಾಟರಿ <xliff:g id="PERCENTAGE">%d</xliff:g>%% ರಷ್ಟು ಇರುವಾಗ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆನ್‌ ಆಗುತ್ತದೆ"</string>
+    <string name="no_auto_saver_action" msgid="8086002101711328500">"ಬೇಡ ಧನ್ಯವಾದಗಳು"</string>
+    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"ಬ್ಯಾಟರಿ ಸೇವರ್ ನಿಗದಿಯನ್ನು ಆನ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"ಬ್ಯಾಟರಿ <xliff:g id="PERCENTAGE">%d</xliff:g>%% ಗಿಂತ ಕಡಿಮೆ ಆದಾಗ ಬ್ಯಾಟರಿ ಸೇವರ್‌ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆನ್‌ ಆಗುತ್ತದೆ."</string>
+    <string name="open_saver_setting_action" msgid="8314624730997322529">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <string name="auto_saver_okay_action" msgid="2701221740227683650">"ಅರ್ಥವಾಯಿತು"</string>
 </resources>

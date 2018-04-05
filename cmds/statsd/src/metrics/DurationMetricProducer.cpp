@@ -61,7 +61,7 @@ DurationMetricProducer::DurationMetricProducer(const ConfigKey& key, const Durat
                                                const bool nesting,
                                                const sp<ConditionWizard>& wizard,
                                                const FieldMatcher& internalDimensions,
-                                               const uint64_t startTimeNs)
+                                               const int64_t startTimeNs)
     : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard),
       mAggregationType(metric.aggregation_type()),
       mStartIndex(startIndex),
@@ -170,7 +170,7 @@ unique_ptr<DurationTracker> DurationMetricProducer::createDurationTracker(
 // 2. No condition in dimension
 // 3. The links covers all dimension fields in the sliced child condition predicate.
 void DurationMetricProducer::onSlicedConditionMayChangeLocked_opt1(bool condition,
-                                                                   const uint64_t eventTime) {
+                                                                   const int64_t eventTime) {
     if (mMetric2ConditionLinks.size() != 1 ||
         !mHasLinksToAllConditionDimensionsInTracker ||
         !mDimensionsInCondition.empty()) {
@@ -243,7 +243,7 @@ void DurationMetricProducer::onSlicedConditionMayChangeLocked_opt1(bool conditio
 // 1. If combination condition, logical operation is AND, only one sliced child predicate.
 // 2. Has dimensions_in_condition and it equals to the output dimensions of the sliced predicate.
 void DurationMetricProducer::onSlicedConditionMayChangeLocked_opt2(bool condition,
-                                                                   const uint64_t eventTime) {
+                                                                   const int64_t eventTime) {
     if (mMetric2ConditionLinks.size() > 1 || !mSameConditionDimensionsInTracker) {
         return;
     }
@@ -328,7 +328,7 @@ void DurationMetricProducer::onSlicedConditionMayChangeLocked_opt2(bool conditio
 }
 
 void DurationMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition,
-                                                              const uint64_t eventTime) {
+                                                              const int64_t eventTime) {
     VLOG("Metric %lld onSlicedConditionMayChange", (long long)mMetricId);
     flushIfNeededLocked(eventTime);
 
@@ -420,7 +420,7 @@ void DurationMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondit
 }
 
 void DurationMetricProducer::onConditionChangedLocked(const bool conditionMet,
-                                                      const uint64_t eventTime) {
+                                                      const int64_t eventTime) {
     VLOG("Metric %lld onConditionChanged", (long long)mMetricId);
     mCondition = conditionMet;
     flushIfNeededLocked(eventTime);
@@ -433,12 +433,12 @@ void DurationMetricProducer::onConditionChangedLocked(const bool conditionMet,
     }
 }
 
-void DurationMetricProducer::dropDataLocked(const uint64_t dropTimeNs) {
+void DurationMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
     flushIfNeededLocked(dropTimeNs);
     mPastBuckets.clear();
 }
 
-void DurationMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
+void DurationMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                                                 ProtoOutputStream* protoOutput) {
     flushIfNeededLocked(dumpTimeNs);
     if (mPastBuckets.empty()) {
@@ -492,8 +492,8 @@ void DurationMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     mPastBuckets.clear();
 }
 
-void DurationMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
-    uint64_t currentBucketEndTimeNs = getCurrentBucketEndTimeNs();
+void DurationMetricProducer::flushIfNeededLocked(const int64_t& eventTimeNs) {
+    int64_t currentBucketEndTimeNs = getCurrentBucketEndTimeNs();
 
     if (currentBucketEndTimeNs > eventTimeNs) {
         return;
@@ -522,7 +522,7 @@ void DurationMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
     mCurrentBucketNum += numBucketsForward;
 }
 
-void DurationMetricProducer::flushCurrentBucketLocked(const uint64_t& eventTimeNs) {
+void DurationMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
     for (auto whatIt = mCurrentSlicedDurationTrackerMap.begin();
             whatIt != mCurrentSlicedDurationTrackerMap.end();) {
         for (auto it = whatIt->second.begin(); it != whatIt->second.end();) {
@@ -644,7 +644,7 @@ void DurationMetricProducer::onMatchedLogEventInternalLocked(
 
 void DurationMetricProducer::onMatchedLogEventLocked(const size_t matcherIndex,
                                                      const LogEvent& event) {
-    uint64_t eventTimeNs = event.GetElapsedTimestampNs();
+    int64_t eventTimeNs = event.GetElapsedTimestampNs();
     if (eventTimeNs < mStartTimeNs) {
         return;
     }

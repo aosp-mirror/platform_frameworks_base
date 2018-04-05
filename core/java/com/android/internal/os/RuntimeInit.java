@@ -34,6 +34,7 @@ import dalvik.system.VMRuntime;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.logging.LogManager;
 import org.apache.harmony.luni.internal.util.TimezoneGetter;
@@ -67,8 +68,12 @@ public class RuntimeInit {
      * but apps can override that behavior.
      */
     private static class LoggingHandler implements Thread.UncaughtExceptionHandler {
+        public volatile boolean mTriggered = false;
+
         @Override
         public void uncaughtException(Thread t, Throwable e) {
+            mTriggered = true;
+
             // Don't re-enter if KillApplicationHandler has already run
             if (mCrashing) return;
 
@@ -96,12 +101,33 @@ public class RuntimeInit {
     /**
      * Handle application death from an uncaught exception.  The framework
      * catches these for the main threads, so this should only matter for
-     * threads created by applications.  Before this method runs,
-     * {@link LoggingHandler} will already have logged details.
+     * threads created by applications. Before this method runs, the given
+     * instance of {@link LoggingHandler} should already have logged details
+     * (and if not it is run first).
      */
     private static class KillApplicationHandler implements Thread.UncaughtExceptionHandler {
+        private final LoggingHandler mLoggingHandler;
+
+        /**
+         * Create a new KillApplicationHandler that follows the given LoggingHandler.
+         * If {@link #uncaughtException(Thread, Throwable) uncaughtException} is called
+         * on the created instance without {@code loggingHandler} having been triggered,
+         * {@link LoggingHandler#uncaughtException(Thread, Throwable)
+         * loggingHandler.uncaughtException} will be called first.
+         *
+         * @param loggingHandler the {@link LoggingHandler} expected to have run before
+         *     this instance's {@link #uncaughtException(Thread, Throwable) uncaughtException}
+         *     is being called.
+         */
+        public KillApplicationHandler(LoggingHandler loggingHandler) {
+            this.mLoggingHandler = Objects.requireNonNull(loggingHandler);
+        }
+
+        @Override
         public void uncaughtException(Thread t, Throwable e) {
             try {
+                ensureLogging(t, e);
+
                 // Don't re-enter -- avoid infinite loops if crash-reporting crashes.
                 if (mCrashing) return;
                 mCrashing = true;
@@ -132,6 +158,33 @@ public class RuntimeInit {
                 System.exit(10);
             }
         }
+
+        /**
+         * Ensures that the logging handler has been triggered.
+         *
+         * See b/73380984. This reinstates the pre-O behavior of
+         *
+         *   {@code thread.getUncaughtExceptionHandler().uncaughtException(thread, e);}
+         *
+         * logging the exception (in addition to killing the app). This behavior
+         * was never documented / guaranteed but helps in diagnostics of apps
+         * using the pattern.
+         *
+         * If this KillApplicationHandler is invoked the "regular" way (by
+         * {@link Thread#dispatchUncaughtException(Throwable)
+         * Thread.dispatchUncaughtException} in case of an uncaught exception)
+         * then the pre-handler (expected to be {@link #mLoggingHandler}) will already
+         * have run. Otherwise, we manually invoke it here.
+         */
+        private void ensureLogging(Thread t, Throwable e) {
+            if (!mLoggingHandler.mTriggered) {
+                try {
+                    mLoggingHandler.uncaughtException(t, e);
+                } catch (Throwable loggingThrowable) {
+                    // Ignored.
+                }
+            }
+        }
     }
 
     protected static final void commonInit() {
@@ -141,8 +194,9 @@ public class RuntimeInit {
          * set handlers; these apply to all threads in the VM. Apps can replace
          * the default handler, but not the pre handler.
          */
-        Thread.setUncaughtExceptionPreHandler(new LoggingHandler());
-        Thread.setDefaultUncaughtExceptionHandler(new KillApplicationHandler());
+        LoggingHandler loggingHandler = new LoggingHandler();
+        Thread.setUncaughtExceptionPreHandler(loggingHandler);
+        Thread.setDefaultUncaughtExceptionHandler(new KillApplicationHandler(loggingHandler));
 
         /*
          * Install a TimezoneGetter subclass for ZoneInfo.db

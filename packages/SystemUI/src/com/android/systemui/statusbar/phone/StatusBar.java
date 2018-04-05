@@ -2047,11 +2047,19 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     /**
+     * Decides if the status bar (clock + notifications + signal cluster) should be visible
+     * or not when showing the bouncer.
+     *
+     * We want to hide it when:
+     * • User swipes up on the keyguard
+     * • Locked activity that doesn't show a status bar requests the bouncer
+     *
      * @param animate should the change of the icons be animated.
      */
     private void updateHideIconsForBouncer(boolean animate) {
-        boolean shouldHideIconsForBouncer = !mPanelExpanded && mTopHidesStatusBar && mIsOccluded
-                && (mBouncerShowing || mStatusBarWindowHidden);
+        boolean hideBecauseApp = mTopHidesStatusBar && mIsOccluded;
+        boolean hideBecauseKeyguard = !mPanelExpanded && !mIsOccluded && mBouncerShowing;
+        boolean shouldHideIconsForBouncer = hideBecauseApp || hideBecauseKeyguard;
         if (mHideIconsForBouncer != shouldHideIconsForBouncer) {
             mHideIconsForBouncer = shouldHideIconsForBouncer;
             if (!shouldHideIconsForBouncer && mBouncerWasShowingWhenHidden) {
@@ -2290,7 +2298,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             return ;
         }
 
-        mNotificationPanel.expand(true /* animate */);
+        mNotificationPanel.expandWithoutQs();
 
         if (false) postStartTracing();
     }

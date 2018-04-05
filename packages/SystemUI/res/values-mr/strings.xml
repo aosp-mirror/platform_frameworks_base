@@ -74,10 +74,8 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"स्क्रीनशॉट जतन करत आहे…"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"स्क्रीनशॉट सेव्ह केला"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"तुमचा स्क्रीनशॉट पाहण्यासाठी टॅप करा"</string>
-    <!-- no translation found for screenshot_failed_title (7612509838919089748) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_to_save_unknown_text (3637758096565605541) -->
-    <skip />
+    <string name="screenshot_failed_title" msgid="7612509838919089748">"स्क्रीनशॉट सेव्ह करू शकलो नाही"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"स्क्रीनशॉट पुन्हा घेण्याचा प्रयत्न करा"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"मर्यादित स्टोरेज जागेमुळे स्क्रीनशॉट सेव्ह करू शकत नाही"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"अ‍ॅप किंवा आपल्या संस्थेद्वारे स्क्रीनशॉट घेण्याची अनुमती नाही"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB फाईल स्थानांतरण पर्याय"</string>
@@ -348,8 +346,7 @@
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"संध्याकाळी चालू असते"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"सूर्योदयापर्यंत"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> वाजता चालू"</string>
-    <!-- no translation found for quick_settings_secondary_label_until (2749196569462600150) -->
-    <skip />
+    <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> पर्यंत"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC अक्षम केले आहे"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC सक्षम केले आहे"</string>
@@ -433,10 +430,8 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> आपल्‍या स्‍क्रीनवर प्रदर्शित होणारी प्रत्‍येक गोष्‍ट कॅप्‍चर करणे प्रारंभ करेल."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"पुन्हा दर्शवू नका"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"सर्व साफ करा"</string>
-    <!-- no translation found for manage_notifications_text (8035284146227267681) -->
-    <skip />
-    <!-- no translation found for dnd_suppressing_shade_text (5179021215370153526) -->
-    <skip />
+    <string name="manage_notifications_text" msgid="8035284146227267681">"सूचना व्यवस्थापित करा"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"व्यत्यय आणू नका सूचना लपवत आहे"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"आता सुरू करा"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"सूचना नाहीत"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"प्रोफाईलचे परीक्षण केले जाऊ शकते"</string>
@@ -536,6 +531,10 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"रिंग करा"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"कंपन"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"म्युट करा"</string>
+    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
+    <skip />
+    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. सशब्द करण्यासाठी टॅप करा."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. कंपन सेट करण्यासाठी टॅप करा. प्रवेशयोग्यता सेवा नि:शब्द केल्या जाऊ शकतात."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. नि:शब्द करण्यासाठी टॅप करा. प्रवेशक्षमता सेवा नि:शब्द केल्या जाऊ शकतात."</string>
@@ -630,8 +629,7 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"सूचना नियंत्रणे"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"सूचना स्नूझ पर्याय"</string>
-    <!-- no translation found for notification_menu_snooze_action (1112254519029621372) -->
-    <skip />
+    <string name="notification_menu_snooze_action" msgid="1112254519029621372">"स्नूझ करा"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"पूर्ववत करा"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> साठी स्नूझ करा"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
@@ -820,8 +818,7 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"स्क्रीनशॉट"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"सर्वसाधारण संदेश"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"संचय"</string>
-    <!-- no translation found for notification_channel_hints (7323870212489152689) -->
-    <skip />
+    <string name="notification_channel_hints" msgid="7323870212489152689">"सूचना"</string>
     <string name="instant_apps" msgid="6647570248119804907">"इन्सटंट अ‍ॅप्स"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"इन्सटंट अॅप्सना स्थापनेची आवश्यकता नसते."</string>
     <string name="app_info" msgid="6856026610594615344">"अॅप माहिती"</string>
@@ -849,18 +846,11 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"<xliff:g id="APP">%1$s</xliff:g> ला कुठल्याही अ‍ॅपमधील तुकडे दाखवण्याची अनुमती द्या"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"अनुमती द्या"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"नकार द्या"</string>
-    <!-- no translation found for auto_saver_title (1217959994732964228) -->
-    <skip />
-    <!-- no translation found for auto_saver_text (6324376061044218113) -->
-    <skip />
-    <!-- no translation found for no_auto_saver_action (8086002101711328500) -->
-    <skip />
-    <!-- no translation found for auto_saver_enabled_title (6726474226058316862) -->
-    <skip />
-    <!-- no translation found for auto_saver_enabled_text (874711029884777579) -->
-    <skip />
-    <!-- no translation found for open_saver_setting_action (8314624730997322529) -->
-    <skip />
-    <!-- no translation found for auto_saver_okay_action (2701221740227683650) -->
-    <skip />
+    <string name="auto_saver_title" msgid="1217959994732964228">"बॅटरी बचतकर्ता शेड्यूल करण्यासाठी टॅप करा"</string>
+    <string name="auto_saver_text" msgid="6324376061044218113">"बॅटरी <xliff:g id="PERCENTAGE">%d</xliff:g>%% असताना आपोआप सुरू करा"</string>
+    <string name="no_auto_saver_action" msgid="8086002101711328500">"नाही नको"</string>
+    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"बॅटरी बचतकर्ता शेड्यूल सुरू केले आहे"</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"बॅटरी <xliff:g id="PERCENTAGE">%d</xliff:g>%% पेक्षा खाली गेल्यास बॅटरी सेव्हर आपोआप सुरू होईल."</string>
+    <string name="open_saver_setting_action" msgid="8314624730997322529">"सेटिंग्ज"</string>
+    <string name="auto_saver_okay_action" msgid="2701221740227683650">"समजले"</string>
 </resources>

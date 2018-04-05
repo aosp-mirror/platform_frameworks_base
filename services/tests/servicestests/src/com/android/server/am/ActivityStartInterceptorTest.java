@@ -34,11 +34,13 @@ import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.support.test.filters.SmallTest;
+import android.testing.DexmakerShareClassLoaderRule;
 
 import com.android.internal.app.UnlaunchableAppActivity;
 import com.android.server.LocalServices;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -64,6 +66,10 @@ public class ActivityStartInterceptorTest {
             0 /* flags */);
     private static final String TEST_PACKAGE_NAME = "com.test.package";
 
+    @Rule
+    public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
+            new DexmakerShareClassLoaderRule();
+
     @Mock
     private Context mContext;
     @Mock
@@ -84,9 +90,6 @@ public class ActivityStartInterceptorTest {
 
     @Before
     public void setUp() {
-        // This property is used to allow mocking of package private classes with mockito
-        System.setProperty("dexmaker.share_classloader", "true");
-
         MockitoAnnotations.initMocks(this);
         mInterceptor = new ActivityStartInterceptor(mService, mSupervisor, mContext,
                 mUserController);

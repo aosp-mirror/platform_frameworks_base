@@ -36,9 +36,9 @@ namespace statsd {
 const ConfigKey kConfigKey(0, 12345);
 
 TEST(EventMetricProducerTest, TestNoCondition) {
-    uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
-    uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t eventStartTimeNs = bucketStartTimeNs + 1;
+    int64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
     EventMetric metric;
     metric.set_id(1);
@@ -59,9 +59,9 @@ TEST(EventMetricProducerTest, TestNoCondition) {
 }
 
 TEST(EventMetricProducerTest, TestEventsWithNonSlicedCondition) {
-    uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t eventStartTimeNs = bucketStartTimeNs + 1;
-    uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t eventStartTimeNs = bucketStartTimeNs + 1;
+    int64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
     EventMetric metric;
     metric.set_id(1);
@@ -86,8 +86,8 @@ TEST(EventMetricProducerTest, TestEventsWithNonSlicedCondition) {
 }
 
 TEST(EventMetricProducerTest, TestEventsWithSlicedCondition) {
-    uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
 
     int tagId = 1;
     int conditionTagId = 2;

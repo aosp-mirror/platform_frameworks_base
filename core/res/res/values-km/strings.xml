@@ -1013,8 +1013,9 @@
     <string name="email_desc" msgid="3638665569546416795">"ផ្ញើ​អ៊ីមែល​ទៅ​អាសយដ្ឋាន​ដែល​បាន​ជ្រើសរើស"</string>
     <string name="dial" msgid="1253998302767701559">"ហៅទូរសព្ទ"</string>
     <string name="dial_desc" msgid="6573723404985517250">"ហៅ​ទូរសព្ទ​ទៅ​លេខ​ដែល​បាន​ជ្រើសរើស"</string>
-    <string name="map" msgid="6521159124535543457">"កំណត់ទីតាំង"</string>
-    <string name="map_desc" msgid="9036645769910215302">"កំណត់​ទីតាំង​អាសយដ្ឋាន​ដែល​បាន​ជ្រើសរើស"</string>
+    <string name="map" msgid="5441053548030107189">"ផែនទី"</string>
+    <!-- no translation found for map_desc (1836995341943772348) -->
+    <skip />
     <string name="browse" msgid="1245903488306147205">"បើក"</string>
     <string name="browse_desc" msgid="8220976549618935044">"បើក URL ដែល​បាន​ជ្រើសរើស"</string>
     <string name="sms" msgid="4560537514610063430">"សារ"</string>

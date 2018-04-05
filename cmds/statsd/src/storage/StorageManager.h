@@ -74,6 +74,13 @@ public:
     static void readConfigFromDisk(std::map<ConfigKey, StatsdConfig>& configsMap);
 
     /**
+     * Call to load the specified config from disk. Returns false if the config file does not
+     * exist or error occurs when reading the file.
+     */
+    static bool readConfigFromDisk(const ConfigKey& key, StatsdConfig* config);
+    static bool readConfigFromDisk(const ConfigKey& key, string* config);
+
+    /**
      * Trims files in the provided directory to limit the total size, number of
      * files, accumulation of outdated files.
      */

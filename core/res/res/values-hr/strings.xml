@@ -1033,8 +1033,9 @@
     <string name="email_desc" msgid="3638665569546416795">"Slanje e-poruke na odabranu adresu"</string>
     <string name="dial" msgid="1253998302767701559">"Poziv"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Pozivanje odabranog telefonskog broja"</string>
-    <string name="map" msgid="6521159124535543457">"Lociraj"</string>
-    <string name="map_desc" msgid="9036645769910215302">"Prikaz odabrane adrese na karti"</string>
+    <string name="map" msgid="5441053548030107189">"Karta"</string>
+    <!-- no translation found for map_desc (1836995341943772348) -->
+    <skip />
     <string name="browse" msgid="1245903488306147205">"Otvori"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Otvaranje odabranog URL-a"</string>
     <string name="sms" msgid="4560537514610063430">"Poruka"</string>

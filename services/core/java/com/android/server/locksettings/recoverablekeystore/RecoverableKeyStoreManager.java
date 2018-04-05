@@ -47,12 +47,12 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.Preconditions;
-import com.android.server.locksettings.recoverablekeystore.certificate.CertUtils;
-import com.android.server.locksettings.recoverablekeystore.certificate.SigXml;
-import com.android.server.locksettings.recoverablekeystore.storage.ApplicationKeyStorage;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertParsingException;
+import com.android.server.locksettings.recoverablekeystore.certificate.CertUtils;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertValidationException;
 import com.android.server.locksettings.recoverablekeystore.certificate.CertXml;
+import com.android.server.locksettings.recoverablekeystore.certificate.SigXml;
+import com.android.server.locksettings.recoverablekeystore.storage.ApplicationKeyStorage;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySessionStorage;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
@@ -296,20 +296,6 @@ public class RecoverableKeyStoreManager {
         }
 
         initRecoveryService(rootCertificateAlias, recoveryServiceCertFile);
-    }
-
-    private PublicKey parseEcPublicKey(@NonNull byte[] bytes) throws ServiceSpecificException {
-        try {
-            KeyFactory kf = KeyFactory.getInstance("EC");
-            X509EncodedKeySpec pkSpec = new X509EncodedKeySpec(bytes);
-            return kf.generatePublic(pkSpec);
-        } catch (NoSuchAlgorithmException e) {
-            Log.wtf(TAG, "EC algorithm not available. AOSP must support this.", e);
-            throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
-        } catch (InvalidKeySpecException e) {
-            throw new ServiceSpecificException(
-                    ERROR_BAD_CERTIFICATE_FORMAT, "Not a valid X509 certificate.");
-        }
     }
 
     /**
@@ -749,8 +735,6 @@ public class RecoverableKeyStoreManager {
 
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
-
-        // TODO: Refactor RecoverableKeyGenerator to wrap the PlatformKey logic
 
         PlatformEncryptionKey encryptionKey;
         try {

@@ -1013,8 +1013,9 @@
     <string name="email_desc" msgid="3638665569546416795">"Envía un correo electrónico ao enderezo seleccionado"</string>
     <string name="dial" msgid="1253998302767701559">"Chamar"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Chama ao número de teléfono seleccionado"</string>
-    <string name="map" msgid="6521159124535543457">"Localizar"</string>
-    <string name="map_desc" msgid="9036645769910215302">"Localiza o enderezo seleccionado"</string>
+    <string name="map" msgid="5441053548030107189">"Mapa"</string>
+    <!-- no translation found for map_desc (1836995341943772348) -->
+    <skip />
     <string name="browse" msgid="1245903488306147205">"Abrir"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Abre o URL seleccionado"</string>
     <string name="sms" msgid="4560537514610063430">"Mensaxe"</string>
@@ -1024,7 +1025,7 @@
     <string name="view_calendar" msgid="979609872939597838">"Ver"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Consulta a hora seleccionada no calendario"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"Programar"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Programa o evento para a hora seleccionada"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Programa un evento para unha data seleccionada"</string>
     <string name="view_flight" msgid="7691640491425680214">"Realizar seguimento"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"Fai un seguimento do voo seleccionado"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Estase esgotando o espazo de almacenamento"</string>

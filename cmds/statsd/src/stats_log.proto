@@ -234,6 +234,7 @@ message StatsdStatsReport {
         optional int64 id = 2;
         optional int32 creation_time_sec = 3;
         optional int32 deletion_time_sec = 4;
+        optional int32 reset_time_sec = 19;
         optional int32 metric_count = 5;
         optional int32 condition_count = 6;
         optional int32 matcher_count = 7;

@@ -95,7 +95,7 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
                                     Overlayable{}, test::GetDiagnostics()));
 
   pb::ResourceTable pb_table;
-  SerializeTableToPb(*table, &pb_table);
+  SerializeTableToPb(*table, &pb_table, context->GetDiagnostics());
 
   test::TestFile file_a("res/layout/main.xml");
   MockFileCollection files;
@@ -255,6 +255,7 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeXml) {
 }
 
 TEST(ProtoSerializeTest, SerializeAndDeserializePrimitives) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
           .AddValue("android:bool/boolean_true",
@@ -274,7 +275,7 @@ TEST(ProtoSerializeTest, SerializeAndDeserializePrimitives) {
           .Build();
 
   pb::ResourceTable pb_table;
-  SerializeTableToPb(*table, &pb_table);
+  SerializeTableToPb(*table, &pb_table, context->GetDiagnostics());
 
   test::TestFile file_a("res/layout/main.xml");
   MockFileCollection files;

@@ -197,8 +197,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"സജീവമായി തുടരുക"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"ചാർജ്ജുചെയ്യുമ്പോൾ സ്‌ക്രീൻ ഒരിക്കലും സുഷുപ്തിയിലാകില്ല"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ബ്ലൂടൂത്ത് HCI സ്‌നൂപ്പ് ലോഗ് സജീവമാക്കൂ"</string>
-    <!-- no translation found for bt_hci_snoop_log_summary (366083475849911315) -->
-    <skip />
+    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"എല്ലാ Bluetooth HCI പാക്കറ്റുകളും ഒരു ഫയലിൽ ക്യാപ്‌ചർ ചെയ്യുക (ഈ ക്രമീകരണം മാറ്റിയ ശേഷം Bluetooth മാറ്റുക)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM അൺലോക്കുചെയ്യൽ"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"അൺലോക്കാകാൻ ബൂട്ട്‌ലോഡറിനെ അനുവദിക്കുക"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM അൺലോക്കുചെയ്യൽ അനുവദിക്കണോ?"</string>

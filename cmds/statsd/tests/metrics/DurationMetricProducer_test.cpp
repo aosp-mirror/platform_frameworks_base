@@ -41,7 +41,7 @@ const ConfigKey kConfigKey(0, 12345);
 
 TEST(DurationMetricTrackerTest, TestNoCondition) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-    uint64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketStartTimeNs = 10000000000;
     int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
 
     DurationMetric metric;
@@ -71,15 +71,15 @@ TEST(DurationMetricTrackerTest, TestNoCondition) {
     EXPECT_EQ(2UL, buckets.size());
     EXPECT_EQ(bucketStartTimeNs, buckets[0].mBucketStartNs);
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, buckets[0].mBucketEndNs);
-    EXPECT_EQ(bucketSizeNs - 1ULL, buckets[0].mDuration);
+    EXPECT_EQ(bucketSizeNs - 1LL, buckets[0].mDuration);
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, buckets[1].mBucketStartNs);
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs, buckets[1].mBucketEndNs);
-    EXPECT_EQ(2ULL, buckets[1].mDuration);
+    EXPECT_EQ(2LL, buckets[1].mDuration);
 }
 
 TEST(DurationMetricTrackerTest, TestNonSlicedCondition) {
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-    uint64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketStartTimeNs = 10000000000;
     int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
 
     DurationMetric metric;
@@ -122,7 +122,7 @@ TEST(DurationMetricTrackerTest, TestNonSlicedCondition) {
     EXPECT_EQ(1UL, buckets2.size());
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, buckets2[0].mBucketStartNs);
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs, buckets2[0].mBucketEndNs);
-    EXPECT_EQ(1ULL, buckets2[0].mDuration);
+    EXPECT_EQ(1LL, buckets2[0].mDuration);
 }
 
 TEST(DurationMetricTrackerTest, TestSumDurationWithUpgrade) {
@@ -135,11 +135,11 @@ TEST(DurationMetricTrackerTest, TestSumDurationWithUpgrade) {
      *  - [70,130]: All 60 secs
      *  - [130, 210]: Only 5 secs (event ended at 135sec)
      */
-    uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
-    uint64_t eventUpgradeTimeNs = bucketStartTimeNs + 15 * NS_PER_SEC;
-    uint64_t startTimeNs = bucketStartTimeNs + 1 * NS_PER_SEC;
-    uint64_t endTimeNs = startTimeNs + 125 * NS_PER_SEC;
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
+    int64_t eventUpgradeTimeNs = bucketStartTimeNs + 15 * NS_PER_SEC;
+    int64_t startTimeNs = bucketStartTimeNs + 1 * NS_PER_SEC;
+    int64_t endTimeNs = startTimeNs + 125 * NS_PER_SEC;
 
     int tagId = 1;
 
@@ -190,11 +190,11 @@ TEST(DurationMetricTrackerTest, TestSumDurationWithUpgradeInFollowingBucket) {
      *  - [70,75]: 5 sec
      *  - [75,130]: 55 secs
      */
-    uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
-    uint64_t eventUpgradeTimeNs = bucketStartTimeNs + 65 * NS_PER_SEC;
-    uint64_t startTimeNs = bucketStartTimeNs + 1 * NS_PER_SEC;
-    uint64_t endTimeNs = startTimeNs + 125 * NS_PER_SEC;
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
+    int64_t eventUpgradeTimeNs = bucketStartTimeNs + 65 * NS_PER_SEC;
+    int64_t startTimeNs = bucketStartTimeNs + 1 * NS_PER_SEC;
+    int64_t endTimeNs = startTimeNs + 125 * NS_PER_SEC;
 
     int tagId = 1;
 
@@ -240,11 +240,11 @@ TEST(DurationMetricTrackerTest, TestSumDurationWithUpgradeInFollowingBucket) {
 
 TEST(DurationMetricTrackerTest, TestSumDurationAnomalyWithUpgrade) {
     sp<AlarmMonitor> alarmMonitor;
-    uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
-    uint64_t eventUpgradeTimeNs = bucketStartTimeNs + 15 * NS_PER_SEC;
-    uint64_t startTimeNs = bucketStartTimeNs + 1;
-    uint64_t endTimeNs = startTimeNs + 65 * NS_PER_SEC;
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
+    int64_t eventUpgradeTimeNs = bucketStartTimeNs + 15 * NS_PER_SEC;
+    int64_t startTimeNs = bucketStartTimeNs + 1;
+    int64_t endTimeNs = startTimeNs + 65 * NS_PER_SEC;
 
     int tagId = 1;
 
@@ -277,15 +277,15 @@ TEST(DurationMetricTrackerTest, TestSumDurationAnomalyWithUpgrade) {
     durationProducer.onMatchedLogEvent(2 /* stop index*/, end_event);
 
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs - startTimeNs,
-              (uint64_t)anomalyTracker->getSumOverPastBuckets(DEFAULT_METRIC_DIMENSION_KEY));
+              anomalyTracker->getSumOverPastBuckets(DEFAULT_METRIC_DIMENSION_KEY));
 }
 
 TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgrade) {
-    uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
-    uint64_t eventUpgradeTimeNs = bucketStartTimeNs + 15 * NS_PER_SEC;
-    uint64_t startTimeNs = bucketStartTimeNs + 1;
-    uint64_t endTimeNs = startTimeNs + 125 * NS_PER_SEC;
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
+    int64_t eventUpgradeTimeNs = bucketStartTimeNs + 15 * NS_PER_SEC;
+    int64_t startTimeNs = bucketStartTimeNs + 1;
+    int64_t endTimeNs = startTimeNs + 125 * NS_PER_SEC;
 
     int tagId = 1;
 
@@ -329,11 +329,11 @@ TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgrade) {
 }
 
 TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgradeInNextBucket) {
-    uint64_t bucketStartTimeNs = 10000000000;
-    uint64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
-    uint64_t eventUpgradeTimeNs = bucketStartTimeNs + 65 * NS_PER_SEC;
-    uint64_t startTimeNs = bucketStartTimeNs + 1;
-    uint64_t endTimeNs = startTimeNs + 115 * NS_PER_SEC;
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
+    int64_t eventUpgradeTimeNs = bucketStartTimeNs + 65 * NS_PER_SEC;
+    int64_t startTimeNs = bucketStartTimeNs + 1;
+    int64_t endTimeNs = startTimeNs + 115 * NS_PER_SEC;
 
     int tagId = 1;
 

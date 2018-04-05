@@ -197,7 +197,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"ဖွင့်လျက်သား"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"အားသွင်းနေစဉ် ဖန်သားပြင်မှာဘယ်သောအခါမှ ပိတ်မည်မဟုတ်ပါ။"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"ဘလူးတုသ် HCI snoop မှတ်တမ်းကို ဖွင့်ရန်။"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"ဖိုင်တစ်ခုတွင် ဘလူးတုသ် HCI အစုလိုက်များကို ဖမ်းယူရန် (ဤဆက်တင်ကို ပြောင်းပြီးသည့်အခါ ဘလူးတုသ် ဖွင့်/ပိတ် လုပ်ပါ)"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"ဖိုင်တစ်ခုတွင် ဘလူးတုသ် HCI အစုလိုက်များကို သိမ်းယူရန် (ဤဆက်တင်ကို ပြောင်းပြီးသည့်အခါ ဘလူးတုသ် ဖွင့်/ပိတ် လုပ်ပါ)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM သော့ဖွင့်ခြင်း"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"အစပြုခြင်းကိရိယာအား သော့ဖွင့်ရန် ခွင့်ပြုမည်"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"OEM သော့ဖွင့်ခြင်း ခွင့်ပြုမလား?"</string>

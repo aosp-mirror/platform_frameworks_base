@@ -41,8 +41,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Interface for providing text classification related features.
@@ -471,21 +472,15 @@ public interface TextClassifier {
          *
          * This method is intended for use by TextClassifier implementations.
          */
-        public List<String> resolveEntityListModifications(@NonNull Collection<String> entities) {
-            final ArrayList<String> finalList = new ArrayList<>();
+        public Collection<String> resolveEntityListModifications(
+                @NonNull Collection<String> entities) {
+            final Set<String> finalSet = new HashSet();
             if (mUseHints) {
-                for (String entity : entities) {
-                    if (!mExcludedEntityTypes.contains(entity)) {
-                        finalList.add(entity);
-                    }
-                }
+                finalSet.addAll(entities);
             }
-            for (String entity : mIncludedEntityTypes) {
-                if (!mExcludedEntityTypes.contains(entity) && !finalList.contains(entity)) {
-                    finalList.add(entity);
-                }
-            }
-            return finalList;
+            finalSet.addAll(mIncludedEntityTypes);
+            finalSet.removeAll(mExcludedEntityTypes);
+            return finalSet;
         }
 
         /**
@@ -566,7 +561,7 @@ public interface TextClassifier {
             final String string = request.getText().toString();
             final TextLinks.Builder links = new TextLinks.Builder(string);
 
-            final List<String> entities = request.getEntityConfig()
+            final Collection<String> entities = request.getEntityConfig()
                     .resolveEntityListModifications(Collections.emptyList());
             if (entities.contains(TextClassifier.TYPE_URL)) {
                 addLinks(links, string, TextClassifier.TYPE_URL);

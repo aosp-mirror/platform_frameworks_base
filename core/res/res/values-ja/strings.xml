@@ -82,8 +82,7 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"音声通話サービス停止"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"音声サービスと緊急通報のブロック"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"携帯通信会社によって一時的に OFF にされています"</string>
-    <!-- no translation found for RestrictedStateContentMsimTemplate (673416791370248176) -->
-    <skip />
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> は携帯通信会社によって一時的に OFF になっています"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"モバイル ネットワークにアクセスできません"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"タップして、優先ネットワークを変更してください。"</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"緊急通報は利用できません"</string>
@@ -498,8 +497,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"認識されませんでした"</string>
-    <!-- no translation found for fingerprint_authenticated (5309333983002526448) -->
-    <skip />
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"指紋認証を完了しました"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"指紋ハードウェアは使用できません。"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"指紋を保存できません。既存の指紋を削除してください。"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"指紋の読み取りがタイムアウトになりました。もう一度お試しください。"</string>
@@ -1015,8 +1013,9 @@
     <string name="email_desc" msgid="3638665569546416795">"選択したメールアドレスにメールを送信します"</string>
     <string name="dial" msgid="1253998302767701559">"電話"</string>
     <string name="dial_desc" msgid="6573723404985517250">"選択した電話番号に電話をかけます"</string>
-    <string name="map" msgid="6521159124535543457">"探す"</string>
-    <string name="map_desc" msgid="9036645769910215302">"選択した住所を探します"</string>
+    <string name="map" msgid="5441053548030107189">"地図"</string>
+    <!-- no translation found for map_desc (1836995341943772348) -->
+    <skip />
     <string name="browse" msgid="1245903488306147205">"開く"</string>
     <string name="browse_desc" msgid="8220976549618935044">"選択した URL を開きます"</string>
     <string name="sms" msgid="4560537514610063430">"メッセージ"</string>
@@ -1273,49 +1272,34 @@
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g>が他のアプリの上に表示されています"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"<xliff:g id="NAME">%s</xliff:g>でこの機能を使用しない場合は、タップして設定を開いて OFF にしてください。"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"OFF にする"</string>
-    <!-- no translation found for ext_media_checking_notification_title (4411133692439308924) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (410185170877285434) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_title (1621805083736634077) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_message (3673685270558405087) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"<xliff:g id="NAME">%s</xliff:g>を確認しています…"</string>
+    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"現在のコンテンツを確認しています"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"新しい <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"タップして設定してください"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"写真などのメディア転送用"</string>
-    <!-- no translation found for ext_media_unmountable_notification_title (4179418065210797130) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (4193858924381066522) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"<xliff:g id="NAME">%s</xliff:g>に関する問題"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"タップして修正してください"</string>
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g>が破損しています。修正するには選択してください。"</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"対応していない<xliff:g id="NAME">%s</xliff:g>です"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"この端末はこの <xliff:g id="NAME">%s</xliff:g>に対応していません。タップして、対応している形式でセットアップしてください。"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"この端末はこの <xliff:g id="NAME">%s</xliff:g>に対応していません。サポートされるフォーマットで設定するには選択してください。"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>が不適切に取り外されました"</string>
-    <!-- no translation found for ext_media_badremoval_notification_message (8556885808951260574) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (6593814191061956856) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (2110883356419799994) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (5046532339291216076) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (1003926904442321115) -->
-    <skip />
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"コンテンツを消去しないようメディアを取り出してから取り外してください"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g>の取り外し"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"一部の機能が正しく動作しない可能性があります。新しいストレージを挿入してください。"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g>を取り出しています"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"取り外さないでください"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"セットアップ"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"取り外し"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"外部メディア"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g>が見つかりません"</string>
-    <!-- no translation found for ext_media_missing_message (4012389235250987930) -->
-    <skip />
+    <string name="ext_media_missing_message" msgid="4012389235250987930">"デバイスを挿入し直してください"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g>を移動しています"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"データを移動しています"</string>
-    <!-- no translation found for ext_media_move_success_title (7863652232242276066) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (8939137931961728009) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (1604422634177382092) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (7388950499623016135) -->
-    <skip />
+    <string name="ext_media_move_success_title" msgid="7863652232242276066">"コンテンツを転送中"</string>
+    <string name="ext_media_move_success_message" msgid="8939137931961728009">"コンテンツを <xliff:g id="NAME">%s</xliff:g>へ移動"</string>
+    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"コンテンツ移動エラー"</string>
+    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"コンテンツの移動をもう一度行ってください"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"取り外しました"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"取り外しました"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"確認しています…"</string>
@@ -1863,14 +1847,10 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"音声に対応していない SIM です"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"音声を使用できない SIM です"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"音声を使用できないスマートフォンです"</string>
-    <!-- no translation found for mmcc_authentication_reject_msim_template (1217031195834766479) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr_msim_template (5636464607596778986) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms_msim_template (5994323296399913454) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me_msim_template (5550259730350571826) -->
-    <skip />
+    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> を利用できません"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> がプロビジョニングされていません"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> を利用できません"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> を利用できません"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"ポップアップ ウィンドウ"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"他 <xliff:g id="NUMBER">%1$d</xliff:g> 件"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"アプリのバージョンがダウングレードされているか、このショートカットに対応していません"</string>

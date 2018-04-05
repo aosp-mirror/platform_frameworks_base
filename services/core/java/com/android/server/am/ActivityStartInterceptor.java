@@ -21,6 +21,8 @@ import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
+import static android.app.admin.DevicePolicyManager.EXTRA_RESTRICTION;
+import static android.app.admin.DevicePolicyManager.POLICY_SUSPEND_PACKAGES;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.Intent.EXTRA_INTENT;
 import static android.content.Intent.EXTRA_PACKAGE_NAME;
@@ -214,6 +216,8 @@ class ActivityStartInterceptor {
             return false;
         }
         mIntent = devicePolicyManager.createShowAdminSupportIntent(mUserId, true);
+        mIntent.putExtra(EXTRA_RESTRICTION, POLICY_SUSPEND_PACKAGES);
+
         mCallingPid = mRealCallingPid;
         mCallingUid = mRealCallingUid;
         mResolvedType = null;

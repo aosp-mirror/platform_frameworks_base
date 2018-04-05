@@ -489,10 +489,8 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Leidžiama programai perduoti artimojo lauko ryšių technologijos (ALR) žymas, korteles ir skaitymo programas."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"išjungti ekrano užraktą"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Leidžiama programai neleisti klavišo užrakto ir visos susijusios slaptažodžio apsaugos. Pvz., telefonas neleidžia klavišo užrakto priimant gaunamąjį skambutį ir pakartotinai jį įgalina, kai skambutis baigiamas."</string>
-    <!-- no translation found for permlab_useBiometric (8837753668509919318) -->
-    <skip />
-    <!-- no translation found for permdesc_useBiometric (8389855232721612926) -->
-    <skip />
+    <string name="permlab_useBiometric" msgid="8837753668509919318">"naudoti biometrinę aparatinę įrangą"</string>
+    <string name="permdesc_useBiometric" msgid="8389855232721612926">"Leidžiama programai naudoti biometrinę aparatinę įrangą tapatybei nustatyti"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"tvarkyti kontrolinio kodo aparatinę įrangą"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Leidžiama programai aktyvinti metodus, norint pridėti ir ištrinti naudojamus kontrolinių kodų šablonus."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"naudoti kontrolinio kodo aparatinę įrangą"</string>
@@ -1052,32 +1050,24 @@
     <string name="inputMethod" msgid="1653630062304567879">"Įvesties būdas"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Teksto veiksmai"</string>
     <string name="email" msgid="4560673117055050403">"Siųsti el. laišką"</string>
-    <!-- no translation found for email_desc (3638665569546416795) -->
-    <skip />
+    <string name="email_desc" msgid="3638665569546416795">"Siųsti el. laišką pasirinktu adresu"</string>
     <string name="dial" msgid="1253998302767701559">"Skambinti"</string>
-    <!-- no translation found for dial_desc (6573723404985517250) -->
-    <skip />
-    <string name="map" msgid="6521159124535543457">"Rasti"</string>
-    <!-- no translation found for map_desc (9036645769910215302) -->
+    <string name="dial_desc" msgid="6573723404985517250">"Skambinti pasirinktu telefono numeriu"</string>
+    <string name="map" msgid="5441053548030107189">"Žemėlapis"</string>
+    <!-- no translation found for map_desc (1836995341943772348) -->
     <skip />
     <string name="browse" msgid="1245903488306147205">"Atidaryti"</string>
-    <!-- no translation found for browse_desc (8220976549618935044) -->
-    <skip />
+    <string name="browse_desc" msgid="8220976549618935044">"Atidaryti pasirinktą URL"</string>
     <string name="sms" msgid="4560537514610063430">"Pranešimas"</string>
-    <!-- no translation found for sms_desc (7526588350969638809) -->
-    <skip />
+    <string name="sms_desc" msgid="7526588350969638809">"Siųsti pranešimą pasirinktu telefono numeriu"</string>
     <string name="add_contact" msgid="7867066569670597203">"Pridėti"</string>
-    <!-- no translation found for add_contact_desc (4830217847004590345) -->
-    <skip />
+    <string name="add_contact_desc" msgid="4830217847004590345">"Pridėti prie kontaktų"</string>
     <string name="view_calendar" msgid="979609872939597838">"Peržiūrėti"</string>
-    <!-- no translation found for view_calendar_desc (5828320291870344584) -->
-    <skip />
+    <string name="view_calendar_desc" msgid="5828320291870344584">"Peržiūrėti kalendoriuje pasirinktą laiką"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"Tvarkaraštis"</string>
-    <!-- no translation found for add_calendar_event_desc (4326891793260687388) -->
-    <skip />
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Planuoti įvykį pasirinktam laikui"</string>
     <string name="view_flight" msgid="7691640491425680214">"Stebėti"</string>
-    <!-- no translation found for view_flight_desc (3876322502674253506) -->
-    <skip />
+    <string name="view_flight_desc" msgid="3876322502674253506">"Stebėti pasirinktą skrydį"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Mažėja laisvos saugyklos vietos"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Kai kurios sistemos funkcijos gali neveikti"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Sistemos saugykloje nepakanka vietos. Įsitikinkite, kad yra 250 MB laisvos vietos, ir paleiskite iš naujo."</string>

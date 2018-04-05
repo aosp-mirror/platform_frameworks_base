@@ -84,8 +84,7 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Няма сэрвісу галасавых выклікаў"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Галасавыя або экстранныя выклікі недаступныя"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"Часова выключана аператарам сувязі"</string>
-    <!-- no translation found for RestrictedStateContentMsimTemplate (673416791370248176) -->
-    <skip />
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"Часова адключаны для SIM <xliff:g id="SIMNUMBER">%d</xliff:g> аператарам сувязі"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"Сетка мабільнай сувязі недаступная"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Націсніце, каб выбраць іншую сетку."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Экстранныя выклікі недаступныя"</string>
@@ -490,7 +489,7 @@
     <string name="permdesc_nfc" msgid="7120611819401789907">"Дазваляе прыкладаннzv спалучацца з тэгамі, картамі і счытваючымі прыладамі Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"адключэнне блакiроўкi экрана"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Дазваляе прыкладанням адключаць блакiроўку клавіятуры і любыя сродкі абароны, звязаныя з паролем. Прыкладам гэтага з\'яўляецца адключэнне тэлефонам блакiроўкi клавіятуры пры атрыманні ўваходнага выкліку і паўторнае ўключэнне блакiроўкi клавіятуры, калі выклік завершаны."</string>
-    <string name="permlab_useBiometric" msgid="8837753668509919318">"выкарыстоўваць біяметрычнае абсталявання"</string>
+    <string name="permlab_useBiometric" msgid="8837753668509919318">"выкарыстоўваць біяметрычнае абсталяванне"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Дазваляе праграме выкарыстоўваць для аўтэнтыфікацыі біяметрычнае абсталяванне"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"кіраваць апаратнымі сродкамі для адбіткаў пальцаў"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Дазваляе праграме выкарыстоўваць спосабы дадання і выдалення шаблонаў адбіткаў пальцаў для выкарыстання."</string>
@@ -504,8 +503,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Не распазнаны"</string>
-    <!-- no translation found for fingerprint_authenticated (5309333983002526448) -->
-    <skip />
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"Адбітак пальца распазнаны"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Апаратныя сродкі адбіткаў пальцаў недаступныя."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Адбіткі пальцаў нельга захаваць. Выдаліце існы адбітак."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Час чакання адбіткаў пальцаў выйшаў. Паспрабуйце яшчэ раз."</string>
@@ -1052,15 +1050,16 @@
     <string name="inputMethod" msgid="1653630062304567879">"Метад уводу"</string>
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Дзеянні з тэкстам"</string>
     <string name="email" msgid="4560673117055050403">"Электронная пошта"</string>
-    <string name="email_desc" msgid="3638665569546416795">"Напісаць электронны ліст"</string>
+    <string name="email_desc" msgid="3638665569546416795">"Напісаць электронны ліст на выбраны адрас"</string>
     <string name="dial" msgid="1253998302767701559">"Выклікаць"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Звязацца з абанентам"</string>
-    <string name="map" msgid="6521159124535543457">"Знайсці"</string>
-    <string name="map_desc" msgid="9036645769910215302">"Паказаць адрас на карце"</string>
+    <string name="map" msgid="5441053548030107189">"Карта"</string>
+    <!-- no translation found for map_desc (1836995341943772348) -->
+    <skip />
     <string name="browse" msgid="1245903488306147205">"Адкрыць"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Адкрыць URL у браўзеры"</string>
     <string name="sms" msgid="4560537514610063430">"Паведамленне"</string>
-    <string name="sms_desc" msgid="7526588350969638809">"Адправіць паведамленне"</string>
+    <string name="sms_desc" msgid="7526588350969638809">"Адправіць паведамленне на выбраны нумар"</string>
     <string name="add_contact" msgid="7867066569670597203">"Дадаць"</string>
     <string name="add_contact_desc" msgid="4830217847004590345">"Дадаць у кантакты"</string>
     <string name="view_calendar" msgid="979609872939597838">"Прагледзець"</string>
@@ -1317,49 +1316,34 @@
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> паказв. паверх іншых праграм"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Калі вы не хочаце, каб праграма <xliff:g id="NAME">%s</xliff:g> выкарыстоўвала гэту функцыю, дакраніцеся, каб адкрыць налады і адключыць гэта."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Выключыць"</string>
-    <!-- no translation found for ext_media_checking_notification_title (4411133692439308924) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (410185170877285434) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_title (1621805083736634077) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_message (3673685270558405087) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"Правяраецца носьбіт <xliff:g id="NAME">%s</xliff:g>…"</string>
+    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"Правяраецца змесціва"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"Знойдзена новая прылада: <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"Дакраніцеся, каб наладзіць"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Для перадачы фатаграфій і медыяфайлаў"</string>
-    <!-- no translation found for ext_media_unmountable_notification_title (4179418065210797130) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (4193858924381066522) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"Праблема з носьбітам <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"Націсніце, каб выправіць"</string>
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"Носьбіт <xliff:g id="NAME">%s</xliff:g> пашкоджаны. Выберыце, каб выправіць."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> не падтрымліваецца"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Гэта прылада не падтрымлівае носьбіт <xliff:g id="NAME">%s</xliff:g>. Дакраніцеся, каб наладзіць яго ў фармаце, які падтрымліваецца."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Гэта прылада не падтрымлівае носьбіт <xliff:g id="NAME">%s</xliff:g>. Выберыце, каб наладзіць яго ў фармаце, які падтрымліваецца."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Носьбіт <xliff:g id="NAME">%s</xliff:g> нечакана выняты"</string>
-    <!-- no translation found for ext_media_badremoval_notification_message (8556885808951260574) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (6593814191061956856) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (2110883356419799994) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (5046532339291216076) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (1003926904442321115) -->
-    <skip />
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"Адключыце носьбіт перад тым, як дастаць яго, каб не страціць змесціва"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"Носьбіт <xliff:g id="NAME">%s</xliff:g> прыбралі"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Некаторыя функцыі могуць кепска працаваць. Устаўце новае сховішча."</string>
+    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g> адключаецца"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"Не даставайце носьбіт"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"Наладзіць"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Выняць"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Праглядзець"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> адсутнічае"</string>
-    <!-- no translation found for ext_media_missing_message (4012389235250987930) -->
-    <skip />
+    <string name="ext_media_missing_message" msgid="4012389235250987930">"Устаўце прыладу яшчэ раз"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Перамяшчэнне <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"Перамяшчэнне даных"</string>
-    <!-- no translation found for ext_media_move_success_title (7863652232242276066) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (8939137931961728009) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (1604422634177382092) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (7388950499623016135) -->
-    <skip />
+    <string name="ext_media_move_success_title" msgid="7863652232242276066">"Перадача змесціва завершана"</string>
+    <string name="ext_media_move_success_message" msgid="8939137931961728009">"Змесціва перанесена на сховішча <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"Не ўдалося перамясціць змесціва"</string>
+    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"Паспрабуйце перамясціць змесціва яшчэ раз"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"Носьбіт выдалены"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Носьбіт выняты"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"Праверка..."</string>
@@ -1933,14 +1917,10 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"Няма SIM-карты для дзеянняў з голасам"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"Дзеянні з голасам для гэтай SIM-карты не дапускаюцца"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Дзеянні з голасам для гэтага тэлефона не дапускаюцца"</string>
-    <!-- no translation found for mmcc_authentication_reject_msim_template (1217031195834766479) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr_msim_template (5636464607596778986) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms_msim_template (5994323296399913454) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me_msim_template (5550259730350571826) -->
-    <skip />
+    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"Дзеянні з SIM <xliff:g id="SIMNUMBER">%d</xliff:g> не дазволены"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> адсутнічае"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"Дзеянні з SIM <xliff:g id="SIMNUMBER">%d</xliff:g> не дазволены"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"Дзеянні з SIM <xliff:g id="SIMNUMBER">%d</xliff:g> не дазволены"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Выплыўное акно"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Ярлык адносіцца да старэйшай версіі праграмы або несумяшчальны з ёю"</string>

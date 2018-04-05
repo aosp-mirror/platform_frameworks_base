@@ -242,7 +242,7 @@
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Povećajte nivo Wi-Fi zapisivanja, pokazati po SSID RSSI Wi-Fi Picker"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Nasumično odaberi MAC adresu prilikom povezivanja na Wi-Fi mreže"</string>
     <string name="wifi_metered_label" msgid="4514924227256839725">"S naplatom"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Mreža bez ograničenja"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Mreža bez ograničenja prometa"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Veličine bafera za zapisnik"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Odaberite veličine za Logger prema međumemoriji evidencije"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Želite li izbrisati trajnu pohranu zapisivača?"</string>

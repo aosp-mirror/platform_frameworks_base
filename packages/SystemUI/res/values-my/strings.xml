@@ -531,6 +531,10 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"အသံမြည်သည်"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"တုန်ခါသည်"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"အသံတိတ်သည်"</string>
+    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
+    <skip />
+    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s။ အသံပြန်ဖွင့်ရန် တို့ပါ။"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s။ တုန်ခါမှုကို သတ်မှတ်ရန် တို့ပါ။ အများသုံးစွဲနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s။ အသံပိတ်ရန် တို့ပါ။ အများသုံးစွဲနိုင်မှု ဝန်ဆောင်မှုများကို အသံပိတ်ထားနိုင်ပါသည်။"</string>
@@ -846,7 +850,7 @@
     <string name="auto_saver_text" msgid="6324376061044218113">"ဘက်ထရီ <xliff:g id="PERCENTAGE">%d</xliff:g>%% ရောက်သည့်အခါ အလိုအလျောက် ဖွင့်ပါ"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"မလိုပါ"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"\'ဘက်ထရီ အားထိန်း\' အစီအစဉ် ဖွင့်ထားသည်"</string>
-    <string name="auto_saver_enabled_text" msgid="874711029884777579">"ဘက်ထရီ <xliff:g id="PERCENTAGE">%d</xliff:g>%% အောက် နည်းသွားသည်နှင့် \'ဘက်ထရီ အားထိန်း\' အလိုအလျောက် ဖွင့်ပါမည်။"</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"ဘက်ထရီ <xliff:g id="PERCENTAGE">%d</xliff:g>%% အောက် ရောက်သွားသည်နှင့် \'ဘက်ထရီ အားထိန်း\' အလိုအလျောက် ဖွင့်ပါမည်။"</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"ဆက်တင်များ"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"ရပါပြီ"</string>
 </resources>

@@ -30,6 +30,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.android.server.UiServiceTestCase;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -205,6 +206,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
         assertTrue(mScheduleCalendar.shouldExitForAlarm(1000));
     }
 
+    @Ignore
     @Test
     public void testShouldExitForAlarm_oldAlarm() {
         // Cal: today 2:15pm

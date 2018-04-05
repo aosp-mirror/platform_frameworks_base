@@ -1013,8 +1013,9 @@
     <string name="email_desc" msgid="3638665569546416795">"Enviar um email para o endereço selecionado"</string>
     <string name="dial" msgid="1253998302767701559">"Telefonar"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Telefonar para o número de telefone selecionado"</string>
-    <string name="map" msgid="6521159124535543457">"Localizar"</string>
-    <string name="map_desc" msgid="9036645769910215302">"Localizar o endereço selecionado"</string>
+    <string name="map" msgid="5441053548030107189">"Mapa"</string>
+    <!-- no translation found for map_desc (1836995341943772348) -->
+    <skip />
     <string name="browse" msgid="1245903488306147205">"Abrir"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Abrir o URL selecionado"</string>
     <string name="sms" msgid="4560537514610063430">"Mensagem"</string>

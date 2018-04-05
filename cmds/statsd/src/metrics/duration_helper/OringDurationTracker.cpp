@@ -27,8 +27,8 @@ using std::pair;
 OringDurationTracker::OringDurationTracker(
         const ConfigKey& key, const int64_t& id, const MetricDimensionKey& eventKey,
         sp<ConditionWizard> wizard, int conditionIndex, const vector<Matcher>& dimensionInCondition,
-        bool nesting, uint64_t currentBucketStartNs, uint64_t currentBucketNum,
-        uint64_t startTimeNs, uint64_t bucketSizeNs, bool conditionSliced, bool fullLink,
+        bool nesting, int64_t currentBucketStartNs, int64_t currentBucketNum,
+        int64_t startTimeNs, int64_t bucketSizeNs, bool conditionSliced, bool fullLink,
         const vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
     : DurationTracker(key, id, eventKey, wizard, conditionIndex, dimensionInCondition, nesting,
                       currentBucketStartNs, currentBucketNum, startTimeNs, bucketSizeNs,
@@ -42,7 +42,7 @@ OringDurationTracker::OringDurationTracker(
     }
 }
 
-unique_ptr<DurationTracker> OringDurationTracker::clone(const uint64_t eventTime) {
+unique_ptr<DurationTracker> OringDurationTracker::clone(const int64_t eventTime) {
     auto clonedTracker = make_unique<OringDurationTracker>(*this);
     clonedTracker->mLastStartTime = eventTime;
     clonedTracker->mDuration = 0;
@@ -69,7 +69,7 @@ bool OringDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
 }
 
 void OringDurationTracker::noteStart(const HashableDimensionKey& key, bool condition,
-                                     const uint64_t eventTime, const ConditionKey& conditionKey) {
+                                     const int64_t eventTime, const ConditionKey& conditionKey) {
     if (hitGuardRail(key)) {
         return;
     }
@@ -90,7 +90,7 @@ void OringDurationTracker::noteStart(const HashableDimensionKey& key, bool condi
     VLOG("Oring: %s start, condition %d", key.toString().c_str(), condition);
 }
 
-void OringDurationTracker::noteStop(const HashableDimensionKey& key, const uint64_t timestamp,
+void OringDurationTracker::noteStop(const HashableDimensionKey& key, const int64_t timestamp,
                                     const bool stopAll) {
     VLOG("Oring: %s stop", key.toString().c_str());
     auto it = mStarted.find(key);
@@ -121,7 +121,7 @@ void OringDurationTracker::noteStop(const HashableDimensionKey& key, const uint6
     }
 }
 
-void OringDurationTracker::noteStopAll(const uint64_t timestamp) {
+void OringDurationTracker::noteStopAll(const int64_t timestamp) {
     if (!mStarted.empty()) {
         mDuration += (timestamp - mLastStartTime);
         VLOG("Oring Stop all: record duration %lld %lld ", (long long)timestamp - mLastStartTime,
@@ -136,7 +136,7 @@ void OringDurationTracker::noteStopAll(const uint64_t timestamp) {
 }
 
 bool OringDurationTracker::flushCurrentBucket(
-        const uint64_t& eventTimeNs,
+        const int64_t& eventTimeNs,
         std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>>* output) {
     VLOG("OringDurationTracker Flushing.............");
 
@@ -144,8 +144,8 @@ bool OringDurationTracker::flushCurrentBucket(
     // MetricProducer#notifyAppUpgrade.
 
     int numBucketsForward = 0;
-    uint64_t fullBucketEnd = getCurrentBucketEndTimeNs();
-    uint64_t currentBucketEndTimeNs;
+    int64_t fullBucketEnd = getCurrentBucketEndTimeNs();
+    int64_t currentBucketEndTimeNs;
 
     if (eventTimeNs >= fullBucketEnd) {
         numBucketsForward = 1 + (eventTimeNs - fullBucketEnd) / mBucketSizeNs;
@@ -207,7 +207,7 @@ bool OringDurationTracker::flushCurrentBucket(
 }
 
 bool OringDurationTracker::flushIfNeeded(
-        uint64_t eventTimeNs, unordered_map<MetricDimensionKey, vector<DurationBucket>>* output) {
+        int64_t eventTimeNs, unordered_map<MetricDimensionKey, vector<DurationBucket>>* output) {
     if (eventTimeNs < getCurrentBucketEndTimeNs()) {
         return false;
     }
@@ -215,7 +215,7 @@ bool OringDurationTracker::flushIfNeeded(
 }
 
 void OringDurationTracker::onSlicedConditionMayChange(bool overallCondition,
-                                                      const uint64_t timestamp) {
+                                                      const int64_t timestamp) {
     vector<pair<HashableDimensionKey, int>> startedToPaused;
     vector<pair<HashableDimensionKey, int>> pausedToStarted;
     if (!mStarted.empty()) {
@@ -297,7 +297,7 @@ void OringDurationTracker::onSlicedConditionMayChange(bool overallCondition,
     }
 }
 
-void OringDurationTracker::onConditionChanged(bool condition, const uint64_t timestamp) {
+void OringDurationTracker::onConditionChanged(bool condition, const int64_t timestamp) {
     if (condition) {
         if (!mPaused.empty()) {
             VLOG("Condition true, all started");

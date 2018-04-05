@@ -534,6 +534,10 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Zvono"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Vibriranje"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Isključi zvuk"</string>
+    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
+    <skip />
+    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
+    <skip />
     <!-- String.format failed for translation -->
     <!-- no translation found for volume_stream_content_description_unmute (4436631538779230857) -->
     <skip />
@@ -852,7 +856,7 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Dozvoli"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Odbij"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Dodirnite da zakažete Uštedu baterije"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"Automatski uključite kada je baterija ispod <xliff:g id="PERCENTAGE">%d</xliff:g>%%"</string>
+    <string name="auto_saver_text" msgid="6324376061044218113">"Automatski uključiti kada je baterija ispod <xliff:g id="PERCENTAGE">%d</xliff:g>%%"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Ne, hvala"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Zakazivanje Uštede baterije je uključeno"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Kada je baterija ispod <xliff:g id="PERCENTAGE">%d</xliff:g>%%, Ušteda baterije se automatski uključuje."</string>
