@@ -306,17 +306,6 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         mIconGroups.forEach(l -> l.onSetIconHolder(viewIndex, holder));
     }
 
-    /**
-     * For mobile essentially (an array of holders in one slot)
-     */
-    private void handleSet(int slotIndex, List<StatusBarIconHolder> holders) {
-        for (StatusBarIconHolder holder : holders) {
-            int viewIndex = getViewIndex(slotIndex, holder.getTag());
-            mIconLogger.onIconVisibility(getSlotName(slotIndex), holder.isVisible());
-            mIconGroups.forEach(l -> l.onSetIconHolder(viewIndex, holder));
-        }
-    }
-
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(TAG + " state:");
