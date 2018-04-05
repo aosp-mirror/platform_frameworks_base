@@ -213,6 +213,7 @@ import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.UnlockMethodCache.OnUnlockMethodChangedListener;
+import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
@@ -1300,6 +1301,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mKeyguardViewMediatorCallback = keyguardViewMediator.getViewMediatorCallback();
         mLightBarController.setFingerprintUnlockController(mFingerprintUnlockController);
+        Dependency.get(KeyguardDismissUtil.class).setDismissHandler(
+                this::dismissKeyguardThenExecute);
         Trace.endSection();
     }
 
