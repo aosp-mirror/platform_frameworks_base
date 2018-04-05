@@ -2629,6 +2629,17 @@ public abstract class PackageManager {
             "android.hardware.strongbox_keystore";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device has a Keymaster implementation that supports Device ID attestation.
+     *
+     * @see DevicePolicyManager#isDeviceIdAttestationSupported
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_DEVICE_ID_ATTESTATION =
+            "android.software.device_id_attestation";
+
+    /**
      * Action to external storage service to clean out removed apps.
      * @hide
      */
