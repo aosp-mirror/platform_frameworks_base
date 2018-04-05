@@ -17,6 +17,9 @@
 package com.android.server.am;
 
 import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
+
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -30,6 +33,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -83,6 +87,8 @@ public class ActivityStartInterceptorTest {
     @Mock
     private DevicePolicyManagerInternal mDevicePolicyManager;
     @Mock
+    private PackageManagerInternal mPackageManagerInternal;
+    @Mock
     private UserManager mUserManager;
     @Mock
     private UserController mUserController;
@@ -109,6 +115,7 @@ public class ActivityStartInterceptorTest {
         when(mDevicePolicyManager
                         .createShowAdminSupportIntent(TEST_USER_ID, true))
                 .thenReturn(ADMIN_SUPPORT_INTENT);
+        when(mService.getPackageManagerInternalLocked()).thenReturn(mPackageManagerInternal);
 
         // Mock UserManager
         when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUserManager);
@@ -126,14 +133,17 @@ public class ActivityStartInterceptorTest {
                 .thenReturn(null);
 
         // Initialise activity info
-        mAInfo.packageName = TEST_PACKAGE_NAME;
         mAInfo.applicationInfo = new ApplicationInfo();
+        mAInfo.packageName = mAInfo.applicationInfo.packageName = TEST_PACKAGE_NAME;
     }
 
     @Test
-    public void testSuspendedPackage() {
+    public void testSuspendedByAdminPackage() {
         // GIVEN the package we're about to launch is currently suspended
         mAInfo.applicationInfo.flags = FLAG_SUSPENDED;
+
+        when(mPackageManagerInternal.getSuspendingPackage(TEST_PACKAGE_NAME, TEST_USER_ID))
+                .thenReturn(PLATFORM_PACKAGE_NAME);
 
         // THEN calling intercept returns true
         assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));

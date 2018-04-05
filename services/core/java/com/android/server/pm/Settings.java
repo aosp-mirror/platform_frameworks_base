@@ -222,6 +222,7 @@ public final class Settings {
     private static final String ATTR_HIDDEN = "hidden";
     private static final String ATTR_SUSPENDED = "suspended";
     private static final String ATTR_SUSPENDING_PACKAGE = "suspending-package";
+    private static final String ATTR_SUSPEND_DIALOG_MESSAGE = "suspend_dialog_message";
     // Legacy, uninstall blocks are stored separately.
     @Deprecated
     private static final String ATTR_BLOCK_UNINSTALL = "blockUninstall";
@@ -734,6 +735,7 @@ public final class Settings {
                                 false /*hidden*/,
                                 false /*suspended*/,
                                 null, /*suspendingPackage*/
+                                null, /*dialogMessage*/
                                 null, /*suspendedAppExtras*/
                                 null, /*suspendedLauncherExtras*/
                                 instantApp,
@@ -1628,6 +1630,7 @@ public final class Settings {
                                 false /*hidden*/,
                                 false /*suspended*/,
                                 null, /*suspendingPackage*/
+                                null, /*dialogMessage*/
                                 null, /*suspendedAppExtras*/
                                 null, /*suspendedLauncherExtras*/
                                 false /*instantApp*/,
@@ -1704,6 +1707,8 @@ public final class Settings {
                             false);
                     String suspendingPackage = parser.getAttributeValue(null,
                             ATTR_SUSPENDING_PACKAGE);
+                    final String dialogMessage = parser.getAttributeValue(null,
+                            ATTR_SUSPEND_DIALOG_MESSAGE);
                     if (suspended && suspendingPackage == null) {
                         suspendingPackage = PLATFORM_PACKAGE_NAME;
                     }
@@ -1767,7 +1772,7 @@ public final class Settings {
                         setBlockUninstallLPw(userId, name, true);
                     }
                     ps.setUserState(userId, ceDataInode, enabled, installed, stopped, notLaunched,
-                            hidden, suspended, suspendingPackage, suspendedAppExtras,
+                            hidden, suspended, suspendingPackage, dialogMessage, suspendedAppExtras,
                             suspendedLauncherExtras, instantApp, virtualPreload, enabledCaller,
                             enabledComponents, disabledComponents, verifState, linkGeneration,
                             installReason, harmfulAppWarning);
@@ -2077,7 +2082,14 @@ public final class Settings {
                 }
                 if (ustate.suspended) {
                     serializer.attribute(null, ATTR_SUSPENDED, "true");
-                    serializer.attribute(null, ATTR_SUSPENDING_PACKAGE, ustate.suspendingPackage);
+                    if (ustate.suspendingPackage != null) {
+                        serializer.attribute(null, ATTR_SUSPENDING_PACKAGE,
+                                ustate.suspendingPackage);
+                    }
+                    if (ustate.dialogMessage != null) {
+                        serializer.attribute(null, ATTR_SUSPEND_DIALOG_MESSAGE,
+                                ustate.dialogMessage);
+                    }
                     if (ustate.suspendedAppExtras != null) {
                         serializer.startTag(null, TAG_SUSPENDED_APP_EXTRAS);
                         try {
@@ -4750,8 +4762,11 @@ public final class Settings {
             pw.print(" suspended=");
             pw.print(ps.getSuspended(user.id));
             if (ps.getSuspended(user.id)) {
+                final PackageUserState pus = ps.readUserState(user.id);
                 pw.print(" suspendingPackage=");
-                pw.print(ps.readUserState(user.id).suspendingPackage);
+                pw.print(pus.suspendingPackage);
+                pw.print(" dialogMessage=");
+                pw.print(pus.dialogMessage);
             }
             pw.print(" stopped=");
             pw.print(ps.getStopped(user.id));

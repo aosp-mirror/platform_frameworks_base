@@ -20,7 +20,7 @@ LOCAL_MODULE_TAGS := tests
 
 LOCAL_COMPATIBILITY_SUITE := device-tests
 
-LOCAL_STATIC_JAVA_LIBRARIES := android-support-test
+LOCAL_STATIC_JAVA_LIBRARIES := android-support-test ub-uiautomator
 
 LOCAL_SRC_FILES := $(call all-subdir-java-files)
 LOCAL_SRC_FILES += ../../src/com/android/server/pm/SuspendPackagesTest.java

@@ -29,6 +29,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     truth-prebuilt \
     testables \
     testng \
+    ub-uiautomator\
     platformprotosnano
 
 LOCAL_AIDL_INCLUDES := $(LOCAL_PATH)/aidl
@@ -68,8 +69,6 @@ LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
 LOCAL_JACK_FLAGS := --multi-dex native
 LOCAL_DX_FLAGS := --multi-dex
-
-LOCAL_STATIC_JAVA_LIBRARIES += ub-uiautomator
 
 LOCAL_PROGUARD_ENABLED := disabled
 

@@ -274,6 +274,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
+import com.android.internal.app.SuspendedAppActivity;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.logging.MetricsLogger;
@@ -14021,8 +14022,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String[] setPackagesSuspendedAsUser(String[] packageNames, boolean suspended,
-            PersistableBundle appExtras, PersistableBundle launcherExtras, String callingPackage,
-            int userId) {
+            PersistableBundle appExtras, PersistableBundle launcherExtras, String dialogMessage,
+            String callingPackage, int userId) {
         try {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.SUSPEND_APPS, null);
         } catch (SecurityException e) {
@@ -14070,7 +14071,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             unactionedPackages.add(packageName);
                             continue;
                         }
-                        pkgSetting.setSuspended(suspended, callingPackage, appExtras,
+                        pkgSetting.setSuspended(suspended, callingPackage, dialogMessage, appExtras,
                                 launcherExtras, userId);
                         changedPackagesList.add(packageName);
                     }
@@ -14192,7 +14193,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 for (int user : userIds) {
                     final PackageUserState pus = ps.readUserState(user);
                     if (pus.suspended && packageName.equals(pus.suspendingPackage)) {
-                        ps.setSuspended(false, null, null, null, user);
+                        ps.setSuspended(false, null, null, null, null, user);
                     }
                 }
             }
@@ -18926,6 +18927,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     false /*hidden*/,
                     false /*suspended*/,
                     null, /*suspendingPackage*/
+                    null, /*dialogMessage*/
                     null, /*suspendedAppExtras*/
                     null, /*suspendedLauncherExtras*/
                     false /*instantApp*/,
@@ -23814,6 +23816,22 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
             synchronized (mPackages) {
                 final PackageSetting ps = mSettings.mPackages.get(packageName);
                 return (ps != null) ? ps.getSuspended(userId) : false;
+            }
+        }
+
+        @Override
+        public String getSuspendingPackage(String suspendedPackage, int userId) {
+            synchronized (mPackages) {
+                final PackageSetting ps = mSettings.mPackages.get(suspendedPackage);
+                return (ps != null) ? ps.readUserState(userId).suspendingPackage : null;
+            }
+        }
+
+        @Override
+        public String getSuspendedDialogMessage(String suspendedPackage, int userId) {
+            synchronized (mPackages) {
+                final PackageSetting ps = mSettings.mPackages.get(suspendedPackage);
+                return (ps != null) ? ps.readUserState(userId).dialogMessage : null;
             }
         }
 

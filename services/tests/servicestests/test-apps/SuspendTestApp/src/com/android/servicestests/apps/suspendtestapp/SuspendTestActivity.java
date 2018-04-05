@@ -16,9 +16,45 @@
 
 package com.android.servicestests.apps.suspendtestapp;
 
+import static com.android.server.pm.SuspendPackagesTest.ACTION_FINISH_TEST_ACTIVITY;
+import static com.android.server.pm.SuspendPackagesTest.ACTION_REPORT_TEST_ACTIVITY_STARTED;
+import static com.android.server.pm.SuspendPackagesTest.ACTION_REPORT_TEST_ACTIVITY_STOPPED;
+import static com.android.server.pm.SuspendPackagesTest.INSTRUMENTATION_PACKAGE;
+
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.util.Log;
 
 public class SuspendTestActivity extends Activity {
     private static final String TAG = SuspendTestActivity.class.getSimpleName();
 
+    private BroadcastReceiver mFinishReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "Finishing test activity from receiver");
+            SuspendTestActivity.this.finish();
+        }
+    };
+
+    @Override
+    public void onStart() {
+        Log.d(TAG, "onStart");
+        final Intent reportStart = new Intent(ACTION_REPORT_TEST_ACTIVITY_STARTED)
+                .setPackage(INSTRUMENTATION_PACKAGE);
+        sendBroadcast(reportStart);
+        registerReceiver(mFinishReceiver, new IntentFilter(ACTION_FINISH_TEST_ACTIVITY));
+        super.onStart();
+    }
+    @Override
+    public void onStop() {
+        Log.d(TAG, "onStop");
+        final Intent reportStop = new Intent(ACTION_REPORT_TEST_ACTIVITY_STOPPED)
+                .setPackage(INSTRUMENTATION_PACKAGE);
+        sendBroadcast(reportStop);
+        unregisterReceiver(mFinishReceiver);
+        super.onStop();
+    }
 }
