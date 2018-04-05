@@ -489,6 +489,11 @@ public abstract class PackageManagerInternal {
     public abstract @Nullable PackageParser.Package getPackage(@NonNull String packageName);
 
     /**
+     * Returns a {@link com.android.server.pm.PackageSetting} for a given package name.
+     */
+    public abstract @Nullable Object getPackageSetting(String packageName);
+
+    /**
      * Returns a list without a change observer.
      *
      * {@see #getPackageList(PackageListObserver)}

@@ -5304,7 +5304,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mPackages) {
             final String[] packageNames = getPackagesForUid(uid);
             final PackageParser.Package pkg = (packageNames != null && packageNames.length > 0)
-                    ? mPackages.get(packageNames[0])
+                    ? mSettings.getPackageLPr(packageNames[0]).getPackage()
                     : null;
             return mPermissionManager.checkUidPermission(permName, pkg, uid, getCallingUid());
         }
@@ -8070,7 +8070,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 callingUid = mIsolatedOwners.get(callingUid);
             }
             final PackageSetting ps = mSettings.mPackages.get(packageName);
-            PackageParser.Package pkg = mPackages.get(packageName);
             final boolean returnAllowed =
                     ps != null
                     && (isCallerSameApp(packageName, callingUid)
@@ -8141,7 +8140,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private boolean isCallerSameApp(String packageName, int uid) {
-        PackageParser.Package pkg = mPackages.get(packageName);
+        PackageParser.Package pkg = mSettings.getPackageLPr(packageName).getPackage();
         return pkg != null
                 && UserHandle.getAppId(uid) == pkg.applicationInfo.uid;
     }
@@ -23610,6 +23609,13 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 packageName = resolveInternalPackageNameLPr(
                         packageName, PackageManager.VERSION_CODE_HIGHEST);
                 return mPackages.get(packageName);
+            }
+        }
+
+        @Override
+        public Object getPackageSetting(String packageName) {
+            synchronized (mPackages) {
+                return mSettings.getPackageLPr(packageName);
             }
         }
 
