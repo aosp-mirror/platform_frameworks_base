@@ -16,6 +16,7 @@
 
 package com.android.internal.widget;
 
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.view.View;
 
@@ -33,7 +34,7 @@ public interface MessagingMessage extends MessagingLinearLayout.MessagingChild {
 
     static MessagingMessage createMessage(MessagingLayout layout,
             Notification.MessagingStyle.Message m) {
-        if (hasImage(m)) {
+        if (hasImage(m) && !ActivityManager.isLowRamDeviceStatic()) {
             return MessagingImageMessage.createMessage(layout, m);
         } else {
             return MessagingTextMessage.createMessage(layout, m);
