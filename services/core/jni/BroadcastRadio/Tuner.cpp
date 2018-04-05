@@ -90,10 +90,11 @@ struct TunerContext {
     bool mIsAudioConnected = false;
     Band mBand;
     wp<V1_0::IBroadcastRadio> mHalModule;
-    wp<V1_1::IBroadcastRadio> mHalModule11;
     sp<V1_0::ITuner> mHalTuner;
     sp<V1_1::ITuner> mHalTuner11;
     sp<HalDeathRecipient> mHalDeathRecipient;
+
+    sp<V1_1::IBroadcastRadio> getHalModule11() const;
 
 private:
     DISALLOW_COPY_AND_ASSIGN(TunerContext);
@@ -143,6 +144,16 @@ void HalDeathRecipient::serviceDied(uint64_t cookie __unused,
     tunerCallback->hardwareFailure();
 }
 
+sp<V1_1::IBroadcastRadio> TunerContext::getHalModule11() const {
+    auto halModule = mHalModule.promote();
+    if (halModule == nullptr) {
+        ALOGE("HAL module is gone");
+        return nullptr;
+    }
+
+    return V1_1::IBroadcastRadio::castFrom(halModule).withDefault(nullptr);
+}
+
 // TODO(b/62713378): implement support for multiple tuners open at the same time
 static void notifyAudioService(TunerContext& ctx, bool connected) {
     if (!ctx.mWithAudio) return;
@@ -175,8 +186,6 @@ void assignHalInterfaces(JNIEnv *env, JavaRef<jobject> const &jTuner,
     }
 
     ctx.mHalModule = halModule;
-    ctx.mHalModule11 = V1_1::IBroadcastRadio::castFrom(halModule).withDefault(nullptr);
-
     ctx.mHalTuner = halTuner;
     ctx.mHalTuner11 = V1_1::ITuner::castFrom(halTuner).withDefault(nullptr);
     ALOGW_IF(ctx.mHalRev >= HalRevision::V1_1 && ctx.mHalTuner11 == nullptr,
@@ -388,15 +397,10 @@ static jbyteArray nativeGetImage(JNIEnv *env, jobject obj, jlong nativeContext, 
     lock_guard<mutex> lk(gContextMutex);
     auto& ctx = getNativeContext(nativeContext);
 
-    if (ctx.mHalModule11 == nullptr) {
+    auto halModule = ctx.getHalModule11();
+    if (halModule == nullptr) {
         jniThrowException(env, "java/lang/IllegalStateException",
                 "Out-of-band images are not supported with HAL < 1.1");
-        return nullptr;
-    }
-
-    auto halModule = ctx.mHalModule11.promote();
-    if (halModule == nullptr) {
-        ALOGE("HAL module is gone");
         return nullptr;
     }
 
@@ -418,7 +422,7 @@ static jbyteArray nativeGetImage(JNIEnv *env, jobject obj, jlong nativeContext, 
 
     if (convert::ThrowIfFailed(env, hidlResult)) return nullptr;
 
-    return jRawImage.get();
+    return jRawImage.release();
 }
 
 static bool nativeIsAnalogForced(JNIEnv *env, jobject obj, jlong nativeContext) {
