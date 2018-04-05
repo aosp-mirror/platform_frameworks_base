@@ -83,7 +83,11 @@ import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.internal.location.gnssmetrics.GnssMetrics;
+import com.android.server.location.GnssSatelliteBlacklistHelper.GnssSatelliteBlacklistCallback;
 import com.android.server.location.NtpTimeHelper.InjectNtpTimeCallback;
+
+import libcore.io.IoUtils;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -99,14 +103,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import libcore.io.IoUtils;
-
 /**
  * A GNSS implementation of LocationProvider used by LocationManager.
  *
  * {@hide}
  */
-public class GnssLocationProvider implements LocationProviderInterface, InjectNtpTimeCallback {
+public class GnssLocationProvider implements LocationProviderInterface, InjectNtpTimeCallback,
+        GnssSatelliteBlacklistCallback {
 
     private static final String TAG = "GnssLocationProvider";
 
@@ -308,7 +311,7 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
         }
     }
 
-    private Object mLock = new Object();
+    private final Object mLock = new Object();
 
     // current status
     private int mStatus = LocationProvider.TEMPORARILY_UNAVAILABLE;
@@ -411,6 +414,7 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     private final ILocationManager mILocationManager;
     private final LocationExtras mLocationExtras = new LocationExtras();
     private final GnssStatusListenerHelper mListenerHelper;
+    private final GnssSatelliteBlacklistHelper mGnssSatelliteBlacklistHelper;
     private final GnssMeasurementsProvider mGnssMeasurementsProvider;
     private final GnssNavigationMessageProvider mGnssNavigationMessageProvider;
     private final LocationChangeListener mNetworkLocationListener = new NetworkLocationListener();
@@ -576,6 +580,16 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
                     sendMessage(SUBSCRIPTION_OR_SIM_CHANGED, 0, null);
                 }
             };
+
+    /**
+     * Implements {@link GnssSatelliteBlacklistCallback#onUpdateSatelliteBlacklist}.
+     */
+    @Override
+    public void onUpdateSatelliteBlacklist(int[] constellations, int[] svids) {
+        mHandler.post(()->{
+            native_set_satellite_blacklist(constellations, svids);
+        });
+    }
 
     private void subscriptionOrSimChanged(Context context) {
         if (DEBUG) Log.d(TAG, "received SIM related action: ");
@@ -869,7 +883,10 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
         };
         mGnssMetrics = new GnssMetrics(mBatteryStats);
 
-        mNtpTimeHelper = new NtpTimeHelper(mContext, Looper.myLooper(), this);
+        mNtpTimeHelper = new NtpTimeHelper(mContext, looper, this);
+        mGnssSatelliteBlacklistHelper = new GnssSatelliteBlacklistHelper(mContext,
+                looper, this);
+        mHandler.post(mGnssSatelliteBlacklistHelper::updateSatelliteBlacklist);
     }
 
     /**
@@ -2899,6 +2916,8 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     private static native boolean native_set_gps_lock(int gpsLock);
 
     private static native boolean native_set_emergency_supl_pdn(int emergencySuplPdn);
+
+    private static native boolean native_set_satellite_blacklist(int[] constellations, int[] svIds);
 
     // GNSS Batching
     private static native int native_get_batch_size();
