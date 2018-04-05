@@ -1918,7 +1918,7 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifest_versionCode, 0);
         pkg.mVersionCodeMajor = sa.getInteger(
                 com.android.internal.R.styleable.AndroidManifest_versionCodeMajor, 0);
-        pkg.applicationInfo.versionCode = pkg.getLongVersionCode();
+        pkg.applicationInfo.setVersionCode(pkg.getLongVersionCode());
         pkg.baseRevisionCode = sa.getInteger(
                 com.android.internal.R.styleable.AndroidManifest_revisionCode, 0);
         pkg.mVersionName = sa.getNonConfigurationString(
