@@ -295,6 +295,26 @@ public class PipTouchHandler {
                 final Rect toAdjustedBounds = mMenuState == MENU_STATE_FULL
                         ? expandedAdjustedBounds
                         : normalAdjustedBounds;
+                final Rect toMovementBounds = mMenuState == MENU_STATE_FULL
+                        ? expandedMovementBounds
+                        : normalMovementBounds;
+
+                // If the PIP window needs to shift to right above shelf/IME and it's already above
+                // that, don't move the PIP window.
+                if (toAdjustedBounds.bottom < mMovementBounds.bottom
+                        && animatingBounds.top < toAdjustedBounds.bottom) {
+                    return;
+                }
+
+                // If the PIP window needs to shift down due to dismissal of shelf/IME but it's way
+                // above the position as if shelf/IME shows, don't move the PIP window.
+                int movementBoundsAdjustment = toMovementBounds.bottom - mMovementBounds.bottom;
+                int offsetAdjustment = fromImeAdjustment ? mImeOffset : mShelfHeight;
+                if (toAdjustedBounds.bottom >= mMovementBounds.bottom
+                        && animatingBounds.top
+                        < toAdjustedBounds.bottom - movementBoundsAdjustment - offsetAdjustment) {
+                    return;
+                }
 
                 animateToOffset(animatingBounds, toAdjustedBounds);
             }
@@ -320,10 +340,6 @@ public class PipTouchHandler {
 
     private void animateToOffset(Rect animatingBounds, Rect toAdjustedBounds) {
         final Rect bounds = new Rect(animatingBounds);
-        if (toAdjustedBounds.bottom < mMovementBounds.bottom
-                && bounds.top < toAdjustedBounds.bottom) {
-            return;
-        }
         bounds.offset(0, toAdjustedBounds.bottom - bounds.top);
         // In landscape mode, PIP window can go offset while launching IME. We want to align the
         // the top of the PIP window with the top of the movement bounds in that case.
