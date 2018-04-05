@@ -34,10 +34,6 @@ local_java_files := $(filter %.java,$(LOCAL_SRC_FILES))
 # This only works if the class name matches the file name and the directory structure
 # matches the package.
 local_classes := $(subst /,.,$(patsubst src/%.java,%,$(local_java_files)))
-# Utility variables to allow replacing a space with a comma
-comma:= ,
-empty:=
-space:= $(empty) $(empty)
 # Convert class name list to jacoco exclude list
 # This appends a * to all classes and replace the space separators with commas.
 # These patterns will match all classes in this module and their inner classes.
