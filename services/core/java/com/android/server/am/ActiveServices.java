@@ -2283,7 +2283,7 @@ public final class ActiveServices {
                         + " app=" + app);
             if (app != null && app.thread != null) {
                 try {
-                    app.addPackage(r.appInfo.packageName, r.appInfo.versionCode, mAm.mProcessStats);
+                    app.addPackage(r.appInfo.packageName, r.appInfo.longVersionCode, mAm.mProcessStats);
                     realStartServiceLocked(r, app, execInFg);
                     return null;
                 } catch (TransactionTooLargeException e) {
@@ -3009,7 +3009,7 @@ public final class ActiveServices {
 
                     mPendingServices.remove(i);
                     i--;
-                    proc.addPackage(sr.appInfo.packageName, sr.appInfo.versionCode,
+                    proc.addPackage(sr.appInfo.packageName, sr.appInfo.longVersionCode,
                             mAm.mProcessStats);
                     realStartServiceLocked(sr, proc, sr.createdFromFg);
                     didSomething = true;

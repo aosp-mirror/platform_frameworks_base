@@ -1579,7 +1579,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     // to run in multiple processes, because this is actually
                     // part of the framework so doesn't make sense to track as a
                     // separate apk in the process.
-                    app.addPackage(r.info.packageName, r.info.applicationInfo.versionCode,
+                    app.addPackage(r.info.packageName, r.info.applicationInfo.longVersionCode,
                             mService.mProcessStats);
                 }
                 realStartActivityLocked(r, app, andResume, checkConfig);
