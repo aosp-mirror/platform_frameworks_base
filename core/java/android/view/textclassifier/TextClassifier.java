@@ -216,13 +216,17 @@ public interface TextClassifier {
             @IntRange(from = 0) int selectionStartIndex,
             @IntRange(from = 0) int selectionEndIndex,
             @Nullable TextSelection.Options options) {
-        final TextSelection.Request request = options.getRequest() != null
-                ? options.getRequest()
-                : new TextSelection.Request.Builder(
-                        text, selectionStartIndex, selectionEndIndex)
-                        .setDefaultLocales(options.getDefaultLocales())
-                        .build();
-        return suggestSelection(request);
+        if (options == null) {
+            return suggestSelection(new TextSelection.Request.Builder(
+                    text, selectionStartIndex, selectionEndIndex).build());
+        } else if (options.getRequest() != null) {
+            return suggestSelection(options.getRequest());
+        } else {
+            return suggestSelection(
+                    new TextSelection.Request.Builder(text, selectionStartIndex, selectionEndIndex)
+                            .setDefaultLocales(options.getDefaultLocales())
+                            .build());
+        }
     }
 
     /**
@@ -291,14 +295,17 @@ public interface TextClassifier {
             @IntRange(from = 0) int startIndex,
             @IntRange(from = 0) int endIndex,
             @Nullable TextClassification.Options options) {
-        final TextClassification.Request request = options.getRequest() != null
-                ? options.getRequest()
-                : new TextClassification.Request.Builder(
-                        text, startIndex, endIndex)
-                        .setDefaultLocales(options.getDefaultLocales())
-                        .setReferenceTime(options.getReferenceTime())
-                        .build();
-        return classifyText(request);
+        if (options == null) {
+            return classifyText(
+                    new TextClassification.Request.Builder(text, startIndex, endIndex).build());
+        } else if (options.getRequest() != null) {
+            return classifyText(options.getRequest());
+        } else {
+            return classifyText(new TextClassification.Request.Builder(text, startIndex, endIndex)
+                    .setDefaultLocales(options.getDefaultLocales())
+                    .setReferenceTime(options.getReferenceTime())
+                    .build());
+        }
     }
 
     /**
@@ -326,13 +333,16 @@ public interface TextClassifier {
     /** @hide */
     default TextLinks generateLinks(
             @NonNull CharSequence text, @Nullable TextLinks.Options options) {
-        final TextLinks.Request request = options.getRequest() != null
-                ? options.getRequest()
-                : new TextLinks.Request.Builder(text)
-                        .setDefaultLocales(options.getDefaultLocales())
-                        .setEntityConfig(options.getEntityConfig())
-                        .build();
-        return generateLinks(request);
+        if (options == null) {
+            return generateLinks(new TextLinks.Request.Builder(text).build());
+        } else if (options.getRequest() != null) {
+            return generateLinks(options.getRequest());
+        } else {
+            return generateLinks(new TextLinks.Request.Builder(text)
+                    .setDefaultLocales(options.getDefaultLocales())
+                    .setEntityConfig(options.getEntityConfig())
+                    .build());
+        }
     }
 
     /**
