@@ -99,6 +99,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -1971,8 +1972,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     return;
                 }
 
-                if (value != null && !value.equals(viewState.getCurrentValue())) {
-                    if (value.isEmpty()
+                if (!Objects.equals(value, viewState.getCurrentValue())) {
+                    if ((value == null || value.isEmpty())
                             && viewState.getCurrentValue() != null
                             && viewState.getCurrentValue().isText()
                             && viewState.getCurrentValue().getTextValue() != null
@@ -1993,18 +1994,26 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     // Must check if this update was caused by autofilling the view, in which
                     // case we just update the value, but not the UI.
                     final AutofillValue filledValue = viewState.getAutofilledValue();
-                    if (value.equals(filledValue)) {
+                    if (filledValue != null && filledValue.equals(value)) {
+                        if (sVerbose) {
+                            Slog.v(TAG, "ignoring autofilled change on id " + id);
+                        }
                         return;
                     }
                     // Update the internal state...
                     viewState.setState(ViewState.STATE_CHANGED);
 
                     //..and the UI
-                    if (value.isText()) {
-                        getUiForShowing().filterFillUi(value.getTextValue().toString(), this);
+                    final String filterText;
+                    if (value == null || !value.isText()) {
+                        filterText = null;
                     } else {
-                        getUiForShowing().filterFillUi(null, this);
+                        final CharSequence text = value.getTextValue();
+                        // Text should never be null, but it doesn't hurt to check to avoid a
+                        // system crash...
+                        filterText = (text == null) ? null : text.toString();
                     }
+                    getUiForShowing().filterFillUi(filterText, this);
                 }
                 break;
             case ACTION_VIEW_ENTERED:
