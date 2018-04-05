@@ -84,7 +84,7 @@ public class CachedBluetoothDeviceManager {
      * @return the cached device object for this device, or null if it has
      *   not been previously seen
      */
-    public CachedBluetoothDevice findDevice(BluetoothDevice device) {
+    public synchronized CachedBluetoothDevice findDevice(BluetoothDevice device) {
         for (CachedBluetoothDevice cachedDevice : mCachedDevices) {
             if (cachedDevice.getDevice().equals(device)) {
                 return cachedDevice;
