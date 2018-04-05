@@ -27,6 +27,7 @@ import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REMOVE_TASKS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
+import static android.Manifest.permission.STOP_APP_SWITCHES;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
@@ -13212,12 +13213,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void stopAppSwitches() {
-        if (checkCallingPermission(android.Manifest.permission.STOP_APP_SWITCHES)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("viewquires permission "
-                    + android.Manifest.permission.STOP_APP_SWITCHES);
-        }
-
+        enforceCallerIsRecentsOrHasPermission(STOP_APP_SWITCHES, "stopAppSwitches");
         synchronized(this) {
             mAppSwitchesAllowedTime = SystemClock.uptimeMillis()
                     + APP_SWITCH_DELAY_TIME;
@@ -13227,12 +13223,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     public void resumeAppSwitches() {
-        if (checkCallingPermission(android.Manifest.permission.STOP_APP_SWITCHES)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires permission "
-                    + android.Manifest.permission.STOP_APP_SWITCHES);
-        }
-
+        enforceCallerIsRecentsOrHasPermission(STOP_APP_SWITCHES, "resumeAppSwitches");
         synchronized(this) {
             // Note that we don't execute any pending app switches... we will
             // let those wait until either the timeout, or the next start
@@ -13259,9 +13250,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             return true;
         }
 
-        int perm = checkComponentPermission(
-                android.Manifest.permission.STOP_APP_SWITCHES, sourcePid,
-                sourceUid, -1, true);
+        if (mRecentTasks.isCallerRecents(sourceUid)) {
+            return true;
+        }
+
+        int perm = checkComponentPermission(STOP_APP_SWITCHES, sourcePid, sourceUid, -1, true);
         if (perm == PackageManager.PERMISSION_GRANTED) {
             return true;
         }
@@ -13272,9 +13265,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // If the actual IPC caller is different from the logical source, then
         // also see if they are allowed to control app switches.
         if (callingUid != -1 && callingUid != sourceUid) {
-            perm = checkComponentPermission(
-                    android.Manifest.permission.STOP_APP_SWITCHES, callingPid,
-                    callingUid, -1, true);
+            perm = checkComponentPermission(STOP_APP_SWITCHES, callingPid, callingUid, -1, true);
             if (perm == PackageManager.PERMISSION_GRANTED) {
                 return true;
             }
