@@ -122,6 +122,7 @@ public final class RemoteAction implements Parcelable {
     public RemoteAction clone() {
         RemoteAction action = new RemoteAction(mIcon, mTitle, mContentDescription, mActionIntent);
         action.setEnabled(mEnabled);
+        action.setShouldShowIcon(mShouldShowIcon);
         return action;
     }
 
