@@ -37,6 +37,8 @@ class AnimatingAppWindowTokenRegistry {
 
     private ArrayList<Runnable> mTmpRunnableList = new ArrayList<>();
 
+    private boolean mEndingDeferredFinish;
+
     /**
      * Notifies that an {@link AppWindowToken} has started animating.
      */
@@ -50,6 +52,11 @@ class AnimatingAppWindowTokenRegistry {
     void notifyFinished(AppWindowToken token) {
         mAnimatingTokens.remove(token);
         mFinishedTokens.remove(token);
+
+        // If we were the last token, make sure the end all deferred finishes.
+        if (mAnimatingTokens.isEmpty()) {
+            endDeferringFinished();
+        }
     }
 
     /**
@@ -78,16 +85,28 @@ class AnimatingAppWindowTokenRegistry {
     }
 
     private void endDeferringFinished() {
-        // Copy it into a separate temp list to avoid modifying the collection while iterating as
-        // calling the callback may call back into notifyFinished.
-        for (int i = mFinishedTokens.size() - 1; i >= 0; i--) {
-            mTmpRunnableList.add(mFinishedTokens.valueAt(i));
+
+        // Don't start recursing. Running the finished listener invokes notifyFinished, which may
+        // invoked us again.
+        if (mEndingDeferredFinish) {
+            return;
         }
-        mFinishedTokens.clear();
-        for (int i = mTmpRunnableList.size() - 1; i >= 0; i--) {
-            mTmpRunnableList.get(i).run();
+        try {
+            mEndingDeferredFinish = true;
+
+            // Copy it into a separate temp list to avoid modifying the collection while iterating
+            // as calling the callback may call back into notifyFinished.
+            for (int i = mFinishedTokens.size() - 1; i >= 0; i--) {
+                mTmpRunnableList.add(mFinishedTokens.valueAt(i));
+            }
+            mFinishedTokens.clear();
+            for (int i = mTmpRunnableList.size() - 1; i >= 0; i--) {
+                mTmpRunnableList.get(i).run();
+            }
+            mTmpRunnableList.clear();
+        } finally {
+            mEndingDeferredFinish = false;
         }
-        mTmpRunnableList.clear();
     }
 
     void dump(PrintWriter pw, String header, String prefix) {
