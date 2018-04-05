@@ -64,7 +64,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
     private boolean mIsHidingAnimated;
     private boolean mNeedsGeneratedAvatar;
     private Notification.Person mSender;
-    private boolean mAvatarsAtEnd;
+    private boolean mImagesAtEnd;
     private ViewGroup mImageContainer;
     private MessagingImageMessage mIsolatedMessage;
     private boolean mTransformingImages;
@@ -342,7 +342,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
                 mAddedMessages.add(message);
             }
             boolean isImage = message instanceof MessagingImageMessage;
-            if (mAvatarsAtEnd && isImage) {
+            if (mImagesAtEnd && isImage) {
                 isolatedMessage = (MessagingImageMessage) message;
             } else {
                 if (removeFromParentIfDifferent(message, mMessageContainer)) {
@@ -474,9 +474,9 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         mTransformingImages = transformingImages;
     }
 
-    public void setDisplayAvatarsAtEnd(boolean atEnd) {
-        if (mAvatarsAtEnd != atEnd) {
-            mAvatarsAtEnd = atEnd;
+    public void setDisplayImagesAtEnd(boolean atEnd) {
+        if (mImagesAtEnd != atEnd) {
+            mImagesAtEnd = atEnd;
             mImageContainer.setVisibility(atEnd ? View.VISIBLE : View.GONE);
         }
     }
