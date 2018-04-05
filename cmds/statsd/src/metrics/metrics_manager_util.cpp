@@ -263,15 +263,14 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
 }
 
 bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long timeBaseSec,
-                 const unordered_map<int64_t, int>& logTrackerMap,
+                 UidMap& uidMap, const unordered_map<int64_t, int>& logTrackerMap,
                  const unordered_map<int64_t, int>& conditionTrackerMap,
                  const vector<sp<LogMatchingTracker>>& allAtomMatchers,
                  vector<sp<ConditionTracker>>& allConditionTrackers,
                  vector<sp<MetricProducer>>& allMetricProducers,
                  unordered_map<int, std::vector<int>>& conditionToMetricMap,
                  unordered_map<int, std::vector<int>>& trackerToMetricMap,
-                 unordered_map<int64_t, int>& metricMap,
-                 std::set<int64_t> &noReportMetricIds) {
+                 unordered_map<int64_t, int>& metricMap, std::set<int64_t>& noReportMetricIds) {
     sp<ConditionWizard> wizard = new ConditionWizard(allConditionTrackers);
     const int allMetricsCount = config.count_metric_size() + config.duration_metric_size() +
                                 config.event_metric_size() + config.value_metric_size();
@@ -538,6 +537,9 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long ti
         }
         noReportMetricIds.insert(no_report_metric);
     }
+    for (auto it : allMetricProducers) {
+        uidMap.addListener(it);
+    }
     return true;
 }
 
@@ -642,12 +644,10 @@ bool initAlarms(const StatsdConfig& config, const ConfigKey& key,
     return true;
 }
 
-bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config,
-                      const UidMap& uidMap,
+bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& uidMap,
                       const sp<AlarmMonitor>& anomalyAlarmMonitor,
-                      const sp<AlarmMonitor>& periodicAlarmMonitor,
-                      const long timeBaseSec, const long currentTimeSec,
-                      set<int>& allTagIds,
+                      const sp<AlarmMonitor>& periodicAlarmMonitor, const long timeBaseSec,
+                      const long currentTimeSec, set<int>& allTagIds,
                       vector<sp<LogMatchingTracker>>& allAtomMatchers,
                       vector<sp<ConditionTracker>>& allConditionTrackers,
                       vector<sp<MetricProducer>>& allMetricProducers,
@@ -656,7 +656,7 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config,
                       unordered_map<int, std::vector<int>>& conditionToMetricMap,
                       unordered_map<int, std::vector<int>>& trackerToMetricMap,
                       unordered_map<int, std::vector<int>>& trackerToConditionMap,
-                      std::set<int64_t> &noReportMetricIds) {
+                      std::set<int64_t>& noReportMetricIds) {
     unordered_map<int64_t, int> logTrackerMap;
     unordered_map<int64_t, int> conditionTrackerMap;
     unordered_map<int64_t, int> metricProducerMap;
@@ -673,9 +673,10 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config,
         return false;
     }
 
-    if (!initMetrics(key, config, timeBaseSec, logTrackerMap, conditionTrackerMap, allAtomMatchers,
-                     allConditionTrackers, allMetricProducers, conditionToMetricMap,
-                     trackerToMetricMap, metricProducerMap, noReportMetricIds)) {
+    if (!initMetrics(key, config, timeBaseSec, uidMap, logTrackerMap, conditionTrackerMap,
+                     allAtomMatchers, allConditionTrackers, allMetricProducers,
+                     conditionToMetricMap, trackerToMetricMap, metricProducerMap,
+                     noReportMetricIds)) {
         ALOGE("initMetricProducers failed");
         return false;
     }

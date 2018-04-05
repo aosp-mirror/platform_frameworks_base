@@ -640,7 +640,7 @@ Status StatsService::informAllUidData(const vector<int32_t>& uid, const vector<i
                                          "Only system uid can call informAllUidData");
     }
 
-    mUidMap->updateMap(uid, version, app);
+    mUidMap->updateMap(getElapsedRealtimeNs(), uid, version, app);
     VLOG("StatsService::informAllUidData succeeded");
 
     return Status::ok();
@@ -653,7 +653,7 @@ Status StatsService::informOnePackage(const String16& app, int32_t uid, int64_t 
         return Status::fromExceptionCode(Status::EX_SECURITY,
                                          "Only system uid can call informOnePackage");
     }
-    mUidMap->updateApp(app, uid, version);
+    mUidMap->updateApp(getElapsedRealtimeNs(), app, uid, version);
     return Status::ok();
 }
 
@@ -664,7 +664,7 @@ Status StatsService::informOnePackageRemoved(const String16& app, int32_t uid) {
         return Status::fromExceptionCode(Status::EX_SECURITY,
                                          "Only system uid can call informOnePackageRemoved");
     }
-    mUidMap->removeApp(app, uid);
+    mUidMap->removeApp(getElapsedRealtimeNs(), app, uid);
     mConfigManager->RemoveConfigs(uid);
     return Status::ok();
 }

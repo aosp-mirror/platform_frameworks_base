@@ -91,11 +91,10 @@ const int FIELD_ID_METRIC_STATS_COUNT = 2;
 const int FIELD_ID_ALERT_STATS_ID = 1;
 const int FIELD_ID_ALERT_STATS_COUNT = 2;
 
-const int FIELD_ID_UID_MAP_SNAPSHOTS = 1;
-const int FIELD_ID_UID_MAP_CHANGES = 2;
-const int FIELD_ID_UID_MAP_BYTES_USED = 3;
-const int FIELD_ID_UID_MAP_DROPPED_SNAPSHOTS = 4;
-const int FIELD_ID_UID_MAP_DROPPED_CHANGES = 5;
+const int FIELD_ID_UID_MAP_CHANGES = 1;
+const int FIELD_ID_UID_MAP_BYTES_USED = 2;
+const int FIELD_ID_UID_MAP_DROPPED_CHANGES = 3;
+const int FIELD_ID_UID_MAP_DELETED_APPS = 4;
 
 const std::map<int, std::pair<size_t, size_t>> StatsdStats::kAtomDimensionKeySizeLimitMap = {
         {android::util::CPU_TIME_PER_UID_FREQ, {6000, 10000}},
@@ -229,15 +228,14 @@ void StatsdStats::noteMetricsReportSent(const ConfigKey& key, int32_t timeSec) {
     it->second->dump_report_time_sec.push_back(timeSec);
 }
 
-void StatsdStats::noteUidMapDropped(int snapshots, int deltas) {
+void StatsdStats::noteUidMapDropped(int deltas) {
     lock_guard<std::mutex> lock(mLock);
-    mUidMapStats.dropped_snapshots += mUidMapStats.dropped_snapshots + snapshots;
     mUidMapStats.dropped_changes += mUidMapStats.dropped_changes + deltas;
 }
 
-void StatsdStats::setUidMapSnapshots(int snapshots) {
+void StatsdStats::noteUidMapAppDeletionDropped() {
     lock_guard<std::mutex> lock(mLock);
-    mUidMapStats.snapshots = snapshots;
+    mUidMapStats.deleted_apps++;
 }
 
 void StatsdStats::setUidMapChanges(int changes) {
@@ -478,11 +476,9 @@ void StatsdStats::dumpStats(FILE* out) const {
         fprintf(out, "Subscriber alarm registrations: %d\n", mPeriodicAlarmRegisteredStats);
     }
 
-    fprintf(out,
-            "UID map stats: bytes=%d, snapshots=%d, changes=%d, snapshots lost=%d, changes "
-            "lost=%d\n",
-            mUidMapStats.bytes_used, mUidMapStats.snapshots, mUidMapStats.changes,
-            mUidMapStats.dropped_snapshots, mUidMapStats.dropped_changes);
+    fprintf(out, "UID map stats: bytes=%d, changes=%d, deleted=%d, changes lost=%d\n",
+            mUidMapStats.bytes_used, mUidMapStats.changes, mUidMapStats.deleted_apps,
+            mUidMapStats.dropped_changes);
 
     for (const auto& error : mLoggerErrors) {
         time_t error_time = error.first;
@@ -624,12 +620,10 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
     }
 
     uint64_t uidMapToken = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_UIDMAP_STATS);
-    proto.write(FIELD_TYPE_INT32 | FIELD_ID_UID_MAP_SNAPSHOTS, mUidMapStats.snapshots);
     proto.write(FIELD_TYPE_INT32 | FIELD_ID_UID_MAP_CHANGES, mUidMapStats.changes);
     proto.write(FIELD_TYPE_INT32 | FIELD_ID_UID_MAP_BYTES_USED, mUidMapStats.bytes_used);
-    proto.write(FIELD_TYPE_INT32 | FIELD_ID_UID_MAP_DROPPED_SNAPSHOTS,
-                mUidMapStats.dropped_snapshots);
     proto.write(FIELD_TYPE_INT32 | FIELD_ID_UID_MAP_DROPPED_CHANGES, mUidMapStats.dropped_changes);
+    proto.write(FIELD_TYPE_INT32 | FIELD_ID_UID_MAP_DELETED_APPS, mUidMapStats.deleted_apps);
     proto.end(uidMapToken);
 
     for (const auto& error : mLoggerErrors) {

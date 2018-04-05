@@ -45,6 +45,7 @@ namespace statsd {
 const int FIELD_ID_SNAPSHOT_PACKAGE_NAME = 1;
 const int FIELD_ID_SNAPSHOT_PACKAGE_VERSION = 2;
 const int FIELD_ID_SNAPSHOT_PACKAGE_UID = 3;
+const int FIELD_ID_SNAPSHOT_PACKAGE_DELETED = 4;
 const int FIELD_ID_SNAPSHOT_TIMESTAMP = 1;
 const int FIELD_ID_SNAPSHOT_PACKAGE_INFO = 2;
 const int FIELD_ID_SNAPSHOTS = 1;
@@ -53,7 +54,8 @@ const int FIELD_ID_CHANGE_DELETION = 1;
 const int FIELD_ID_CHANGE_TIMESTAMP = 2;
 const int FIELD_ID_CHANGE_PACKAGE = 3;
 const int FIELD_ID_CHANGE_UID = 4;
-const int FIELD_ID_CHANGE_VERSION = 5;
+const int FIELD_ID_CHANGE_NEW_VERSION = 5;
+const int FIELD_ID_CHANGE_PREV_VERSION = 6;
 
 UidMap::UidMap() : mBytesUsed(0) {}
 
@@ -62,13 +64,8 @@ UidMap::~UidMap() {}
 bool UidMap::hasApp(int uid, const string& packageName) const {
     lock_guard<mutex> lock(mMutex);
 
-    auto range = mMap.equal_range(uid);
-    for (auto it = range.first; it != range.second; ++it) {
-        if (it->second.packageName == packageName) {
-            return true;
-        }
-    }
-    return false;
+    auto it = mMap.find(std::make_pair(uid, packageName));
+    return it != mMap.end() && !it->second.deleted;
 }
 
 string UidMap::normalizeAppName(const string& appName) const {
@@ -84,10 +81,10 @@ std::set<string> UidMap::getAppNamesFromUid(const int32_t& uid, bool returnNorma
 
 std::set<string> UidMap::getAppNamesFromUidLocked(const int32_t& uid, bool returnNormalized) const {
     std::set<string> names;
-    auto range = mMap.equal_range(uid);
-    for (auto it = range.first; it != range.second; ++it) {
-        names.insert(returnNormalized ?
-            normalizeAppName(it->second.packageName) : it->second.packageName);
+    for (const auto& kv : mMap) {
+        if (kv.first.first == uid && !kv.second.deleted) {
+            names.insert(returnNormalized ? normalizeAppName(kv.first.second) : kv.first.second);
+        }
     }
     return names;
 }
@@ -95,18 +92,11 @@ std::set<string> UidMap::getAppNamesFromUidLocked(const int32_t& uid, bool retur
 int64_t UidMap::getAppVersion(int uid, const string& packageName) const {
     lock_guard<mutex> lock(mMutex);
 
-    auto range = mMap.equal_range(uid);
-    for (auto it = range.first; it != range.second; ++it) {
-        if (it->second.packageName == packageName) {
-            return it->second.versionCode;
-        }
+    auto it = mMap.find(std::make_pair(uid, packageName));
+    if (it == mMap.end() || it->second.deleted) {
+        return 0;
     }
-    return 0;
-}
-
-void UidMap::updateMap(const vector<int32_t>& uid, const vector<int64_t>& versionCode,
-                       const vector<String16>& packageName) {
-    updateMap(getElapsedRealtimeNs(), uid, versionCode, packageName);
+    return it->second.versionCode;
 }
 
 void UidMap::updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
@@ -115,20 +105,31 @@ void UidMap::updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
     {
         lock_guard<mutex> lock(mMutex);  // Exclusively lock for updates.
 
-        mMap.clear();
-        vector<const SnapshotPackageInfo> infos;
-        for (size_t j = 0; j < uid.size(); j++) {
-            string package = string(String8(packageName[j]).string());
-            mMap.insert(make_pair(uid[j], AppData(package, versionCode[j])));
-            infos.emplace_back(package, versionCode[j], uid[j]);
+        std::unordered_map<std::pair<int, string>, AppData, PairHash> deletedApps;
+
+        // Copy all the deleted apps.
+        for (const auto& kv : mMap) {
+            if (kv.second.deleted) {
+                deletedApps[kv.first] = kv.second;
+            }
         }
 
-        mSnapshots.emplace_back(timestamp, infos);
+        mMap.clear();
+        for (size_t j = 0; j < uid.size(); j++) {
+            string package = string(String8(packageName[j]).string());
+            mMap[std::make_pair(uid[j], package)] = AppData(versionCode[j]);
+        }
 
-        mBytesUsed += mSnapshots.back().bytes;
+        for (const auto& kv : deletedApps) {
+            auto mMapIt = mMap.find(kv.first);
+            if (mMapIt != mMap.end()) {
+                // Insert this deleted app back into the current map.
+                mMap[kv.first] = kv.second;
+            }
+        }
+
         ensureBytesUsedBelowLimit();
         StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
-        StatsdStats::getInstance().setUidMapSnapshots(mSnapshots.size());
         getListenerListCopyLocked(&broadcastList);
     }
     // To avoid invoking callback while holding the internal lock. we get a copy of the listener
@@ -144,38 +145,34 @@ void UidMap::updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
     }
 }
 
-void UidMap::updateApp(const String16& app_16, const int32_t& uid, const int64_t& versionCode) {
-    updateApp(getElapsedRealtimeNs(), app_16, uid, versionCode);
-}
-
 void UidMap::updateApp(const int64_t& timestamp, const String16& app_16, const int32_t& uid,
                        const int64_t& versionCode) {
     vector<wp<PackageInfoListener>> broadcastList;
     string appName = string(String8(app_16).string());
     {
         lock_guard<mutex> lock(mMutex);
-
-        mChanges.emplace_back(false, timestamp, appName, uid, versionCode);
+        int32_t prevVersion = 0;
+        bool found = false;
+        auto it = mMap.find(std::make_pair(uid, appName));
+        if (it != mMap.end()) {
+            found = true;
+            prevVersion = it->second.versionCode;
+            it->second.versionCode = versionCode;
+            it->second.deleted = false;
+        }
+        if (!found) {
+            // Otherwise, we need to add an app at this uid.
+            mMap[std::make_pair(uid, appName)] = AppData(versionCode);
+        } else {
+            // Only notify the listeners if this is an app upgrade. If this app is being installed
+            // for the first time, then we don't notify the listeners.
+            getListenerListCopyLocked(&broadcastList);
+        }
+        mChanges.emplace_back(false, timestamp, appName, uid, versionCode, prevVersion);
         mBytesUsed += kBytesChangeRecord;
         ensureBytesUsedBelowLimit();
         StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
         StatsdStats::getInstance().setUidMapChanges(mChanges.size());
-
-        auto range = mMap.equal_range(int(uid));
-        bool found = false;
-        for (auto it = range.first; it != range.second; ++it) {
-            // If we find the exact same app name and uid, update the app version directly.
-            if (it->second.packageName == appName) {
-                it->second.versionCode = versionCode;
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            // Otherwise, we need to add an app at this uid.
-            mMap.insert(make_pair(uid, AppData(appName, versionCode)));
-        }
-        getListenerListCopyLocked(&broadcastList);
     }
 
     for (auto weakPtr : broadcastList) {
@@ -195,20 +192,12 @@ void UidMap::ensureBytesUsedBelowLimit() {
     }
     while (mBytesUsed > limit) {
         ALOGI("Bytes used %zu is above limit %zu, need to delete something", mBytesUsed, limit);
-        if (mSnapshots.size() > 0) {
-            mBytesUsed -= mSnapshots.front().bytes;
-            mSnapshots.pop_front();
-            StatsdStats::getInstance().noteUidMapDropped(1, 0);
-        } else if (mChanges.size() > 0) {
+        if (mChanges.size() > 0) {
             mBytesUsed -= kBytesChangeRecord;
             mChanges.pop_front();
-            StatsdStats::getInstance().noteUidMapDropped(0, 1);
+            StatsdStats::getInstance().noteUidMapDropped(1);
         }
     }
-}
-
-void UidMap::removeApp(const String16& app_16, const int32_t& uid) {
-    removeApp(getElapsedRealtimeNs(), app_16, uid);
 }
 
 void UidMap::getListenerListCopyLocked(vector<wp<PackageInfoListener>>* output) {
@@ -230,19 +219,26 @@ void UidMap::removeApp(const int64_t& timestamp, const String16& app_16, const i
     {
         lock_guard<mutex> lock(mMutex);
 
-        mChanges.emplace_back(true, timestamp, app, uid, 0);
+        int32_t prevVersion = 0;
+        auto key = std::make_pair(uid, app);
+        auto it = mMap.find(key);
+        if (it != mMap.end() && !it->second.deleted) {
+            prevVersion = it->second.versionCode;
+            it->second.deleted = true;
+            mDeletedApps.push_back(key);
+        }
+        if (mDeletedApps.size() > StatsdStats::kMaxDeletedAppsInUidMap) {
+            // Delete the oldest one.
+            auto oldest = mDeletedApps.front();
+            mDeletedApps.pop_front();
+            mMap.erase(oldest);
+            StatsdStats::getInstance().noteUidMapAppDeletionDropped();
+        }
+        mChanges.emplace_back(true, timestamp, app, uid, 0, prevVersion);
         mBytesUsed += kBytesChangeRecord;
         ensureBytesUsedBelowLimit();
         StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
         StatsdStats::getInstance().setUidMapChanges(mChanges.size());
-
-        auto range = mMap.equal_range(int(uid));
-        for (auto it = range.first; it != range.second; ++it) {
-            if (it->second.packageName == app) {
-                mMap.erase(it);
-                break;
-            }
-        }
         getListenerListCopyLocked(&broadcastList);
     }
 
@@ -290,22 +286,20 @@ int UidMap::getHostUidOrSelf(int uid) const {
 }
 
 void UidMap::clearOutput() {
-    mSnapshots.clear();
     mChanges.clear();
     // Also update the guardrail trackers.
     StatsdStats::getInstance().setUidMapChanges(0);
-    StatsdStats::getInstance().setUidMapSnapshots(1);
     mBytesUsed = 0;
     StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
 }
 
 int64_t UidMap::getMinimumTimestampNs() {
     int64_t m = 0;
-    for (auto it : mLastUpdatePerConfigKey) {
+    for (const auto& kv : mLastUpdatePerConfigKey) {
         if (m == 0) {
-            m = it.second;
-        } else if (it.second < m) {
-            m = it.second;
+            m = kv.second;
+        } else if (kv.second < m) {
+            m = kv.second;
         }
     }
     return m;
@@ -313,10 +307,6 @@ int64_t UidMap::getMinimumTimestampNs() {
 
 size_t UidMap::getBytesUsed() const {
     return mBytesUsed;
-}
-
-void UidMap::appendUidMap(const ConfigKey& key, ProtoOutputStream* proto) {
-    appendUidMap(getElapsedRealtimeNs(), key, proto);
 }
 
 void UidMap::appendUidMap(const int64_t& timestamp, const ConfigKey& key,
@@ -332,34 +322,27 @@ void UidMap::appendUidMap(const int64_t& timestamp, const ConfigKey& key,
                          (long long)record.timestampNs);
             proto->write(FIELD_TYPE_STRING | FIELD_ID_CHANGE_PACKAGE, record.package);
             proto->write(FIELD_TYPE_INT32 | FIELD_ID_CHANGE_UID, (int)record.uid);
-            proto->write(FIELD_TYPE_INT32 | FIELD_ID_CHANGE_VERSION, (int)record.version);
+            proto->write(FIELD_TYPE_INT32 | FIELD_ID_CHANGE_NEW_VERSION, (int)record.version);
+            proto->write(FIELD_TYPE_INT32 | FIELD_ID_CHANGE_PREV_VERSION, (int)record.prevVersion);
             proto->end(changesToken);
         }
     }
 
-    bool atLeastOneSnapshot = false;
-    unsigned int count = 0;
-    for (const SnapshotRecord& record : mSnapshots) {
-        // Ensure that we include at least the latest snapshot.
-        if ((count == mSnapshots.size() - 1 && !atLeastOneSnapshot) ||
-            record.timestampNs > mLastUpdatePerConfigKey[key]) {
-            uint64_t snapshotsToken =
-                    proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_SNAPSHOTS);
-            atLeastOneSnapshot = true;
-            count++;
-            proto->write(FIELD_TYPE_INT64 | FIELD_ID_SNAPSHOT_TIMESTAMP,
-                         (long long)record.timestampNs);
-            for (const SnapshotPackageInfo& info : record.infos) {
-                uint64_t token = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
-                                              FIELD_ID_SNAPSHOT_PACKAGE_INFO);
-                proto->write(FIELD_TYPE_STRING | FIELD_ID_SNAPSHOT_PACKAGE_NAME, info.package);
-                proto->write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_VERSION, info.version);
-                proto->write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_UID, info.uid);
-                proto->end(token);
-            }
-            proto->end(snapshotsToken);
-        }
+    // Write snapshot from current uid map state.
+    uint64_t snapshotsToken =
+            proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_SNAPSHOTS);
+    proto->write(FIELD_TYPE_INT64 | FIELD_ID_SNAPSHOT_TIMESTAMP, (long long)timestamp);
+    for (const auto& kv : mMap) {
+        uint64_t token = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                                      FIELD_ID_SNAPSHOT_PACKAGE_INFO);
+        proto->write(FIELD_TYPE_STRING | FIELD_ID_SNAPSHOT_PACKAGE_NAME, kv.first.second);
+        proto->write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_VERSION,
+                     (int)kv.second.versionCode);
+        proto->write(FIELD_TYPE_INT32 | FIELD_ID_SNAPSHOT_PACKAGE_UID, kv.first.first);
+        proto->write(FIELD_TYPE_BOOL | FIELD_ID_SNAPSHOT_PACKAGE_DELETED, kv.second.deleted);
+        proto->end(token);
     }
+    proto->end(snapshotsToken);
 
     int64_t prevMin = getMinimumTimestampNs();
     mLastUpdatePerConfigKey[key] = timestamp;
@@ -368,14 +351,6 @@ void UidMap::appendUidMap(const int64_t& timestamp, const ConfigKey& key,
     if (newMin > prevMin) {  // Delete anything possible now that the minimum has
                              // moved forward.
         int64_t cutoff_nanos = newMin;
-        for (auto it_snapshots = mSnapshots.begin(); it_snapshots != mSnapshots.end();) {
-            if (it_snapshots->timestampNs < cutoff_nanos) {
-                mBytesUsed -= it_snapshots->bytes;
-                it_snapshots = mSnapshots.erase(it_snapshots);
-            } else {
-                ++it_snapshots;
-            }
-        }
         for (auto it_changes = mChanges.begin(); it_changes != mChanges.end();) {
             if (it_changes->timestampNs < cutoff_nanos) {
                 mBytesUsed -= kBytesChangeRecord;
@@ -384,53 +359,24 @@ void UidMap::appendUidMap(const int64_t& timestamp, const ConfigKey& key,
                 ++it_changes;
             }
         }
-
-        if (mSnapshots.size() == 0) {
-            // Produce another snapshot. This results in extra data being uploaded but
-            // helps ensure we can re-construct the UID->app name, versionCode mapping
-            // in server.
-            vector<const SnapshotPackageInfo> infos;
-            for (const auto& it : mMap) {
-                infos.emplace_back(it.second.packageName, it.second.versionCode, it.first);
-            }
-
-            mSnapshots.emplace_back(timestamp, infos);
-            mBytesUsed += mSnapshots.back().bytes;
-        }
     }
     StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
     StatsdStats::getInstance().setUidMapChanges(mChanges.size());
-    StatsdStats::getInstance().setUidMapSnapshots(mSnapshots.size());
 }
 
 void UidMap::printUidMap(FILE* out) const {
     lock_guard<mutex> lock(mMutex);
 
-    for (auto it : mMap) {
-        fprintf(out, "%s, v%" PRId64 " (%i)\n", it.second.packageName.c_str(),
-                it.second.versionCode, it.first);
+    for (const auto& kv : mMap) {
+        if (!kv.second.deleted) {
+            fprintf(out, "%s, v%" PRId64 " (%i)\n", kv.first.second.c_str(), kv.second.versionCode,
+                    kv.first.first);
+        }
     }
 }
 
 void UidMap::OnConfigUpdated(const ConfigKey& key) {
     mLastUpdatePerConfigKey[key] = -1;
-
-    // Ensure there is at least one snapshot available since this configuration also needs to know
-    // what all the uid's represent.
-    if (mSnapshots.size() == 0) {
-        sp<IStatsCompanionService> statsCompanion = nullptr;
-        // Get statscompanion service from service manager
-        const sp<IServiceManager> sm(defaultServiceManager());
-        if (sm != nullptr) {
-            const String16 name("statscompanion");
-            statsCompanion = interface_cast<IStatsCompanionService>(sm->checkService(name));
-            if (statsCompanion == nullptr) {
-                ALOGW("statscompanion service unavailable!");
-                return;
-            }
-            statsCompanion->triggerUidSnapshot();
-        }
-    }
 }
 
 void UidMap::OnConfigRemoved(const ConfigKey& key) {
@@ -441,9 +387,9 @@ set<int32_t> UidMap::getAppUid(const string& package) const {
     lock_guard<mutex> lock(mMutex);
 
     set<int32_t> results;
-    for (const auto& pair : mMap) {
-        if (pair.second.packageName == package) {
-            results.insert(pair.first);
+    for (const auto& kv : mMap) {
+        if (kv.first.second == package && !kv.second.deleted) {
+            results.insert(kv.first.first);
         }
     }
     return results;

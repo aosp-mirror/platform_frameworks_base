@@ -73,11 +73,10 @@ struct ConfigStats {
 };
 
 struct UidMapStats {
-    int32_t snapshots;
     int32_t changes;
     int32_t bytes_used;
-    int32_t dropped_snapshots;
     int32_t dropped_changes;
+    int32_t deleted_apps = 0;
 };
 
 // Keeps track of stats of statsd.
@@ -120,6 +119,9 @@ public:
     // Cap the UID map's memory usage to this. This should be fairly high since the UID information
     // is critical for understanding the metrics.
     const static size_t kMaxBytesUsedUidMap = 50 * 1024;
+
+    // The number of deleted apps that are stored in the uid map.
+    const static int kMaxDeletedAppsInUidMap = 100;
 
     /* Minimum period between two broadcasts in nanoseconds. */
     static const int64_t kMinBroadcastPeriodNs = 60 * NS_PER_SEC;
@@ -244,14 +246,18 @@ public:
     void noteRegisteredPeriodicAlarmChanged();
 
     /**
-     * Records the number of snapshot and delta entries that are being dropped from the uid map.
+     * Records the number of delta entries that are being dropped from the uid map.
      */
-    void noteUidMapDropped(int snapshots, int deltas);
+    void noteUidMapDropped(int deltas);
 
     /**
-     * Updates the number of snapshots currently stored in the uid map.
+     * Records that an app was deleted (from statsd's map).
      */
-    void setUidMapSnapshots(int snapshots);
+    void noteUidMapAppDeletionDropped();
+
+    /**
+     * Updates the number of changes currently stored in the uid map.
+     */
     void setUidMapChanges(int changes);
     void setCurrentUidMapMemory(int bytes);
 
