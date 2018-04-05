@@ -18,6 +18,7 @@ package android.media.audiofx;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.os.Handler;
 import android.os.Looper;
@@ -133,9 +134,10 @@ public class AudioEffect {
               .fromString("7261676f-6d75-7369-6364-28e2fd3ac39e");
 
     /**
-     * Null effect UUID. Used when the UUID for effect type of
+     * Null effect UUID. See {@link AudioEffect(UUID, UUID, int, int)} for use.
      * @hide
      */
+    @TestApi
     public static final UUID EFFECT_TYPE_NULL = UUID
             .fromString("ec7178ec-e5e1-4432-a3f4-4657e6795210");
 
