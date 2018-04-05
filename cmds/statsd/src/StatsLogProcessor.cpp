@@ -158,7 +158,10 @@ void StatsLogProcessor::onIsolatedUidChangedEventLocked(const LogEvent& event) {
 void StatsLogProcessor::OnLogEvent(LogEvent* event) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
     const int64_t currentTimestampNs = event->GetElapsedTimestampNs();
+
     if (currentTimestampNs < mLastLogTimestamp) {
+        StatsdStats::getInstance().noteLogEventSkipped(
+            event->GetTagId(), event->GetElapsedTimestampNs());
         return;
     }
 

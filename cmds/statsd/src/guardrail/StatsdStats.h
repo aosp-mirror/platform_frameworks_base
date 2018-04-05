@@ -105,6 +105,8 @@ public:
 
     const static int kMaxLoggerErrors = 10;
 
+    const static int kMaxSkippedLogEvents = 200;
+
     const static int kMaxTimestampCount = 20;
 
     const static int kMaxLogSourceCount = 50;
@@ -270,6 +272,11 @@ public:
     void noteLoggerError(int error);
 
     /**
+     * Records statsd skipped an event.
+     */
+    void noteLogEventSkipped(int tag, int64_t timestamp);
+
+    /**
      * Reset the historical stats. Including all stats in icebox, and the tracked stats about
      * metrics, matchers, and atoms. The active configs will be kept and StatsdStats will continue
      * to collect stats after reset() has been called.
@@ -323,6 +330,9 @@ private:
 
     // Logd errors. Size capped by kMaxLoggerErrors.
     std::list<const std::pair<int, int>> mLoggerErrors;
+
+    // Skipped log events.
+    std::list<const std::pair<int, int64_t>> mSkippedLogEvents;
 
     // Stores the number of times statsd modified the anomaly alarm registered with
     // StatsCompanionService.
