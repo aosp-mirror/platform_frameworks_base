@@ -36,7 +36,6 @@ import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.Manifest;
 import android.app.ActivityOptions;
-import android.app.AppGlobals;
 import android.app.KeyguardManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Context;
@@ -342,9 +341,9 @@ class ActivityStartInterceptor {
     private boolean interceptHarmfulAppIfNeeded() {
         CharSequence harmfulAppWarning;
         try {
-            harmfulAppWarning = AppGlobals.getPackageManager().getHarmfulAppWarning(
-                    mAInfo.packageName, mUserId);
-        } catch (RemoteException e) {
+            harmfulAppWarning = mService.getPackageManager()
+                    .getHarmfulAppWarning(mAInfo.packageName, mUserId);
+        } catch (RemoteException ex) {
             return false;
         }
 

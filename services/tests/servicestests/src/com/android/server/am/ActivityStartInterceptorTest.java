@@ -42,6 +42,7 @@ import android.testing.DexmakerShareClassLoaderRule;
 
 import com.android.internal.app.UnlaunchableAppActivity;
 import com.android.server.LocalServices;
+import com.android.server.pm.PackageManagerService;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -90,6 +91,8 @@ public class ActivityStartInterceptorTest {
     private UserController mUserController;
     @Mock
     private KeyguardManager mKeyguardManager;
+    @Mock
+    private PackageManagerService mPackageManager;
 
     private ActivityStartInterceptor mInterceptor;
     private ActivityInfo mAInfo = new ActivityInfo();
@@ -120,6 +123,11 @@ public class ActivityStartInterceptorTest {
         when(mKeyguardManager.createConfirmDeviceCredentialIntent(
                 nullable(CharSequence.class), nullable(CharSequence.class), eq(TEST_USER_ID))).
                 thenReturn(CONFIRM_CREDENTIALS_INTENT);
+
+        // Mock PackageManager
+        when(mService.getPackageManager()).thenReturn(mPackageManager);
+        when(mPackageManager.getHarmfulAppWarning(TEST_PACKAGE_NAME, TEST_USER_ID))
+                .thenReturn(null);
 
         // Initialise activity info
         mAInfo.applicationInfo = new ApplicationInfo();
