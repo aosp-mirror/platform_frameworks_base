@@ -59,7 +59,6 @@
             android:src="@drawable/screen_pinning_bg_circ" />
 
         <ImageView
-            android:id="@+id/screen_pinning_back_icon"
             android:layout_height="match_parent"
             android:layout_width="match_parent"
             android:scaleType="center"
@@ -141,6 +140,7 @@
             android:src="@drawable/screen_pinning_bg_circ" />
 
         <ImageView
+            android:id="@+id/screen_pinning_back_icon"
             android:layout_height="match_parent"
             android:layout_width="match_parent"
             android:scaleType="center"
