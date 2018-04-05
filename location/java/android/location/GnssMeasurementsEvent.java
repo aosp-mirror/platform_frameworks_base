@@ -74,6 +74,13 @@ public final class GnssMeasurementsEvent implements Parcelable {
         /**
          * The client is not allowed to register for GNSS Measurements in general or in the
          * requested mode.
+         *
+         * <p>Such a status is returned when a client tries to request a functionality from the GNSS
+         * chipset while another client has an ongoing request that does not allow such
+         * functionality to be performed.
+         *
+         * <p>If such a status is received, one would try again at a later time point where no
+         * other client is having a conflicting request.
          */
         public static final int STATUS_NOT_ALLOWED = 3;
 
