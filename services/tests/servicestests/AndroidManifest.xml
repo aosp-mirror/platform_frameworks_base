@@ -63,6 +63,7 @@
     <uses-permission android:name="android.permission.WATCH_APPOPS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.SUSPEND_APPS"/>
+    <uses-permission android:name="android.permission.CONTROL_KEYGUARD"/>
 
     <!-- Uses API introduced in O (26) -->
     <uses-sdk android:minSdkVersion="1"
@@ -144,6 +145,15 @@
 
         <activity android:name="com.android.server.pm.ShortcutTestActivity"
                  android:enabled="true" android:exported="true" />
+
+        <activity android:name="com.android.server.pm.SuspendedDetailsActivity"
+                  android:enabled="true"
+                  android:permission="android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS">
+            <intent-filter>
+                <action android:name="android.intent.action.SHOW_SUSPENDED_APP_DETAILS" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <activity android:name="com.android.server.accounts.AccountAuthenticatorDummyActivity" />
 
