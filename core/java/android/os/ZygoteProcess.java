@@ -467,7 +467,8 @@ public class ZygoteProcess {
      * <p>The list of exemptions will take affect for all new processes forked from the zygote after
      * this call.
      *
-     * @param exemptions List of hidden API exemption prefixes.
+     * @param exemptions List of hidden API exemption prefixes. Any matching members are treated as
+     *        whitelisted/public APIs (i.e. allowed, no logging of usage).
      */
     public void setApiBlacklistExemptions(List<String> exemptions) {
         synchronized (mLock) {
