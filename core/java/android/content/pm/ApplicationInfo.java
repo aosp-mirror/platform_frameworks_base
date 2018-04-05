@@ -610,6 +610,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_PRODUCT = 1 << 19;
 
+    /**
+     * Value for {@link #privateFlags}: whether this app is signed with the
+     * platform key.
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY = 1 << 20;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_" }, value = {
             PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE,
@@ -629,6 +636,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             PRIVATE_FLAG_PRIVILEGED,
             PRIVATE_FLAG_PRODUCT,
             PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER,
+            PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY,
             PRIVATE_FLAG_STATIC_SHARED_LIBRARY,
             PRIVATE_FLAG_VENDOR,
             PRIVATE_FLAG_VIRTUAL_PRELOAD,
@@ -1658,6 +1666,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         return SystemConfig.getInstance().getHiddenApiWhitelistedApps().contains(packageName);
     }
 
+    private boolean isAllowedToUseHiddenApis() {
+        return isSignedWithPlatformKey()
+            || (isPackageWhitelistedForHiddenApis() && (isSystemApp() || isUpdatedSystemApp()));
+    }
+
     /**
      * @hide
      */
@@ -1665,7 +1678,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         if (mHiddenApiPolicy != HIDDEN_API_ENFORCEMENT_DEFAULT) {
             return mHiddenApiPolicy;
         }
-        if (isPackageWhitelistedForHiddenApis() && (isSystemApp() || isUpdatedSystemApp())) {
+        if (isAllowedToUseHiddenApis()) {
             return HIDDEN_API_ENFORCEMENT_NONE;
         }
         return HIDDEN_API_ENFORCEMENT_BLACK;
@@ -1755,6 +1768,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /** @hide */
     public boolean isPartiallyDirectBootAware() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE) != 0;
+    }
+
+    /** @hide */
+    public boolean isSignedWithPlatformKey() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY) != 0;
     }
 
     /** @hide */
