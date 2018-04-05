@@ -34,7 +34,7 @@ namespace incidentd {
 void PrivacyBuffer::writeFieldOrSkip(uint32_t fieldTag, bool skip) {
     uint8_t wireType = read_wire_type(fieldTag);
     size_t bytesToWrite = 0;
-    uint32_t varint = 0;
+    uint64_t varint = 0;
 
     switch (wireType) {
         case WIRE_TYPE_VARINT:
