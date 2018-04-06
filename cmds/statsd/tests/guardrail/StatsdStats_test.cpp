@@ -129,9 +129,9 @@ TEST(StatsdStatsTest, TestSubStats) {
     stats.noteDataDropped(key);
 
     // dump report -> 3
-    stats.noteMetricsReportSent(key);
-    stats.noteMetricsReportSent(key);
-    stats.noteMetricsReportSent(key);
+    stats.noteMetricsReportSent(key, 0);
+    stats.noteMetricsReportSent(key, 0);
+    stats.noteMetricsReportSent(key, 0);
 
     vector<uint8_t> output;
     stats.dumpStats(&output, true);  // Dump and reset stats
@@ -143,6 +143,7 @@ TEST(StatsdStatsTest, TestSubStats) {
     EXPECT_EQ(2, configReport.broadcast_sent_time_sec_size());
     EXPECT_EQ(1, configReport.data_drop_time_sec_size());
     EXPECT_EQ(3, configReport.dump_report_time_sec_size());
+    EXPECT_EQ(3, configReport.dump_report_data_size_size());
     EXPECT_EQ(1, configReport.annotation_size());
     EXPECT_EQ(123, configReport.annotation(0).field_int64());
     EXPECT_EQ(456, configReport.annotation(0).field_int32());
@@ -268,7 +269,7 @@ TEST(StatsdStatsTest, TestTimestampThreshold) {
     for (int i = 0; i < StatsdStats::kMaxTimestampCount; i++) {
         stats.noteDataDropped(key, timestamps[i]);
         stats.noteBroadcastSent(key, timestamps[i]);
-        stats.noteMetricsReportSent(key, timestamps[i]);
+        stats.noteMetricsReportSent(key, 0, timestamps[i]);
     }
 
     int32_t newTimestamp = 10000;
@@ -276,7 +277,7 @@ TEST(StatsdStatsTest, TestTimestampThreshold) {
     // now it should trigger removing oldest timestamp
     stats.noteDataDropped(key, 10000);
     stats.noteBroadcastSent(key, 10000);
-    stats.noteMetricsReportSent(key, 10000);
+    stats.noteMetricsReportSent(key, 0, 10000);
 
     EXPECT_TRUE(stats.mConfigStats.find(key) != stats.mConfigStats.end());
     const auto& configStats = stats.mConfigStats[key];
@@ -284,7 +285,7 @@ TEST(StatsdStatsTest, TestTimestampThreshold) {
     size_t maxCount = StatsdStats::kMaxTimestampCount;
     EXPECT_EQ(maxCount, configStats->broadcast_sent_time_sec.size());
     EXPECT_EQ(maxCount, configStats->data_drop_time_sec.size());
-    EXPECT_EQ(maxCount, configStats->dump_report_time_sec.size());
+    EXPECT_EQ(maxCount, configStats->dump_report_stats.size());
 
     // the oldest timestamp is the second timestamp in history
     EXPECT_EQ(1, configStats->broadcast_sent_time_sec.front());
@@ -294,7 +295,7 @@ TEST(StatsdStatsTest, TestTimestampThreshold) {
     // the last timestamp is the newest timestamp.
     EXPECT_EQ(newTimestamp, configStats->broadcast_sent_time_sec.back());
     EXPECT_EQ(newTimestamp, configStats->data_drop_time_sec.back());
-    EXPECT_EQ(newTimestamp, configStats->dump_report_time_sec.back());
+    EXPECT_EQ(newTimestamp, configStats->dump_report_stats.back().first);
 }
 
 }  // namespace statsd

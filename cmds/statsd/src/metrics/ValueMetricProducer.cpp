@@ -147,9 +147,14 @@ void ValueMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
 }
 
 void ValueMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
+                                             const bool include_current_partial_bucket,
                                              ProtoOutputStream* protoOutput) {
     VLOG("metric %lld dump report now...", (long long)mMetricId);
-    flushIfNeededLocked(dumpTimeNs);
+    if (include_current_partial_bucket) {
+        flushLocked(dumpTimeNs);
+    } else {
+        flushIfNeededLocked(dumpTimeNs);
+    }
     if (mPastBuckets.empty()) {
         return;
     }

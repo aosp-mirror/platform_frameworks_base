@@ -156,8 +156,14 @@ void GaugeMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
 }
 
 void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
+                                             const bool include_current_partial_bucket,
                                              ProtoOutputStream* protoOutput) {
     VLOG("Gauge metric %lld report now...", (long long)mMetricId);
+    if (include_current_partial_bucket) {
+        flushLocked(dumpTimeNs);
+    } else {
+        flushIfNeededLocked(dumpTimeNs);
+    }
 
     flushIfNeededLocked(dumpTimeNs);
     if (mPastBuckets.empty()) {
