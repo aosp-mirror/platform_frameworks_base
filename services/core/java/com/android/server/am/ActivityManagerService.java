@@ -12959,9 +12959,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         } catch (RemoteException exc) {
             // Ignore.
         }
+        return isBackgroundRestrictedNoCheck(callingUid, packageName);
+    }
+
+    boolean isBackgroundRestrictedNoCheck(final int uid, final String packageName) {
         final int mode = mAppOpsService.checkOperation(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND,
-                callingUid, packageName);
-        return (mode != AppOpsManager.MODE_ALLOWED);
+                uid, packageName);
+        return mode != AppOpsManager.MODE_ALLOWED;
     }
 
     @Override
@@ -21056,6 +21060,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
+        final String action = intent.getAction();
         BroadcastOptions brOptions = null;
         if (bOptions != null) {
             brOptions = new BroadcastOptions(bOptions);
@@ -21076,11 +21081,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                     throw new SecurityException(msg);
                 }
             }
+            if (brOptions.isDontSendToRestrictedApps()
+                    && isBackgroundRestrictedNoCheck(callingUid, callerPackage)) {
+                Slog.i(TAG, "Not sending broadcast " + action + " - app " + callerPackage
+                        + " has background restrictions");
+                return ActivityManager.START_CANCELED;
+            }
         }
 
         // Verify that protected broadcasts are only being sent by system code,
         // and that system code is only sending protected broadcasts.
-        final String action = intent.getAction();
         final boolean isProtectedBroadcast;
         try {
             isProtectedBroadcast = AppGlobals.getPackageManager().isProtectedBroadcast(action);

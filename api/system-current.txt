@@ -317,6 +317,7 @@ package android.app {
 
   public class BroadcastOptions {
     method public static android.app.BroadcastOptions makeBasic();
+    method public void setDontSendToRestrictedApps(boolean);
     method public void setTemporaryAppWhitelistDuration(long);
     method public android.os.Bundle toBundle();
   }
