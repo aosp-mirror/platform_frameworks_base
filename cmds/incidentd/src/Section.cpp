@@ -308,7 +308,7 @@ GZipSection::GZipSection(int id, const char* filename, ...) : Section(id) {
     }
 }
 
-GZipSection::~GZipSection() {}
+GZipSection::~GZipSection() { free(mFilenames); }
 
 status_t GZipSection::Execute(ReportRequestSet* requests) const {
     // Reads the files in order, use the first available one.
