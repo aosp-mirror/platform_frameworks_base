@@ -6810,6 +6810,9 @@ public class Intent implements Parcelable, Cloneable {
                 case "--activity-task-on-home":
                     intent.addFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME);
                     break;
+                case "--activity-match-external":
+                    intent.addFlags(Intent.FLAG_ACTIVITY_MATCH_EXTERNAL);
+                    break;
                 case "--receiver-registered-only":
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                     break;
@@ -6946,7 +6949,7 @@ public class Intent implements Parcelable, Cloneable {
                 "    [--activity-no-user-action] [--activity-previous-is-top]",
                 "    [--activity-reorder-to-front] [--activity-reset-task-if-needed]",
                 "    [--activity-single-top] [--activity-clear-task]",
-                "    [--activity-task-on-home]",
+                "    [--activity-task-on-home] [--activity-match-external]",
                 "    [--receiver-registered-only] [--receiver-replace-pending]",
                 "    [--receiver-foreground] [--receiver-no-abort]",
                 "    [--receiver-include-background]",
