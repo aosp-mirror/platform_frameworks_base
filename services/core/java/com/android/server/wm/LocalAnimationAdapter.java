@@ -146,6 +146,13 @@ class LocalAnimationAdapter implements AnimationAdapter {
             return false;
         }
 
+        /**
+         * @return {@code true} if we need to wake-up SurfaceFlinger earlier during this animation.
+         *
+         * @see Transaction#setEarlyWakeup
+         */
+        default boolean needsEarlyWakeup() { return false; }
+
         void dump(PrintWriter pw, String prefix);
 
         default void writeToProto(ProtoOutputStream proto, long fieldId) {

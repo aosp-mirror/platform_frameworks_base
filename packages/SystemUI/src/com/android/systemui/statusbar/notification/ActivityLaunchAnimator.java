@@ -238,6 +238,7 @@ public class ActivityLaunchAnimator {
                 t.deferTransactionUntilSurface(app.leash, systemUiSurface,
                         systemUiSurface.getNextFrameNumber());
             }
+            t.setEarlyWakeup();
             t.apply();
         }
 
