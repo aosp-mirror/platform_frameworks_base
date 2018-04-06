@@ -97,7 +97,7 @@ public class PreciseDisconnectCause {
     /** This cause is used to report a resource unavailable event only when no other
      *  cause in the resource unavailable class applies
      */
-    public static final int RESOURCES_UNAVAILABLE_OR_UNSPECIFIED             = 44;
+    public static final int RESOURCES_UNAVAILABLE_OR_UNSPECIFIED             = 47;
     /** The requested quality of service (ITU-T X.213) cannot be provided */
     public static final int QOS_NOT_AVAIL                                    = 49;
     /** The facility could not be provided by the network because the user has no
