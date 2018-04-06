@@ -365,6 +365,10 @@ public final class ColorDisplayController {
      * Get the current color mode.
      */
     public int getColorMode() {
+        if (getAccessibilityTransformActivated()) {
+            return COLOR_MODE_SATURATED;
+        }
+
         final int colorMode = System.getIntForUser(mContext.getContentResolver(),
             System.DISPLAY_COLOR_MODE, -1, mUserId);
         if (colorMode < COLOR_MODE_NATURAL || colorMode > COLOR_MODE_SATURATED) {
@@ -416,6 +420,18 @@ public final class ColorDisplayController {
                 R.integer.config_nightDisplayColorTemperatureDefault);
     }
 
+    /**
+     * Returns true if any Accessibility color transforms are enabled.
+     */
+    public boolean getAccessibilityTransformActivated() {
+        final ContentResolver cr = mContext.getContentResolver();
+        return
+            Secure.getIntForUser(cr, Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED,
+                    0, mUserId) == 1
+            || Secure.getIntForUser(cr, Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED,
+                    0, mUserId) == 1;
+    }
+
     private void onSettingChanged(@NonNull String setting) {
         if (DEBUG) {
             Slog.d(TAG, "onSettingChanged: " + setting);
@@ -440,6 +456,10 @@ public final class ColorDisplayController {
                     break;
                 case System.DISPLAY_COLOR_MODE:
                     mCallback.onDisplayColorModeChanged(getColorMode());
+                    break;
+                case Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED:
+                case Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED:
+                    mCallback.onAccessibilityTransformChanged(getAccessibilityTransformActivated());
                     break;
             }
         }
@@ -470,6 +490,12 @@ public final class ColorDisplayController {
                 cr.registerContentObserver(Secure.getUriFor(Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE),
                         false /* notifyForDescendants */, mContentObserver, mUserId);
                 cr.registerContentObserver(System.getUriFor(System.DISPLAY_COLOR_MODE),
+                        false /* notifyForDecendants */, mContentObserver, mUserId);
+                cr.registerContentObserver(
+                        Secure.getUriFor(Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED),
+                        false /* notifyForDecendants */, mContentObserver, mUserId);
+                cr.registerContentObserver(
+                        Secure.getUriFor(Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED),
                         false /* notifyForDecendants */, mContentObserver, mUserId);
             }
         }
@@ -531,5 +557,12 @@ public final class ColorDisplayController {
          * @param displayColorMode the color mode
          */
         default void onDisplayColorModeChanged(int displayColorMode) {}
+
+        /**
+         * Callback invoked when Accessibility color transforms change.
+         *
+         * @param state the state Accessibility color transforms (true of active)
+         */
+        default void onAccessibilityTransformChanged(boolean state) {}
     }
 }
