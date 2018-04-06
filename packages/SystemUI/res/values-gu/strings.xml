@@ -74,10 +74,8 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"સ્ક્રીનશોટ સાચવી રહ્યું છે…"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"સ્ક્રીનશૉટ સાચવ્યો"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"તમારા સ્ક્રીનશૉટને જોવા માટે ટૅપ કરો"</string>
-    <!-- no translation found for screenshot_failed_title (7612509838919089748) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_to_save_unknown_text (3637758096565605541) -->
-    <skip />
+    <string name="screenshot_failed_title" msgid="7612509838919089748">"સ્ક્રીનશૉટ સાચવી શક્યાં નથી"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"ફરીથી સ્ક્રીનશૉટ લેવાનો પ્રયાસ કરો"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"મર્યાદિત સ્ટોરેજ સ્પેસને કારણે સ્ક્રીનશૉટ સાચવી શકાતો નથી"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"ઍપ્લિકેશન કે તમારી સંસ્થા દ્વારા સ્ક્રીનશૉટ લેવાની મંજૂરી નથી"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ફાઇલ ટ્રાન્સફર વિકલ્પો"</string>
@@ -348,8 +346,7 @@
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"સૂર્યાસ્ત વખતે"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"સૂર્યોદય સુધી"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> વાગ્યે"</string>
-    <!-- no translation found for quick_settings_secondary_label_until (2749196569462600150) -->
-    <skip />
+    <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> સુધી"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC અક્ષમ કરેલ છે"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC સક્ષમ કરેલ છે"</string>
@@ -433,8 +430,7 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> તમારી સ્ક્રીન પર જે પ્રદર્શિત થાય છે તે દરેક વસ્તુને કેપ્ચર કરવાનું પ્રારંભ કરશે."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ફરીથી બતાવશો નહીં"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"બધુ સાફ કરો"</string>
-    <!-- no translation found for manage_notifications_text (8035284146227267681) -->
-    <skip />
+    <string name="manage_notifications_text" msgid="8035284146227267681">"સૂચનાઓને મેનેજ કરો"</string>
     <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"ખલેલ પાડશો નહીં નોટિફિકેશન છુપાવી રહ્યું છે"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"હવે પ્રારંભ કરો"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"કોઈ સૂચનાઓ નથી"</string>
@@ -633,8 +629,7 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"સૂચના નિયંત્રણો"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"સૂચના સ્નૂઝ કરવાના વિકલ્પો"</string>
-    <!-- no translation found for notification_menu_snooze_action (1112254519029621372) -->
-    <skip />
+    <string name="notification_menu_snooze_action" msgid="1112254519029621372">"સ્નૂઝ કરો"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"પૂર્વવત્ કરો"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> માટે સ્નૂઝ કરો"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">

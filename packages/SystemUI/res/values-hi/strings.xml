@@ -74,10 +74,8 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"स्क्रीनशॉट सहेजा जा रहा है..."</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"स्क्रीनशॉट सेव किया गया"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"अपना स्क्रीनशॉट देखने के लिए टैप करें"</string>
-    <!-- no translation found for screenshot_failed_title (7612509838919089748) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_to_save_unknown_text (3637758096565605541) -->
-    <skip />
+    <string name="screenshot_failed_title" msgid="7612509838919089748">"स्क्रीनशॉट सेव नहीं किया जा सका"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"स्क्रीनशॉट दोबारा लेने की कोशिश करें"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"मेमोरी कम होने की वजह से स्क्रीनशॉट सेव नहीं किया जा सका"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"ऐप्लिकेशन या आपका संगठन स्क्रीनशॉट लेने की अनुमति नहीं देता"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB फ़ाइल स्थानांतरण विकल्प"</string>
@@ -348,8 +346,7 @@
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"शाम को चालू की जाएगी"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"सुबह तक चालू रहेगी"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> पर चालू की जाएगी"</string>
-    <!-- no translation found for quick_settings_secondary_label_until (2749196569462600150) -->
-    <skip />
+    <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> तक"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC बंद है"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC चालू है"</string>
@@ -433,8 +430,7 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> आपके स्क्रीन पर दिखाई देने वाली हर सामग्री को कैप्चर करना शुरू कर देगी."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"फिर से न दिखाएं"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"सभी साफ़ करें"</string>
-    <!-- no translation found for manage_notifications_text (8035284146227267681) -->
-    <skip />
+    <string name="manage_notifications_text" msgid="8035284146227267681">"सूचनाएं प्रबंधित करें"</string>
     <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"परेशान न करें सुविधा चालू होने की वजह से सूचनाएं नहीं दिखाई जा रही हैं"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"अब शुरू करें"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"कोई सूचना नहीं मिली"</string>
@@ -633,8 +629,7 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"सूचना नियंत्रण"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"सूचना को स्नूज़ (थोड़ी देर के लिए चुप करना) करने के विकल्प"</string>
-    <!-- no translation found for notification_menu_snooze_action (1112254519029621372) -->
-    <skip />
+    <string name="notification_menu_snooze_action" msgid="1112254519029621372">"स्नूज़ करें"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"पहले जैसा करें"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> के लिए याद दिलाया गया"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">

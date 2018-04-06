@@ -75,7 +75,7 @@
     <string name="screenshot_saved_title" msgid="5637073968117370753">"Screenshot gespeichert"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"Tippe, um deinen Screenshot anzusehen"</string>
     <string name="screenshot_failed_title" msgid="7612509838919089748">"Screenshot konnte nicht gespeichert werden"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Erstelle einen weiteren Screenshot"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Versuche noch einmal, den Screenshot zu erstellen"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Speichern des Screenshots aufgrund von zu wenig Speicher nicht möglich"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Die App oder deine Organisation lässt das Erstellen von Screenshots nicht zu"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB-Dateiübertragungsoptionen"</string>

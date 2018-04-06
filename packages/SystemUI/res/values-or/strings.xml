@@ -74,10 +74,8 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"ସ୍କ୍ରୀନଶଟ୍‍ ସେଭ୍‍ କରାଯାଉଛି…"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"ସ୍କ୍ରୀନଶଟ୍ ସେଭ୍ ହୋଇଛି"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"ସ୍କ୍ରୀନଶଟ୍‍ ଦେଖିବା ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ"</string>
-    <!-- no translation found for screenshot_failed_title (7612509838919089748) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_to_save_unknown_text (3637758096565605541) -->
-    <skip />
+    <string name="screenshot_failed_title" msgid="7612509838919089748">"ସ୍କ୍ରୀନ୍‍ଶଟ୍ ସେଭ୍ କରିହେବ ନାହିଁ"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"ପୁଣିଥରେ ସ୍କ୍ରୀନ୍‌ଶଟ୍ ନେବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"ସୀମିତ ଷ୍ଟୋରେଜ୍‍ ସ୍ପେସ୍‍ ହେତୁ ସ୍କ୍ରୀନଶଟ୍‍ ସେଭ୍‍ ହୋଇପାରିବ ନାହିଁ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"ଆପ୍‍ କିମ୍ବା ସଂସ୍ଥା ଦ୍ୱାରା ସ୍କ୍ରୀନଶଟ୍‍ ନେବାକୁ ଅନୁମତି ଦିଆଯାଇ ନାହିଁ"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ଫାଇଲ୍‌ ଟ୍ରାନ୍ସଫର୍‌ର ବିକଳ୍ପ"</string>
@@ -348,8 +346,7 @@
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"ସୂର୍ଯ୍ୟାସ୍ତ ବେଳେ ଅନ୍ ହେବ"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"ସୂର୍ଯ୍ୟୋଦୟ ପର୍ଯ୍ୟନ୍ତ"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g>ରେ ଅନ୍ ହେବ"</string>
-    <!-- no translation found for quick_settings_secondary_label_until (2749196569462600150) -->
-    <skip />
+    <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> ପର୍ଯ୍ୟନ୍ତ"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC ଅକ୍ଷମ କରାଯାଇଛି"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC ସକ୍ଷମ କରାଯାଇଛି"</string>
@@ -433,8 +430,7 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ଆପଣଙ୍କ ସ୍କ୍ରୀନ୍‌ରେ ପ୍ରଦର୍ଶିତ ହେଉଥିବା ସମସ୍ତ ବସ୍ତୁକୁ କ୍ୟାପଚର୍ କରିବା ଆରମ୍ଭ ହୋଇଯିବ।"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ପୁଣି ଦେଖାନ୍ତୁ ନାହିଁ"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"ସମସ୍ତ ଖାଲି କରନ୍ତୁ"</string>
-    <!-- no translation found for manage_notifications_text (8035284146227267681) -->
-    <skip />
+    <string name="manage_notifications_text" msgid="8035284146227267681">"ବିଜ୍ଞପ୍ତି ପରିଚାଳନା କରନ୍ତୁ"</string>
     <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ମୋଡ୍‌ ଅନ୍‌ ଥିବାଯୋଗୁଁ ବିଜ୍ଞପ୍ତି ଲୁଚାଇ ଦିଆଯାଉଛି"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ବର୍ତ୍ତମାନ ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"କୌଣସି ବିଜ୍ଞପ୍ତି ନାହିଁ"</string>
@@ -633,8 +629,7 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"ବିଜ୍ଞପ୍ତି ନିୟନ୍ତ୍ରଣ"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"ବିଜ୍ଞପ୍ତି ସ୍ନୁଜ୍‍ ବିକଳ୍ପ"</string>
-    <!-- no translation found for notification_menu_snooze_action (1112254519029621372) -->
-    <skip />
+    <string name="notification_menu_snooze_action" msgid="1112254519029621372">"ସ୍ନୁଜ୍"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ପୂର୍ବାବସ୍ଥାକୁ ଫେରାଇ ଆଣନ୍ତୁ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"<xliff:g id="TIME_AMOUNT">%1$s</xliff:g> ପାଇଁ ସ୍ନୁଜ୍‍ କରାଗଲା"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
