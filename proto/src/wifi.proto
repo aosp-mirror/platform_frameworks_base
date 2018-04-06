@@ -1271,8 +1271,15 @@ message WifiWakeStats {
     // Start time of session in milliseconds.
     optional int64 start_time_millis = 1;
 
-    // The number of networks the lock was initialized with at start.
+    // The number of networks the lock was provided with at start.
     optional int32 locked_networks_at_start = 2;
+
+    // The number of networks in the lock at the time of the initialize event. Only valid if
+    // initialize_event is recorded.
+    optional int32 locked_networks_at_initialize = 6;
+
+    // Event for fully initializing the WakeupLock (i.e. WakeupLock is "locked").
+    optional Event initialize_event = 7;
 
     // Event for unlocking the WakeupLock. Does not occur if lock was initialized with 0 networks.
     optional Event unlock_event = 3;
@@ -1289,4 +1296,10 @@ message WifiWakeStats {
 
   // Session information for every Wifi Wake session (up to a maximum of 10).
   repeated Session sessions = 2;
+
+  // Number of ignored calls to start (due to WakeupController already being active).
+  optional int32 num_ignored_starts = 3;
+
+  // Number of Wifi Wake sessions that have recorded wakeup events.
+  optional int32 num_wakeups = 4;
 }
