@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
@@ -17,23 +18,34 @@ import java.net.URISyntaxException;
  */
 public class CarNavigationButton extends com.android.keyguard.AlphaOptimizedImageButton {
 
-    private static final float SELECTED_ALPHA = 1;
-    private static final float UNSELECTED_ALPHA = 0.7f;
-
+    private static final String TAG = "CarNavigationButton";
     private Context mContext;
-    private String mIntent = null;
-    private String mLongIntent = null;
-    private boolean mBroadcastIntent = false;
+    private String mIntent;
+    private String mLongIntent;
+    private boolean mBroadcastIntent;
     private boolean mSelected = false;
+    private float mSelectedAlpha;
+    private float mUnselectedAlpha;
+    private int mSelectedIconResourceId;
+    private int mIconResourceId;
 
 
     public CarNavigationButton(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
-        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.CarNavigationButton);
+        TypedArray typedArray = context.obtainStyledAttributes(
+                attrs, R.styleable.CarNavigationButton);
         mIntent = typedArray.getString(R.styleable.CarNavigationButton_intent);
         mLongIntent = typedArray.getString(R.styleable.CarNavigationButton_longIntent);
         mBroadcastIntent = typedArray.getBoolean(R.styleable.CarNavigationButton_broadcast, false);
+        mSelectedAlpha = typedArray.getFloat(
+                R.styleable.CarNavigationButton_selectedAlpha, mSelectedAlpha);
+        mUnselectedAlpha = typedArray.getFloat(
+                R.styleable.CarNavigationButton_unselectedAlpha, mUnselectedAlpha);
+        mIconResourceId = typedArray.getResourceId(
+                com.android.internal.R.styleable.ImageView_src, 0);
+        mSelectedIconResourceId = typedArray.getResourceId(
+                R.styleable.CarNavigationButton_selectedIcon, mIconResourceId);
     }
 
 
@@ -45,17 +57,20 @@ public class CarNavigationButton extends com.android.keyguard.AlphaOptimizedImag
     public void onFinishInflate() {
         super.onFinishInflate();
         setScaleType(ImageView.ScaleType.CENTER);
-        setAlpha(UNSELECTED_ALPHA);
+        setAlpha(mUnselectedAlpha);
         try {
             if (mIntent != null) {
                 final Intent intent = Intent.parseUri(mIntent, Intent.URI_INTENT_SCHEME);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                 setOnClickListener(v -> {
-                    if (mBroadcastIntent) {
-                        mContext.sendBroadcast(intent);
-                        return;
+                    try {
+                        if (mBroadcastIntent) {
+                            mContext.sendBroadcast(intent);
+                            return;
+                        }
+                        mContext.startActivity(intent);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Failed to launch intent", e);
                     }
-                    mContext.startActivity(intent);
                 });
             }
         } catch (URISyntaxException e) {
@@ -65,9 +80,13 @@ public class CarNavigationButton extends com.android.keyguard.AlphaOptimizedImag
         try {
             if (mLongIntent != null) {
                 final Intent intent = Intent.parseUri(mLongIntent, Intent.URI_INTENT_SCHEME);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                 setOnLongClickListener(v -> {
-                    mContext.startActivity(intent);
+                    try {
+                        mContext.startActivity(intent);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Failed to launch intent", e);
+                    }
+                    // consume event either way
                     return true;
                 });
             }
@@ -82,6 +101,7 @@ public class CarNavigationButton extends com.android.keyguard.AlphaOptimizedImag
     public void setSelected(boolean selected) {
         super.setSelected(selected);
         mSelected = selected;
-        setAlpha(mSelected ? SELECTED_ALPHA : UNSELECTED_ALPHA);
+        setAlpha(mSelected ? mSelectedAlpha : mUnselectedAlpha);
+        setImageResource(mSelected ? mSelectedIconResourceId : mIconResourceId);
     }
 }
