@@ -333,7 +333,7 @@ public class ShareActionProvider extends ActionProvider {
         @Override
         public boolean onChooseActivity(ActivityChooserModel host, Intent intent) {
             if (mOnShareTargetSelectedListener != null) {
-                mOnShareTargetSelectedListener.onShareTargetSelected(
+                return mOnShareTargetSelectedListener.onShareTargetSelected(
                         ShareActionProvider.this, intent);
             }
             return false;
