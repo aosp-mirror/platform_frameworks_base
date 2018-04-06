@@ -34,6 +34,7 @@ import android.net.NetworkRequest;
 import android.net.ProxyInfo;
 import android.net.TrafficStats;
 import android.net.Uri;
+import android.net.dns.ResolvUtil;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
 import android.net.metrics.ValidationProbeEvent;
@@ -64,6 +65,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
+import com.android.server.connectivity.DnsManager.PrivateDnsConfig;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -77,6 +79,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -165,7 +168,7 @@ public class NetworkMonitor extends StateMachine {
      * Force evaluation even if it has succeeded in the past.
      * arg1 = UID responsible for requesting this reeval.  Will be billed for data.
      */
-    public static final int CMD_FORCE_REEVALUATION = BASE + 8;
+    private static final int CMD_FORCE_REEVALUATION = BASE + 8;
 
     /**
      * Message to self indicating captive portal app finished.
@@ -205,9 +208,15 @@ public class NetworkMonitor extends StateMachine {
      * Private DNS. If a DNS resolution is required, e.g. for DNS-over-TLS in
      * strict mode, then an event is sent back to ConnectivityService with the
      * result of the resolution attempt.
+     *
+     * A separate message is used to trigger (re)evaluation of the Private DNS
+     * configuration, so that the message can be handled as needed in different
+     * states, including being ignored until after an ongoing captive portal
+     * validation phase is completed.
      */
     private static final int CMD_PRIVATE_DNS_SETTINGS_CHANGED = BASE + 13;
     public static final int EVENT_PRIVATE_DNS_CONFIG_RESOLVED = BASE + 14;
+    private static final int CMD_EVALUATE_PRIVATE_DNS = BASE + 15;
 
     // Start mReevaluateDelayMs at this value and double.
     private static final int INITIAL_REEVALUATE_DELAY_MS = 1000;
@@ -215,6 +224,7 @@ public class NetworkMonitor extends StateMachine {
     // Before network has been evaluated this many times, ignore repeated reevaluate requests.
     private static final int IGNORE_REEVALUATE_ATTEMPTS = 5;
     private int mReevaluateToken = 0;
+    private static final int NO_UID = 0;
     private static final int INVALID_UID = -1;
     private int mUidResponsibleForReeval = INVALID_UID;
     // Stop blaming UID that requested re-evaluation after this many attempts.
@@ -223,6 +233,8 @@ public class NetworkMonitor extends StateMachine {
     private static final int CAPTIVE_PORTAL_REEVALUATE_DELAY_MS = 10*60*1000;
 
     private static final int NUM_VALIDATION_LOG_LINES = 20;
+
+    private String mPrivateDnsProviderHostname = "";
 
     public static boolean isValidationRequired(
             NetworkCapabilities dfltNetCap, NetworkCapabilities nc) {
@@ -261,13 +273,12 @@ public class NetworkMonitor extends StateMachine {
 
     public boolean systemReady = false;
 
-    private DnsManager.PrivateDnsConfig mPrivateDnsCfg = null;
-
     private final State mDefaultState = new DefaultState();
     private final State mValidatedState = new ValidatedState();
     private final State mMaybeNotifyState = new MaybeNotifyState();
     private final State mEvaluatingState = new EvaluatingState();
     private final State mCaptivePortalState = new CaptivePortalState();
+    private final State mEvaluatingPrivateDnsState = new EvaluatingPrivateDnsState();
 
     private CustomIntentReceiver mLaunchCaptivePortalAppBroadcastReceiver = null;
 
@@ -293,6 +304,10 @@ public class NetworkMonitor extends StateMachine {
         // Add suffix indicating which NetworkMonitor we're talking about.
         super(TAG + networkAgentInfo.name());
 
+        // Logs with a tag of the form given just above, e.g.
+        //     <timestamp>   862  2402 D NetworkMonitor/NetworkAgentInfo [WIFI () - 100]: ...
+        setDbg(VDBG);
+
         mContext = context;
         mMetricsLog = logger;
         mConnectivityServiceHandler = handler;
@@ -305,10 +320,11 @@ public class NetworkMonitor extends StateMachine {
         mDefaultRequest = defaultRequest;
 
         addState(mDefaultState);
-        addState(mValidatedState, mDefaultState);
         addState(mMaybeNotifyState, mDefaultState);
             addState(mEvaluatingState, mMaybeNotifyState);
             addState(mCaptivePortalState, mMaybeNotifyState);
+        addState(mEvaluatingPrivateDnsState, mDefaultState);
+        addState(mValidatedState, mDefaultState);
         setInitialState(mDefaultState);
 
         mIsCaptivePortalCheckEnabled = getIsCaptivePortalCheckEnabled();
@@ -319,6 +335,17 @@ public class NetworkMonitor extends StateMachine {
         mCaptivePortalFallbackUrls = makeCaptivePortalFallbackUrls();
 
         start();
+    }
+
+    public void forceReevaluation(int responsibleUid) {
+        sendMessage(CMD_FORCE_REEVALUATION, responsibleUid, 0);
+    }
+
+    public void notifyPrivateDnsSettingsChanged(PrivateDnsConfig newCfg) {
+        // Cancel any outstanding resolutions.
+        removeMessages(CMD_PRIVATE_DNS_SETTINGS_CHANGED);
+        // Send the update to the proper thread.
+        sendMessage(CMD_PRIVATE_DNS_SETTINGS_CHANGED, newCfg);
     }
 
     @Override
@@ -347,6 +374,12 @@ public class NetworkMonitor extends StateMachine {
     private boolean isValidationRequired() {
         return isValidationRequired(
                 mDefaultRequest.networkCapabilities, mNetworkAgentInfo.networkCapabilities);
+    }
+
+
+    private void notifyNetworkTestResultInvalid(Object obj) {
+        mConnectivityServiceHandler.sendMessage(obtainMessage(
+                EVENT_NETWORK_TESTED, NETWORK_TEST_RESULT_INVALID, mNetId, obj));
     }
 
     // DefaultState is the parent of all States.  It exists only to handle CMD_* messages but
@@ -392,41 +425,66 @@ public class NetworkMonitor extends StateMachine {
 
                     switch (message.arg1) {
                         case APP_RETURN_DISMISSED:
-                            sendMessage(CMD_FORCE_REEVALUATION, 0 /* no UID */, 0);
+                            sendMessage(CMD_FORCE_REEVALUATION, NO_UID, 0);
                             break;
                         case APP_RETURN_WANTED_AS_IS:
                             mDontDisplaySigninNotification = true;
                             // TODO: Distinguish this from a network that actually validates.
-                            // Displaying the "!" on the system UI icon may still be a good idea.
-                            transitionTo(mValidatedState);
+                            // Displaying the "x" on the system UI icon may still be a good idea.
+                            transitionTo(mEvaluatingPrivateDnsState);
                             break;
                         case APP_RETURN_UNWANTED:
                             mDontDisplaySigninNotification = true;
                             mUserDoesNotWant = true;
-                            mConnectivityServiceHandler.sendMessage(obtainMessage(
-                                    EVENT_NETWORK_TESTED, NETWORK_TEST_RESULT_INVALID,
-                                    mNetId, null));
+                            notifyNetworkTestResultInvalid(null);
                             // TODO: Should teardown network.
                             mUidResponsibleForReeval = 0;
                             transitionTo(mEvaluatingState);
                             break;
                     }
                     return HANDLED;
-                case CMD_PRIVATE_DNS_SETTINGS_CHANGED:
-                    if (isValidationRequired()) {
-                        // This performs a blocking DNS resolution of the
-                        // strict mode hostname, if required.
-                        resolvePrivateDnsConfig((DnsManager.PrivateDnsConfig) message.obj);
-                        if ((mPrivateDnsCfg != null) && mPrivateDnsCfg.inStrictMode()) {
-                            mConnectivityServiceHandler.sendMessage(obtainMessage(
-                                    EVENT_PRIVATE_DNS_CONFIG_RESOLVED, 0, mNetId,
-                                    new DnsManager.PrivateDnsConfig(mPrivateDnsCfg)));
-                        }
+                case CMD_PRIVATE_DNS_SETTINGS_CHANGED: {
+                    final PrivateDnsConfig cfg = (PrivateDnsConfig) message.obj;
+                    if (!isValidationRequired() || cfg == null || !cfg.inStrictMode()) {
+                        // No DNS resolution required.
+                        //
+                        // We don't force any validation in opportunistic mode
+                        // here. Opportunistic mode nameservers are validated
+                        // separately within netd.
+                        //
+                        // Reset Private DNS settings state.
+                        mPrivateDnsProviderHostname = "";
+                        break;
                     }
-                    return HANDLED;
+
+                    mPrivateDnsProviderHostname = cfg.hostname;
+
+                    // DNS resolutions via Private DNS strict mode block for a
+                    // few seconds (~4.2) checking for any IP addresses to
+                    // arrive and validate. Initiating a (re)evaluation now
+                    // should not significantly alter the validation outcome.
+                    //
+                    // No matter what: enqueue a validation request; one of
+                    // three things can happen with this request:
+                    //     [1] ignored (EvaluatingState or CaptivePortalState)
+                    //     [2] transition to EvaluatingPrivateDnsState
+                    //         (DefaultState and ValidatedState)
+                    //     [3] handled (EvaluatingPrivateDnsState)
+                    //
+                    // The Private DNS configuration to be evaluated will:
+                    //     [1] be skipped (not in strict mode), or
+                    //     [2] validate (huzzah), or
+                    //     [3] encounter some problem (invalid hostname,
+                    //         no resolved IP addresses, IPs unreachable,
+                    //         port 853 unreachable, port 853 is not running a
+                    //         DNS-over-TLS server, et cetera).
+                    sendMessage(CMD_EVALUATE_PRIVATE_DNS);
+                    break;
+                }
                 default:
-                    return HANDLED;
+                    break;
             }
+            return HANDLED;
         }
     }
 
@@ -440,7 +498,7 @@ public class NetworkMonitor extends StateMachine {
             maybeLogEvaluationResult(
                     networkEventType(validationStage(), EvaluationResult.VALIDATED));
             mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
-                    NETWORK_TEST_RESULT_VALID, mNetId, mPrivateDnsCfg));
+                    NETWORK_TEST_RESULT_VALID, mNetId, null));
             mValidations++;
         }
 
@@ -449,10 +507,14 @@ public class NetworkMonitor extends StateMachine {
             switch (message.what) {
                 case CMD_NETWORK_CONNECTED:
                     transitionTo(mValidatedState);
-                    return HANDLED;
+                    break;
+                case CMD_EVALUATE_PRIVATE_DNS:
+                    transitionTo(mEvaluatingPrivateDnsState);
+                    break;
                 default:
                     return NOT_HANDLED;
             }
+            return HANDLED;
         }
     }
 
@@ -569,11 +631,11 @@ public class NetworkMonitor extends StateMachine {
                 case CMD_REEVALUATE:
                     if (message.arg1 != mReevaluateToken || mUserDoesNotWant)
                         return HANDLED;
-                    // Don't bother validating networks that don't satisify the default request.
+                    // Don't bother validating networks that don't satisfy the default request.
                     // This includes:
                     //  - VPNs which can be considered explicitly desired by the user and the
                     //    user's desire trumps whether the network validates.
-                    //  - Networks that don't provide internet access.  It's unclear how to
+                    //  - Networks that don't provide Internet access.  It's unclear how to
                     //    validate such networks.
                     //  - Untrusted networks.  It's unsafe to prompt the user to sign-in to
                     //    such networks and the user didn't express interest in connecting to
@@ -588,7 +650,6 @@ public class NetworkMonitor extends StateMachine {
                     //    expensive metered network, or unwanted leaking of the User Agent string.
                     if (!isValidationRequired()) {
                         validationLog("Network would not satisfy default request, not validating");
-                        mPrivateDnsCfg = null;
                         transitionTo(mValidatedState);
                         return HANDLED;
                     }
@@ -601,20 +662,18 @@ public class NetworkMonitor extends StateMachine {
                     // if this is found to cause problems.
                     CaptivePortalProbeResult probeResult = isCaptivePortal();
                     if (probeResult.isSuccessful()) {
-                        resolvePrivateDnsConfig();
-                        transitionTo(mValidatedState);
+                        // Transit EvaluatingPrivateDnsState to get to Validated
+                        // state (even if no Private DNS validation required).
+                        transitionTo(mEvaluatingPrivateDnsState);
                     } else if (probeResult.isPortal()) {
-                        mConnectivityServiceHandler.sendMessage(obtainMessage(EVENT_NETWORK_TESTED,
-                                NETWORK_TEST_RESULT_INVALID, mNetId, probeResult.redirectUrl));
+                        notifyNetworkTestResultInvalid(probeResult.redirectUrl);
                         mLastPortalProbeResult = probeResult;
                         transitionTo(mCaptivePortalState);
                     } else {
                         final Message msg = obtainMessage(CMD_REEVALUATE, ++mReevaluateToken, 0);
                         sendMessageDelayed(msg, mReevaluateDelayMs);
                         logNetworkEvent(NetworkEvent.NETWORK_VALIDATION_FAILED);
-                        mConnectivityServiceHandler.sendMessage(obtainMessage(
-                                EVENT_NETWORK_TESTED, NETWORK_TEST_RESULT_INVALID, mNetId,
-                                probeResult.redirectUrl));
+                        notifyNetworkTestResultInvalid(probeResult.redirectUrl);
                         if (mAttempts >= BLAME_FOR_EVALUATION_ATTEMPTS) {
                             // Don't continue to blame UID forever.
                             TrafficStats.clearThreadStatsUid();
@@ -700,6 +759,110 @@ public class NetworkMonitor extends StateMachine {
         }
     }
 
+    private class EvaluatingPrivateDnsState extends State {
+        private int mPrivateDnsReevalDelayMs;
+        private PrivateDnsConfig mPrivateDnsConfig;
+
+        @Override
+        public void enter() {
+            mPrivateDnsReevalDelayMs = INITIAL_REEVALUATE_DELAY_MS;
+            mPrivateDnsConfig = null;
+            sendMessage(CMD_EVALUATE_PRIVATE_DNS);
+        }
+
+        @Override
+        public boolean processMessage(Message msg) {
+            switch (msg.what) {
+                case CMD_EVALUATE_PRIVATE_DNS:
+                    if (inStrictMode()) {
+                        if (!isStrictModeHostnameResolved()) {
+                            resolveStrictModeHostname();
+
+                            if (isStrictModeHostnameResolved()) {
+                                notifyPrivateDnsConfigResolved();
+                            } else {
+                                handlePrivateDnsEvaluationFailure();
+                                break;
+                            }
+                        }
+
+                        // Look up a one-time hostname, to bypass caching.
+                        //
+                        // Note that this will race with ConnectivityService
+                        // code programming the DNS-over-TLS server IP addresses
+                        // into netd (if invoked, above). If netd doesn't know
+                        // the IP addresses yet, or if the connections to the IP
+                        // addresses haven't yet been validated, netd will block
+                        // for up to a few seconds before failing the lookup.
+                        if (!sendPrivateDnsProbe()) {
+                            handlePrivateDnsEvaluationFailure();
+                            break;
+                        }
+                    }
+
+                    // All good!
+                    transitionTo(mValidatedState);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            return HANDLED;
+        }
+
+        private boolean inStrictMode() {
+            return !TextUtils.isEmpty(mPrivateDnsProviderHostname);
+        }
+
+        private boolean isStrictModeHostnameResolved() {
+            return (mPrivateDnsConfig != null) &&
+                   mPrivateDnsConfig.hostname.equals(mPrivateDnsProviderHostname) &&
+                   (mPrivateDnsConfig.ips.length > 0);
+        }
+
+        private void resolveStrictModeHostname() {
+            try {
+                // Do a blocking DNS resolution using the network-assigned nameservers.
+                mPrivateDnsConfig = new PrivateDnsConfig(
+                        mPrivateDnsProviderHostname,
+                        mNetwork.getAllByName(mPrivateDnsProviderHostname));
+            } catch (UnknownHostException uhe) {
+                mPrivateDnsConfig = null;
+            }
+        }
+
+        private void notifyPrivateDnsConfigResolved() {
+            mConnectivityServiceHandler.sendMessage(obtainMessage(
+                    EVENT_PRIVATE_DNS_CONFIG_RESOLVED, 0, mNetId, mPrivateDnsConfig));
+        }
+
+        private void handlePrivateDnsEvaluationFailure() {
+            notifyNetworkTestResultInvalid(null);
+
+            // Queue up a re-evaluation with backoff.
+            //
+            // TODO: Consider abandoning this state after a few attempts and
+            // transitioning back to EvaluatingState, to perhaps give ourselves
+            // the opportunity to (re)detect a captive portal or something.
+            sendMessageDelayed(CMD_EVALUATE_PRIVATE_DNS, mPrivateDnsReevalDelayMs);
+            mPrivateDnsReevalDelayMs *= 2;
+            if (mPrivateDnsReevalDelayMs > MAX_REEVALUATE_DELAY_MS) {
+                mPrivateDnsReevalDelayMs = MAX_REEVALUATE_DELAY_MS;
+            }
+        }
+
+        private boolean sendPrivateDnsProbe() {
+            // q.v. system/netd/server/dns/DnsTlsTransport.cpp
+            final String ONE_TIME_HOSTNAME_SUFFIX = "-dnsotls-ds.metric.gstatic.com";
+            final String host = UUID.randomUUID().toString().substring(0, 8) +
+                    ONE_TIME_HOSTNAME_SUFFIX;
+            try {
+                final InetAddress[] ips = mNetworkAgentInfo.network().getAllByName(host);
+                return (ips != null && ips.length > 0);
+            } catch (UnknownHostException uhe) {}
+            return false;
+        }
+    }
+
     // Limits the list of IP addresses returned by getAllByName or tried by openConnection to at
     // most one per address family. This ensures we only wait up to 20 seconds for TCP connections
     // to complete, regardless of how many IP addresses a host has.
@@ -710,7 +873,9 @@ public class NetworkMonitor extends StateMachine {
 
         @Override
         public InetAddress[] getAllByName(String host) throws UnknownHostException {
-            List<InetAddress> addrs = Arrays.asList(super.getAllByName(host));
+            // Always bypass Private DNS.
+            final List<InetAddress> addrs = Arrays.asList(
+                    ResolvUtil.blockingResolveAllLocally(this, host));
 
             // Ensure the address family of the first address is tried first.
             LinkedHashMap<Class, InetAddress> addressByFamily = new LinkedHashMap<>();
@@ -1063,44 +1228,6 @@ public class NetworkMonitor extends StateMachine {
             }
         }
         return null;
-    }
-
-    public void notifyPrivateDnsSettingsChanged(DnsManager.PrivateDnsConfig newCfg) {
-        // Cancel any outstanding resolutions.
-        removeMessages(CMD_PRIVATE_DNS_SETTINGS_CHANGED);
-        // Send the update to the proper thread.
-        sendMessage(CMD_PRIVATE_DNS_SETTINGS_CHANGED, newCfg);
-    }
-
-    private void resolvePrivateDnsConfig() {
-        resolvePrivateDnsConfig(DnsManager.getPrivateDnsConfig(mContext.getContentResolver()));
-    }
-
-    private void resolvePrivateDnsConfig(DnsManager.PrivateDnsConfig cfg) {
-        // Nothing to do.
-        if (cfg == null) {
-            mPrivateDnsCfg = null;
-            return;
-        }
-
-        // No DNS resolution required.
-        if (!cfg.inStrictMode()) {
-            mPrivateDnsCfg = cfg;
-            return;
-        }
-
-        if ((mPrivateDnsCfg != null) && mPrivateDnsCfg.inStrictMode() &&
-                (mPrivateDnsCfg.ips.length > 0) && mPrivateDnsCfg.hostname.equals(cfg.hostname)) {
-            // We have already resolved this strict mode hostname. Assume that
-            // Private DNS services won't be changing serving IP addresses very
-            // frequently and save ourselves one re-resolve.
-            return;
-        }
-
-        mPrivateDnsCfg = cfg;
-        final DnsManager.PrivateDnsConfig resolvedCfg = DnsManager.tryBlockingResolveOf(
-                mNetwork, mPrivateDnsCfg.hostname);
-        if (resolvedCfg != null) mPrivateDnsCfg = resolvedCfg;
     }
 
     /**
