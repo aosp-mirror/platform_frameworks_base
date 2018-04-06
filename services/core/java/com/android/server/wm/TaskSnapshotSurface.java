@@ -173,6 +173,8 @@ class TaskSnapshotSurface implements StartingSurface {
             windowFlags = topFullscreenWindow.getAttrs().flags;
             windowPrivateFlags = topFullscreenWindow.getAttrs().privateFlags;
 
+            layoutParams.packageName = mainWindow.getAttrs().packageName;
+            layoutParams.windowAnimations = mainWindow.getAttrs().windowAnimations;
             layoutParams.dimAmount = mainWindow.getAttrs().dimAmount;
             layoutParams.type = TYPE_APPLICATION_STARTING;
             layoutParams.format = snapshot.getSnapshot().getFormat();
