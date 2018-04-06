@@ -112,9 +112,9 @@ public enum ScrimState {
             mCurrentInFrontTint = Color.BLACK;
             mCurrentBehindTint = Color.BLACK;
             mAnimationDuration = ScrimController.ANIMATION_DURATION_LONG;
-            // DisplayPowerManager will blank the screen for us, we just need
-            // to set our state.
-            mAnimateChange = !mDisplayRequiresBlanking;
+            // DisplayPowerManager may blank the screen for us,
+            // in this case we just need to set our state.
+            mAnimateChange = mDozeParameters.shouldControlScreenOff();
         }
 
         @Override
