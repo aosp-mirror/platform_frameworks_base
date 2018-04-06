@@ -1714,7 +1714,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                     adapter = new LocalAnimationAdapter(
                             new WindowAnimationSpec(a, mTmpPoint, mTmpRect,
                                     mService.mAppTransition.canSkipFirstFrame(),
-                                    mService.mAppTransition.getAppStackClipMode()),
+                                    mService.mAppTransition.getAppStackClipMode(),
+                                    true /* isAppAnimation */),
                             mService.mSurfaceAnimationRunner);
                     if (a.getZAdjustment() == Animation.ZORDER_TOP) {
                         mNeedsZBoost = true;

@@ -47,21 +47,24 @@ public class WindowAnimationSpec implements AnimationSpec {
     private final Point mPosition = new Point();
     private final ThreadLocal<TmpValues> mThreadLocalTmps = ThreadLocal.withInitial(TmpValues::new);
     private final boolean mCanSkipFirstFrame;
+    private final boolean mIsAppAnimation;
     private final Rect mStackBounds = new Rect();
     private int mStackClipMode;
     private final Rect mTmpRect = new Rect();
 
     public WindowAnimationSpec(Animation animation, Point position, boolean canSkipFirstFrame)  {
-        this(animation, position, null /* stackBounds */, canSkipFirstFrame, STACK_CLIP_NONE);
+        this(animation, position, null /* stackBounds */, canSkipFirstFrame, STACK_CLIP_NONE,
+                false /* isAppAnimation */);
     }
 
     public WindowAnimationSpec(Animation animation, Point position, Rect stackBounds,
-            boolean canSkipFirstFrame, int stackClipMode) {
+            boolean canSkipFirstFrame, int stackClipMode, boolean isAppAnimation) {
         mAnimation = animation;
         if (position != null) {
             mPosition.set(position.x, position.y);
         }
         mCanSkipFirstFrame = canSkipFirstFrame;
+        mIsAppAnimation = isAppAnimation;
         mStackClipMode = stackClipMode;
         if (stackBounds != null) {
             mStackBounds.set(stackBounds);
@@ -132,6 +135,11 @@ public class WindowAnimationSpec implements AnimationSpec {
     @Override
     public boolean canSkipFirstFrame() {
         return mCanSkipFirstFrame;
+    }
+
+    @Override
+    public boolean needsEarlyWakeup() {
+        return mIsAppAnimation;
     }
 
     @Override
