@@ -209,7 +209,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
         state.slash.isSlashed = !state.value;
         state.label = getTileLabel();
         state.secondaryLabel = ZenModeConfig.getDescription(mContext,zen != Global.ZEN_MODE_OFF,
-                mController.getConfig());
+                mController.getConfig(), false);
         state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_ADJUST_VOLUME);
         switch (zen) {
