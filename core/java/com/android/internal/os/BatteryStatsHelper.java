@@ -657,7 +657,7 @@ public class BatteryStatsHelper {
      * {@link #removeHiddenBatterySippers(List)}.
      */
     private void addAmbientDisplayUsage() {
-        long ambientDisplayMs = mStats.getScreenDozeTime(mRawRealtimeUs, mStatsType);
+        long ambientDisplayMs = mStats.getScreenDozeTime(mRawRealtimeUs, mStatsType) / 1000;
         double power = mPowerProfile.getAveragePower(PowerProfile.POWER_AMBIENT_DISPLAY)
                 * ambientDisplayMs / (60 * 60 * 1000);
         if (power > 0) {
