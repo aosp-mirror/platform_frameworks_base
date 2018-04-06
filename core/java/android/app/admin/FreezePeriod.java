@@ -20,49 +20,88 @@ import android.util.Log;
 import android.util.Pair;
 
 import java.time.LocalDate;
+import java.time.MonthDay;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An interval representing one freeze period which repeats annually. We use the number of days
- * since the start of (non-leap) year to define the start and end dates of an interval, both
- * inclusive. If the end date is smaller than the start date, the interval is considered wrapped
- * around the year-end. As far as an interval is concerned, February 29th should be treated as
- * if it were February 28th: so an interval starting or ending on February 28th are not
- * distinguishable from an interval on February 29th. When calulating interval length or
- * distance between two dates, February 29th is also disregarded.
+ * A class that represents one freeze period which repeats <em>annually</em>. A freeze period has
+ * two {@link java.time#MonthDay} values that define the start and end dates of the period, both
+ * inclusive. If the end date is earlier than the start date, the period is considered wrapped
+ * around the year-end. As far as freeze period is concerned, leap year is disregarded and February
+ * 29th should be treated as if it were February 28th: so a freeze starting or ending on February
+ * 28th is identical to a freeze starting or ending on February 29th. When calulating the length of
+ * a freeze or the distance bewteen two freee periods, February 29th is also ignored.
  *
  * @see SystemUpdatePolicy#setFreezePeriods
- * @hide
  */
-public class FreezeInterval {
-    private static final String TAG = "FreezeInterval";
+public class FreezePeriod {
+    private static final String TAG = "FreezePeriod";
 
     private static final int DUMMY_YEAR = 2001;
     static final int DAYS_IN_YEAR = 365; // 365 since DUMMY_YEAR is not a leap year
 
-    final int mStartDay; // [1,365]
-    final int mEndDay; // [1,365]
+    private final MonthDay mStart;
+    private final MonthDay mEnd;
 
-    FreezeInterval(int startDay, int endDay) {
-        if (startDay < 1 || startDay > 365 || endDay < 1 || endDay > 365) {
-            throw new RuntimeException("Bad dates for Interval: " + startDay + "," + endDay);
-        }
-        mStartDay = startDay;
-        mEndDay = endDay;
+    /*
+     * Start and end dates represented by number of days since the beginning of the year.
+     * They are internal representations of mStart and mEnd with normalized Leap year days
+     * (Feb 29 == Feb 28 == 59th day of year). All internal calclations are based on
+     * these two values so that leap year days are disregarded.
+     */
+    private final int mStartDay; // [1, 365]
+    private final int mEndDay; // [1, 365]
+
+    /**
+     * Creates a freeze period by its start and end dates. If the end date is earlier than the start
+     * date, the freeze period is considered wrapping year-end.
+     */
+    public FreezePeriod(MonthDay start, MonthDay end) {
+        mStart = start;
+        mStartDay = mStart.atYear(DUMMY_YEAR).getDayOfYear();
+        mEnd = end;
+        mEndDay = mEnd.atYear(DUMMY_YEAR).getDayOfYear();
     }
 
+    /**
+     * Returns the start date (inclusive) of this freeze period.
+     */
+    public MonthDay getStart() {
+        return mStart;
+    }
+
+    /**
+     * Returns the end date (inclusive) of this freeze period.
+     */
+    public MonthDay getEnd() {
+        return mEnd;
+    }
+
+    /**
+     * @hide
+     */
+    private FreezePeriod(int startDay, int endDay) {
+        mStartDay = startDay;
+        mStart = dayOfYearToMonthDay(startDay);
+        mEndDay = endDay;
+        mEnd = dayOfYearToMonthDay(endDay);
+    }
+
+    /** @hide */
     int getLength() {
         return getEffectiveEndDay() - mStartDay + 1;
     }
 
+    /** @hide */
     boolean isWrapped() {
         return mEndDay < mStartDay;
     }
 
     /**
      * Returns the effective end day, taking wrapping around year-end into consideration
+     * @hide
      */
     int getEffectiveEndDay() {
         if (!isWrapped()) {
@@ -72,6 +111,7 @@ public class FreezeInterval {
         }
     }
 
+    /** @hide */
     boolean contains(LocalDate localDate) {
         final int daysOfYear = dayOfYearDisregardLeapYear(localDate);
         if (!isWrapped()) {
@@ -84,6 +124,7 @@ public class FreezeInterval {
         }
     }
 
+    /** @hide */
     boolean after(LocalDate localDate) {
         return mStartDay > dayOfYearDisregardLeapYear(localDate);
     }
@@ -95,6 +136,7 @@ public class FreezeInterval {
      * include now, the returned dates represents the next future interval.
      * The result will always have the same month and dayOfMonth value as the non-instantiated
      * interval itself.
+     * @hide
      */
     Pair<LocalDate, LocalDate> toCurrentOrFutureRealDates(LocalDate now) {
         final int nowDays = dayOfYearDisregardLeapYear(now);
@@ -138,14 +180,24 @@ public class FreezeInterval {
                 + LocalDate.ofYearDay(DUMMY_YEAR, mEndDay).format(formatter);
     }
 
-    // Treat the supplied date as in a non-leap year and return its day of year.
-    static int dayOfYearDisregardLeapYear(LocalDate date) {
+    /** @hide */
+    private static MonthDay dayOfYearToMonthDay(int dayOfYear) {
+        LocalDate date = LocalDate.ofYearDay(DUMMY_YEAR, dayOfYear);
+        return MonthDay.of(date.getMonth(), date.getDayOfMonth());
+    }
+
+    /**
+     * Treat the supplied date as in a non-leap year and return its day of year.
+     * @hide
+     */
+    private static int dayOfYearDisregardLeapYear(LocalDate date) {
         return date.withYear(DUMMY_YEAR).getDayOfYear();
     }
 
     /**
      * Compute the number of days between first (inclusive) and second (exclusive),
      * treating all years in between as non-leap.
+     * @hide
      */
     public static int distanceWithoutLeapYear(LocalDate first, LocalDate second) {
         return dayOfYearDisregardLeapYear(first) - dayOfYearDisregardLeapYear(second)
@@ -165,16 +217,16 @@ public class FreezeInterval {
      *     3. At most one wrapped Interval remains, and it will be at the end of the list
      * @hide
      */
-    protected static List<FreezeInterval> canonicalizeIntervals(List<FreezeInterval> intervals) {
+    static List<FreezePeriod> canonicalizePeriods(List<FreezePeriod> intervals) {
         boolean[] taken = new boolean[DAYS_IN_YEAR];
         // First convert the intervals into flat array
-        for (FreezeInterval interval : intervals) {
+        for (FreezePeriod interval : intervals) {
             for (int i = interval.mStartDay; i <= interval.getEffectiveEndDay(); i++) {
                 taken[(i - 1) % DAYS_IN_YEAR] = true;
             }
         }
         // Then reconstruct intervals from the array
-        List<FreezeInterval> result = new ArrayList<>();
+        List<FreezePeriod> result = new ArrayList<>();
         int i = 0;
         while (i < DAYS_IN_YEAR) {
             if (!taken[i]) {
@@ -183,14 +235,14 @@ public class FreezeInterval {
             }
             final int intervalStart = i + 1;
             while (i < DAYS_IN_YEAR && taken[i]) i++;
-            result.add(new FreezeInterval(intervalStart, i));
+            result.add(new FreezePeriod(intervalStart, i));
         }
         // Check if the last entry can be merged to the first entry to become one single
         // wrapped interval
         final int lastIndex = result.size() - 1;
         if (lastIndex > 0 && result.get(lastIndex).mEndDay == DAYS_IN_YEAR
                 && result.get(0).mStartDay == 1) {
-            FreezeInterval wrappedInterval = new FreezeInterval(result.get(lastIndex).mStartDay,
+            FreezePeriod wrappedInterval = new FreezePeriod(result.get(lastIndex).mStartDay,
                     result.get(0).mEndDay);
             result.set(lastIndex, wrappedInterval);
             result.remove(0);
@@ -207,18 +259,18 @@ public class FreezeInterval {
      *
      * @hide
      */
-    protected static void validatePeriods(List<FreezeInterval> periods) {
-        List<FreezeInterval> allPeriods = FreezeInterval.canonicalizeIntervals(periods);
+    static void validatePeriods(List<FreezePeriod> periods) {
+        List<FreezePeriod> allPeriods = FreezePeriod.canonicalizePeriods(periods);
         if (allPeriods.size() != periods.size()) {
             throw SystemUpdatePolicy.ValidationFailedException.duplicateOrOverlapPeriods();
         }
         for (int i = 0; i < allPeriods.size(); i++) {
-            FreezeInterval current = allPeriods.get(i);
+            FreezePeriod current = allPeriods.get(i);
             if (current.getLength() > SystemUpdatePolicy.FREEZE_PERIOD_MAX_LENGTH) {
                 throw SystemUpdatePolicy.ValidationFailedException.freezePeriodTooLong("Freeze "
                         + "period " + current + " is too long: " + current.getLength() + " days");
             }
-            FreezeInterval previous = i > 0 ? allPeriods.get(i - 1)
+            FreezePeriod previous = i > 0 ? allPeriods.get(i - 1)
                     : allPeriods.get(allPeriods.size() - 1);
             if (previous != current) {
                 final int separation;
@@ -247,7 +299,7 @@ public class FreezeInterval {
      *
      * @hide
      */
-    protected static void validateAgainstPreviousFreezePeriod(List<FreezeInterval> periods,
+    static void validateAgainstPreviousFreezePeriod(List<FreezePeriod> periods,
             LocalDate prevPeriodStart, LocalDate prevPeriodEnd, LocalDate now) {
         if (periods.size() == 0 || prevPeriodStart == null || prevPeriodEnd == null) {
             return;
@@ -258,14 +310,14 @@ public class FreezeInterval {
             // Clock was adjusted backwards. We can continue execution though, the separation
             // and length validation below still works under this condition.
         }
-        List<FreezeInterval> allPeriods = FreezeInterval.canonicalizeIntervals(periods);
+        List<FreezePeriod> allPeriods = FreezePeriod.canonicalizePeriods(periods);
         // Given current time now, find the freeze period that's either current, or the one
         // that's immediately afterwards. For the later case, it might be after the year-end,
         // but this can only happen if there is only one freeze period.
-        FreezeInterval curOrNextFreezePeriod = allPeriods.get(0);
-        for (FreezeInterval interval : allPeriods) {
+        FreezePeriod curOrNextFreezePeriod = allPeriods.get(0);
+        for (FreezePeriod interval : allPeriods) {
             if (interval.contains(now)
-                    || interval.mStartDay > FreezeInterval.dayOfYearDisregardLeapYear(now)) {
+                    || interval.mStartDay > FreezePeriod.dayOfYearDisregardLeapYear(now)) {
                 curOrNextFreezePeriod = interval;
                 break;
             }
@@ -282,7 +334,7 @@ public class FreezeInterval {
         // Now validate [prevPeriodStart, prevPeriodEnd] against curOrNextFreezeDates
         final String periodsDescription = "Prev: " + prevPeriodStart + "," + prevPeriodEnd
                 + "; cur: " + curOrNextFreezeDates.first + "," + curOrNextFreezeDates.second;
-        long separation = FreezeInterval.distanceWithoutLeapYear(curOrNextFreezeDates.first,
+        long separation = FreezePeriod.distanceWithoutLeapYear(curOrNextFreezeDates.first,
                 prevPeriodEnd) - 1;
         if (separation > 0) {
             // Two intervals do not overlap, check separation
@@ -292,7 +344,7 @@ public class FreezeInterval {
             }
         } else {
             // Two intervals overlap, check combined length
-            long length = FreezeInterval.distanceWithoutLeapYear(curOrNextFreezeDates.second,
+            long length = FreezePeriod.distanceWithoutLeapYear(curOrNextFreezeDates.second,
                     prevPeriodStart) + 1;
             if (length > SystemUpdatePolicy.FREEZE_PERIOD_MAX_LENGTH) {
                 throw ValidationFailedException.combinedPeriodTooLong("Combined freeze period "
