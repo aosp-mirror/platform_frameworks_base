@@ -668,12 +668,14 @@ Landroid/database/sqlite/SQLiteCustomFunction;->dispatchCallback([Ljava/lang/Str
 Landroid/database/sqlite/SQLiteCustomFunction;->name:Ljava/lang/String;
 Landroid/database/sqlite/SQLiteCustomFunction;->numArgs:I
 Landroid/database/sqlite/SQLiteDatabaseConfiguration;->maxSqlCacheSize:I
+Landroid/database/sqlite/SQLiteDatabase;->CONFLICT_VALUES:[Ljava/lang/String;
 Landroid/database/sqlite/SQLiteDatabase;->mConfigurationLocked:Landroid/database/sqlite/SQLiteDatabaseConfiguration;
 Landroid/database/sqlite/SQLiteDatabase;->mConnectionPoolLocked:Landroid/database/sqlite/SQLiteConnectionPool;
 Landroid/database/sqlite/SQLiteDebug$PagerStats;->largestMemAlloc:I
 Landroid/database/sqlite/SQLiteDebug$PagerStats;->memoryUsed:I
 Landroid/database/sqlite/SQLiteDebug$PagerStats;->pageCacheOverflow:I
 Landroid/database/sqlite/SQLiteOpenHelper;->mName:Ljava/lang/String;
+Landroid/database/sqlite/SQLiteStatement;-><init>(Landroid/database/sqlite/SQLiteDatabase;Ljava/lang/String;[Ljava/lang/Object;)V
 Landroid/ddm/DdmHandleAppName;->getAppName()Ljava/lang/String;
 Landroid/graphics/AvoidXfermode$Mode;->AVOID:Landroid/graphics/AvoidXfermode$Mode;
 Landroid/graphics/AvoidXfermode$Mode;->TARGET:Landroid/graphics/AvoidXfermode$Mode;
@@ -2522,6 +2524,7 @@ Landroid/widget/HorizontalScrollView;->mChildToScrollTo:Landroid/view/View;
 Landroid/widget/HorizontalScrollView;->mEdgeGlowLeft:Landroid/widget/EdgeEffect;
 Landroid/widget/HorizontalScrollView;->mEdgeGlowRight:Landroid/widget/EdgeEffect;
 Landroid/widget/HorizontalScrollView;->mScroller:Landroid/widget/OverScroller;
+Landroid/widget/ImageView;->animateTransform(Landroid/graphics/Matrix;)V
 Landroid/widget/ImageView;->mAdjustViewBounds:Z
 Landroid/widget/ImageView;->mAlpha:I
 Landroid/widget/ImageView;->mDrawMatrix:Landroid/graphics/Matrix;
