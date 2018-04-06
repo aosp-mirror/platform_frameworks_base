@@ -149,9 +149,9 @@ private:
                                          uint32_t serial);
 
     /**
-     * Text output of dumpsys.
+     * Text or proto output of dumpsys.
      */
-    void dump_impl(FILE* out, bool verbose);
+    void dump_impl(FILE* out, bool verbose, bool proto);
 
     /**
      * Print usage information for the commands
