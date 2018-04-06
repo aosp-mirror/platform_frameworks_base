@@ -260,12 +260,14 @@ public class IpSecManagerTest {
         IpSecManager.IpSecTunnelInterface tunnelIntf =
                 createAndValidateVti(DUMMY_RESOURCE_ID, VTI_INTF_NAME);
 
-        tunnelIntf.addAddress(VTI_INNER_ADDRESS);
+        tunnelIntf.addAddress(VTI_INNER_ADDRESS.getAddress(),
+                VTI_INNER_ADDRESS.getPrefixLength());
         verify(mMockIpSecService)
                 .addAddressToTunnelInterface(
                         eq(DUMMY_RESOURCE_ID), eq(VTI_INNER_ADDRESS), anyString());
 
-        tunnelIntf.removeAddress(VTI_INNER_ADDRESS);
+        tunnelIntf.removeAddress(VTI_INNER_ADDRESS.getAddress(),
+                VTI_INNER_ADDRESS.getPrefixLength());
         verify(mMockIpSecService)
                 .addAddressToTunnelInterface(
                         eq(DUMMY_RESOURCE_ID), eq(VTI_INNER_ADDRESS), anyString());

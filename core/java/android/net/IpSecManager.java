@@ -684,14 +684,15 @@ public final class IpSecManager {
          * tunneled traffic.
          *
          * @param address the local address for traffic inside the tunnel
+         * @param prefixLen length of the InetAddress prefix
          * @hide
          */
         @SystemApi
         @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
-        public void addAddress(@NonNull LinkAddress address) throws IOException {
+        public void addAddress(@NonNull InetAddress address, int prefixLen) throws IOException {
             try {
                 mService.addAddressToTunnelInterface(
-                        mResourceId, address, mOpPackageName);
+                        mResourceId, new LinkAddress(address, prefixLen), mOpPackageName);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -703,14 +704,15 @@ public final class IpSecManager {
          * <p>Remove an address which was previously added to the IpSecTunnelInterface
          *
          * @param address to be removed
+         * @param prefixLen length of the InetAddress prefix
          * @hide
          */
         @SystemApi
         @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
-        public void removeAddress(@NonNull LinkAddress address) throws IOException {
+        public void removeAddress(@NonNull InetAddress address, int prefixLen) throws IOException {
             try {
                 mService.removeAddressFromTunnelInterface(
-                        mResourceId, address, mOpPackageName);
+                        mResourceId, new LinkAddress(address, prefixLen), mOpPackageName);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
