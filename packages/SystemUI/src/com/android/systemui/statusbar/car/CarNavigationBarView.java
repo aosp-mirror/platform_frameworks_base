@@ -25,7 +25,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.keyguard.AlphaOptimizedImageButton;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.StatusBarIconController;
 
 /**
  * A custom navigation bar for the automotive use case.
@@ -52,6 +54,17 @@ class CarNavigationBarView extends LinearLayout {
         if (mNotificationsButton != null) {
             mNotificationsButton.setOnClickListener(this::onNotificationsClick);
         }
+        View mStatusIcons = findViewById(R.id.statusIcons);
+        if (mStatusIcons != null) {
+            // Attach the controllers for Status icons such as wifi and bluetooth if the standard
+            // container is in the view.
+            StatusBarIconController.DarkIconManager mDarkIconManager =
+                    new StatusBarIconController.DarkIconManager(
+                            mStatusIcons.findViewById(R.id.statusIcons));
+            mDarkIconManager.setShouldLog(true);
+            Dependency.get(StatusBarIconController.class).addIconGroup(mDarkIconManager);
+        }
+
     }
 
     void setStatusBar(CarStatusBar carStatusBar) {
