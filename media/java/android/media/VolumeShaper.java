@@ -18,6 +18,7 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -843,6 +844,7 @@ public final class VolumeShaper implements AutoCloseable {
              * @return the same {@code Builder} instance.
              * @throws IllegalArgumentException if flag is not recognized.
              */
+            @TestApi
             public @NonNull Builder setOptionFlags(@OptionFlag int optionFlags) {
                 if ((optionFlags & ~OPTION_FLAG_PUBLIC_ALL) != 0) {
                     throw new IllegalArgumentException("invalid bits in flag: " + optionFlags);
