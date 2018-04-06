@@ -422,6 +422,16 @@ message WifiLog {
 
   // Indicates the number of times a scan request from an external background app was throttled.
   optional int32 num_external_background_app_oneshot_scan_requests_throttled = 106;
+
+  // WifiLastResortWatchdog time milliseconds delta between trigger and first connection success
+  optional int64 watchdog_trigger_to_connection_success_duration_ms = 107 [default = -1];
+
+  // The number of times wifi experienced failures after watchdog has already been triggered and is
+  // waiting for a connection success
+  optional int64 watchdog_total_connection_failure_count_after_trigger = 108;
+
+  // Number of times DFS channel scans are requested in single scan requests.
+  optional int32 num_oneshot_has_dfs_channel_scans = 109;
 }
 
 // Information that gets logged for every WiFi connection.
