@@ -1060,7 +1060,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int HIDDEN_API_ENFORCEMENT_NONE = 0;
     /**
      * No API enforcement, but enable the detection logic and warnings. Observed behaviour is the
-     * sane as {@link #HIDDEN_API_ENFORCEMENT_NONE} but you may see warnings in the log when APIs
+     * same as {@link #HIDDEN_API_ENFORCEMENT_NONE} but you may see warnings in the log when APIs
      * are accessed.
      * @hide
      * */
