@@ -660,6 +660,7 @@ Landroid/content/UriMatcher;->mText:Ljava/lang/String;
 Landroid/database/AbstractCursor;->mExtras:Landroid/os/Bundle;
 Landroid/database/AbstractCursor;->mNotifyUri:Landroid/net/Uri;
 Landroid/database/AbstractCursor;->mRowIdColumnIndex:I
+Landroid/database/AbstractWindowedCursor;->clearOrCreateWindow(Ljava/lang/String;)V
 Landroid/database/CursorWindow;->mWindowPtr:J
 Landroid/database/CursorWindow;->sCursorWindowSize:I
 Landroid/database/CursorWindow;->sWindowToPidMap:Landroid/util/LongSparseArray;
