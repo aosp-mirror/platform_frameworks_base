@@ -42,6 +42,11 @@ public class CarFacetButton extends LinearLayout {
     /** App packages that are allowed to be used with this widget */
     private String[] mFacetPackages;
     private int mIconResourceId;
+    /**
+     * If defined in the xml this will be the icon that's rendered when the button is marked as
+     * selected
+     */
+    private int mSelectedIconResourceId;
     private boolean mUseMoreIcon = true;
     private float mSelectedAlpha = 1f;
     private float mUnselectedAlpha = 1f;
@@ -112,10 +117,9 @@ public class CarFacetButton extends LinearLayout {
         mIcon.setClickable(false);
         mIcon.setAlpha(mUnselectedAlpha);
         mIconResourceId = styledAttributes.getResourceId(R.styleable.CarFacetButton_icon, 0);
-        if (mIconResourceId == 0)  {
-            throw new RuntimeException("specified icon resource was not found and is required");
-        }
         mIcon.setImageResource(mIconResourceId);
+        mSelectedIconResourceId = styledAttributes.getResourceId(
+                R.styleable.CarFacetButton_selectedIcon, mIconResourceId);
 
         mMoreIcon = findViewById(R.id.car_nav_button_more_icon);
         mMoreIcon.setClickable(false);
@@ -161,22 +165,10 @@ public class CarFacetButton extends LinearLayout {
      */
     public void setSelected(boolean selected, boolean showMoreIcon) {
         mSelected = selected;
-        if (selected) {
-            if (mUseMoreIcon) {
-                mMoreIcon.setVisibility(showMoreIcon ? VISIBLE : GONE);
-            }
-            mIcon.setAlpha(mSelectedAlpha);
-        } else {
-            mMoreIcon.setVisibility(GONE);
-            mIcon.setAlpha(mUnselectedAlpha);
-        }
-    }
-
-    public void setIcon(Drawable d) {
-        if (d != null) {
-            mIcon.setImageDrawable(d);
-        } else {
-            mIcon.setImageResource(mIconResourceId);
+        mIcon.setAlpha(mSelected ? mSelectedAlpha : mUnselectedAlpha);
+        mIcon.setImageResource(mSelected ? mSelectedIconResourceId : mIconResourceId);
+        if (mUseMoreIcon) {
+            mMoreIcon.setVisibility(showMoreIcon ? VISIBLE : GONE);
         }
     }
 }
