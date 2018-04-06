@@ -1312,7 +1312,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (prevWinMode != WINDOWING_MODE_UNDEFINED && winMode == WINDOWING_MODE_PINNED) {
             // Entering PiP from fullscreen, reset the snap fraction
             mDisplayContent.mPinnedStackControllerLocked.resetReentrySnapFraction(this);
-        } else if (prevWinMode == WINDOWING_MODE_PINNED && winMode != WINDOWING_MODE_UNDEFINED) {
+        } else if (prevWinMode == WINDOWING_MODE_PINNED && winMode != WINDOWING_MODE_UNDEFINED
+                && !isHidden()) {
             // Leaving PiP to fullscreen, save the snap fraction based on the pre-animation bounds
             // for the next re-entry into PiP (assuming the activity is not hidden or destroyed)
             final TaskStack pinnedStack = mDisplayContent.getPinnedStack();
