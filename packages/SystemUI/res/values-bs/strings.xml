@@ -504,7 +504,7 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"Isključi sada"</string>
     <string name="accessibility_volume_settings" msgid="4915364006817819212">"Postavke zvuka"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Proširi"</string>
-    <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Skupi"</string>
+    <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Suzi"</string>
     <string name="accessibility_output_chooser" msgid="8185317493017988680">"Promijenite izlazni uređaj"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Ekran je prikačen"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Ekran ostaje prikazan ovako dok ga ne otkačite. Da ga otkačite, dodirnite i držite dugme Nazad."</string>
@@ -765,9 +765,9 @@
     <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"Gore 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"Gore 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Donji ekran kao cijeli ekran"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Pozicija <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Dvaput dodirnite za uređivanje."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g> Dvaput dodirnite za dodavanje."</string>
-    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Pozicija <xliff:g id="POSITION">%1$d</xliff:g>. Dvaput dodirnite za odabir."</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Pozicija <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Dodirnite dvaput za uređivanje."</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g> Dodirnite dvaput za dodavanje."</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Pozicija <xliff:g id="POSITION">%1$d</xliff:g>. Dodirnite dvaput za odabir."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"Pomjeri <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"Ukloni <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="TILE_NAME">%1$s</xliff:g> je dodan na poziciju <xliff:g id="POSITION">%2$d</xliff:g>"</string>

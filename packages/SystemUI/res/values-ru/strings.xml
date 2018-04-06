@@ -358,7 +358,7 @@
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"Модуль NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"Модуль NFC отключен"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"Модуль NFC включен"</string>
-    <string name="recents_empty_message" msgid="808480104164008572">"Недавних приложений нет"</string>
+    <string name="recents_empty_message" msgid="808480104164008572">"Здесь пока ничего нет."</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Вы очистили всё"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"Сведения о приложении"</string>
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"Заблокировать в приложении"</string>
