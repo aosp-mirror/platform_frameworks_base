@@ -467,10 +467,47 @@ package android.location {
 
 }
 
+package android.media {
+
+  public final class AudioFormat implements android.os.Parcelable {
+    method public static int channelCountFromInChannelMask(int);
+    method public static int channelCountFromOutChannelMask(int);
+    method public static int getBytesPerSample(int);
+    method public static boolean isEncodingLinearPcm(int);
+  }
+
+  public static final class VolumeShaper.Configuration.Builder {
+    method public android.media.VolumeShaper.Configuration.Builder setOptionFlags(int);
+  }
+
+}
+
 package android.media.audiofx {
 
   public class AudioEffect {
+    method public static int byteArrayToInt(byte[]);
+    method public static short byteArrayToShort(byte[]);
+    method public int getParameter(byte[], byte[]) throws java.lang.IllegalStateException;
+    method public int getParameter(int, byte[]) throws java.lang.IllegalStateException;
+    method public int getParameter(int, int[]) throws java.lang.IllegalStateException;
+    method public int getParameter(int, short[]) throws java.lang.IllegalStateException;
+    method public int getParameter(int[], short[]) throws java.lang.IllegalStateException;
+    method public static byte[] intToByteArray(int);
+    method public static boolean isEffectTypeAvailable(java.util.UUID);
+    method public static boolean isError(int);
+    method public int setParameter(byte[], byte[]) throws java.lang.IllegalStateException;
+    method public int setParameter(int, int) throws java.lang.IllegalStateException;
+    method public int setParameter(int, short) throws java.lang.IllegalStateException;
+    method public int setParameter(int, byte[]) throws java.lang.IllegalStateException;
+    method public int setParameter(int[], int[]) throws java.lang.IllegalStateException;
+    method public int setParameter(int[], byte[]) throws java.lang.IllegalStateException;
+    method public void setParameterListener(android.media.audiofx.AudioEffect.OnParameterChangeListener);
+    method public static byte[] shortToByteArray(short);
     field public static final java.util.UUID EFFECT_TYPE_NULL;
+  }
+
+  public static abstract interface AudioEffect.OnParameterChangeListener {
+    method public abstract void onParameterChange(android.media.audiofx.AudioEffect, int, byte[], byte[]);
   }
 
 }
