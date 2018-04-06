@@ -148,7 +148,7 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
         }
         ConfigMetricsReportList reports;
         vector<uint8_t> buffer;
-        processor->onDumpReport(cfgKey, bucketStartTimeNs + 3 * bucketSizeNs, &buffer);
+        processor->onDumpReport(cfgKey, bucketStartTimeNs + 3 * bucketSizeNs, false, &buffer);
         EXPECT_TRUE(buffer.size() > 0);
         EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
         EXPECT_EQ(1, reports.reports_size());
