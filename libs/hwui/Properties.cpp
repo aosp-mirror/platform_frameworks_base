@@ -65,6 +65,8 @@ bool Properties::runningInEmulator = false;
 bool Properties::debuggingEnabled = false;
 bool Properties::isolatedProcess = false;
 
+int Properties::contextPriority = 0;
+
 static int property_get_int(const char* key, int defaultValue) {
     char buf[PROPERTY_VALUE_MAX] = {
             '\0',
