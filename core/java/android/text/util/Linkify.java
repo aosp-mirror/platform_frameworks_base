@@ -100,13 +100,20 @@ public class Linkify {
      *  take an options mask. Note that this uses the
      *  {@link android.webkit.WebView#findAddress(String) findAddress()} method in
      *  {@link android.webkit.WebView} for finding addresses, which has various
-     *  limitations.
+     *  limitations and has been deprecated.
+     *  @deprecated use {@link android.view.textclassifier.TextClassifier#generateLinks(
+     *  TextLinks.Request)} instead and avoid it even when targeting API levels where no alternative
+     *  is available.
      */
+    @Deprecated
     public static final int MAP_ADDRESSES = 0x08;
 
     /**
      *  Bit mask indicating that all available patterns should be matched in
      *  methods that take an options mask
+     *  <p><strong>Note:</strong></p> {@link #MAP_ADDRESSES} is deprecated.
+     *  Use {@link android.view.textclassifier.TextClassifier#generateLinks(TextLinks.Request)}
+     *  instead and avoid it even when targeting API levels where no alternative is available.
      */
     public static final int ALL = WEB_URLS | EMAIL_ADDRESSES | PHONE_NUMBERS | MAP_ADDRESSES;
 
