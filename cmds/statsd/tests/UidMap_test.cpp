@@ -76,7 +76,7 @@ TEST(UidMapTest, TestMatching) {
     apps.push_back(String16(kApp2.c_str()));
     versions.push_back(4);
     versions.push_back(5);
-    m.updateMap(uids, versions, apps);
+    m.updateMap(1, uids, versions, apps);
     EXPECT_TRUE(m.hasApp(1000, kApp1));
     EXPECT_TRUE(m.hasApp(1000, kApp2));
     EXPECT_FALSE(m.hasApp(1000, "not.app"));
@@ -102,7 +102,7 @@ TEST(UidMapTest, TestAddAndRemove) {
     apps.push_back(String16(kApp2.c_str()));
     versions.push_back(4);
     versions.push_back(5);
-    m.updateMap(uids, versions, apps);
+    m.updateMap(1, uids, versions, apps);
 
     std::set<string> name_set = m.getAppNamesFromUid(1000, true /* returnNormalized */);
     EXPECT_EQ(name_set.size(), 2u);
@@ -110,7 +110,7 @@ TEST(UidMapTest, TestAddAndRemove) {
     EXPECT_TRUE(name_set.find(kApp2) != name_set.end());
 
     // Update the app1 version.
-    m.updateApp(String16(kApp1.c_str()), 1000, 40);
+    m.updateApp(2, String16(kApp1.c_str()), 1000, 40);
     EXPECT_EQ(40, m.getAppVersion(1000, kApp1));
 
     name_set = m.getAppNamesFromUid(1000, true /* returnNormalized */);
@@ -118,7 +118,7 @@ TEST(UidMapTest, TestAddAndRemove) {
     EXPECT_TRUE(name_set.find(kApp1) != name_set.end());
     EXPECT_TRUE(name_set.find(kApp2) != name_set.end());
 
-    m.removeApp(String16(kApp1.c_str()), 1000);
+    m.removeApp(3, String16(kApp1.c_str()), 1000);
     EXPECT_FALSE(m.hasApp(1000, kApp1));
     EXPECT_TRUE(m.hasApp(1000, kApp2));
     name_set = m.getAppNamesFromUid(1000, true /* returnNormalized */);
@@ -127,7 +127,7 @@ TEST(UidMapTest, TestAddAndRemove) {
     EXPECT_TRUE(name_set.find(kApp2) != name_set.end());
 
     // Remove app2.
-    m.removeApp(String16(kApp2.c_str()), 1000);
+    m.removeApp(4, String16(kApp2.c_str()), 1000);
     EXPECT_FALSE(m.hasApp(1000, kApp1));
     EXPECT_FALSE(m.hasApp(1000, kApp2));
     name_set = m.getAppNamesFromUid(1000, true /* returnNormalized */);
@@ -136,14 +136,14 @@ TEST(UidMapTest, TestAddAndRemove) {
 
 TEST(UidMapTest, TestUpdateApp) {
     UidMap m;
-    m.updateMap({1000, 1000}, {4, 5}, {String16(kApp1.c_str()), String16(kApp2.c_str())});
+    m.updateMap(1, {1000, 1000}, {4, 5}, {String16(kApp1.c_str()), String16(kApp2.c_str())});
     std::set<string> name_set = m.getAppNamesFromUid(1000, true /* returnNormalized */);
     EXPECT_EQ(name_set.size(), 2u);
     EXPECT_TRUE(name_set.find(kApp1) != name_set.end());
     EXPECT_TRUE(name_set.find(kApp2) != name_set.end());
 
     // Adds a new name for uid 1000.
-    m.updateApp(String16("NeW_aPP1_NAmE"), 1000, 40);
+    m.updateApp(2, String16("NeW_aPP1_NAmE"), 1000, 40);
     name_set = m.getAppNamesFromUid(1000, true /* returnNormalized */);
     EXPECT_EQ(name_set.size(), 3u);
     EXPECT_TRUE(name_set.find(kApp1) != name_set.end());
@@ -152,7 +152,7 @@ TEST(UidMapTest, TestUpdateApp) {
     EXPECT_TRUE(name_set.find("new_app1_name") != name_set.end());
 
     // This name is also reused by another uid 2000.
-    m.updateApp(String16("NeW_aPP1_NAmE"), 2000, 1);
+    m.updateApp(3, String16("NeW_aPP1_NAmE"), 2000, 1);
     name_set = m.getAppNamesFromUid(2000, true /* returnNormalized */);
     EXPECT_EQ(name_set.size(), 1u);
     EXPECT_TRUE(name_set.find("NeW_aPP1_NAmE") == name_set.end());
@@ -200,6 +200,66 @@ TEST(UidMapTest, TestOutputIncludesAtLeastOneSnapshot) {
     EXPECT_EQ(1, results.snapshots_size());
 }
 
+TEST(UidMapTest, TestRemovedAppRetained) {
+    UidMap m;
+    // Initialize single config key.
+    ConfigKey config1(1, StringToId("config1"));
+    m.OnConfigUpdated(config1);
+    vector<int32_t> uids;
+    vector<int64_t> versions;
+    vector<String16> apps;
+    uids.push_back(1000);
+    apps.push_back(String16(kApp2.c_str()));
+    versions.push_back(5);
+    m.updateMap(1, uids, versions, apps);
+    m.removeApp(2, String16(kApp2.c_str()), 1000);
+
+    ProtoOutputStream proto;
+    m.appendUidMap(3, config1, &proto);
+
+    // Snapshot should still contain this item as deleted.
+    UidMapping results;
+    protoOutputStreamToUidMapping(&proto, &results);
+    EXPECT_EQ(1, results.snapshots(0).package_info_size());
+    EXPECT_EQ(true, results.snapshots(0).package_info(0).deleted());
+}
+
+TEST(UidMapTest, TestRemovedAppOverGuardrail) {
+    UidMap m;
+    // Initialize single config key.
+    ConfigKey config1(1, StringToId("config1"));
+    m.OnConfigUpdated(config1);
+    vector<int32_t> uids;
+    vector<int64_t> versions;
+    vector<String16> apps;
+    const int maxDeletedApps = StatsdStats::kMaxDeletedAppsInUidMap;
+    for (int j = 0; j < maxDeletedApps + 10; j++) {
+        uids.push_back(j);
+        apps.push_back(String16(kApp1.c_str()));
+        versions.push_back(j);
+    }
+    m.updateMap(1, uids, versions, apps);
+
+    // First, verify that we have the expected number of items.
+    UidMapping results;
+    ProtoOutputStream proto;
+    m.appendUidMap(3, config1, &proto);
+    protoOutputStreamToUidMapping(&proto, &results);
+    EXPECT_EQ(maxDeletedApps + 10, results.snapshots(0).package_info_size());
+
+    // Now remove all the apps.
+    m.updateMap(1, uids, versions, apps);
+    for (int j = 0; j < maxDeletedApps + 10; j++) {
+        m.removeApp(4, String16(kApp1.c_str()), j);
+    }
+
+    proto.clear();
+    m.appendUidMap(5, config1, &proto);
+    // Snapshot drops the first nine items.
+    protoOutputStreamToUidMapping(&proto, &results);
+    EXPECT_EQ(maxDeletedApps, results.snapshots(0).package_info_size());
+}
+
 TEST(UidMapTest, TestClearingOutput) {
     UidMap m;
 
@@ -218,7 +278,6 @@ TEST(UidMapTest, TestClearingOutput) {
     versions.push_back(4);
     versions.push_back(5);
     m.updateMap(1, uids, versions, apps);
-    EXPECT_EQ(1U, m.mSnapshots.size());
 
     ProtoOutputStream proto;
     m.appendUidMap(2, config1, &proto);
@@ -227,7 +286,6 @@ TEST(UidMapTest, TestClearingOutput) {
     EXPECT_EQ(1, results.snapshots_size());
 
     // We have to keep at least one snapshot in memory at all times.
-    EXPECT_EQ(1U, m.mSnapshots.size());
     proto.clear();
     m.appendUidMap(2, config1, &proto);
     protoOutputStreamToUidMapping(&proto, &results);
@@ -262,7 +320,6 @@ TEST(UidMapTest, TestClearingOutput) {
     EXPECT_EQ(1, results.snapshots_size());
     EXPECT_EQ(2, results.changes_size());
     // At this point both should be cleared.
-    EXPECT_EQ(1U, m.mSnapshots.size());
     EXPECT_EQ(0U, m.mChanges.size());
 }
 
@@ -280,11 +337,8 @@ TEST(UidMapTest, TestMemoryComputed) {
     apps.push_back(String16(kApp1.c_str()));
     versions.push_back(1);
     m.updateMap(1, uids, versions, apps);
-    size_t snapshot_bytes = m.mBytesUsed;
-    EXPECT_TRUE(snapshot_bytes > startBytes);
 
     m.updateApp(3, String16(kApp1.c_str()), 1000, 40);
-    EXPECT_TRUE(m.mBytesUsed > snapshot_bytes);
 
     ProtoOutputStream proto;
     vector<uint8_t> bytes;
@@ -313,16 +367,13 @@ TEST(UidMapTest, TestMemoryGuardrail) {
         versions.push_back(1);
     }
     m.updateMap(1, uids, versions, apps);
-    EXPECT_EQ(1U, m.mSnapshots.size());
 
     m.updateApp(3, String16("EXTREMELY_LONG_STRING_FOR_APP_TO_WASTE_MEMORY.0"), 1000, 2);
-    EXPECT_EQ(1U, m.mSnapshots.size());
     EXPECT_EQ(1U, m.mChanges.size());
 
     // Now force deletion by limiting the memory to hold one delta change.
     m.maxBytesOverride = 80; // Since the app string alone requires >45 characters.
     m.updateApp(5, String16("EXTREMELY_LONG_STRING_FOR_APP_TO_WASTE_MEMORY.0"), 1000, 4);
-    EXPECT_EQ(0U, m.mSnapshots.size());
     EXPECT_EQ(1U, m.mChanges.size());
 }
 #else
