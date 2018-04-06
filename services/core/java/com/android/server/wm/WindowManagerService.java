@@ -2689,7 +2689,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void initializeRecentsAnimation(
+    public void initializeRecentsAnimation(int targetActivityType,
             IRecentsAnimationRunner recentsAnimationRunner,
             RecentsAnimationController.RecentsAnimationCallbacks callbacks, int displayId,
             SparseBooleanArray recentTaskIds) {
@@ -2697,7 +2697,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mRecentsAnimationController = new RecentsAnimationController(this,
                     recentsAnimationRunner, callbacks, displayId);
             mAppTransition.updateBooster();
-            mRecentsAnimationController.initialize(recentTaskIds);
+            mRecentsAnimationController.initialize(targetActivityType, recentTaskIds);
         }
     }
 

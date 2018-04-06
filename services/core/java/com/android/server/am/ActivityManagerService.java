@@ -39,6 +39,7 @@ import static android.app.ActivityManagerInternal.ASSIST_KEY_STRUCTURE;
 import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
 import static android.app.AppOpsManager.OP_ASSIST_STRUCTURE;
 import static android.app.AppOpsManager.OP_NONE;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -205,8 +206,8 @@ import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
-import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_HOME_TO_ORIGINAL_POSITION;
-import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_HOME_IN_PLACE;
+import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
+import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
@@ -5249,8 +5250,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             synchronized (this) {
                 mWindowManager.cancelRecentsAnimation(restoreHomeStackPosition
-                        ? REORDER_MOVE_HOME_TO_ORIGINAL_POSITION
-                        : REORDER_KEEP_HOME_IN_PLACE);
+                        ? REORDER_MOVE_TO_ORIGINAL_POSITION
+                        : REORDER_KEEP_IN_PLACE);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
