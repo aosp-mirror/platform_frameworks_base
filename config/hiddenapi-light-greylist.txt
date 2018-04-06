@@ -1225,11 +1225,11 @@ Landroid/net/wifi/p2p/WifiP2pGroupList;->getGroupList()Ljava/util/Collection;
 Landroid/net/wifi/p2p/WifiP2pGroup;->TEMPORARY_NET_ID:I
 Landroid/net/wifi/p2p/WifiP2pManager$Channel;->mAsyncChannel:Lcom/android/internal/util/AsyncChannel;
 Landroid/net/wifi/p2p/WifiP2pManager$Channel;->putListener(Ljava/lang/Object;)I
+Landroid/net/wifi/p2p/WifiP2pManager;->CREATE_GROUP:I
 Landroid/net/wifi/p2p/WifiP2pManager;->deletePersistentGroup(Landroid/net/wifi/p2p/WifiP2pManager$Channel;ILandroid/net/wifi/p2p/WifiP2pManager$ActionListener;)V
 Landroid/net/wifi/p2p/WifiP2pManager;->requestPersistentGroupInfo(Landroid/net/wifi/p2p/WifiP2pManager$Channel;Landroid/net/wifi/p2p/WifiP2pManager$PersistentGroupInfoListener;)V
 Landroid/net/wifi/p2p/WifiP2pManager;->setDeviceName(Landroid/net/wifi/p2p/WifiP2pManager$Channel;Ljava/lang/String;Landroid/net/wifi/p2p/WifiP2pManager$ActionListener;)V
 Landroid/net/wifi/p2p/WifiP2pManager;->setWifiP2pChannels(Landroid/net/wifi/p2p/WifiP2pManager$Channel;IILandroid/net/wifi/p2p/WifiP2pManager$ActionListener;)V
-Landroid/net/wifi/p2p/WifiP2pManager;->CREATE_GROUP:I
 Landroid/net/wifi/ScanResult;->anqpDomainId:I
 Landroid/net/wifi/ScanResult;->anqpLines:Ljava/util/List;
 Landroid/net/wifi/ScanResult;->distanceCm:I
@@ -1598,6 +1598,7 @@ Landroid/provider/Browser;->clearHistory(Landroid/content/ContentResolver;)V
 Landroid/provider/Browser;->clearSearches(Landroid/content/ContentResolver;)V
 Landroid/provider/Browser;->deleteFromHistory(Landroid/content/ContentResolver;Ljava/lang/String;)V
 Landroid/provider/Browser;->getVisitedHistory(Landroid/content/ContentResolver;)[Ljava/lang/String;
+Landroid/provider/Browser;->HISTORY_PROJECTION:[Ljava/lang/String;
 Landroid/provider/Browser;->SEARCHES_URI:Landroid/net/Uri;
 Landroid/provider/Browser;->sendString(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V
 Landroid/provider/Browser;->updateVisitedHistory(Landroid/content/ContentResolver;Ljava/lang/String;Z)V
@@ -3008,6 +3009,8 @@ Lcom/android/internal/telephony/ITelephony;->endCall()Z
 Lcom/android/internal/telephony/ITelephony;->getCallState()I
 Lcom/android/internal/telephony/ITelephony;->getDataState()I
 Lcom/android/internal/telephony/ITelephony;->isIdle(Ljava/lang/String;)Z
+Lcom/android/internal/telephony/ITelephonyRegistry;->notifyCallState(ILjava/lang/String;)V
+Lcom/android/internal/telephony/ITelephonyRegistry$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/telephony/ITelephonyRegistry;
 Lcom/android/internal/telephony/ITelephony;->silenceRinger()V
 Lcom/android/internal/telephony/ITelephony$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/telephony/ITelephony;
 Lcom/android/internal/telephony/ITelephony$Stub$Proxy;->endCall()Z
