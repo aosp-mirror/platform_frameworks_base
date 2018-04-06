@@ -934,13 +934,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     // Used only for testing.
     // TODO: Delete this and either:
-    // 1. Give Fake SettingsProvider the ability to send settings change notifications (requires
+    // 1. Give FakeSettingsProvider the ability to send settings change notifications (requires
     //    changing ContentResolver to make registerContentObserver non-final).
     // 2. Give FakeSettingsProvider an alternative notification mechanism and have the test use it
     //    by subclassing SettingsObserver.
     @VisibleForTesting
     void updateMobileDataAlwaysOn() {
         mHandler.sendEmptyMessage(EVENT_CONFIGURE_MOBILE_DATA_ALWAYS_ON);
+    }
+
+    // See FakeSettingsProvider comment above.
+    @VisibleForTesting
+    void updatePrivateDnsSettings() {
+        mHandler.sendEmptyMessage(EVENT_PRIVATE_DNS_SETTINGS_CHANGED);
     }
 
     private void handleMobileDataAlwaysOn() {
@@ -972,8 +978,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void registerPrivateDnsSettingsCallbacks() {
-        for (Uri u : DnsManager.getPrivateDnsSettingsUris()) {
-            mSettingsObserver.observe(u, EVENT_PRIVATE_DNS_SETTINGS_CHANGED);
+        for (Uri uri : DnsManager.getPrivateDnsSettingsUris()) {
+            mSettingsObserver.observe(uri, EVENT_PRIVATE_DNS_SETTINGS_CHANGED);
         }
     }
 
@@ -1026,8 +1032,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (network == null) {
             return null;
         }
+        return getNetworkAgentInfoForNetId(network.netId);
+    }
+
+    private NetworkAgentInfo getNetworkAgentInfoForNetId(int netId) {
         synchronized (mNetworkForNetId) {
-            return mNetworkForNetId.get(network.netId);
+            return mNetworkForNetId.get(netId);
         }
     }
 
@@ -1167,9 +1177,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         NetworkAgentInfo nai;
         if (vpnNetId != NETID_UNSET) {
-            synchronized (mNetworkForNetId) {
-                nai = mNetworkForNetId.get(vpnNetId);
-            }
+            nai = getNetworkAgentInfoForNetId(vpnNetId);
             if (nai != null) return nai.network;
         }
         nai = getDefaultNetwork();
@@ -2155,40 +2163,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 default:
                     return false;
                 case NetworkMonitor.EVENT_NETWORK_TESTED: {
-                    final NetworkAgentInfo nai;
-                    synchronized (mNetworkForNetId) {
-                        nai = mNetworkForNetId.get(msg.arg2);
-                    }
+                    final NetworkAgentInfo nai = getNetworkAgentInfoForNetId(msg.arg2);
                     if (nai == null) break;
 
                     final boolean valid = (msg.arg1 == NetworkMonitor.NETWORK_TEST_RESULT_VALID);
                     final boolean wasValidated = nai.lastValidated;
                     final boolean wasDefault = isDefaultNetwork(nai);
 
-                    final PrivateDnsConfig privateDnsCfg = (msg.obj instanceof PrivateDnsConfig)
-                            ? (PrivateDnsConfig) msg.obj : null;
                     final String redirectUrl = (msg.obj instanceof String) ? (String) msg.obj : "";
 
-                    final boolean reevaluationRequired;
-                    final String logMsg;
-                    if (valid) {
-                        reevaluationRequired = updatePrivateDns(nai, privateDnsCfg);
-                        logMsg = (DBG && (privateDnsCfg != null))
-                                 ? " with " + privateDnsCfg.toString() : "";
-                    } else {
-                        reevaluationRequired = false;
-                        logMsg = (DBG && !TextUtils.isEmpty(redirectUrl))
-                                 ? " with redirect to " + redirectUrl : "";
-                    }
                     if (DBG) {
+                        final String logMsg = !TextUtils.isEmpty(redirectUrl)
+                                 ? " with redirect to " + redirectUrl
+                                 : "";
                         log(nai.name() + " validation " + (valid ? "passed" : "failed") + logMsg);
-                    }
-                    // If there is a change in Private DNS configuration,
-                    // trigger reevaluation of the network to test it.
-                    if (reevaluationRequired) {
-                        nai.networkMonitor.sendMessage(
-                                NetworkMonitor.CMD_FORCE_REEVALUATION, Process.SYSTEM_UID);
-                        break;
                     }
                     if (valid != nai.lastValidated) {
                         if (wasDefault) {
@@ -2218,10 +2206,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 case NetworkMonitor.EVENT_PROVISIONING_NOTIFICATION: {
                     final int netId = msg.arg2;
                     final boolean visible = toBool(msg.arg1);
-                    final NetworkAgentInfo nai;
-                    synchronized (mNetworkForNetId) {
-                        nai = mNetworkForNetId.get(netId);
-                    }
+                    final NetworkAgentInfo nai = getNetworkAgentInfoForNetId(netId);
                     // If captive portal status has changed, update capabilities or disconnect.
                     if (nai != null && (visible != nai.lastCaptivePortalDetected)) {
                         final int oldScore = nai.getCurrentScore();
@@ -2252,18 +2237,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     break;
                 }
                 case NetworkMonitor.EVENT_PRIVATE_DNS_CONFIG_RESOLVED: {
-                    final NetworkAgentInfo nai;
-                    synchronized (mNetworkForNetId) {
-                        nai = mNetworkForNetId.get(msg.arg2);
-                    }
+                    final NetworkAgentInfo nai = getNetworkAgentInfoForNetId(msg.arg2);
                     if (nai == null) break;
 
-                    final PrivateDnsConfig cfg = (PrivateDnsConfig) msg.obj;
-                    final boolean reevaluationRequired = updatePrivateDns(nai, cfg);
-                    if (nai.lastValidated && reevaluationRequired) {
-                        nai.networkMonitor.sendMessage(
-                                NetworkMonitor.CMD_FORCE_REEVALUATION, Process.SYSTEM_UID);
-                    }
+                    updatePrivateDns(nai, (PrivateDnsConfig) msg.obj);
                     break;
                 }
             }
@@ -2301,61 +2278,38 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    private boolean networkRequiresValidation(NetworkAgentInfo nai) {
+        return NetworkMonitor.isValidationRequired(
+                mDefaultRequest.networkCapabilities, nai.networkCapabilities);
+    }
+
     private void handlePrivateDnsSettingsChanged() {
         final PrivateDnsConfig cfg = mDnsManager.getPrivateDnsConfig();
 
         for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
-            // Private DNS only ever applies to networks that might provide
-            // Internet access and therefore also require validation.
-            if (!NetworkMonitor.isValidationRequired(
-                    mDefaultRequest.networkCapabilities, nai.networkCapabilities)) {
-                continue;
-            }
-
-            // Notify the NetworkMonitor thread in case it needs to cancel or
-            // schedule DNS resolutions. If a DNS resolution is required the
-            // result will be sent back to us.
-            nai.networkMonitor.notifyPrivateDnsSettingsChanged(cfg);
-
-            if (!cfg.inStrictMode()) {
-                // No strict mode hostname DNS resolution needed, so just update
-                // DNS settings directly. In opportunistic and "off" modes this
-                // just reprograms netd with the network-supplied DNS servers
-                // (and of course the boolean of whether or not to attempt TLS).
-                //
-                // TODO: Consider code flow parity with strict mode, i.e. having
-                // NetworkMonitor relay the PrivateDnsConfig back to us and then
-                // performing this call at that time.
-                updatePrivateDns(nai, cfg);
-            }
+            handlePerNetworkPrivateDnsConfig(nai, cfg);
         }
     }
 
-    private boolean updatePrivateDns(NetworkAgentInfo nai, PrivateDnsConfig newCfg) {
-        final boolean reevaluationRequired = true;
-        final boolean dontReevaluate = false;
+    private void handlePerNetworkPrivateDnsConfig(NetworkAgentInfo nai, PrivateDnsConfig cfg) {
+        // Private DNS only ever applies to networks that might provide
+        // Internet access and therefore also require validation.
+        if (!networkRequiresValidation(nai)) return;
 
-        final PrivateDnsConfig oldCfg = mDnsManager.updatePrivateDns(nai.network, newCfg);
+        // Notify the NetworkMonitor thread in case it needs to cancel or
+        // schedule DNS resolutions. If a DNS resolution is required the
+        // result will be sent back to us.
+        nai.networkMonitor.notifyPrivateDnsSettingsChanged(cfg);
+
+        // With Private DNS bypass support, we can proceed to update the
+        // Private DNS config immediately, even if we're in strict mode
+        // and have not yet resolved the provider name into a set of IPs.
+        updatePrivateDns(nai, cfg);
+    }
+
+    private void updatePrivateDns(NetworkAgentInfo nai, PrivateDnsConfig newCfg) {
+        mDnsManager.updatePrivateDns(nai.network, newCfg);
         updateDnses(nai.linkProperties, null, nai.network.netId);
-
-        if (newCfg == null) {
-            if (oldCfg == null) return dontReevaluate;
-            return oldCfg.useTls ? reevaluationRequired : dontReevaluate;
-        }
-
-        if (oldCfg == null) {
-            return newCfg.useTls ? reevaluationRequired : dontReevaluate;
-        }
-
-        if (oldCfg.useTls != newCfg.useTls) {
-            return reevaluationRequired;
-        }
-
-        if (newCfg.inStrictMode() && !Objects.equals(oldCfg.hostname, newCfg.hostname)) {
-            return reevaluationRequired;
-        }
-
-        return dontReevaluate;
     }
 
     private void updateLingerState(NetworkAgentInfo nai, long now) {
@@ -3300,7 +3254,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (isNetworkWithLinkPropertiesBlocked(lp, uid, false)) {
             return;
         }
-        nai.networkMonitor.sendMessage(NetworkMonitor.CMD_FORCE_REEVALUATION, uid);
+        nai.networkMonitor.forceReevaluation(uid);
     }
 
     private ProxyInfo getDefaultProxy() {
@@ -4919,7 +4873,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     public void handleUpdateLinkProperties(NetworkAgentInfo nai, LinkProperties newLp) {
-        if (mNetworkForNetId.get(nai.network.netId) != nai) {
+        if (getNetworkAgentInfoForNetId(nai.network.netId) != nai) {
             // Ignore updates for disconnected networks
             return;
         }
@@ -5495,6 +5449,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (!networkAgent.everConnected && state == NetworkInfo.State.CONNECTED) {
             networkAgent.everConnected = true;
 
+            handlePerNetworkPrivateDnsConfig(networkAgent, mDnsManager.getPrivateDnsConfig());
             updateLinkProperties(networkAgent, null);
             notifyIfacesChangedForNetworkStats();
 
