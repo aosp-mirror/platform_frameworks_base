@@ -19,6 +19,8 @@
     <declare-styleable name="CarFacetButton">
         <!-- icon to be rendered (drawable) -->
         <attr name="icon" format="reference"/>
+        <!-- icon to be rendered when in selected state -->
+        <attr name="selectedIcon" format="reference"/>
         <!-- intent to start when button is click -->
         <attr name="intent" format="string"/>
         <!-- intent to start when a long press has happened -->
@@ -45,6 +47,12 @@
         <attr name="longIntent" format="string"/>
         <!-- start the intent as a broad cast instead of an activity if true-->
         <attr name="broadcast" format="boolean"/>
+        <!-- Alpha value to used when in selected state.  Defaults 1f  -->
+        <attr name="selectedAlpha" format="float" />
+        <!-- Alpha value to used when in un-selected state.  Defaults 0.7f  -->
+        <attr name="unselectedAlpha" format="float" />
+        <!-- icon to be rendered when in selected state -->
+        <attr name="selectedIcon" format="reference"/>
     </declare-styleable>
 
     <!-- Custom attributes to configure hvac values -->
