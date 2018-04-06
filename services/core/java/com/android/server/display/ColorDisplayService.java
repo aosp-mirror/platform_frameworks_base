@@ -300,6 +300,11 @@ public final class ColorDisplayService extends SystemService
         dtm.setColorMode(mode, mIsActivated ? mMatrixNight : MATRIX_IDENTITY);
     }
 
+    @Override
+    public void onAccessibilityTransformChanged(boolean state) {
+        onDisplayColorModeChanged(mController.getColorMode());
+    }
+
     /**
      * Set coefficients based on native mode. Use DisplayTransformManager#isNativeModeEnabled while
      * setting is stable; when setting is changing, pass native mode selection directly.
