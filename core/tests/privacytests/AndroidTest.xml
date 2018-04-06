@@ -23,5 +23,6 @@
 
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.frameworks.coretests.privacy" />
+        <option name="hidden-api-checks" value="false"/>
     </test>
 </configuration>

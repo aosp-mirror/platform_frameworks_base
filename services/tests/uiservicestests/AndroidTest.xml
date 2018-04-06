@@ -24,5 +24,6 @@
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.frameworks.tests.uiservices" />
         <option name="runner" value="android.testing.TestableInstrumentation" />
+        <option name="hidden-api-checks" value="false"/>
     </test>
 </configuration>
