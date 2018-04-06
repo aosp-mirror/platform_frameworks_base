@@ -21901,8 +21901,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         "com.android.frameworks.locationtests",
         "com.android.frameworks.coretests.privacy",
         "com.android.settings.ui",
-        "com.android.perftests.core",
-        "com.android.perftests.multiuser",
     };
 
     public boolean startInstrumentation(ComponentName className,
