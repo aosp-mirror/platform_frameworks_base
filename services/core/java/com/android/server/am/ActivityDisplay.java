@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -44,7 +43,6 @@ import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -702,57 +700,52 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     }
 
     /**
-     * @return the stack currently above the home stack.  Can be null if there is no home stack, or
-     *         the home stack is already on top.
+     * @return the stack currently above the {@param stack}.  Can be null if the {@param stack} is
+     *         already top-most.
      */
-    ActivityStack getStackAboveHome() {
-        if (mHomeStack == null) {
-            // Skip if there is no home stack
-            return null;
-        }
-
-        final int stackIndex = mStacks.indexOf(mHomeStack) + 1;
+    ActivityStack getStackAbove(ActivityStack stack) {
+        final int stackIndex = mStacks.indexOf(stack) + 1;
         return (stackIndex < mStacks.size()) ? mStacks.get(stackIndex) : null;
     }
 
     /**
-     * Adjusts the home stack behind the last visible stack in the display if necessary. Generally
-     * used in conjunction with {@link #moveHomeStackBehindStack}.
+     * Adjusts the {@param stack} behind the last visible stack in the display if necessary.
+     * Generally used in conjunction with {@link #moveStackBehindStack}.
      */
-    void moveHomeStackBehindBottomMostVisibleStack() {
-        if (mHomeStack == null || mHomeStack.shouldBeVisible(null)) {
-            // Skip if there is no home stack, or if it is already visible
+    void moveStackBehindBottomMostVisibleStack(ActivityStack stack) {
+        if (stack.shouldBeVisible(null)) {
+            // Skip if the stack is already visible
             return;
         }
 
-        // Move the home stack to the bottom to not affect the following visibility checks
-        positionChildAtBottom(mHomeStack);
+        // Move the stack to the bottom to not affect the following visibility checks
+        positionChildAtBottom(stack);
 
-        // Find the next position where the homes stack should be placed
+        // Find the next position where the stack should be placed
         final int numStacks = mStacks.size();
         for (int stackNdx = 0; stackNdx < numStacks; stackNdx++) {
-            final ActivityStack stack = mStacks.get(stackNdx);
-            if (stack == mHomeStack) {
+            final ActivityStack s = mStacks.get(stackNdx);
+            if (s == stack) {
                 continue;
             }
-            final int winMode = stack.getWindowingMode();
+            final int winMode = s.getWindowingMode();
             final boolean isValidWindowingMode = winMode == WINDOWING_MODE_FULLSCREEN ||
                     winMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
-            if (stack.shouldBeVisible(null) && isValidWindowingMode) {
-                // Move the home stack to behind this stack
-                positionChildAt(mHomeStack, Math.max(0, stackNdx - 1));
+            if (s.shouldBeVisible(null) && isValidWindowingMode) {
+                // Move the provided stack to behind this stack
+                positionChildAt(stack, Math.max(0, stackNdx - 1));
                 break;
             }
         }
     }
 
     /**
-     * Moves the home stack behind the given {@param stack} if possible. If {@param stack} is not
-     * currently in the display, then then the home stack is moved to the back. Generally used in
-     * conjunction with {@link #moveHomeStackBehindBottomMostVisibleStack}.
+     * Moves the {@param stack} behind the given {@param behindStack} if possible. If
+     * {@param behindStack} is not currently in the display, then then the stack is moved to the
+     * back. Generally used in conjunction with {@link #moveStackBehindBottomMostVisibleStack}.
      */
-    void moveHomeStackBehindStack(ActivityStack behindStack) {
-        if (behindStack == null || behindStack == mHomeStack) {
+    void moveStackBehindStack(ActivityStack stack, ActivityStack behindStack) {
+        if (behindStack == null || behindStack == stack) {
             return;
         }
 
@@ -760,11 +753,11 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         // list, so we need to adjust the insertion index to account for the removed index
         // TODO: Remove this logic when WindowContainer.positionChildAt() is updated to adjust the
         //       position internally
-        final int homeStackIndex = mStacks.indexOf(mHomeStack);
+        final int stackIndex = mStacks.indexOf(stack);
         final int behindStackIndex = mStacks.indexOf(behindStack);
-        final int insertIndex = homeStackIndex <= behindStackIndex
+        final int insertIndex = stackIndex <= behindStackIndex
                 ? behindStackIndex - 1 : behindStackIndex;
-        positionChildAt(mHomeStack, Math.max(0, insertIndex));
+        positionChildAt(stack, Math.max(0, insertIndex));
     }
 
     boolean isSleeping() {
