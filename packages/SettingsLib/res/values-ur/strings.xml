@@ -40,10 +40,8 @@
     <string name="connected_via_passpoint" msgid="2826205693803088747">"‏منسلک بذریعہ ‎%1$s"</string>
     <string name="available_via_passpoint" msgid="1617440946846329613">"‏دستیاب بذریعہ ‎%1$s"</string>
     <string name="wifi_connected_no_internet" msgid="8202906332837777829">"منسلک، انٹرنیٹ نہیں ہے"</string>
-    <!-- no translation found for wifi_status_no_internet (5784710974669608361) -->
-    <skip />
-    <!-- no translation found for wifi_status_sign_in_required (123517180404752756) -->
-    <skip />
+    <string name="wifi_status_no_internet" msgid="5784710974669608361">"انٹرنیٹ نہیں ہے"</string>
+    <string name="wifi_status_sign_in_required" msgid="123517180404752756">"سائن ان درکار ہے"</string>
     <string name="wifi_ap_unable_to_handle_new_sta" msgid="5348824313514404541">"رسائی پوائنٹ عارضی طور پر فُل ہے"</string>
     <string name="connected_via_carrier" msgid="7583780074526041912">"‏منسلک بذریعہ ‎%1$s"</string>
     <string name="available_via_carrier" msgid="1469036129740799053">"‏دستیاب بذریعہ ‎%1$s"</string>
@@ -67,12 +65,9 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"منسلک ہے (فون کے علاوہ)، بیٹری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"منسلک ہے (میڈیا کے علاوہ)، بیٹری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"منسلک ہے (فون یا میڈیا کے علاوہ)، بیٹری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_active_battery_level (3149689299296462009) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level (1447164613319663655) -->
-    <skip />
-    <!-- no translation found for bluetooth_active_no_battery_level (8380223546730241956) -->
-    <skip />
+    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"فعال، <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری"</string>
+    <string name="bluetooth_battery_level" msgid="1447164613319663655">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری"</string>
+    <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"فعال"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"میڈيا آڈیو"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"فون کالز"</string>
     <string name="bluetooth_profile_opp" msgid="9168139293654233697">"فائل کی منتقلی"</string>
@@ -119,14 +114,10 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"ہیڈ فون"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"ان پٹ پیریفرل"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"بلوٹوتھ"</string>
-    <!-- no translation found for bluetooth_hearingaid_left_pairing_message (7378813500862148102) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearingaid_right_pairing_message (1550373802309160891) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearingaid_left_battery_level (8797811465352097562) -->
-    <skip />
-    <!-- no translation found for bluetooth_hearingaid_right_battery_level (7309476148173459677) -->
-    <skip />
+    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"بائيں جانب کے سماعتی آلہ کا جوڑا بنایا جا رہا ہے…"</string>
+    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"دائیں جانب کے سماعتی آلہ کا جوڑا بنایا جا رہا ہے…"</string>
+    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"بائيں - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"دائيں - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"‏Wifi آف ہے۔"</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"‏Wifi غیر منسلک ہو گیا۔"</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"‏Wifi ایک بار۔"</string>
@@ -246,15 +237,12 @@
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"خودکار"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"‏نجی DNS فراہم کنندہ میزبان کا نام"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"‏DNS فراہم کنندہ کے میزبان کا نام درج کریں"</string>
-    <!-- no translation found for private_dns_mode_provider_failure (231837290365031223) -->
-    <skip />
+    <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"منسلک نہیں ہو سکا"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"وائرلیس ڈسپلے سرٹیفیکیشن کیلئے اختیارات دکھائیں"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏Wi‑Fi لاگنگ لیول میں اضافہ کریں، Wi‑Fi منتخب کنندہ میں فی SSID RSSI دکھائیں"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"‏Wi-Fi نیٹ ورکس سے منسلک کرتے وقت MAC پتے کو غیر مرتب کریں"</string>
-    <!-- no translation found for wifi_metered_label (4514924227256839725) -->
-    <skip />
-    <!-- no translation found for wifi_unmetered_label (6124098729457992931) -->
-    <skip />
+    <string name="wifi_metered_label" msgid="4514924227256839725">"میٹرڈ"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"غیر میٹر شدہ"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"لاگر بفر کے سائز"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"فی لاگ بفر لاگر کے سائز منتخب کریں"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"لاگر مستقل اسٹوریج صاف کریں؟"</string>

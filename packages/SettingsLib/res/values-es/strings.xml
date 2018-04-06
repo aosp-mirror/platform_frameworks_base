@@ -241,8 +241,8 @@
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostrar opciones para la certificación de la pantalla inalámbrica"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumentar el nivel de registro de Wi-Fi, mostrar por SSID RSSI en el selector Wi-Fi"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Ordenar las direcciones MAC de forma aleatoria al conectarse a redes Wi‑Fi"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"Medido"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"No medido"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"Medida"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"No medida"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Tamaños de búfer de registrador"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Elige el tamaño del Logger por búfer"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"¿Borrar almacenamiento continuo del registrador?"</string>
