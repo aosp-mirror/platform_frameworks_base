@@ -43,7 +43,7 @@ struct ConfigStats {
 
     std::list<int32_t> broadcast_sent_time_sec;
     std::list<int32_t> data_drop_time_sec;
-    std::list<int32_t> dump_report_time_sec;
+    std::list<std::pair<int32_t, int64_t>> dump_report_stats;
 
     // Stores how many times a matcher have been matched. The map size is capped by kMaxConfigCount.
     std::map<const int64_t, int> matcher_stats;
@@ -177,7 +177,7 @@ public:
      *
      * The report may be requested via StatsManager API, or through adb cmd.
      */
-    void noteMetricsReportSent(const ConfigKey& key);
+    void noteMetricsReportSent(const ConfigKey& key, const size_t num_bytes);
 
     /**
      * Report the size of output tuple of a condition.
@@ -355,7 +355,7 @@ private:
 
     void noteDataDropped(const ConfigKey& key, int32_t timeSec);
 
-    void noteMetricsReportSent(const ConfigKey& key, int32_t timeSec);
+    void noteMetricsReportSent(const ConfigKey& key, const size_t num_bytes, int32_t timeSec);
 
     void noteBroadcastSent(const ConfigKey& key, int32_t timeSec);
 

@@ -243,10 +243,10 @@ message StatsdStatsReport {
         optional int32 matcher_count = 7;
         optional int32 alert_count = 8;
         optional bool is_valid = 9;
-
         repeated int32 broadcast_sent_time_sec = 10;
         repeated int32 data_drop_time_sec = 11;
         repeated int32 dump_report_time_sec = 12;
+        repeated int32 dump_report_data_size = 20;
         repeated MatcherStats matcher_stats = 13;
         repeated ConditionStats condition_stats = 14;
         repeated MetricStats metric_stats = 15;

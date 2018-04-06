@@ -90,8 +90,8 @@ public:
 
     virtual void dropData(const int64_t dropTimeNs);
 
-    // Config source owner can call onDumpReport() to get all the metrics collected.
     virtual void onDumpReport(const int64_t dumpTimeNs,
+                              const bool include_current_partial_bucket,
                               android::util::ProtoOutputStream* protoOutput);
 
     // Computes the total byte size of all metrics managed by a single config source.
