@@ -408,6 +408,15 @@ public class TextClock extends TextView {
     }
 
     /**
+     * Update the displayed time if necessary and invalidate the view.
+     * @hide
+     */
+    public void refresh() {
+        onTimeChanged();
+        invalidate();
+    }
+
+    /**
      * Indicates whether the system is currently using the 24-hour mode.
      *
      * When the system is in 24-hour mode, this view will use the pattern
