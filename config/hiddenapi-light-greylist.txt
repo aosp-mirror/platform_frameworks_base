@@ -1184,6 +1184,9 @@ Landroid/net/NetworkTemplate;->buildTemplateWifi()Landroid/net/NetworkTemplate;
 Landroid/net/Proxy;->getProxy(Landroid/content/Context;Ljava/lang/String;)Ljava/net/Proxy;
 Landroid/net/ProxyInfo;-><init>(Ljava/lang/String;ILjava/lang/String;)V
 Landroid/net/SntpClient;-><init>()V
+Landroid/net/StaticIpConfiguration;->gateway:Ljava/net/InetAddress;
+Landroid/net/StaticIpConfiguration;->ipAddress:Landroid/net/LinkAddress;
+Landroid/net/StaticIpConfiguration;-><init>()V
 Landroid/net/SSLCertificateSocketFactory;->castToOpenSSLSocket(Ljava/net/Socket;)Lcom/android/org/conscrypt/OpenSSLSocketImpl;
 Landroid/net/SSLCertificateSocketFactory;->getAlpnSelectedProtocol(Ljava/net/Socket;)[B
 Landroid/net/SSLCertificateSocketFactory;->getDelegate()Ljavax/net/ssl/SSLSocketFactory;
@@ -1256,6 +1259,8 @@ Landroid/net/wifi/WifiConfiguration;->apChannel:I
 Landroid/net/wifi/WifiConfiguration;->defaultGwMacAddress:Ljava/lang/String;
 Landroid/net/wifi/WifiConfiguration;->lastConnectUid:I
 Landroid/net/wifi/WifiConfiguration;->mIpConfiguration:Landroid/net/IpConfiguration;
+Landroid/net/wifi/WifiConfiguration;->setIpAssignment(Landroid/net/IpConfiguration$IpAssignment;)V
+Landroid/net/wifi/WifiConfiguration;->setStaticIpConfiguration(Landroid/net/StaticIpConfiguration;)V
 Landroid/net/wifi/WifiConfiguration;->validatedInternetAccess:Z
 Landroid/net/wifi/WifiEnterpriseConfig;->getCaCertificateAlias()Ljava/lang/String;
 Landroid/net/wifi/WifiEnterpriseConfig;->getClientCertificateAlias()Ljava/lang/String;
