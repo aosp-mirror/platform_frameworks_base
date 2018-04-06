@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.app.Notification;
+import android.app.Person;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -79,7 +80,7 @@ public class MessagingLayout extends FrameLayout {
     private Icon mLargeIcon;
     private boolean mIsOneToOne;
     private ArrayList<MessagingGroup> mAddedGroups = new ArrayList<>();
-    private Notification.Person mUser;
+    private Person mUser;
     private CharSequence mNameReplacement;
     private boolean mDisplayImagesAtEnd;
 
@@ -160,7 +161,7 @@ public class MessagingLayout extends FrameLayout {
         for (int i = remoteInputHistory.length - 1; i >= 0; i--) {
             CharSequence message = remoteInputHistory[i];
             newMessages.add(new Notification.MessagingStyle.Message(
-                    message, 0, (Notification.Person) null));
+                    message, 0, (Person) null));
         }
     }
 
@@ -296,13 +297,13 @@ public class MessagingLayout extends FrameLayout {
         mIsOneToOne = oneToOne;
     }
 
-    public void setUser(Notification.Person user) {
+    public void setUser(Person user) {
         mUser = user;
         if (mUser.getIcon() == null) {
             Icon userIcon = Icon.createWithResource(getContext(),
                     com.android.internal.R.drawable.messaging_user);
             userIcon.setTint(mLayoutColor);
-            mUser.setIcon(userIcon);
+            mUser = mUser.toBuilder().setIcon(userIcon).build();
         }
     }
 
@@ -310,7 +311,7 @@ public class MessagingLayout extends FrameLayout {
             List<MessagingMessage> messages) {
         // Let's first find our groups!
         List<List<MessagingMessage>> groups = new ArrayList<>();
-        List<Notification.Person> senders = new ArrayList<>();
+        List<Person> senders = new ArrayList<>();
 
         // Lets first find the groups
         findGroups(historicMessages, messages, groups, senders);
@@ -320,7 +321,7 @@ public class MessagingLayout extends FrameLayout {
     }
 
     private void createGroupViews(List<List<MessagingMessage>> groups,
-            List<Notification.Person> senders) {
+            List<Person> senders) {
         mGroups.clear();
         for (int groupIndex = 0; groupIndex < groups.size(); groupIndex++) {
             List<MessagingMessage> group = groups.get(groupIndex);
@@ -339,7 +340,7 @@ public class MessagingLayout extends FrameLayout {
             }
             newGroup.setDisplayImagesAtEnd(mDisplayImagesAtEnd);
             newGroup.setLayoutColor(mLayoutColor);
-            Notification.Person sender = senders.get(groupIndex);
+            Person sender = senders.get(groupIndex);
             CharSequence nameOverride = null;
             if (sender != mUser && mNameReplacement != null) {
                 nameOverride = mNameReplacement;
@@ -357,7 +358,7 @@ public class MessagingLayout extends FrameLayout {
 
     private void findGroups(List<MessagingMessage> historicMessages,
             List<MessagingMessage> messages, List<List<MessagingMessage>> groups,
-            List<Notification.Person> senders) {
+            List<Person> senders) {
         CharSequence currentSenderKey = null;
         List<MessagingMessage> currentGroup = null;
         int histSize = historicMessages.size();
@@ -369,7 +370,7 @@ public class MessagingLayout extends FrameLayout {
                 message = messages.get(i - histSize);
             }
             boolean isNewGroup = currentGroup == null;
-            Notification.Person sender = message.getMessage().getSenderPerson();
+            Person sender = message.getMessage().getSenderPerson();
             CharSequence key = sender == null ? null
                     : sender.getKey() == null ? sender.getName() : sender.getKey();
             isNewGroup |= !TextUtils.equals(key, currentSenderKey);
