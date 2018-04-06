@@ -6431,6 +6431,7 @@ public class Notification implements Parcelable
         /**
          * @return the user to be displayed for any replies sent by the user
          */
+        @NonNull
         public Person getUser() {
             return mUser;
         }
@@ -6505,7 +6506,8 @@ public class Notification implements Parcelable
          *
          * @return this object for method chaining
          */
-        public MessagingStyle addMessage(CharSequence text, long timestamp, Person sender) {
+        public MessagingStyle addMessage(@NonNull CharSequence text, long timestamp,
+                @Nullable Person sender) {
             return addMessage(new Message(text, timestamp, sender));
         }
 
@@ -6935,7 +6937,7 @@ public class Notification implements Parcelable
              * to differentiate between the different users.
              * </p>
              */
-            public Message(CharSequence text, long timestamp, @Nullable Person sender){
+            public Message(@NonNull CharSequence text, long timestamp, @Nullable Person sender) {
                 mText = text;
                 mTimestamp = timestamp;
                 mSender = sender;
