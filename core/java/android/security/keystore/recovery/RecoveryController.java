@@ -288,7 +288,7 @@ public class RecoveryController {
     }
 
     /**
-     * @removed Use {@link #initRecoveryService(String, byte[], byte[])} instead.
+     * @deprecated Use {@link #initRecoveryService(String, byte[], byte[])} instead.
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -359,7 +359,7 @@ public class RecoveryController {
     }
 
     /**
-     * @removed Use {@link #getKeyChainSnapshot()}
+     * @deprecated Use {@link #getKeyChainSnapshot()}
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -435,7 +435,7 @@ public class RecoveryController {
     }
 
     /**
-     * @removed Use {@link #getAliases()}.
+     * @deprecated Use {@link #getAliases()}.
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -460,7 +460,7 @@ public class RecoveryController {
     }
 
     /**
-     * @removed Use {@link #setRecoveryStatus(String, int)}
+     * @deprecated Use {@link #setRecoveryStatus(String, int)}
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -494,7 +494,7 @@ public class RecoveryController {
     }
 
     /**
-     * @removed Use {@link #getRecoveryStatus(String)}.
+     * @deprecated Use {@link #getRecoveryStatus(String)}.
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -576,7 +576,26 @@ public class RecoveryController {
     }
 
     /**
-     * @removed Use {@link #generateKey(String)}.
+     * Deprecated.
+     * Generates a AES256/GCM/NoPADDING key called {@code alias} and loads it into the recoverable
+     * key store. Returns the raw material of the key.
+     *
+     * @param alias The key alias.
+     * @param account The account associated with the key
+     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
+     *     service.
+     * @throws LockScreenRequiredException if the user has not set a lock screen. This is required
+     *     to generate recoverable keys, as the snapshots are encrypted using a key derived from the
+     *     lock screen.
+     */
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
+    public byte[] generateAndStoreKey(@NonNull String alias, byte[] account)
+            throws InternalRecoveryServiceException, LockScreenRequiredException {
+        throw new UnsupportedOperationException("Operation is not supported, use generateKey");
+    }
+
+    /**
+     * @deprecated Use {@link #generateKey(String)}.
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
