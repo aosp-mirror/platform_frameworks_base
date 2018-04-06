@@ -82,7 +82,7 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Aucun service vocal"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Aucun de service vocal ni d\'appel d\'urgence"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"Temporairement désactivé par votre fournisseur de services"</string>
-    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"Temporairement désactivé par votre fournisseur de services pour la carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"Temporairement désactivé par votre fournisseur de services pour la carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"Impossible de joindre le réseau cellulaire"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Essayez de changer de réseau préféré. Touchez l\'écran pour changer."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Le service d\'appel d\'urgence n\'est pas accessible"</string>
@@ -1274,7 +1274,7 @@
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Désactiver"</string>
     <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"Vérification de <xliff:g id="NAME">%s</xliff:g> en cours…"</string>
     <string name="ext_media_checking_notification_message" msgid="410185170877285434">"Vérification du contenu actuel"</string>
-    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"Nouveau/nouvelle <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"Nouveau périphérique <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_message" msgid="3673685270558405087">"Toucher pour configurer"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Pour transférer des photos et d\'autres fichiers"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"Il y a un problème avec <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1298,7 +1298,7 @@
     <string name="ext_media_move_title" msgid="1022809140035962662">"Déplacement des données..."</string>
     <string name="ext_media_move_success_title" msgid="7863652232242276066">"Transfert de contenu terminé"</string>
     <string name="ext_media_move_success_message" msgid="8939137931961728009">"Contenu déplacé vers <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"Impossible de déplacer contenu"</string>
+    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"Impossible de déplacer le contenu"</string>
     <string name="ext_media_move_failure_message" msgid="7388950499623016135">"Essayez de déplacer le contenu de nouveau"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"Supprimée"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Éjectée"</string>
@@ -1847,10 +1847,10 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"Cette carte SIM n\'est pas autorisée pour la voix"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"Cette carte SIM n\'est pas autorisée pour la voix"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Ce téléphone n\'est pas autorisé pour la voix"</string>
-    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"La carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g> n\'est pas autorisée"</string>
-    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"Carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g> non configurée"</string>
-    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"La carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g> n\'est pas autorisée"</string>
-    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"La carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g> n\'est pas autorisée"</string>
+    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"La carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g> n\'est pas autorisée"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"La carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g> n\'est pas configurée"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"La carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g> n\'est pas autorisée"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"La carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g> n\'est pas autorisée"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Fenêtre contextuelle"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"La version de l\'application a été rétrogradée ou n\'est pas compatible avec ce raccourci"</string>

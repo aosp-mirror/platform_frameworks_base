@@ -287,7 +287,7 @@
     <string name="permgrouprequest_storage" msgid="7885942926944299560">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toegang geven tot foto\'s, media en bestanden op je apparaat?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfoon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"audio opnemen"</string>
-    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toestaan om audio op te nemen?"</string>
+    <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; het volgende toestaan: audio opnemen."</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"foto\'s maken en video opnemen"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; toestaan om foto\'s te maken en video op te nemen?"</string>

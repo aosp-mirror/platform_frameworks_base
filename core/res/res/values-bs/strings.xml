@@ -316,8 +316,8 @@
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Dozvoljava aplikaciji onemogućavanje statusne trake ili dodavanje i uklanjanje sistemskih ikona."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"funkcioniranje u vidu statusne trake"</string>
     <string name="permdesc_statusBarService" msgid="716113660795976060">"Dozvoljava aplikaciji da postane statusna traka."</string>
-    <string name="permlab_expandStatusBar" msgid="1148198785937489264">"otvaranje/zatvaranje statusne trake"</string>
-    <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Dozvoljava aplikaciji otvaranje ili zatvaranje statusne trake."</string>
+    <string name="permlab_expandStatusBar" msgid="1148198785937489264">"proširivanje/sužavanje statusne trake"</string>
+    <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Dozvoljava aplikaciji proširivanje ili sužavanje statusne trake."</string>
     <string name="permlab_install_shortcut" msgid="4279070216371564234">"instaliranje prečica"</string>
     <string name="permdesc_install_shortcut" msgid="8341295916286736996">"Omogućava aplikaciji dodavanje prečice za početni ekran bez intervencije korisnika."</string>
     <string name="permlab_uninstall_shortcut" msgid="4729634524044003699">"uklanjanje prečica"</string>
@@ -1767,7 +1767,7 @@
     <string name="zen_mode_forever" msgid="931849471004038757">"Dok ne isključite"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Dok ne isključite način rada Ne ometaj"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
-    <string name="toolbar_collapse_description" msgid="2821479483960330739">"Skupi"</string>
+    <string name="toolbar_collapse_description" msgid="2821479483960330739">"Suzi"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Ne ometaj"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Prestanak rada"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Radni dan uvečer"</string>
@@ -1787,7 +1787,7 @@
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Promijenjeno u novi SS zahtjev"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profil za posao"</string>
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Proširi"</string>
-    <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Skupi"</string>
+    <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Suzi"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"aktiviraj/deaktiviraj proširenje"</string>
     <string name="usb_midi_peripheral_name" msgid="7221113987741003817">"Android USB ulaz za periferijske uređaje"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7176526170008970168">"Android"</string>

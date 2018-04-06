@@ -82,8 +82,7 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Sense servei de veu"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"No hi ha servei de veu ni trucades d\'emergència"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"L\'operador de telefonia mòbil ho ha desactivat temporalment"</string>
-    <!-- no translation found for RestrictedStateContentMsimTemplate (673416791370248176) -->
-    <skip />
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"L\'operador de telefonia mòbil ho ha desactivat temporalment per a la SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"No es pot accedir a la xarxa mòbil"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Prova de canviar de xarxa preferida. Toca per canviar-la."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Les trucades d\'emergència no estan disponibles"</string>
@@ -498,8 +497,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"No s\'ha reconegut"</string>
-    <!-- no translation found for fingerprint_authenticated (5309333983002526448) -->
-    <skip />
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"L\'empremta digital s\'ha autenticat"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"El maquinari per a empremtes digitals no està disponible."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"L\'empremta digital no es pot desar. Suprimeix-ne una."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"S\'ha esgotat el temps d\'espera per a l\'empremta digital. Torna-ho a provar."</string>
@@ -1274,49 +1272,34 @@
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> s\'està superposant a altres apps"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Si no vols que <xliff:g id="NAME">%s</xliff:g> utilitzi aquesta funció, toca per obrir la configuració i desactiva-la."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Desactiva"</string>
-    <!-- no translation found for ext_media_checking_notification_title (4411133692439308924) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (410185170877285434) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_title (1621805083736634077) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_message (3673685270558405087) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"S\'està comprovant el suport (<xliff:g id="NAME">%s</xliff:g>)…"</string>
+    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"S\'està revisant el contingut actual"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"Suport extern nou (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"Toca per configurar"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Per transferir fotos i fitxers multimèdia"</string>
-    <!-- no translation found for ext_media_unmountable_notification_title (4179418065210797130) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (4193858924381066522) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"Problema amb el suport (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"Toca per solucionar el problema"</string>
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"La unitat següent està malmesa: <xliff:g id="NAME">%s</xliff:g>. Selecciona-la per solucionar-ho."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> no és compatible"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"El dispositiu no admet la unitat <xliff:g id="NAME">%s</xliff:g>. Toca per configurar-la amb un format compatible."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Aquest dispositiu no admet la unitat següent: <xliff:g id="NAME">%s</xliff:g>. Selecciona-la per configurar-la en un format compatible."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"S\'ha extret <xliff:g id="NAME">%s</xliff:g> de manera inesperada"</string>
-    <!-- no translation found for ext_media_badremoval_notification_message (8556885808951260574) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (6593814191061956856) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (2110883356419799994) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (5046532339291216076) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (1003926904442321115) -->
-    <skip />
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"Expulsa el suport extern abans d\'extreure\'l per evitar perdre\'n el contingut"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"S\'ha suprimit el suport (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Pot ser que algunes funcions no funcionin correctament. Insereix un altre dispositiu d\'emmagatzematge."</string>
+    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"S\'està expulsant el suport (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"No extreguis el suport extern"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"Configura"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Expulsa"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Explora"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"No es detecta <xliff:g id="NAME">%s</xliff:g>"</string>
-    <!-- no translation found for ext_media_missing_message (4012389235250987930) -->
-    <skip />
+    <string name="ext_media_missing_message" msgid="4012389235250987930">"Torna a inserir el dispositiu"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"S\'està desplaçant l\'aplicació <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"S\'estan desplaçant dades"</string>
-    <!-- no translation found for ext_media_move_success_title (7863652232242276066) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (8939137931961728009) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (1604422634177382092) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (7388950499623016135) -->
-    <skip />
+    <string name="ext_media_move_success_title" msgid="7863652232242276066">"S\'ha transferit el contingut"</string>
+    <string name="ext_media_move_success_message" msgid="8939137931961728009">"El contingut s\'ha transferit al suport extern (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"No s\'ha pogut transferir"</string>
+    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"Torna a provar de transferir el contingut"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"S\'ha retirat"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"S\'ha expulsat"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"S\'està comprovant..."</string>
@@ -1864,14 +1847,10 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"La SIM no està proporcionada per a la veu"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"La SIM no és compatible per a la veu"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"El telèfon no és compatible per a la veu"</string>
-    <!-- no translation found for mmcc_authentication_reject_msim_template (1217031195834766479) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr_msim_template (5636464607596778986) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms_msim_template (5994323296399913454) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me_msim_template (5550259730350571826) -->
-    <skip />
+    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"No s\'admet la SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"La SIM <xliff:g id="SIMNUMBER">%d</xliff:g> no s\'ha proporcionat"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"No s\'admet la SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"No s\'admet la SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Finestra emergent"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"<xliff:g id="NUMBER">%1$d</xliff:g> més"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"S\'ha canviat a una versió anterior de l\'aplicació o la versió actual no és compatible amb aquesta drecera"</string>

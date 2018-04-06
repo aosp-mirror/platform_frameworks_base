@@ -1284,7 +1284,7 @@
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"この端末はこの <xliff:g id="NAME">%s</xliff:g>に対応していません。タップして、対応している形式でセットアップしてください。"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"この端末はこの <xliff:g id="NAME">%s</xliff:g>に対応していません。サポートされるフォーマットで設定するには選択してください。"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>が不適切に取り外されました"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"コンテンツを消去しないようメディアを取り出してから取り外してください"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"コンテンツの喪失を防ぐため、メディアを取り出してから取り外してください"</string>
     <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g>の取り外し"</string>
     <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"一部の機能が正しく動作しない可能性があります。新しいストレージを挿入してください。"</string>
     <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g>を取り出しています"</string>
