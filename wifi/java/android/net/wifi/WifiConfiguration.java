@@ -28,10 +28,12 @@ import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.BackupUtils;
 import android.util.Log;
+import android.util.TimeUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -1620,8 +1622,9 @@ public class WifiConfiguration implements Parcelable {
         }
         if (mNetworkSelectionStatus.getConnectChoice() != null) {
             sbuf.append(" connect choice: ").append(mNetworkSelectionStatus.getConnectChoice());
-            sbuf.append(" connect choice set time: ").append(mNetworkSelectionStatus
-                    .getConnectChoiceTimestamp());
+            sbuf.append(" connect choice set time: ")
+                    .append(TimeUtils.logTimeOfDay(
+                            mNetworkSelectionStatus.getConnectChoiceTimestamp()));
         }
         sbuf.append(" hasEverConnected: ")
                 .append(mNetworkSelectionStatus.getHasEverConnected()).append("\n");
@@ -1724,7 +1727,7 @@ public class WifiConfiguration implements Parcelable {
             sbuf.append(" networkSelectionBSSID="
                     + mNetworkSelectionStatus.getNetworkSelectionBSSID());
         }
-        long now_ms = System.currentTimeMillis();
+        long now_ms = SystemClock.elapsedRealtime();
         if (mNetworkSelectionStatus.getDisableTime() != NetworkSelectionStatus
                 .INVALID_NETWORK_SELECTION_DISABLE_TIMESTAMP) {
             sbuf.append('\n');
@@ -1746,12 +1749,8 @@ public class WifiConfiguration implements Parcelable {
 
         if (this.lastConnected != 0) {
             sbuf.append('\n');
-            long diff = now_ms - this.lastConnected;
-            if (diff <= 0) {
-                sbuf.append("lastConnected since <incorrect>");
-            } else {
-                sbuf.append("lastConnected: ").append(Long.toString(diff / 1000)).append("sec ");
-            }
+            sbuf.append("lastConnected: ").append(TimeUtils.logTimeOfDay(this.lastConnected));
+            sbuf.append(" ");
         }
         if (this.lastConnectionFailure != 0) {
             sbuf.append('\n');
