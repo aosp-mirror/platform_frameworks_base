@@ -715,6 +715,7 @@ Lcom/android/ims/internal/uce/presence/IPresenceService;->setNewFeatureTag(ILjav
 Lcom/android/ims/internal/uce/presence/IPresenceService$Stub;-><init>()V
 Lcom/android/ims/internal/uce/presence/PresCapInfo;->getCapInfo()Lcom/android/ims/internal/uce/common/CapInfo;
 Lcom/android/ims/internal/uce/presence/PresCapInfo;->getContactUri()Ljava/lang/String;
+Lcom/android/ims/internal/uce/presence/PresCapInfo;->mContactUri:Ljava/lang/String;
 Lcom/android/ims/internal/uce/presence/PresServiceInfo;->getMediaType()I
 Lcom/android/ims/internal/uce/presence/PresServiceInfo;->getServiceDesc()Ljava/lang/String;
 Lcom/android/ims/internal/uce/presence/PresServiceInfo;->getServiceId()Ljava/lang/String;
