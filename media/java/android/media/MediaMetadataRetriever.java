@@ -890,5 +890,14 @@ public class MediaMetadataRetriever
      */
     public static final int METADATA_KEY_VIDEO_FRAME_COUNT = 32;
 
+    /**
+     * @hide
+     */
+    public static final int METADATA_KEY_EXIF_OFFSET = 33;
+
+    /**
+     * @hide
+     */
+    public static final int METADATA_KEY_EXIF_LENGTH = 34;
     // Add more here...
 }
