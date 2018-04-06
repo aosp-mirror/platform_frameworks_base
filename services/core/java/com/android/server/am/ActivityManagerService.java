@@ -1920,6 +1920,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int FIRST_COMPAT_MODE_MSG = 300;
     static final int FIRST_SUPERVISOR_STACK_MSG = 100;
 
+    static final String SERVICE_RECORD_KEY = "servicerecord";
+
     static ServiceThread sKillThread = null;
     static KillHandler sKillHandler = null;
 
@@ -2168,7 +2170,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mServices.serviceForegroundTimeout((ServiceRecord)msg.obj);
             } break;
             case SERVICE_FOREGROUND_CRASH_MSG: {
-                mServices.serviceForegroundCrash((ProcessRecord)msg.obj);
+                mServices.serviceForegroundCrash(
+                    (ProcessRecord) msg.obj, msg.getData().getCharSequence(SERVICE_RECORD_KEY));
             } break;
             case DISPATCH_PENDING_INTENT_CANCEL_MSG: {
                 RemoteCallbackList<IResultReceiver> callbacks
