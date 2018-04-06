@@ -2,8 +2,8 @@ Landroid/accounts/AccountManager;->mContext:Landroid/content/Context;
 Landroid/accounts/IAccountAuthenticatorResponse$Stub;-><init>()V
 Landroid/accounts/IAccountManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/accounts/IAccountManager;
 Landroid/accounts/IAccountManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
-Landroid/animation/LayoutTransition;->cancel()V
 Landroid/animation/LayoutTransition;->cancel(I)V
+Landroid/animation/LayoutTransition;->cancel()V
 Landroid/animation/ValueAnimator;->animateValue(F)V
 Landroid/animation/ValueAnimator;->sDurationScale:F
 Landroid/app/Activity;->getActivityOptions()Landroid/app/ActivityOptions;
@@ -661,6 +661,7 @@ Landroid/content/UriMatcher;->mText:Ljava/lang/String;
 Landroid/database/AbstractCursor;->mExtras:Landroid/os/Bundle;
 Landroid/database/AbstractCursor;->mNotifyUri:Landroid/net/Uri;
 Landroid/database/AbstractCursor;->mRowIdColumnIndex:I
+Landroid/database/AbstractWindowedCursor;->clearOrCreateWindow(Ljava/lang/String;)V
 Landroid/database/CursorWindow;->mWindowPtr:J
 Landroid/database/CursorWindow;->sCursorWindowSize:I
 Landroid/database/CursorWindow;->sWindowToPidMap:Landroid/util/LongSparseArray;
@@ -1188,9 +1189,6 @@ Landroid/net/NetworkTemplate;->buildTemplateWifi()Landroid/net/NetworkTemplate;
 Landroid/net/Proxy;->getProxy(Landroid/content/Context;Ljava/lang/String;)Ljava/net/Proxy;
 Landroid/net/ProxyInfo;-><init>(Ljava/lang/String;ILjava/lang/String;)V
 Landroid/net/SntpClient;-><init>()V
-Landroid/net/StaticIpConfiguration;->gateway:Ljava/net/InetAddress;
-Landroid/net/StaticIpConfiguration;->ipAddress:Landroid/net/LinkAddress;
-Landroid/net/StaticIpConfiguration;-><init>()V
 Landroid/net/SSLCertificateSocketFactory;->castToOpenSSLSocket(Ljava/net/Socket;)Lcom/android/org/conscrypt/OpenSSLSocketImpl;
 Landroid/net/SSLCertificateSocketFactory;->getAlpnSelectedProtocol(Ljava/net/Socket;)[B
 Landroid/net/SSLCertificateSocketFactory;->getDelegate()Ljavax/net/ssl/SSLSocketFactory;
@@ -1215,6 +1213,9 @@ Landroid/net/SSLCertificateSocketFactory;->setSoWriteTimeout(Ljava/net/Socket;I)
 Landroid/net/SSLCertificateSocketFactory;->TAG:Ljava/lang/String;
 Landroid/net/SSLCertificateSocketFactory;->verifyHostname(Ljava/net/Socket;Ljava/lang/String;)V
 Landroid/net/SSLSessionCache;->mSessionCache:Lcom/android/org/conscrypt/SSLClientSessionCache;
+Landroid/net/StaticIpConfiguration;->gateway:Ljava/net/InetAddress;
+Landroid/net/StaticIpConfiguration;-><init>()V
+Landroid/net/StaticIpConfiguration;->ipAddress:Landroid/net/LinkAddress;
 Landroid/net/TrafficStats;->getMobileIfaces()[Ljava/lang/String;
 Landroid/net/TrafficStats;->getRxBytes(Ljava/lang/String;)J
 Landroid/net/TrafficStats;->getStatsService()Landroid/net/INetworkStatsService;
@@ -3198,8 +3199,8 @@ Ljava/lang/Daemons;->stop()V
 Ljava/lang/Double;->value:D
 Ljava/lang/Float;->value:F
 Ljava/lang/Integer;->value:I
-Ljava/lang/Long;->value:J
 Ljava/lang/invoke/MethodHandles$Lookup;-><init>(Ljava/lang/Class;I)V
+Ljava/lang/Long;->value:J
 Ljava/lang/ref/FinalizerReference;->add(Ljava/lang/Object;)V
 Ljava/lang/ref/FinalizerReference;->head:Ljava/lang/ref/FinalizerReference;
 Ljava/lang/ref/FinalizerReference;->next:Ljava/lang/ref/FinalizerReference;
