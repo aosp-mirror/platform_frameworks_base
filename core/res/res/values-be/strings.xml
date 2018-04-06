@@ -84,7 +84,7 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Няма сэрвісу галасавых выклікаў"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Галасавыя або экстранныя выклікі недаступныя"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"Часова выключана аператарам сувязі"</string>
-    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"Часова адключаны для SIM <xliff:g id="SIMNUMBER">%d</xliff:g> аператарам сувязі"</string>
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"Часова адключана для SIM <xliff:g id="SIMNUMBER">%d</xliff:g> аператарам сувязі"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"Сетка мабільнай сувязі недаступная"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Націсніце, каб выбраць іншую сетку."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Экстранныя выклікі недаступныя"</string>
@@ -1321,7 +1321,7 @@
     <string name="ext_media_new_notification_title" msgid="1621805083736634077">"Знойдзена новая прылада: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_message" msgid="3673685270558405087">"Дакраніцеся, каб наладзіць"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Для перадачы фатаграфій і медыяфайлаў"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"Праблема з носьбітам <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"Праблема з носьбітам (<xliff:g id="NAME">%s</xliff:g>)"</string>
     <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"Націсніце, каб выправіць"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"Носьбіт <xliff:g id="NAME">%s</xliff:g> пашкоджаны. Выберыце, каб выправіць."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> не падтрымліваецца"</string>
@@ -1329,8 +1329,8 @@
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Гэта прылада не падтрымлівае носьбіт <xliff:g id="NAME">%s</xliff:g>. Выберыце, каб наладзіць яго ў фармаце, які падтрымліваецца."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Носьбіт <xliff:g id="NAME">%s</xliff:g> нечакана выняты"</string>
     <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"Адключыце носьбіт перад тым, як дастаць яго, каб не страціць змесціва"</string>
-    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"Носьбіт <xliff:g id="NAME">%s</xliff:g> прыбралі"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Некаторыя функцыі могуць кепска працаваць. Устаўце новае сховішча."</string>
+    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"Носьбіт (<xliff:g id="NAME">%s</xliff:g>) выняты"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Некаторыя функцыі могуць кепска працаваць. Устаўце новы носьбіт."</string>
     <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g> адключаецца"</string>
     <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"Не даставайце носьбіт"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"Наладзіць"</string>
@@ -1341,7 +1341,7 @@
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Перамяшчэнне <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"Перамяшчэнне даных"</string>
     <string name="ext_media_move_success_title" msgid="7863652232242276066">"Перадача змесціва завершана"</string>
-    <string name="ext_media_move_success_message" msgid="8939137931961728009">"Змесціва перанесена на сховішча <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_move_success_message" msgid="8939137931961728009">"Змесціва перанесена на носьбіт: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_failure_title" msgid="1604422634177382092">"Не ўдалося перамясціць змесціва"</string>
     <string name="ext_media_move_failure_message" msgid="7388950499623016135">"Паспрабуйце перамясціць змесціва яшчэ раз"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"Носьбіт выдалены"</string>

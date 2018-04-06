@@ -1300,7 +1300,7 @@
     <string name="ext_media_move_success_title" msgid="7863652232242276066">"ഉള്ളടക്ക കൈമാറ്റം പൂർത്തിയായി"</string>
     <string name="ext_media_move_success_message" msgid="8939137931961728009">"ഉള്ളടക്കം <xliff:g id="NAME">%s</xliff:g>-ലേക്ക് നീക്കി"</string>
     <string name="ext_media_move_failure_title" msgid="1604422634177382092">"ഉള്ളടക്കം നീക്കാനായില്ല"</string>
-    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"ഉള്ളടക്കം നീക്കുന്നതിന് വീണ്ടും ശ്രമിക്കുക"</string>
+    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"ഉള്ളടക്കം നീക്കാൻ വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"നീക്കംചെയ്‌തു"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"ഇജക്റ്റുചെയ്തു"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"പരിശോധിക്കുന്നു…"</string>

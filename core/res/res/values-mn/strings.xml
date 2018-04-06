@@ -1273,22 +1273,22 @@
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"Та <xliff:g id="NAME">%s</xliff:g>-д энэ онцлогийг ашиглахыг хүсэхгүй байгаа бол тохиргоог нээгээд, унтраана уу."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Унтраах"</string>
     <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"<xliff:g id="NAME">%s</xliff:g>-г шалгаж байна…"</string>
-    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"Одоогийн агуулгыг харж байна"</string>
+    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"Одоогийн агуулгыг хянаж байна"</string>
     <string name="ext_media_new_notification_title" msgid="1621805083736634077">"Шинэ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_message" msgid="3673685270558405087">"Тохируулахын тулд товшино уу"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Зураг, медиа шилжүүлэхэд зориулсан"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"<xliff:g id="NAME">%s</xliff:g>-р олгоно уу"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"<xliff:g id="NAME">%s</xliff:g> алдаатай байна"</string>
     <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"Засахын тулд товшино уу"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> эвдэрсэн байна. Засахын тулд сонгоно уу."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"Дэмжээгүй <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Энэ төхөөрөмж нь <xliff:g id="NAME">%s</xliff:g>-г дэмждэггүй. Дэмжигдсэн хэлбэршүүлэлтэд тохируулахын тулд товшино уу."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Энэ төхөөрөмж <xliff:g id="NAME">%s</xliff:g>-г дэмждэггүй. Дэмжсэн хэлбэршүүлэлтэд тохируулахын тулд сонгоно уу."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>-ыг гэнэт гаргасан байна"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"Агуулга алдахаас сэргийлэхийн тулд медиаг устгахаасаа өмнө салгана уу"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"Агуулга алдахаас сэргийлэхийн тулд медиаг төхөөрөмжөөс салгахаасаа өмнө холболтыг салгана уу"</string>
     <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g>-г устгасан"</string>
     <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Зарим функц зөв ажиллахгүй байж болзошгүй. Шинэ хадгалах сан оруулна уу."</string>
     <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g>-г салгаж байна"</string>
-    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"Бүү устга"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"Бүү салга"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"Тохируулах"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Салгах"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Судлах"</string>

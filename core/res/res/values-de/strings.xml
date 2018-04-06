@@ -82,7 +82,7 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Keine Anrufe"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Keine Anrufe oder Notrufe"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"Vorübergehend von deinem Mobilfunkanbieter deaktiviert"</string>
-    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"Vorübergehend von deinem Mobilfunkanbieter für SIM <xliff:g id="SIMNUMBER">%d</xliff:g> deaktiviert"</string>
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"Von deinem Mobilfunkanbieter für SIM <xliff:g id="SIMNUMBER">%d</xliff:g> vorübergehend deaktiviert"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"Mobilfunknetz nicht erreichbar"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Versuche, das bevorzugte Netzwerk zu ändern. Tippe, um ein anderes auszuwählen."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Notrufe nicht möglich"</string>
@@ -1274,7 +1274,7 @@
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Deaktivieren"</string>
     <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"<xliff:g id="NAME">%s</xliff:g> wird geprüft…"</string>
     <string name="ext_media_checking_notification_message" msgid="410185170877285434">"Aktuelle Inhalte werden geprüft"</string>
-    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"Neues Medium (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"Neues Speichergerät (<xliff:g id="NAME">%s</xliff:g>)"</string>
     <string name="ext_media_new_notification_message" msgid="3673685270558405087">"Zum Einrichten tippen"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Zum Übertragen von Fotos und Medien"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"Problem mit <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1284,9 +1284,9 @@
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"<xliff:g id="NAME">%s</xliff:g> wird von diesem Gerät nicht unterstützt. Zum Einrichten in einem unterstützten Format tippen."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"<xliff:g id="NAME">%s</xliff:g> wird von diesem Gerät nicht unterstützt. Zur Einrichtung eines unterstützten Formats auswählen."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> wurde unerwartet entfernt"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"Trenne die Medien vor dem Entfernen, um Inhaltsverluste zu vermeiden"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"Lass das Speichergerät vor dem Entfernen auswerfen, damit keine Daten verloren gehen"</string>
     <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g> wurde entfernt"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Möglicherweise sind einige Funktionen fehlerhaft. Setze einen neuen Speicher ein."</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Einige Funktionen können möglicherweise nicht richtig genutzt werden. Sorge dafür, dass ein neues Speichergerät genutzt werden kann."</string>
     <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g> wird ausgeworfen"</string>
     <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"Nicht entfernen"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"Einrichten"</string>
