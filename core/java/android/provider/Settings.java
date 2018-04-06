@@ -5262,7 +5262,7 @@ public final class Settings {
          *
          * For more information about how the platform handles {@code ANDROID_ID}
          * in Android 8.0 (API level 26) and higher, see <a
-         * href="{@docRoot}preview/behavior-changes.html#privacy-all">
+         * href="{@docRoot}about/versions/oreo/android-8.0-changes.html#privacy-all">
          * Android 8.0 Behavior Changes</a>.
          *
          * <p class="note"><strong>Note:</strong> For apps that were installed
