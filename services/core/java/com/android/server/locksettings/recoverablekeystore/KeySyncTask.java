@@ -70,8 +70,6 @@ public class KeySyncTask implements Runnable {
     private static final String LOCK_SCREEN_HASH_ALGORITHM = "SHA-256";
     private static final int TRUSTED_HARDWARE_MAX_ATTEMPTS = 10;
 
-    // TODO: Reduce the minimal length once all other components are updated
-    private static final int MIN_CREDENTIAL_LEN_TO_USE_SCRYPT = 24;
     @VisibleForTesting
     static final int SCRYPT_PARAM_N = 4096;
     @VisibleForTesting
@@ -246,7 +244,7 @@ public class KeySyncTask implements Runnable {
             }
         }
 
-        boolean useScryptToHashCredential = shouldUseScryptToHashCredential(rootCertAlias);
+        boolean useScryptToHashCredential = shouldUseScryptToHashCredential();
         byte[] salt = generateSalt();
         byte[] localLskfHash;
         if (useScryptToHashCredential) {
@@ -514,10 +512,7 @@ public class KeySyncTask implements Runnable {
         return keyEntries;
     }
 
-    private boolean shouldUseScryptToHashCredential(String rootCertAlias) {
-        return mCredentialType == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD
-                && mCredential.length() >= MIN_CREDENTIAL_LEN_TO_USE_SCRYPT
-                // TODO: Remove the test cert check once all other components are updated
-                && mTestOnlyInsecureCertificateHelper.isTestOnlyCertificateAlias(rootCertAlias);
+    private boolean shouldUseScryptToHashCredential() {
+        return mCredentialType == LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
     }
 }
