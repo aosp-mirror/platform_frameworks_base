@@ -73,7 +73,7 @@ public interface ForegroundServiceController {
     void onAppOpChanged(int code, int uid, String packageName, boolean active);
 
     /**
-     * Gets active app ops for this user and package.
+     * Gets active app ops for this user and package
      */
     @Nullable ArraySet<Integer> getAppOps(int userId, String packageName);
 }

@@ -34,6 +34,7 @@ import android.util.ArraySet;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Per-user state information about a package.
@@ -47,6 +48,7 @@ public class PackageUserState {
     public boolean hidden; // Is the app restricted by owner / admin
     public boolean suspended;
     public String suspendingPackage;
+    public String dialogMessage; // Message to show when a suspended package launch attempt is made
     public PersistableBundle suspendedAppExtras;
     public PersistableBundle suspendedLauncherExtras;
     public boolean instantApp;
@@ -82,6 +84,7 @@ public class PackageUserState {
         hidden = o.hidden;
         suspended = o.suspended;
         suspendingPackage = o.suspendingPackage;
+        dialogMessage = o.dialogMessage;
         suspendedAppExtras = o.suspendedAppExtras;
         suspendedLauncherExtras = o.suspendedLauncherExtras;
         instantApp = o.instantApp;
@@ -206,6 +209,9 @@ public class PackageUserState {
         if (suspended) {
             if (suspendingPackage == null
                     || !suspendingPackage.equals(oldState.suspendingPackage)) {
+                return false;
+            }
+            if (!Objects.equals(dialogMessage, oldState.dialogMessage)) {
                 return false;
             }
             if (!BaseBundle.kindofEquals(suspendedAppExtras,

@@ -656,6 +656,8 @@ final class FillUi {
         private final WindowManager mWm;
         private final View mContentView;
         private boolean mShowing;
+        // Used on dump only
+        private WindowManager.LayoutParams mShowParams;
 
         /**
          * Constructor.
@@ -672,16 +674,13 @@ final class FillUi {
          * Shows the window.
          */
         public void show(WindowManager.LayoutParams params) {
+            mShowParams = params;
             if (sVerbose) {
                 Slog.v(TAG, "show(): showing=" + mShowing + ", params=" + paramsToString(params));
             }
             try {
-                // Okay here is a bit of voodoo - we want to show the window as system
-                // controlled one so it covers app windows - adjust the params accordingly.
-                params.type = WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
-                params.token = null;
                 params.packageName = "android";
-                params.flags |= WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+                params.setTitle("Autofill UI"); // Title is set for debugging purposes
                 if (!mShowing) {
                     params.accessibilityTitle = mContentView.getContext()
                             .getString(R.string.autofill_picker_accessibility_title);
@@ -760,6 +759,9 @@ final class FillUi {
             pw.println();
             pw.print(prefix2); pw.print("showing: "); pw.println(mWindow.mShowing);
             pw.print(prefix2); pw.print("view: "); pw.println(mWindow.mContentView);
+            if (mWindow.mShowParams != null) {
+                pw.print(prefix2); pw.print("params: "); pw.println(mWindow.mShowParams);
+            }
             pw.print(prefix2); pw.print("screen coordinates: ");
             if (mWindow.mContentView == null) {
                 pw.println("N/A");

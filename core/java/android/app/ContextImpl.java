@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -88,11 +89,12 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicInteger;
 
 class ReceiverRestrictedContext extends ContextWrapper {
     ReceiverRestrictedContext(Context base) {
@@ -212,13 +214,24 @@ class ContextImpl extends Context {
     static final int STATE_UNINITIALIZED = 0;
     static final int STATE_INITIALIZING = 1;
     static final int STATE_READY = 2;
+    static final int STATE_NOT_FOUND = 3;
+
+    /** @hide */
+    @IntDef(prefix = { "STATE_" }, value = {
+            STATE_UNINITIALIZED,
+            STATE_INITIALIZING,
+            STATE_READY,
+            STATE_NOT_FOUND,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ServiceInitializationState {}
 
     /**
      * Initialization state for each service. Any of {@link #STATE_UNINITIALIZED},
      * {@link #STATE_INITIALIZING} or {@link #STATE_READY},
      */
-    final AtomicInteger[] mServiceInitializationStateArray =
-            SystemServiceRegistry.createServiceInitializationStateArray();
+    @ServiceInitializationState
+    final int[] mServiceInitializationStateArray = new int[mServiceCache.length];
 
     static ContextImpl getImpl(Context context) {
         Context nextContext;

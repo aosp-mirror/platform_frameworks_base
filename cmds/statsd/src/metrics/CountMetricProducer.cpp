@@ -59,7 +59,7 @@ const int FIELD_ID_COUNT = 3;
 CountMetricProducer::CountMetricProducer(const ConfigKey& key, const CountMetric& metric,
                                          const int conditionIndex,
                                          const sp<ConditionWizard>& wizard,
-                                         const uint64_t startTimeNs)
+                                         const int64_t startTimeNs)
     : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard) {
     // TODO: evaluate initial conditions. and set mConditionMet.
     if (metric.has_bucket()) {
@@ -118,13 +118,18 @@ void CountMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
 }
 
 void CountMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition,
-                                                           const uint64_t eventTime) {
+                                                           const int64_t eventTime) {
     VLOG("Metric %lld onSlicedConditionMayChange", (long long)mMetricId);
 }
 
-void CountMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
+void CountMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
+                                             const bool include_current_partial_bucket,
                                              ProtoOutputStream* protoOutput) {
-    flushIfNeededLocked(dumpTimeNs);
+    if (include_current_partial_bucket) {
+        flushLocked(dumpTimeNs);
+    } else {
+        flushIfNeededLocked(dumpTimeNs);
+    }
     if (mPastBuckets.empty()) {
         return;
     }
@@ -173,13 +178,13 @@ void CountMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     mPastBuckets.clear();
 }
 
-void CountMetricProducer::dropDataLocked(const uint64_t dropTimeNs) {
+void CountMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
     flushIfNeededLocked(dropTimeNs);
     mPastBuckets.clear();
 }
 
 void CountMetricProducer::onConditionChangedLocked(const bool conditionMet,
-                                                   const uint64_t eventTime) {
+                                                   const int64_t eventTime) {
     VLOG("Metric %lld onConditionChanged", (long long)mMetricId);
     mCondition = conditionMet;
 }
@@ -208,7 +213,7 @@ void CountMetricProducer::onMatchedLogEventInternalLocked(
         const size_t matcherIndex, const MetricDimensionKey& eventKey,
         const ConditionKey& conditionKey, bool condition,
         const LogEvent& event) {
-    uint64_t eventTimeNs = event.GetElapsedTimestampNs();
+    int64_t eventTimeNs = event.GetElapsedTimestampNs();
     flushIfNeededLocked(eventTimeNs);
 
     if (condition == false) {
@@ -244,23 +249,23 @@ void CountMetricProducer::onMatchedLogEventInternalLocked(
 
 // When a new matched event comes in, we check if event falls into the current
 // bucket. If not, flush the old counter to past buckets and initialize the new bucket.
-void CountMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
-    uint64_t currentBucketEndTimeNs = getCurrentBucketEndTimeNs();
+void CountMetricProducer::flushIfNeededLocked(const int64_t& eventTimeNs) {
+    int64_t currentBucketEndTimeNs = getCurrentBucketEndTimeNs();
     if (eventTimeNs < currentBucketEndTimeNs) {
         return;
     }
 
     flushCurrentBucketLocked(eventTimeNs);
     // Setup the bucket start time and number.
-    uint64_t numBucketsForward = 1 + (eventTimeNs - currentBucketEndTimeNs) / mBucketSizeNs;
+    int64_t numBucketsForward = 1 + (eventTimeNs - currentBucketEndTimeNs) / mBucketSizeNs;
     mCurrentBucketStartTimeNs = currentBucketEndTimeNs + (numBucketsForward - 1) * mBucketSizeNs;
     mCurrentBucketNum += numBucketsForward;
     VLOG("metric %lld: new bucket start time: %lld", (long long)mMetricId,
          (long long)mCurrentBucketStartTimeNs);
 }
 
-void CountMetricProducer::flushCurrentBucketLocked(const uint64_t& eventTimeNs) {
-    uint64_t fullBucketEndTimeNs = getCurrentBucketEndTimeNs();
+void CountMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
+    int64_t fullBucketEndTimeNs = getCurrentBucketEndTimeNs();
     CountBucket info;
     info.mBucketStartNs = mCurrentBucketStartTimeNs;
     if (eventTimeNs < fullBucketEndTimeNs) {

@@ -19,6 +19,7 @@ package com.android.server.locksettings.recoverablekeystore;
 import static android.security.keystore.recovery.KeyChainProtectionParams.TYPE_LOCKSCREEN;
 import static android.security.keystore.recovery.KeyChainProtectionParams.UI_FORMAT_PASSWORD;
 import static android.security.keystore.recovery.RecoveryController.ERROR_BAD_CERTIFICATE_FORMAT;
+import static android.security.keystore.recovery.RecoveryController.ERROR_DOWNGRADE_CERTIFICATE;
 import static android.security.keystore.recovery.RecoveryController.ERROR_INVALID_CERTIFICATE;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -222,7 +223,6 @@ public class RecoverableKeyStoreManagerTest {
 
         assertThat(mRecoverableKeyStoreDb.getKey(uid, TEST_ALIAS)).isNotNull();
         assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
-        // TODO(76083050) Test the grant mechanism for the keys.
     }
 
     @Test
@@ -409,19 +409,20 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
-    public void initRecoveryService_ignoresSmallerSerial() throws Exception {
+    public void initRecoveryService_throwsExceptionOnSmallerSerial() throws Exception {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
         long certSerial = 1000L;
 
         mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
                 TestData.getCertXmlWithSerial(certSerial));
-        mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
-                TestData.getCertXmlWithSerial(certSerial - 1));
-
-        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid,
-                DEFAULT_ROOT_CERT_ALIAS)).isEqualTo(certSerial);
-        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isFalse();
+        try {
+            mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
+                    TestData.getCertXmlWithSerial(certSerial - 1));
+            fail();
+        } catch (ServiceSpecificException e) {
+            assertThat(e.errorCode).isEqualTo(ERROR_DOWNGRADE_CERTIFICATE);
+        }
     }
 
     @Test

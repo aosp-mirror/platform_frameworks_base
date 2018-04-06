@@ -24,6 +24,8 @@ import static android.system.OsConstants.IPPROTO_UDP;
 import static android.system.OsConstants.SOCK_DGRAM;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
+import android.annotation.NonNull;
+import android.app.AppOpsManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.IIpSecService;
@@ -42,6 +44,7 @@ import android.net.NetworkUtils;
 import android.net.TrafficStats;
 import android.net.util.NetdService;
 import android.os.Binder;
+import android.os.DeadSystemException;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -974,6 +977,13 @@ public class IpSecService extends IIpSecService.Stub {
         return service;
     }
 
+    @NonNull
+    private AppOpsManager getAppOpsManager() {
+        AppOpsManager appOps = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
+        if(appOps == null) throw new RuntimeException("System Server couldn't get AppOps");
+        return appOps;
+    }
+
     /** @hide */
     @VisibleForTesting
     public IpSecService(Context context, IpSecServiceConfiguration config) {
@@ -1240,7 +1250,9 @@ public class IpSecService extends IIpSecService.Stub {
      */
     @Override
     public synchronized IpSecTunnelInterfaceResponse createTunnelInterface(
-            String localAddr, String remoteAddr, Network underlyingNetwork, IBinder binder) {
+            String localAddr, String remoteAddr, Network underlyingNetwork, IBinder binder,
+            String callingPackage) {
+        enforceTunnelPermissions(callingPackage);
         checkNotNull(binder, "Null Binder passed to createTunnelInterface");
         checkNotNull(underlyingNetwork, "No underlying network was specified");
         checkInetAddress(localAddr);
@@ -1320,8 +1332,8 @@ public class IpSecService extends IIpSecService.Stub {
      */
     @Override
     public synchronized void addAddressToTunnelInterface(
-            int tunnelResourceId, LinkAddress localAddr) {
-        enforceNetworkStackPermission();
+            int tunnelResourceId, LinkAddress localAddr, String callingPackage) {
+        enforceTunnelPermissions(callingPackage);
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
 
         // Get tunnelInterface record; if no such interface is found, will throw
@@ -1352,10 +1364,10 @@ public class IpSecService extends IIpSecService.Stub {
      */
     @Override
     public synchronized void removeAddressFromTunnelInterface(
-            int tunnelResourceId, LinkAddress localAddr) {
-        enforceNetworkStackPermission();
-        UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
+            int tunnelResourceId, LinkAddress localAddr, String callingPackage) {
+        enforceTunnelPermissions(callingPackage);
 
+        UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
         // Get tunnelInterface record; if no such interface is found, will throw
         // IllegalArgumentException
         TunnelInterfaceRecord tunnelInterfaceInfo =
@@ -1383,7 +1395,9 @@ public class IpSecService extends IIpSecService.Stub {
      * server
      */
     @Override
-    public synchronized void deleteTunnelInterface(int resourceId) throws RemoteException {
+    public synchronized void deleteTunnelInterface(
+            int resourceId, String callingPackage) throws RemoteException {
+        enforceTunnelPermissions(callingPackage);
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
         releaseResource(userRecord.mTunnelInterfaceRecords, resourceId);
     }
@@ -1469,7 +1483,6 @@ public class IpSecService extends IIpSecService.Stub {
             case IpSecTransform.MODE_TRANSPORT:
                 break;
             case IpSecTransform.MODE_TUNNEL:
-                enforceNetworkStackPermission();
                 break;
             default:
                 throw new IllegalArgumentException(
@@ -1477,9 +1490,20 @@ public class IpSecService extends IIpSecService.Stub {
         }
     }
 
-    private void enforceNetworkStackPermission() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.NETWORK_STACK,
-                "IpSecService");
+    private void enforceTunnelPermissions(String callingPackage) {
+        checkNotNull(callingPackage, "Null calling package cannot create IpSec tunnels");
+        switch (getAppOpsManager().noteOp(
+                    AppOpsManager.OP_MANAGE_IPSEC_TUNNELS,
+                    Binder.getCallingUid(), callingPackage)) {
+            case AppOpsManager.MODE_DEFAULT:
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.MANAGE_IPSEC_TUNNELS, "IpSecService");
+                break;
+            case AppOpsManager.MODE_ALLOWED:
+                return;
+            default:
+                throw new SecurityException("Request to ignore AppOps for non-legacy API");
+        }
     }
 
     private void createOrUpdateTransform(
@@ -1535,8 +1559,12 @@ public class IpSecService extends IIpSecService.Stub {
      * result in all of those sockets becoming unable to send or receive data.
      */
     @Override
-    public synchronized IpSecTransformResponse createTransform(IpSecConfig c, IBinder binder)
-            throws RemoteException {
+    public synchronized IpSecTransformResponse createTransform(
+            IpSecConfig c, IBinder binder, String callingPackage) throws RemoteException {
+        checkNotNull(c);
+        if (c.getMode() == IpSecTransform.MODE_TUNNEL) {
+            enforceTunnelPermissions(callingPackage);
+        }
         checkIpSecConfig(c);
         checkNotNull(binder, "Null Binder passed to createTransform");
         final int resourceId = mNextResourceId++;
@@ -1657,8 +1685,9 @@ public class IpSecService extends IIpSecService.Stub {
      */
     @Override
     public synchronized void applyTunnelModeTransform(
-            int tunnelResourceId, int direction, int transformResourceId) throws RemoteException {
-        enforceNetworkStackPermission();
+            int tunnelResourceId, int direction,
+            int transformResourceId, String callingPackage) throws RemoteException {
+        enforceTunnelPermissions(callingPackage);
         checkDirection(direction);
 
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());

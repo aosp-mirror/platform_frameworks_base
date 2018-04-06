@@ -16,108 +16,47 @@
 
 package com.android.server.wm;
 
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.spy;
-
-import android.os.PowerSaveState;
-import android.util.proto.ProtoOutputStream;
-import org.mockito.invocation.InvocationOnMock;
 
 import android.annotation.Nullable;
-import android.app.ActivityManagerInternal;
 import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.hardware.display.DisplayManagerInternal;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.DisplayCutout;
+import android.view.IWindow;
 import android.view.IWindowManager;
-import android.view.InputChannel;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.view.animation.Animation;
-import android.os.PowerManagerInternal;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
-import com.android.server.input.InputManagerService;
-import com.android.server.LocalServices;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
+import java.util.function.Supplier;
 
 class TestWindowManagerPolicy implements WindowManagerPolicy {
     private static final String TAG = "TestWindowManagerPolicy";
 
-    private static WindowManagerService sWm = null;
+    private final Supplier<WindowManagerService> mWmSupplier;
 
     int rotationToReport = 0;
 
     private Runnable mRunnableWhenAddingSplashScreen;
 
-    static synchronized WindowManagerService getWindowManagerService(Context context) {
-        if (sWm == null) {
-            // We only want to do this once for the test process as we don't want WM to try to
-            // register a bunch of local services again.
-            if (LocalServices.getService(DisplayManagerInternal.class) == null) {
-                LocalServices.addService(DisplayManagerInternal.class,
-                        mock(DisplayManagerInternal.class));
-            }
-            if (LocalServices.getService(PowerManagerInternal.class) == null) {
-                LocalServices.addService(PowerManagerInternal.class,
-                        mock(PowerManagerInternal.class));
-                final PowerManagerInternal pm =
-                        LocalServices.getService(PowerManagerInternal.class);
-                PowerSaveState state = new PowerSaveState.Builder().build();
-                doReturn(state).when(pm).getLowPowerState(anyInt());
-            }
-            if (LocalServices.getService(ActivityManagerInternal.class) == null) {
-                LocalServices.addService(ActivityManagerInternal.class,
-                        mock(ActivityManagerInternal.class));
-                final ActivityManagerInternal am =
-                        LocalServices.getService(ActivityManagerInternal.class);
-                doAnswer((InvocationOnMock invocationOnMock) -> {
-                    final Runnable runnable = invocationOnMock.<Runnable>getArgument(0);
-                    if (runnable != null) {
-                        runnable.run();
-                    }
-                    return null;
-                }).when(am).notifyKeyguardFlagsChanged(any());
-            }
+    public TestWindowManagerPolicy(Supplier<WindowManagerService> wmSupplier) {
 
-            InputManagerService ims = mock(InputManagerService.class);
-            // InputChannel is final and can't be mocked.
-            InputChannel[] input = InputChannel.openInputChannelPair(TAG_WM);
-            if (input != null && input.length > 1) {
-                doReturn(input[1]).when(ims).monitorInput(anyString());
-            }
-
-            sWm = WindowManagerService.main(context, ims, true, false,
-                    false, new TestWindowManagerPolicy());
-
-            sWm.onInitReady();
-
-            // Display creation is driven by the ActivityManagerService via ActivityStackSupervisor.
-            // We emulate those steps here.
-            sWm.mRoot.createDisplayContent(sWm.mDisplayManager.getDisplay(DEFAULT_DISPLAY),
-                    mock(DisplayWindowController.class));
-        }
-        return sWm;
+        mWmSupplier = wmSupplier;
     }
 
     @Override
@@ -216,10 +155,12 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
             int logo, int windowFlags, Configuration overrideConfig, int displayId) {
         final com.android.server.wm.WindowState window;
         final AppWindowToken atoken;
-        synchronized (sWm.mWindowMap) {
-            atoken = sWm.mRoot.getAppWindowToken(appToken);
+        final WindowManagerService wm = mWmSupplier.get();
+        synchronized (wm.mWindowMap) {
+            atoken = wm.mRoot.getAppWindowToken(appToken);
             window = WindowTestsBase.createWindow(null, TYPE_APPLICATION_STARTING, atoken,
-                    "Starting window");
+                    "Starting window", 0 /* ownerId */, false /* internalWindows */, wm,
+                    mock(Session.class), mock(IWindow.class));
             atoken.startingWindow = window;
         }
         if (mRunnableWhenAddingSplashScreen != null) {
@@ -227,7 +168,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
             mRunnableWhenAddingSplashScreen = null;
         }
         return () -> {
-            synchronized (sWm.mWindowMap) {
+            synchronized (wm.mWindowMap) {
                 atoken.removeChild(window);
                 atoken.startingWindow = null;
             }

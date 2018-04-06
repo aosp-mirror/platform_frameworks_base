@@ -92,6 +92,8 @@ import com.android.server.pm.ShortcutUser.PackageWithUser;
 
 import org.junit.Assert;
 import org.mockito.ArgumentCaptor;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -111,6 +113,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected static final String TAG = "ShortcutManagerTest";
@@ -834,6 +837,8 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                             + targetUserId);
                 });
 
+        when(mMockUserManager.getUserInfo(anyInt())).thenAnswer(new AnswerWithSystemCheck<>(
+                inv -> mUserInfos.get((Integer) inv.getArguments()[0])));
         when(mMockActivityManagerInternal.getUidProcessState(anyInt())).thenReturn(
                 ActivityManager.PROCESS_STATE_CACHED_EMPTY);
 
@@ -860,6 +865,24 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         if (ENABLE_DUMP) {
             Log.d(TAG, "setUp done");
+        }
+    }
+
+    /**
+     * Returns a boolean but also checks if the current UID is SYSTEM_UID.
+     */
+    protected class AnswerWithSystemCheck<T> implements Answer<T> {
+        private final Function<InvocationOnMock, T> mChecker;
+
+        public AnswerWithSystemCheck(Function<InvocationOnMock, T> checker) {
+            mChecker = checker;
+        }
+
+        @Override
+        public T answer(InvocationOnMock invocation) throws Throwable {
+            assertEquals("Must be called on SYSTEM UID.",
+                    Process.SYSTEM_UID, mInjectedCallingUid);
+            return mChecker.apply(invocation);
         }
     }
 
@@ -1014,7 +1037,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         pi.applicationInfo.flags = ApplicationInfo.FLAG_INSTALLED
                 | ApplicationInfo.FLAG_ALLOW_BACKUP;
         pi.versionCode = version;
-        pi.applicationInfo.versionCode = version;
+        pi.applicationInfo.setVersionCode(version);
         pi.signatures = null;
         pi.signingCertificateHistory = new Signature[][] {genSignatures(signatures)};
 
@@ -1032,7 +1055,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected void updatePackageVersion(String packageName, int increment) {
         updatePackageInfo(packageName, pi -> {
             pi.versionCode += increment;
-            pi.applicationInfo.versionCode += increment;
+            pi.applicationInfo.setVersionCode(pi.applicationInfo.longVersionCode + increment);
         });
     }
 

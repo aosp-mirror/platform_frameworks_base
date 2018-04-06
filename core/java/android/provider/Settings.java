@@ -3761,17 +3761,6 @@ public final class Settings {
                 new SettingsValidators.InclusiveIntegerRangeValidator(0, 3);
 
         /**
-         * User-selected RTT mode. When on, outgoing and incoming calls will be answered as RTT
-         * calls when supported by the device and carrier. Boolean value.
-         * 0 = OFF
-         * 1 = ON
-         */
-        public static final String RTT_CALLING_MODE = "rtt_calling_mode";
-
-        /** @hide */
-        public static final Validator RTT_CALLING_MODE_VALIDATOR = BOOLEAN_VALIDATOR;
-
-        /**
          * Whether the sounds effects (key clicks, lid open ...) are enabled. The value is
          * boolean (1 or 0).
          */
@@ -4096,7 +4085,6 @@ public final class Settings {
             DTMF_TONE_WHEN_DIALING,
             DTMF_TONE_TYPE_WHEN_DIALING,
             HEARING_AID,
-            RTT_CALLING_MODE,
             TTY_MODE,
             MASTER_MONO,
             SOUND_EFFECTS_ENABLED,
@@ -4295,7 +4283,6 @@ public final class Settings {
             VALIDATORS.put(DTMF_TONE_TYPE_WHEN_DIALING, DTMF_TONE_TYPE_WHEN_DIALING_VALIDATOR);
             VALIDATORS.put(HEARING_AID, HEARING_AID_VALIDATOR);
             VALIDATORS.put(TTY_MODE, TTY_MODE_VALIDATOR);
-            VALIDATORS.put(RTT_CALLING_MODE, RTT_CALLING_MODE_VALIDATOR);
             VALIDATORS.put(NOTIFICATION_LIGHT_PULSE, NOTIFICATION_LIGHT_PULSE_VALIDATOR);
             VALIDATORS.put(POINTER_LOCATION, POINTER_LOCATION_VALIDATOR);
             VALIDATORS.put(SHOW_TOUCHES, SHOW_TOUCHES_VALIDATOR);
@@ -6668,6 +6655,17 @@ public final class Settings {
         private static final Validator TTY_MODE_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * User-selected RTT mode. When on, outgoing and incoming calls will be answered as RTT
+         * calls when supported by the device and carrier. Boolean value.
+         * 0 = OFF
+         * 1 = ON
+         */
+        public static final String RTT_CALLING_MODE = "rtt_calling_mode";
+
+        private static final Validator RTT_CALLING_MODE_VALIDATOR = BOOLEAN_VALIDATOR;
+
+        /**
+        /**
          * Controls whether settings backup is enabled.
          * Type: int ( 0 = disabled, 1 = enabled )
          * @hide
@@ -7893,6 +7891,7 @@ public final class Settings {
             PREFERRED_TTY_MODE,
             ENHANCED_VOICE_PRIVACY_ENABLED,
             TTY_MODE_ENABLED,
+            RTT_CALLING_MODE,
             INCALL_POWER_BUTTON_BEHAVIOR,
             NIGHT_DISPLAY_CUSTOM_START_TIME,
             NIGHT_DISPLAY_CUSTOM_END_TIME,
@@ -8022,6 +8021,7 @@ public final class Settings {
             VALIDATORS.put(ENHANCED_VOICE_PRIVACY_ENABLED,
                     ENHANCED_VOICE_PRIVACY_ENABLED_VALIDATOR);
             VALIDATORS.put(TTY_MODE_ENABLED, TTY_MODE_ENABLED_VALIDATOR);
+            VALIDATORS.put(RTT_CALLING_MODE, RTT_CALLING_MODE_VALIDATOR);
             VALIDATORS.put(INCALL_POWER_BUTTON_BEHAVIOR, INCALL_POWER_BUTTON_BEHAVIOR_VALIDATOR);
             VALIDATORS.put(NIGHT_DISPLAY_CUSTOM_START_TIME,
                     NIGHT_DISPLAY_CUSTOM_START_TIME_VALIDATOR);
@@ -9315,6 +9315,15 @@ public final class Settings {
         */
        public static final String NETWORK_METERED_MULTIPATH_PREFERENCE =
                "network_metered_multipath_preference";
+
+        /**
+         * Default daily multipath budget used by ConnectivityManager.getMultipathPreference()
+         * on metered networks. This default quota is only used if quota could not be determined
+         * from data plan or data limit/warning set by the user.
+         * @hide
+         */
+        public static final String NETWORK_DEFAULT_DAILY_MULTIPATH_QUOTA_BYTES =
+                "network_default_daily_multipath_quota_bytes";
 
         /**
          * Network watchlist last report time.
@@ -12540,6 +12549,19 @@ public final class Settings {
          */
          public static final String SWAP_ENABLED = "swap_enabled";
 
+        /**
+         * Blacklist of GNSS satellites.
+         *
+         * This is a list of integers separated by commas to represent pairs of (constellation,
+         * svid). Thus, the number of integers should be even.
+         *
+         * E.g.: "3,0,5,24" denotes (constellation=3, svid=0) and (constellation=5, svid=24) are
+         * blacklisted. Note that svid=0 denotes all svids in the
+         * constellation are blacklisted.
+         *
+         * @hide
+         */
+        public static final String GNSS_SATELLITE_BLACKLIST = "gnss_satellite_blacklist";
     }
 
     /**

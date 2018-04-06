@@ -43,7 +43,7 @@ public:
     // TODO: Pass in the start time from MetricsManager, it should be consistent for all metrics.
     CountMetricProducer(const ConfigKey& key, const CountMetric& countMetric,
                         const int conditionIndex, const sp<ConditionWizard>& wizard,
-                        const uint64_t startTimeNs);
+                        const int64_t startTimeNs);
 
     virtual ~CountMetricProducer();
 
@@ -54,26 +54,28 @@ protected:
             const LogEvent& event) override;
 
 private:
-    void onDumpReportLocked(const uint64_t dumpTimeNs,
+
+    void onDumpReportLocked(const int64_t dumpTimeNs,
+                            const bool include_current_partial_bucket,
                             android::util::ProtoOutputStream* protoOutput) override;
 
     // Internal interface to handle condition change.
-    void onConditionChangedLocked(const bool conditionMet, const uint64_t eventTime) override;
+    void onConditionChangedLocked(const bool conditionMet, const int64_t eventTime) override;
 
     // Internal interface to handle sliced condition change.
-    void onSlicedConditionMayChangeLocked(bool overallCondition, const uint64_t eventTime) override;
+    void onSlicedConditionMayChangeLocked(bool overallCondition, const int64_t eventTime) override;
 
     // Internal function to calculate the current used bytes.
     size_t byteSizeLocked() const override;
 
     void dumpStatesLocked(FILE* out, bool verbose) const override;
 
-    void dropDataLocked(const uint64_t dropTimeNs) override;
+    void dropDataLocked(const int64_t dropTimeNs) override;
 
     // Util function to flush the old packet.
-    void flushIfNeededLocked(const uint64_t& newEventTime) override;
+    void flushIfNeededLocked(const int64_t& newEventTime) override;
 
-    void flushCurrentBucketLocked(const uint64_t& eventTimeNs) override;
+    void flushCurrentBucketLocked(const int64_t& eventTimeNs) override;
 
     // TODO: Add a lock to mPastBuckets.
     std::unordered_map<MetricDimensionKey, std::vector<CountBucket>> mPastBuckets;

@@ -327,6 +327,13 @@
          This is the default value of that setting. -->
     <integer translatable="false" name="config_networkMeteredMultipathPreference">0</integer>
 
+    <!-- Default daily multipath budget used by ConnectivityManager.getMultipathPreference()
+         on metered networks. This default quota only used if quota could not be determined from
+         data plan or data limit/warning set by the user. The value that is actually used is
+         controlled by Settings.Global.NETWORK_DEFAULT_DAILY_MULTIPATH_QUOTA_BYTES. This is the
+         default value of that setting. -->
+    <integer translatable="false" name="config_networkDefaultDailyMultipathQuotaBytes">2500000</integer>
+
     <!-- List of regexpressions describing the interface (if any) that represent tetherable
          USB interfaces.  If the device doesn't want to support tethering over USB this should
          be empty.  An example would be "usb.*" -->
@@ -2241,6 +2248,10 @@
     <!-- When true, local displays that do not contain any of their own content will automatically
          mirror the content of the default display. -->
     <bool name="config_localDisplaysMirrorContent">true</bool>
+
+    <!-- Indicates whether local non-default displays are private.
+         {@see android.view.Display#FLAG_PRIVATE} -->
+    <bool name="config_localDisplaysPrivate">false</bool>
 
     <!-- The default mode for the default display. One of the following values (See Display.java):
              0 - COLOR_MODE_DEFAULT

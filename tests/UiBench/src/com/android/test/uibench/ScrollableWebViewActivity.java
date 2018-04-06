@@ -16,7 +16,7 @@
 package com.android.test.uibench;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.webkit.WebView;
 
 public class ScrollableWebViewActivity extends AppCompatActivity {

@@ -250,6 +250,16 @@ public class RecoveryController {
      */
     public static final int ERROR_INVALID_CERTIFICATE = 28;
 
+
+    /**
+     * Failed because the provided certificate contained serial version which is lower that the
+     * version device is already initialized with. It is not possible to downgrade serial version of
+     * the provided certificate.
+     *
+     * @hide
+     */
+    public static final int ERROR_DOWNGRADE_CERTIFICATE = 29;
+
     private final ILockSettings mBinder;
     private final KeyStore mKeyStore;
 
@@ -278,7 +288,7 @@ public class RecoveryController {
     }
 
     /**
-     * @deprecated Use {@link #initRecoveryService(String, byte[], byte[])} instead.
+     * @removed Use {@link #initRecoveryService(String, byte[], byte[])} instead.
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -340,12 +350,16 @@ public class RecoveryController {
                     || e.errorCode == ERROR_INVALID_CERTIFICATE) {
                 throw new CertificateException("Invalid certificate for recovery service", e);
             }
+            if (e.errorCode == ERROR_DOWNGRADE_CERTIFICATE) {
+                throw new CertificateException(
+                        "Downgrading certificate serial version isn't supported.", e);
+            }
             throw wrapUnexpectedServiceSpecificException(e);
         }
     }
 
     /**
-     * @deprecated Use {@link #getKeyChainSnapshot()}
+     * @removed Use {@link #getKeyChainSnapshot()}
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -421,7 +435,7 @@ public class RecoveryController {
     }
 
     /**
-     * @deprecated Use {@link #getAliases()}.
+     * @removed Use {@link #getAliases()}.
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -446,7 +460,7 @@ public class RecoveryController {
     }
 
     /**
-     * @deprecated Use {@link #setRecoveryStatus(String, int)}
+     * @removed Use {@link #setRecoveryStatus(String, int)}
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -480,7 +494,7 @@ public class RecoveryController {
     }
 
     /**
-     * @deprecated Use {@link #getRecoveryStatus(String)}.
+     * @removed Use {@link #getRecoveryStatus(String)}.
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -562,26 +576,7 @@ public class RecoveryController {
     }
 
     /**
-     * Deprecated.
-     * Generates a AES256/GCM/NoPADDING key called {@code alias} and loads it into the recoverable
-     * key store. Returns the raw material of the key.
-     *
-     * @param alias The key alias.
-     * @param account The account associated with the key
-     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
-     *     service.
-     * @throws LockScreenRequiredException if the user has not set a lock screen. This is required
-     *     to generate recoverable keys, as the snapshots are encrypted using a key derived from the
-     *     lock screen.
-     */
-    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public byte[] generateAndStoreKey(@NonNull String alias, byte[] account)
-            throws InternalRecoveryServiceException, LockScreenRequiredException {
-        throw new UnsupportedOperationException("Operation is not supported, use generateKey");
-    }
-
-    /**
-     * @deprecated Use {@link #generateKey(String)}.
+     * @removed Use {@link #generateKey(String)}.
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)

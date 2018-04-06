@@ -17,7 +17,7 @@ package com.android.test.uibench.recyclerview;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.support.v7.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.ViewGroup;
 import android.widget.TextView;

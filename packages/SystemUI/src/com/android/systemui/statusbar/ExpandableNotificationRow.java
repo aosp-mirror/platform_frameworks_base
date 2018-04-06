@@ -35,6 +35,7 @@ import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
@@ -100,13 +101,17 @@ import java.util.function.Consumer;
 public class ExpandableNotificationRow extends ActivatableNotificationView
         implements PluginListener<NotificationMenuRowPlugin> {
 
+    private static final boolean DEBUG = false;
     private static final int DEFAULT_DIVIDER_ALPHA = 0x29;
     private static final int COLORED_DIVIDER_ALPHA = 0x7B;
     private static final int MENU_VIEW_INDEX = 0;
     private static final String TAG = "ExpandableNotifRow";
 
+    /**
+     * Listener for when {@link ExpandableNotificationRow} is laid out.
+     */
     public interface LayoutListener {
-        public void onLayout();
+        void onLayout();
     }
 
     private LayoutListener mLayoutListener;
@@ -174,8 +179,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private NotificationGuts mGuts;
     private NotificationData.Entry mEntry;
     private StatusBarNotification mStatusBarNotification;
-    private PackageManager mCachedPackageManager;
-    private PackageInfo mCachedPackageInfo;
+    /**
+     * Whether or not this row represents a system notification. Note that if this is {@code null},
+     * that means we were either unable to retrieve the info or have yet to retrieve the info.
+     */
+    private Boolean mIsSystemNotification;
     private String mAppName;
     private boolean mIsHeadsUp;
     private boolean mLastChronometerRunning = true;
@@ -271,7 +279,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 public Float get(ExpandableNotificationRow object) {
                     return object.getTranslation();
                 }
-    };
+            };
     private OnClickListener mOnClickListener;
     private boolean mHeadsupDisappearRunning;
     private View mChildAfterViewWhenDismissed;
@@ -291,6 +299,33 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mWasChildInGroupWhenRemoved;
     private int mNotificationColorAmbient;
     private NotificationViewState mNotificationViewState;
+
+    private SystemNotificationAsyncTask mSystemNotificationAsyncTask =
+            new SystemNotificationAsyncTask();
+
+    /**
+     * Returns whether the given {@code statusBarNotification} is a system notification.
+     * <b>Note</b>, this should be run in the background thread if possible as it makes multiple IPC
+     * calls.
+     */
+    private static Boolean isSystemNotification(
+            Context context, StatusBarNotification statusBarNotification) {
+        PackageManager packageManager = StatusBar.getPackageManagerForUser(
+                context, statusBarNotification.getUser().getIdentifier());
+        Boolean isSystemNotification = null;
+
+        try {
+            PackageInfo packageInfo = packageManager.getPackageInfo(
+                    statusBarNotification.getPackageName(), PackageManager.GET_SIGNATURES);
+
+            isSystemNotification =
+                    com.android.settingslib.Utils.isSystemPackage(
+                            context.getResources(), packageManager, packageInfo);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "cacheIsSystemNotification: Could not find package info");
+        }
+        return isSystemNotification;
+    }
 
     @Override
     public boolean isGroupExpansionChanging() {
@@ -383,21 +418,19 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mStatusBarNotification = entry.notification;
         mNotificationInflater.inflateNotificationViews();
 
-        perhapsCachePackageInfo();
+        cacheIsSystemNotification();
     }
 
     /**
-     * Caches the package manager and info objects which are expensive to obtain.
+     * Caches whether or not this row contains a system notification. Note, this is only cached
+     * once per notification as the packageInfo can't technically change for a notification row.
      */
-    private void perhapsCachePackageInfo() {
-        if (mCachedPackageInfo == null) {
-            mCachedPackageManager = StatusBar.getPackageManagerForUser(
-                    mContext, mStatusBarNotification.getUser().getIdentifier());
-            try {
-                mCachedPackageInfo = mCachedPackageManager.getPackageInfo(
-                        mStatusBarNotification.getPackageName(), PackageManager.GET_SIGNATURES);
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.e(TAG, "perhapsCachePackageInfo: Could not find package info");
+    private void cacheIsSystemNotification() {
+        if (mIsSystemNotification == null) {
+            if (mSystemNotificationAsyncTask.getStatus() == AsyncTask.Status.PENDING) {
+                // Run async task once, only if it hasn't already been executed. Note this is
+                // executed in serial - no need to parallelize this small task.
+                mSystemNotificationAsyncTask.execute();
             }
         }
     }
@@ -407,9 +440,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      * covers multiple channels, or is in a whitelist).
      */
     public boolean getIsNonblockable() {
-        boolean isNonblockable;
-
-        isNonblockable = Dependency.get(NotificationBlockingHelperManager.class)
+        boolean isNonblockable = Dependency.get(NotificationBlockingHelperManager.class)
                 .isNonblockablePackage(mStatusBarNotification.getPackageName());
 
         // Only bother with going through the children if the row is still blockable based on the
@@ -418,10 +449,18 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             isNonblockable = getNumUniqueChannels() > 1;
         }
 
-        // Only bother with IPC if the package is still blockable.
-        if (!isNonblockable && mCachedPackageManager != null && mCachedPackageInfo != null) {
-            if (com.android.settingslib.Utils.isSystemPackage(
-                    mContext.getResources(), mCachedPackageManager, mCachedPackageInfo)) {
+        // If the SystemNotifAsyncTask hasn't finished running or retrieved a value, we'll try once
+        // again, but in-place on the main thread this time. This should rarely ever get called.
+        if (mIsSystemNotification == null) {
+            if (DEBUG) {
+                Log.d(TAG, "Retrieving isSystemNotification on main thread");
+            }
+            mSystemNotificationAsyncTask.cancel(true /* mayInterruptIfRunning */);
+            mIsSystemNotification = isSystemNotification(mContext, mStatusBarNotification);
+        }
+
+        if (!isNonblockable && mIsSystemNotification != null) {
+            if (mIsSystemNotification) {
                 if (mEntry.channel != null
                         && !mEntry.channel.isBlockableSystem()) {
                     isNonblockable = true;
@@ -2827,5 +2866,22 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
          * @return whether the click was handled
          */
         boolean onClick(View v, int x, int y, MenuItem item);
+    }
+
+    /**
+     * Background task for executing IPCs to check if the notification is a system notification. The
+     * output is used for both the blocking helper and the notification info.
+     */
+    private class SystemNotificationAsyncTask extends AsyncTask<Void, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            return isSystemNotification(mContext, mStatusBarNotification);
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            mIsSystemNotification = result;
+        }
     }
 }

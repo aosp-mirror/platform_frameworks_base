@@ -35,7 +35,6 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Поточні"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Сповіщення"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Низький рівень заряду акумулятора"</string>
-    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Акумулятор майже розрядився. Увімкніть режим економії заряду акумулятора"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Залишилося <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"На основі використання залишилося <xliff:g id="PERCENTAGE">%s</xliff:g> – близько <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Залишилося <xliff:g id="PERCENTAGE">%s</xliff:g> – близько <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -75,11 +74,10 @@
     <string name="global_action_screenshot" msgid="8329831278085426283">"Знімок екрана"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Збереження знімка екрана..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Збереження знімка екрана..."</string>
-    <string name="screenshot_saving_text" msgid="2545047868936087248">"Знімок екрана зберігається"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"Знімок екрана збережено"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"Торкніться, щоб переглянути знімок екрана"</string>
-    <string name="screenshot_failed_title" msgid="9096484883063264803">"Не вдалося зробити знімок екрана"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Не вдалося зберегти знімок екрана"</string>
+    <string name="screenshot_failed_title" msgid="7612509838919089748">"Не вдалося зберегти знімок екрана"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Спробуйте зробити знімок екрана ще раз"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Не вдалося зберегти знімок екрана через обмежений обсяг пам’яті"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Додаток або адміністратор вашої організації не дозволяють робити знімки екрана"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Парам.передав.файлів через USB"</string>
@@ -356,7 +354,7 @@
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Вмикається ввечері"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"До сходу сонця"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Вмикається о <xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"До <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"До <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC вимкнено"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC ввімкнено"</string>
@@ -440,7 +438,8 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> отримає доступ до всіх даних, які відображаються на вашому екрані."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Більше не показувати"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Очистити все"</string>
-    <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"У режимі \"Не турбувати\" сповіщення ховаються"</string>
+    <string name="manage_notifications_text" msgid="8035284146227267681">"Керувати сповіщеннями"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"У режимі \"Не турбувати\" сповіщення ховаються"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Почати зараз"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Сповіщень немає"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Профіль може відстежуватись"</string>
@@ -540,13 +539,18 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Дзвінок"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Вібросигнал"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Без звуку"</string>
+    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
+    <skip />
+    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Торкніться, щоб увімкнути звук."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Торкніться, щоб налаштувати вібросигнал. Спеціальні можливості може бути вимкнено."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Торкніться, щоб вимкнути звук. Спеціальні можливості може бути вимкнено."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Торкніться, щоб налаштувати вібросигнал."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Торкніться, щоб вимкнути звук."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"Регуляторів гучності: %s"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"Звуковий сигнал для викликів і сповіщень увімкнено"</string>
+    <!-- no translation found for volume_dialog_ringer_guidance_ring (3360373718388509040) -->
+    <skip />
     <string name="output_title" msgid="5355078100792942802">"Вивід медіа-вмісту"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Вивід телефонного виклику"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Пристроїв не знайдено"</string>
@@ -637,6 +641,7 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"елементи керування сповіщеннями"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"параметри відкладення сповіщень"</string>
+    <string name="notification_menu_snooze_action" msgid="1112254519029621372">"Відкласти"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ВІДМІНИТИ"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"Відкладено на <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
@@ -704,6 +709,8 @@
     <string name="battery" msgid="7498329822413202973">"Акумулятор"</string>
     <string name="clock" msgid="7416090374234785905">"Годинник"</string>
     <string name="headset" msgid="4534219457597457353">"Гарнітура"</string>
+    <!-- no translation found for accessibility_long_click_tile (6687350750091842525) -->
+    <skip />
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Навушники під’єднано"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Гарнітуру під’єднано"</string>
     <string name="data_saver" msgid="5037565123367048522">"Заощадження трафіку"</string>
@@ -738,11 +745,9 @@
     <string name="right_keycode" msgid="708447961000848163">"Код клавіші праворуч"</string>
     <string name="left_icon" msgid="3096287125959387541">"Значок ліворуч"</string>
     <string name="right_icon" msgid="3952104823293824311">"Значок праворуч"</string>
-    <!-- no translation found for drag_to_add_tiles (230586591689084925) -->
-    <skip />
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"Натисніть і перетягніть, щоб додати фрагменти"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Перетягніть сюди, щоб видалити"</string>
-    <!-- no translation found for drag_to_remove_disabled (2390968976638993382) -->
-    <skip />
+    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"Потрібно принаймні 6 фрагментів"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Редагувати"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Час"</string>
   <string-array name="clock_options">
@@ -829,6 +834,7 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Знімки екрана"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Загальні повідомлення"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"Пам’ять"</string>
+    <string name="notification_channel_hints" msgid="7323870212489152689">"Поради"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Додатки з миттєвим запуском"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Додатки з миттєвим запуском не потрібно встановлювати."</string>
     <string name="app_info" msgid="6856026610594615344">"Про додаток"</string>
@@ -846,12 +852,9 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Замінити"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Додатки, які працюють у фоновому режимі"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Торкніться, щоб перевірити використання акумулятора й трафік"</string>
-    <!-- no translation found for mobile_data_disable_title (1068272097382942231) -->
-    <skip />
-    <!-- no translation found for mobile_data_disable_message (4756541658791493506) -->
-    <skip />
-    <!-- no translation found for mobile_data_disable_message_default_carrier (6078110473451946831) -->
-    <skip />
+    <string name="mobile_data_disable_title" msgid="1068272097382942231">"Вимкнути мобільне передавання даних?"</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"Ви не матимете доступу до даних чи Інтернету через оператора <xliff:g id="CARRIER">%s</xliff:g>. Інтернет буде доступний лише через Wi-Fi."</string>
+    <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"ваш оператор"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Не вдається підтвердити вашу відповідь у налаштуваннях, оскільки інший додаток заступає запит на дозвіл."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"Дозволити додатку <xliff:g id="APP_0">%1$s</xliff:g> показувати фрагменти додатка <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- Має доступ до інформації з додатка <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -859,4 +862,11 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"Дозволити додатку <xliff:g id="APP">%1$s</xliff:g> показувати фрагменти будь-якого додатка"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"Дозволити"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Відмовити"</string>
+    <string name="auto_saver_title" msgid="1217959994732964228">"Торкніться, щоб увімкнути автоматичний режим економії заряду акумулятора"</string>
+    <string name="auto_saver_text" msgid="6324376061044218113">"Вмикати автоматично, коли рівень знижується до <xliff:g id="PERCENTAGE">%d</xliff:g>%%"</string>
+    <string name="no_auto_saver_action" msgid="8086002101711328500">"Ні, дякую"</string>
+    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Автоматичний режим економії заряду акумулятора ввімкнено"</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"Режим економії заряду акумулятора вмикатиметься автоматично, коли рівень нижчий за <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
+    <string name="open_saver_setting_action" msgid="8314624730997322529">"Налаштування"</string>
+    <string name="auto_saver_okay_action" msgid="2701221740227683650">"OK"</string>
 </resources>

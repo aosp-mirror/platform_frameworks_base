@@ -63,7 +63,7 @@ const int FIELD_ID_VALUE = 3;
 ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric& metric,
                                          const int conditionIndex,
                                          const sp<ConditionWizard>& wizard, const int pullTagId,
-                                         const uint64_t startTimeNs,
+                                         const int64_t startTimeNs,
                                          shared_ptr<StatsPullerManager> statsPullerManager)
     : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard),
       mValueField(metric.value_field()),
@@ -124,7 +124,7 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
 ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric& metric,
                                          const int conditionIndex,
                                          const sp<ConditionWizard>& wizard, const int pullTagId,
-                                         const uint64_t startTimeNs)
+                                         const int64_t startTimeNs)
     : ValueMetricProducer(key, metric, conditionIndex, wizard, pullTagId, startTimeNs,
                           make_shared<StatsPullerManager>()) {
 }
@@ -137,19 +137,24 @@ ValueMetricProducer::~ValueMetricProducer() {
 }
 
 void ValueMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition,
-                                                           const uint64_t eventTime) {
+                                                           const int64_t eventTime) {
     VLOG("Metric %lld onSlicedConditionMayChange", (long long)mMetricId);
 }
 
-void ValueMetricProducer::dropDataLocked(const uint64_t dropTimeNs) {
+void ValueMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
     flushIfNeededLocked(dropTimeNs);
     mPastBuckets.clear();
 }
 
-void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
+void ValueMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
+                                             const bool include_current_partial_bucket,
                                              ProtoOutputStream* protoOutput) {
     VLOG("metric %lld dump report now...", (long long)mMetricId);
-    flushIfNeededLocked(dumpTimeNs);
+    if (include_current_partial_bucket) {
+        flushLocked(dumpTimeNs);
+    } else {
+        flushIfNeededLocked(dumpTimeNs);
+    }
     if (mPastBuckets.empty()) {
         return;
     }
@@ -197,7 +202,7 @@ void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
 }
 
 void ValueMetricProducer::onConditionChangedLocked(const bool condition,
-                                                   const uint64_t eventTimeNs) {
+                                                   const int64_t eventTimeNs) {
     mCondition = condition;
 
     if (eventTimeNs < mCurrentBucketStartTimeNs) {
@@ -231,8 +236,8 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
         }
         // For scheduled pulled data, the effective event time is snap to the nearest
         // bucket boundary to make bucket finalize.
-        uint64_t realEventTime = allData.at(0)->GetElapsedTimestampNs();
-        uint64_t eventTime = mStartTimeNs +
+        int64_t realEventTime = allData.at(0)->GetElapsedTimestampNs();
+        int64_t eventTime = mStartTimeNs +
             ((realEventTime - mStartTimeNs) / mBucketSizeNs) * mBucketSizeNs;
 
         mCondition = false;
@@ -290,7 +295,7 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
         const size_t matcherIndex, const MetricDimensionKey& eventKey,
         const ConditionKey& conditionKey, bool condition,
         const LogEvent& event) {
-    uint64_t eventTimeNs = event.GetElapsedTimestampNs();
+    int64_t eventTimeNs = event.GetElapsedTimestampNs();
     if (eventTimeNs < mCurrentBucketStartTimeNs) {
         VLOG("Skip event due to late arrival: %lld vs %lld", (long long)eventTimeNs,
              (long long)mCurrentBucketStartTimeNs);
@@ -349,8 +354,8 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
     }
 }
 
-void ValueMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
-    uint64_t currentBucketEndTimeNs = getCurrentBucketEndTimeNs();
+void ValueMetricProducer::flushIfNeededLocked(const int64_t& eventTimeNs) {
+    int64_t currentBucketEndTimeNs = getCurrentBucketEndTimeNs();
 
     if (currentBucketEndTimeNs > eventTimeNs) {
         VLOG("eventTime is %lld, less than next bucket start time %lld", (long long)eventTimeNs,
@@ -371,10 +376,10 @@ void ValueMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
          (long long)mCurrentBucketStartTimeNs);
 }
 
-void ValueMetricProducer::flushCurrentBucketLocked(const uint64_t& eventTimeNs) {
+void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
     VLOG("finalizing bucket for %ld, dumping %d slices", (long)mCurrentBucketStartTimeNs,
          (int)mCurrentSlicedBucket.size());
-    uint64_t fullBucketEndTimeNs = getCurrentBucketEndTimeNs();
+    int64_t fullBucketEndTimeNs = getCurrentBucketEndTimeNs();
 
     ValueBucket info;
     info.mBucketStartNs = mCurrentBucketStartTimeNs;

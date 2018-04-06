@@ -69,6 +69,10 @@ public class SystemUIDialog extends AlertDialog {
         setButton(BUTTON_NEGATIVE, mContext.getString(resId), onClick);
     }
 
+    public void setNeutralButton(int resId, OnClickListener onClick) {
+        setButton(BUTTON_NEUTRAL, mContext.getString(resId), onClick);
+    }
+
     public static void setShowForAllUsers(Dialog dialog, boolean show) {
         if (show) {
             dialog.getWindow().getAttributes().privateFlags |=

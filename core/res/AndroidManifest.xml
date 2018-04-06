@@ -2030,6 +2030,15 @@
     <permission android:name="android.permission.START_ANY_ACTIVITY"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Must be required by activities that handle the intent action
+         {@link Intent#ACTION_SEND_SHOW_SUSPENDED_APP_DETAILS}. This is for use by apps that
+         hold {@link Manifest.permission#SUSPEND_APPS} to interact with the system.
+         <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS"
+                android:protectionLevel="signature" />
+    <uses-permission android:name="android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS" />
+
     <!-- @deprecated The {@link android.app.ActivityManager#restartPackage}
         API is no longer supported. -->
     <permission android:name="android.permission.RESTART_PACKAGES"
@@ -4116,6 +4125,12 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="com.android.internal.app.SuspendedAppActivity"
+                  android:theme="@style/Theme.DeviceDefault.Light.Dialog.Alert"
+                  android:excludeFromRecents="true"
+                  android:process=":ui">
+        </activity>
+
         <activity android:name="com.android.internal.app.UnlaunchableAppActivity"
                 android:theme="@style/Theme.DeviceDefault.Light.Dialog.Alert"
                 android:excludeFromRecents="true"
@@ -4248,14 +4263,9 @@
                   android:exported="false">
         </receiver>
 
-        <receiver android:name="com.android.server.am.BatteryStatsService$UsbConnectionReceiver"
+        <receiver android:name="com.android.server.stats.StatsCompanionService$PeriodicAlarmReceiver"
+                  android:permission="android.permission.STATSCOMPANION"
                   android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.hardware.usb.action.USB_STATE" />
-            </intent-filter>
         </receiver>
 
         <service android:name="android.hardware.location.GeofenceHardwareService"

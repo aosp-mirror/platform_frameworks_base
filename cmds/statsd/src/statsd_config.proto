@@ -347,4 +347,15 @@ message StatsdConfig {
   repeated string allowed_log_source = 12;
 
   repeated int64 no_report_metric = 13;
+
+  message Annotation {
+    optional int64 field_int64 = 1;
+    optional int32 field_int32 = 2;
+  }
+  repeated Annotation annotation = 14;
+
+  optional int64 ttl_in_seconds = 15;
+
+  // Field number 1000 is reserved for later use.
+  reserved 1000;
 }

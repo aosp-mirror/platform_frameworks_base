@@ -67,13 +67,13 @@ public:
                        const int64_t& currentBucketValue);
 
     // Informs incidentd about the detected alert.
-    void declareAnomaly(const uint64_t& timestampNs, const MetricDimensionKey& key);
+    void declareAnomaly(const int64_t& timestampNs, const MetricDimensionKey& key);
 
     // Detects if, based on past buckets plus the new currentBucketValue (which generally
     // represents the partially-filled current bucket), an anomaly has happened, and if so,
     // declares an anomaly and informs relevant subscribers.
     // Also advances to currBucketNum-1.
-    void detectAndDeclareAnomaly(const uint64_t& timestampNs, const int64_t& currBucketNum,
+    void detectAndDeclareAnomaly(const int64_t& timestampNs, const int64_t& currBucketNum,
                                  const MetricDimensionKey& key, const int64_t& currentBucketValue);
 
     // Init the AlarmMonitor which is shared across anomaly trackers.
@@ -107,7 +107,7 @@ public:
 
     // Declares an anomaly for each alarm in firedAlarms that belongs to this AnomalyTracker,
     // and removes it from firedAlarms. Does NOT remove the alarm from the AlarmMonitor.
-    virtual void informAlarmsFired(const uint64_t& timestampNs,
+    virtual void informAlarmsFired(const int64_t& timestampNs,
             unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& firedAlarms) {
         return; // The base AnomalyTracker class doesn't have alarms.
     }
@@ -127,7 +127,7 @@ protected:
     std::vector<Subscription> mSubscriptions;
 
     // A reference to the Alert's config key.
-    const ConfigKey& mConfigKey;
+    const ConfigKey mConfigKey;
 
     // Number of past buckets. One less than the total number of buckets needed
     // for the anomaly detection (since the current bucket is not in the past).
@@ -166,7 +166,7 @@ protected:
     void subtractValueFromSum(const MetricDimensionKey& key, const int64_t& bucketValue);
 
     // Returns true if in the refractory period, else false.
-    bool isInRefractoryPeriod(const uint64_t& timestampNs, const MetricDimensionKey& key) const;
+    bool isInRefractoryPeriod(const int64_t& timestampNs, const MetricDimensionKey& key) const;
 
     // Calculates the corresponding bucket index within the circular array.
     // Requires bucketNum >= 0.

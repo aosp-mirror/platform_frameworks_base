@@ -220,7 +220,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SystemUI"
         android:defaultToDeviceProtectedStorage="true"
-        android:directBootAware="true">
+        android:directBootAware="true"
+        android:appComponentFactory="android.support.v4.app.CoreComponentFactory">
         <!-- Keep theme in sync with SystemUIApplication.onCreate().
              Setting the theme on the application does not affect views inflated by services.
              The application theme is set again from onCreate to take effect for those views. -->

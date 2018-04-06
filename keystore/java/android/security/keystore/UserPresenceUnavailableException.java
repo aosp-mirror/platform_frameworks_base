@@ -16,13 +16,13 @@
 
 package android.security.keystore;
 
-import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 
 /**
  * Indicates the condition that a proof of user-presence was
  * requested but this proof was not presented.
  */
-public class UserPresenceUnavailableException extends InvalidAlgorithmParameterException {
+public class UserPresenceUnavailableException extends InvalidKeyException {
     /**
      * Constructs a {@code UserPresenceUnavailableException} without a detail message or cause.
      */

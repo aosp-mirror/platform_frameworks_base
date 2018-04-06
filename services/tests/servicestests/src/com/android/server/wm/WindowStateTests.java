@@ -37,6 +37,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
@@ -51,6 +52,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -126,6 +128,16 @@ public class WindowStateTests extends WindowTestsBase {
         assertNull(parentWindow.getParentWindow());
         assertEquals(parentWindow, child1.getParentWindow());
         assertEquals(parentWindow, child2.getParentWindow());
+    }
+
+    @Test
+    public void testOverlayWindowHiddenWhenSuspended() {
+        final WindowState overlayWindow = spy(createWindow(null, TYPE_APPLICATION_OVERLAY,
+                "overlayWindow"));
+        overlayWindow.setHiddenWhileSuspended(true);
+        verify(overlayWindow).hideLw(true, true);
+        overlayWindow.setHiddenWhileSuspended(false);
+        verify(overlayWindow).showLw(true, true);
     }
 
     @Test
@@ -324,6 +336,17 @@ public class WindowStateTests extends WindowTestsBase {
         app.onDisplayChanged(mDisplayContent);
 
         assertThat(app.mLayoutSeq, not(is(mDisplayContent.mLayoutSeq)));
+    }
+
+    @Test
+    public void testDisplayIdUpdatedOnReparent() throws Exception {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        // fake a different display
+        app.mInputWindowHandle.displayId = mDisplayContent.getDisplayId() + 1;
+        app.onDisplayChanged(mDisplayContent);
+
+        assertThat(app.mInputWindowHandle.displayId, is(mDisplayContent.getDisplayId()));
+        assertThat(app.getDisplayId(), is(mDisplayContent.getDisplayId()));
     }
 
     private void testPrepareWindowToDisplayDuringRelayout(boolean wasVisible) {

@@ -61,7 +61,7 @@ const int FIELD_ID_WALL_CLOCK_ATOM_TIMESTAMP = 5;
 GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& metric,
                                          const int conditionIndex,
                                          const sp<ConditionWizard>& wizard, const int pullTagId,
-                                         const uint64_t startTimeNs,
+                                         const int64_t startTimeNs,
                                          shared_ptr<StatsPullerManager> statsPullerManager)
     : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard),
       mStatsPullerManager(statsPullerManager),
@@ -155,9 +155,15 @@ void GaugeMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
     }
 }
 
-void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
+void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
+                                             const bool include_current_partial_bucket,
                                              ProtoOutputStream* protoOutput) {
     VLOG("Gauge metric %lld report now...", (long long)mMetricId);
+    if (include_current_partial_bucket) {
+        flushLocked(dumpTimeNs);
+    } else {
+        flushIfNeededLocked(dumpTimeNs);
+    }
 
     flushIfNeededLocked(dumpTimeNs);
     if (mPastBuckets.empty()) {
@@ -267,7 +273,7 @@ void GaugeMetricProducer::pullLocked() {
 }
 
 void GaugeMetricProducer::onConditionChangedLocked(const bool conditionMet,
-                                                   const uint64_t eventTime) {
+                                                   const int64_t eventTime) {
     VLOG("GaugeMetric %lld onConditionChanged", (long long)mMetricId);
     flushIfNeededLocked(eventTime);
     mCondition = conditionMet;
@@ -278,7 +284,7 @@ void GaugeMetricProducer::onConditionChangedLocked(const bool conditionMet,
 }
 
 void GaugeMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition,
-                                                           const uint64_t eventTime) {
+                                                           const int64_t eventTime) {
     VLOG("GaugeMetric %lld onSlicedConditionMayChange overall condition %d", (long long)mMetricId,
          overallCondition);
     flushIfNeededLocked(eventTime);
@@ -336,7 +342,7 @@ void GaugeMetricProducer::onMatchedLogEventInternalLocked(
     if (condition == false) {
         return;
     }
-    uint64_t eventTimeNs = event.GetElapsedTimestampNs();
+    int64_t eventTimeNs = event.GetElapsedTimestampNs();
     mTagId = event.GetTagId();
     if (eventTimeNs < mCurrentBucketStartTimeNs) {
         VLOG("Gauge Skip event due to late arrival: %lld vs %lld", (long long)eventTimeNs,
@@ -391,7 +397,7 @@ void GaugeMetricProducer::updateCurrentSlicedBucketForAnomaly() {
     }
 }
 
-void GaugeMetricProducer::dropDataLocked(const uint64_t dropTimeNs) {
+void GaugeMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
     flushIfNeededLocked(dropTimeNs);
     mPastBuckets.clear();
 }
@@ -401,8 +407,8 @@ void GaugeMetricProducer::dropDataLocked(const uint64_t dropTimeNs) {
 // bucket.
 // if data is pushed, onMatchedLogEvent will only be called through onConditionChanged() inside
 // the GaugeMetricProducer while holding the lock.
-void GaugeMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
-    uint64_t currentBucketEndTimeNs = getCurrentBucketEndTimeNs();
+void GaugeMetricProducer::flushIfNeededLocked(const int64_t& eventTimeNs) {
+    int64_t currentBucketEndTimeNs = getCurrentBucketEndTimeNs();
 
     if (eventTimeNs < currentBucketEndTimeNs) {
         VLOG("Gauge eventTime is %lld, less than next bucket start time %lld",
@@ -420,8 +426,8 @@ void GaugeMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
          (long long)mCurrentBucketStartTimeNs);
 }
 
-void GaugeMetricProducer::flushCurrentBucketLocked(const uint64_t& eventTimeNs) {
-    uint64_t fullBucketEndTimeNs = getCurrentBucketEndTimeNs();
+void GaugeMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
+    int64_t fullBucketEndTimeNs = getCurrentBucketEndTimeNs();
 
     GaugeBucket info;
     info.mBucketStartNs = mCurrentBucketStartTimeNs;

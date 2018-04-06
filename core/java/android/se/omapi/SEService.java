@@ -32,6 +32,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.HashMap;
+import java.util.concurrent.Executor;
 
 /**
  * The SEService realises the communication to available Secure Elements on the
@@ -66,7 +67,7 @@ public final class SEService {
         /**
          * Called by the framework when the service is connected.
          */
-        void onServiceConnected();
+        void onConnected();
     }
 
     /**
@@ -75,15 +76,21 @@ public final class SEService {
      */
     private class SEListener extends ISecureElementListener.Stub {
         public OnConnectedListener mListener = null;
+        public Executor mExecutor = null;
 
         @Override
         public IBinder asBinder() {
             return this;
         }
 
-        public void onServiceConnected() {
-            if (mListener != null) {
-                mListener.onServiceConnected();
+        public void onConnected() {
+            if (mListener != null && mExecutor != null) {
+                mExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mListener.onConnected();
+                    }
+                });
             }
         }
     }
@@ -116,22 +123,26 @@ public final class SEService {
      * the specified listener is called or if isConnected() returns
      * <code>true</code>. <br>
      * The call-back object passed as a parameter will have its
-     * onServiceConnected() method called when the connection actually happen.
+     * onConnected() method called when the connection actually happen.
      *
      * @param context
      *            the context of the calling application. Cannot be
      *            <code>null</code>.
      * @param listener
      *            a OnConnectedListener object.
+     * @param executor
+     *            an Executor which will be used when invoking the callback.
      */
-    public SEService(@NonNull Context context, @NonNull OnConnectedListener listener) {
+    public SEService(@NonNull Context context, @NonNull Executor executor,
+            @NonNull OnConnectedListener listener) {
 
-        if (context == null) {
-            throw new NullPointerException("context must not be null");
+        if (context == null || listener == null || executor == null) {
+            throw new NullPointerException("Arguments must not be null");
         }
 
         mContext = context;
         mSEListener.mListener = listener;
+        mSEListener.mExecutor = executor;
 
         mConnection = new ServiceConnection() {
 
@@ -140,7 +151,7 @@ public final class SEService {
 
                 mSecureElementService = ISecureElementService.Stub.asInterface(service);
                 if (mSEListener != null) {
-                    mSEListener.onServiceConnected();
+                    mSEListener.onConnected();
                 }
                 Log.i(TAG, "Service onServiceConnected");
             }

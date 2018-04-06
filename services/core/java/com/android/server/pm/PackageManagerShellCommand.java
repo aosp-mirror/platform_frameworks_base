@@ -1505,6 +1505,7 @@ class PackageManagerShellCommand extends ShellCommand {
     private int runSuspend(boolean suspendedState) {
         final PrintWriter pw = getOutPrintWriter();
         int userId = UserHandle.USER_SYSTEM;
+        String dialogMessage = null;
         final PersistableBundle appExtras = new PersistableBundle();
         final PersistableBundle launcherExtras = new PersistableBundle();
         String opt;
@@ -1512,6 +1513,9 @@ class PackageManagerShellCommand extends ShellCommand {
             switch (opt) {
                 case "--user":
                     userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+                case "--dialogMessage":
+                    dialogMessage = getNextArgRequired();
                     break;
                 case "--ael":
                 case "--aes":
@@ -1553,7 +1557,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 (Binder.getCallingUid() == Process.ROOT_UID) ? "root" : "com.android.shell";
         try {
             mInterface.setPackagesSuspendedAsUser(new String[]{packageName}, suspendedState,
-                    appExtras, launcherExtras, callingPackage, userId);
+                    appExtras, launcherExtras, dialogMessage, callingPackage, userId);
             pw.println("Package " + packageName + " new suspended state: "
                     + mInterface.isPackageSuspendedForUser(packageName, userId));
             return 0;

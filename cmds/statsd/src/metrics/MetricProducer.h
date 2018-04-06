@@ -64,7 +64,7 @@ public:
      * the flush again when the end timestamp is forced to be now, and then after flushing, update
      * the start timestamp to be now.
      */
-    void notifyAppUpgrade(const uint64_t& eventTimeNs, const string& apk, const int uid,
+    void notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk, const int uid,
                           const int64_t version) override {
         std::lock_guard<std::mutex> lock(mMutex);
 
@@ -79,12 +79,14 @@ public:
         // is a partial bucket and can merge it with the previous bucket.
     };
 
-    void notifyAppRemoved(const uint64_t& eventTimeNs, const string& apk, const int uid) override{
-            // TODO: Implement me.
+    void notifyAppRemoved(const int64_t& eventTimeNs, const string& apk, const int uid) override{
+        // Force buckets to split on removal also.
+        notifyAppUpgrade(eventTimeNs, apk, uid, 0);
     };
 
-    void onUidMapReceived(const uint64_t& eventTimeNs) override{
-            // TODO: Implement me.
+    void onUidMapReceived(const int64_t& eventTimeNs) override{
+            // Purposefully don't flush partial buckets on a new snapshot.
+            // This occurs if a new user is added/removed or statsd crashes.
     };
 
     // Consume the parsed stats log entry that already matched the "what" of the metric.
@@ -93,12 +95,12 @@ public:
         onMatchedLogEventLocked(matcherIndex, event);
     }
 
-    void onConditionChanged(const bool condition, const uint64_t eventTime) {
+    void onConditionChanged(const bool condition, const int64_t eventTime) {
         std::lock_guard<std::mutex> lock(mMutex);
         onConditionChangedLocked(condition, eventTime);
     }
 
-    void onSlicedConditionMayChange(bool overallCondition, const uint64_t eventTime) {
+    void onSlicedConditionMayChange(bool overallCondition, const int64_t eventTime) {
         std::lock_guard<std::mutex> lock(mMutex);
         onSlicedConditionMayChangeLocked(overallCondition, eventTime);
     }
@@ -110,9 +112,11 @@ public:
 
     // Output the metrics data to [protoOutput]. All metrics reports end with the same timestamp.
     // This method clears all the past buckets.
-    void onDumpReport(const uint64_t dumpTimeNs, android::util::ProtoOutputStream* protoOutput) {
+    void onDumpReport(const int64_t dumpTimeNs,
+                      const bool include_current_partial_bucket,
+                      android::util::ProtoOutputStream* protoOutput) {
         std::lock_guard<std::mutex> lock(mMutex);
-        return onDumpReportLocked(dumpTimeNs, protoOutput);
+        return onDumpReportLocked(dumpTimeNs, include_current_partial_bucket, protoOutput);
     }
 
     void dumpStates(FILE* out, bool verbose) const {
@@ -156,24 +160,34 @@ public:
     // We still need to keep future data valid and anomaly tracking work, which means we will
     // have to flush old data, informing anomaly trackers then safely drop old data.
     // We still keep current bucket data for future metrics' validity.
-    void dropData(const uint64_t dropTimeNs) {
+    void dropData(const int64_t dropTimeNs) {
         std::lock_guard<std::mutex> lock(mMutex);
         dropDataLocked(dropTimeNs);
     }
 
 protected:
-    virtual void onConditionChangedLocked(const bool condition, const uint64_t eventTime) = 0;
+    virtual void onConditionChangedLocked(const bool condition, const int64_t eventTime) = 0;
     virtual void onSlicedConditionMayChangeLocked(bool overallCondition,
-                                                  const uint64_t eventTime) = 0;
-    virtual void onDumpReportLocked(const uint64_t dumpTimeNs,
+                                                  const int64_t eventTime) = 0;
+    virtual void onDumpReportLocked(const int64_t dumpTimeNs,
+                                    const bool include_current_partial_bucket,
                                     android::util::ProtoOutputStream* protoOutput) = 0;
     virtual size_t byteSizeLocked() const = 0;
     virtual void dumpStatesLocked(FILE* out, bool verbose) const = 0;
 
     /**
-     * Flushes the current bucket if the eventTime is after the current bucket's end time.
+     * Flushes the current bucket if the eventTime is after the current bucket's end time. This will
+       also flush the current partial bucket in memory.
      */
-    virtual void flushIfNeededLocked(const uint64_t& eventTime){};
+    virtual void flushIfNeededLocked(const int64_t& eventTime){};
+
+    /**
+     * Flushes all the data including the current partial bucket.
+     */
+    virtual void flushLocked(const int64_t& eventTime) {
+        flushIfNeededLocked(eventTime);
+        flushCurrentBucketLocked(eventTime);
+    };
 
     /**
      * For metrics that aggregate (ie, every metric producer except for EventMetricProducer),
@@ -185,15 +199,15 @@ protected:
      * flushIfNeededLocked or the app upgrade handler; the caller MUST update the bucket timestamp
      * and bucket number as needed.
      */
-    virtual void flushCurrentBucketLocked(const uint64_t& eventTimeNs){};
+    virtual void flushCurrentBucketLocked(const int64_t& eventTimeNs){};
 
     // Convenience to compute the current bucket's end time, which is always aligned with the
     // start time of the metric.
-    uint64_t getCurrentBucketEndTimeNs() const {
+    int64_t getCurrentBucketEndTimeNs() const {
         return mStartTimeNs + (mCurrentBucketNum + 1) * mBucketSizeNs;
     }
 
-    virtual void dropDataLocked(const uint64_t dropTimeNs) = 0;
+    virtual void dropDataLocked(const int64_t dropTimeNs) = 0;
 
     const int64_t mMetricId;
 
@@ -201,15 +215,15 @@ protected:
 
     // The time when this metric producer was first created. The end time for the current bucket
     // can be computed from this based on mCurrentBucketNum.
-    uint64_t mStartTimeNs;
+    int64_t mStartTimeNs;
 
     // Start time may not be aligned with the start of statsd if there is an app upgrade in the
     // middle of a bucket.
-    uint64_t mCurrentBucketStartTimeNs;
+    int64_t mCurrentBucketStartTimeNs;
 
     // Used by anomaly detector to track which bucket we are in. This is not sent with the produced
     // report.
-    uint64_t mCurrentBucketNum;
+    int64_t mCurrentBucketNum;
 
     int64_t mBucketSizeNs;
 

@@ -151,6 +151,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private ArrayMap<String, ArrayList<StatusBarIcon>> mReplacingIcons;
     // Keep track of the last visible icon so collapsed container can report on its location
     private IconState mLastVisibleIconState;
+    private IconState mFirstVisibleIconState;
     private float mVisualOverflowStart;
     // Keep track of overflow in range [0, 3]
     private int mNumDots;
@@ -158,7 +159,6 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private Rect mIsolatedIconLocation;
     private int[] mAbsolutePosition = new int[2];
     private View mIsolatedIconForAnimation;
-
 
     public NotificationIconContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -192,9 +192,14 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             paint.setColor(Color.BLUE);
             canvas.drawLine(end, 0, end, height, paint);
 
-            paint.setColor(Color.BLACK);
+            paint.setColor(Color.GREEN);
             int lastIcon = (int) mLastVisibleIconState.xTranslation;
             canvas.drawLine(lastIcon, 0, lastIcon, height, paint);
+
+            if (mFirstVisibleIconState != null) {
+                int firstIcon = (int) mFirstVisibleIconState.xTranslation;
+                canvas.drawLine(firstIcon, 0, firstIcon, height, paint);
+            }
 
             paint.setColor(Color.RED);
             canvas.drawLine(mVisualOverflowStart, 0, mVisualOverflowStart, height, paint);
@@ -210,6 +215,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         super.onConfigurationChanged(newConfig);
         initDimens();
     }
+
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         float centerY = getHeight() / 2.0f;
@@ -364,11 +370,15 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         float layoutEnd = getLayoutEnd();
         float overflowStart = getMaxOverflowStart();
         mVisualOverflowStart = 0;
+        mFirstVisibleIconState = null;
         boolean hasAmbient = mSpeedBumpIndex != -1 && mSpeedBumpIndex < getChildCount();
         for (int i = 0; i < childCount; i++) {
             View view = getChildAt(i);
             IconState iconState = mIconStates.get(view);
             iconState.xTranslation = translationX;
+            if (mFirstVisibleIconState == null) {
+                mFirstVisibleIconState = iconState;
+            }
             boolean forceOverflow = mSpeedBumpIndex != -1 && i >= mSpeedBumpIndex
                     && iconState.iconAppearAmount > 0.0f || i >= maxVisibleIcons;
             boolean noOverflowAfter = i == childCount - 1;
@@ -417,10 +427,16 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         } else if (childCount > 0) {
             View lastChild = getChildAt(childCount - 1);
             mLastVisibleIconState = mIconStates.get(lastChild);
+            mFirstVisibleIconState = mIconStates.get(getChildAt(0));
         }
         boolean center = mDark;
         if (center && translationX < getLayoutEnd()) {
-            float delta = (getLayoutEnd() - translationX) / 2;
+            float initialTranslation =
+                    mFirstVisibleIconState == null ? 0 : mFirstVisibleIconState.xTranslation;
+            float contentWidth = getFinalTranslationX() - initialTranslation;
+            float availableSpace = getLayoutEnd() - getActualPaddingStart();
+            float delta = (availableSpace - contentWidth) / 2;
+
             if (firstOverflowIndex != -1) {
                 // If we have an overflow, only count those half for centering because the dots
                 // don't have a lot of visual weight.

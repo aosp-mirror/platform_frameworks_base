@@ -65,7 +65,7 @@ message NotificationRecordProto {
     optional bool can_vibrate = 7;
     optional bool can_show_light = 8;
     optional string group_key = 9 [ (.android.privacy).dest = DEST_EXPLICIT ];
-    optional int32 importance = 10;
+    optional sint32 importance = 10;
 }
 
 message ListenersDisablingEffectsProto {
@@ -122,11 +122,11 @@ message RankingHelperProto {
         // Default value is UNKNOWN_UID = USER_NULL = -10000.
         optional int32 uid = 2;
         // Default is IMPORTANCE_UNSPECIFIED (-1000).
-        optional int32 importance = 3;
+        optional sint32 importance = 3;
         // Default is PRIORITY_DEFAULT (0).
         optional int32 priority = 4;
         // Default is VISIBILITY_NO_OVERRIDE (-1000).
-        optional int32 visibility = 5;
+        optional sint32 visibility = 5;
         // Default is true.
         optional bool show_badge = 6;
         repeated android.app.NotificationChannelProto channels = 7;

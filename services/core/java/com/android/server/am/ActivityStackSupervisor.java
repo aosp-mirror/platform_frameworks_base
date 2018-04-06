@@ -1264,10 +1264,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     ResolveInfo resolveIntent(Intent intent, String resolvedType, int userId) {
-        return resolveIntent(intent, resolvedType, userId, 0);
+        return resolveIntent(intent, resolvedType, userId, 0, Binder.getCallingUid());
     }
 
-    ResolveInfo resolveIntent(Intent intent, String resolvedType, int userId, int flags) {
+    ResolveInfo resolveIntent(Intent intent, String resolvedType, int userId, int flags,
+            int filterCallingUid) {
         synchronized (mService) {
             try {
                 Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "resolveIntent");
@@ -1278,7 +1279,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     modifiedFlags |= PackageManager.MATCH_INSTANT;
                 }
                 return mService.getPackageManagerInternalLocked().resolveIntent(
-                        intent, resolvedType, modifiedFlags, userId, true);
+                        intent, resolvedType, modifiedFlags, userId, true, filterCallingUid);
 
             } finally {
                 Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
@@ -1287,8 +1288,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     ActivityInfo resolveActivity(Intent intent, String resolvedType, int startFlags,
-            ProfilerInfo profilerInfo, int userId) {
-        final ResolveInfo rInfo = resolveIntent(intent, resolvedType, userId);
+            ProfilerInfo profilerInfo, int userId, int filterCallingUid) {
+        final ResolveInfo rInfo = resolveIntent(intent, resolvedType, userId, 0, filterCallingUid);
         return resolveActivity(intent, rInfo, startFlags, profilerInfo);
     }
 
@@ -1579,7 +1580,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     // to run in multiple processes, because this is actually
                     // part of the framework so doesn't make sense to track as a
                     // separate apk in the process.
-                    app.addPackage(r.info.packageName, r.info.applicationInfo.versionCode,
+                    app.addPackage(r.info.packageName, r.info.applicationInfo.longVersionCode,
                             mService.mProcessStats);
                 }
                 realStartActivityLocked(r, app, andResume, checkConfig);
@@ -2126,15 +2127,22 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
-    TaskRecord finishTopRunningActivityLocked(ProcessRecord app, String reason) {
+    /**
+     * Finish the topmost activities in all stacks that belong to the crashed app.
+     * @param app The app that crashed.
+     * @param reason Reason to perform this action.
+     * @return The task that was finished in this stack, {@code null} if haven't found any.
+     */
+    TaskRecord finishTopCrashedActivitiesLocked(ProcessRecord app, String reason) {
         TaskRecord finishedTask = null;
         ActivityStack focusedStack = getFocusedStack();
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ActivityDisplay display = mActivityDisplays.valueAt(displayNdx);
-            final int numStacks = display.getChildCount();
-            for (int stackNdx = 0; stackNdx < numStacks; ++stackNdx) {
+            // It is possible that request to finish activity might also remove its task and stack,
+            // so we need to be careful with indexes in the loop and check child count every time.
+            for (int stackNdx = 0; stackNdx < display.getChildCount(); ++stackNdx) {
                 final ActivityStack stack = display.getChildAt(stackNdx);
-                TaskRecord t = stack.finishTopRunningActivityLocked(app, reason);
+                final TaskRecord t = stack.finishTopCrashedActivityLocked(app, reason);
                 if (stack == focusedStack || finishedTask == null) {
                     finishedTask = t;
                 }

@@ -44,4 +44,9 @@ public class CustomizeTileView extends QSTileView {
     public TextView getAppLabel() {
         return mSecondLine;
     }
+
+    @Override
+    protected boolean animationsEnabled() {
+        return false;
+    }
 }

@@ -41,6 +41,7 @@ import com.android.systemui.qs.AlphaControlledSignalTileView;
 import com.android.systemui.qs.QSDetailItems;
 import com.android.systemui.qs.QSDetailItems.Item;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.tileimpl.QSIconViewImpl;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.AccessPointController;
@@ -60,6 +61,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
 
     protected final WifiSignalCallback mSignalCallback = new WifiSignalCallback();
     private final ActivityStarter mActivityStarter;
+    private boolean mExpectDisabled;
 
     public WifiTile(QSHost host) {
         super(host);
@@ -120,6 +122,15 @@ public class WifiTile extends QSTileImpl<SignalState> {
         // Immediately enter transient state when turning on wifi.
         refreshState(wifiEnabled ? null : ARG_SHOW_TRANSIENT_ENABLING);
         mController.setWifiEnabled(!wifiEnabled);
+        mExpectDisabled = wifiEnabled;
+        if (mExpectDisabled) {
+            mHandler.postDelayed(() -> {
+                if (mExpectDisabled) {
+                    mExpectDisabled = false;
+                    refreshState();
+                }
+            }, QSIconViewImpl.QS_ANIM_LENGTH);
+        }
     }
 
     @Override
@@ -143,11 +154,13 @@ public class WifiTile extends QSTileImpl<SignalState> {
     @Override
     protected void handleUpdateState(SignalState state, Object arg) {
         if (DEBUG) Log.d(TAG, "handleUpdateState arg=" + arg);
-        final CallbackInfo cb;
-        if (arg != null && arg instanceof CallbackInfo) {
-            cb = (CallbackInfo) arg;
-        } else {
-            cb = mSignalCallback.mInfo;
+        final CallbackInfo cb = mSignalCallback.mInfo;
+        if (mExpectDisabled) {
+            if (cb.enabled) {
+                return; // Ignore updates until disabled event occurs.
+            } else {
+                mExpectDisabled = false;
+            }
         }
         boolean transientEnabling = arg == ARG_SHOW_TRANSIENT_ENABLING;
         boolean wifiConnected = cb.enabled && (cb.wifiSignalIconId > 0) && (cb.ssid != null);
@@ -288,7 +301,7 @@ public class WifiTile extends QSTileImpl<SignalState> {
             if (isShowingDetail()) {
                 mDetailAdapter.updateItems();
             }
-            refreshState(mInfo);
+            refreshState();
         }
     }
 

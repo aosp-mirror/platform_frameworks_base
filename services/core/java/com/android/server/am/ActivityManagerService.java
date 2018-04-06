@@ -27,6 +27,7 @@ import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REMOVE_TASKS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
+import static android.Manifest.permission.STOP_APP_SWITCHES;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
@@ -204,6 +205,8 @@ import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
+import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_HOME_TO_ORIGINAL_POSITION;
+import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_HOME_IN_PLACE;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
@@ -257,7 +260,6 @@ import android.app.WaitResult;
 import android.app.WindowConfiguration.ActivityType;
 import android.app.WindowConfiguration.WindowingMode;
 import android.app.admin.DevicePolicyCache;
-import android.app.admin.DevicePolicyManager;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
 import android.app.backup.IBackupManager;
@@ -1918,6 +1920,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int FIRST_COMPAT_MODE_MSG = 300;
     static final int FIRST_SUPERVISOR_STACK_MSG = 100;
 
+    static final String SERVICE_RECORD_KEY = "servicerecord";
+
     static ServiceThread sKillThread = null;
     static KillHandler sKillHandler = null;
 
@@ -2166,7 +2170,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mServices.serviceForegroundTimeout((ServiceRecord)msg.obj);
             } break;
             case SERVICE_FOREGROUND_CRASH_MSG: {
-                mServices.serviceForegroundCrash((ProcessRecord)msg.obj);
+                mServices.serviceForegroundCrash(
+                    (ProcessRecord) msg.obj, msg.getData().getCharSequence(SERVICE_RECORD_KEY));
             } break;
             case DISPATCH_PENDING_INTENT_CANCEL_MSG: {
                 RemoteCallbackList<IResultReceiver> callbacks
@@ -5238,12 +5243,14 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void cancelRecentsAnimation() {
+    public void cancelRecentsAnimation(boolean restoreHomeStackPosition) {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "cancelRecentsAnimation()");
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                mWindowManager.cancelRecentsAnimation();
+                mWindowManager.cancelRecentsAnimation(restoreHomeStackPosition
+                        ? REORDER_MOVE_HOME_TO_ORIGINAL_POSITION
+                        : REORDER_KEEP_HOME_IN_PLACE);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -13209,12 +13216,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void stopAppSwitches() {
-        if (checkCallingPermission(android.Manifest.permission.STOP_APP_SWITCHES)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("viewquires permission "
-                    + android.Manifest.permission.STOP_APP_SWITCHES);
-        }
-
+        enforceCallerIsRecentsOrHasPermission(STOP_APP_SWITCHES, "stopAppSwitches");
         synchronized(this) {
             mAppSwitchesAllowedTime = SystemClock.uptimeMillis()
                     + APP_SWITCH_DELAY_TIME;
@@ -13224,12 +13226,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     public void resumeAppSwitches() {
-        if (checkCallingPermission(android.Manifest.permission.STOP_APP_SWITCHES)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires permission "
-                    + android.Manifest.permission.STOP_APP_SWITCHES);
-        }
-
+        enforceCallerIsRecentsOrHasPermission(STOP_APP_SWITCHES, "resumeAppSwitches");
         synchronized(this) {
             // Note that we don't execute any pending app switches... we will
             // let those wait until either the timeout, or the next start
@@ -13256,9 +13253,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             return true;
         }
 
-        int perm = checkComponentPermission(
-                android.Manifest.permission.STOP_APP_SWITCHES, sourcePid,
-                sourceUid, -1, true);
+        if (mRecentTasks.isCallerRecents(sourceUid)) {
+            return true;
+        }
+
+        int perm = checkComponentPermission(STOP_APP_SWITCHES, sourcePid, sourceUid, -1, true);
         if (perm == PackageManager.PERMISSION_GRANTED) {
             return true;
         }
@@ -13269,9 +13268,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // If the actual IPC caller is different from the logical source, then
         // also see if they are allowed to control app switches.
         if (callingUid != -1 && callingUid != sourceUid) {
-            perm = checkComponentPermission(
-                    android.Manifest.permission.STOP_APP_SWITCHES, callingPid,
-                    callingUid, -1, true);
+            perm = checkComponentPermission(STOP_APP_SWITCHES, callingPid, callingUid, -1, true);
             if (perm == PackageManager.PERMISSION_GRANTED) {
                 return true;
             }

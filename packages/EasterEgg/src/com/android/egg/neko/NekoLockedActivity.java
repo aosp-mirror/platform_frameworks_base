@@ -14,7 +14,7 @@
 
 package com.android.egg.neko;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;

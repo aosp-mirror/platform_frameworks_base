@@ -34,7 +34,8 @@ namespace statsd {
 
 class AlarmTracker : public virtual RefBase {
 public:
-    AlarmTracker(uint64_t startMillis,
+    AlarmTracker(const int64_t startMillis,
+                 const int64_t currentMillis,
                  const Alarm& alarm, const ConfigKey& configKey,
                  const sp<AlarmMonitor>& subscriberAlarmMonitor);
 
@@ -44,22 +45,22 @@ public:
 
     void addSubscription(const Subscription& subscription);
 
-    void informAlarmsFired(const uint64_t& timestampNs,
+    void informAlarmsFired(const int64_t& timestampNs,
             unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& firedAlarms);
 
 protected:
     // For test only. Returns the alarm timestamp in seconds. Otherwise returns 0.
-    inline uint32_t getAlarmTimestampSec() const {
+    inline int32_t getAlarmTimestampSec() const {
         return mInternalAlarm == nullptr ? 0 : mInternalAlarm->timestampSec;
     }
 
-    uint64_t findNextAlarmSec(uint64_t currentTimeMillis);
+    int64_t findNextAlarmSec(int64_t currentTimeMillis);
 
     // statsd_config.proto Alarm message that defines this tracker.
     const Alarm mAlarmConfig;
 
     // A reference to the Alarm's config key.
-    const ConfigKey& mConfigKey;
+    const ConfigKey mConfigKey;
 
     // The subscriptions that depend on this alarm.
     std::vector<Subscription> mSubscriptions;
@@ -68,7 +69,7 @@ protected:
     sp<AlarmMonitor> mAlarmMonitor;
 
     // The current expected alarm time in seconds.
-    uint64_t mAlarmSec;
+    int64_t mAlarmSec;
 
     // The current alarm.
     sp<const InternalAlarm> mInternalAlarm;

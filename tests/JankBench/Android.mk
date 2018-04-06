@@ -19,12 +19,12 @@ LOCAL_RESOURCE_DIR := \
 
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-    $(ANDROID_SUPPORT_DESIGN_TARGETS) \
-    android-support-v4 \
-    android-support-v7-appcompat \
-    android-support-v7-cardview \
-    android-support-v7-recyclerview \
-    android-support-v17-leanback \
+    androidx.design_design \
+    androidx.legacy_legacy-support-v4 \
+    androidx.appcompat_appcompat \
+    androidx.cardview_cardview \
+    androidx.recyclerview_recyclerview \
+    androidx.leanback_leanback \
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
     apache-commons-math \

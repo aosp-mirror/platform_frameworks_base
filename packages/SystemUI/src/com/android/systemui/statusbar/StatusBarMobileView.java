@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar;
 
 import static com.android.systemui.statusbar.policy.DarkIconDispatcher.getTint;
+import static com.android.systemui.statusbar.policy.DarkIconDispatcher.isInArea;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -141,12 +142,14 @@ public class StatusBarMobileView extends AlphaOptimizedLinearLayout implements D
         if (mState.strengthId != state.strengthId) {
             mMobileDrawable.setLevel(state.strengthId);
         }
-        if (mState.typeId != state.typeId && state.typeId != 0) {
-            mMobileType.setContentDescription(state.typeContentDescription);
-            mMobileType.setImageResource(state.typeId);
-            mMobileType.setVisibility(View.VISIBLE);
-        } else {
-            mMobileType.setVisibility(View.GONE);
+        if (mState.typeId != state.typeId) {
+            if (state.typeId != 0) {
+                mMobileType.setContentDescription(state.typeContentDescription);
+                mMobileType.setImageResource(state.typeId);
+                mMobileType.setVisibility(View.VISIBLE);
+            } else {
+                mMobileType.setVisibility(View.GONE);
+            }
         }
 
         mMobileRoaming.setVisibility(state.roaming ? View.VISIBLE : View.GONE);
@@ -161,6 +164,9 @@ public class StatusBarMobileView extends AlphaOptimizedLinearLayout implements D
 
     @Override
     public void onDarkChanged(Rect area, float darkIntensity, int tint) {
+        if (!isInArea(area, this)) {
+            return;
+        }
         mMobileDrawable.setDarkIntensity(darkIntensity);
         ColorStateList color = ColorStateList.valueOf(getTint(area, this, tint));
         mIn.setImageTintList(color);

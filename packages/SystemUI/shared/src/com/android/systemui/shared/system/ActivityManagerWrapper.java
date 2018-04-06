@@ -44,8 +44,10 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
@@ -53,6 +55,8 @@ import android.view.IRecentsAnimationController;
 import android.view.IRecentsAnimationRunner;
 
 import android.view.RemoteAnimationTarget;
+
+import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.recents.model.Task.TaskKey;
 import com.android.systemui.shared.recents.model.ThumbnailData;
@@ -66,6 +70,9 @@ public class ActivityManagerWrapper {
     private static final String TAG = "ActivityManagerWrapper";
 
     private static final ActivityManagerWrapper sInstance = new ActivityManagerWrapper();
+
+    // Should match the values in PhoneWindowManager
+    public static final String CLOSE_SYSTEM_WINDOWS_REASON_RECENTS = "recentapps";
 
     private final PackageManager mPackageManager;
     private final BackgroundExecutor mBackgroundExecutor;
@@ -258,9 +265,9 @@ public class ActivityManagerWrapper {
     /**
      * Cancels the remote recents animation started from {@link #startRecentsActivity}.
      */
-    public void cancelRecentsAnimation() {
+    public void cancelRecentsAnimation(boolean restoreHomeStackPosition) {
         try {
-            ActivityManager.getService().cancelRecentsAnimation();
+            ActivityManager.getService().cancelRecentsAnimation(restoreHomeStackPosition);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to cancel recents animation", e);
         }
@@ -428,6 +435,23 @@ public class ActivityManagerWrapper {
     public boolean isLockToAppActive() {
         try {
             return ActivityManager.getService().getLockTaskModeState() != LOCK_TASK_MODE_NONE;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Shows a voice session identified by {@code token}
+     * @return true if the session was shown, false otherwise
+     */
+    public boolean showVoiceSession(IBinder token, Bundle args, int flags) {
+        IVoiceInteractionManagerService service = IVoiceInteractionManagerService.Stub.asInterface(
+                ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
+        if (service == null) {
+            return false;
+        }
+        try {
+            return service.showSessionFromSession(token, args, flags);
         } catch (RemoteException e) {
             return false;
         }

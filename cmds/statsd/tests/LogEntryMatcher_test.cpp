@@ -146,11 +146,10 @@ TEST(AtomMatcherTest, TestAttributionMatcher) {
     attributionMatcher->mutable_matches_tuple()->mutable_field_value_matcher(0)->set_eq_string("pkg0");
     EXPECT_FALSE(matchesSimple(uidMap, *simpleMatcher, event));
 
-    uidMap.updateMap({1111, 1111, 2222, 3333, 3333} /* uid list */,
-        {1, 1, 2, 1, 2} /* version list */,
-        {android::String16("pkg0"), android::String16("pkg1"),
-         android::String16("pkg1"), android::String16("Pkg2"),
-         android::String16("PkG3")} /* package name list */);
+    uidMap.updateMap(
+            1, {1111, 1111, 2222, 3333, 3333} /* uid list */, {1, 1, 2, 1, 2} /* version list */,
+            {android::String16("pkg0"), android::String16("pkg1"), android::String16("pkg1"),
+             android::String16("Pkg2"), android::String16("PkG3")} /* package name list */);
 
     EXPECT_TRUE(matchesSimple(uidMap, *simpleMatcher, event));
     attributionMatcher->mutable_matches_tuple()->mutable_field_value_matcher(0)
@@ -297,7 +296,7 @@ TEST(AtomMatcherTest, TestAttributionMatcher) {
 TEST(AtomMatcherTest, TestNeqAnyStringMatcher) {
     UidMap uidMap;
     uidMap.updateMap(
-            {1111, 1111, 2222, 3333, 3333} /* uid list */, {1, 1, 2, 1, 2} /* version list */,
+            1, {1111, 1111, 2222, 3333, 3333} /* uid list */, {1, 1, 2, 1, 2} /* version list */,
             {android::String16("pkg0"), android::String16("pkg1"), android::String16("pkg1"),
              android::String16("Pkg2"), android::String16("PkG3")} /* package name list */);
 
@@ -372,7 +371,7 @@ TEST(AtomMatcherTest, TestNeqAnyStringMatcher) {
 TEST(AtomMatcherTest, TestEqAnyStringMatcher) {
     UidMap uidMap;
     uidMap.updateMap(
-            {1111, 1111, 2222, 3333, 3333} /* uid list */, {1, 1, 2, 1, 2} /* version list */,
+            1, {1111, 1111, 2222, 3333, 3333} /* uid list */, {1, 1, 2, 1, 2} /* version list */,
             {android::String16("pkg0"), android::String16("pkg1"), android::String16("pkg1"),
              android::String16("Pkg2"), android::String16("PkG3")} /* package name list */);
 

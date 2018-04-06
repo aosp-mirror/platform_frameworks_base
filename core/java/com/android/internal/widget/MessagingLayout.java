@@ -81,7 +81,7 @@ public class MessagingLayout extends FrameLayout {
     private ArrayList<MessagingGroup> mAddedGroups = new ArrayList<>();
     private Notification.Person mUser;
     private CharSequence mNameReplacement;
-    private boolean mIsCollapsed;
+    private boolean mDisplayImagesAtEnd;
 
     public MessagingLayout(@NonNull Context context) {
         super(context);
@@ -128,8 +128,8 @@ public class MessagingLayout extends FrameLayout {
     }
 
     @RemotableViewMethod
-    public void setIsCollapsed(boolean isCollapsed) {
-        mIsCollapsed = isCollapsed;
+    public void setDisplayImagesAtEnd(boolean atEnd) {
+        mDisplayImagesAtEnd = atEnd;
     }
 
     @RemotableViewMethod
@@ -337,7 +337,7 @@ public class MessagingLayout extends FrameLayout {
                 newGroup = MessagingGroup.createGroup(mMessagingLinearLayout);
                 mAddedGroups.add(newGroup);
             }
-            newGroup.setDisplayAvatarsAtEnd(mIsCollapsed);
+            newGroup.setDisplayImagesAtEnd(mDisplayImagesAtEnd);
             newGroup.setLayoutColor(mLayoutColor);
             Notification.Person sender = senders.get(groupIndex);
             CharSequence nameOverride = null;

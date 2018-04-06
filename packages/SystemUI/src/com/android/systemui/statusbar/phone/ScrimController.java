@@ -68,8 +68,14 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     private static final String TAG = "ScrimController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    /**
+     * General scrim animation duration.
+     */
     public static final long ANIMATION_DURATION = 220;
-
+    /**
+     * Longer duration, currently only used when going to AOD.
+     */
+    public static final long ANIMATION_DURATION_LONG = 1000;
     /**
      * When both scrims have 0 alpha.
      */
@@ -85,7 +91,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     /**
      * Default alpha value for most scrims.
      */
-    public static final float GRADIENT_SCRIM_ALPHA = 0.45f;
+    public static final float GRADIENT_SCRIM_ALPHA = 0.70f;
     /**
      * A scrim varies its opacity based on a busyness factor, for example
      * how many notifications are currently visible.
@@ -389,7 +395,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             // Darken scrim as you pull down the shade when unlocked
             float behindFraction = getInterpolatedFraction();
             behindFraction = (float) Math.pow(behindFraction, 0.8f);
-            mCurrentBehindAlpha = behindFraction * mScrimBehindAlphaKeyguard;
+            mCurrentBehindAlpha = behindFraction * GRADIENT_SCRIM_ALPHA_BUSY;
             mCurrentInFrontAlpha = 0;
         } else if (mState == ScrimState.KEYGUARD) {
             // Either darken of make the scrim transparent when you
@@ -528,8 +534,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         if (alpha == 0f) {
             scrim.setClickable(false);
         } else {
-            // Eat touch events (unless dozing).
-            scrim.setClickable(!mState.isLowPowerState());
+            // Eat touch events (unless dozing or pulsing).
+            scrim.setClickable(mState != ScrimState.AOD && mState != ScrimState.PULSING);
         }
         updateScrim(scrim, alpha);
     }
@@ -807,7 +813,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     @VisibleForTesting
     protected WakeLock createWakeLock() {
          return new DelayedWakeLock(getHandler(),
-                WakeLock.createPartial(mContext, "Doze"));
+                WakeLock.createPartial(mContext, "Scrims"));
     }
 
     @Override

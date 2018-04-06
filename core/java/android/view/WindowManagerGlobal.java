@@ -610,6 +610,10 @@ public final class WindowManagerGlobal {
                     ViewRootImpl root = mRoots.get(i);
                     // Client might remove the view by "stopped" event.
                     root.setWindowStopped(stopped);
+                    // Recursively forward stopped state to View's attached
+                    // to this Window rather than the root application token,
+                    // e.g. PopupWindow's.
+                    setStoppedState(root.mAttachInfo.mWindowToken, stopped);
                 }
             }
         }

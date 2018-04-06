@@ -42,7 +42,7 @@ public:
                            const int conditionIndex, const size_t startIndex,
                            const size_t stopIndex, const size_t stopAllIndex, const bool nesting,
                            const sp<ConditionWizard>& wizard,
-                           const FieldMatcher& internalDimensions, const uint64_t startTimeNs);
+                           const FieldMatcher& internalDimensions, const int64_t startTimeNs);
 
     virtual ~DurationMetricProducer();
 
@@ -61,29 +61,30 @@ private:
     void handleStartEvent(const MetricDimensionKey& eventKey, const ConditionKey& conditionKeys,
                           bool condition, const LogEvent& event);
 
-    void onDumpReportLocked(const uint64_t dumpTimeNs,
+    void onDumpReportLocked(const int64_t dumpTimeNs,
+                            const bool include_current_partial_bucket,
                             android::util::ProtoOutputStream* protoOutput) override;
 
     // Internal interface to handle condition change.
-    void onConditionChangedLocked(const bool conditionMet, const uint64_t eventTime) override;
+    void onConditionChangedLocked(const bool conditionMet, const int64_t eventTime) override;
 
     // Internal interface to handle sliced condition change.
-    void onSlicedConditionMayChangeLocked(bool overallCondition, const uint64_t eventTime) override;
+    void onSlicedConditionMayChangeLocked(bool overallCondition, const int64_t eventTime) override;
 
-    void onSlicedConditionMayChangeLocked_opt1(bool overallCondition, const uint64_t eventTime);
-    void onSlicedConditionMayChangeLocked_opt2(bool overallCondition, const uint64_t eventTime);
+    void onSlicedConditionMayChangeLocked_opt1(bool overallCondition, const int64_t eventTime);
+    void onSlicedConditionMayChangeLocked_opt2(bool overallCondition, const int64_t eventTime);
 
     // Internal function to calculate the current used bytes.
     size_t byteSizeLocked() const override;
 
     void dumpStatesLocked(FILE* out, bool verbose) const override;
 
-    void dropDataLocked(const uint64_t dropTimeNs) override;
+    void dropDataLocked(const int64_t dropTimeNs) override;
 
     // Util function to flush the old packet.
-    void flushIfNeededLocked(const uint64_t& eventTime);
+    void flushIfNeededLocked(const int64_t& eventTime);
 
-    void flushCurrentBucketLocked(const uint64_t& eventTimeNs) override;
+    void flushCurrentBucketLocked(const int64_t& eventTimeNs) override;
 
     const DurationMetric_AggregationType mAggregationType;
 

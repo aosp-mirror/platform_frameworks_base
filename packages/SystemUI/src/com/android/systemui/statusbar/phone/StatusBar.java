@@ -213,6 +213,7 @@ import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.UnlockMethodCache.OnUnlockMethodChangedListener;
+import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
@@ -1300,6 +1301,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mKeyguardViewMediatorCallback = keyguardViewMediator.getViewMediatorCallback();
         mLightBarController.setFingerprintUnlockController(mFingerprintUnlockController);
+        Dependency.get(KeyguardDismissUtil.class).setDismissHandler(
+                this::dismissKeyguardThenExecute);
         Trace.endSection();
     }
 
@@ -1425,11 +1428,15 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public void addQsTile(ComponentName tile) {
-        mQSPanel.getHost().addTile(tile);
+        if (mQSPanel.getHost() != null) {
+            mQSPanel.getHost().addTile(tile);
+        }
     }
 
     public void remQsTile(ComponentName tile) {
-        mQSPanel.getHost().removeTile(tile);
+        if (mQSPanel.getHost() != null) {
+            mQSPanel.getHost().removeTile(tile);
+        }
     }
 
     public void clickTile(ComponentName tile) {
@@ -2043,11 +2050,19 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     /**
+     * Decides if the status bar (clock + notifications + signal cluster) should be visible
+     * or not when showing the bouncer.
+     *
+     * We want to hide it when:
+     * • User swipes up on the keyguard
+     * • Locked activity that doesn't show a status bar requests the bouncer
+     *
      * @param animate should the change of the icons be animated.
      */
     private void updateHideIconsForBouncer(boolean animate) {
-        boolean shouldHideIconsForBouncer = !mPanelExpanded && mTopHidesStatusBar && mIsOccluded
-                && (mBouncerShowing || mStatusBarWindowHidden);
+        boolean hideBecauseApp = mTopHidesStatusBar && mIsOccluded;
+        boolean hideBecauseKeyguard = !mPanelExpanded && !mIsOccluded && mBouncerShowing;
+        boolean shouldHideIconsForBouncer = hideBecauseApp || hideBecauseKeyguard;
         if (mHideIconsForBouncer != shouldHideIconsForBouncer) {
             mHideIconsForBouncer = shouldHideIconsForBouncer;
             if (!shouldHideIconsForBouncer && mBouncerWasShowingWhenHidden) {

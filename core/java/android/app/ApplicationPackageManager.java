@@ -2155,10 +2155,10 @@ public class ApplicationPackageManager extends PackageManager {
     public String[] setPackagesSuspended(String[] packageNames, boolean suspended,
             PersistableBundle appExtras, PersistableBundle launcherExtras,
             String dialogMessage) {
-        // TODO (b/75332201): Pass in the dialogMessage and use it in the interceptor dialog
         try {
             return mPM.setPackagesSuspendedAsUser(packageNames, suspended, appExtras,
-                    launcherExtras, mContext.getOpPackageName(), mContext.getUserId());
+                    launcherExtras, dialogMessage, mContext.getOpPackageName(),
+                    mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

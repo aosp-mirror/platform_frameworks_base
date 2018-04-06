@@ -439,8 +439,17 @@ public class TransportClient {
         synchronized (mStateLock) {
             log(Priority.ERROR, "Service disconnected: client UNUSABLE");
             setStateLocked(State.UNUSABLE, null);
-            // After unbindService() no calls back to mConnection
-            mContext.unbindService(mConnection);
+            try {
+                // After unbindService() no calls back to mConnection
+                mContext.unbindService(mConnection);
+            } catch (IllegalArgumentException e) {
+                // TODO: Investigate why this is happening
+                // We're UNUSABLE, so any calls to mConnection will be no-op, so it's safe to
+                // swallow this one
+                log(
+                        Priority.WARN,
+                        "Exception trying to unbind onServiceDisconnected(): " + e.getMessage());
+            }
         }
     }
 

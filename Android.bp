@@ -145,7 +145,7 @@ java_library {
         ":libcamera_client_framework_aidl",
         "core/java/android/hardware/IConsumerIrService.aidl",
         "core/java/android/hardware/ISerialManager.aidl",
-        "core/java/android/hardware/biometrics/IBiometricDialogReceiver.aidl",
+        "core/java/android/hardware/biometrics/IBiometricPromptReceiver.aidl",
         "core/java/android/hardware/display/IDisplayManager.aidl",
         "core/java/android/hardware/display/IDisplayManagerCallback.aidl",
         "core/java/android/hardware/display/IVirtualDisplayCallback.aidl",

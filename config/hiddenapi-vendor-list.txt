@@ -20,7 +20,7 @@ Landroid/app/AppOpsManager$PackageOps;->getOps()Ljava/util/List;
 Landroid/app/AppOpsManager$PackageOps;->getPackageName()Ljava/lang/String;
 Landroid/app/AppOpsManager$PackageOps;->getUid()I
 Landroid/app/IActivityController$Stub;-><init>()V
-Landroid/app/IActivityManager;->cancelRecentsAnimation()V
+Landroid/app/IActivityManager;->cancelRecentsAnimation(Z)V
 Landroid/app/IActivityManager;->cancelTaskWindowTransition(I)V
 Landroid/app/IActivityManager;->closeSystemDialogs(Ljava/lang/String;)V
 Landroid/app/IActivityManager;->getCurrentUser()Landroid/content/pm/UserInfo;
@@ -514,7 +514,6 @@ Landroid/telephony/TelephonyManager;->getServiceStateForSubscriber(I)Landroid/te
 Landroid/telephony/TelephonyManager;->getVoiceMessageCount()I
 Landroid/telephony/TelephonyManager;->getVoiceNetworkType(I)I
 Landroid/telephony/TelephonyManager;->isImsRegistered()Z
-Landroid/telephony/TelephonyManager;->isWifiCallingAvailable()Z
 Landroid/telephony/TelephonyManager$MultiSimVariants;->DSDA:Landroid/telephony/TelephonyManager$MultiSimVariants;
 Landroid/telephony/TelephonyManager$MultiSimVariants;->DSDS:Landroid/telephony/TelephonyManager$MultiSimVariants;
 Landroid/telephony/TelephonyManager;->nvResetConfig(I)Z

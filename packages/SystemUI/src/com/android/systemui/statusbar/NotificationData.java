@@ -383,8 +383,6 @@ public class NotificationData {
         }
         mGroupManager.onEntryAdded(entry);
 
-        updateAppOps(entry);
-
         updateRankingAndSort(mRankingMap);
     }
 
@@ -403,25 +401,14 @@ public class NotificationData {
         updateRankingAndSort(ranking);
     }
 
-    private void updateAppOps(Entry entry) {
-        final int uid = entry.notification.getUid();
-        final String pkg = entry.notification.getPackageName();
-        ArraySet<Integer> activeOps = mFsc.getAppOps(entry.notification.getUserId(), pkg);
-        if (activeOps != null) {
-            int N = activeOps.size();
-            for (int i = 0; i < N; i++) {
-                updateAppOp(activeOps.valueAt(i), uid, pkg, true);
-            }
-        }
-    }
-
-    public void updateAppOp(int appOp, int uid, String pkg, boolean showIcon) {
+    public void updateAppOp(int appOp, int uid, String pkg, String key, boolean showIcon) {
         synchronized (mEntries) {
             final int N = mEntries.size();
             for (int i = 0; i < N; i++) {
                 Entry entry = mEntries.valueAt(i);
                 if (uid == entry.notification.getUid()
-                    && pkg.equals(entry.notification.getPackageName())) {
+                        && pkg.equals(entry.notification.getPackageName())
+                        && key.equals(entry.key)) {
                     if (showIcon) {
                         entry.mActiveAppOps.add(appOp);
                     } else {

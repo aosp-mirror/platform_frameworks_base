@@ -2128,7 +2128,13 @@ public class MediaPlayer extends PlayerBase
             mTimeProvider.close();
             mTimeProvider = null;
         }
-        mOnSubtitleDataListener = null;
+        synchronized(this) {
+            mSubtitleDataListenerDisabled = false;
+            mExtSubtitleDataListener = null;
+            mExtSubtitleDataHandler = null;
+            mOnMediaTimeDiscontinuityListener = null;
+            mOnMediaTimeDiscontinuityHandler = null;
+        }
 
         // Modular DRM clean up
         mOnDrmConfigHelper = null;
@@ -2699,7 +2705,7 @@ public class MediaPlayer extends PlayerBase
     private int mSelectedSubtitleTrackIndex = -1;
     private Vector<InputStream> mOpenSubtitleSources;
 
-    private OnSubtitleDataListener mSubtitleDataListener = new OnSubtitleDataListener() {
+    private final OnSubtitleDataListener mIntSubtitleDataListener = new OnSubtitleDataListener() {
         @Override
         public void onSubtitleData(MediaPlayer mp, SubtitleData data) {
             int index = data.getTrackIndex();
@@ -2725,7 +2731,9 @@ public class MediaPlayer extends PlayerBase
             }
             mSelectedSubtitleTrackIndex = -1;
         }
-        setOnSubtitleDataListener(null);
+        synchronized (this) {
+            mSubtitleDataListenerDisabled = true;
+        }
         if (track == null) {
             return;
         }
@@ -2745,7 +2753,9 @@ public class MediaPlayer extends PlayerBase
                 selectOrDeselectInbandTrack(mSelectedSubtitleTrackIndex, true);
             } catch (IllegalStateException e) {
             }
-            setOnSubtitleDataListener(mSubtitleDataListener);
+            synchronized (this) {
+                mSubtitleDataListenerDisabled = false;
+            }
         }
         // no need to select out-of-band tracks
     }
@@ -3304,6 +3314,7 @@ public class MediaPlayer extends PlayerBase
     private static final int MEDIA_SUBTITLE_DATA = 201;
     private static final int MEDIA_META_DATA = 202;
     private static final int MEDIA_DRM_INFO = 210;
+    private static final int MEDIA_TIME_DISCONTINUITY = 211;
     private static final int MEDIA_AUDIO_ROUTING_CHANGED = 10000;
 
     private TimeProvider mTimeProvider;
@@ -3514,15 +3525,34 @@ public class MediaPlayer extends PlayerBase
                 return;
 
             case MEDIA_SUBTITLE_DATA:
-                OnSubtitleDataListener onSubtitleDataListener = mOnSubtitleDataListener;
-                if (onSubtitleDataListener == null) {
-                    return;
+                final OnSubtitleDataListener extSubtitleListener;
+                final Handler extSubtitleHandler;
+                synchronized(this) {
+                    if (mSubtitleDataListenerDisabled) {
+                        return;
+                    }
+                    extSubtitleListener = mExtSubtitleDataListener;
+                    extSubtitleHandler = mExtSubtitleDataHandler;
                 }
                 if (msg.obj instanceof Parcel) {
                     Parcel parcel = (Parcel) msg.obj;
-                    SubtitleData data = new SubtitleData(parcel);
+                    final SubtitleData data = new SubtitleData(parcel);
                     parcel.recycle();
-                    onSubtitleDataListener.onSubtitleData(mMediaPlayer, data);
+
+                    mIntSubtitleDataListener.onSubtitleData(mMediaPlayer, data);
+
+                    if (extSubtitleListener != null) {
+                        if (extSubtitleHandler == null) {
+                            extSubtitleListener.onSubtitleData(mMediaPlayer, data);
+                        } else {
+                            extSubtitleHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    extSubtitleListener.onSubtitleData(mMediaPlayer, data);
+                                }
+                            });
+                        }
+                    }
                 }
                 return;
 
@@ -3549,6 +3579,43 @@ public class MediaPlayer extends PlayerBase
                     for (NativeRoutingEventHandlerDelegate delegate
                             : mRoutingChangeListeners.values()) {
                         delegate.notifyClient();
+                    }
+                }
+                return;
+
+            case MEDIA_TIME_DISCONTINUITY:
+                final OnMediaTimeDiscontinuityListener mediaTimeListener;
+                final Handler mediaTimeHandler;
+                synchronized(this) {
+                    mediaTimeListener = mOnMediaTimeDiscontinuityListener;
+                    mediaTimeHandler = mOnMediaTimeDiscontinuityHandler;
+                }
+                if (mediaTimeListener == null) {
+                    return;
+                }
+                if (msg.obj instanceof Parcel) {
+                    Parcel parcel = (Parcel) msg.obj;
+                    parcel.setDataPosition(0);
+                    long anchorMediaUs = parcel.readLong();
+                    long anchorRealUs = parcel.readLong();
+                    float playbackRate = parcel.readFloat();
+                    parcel.recycle();
+                    final MediaTimestamp timestamp;
+                    if (anchorMediaUs != -1 && anchorRealUs != -1) {
+                        timestamp = new MediaTimestamp(
+                                anchorMediaUs /*Us*/, anchorRealUs * 1000 /*Ns*/, playbackRate);
+                    } else {
+                        timestamp = MediaTimestamp.TIMESTAMP_UNKNOWN;
+                    }
+                    if (mediaTimeHandler == null) {
+                        mediaTimeListener.onMediaTimeDiscontinuity(mMediaPlayer, timestamp);
+                    } else {
+                        mediaTimeHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mediaTimeListener.onMediaTimeDiscontinuity(mMediaPlayer, timestamp);
+                            }
+                        });
                     }
                 }
                 return;
@@ -3877,13 +3944,15 @@ public class MediaPlayer extends PlayerBase
     private void setOnSubtitleDataListenerInt(
             @Nullable OnSubtitleDataListener listener, @Nullable Handler handler) {
         synchronized (this) {
-            mOnSubtitleDataListener = listener;
-            mOnSubtitleDataHandler = handler;
+            mExtSubtitleDataListener = listener;
+            mExtSubtitleDataHandler = handler;
         }
     }
 
-    private OnSubtitleDataListener mOnSubtitleDataListener;
-    private Handler mOnSubtitleDataHandler;
+    private boolean mSubtitleDataListenerDisabled;
+    /** External OnSubtitleDataListener, the one set by {@link #setOnSubtitleDataListener}. */
+    private OnSubtitleDataListener mExtSubtitleDataListener;
+    private Handler mExtSubtitleDataHandler;
 
     /**
      * Interface definition of a callback to be invoked when discontinuity in the normal progression

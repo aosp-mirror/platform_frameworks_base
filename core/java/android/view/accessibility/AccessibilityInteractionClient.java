@@ -326,12 +326,14 @@ public final class AccessibilityInteractionClient
                             accessibilityWindowId, accessibilityNodeId);
                     if (cachedInfo != null) {
                         if (DEBUG) {
-                            Log.i(LOG_TAG, "Node cache hit");
+                            Log.i(LOG_TAG, "Node cache hit for "
+                                    + idToString(accessibilityWindowId, accessibilityNodeId));
                         }
                         return cachedInfo;
                     }
                     if (DEBUG) {
-                        Log.i(LOG_TAG, "Node cache miss");
+                        Log.i(LOG_TAG, "Node cache miss for "
+                                + idToString(accessibilityWindowId, accessibilityNodeId));
                     }
                 }
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
@@ -366,6 +368,11 @@ public final class AccessibilityInteractionClient
                     + " findAccessibilityNodeInfoByAccessibilityId", re);
         }
         return null;
+    }
+
+    private static String idToString(int accessibilityWindowId, long accessibilityNodeId) {
+        return accessibilityWindowId + "/"
+                + AccessibilityNodeInfo.idToString(accessibilityNodeId);
     }
 
     /**

@@ -610,6 +610,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_PRODUCT = 1 << 19;
 
+    /**
+     * Value for {@link #privateFlags}: whether this app is signed with the
+     * platform key.
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY = 1 << 20;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_" }, value = {
             PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE,
@@ -629,6 +636,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             PRIVATE_FLAG_PRIVILEGED,
             PRIVATE_FLAG_PRODUCT,
             PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER,
+            PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY,
             PRIVATE_FLAG_STATIC_SHARED_LIBRARY,
             PRIVATE_FLAG_VENDOR,
             PRIVATE_FLAG_VIRTUAL_PRELOAD,
@@ -904,7 +912,17 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * The app's declared version code.
      * @hide
      */
-    public long versionCode;
+    public long longVersionCode;
+
+    /**
+     * An integer representation of the app's declared version code. This is being left in place as
+     * some apps were using reflection to access it before the move to long in
+     * {@link android.os.Build.VERSION_CODES#P}
+     * @deprecated Use {@link #longVersionCode} instead.
+     * @hide
+     */
+    @Deprecated
+    public int versionCode;
 
     /**
      * The user-visible SDK version (ex. 26) of the framework against which the application claims
@@ -1214,7 +1232,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         pw.println(prefix + "enabled=" + enabled
                 + " minSdkVersion=" + minSdkVersion
                 + " targetSdkVersion=" + targetSdkVersion
-                + " versionCode=" + versionCode
+                + " versionCode=" + longVersionCode
                 + " targetSandboxVersion=" + targetSandboxVersion);
         if ((dumpFlags & DUMP_FLAG_DETAILS) != 0) {
             if (manageSpaceActivityName != null) {
@@ -1287,7 +1305,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         proto.write(ApplicationInfoProto.Version.ENABLED, enabled);
         proto.write(ApplicationInfoProto.Version.MIN_SDK_VERSION, minSdkVersion);
         proto.write(ApplicationInfoProto.Version.TARGET_SDK_VERSION, targetSdkVersion);
-        proto.write(ApplicationInfoProto.Version.VERSION_CODE, versionCode);
+        proto.write(ApplicationInfoProto.Version.VERSION_CODE, longVersionCode);
         proto.write(ApplicationInfoProto.Version.TARGET_SANDBOX_VERSION, targetSandboxVersion);
         proto.end(versionToken);
 
@@ -1421,7 +1439,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         uid = orig.uid;
         minSdkVersion = orig.minSdkVersion;
         targetSdkVersion = orig.targetSdkVersion;
-        versionCode = orig.versionCode;
+        setVersionCode(orig.longVersionCode);
         enabled = orig.enabled;
         enabledSetting = orig.enabledSetting;
         installLocation = orig.installLocation;
@@ -1495,7 +1513,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(uid);
         dest.writeInt(minSdkVersion);
         dest.writeInt(targetSdkVersion);
-        dest.writeLong(versionCode);
+        dest.writeLong(longVersionCode);
         dest.writeInt(enabled ? 1 : 0);
         dest.writeInt(enabledSetting);
         dest.writeInt(installLocation);
@@ -1566,7 +1584,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         uid = source.readInt();
         minSdkVersion = source.readInt();
         targetSdkVersion = source.readInt();
-        versionCode = source.readLong();
+        setVersionCode(source.readLong());
         enabled = source.readInt() != 0;
         enabledSetting = source.readInt();
         installLocation = source.readInt();
@@ -1658,6 +1676,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         return SystemConfig.getInstance().getHiddenApiWhitelistedApps().contains(packageName);
     }
 
+    private boolean isAllowedToUseHiddenApis() {
+        return isSignedWithPlatformKey()
+            || (isPackageWhitelistedForHiddenApis() && (isSystemApp() || isUpdatedSystemApp()));
+    }
+
     /**
      * @hide
      */
@@ -1665,7 +1688,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         if (mHiddenApiPolicy != HIDDEN_API_ENFORCEMENT_DEFAULT) {
             return mHiddenApiPolicy;
         }
-        if (isPackageWhitelistedForHiddenApis() && (isSystemApp() || isUpdatedSystemApp())) {
+        if (isAllowedToUseHiddenApis()) {
             return HIDDEN_API_ENFORCEMENT_NONE;
         }
         return HIDDEN_API_ENFORCEMENT_BLACK;
@@ -1679,6 +1702,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             throw new IllegalArgumentException("Invalid API enforcement policy: " + policy);
         }
         mHiddenApiPolicy = policy;
+    }
+
+    /**
+     * @hide
+     */
+    public void setVersionCode(long newVersionCode) {
+        longVersionCode = newVersionCode;
+        versionCode = (int) newVersionCode;
     }
 
     /**
@@ -1755,6 +1786,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /** @hide */
     public boolean isPartiallyDirectBootAware() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE) != 0;
+    }
+
+    /** @hide */
+    public boolean isSignedWithPlatformKey() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY) != 0;
     }
 
     /** @hide */

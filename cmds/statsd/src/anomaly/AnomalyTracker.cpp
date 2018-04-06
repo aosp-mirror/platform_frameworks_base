@@ -207,7 +207,7 @@ bool AnomalyTracker::detectAnomaly(const int64_t& currentBucketNum,
            getSumOverPastBuckets(key) + currentBucketValue > mAlert.trigger_if_sum_gt();
 }
 
-void AnomalyTracker::declareAnomaly(const uint64_t& timestampNs, const MetricDimensionKey& key) {
+void AnomalyTracker::declareAnomaly(const int64_t& timestampNs, const MetricDimensionKey& key) {
     // TODO: Why receive timestamp? RefractoryPeriod should always be based on real time right now.
     if (isInRefractoryPeriod(timestampNs, key)) {
         VLOG("Skipping anomaly declaration since within refractory period");
@@ -235,7 +235,7 @@ void AnomalyTracker::declareAnomaly(const uint64_t& timestampNs, const MetricDim
                                mConfigKey.GetId(), mAlert.id());
 }
 
-void AnomalyTracker::detectAndDeclareAnomaly(const uint64_t& timestampNs,
+void AnomalyTracker::detectAndDeclareAnomaly(const int64_t& timestampNs,
                                              const int64_t& currBucketNum,
                                              const MetricDimensionKey& key,
                                              const int64_t& currentBucketValue) {
@@ -244,11 +244,11 @@ void AnomalyTracker::detectAndDeclareAnomaly(const uint64_t& timestampNs,
     }
 }
 
-bool AnomalyTracker::isInRefractoryPeriod(const uint64_t& timestampNs,
+bool AnomalyTracker::isInRefractoryPeriod(const int64_t& timestampNs,
                                           const MetricDimensionKey& key) const {
     const auto& it = mRefractoryPeriodEndsSec.find(key);
     if (it != mRefractoryPeriodEndsSec.end()) {
-        return timestampNs < it->second * NS_PER_SEC;
+        return timestampNs < (it->second *  (int64_t)NS_PER_SEC);
     }
     return false;
 }

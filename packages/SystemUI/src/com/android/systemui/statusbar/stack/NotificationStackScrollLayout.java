@@ -3023,6 +3023,11 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setAnimationsEnabled(boolean animationsEnabled) {
         mAnimationsEnabled = animationsEnabled;
         updateNotificationAnimationStates();
+        if (!animationsEnabled) {
+            mSwipedOutViews.clear();
+            mChildrenToRemoveAnimated.clear();
+            clearTemporaryViewsInGroup(this);
+        }
     }
 
     private void updateNotificationAnimationStates() {
@@ -3090,6 +3095,21 @@ public class NotificationStackScrollLayout extends ViewGroup
     @Override
     public void changeViewPosition(View child, int newIndex) {
         int currentIndex = indexOfChild(child);
+
+        if (currentIndex == -1) {
+            boolean isTransient = false;
+            if (child instanceof ExpandableNotificationRow
+                    && ((ExpandableNotificationRow)child).getTransientContainer() != null) {
+                isTransient = true;
+            }
+            Log.e(TAG, "Attempting to re-position "
+                    + (isTransient ? "transient" : "")
+                    + " view {"
+                    + child
+                    + "}");
+            return;
+        }
+
         if (child != null && child.getParent() == this && currentIndex != newIndex) {
             mChangePositionInProgress = true;
             ((ExpandableView)child).setChangingPosition(true);
@@ -3569,17 +3589,17 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void clearTemporaryViews() {
         // lets make sure nothing is in the overlay / transient anymore
-        clearTemporaryViews(this);
+        clearTemporaryViewsInGroup(this);
         for (int i = 0; i < getChildCount(); i++) {
             ExpandableView child = (ExpandableView) getChildAt(i);
             if (child instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                clearTemporaryViews(row.getChildrenContainer());
+                clearTemporaryViewsInGroup(row.getChildrenContainer());
             }
         }
     }
 
-    private void clearTemporaryViews(ViewGroup viewGroup) {
+    private void clearTemporaryViewsInGroup(ViewGroup viewGroup) {
         while (viewGroup != null && viewGroup.getTransientViewCount() != 0) {
             viewGroup.removeTransientView(viewGroup.getTransientView(0));
         }
@@ -3922,12 +3942,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         requestChildrenUpdate();
         applyCurrentBackgroundBounds();
         updateWillNotDraw();
-        updateAntiBurnInTranslation();
         notifyHeightChangeListener(mShelf);
     }
 
     private void updateAntiBurnInTranslation() {
-        setTranslationX(mAmbientState.isDark() ? mAntiBurnInOffsetX : 0);
+        setTranslationX(mAntiBurnInOffsetX * mDarkAmount);
     }
 
     /**
@@ -3948,6 +3967,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             updateContentHeight();
         }
         updateBackgroundDimming();
+        updateAntiBurnInTranslation();
     }
 
     public float getDarkAmount() {

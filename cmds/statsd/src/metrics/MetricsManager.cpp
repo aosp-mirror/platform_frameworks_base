@@ -33,6 +33,8 @@
 #include <utils/SystemClock.h>
 
 using android::util::FIELD_COUNT_REPEATED;
+using android::util::FIELD_TYPE_INT32;
+using android::util::FIELD_TYPE_INT64;
 using android::util::FIELD_TYPE_MESSAGE;
 using android::util::ProtoOutputStream;
 
@@ -47,18 +49,26 @@ namespace os {
 namespace statsd {
 
 const int FIELD_ID_METRICS = 1;
+const int FIELD_ID_ANNOTATIONS = 7;
+const int FIELD_ID_ANNOTATIONS_INT64 = 1;
+const int FIELD_ID_ANNOTATIONS_INT32 = 2;
 
 MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
-                               const long timeBaseSec,
+                               const long timeBaseSec, const long currentTimeSec,
                                const sp<UidMap> &uidMap,
                                const sp<AlarmMonitor>& anomalyAlarmMonitor,
                                const sp<AlarmMonitor>& periodicAlarmMonitor)
     : mConfigKey(key), mUidMap(uidMap),
+      mTtlNs(config.has_ttl_in_seconds() ? config.ttl_in_seconds() * NS_PER_SEC : -1),
+      mTtlEndNs(-1),
       mLastReportTimeNs(timeBaseSec * NS_PER_SEC),
       mLastReportWallClockNs(getWallClockNs()) {
+    // Init the ttl end timestamp.
+    refreshTtl(timeBaseSec * NS_PER_SEC);
+
     mConfigValid =
             initStatsdConfig(key, config, *uidMap, anomalyAlarmMonitor, periodicAlarmMonitor,
-                             timeBaseSec, mTagIds, mAllAtomMatchers,
+                             timeBaseSec, currentTimeSec, mTagIds, mAllAtomMatchers,
                              mAllConditionTrackers, mAllMetricProducers, mAllAnomalyTrackers,
                              mAllPeriodicAlarmTrackers, mConditionToMetricMap, mTrackerToMetricMap,
                              mTrackerToConditionMap, mNoReportMetricIds);
@@ -85,6 +95,11 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
         }
     }
 
+    // Store the sub-configs used.
+    for (const auto& annotation : config.annotation()) {
+        mAnnotations.emplace_back(annotation.field_int64(), annotation.field_int32());
+    }
+
     // Guardrail. Reject the config if it's too big.
     if (mAllMetricProducers.size() > StatsdStats::kMaxMetricCountPerConfig ||
         mAllConditionTrackers.size() > StatsdStats::kMaxConditionCountPerConfig ||
@@ -97,11 +112,9 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
         mConfigValid = false;
     }
     // no matter whether this config is valid, log it in the stats.
-    StatsdStats::getInstance().noteConfigReceived(key, mAllMetricProducers.size(),
-                                                  mAllConditionTrackers.size(),
-                                                  mAllAtomMatchers.size(),
-                                                  mAllAnomalyTrackers.size(),
-                                                  mConfigValid);
+    StatsdStats::getInstance().noteConfigReceived(
+            key, mAllMetricProducers.size(), mAllConditionTrackers.size(), mAllAtomMatchers.size(),
+            mAllAnomalyTrackers.size(), mAnnotations, mConfigValid);
 }
 
 MetricsManager::~MetricsManager() {
@@ -128,7 +141,7 @@ bool MetricsManager::isConfigValid() const {
     return mConfigValid;
 }
 
-void MetricsManager::notifyAppUpgrade(const uint64_t& eventTimeNs, const string& apk, const int uid,
+void MetricsManager::notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk, const int uid,
                                       const int64_t version) {
     // check if we care this package
     if (std::find(mAllowedPkg.begin(), mAllowedPkg.end(), apk) == mAllowedPkg.end()) {
@@ -139,7 +152,7 @@ void MetricsManager::notifyAppUpgrade(const uint64_t& eventTimeNs, const string&
     initLogSourceWhiteList();
 }
 
-void MetricsManager::notifyAppRemoved(const uint64_t& eventTimeNs, const string& apk,
+void MetricsManager::notifyAppRemoved(const int64_t& eventTimeNs, const string& apk,
                                       const int uid) {
     // check if we care this package
     if (std::find(mAllowedPkg.begin(), mAllowedPkg.end(), apk) == mAllowedPkg.end()) {
@@ -150,7 +163,7 @@ void MetricsManager::notifyAppRemoved(const uint64_t& eventTimeNs, const string&
     initLogSourceWhiteList();
 }
 
-void MetricsManager::onUidMapReceived(const uint64_t& eventTimeNs) {
+void MetricsManager::onUidMapReceived(const int64_t& eventTimeNs) {
     if (mAllowedPkg.size() == 0) {
         return;
     }
@@ -171,22 +184,32 @@ void MetricsManager::dumpStates(FILE* out, bool verbose) {
     }
 }
 
-void MetricsManager::dropData(const uint64_t dropTimeNs) {
+void MetricsManager::dropData(const int64_t dropTimeNs) {
     for (const auto& producer : mAllMetricProducers) {
         producer->dropData(dropTimeNs);
     }
 }
 
-void MetricsManager::onDumpReport(const uint64_t dumpTimeStampNs, ProtoOutputStream* protoOutput) {
+void MetricsManager::onDumpReport(const int64_t dumpTimeStampNs,
+                                  const bool include_current_partial_bucket,
+                                  ProtoOutputStream* protoOutput) {
     VLOG("=========================Metric Reports Start==========================");
     // one StatsLogReport per MetricProduer
     for (const auto& producer : mAllMetricProducers) {
         if (mNoReportMetricIds.find(producer->getMetricId()) == mNoReportMetricIds.end()) {
             uint64_t token =
                     protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_METRICS);
-            producer->onDumpReport(dumpTimeStampNs, protoOutput);
+            producer->onDumpReport(dumpTimeStampNs, include_current_partial_bucket, protoOutput);
             protoOutput->end(token);
         }
+    }
+    for (const auto& annotation : mAnnotations) {
+        uint64_t token = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                                            FIELD_ID_ANNOTATIONS);
+        protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ANNOTATIONS_INT64,
+                           (long long)annotation.first);
+        protoOutput->write(FIELD_TYPE_INT32 | FIELD_ID_ANNOTATIONS_INT32, annotation.second);
+        protoOutput->end(token);
     }
     mLastReportTimeNs = dumpTimeStampNs;
     mLastReportWallClockNs = getWallClockNs();
@@ -272,7 +295,7 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
     }
 
     int tagId = event.GetTagId();
-    uint64_t eventTime = event.GetElapsedTimestampNs();
+    int64_t eventTime = event.GetElapsedTimestampNs();
     if (mTagIds.find(tagId) == mTagIds.end()) {
         // not interesting...
         return;
@@ -351,7 +374,7 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
 }
 
 void MetricsManager::onAnomalyAlarmFired(
-        const uint64_t& timestampNs,
+        const int64_t& timestampNs,
         unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& alarmSet) {
     for (const auto& itr : mAllAnomalyTrackers) {
         itr->informAlarmsFired(timestampNs, alarmSet);
@@ -359,7 +382,7 @@ void MetricsManager::onAnomalyAlarmFired(
 }
 
 void MetricsManager::onPeriodicAlarmFired(
-        const uint64_t& timestampNs,
+        const int64_t& timestampNs,
         unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>>& alarmSet) {
     for (const auto& itr : mAllPeriodicAlarmTrackers) {
         itr->informAlarmsFired(timestampNs, alarmSet);

@@ -1400,6 +1400,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
          *   the current values of all fields in the screen.
          */
         if (saveInfo == null) {
+            if (sVerbose) Slog.w(TAG, "showSaveLocked(): no saveInfo from service");
             return true;
         }
 

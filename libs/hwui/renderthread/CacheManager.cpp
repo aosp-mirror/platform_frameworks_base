@@ -151,7 +151,12 @@ void CacheManager::trimMemory(TrimMemoryMode mode) {
             mGrContext->freeGpuResources();
             break;
         case TrimMemoryMode::UiHidden:
-            mGrContext->purgeUnlockedResources(mMaxResourceBytes - mBackgroundResourceBytes, true);
+            // Here we purge all the unlocked scratch resources and then toggle the resources cache
+            // limits between the background and max amounts. This causes the unlocked resources
+            // that have persistent data to be purged in LRU order.
+            mGrContext->purgeUnlockedResources(true);
+            mGrContext->setResourceCacheLimits(mMaxResources, mBackgroundResourceBytes);
+            mGrContext->setResourceCacheLimits(mMaxResources, mMaxResourceBytes);
             break;
     }
 }
@@ -161,7 +166,10 @@ void CacheManager::trimStaleResources() {
         return;
     }
     mGrContext->flush();
-    mGrContext->purgeResourcesNotUsedInMs(std::chrono::seconds(30));
+    // Here we purge all the unlocked scratch resources (leaving those resources w/ persistent data)
+    // and then purge those w/ persistent data based on age.
+    mGrContext->purgeUnlockedResources(true);
+    mGrContext->purgeResourcesNotUsedInMs(std::chrono::seconds(10));
 }
 
 sp<skiapipeline::VectorDrawableAtlas> CacheManager::acquireVectorDrawableAtlas() {

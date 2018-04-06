@@ -594,12 +594,12 @@ public class ShapeDrawable extends Drawable {
 
         @Override
         public Drawable newDrawable() {
-            return new ShapeDrawable(this, null);
+            return new ShapeDrawable(new ShapeState(this), null);
         }
 
         @Override
         public Drawable newDrawable(Resources res) {
-            return new ShapeDrawable(this, res);
+            return new ShapeDrawable(new ShapeState(this), res);
         }
 
         @Override

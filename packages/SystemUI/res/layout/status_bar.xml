@@ -60,7 +60,11 @@
 
             <include layout="@layout/heads_up_status_bar_layout" />
 
+            <!-- The alpha of the left side is controlled by PhoneStatusBarTransitions, and the
+             individual views are controlled by StatusBarManager disable flags DISABLE_CLOCK and
+             DISABLE_NOTIFICATION_ICONS, respectively -->
             <LinearLayout
+                android:id="@+id/status_bar_left_side"
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
                 android:clipChildren="false"
@@ -76,8 +80,6 @@
                     android:gravity="center_vertical|start"
                 />
 
-                <!-- The alpha of this area is controlled from both PhoneStatusBarTransitions and
-                     PhoneStatusBar (DISABLE_NOTIFICATION_ICONS). -->
                 <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
                     android:id="@+id/notification_icon_area"
                     android:layout_width="0dp"

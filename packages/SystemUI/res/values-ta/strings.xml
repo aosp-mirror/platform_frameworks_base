@@ -33,7 +33,6 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"செயலில் இருக்கும்"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"அறிவிப்புகள்"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"பேட்டரி குறைவு"</string>
-    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"பேட்டரி குறைவாக உள்ளது. பேட்டரி சேமிப்பானை ஆன் செய்யவும்"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> உள்ளது"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> பேட்டரி மீதமுள்ளது. உங்கள் உபயோகத்தைப் பொறுத்து, இதைச் சுமார் <xliff:g id="TIME">%s</xliff:g> மணி நேரத்திற்குப் பயன்படுத்தலாம்"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> மீதமுள்ளது, இதைச் சுமார் <xliff:g id="TIME">%s</xliff:g> மணி நேரத்திற்குப் பயன்படுத்தலாம்"</string>
@@ -73,11 +72,12 @@
     <string name="global_action_screenshot" msgid="8329831278085426283">"ஸ்கிரீன் ஷாட்"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"ஸ்க்ரீன் ஷாட்டைச் சேமிக்கிறது…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"ஸ்க்ரீன் ஷாட்டைச் சேமிக்கிறது…"</string>
-    <string name="screenshot_saving_text" msgid="2545047868936087248">"ஸ்கிரீன் ஷாட் சேமிக்கப்படுகிறது"</string>
     <string name="screenshot_saved_title" msgid="5637073968117370753">"ஸ்கிரீன் ஷாட் சேமிக்கப்பட்டது"</string>
     <string name="screenshot_saved_text" msgid="7574667448002050363">"ஸ்கிரீன்ஷாட்டைப் பார்க்க, தட்டவும்"</string>
-    <string name="screenshot_failed_title" msgid="9096484883063264803">"ஸ்கிரீன் ஷாட் எடுக்க முடியவில்லை"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"ஸ்கிரீன்ஷாட்டைச் சேமிப்பதில் சிக்கல் ஏற்பட்டது"</string>
+    <!-- no translation found for screenshot_failed_title (7612509838919089748) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_to_save_unknown_text (3637758096565605541) -->
+    <skip />
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"போதுமான சேமிப்பிடம் இல்லாததால் ஸ்கிரீன்ஷாட்டைச் சேமிக்க முடியவில்லை"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"ஸ்கிரீன் ஷாட்டுகளை எடுப்பதை, பயன்பாடு அல்லது உங்கள் நிறுவனம் அனுமதிக்கவில்லை"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB கோப்பு இடமாற்ற விருப்பங்கள்"</string>
@@ -273,8 +273,7 @@
     <string name="dessert_case" msgid="1295161776223959221">"இனிப்பு வடிவங்கள்"</string>
     <string name="start_dreams" msgid="5640361424498338327">"ஸ்கிரீன் சேவர்"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"ஈதர்நெட்"</string>
-    <!-- no translation found for quick_settings_header_onboarding_text (8030309023792936283) -->
-    <skip />
+    <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"மேலும் விருப்பங்களைக் காண, ஐகான்களைத் தொட்டுப் பிடிக்கவும்"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"தொந்தரவு செய்யாதே"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"முதன்மை மட்டும்"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"அலாரங்கள் மட்டும்"</string>
@@ -349,7 +348,8 @@
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"மாலையில் ஆன் செய்"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"சூரிய உதயம் வரை"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g>க்கு ஆன் செய்"</string>
-    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"<xliff:g id="TIME">%s</xliff:g> மணி வரை"</string>
+    <!-- no translation found for quick_settings_secondary_label_until (2749196569462600150) -->
+    <skip />
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC முடக்கப்பட்டது"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC இயக்கப்பட்டது"</string>
@@ -433,7 +433,9 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"திரையில் காட்டப்படும் அனைத்தையும் <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> படமெடுக்கும்."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"மீண்டும் காட்டாதே"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"எல்லாவற்றையும் அழி"</string>
-    <string name="dnd_suppressing_shade_text" msgid="7986451830430707907">"\'தொந்தரவு செய்ய வேண்டாம்\' பயன்முறையானது அறிவிப்புகளைக் காட்டாமல் மறைக்கிறது"</string>
+    <!-- no translation found for manage_notifications_text (8035284146227267681) -->
+    <skip />
+    <string name="dnd_suppressing_shade_text" msgid="5179021215370153526">"\'தொந்தரவு செய்ய வேண்டாம்\' பயன்முறையானது அறிவிப்புகளைக் காட்டாமல் மறைக்கிறது"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"இப்போது தொடங்கு"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"அறிவிப்புகள் இல்லை"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"சுயவிவரம் கண்காணிக்கப்படலாம்"</string>
@@ -533,13 +535,18 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"ஒலி"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"அதிர்வு"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"அமைதி"</string>
+    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
+    <skip />
+    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
+    <skip />
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. ஒலி இயக்க, தட்டவும்."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. அதிர்விற்கு அமைக்க, தட்டவும். அணுகல்தன்மை சேவைகள் ஒலியடக்கப்படக்கூடும்."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. ஒலியடக்க, தட்டவும். அணுகல்தன்மை சேவைகள் ஒலியடக்கப்படக்கூடும்."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. அதிர்விற்கு அமைக்க, தட்டவும்."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. ஒலியடக்க, தட்டவும்."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s ஒலியளவுக் கட்டுப்பாடுகள்"</string>
-    <string name="volume_dialog_ringer_guidance_ring" msgid="6144469689490528338">"அழைப்புகள் மற்றும் அறிவிப்புகளுக்கு ஒலியெழுப்பும்"</string>
+    <!-- no translation found for volume_dialog_ringer_guidance_ring (3360373718388509040) -->
+    <skip />
     <string name="output_title" msgid="5355078100792942802">"மீடியா வெளியீடு"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"ஃபோன் அழைப்பு வெளியீடு"</string>
     <string name="output_none_found" msgid="5544982839808921091">"சாதனங்கள் எதுவும் இல்லை"</string>
@@ -626,6 +633,8 @@
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"அறிவிப்புக் கட்டுப்பாடுகள்"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"அறிவிப்பை உறக்கநிலையாக்கும் விருப்பங்கள்"</string>
+    <!-- no translation found for notification_menu_snooze_action (1112254519029621372) -->
+    <skip />
     <string name="snooze_undo" msgid="6074877317002985129">"செயல்தவிர்"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"உறக்கநிலையில் வைத்திருந்த நேரம்: <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2124335842674413030">
@@ -689,6 +698,8 @@
     <string name="battery" msgid="7498329822413202973">"பேட்டரி"</string>
     <string name="clock" msgid="7416090374234785905">"கடிகாரம்"</string>
     <string name="headset" msgid="4534219457597457353">"ஹெட்செட்"</string>
+    <!-- no translation found for accessibility_long_click_tile (6687350750091842525) -->
+    <skip />
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"ஹெட்ஃபோன்கள் இணைக்கப்பட்டன"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"ஹெட்செட் இணைக்கப்பட்டது"</string>
     <string name="data_saver" msgid="5037565123367048522">"டேட்டா சேமிப்பான்"</string>
@@ -723,11 +734,9 @@
     <string name="right_keycode" msgid="708447961000848163">"வலப்புற விசைக்குறியீடு"</string>
     <string name="left_icon" msgid="3096287125959387541">"இடப்புற ஐகான்"</string>
     <string name="right_icon" msgid="3952104823293824311">"வலப்புற ஐகான்"</string>
-    <!-- no translation found for drag_to_add_tiles (230586591689084925) -->
-    <skip />
+    <string name="drag_to_add_tiles" msgid="230586591689084925">"கட்டங்களைச் சேர்க்க, அவற்றைப் பிடித்து இழுக்கவும்"</string>
     <string name="drag_to_remove_tiles" msgid="3361212377437088062">"அகற்ற, இங்கே இழுக்கவும்"</string>
-    <!-- no translation found for drag_to_remove_disabled (2390968976638993382) -->
-    <skip />
+    <string name="drag_to_remove_disabled" msgid="2390968976638993382">"குறைந்தது 6 கட்டங்கள் தேவை"</string>
     <string name="qs_edit" msgid="2232596095725105230">"மாற்று"</string>
     <string name="tuner_time" msgid="6572217313285536011">"நேரம்"</string>
   <string-array name="clock_options">
@@ -814,6 +823,7 @@
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"ஸ்கிரீன் ஷாட்டுகள்"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"பொதுச் செய்திகள்"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"சேமிப்பிடம்"</string>
+    <string name="notification_channel_hints" msgid="7323870212489152689">"குறிப்புகள்"</string>
     <string name="instant_apps" msgid="6647570248119804907">"இன்ஸ்டண்ட் பயன்பாடுகள்"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"இன்ஸ்டண்ட் பயன்பாடுகளுக்கு நிறுவல் தேவையில்லை."</string>
     <string name="app_info" msgid="6856026610594615344">"ஆப்ஸ் தகவல்"</string>
@@ -831,12 +841,9 @@
     <string name="qs_dnd_replace" msgid="8019520786644276623">"மாற்று"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"பின்னணியில் இயங்கும் பயன்பாடுகள்"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"பேட்டரி மற்றும் தரவு உபயோக விவரங்களைக் காண, தட்டவும்"</string>
-    <!-- no translation found for mobile_data_disable_title (1068272097382942231) -->
-    <skip />
-    <!-- no translation found for mobile_data_disable_message (4756541658791493506) -->
-    <skip />
-    <!-- no translation found for mobile_data_disable_message_default_carrier (6078110473451946831) -->
-    <skip />
+    <string name="mobile_data_disable_title" msgid="1068272097382942231">"மொபைல் டேட்டாவை ஆஃப் செய்யவா?"</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"<xliff:g id="CARRIER">%s</xliff:g> மொபைல் நிறுவனத்தின் மூலம் டேட்டா அல்லது இணையத்தை உங்களால் பயன்படுத்த முடியாது. வைஃபை வழியாக மட்டுமே இணையத்தைப் பயன்படுத்த முடியும்."</string>
+    <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"உங்கள் மொபைல் நிறுவனம்"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"அனுமதிக் கோரிக்கையைப் பயன்பாடு மறைப்பதால், அமைப்புகளால் உங்கள் பதிலைச் சரிபார்க்க முடியாது."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g> பயன்பாட்டை, <xliff:g id="APP_2">%2$s</xliff:g> பயன்பாட்டின் விழிப்பூட்டல்களைக் காண்பிக்க அனுமதிக்கவா?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- இது, <xliff:g id="APP">%1$s</xliff:g> பயன்பாட்டிலிருந்து தகவலைப் படிக்கும்"</string>
@@ -844,4 +851,11 @@
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"எல்லா பயன்பாட்டிலிருந்தும் விழிப்பூட்டல்களைக் காண்பிக்க, <xliff:g id="APP">%1$s</xliff:g> பயன்பாட்டை அனுமதி"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"அனுமதி"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"நிராகரி"</string>
+    <string name="auto_saver_title" msgid="1217959994732964228">"பேட்டரி சேமிப்பானை ஆன் செய்வது தொடர்பாகத் திட்டமிட, தட்டவும்"</string>
+    <string name="auto_saver_text" msgid="6324376061044218113">"பேட்டரியின் அளவு <xliff:g id="PERCENTAGE">%d</xliff:g>%% ஆக இருக்கும்போது, தானாக ஆன் செய்"</string>
+    <string name="no_auto_saver_action" msgid="8086002101711328500">"வேண்டாம்"</string>
+    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"திட்டமிட்ட பேட்டரி சேமிப்பான் ஆன் செய்யப்பட்டது"</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"பேட்டரியின் அளவு <xliff:g id="PERCENTAGE">%d</xliff:g>%%க்குக் கீழ் குறையும்போது, பேட்டரி சேமிப்பான் தானாகவே ஆன் செய்யப்படும்."</string>
+    <string name="open_saver_setting_action" msgid="8314624730997322529">"அமைப்புகள்"</string>
+    <string name="auto_saver_okay_action" msgid="2701221740227683650">"சரி"</string>
 </resources>

@@ -320,13 +320,13 @@ public class AudioService extends IAudioService.Stub
         0,  // STREAM_SYSTEM
         0,  // STREAM_RING
         0,  // STREAM_MUSIC
-        0,  // STREAM_ALARM
+        1,  // STREAM_ALARM
         0,  // STREAM_NOTIFICATION
         0,  // STREAM_BLUETOOTH_SCO
         0,  // STREAM_SYSTEM_ENFORCED
         0,  // STREAM_DTMF
         0,  // STREAM_TTS
-        0   // STREAM_ACCESSIBILITY
+        1   // STREAM_ACCESSIBILITY
     };
 
     /* mStreamVolumeAlias[] indicates for each stream if it uses the volume settings
@@ -588,7 +588,7 @@ public class AudioService extends IAudioService.Stub
             AudioSystem.DEVICE_OUT_HDMI_ARC |
             AudioSystem.DEVICE_OUT_SPDIF |
             AudioSystem.DEVICE_OUT_AUX_LINE;
-    int mFullVolumeDevices = AudioSystem.DEVICE_OUT_HEARING_AID;
+    int mFullVolumeDevices = 0;
 
     private final boolean mMonitorRotation;
 
@@ -1217,6 +1217,8 @@ public class AudioService extends IAudioService.Stub
                             System.VOLUME_SETTINGS_INT[a11yStreamAlias];
                     mStreamStates[AudioSystem.STREAM_ACCESSIBILITY].setAllIndexes(
                             mStreamStates[a11yStreamAlias], caller);
+                    mStreamStates[AudioSystem.STREAM_ACCESSIBILITY].refreshRange(
+                            mStreamVolumeAlias[AudioSystem.STREAM_ACCESSIBILITY]);
                 }
             }
             if (sIndependentA11yVolume) {
@@ -1398,7 +1400,15 @@ public class AudioService extends IAudioService.Stub
     }
 
     private int rescaleIndex(int index, int srcStream, int dstStream) {
-        return (index * mStreamStates[dstStream].getMaxIndex() + mStreamStates[srcStream].getMaxIndex() / 2) / mStreamStates[srcStream].getMaxIndex();
+        final int rescaled =
+                (index * mStreamStates[dstStream].getMaxIndex()
+                        + mStreamStates[srcStream].getMaxIndex() / 2)
+                / mStreamStates[srcStream].getMaxIndex();
+        if (rescaled < mStreamStates[dstStream].getMinIndex()) {
+            return mStreamStates[dstStream].getMinIndex();
+        } else {
+            return rescaled;
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -4615,8 +4625,8 @@ public class AudioService extends IAudioService.Stub
     //  4       VolumeStreamState.class
     public class VolumeStreamState {
         private final int mStreamType;
-        private final int mIndexMin;
-        private final int mIndexMax;
+        private int mIndexMin;
+        private int mIndexMax;
 
         private boolean mIsMuted;
         private String mVolumeIndexSettingName;
@@ -4768,6 +4778,8 @@ public class AudioService extends IAudioService.Stub
                 index = getAbsoluteVolumeIndex((getIndex(device) + 5)/10);
             } else if ((device & mFullVolumeDevices) != 0) {
                 index = (mIndexMax + 5)/10;
+            } else if ((device & AudioSystem.DEVICE_OUT_HEARING_AID) != 0) {
+                index = (mIndexMax + 5)/10;
             } else {
                 index = (getIndex(device) + 5)/10;
             }
@@ -4787,6 +4799,8 @@ public class AudioService extends IAudioService.Stub
                                 mAvrcpAbsVolSupported) {
                             index = getAbsoluteVolumeIndex((getIndex(device) + 5)/10);
                         } else if ((device & mFullVolumeDevices) != 0) {
+                            index = (mIndexMax + 5)/10;
+                        } else if ((device & AudioSystem.DEVICE_OUT_HEARING_AID) != 0) {
                             index = (mIndexMax + 5)/10;
                         } else {
                             index = (mIndexMap.valueAt(i) + 5)/10;
@@ -4899,6 +4913,24 @@ public class AudioService extends IAudioService.Stub
 
         public int getMinIndex() {
             return mIndexMin;
+        }
+
+        /**
+         * Updates the min/max index values from another stream. Use this when changing the alias
+         * for the current stream type.
+         * @param sourceStreamType
+         */
+        // must be sync'd on mSettingsLock before VolumeStreamState.class
+        @GuardedBy("VolumeStreamState.class")
+        public void refreshRange(int sourceStreamType) {
+            mIndexMin = MIN_STREAM_VOLUME[sourceStreamType] * 10;
+            mIndexMax = MAX_STREAM_VOLUME[sourceStreamType] * 10;
+            // verify all current volumes are within bounds
+            for (int i = 0 ; i < mIndexMap.size(); i++) {
+                final int device = mIndexMap.keyAt(i);
+                final int index = mIndexMap.valueAt(i);
+                mIndexMap.put(device, getValidIndex(index));
+            }
         }
 
         /**

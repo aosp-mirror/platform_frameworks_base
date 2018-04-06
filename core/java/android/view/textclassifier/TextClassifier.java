@@ -41,8 +41,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Interface for providing text classification related features.
@@ -208,6 +209,26 @@ public interface TextClassifier {
         return suggestSelection(request);
     }
 
+    // TODO: Remove once apps can build against the latest sdk.
+    /** @hide */
+    default TextSelection suggestSelection(
+            @NonNull CharSequence text,
+            @IntRange(from = 0) int selectionStartIndex,
+            @IntRange(from = 0) int selectionEndIndex,
+            @Nullable TextSelection.Options options) {
+        if (options == null) {
+            return suggestSelection(new TextSelection.Request.Builder(
+                    text, selectionStartIndex, selectionEndIndex).build());
+        } else if (options.getRequest() != null) {
+            return suggestSelection(options.getRequest());
+        } else {
+            return suggestSelection(
+                    new TextSelection.Request.Builder(text, selectionStartIndex, selectionEndIndex)
+                            .setDefaultLocales(options.getDefaultLocales())
+                            .build());
+        }
+    }
+
     /**
      * Classifies the specified text and returns a {@link TextClassification} object that can be
      * used to generate a widget for handling the classified text.
@@ -267,6 +288,26 @@ public interface TextClassifier {
         return classifyText(request);
     }
 
+    // TODO: Remove once apps can build against the latest sdk.
+    /** @hide */
+    default TextClassification classifyText(
+            @NonNull CharSequence text,
+            @IntRange(from = 0) int startIndex,
+            @IntRange(from = 0) int endIndex,
+            @Nullable TextClassification.Options options) {
+        if (options == null) {
+            return classifyText(
+                    new TextClassification.Request.Builder(text, startIndex, endIndex).build());
+        } else if (options.getRequest() != null) {
+            return classifyText(options.getRequest());
+        } else {
+            return classifyText(new TextClassification.Request.Builder(text, startIndex, endIndex)
+                    .setDefaultLocales(options.getDefaultLocales())
+                    .setReferenceTime(options.getReferenceTime())
+                    .build());
+        }
+    }
+
     /**
      * Generates and returns a {@link TextLinks} that may be applied to the text to annotate it with
      * links information.
@@ -286,6 +327,22 @@ public interface TextClassifier {
         Preconditions.checkNotNull(request);
         Utils.checkMainThread();
         return new TextLinks.Builder(request.getText().toString()).build();
+    }
+
+    // TODO: Remove once apps can build against the latest sdk.
+    /** @hide */
+    default TextLinks generateLinks(
+            @NonNull CharSequence text, @Nullable TextLinks.Options options) {
+        if (options == null) {
+            return generateLinks(new TextLinks.Request.Builder(text).build());
+        } else if (options.getRequest() != null) {
+            return generateLinks(options.getRequest());
+        } else {
+            return generateLinks(new TextLinks.Request.Builder(text)
+                    .setDefaultLocales(options.getDefaultLocales())
+                    .setEntityConfig(options.getEntityConfig())
+                    .build());
+        }
     }
 
     /**
@@ -377,6 +434,12 @@ public interface TextClassifier {
                     /* includedEntityTypes */null, /* excludedEntityTypes */ null);
         }
 
+        // TODO: Remove once apps can build against the latest sdk.
+        /** @hide */
+        public static EntityConfig create(@Nullable Collection<String> hints) {
+            return createWithHints(hints);
+        }
+
         /**
          * Creates an EntityConfig.
          *
@@ -406,6 +469,12 @@ public interface TextClassifier {
                     /* includedEntityTypes */ entityTypes, /* excludedEntityTypes */ null);
         }
 
+        // TODO: Remove once apps can build against the latest sdk.
+        /** @hide */
+        public static EntityConfig createWithEntityList(@Nullable Collection<String> entityTypes) {
+            return createWithExplicitEntityList(entityTypes);
+        }
+
         /**
          * Returns a list of the final set of entities to find.
          *
@@ -413,21 +482,15 @@ public interface TextClassifier {
          *
          * This method is intended for use by TextClassifier implementations.
          */
-        public List<String> resolveEntityListModifications(@NonNull Collection<String> entities) {
-            final ArrayList<String> finalList = new ArrayList<>();
+        public Collection<String> resolveEntityListModifications(
+                @NonNull Collection<String> entities) {
+            final Set<String> finalSet = new HashSet();
             if (mUseHints) {
-                for (String entity : entities) {
-                    if (!mExcludedEntityTypes.contains(entity)) {
-                        finalList.add(entity);
-                    }
-                }
+                finalSet.addAll(entities);
             }
-            for (String entity : mIncludedEntityTypes) {
-                if (!mExcludedEntityTypes.contains(entity) && !finalList.contains(entity)) {
-                    finalList.add(entity);
-                }
-            }
-            return finalList;
+            finalSet.addAll(mIncludedEntityTypes);
+            finalSet.removeAll(mExcludedEntityTypes);
+            return finalSet;
         }
 
         /**
@@ -508,7 +571,7 @@ public interface TextClassifier {
             final String string = request.getText().toString();
             final TextLinks.Builder links = new TextLinks.Builder(string);
 
-            final List<String> entities = request.getEntityConfig()
+            final Collection<String> entities = request.getEntityConfig()
                     .resolveEntityListModifications(Collections.emptyList());
             if (entities.contains(TextClassifier.TYPE_URL)) {
                 addLinks(links, string, TextClassifier.TYPE_URL);

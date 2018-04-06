@@ -34,22 +34,19 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkUtils;
 import android.net.Uri;
+import android.net.dns.ResolvUtil;
 import android.os.Binder;
 import android.os.INetworkManagementService;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.system.GaiException;
-import android.system.OsConstants;
-import android.system.StructAddrinfo;
 import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.server.connectivity.MockableSystemProperties;
 
-import libcore.io.Libcore;
-
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -63,6 +60,51 @@ import java.util.StringJoiner;
  *
  * This class it NOT designed for concurrent access. Furthermore, all non-static
  * methods MUST be called from ConnectivityService's thread.
+ *
+ * [ Private DNS ]
+ * The code handling Private DNS is spread across several components, but this
+ * seems like the least bad place to collect all the observations.
+ *
+ * Private DNS handling and updating occurs in response to several different
+ * events. Each is described here with its corresponding intended handling.
+ *
+ * [A] Event: A new network comes up.
+ * Mechanics:
+ *     [1] ConnectivityService gets notifications from NetworkAgents.
+ *     [2] in updateNetworkInfo(), the first time the NetworkAgent goes into
+ *         into CONNECTED state, the Private DNS configuration is retrieved,
+ *         programmed, and strict mode hostname resolution (if applicable) is
+ *         enqueued in NetworkAgent's NetworkMonitor, via a call to
+ *         handlePerNetworkPrivateDnsConfig().
+ *     [3] Re-resolution of strict mode hostnames that fail to return any
+ *         IP addresses happens inside NetworkMonitor; it sends itself a
+ *         delayed CMD_EVALUATE_PRIVATE_DNS message in a simple backoff
+ *         schedule.
+ *     [4] Successfully resolved hostnames are sent to ConnectivityService
+ *         inside an EVENT_PRIVATE_DNS_CONFIG_RESOLVED message. The resolved
+ *         IP addresses are programmed into netd via:
+ *
+ *             updatePrivateDns() -> updateDnses()
+ *
+ *         both of which make calls into DnsManager.
+ *     [5] Upon a successful hostname resolution NetworkMonitor initiates a
+ *         validation attempt in the form of a lookup for a one-time hostname
+ *         that uses Private DNS.
+ *
+ * [B] Event: Private DNS settings are changed.
+ * Mechanics:
+ *     [1] ConnectivityService gets notifications from its SettingsObserver.
+ *     [2] handlePrivateDnsSettingsChanged() is called, which calls
+ *         handlePerNetworkPrivateDnsConfig() and the process proceeds
+ *         as if from A.3 above.
+ *
+ * [C] Event: An application calls ConnectivityManager#reportBadNetwork().
+ * Mechanics:
+ *     [1] NetworkMonitor is notified and initiates a reevaluation, which
+ *         always bypasses Private DNS.
+ *     [2] Once completed, NetworkMonitor checks if strict mode is in operation
+ *         and if so enqueues another evaluation of Private DNS, as if from
+ *         step A.5 above.
  *
  * @hide
  */
@@ -126,28 +168,19 @@ public class DnsManager {
     }
 
     public static PrivateDnsConfig tryBlockingResolveOf(Network network, String name) {
-        final StructAddrinfo hints = new StructAddrinfo();
-        // Unnecessary, but expressly no AI_ADDRCONFIG.
-        hints.ai_flags = 0;
-        // Fetch all IP addresses at once to minimize re-resolution.
-        hints.ai_family = OsConstants.AF_UNSPEC;
-        hints.ai_socktype = OsConstants.SOCK_DGRAM;
-
         try {
-            final InetAddress[] ips = Libcore.os.android_getaddrinfo(name, hints, network.netId);
-            if (ips != null && ips.length > 0) {
-                return new PrivateDnsConfig(name, ips);
-            }
-        } catch (GaiException ignored) {}
-
-        return null;
+            final InetAddress[] ips = ResolvUtil.blockingResolveAllLocally(network, name);
+            return new PrivateDnsConfig(name, ips);
+        } catch (UnknownHostException uhe) {
+            return new PrivateDnsConfig(name, null);
+        }
     }
 
     public static Uri[] getPrivateDnsSettingsUris() {
-        final Uri[] uris = new Uri[2];
-        uris[0] = Settings.Global.getUriFor(PRIVATE_DNS_MODE);
-        uris[1] = Settings.Global.getUriFor(PRIVATE_DNS_SPECIFIER);
-        return uris;
+        return new Uri[]{
+            Settings.Global.getUriFor(PRIVATE_DNS_MODE),
+            Settings.Global.getUriFor(PRIVATE_DNS_SPECIFIER),
+        };
     }
 
     private final Context mContext;
@@ -203,7 +236,7 @@ public class DnsManager {
         // NetworkMonitor to decide which networks need validation and runs the
         // blocking calls to resolve Private DNS strict mode hostnames.
         //
-        // At this time we do attempt to enable Private DNS on non-Internet
+        // At this time we do not attempt to enable Private DNS on non-Internet
         // networks like IMS.
         final PrivateDnsConfig privateDnsCfg = mPrivateDnsMap.get(netId);
 

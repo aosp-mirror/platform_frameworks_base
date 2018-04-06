@@ -23,7 +23,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.ALLOW_FULL_ONLY;
 
-import android.app.ActivityOptions;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -33,7 +32,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.FactoryTest;
 import android.os.Handler;
 import android.os.IBinder;
@@ -322,7 +320,7 @@ public class ActivityStartController {
 
                     // Collect information about the target of the Intent.
                     ActivityInfo aInfo = mSupervisor.resolveActivity(intent, resolvedTypes[i], 0,
-                            null, userId);
+                            null, userId, realCallingUid);
                     // TODO: New, check if this is correct
                     aInfo = mService.getActivityInfoForUser(aInfo, userId);
 

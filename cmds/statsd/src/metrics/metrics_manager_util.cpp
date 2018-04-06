@@ -263,15 +263,14 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
 }
 
 bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long timeBaseSec,
-                 const unordered_map<int64_t, int>& logTrackerMap,
+                 UidMap& uidMap, const unordered_map<int64_t, int>& logTrackerMap,
                  const unordered_map<int64_t, int>& conditionTrackerMap,
                  const vector<sp<LogMatchingTracker>>& allAtomMatchers,
                  vector<sp<ConditionTracker>>& allConditionTrackers,
                  vector<sp<MetricProducer>>& allMetricProducers,
                  unordered_map<int, std::vector<int>>& conditionToMetricMap,
                  unordered_map<int, std::vector<int>>& trackerToMetricMap,
-                 unordered_map<int64_t, int>& metricMap,
-                 std::set<int64_t> &noReportMetricIds) {
+                 unordered_map<int64_t, int>& metricMap, std::set<int64_t>& noReportMetricIds) {
     sp<ConditionWizard> wizard = new ConditionWizard(allConditionTrackers);
     const int allMetricsCount = config.count_metric_size() + config.duration_metric_size() +
                                 config.event_metric_size() + config.value_metric_size();
@@ -538,6 +537,9 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long ti
         }
         noReportMetricIds.insert(no_report_metric);
     }
+    for (auto it : allMetricProducers) {
+        uidMap.addListener(it);
+    }
     return true;
 }
 
@@ -599,10 +601,11 @@ bool initAlerts(const StatsdConfig& config,
 
 bool initAlarms(const StatsdConfig& config, const ConfigKey& key,
                 const sp<AlarmMonitor>& periodicAlarmMonitor,
-                const long timeBaseSec,
+                const long timeBaseSec, const long currentTimeSec,
                 vector<sp<AlarmTracker>>& allAlarmTrackers) {
     unordered_map<int64_t, int> alarmTrackerMap;
     uint64_t startMillis = (uint64_t)timeBaseSec * MS_PER_SEC;
+    uint64_t currentTimeMillis = (uint64_t)currentTimeSec * MS_PER_SEC;
     for (int i = 0; i < config.alarm_size(); i++) {
         const Alarm& alarm = config.alarm(i);
         if (alarm.offset_millis() <= 0) {
@@ -615,7 +618,8 @@ bool initAlarms(const StatsdConfig& config, const ConfigKey& key,
         }
         alarmTrackerMap.insert(std::make_pair(alarm.id(), allAlarmTrackers.size()));
         allAlarmTrackers.push_back(
-            new AlarmTracker(startMillis, alarm, key, periodicAlarmMonitor));
+            new AlarmTracker(startMillis, currentTimeMillis,
+                             alarm, key, periodicAlarmMonitor));
     }
     for (int i = 0; i < config.subscription_size(); ++i) {
         const Subscription& subscription = config.subscription(i);
@@ -640,12 +644,10 @@ bool initAlarms(const StatsdConfig& config, const ConfigKey& key,
     return true;
 }
 
-bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config,
-                      const UidMap& uidMap,
+bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& uidMap,
                       const sp<AlarmMonitor>& anomalyAlarmMonitor,
-                      const sp<AlarmMonitor>& periodicAlarmMonitor,
-                      const long timeBaseSec,
-                      set<int>& allTagIds,
+                      const sp<AlarmMonitor>& periodicAlarmMonitor, const long timeBaseSec,
+                      const long currentTimeSec, set<int>& allTagIds,
                       vector<sp<LogMatchingTracker>>& allAtomMatchers,
                       vector<sp<ConditionTracker>>& allConditionTrackers,
                       vector<sp<MetricProducer>>& allMetricProducers,
@@ -654,7 +656,7 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config,
                       unordered_map<int, std::vector<int>>& conditionToMetricMap,
                       unordered_map<int, std::vector<int>>& trackerToMetricMap,
                       unordered_map<int, std::vector<int>>& trackerToConditionMap,
-                      std::set<int64_t> &noReportMetricIds) {
+                      std::set<int64_t>& noReportMetricIds) {
     unordered_map<int64_t, int> logTrackerMap;
     unordered_map<int64_t, int> conditionTrackerMap;
     unordered_map<int64_t, int> metricProducerMap;
@@ -671,9 +673,10 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config,
         return false;
     }
 
-    if (!initMetrics(key, config, timeBaseSec, logTrackerMap, conditionTrackerMap, allAtomMatchers,
-                     allConditionTrackers, allMetricProducers, conditionToMetricMap,
-                     trackerToMetricMap, metricProducerMap, noReportMetricIds)) {
+    if (!initMetrics(key, config, timeBaseSec, uidMap, logTrackerMap, conditionTrackerMap,
+                     allAtomMatchers, allConditionTrackers, allMetricProducers,
+                     conditionToMetricMap, trackerToMetricMap, metricProducerMap,
+                     noReportMetricIds)) {
         ALOGE("initMetricProducers failed");
         return false;
     }
@@ -682,7 +685,8 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config,
         ALOGE("initAlerts failed");
         return false;
     }
-    if (!initAlarms(config, key, periodicAlarmMonitor, timeBaseSec, allPeriodicAlarmTrackers)) {
+    if (!initAlarms(config, key, periodicAlarmMonitor,
+                    timeBaseSec, currentTimeSec, allPeriodicAlarmTrackers)) {
         ALOGE("initAlarms failed");
         return false;
     }

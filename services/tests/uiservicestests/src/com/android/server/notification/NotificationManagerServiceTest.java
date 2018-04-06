@@ -2184,7 +2184,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testReadPolicyXml_readApprovedServicesFromXml() throws Exception {
-        final String preupgradeXml = "<notification-policy version=\"1\">"
+        final String upgradeXml = "<notification-policy version=\"1\">"
                 + "<zen></zen>"
                 + "<ranking></ranking>"
                 + "<enabled_listeners>"
@@ -2198,7 +2198,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 + "</dnd_apps>"
                 + "</notification-policy>";
         mService.readPolicyXml(
-                new BufferedInputStream(new ByteArrayInputStream(preupgradeXml.getBytes())), false);
+                new BufferedInputStream(new ByteArrayInputStream(upgradeXml.getBytes())), false);
         verify(mListeners, times(1)).readXml(any());
         verify(mConditionProviders, times(1)).readXml(any());
         verify(mAssistants, times(1)).readXml(any());
@@ -2207,6 +2207,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mListeners, times(1)).migrateToXml();
         verify(mConditionProviders, times(1)).migrateToXml();
         verify(mAssistants, times(1)).migrateToXml();
+        verify(mAssistants, times(2)).ensureAssistant();
     }
 
     @Test
@@ -2225,6 +2226,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mListeners, times(2)).migrateToXml();
         verify(mConditionProviders, times(2)).migrateToXml();
         verify(mAssistants, times(2)).migrateToXml();
+        verify(mAssistants, times(2)).ensureAssistant();
     }
 
 

@@ -23,6 +23,9 @@ import static android.content.Intent.FLAG_ACTIVITY_NO_ANIMATION;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_HOME_IN_PLACE;
+import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_HOME_TO_ORIGINAL_POSITION;
+import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_HOME_TO_TOP;
 
 import android.app.ActivityOptions;
 import android.content.ComponentName;
@@ -32,6 +35,7 @@ import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Slog;
 import android.view.IRecentsAnimationRunner;
+import com.android.server.wm.RecentsAnimationController;
 import com.android.server.wm.RecentsAnimationController.RecentsAnimationCallbacks;
 import com.android.server.wm.WindowManagerService;
 
@@ -84,6 +88,13 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
             }
         }
 
+        // Send launch hint if we are actually launching home. If it's already visible (shouldn't
+        // happen in general) we don't need to send it.
+        if (homeActivity == null || !homeActivity.visible) {
+            mStackSupervisor.sendPowerHintForLaunchStartIfNeeded(true /* forceSend */,
+                    homeActivity);
+        }
+
         mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunching();
 
         mService.setRunningRemoteAnimation(mCallingPid, true);
@@ -123,7 +134,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
 
             // Fetch all the surface controls and pass them to the client to get the animation
             // started
-            mWindowManager.cancelRecentsAnimation();
+            mWindowManager.cancelRecentsAnimation(REORDER_MOVE_HOME_TO_ORIGINAL_POSITION);
             mWindowManager.initializeRecentsAnimation(recentsAnimationRunner, this,
                     display.mDisplayId, mStackSupervisor.mRecentTasks.getRecentTaskIds());
 
@@ -140,9 +151,15 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
     }
 
     @Override
-    public void onAnimationFinished(boolean moveHomeToTop) {
+    public void onAnimationFinished(@RecentsAnimationController.ReorderMode int reorderMode) {
         synchronized (mService) {
             if (mWindowManager.getRecentsAnimationController() == null) return;
+
+            // Just to be sure end the launch hint in case home was never launched. However, if
+            // we're keeping home and making it visible, we can leave it on.
+            if (reorderMode != REORDER_KEEP_HOME_IN_PLACE) {
+                mStackSupervisor.sendPowerHintForLaunchEndIfNeeded();
+            }
 
             mService.setRunningRemoteAnimation(mCallingPid, false);
 
@@ -151,9 +168,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
                         "RecentsAnimation#onAnimationFinished_inSurfaceTransaction");
                 mWindowManager.deferSurfaceLayout();
                 try {
-                    mWindowManager.cleanupRecentsAnimation(moveHomeToTop);
+                    mWindowManager.cleanupRecentsAnimation(reorderMode);
 
-                    // Move the home stack to the front
                     final ActivityRecord homeActivity = mStackSupervisor.getHomeActivity();
                     if (homeActivity == null) {
                         return;
@@ -162,15 +178,19 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
                     // Restore the launched-behind state
                     homeActivity.mLaunchTaskBehind = false;
 
-                    if (moveHomeToTop) {
+                    if (reorderMode == REORDER_MOVE_HOME_TO_TOP) {
                         // Bring the home stack to the front
                         final ActivityStack homeStack = homeActivity.getStack();
                         mStackSupervisor.mNoAnimActivities.add(homeActivity);
                         homeStack.moveToFront("RecentsAnimation.onAnimationFinished()");
-                    } else {
+                    } else if (reorderMode == REORDER_MOVE_HOME_TO_ORIGINAL_POSITION){
                         // Restore the home stack to its previous position
                         final ActivityDisplay display = homeActivity.getDisplay();
                         display.moveHomeStackBehindStack(mRestoreHomeBehindStack);
+                    } else {
+                        // Keep home stack in place, nothing changes, so ignore the transition logic
+                        // below
+                        return;
                     }
 
                     mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
@@ -180,6 +200,11 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
                     // No reason to wait for the pausing activity in this case, as the hiding of
                     // surfaces needs to be done immediately.
                     mWindowManager.executeAppTransition();
+
+                    // After reordering the stacks, reset the minimized state. At this point, either
+                    // home is now top-most and we will stay minimized (if in split-screen), or we
+                    // will have returned to the app, and the minimized state should be reset
+                    mWindowManager.checkSplitScreenMinimizedChanged(true /* animate */);
                 } finally {
                     mWindowManager.continueSurfaceLayout();
                     Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);

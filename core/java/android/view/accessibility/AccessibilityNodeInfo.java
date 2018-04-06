@@ -3874,6 +3874,24 @@ public class AccessibilityNodeInfo implements Parcelable {
                         | FLAG_PREFETCH_DESCENDANTS | FLAG_PREFETCH_SIBLINGS, null);
     }
 
+    /** @hide */
+    public static String idToString(long accessibilityId) {
+        int accessibilityViewId = getAccessibilityViewId(accessibilityId);
+        int virtualDescendantId = getVirtualDescendantId(accessibilityId);
+        return virtualDescendantId == AccessibilityNodeProvider.HOST_VIEW_ID
+                ? idItemToString(accessibilityViewId)
+                : idItemToString(accessibilityViewId) + ":" + idItemToString(virtualDescendantId);
+    }
+
+    private static String idItemToString(int item) {
+        switch (item) {
+            case ROOT_ITEM_ID: return "ROOT";
+            case UNDEFINED_ITEM_ID: return "UNDEFINED";
+            case AccessibilityNodeProvider.HOST_VIEW_ID: return "HOST";
+            default: return "" + item;
+        }
+    }
+
     /**
      * A class defining an action that can be performed on an {@link AccessibilityNodeInfo}.
      * Each action has a unique id that is mandatory and optional data.

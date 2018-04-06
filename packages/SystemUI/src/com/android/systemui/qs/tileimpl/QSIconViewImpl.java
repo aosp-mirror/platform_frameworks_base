@@ -16,6 +16,8 @@ package com.android.systemui.qs.tileimpl;
 
 import static com.android.systemui.qs.tileimpl.QSTileImpl.getColorForState;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -127,7 +129,6 @@ public class QSIconViewImpl extends QSIconView {
     }
 
     protected void setIcon(ImageView iv, QSTile.State state) {
-        updateIcon(iv, state);
         if (state.disabledByPolicy) {
             iv.setColorFilter(getContext().getColor(R.color.qs_tile_disabled_color));
         } else {
@@ -137,7 +138,7 @@ public class QSIconViewImpl extends QSIconView {
             int color = getColor(state.state);
             mState = state.state;
             if (iv.isShown() && mTint != 0) {
-                animateGrayScale(mTint, color, iv);
+                animateGrayScale(mTint, color, iv, () -> updateIcon(iv, state));
                 mTint = color;
             } else {
                 if (iv instanceof AlphaControlledSlashImageView) {
@@ -147,7 +148,10 @@ public class QSIconViewImpl extends QSIconView {
                     setTint(iv, color);
                 }
                 mTint = color;
+                updateIcon(iv, state);
             }
+        } else {
+            updateIcon(iv, state);
         }
     }
 
@@ -155,12 +159,13 @@ public class QSIconViewImpl extends QSIconView {
         return getColorForState(getContext(), state);
     }
 
-    public static void animateGrayScale(int fromColor, int toColor, ImageView iv) {
+    private void animateGrayScale(int fromColor, int toColor, ImageView iv,
+        final Runnable endRunnable) {
         if (iv instanceof AlphaControlledSlashImageView) {
             ((AlphaControlledSlashImageView)iv)
                     .setFinalImageTintList(ColorStateList.valueOf(toColor));
         }
-        if (ValueAnimator.areAnimatorsEnabled()) {
+        if (mAnimationEnabled && ValueAnimator.areAnimatorsEnabled()) {
             final float fromAlpha = Color.alpha(fromColor);
             final float toAlpha = Color.alpha(toColor);
             final float fromChannel = Color.red(fromColor);
@@ -175,10 +180,16 @@ public class QSIconViewImpl extends QSIconView {
 
                 setTint(iv, Color.argb(alpha, channel, channel, channel));
             });
-
+            anim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    endRunnable.run();
+                }
+            });
             anim.start();
         } else {
             setTint(iv, toColor);
+            endRunnable.run();
         }
     }
 

@@ -17,6 +17,7 @@
 package android.service.textclassifier;
 
 import android.Manifest;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -97,7 +98,8 @@ public abstract class TextClassifierService extends Service {
             Preconditions.checkNotNull(request);
             Preconditions.checkNotNull(callback);
             TextClassifierService.this.onSuggestSelection(
-                    sessionId, request, mCancellationSignal,
+                    request.getText(), request.getStartIndex(), request.getEndIndex(),
+                    TextSelection.Options.from(sessionId, request), mCancellationSignal,
                     new Callback<TextSelection>() {
                         @Override
                         public void onSuccess(TextSelection result) {
@@ -130,7 +132,8 @@ public abstract class TextClassifierService extends Service {
             Preconditions.checkNotNull(request);
             Preconditions.checkNotNull(callback);
             TextClassifierService.this.onClassifyText(
-                    sessionId, request, mCancellationSignal,
+                    request.getText(), request.getStartIndex(), request.getEndIndex(),
+                    TextClassification.Options.from(sessionId, request), mCancellationSignal,
                     new Callback<TextClassification>() {
                         @Override
                         public void onSuccess(TextClassification result) {
@@ -161,7 +164,8 @@ public abstract class TextClassifierService extends Service {
             Preconditions.checkNotNull(request);
             Preconditions.checkNotNull(callback);
             TextClassifierService.this.onGenerateLinks(
-                    sessionId, request, mCancellationSignal,
+                    request.getText(), TextLinks.Options.from(sessionId, request),
+                    mCancellationSignal,
                     new Callback<TextLinks>() {
                         @Override
                         public void onSuccess(TextLinks result) {
@@ -234,6 +238,25 @@ public abstract class TextClassifierService extends Service {
             @NonNull CancellationSignal cancellationSignal,
             @NonNull Callback<TextSelection> callback);
 
+    // TODO: Remove once apps can build against the latest sdk.
+    /** @hide */
+    public void onSuggestSelection(
+            @NonNull CharSequence text,
+            @IntRange(from = 0) int selectionStartIndex,
+            @IntRange(from = 0) int selectionEndIndex,
+            @Nullable TextSelection.Options options,
+            @NonNull CancellationSignal cancellationSignal,
+            @NonNull Callback<TextSelection> callback) {
+        final TextClassificationSessionId sessionId = options.getSessionId();
+        final TextSelection.Request request = options.getRequest() != null
+                ? options.getRequest()
+                : new TextSelection.Request.Builder(
+                        text, selectionStartIndex, selectionEndIndex)
+                        .setDefaultLocales(options.getDefaultLocales())
+                        .build();
+        onSuggestSelection(sessionId, request, cancellationSignal, callback);
+    }
+
     /**
      * Classifies the specified text and returns a {@link TextClassification} object that can be
      * used to generate a widget for handling the classified text.
@@ -249,6 +272,26 @@ public abstract class TextClassifierService extends Service {
             @NonNull CancellationSignal cancellationSignal,
             @NonNull Callback<TextClassification> callback);
 
+    // TODO: Remove once apps can build against the latest sdk.
+    /** @hide */
+    public void onClassifyText(
+            @NonNull CharSequence text,
+            @IntRange(from = 0) int startIndex,
+            @IntRange(from = 0) int endIndex,
+            @Nullable TextClassification.Options options,
+            @NonNull CancellationSignal cancellationSignal,
+            @NonNull Callback<TextClassification> callback) {
+        final TextClassificationSessionId sessionId = options.getSessionId();
+        final TextClassification.Request request = options.getRequest() != null
+                ? options.getRequest()
+                : new TextClassification.Request.Builder(
+                        text, startIndex, endIndex)
+                        .setDefaultLocales(options.getDefaultLocales())
+                        .setReferenceTime(options.getReferenceTime())
+                        .build();
+        onClassifyText(sessionId, request, cancellationSignal, callback);
+    }
+
     /**
      * Generates and returns a {@link TextLinks} that may be applied to the text to annotate it with
      * links information.
@@ -263,6 +306,23 @@ public abstract class TextClassifierService extends Service {
             @NonNull TextLinks.Request request,
             @NonNull CancellationSignal cancellationSignal,
             @NonNull Callback<TextLinks> callback);
+
+    // TODO: Remove once apps can build against the latest sdk.
+    /** @hide */
+    public void onGenerateLinks(
+            @NonNull CharSequence text,
+            @Nullable TextLinks.Options options,
+            @NonNull CancellationSignal cancellationSignal,
+            @NonNull Callback<TextLinks> callback) {
+        final TextClassificationSessionId sessionId = options.getSessionId();
+        final TextLinks.Request request = options.getRequest() != null
+                ? options.getRequest()
+                : new TextLinks.Request.Builder(text)
+                        .setDefaultLocales(options.getDefaultLocales())
+                        .setEntityConfig(options.getEntityConfig())
+                        .build();
+        onGenerateLinks(sessionId, request, cancellationSignal, callback);
+    }
 
     /**
      * Writes the selection event.
@@ -283,17 +343,17 @@ public abstract class TextClassifierService extends Service {
      * @param context the text classification context
      * @param sessionId the session's Id
      */
-    public abstract void onCreateTextClassificationSession(
+    public void onCreateTextClassificationSession(
             @NonNull TextClassificationContext context,
-            @NonNull TextClassificationSessionId sessionId);
+            @NonNull TextClassificationSessionId sessionId) {}
 
     /**
      * Destroys the text classification session identified by the specified sessionId.
      *
      * @param sessionId the id of the session to destroy
      */
-    public abstract void onDestroyTextClassificationSession(
-            @NonNull TextClassificationSessionId sessionId);
+    public void onDestroyTextClassificationSession(
+            @NonNull TextClassificationSessionId sessionId) {}
 
     /**
      * Returns a TextClassifier that runs in this service's process.

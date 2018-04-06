@@ -36,7 +36,7 @@ public:
     // TODO: Pass in the start time from MetricsManager, it should be consistent for all metrics.
     EventMetricProducer(const ConfigKey& key, const EventMetric& eventMetric,
                         const int conditionIndex, const sp<ConditionWizard>& wizard,
-                        const uint64_t startTimeNs);
+                        const int64_t startTimeNs);
 
     virtual ~EventMetricProducer();
 
@@ -46,16 +46,17 @@ private:
             const ConditionKey& conditionKey, bool condition,
             const LogEvent& event) override;
 
-    void onDumpReportLocked(const uint64_t dumpTimeNs,
+    void onDumpReportLocked(const int64_t dumpTimeNs,
+                            const bool include_current_partial_bucket,
                             android::util::ProtoOutputStream* protoOutput) override;
 
     // Internal interface to handle condition change.
-    void onConditionChangedLocked(const bool conditionMet, const uint64_t eventTime) override;
+    void onConditionChangedLocked(const bool conditionMet, const int64_t eventTime) override;
 
     // Internal interface to handle sliced condition change.
-    void onSlicedConditionMayChangeLocked(bool overallCondition, const uint64_t eventTime) override;
+    void onSlicedConditionMayChangeLocked(bool overallCondition, const int64_t eventTime) override;
 
-    void dropDataLocked(const uint64_t dropTimeNs) override;
+    void dropDataLocked(const int64_t dropTimeNs) override;
 
     // Internal function to calculate the current used bytes.
     size_t byteSizeLocked() const override;

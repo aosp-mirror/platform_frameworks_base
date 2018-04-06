@@ -1857,26 +1857,7 @@ public final class Parcel {
         int code = readExceptionCode();
         if (code != 0) {
             String msg = readString();
-            String remoteStackTrace = null;
-            final int remoteStackPayloadSize = readInt();
-            if (remoteStackPayloadSize > 0) {
-                remoteStackTrace = readString();
-            }
-            Exception e = createException(code, msg);
-            // Attach remote stack trace if availalble
-            if (remoteStackTrace != null) {
-                RemoteException cause = new RemoteException(
-                        "Remote stack trace:\n" + remoteStackTrace, null, false, false);
-                try {
-                    Throwable rootCause = ExceptionUtils.getRootCause(e);
-                    if (rootCause != null) {
-                        rootCause.initCause(cause);
-                    }
-                } catch (RuntimeException ex) {
-                    Log.e(TAG, "Cannot set cause " + cause + " for " + e, ex);
-                }
-            }
-            SneakyThrow.sneakyThrow(e);
+            readException(code, msg);
         }
     }
 
@@ -1921,7 +1902,26 @@ public final class Parcel {
      * @param msg The exception message.
      */
     public final void readException(int code, String msg) {
-        SneakyThrow.sneakyThrow(createException(code, msg));
+        String remoteStackTrace = null;
+        final int remoteStackPayloadSize = readInt();
+        if (remoteStackPayloadSize > 0) {
+            remoteStackTrace = readString();
+        }
+        Exception e = createException(code, msg);
+        // Attach remote stack trace if availalble
+        if (remoteStackTrace != null) {
+            RemoteException cause = new RemoteException(
+                    "Remote stack trace:\n" + remoteStackTrace, null, false, false);
+            try {
+                Throwable rootCause = ExceptionUtils.getRootCause(e);
+                if (rootCause != null) {
+                    rootCause.initCause(cause);
+                }
+            } catch (RuntimeException ex) {
+                Log.e(TAG, "Cannot set cause " + cause + " for " + e, ex);
+            }
+        }
+        SneakyThrow.sneakyThrow(e);
     }
 
     /**

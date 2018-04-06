@@ -21,7 +21,9 @@
 #include "storage/StorageManager.h"
 
 #include "guardrail/StatsdStats.h"
+#include "stats_log_util.h"
 #include "stats_util.h"
+#include "stats_log_util.h"
 
 #include <android-base/file.h>
 #include <dirent.h>
@@ -109,9 +111,10 @@ void ConfigManager::UpdateConfig(const ConfigKey& key, const StatsdConfig& confi
         }
     }
 
+    const int64_t timestampNs = getElapsedRealtimeNs();
     // Tell everyone
-    for (sp<ConfigListener> listener:broadcastList) {
-        listener->OnConfigUpdated(key, config);
+    for (sp<ConfigListener> listener : broadcastList) {
+        listener->OnConfigUpdated(timestampNs, key, config);
     }
 }
 

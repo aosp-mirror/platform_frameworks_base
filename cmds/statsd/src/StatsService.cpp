@@ -501,7 +501,7 @@ status_t StatsService::cmd_dump_report(FILE* out, FILE* err, const Vector<String
         if (good) {
             vector<uint8_t> data;
             mProcessor->onDumpReport(ConfigKey(uid, StrToInt64(name)), getElapsedRealtimeNs(),
-                                     &data);
+                                     false /* include_current_bucket*/, &data);
             // TODO: print the returned StatsLogReport to file instead of printing to logcat.
             if (proto) {
                 for (size_t i = 0; i < data.size(); i ++) {
@@ -640,7 +640,7 @@ Status StatsService::informAllUidData(const vector<int32_t>& uid, const vector<i
                                          "Only system uid can call informAllUidData");
     }
 
-    mUidMap->updateMap(uid, version, app);
+    mUidMap->updateMap(getElapsedRealtimeNs(), uid, version, app);
     VLOG("StatsService::informAllUidData succeeded");
 
     return Status::ok();
@@ -653,7 +653,7 @@ Status StatsService::informOnePackage(const String16& app, int32_t uid, int64_t 
         return Status::fromExceptionCode(Status::EX_SECURITY,
                                          "Only system uid can call informOnePackage");
     }
-    mUidMap->updateApp(app, uid, version);
+    mUidMap->updateApp(getElapsedRealtimeNs(), app, uid, version);
     return Status::ok();
 }
 
@@ -664,7 +664,7 @@ Status StatsService::informOnePackageRemoved(const String16& app, int32_t uid) {
         return Status::fromExceptionCode(Status::EX_SECURITY,
                                          "Only system uid can call informOnePackageRemoved");
     }
-    mUidMap->removeApp(app, uid);
+    mUidMap->removeApp(getElapsedRealtimeNs(), app, uid);
     mConfigManager->RemoveConfigs(uid);
     return Status::ok();
 }
@@ -677,7 +677,7 @@ Status StatsService::informAnomalyAlarmFired() {
                                          "Only system uid can call informAnomalyAlarmFired");
     }
 
-    uint64_t currentTimeSec = getElapsedRealtimeSec();
+    int64_t currentTimeSec = getElapsedRealtimeSec();
     std::unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet =
             mAnomalyAlarmMonitor->popSoonerThan(static_cast<uint32_t>(currentTimeSec));
     if (alarmSet.size() > 0) {
@@ -698,7 +698,7 @@ Status StatsService::informAlarmForSubscriberTriggeringFired() {
                 "Only system uid can call informAlarmForSubscriberTriggeringFired");
     }
 
-    uint64_t currentTimeSec = getElapsedRealtimeSec();
+    int64_t currentTimeSec = getElapsedRealtimeSec();
     std::unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet =
             mPeriodicAlarmMonitor->popSoonerThan(static_cast<uint32_t>(currentTimeSec));
     if (alarmSet.size() > 0) {
@@ -800,7 +800,8 @@ Status StatsService::getData(int64_t key, vector<uint8_t>* output) {
     VLOG("StatsService::getData with Pid %i, Uid %i", ipc->getCallingPid(), ipc->getCallingUid());
     if (checkCallingPermission(String16(kPermissionDump))) {
         ConfigKey configKey(ipc->getCallingUid(), key);
-        mProcessor->onDumpReport(configKey, getElapsedRealtimeNs(), output);
+        mProcessor->onDumpReport(configKey, getElapsedRealtimeNs(),
+                                 false /* include_current_bucket*/, output);
         return Status::ok();
     } else {
         return Status::fromExceptionCode(binder::Status::EX_SECURITY);

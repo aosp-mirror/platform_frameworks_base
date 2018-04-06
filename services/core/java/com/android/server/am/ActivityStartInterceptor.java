@@ -21,6 +21,8 @@ import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
+import static android.app.admin.DevicePolicyManager.EXTRA_RESTRICTION;
+import static android.app.admin.DevicePolicyManager.POLICY_SUSPEND_PACKAGES;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.Intent.EXTRA_INTENT;
 import static android.content.Intent.EXTRA_PACKAGE_NAME;
@@ -30,6 +32,9 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+
+import android.Manifest;
 import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.app.admin.DevicePolicyManagerInternal;
@@ -38,6 +43,7 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.os.Binder;
@@ -48,6 +54,7 @@ import android.os.UserManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HarmfulAppWarningActivity;
+import com.android.internal.app.SuspendedAppActivity;
 import com.android.internal.app.UnlaunchableAppActivity;
 import com.android.server.LocalServices;
 
@@ -148,7 +155,7 @@ class ActivityStartInterceptor {
         mInTask = inTask;
         mActivityOptions = activityOptions;
 
-        if (interceptSuspendPackageIfNeed()) {
+        if (interceptSuspendedPackageIfNeeded()) {
             // Skip the rest of interceptions as the package is suspended by device admin so
             // no user action can undo this.
             return true;
@@ -201,18 +208,15 @@ class ActivityStartInterceptor {
         return true;
     }
 
-    private boolean interceptSuspendPackageIfNeed() {
-        // Do not intercept if the admin did not suspend the package
-        if (mAInfo == null || mAInfo.applicationInfo == null ||
-                (mAInfo.applicationInfo.flags & FLAG_SUSPENDED) == 0) {
-            return false;
-        }
+    private boolean interceptSuspendedByAdminPackage() {
         DevicePolicyManagerInternal devicePolicyManager = LocalServices
                 .getService(DevicePolicyManagerInternal.class);
         if (devicePolicyManager == null) {
             return false;
         }
         mIntent = devicePolicyManager.createShowAdminSupportIntent(mUserId, true);
+        mIntent.putExtra(EXTRA_RESTRICTION, POLICY_SUSPEND_PACKAGES);
+
         mCallingPid = mRealCallingPid;
         mCallingUid = mRealCallingUid;
         mResolvedType = null;
@@ -223,6 +227,55 @@ class ActivityStartInterceptor {
         } else {
             mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId);
         }
+        mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
+        return true;
+    }
+
+    private Intent createSuspendedAppInterceptIntent(String suspendedPackage,
+            String suspendingPackage, String dialogMessage, int userId) {
+        final Intent interceptIntent = new Intent(mServiceContext, SuspendedAppActivity.class)
+                .putExtra(Intent.EXTRA_PACKAGE_NAME, suspendedPackage)
+                .putExtra(SuspendedAppActivity.EXTRA_DIALOG_MESSAGE, dialogMessage)
+                .putExtra(Intent.EXTRA_USER_ID, userId)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+
+        final Intent moreDetailsIntent = new Intent(Intent.ACTION_SHOW_SUSPENDED_APP_DETAILS)
+                .setPackage(suspendingPackage);
+        final String requiredPermission = Manifest.permission.SEND_SHOW_SUSPENDED_APP_DETAILS;
+        final ResolveInfo resolvedInfo = mSupervisor.resolveIntent(moreDetailsIntent, null, userId);
+        if (resolvedInfo != null && resolvedInfo.activityInfo != null
+                && requiredPermission.equals(resolvedInfo.activityInfo.permission)) {
+            moreDetailsIntent.putExtra(Intent.EXTRA_PACKAGE_NAME, suspendedPackage)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            interceptIntent.putExtra(SuspendedAppActivity.EXTRA_MORE_DETAILS_INTENT,
+                    moreDetailsIntent);
+        }
+        return interceptIntent;
+    }
+
+    private boolean interceptSuspendedPackageIfNeeded() {
+        // Do not intercept if the package is not suspended
+        if (mAInfo == null || mAInfo.applicationInfo == null ||
+                (mAInfo.applicationInfo.flags & FLAG_SUSPENDED) == 0) {
+            return false;
+        }
+        final PackageManagerInternal pmi = mService.getPackageManagerInternalLocked();
+        if (pmi == null) {
+            return false;
+        }
+        final String suspendedPackage = mAInfo.applicationInfo.packageName;
+        final String suspendingPackage = pmi.getSuspendingPackage(suspendedPackage, mUserId);
+        if (PLATFORM_PACKAGE_NAME.equals(suspendingPackage)) {
+            return interceptSuspendedByAdminPackage();
+        }
+        final String dialogMessage = pmi.getSuspendedDialogMessage(suspendedPackage, mUserId);
+        mIntent = createSuspendedAppInterceptIntent(suspendedPackage, suspendingPackage,
+                dialogMessage, mUserId);
+        mCallingPid = mRealCallingPid;
+        mCallingUid = mRealCallingUid;
+        mResolvedType = null;
+        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, 0);
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
     }

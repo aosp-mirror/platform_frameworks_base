@@ -229,10 +229,11 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         // Bump the notification when the bucket dropped.
                         .setWhen(mWarningTriggerTimeMs)
                         .setShowWhen(false)
-                        .setContentTitle(title)
                         .setContentText(contentText)
+                        .setContentTitle(title)
                         .setOnlyAlertOnce(true)
                         .setDeleteIntent(pendingBroadcast(ACTION_DISMISSED_WARNING))
+                        .setStyle(new Notification.BigTextStyle().bigText(contentText))
                         .setVisibility(Notification.VISIBILITY_PUBLIC);
         if (hasBatterySettings()) {
             nb.setContentIntent(pendingBroadcast(ACTION_SHOW_BATTERY_SETTINGS));
@@ -483,16 +484,24 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         d.setMessage(mContext.getString(R.string.auto_saver_enabled_text,
                 getLowBatteryAutoTriggerDefaultLevel()));
 
-        // Negative == "got it". Just close the dialog. Battery saver has already been enabled.
-        d.setNegativeButton(R.string.auto_saver_okay_action, null);
-        d.setPositiveButton(R.string.open_saver_setting_action, (dialog, which) ->
-                mContext.startActivity(actionBatterySaverSetting));
+        // "Got it". Just close the dialog. Automatic battery has been enabled already.
+        d.setPositiveButton(R.string.auto_saver_okay_action,
+                (dialog, which) -> onAutoSaverEnabledConfirmationClosed());
+
+        // "Settings" -> Opens the battery saver settings activity.
+        d.setNeutralButton(R.string.open_saver_setting_action, (dialog, which) -> {
+            mContext.startActivity(actionBatterySaverSetting);
+            onAutoSaverEnabledConfirmationClosed();
+        });
         d.setShowForAllUsers(true);
-        d.setOnDismissListener((dialog) -> mSaverEnabledConfirmation = null);
+        d.setOnDismissListener((dialog) -> onAutoSaverEnabledConfirmationClosed());
         d.show();
         mSaverEnabledConfirmation = d;
     }
 
+    private void onAutoSaverEnabledConfirmationClosed() {
+        mSaverEnabledConfirmation = null;
+    }
 
     private void setSaverMode(boolean mode, boolean needFirstTimeWarning) {
         BatterySaverUtils.setPowerSaveMode(mContext, mode, needFirstTimeWarning);

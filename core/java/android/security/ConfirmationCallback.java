@@ -33,22 +33,22 @@ public abstract class ConfirmationCallback {
      *
      * @param dataThatWasConfirmed the data that was confirmed, see above for the format.
      */
-    public void onConfirmedByUser(@NonNull byte[] dataThatWasConfirmed) {}
+    public void onConfirmed(@NonNull byte[] dataThatWasConfirmed) {}
 
     /**
      * Called when the requested prompt was dismissed (not accepted) by the user.
      */
-    public void onDismissedByUser() {}
+    public void onDismissed() {}
 
     /**
      * Called when the requested prompt was dismissed by the application.
      */
-    public void onDismissedByApplication() {}
+    public void onCanceled() {}
 
     /**
      * Called when the requested prompt was dismissed because of a low-level error.
      *
-     * @param e an exception representing the error.
+     * @param e a throwable representing the error.
      */
-    public void onError(Exception e) {}
+    public void onError(Throwable e) {}
 }

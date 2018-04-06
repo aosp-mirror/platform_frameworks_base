@@ -49,20 +49,25 @@ const int FIELD_ID_UIDMAP_STATS = 8;
 const int FIELD_ID_ANOMALY_ALARM_STATS = 9;
 // const int FIELD_ID_PULLED_ATOM_STATS = 10; // The proto is written in stats_log_util.cpp
 const int FIELD_ID_LOGGER_ERROR_STATS = 11;
-const int FIELD_ID_SUBSCRIBER_ALARM_STATS = 12;
+const int FIELD_ID_PERIODIC_ALARM_STATS = 12;
+const int FIELD_ID_SKIPPED_LOG_EVENT_STATS = 13;
 
 const int FIELD_ID_ATOM_STATS_TAG = 1;
 const int FIELD_ID_ATOM_STATS_COUNT = 2;
 
 const int FIELD_ID_ANOMALY_ALARMS_REGISTERED = 1;
-const int FIELD_ID_SUBSCRIBER_ALARMS_REGISTERED = 1;
+const int FIELD_ID_PERIODIC_ALARMS_REGISTERED = 1;
 
 const int FIELD_ID_LOGGER_STATS_TIME = 1;
 const int FIELD_ID_LOGGER_STATS_ERROR_CODE = 2;
 
+const int FIELD_ID_SKIPPED_LOG_EVENT_STATS_TAG = 1;
+const int FIELD_ID_SKIPPED_LOG_EVENT_STATS_TIMESTAMP = 2;
+
 const int FIELD_ID_CONFIG_STATS_UID = 1;
 const int FIELD_ID_CONFIG_STATS_ID = 2;
 const int FIELD_ID_CONFIG_STATS_CREATION = 3;
+const int FIELD_ID_CONFIG_STATS_RESET = 19;
 const int FIELD_ID_CONFIG_STATS_DELETION = 4;
 const int FIELD_ID_CONFIG_STATS_METRIC_COUNT = 5;
 const int FIELD_ID_CONFIG_STATS_CONDITION_COUNT = 6;
@@ -71,12 +76,16 @@ const int FIELD_ID_CONFIG_STATS_ALERT_COUNT = 8;
 const int FIELD_ID_CONFIG_STATS_VALID = 9;
 const int FIELD_ID_CONFIG_STATS_BROADCAST = 10;
 const int FIELD_ID_CONFIG_STATS_DATA_DROP = 11;
-const int FIELD_ID_CONFIG_STATS_DUMP_REPORT = 12;
+const int FIELD_ID_CONFIG_STATS_DUMP_REPORT_TIME = 12;
+const int FIELD_ID_CONFIG_STATS_DUMP_REPORT_BYTES = 20;
 const int FIELD_ID_CONFIG_STATS_MATCHER_STATS = 13;
 const int FIELD_ID_CONFIG_STATS_CONDITION_STATS = 14;
 const int FIELD_ID_CONFIG_STATS_METRIC_STATS = 15;
 const int FIELD_ID_CONFIG_STATS_ALERT_STATS = 16;
 const int FIELD_ID_CONFIG_STATS_METRIC_DIMENSION_IN_CONDITION_STATS = 17;
+const int FIELD_ID_CONFIG_STATS_ANNOTATION = 18;
+const int FIELD_ID_CONFIG_STATS_ANNOTATION_INT64 = 1;
+const int FIELD_ID_CONFIG_STATS_ANNOTATION_INT32 = 2;
 
 const int FIELD_ID_MATCHER_STATS_ID = 1;
 const int FIELD_ID_MATCHER_STATS_COUNT = 2;
@@ -87,11 +96,10 @@ const int FIELD_ID_METRIC_STATS_COUNT = 2;
 const int FIELD_ID_ALERT_STATS_ID = 1;
 const int FIELD_ID_ALERT_STATS_COUNT = 2;
 
-const int FIELD_ID_UID_MAP_SNAPSHOTS = 1;
-const int FIELD_ID_UID_MAP_CHANGES = 2;
-const int FIELD_ID_UID_MAP_BYTES_USED = 3;
-const int FIELD_ID_UID_MAP_DROPPED_SNAPSHOTS = 4;
-const int FIELD_ID_UID_MAP_DROPPED_CHANGES = 5;
+const int FIELD_ID_UID_MAP_CHANGES = 1;
+const int FIELD_ID_UID_MAP_BYTES_USED = 2;
+const int FIELD_ID_UID_MAP_DROPPED_CHANGES = 3;
+const int FIELD_ID_UID_MAP_DELETED_APPS = 4;
 
 const std::map<int, std::pair<size_t, size_t>> StatsdStats::kAtomDimensionKeySizeLimitMap = {
         {android::util::CPU_TIME_PER_UID_FREQ, {6000, 10000}},
@@ -116,8 +124,10 @@ void StatsdStats::addToIceBoxLocked(shared_ptr<ConfigStats>& stats) {
     mIceBox.push_back(stats);
 }
 
-void StatsdStats::noteConfigReceived(const ConfigKey& key, int metricsCount, int conditionsCount,
-                                     int matchersCount, int alertsCount, bool isValid) {
+void StatsdStats::noteConfigReceived(
+        const ConfigKey& key, int metricsCount, int conditionsCount, int matchersCount,
+        int alertsCount, const std::list<std::pair<const int64_t, const int32_t>>& annotations,
+        bool isValid) {
     lock_guard<std::mutex> lock(mLock);
     int32_t nowTimeSec = getWallClockSec();
 
@@ -133,6 +143,9 @@ void StatsdStats::noteConfigReceived(const ConfigKey& key, int metricsCount, int
     configStats->matcher_count = matchersCount;
     configStats->alert_count = alertsCount;
     configStats->is_valid = isValid;
+    for (auto& v : annotations) {
+        configStats->annotations.emplace_back(v);
+    }
 
     if (isValid) {
         mConfigStats[key] = configStats;
@@ -155,6 +168,18 @@ void StatsdStats::noteConfigRemovedInternalLocked(const ConfigKey& key) {
 void StatsdStats::noteConfigRemoved(const ConfigKey& key) {
     lock_guard<std::mutex> lock(mLock);
     noteConfigRemovedInternalLocked(key);
+}
+
+void StatsdStats::noteConfigResetInternalLocked(const ConfigKey& key) {
+    auto it = mConfigStats.find(key);
+    if (it != mConfigStats.end()) {
+        it->second->reset_time_sec = getWallClockSec();
+    }
+}
+
+void StatsdStats::noteConfigReset(const ConfigKey& key) {
+    lock_guard<std::mutex> lock(mLock);
+    noteConfigResetInternalLocked(key);
 }
 
 void StatsdStats::noteBroadcastSent(const ConfigKey& key) {
@@ -191,32 +216,32 @@ void StatsdStats::noteDataDropped(const ConfigKey& key, int32_t timeSec) {
     it->second->data_drop_time_sec.push_back(timeSec);
 }
 
-void StatsdStats::noteMetricsReportSent(const ConfigKey& key) {
-    noteMetricsReportSent(key, getWallClockSec());
+void StatsdStats::noteMetricsReportSent(const ConfigKey& key, const size_t num_bytes) {
+    noteMetricsReportSent(key, num_bytes, getWallClockSec());
 }
 
-void StatsdStats::noteMetricsReportSent(const ConfigKey& key, int32_t timeSec) {
+void StatsdStats::noteMetricsReportSent(const ConfigKey& key, const size_t num_bytes,
+                                        int32_t timeSec) {
     lock_guard<std::mutex> lock(mLock);
     auto it = mConfigStats.find(key);
     if (it == mConfigStats.end()) {
         ALOGE("Config key %s not found!", key.ToString().c_str());
         return;
     }
-    if (it->second->dump_report_time_sec.size() == kMaxTimestampCount) {
-        it->second->dump_report_time_sec.pop_front();
+    if (it->second->dump_report_stats.size() == kMaxTimestampCount) {
+        it->second->dump_report_stats.pop_front();
     }
-    it->second->dump_report_time_sec.push_back(timeSec);
+    it->second->dump_report_stats.push_back(std::make_pair(timeSec, num_bytes));
 }
 
-void StatsdStats::noteUidMapDropped(int snapshots, int deltas) {
+void StatsdStats::noteUidMapDropped(int deltas) {
     lock_guard<std::mutex> lock(mLock);
-    mUidMapStats.dropped_snapshots += mUidMapStats.dropped_snapshots + snapshots;
     mUidMapStats.dropped_changes += mUidMapStats.dropped_changes + deltas;
 }
 
-void StatsdStats::setUidMapSnapshots(int snapshots) {
+void StatsdStats::noteUidMapAppDeletionDropped() {
     lock_guard<std::mutex> lock(mLock);
-    mUidMapStats.snapshots = snapshots;
+    mUidMapStats.deleted_apps++;
 }
 
 void StatsdStats::setUidMapChanges(int changes) {
@@ -325,6 +350,15 @@ void StatsdStats::noteAtomLogged(int atomId, int32_t timeSec) {
     mPushedAtomStats[atomId]++;
 }
 
+void StatsdStats::noteLogEventSkipped(int tag, int64_t timestamp) {
+    lock_guard<std::mutex> lock(mLock);
+    // grows strictly one at a time. so it won't > kMaxSkippedLogEvents
+    if (mSkippedLogEvents.size() == kMaxSkippedLogEvents) {
+        mSkippedLogEvents.pop_front();
+    }
+    mSkippedLogEvents.push_back(std::make_pair(tag, timestamp));
+}
+
 void StatsdStats::noteLoggerError(int error) {
     lock_guard<std::mutex> lock(mLock);
     // grows strictly one at a time. so it won't > kMaxLoggerErrors
@@ -347,10 +381,12 @@ void StatsdStats::resetInternalLocked() {
     mAnomalyAlarmRegisteredStats = 0;
     mPeriodicAlarmRegisteredStats = 0;
     mLoggerErrors.clear();
+    mSkippedLogEvents.clear();
     for (auto& config : mConfigStats) {
         config.second->broadcast_sent_time_sec.clear();
         config.second->data_drop_time_sec.clear();
-        config.second->dump_report_time_sec.clear();
+        config.second->dump_report_stats.clear();
+        config.second->annotations.clear();
         config.second->matcher_stats.clear();
         config.second->condition_stats.clear();
         config.second->metric_stats.clear();
@@ -369,10 +405,11 @@ void StatsdStats::dumpStats(FILE* out) const {
     fprintf(out, "%lu Config in icebox: \n", (unsigned long)mIceBox.size());
     for (const auto& configStats : mIceBox) {
         fprintf(out,
-                "Config {%d_%lld}: creation=%d, deletion=%d, #metric=%d, #condition=%d, "
+                "Config {%d_%lld}: creation=%d, deletion=%d, reset=%d, #metric=%d, #condition=%d, "
                 "#matcher=%d, #alert=%d,  valid=%d\n",
                 configStats->uid, (long long)configStats->id, configStats->creation_time_sec,
-                configStats->deletion_time_sec, configStats->metric_count,
+                configStats->deletion_time_sec, configStats->reset_time_sec,
+                configStats->metric_count,
                 configStats->condition_count, configStats->matcher_count, configStats->alert_count,
                 configStats->is_valid);
 
@@ -394,6 +431,11 @@ void StatsdStats::dumpStats(FILE* out) const {
                 configStats->deletion_time_sec, configStats->metric_count,
                 configStats->condition_count, configStats->matcher_count, configStats->alert_count,
                 configStats->is_valid);
+        for (const auto& annotation : configStats->annotations) {
+            fprintf(out, "\tannotation: %lld, %d\n", (long long)annotation.first,
+                    annotation.second);
+        }
+
         for (const auto& broadcastTime : configStats->broadcast_sent_time_sec) {
             fprintf(out, "\tbroadcast time: %d\n", broadcastTime);
         }
@@ -402,8 +444,8 @@ void StatsdStats::dumpStats(FILE* out) const {
             fprintf(out, "\tdata drop time: %d\n", dataDropTime);
         }
 
-        for (const auto& dumpTime : configStats->dump_report_time_sec) {
-            fprintf(out, "\tdump report time: %d\n", dumpTime);
+        for (const auto& dump : configStats->dump_report_stats) {
+            fprintf(out, "\tdump report time: %d bytes: %lld\n", dump.first, (long long)dump.second);
         }
 
         for (const auto& stats : pair.second->matcher_stats) {
@@ -450,11 +492,9 @@ void StatsdStats::dumpStats(FILE* out) const {
         fprintf(out, "Subscriber alarm registrations: %d\n", mPeriodicAlarmRegisteredStats);
     }
 
-    fprintf(out,
-            "UID map stats: bytes=%d, snapshots=%d, changes=%d, snapshots lost=%d, changes "
-            "lost=%d\n",
-            mUidMapStats.bytes_used, mUidMapStats.snapshots, mUidMapStats.changes,
-            mUidMapStats.dropped_snapshots, mUidMapStats.dropped_changes);
+    fprintf(out, "UID map stats: bytes=%d, changes=%d, deleted=%d, changes lost=%d\n",
+            mUidMapStats.bytes_used, mUidMapStats.changes, mUidMapStats.deleted_apps,
+            mUidMapStats.dropped_changes);
 
     for (const auto& error : mLoggerErrors) {
         time_t error_time = error.first;
@@ -462,6 +502,9 @@ void StatsdStats::dumpStats(FILE* out) const {
         char buffer[80];
         strftime(buffer, sizeof(buffer), "%Y-%m-%d %I:%M%p\n", error_tm);
         fprintf(out, "Logger error %d at %s\n", error.second, buffer);
+    }
+    for (const auto& skipped : mSkippedLogEvents) {
+        fprintf(out, "Log event (%d) skipped at %lld\n", skipped.first, (long long)skipped.second);
     }
 }
 
@@ -471,6 +514,9 @@ void addConfigStatsToProto(const ConfigStats& configStats, ProtoOutputStream* pr
     proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_STATS_UID, configStats.uid);
     proto->write(FIELD_TYPE_INT64 | FIELD_ID_CONFIG_STATS_ID, (long long)configStats.id);
     proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_STATS_CREATION, configStats.creation_time_sec);
+    if (configStats.reset_time_sec != 0) {
+        proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_STATS_RESET, configStats.reset_time_sec);
+    }
     if (configStats.deletion_time_sec != 0) {
         proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_STATS_DELETION,
                      configStats.deletion_time_sec);
@@ -492,9 +538,25 @@ void addConfigStatsToProto(const ConfigStats& configStats, ProtoOutputStream* pr
                      drop);
     }
 
-    for (const auto& dump : configStats.dump_report_time_sec) {
-        proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_STATS_DUMP_REPORT | FIELD_COUNT_REPEATED,
-                     dump);
+    for (const auto& dump : configStats.dump_report_stats) {
+        proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_STATS_DUMP_REPORT_TIME |
+                     FIELD_COUNT_REPEATED,
+                     dump.first);
+    }
+
+    for (const auto& dump : configStats.dump_report_stats) {
+        proto->write(FIELD_TYPE_INT64 | FIELD_ID_CONFIG_STATS_DUMP_REPORT_BYTES |
+                     FIELD_COUNT_REPEATED,
+                     (long long)dump.second);
+    }
+
+    for (const auto& annotation : configStats.annotations) {
+        uint64_t token = proto->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED |
+                                      FIELD_ID_CONFIG_STATS_ANNOTATION);
+        proto->write(FIELD_TYPE_INT64 | FIELD_ID_CONFIG_STATS_ANNOTATION_INT64,
+                     (long long)annotation.first);
+        proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_STATS_ANNOTATION_INT32, annotation.second);
+        proto->end(token);
     }
 
     for (const auto& pair : configStats.matcher_stats) {
@@ -577,19 +639,17 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
     }
 
     if (mPeriodicAlarmRegisteredStats > 0) {
-        uint64_t token = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_SUBSCRIBER_ALARM_STATS);
-        proto.write(FIELD_TYPE_INT32 | FIELD_ID_SUBSCRIBER_ALARMS_REGISTERED,
+        uint64_t token = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_PERIODIC_ALARM_STATS);
+        proto.write(FIELD_TYPE_INT32 | FIELD_ID_PERIODIC_ALARMS_REGISTERED,
                     mPeriodicAlarmRegisteredStats);
         proto.end(token);
     }
 
     uint64_t uidMapToken = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_UIDMAP_STATS);
-    proto.write(FIELD_TYPE_INT32 | FIELD_ID_UID_MAP_SNAPSHOTS, mUidMapStats.snapshots);
     proto.write(FIELD_TYPE_INT32 | FIELD_ID_UID_MAP_CHANGES, mUidMapStats.changes);
     proto.write(FIELD_TYPE_INT32 | FIELD_ID_UID_MAP_BYTES_USED, mUidMapStats.bytes_used);
-    proto.write(FIELD_TYPE_INT32 | FIELD_ID_UID_MAP_DROPPED_SNAPSHOTS,
-                mUidMapStats.dropped_snapshots);
     proto.write(FIELD_TYPE_INT32 | FIELD_ID_UID_MAP_DROPPED_CHANGES, mUidMapStats.dropped_changes);
+    proto.write(FIELD_TYPE_INT32 | FIELD_ID_UID_MAP_DELETED_APPS, mUidMapStats.deleted_apps);
     proto.end(uidMapToken);
 
     for (const auto& error : mLoggerErrors) {
@@ -597,6 +657,15 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
                                       FIELD_COUNT_REPEATED);
         proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOGGER_STATS_TIME, error.first);
         proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOGGER_STATS_ERROR_CODE, error.second);
+        proto.end(token);
+    }
+
+    for (const auto& skipped : mSkippedLogEvents) {
+        uint64_t token = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_SKIPPED_LOG_EVENT_STATS |
+                                      FIELD_COUNT_REPEATED);
+        proto.write(FIELD_TYPE_INT32 | FIELD_ID_SKIPPED_LOG_EVENT_STATS_TAG, skipped.first);
+        proto.write(FIELD_TYPE_INT64 | FIELD_ID_SKIPPED_LOG_EVENT_STATS_TIMESTAMP,
+                    (long long)skipped.second);
         proto.end(token);
     }
 
