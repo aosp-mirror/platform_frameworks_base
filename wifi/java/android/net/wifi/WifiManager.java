@@ -2141,7 +2141,8 @@ public class WifiManager {
     }
 
     /**
-     * Sets the Wi-Fi AP Configuration.
+     * Sets the Wi-Fi AP Configuration.  The AP configuration must either be open or
+     * WPA2 PSK networks.
      * @return {@code true} if the operation succeeded, {@code false} otherwise
      *
      * @hide
@@ -2150,8 +2151,7 @@ public class WifiManager {
     @RequiresPermission(android.Manifest.permission.CHANGE_WIFI_STATE)
     public boolean setWifiApConfiguration(WifiConfiguration wifiConfig) {
         try {
-            mService.setWifiApConfiguration(wifiConfig, mContext.getOpPackageName());
-            return true;
+            return mService.setWifiApConfiguration(wifiConfig, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
