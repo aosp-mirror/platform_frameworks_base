@@ -476,6 +476,12 @@ package android.media {
     method public static boolean isEncodingLinearPcm(int);
   }
 
+  public final class AudioPresentation {
+    ctor public AudioPresentation(int, int, java.util.Map<java.lang.String, java.lang.String>, java.lang.String, int, boolean, boolean, boolean);
+    method public int getPresentationId();
+    method public int getProgramId();
+  }
+
   public static final class VolumeShaper.Configuration.Builder {
     method public android.media.VolumeShaper.Configuration.Builder setOptionFlags(int);
   }
