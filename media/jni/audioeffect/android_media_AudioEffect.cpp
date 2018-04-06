@@ -110,15 +110,15 @@ static void effectCallback(int event, void* user, void *info) {
     effect_callback_cookie *callbackInfo = (effect_callback_cookie *)user;
     JNIEnv *env = AndroidRuntime::getJNIEnv();
 
-    ALOGV("effectCallback: callbackInfo %p, audioEffect_ref %p audioEffect_class %p",
-            callbackInfo,
-            callbackInfo->audioEffect_ref,
-            callbackInfo->audioEffect_class);
-
     if (!user || !env) {
         ALOGW("effectCallback error user %p, env %p", user, env);
         return;
     }
+
+    ALOGV("effectCallback: callbackInfo %p, audioEffect_ref %p audioEffect_class %p",
+            callbackInfo,
+            callbackInfo->audioEffect_ref,
+            callbackInfo->audioEffect_class);
 
     switch (event) {
     case AudioEffect::EVENT_CONTROL_STATUS_CHANGED:
