@@ -3728,8 +3728,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
             mLastWindowForcedOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
 
-            if (policy.isKeyguardShowingAndNotOccluded()
-                    || mService.mAppTransition.getAppTransition() == TRANSIT_KEYGUARD_UNOCCLUDE) {
+            // Only allow force setting the orientation when all unknown visibilities have been
+            // resolved, as otherwise we just may be starting another occluding activity.
+            final boolean isUnoccluding =
+                    mService.mAppTransition.getAppTransition() == TRANSIT_KEYGUARD_UNOCCLUDE
+                            && mService.mUnknownAppVisibilityController.allResolved();
+            if (policy.isKeyguardShowingAndNotOccluded() || isUnoccluding) {
                 return mLastKeyguardForcedOrientation;
             }
 
