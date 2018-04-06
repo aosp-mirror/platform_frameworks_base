@@ -3195,6 +3195,7 @@ Ljava/lang/Double;->value:D
 Ljava/lang/Float;->value:F
 Ljava/lang/Integer;->value:I
 Ljava/lang/Long;->value:J
+Ljava/lang/invoke/MethodHandles$Lookup;-><init>(Ljava/lang/Class;I)V
 Ljava/lang/ref/FinalizerReference;->add(Ljava/lang/Object;)V
 Ljava/lang/ref/FinalizerReference;->head:Ljava/lang/ref/FinalizerReference;
 Ljava/lang/ref/FinalizerReference;->next:Ljava/lang/ref/FinalizerReference;
