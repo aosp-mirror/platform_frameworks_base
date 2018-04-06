@@ -46,6 +46,7 @@
 #define ANDROID_MEDIA_SURFACEIMAGE_BUFFER_JNI_ID   "mNativeBuffer"
 #define ANDROID_MEDIA_SURFACEIMAGE_TS_JNI_ID       "mTimestamp"
 #define ANDROID_MEDIA_SURFACEIMAGE_TF_JNI_ID       "mTransform"
+#define ANDROID_MEDIA_SURFACEIMAGE_SM_JNI_ID       "mScalingMode"
 
 #define CONSUMER_BUFFER_USAGE_UNKNOWN              0;
 // ----------------------------------------------------------------------------
@@ -68,6 +69,7 @@ static struct {
     jfieldID mNativeBuffer;
     jfieldID mTimestamp;
     jfieldID mTransform;
+    jfieldID mScalingMode;
     jfieldID mPlanes;
 } gSurfaceImageClassInfo;
 
@@ -314,6 +316,12 @@ static void ImageReader_classInit(JNIEnv* env, jclass clazz)
     LOG_ALWAYS_FATAL_IF(gSurfaceImageClassInfo.mTransform == NULL,
                         "can't find android/graphics/ImageReader.%s",
                         ANDROID_MEDIA_SURFACEIMAGE_TF_JNI_ID);
+
+    gSurfaceImageClassInfo.mScalingMode = env->GetFieldID(
+            imageClazz, ANDROID_MEDIA_SURFACEIMAGE_SM_JNI_ID, "I");
+    LOG_ALWAYS_FATAL_IF(gSurfaceImageClassInfo.mScalingMode == NULL,
+                        "can't find android/graphics/ImageReader.%s",
+                        ANDROID_MEDIA_SURFACEIMAGE_SM_JNI_ID);
 
     gSurfaceImageClassInfo.mPlanes = env->GetFieldID(
             imageClazz, "mPlanes", "[Landroid/media/ImageReader$SurfaceImage$SurfacePlane;");
@@ -606,6 +614,8 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz, jobject image) {
             static_cast<jlong>(buffer->mTimestamp));
     env->SetIntField(image, gSurfaceImageClassInfo.mTransform,
             static_cast<jint>(buffer->mTransform));
+    env->SetIntField(image, gSurfaceImageClassInfo.mScalingMode,
+            static_cast<jint>(buffer->mScalingMode));
 
     return ACQUIRE_SUCCESS;
 }

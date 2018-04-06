@@ -871,6 +871,12 @@ public class ImageReader implements AutoCloseable {
         }
 
         @Override
+        public int getScalingMode() {
+            throwISEIfImageIsInvalid();
+            return mScalingMode;
+        }
+
+        @Override
         public HardwareBuffer getHardwareBuffer() {
             throwISEIfImageIsInvalid();
             return nativeGetHardwareBuffer();
@@ -1004,14 +1010,11 @@ public class ImageReader implements AutoCloseable {
         private long mNativeBuffer;
 
         /**
-         * This field is set by native code during nativeImageSetup().
+         * These fields are set by native code during nativeImageSetup().
          */
         private long mTimestamp;
-
-        /**
-         * This field is set by native code during nativeImageSetup().
-         */
         private int mTransform;
+        private int mScalingMode;
 
         private SurfacePlane[] mPlanes;
         private int mFormat = ImageFormat.UNKNOWN;
