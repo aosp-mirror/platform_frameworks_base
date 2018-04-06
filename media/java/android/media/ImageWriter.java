@@ -371,7 +371,7 @@ public class ImageWriter implements AutoCloseable {
 
         Rect crop = image.getCropRect();
         nativeQueueInputImage(mNativeContext, image, image.getTimestamp(), crop.left, crop.top,
-                crop.right, crop.bottom, image.getTransform());
+                crop.right, crop.bottom, image.getTransform(), image.getScalingMode());
 
         /**
          * Only remove and cleanup the Images that are owned by this
@@ -558,7 +558,7 @@ public class ImageWriter implements AutoCloseable {
         Rect crop = image.getCropRect();
         nativeAttachAndQueueImage(mNativeContext, image.getNativeContext(), image.getFormat(),
                 image.getTimestamp(), crop.left, crop.top, crop.right, crop.bottom,
-                image.getTransform());
+                image.getTransform(), image.getScalingMode());
     }
 
     /**
@@ -676,6 +676,7 @@ public class ImageWriter implements AutoCloseable {
         private long mTimestamp = DEFAULT_TIMESTAMP;
 
         private int mTransform = 0; //Default no transform
+        private int mScalingMode = 0; //Default frozen scaling mode
 
         public WriterSurfaceImage(ImageWriter writer) {
             mOwner = writer;
@@ -718,6 +719,13 @@ public class ImageWriter implements AutoCloseable {
             throwISEIfImageIsInvalid();
 
             return mTransform;
+        }
+
+        @Override
+        public int getScalingMode() {
+            throwISEIfImageIsInvalid();
+
+            return mScalingMode;
         }
 
         @Override
@@ -866,11 +874,12 @@ public class ImageWriter implements AutoCloseable {
     private synchronized native void nativeDequeueInputImage(long nativeCtx, Image wi);
 
     private synchronized native void nativeQueueInputImage(long nativeCtx, Image image,
-            long timestampNs, int left, int top, int right, int bottom, int transform);
+            long timestampNs, int left, int top, int right, int bottom, int transform,
+            int scalingMode);
 
     private synchronized native int nativeAttachAndQueueImage(long nativeCtx,
             long imageNativeBuffer, int imageFormat, long timestampNs, int left,
-            int top, int right, int bottom, int transform);
+            int top, int right, int bottom, int transform, int scalingMode);
 
     private synchronized native void cancelImage(long nativeCtx, Image image);
 
