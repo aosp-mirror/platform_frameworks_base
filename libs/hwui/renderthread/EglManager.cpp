@@ -82,6 +82,7 @@ static struct {
     bool pixelFormatFloat = false;
     bool glColorSpace = false;
     bool scRGB = false;
+    bool contextPriority = false;
 } EglExtensions;
 
 EglManager::EglManager(RenderThread& thread)
@@ -168,6 +169,7 @@ void EglManager::initExtensions() {
 #else
     EglExtensions.scRGB = extensions.has("EGL_EXT_gl_colorspace_scrgb");
 #endif
+    EglExtensions.contextPriority = extensions.has("EGL_IMG_context_priority");
 }
 
 bool EglManager::hasEglContext() {
@@ -247,10 +249,18 @@ void EglManager::loadConfigs() {
 }
 
 void EglManager::createContext() {
-    EGLint attribs[] = {EGL_CONTEXT_CLIENT_VERSION, GLES_VERSION, EGL_NONE};
+    std::vector<EGLint> contextAttributes;
+    contextAttributes.reserve(5);
+    contextAttributes.push_back(EGL_CONTEXT_CLIENT_VERSION);
+    contextAttributes.push_back(GLES_VERSION);
+    if (Properties::contextPriority != 0 && EglExtensions.contextPriority) {
+        contextAttributes.push_back(EGL_CONTEXT_PRIORITY_LEVEL_IMG);
+        contextAttributes.push_back(Properties::contextPriority);
+    }
+    contextAttributes.push_back(EGL_NONE);
     mEglContext = eglCreateContext(
             mEglDisplay, EglExtensions.noConfigContext ? ((EGLConfig) nullptr) : mEglConfig,
-            EGL_NO_CONTEXT, attribs);
+            EGL_NO_CONTEXT, contextAttributes.data());
     LOG_ALWAYS_FATAL_IF(mEglContext == EGL_NO_CONTEXT, "Failed to create context, error = %s",
                         eglErrorString());
 }

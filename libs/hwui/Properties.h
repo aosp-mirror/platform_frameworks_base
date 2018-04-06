@@ -271,6 +271,8 @@ public:
     ANDROID_API static bool debuggingEnabled;
     ANDROID_API static bool isolatedProcess;
 
+    ANDROID_API static int contextPriority;
+
 private:
     static ProfileType sProfileType;
     static bool sDisableProfileBars;
