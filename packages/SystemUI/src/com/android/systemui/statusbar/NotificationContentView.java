@@ -81,7 +81,7 @@ public class NotificationContentView extends FrameLayout {
 
     private SmartReplyConstants mSmartReplyConstants;
     private SmartReplyView mExpandedSmartReplyView;
-    private SmartReplyLogger mSmartReplyLogger;
+    private SmartReplyController mSmartReplyController;
 
     private NotificationViewWrapper mContractedWrapper;
     private NotificationViewWrapper mExpandedWrapper;
@@ -154,7 +154,7 @@ public class NotificationContentView extends FrameLayout {
         super(context, attrs);
         mHybridGroupManager = new HybridGroupManager(getContext(), this);
         mSmartReplyConstants = Dependency.get(SmartReplyConstants.class);
-        mSmartReplyLogger = Dependency.get(SmartReplyLogger.class);
+        mSmartReplyController = Dependency.get(SmartReplyController.class);
         initView();
     }
 
@@ -1359,7 +1359,7 @@ public class NotificationContentView extends FrameLayout {
                     applySmartReplyView(mExpandedChild, remoteInput, pendingIntent, entry);
             if (mExpandedSmartReplyView != null && remoteInput != null
                     && remoteInput.getChoices() != null && remoteInput.getChoices().length > 0) {
-                mSmartReplyLogger.smartRepliesAdded(entry, remoteInput.getChoices().length);
+                mSmartReplyController.smartRepliesAdded(entry, remoteInput.getChoices().length);
             }
         }
     }
@@ -1377,6 +1377,13 @@ public class NotificationContentView extends FrameLayout {
             smartReplyContainer.setVisibility(View.GONE);
             return null;
         }
+        // If we are showing the spinner we don't want to add the buttons.
+        boolean showingSpinner = entry.notification.getNotification()
+                .extras.getBoolean(Notification.EXTRA_SHOW_REMOTE_INPUT_SPINNER, false);
+        if (showingSpinner) {
+            smartReplyContainer.setVisibility(View.GONE);
+            return null;
+        }
         SmartReplyView smartReplyView = null;
         if (smartReplyContainer.getChildCount() == 0) {
             smartReplyView = SmartReplyView.inflate(mContext, smartReplyContainer);
@@ -1389,7 +1396,7 @@ public class NotificationContentView extends FrameLayout {
         }
         if (smartReplyView != null) {
             smartReplyView.setRepliesFromRemoteInput(remoteInput, pendingIntent,
-                    mSmartReplyLogger, entry);
+                    mSmartReplyController, entry, smartReplyContainer);
             smartReplyContainer.setVisibility(View.VISIBLE);
         }
         return smartReplyView;
