@@ -313,7 +313,8 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             mContext.registerReceiver(mReceiver, mFilter, null /* permission */, mWorkHandler);
             // NetworkCallback objects cannot be reused. http://b/20701525 .
             mNetworkCallback = new WifiTrackerNetworkCallback();
-            mConnectivityManager.registerNetworkCallback(mNetworkRequest, mNetworkCallback);
+            mConnectivityManager.registerNetworkCallback(
+                    mNetworkRequest, mNetworkCallback, mWorkHandler);
             mRegistered = true;
         }
     }
@@ -788,7 +789,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                 // We don't send a NetworkInfo object along with this message, because even if we
                 // fetch one from ConnectivityManager, it might be older than the most recent
                 // NetworkInfo message we got via a WIFI_STATE_CHANGED broadcast.
-                mWorkHandler.post(() -> updateNetworkInfo(null));
+                updateNetworkInfo(null);
             }
         }
     }
