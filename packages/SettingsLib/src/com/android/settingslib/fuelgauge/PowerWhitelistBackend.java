@@ -16,6 +16,7 @@
 
 package com.android.settingslib.fuelgauge;
 
+import android.content.pm.PackageManager;
 import android.os.IDeviceIdleController;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -23,6 +24,8 @@ import android.os.UserHandle;
 import android.support.annotation.VisibleForTesting;
 import android.util.ArraySet;
 import android.util.Log;
+
+import com.android.internal.util.ArrayUtils;
 
 /**
  * Handles getting/changing the whitelist for the exceptions to battery saving features.
@@ -66,6 +69,19 @@ public class PowerWhitelistBackend {
 
     public boolean isSysWhitelistedExceptIdle(String pkg) {
         return mSysWhitelistedAppsExceptIdle.contains(pkg);
+    }
+
+    public boolean isSysWhitelistedExceptIdle(String[] pkgs) {
+        if (ArrayUtils.isEmpty(pkgs)) {
+            return false;
+        }
+        for (String pkg : pkgs) {
+            if (isSysWhitelistedExceptIdle(pkg)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void addApp(String pkg) {
