@@ -27,6 +27,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -165,7 +166,7 @@ public class FingerprintDialogView extends LinearLayout {
         title.setSelected(true);
 
         final CharSequence subtitleText = mBundle.getCharSequence(BiometricPrompt.KEY_SUBTITLE);
-        if (subtitleText == null) {
+        if (TextUtils.isEmpty(subtitleText)) {
             subtitle.setVisibility(View.GONE);
         } else {
             subtitle.setVisibility(View.VISIBLE);
@@ -173,11 +174,11 @@ public class FingerprintDialogView extends LinearLayout {
         }
 
         final CharSequence descriptionText = mBundle.getCharSequence(BiometricPrompt.KEY_DESCRIPTION);
-        if (descriptionText == null) {
-            subtitle.setVisibility(View.VISIBLE);
+        if (TextUtils.isEmpty(descriptionText)) {
             description.setVisibility(View.GONE);
         } else {
-            description.setText(mBundle.getCharSequence(BiometricPrompt.KEY_DESCRIPTION));
+            description.setVisibility(View.VISIBLE);
+            description.setText(descriptionText);
         }
 
         negative.setText(mBundle.getCharSequence(BiometricPrompt.KEY_NEGATIVE_TEXT));
