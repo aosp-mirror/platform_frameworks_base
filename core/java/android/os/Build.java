@@ -197,7 +197,11 @@ public class Build {
         public static final String INCREMENTAL = getString("ro.build.version.incremental");
 
         /**
-         * The user-visible version string.  E.g., "1.0" or "3.4b5".
+         * The user-visible version string.  E.g., "1.0" or "3.4b5" or "bananas".
+         *
+         * This field is an opaque string. Do not assume that its value
+         * has any particular structure or that values of RELEASE from
+         * different releases can be somehow ordered.
          */
         public static final String RELEASE = getString("ro.build.version.release");
 
