@@ -126,7 +126,7 @@ TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge) {
 TEST(StatsLogProcessorTest, TestUidMapHasSnapshot) {
     // Setup simple config key corresponding to empty config.
     sp<UidMap> m = new UidMap();
-    m->updateMap({1, 2}, {1, 2}, {String16("p1"), String16("p2")});
+    m->updateMap(1, {1, 2}, {1, 2}, {String16("p1"), String16("p2")});
     sp<AlarmMonitor> anomalyAlarmMonitor;
     sp<AlarmMonitor> subscriberAlarmMonitor;
     int broadcastCount = 0;
