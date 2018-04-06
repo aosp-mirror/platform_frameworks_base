@@ -2220,7 +2220,7 @@ class UserController implements Handler.Callback {
 
         protected void clearAllLockedTasks(String reason) {
             synchronized (mService) {
-                mService.mLockTaskController.clearLockedTasks(reason);
+                mService.getLockTaskController().clearLockedTasks(reason);
             }
         }
 

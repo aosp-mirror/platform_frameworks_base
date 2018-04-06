@@ -3743,7 +3743,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 }
 
                 if (endTask) {
-                    mService.mLockTaskController.clearLockedTask(task);
+                    mService.getLockTaskController().clearLockedTask(task);
                 }
             } else if (!r.isState(PAUSING)) {
                 // If the activity is PAUSING, we will complete the finish once
@@ -4639,7 +4639,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         // In LockTask mode, moving a locked task to the back of the stack may expose unlocked
         // ones. Therefore we need to check if this operation is allowed.
-        if (!mService.mLockTaskController.canMoveTaskToBack(tr)) {
+        if (!mService.getLockTaskController().canMoveTaskToBack(tr)) {
             return false;
         }
 
@@ -5084,7 +5084,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             onActivityRemovedFromStack(record);
         }
 
-        mTaskHistory.remove(task);
+        final boolean removed = mTaskHistory.remove(task);
+
+        if (removed) {
+            EventLog.writeEvent(EventLogTags.AM_REMOVE_TASK, task.taskId, getStackId());
+        }
+
         removeActivitiesFromLRUListLocked(task);
         updateTaskMovement(task, true);
 

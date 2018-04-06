@@ -451,7 +451,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     }
 
     void removeWindowContainer() {
-        mService.mLockTaskController.clearLockedTask(this);
+        mService.getLockTaskController().clearLockedTask(this);
         mWindowContainerController.removeContainer();
         if (!getWindowConfiguration().persistTaskBounds()) {
             // Reset current bounds for task whose bounds shouldn't be persisted so it uses
@@ -1446,9 +1446,10 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         }
 
         final String pkg = (realActivity != null) ? realActivity.getPackageName() : null;
+        final LockTaskController lockTaskController = mService.getLockTaskController();
         switch (r.lockTaskLaunchMode) {
             case LOCK_TASK_LAUNCH_MODE_DEFAULT:
-                mLockTaskAuth = mService.mLockTaskController.isPackageWhitelisted(userId, pkg)
+                mLockTaskAuth = lockTaskController.isPackageWhitelisted(userId, pkg)
                         ? LOCK_TASK_AUTH_WHITELISTED : LOCK_TASK_AUTH_PINNABLE;
                 break;
 
@@ -1461,7 +1462,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 break;
 
             case LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED:
-                mLockTaskAuth = mService.mLockTaskController.isPackageWhitelisted(userId, pkg)
+                mLockTaskAuth = lockTaskController.isPackageWhitelisted(userId, pkg)
                         ? LOCK_TASK_AUTH_LAUNCHABLE : LOCK_TASK_AUTH_PINNABLE;
                 break;
         }

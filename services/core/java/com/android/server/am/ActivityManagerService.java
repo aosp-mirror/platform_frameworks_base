@@ -764,7 +764,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * The controller for all operations related to locktask.
      */
-    final LockTaskController mLockTaskController;
+    private final LockTaskController mLockTaskController;
 
     final UserController mUserController;
 
@@ -12394,6 +12394,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     ActivityStartController getActivityStartController() {
         return mActivityStartController;
+    }
+
+    LockTaskController getLockTaskController() {
+        return mLockTaskController;
     }
 
     ClientLifecycleManager getLifecycleManager() {
