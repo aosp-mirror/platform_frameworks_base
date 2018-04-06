@@ -157,6 +157,13 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
         if (button != null) {
             button.setCallback(this);
         }
+
+        View cancelBtn = findViewById(R.id.cancel_button);
+        if (cancelBtn != null) {
+            cancelBtn.setOnClickListener(view -> {
+                mCallback.reset();
+            });
+        }
     }
 
     @Override
