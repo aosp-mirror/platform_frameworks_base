@@ -305,6 +305,8 @@ public class NetworkStatsManager {
      *            {@link java.lang.System#currentTimeMillis}.
      * @param uid UID of app
      * @param tag TAG of interest. Use {@link NetworkStats.Bucket#TAG_NONE} for no tags.
+     * @param state state of interest. Use {@link NetworkStats.Bucket#STATE_ALL} to aggregate
+     *            traffic from all states.
      * @return Statistics object or null if an error happened during statistics collection.
      * @throws SecurityException if permissions are insufficient to read network statistics.
      */
