@@ -17,18 +17,14 @@
 -->
 <resources>
     <dimen name="car_margin">148dp</dimen>
+    <dimen name="car_margin_standard">112dp</dimen>
 
-    <dimen name="car_fullscreen_user_pod_margin_image_top">24dp</dimen>
-    <dimen name="car_fullscreen_user_pod_margin_name_top">24dp</dimen>
-    <dimen name="car_fullscreen_user_pod_margin_name_bottom">20dp</dimen>
-    <dimen name="car_fullscreen_user_pod_margin_between">24dp</dimen>
-    <dimen name="car_fullscreen_user_pod_icon_text_size">96dp</dimen>
-    <dimen name="car_fullscreen_user_pod_image_avatar_width">192dp</dimen>
-    <dimen name="car_fullscreen_user_pod_image_avatar_height">192dp</dimen>
-    <dimen name="car_fullscreen_user_pod_width">264dp</dimen>
+    <!-- TODO replace with car support lib sizes when available -->
+    <dimen name="car_fullscreen_user_pod_icon_text_size">32sp</dimen>
+    <dimen name="car_fullscreen_user_pod_width">243dp</dimen>
     <dimen name="car_fullscreen_user_pod_height">356dp</dimen>
-    <dimen name="car_fullscreen_user_pod_name_text_size">40sp</dimen> <!-- B1 -->
-    <dimen name="car_fullscreen_user_pod_device_text_size">@dimen/car_body2_size</dimen>
+    <dimen name="car_fullscreen_user_pod_image_avatar_width">96dp</dimen>
+    <dimen name="car_fullscreen_user_pod_image_avatar_height">96dp</dimen>
 
     <dimen name="car_navigation_button_width">64dp</dimen>
     <dimen name="car_navigation_bar_width">760dp</dimen>

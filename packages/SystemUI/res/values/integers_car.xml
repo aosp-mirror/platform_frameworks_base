@@ -17,4 +17,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <integer name="car_user_switcher_anim_cascade_delay_ms">27</integer>
+    <!-- Full screen user switcher column number TODO: move to support library-->
+    <integer name="user_fullscreen_switcher_num_col">3</integer>
 </resources>
