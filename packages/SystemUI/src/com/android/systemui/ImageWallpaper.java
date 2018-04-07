@@ -444,13 +444,7 @@ public class ImageWallpaper extends WallpaperService {
             final Surface surface = getSurfaceHolder().getSurface();
             surface.hwuiDestroy();
 
-            mLoader = new AsyncTask<Void, Void, Bitmap>() {
-                @Override
-                protected Bitmap doInBackground(Void... params) {
-                    mWallpaperManager.forgetLoadedWallpaper();
-                    return null;
-                }
-            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            mWallpaperManager.forgetLoadedWallpaper();
         }
 
         private void scheduleUnloadWallpaper() {
