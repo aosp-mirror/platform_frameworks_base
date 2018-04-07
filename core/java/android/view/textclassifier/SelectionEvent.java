@@ -362,6 +362,7 @@ public final class SelectionEvent implements Parcelable {
             case SelectionEvent.ACTION_ABANDON:  // fall through
             case SelectionEvent.ACTION_SELECT_ALL:  // fall through
             case SelectionEvent.ACTION_RESET:  // fall through
+            case SelectionEvent.ACTION_OTHER:  // fall through
                 return;
             default:
                 throw new IllegalArgumentException(
