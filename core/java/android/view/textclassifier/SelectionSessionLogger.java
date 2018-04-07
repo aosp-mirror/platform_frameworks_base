@@ -17,28 +17,29 @@
 package android.view.textclassifier;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.metrics.LogMaker;
-import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.Preconditions;
 
+import java.text.BreakIterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * Default Logger.
- * Used internally by TextClassifierImpl.
+ * A helper for logging selection session events.
  * @hide
  */
-public final class DefaultLogger extends Logger {
+public final class SelectionSessionLogger {
 
-    private static final String LOG_TAG = "DefaultLogger";
+    private static final String LOG_TAG = "SelectionSessionLogger";
+    private static final boolean DEBUG_LOG_ENABLED = false;
     static final String CLASSIFIER_ID = "androidtc";
 
     private static final int START_EVENT_DELTA = MetricsEvent.FIELD_SELECTION_SINCE_START;
@@ -59,23 +60,16 @@ public final class DefaultLogger extends Logger {
 
     private final MetricsLogger mMetricsLogger;
 
-    public DefaultLogger(@NonNull Config config) {
-        super(config);
+    public SelectionSessionLogger() {
         mMetricsLogger = new MetricsLogger();
     }
 
     @VisibleForTesting
-    public DefaultLogger(@NonNull Config config, @NonNull MetricsLogger metricsLogger) {
-        super(config);
+    public SelectionSessionLogger(@NonNull MetricsLogger metricsLogger) {
         mMetricsLogger = Preconditions.checkNotNull(metricsLogger);
     }
 
-    @Override
-    public boolean isSmartSelection(@NonNull String signature) {
-        return CLASSIFIER_ID.equals(SignatureParser.getClassifierId(signature));
-    }
-
-    @Override
+    /** Emits a selection event to the logs. */
     public void writeEvent(@NonNull SelectionEvent event) {
         Preconditions.checkNotNull(event);
         final LogMaker log = new LogMaker(MetricsEvent.TEXT_SELECTION_SESSION)
@@ -93,7 +87,7 @@ public final class DefaultLogger extends Logger {
                 .addTaggedData(SMART_END, event.getSmartEnd())
                 .addTaggedData(EVENT_START, event.getStart())
                 .addTaggedData(EVENT_END, event.getEnd())
-                .addTaggedData(SESSION_ID, event.getSessionId());
+                .addTaggedData(SESSION_ID, event.getSessionId().flattenToString());
         mMetricsLogger.write(log);
         debugLog(log);
     }
@@ -225,9 +219,17 @@ public final class DefaultLogger extends Logger {
         final int eventEnd = Integer.parseInt(
                 Objects.toString(log.getTaggedData(EVENT_END), ZERO));
 
-        Log.d(LOG_TAG, String.format("%2d: %s/%s/%s, range=%d,%d - smart_range=%d,%d (%s/%s)",
-                index, type, subType, entity, eventStart, eventEnd, smartStart, smartEnd, widget,
-                model));
+        Log.d(LOG_TAG,
+                String.format(Locale.US, "%2d: %s/%s/%s, range=%d,%d - smart_range=%d,%d (%s/%s)",
+                        index, type, subType, entity, eventStart, eventEnd, smartStart, smartEnd,
+                        widget, model));
+    }
+
+    /**
+     * Returns a token iterator for tokenizing text for logging purposes.
+     */
+    public static BreakIterator getTokenIterator(@NonNull Locale locale) {
+        return BreakIterator.getWordInstance(Preconditions.checkNotNull(locale));
     }
 
     /**
@@ -260,8 +262,10 @@ public final class DefaultLogger extends Logger {
             return String.format(Locale.US, "%s|%s|%d", classifierId, modelName, hash);
         }
 
-        static String getClassifierId(String signature) {
-            Preconditions.checkNotNull(signature);
+        static String getClassifierId(@Nullable String signature) {
+            if (signature == null) {
+                return "";
+            }
             final int end = signature.indexOf("|");
             if (end >= 0) {
                 return signature.substring(0, end);
@@ -269,8 +273,10 @@ public final class DefaultLogger extends Logger {
             return "";
         }
 
-        static String getModelName(String signature) {
-            Preconditions.checkNotNull(signature);
+        static String getModelName(@Nullable String signature) {
+            if (signature == null) {
+                return "";
+            }
             final int start = signature.indexOf("|") + 1;
             final int end = signature.indexOf("|", start);
             if (start >= 1 && end >= start) {
@@ -279,8 +285,10 @@ public final class DefaultLogger extends Logger {
             return "";
         }
 
-        static int getHash(String signature) {
-            Preconditions.checkNotNull(signature);
+        static int getHash(@Nullable String signature) {
+            if (signature == null) {
+                return 0;
+            }
             final int index1 = signature.indexOf("|");
             final int index2 = signature.indexOf("|", index1);
             if (index2 > 0) {
