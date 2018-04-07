@@ -41,8 +41,9 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
     private final WifiManager mWifiManager;
     private final NetworkScoreManager mNetworkScoreManager;
     private final ConnectivityManager mConnectivityManager;
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final WifiNetworkScoreCache.CacheListener mCacheListener =
-            new WifiNetworkScoreCache.CacheListener(new Handler(Looper.getMainLooper())) {
+            new WifiNetworkScoreCache.CacheListener(mHandler) {
                 @Override
                 public void networkCacheUpdated(List<ScoredNetwork> updatedNetworks) {
                     updateStatusLabel();
@@ -89,7 +90,8 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
             mNetworkScoreManager.registerNetworkScoreCache(NetworkKey.TYPE_WIFI,
                     mWifiNetworkScoreCache, NetworkScoreManager.CACHE_FILTER_CURRENT_NETWORK);
             mWifiNetworkScoreCache.registerListener(mCacheListener);
-            mConnectivityManager.registerNetworkCallback(mNetworkRequest, mNetworkCallback);
+            mConnectivityManager.registerNetworkCallback(
+                    mNetworkRequest, mNetworkCallback, mHandler);
         } else {
             mNetworkScoreManager.unregisterNetworkScoreCache(NetworkKey.TYPE_WIFI,
                     mWifiNetworkScoreCache);
