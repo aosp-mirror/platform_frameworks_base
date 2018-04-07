@@ -327,6 +327,33 @@ public class RecentTasksTest extends ActivityTestsBase {
     }
 
     @Test
+    public void testAddTaskCompatibleActivityTypeDifferentUser_expectNoRemove() throws Exception {
+        Configuration config1 = new Configuration();
+        config1.windowConfiguration.setActivityType(ACTIVITY_TYPE_UNDEFINED);
+        TaskRecord task1 = createTaskBuilder(".Task1")
+                .setFlags(FLAG_ACTIVITY_NEW_TASK)
+                .setStack(mStack)
+                .setUserId(TEST_USER_0_ID)
+                .build();
+        task1.onConfigurationChanged(config1);
+        assertTrue(task1.getActivityType() == ACTIVITY_TYPE_UNDEFINED);
+        mRecentTasks.add(task1);
+        mCallbacksRecorder.clear();
+
+        TaskRecord task2 = createTaskBuilder(".Task1")
+                .setFlags(FLAG_ACTIVITY_NEW_TASK)
+                .setStack(mStack)
+                .setUserId(TEST_USER_1_ID)
+                .build();
+        assertTrue(task2.getActivityType() == ACTIVITY_TYPE_STANDARD);
+        mRecentTasks.add(task2);
+        assertTrue(mCallbacksRecorder.added.size() == 1);
+        assertTrue(mCallbacksRecorder.added.contains(task2));
+        assertTrue(mCallbacksRecorder.trimmed.isEmpty());
+        assertTrue(mCallbacksRecorder.removed.isEmpty());
+    }
+
+    @Test
     public void testUsersTasks() throws Exception {
         mRecentTasks.setOnlyTestVisibleRange();
 
