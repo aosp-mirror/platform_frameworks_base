@@ -418,8 +418,7 @@ public class CarStatusBar extends StatusBar implements
                 Dependency.get(UserSwitcherController.class);
         if (userSwitcherController.useFullscreenUserSwitcher()) {
             mFullscreenUserSwitcher = new FullscreenUserSwitcher(this,
-                    userSwitcherController,
-                    mStatusBarWindow.findViewById(R.id.fullscreen_user_switcher_stub));
+                    mStatusBarWindow.findViewById(R.id.fullscreen_user_switcher_stub), mContext);
         } else {
             super.createUserSwitcher();
         }

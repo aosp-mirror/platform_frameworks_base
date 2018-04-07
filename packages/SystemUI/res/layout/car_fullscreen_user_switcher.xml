@@ -39,27 +39,34 @@
             android:theme="@android:style/Theme"
             android:layout_alignParentTop="true"/>
 
-        <com.android.systemui.statusbar.car.UserGridView
-            android:id="@+id/user_grid"
+        <RelativeLayout
+            android:id="@+id/fullscreen_user_switcher_container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/car_margin"
-            android:layout_marginRight="@dimen/car_margin"
-            android:layout_centerInParent="true"/>
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/car_margin"
+            android:layout_marginEnd="@dimen/car_margin">
 
-        <com.android.systemui.statusbar.car.PageIndicator
-            android:id="@+id/user_switcher_page_indicator"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/car_page_indicator_dot_diameter"
-            android:layout_below="@+id/user_grid" />
+            <RelativeLayout
+                android:id="@+id/fullscreen_user_switcher_container_inner"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/car_padding_4">
 
-        <Button
-            android:id="@+id/start_driving"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/car_start_driving_height"
-            android:text="@string/start_driving"
-            style="@style/CarUserSwitcher.StartDrivingButton"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true" />
+                <com.android.systemui.statusbar.car.UserGridRecyclerView
+                    android:id="@+id/user_grid"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/header"
+                    android:scrollbars="vertical"
+                    android:scrollbarFadeDuration="0"
+                    android:verticalScrollbarPosition="left"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentRight="true"/>
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
     </RelativeLayout>
 </FrameLayout>
