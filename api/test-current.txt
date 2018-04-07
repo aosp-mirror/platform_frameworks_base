@@ -469,6 +469,10 @@ package android.location {
 
 package android.media {
 
+  public final class AudioFocusRequest {
+    method public android.media.AudioManager.OnAudioFocusChangeListener getOnAudioFocusChangeListener();
+  }
+
   public final class AudioFormat implements android.os.Parcelable {
     method public static int channelCountFromInChannelMask(int);
     method public static int channelCountFromOutChannelMask(int);
