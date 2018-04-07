@@ -17,7 +17,6 @@
 package android.view.textclassifier;
 
 import android.annotation.WorkerThread;
-import android.view.textclassifier.DefaultLogger.SignatureParser;
 import android.view.textclassifier.SelectionEvent.InvocationMethod;
 
 import com.android.internal.util.Preconditions;
@@ -222,7 +221,8 @@ final class TextClassificationSession implements TextClassifier {
         }
 
         private static boolean isPlatformLocalTextClassifierSmartSelection(String signature) {
-            return DefaultLogger.CLASSIFIER_ID.equals(SignatureParser.getClassifierId(signature));
+            return SelectionSessionLogger.CLASSIFIER_ID.equals(
+                    SelectionSessionLogger.SignatureParser.getClassifierId(signature));
         }
     }
 }
