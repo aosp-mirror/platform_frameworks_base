@@ -701,6 +701,28 @@ public final class BluetoothHidDevice implements BluetoothProfile {
     }
 
     /**
+     * Gets the application name of the current HidDeviceService user.
+     *
+     * @return the current user name, or empty string if cannot get the name
+     * {@hide}
+     */
+    public String getUserAppName() {
+        final IBluetoothHidDevice service = mService;
+
+        if (service != null) {
+            try {
+                return service.getUserAppName();
+            } catch (RemoteException e) {
+                Log.e(TAG, e.toString());
+            }
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+        }
+
+        return "";
+    }
+
+    /**
      * Initiates connection to host which is currently paired with this device. If the application
      * is not registered, #connect(BluetoothDevice) will fail. The connection state should be
      * tracked by the application by handling callback from Callback#onConnectionStateChanged. The
