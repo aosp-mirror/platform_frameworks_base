@@ -41,16 +41,6 @@
         android:textAppearance="@style/TextAppearance.StatusBar.Clock"
         systemui:showDark="false" />
 
-    <com.android.systemui.statusbar.policy.DateView
-        android:id="@+id/date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:singleLine="true"
-        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
-        android:textSize="@dimen/qs_time_collapsed_size"
-        systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm" />
-
     <android.widget.Space
         android:id="@+id/space"
         android:layout_width="0dp"
