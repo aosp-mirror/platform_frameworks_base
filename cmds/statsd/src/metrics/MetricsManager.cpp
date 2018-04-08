@@ -54,21 +54,21 @@ const int FIELD_ID_ANNOTATIONS_INT64 = 1;
 const int FIELD_ID_ANNOTATIONS_INT32 = 2;
 
 MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
-                               const long timeBaseSec, const long currentTimeSec,
+                               const int64_t timeBaseNs, const int64_t currentTimeNs,
                                const sp<UidMap> &uidMap,
                                const sp<AlarmMonitor>& anomalyAlarmMonitor,
                                const sp<AlarmMonitor>& periodicAlarmMonitor)
     : mConfigKey(key), mUidMap(uidMap),
       mTtlNs(config.has_ttl_in_seconds() ? config.ttl_in_seconds() * NS_PER_SEC : -1),
       mTtlEndNs(-1),
-      mLastReportTimeNs(timeBaseSec * NS_PER_SEC),
+      mLastReportTimeNs(timeBaseNs),
       mLastReportWallClockNs(getWallClockNs()) {
     // Init the ttl end timestamp.
-    refreshTtl(timeBaseSec * NS_PER_SEC);
+    refreshTtl(timeBaseNs);
 
     mConfigValid =
             initStatsdConfig(key, config, *uidMap, anomalyAlarmMonitor, periodicAlarmMonitor,
-                             timeBaseSec, currentTimeSec, mTagIds, mAllAtomMatchers,
+                             timeBaseNs, currentTimeNs, mTagIds, mAllAtomMatchers,
                              mAllConditionTrackers, mAllMetricProducers, mAllAnomalyTrackers,
                              mAllPeriodicAlarmTrackers, mConditionToMetricMap, mTrackerToMetricMap,
                              mTrackerToConditionMap, mNoReportMetricIds);

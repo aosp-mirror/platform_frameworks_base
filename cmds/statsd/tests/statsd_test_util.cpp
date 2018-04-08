@@ -18,12 +18,17 @@ namespace android {
 namespace os {
 namespace statsd {
 
+
 AtomMatcher CreateSimpleAtomMatcher(const string& name, int atomId) {
     AtomMatcher atom_matcher;
     atom_matcher.set_id(StringToId(name));
     auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
     simple_atom_matcher->set_atom_id(atomId);
     return atom_matcher;
+}
+
+AtomMatcher CreateTemperatureAtomMatcher() {
+    return CreateSimpleAtomMatcher("TemperatureMatcher", android::util::TEMPERATURE);
 }
 
 AtomMatcher CreateScheduledJobStateChangedAtomMatcher(const string& name,
@@ -444,8 +449,8 @@ std::unique_ptr<LogEvent> CreateIsolatedUidChangedEvent(
     return logEvent;
 }
 
-sp<StatsLogProcessor> CreateStatsLogProcessor(const long timeBaseSec, const StatsdConfig& config,
-                                              const ConfigKey& key) {
+sp<StatsLogProcessor> CreateStatsLogProcessor(const int64_t timeBaseNs, const int64_t currentTimeNs,
+                                              const StatsdConfig& config, const ConfigKey& key) {
     sp<UidMap> uidMap = new UidMap();
     sp<AlarmMonitor> anomalyAlarmMonitor =
         new AlarmMonitor(1,  [](const sp<IStatsCompanionService>&, int64_t){},
@@ -454,8 +459,8 @@ sp<StatsLogProcessor> CreateStatsLogProcessor(const long timeBaseSec, const Stat
         new AlarmMonitor(1,  [](const sp<IStatsCompanionService>&, int64_t){},
                 [](const sp<IStatsCompanionService>&){});
     sp<StatsLogProcessor> processor = new StatsLogProcessor(
-        uidMap, anomalyAlarmMonitor, periodicAlarmMonitor, timeBaseSec, [](const ConfigKey&){});
-    processor->OnConfigUpdated(timeBaseSec * NS_PER_SEC, key, config);
+        uidMap, anomalyAlarmMonitor, periodicAlarmMonitor, timeBaseNs, [](const ConfigKey&){});
+    processor->OnConfigUpdated(currentTimeNs, key, config);
     return processor;
 }
 

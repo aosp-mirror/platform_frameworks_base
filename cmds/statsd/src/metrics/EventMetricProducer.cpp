@@ -68,7 +68,7 @@ EventMetricProducer::EventMetricProducer(const ConfigKey& key, const EventMetric
     }
     mProto = std::make_unique<ProtoOutputStream>();
     VLOG("metric %lld created. bucket size %lld start_time: %lld", (long long)metric.id(),
-         (long long)mBucketSizeNs, (long long)mStartTimeNs);
+         (long long)mBucketSizeNs, (long long)mTimeBaseNs);
 }
 
 EventMetricProducer::~EventMetricProducer() {

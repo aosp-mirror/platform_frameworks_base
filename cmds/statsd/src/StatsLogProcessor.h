@@ -36,7 +36,7 @@ class StatsLogProcessor : public ConfigListener {
 public:
     StatsLogProcessor(const sp<UidMap>& uidMap, const sp<AlarmMonitor>& anomalyAlarmMonitor,
                       const sp<AlarmMonitor>& subscriberTriggerAlarmMonitor,
-                      const long timeBaseSec,
+                      const int64_t timeBaseNs,
                       const std::function<void(const ConfigKey&)>& sendBroadcast);
     virtual ~StatsLogProcessor();
 
@@ -70,6 +70,7 @@ public:
 
     void dumpStates(FILE* out, bool verbose);
 
+    void informPullAlarmFired(const int64_t timestampNs);
 
 private:
     // For testing only.
@@ -125,7 +126,7 @@ private:
     // to retrieve the stored data.
     std::function<void(const ConfigKey& key)> mSendBroadcast;
 
-    const long mTimeBaseSec;
+    const int64_t mTimeBaseNs;
 
     int64_t mLastLogTimestamp;
 
@@ -145,6 +146,12 @@ private:
     FRIEND_TEST(AttributionE2eTest, TestAttributionMatchAndSliceByFirstUid);
     FRIEND_TEST(AttributionE2eTest, TestAttributionMatchAndSliceByChain);
     FRIEND_TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent);
+    FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents);
+    FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm);
+    FRIEND_TEST(GaugeMetricE2eTest, TestAllConditionChangesSamplePulledEvents);
+    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents);
+    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm);
+
     FRIEND_TEST(DimensionInConditionE2eTest, TestCreateCountMetric_NoLink_OR_CombinationCondition);
     FRIEND_TEST(DimensionInConditionE2eTest, TestCreateCountMetric_Link_OR_CombinationCondition);
     FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_OR_CombinationCondition);

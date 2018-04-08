@@ -67,7 +67,7 @@ TEST(GaugeMetricProducerTest, TestNoCondition) {
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
 
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      tagId, bucketStartTimeNs, pullerManager);
+                                      tagId, bucketStartTimeNs, bucketStartTimeNs, pullerManager);
     gaugeProducer.setBucketSize(60 * NS_PER_SEC);
 
     vector<shared_ptr<LogEvent>> allData;
@@ -144,7 +144,7 @@ TEST(GaugeMetricProducerTest, TestPushedEventsWithUpgrade) {
             make_shared<StrictMock<MockStatsPullerManager>>();
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
                                       -1 /* -1 means no pulling */, bucketStartTimeNs,
-                                      pullerManager);
+                                      bucketStartTimeNs, pullerManager);
 
     gaugeProducer.setBucketSize(60 * NS_PER_SEC);
     sp<AnomalyTracker> anomalyTracker = gaugeProducer.addAnomalyTracker(alert, alarmMonitor);
@@ -228,7 +228,7 @@ TEST(GaugeMetricProducerTest, TestPulledWithUpgrade) {
             }));
 
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      tagId, bucketStartTimeNs, pullerManager);
+                                      tagId, bucketStartTimeNs, bucketStartTimeNs, pullerManager);
     gaugeProducer.setBucketSize(60 * NS_PER_SEC);
 
     vector<shared_ptr<LogEvent>> allData;
@@ -297,7 +297,7 @@ TEST(GaugeMetricProducerTest, TestWithCondition) {
             }));
 
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, 1, wizard, tagId,
-                                      bucketStartTimeNs, pullerManager);
+                                      bucketStartTimeNs, bucketStartTimeNs, pullerManager);
     gaugeProducer.setBucketSize(60 * NS_PER_SEC);
 
     gaugeProducer.onConditionChanged(true, bucketStartTimeNs + 8);
@@ -389,7 +389,7 @@ TEST(GaugeMetricProducerTest, TestWithSlicedCondition) {
             }));
 
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, 1, wizard, tagId, bucketStartTimeNs,
-                                      pullerManager);
+                                      bucketStartTimeNs, pullerManager);
     gaugeProducer.setBucketSize(60 * NS_PER_SEC);
 
     gaugeProducer.onSlicedConditionMayChange(true, bucketStartTimeNs + 8);
@@ -433,7 +433,7 @@ TEST(GaugeMetricProducerTest, TestAnomalyDetection) {
     gaugeFieldMatcher->set_field(tagId);
     gaugeFieldMatcher->add_child()->set_field(2);
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      tagId, bucketStartTimeNs, pullerManager);
+                                      tagId, bucketStartTimeNs, bucketStartTimeNs, pullerManager);
     gaugeProducer.setBucketSize(60 * NS_PER_SEC);
 
     Alert alert;
