@@ -1003,6 +1003,9 @@ easier.
     <!-- Variant of {@link #Theme_DeviceDefault_Light_Dialog} that has a nice minimum width for a
     regular dialog. -->
     <style name="Theme.DeviceDefault.Light.Dialog.MinWidth" parent="Theme.Material.Light.Dialog.MinWidth">
+        <item name="windowTitleStyle">@style/DialogWindowTitle.DeviceDefault.Light</item>
+        <item name="windowAnimationStyle">@style/Animation.DeviceDefault.Dialog</item>
+
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
@@ -1026,6 +1029,9 @@ easier.
 
      <!-- Variant of {@link #Theme_DeviceDefault_Light_Dialog} without an action bar -->
     <style name="Theme.DeviceDefault.Light.Dialog.NoActionBar" parent="Theme.Material.Light.Dialog.NoActionBar">
+        <item name="windowTitleStyle">@style/DialogWindowTitle.DeviceDefault.Light</item>
+        <item name="windowAnimationStyle">@style/Animation.DeviceDefault.Dialog</item>
+
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
@@ -1050,6 +1056,9 @@ easier.
     <!-- Variant of {@link #Theme_DeviceDefault_Light_Dialog_NoActionBar} that has a nice minimum
     width for a regular dialog. -->
     <style name="Theme.DeviceDefault.Light.Dialog.NoActionBar.MinWidth" parent="Theme.Material.Light.Dialog.NoActionBar.MinWidth">
+        <item name="windowTitleStyle">@style/DialogWindowTitle.DeviceDefault.Light</item>
+        <item name="windowAnimationStyle">@style/Animation.DeviceDefault.Dialog</item>
+
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
@@ -1100,6 +1109,9 @@ easier.
     <!-- DeviceDefault light theme for a window that will be displayed either full-screen on smaller
     screens (small, normal) or as a dialog on larger screens (large, xlarge). -->
     <style name="Theme.DeviceDefault.Light.DialogWhenLarge" parent="Theme.Material.Light.DialogWhenLarge">
+        <item name="windowTitleStyle">@style/DialogWindowTitle.DeviceDefault.Light</item>
+        <item name="windowAnimationStyle">@style/Animation.DeviceDefault.Dialog</item>
+
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
@@ -1125,6 +1137,9 @@ easier.
     full-screen on smaller screens (small, normal) or as a dialog on larger screens (large,
     xlarge). -->
     <style name="Theme.DeviceDefault.Light.DialogWhenLarge.NoActionBar" parent="Theme.Material.Light.DialogWhenLarge.NoActionBar">
+        <item name="windowTitleStyle">@style/DialogWindowTitle.DeviceDefault.Light</item>
+        <item name="windowAnimationStyle">@style/Animation.DeviceDefault.Dialog</item>
+
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
@@ -1148,6 +1163,9 @@ easier.
 
     <!-- DeviceDefault light theme for a presentation window on a secondary display. -->
     <style name="Theme.DeviceDefault.Light.Dialog.Presentation" parent="Theme.Material.Light.Dialog.Presentation">
+        <item name="windowTitleStyle">@style/DialogWindowTitle.DeviceDefault.Light</item>
+        <item name="windowAnimationStyle">@style/Animation.DeviceDefault.Dialog</item>
+
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_light</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_light</item>
@@ -1361,6 +1379,9 @@ easier.
     </style>
 
     <style name="Theme.DeviceDefault.Settings.Dialog" parent="Theme.Material.Settings.Dialog">
+        <item name="windowTitleStyle">@style/DialogWindowTitle.DeviceDefault</item>
+        <item name="windowAnimationStyle">@style/Animation.DeviceDefault.Dialog</item>
+
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_settings</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
@@ -1384,6 +1405,9 @@ easier.
     </style>
 
     <style name="Theme.DeviceDefault.Settings.DialogWhenLarge" parent="Theme.Material.Settings.DialogWhenLarge">
+        <item name="windowTitleStyle">@style/DialogWindowTitle.DeviceDefault</item>
+        <item name="windowAnimationStyle">@style/Animation.DeviceDefault.Dialog</item>
+
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_settings</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
@@ -1407,6 +1431,9 @@ easier.
     </style>
 
     <style name="Theme.DeviceDefault.Settings.Dialog.Alert" parent="Theme.Material.Settings.Dialog.Alert">
+        <item name="windowTitleStyle">@style/DialogWindowTitle.DeviceDefault</item>
+        <item name="windowAnimationStyle">@style/Animation.DeviceDefault.Dialog</item>
+
         <!-- Color palette -->
         <item name="colorPrimary">@color/primary_device_default_settings</item>
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
