@@ -28,6 +28,7 @@ import android.app.Notification.Builder;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
+import android.app.Person;
 import android.app.Service;
 import android.companion.CompanionDeviceManager;
 import android.content.ComponentName;
@@ -1195,13 +1196,13 @@ public abstract class NotificationListenerService extends Service {
      */
     private void maybePopulatePeople(Notification notification) {
         if (getContext().getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.P) {
-            ArrayList<Notification.Person> people = notification.extras.getParcelableArrayList(
+            ArrayList<Person> people = notification.extras.getParcelableArrayList(
                     Notification.EXTRA_PEOPLE_LIST);
             if (people != null && people.isEmpty()) {
                 int size = people.size();
                 String[] peopleArray = new String[size];
                 for (int i = 0; i < size; i++) {
-                    Notification.Person person = people.get(i);
+                    Person person = people.get(i);
                     peopleArray[i] = person.resolveToLegacyUri();
                 }
                 notification.extras.putStringArray(Notification.EXTRA_PEOPLE, peopleArray);

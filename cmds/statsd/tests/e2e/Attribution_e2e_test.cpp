@@ -18,6 +18,7 @@
 #include "src/stats_log_util.h"
 #include "tests/statsd_test_util.h"
 
+#include <iostream>
 #include <vector>
 
 namespace android {
@@ -66,14 +67,10 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByFirstUid) {
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
 
     // Here it assumes that GMS core has two uids.
-    processor->getUidMap()->updateApp(
-        android::String16("com.android.gmscore"), 222 /* uid */, 1 /* version code*/);
-    processor->getUidMap()->updateApp(
-        android::String16("com.android.gmscore"), 444 /* uid */, 1 /* version code*/);
-    processor->getUidMap()->updateApp(
-        android::String16("app1"), 111 /* uid */, 2 /* version code*/);
-    processor->getUidMap()->updateApp(
-        android::String16("APP3"), 333 /* uid */, 2 /* version code*/);
+    processor->getUidMap()->updateMap(
+            1, {222, 444, 111, 333}, {1, 1, 2, 2},
+            {String16("com.android.gmscore"), String16("com.android.gmscore"), String16("app1"),
+             String16("APP3")});
 
     // GMS core node is in the middle.
     std::vector<AttributionNodeInternal> attributions1 = {CreateAttribution(111, "App1"),
@@ -147,7 +144,7 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByFirstUid) {
     }
     ConfigMetricsReportList reports;
     vector<uint8_t> buffer;
-    processor->onDumpReport(cfgKey, bucketStartTimeNs + 4 * bucketSizeNs + 1, &buffer);
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 4 * bucketSizeNs + 1, false, &buffer);
     EXPECT_TRUE(buffer.size() > 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     EXPECT_EQ(reports.reports_size(), 1);
@@ -212,14 +209,10 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByChain) {
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
 
     // Here it assumes that GMS core has two uids.
-    processor->getUidMap()->updateApp(
-        android::String16("com.android.gmscore"), 222 /* uid */, 1 /* version code*/);
-    processor->getUidMap()->updateApp(
-        android::String16("com.android.gmscore"), 444 /* uid */, 1 /* version code*/);
-    processor->getUidMap()->updateApp(
-        android::String16("app1"), 111 /* uid */, 2 /* version code*/);
-    processor->getUidMap()->updateApp(
-        android::String16("APP3"), 333 /* uid */, 2 /* version code*/);
+    processor->getUidMap()->updateMap(
+            1, {222, 444, 111, 333}, {1, 1, 2, 2},
+            {String16("com.android.gmscore"), String16("com.android.gmscore"), String16("app1"),
+             String16("APP3")});
 
     // GMS core node is in the middle.
     std::vector<AttributionNodeInternal> attributions1 = {CreateAttribution(111, "App1"),
@@ -293,7 +286,7 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByChain) {
     }
     ConfigMetricsReportList reports;
     vector<uint8_t> buffer;
-    processor->onDumpReport(cfgKey, bucketStartTimeNs + 4 * bucketSizeNs + 1, &buffer);
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 4 * bucketSizeNs + 1, false, &buffer);
     EXPECT_TRUE(buffer.size() > 0);
     EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
     EXPECT_EQ(reports.reports_size(), 1);

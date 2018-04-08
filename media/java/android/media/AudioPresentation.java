@@ -18,8 +18,7 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-
-import com.android.internal.annotations.VisibleForTesting;
+import android.annotation.TestApi;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -94,7 +93,7 @@ public final class AudioPresentation {
     /**
      * @hide
      */
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    @TestApi
     public AudioPresentation(int presentationId,
                         int programId,
                         @NonNull Map<String, String> labels,
@@ -119,7 +118,7 @@ public final class AudioPresentation {
      * decoder. Presentation id is typically sequential, but does not have to be.
      * @hide
      */
-    @VisibleForTesting
+    @TestApi
     public int getPresentationId() {
         return mPresentationId;
     }
@@ -129,7 +128,7 @@ public final class AudioPresentation {
      * Program id can be used to further uniquely identify the presentation to a decoder.
      * @hide
      */
-    @VisibleForTesting
+    @TestApi
     public int getProgramId() {
         return mProgramId;
     }

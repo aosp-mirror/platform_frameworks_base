@@ -4218,6 +4218,15 @@ public class DevicePolicyManager {
         return null;
     }
 
+    /**
+     * Returns {@code true} if the device supports attestation of device identifiers in addition
+     * to key attestation.
+     * @return {@code true} if Device ID attestation is supported.
+     */
+    public boolean isDeviceIdAttestationSupported() {
+        PackageManager pm = mContext.getPackageManager();
+        return pm.hasSystemFeature(PackageManager.FEATURE_DEVICE_ID_ATTESTATION);
+    }
 
     /**
      * Called by a device or profile owner, or delegated certificate installer, to associate

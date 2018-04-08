@@ -80,11 +80,13 @@ public:
     };
 
     void notifyAppRemoved(const int64_t& eventTimeNs, const string& apk, const int uid) override{
-            // TODO: Implement me.
+        // Force buckets to split on removal also.
+        notifyAppUpgrade(eventTimeNs, apk, uid, 0);
     };
 
     void onUidMapReceived(const int64_t& eventTimeNs) override{
-            // TODO: Implement me.
+            // Purposefully don't flush partial buckets on a new snapshot.
+            // This occurs if a new user is added/removed or statsd crashes.
     };
 
     // Consume the parsed stats log entry that already matched the "what" of the metric.
@@ -110,9 +112,11 @@ public:
 
     // Output the metrics data to [protoOutput]. All metrics reports end with the same timestamp.
     // This method clears all the past buckets.
-    void onDumpReport(const int64_t dumpTimeNs, android::util::ProtoOutputStream* protoOutput) {
+    void onDumpReport(const int64_t dumpTimeNs,
+                      const bool include_current_partial_bucket,
+                      android::util::ProtoOutputStream* protoOutput) {
         std::lock_guard<std::mutex> lock(mMutex);
-        return onDumpReportLocked(dumpTimeNs, protoOutput);
+        return onDumpReportLocked(dumpTimeNs, include_current_partial_bucket, protoOutput);
     }
 
     void dumpStates(FILE* out, bool verbose) const {
@@ -166,14 +170,24 @@ protected:
     virtual void onSlicedConditionMayChangeLocked(bool overallCondition,
                                                   const int64_t eventTime) = 0;
     virtual void onDumpReportLocked(const int64_t dumpTimeNs,
+                                    const bool include_current_partial_bucket,
                                     android::util::ProtoOutputStream* protoOutput) = 0;
     virtual size_t byteSizeLocked() const = 0;
     virtual void dumpStatesLocked(FILE* out, bool verbose) const = 0;
 
     /**
-     * Flushes the current bucket if the eventTime is after the current bucket's end time.
+     * Flushes the current bucket if the eventTime is after the current bucket's end time. This will
+       also flush the current partial bucket in memory.
      */
     virtual void flushIfNeededLocked(const int64_t& eventTime){};
+
+    /**
+     * Flushes all the data including the current partial bucket.
+     */
+    virtual void flushLocked(const int64_t& eventTime) {
+        flushIfNeededLocked(eventTime);
+        flushCurrentBucketLocked(eventTime);
+    };
 
     /**
      * For metrics that aggregate (ie, every metric producer except for EventMetricProducer),

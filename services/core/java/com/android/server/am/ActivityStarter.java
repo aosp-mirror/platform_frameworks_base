@@ -28,10 +28,10 @@ import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.content.Intent.ACTION_INSTALL_INSTANT_APP_PACKAGE;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
@@ -903,14 +903,22 @@ class ActivityStarter {
         final int clearTaskFlags = FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK;
         boolean clearedTask = (mLaunchFlags & clearTaskFlags) == clearTaskFlags
                 && mReuseTask != null;
-        if (startedActivityStack.inPinnedWindowingMode()
-                && (result == START_TASK_TO_FRONT || result == START_DELIVERED_TO_TOP
-                || clearedTask)) {
-            // The activity was already running in the pinned stack so it wasn't started, but either
-            // brought to the front or the new intent was delivered to it since it was already in
-            // front. Notify anyone interested in this piece of information.
-            mService.mTaskChangeNotificationController.notifyPinnedActivityRestartAttempt(
-                    clearedTask);
+        if (result == START_TASK_TO_FRONT || result == START_DELIVERED_TO_TOP || clearedTask) {
+            // The activity was already running so it wasn't started, but either brought to the
+            // front or the new intent was delivered to it since it was already in front. Notify
+            // anyone interested in this piece of information.
+            switch (startedActivityStack.getWindowingMode()) {
+                case WINDOWING_MODE_PINNED:
+                    mService.mTaskChangeNotificationController.notifyPinnedActivityRestartAttempt(
+                            clearedTask);
+                    break;
+                case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
+                    final ActivityStack homeStack = mSupervisor.mHomeStack;
+                    if (homeStack != null && homeStack.shouldBeVisible(null /* starting */)) {
+                        mService.mWindowManager.showRecentApps();
+                    }
+                    break;
+            }
         }
     }
 
@@ -966,7 +974,8 @@ class ActivityStarter {
                 if (profileLockedAndParentUnlockingOrUnlocked) {
                     rInfo = mSupervisor.resolveIntent(intent, resolvedType, userId,
                             PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                            Binder.getCallingUid());
                 }
             }
         }

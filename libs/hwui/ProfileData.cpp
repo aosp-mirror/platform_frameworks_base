@@ -104,7 +104,8 @@ void ProfileData::dump(int fd) const {
     dprintf(fd, "\nStats since: %" PRIu64 "ns", mStatStartTime);
     dprintf(fd, "\nTotal frames rendered: %u", mTotalFrameCount);
     dprintf(fd, "\nJanky frames: %u (%.2f%%)", mJankFrameCount,
-            (float)mJankFrameCount / (float)mTotalFrameCount * 100.0f);
+            mTotalFrameCount == 0 ? 0.0f :
+                (float)mJankFrameCount / (float)mTotalFrameCount * 100.0f);
     dprintf(fd, "\n50th percentile: %ums", findPercentile(50));
     dprintf(fd, "\n90th percentile: %ums", findPercentile(90));
     dprintf(fd, "\n95th percentile: %ums", findPercentile(95));

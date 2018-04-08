@@ -87,6 +87,7 @@ public class SurfaceControl implements Parcelable {
     private static native void nativeMergeTransaction(long transactionObj,
             long otherTransactionObj);
     private static native void nativeSetAnimationTransaction(long transactionObj);
+    private static native void nativeSetEarlyWakeup(long transactionObj);
 
     private static native void nativeSetLayer(long transactionObj, long nativeObject, int zorder);
     private static native void nativeSetRelativeLayer(long transactionObj, long nativeObject,
@@ -1638,6 +1639,19 @@ public class SurfaceControl implements Parcelable {
         /** flag the transaction as an animation */
         public Transaction setAnimationTransaction() {
             nativeSetAnimationTransaction(mNativeObject);
+            return this;
+        }
+
+        /**
+         * Indicate that SurfaceFlinger should wake up earlier than usual as a result of this
+         * transaction. This should be used when the caller thinks that the scene is complex enough
+         * that it's likely to hit GL composition, and thus, SurfaceFlinger needs to more time in
+         * order not to miss frame deadlines.
+         * <p>
+         * Corresponds to setting ISurfaceComposer::eEarlyWakeup
+         */
+        public Transaction setEarlyWakeup() {
+            nativeSetEarlyWakeup(mNativeObject);
             return this;
         }
 

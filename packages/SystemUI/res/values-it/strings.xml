@@ -53,8 +53,8 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth con tethering"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Configura metodi di immissione"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Tastiera fisica"</string>
-    <string name="usb_device_permission_prompt" msgid="1825685909587559679">"Vuoi consentire a <xliff:g id="APPLICATION">%1$s</xliff:g> di accedere a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"Vuoi consentire a <xliff:g id="APPLICATION">%1$s</xliff:g> di accedere a <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
+    <string name="usb_device_permission_prompt" msgid="1825685909587559679">"Consentire a <xliff:g id="APPLICATION">%1$s</xliff:g> di accedere a <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"Consentire a <xliff:g id="APPLICATION">%1$s</xliff:g> di accedere a <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"Vuoi aprire <xliff:g id="APPLICATION">%1$s</xliff:g> per gestire <xliff:g id="USB_DEVICE">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"Vuoi aprire <xliff:g id="APPLICATION">%1$s</xliff:g> per gestire <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>?"</string>
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Nessuna app installata funziona con questo accessorio USB. Altre info su <xliff:g id="URL">%1$s</xliff:g>."</string>

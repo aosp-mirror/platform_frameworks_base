@@ -91,7 +91,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     /**
      * Default alpha value for most scrims.
      */
-    public static final float GRADIENT_SCRIM_ALPHA = 0.45f;
+    public static final float GRADIENT_SCRIM_ALPHA = 0.70f;
     /**
      * A scrim varies its opacity based on a busyness factor, for example
      * how many notifications are currently visible.
@@ -395,7 +395,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             // Darken scrim as you pull down the shade when unlocked
             float behindFraction = getInterpolatedFraction();
             behindFraction = (float) Math.pow(behindFraction, 0.8f);
-            mCurrentBehindAlpha = behindFraction * mScrimBehindAlphaKeyguard;
+            mCurrentBehindAlpha = behindFraction * GRADIENT_SCRIM_ALPHA_BUSY;
             mCurrentInFrontAlpha = 0;
         } else if (mState == ScrimState.KEYGUARD) {
             // Either darken of make the scrim transparent when you

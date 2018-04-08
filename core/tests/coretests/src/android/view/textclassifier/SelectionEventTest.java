@@ -19,7 +19,6 @@ package android.view.textclassifier;
 import static org.junit.Assert.assertEquals;
 
 import android.os.Parcel;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -32,19 +31,8 @@ public class SelectionEventTest {
 
     @Test
     public void testParcel() {
-        final SelectionEvent[] captured = new SelectionEvent[1];
-        final Logger logger = new Logger(
-                new Logger.Config(
-                        InstrumentationRegistry.getTargetContext(),
-                        TextClassifier.WIDGET_TYPE_TEXTVIEW,
-                        null)) {
-            @Override
-            public void writeEvent(SelectionEvent event) {
-                captured[0] = event;
-            }
-        };
-        logger.logSelectionStartedEvent(SelectionEvent.INVOCATION_MANUAL, 0);
-        final SelectionEvent event = captured[0];
+        final SelectionEvent event = SelectionEvent.createSelectionStartedEvent(
+                SelectionEvent.INVOCATION_MANUAL, 0);
         final Parcel parcel = Parcel.obtain();
         event.writeToParcel(parcel, event.describeContents());
         parcel.setDataPosition(0);

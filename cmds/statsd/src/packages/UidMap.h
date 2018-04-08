@@ -43,10 +43,13 @@ namespace os {
 namespace statsd {
 
 struct AppData {
-    const string packageName;
     int64_t versionCode;
+    bool deleted;
 
-    AppData(const string& a, const int64_t v) : packageName(a), versionCode(v){};
+    // Empty constructor needed for unordered map.
+    AppData() {
+    }
+    AppData(const int64_t v) : versionCode(v), deleted(false){};
 };
 
 // When calling appendUidMap, we retrieve all the ChangeRecords since the last
@@ -57,54 +60,20 @@ struct ChangeRecord {
     const string package;
     const int32_t uid;
     const int32_t version;
+    const int32_t prevVersion;
 
     ChangeRecord(const bool isDeletion, const int64_t timestampNs, const string& package,
-                 const int32_t uid, const int32_t version)
+                 const int32_t uid, const int32_t version, const int32_t prevVersion)
         : deletion(isDeletion),
           timestampNs(timestampNs),
           package(package),
           uid(uid),
-          version(version) {
+          version(version),
+          prevVersion(prevVersion) {
     }
 };
 
 const unsigned int kBytesChangeRecord = sizeof(struct ChangeRecord);
-
-// Storing the int64 for a timestamp is expected to take 10 bytes (could take
-// less because of varint encoding).
-const unsigned int kBytesTimestampField = 10;
-
-struct SnapshotPackageInfo {
-    const string package;
-    const int32_t version;
-    const int32_t uid;
-    SnapshotPackageInfo(const string& package, const int32_t version, const int32_t uid)
-        : package(package), version(version), uid(uid) {
-    }
-};
-
-const unsigned int kBytesSnapshotInfo = sizeof(struct SnapshotPackageInfo);
-
-// When calling appendUidMap, we retrieve all the snapshots since the last
-// timestamp we called appendUidMap for this configuration key.
-struct SnapshotRecord {
-    const int64_t timestampNs;
-
-    // All the package info known.
-    vector<const SnapshotPackageInfo> infos;
-
-    // Tracks the number of bytes this snapshot consumes.
-    uint32_t bytes;
-
-    SnapshotRecord(const int64_t timestampNs, vector<const SnapshotPackageInfo>& infos)
-        : timestampNs(timestampNs), infos(infos) {
-        bytes = 0;
-        for (auto info : infos) {
-            bytes += info.package.size() + kBytesSnapshotInfo;
-        }
-        bytes += kBytesTimestampField;
-    }
-};
 
 // UidMap keeps track of what the corresponding app name (APK name) and version code for every uid
 // at any given moment. This map must be updated by StatsCompanionService.
@@ -117,11 +86,12 @@ public:
      * All three inputs must be the same size, and the jth element in each array refers to the same
      * tuple, ie. uid[j] corresponds to packageName[j] with versionCode[j].
      */
-    void updateMap(const vector<int32_t>& uid, const vector<int64_t>& versionCode,
-                   const vector<String16>& packageName);
+    void updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
+                   const vector<int64_t>& versionCode, const vector<String16>& packageName);
 
-    void updateApp(const String16& packageName, const int32_t& uid, const int64_t& versionCode);
-    void removeApp(const String16& packageName, const int32_t& uid);
+    void updateApp(const int64_t& timestamp, const String16& packageName, const int32_t& uid,
+                   const int64_t& versionCode);
+    void removeApp(const int64_t& timestamp, const String16& packageName, const int32_t& uid);
 
     // Returns true if the given uid contains the specified app (eg. com.google.android.gms).
     bool hasApp(int uid, const string& packageName) const;
@@ -157,7 +127,8 @@ public:
     // Gets all snapshots and changes that have occurred since the last output.
     // If every config key has received a change or snapshot record, then this
     // record is deleted.
-    void appendUidMap(const ConfigKey& key, util::ProtoOutputStream* proto);
+    void appendUidMap(const int64_t& timestamp, const ConfigKey& key,
+                      util::ProtoOutputStream* proto);
 
     // Forces the output to be cleared. We still generate a snapshot based on the current state.
     // This results in extra data uploaded but helps us reconstruct the uid mapping on the server
@@ -173,25 +144,20 @@ private:
     std::set<string> getAppNamesFromUidLocked(const int32_t& uid, bool returnNormalized) const;
     string normalizeAppName(const string& appName) const;
 
-    void updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
-                   const vector<int64_t>& versionCode, const vector<String16>& packageName);
-
-    void updateApp(const int64_t& timestamp, const String16& packageName, const int32_t& uid,
-                   const int64_t& versionCode);
-    void removeApp(const int64_t& timestamp, const String16& packageName, const int32_t& uid);
-
-    void appendUidMap(const int64_t& timestamp, const ConfigKey& key,
-                      util::ProtoOutputStream* proto);
-
     void getListenerListCopyLocked(std::vector<wp<PackageInfoListener>>* output);
 
     // TODO: Use shared_mutex for improved read-locking if a library can be found in Android.
     mutable mutex mMutex;
     mutable mutex mIsolatedMutex;
 
-    // Maps uid to application data. This must be multimap since there is a feature in Android for
-    // multiple apps to share the same uid.
-    std::unordered_multimap<int, AppData> mMap;
+    struct PairHash {
+        size_t operator()(std::pair<int, string> p) const noexcept {
+            std::hash<std::string> hash_fn;
+            return hash_fn(std::to_string(p.first) + p.second);
+        }
+    };
+    // Maps uid and package name to application data.
+    std::unordered_map<std::pair<int, string>, AppData, PairHash> mMap;
 
     // Maps isolated uid to the parent uid. Any metrics for an isolated uid will instead contribute
     // to the parent uid.
@@ -200,8 +166,8 @@ private:
     // Record the changes that can be provided with the uploads.
     std::list<ChangeRecord> mChanges;
 
-    // Record the snapshots that can be provided with the uploads.
-    std::list<SnapshotRecord> mSnapshots;
+    // Store which uid and apps represent deleted ones.
+    std::list<std::pair<int, string>> mDeletedApps;
 
     // Metric producers that should be notified if there's an upgrade in any app.
     set<wp<PackageInfoListener>> mSubscribers;
@@ -228,6 +194,8 @@ private:
 
     // Allows unit-test to access private methods.
     FRIEND_TEST(UidMapTest, TestClearingOutput);
+    FRIEND_TEST(UidMapTest, TestRemovedAppRetained);
+    FRIEND_TEST(UidMapTest, TestRemovedAppOverGuardrail);
     FRIEND_TEST(UidMapTest, TestOutputIncludesAtLeastOneSnapshot);
     FRIEND_TEST(UidMapTest, TestMemoryComputed);
     FRIEND_TEST(UidMapTest, TestMemoryGuardrail);

@@ -116,8 +116,8 @@
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
     <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"Se asociază aparatul auditiv stâng…"</string>
     <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"Se asociază aparatul auditiv drept…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"Stâng - baterie <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"Drept - baterie <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"Stânga – baterie <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"Dreapta – baterie <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi dezactivat."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi deconectat."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Semnal Wi-Fi: o bară."</string>
@@ -241,8 +241,8 @@
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Afișați opțiunile pentru certificarea Ecran wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Măriți niv. de înr. prin Wi‑Fi, afișați în fcț. de SSID RSSI în Selectorul Wi‑Fi"</string>
     <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Afișează aleatoriu adresa MAC când te conectezi la rețele Wi‑Fi"</string>
-    <string name="wifi_metered_label" msgid="4514924227256839725">"Contorizat"</string>
-    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Necontorizat"</string>
+    <string name="wifi_metered_label" msgid="4514924227256839725">"Contorizată"</string>
+    <string name="wifi_unmetered_label" msgid="6124098729457992931">"Necontorizată"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Dimensiunile tamponului jurnalului"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Dimensiuni jurnal / tampon jurnal"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Ștergeți stocarea permanentă a jurnalului?"</string>

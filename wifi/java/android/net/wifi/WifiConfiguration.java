@@ -28,10 +28,12 @@ import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.BackupUtils;
 import android.util.Log;
+import android.util.TimeUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -608,37 +610,6 @@ public class WifiConfiguration implements Parcelable {
      * Last time the system was connected to this configuration.
      */
     public long lastConnected;
-
-    /**
-     * @hide
-     * Last time the system tried to connect and failed.
-     */
-    public long lastConnectionFailure;
-
-    /**
-     * @hide
-     * Last time the system tried to roam and failed because of authentication failure or DHCP
-     * RENEW failure.
-     */
-    public long lastRoamingFailure;
-
-    /** @hide */
-    public static int ROAMING_FAILURE_IP_CONFIG = 1;
-    /** @hide */
-    public static int ROAMING_FAILURE_AUTH_FAILURE = 2;
-
-    /**
-     * @hide
-     * Initial amount of time this Wifi configuration gets blacklisted for network switching
-     * because of roaming failure
-     */
-    public long roamingFailureBlackListTimeMilli = 1000;
-
-    /**
-     * @hide
-     * Last roaming failure reason code
-     */
-    public int lastRoamingFailureReason;
 
     /**
      * @hide
@@ -1620,8 +1591,9 @@ public class WifiConfiguration implements Parcelable {
         }
         if (mNetworkSelectionStatus.getConnectChoice() != null) {
             sbuf.append(" connect choice: ").append(mNetworkSelectionStatus.getConnectChoice());
-            sbuf.append(" connect choice set time: ").append(mNetworkSelectionStatus
-                    .getConnectChoiceTimestamp());
+            sbuf.append(" connect choice set time: ")
+                    .append(TimeUtils.logTimeOfDay(
+                            mNetworkSelectionStatus.getConnectChoiceTimestamp()));
         }
         sbuf.append(" hasEverConnected: ")
                 .append(mNetworkSelectionStatus.getHasEverConnected()).append("\n");
@@ -1724,7 +1696,7 @@ public class WifiConfiguration implements Parcelable {
             sbuf.append(" networkSelectionBSSID="
                     + mNetworkSelectionStatus.getNetworkSelectionBSSID());
         }
-        long now_ms = System.currentTimeMillis();
+        long now_ms = SystemClock.elapsedRealtime();
         if (mNetworkSelectionStatus.getDisableTime() != NetworkSelectionStatus
                 .INVALID_NETWORK_SELECTION_DISABLE_TIMESTAMP) {
             sbuf.append('\n');
@@ -1746,35 +1718,9 @@ public class WifiConfiguration implements Parcelable {
 
         if (this.lastConnected != 0) {
             sbuf.append('\n');
-            long diff = now_ms - this.lastConnected;
-            if (diff <= 0) {
-                sbuf.append("lastConnected since <incorrect>");
-            } else {
-                sbuf.append("lastConnected: ").append(Long.toString(diff / 1000)).append("sec ");
-            }
+            sbuf.append("lastConnected: ").append(TimeUtils.logTimeOfDay(this.lastConnected));
+            sbuf.append(" ");
         }
-        if (this.lastConnectionFailure != 0) {
-            sbuf.append('\n');
-            long diff = now_ms - this.lastConnectionFailure;
-            if (diff <= 0) {
-                sbuf.append("lastConnectionFailure since <incorrect> ");
-            } else {
-                sbuf.append("lastConnectionFailure: ").append(Long.toString(diff / 1000));
-                sbuf.append("sec ");
-            }
-        }
-        if (this.lastRoamingFailure != 0) {
-            sbuf.append('\n');
-            long diff = now_ms - this.lastRoamingFailure;
-            if (diff <= 0) {
-                sbuf.append("lastRoamingFailure since <incorrect> ");
-            } else {
-                sbuf.append("lastRoamingFailure: ").append(Long.toString(diff / 1000));
-                sbuf.append("sec ");
-            }
-        }
-        sbuf.append("roamingFailureBlackListTimeMilli: ").
-                append(Long.toString(this.roamingFailureBlackListTimeMilli));
         sbuf.append('\n');
         if (this.linkedConfigurations != null) {
             for (String key : this.linkedConfigurations.keySet()) {
@@ -2119,10 +2065,6 @@ public class WifiConfiguration implements Parcelable {
 
             lastConnected = source.lastConnected;
             lastDisconnected = source.lastDisconnected;
-            lastConnectionFailure = source.lastConnectionFailure;
-            lastRoamingFailure = source.lastRoamingFailure;
-            lastRoamingFailureReason = source.lastRoamingFailureReason;
-            roamingFailureBlackListTimeMilli = source.roamingFailureBlackListTimeMilli;
             numScorerOverride = source.numScorerOverride;
             numScorerOverrideAndSwitchedNetwork = source.numScorerOverrideAndSwitchedNetwork;
             numAssociation = source.numAssociation;
@@ -2188,10 +2130,6 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(lastUpdateUid);
         dest.writeString(creatorName);
         dest.writeString(lastUpdateName);
-        dest.writeLong(lastConnectionFailure);
-        dest.writeLong(lastRoamingFailure);
-        dest.writeInt(lastRoamingFailureReason);
-        dest.writeLong(roamingFailureBlackListTimeMilli);
         dest.writeInt(numScorerOverride);
         dest.writeInt(numScorerOverrideAndSwitchedNetwork);
         dest.writeInt(numAssociation);
@@ -2257,10 +2195,6 @@ public class WifiConfiguration implements Parcelable {
                 config.lastUpdateUid = in.readInt();
                 config.creatorName = in.readString();
                 config.lastUpdateName = in.readString();
-                config.lastConnectionFailure = in.readLong();
-                config.lastRoamingFailure = in.readLong();
-                config.lastRoamingFailureReason = in.readInt();
-                config.roamingFailureBlackListTimeMilli = in.readLong();
                 config.numScorerOverride = in.readInt();
                 config.numScorerOverrideAndSwitchedNetwork = in.readInt();
                 config.numAssociation = in.readInt();

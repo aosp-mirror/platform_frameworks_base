@@ -370,11 +370,15 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         float layoutEnd = getLayoutEnd();
         float overflowStart = getMaxOverflowStart();
         mVisualOverflowStart = 0;
+        mFirstVisibleIconState = null;
         boolean hasAmbient = mSpeedBumpIndex != -1 && mSpeedBumpIndex < getChildCount();
         for (int i = 0; i < childCount; i++) {
             View view = getChildAt(i);
             IconState iconState = mIconStates.get(view);
             iconState.xTranslation = translationX;
+            if (mFirstVisibleIconState == null) {
+                mFirstVisibleIconState = iconState;
+            }
             boolean forceOverflow = mSpeedBumpIndex != -1 && i >= mSpeedBumpIndex
                     && iconState.iconAppearAmount > 0.0f || i >= maxVisibleIcons;
             boolean noOverflowAfter = i == childCount - 1;
@@ -401,7 +405,6 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         mNumDots = 0;
         if (firstOverflowIndex != -1) {
             translationX = mVisualOverflowStart;
-            mFirstVisibleIconState = null;
             for (int i = firstOverflowIndex; i < childCount; i++) {
                 View view = getChildAt(i);
                 IconState iconState = mIconStates.get(view);
@@ -416,9 +419,6 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                     }
                     translationX += (mNumDots == MAX_DOTS ? MAX_DOTS * dotWidth : dotWidth)
                             * iconState.iconAppearAmount;
-                    if (mFirstVisibleIconState == null) {
-                        mFirstVisibleIconState = iconState;
-                    }
                     mLastVisibleIconState = iconState;
                 } else {
                     iconState.visibleState = StatusBarIconView.STATE_HIDDEN;

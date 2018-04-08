@@ -19,6 +19,7 @@ package android.media;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.os.Bundle;
 import android.os.Handler;
@@ -262,6 +263,7 @@ public final class AudioFocusRequest {
      * Returns the focus change listener set for this {@code AudioFocusRequest}.
      * @return null if no {@link AudioManager.OnAudioFocusChangeListener} was set.
      */
+    @TestApi
     public @Nullable OnAudioFocusChangeListener getOnAudioFocusChangeListener() {
         return mFocusListener;
     }

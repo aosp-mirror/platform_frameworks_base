@@ -159,6 +159,11 @@ public class KeyguardBouncer {
      */
     public void onFullyShown() {
         mFalsingManager.onBouncerShown();
+        if (mKeyguardView == null) {
+            Log.wtf(TAG, "onFullyShown when view was null");
+        } else {
+            mKeyguardView.onResume();
+        }
     }
 
     /**
@@ -180,7 +185,6 @@ public class KeyguardBouncer {
         @Override
         public void run() {
             mRoot.setVisibility(View.VISIBLE);
-            mKeyguardView.onResume();
             showPromptReason(mBouncerPromptReason);
             final CharSequence customMessage = mCallback.consumeCustomMessage();
             if (customMessage != null) {
@@ -296,7 +300,7 @@ public class KeyguardBouncer {
 
     public boolean isShowing() {
         return (mShowingSoon || (mRoot != null && mRoot.getVisibility() == View.VISIBLE))
-                && mExpansion == 0;
+                && mExpansion == 0 && !isAnimatingAway();
     }
 
     /**

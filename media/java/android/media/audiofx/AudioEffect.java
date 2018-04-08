@@ -18,6 +18,7 @@ package android.media.audiofx;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.os.Handler;
 import android.os.Looper;
@@ -133,9 +134,10 @@ public class AudioEffect {
               .fromString("7261676f-6d75-7369-6364-28e2fd3ac39e");
 
     /**
-     * Null effect UUID. Used when the UUID for effect type of
+     * Null effect UUID. See {@link AudioEffect(UUID, UUID, int, int)} for use.
      * @hide
      */
+    @TestApi
     public static final UUID EFFECT_TYPE_NULL = UUID
             .fromString("ec7178ec-e5e1-4432-a3f4-4657e6795210");
 
@@ -492,6 +494,7 @@ public class AudioEffect {
      * @return true if the device implements the specified effect type, false otherwise.
      * @hide
      */
+    @TestApi
     public static boolean isEffectTypeAvailable(UUID type) {
         AudioEffect.Descriptor[] desc = AudioEffect.queryEffects();
         if (desc == null) {
@@ -544,6 +547,7 @@ public class AudioEffect {
      * @throws IllegalStateException
      * @hide
      */
+    @TestApi
     public int setParameter(byte[] param, byte[] value)
             throws IllegalStateException {
         checkState("setParameter()");
@@ -556,6 +560,7 @@ public class AudioEffect {
      * @see #setParameter(byte[], byte[])
      * @hide
      */
+    @TestApi
     public int setParameter(int param, int value) throws IllegalStateException {
         byte[] p = intToByteArray(param);
         byte[] v = intToByteArray(value);
@@ -569,6 +574,7 @@ public class AudioEffect {
      * @see #setParameter(byte[], byte[])
      * @hide
      */
+    @TestApi
     public int setParameter(int param, short value)
             throws IllegalStateException {
         byte[] p = intToByteArray(param);
@@ -583,6 +589,7 @@ public class AudioEffect {
      * @see #setParameter(byte[], byte[])
      * @hide
      */
+    @TestApi
     public int setParameter(int param, byte[] value)
             throws IllegalStateException {
         byte[] p = intToByteArray(param);
@@ -596,6 +603,7 @@ public class AudioEffect {
      * @see #setParameter(byte[], byte[])
      * @hide
      */
+    @TestApi
     public int setParameter(int[] param, int[] value)
             throws IllegalStateException {
         if (param.length > 2 || value.length > 2) {
@@ -647,6 +655,7 @@ public class AudioEffect {
      * @see #setParameter(byte[], byte[])
      * @hide
      */
+    @TestApi
     public int setParameter(int[] param, byte[] value)
             throws IllegalStateException {
         if (param.length > 2) {
@@ -675,6 +684,7 @@ public class AudioEffect {
      * @throws IllegalStateException
      * @hide
      */
+    @TestApi
     public int getParameter(byte[] param, byte[] value)
             throws IllegalStateException {
         checkState("getParameter()");
@@ -688,6 +698,7 @@ public class AudioEffect {
      * @see #getParameter(byte[], byte[])
      * @hide
      */
+    @TestApi
     public int getParameter(int param, byte[] value)
             throws IllegalStateException {
         byte[] p = intToByteArray(param);
@@ -703,6 +714,7 @@ public class AudioEffect {
      * In case of success, returns the number of meaningful integers in value array.
      * @hide
      */
+    @TestApi
     public int getParameter(int param, int[] value)
             throws IllegalStateException {
         if (value.length > 2) {
@@ -734,6 +746,7 @@ public class AudioEffect {
      * In case of success, returns the number of meaningful short integers in value array.
      * @hide
      */
+    @TestApi
     public int getParameter(int param, short[] value)
             throws IllegalStateException {
         if (value.length > 2) {
@@ -799,6 +812,7 @@ public class AudioEffect {
      * In case of success, returns the number of meaningful short integers in value array.
      * @hide
      */
+    @TestApi
     public int getParameter(int[] param, short[] value)
             throws IllegalStateException {
         if (param.length > 2 || value.length > 2) {
@@ -938,6 +952,7 @@ public class AudioEffect {
      * @param listener
      * @hide
      */
+    @TestApi
     public void setParameterListener(OnParameterChangeListener listener) {
         synchronized (mListenerLock) {
             mParameterChangeListener = listener;
@@ -999,6 +1014,7 @@ public class AudioEffect {
      * when a parameter is changed in the effect engine by the controlling application.
      * @hide
      */
+    @TestApi
     public interface OnParameterChangeListener {
         /**
          * Called on the listener to notify it that a parameter value has changed.
@@ -1291,6 +1307,7 @@ public class AudioEffect {
     /**
      * @hide
      */
+    @TestApi
     public static boolean isError(int status) {
         return (status < 0);
     }
@@ -1298,6 +1315,7 @@ public class AudioEffect {
     /**
      * @hide
      */
+    @TestApi
     public static int byteArrayToInt(byte[] valueBuf) {
         return byteArrayToInt(valueBuf, 0);
 
@@ -1316,6 +1334,7 @@ public class AudioEffect {
     /**
      * @hide
      */
+    @TestApi
     public static byte[] intToByteArray(int value) {
         ByteBuffer converter = ByteBuffer.allocate(4);
         converter.order(ByteOrder.nativeOrder());
@@ -1326,6 +1345,7 @@ public class AudioEffect {
     /**
      * @hide
      */
+    @TestApi
     public static short byteArrayToShort(byte[] valueBuf) {
         return byteArrayToShort(valueBuf, 0);
     }
@@ -1343,6 +1363,7 @@ public class AudioEffect {
     /**
      * @hide
      */
+    @TestApi
     public static byte[] shortToByteArray(short value) {
         ByteBuffer converter = ByteBuffer.allocate(2);
         converter.order(ByteOrder.nativeOrder());

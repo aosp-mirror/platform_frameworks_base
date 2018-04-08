@@ -163,6 +163,7 @@ package android {
     field public static final java.lang.String REVOKE_RUNTIME_PERMISSIONS = "android.permission.REVOKE_RUNTIME_PERMISSIONS";
     field public static final java.lang.String SCORE_NETWORKS = "android.permission.SCORE_NETWORKS";
     field public static final java.lang.String SEND_RESPOND_VIA_MESSAGE = "android.permission.SEND_RESPOND_VIA_MESSAGE";
+    field public static final java.lang.String SEND_SHOW_SUSPENDED_APP_DETAILS = "android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS";
     field public static final java.lang.String SEND_SMS_NO_CONFIRMATION = "android.permission.SEND_SMS_NO_CONFIRMATION";
     field public static final java.lang.String SERIAL_PORT = "android.permission.SERIAL_PORT";
     field public static final java.lang.String SET_ACTIVITY_WATCHER = "android.permission.SET_ACTIVITY_WATCHER";
@@ -316,6 +317,7 @@ package android.app {
 
   public class BroadcastOptions {
     method public static android.app.BroadcastOptions makeBasic();
+    method public void setDontSendToRestrictedApps(boolean);
     method public void setTemporaryAppWhitelistDuration(long);
     method public android.os.Bundle toBundle();
   }
@@ -451,7 +453,7 @@ package android.app.admin {
     field public static final int STATE_USER_UNMANAGED = 0; // 0x0
   }
 
-  public class SystemUpdatePolicy implements android.os.Parcelable {
+  public final class SystemUpdatePolicy implements android.os.Parcelable {
     method public int describeContents();
     method public android.app.admin.SystemUpdatePolicy.InstallationOption getInstallationOptionAt(long);
     method public void writeToParcel(android.os.Parcel, int);
@@ -878,6 +880,7 @@ package android.content {
     field public static final java.lang.String ACTION_QUERY_PACKAGE_RESTART = "android.intent.action.QUERY_PACKAGE_RESTART";
     field public static final java.lang.String ACTION_RESOLVE_INSTANT_APP_PACKAGE = "android.intent.action.RESOLVE_INSTANT_APP_PACKAGE";
     field public static final java.lang.String ACTION_REVIEW_PERMISSIONS = "android.intent.action.REVIEW_PERMISSIONS";
+    field public static final java.lang.String ACTION_SHOW_SUSPENDED_APP_DETAILS = "android.intent.action.SHOW_SUSPENDED_APP_DETAILS";
     field public static final deprecated java.lang.String ACTION_SIM_STATE_CHANGED = "android.intent.action.SIM_STATE_CHANGED";
     field public static final java.lang.String ACTION_SPLIT_CONFIGURATION_CHANGED = "android.intent.action.SPLIT_CONFIGURATION_CHANGED";
     field public static final java.lang.String ACTION_UPGRADE_SETUP = "android.intent.action.UPGRADE_SETUP";
@@ -3081,10 +3084,10 @@ package android.net {
   }
 
   public static final class IpSecManager.IpSecTunnelInterface implements java.lang.AutoCloseable {
-    method public void addAddress(android.net.LinkAddress) throws java.io.IOException;
+    method public void addAddress(java.net.InetAddress, int) throws java.io.IOException;
     method public void close();
     method public java.lang.String getInterfaceName();
-    method public void removeAddress(android.net.LinkAddress) throws java.io.IOException;
+    method public void removeAddress(java.net.InetAddress, int) throws java.io.IOException;
   }
 
   public final class IpSecTransform implements java.lang.AutoCloseable {
@@ -5119,6 +5122,7 @@ package android.telephony {
   }
 
   public abstract class NetworkService extends android.app.Service {
+    ctor public NetworkService();
     method protected abstract android.telephony.NetworkService.NetworkServiceProvider createNetworkServiceProvider(int);
     field public static final java.lang.String NETWORK_SERVICE_EXTRA_SLOT_ID = "android.telephony.extra.SLOT_ID";
     field public static final java.lang.String NETWORK_SERVICE_INTERFACE = "android.telephony.NetworkService";
@@ -5400,6 +5404,7 @@ package android.telephony.data {
   }
 
   public abstract class DataService extends android.app.Service {
+    ctor public DataService();
     method public abstract android.telephony.data.DataService.DataServiceProvider createDataServiceProvider(int);
     field public static final java.lang.String DATA_SERVICE_EXTRA_SLOT_ID = "android.telephony.data.extra.SLOT_ID";
     field public static final java.lang.String DATA_SERVICE_INTERFACE = "android.telephony.data.DataService";

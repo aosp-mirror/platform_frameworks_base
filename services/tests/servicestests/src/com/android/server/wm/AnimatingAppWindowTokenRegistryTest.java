@@ -88,4 +88,25 @@ public class AnimatingAppWindowTokenRegistryTest extends WindowTestsBase {
         verify(mMockEndDeferFinishCallback1).run();
         verifyZeroInteractions(mMockEndDeferFinishCallback2);
     }
+
+    @Test
+    public void testContainerRemoved() throws Exception {
+        final AppWindowToken window1 = createAppWindowToken(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final AppWindowToken window2 = createAppWindow(window1.getTask(), ACTIVITY_TYPE_STANDARD,
+                "window2").mAppToken;
+        final AnimatingAppWindowTokenRegistry registry =
+                window1.getStack().getAnimatingAppWindowTokenRegistry();
+
+        window1.startAnimation(window1.getPendingTransaction(), mAdapter, false /* hidden */);
+        window2.startAnimation(window1.getPendingTransaction(), mAdapter, false /* hidden */);
+        assertTrue(window1.isSelfAnimating());
+        assertTrue(window2.isSelfAnimating());
+
+        // Make sure that first animation finish is deferred, and removing the second window stops
+        // finishes all pending deferred finishings.
+        registry.notifyAboutToFinish(window1, mMockEndDeferFinishCallback1);
+        window2.setParent(null);
+        verify(mMockEndDeferFinishCallback1).run();
+    }
 }

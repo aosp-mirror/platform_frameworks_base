@@ -65,7 +65,7 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> connesso (telefono escluso), batteria al <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> connesso (contenuti multimediali esclusi), batteria al <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> connesso (telefono o contenuti multimediali esclusi), batteria al <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Attivo, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> di batteria"</string>
+    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Attivo - Batteria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"Batteria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Attivo"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Audio multimediale"</string>

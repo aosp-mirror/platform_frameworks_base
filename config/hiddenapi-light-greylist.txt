@@ -2,6 +2,7 @@ Landroid/accounts/AccountManager;->mContext:Landroid/content/Context;
 Landroid/accounts/IAccountAuthenticatorResponse$Stub;-><init>()V
 Landroid/accounts/IAccountManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/accounts/IAccountManager;
 Landroid/accounts/IAccountManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
+Landroid/animation/LayoutTransition;->cancel(I)V
 Landroid/animation/LayoutTransition;->cancel()V
 Landroid/animation/ValueAnimator;->animateValue(F)V
 Landroid/animation/ValueAnimator;->sDurationScale:F
@@ -189,6 +190,7 @@ Landroid/app/AppOpsManager$OpEntry;->getRejectTime()J
 Landroid/app/AppOpsManager;->OP_FINE_LOCATION:I
 Landroid/app/AppOpsManager;->OP_GET_USAGE_STATS:I
 Landroid/app/AppOpsManager;->OP_POST_NOTIFICATION:I
+Landroid/app/AppOpsManager;->OP_PROJECT_MEDIA:I
 Landroid/app/AppOpsManager;->OP_READ_CONTACTS:I
 Landroid/app/AppOpsManager;->OP_READ_PHONE_STATE:I
 Landroid/app/AppOpsManager;->OP_READ_SMS:I
@@ -393,6 +395,7 @@ Landroid/appwidget/AppWidgetManager;->bindAppWidgetIdIfAllowed(IILandroid/conten
 Landroid/appwidget/AppWidgetManager;->bindAppWidgetId(ILandroid/content/ComponentName;Landroid/os/Bundle;)V
 Landroid/appwidget/AppWidgetManager;->bindAppWidgetId(ILandroid/content/ComponentName;)V
 Landroid/appwidget/AppWidgetManager;->mService:Lcom/android/internal/appwidget/IAppWidgetService;
+Landroid/appwidget/AppWidgetProviderInfo;->providerInfo:Landroid/content/pm/ActivityInfo;
 Landroid/bluetooth/BluetoothA2dp;->connect(Landroid/bluetooth/BluetoothDevice;)Z
 Landroid/bluetooth/BluetoothAdapter;->disable(Z)Z
 Landroid/bluetooth/BluetoothAdapter;->factoryReset()Z
@@ -658,6 +661,7 @@ Landroid/content/UriMatcher;->mText:Ljava/lang/String;
 Landroid/database/AbstractCursor;->mExtras:Landroid/os/Bundle;
 Landroid/database/AbstractCursor;->mNotifyUri:Landroid/net/Uri;
 Landroid/database/AbstractCursor;->mRowIdColumnIndex:I
+Landroid/database/AbstractWindowedCursor;->clearOrCreateWindow(Ljava/lang/String;)V
 Landroid/database/CursorWindow;->mWindowPtr:J
 Landroid/database/CursorWindow;->sCursorWindowSize:I
 Landroid/database/CursorWindow;->sWindowToPidMap:Landroid/util/LongSparseArray;
@@ -666,12 +670,14 @@ Landroid/database/sqlite/SQLiteCustomFunction;->dispatchCallback([Ljava/lang/Str
 Landroid/database/sqlite/SQLiteCustomFunction;->name:Ljava/lang/String;
 Landroid/database/sqlite/SQLiteCustomFunction;->numArgs:I
 Landroid/database/sqlite/SQLiteDatabaseConfiguration;->maxSqlCacheSize:I
+Landroid/database/sqlite/SQLiteDatabase;->CONFLICT_VALUES:[Ljava/lang/String;
 Landroid/database/sqlite/SQLiteDatabase;->mConfigurationLocked:Landroid/database/sqlite/SQLiteDatabaseConfiguration;
 Landroid/database/sqlite/SQLiteDatabase;->mConnectionPoolLocked:Landroid/database/sqlite/SQLiteConnectionPool;
 Landroid/database/sqlite/SQLiteDebug$PagerStats;->largestMemAlloc:I
 Landroid/database/sqlite/SQLiteDebug$PagerStats;->memoryUsed:I
 Landroid/database/sqlite/SQLiteDebug$PagerStats;->pageCacheOverflow:I
 Landroid/database/sqlite/SQLiteOpenHelper;->mName:Ljava/lang/String;
+Landroid/database/sqlite/SQLiteStatement;-><init>(Landroid/database/sqlite/SQLiteDatabase;Ljava/lang/String;[Ljava/lang/Object;)V
 Landroid/ddm/DdmHandleAppName;->getAppName()Ljava/lang/String;
 Landroid/graphics/AvoidXfermode$Mode;->AVOID:Landroid/graphics/AvoidXfermode$Mode;
 Landroid/graphics/AvoidXfermode$Mode;->TARGET:Landroid/graphics/AvoidXfermode$Mode;
@@ -761,7 +767,6 @@ Landroid/graphics/GraphicBuffer;->createFromExisting(IIIIJ)Landroid/graphics/Gra
 Landroid/graphics/GraphicBuffer;->CREATOR:Landroid/os/Parcelable$Creator;
 Landroid/graphics/GraphicBuffer;-><init>(IIIIJ)V
 Landroid/graphics/GraphicBuffer;->mNativeObject:J
-Landroid/graphics/ImageDecoder;-><init>(JIIZ)V
 Landroid/graphics/ImageDecoder;->postProcessAndRelease(Landroid/graphics/Canvas;)I
 Landroid/graphics/LinearGradient;->mColors:[I
 Landroid/graphics/Matrix;->native_instance:J
@@ -1018,6 +1023,7 @@ Landroid/media/AudioSystem;->dynamicPolicyCallbackFromNative(ILjava/lang/String;
 Landroid/media/AudioSystem;->errorCallbackFromNative(I)V
 Landroid/media/AudioSystem;->getPrimaryOutputFrameCount()I
 Landroid/media/AudioSystem;->getPrimaryOutputSamplingRate()I
+Landroid/media/AudioSystem;->isSourceActive(I)Z
 Landroid/media/AudioSystem;->isStreamActive(II)Z
 Landroid/media/AudioSystem;->recordingCallbackFromNative(IIII[I)V
 Landroid/media/AudioSystem;->setDeviceConnectionState(IILjava/lang/String;Ljava/lang/String;)I
@@ -1207,6 +1213,9 @@ Landroid/net/SSLCertificateSocketFactory;->setSoWriteTimeout(Ljava/net/Socket;I)
 Landroid/net/SSLCertificateSocketFactory;->TAG:Ljava/lang/String;
 Landroid/net/SSLCertificateSocketFactory;->verifyHostname(Ljava/net/Socket;Ljava/lang/String;)V
 Landroid/net/SSLSessionCache;->mSessionCache:Lcom/android/org/conscrypt/SSLClientSessionCache;
+Landroid/net/StaticIpConfiguration;->gateway:Ljava/net/InetAddress;
+Landroid/net/StaticIpConfiguration;-><init>()V
+Landroid/net/StaticIpConfiguration;->ipAddress:Landroid/net/LinkAddress;
 Landroid/net/TrafficStats;->getMobileIfaces()[Ljava/lang/String;
 Landroid/net/TrafficStats;->getRxBytes(Ljava/lang/String;)J
 Landroid/net/TrafficStats;->getStatsService()Landroid/net/INetworkStatsService;
@@ -1219,11 +1228,11 @@ Landroid/net/wifi/p2p/WifiP2pGroupList;->getGroupList()Ljava/util/Collection;
 Landroid/net/wifi/p2p/WifiP2pGroup;->TEMPORARY_NET_ID:I
 Landroid/net/wifi/p2p/WifiP2pManager$Channel;->mAsyncChannel:Lcom/android/internal/util/AsyncChannel;
 Landroid/net/wifi/p2p/WifiP2pManager$Channel;->putListener(Ljava/lang/Object;)I
+Landroid/net/wifi/p2p/WifiP2pManager;->CREATE_GROUP:I
 Landroid/net/wifi/p2p/WifiP2pManager;->deletePersistentGroup(Landroid/net/wifi/p2p/WifiP2pManager$Channel;ILandroid/net/wifi/p2p/WifiP2pManager$ActionListener;)V
 Landroid/net/wifi/p2p/WifiP2pManager;->requestPersistentGroupInfo(Landroid/net/wifi/p2p/WifiP2pManager$Channel;Landroid/net/wifi/p2p/WifiP2pManager$PersistentGroupInfoListener;)V
 Landroid/net/wifi/p2p/WifiP2pManager;->setDeviceName(Landroid/net/wifi/p2p/WifiP2pManager$Channel;Ljava/lang/String;Landroid/net/wifi/p2p/WifiP2pManager$ActionListener;)V
 Landroid/net/wifi/p2p/WifiP2pManager;->setWifiP2pChannels(Landroid/net/wifi/p2p/WifiP2pManager$Channel;IILandroid/net/wifi/p2p/WifiP2pManager$ActionListener;)V
-Landroid/net/wifi/p2p/WifiP2pManager;->CREATE_GROUP:I
 Landroid/net/wifi/ScanResult;->anqpDomainId:I
 Landroid/net/wifi/ScanResult;->anqpLines:Ljava/util/List;
 Landroid/net/wifi/ScanResult;->distanceCm:I
@@ -1255,6 +1264,8 @@ Landroid/net/wifi/WifiConfiguration;->apChannel:I
 Landroid/net/wifi/WifiConfiguration;->defaultGwMacAddress:Ljava/lang/String;
 Landroid/net/wifi/WifiConfiguration;->lastConnectUid:I
 Landroid/net/wifi/WifiConfiguration;->mIpConfiguration:Landroid/net/IpConfiguration;
+Landroid/net/wifi/WifiConfiguration;->setIpAssignment(Landroid/net/IpConfiguration$IpAssignment;)V
+Landroid/net/wifi/WifiConfiguration;->setStaticIpConfiguration(Landroid/net/StaticIpConfiguration;)V
 Landroid/net/wifi/WifiConfiguration;->validatedInternetAccess:Z
 Landroid/net/wifi/WifiEnterpriseConfig;->getCaCertificateAlias()Ljava/lang/String;
 Landroid/net/wifi/WifiEnterpriseConfig;->getClientCertificateAlias()Ljava/lang/String;
@@ -1590,6 +1601,7 @@ Landroid/provider/Browser;->clearHistory(Landroid/content/ContentResolver;)V
 Landroid/provider/Browser;->clearSearches(Landroid/content/ContentResolver;)V
 Landroid/provider/Browser;->deleteFromHistory(Landroid/content/ContentResolver;Ljava/lang/String;)V
 Landroid/provider/Browser;->getVisitedHistory(Landroid/content/ContentResolver;)[Ljava/lang/String;
+Landroid/provider/Browser;->HISTORY_PROJECTION:[Ljava/lang/String;
 Landroid/provider/Browser;->SEARCHES_URI:Landroid/net/Uri;
 Landroid/provider/Browser;->sendString(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V
 Landroid/provider/Browser;->updateVisitedHistory(Landroid/content/ContentResolver;Ljava/lang/String;Z)V
@@ -2079,7 +2091,9 @@ Landroid/view/accessibility/AccessibilityManager;->mIsEnabled:Z
 Landroid/view/accessibility/AccessibilityManager;->mIsHighTextContrastEnabled:Z
 Landroid/view/accessibility/AccessibilityManager;->sInstance:Landroid/view/accessibility/AccessibilityManager;
 Landroid/view/accessibility/AccessibilityManager;->sInstanceSync:Ljava/lang/Object;
+Landroid/view/accessibility/AccessibilityNodeInfo;->isSealed()Z
 Landroid/view/accessibility/AccessibilityNodeInfo;->refresh(Landroid/os/Bundle;Z)Z
+Landroid/view/accessibility/AccessibilityNodeInfo;->setSealed(Z)V
 Landroid/view/accessibility/AccessibilityRecord;->getSourceNodeId()J
 Landroid/view/accessibility/IAccessibilityManager;->getEnabledAccessibilityServiceList(II)Ljava/util/List;
 Landroid/view/accessibility/IAccessibilityManager$Stub;->asInterface(Landroid/os/IBinder;)Landroid/view/accessibility/IAccessibilityManager;
@@ -2231,7 +2245,6 @@ Landroid/view/SurfaceView;->mRequestedFormat:I
 Landroid/view/SurfaceView;->mSurfaceHolder:Landroid/view/SurfaceHolder;
 Landroid/view/SurfaceView;->surfacePositionLost_uiRtSync(J)V
 Landroid/view/SurfaceView;->updateSurfacePosition_renderWorker(JIIII)V
-Landroid/view/textclassifier/Logger;->DISABLED:Landroid/view/textclassifier/Logger;
 Landroid/view/textclassifier/logging/SmartSelectionEventTracker;-><init>(Landroid/content/Context;I)V
 Landroid/view/textclassifier/logging/SmartSelectionEventTracker;->logEvent(Landroid/view/textclassifier/logging/SmartSelectionEventTracker$SelectionEvent;)V
 Landroid/view/textclassifier/logging/SmartSelectionEventTracker$SelectionEvent;->selectionAction(III)Landroid/view/textclassifier/logging/SmartSelectionEventTracker$SelectionEvent;
@@ -2263,6 +2276,7 @@ Landroid/view/View;->computeFitSystemWindows(Landroid/graphics/Rect;Landroid/gra
 Landroid/view/View;->computeOpaqueFlags()V
 Landroid/view/ViewConfiguration;->getDeviceGlobalActionKeyTimeout()J
 Landroid/view/ViewConfiguration;->getDoubleTapMinTime()I
+Landroid/view/ViewConfiguration;->getScaledScrollFactor()I
 Landroid/view/ViewConfiguration;->mFadingMarqueeEnabled:Z
 Landroid/view/ViewConfiguration;->sHasPermanentMenuKeySet:Z
 Landroid/view/ViewConfiguration;->sHasPermanentMenuKey:Z
@@ -2520,6 +2534,7 @@ Landroid/widget/HorizontalScrollView;->mChildToScrollTo:Landroid/view/View;
 Landroid/widget/HorizontalScrollView;->mEdgeGlowLeft:Landroid/widget/EdgeEffect;
 Landroid/widget/HorizontalScrollView;->mEdgeGlowRight:Landroid/widget/EdgeEffect;
 Landroid/widget/HorizontalScrollView;->mScroller:Landroid/widget/OverScroller;
+Landroid/widget/ImageView;->animateTransform(Landroid/graphics/Matrix;)V
 Landroid/widget/ImageView;->mAdjustViewBounds:Z
 Landroid/widget/ImageView;->mAlpha:I
 Landroid/widget/ImageView;->mDrawMatrix:Landroid/graphics/Matrix;
@@ -2998,6 +3013,8 @@ Lcom/android/internal/telephony/ITelephony;->endCall()Z
 Lcom/android/internal/telephony/ITelephony;->getCallState()I
 Lcom/android/internal/telephony/ITelephony;->getDataState()I
 Lcom/android/internal/telephony/ITelephony;->isIdle(Ljava/lang/String;)Z
+Lcom/android/internal/telephony/ITelephonyRegistry;->notifyCallState(ILjava/lang/String;)V
+Lcom/android/internal/telephony/ITelephonyRegistry$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/telephony/ITelephonyRegistry;
 Lcom/android/internal/telephony/ITelephony;->silenceRinger()V
 Lcom/android/internal/telephony/ITelephony$Stub;->asInterface(Landroid/os/IBinder;)Lcom/android/internal/telephony/ITelephony;
 Lcom/android/internal/telephony/ITelephony$Stub$Proxy;->endCall()Z
@@ -3181,6 +3198,7 @@ Ljava/lang/Daemons;->stop()V
 Ljava/lang/Double;->value:D
 Ljava/lang/Float;->value:F
 Ljava/lang/Integer;->value:I
+Ljava/lang/invoke/MethodHandles$Lookup;-><init>(Ljava/lang/Class;I)V
 Ljava/lang/Long;->value:J
 Ljava/lang/ref/FinalizerReference;->add(Ljava/lang/Object;)V
 Ljava/lang/ref/FinalizerReference;->head:Ljava/lang/ref/FinalizerReference;

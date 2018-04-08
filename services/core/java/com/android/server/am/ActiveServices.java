@@ -2283,7 +2283,7 @@ public final class ActiveServices {
                         + " app=" + app);
             if (app != null && app.thread != null) {
                 try {
-                    app.addPackage(r.appInfo.packageName, r.appInfo.versionCode, mAm.mProcessStats);
+                    app.addPackage(r.appInfo.packageName, r.appInfo.longVersionCode, mAm.mProcessStats);
                     realStartServiceLocked(r, app, execInFg);
                     return null;
                 } catch (TransactionTooLargeException e) {
@@ -2645,6 +2645,8 @@ public final class ActiveServices {
                 Message msg = mAm.mHandler.obtainMessage(
                         ActivityManagerService.SERVICE_FOREGROUND_CRASH_MSG);
                 msg.obj = r.app;
+                msg.getData().putCharSequence(
+                    ActivityManagerService.SERVICE_RECORD_KEY, r.toString());
                 mAm.mHandler.sendMessage(msg);
             }
         }
@@ -3009,7 +3011,7 @@ public final class ActiveServices {
 
                     mPendingServices.remove(i);
                     i--;
-                    proc.addPackage(sr.appInfo.packageName, sr.appInfo.versionCode,
+                    proc.addPackage(sr.appInfo.packageName, sr.appInfo.longVersionCode,
                             mAm.mProcessStats);
                     realStartServiceLocked(sr, proc, sr.createdFromFg);
                     didSomething = true;
@@ -3563,13 +3565,15 @@ public final class ActiveServices {
 
         if (app != null) {
             mAm.mAppErrors.appNotResponding(app, null, null, false,
-                    "Context.startForegroundService() did not then call Service.startForeground()");
+                    "Context.startForegroundService() did not then call Service.startForeground(): "
+                        + r);
         }
     }
 
-    void serviceForegroundCrash(ProcessRecord app) {
+    void serviceForegroundCrash(ProcessRecord app, CharSequence serviceRecord) {
         mAm.crashApplication(app.uid, app.pid, app.info.packageName, app.userId,
-                "Context.startForegroundService() did not then call Service.startForeground()");
+                "Context.startForegroundService() did not then call Service.startForeground(): "
+                    + serviceRecord);
     }
 
     void scheduleServiceTimeoutLocked(ProcessRecord proc) {

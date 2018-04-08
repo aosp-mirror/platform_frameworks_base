@@ -178,10 +178,12 @@ package android.graphics {
 
   public final class ImageDecoder implements java.lang.AutoCloseable {
     method public deprecated boolean getAsAlphaMask();
+    method public deprecated boolean getConserveMemory();
     method public deprecated boolean getDecodeAsAlphaMask();
     method public deprecated boolean getMutable();
     method public deprecated boolean getRequireUnpremultiplied();
     method public deprecated android.graphics.ImageDecoder setAsAlphaMask(boolean);
+    method public deprecated void setConserveMemory(boolean);
     method public deprecated android.graphics.ImageDecoder setDecodeAsAlphaMask(boolean);
     method public deprecated android.graphics.ImageDecoder setMutable(boolean);
     method public deprecated android.graphics.ImageDecoder setRequireUnpremultiplied(boolean);
@@ -287,6 +289,14 @@ package android.net {
   }
 
   public static abstract class NetworkBadging.Badging implements java.lang.annotation.Annotation {
+  }
+
+  public class NetworkRequest implements android.os.Parcelable {
+    method public boolean hasUnwantedCapability(int);
+  }
+
+  public static class NetworkRequest.Builder {
+    method public android.net.NetworkRequest.Builder addUnwantedCapability(int);
   }
 
   public class SSLCertificateSocketFactory extends javax.net.ssl.SSLSocketFactory {

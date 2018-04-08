@@ -219,7 +219,7 @@ option java_package com.android.server
 # DisplayManagerService.java
 # ---------------------------
 # Auto-brightness adjustments by the user.
-35000 auto_brightness_adj (old_adj|5),(old_lux|5),(old_brightness|5),(old_gamma|5),(new_adj|5),(new_lux|5),(new_brightness|5),(new_gamma|5)
+35000 auto_brightness_adj (old_lux|5),(old_brightness|5),(new_lux|5),(new_brightness|5)
 
 # ---------------------------
 # ConnectivityService.java

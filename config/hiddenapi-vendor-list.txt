@@ -312,9 +312,7 @@ Landroid/net/SntpClient;->getRoundTripTime()J
 Landroid/net/SntpClient;->requestTime(Ljava/lang/String;I)Z
 Landroid/net/StaticIpConfiguration;->dnsServers:Ljava/util/ArrayList;
 Landroid/net/StaticIpConfiguration;->domains:Ljava/lang/String;
-Landroid/net/StaticIpConfiguration;->gateway:Ljava/net/InetAddress;
 Landroid/net/StaticIpConfiguration;->getRoutes(Ljava/lang/String;)Ljava/util/List;
-Landroid/net/StaticIpConfiguration;->ipAddress:Landroid/net/LinkAddress;
 Landroid/net/StringNetworkSpecifier;->specifier:Ljava/lang/String;
 Landroid/net/TrafficStats;->getMobileTcpRxPackets()J
 Landroid/net/TrafficStats;->getMobileTcpTxPackets()J
@@ -717,6 +715,7 @@ Lcom/android/ims/internal/uce/presence/IPresenceService;->setNewFeatureTag(ILjav
 Lcom/android/ims/internal/uce/presence/IPresenceService$Stub;-><init>()V
 Lcom/android/ims/internal/uce/presence/PresCapInfo;->getCapInfo()Lcom/android/ims/internal/uce/common/CapInfo;
 Lcom/android/ims/internal/uce/presence/PresCapInfo;->getContactUri()Ljava/lang/String;
+Lcom/android/ims/internal/uce/presence/PresCapInfo;->mContactUri:Ljava/lang/String;
 Lcom/android/ims/internal/uce/presence/PresServiceInfo;->getMediaType()I
 Lcom/android/ims/internal/uce/presence/PresServiceInfo;->getServiceDesc()Ljava/lang/String;
 Lcom/android/ims/internal/uce/presence/PresServiceInfo;->getServiceId()Ljava/lang/String;

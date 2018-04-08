@@ -184,30 +184,40 @@ public class PackageUserStateTest {
         launcherExtras2.putString("name", "launcherExtras2");
         final String suspendingPackage1 = "package1";
         final String suspendingPackage2 = "package2";
+        final String dialogMessage1 = "dialogMessage1";
+        final String dialogMessage2 = "dialogMessage2";
 
         final PackageUserState testUserState1 = new PackageUserState();
         testUserState1.suspended = true;
         testUserState1.suspendedAppExtras = appExtras1;
         testUserState1.suspendedLauncherExtras = launcherExtras1;
         testUserState1.suspendingPackage = suspendingPackage1;
+        testUserState1.dialogMessage = dialogMessage1;
 
-        final PackageUserState testUserState2 = new PackageUserState(testUserState1);
+        PackageUserState testUserState2 = new PackageUserState(testUserState1);
         assertThat(testUserState1.equals(testUserState2), is(true));
         testUserState2.suspendingPackage = suspendingPackage2;
         assertThat(testUserState1.equals(testUserState2), is(false));
 
-        testUserState2.suspendingPackage = testUserState1.suspendingPackage;
+        testUserState2 = new PackageUserState(testUserState1);
         testUserState2.suspendedAppExtras = appExtras2;
         assertThat(testUserState1.equals(testUserState2), is(false));
 
-        testUserState2.suspendedAppExtras = testUserState1.suspendedAppExtras;
+        testUserState2 = new PackageUserState(testUserState1);
         testUserState2.suspendedLauncherExtras = launcherExtras2;
         assertThat(testUserState1.equals(testUserState2), is(false));
 
-        // Everything is different but irrelevant if suspended is false
+        testUserState2 = new PackageUserState(testUserState1);
+        testUserState2.dialogMessage = dialogMessage2;
+        assertThat(testUserState1.equals(testUserState2), is(false));
+
+        testUserState2 = new PackageUserState(testUserState1);
         testUserState2.suspended = testUserState1.suspended = false;
-        testUserState2.suspendedAppExtras = appExtras2;
+        // Everything is different but irrelevant if suspended is false
         testUserState2.suspendingPackage = suspendingPackage2;
+        testUserState2.dialogMessage = dialogMessage2;
+        testUserState2.suspendedAppExtras = appExtras2;
+        testUserState2.suspendedLauncherExtras = launcherExtras2;
         assertThat(testUserState1.equals(testUserState2), is(true));
     }
 

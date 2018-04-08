@@ -439,8 +439,13 @@ void DurationMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
 }
 
 void DurationMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
+                                                const bool include_current_partial_bucket,
                                                 ProtoOutputStream* protoOutput) {
-    flushIfNeededLocked(dumpTimeNs);
+    if (include_current_partial_bucket) {
+        flushLocked(dumpTimeNs);
+    } else {
+        flushIfNeededLocked(dumpTimeNs);
+    }
     if (mPastBuckets.empty()) {
         VLOG(" Duration metric, empty return");
         return;

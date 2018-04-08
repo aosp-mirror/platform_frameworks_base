@@ -65,7 +65,7 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="1610296229139400266">"Terhubung (tanpa ponsel), baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="3908466636369853652">"Terhubung (tanpa media), baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="1163440823807659316">"Terhubung (tanpa ponsel atau media), baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g><xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Aktif, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterai"</string>
+    <string name="bluetooth_active_battery_level" msgid="3149689299296462009">"Aktif, baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level" msgid="1447164613319663655">"Baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Aktif"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Audio media"</string>
@@ -116,8 +116,8 @@
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
     <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"Menyambungkan alat bantu dengar sebelah kiri…"</string>
     <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"Menyambungkan alat bantu dengar sebelah kanan…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"Kiri - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterai"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"Kanan - <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterai"</string>
+    <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"Kiri - baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"Kanan - baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi tidak aktif."</string>
     <string name="accessibility_no_wifi" msgid="8834610636137374508">"Wi-Fi tidak tersambung."</string>
     <string name="accessibility_wifi_one_bar" msgid="4869376278894301820">"Wi-Fi satu baris."</string>

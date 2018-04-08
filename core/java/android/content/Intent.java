@@ -2282,6 +2282,28 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_MY_PACKAGE_SUSPENDED = "android.intent.action.MY_PACKAGE_SUSPENDED";
 
     /**
+     * Activity Action: Started to show more details about why an application was suspended.
+     *
+     * <p>Apps holding {@link android.Manifest.permission#SUSPEND_APPS} must declare an activity
+     * handling this intent and protect it with
+     * {@link android.Manifest.permission#SEND_SHOW_SUSPENDED_APP_DETAILS}.
+     *
+     * <p>Includes an extra {@link #EXTRA_PACKAGE_NAME} which is the name of the suspended package.
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     *
+     * @see PackageManager#isPackageSuspended()
+     * @see #ACTION_PACKAGES_SUSPENDED
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SHOW_SUSPENDED_APP_DETAILS =
+            "android.intent.action.SHOW_SUSPENDED_APP_DETAILS";
+
+    /**
      * Broadcast Action: Sent to a package that has been unsuspended.
      *
      * <p class="note">This is a protected intent that can only be sent
@@ -6788,6 +6810,9 @@ public class Intent implements Parcelable, Cloneable {
                 case "--activity-task-on-home":
                     intent.addFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME);
                     break;
+                case "--activity-match-external":
+                    intent.addFlags(Intent.FLAG_ACTIVITY_MATCH_EXTERNAL);
+                    break;
                 case "--receiver-registered-only":
                     intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                     break;
@@ -6924,7 +6949,7 @@ public class Intent implements Parcelable, Cloneable {
                 "    [--activity-no-user-action] [--activity-previous-is-top]",
                 "    [--activity-reorder-to-front] [--activity-reset-task-if-needed]",
                 "    [--activity-single-top] [--activity-clear-task]",
-                "    [--activity-task-on-home]",
+                "    [--activity-task-on-home] [--activity-match-external]",
                 "    [--receiver-registered-only] [--receiver-replace-pending]",
                 "    [--receiver-foreground] [--receiver-no-abort]",
                 "    [--receiver-include-background]",

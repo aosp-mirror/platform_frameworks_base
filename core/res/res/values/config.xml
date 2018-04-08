@@ -27,6 +27,7 @@
     <!-- Do not translate. Defines the slots for the right-hand side icons.  That is to say, the
          icons in the status bar that are not notifications. -->
     <string-array name="config_statusBarIcons">
+        <item><xliff:g id="id">@string/status_bar_alarm_clock</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_rotate</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_headset</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_data_saver</xliff:g></item>
@@ -44,7 +45,6 @@
         <item><xliff:g id="id">@string/status_bar_phone_evdo_signal</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_phone_signal</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_secure</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_alarm_clock</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_bluetooth</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_managed_profile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_cast</xliff:g></item>
@@ -2248,6 +2248,10 @@
     <!-- When true, local displays that do not contain any of their own content will automatically
          mirror the content of the default display. -->
     <bool name="config_localDisplaysMirrorContent">true</bool>
+
+    <!-- Indicates whether local non-default displays are private.
+         {@see android.view.Display#FLAG_PRIVATE} -->
+    <bool name="config_localDisplaysPrivate">false</bool>
 
     <!-- The default mode for the default display. One of the following values (See Display.java):
              0 - COLOR_MODE_DEFAULT

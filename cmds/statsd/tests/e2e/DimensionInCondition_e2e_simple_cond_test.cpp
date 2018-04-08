@@ -142,7 +142,8 @@ TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_SimpleCondition) {
 
             ConfigMetricsReportList reports;
             vector<uint8_t> buffer;
-            processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, &buffer);
+            processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, false,
+                                    &buffer);
             EXPECT_TRUE(buffer.size() > 0);
             EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
 
@@ -433,7 +434,8 @@ TEST(DimensionInConditionE2eTest, TestDurationMetric_Link_SimpleCondition) {
 
             ConfigMetricsReportList reports;
             vector<uint8_t> buffer;
-            processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, &buffer);
+            processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, false,
+                                    &buffer);
             EXPECT_TRUE(buffer.size() > 0);
             EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
 
@@ -650,7 +652,7 @@ TEST(DimensionInConditionE2eTest, TestDurationMetric_PartialLink_SimpleCondition
 
         ConfigMetricsReportList reports;
         vector<uint8_t> buffer;
-        processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, &buffer);
+        processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, false, &buffer);
         EXPECT_TRUE(buffer.size() > 0);
         EXPECT_TRUE(reports.ParseFromArray(&buffer[0], buffer.size()));
 

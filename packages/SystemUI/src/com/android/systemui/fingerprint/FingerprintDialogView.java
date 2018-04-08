@@ -22,11 +22,12 @@ import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
-import android.hardware.biometrics.BiometricDialog;
+import android.hardware.biometrics.BiometricPrompt;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -161,29 +162,29 @@ public class FingerprintDialogView extends LinearLayout {
         mLastState = STATE_NONE;
         updateFingerprintIcon(STATE_FINGERPRINT);
 
-        title.setText(mBundle.getCharSequence(BiometricDialog.KEY_TITLE));
+        title.setText(mBundle.getCharSequence(BiometricPrompt.KEY_TITLE));
         title.setSelected(true);
 
-        final CharSequence subtitleText = mBundle.getCharSequence(BiometricDialog.KEY_SUBTITLE);
-        if (subtitleText == null) {
+        final CharSequence subtitleText = mBundle.getCharSequence(BiometricPrompt.KEY_SUBTITLE);
+        if (TextUtils.isEmpty(subtitleText)) {
             subtitle.setVisibility(View.GONE);
         } else {
             subtitle.setVisibility(View.VISIBLE);
             subtitle.setText(subtitleText);
         }
 
-        final CharSequence descriptionText = mBundle.getCharSequence(BiometricDialog.KEY_DESCRIPTION);
-        if (descriptionText == null) {
-            subtitle.setVisibility(View.VISIBLE);
+        final CharSequence descriptionText = mBundle.getCharSequence(BiometricPrompt.KEY_DESCRIPTION);
+        if (TextUtils.isEmpty(descriptionText)) {
             description.setVisibility(View.GONE);
         } else {
-            description.setText(mBundle.getCharSequence(BiometricDialog.KEY_DESCRIPTION));
+            description.setVisibility(View.VISIBLE);
+            description.setText(descriptionText);
         }
 
-        negative.setText(mBundle.getCharSequence(BiometricDialog.KEY_NEGATIVE_TEXT));
+        negative.setText(mBundle.getCharSequence(BiometricPrompt.KEY_NEGATIVE_TEXT));
 
         final CharSequence positiveText =
-                mBundle.getCharSequence(BiometricDialog.KEY_POSITIVE_TEXT);
+                mBundle.getCharSequence(BiometricPrompt.KEY_POSITIVE_TEXT);
         positive.setText(positiveText); // needs to be set for marquee to work
         if (positiveText != null) {
             positive.setVisibility(View.VISIBLE);
@@ -269,7 +270,7 @@ public class FingerprintDialogView extends LinearLayout {
         mErrorText.setTextColor(mErrorColor);
         mErrorText.setContentDescription(message);
         mHandler.sendMessageDelayed(mHandler.obtainMessage(FingerprintDialogImpl.MSG_CLEAR_MESSAGE),
-                BiometricDialog.HIDE_DIALOG_DELAY);
+                BiometricPrompt.HIDE_DIALOG_DELAY);
     }
 
     public void showHelpMessage(String message) {
@@ -279,7 +280,7 @@ public class FingerprintDialogView extends LinearLayout {
     public void showErrorMessage(String error) {
         showTemporaryMessage(error);
         mHandler.sendMessageDelayed(mHandler.obtainMessage(FingerprintDialogImpl.MSG_HIDE_DIALOG,
-                false /* userCanceled */), BiometricDialog.HIDE_DIALOG_DELAY);
+                false /* userCanceled */), BiometricPrompt.HIDE_DIALOG_DELAY);
     }
 
     private void updateFingerprintIcon(int newState) {

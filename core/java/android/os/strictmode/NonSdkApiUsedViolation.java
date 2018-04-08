@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.hardware.biometrics;
 
-import android.os.Bundle;
-import android.os.UserHandle;
+package android.os.strictmode;
 
 /**
- * Communication channel from the BiometricDialog (SysUI) back to AuthenticationClient.
- * @hide
+ * Subclass of {@code Violation} that is used when a process accesses
+ * a non SDK API.
  */
-oneway interface IBiometricDialogReceiver {
-    void onDialogDismissed(int reason);
+public final class NonSdkApiUsedViolation extends Violation {
+    /** @hide */
+    public NonSdkApiUsedViolation(String message) {
+        super(message);
+    }
 }

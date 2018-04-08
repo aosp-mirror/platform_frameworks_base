@@ -48,7 +48,8 @@ public:
 
     size_t GetMetricsSize(const ConfigKey& key) const;
 
-    void onDumpReport(const ConfigKey& key, const int64_t dumpTimeNs, vector<uint8_t>* outData);
+    void onDumpReport(const ConfigKey& key, const int64_t dumpTimeNs,
+                      const bool include_current_partial_bucket, vector<uint8_t>* outData);
 
     /* Tells MetricsManager that the alarms in alarmSet have fired. Modifies anomaly alarmSet. */
     void onAnomalyAlarmFired(
@@ -102,7 +103,11 @@ private:
     void OnConfigUpdatedLocked(
         const int64_t currentTimestampNs, const ConfigKey& key, const StatsdConfig& config);
 
+    void WriteDataToDiskLocked();
+    void WriteDataToDiskLocked(const ConfigKey& key);
+
     void onConfigMetricsReportLocked(const ConfigKey& key, const int64_t dumpTimeStampNs,
+                                     const bool include_current_partial_bucket,
                                      util::ProtoOutputStream* proto);
 
     /* Check if we should send a broadcast if approaching memory limits and if we're over, we

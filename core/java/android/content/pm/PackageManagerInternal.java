@@ -191,10 +191,10 @@ public abstract class PackageManagerInternal {
     /**
      * Retrieve launcher extras for a suspended package provided to the system in
      * {@link PackageManager#setPackagesSuspended(String[], boolean, PersistableBundle,
-     * PersistableBundle, String)}
+     * PersistableBundle, String)}.
      *
      * @param packageName The package for which to return launcher extras.
-     * @param userId The user for which to check,
+     * @param userId The user for which to check.
      * @return The launcher extras.
      *
      * @see PackageManager#setPackagesSuspended(String[], boolean, PersistableBundle,
@@ -212,6 +212,29 @@ public abstract class PackageManagerInternal {
      * @see PackageManager#isPackageSuspended(String)
      */
     public abstract boolean isPackageSuspended(String packageName, int userId);
+
+    /**
+     * Get the name of the package that suspended the given package. Packages can be suspended by
+     * device administrators or apps holding {@link android.Manifest.permission#MANAGE_USERS} or
+     * {@link android.Manifest.permission#SUSPEND_APPS}.
+     *
+     * @param suspendedPackage The package that has been suspended.
+     * @param userId The user for which to check.
+     * @return Name of the package that suspended the given package. Returns {@code null} if the
+     * given package is not currently suspended and the platform package name - i.e.
+     * {@code "android"} - if the package was suspended by a device admin.
+     */
+    public abstract String getSuspendingPackage(String suspendedPackage, int userId);
+
+    /**
+     * Get the dialog message to be shown to the user when they try to launch a suspended
+     * application.
+     *
+     * @param suspendedPackage The package that has been suspended.
+     * @param userId The user for which to check.
+     * @return The dialog message to be shown to the user.
+     */
+    public abstract String getSuspendedDialogMessage(String suspendedPackage, int userId);
 
     /**
      * Do a straight uid lookup for the given package/application in the given user.
@@ -438,7 +461,7 @@ public abstract class PackageManagerInternal {
      * Resolves an activity intent, allowing instant apps to be resolved.
      */
     public abstract ResolveInfo resolveIntent(Intent intent, String resolvedType,
-            int flags, int userId, boolean resolveForStart);
+            int flags, int userId, boolean resolveForStart, int filterCallingUid);
 
     /**
     * Resolves a service intent, allowing instant apps to be resolved.

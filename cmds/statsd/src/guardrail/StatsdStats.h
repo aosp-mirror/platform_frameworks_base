@@ -43,7 +43,7 @@ struct ConfigStats {
 
     std::list<int32_t> broadcast_sent_time_sec;
     std::list<int32_t> data_drop_time_sec;
-    std::list<int32_t> dump_report_time_sec;
+    std::list<std::pair<int32_t, int64_t>> dump_report_stats;
 
     // Stores how many times a matcher have been matched. The map size is capped by kMaxConfigCount.
     std::map<const int64_t, int> matcher_stats;
@@ -73,11 +73,10 @@ struct ConfigStats {
 };
 
 struct UidMapStats {
-    int32_t snapshots;
     int32_t changes;
     int32_t bytes_used;
-    int32_t dropped_snapshots;
     int32_t dropped_changes;
+    int32_t deleted_apps = 0;
 };
 
 // Keeps track of stats of statsd.
@@ -105,6 +104,8 @@ public:
 
     const static int kMaxLoggerErrors = 10;
 
+    const static int kMaxSkippedLogEvents = 200;
+
     const static int kMaxTimestampCount = 20;
 
     const static int kMaxLogSourceCount = 50;
@@ -120,6 +121,9 @@ public:
     // Cap the UID map's memory usage to this. This should be fairly high since the UID information
     // is critical for understanding the metrics.
     const static size_t kMaxBytesUsedUidMap = 50 * 1024;
+
+    // The number of deleted apps that are stored in the uid map.
+    const static int kMaxDeletedAppsInUidMap = 100;
 
     /* Minimum period between two broadcasts in nanoseconds. */
     static const int64_t kMinBroadcastPeriodNs = 60 * NS_PER_SEC;
@@ -173,7 +177,7 @@ public:
      *
      * The report may be requested via StatsManager API, or through adb cmd.
      */
-    void noteMetricsReportSent(const ConfigKey& key);
+    void noteMetricsReportSent(const ConfigKey& key, const size_t num_bytes);
 
     /**
      * Report the size of output tuple of a condition.
@@ -244,14 +248,18 @@ public:
     void noteRegisteredPeriodicAlarmChanged();
 
     /**
-     * Records the number of snapshot and delta entries that are being dropped from the uid map.
+     * Records the number of delta entries that are being dropped from the uid map.
      */
-    void noteUidMapDropped(int snapshots, int deltas);
+    void noteUidMapDropped(int deltas);
 
     /**
-     * Updates the number of snapshots currently stored in the uid map.
+     * Records that an app was deleted (from statsd's map).
      */
-    void setUidMapSnapshots(int snapshots);
+    void noteUidMapAppDeletionDropped();
+
+    /**
+     * Updates the number of changes currently stored in the uid map.
+     */
     void setUidMapChanges(int changes);
     void setCurrentUidMapMemory(int bytes);
 
@@ -268,6 +276,11 @@ public:
      * Records statsd met an error while reading from logd.
      */
     void noteLoggerError(int error);
+
+    /**
+     * Records statsd skipped an event.
+     */
+    void noteLogEventSkipped(int tag, int64_t timestamp);
 
     /**
      * Reset the historical stats. Including all stats in icebox, and the tracked stats about
@@ -324,6 +337,9 @@ private:
     // Logd errors. Size capped by kMaxLoggerErrors.
     std::list<const std::pair<int, int>> mLoggerErrors;
 
+    // Skipped log events.
+    std::list<const std::pair<int, int64_t>> mSkippedLogEvents;
+
     // Stores the number of times statsd modified the anomaly alarm registered with
     // StatsCompanionService.
     int mAnomalyAlarmRegisteredStats = 0;
@@ -339,7 +355,7 @@ private:
 
     void noteDataDropped(const ConfigKey& key, int32_t timeSec);
 
-    void noteMetricsReportSent(const ConfigKey& key, int32_t timeSec);
+    void noteMetricsReportSent(const ConfigKey& key, const size_t num_bytes, int32_t timeSec);
 
     void noteBroadcastSent(const ConfigKey& key, int32_t timeSec);
 

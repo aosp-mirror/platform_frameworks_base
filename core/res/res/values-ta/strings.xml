@@ -122,12 +122,13 @@
     <string name="roamingText11" msgid="4154476854426920970">"ரோமிங் பேனர் இயக்கத்தில் உள்ளது"</string>
     <string name="roamingText12" msgid="1189071119992726320">"ரோமிங் பேனர் முடக்கப்பட்டது"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"சேவையைத் தேடுகிறது"</string>
-    <!-- no translation found for wfcRegErrorTitle (3855061241207182194) -->
-    <skip />
+    <string name="wfcRegErrorTitle" msgid="3855061241207182194">"வைஃபை அழைப்பை அமைக்க முடியவில்லை"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
     <item msgid="3910386316304772394">"வைஃபை மூலம் அழைக்கவும் செய்திகளை அனுப்பவும், முதலில் தொலைத்தொடர்பு நிறுவனத்திடம் இந்தச் சேவையை அமைக்குமாறு கேட்கவும். பிறகு அமைப்புகளில் மீண்டும் வைஃபை அழைப்பை இயக்கவும். (பிழைக் குறியீடு <xliff:g id="CODE">%1$s</xliff:g>)"</item>
   </string-array>
-    <!-- no translation found for wfcOperatorErrorNotificationMessages:0 (7372514042696663278) -->
+  <string-array name="wfcOperatorErrorNotificationMessages">
+    <item msgid="7372514042696663278">"உங்கள் மொபைல் நிறுவனத்துடன் வைஃபை அழைப்பைப் பதிவுசெய்வதில் சிக்கல்: <xliff:g id="CODE">%1$s</xliff:g>"</item>
+  </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
     <item msgid="4397097370387921767">"%s வைஃபை அழைப்பு"</item>
@@ -1157,8 +1158,7 @@
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"திறந்த வைஃபை நெட்வொர்க்குடன் இணைக்கவும்"</string>
     <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"தொலைத்தொடர்பு சேவை வழங்கும் நிறுவனத்தின் வைஃபை நெட்வொர்க்குடன் இணைக்கிறது"</string>
-    <!-- no translation found for wifi_available_title_connecting (1139126673968899002) -->
-    <skip />
+    <string name="wifi_available_title_connecting" msgid="1139126673968899002">"வைஃபை நெட்வொர்க்குடன் இணைக்கிறது"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"வைஃபை நெட்வொர்க்குடன் இணைக்கப்பட்டது"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"வைஃபை நெட்வொர்க்குடன் இணைக்க முடியவில்லை"</string>
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"எல்லா நெட்வொர்க்குகளையும் பார்க்க, தட்டவும்"</string>
@@ -1286,8 +1286,8 @@
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"படங்களையும் மீடியாவையும் மாற்றலாம்"</string>
     <!-- no translation found for ext_media_unmountable_notification_title (4179418065210797130) -->
     <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (4193858924381066522) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"Tap to fix"</string>
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> சிதைந்துள்ளது. சரிசெய்ய, தேர்ந்தெடுக்கவும்."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"ஆதரிக்கப்படாத <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"சாதனம் இந்த <xliff:g id="NAME">%s</xliff:g>ஐ ஆதரிக்கவில்லை. ஆதரிக்கப்படும் வடிவமைப்பில் அமைக்க, தட்டவும்."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"சாதனம் இந்த <xliff:g id="NAME">%s</xliff:g>ஐ ஆதரிக்கவில்லை. ஆதரிக்கப்படும் வடிவமைப்பில் அமைக்க, தேர்ந்தெடுக்கவும்."</string>

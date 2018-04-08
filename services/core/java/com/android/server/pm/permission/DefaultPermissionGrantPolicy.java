@@ -1052,7 +1052,8 @@ public final class DefaultPermissionGrantPolicy {
     private PackageParser.Package getDefaultSystemHandlerActivityPackage(
             Intent intent, int userId) {
         ResolveInfo handler = mServiceInternal.resolveIntent(intent,
-                intent.resolveType(mContext.getContentResolver()), DEFAULT_FLAGS, userId, false);
+                intent.resolveType(mContext.getContentResolver()), DEFAULT_FLAGS, userId, false,
+                Binder.getCallingUid());
         if (handler == null || handler.activityInfo == null) {
             return null;
         }
@@ -1093,7 +1094,7 @@ public final class DefaultPermissionGrantPolicy {
 
             ResolveInfo homeActivity = mServiceInternal.resolveIntent(homeIntent,
                     homeIntent.resolveType(mContext.getContentResolver()), DEFAULT_FLAGS,
-                    userId, false);
+                    userId, false, Binder.getCallingUid());
             if (homeActivity != null) {
                 continue;
             }

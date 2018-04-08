@@ -851,7 +851,7 @@
     <string name="auto_saver_title" msgid="1217959994732964228">"Sakatu bateria-aurrezlea noiz aktibatu antolatzeko"</string>
     <string name="auto_saver_text" msgid="6324376061044218113">"Aktibatu automatikoki bateriaren %% <xliff:g id="PERCENTAGE">%d</xliff:g> gelditzen denean"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Ez"</string>
-    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Bateria-aurrezle aktibatu da"</string>
+    <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Bateria-aurrezlea aktibatu da"</string>
     <string name="auto_saver_enabled_text" msgid="874711029884777579">"Bateria-aurrezlea automatikoki aktibatuko da bateriaren %% <xliff:g id="PERCENTAGE">%d</xliff:g> gelditzen denean."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Ezarpenak"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Ados"</string>

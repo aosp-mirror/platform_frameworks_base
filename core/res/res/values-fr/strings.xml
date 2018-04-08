@@ -1274,7 +1274,7 @@
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Désactiver"</string>
     <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"Vérification de \"<xliff:g id="NAME">%s</xliff:g>\"…"</string>
     <string name="ext_media_checking_notification_message" msgid="410185170877285434">"Vérification du contenu actuel"</string>
-    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"Nouvelle <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"Nouveau périphérique : <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_message" msgid="3673685270558405087">"Appuyer pour configurer"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Pour transférer photos et fichiers"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"Problème avec : <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1284,16 +1284,16 @@
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Cet appareil n\'est pas compatible avec la mémoire de stockage \"<xliff:g id="NAME">%s</xliff:g>\". Appuyez ici pour le configurer dans un format accepté."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Cet appareil n\'est pas compatible avec cette <xliff:g id="NAME">%s</xliff:g>. Sélectionnez cette option pour la configurer dans un format accepté."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Retrait inattendu de mémoire \"<xliff:g id="NAME">%s</xliff:g>\""</string>
-    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"Éjectez la mémoire de stockage externe avant de la retirer pour éviter toute perte de contenu"</string>
-    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g> supprimée"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Certaines fonctionnalités risquent de ne pas s\'exécuter correctement. Insérez une nouvelle mémoire de stockage externe."</string>
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"Éjectez le périphérique externe avant de le retirer pour éviter toute perte de contenu"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g> supprimé"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Certaines fonctionnalités risquent de ne pas s\'exécuter correctement. Insérez un nouveau périphérique de stockage externe."</string>
     <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"Éjection de \"<xliff:g id="NAME">%s</xliff:g>\""</string>
-    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"Ne retirez pas la mémoire de stockage"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"Ne retirez pas le périphérique"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"Configurer"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Éjecter"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"Parcourir"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"Mémoire de stockage \"<xliff:g id="NAME">%s</xliff:g>\" manquante"</string>
-    <string name="ext_media_missing_message" msgid="4012389235250987930">"Insérez de nouveau la mémoire"</string>
+    <string name="ext_media_missing_message" msgid="4012389235250987930">"Insérez le périphérique"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"Transfert de l\'application <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"Déplacement des données en cours"</string>
     <string name="ext_media_move_success_title" msgid="7863652232242276066">"Le contenu a bien été déplacé"</string>

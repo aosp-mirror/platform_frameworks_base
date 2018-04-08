@@ -114,8 +114,8 @@
     <string name="bluetooth_talkback_headphone" msgid="26580326066627664">"Навушнікі"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5165842622743212268">"Перыферыйная прылада ўводу"</string>
     <string name="bluetooth_talkback_bluetooth" msgid="5615463912185280812">"Bluetooth"</string>
-    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"Спалучаецца левы навушнік…"</string>
-    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"Спалучаецца правы навушнік…"</string>
+    <string name="bluetooth_hearingaid_left_pairing_message" msgid="7378813500862148102">"Спалучаецца левы слыхавы апарат…"</string>
+    <string name="bluetooth_hearingaid_right_pairing_message" msgid="1550373802309160891">"Спалучаецца правы слыхавы апарат…"</string>
     <string name="bluetooth_hearingaid_left_battery_level" msgid="8797811465352097562">"Левы – узровень зараду <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_hearingaid_right_battery_level" msgid="7309476148173459677">"Правы – узровень зараду <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1166761729660614716">"Wi-Fi выключаны."</string>

@@ -352,6 +352,7 @@
   <java-symbol type="bool" name="config_noHomeScreen" />
   <java-symbol type="bool" name="config_guestUserEphemeral" />
   <java-symbol type="bool" name="config_localDisplaysMirrorContent" />
+  <java-symbol type="bool" name="config_localDisplaysPrivate" />
   <java-symbol type="integer" name="config_defaultDisplayDefaultColorMode" />
   <java-symbol type="bool" name="config_enableAppWidgetService" />
   <java-symbol type="string" name="config_defaultPictureInPictureScreenEdgeInsets" />
@@ -1670,6 +1671,7 @@
   <java-symbol type="dimen" name="navigation_bar_height_landscape_car_mode" />
   <java-symbol type="dimen" name="navigation_bar_width_car_mode" />
   <java-symbol type="dimen" name="status_bar_height" />
+  <java-symbol type="dimen" name="quick_qs_offset_height" />
   <java-symbol type="dimen" name="quick_qs_total_height" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_off" />
   <java-symbol type="drawable" name="ic_jog_dial_sound_on" />
@@ -2875,6 +2877,10 @@
   <java-symbol type="string" name="config_doubleTouchGestureEnableFile" />
 
   <java-symbol type="string" name="suspended_widget_accessibility" />
+
+  <java-symbol type="string" name="app_suspended_title" />
+  <java-symbol type="string" name="app_suspended_more_details" />
+  <java-symbol type="string" name="app_suspended_default_message" />
 
   <!-- Used internally for assistant to launch activity transitions -->
   <java-symbol type="id" name="cross_task_transition" />

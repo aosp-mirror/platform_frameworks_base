@@ -190,6 +190,10 @@ public final class ThreadedRenderer {
      */
     public static final String DEBUG_FPS_DIVISOR = "debug.hwui.fps_divisor";
 
+    public static int EGL_CONTEXT_PRIORITY_HIGH_IMG = 0x3101;
+    public static int EGL_CONTEXT_PRIORITY_MEDIUM_IMG = 0x3102;
+    public static int EGL_CONTEXT_PRIORITY_LOW_IMG = 0x3103;
+
     static {
         // Try to check OpenGL support early if possible.
         isAvailable();
@@ -1140,6 +1144,16 @@ public final class ThreadedRenderer {
         nHackySetRTAnimationsEnabled(divisor <= 1);
     }
 
+    /**
+     * Changes the OpenGL context priority if IMG_context_priority extension is available. Must be
+     * called before any OpenGL context is created.
+     *
+     * @param priority The priority to use. Must be one of EGL_CONTEXT_PRIORITY_* values.
+     */
+    public static void setContextPriority(int priority) {
+        nSetContextPriority(priority);
+    }
+
     /** Not actually public - internal use only. This doc to make lint happy */
     public static native void disableVsync();
 
@@ -1213,4 +1227,5 @@ public final class ThreadedRenderer {
     private static native void nHackySetRTAnimationsEnabled(boolean enabled);
     private static native void nSetDebuggingEnabled(boolean enabled);
     private static native void nSetIsolatedProcess(boolean enabled);
+    private static native void nSetContextPriority(int priority);
 }

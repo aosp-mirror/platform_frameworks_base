@@ -155,6 +155,8 @@ message UidMapping {
             optional int64 version = 2;
 
             optional int32 uid = 3;
+
+            optional bool deleted = 4;
         }
         optional int64 elapsed_timestamp_nanos = 1;
 
@@ -169,7 +171,8 @@ message UidMapping {
         optional string app = 3;
         optional int32 uid = 4;
 
-        optional int64 version = 5;
+        optional int64 new_version = 5;
+        optional int64 prev_version = 6;
     }
     repeated Change changes = 2;
 }
@@ -240,10 +243,10 @@ message StatsdStatsReport {
         optional int32 matcher_count = 7;
         optional int32 alert_count = 8;
         optional bool is_valid = 9;
-
         repeated int32 broadcast_sent_time_sec = 10;
         repeated int32 data_drop_time_sec = 11;
         repeated int32 dump_report_time_sec = 12;
+        repeated int32 dump_report_data_size = 20;
         repeated MatcherStats matcher_stats = 13;
         repeated ConditionStats condition_stats = 14;
         repeated MetricStats metric_stats = 15;
@@ -266,11 +269,10 @@ message StatsdStatsReport {
     repeated AtomStats atom_stats = 7;
 
     message UidMapStats {
-        optional int32 snapshots = 1;
-        optional int32 changes = 2;
-        optional int32 bytes_used = 3;
-        optional int32 dropped_snapshots = 4;
-        optional int32 dropped_changes = 5;
+        optional int32 changes = 1;
+        optional int32 bytes_used = 2;
+        optional int32 dropped_changes = 3;
+        optional int32 deleted_apps = 4;
     }
     optional UidMapStats uidmap_stats = 8;
 
@@ -292,4 +294,15 @@ message StatsdStatsReport {
         optional int32 error_code = 2;
     }
     repeated LoggerErrorStats logger_error_stats = 11;
+
+    message PeriodicAlarmStats {
+        optional int32 alarms_registered = 1;
+    }
+    optional PeriodicAlarmStats periodic_alarm_stats = 12;
+
+    message  SkippedLogEventStats {
+        optional int32 tag = 1;
+        optional int64 elapsed_timestamp_nanos = 2;
+    }
+    repeated SkippedLogEventStats skipped_log_event_stats = 13;
 }

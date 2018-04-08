@@ -23,8 +23,10 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.annotation.AnyThread;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Px;
 import android.annotation.TestApi;
 import android.annotation.WorkerThread;
 import android.content.ContentResolver;
@@ -579,7 +581,7 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Subsumed by {@link #DecodeException}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public static class IncompleteException extends IOException {};
 
     /**
@@ -611,19 +613,19 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Replaced by {@link #DecodeException#SOURCE_EXCEPTION}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public static final int ERROR_SOURCE_EXCEPTION  = 1;
 
     /** @removed
      * @deprecated Replaced by {@link #DecodeException#SOURCE_INCOMPLETE}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public static final int ERROR_SOURCE_INCOMPLETE = 2;
 
     /** @removed
      * @deprecated Replaced by {@link #DecodeException#SOURCE_MALFORMED_DATA}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public static final int ERROR_SOURCE_ERROR      = 3;
 
     /**
@@ -746,6 +748,7 @@ public final class ImageDecoder implements AutoCloseable {
     private final int     mWidth;
     private final int     mHeight;
     private final boolean mAnimated;
+    private final boolean mIsNinePatch;
 
     private int        mDesiredWidth;
     private int        mDesiredHeight;
@@ -776,13 +779,14 @@ public final class ImageDecoder implements AutoCloseable {
      */
     @SuppressWarnings("unused")
     private ImageDecoder(long nativePtr, int width, int height,
-            boolean animated) {
+            boolean animated, boolean isNinePatch) {
         mNativePtr = nativePtr;
         mWidth = width;
         mHeight = height;
         mDesiredWidth = width;
         mDesiredHeight = height;
         mAnimated = animated;
+        mIsNinePatch = isNinePatch;
         mCloseGuard.open("close");
     }
 
@@ -998,7 +1002,7 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Renamed to {@link #setTargetSize}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public ImageDecoder setResize(int width, int height) {
         this.setTargetSize(width, height);
         return this;
@@ -1020,10 +1024,11 @@ public final class ImageDecoder implements AutoCloseable {
      *  <p>Like all setters on ImageDecoder, this must be called inside
      *  {@link OnHeaderDecodedListener#onHeaderDecoded onHeaderDecoded}.</p>
      *
-     *  @param width must be greater than 0.
-     *  @param height must be greater than 0.
+     *  @param width width in pixels of the output, must be greater than 0
+     *  @param height height in pixels of the output, must be greater than 0
      */
-    public void setTargetSize(int width, int height) {
+    public void setTargetSize(@Px @IntRange(from = 1) int width,
+                              @Px @IntRange(from = 1) int height) {
         if (width <= 0 || height <= 0) {
             throw new IllegalArgumentException("Dimensions must be positive! "
                     + "provided (" + width + ", " + height + ")");
@@ -1036,7 +1041,7 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Renamed to {@link #setTargetSampleSize}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public ImageDecoder setResize(int sampleSize) {
         this.setTargetSampleSize(sampleSize);
         return this;
@@ -1083,14 +1088,20 @@ public final class ImageDecoder implements AutoCloseable {
      *
      *  <p>Must be greater than or equal to 1.</p>
      *
+     *  <p>This has the same effect as calling {@link #setTargetSize} with
+     *  dimensions based on the {@code sampleSize}. Unlike dividing the original
+     *  width and height by the {@code sampleSize} manually, calling this method
+     *  allows {@code ImageDecoder} to round in the direction that it can do most
+     *  efficiently.</p>
+     *
      *  <p>Only the last call to this or {@link #setTargetSize} is respected.</p>
      *
      *  <p>Like all setters on ImageDecoder, this must be called inside
      *  {@link OnHeaderDecodedListener#onHeaderDecoded onHeaderDecoded}.</p>
      *
-     *  @param sampleSize Sampling rate of the encoded image.
+     *  @param sampleSize sampling rate of the encoded image.
      */
-    public void setTargetSampleSize(int sampleSize) {
+    public void setTargetSampleSize(@IntRange(from = 1) int sampleSize) {
         Size size = this.getSampledSize(sampleSize);
         int targetWidth = getTargetDimension(mWidth, sampleSize, size.getWidth());
         int targetHeight = getTargetDimension(mHeight, sampleSize, size.getHeight());
@@ -1116,7 +1127,7 @@ public final class ImageDecoder implements AutoCloseable {
     /**
      *  Use a software allocation for the pixel memory.
      *
-     *  Useful for drawing to a software {@link Canvas} or for
+     *  <p>Useful for drawing to a software {@link Canvas} or for
      *  accessing the pixels on the final output.
      */
     public static final int ALLOCATOR_SOFTWARE = 1;
@@ -1124,14 +1135,14 @@ public final class ImageDecoder implements AutoCloseable {
     /**
      *  Use shared memory for the pixel memory.
      *
-     *  Useful for sharing across processes.
+     *  <p>Useful for sharing across processes.
      */
     public static final int ALLOCATOR_SHARED_MEMORY = 2;
 
     /**
      *  Require a {@link Bitmap.Config#HARDWARE} {@link Bitmap}.
      *
-     *  When this is combined with incompatible options, like
+     *  <p>When this is combined with incompatible options, like
      *  {@link #setMutableRequired setMutableRequired(true)} or
      *  {@link #setDecodeAsAlphaMaskEnabled setDecodeAsAlphaMaskEnabled(true)},
      *  {@link #decodeDrawable decodeDrawable} or {@link #decodeBitmap decodeBitmap}
@@ -1194,7 +1205,7 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Renamed to {@link #setUnpremultipliedRequired}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public ImageDecoder setRequireUnpremultiplied(boolean unpremultipliedRequired) {
         this.setUnpremultipliedRequired(unpremultipliedRequired);
         return this;
@@ -1210,7 +1221,7 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Renamed to {@link #isUnpremultipliedRequired}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public boolean getRequireUnpremultiplied() {
         return this.isUnpremultipliedRequired();
     }
@@ -1339,7 +1350,7 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Renamed to {@link #setMutableRequired}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public ImageDecoder setMutable(boolean mutable) {
         this.setMutableRequired(mutable);
         return this;
@@ -1355,37 +1366,68 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Renamed to {@link #isMutableRequired}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public boolean getMutable() {
         return this.isMutableRequired();
     }
 
     /**
-     *  Specify whether to potentially save RAM at the expense of quality.
+     * Save memory if possible by using a denser {@link Bitmap.Config} at the
+     * cost of some image quality.
      *
-     *  <p>Setting this to {@code true} may result in a {@link Bitmap} with a
-     *  denser {@link Bitmap.Config}, depending on the image. For example, an
-     *  opaque {@link Bitmap} with 8 bits or precision for each of its red,
-     *  green and blue components would decode to
-     *  {@link Bitmap.Config#ARGB_8888} by default, but setting this to
-     *  {@code true} will result in decoding to {@link Bitmap.Config#RGB_565}.
-     *  This necessarily lowers the quality of the output, but saves half
-     *  the memory used.</p>
+     * <p>For example an opaque 8-bit image may be compressed into an
+     * {@link Bitmap.Config#RGB_565} configuration, sacrificing image
+     * quality to save memory.
+     */
+    public static final int MEMORY_POLICY_LOW_RAM = 0;
+
+    /**
+     * Use the most natural {@link Bitmap.Config} for the internal {@link Bitmap}.
+     *
+     * <p>This is the recommended default for most applications and usages. This
+     * will use the closest {@link Bitmap.Config} for the encoded source. If the
+     * encoded source does not exactly match any {@link Bitmap.Config}, the next
+     * highest quality {@link Bitmap.Config} will be used avoiding any loss in
+     * image quality.
+     */
+    public static final int MEMORY_POLICY_DEFAULT  = 1;
+
+    /** @hide **/
+    @Retention(SOURCE)
+    @IntDef(value = { MEMORY_POLICY_DEFAULT, MEMORY_POLICY_LOW_RAM },
+              prefix = {"MEMORY_POLICY_"})
+    public @interface MemoryPolicy {};
+
+    /**
+     *  Specify the memory policy for the decoded {@link Bitmap}.
      *
      *  <p>Like all setters on ImageDecoder, this must be called inside
      *  {@link OnHeaderDecodedListener#onHeaderDecoded onHeaderDecoded}.</p>
      */
+    public void setMemorySizePolicy(@MemoryPolicy int policy) {
+        mConserveMemory = (policy == MEMORY_POLICY_LOW_RAM);
+    }
+
+    /**
+     *  Retrieve the memory policy for the decoded {@link Bitmap}.
+     */
+    @MemoryPolicy
+    public int getMemorySizePolicy() {
+        return mConserveMemory ? MEMORY_POLICY_LOW_RAM : MEMORY_POLICY_DEFAULT;
+    }
+
+    /** @removed
+     * @deprecated Replaced by {@link #setMemorySizePolicy}.
+     */
+    @Deprecated
     public void setConserveMemory(boolean conserveMemory) {
         mConserveMemory = conserveMemory;
     }
 
-    /**
-     *  Return whether this object will try to save RAM at the expense of quality.
-     *
-     *  <p>This returns whether {@link #setConserveMemory} was set to {@code true}.
-     *  It may still return {@code true} even if the {@code ImageDecoder} does not
-     *  have a way to save RAM at the expense of quality for this image.</p>
+    /** @removed
+     * @deprecated Replaced by {@link #getMemorySizePolicy}.
      */
+    @Deprecated
     public boolean getConserveMemory() {
         return mConserveMemory;
     }
@@ -1412,7 +1454,7 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Renamed to {@link #setDecodeAsAlphaMaskEnabled}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public ImageDecoder setDecodeAsAlphaMask(boolean enabled) {
         this.setDecodeAsAlphaMaskEnabled(enabled);
         return this;
@@ -1421,7 +1463,7 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Renamed to {@link #setDecodeAsAlphaMaskEnabled}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public ImageDecoder setAsAlphaMask(boolean asAlphaMask) {
         this.setDecodeAsAlphaMask(asAlphaMask);
         return this;
@@ -1442,7 +1484,7 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Renamed to {@link #isDecodeAsAlphaMaskEnabled}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public boolean getDecodeAsAlphaMask() {
         return mDecodeAsAlphaMask;
     }
@@ -1450,7 +1492,7 @@ public final class ImageDecoder implements AutoCloseable {
     /** @removed
      * @deprecated Renamed to {@link #isDecodeAsAlphaMaskEnabled}.
      */
-    @java.lang.Deprecated
+    @Deprecated
     public boolean getAsAlphaMask() {
         return this.getDecodeAsAlphaMask();
     }
@@ -1625,7 +1667,7 @@ public final class ImageDecoder implements AutoCloseable {
 
             // this call potentially manipulates the decoder so it must be performed prior to
             // decoding the bitmap and after decode set the density on the resulting bitmap
-            final int srcDensity = computeDensity(src, decoder);
+            final int srcDensity = decoder.computeDensity(src);
             if (decoder.mAnimated) {
                 // AnimatedImageDrawable calls postProcessAndRelease only if
                 // mPostProcessor exists.
@@ -1715,7 +1757,7 @@ public final class ImageDecoder implements AutoCloseable {
 
             // this call potentially manipulates the decoder so it must be performed prior to
             // decoding the bitmap
-            final int srcDensity = computeDensity(src, decoder);
+            final int srcDensity = decoder.computeDensity(src);
             Bitmap bm = decoder.decodeBitmapInternal();
             bm.setDensity(srcDensity);
 
@@ -1732,10 +1774,24 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     // This method may modify the decoder so it must be called prior to performing the decode
-    private static int computeDensity(@NonNull Source src, @NonNull ImageDecoder decoder) {
+    private int computeDensity(@NonNull Source src) {
         // if the caller changed the size then we treat the density as unknown
-        if (decoder.requestedResize()) {
+        if (this.requestedResize()) {
             return Bitmap.DENSITY_NONE;
+        }
+
+        final int srcDensity = src.getDensity();
+        if (srcDensity == Bitmap.DENSITY_NONE) {
+            return srcDensity;
+        }
+
+        // Scaling up nine-patch divs is imprecise and is better handled
+        // at draw time. An app won't be relying on the internal Bitmap's
+        // size, so it is safe to let NinePatchDrawable handle scaling.
+        // mPostProcessor disables nine-patching, so behave normally if
+        // it is present.
+        if (mIsNinePatch && mPostProcessor == null) {
+            return srcDensity;
         }
 
         // Special stuff for compatibility mode: if the target density is not
@@ -1746,23 +1802,25 @@ public final class ImageDecoder implements AutoCloseable {
         // to the compatibility density only to have them scaled back up when
         // drawn to the screen.
         Resources res = src.getResources();
-        final int srcDensity = src.getDensity();
         if (res != null && res.getDisplayMetrics().noncompatDensityDpi == srcDensity) {
+            return srcDensity;
+        }
+
+        final int dstDensity = src.computeDstDensity();
+        if (srcDensity == dstDensity) {
             return srcDensity;
         }
 
         // For P and above, only resize if it would be a downscale. Scale up prior
         // to P in case the app relies on the Bitmap's size without considering density.
-        final int dstDensity = src.computeDstDensity();
-        if (srcDensity == Bitmap.DENSITY_NONE || srcDensity == dstDensity
-                || (srcDensity < dstDensity && sApiLevel >= Build.VERSION_CODES.P)) {
+        if (srcDensity < dstDensity && sApiLevel >= Build.VERSION_CODES.P) {
             return srcDensity;
         }
 
         float scale = (float) dstDensity / srcDensity;
-        int scaledWidth = (int) (decoder.mWidth * scale + 0.5f);
-        int scaledHeight = (int) (decoder.mHeight * scale + 0.5f);
-        decoder.setTargetSize(scaledWidth, scaledHeight);
+        int scaledWidth = (int) (mWidth * scale + 0.5f);
+        int scaledHeight = (int) (mHeight * scale + 0.5f);
+        this.setTargetSize(scaledWidth, scaledHeight);
         return dstDensity;
     }
 

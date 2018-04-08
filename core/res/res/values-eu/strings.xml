@@ -1287,7 +1287,7 @@
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> ustekabean kendu da"</string>
     <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"Kendu aurretik, kanporatu euskarria edukirik ez galtzeko"</string>
     <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"Kendu egin da <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Funtzio batzuk agian ez dira behar bezala ibiliko. Sartu memoria-gailu berria."</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Funtzio batzuek agian ez dute behar bezala funtzionatuko. Sartu biltegiratze-gailu berria."</string>
     <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g> kanporatzen"</string>
     <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"Ez kendu"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"Konfiguratu"</string>

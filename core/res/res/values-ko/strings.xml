@@ -1285,9 +1285,9 @@
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"이 기기는 이 <xliff:g id="NAME">%s</xliff:g>을(를) 지원하지 않습니다. 선택하여 지원되는 형식으로 설정하세요."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>이(가) 예기치 않게 삭제됨"</string>
     <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"콘텐츠 손실을 피하려면 미디어를 제거하기 전에 마운트 해제하세요."</string>
-    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g>이(가) 제거됨"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g> 제거됨"</string>
     <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"일부 기능이 제대로 작동하지 않을 수 있습니다. 새로운 저장소를 삽입하세요."</string>
-    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g>을(를) 마운트 해제하는 중"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g> 마운트 해제 중"</string>
     <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"외부 미디어를 제거하지 마세요."</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"설정"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"마운트 해제"</string>

@@ -149,9 +149,9 @@ private:
                                          uint32_t serial);
 
     /**
-     * Text output of dumpsys.
+     * Text or proto output of dumpsys.
      */
-    void dump_impl(FILE* out, bool verbose);
+    void dump_impl(FILE* out, bool verbose, bool proto);
 
     /**
      * Print usage information for the commands
@@ -262,6 +262,10 @@ private:
     FRIEND_TEST(StatsServiceTest, TestAddConfig_simple);
     FRIEND_TEST(StatsServiceTest, TestAddConfig_empty);
     FRIEND_TEST(StatsServiceTest, TestAddConfig_invalid);
+    FRIEND_TEST(PartialBucketE2eTest, TestCountMetricNoSplitOnNewApp);
+    FRIEND_TEST(PartialBucketE2eTest, TestCountMetricSplitOnUpgrade);
+    FRIEND_TEST(PartialBucketE2eTest, TestCountMetricSplitOnRemoval);
+    FRIEND_TEST(PartialBucketE2eTest, TestCountMetricWithoutSplit);
 };
 
 }  // namespace statsd

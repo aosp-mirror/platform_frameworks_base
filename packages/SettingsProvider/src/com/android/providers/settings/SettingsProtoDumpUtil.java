@@ -742,6 +742,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.LOCATION_GLOBAL_KILL_SWITCH,
                 GlobalSettingsProto.Location.GLOBAL_KILL_SWITCH);
+        dumpSetting(s, p,
+                Settings.Global.GNSS_SATELLITE_BLACKLIST,
+                GlobalSettingsProto.Location.GNSS_SATELLITE_BLACKLIST);
         p.end(locationToken);
 
         final long lpmToken = p.start(GlobalSettingsProto.LOW_POWER_MODE);
@@ -2019,6 +2022,10 @@ class SettingsProtoDumpUtil {
                 SecureSettingsProto.Rotation.NUM_ROTATION_SUGGESTIONS_ACCEPTED);
         p.end(rotationToken);
 
+        dumpSetting(s, p,
+                Settings.Secure.RTT_CALLING_MODE,
+                SecureSettingsProto.RTT_CALLING_MODE);
+
         final long screensaverToken = p.start(SecureSettingsProto.SCREENSAVER);
         dumpSetting(s, p,
                 Settings.Secure.SCREENSAVER_ENABLED,
@@ -2401,10 +2408,6 @@ class SettingsProtoDumpUtil {
                 Settings.System.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY,
                 SystemSettingsProto.Rotation.HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY);
         p.end(rotationToken);
-
-        dumpSetting(s, p,
-                Settings.System.RTT_CALLING_MODE,
-                SystemSettingsProto.RTT_CALLING_MODE);
 
         final long screenToken = p.start(SystemSettingsProto.SCREEN);
         dumpSetting(s, p,

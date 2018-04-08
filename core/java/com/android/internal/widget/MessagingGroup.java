@@ -20,7 +20,7 @@ import android.annotation.AttrRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
-import android.app.Notification;
+import android.app.Person;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -63,8 +63,8 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
     private boolean mFirstLayout;
     private boolean mIsHidingAnimated;
     private boolean mNeedsGeneratedAvatar;
-    private Notification.Person mSender;
-    private boolean mAvatarsAtEnd;
+    private Person mSender;
+    private boolean mImagesAtEnd;
     private ViewGroup mImageContainer;
     private MessagingImageMessage mIsolatedMessage;
     private boolean mTransformingImages;
@@ -126,7 +126,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         return position;
     }
 
-    public void setSender(Notification.Person sender, CharSequence nameOverride) {
+    public void setSender(Person sender, CharSequence nameOverride) {
         mSender = sender;
         if (nameOverride == null) {
             nameOverride = sender.getName();
@@ -342,7 +342,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
                 mAddedMessages.add(message);
             }
             boolean isImage = message instanceof MessagingImageMessage;
-            if (mAvatarsAtEnd && isImage) {
+            if (mImagesAtEnd && isImage) {
                 isolatedMessage = (MessagingImageMessage) message;
             } else {
                 if (removeFromParentIfDifferent(message, mMessageContainer)) {
@@ -466,7 +466,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         return mNeedsGeneratedAvatar;
     }
 
-    public Notification.Person getSender() {
+    public Person getSender() {
         return mSender;
     }
 
@@ -474,9 +474,9 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         mTransformingImages = transformingImages;
     }
 
-    public void setDisplayAvatarsAtEnd(boolean atEnd) {
-        if (mAvatarsAtEnd != atEnd) {
-            mAvatarsAtEnd = atEnd;
+    public void setDisplayImagesAtEnd(boolean atEnd) {
+        if (mImagesAtEnd != atEnd) {
+            mImagesAtEnd = atEnd;
             mImageContainer.setVisibility(atEnd ? View.VISIBLE : View.GONE);
         }
     }

@@ -118,17 +118,17 @@ message IncidentProto {
 
     // Stack dumps
     optional android.os.BackTraceProto native_traces = 1200 [
-        (section).type = SECTION_NONE,
+        (section).type = SECTION_TOMBSTONE,
         (section).args = "native"
     ];
 
     optional android.os.BackTraceProto hal_traces = 1201 [
-        (section).type = SECTION_NONE,
+        (section).type = SECTION_TOMBSTONE,
         (section).args = "hal"
     ];
 
     optional android.os.BackTraceProto java_traces = 1202 [
-        (section).type = SECTION_NONE,
+        (section).type = SECTION_TOMBSTONE,
         (section).args = "java"
     ];
 
@@ -170,7 +170,7 @@ message IncidentProto {
     ];
 
     optional BatteryTypeProto battery_type = 2006 [
-        (section).type = SECTION_FILE,
+        (section).type = SECTION_NONE, // disabled since the path is device specific!
         (section).args = "/sys/class/power_supply/bms/battery_type"
     ];
 

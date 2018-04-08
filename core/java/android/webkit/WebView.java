@@ -1837,8 +1837,12 @@ public class WebView extends AbsoluteLayout
      *
      * @param addr the string to search for addresses
      * @return the address, or if no address is found, {@code null}
+     * @deprecated this method is superseded by {@link TextClassifier#generateLinks(
+     * android.view.textclassifier.TextLinks.Request)}. Avoid using this method even when targeting
+     * API levels where no alternative is available.
      */
     @Nullable
+    @Deprecated
     public static String findAddress(String addr) {
         if (addr == null) {
             throw new NullPointerException("addr is null");
@@ -2452,14 +2456,6 @@ public class WebView extends AbsoluteLayout
      */
     @NonNull
     public Looper getWebViewLooper() {
-        return mWebViewThread;
-    }
-
-    /**
-     * Returns the {@link Looper} corresponding to the thread on which WebView calls must be made.
-     */
-    @NonNull
-    public Looper getLooper() {
         return mWebViewThread;
     }
 
