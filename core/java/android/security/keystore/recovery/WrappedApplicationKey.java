@@ -75,7 +75,7 @@ public final class WrappedApplicationKey implements Parcelable {
         }
 
         /**
-         * @removed AOSP does not associate keys with accounts. This may be done by system app.
+         * @deprecated AOSP does not associate keys with accounts. This may be done by system app.
          */
         @Deprecated
         public Builder setAccount(@NonNull byte[] account) {
@@ -133,7 +133,7 @@ public final class WrappedApplicationKey implements Parcelable {
     }
 
     /**
-     * @removed AOSP does not associate keys with accounts. This may be done by system app.
+     * @deprecated AOSP does not associate keys with accounts. This may be done by system app.
      */
     @Deprecated
     public @NonNull byte[] getAccount() {

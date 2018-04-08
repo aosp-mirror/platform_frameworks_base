@@ -1132,11 +1132,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int HIDDEN_API_ENFORCEMENT_NONE = 0;
     /**
-     * Light grey list enforcement, the strictest option. Enforces the light grey, dark grey and
-     * black lists.
+     * No API enforcement, but enable the detection logic and warnings. Observed behaviour is the
+     * same as {@link #HIDDEN_API_ENFORCEMENT_NONE} but you may see warnings in the log when APIs
+     * are accessed.
      * @hide
      * */
-    public static final int HIDDEN_API_ENFORCEMENT_ALL_LISTS = 1;
+    public static final int HIDDEN_API_ENFORCEMENT_JUST_WARN = 1;
     /**
      * Dark grey list enforcement. Enforces the dark grey and black lists
      * @hide
@@ -1158,7 +1159,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     @IntDef(prefix = { "HIDDEN_API_ENFORCEMENT_" }, value = {
             HIDDEN_API_ENFORCEMENT_DEFAULT,
             HIDDEN_API_ENFORCEMENT_NONE,
-            HIDDEN_API_ENFORCEMENT_ALL_LISTS,
+            HIDDEN_API_ENFORCEMENT_JUST_WARN,
             HIDDEN_API_ENFORCEMENT_DARK_GREY_AND_BLACK,
             HIDDEN_API_ENFORCEMENT_BLACK,
     })

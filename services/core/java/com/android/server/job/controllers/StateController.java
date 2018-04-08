@@ -41,7 +41,7 @@ public abstract class StateController {
     StateController(JobSchedulerService service) {
         mService = service;
         mStateChangedListener = service;
-        mContext = service.getContext();
+        mContext = service.getTestableContext();
         mLock = service.getLock();
         mConstants = service.getConstants();
     }

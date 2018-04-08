@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
+import android.provider.Settings.System;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentResolver;
@@ -895,6 +896,52 @@ public class ColorDisplayServiceTest {
         assertActivated(true /* activated */);
     }
 
+    @Test
+    public void accessibility_colorInversion_transformActivated() {
+        setAccessibilityColorInversion(true);
+        setColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
+
+        startService();
+        assertAccessibilityTransformActivated(true /* activated */ );
+        assertUserColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
+        assertActiveColorMode(ColorDisplayController.COLOR_MODE_SATURATED);
+    }
+
+    @Test
+    public void accessibility_colorCorrection_transformActivated() {
+        setAccessibilityColorCorrection(true);
+        setColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
+
+        startService();
+        assertAccessibilityTransformActivated(true /* activated */ );
+        assertUserColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
+        assertActiveColorMode(ColorDisplayController.COLOR_MODE_SATURATED);
+    }
+
+    @Test
+    public void accessibility_all_transformActivated() {
+        setAccessibilityColorCorrection(true);
+        setAccessibilityColorInversion(true);
+        setColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
+
+        startService();
+        assertAccessibilityTransformActivated(true /* activated */ );
+        assertUserColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
+        assertActiveColorMode(ColorDisplayController.COLOR_MODE_SATURATED);
+    }
+
+    @Test
+    public void accessibility_none_transformActivated() {
+        setAccessibilityColorCorrection(false);
+        setAccessibilityColorInversion(false);
+        setColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
+
+        startService();
+        assertAccessibilityTransformActivated(false /* activated */ );
+        assertUserColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
+        assertActiveColorMode(ColorDisplayController.COLOR_MODE_NATURAL);
+    }
+
     /**
      * Configures Night display to use a custom schedule.
      *
@@ -935,6 +982,35 @@ public class ColorDisplayServiceTest {
     }
 
     /**
+     * Configures the Accessibility color correction setting state.
+     *
+     * @param state {@code true} if color inversion should be activated
+     */
+    private void setAccessibilityColorCorrection(boolean state) {
+        Secure.putIntForUser(mContext.getContentResolver(),
+                Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED, state ? 1 : 0, mUserId);
+    }
+
+    /**
+     * Configures the Accessibility color inversion setting state.
+     *
+     * @param state {@code true} if color inversion should be activated
+     */
+    private void setAccessibilityColorInversion(boolean state) {
+        Secure.putIntForUser(mContext.getContentResolver(),
+                Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, state ? 1 : 0, mUserId);
+    }
+
+    /**
+     * Configures color mode via ColorDisplayController.
+     *
+     * @param mode the color mode to set
+     */
+    private void setColorMode(int mode) {
+        mColorDisplayController.setColorMode(mode);
+    }
+
+    /**
      * Convenience method to start {@link #mColorDisplayService}.
      */
     private void startService() {
@@ -959,6 +1035,41 @@ public class ColorDisplayServiceTest {
         assertWithMessage("Invalid Night display activated state")
                 .that(mColorDisplayController.isActivated())
                 .isEqualTo(activated);
+    }
+
+    /**
+     * Convenience method for asserting that Accessibility color transform is detected.
+     *
+     * @param state {@code true} if any Accessibility transform should be activated
+     */
+    private void assertAccessibilityTransformActivated(boolean state) {
+        assertWithMessage("Unexpected Accessibility color transform state")
+                .that(mColorDisplayController.getAccessibilityTransformActivated())
+                .isEqualTo(state);
+    }
+
+    /**
+     * Convenience method for asserting that the active color mode matches expectation.
+     *
+     * @param mode the expected active color mode.
+     */
+    private void assertActiveColorMode(int mode) {
+        assertWithMessage("Unexpected color mode setting")
+                .that(mColorDisplayController.getColorMode())
+                .isEqualTo(mode);
+    }
+
+    /**
+     * Convenience method for asserting that the user chosen color mode matches expectation.
+     *
+     * @param mode the expected color mode setting.
+     */
+    private void assertUserColorMode(int mode) {
+        final int actualMode = System.getIntForUser(mContext.getContentResolver(),
+                System.DISPLAY_COLOR_MODE, -1, mUserId);
+        assertWithMessage("Unexpected color mode setting")
+                .that(actualMode)
+                .isEqualTo(mode);
     }
 
     /**

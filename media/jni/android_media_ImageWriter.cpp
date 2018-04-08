@@ -421,7 +421,8 @@ static void ImageWriter_cancelImage(JNIEnv* env, jobject thiz, jlong nativeCtx, 
 }
 
 static void ImageWriter_queueImage(JNIEnv* env, jobject thiz, jlong nativeCtx, jobject image,
-        jlong timestampNs, jint left, jint top, jint right, jint bottom, jint transform) {
+        jlong timestampNs, jint left, jint top, jint right, jint bottom, jint transform,
+        jint scalingMode) {
     ALOGV("%s", __FUNCTION__);
     JNIImageWriterContext* const ctx = reinterpret_cast<JNIImageWriterContext *>(nativeCtx);
     if (ctx == NULL || thiz == NULL) {
@@ -471,6 +472,12 @@ static void ImageWriter_queueImage(JNIEnv* env, jobject thiz, jlong nativeCtx, j
         return;
     }
 
+    res = native_window_set_scaling_mode(anw.get(), scalingMode);
+    if (res != OK) {
+        jniThrowRuntimeException(env, "Set scaling mode failed");
+        return;
+    }
+
     // Finally, queue input buffer
     res = anw->queueBuffer(anw.get(), buffer, fenceFd);
     if (res != OK) {
@@ -493,7 +500,7 @@ static void ImageWriter_queueImage(JNIEnv* env, jobject thiz, jlong nativeCtx, j
 
 static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nativeCtx,
         jlong nativeBuffer, jint imageFormat, jlong timestampNs, jint left, jint top,
-        jint right, jint bottom, jint transform) {
+        jint right, jint bottom, jint transform, jint scalingMode) {
     ALOGV("%s", __FUNCTION__);
     JNIImageWriterContext* const ctx = reinterpret_cast<JNIImageWriterContext *>(nativeCtx);
     if (ctx == NULL || thiz == NULL) {
@@ -536,8 +543,8 @@ static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nat
     }
     sp < ANativeWindow > anw = surface;
 
-    // Step 2. Set timestamp, crop and transform. Note that we do not need unlock the image because
-    // it was not locked.
+    // Step 2. Set timestamp, crop, transform and scaling mode. Note that we do not need unlock the
+    // image because it was not locked.
     ALOGV("timestamp to be queued: %" PRId64, timestampNs);
     res = native_window_set_buffers_timestamp(anw.get(), timestampNs);
     if (res != OK) {
@@ -559,6 +566,12 @@ static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nat
     res = native_window_set_buffers_transform(anw.get(), transform);
     if (res != OK) {
         jniThrowRuntimeException(env, "Set transform failed");
+        return res;
+    }
+
+    res = native_window_set_scaling_mode(anw.get(), scalingMode);
+    if (res != OK) {
+        jniThrowRuntimeException(env, "Set scaling mode failed");
         return res;
     }
 
@@ -797,9 +810,9 @@ static JNINativeMethod gImageWriterMethods[] = {
     {"nativeInit",              "(Ljava/lang/Object;Landroid/view/Surface;II)J",
                                                               (void*)ImageWriter_init },
     {"nativeClose",              "(J)V",                      (void*)ImageWriter_close },
-    {"nativeAttachAndQueueImage", "(JJIJIIIII)I",          (void*)ImageWriter_attachAndQueueImage },
+    {"nativeAttachAndQueueImage", "(JJIJIIIIII)I",          (void*)ImageWriter_attachAndQueueImage },
     {"nativeDequeueInputImage", "(JLandroid/media/Image;)V",  (void*)ImageWriter_dequeueImage },
-    {"nativeQueueInputImage",   "(JLandroid/media/Image;JIIIII)V",  (void*)ImageWriter_queueImage },
+    {"nativeQueueInputImage",   "(JLandroid/media/Image;JIIIIII)V",  (void*)ImageWriter_queueImage },
     {"cancelImage",             "(JLandroid/media/Image;)V",   (void*)ImageWriter_cancelImage },
 };
 

@@ -16,6 +16,7 @@
 package com.android.server.notification;
 
 import android.app.Notification;
+import android.app.Person;
 import android.os.Bundle;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -158,10 +159,10 @@ public class ValidateNotificationPeopleTest extends UiServiceTestCase {
     public void testPeopleArrayList() throws Exception {
         Bundle bundle = new Bundle();
         String[] expected = { "name:test" , "tel:1234" };
-        final ArrayList<Notification.Person> arrayList =
+        final ArrayList<Person> arrayList =
                 new ArrayList<>(expected.length);
-        arrayList.add(new Notification.Person().setName("test"));
-        arrayList.add(new Notification.Person().setUri(expected[1]));
+        arrayList.add(new Person.Builder().setName("test").build());
+        arrayList.add(new Person.Builder().setUri(expected[1]).build());
         bundle.putParcelableArrayList(Notification.EXTRA_PEOPLE_LIST, arrayList);
         String[] result = ValidateNotificationPeople.getExtraPeople(bundle);
         assertStringArrayEquals("testPeopleArrayList", expected, result);

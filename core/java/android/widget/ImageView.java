@@ -817,8 +817,6 @@ public class ImageView extends View {
         if (mScaleType != scaleType) {
             mScaleType = scaleType;
 
-            setWillNotCacheDrawing(mScaleType == ScaleType.CENTER);
-
             requestLayout();
             invalidate();
         }

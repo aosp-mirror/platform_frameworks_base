@@ -20,21 +20,20 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
+import android.support.v7.widget.GridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSFooter;
-import com.android.systemui.statusbar.car.PageIndicator;
-import com.android.systemui.statusbar.car.UserGridView;
-import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.statusbar.car.UserGridRecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,14 +44,12 @@ import java.util.List;
  * status bar, and a static row with access to the user switcher and settings.
  */
 public class CarQSFragment extends Fragment implements QS {
-    private ViewGroup mPanel;
     private View mHeader;
     private View mUserSwitcherContainer;
     private CarQSFooter mFooter;
     private View mFooterUserName;
     private View mFooterExpandIcon;
-    private UserGridView mUserGridView;
-    private PageIndicator mPageIndicator;
+    private UserGridRecyclerView mUserGridView;
     private AnimatorSet mAnimatorSet;
     private UserSwitchCallback mUserSwitchCallback;
 
@@ -65,7 +62,6 @@ public class CarQSFragment extends Fragment implements QS {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mPanel = (ViewGroup) view;
         mHeader = view.findViewById(R.id.header);
         mFooter = view.findViewById(R.id.qs_footer);
         mFooterUserName = mFooter.findViewById(R.id.user_name);
@@ -75,16 +71,15 @@ public class CarQSFragment extends Fragment implements QS {
 
         updateUserSwitcherHeight(0);
 
-        mUserGridView = view.findViewById(R.id.user_grid);
-        mUserGridView.init(null, Dependency.get(UserSwitcherController.class),
-                false /* overrideAlpha */);
-
-        mPageIndicator = view.findViewById(R.id.user_switcher_page_indicator);
-        mPageIndicator.setupWithViewPager(mUserGridView);
+        Context context = getContext();
+        mUserGridView = mUserSwitcherContainer.findViewById(R.id.user_grid);
+        GridLayoutManager layoutManager = new GridLayoutManager(context,
+                context.getResources().getInteger(R.integer.user_fullscreen_switcher_num_col));
+        mUserGridView.setLayoutManager(layoutManager);
+        mUserGridView.buildAdapter();
 
         mUserSwitchCallback = new UserSwitchCallback();
         mFooter.setUserSwitchCallback(mUserSwitchCallback);
-        mUserGridView.setUserSwitchCallback(mUserSwitchCallback);
     }
 
     @Override
@@ -111,13 +106,11 @@ public class CarQSFragment extends Fragment implements QS {
     @Override
     public void setHeaderListening(boolean listening) {
         mFooter.setListening(listening);
-        mUserGridView.setListening(listening);
     }
 
     @Override
     public void setListening(boolean listening) {
         mFooter.setListening(listening);
-        mUserGridView.setListening(listening);
     }
 
     @Override
@@ -219,24 +212,6 @@ public class CarQSFragment extends Fragment implements QS {
             mShowing = false;
             animateHeightChange(false /* opening */);
         }
-
-        public void resetShowing() {
-            if (mShowing) {
-                for (int i = 0; i < mUserGridView.getChildCount(); i++) {
-                    ViewGroup podContainer = (ViewGroup) mUserGridView.getChildAt(i);
-                    // Need to bring the last child to the front to maintain the order in the pod
-                    // container. Why? ¯\_(ツ)_/¯
-                    if (podContainer.getChildCount() > 0) {
-                        podContainer.getChildAt(podContainer.getChildCount() - 1).bringToFront();
-                    }
-                    // The alpha values are default to 0, so if the pods have been refreshed, they
-                    // need to be set to 1 when showing.
-                    for (int j = 0; j < podContainer.getChildCount(); j++) {
-                        podContainer.getChildAt(j).setAlpha(1f);
-                    }
-                }
-            }
-        }
     }
 
     private void updateUserSwitcherHeight(int height) {
@@ -260,27 +235,6 @@ public class CarQSFragment extends Fragment implements QS {
         });
         allAnimators.add(heightAnimator);
 
-        // The user grid contains pod containers that each contain a number of pods.  Animate
-        // all pods to avoid any discrepancy/race conditions with possible changes during the
-        // animation.
-        int cascadeDelay = getResources().getInteger(
-                R.integer.car_user_switcher_anim_cascade_delay_ms);
-        for (int i = 0; i < mUserGridView.getChildCount(); i++) {
-            ViewGroup podContainer = (ViewGroup) mUserGridView.getChildAt(i);
-            for (int j = 0; j < podContainer.getChildCount(); j++) {
-                View pod = podContainer.getChildAt(j);
-                Animator podAnimator = AnimatorInflater.loadAnimator(getContext(),
-                        opening ? R.anim.car_user_switcher_open_pod_animation
-                                : R.anim.car_user_switcher_close_pod_animation);
-                // Add the cascading delay between pods
-                if (opening) {
-                    podAnimator.setStartDelay(podAnimator.getStartDelay() + j * cascadeDelay);
-                }
-                podAnimator.setTarget(pod);
-                allAnimators.add(podAnimator);
-            }
-        }
-
         Animator nameAnimator = AnimatorInflater.loadAnimator(getContext(),
                 opening ? R.anim.car_user_switcher_open_name_animation
                         : R.anim.car_user_switcher_close_name_animation);
@@ -292,12 +246,6 @@ public class CarQSFragment extends Fragment implements QS {
                         : R.anim.car_user_switcher_close_icon_animation);
         iconAnimator.setTarget(mFooterExpandIcon);
         allAnimators.add(iconAnimator);
-
-        Animator pageAnimator = AnimatorInflater.loadAnimator(getContext(),
-                opening ? R.anim.car_user_switcher_open_pages_animation
-                        : R.anim.car_user_switcher_close_pages_animation);
-        pageAnimator.setTarget(mPageIndicator);
-        allAnimators.add(pageAnimator);
 
         mAnimatorSet = new AnimatorSet();
         mAnimatorSet.addListener(new AnimatorListenerAdapter() {

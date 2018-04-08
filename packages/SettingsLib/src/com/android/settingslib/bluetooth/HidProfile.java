@@ -48,7 +48,7 @@ public class HidProfile implements LocalBluetoothProfile {
     private static final int ORDINAL = 3;
 
     // These callbacks run on the main thread.
-    private final class InputDeviceServiceListener
+    private final class HidHostServiceListener
             implements BluetoothProfile.ServiceListener {
 
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
@@ -86,7 +86,7 @@ public class HidProfile implements LocalBluetoothProfile {
         mLocalAdapter = adapter;
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
-        adapter.getProfileProxy(context, new InputDeviceServiceListener(),
+        adapter.getProfileProxy(context, new HidHostServiceListener(),
                 BluetoothProfile.HID_HOST);
     }
 

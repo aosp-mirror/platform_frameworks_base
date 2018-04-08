@@ -127,7 +127,7 @@ import java.util.function.Predicate;
  * Any function with the suffix 'Locked' also needs to lock on {@link #mJobs}.
  * @hide
  */
-public final class JobSchedulerService extends com.android.server.SystemService
+public class JobSchedulerService extends com.android.server.SystemService
         implements StateChangedListener, JobCompletedListener {
     public static final String TAG = "JobScheduler";
     public static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
@@ -780,6 +780,10 @@ public final class JobSchedulerService extends com.android.server.SystemService
         @Override public void onUidCachedChanged(int uid, boolean cached) {
         }
     };
+
+    public Context getTestableContext() {
+        return getContext();
+    }
 
     public Object getLock() {
         return mLock;

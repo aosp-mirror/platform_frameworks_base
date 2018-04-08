@@ -19,13 +19,13 @@ package android.view.textclassifier;
 import android.annotation.Nullable;
 import android.metrics.LogMaker;
 import android.util.ArrayMap;
-import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.Preconditions;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
@@ -39,6 +39,7 @@ import java.util.UUID;
 public final class GenerateLinksLogger {
 
     private static final String LOG_TAG = "GenerateLinksLogger";
+    private static final boolean DEBUG_LOG_ENABLED = false;
     private static final String ZERO = "0";
 
     private final MetricsLogger mMetricsLogger;
@@ -127,7 +128,7 @@ public final class GenerateLinksLogger {
     }
 
     private static void debugLog(LogMaker log) {
-        if (!Logger.DEBUG_LOG_ENABLED) return;
+        if (!DEBUG_LOG_ENABLED) return;
 
         final String callId = Objects.toString(
                 log.getTaggedData(MetricsEvent.FIELD_LINKIFY_CALL_ID), "");
@@ -142,8 +143,9 @@ public final class GenerateLinksLogger {
         final int latencyMs = Integer.parseInt(
                 Objects.toString(log.getTaggedData(MetricsEvent.FIELD_LINKIFY_LATENCY), ZERO));
 
-        Log.d(LOG_TAG, String.format("%s:%s %d links (%d/%d chars) %dms %s", callId, entityType,
-                numLinks, linkLength, textLength, latencyMs, log.getPackageName()));
+        Log.d(LOG_TAG,
+                String.format(Locale.US, "%s:%s %d links (%d/%d chars) %dms %s", callId, entityType,
+                        numLinks, linkLength, textLength, latencyMs, log.getPackageName()));
     }
 
     /** Helper class for storing per-entity type statistics. */

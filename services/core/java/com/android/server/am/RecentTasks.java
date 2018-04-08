@@ -1255,7 +1255,7 @@ class RecentTasks {
         for (int i = 0; i < recentsCount; i++) {
             final TaskRecord tr = mTasks.get(i);
             if (task != tr) {
-                if (!task.hasCompatibleActivityType(tr)) {
+                if (!task.hasCompatibleActivityType(tr) || task.userId != tr.userId) {
                     continue;
                 }
                 final Intent trIntent = tr.intent;

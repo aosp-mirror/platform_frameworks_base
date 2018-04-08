@@ -3133,9 +3133,6 @@ public final class Settings {
          */
         public static final String SCREEN_BRIGHTNESS = "screen_brightness";
 
-        private static final Validator SCREEN_BRIGHTNESS_VALIDATOR =
-                new SettingsValidators.InclusiveIntegerRangeValidator(0, 255);
-
         /**
          * The screen backlight brightness between 0 and 255.
          * @hide
@@ -4068,7 +4065,6 @@ public final class Settings {
             FONT_SCALE,
             DIM_SCREEN,
             SCREEN_OFF_TIMEOUT,
-            SCREEN_BRIGHTNESS,
             SCREEN_BRIGHTNESS_MODE,
             SCREEN_AUTO_BRIGHTNESS_ADJ,
             SCREEN_BRIGHTNESS_FOR_VR,
@@ -4238,7 +4234,6 @@ public final class Settings {
             VALIDATORS.put(FONT_SCALE, FONT_SCALE_VALIDATOR);
             VALIDATORS.put(DIM_SCREEN, DIM_SCREEN_VALIDATOR);
             VALIDATORS.put(SCREEN_OFF_TIMEOUT, SCREEN_OFF_TIMEOUT_VALIDATOR);
-            VALIDATORS.put(SCREEN_BRIGHTNESS, SCREEN_BRIGHTNESS_VALIDATOR);
             VALIDATORS.put(SCREEN_BRIGHTNESS_FOR_VR, SCREEN_BRIGHTNESS_FOR_VR_VALIDATOR);
             VALIDATORS.put(SCREEN_BRIGHTNESS_MODE, SCREEN_BRIGHTNESS_MODE_VALIDATOR);
             VALIDATORS.put(MODE_RINGER_STREAMS_AFFECTED, MODE_RINGER_STREAMS_AFFECTED_VALIDATOR);
@@ -5318,7 +5313,7 @@ public final class Settings {
          *
          * For more information about how the platform handles {@code ANDROID_ID}
          * in Android 8.0 (API level 26) and higher, see <a
-         * href="{@docRoot}preview/behavior-changes.html#privacy-all">
+         * href="{@docRoot}about/versions/oreo/android-8.0-changes.html#privacy-all">
          * Android 8.0 Behavior Changes</a>.
          *
          * <p class="note"><strong>Note:</strong> For apps that were installed

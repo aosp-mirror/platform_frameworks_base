@@ -128,6 +128,30 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
         }
     };
 
+    public static final class Lifecycle extends SystemService {
+        private final NetworkScoreService mService;
+
+        public Lifecycle(Context context) {
+            super(context);
+            mService = new NetworkScoreService(context);
+        }
+
+        @Override
+        public void onStart() {
+            Log.i(TAG, "Registering " + Context.NETWORK_SCORE_SERVICE);
+            publishBinderService(Context.NETWORK_SCORE_SERVICE, mService);
+        }
+
+        @Override
+        public void onBootPhase(int phase) {
+            if (phase == PHASE_SYSTEM_SERVICES_READY) {
+                mService.systemReady();
+            } else if (phase == PHASE_BOOT_COMPLETED) {
+                mService.systemRunning();
+            }
+        }
+    }
+
     /**
      * Clears scores when the active scorer package is no longer valid and
      * manages the service connection.

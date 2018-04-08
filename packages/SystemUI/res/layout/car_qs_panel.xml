@@ -30,27 +30,29 @@
     <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/user_switcher_container"
+        android:layout_marginStart="@dimen/car_margin"
+        android:layout_marginEnd="@dimen/car_margin"
         android:clipChildren="false"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/car_user_switcher_container_height"
-        android:layout_gravity="center_horizontal" >
+        android:layout_height="@dimen/car_user_switcher_container_height">
 
-        <com.android.systemui.statusbar.car.UserGridView
-            android:id="@+id/user_grid"
-            android:clipChildren="false"
+        <RelativeLayout
+            android:id="@+id/fullscreen_user_switcher_container_inner"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/car_margin"
-            android:layout_marginRight="@dimen/car_margin"
-            android:layout_above="@id/user_switcher_page_indicator" />
+            android:layout_height="match_parent"
+            android:layout_marginEnd="@dimen/car_padding_4">
 
-        <com.android.systemui.statusbar.car.PageIndicator
-            android:id="@+id/user_switcher_page_indicator"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/car_page_indicator_dot_diameter"
-            android:layout_marginBottom="@dimen/car_page_indicator_margin_bottom"
-            android:alpha="0"
-            android:layout_alignParentBottom="true" />
+            <com.android.systemui.statusbar.car.UserGridRecyclerView
+                android:id="@+id/user_grid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scrollbars="vertical"
+                android:verticalScrollbarPosition="left"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:scrollbarFadeDuration="0"/>
+        </RelativeLayout>
 
     </RelativeLayout>
 

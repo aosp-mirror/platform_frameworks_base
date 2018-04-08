@@ -101,6 +101,11 @@ public class TransactionCompat {
         return this;
     }
 
+    public TransactionCompat setEarlyWakeup() {
+        mTransaction.setEarlyWakeup();
+        return this;
+    }
+
     public TransactionCompat setColor(SurfaceControlCompat surfaceControl, float[] color) {
         mTransaction.setColor(surfaceControl.mSurfaceControl, color);
         return this;

@@ -992,6 +992,10 @@ static void android_view_ThreadedRenderer_setIsolatedProcess(JNIEnv*, jclass, jb
     Properties::isolatedProcess = isolated;
 }
 
+static void android_view_ThreadedRenderer_setContextPriority(JNIEnv*, jclass,
+        jint contextPriority) {
+    Properties::contextPriority = contextPriority;
+}
 
 // ----------------------------------------------------------------------------
 // FrameMetricsObserver
@@ -1103,6 +1107,7 @@ static const JNINativeMethod gMethods[] = {
             (void*)android_view_ThreadedRenderer_hackySetRTAnimationsEnabled },
     { "nSetDebuggingEnabled", "(Z)V", (void*)android_view_ThreadedRenderer_setDebuggingEnabled },
     { "nSetIsolatedProcess", "(Z)V", (void*)android_view_ThreadedRenderer_setIsolatedProcess },
+    { "nSetContextPriority", "(I)V", (void*)android_view_ThreadedRenderer_setContextPriority },
 };
 
 static JavaVM* mJvm = nullptr;

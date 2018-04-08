@@ -467,10 +467,57 @@ package android.location {
 
 }
 
+package android.media {
+
+  public final class AudioFocusRequest {
+    method public android.media.AudioManager.OnAudioFocusChangeListener getOnAudioFocusChangeListener();
+  }
+
+  public final class AudioFormat implements android.os.Parcelable {
+    method public static int channelCountFromInChannelMask(int);
+    method public static int channelCountFromOutChannelMask(int);
+    method public static int getBytesPerSample(int);
+    method public static boolean isEncodingLinearPcm(int);
+  }
+
+  public final class AudioPresentation {
+    ctor public AudioPresentation(int, int, java.util.Map<java.lang.String, java.lang.String>, java.lang.String, int, boolean, boolean, boolean);
+    method public int getPresentationId();
+    method public int getProgramId();
+  }
+
+  public static final class VolumeShaper.Configuration.Builder {
+    method public android.media.VolumeShaper.Configuration.Builder setOptionFlags(int);
+  }
+
+}
+
 package android.media.audiofx {
 
   public class AudioEffect {
+    method public static int byteArrayToInt(byte[]);
+    method public static short byteArrayToShort(byte[]);
+    method public int getParameter(byte[], byte[]) throws java.lang.IllegalStateException;
+    method public int getParameter(int, byte[]) throws java.lang.IllegalStateException;
+    method public int getParameter(int, int[]) throws java.lang.IllegalStateException;
+    method public int getParameter(int, short[]) throws java.lang.IllegalStateException;
+    method public int getParameter(int[], short[]) throws java.lang.IllegalStateException;
+    method public static byte[] intToByteArray(int);
+    method public static boolean isEffectTypeAvailable(java.util.UUID);
+    method public static boolean isError(int);
+    method public int setParameter(byte[], byte[]) throws java.lang.IllegalStateException;
+    method public int setParameter(int, int) throws java.lang.IllegalStateException;
+    method public int setParameter(int, short) throws java.lang.IllegalStateException;
+    method public int setParameter(int, byte[]) throws java.lang.IllegalStateException;
+    method public int setParameter(int[], int[]) throws java.lang.IllegalStateException;
+    method public int setParameter(int[], byte[]) throws java.lang.IllegalStateException;
+    method public void setParameterListener(android.media.audiofx.AudioEffect.OnParameterChangeListener);
+    method public static byte[] shortToByteArray(short);
     field public static final java.util.UUID EFFECT_TYPE_NULL;
+  }
+
+  public static abstract interface AudioEffect.OnParameterChangeListener {
+    method public abstract void onParameterChange(android.media.audiofx.AudioEffect, int, byte[], byte[]);
   }
 
 }
@@ -571,6 +618,51 @@ package android.os {
 
   public class UserManager {
     field public static final java.lang.String ACTION_USER_RESTRICTIONS_CHANGED = "android.os.action.USER_RESTRICTIONS_CHANGED";
+  }
+
+  public abstract class VibrationEffect implements android.os.Parcelable {
+    method public static android.os.VibrationEffect get(int);
+    method public static android.os.VibrationEffect get(int, boolean);
+    method public static android.os.VibrationEffect get(android.net.Uri, android.content.Context);
+    method protected static int scale(int, float, int);
+    field public static final int[] RINGTONES;
+  }
+
+  public static class VibrationEffect.OneShot extends android.os.VibrationEffect implements android.os.Parcelable {
+    ctor public VibrationEffect.OneShot(android.os.Parcel);
+    ctor public VibrationEffect.OneShot(long, int);
+    method public int getAmplitude();
+    method public long getDuration();
+    method public android.os.VibrationEffect.OneShot scale(float, int);
+    method public void validate();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.os.VibrationEffect.OneShot> CREATOR;
+  }
+
+  public static class VibrationEffect.Prebaked extends android.os.VibrationEffect implements android.os.Parcelable {
+    ctor public VibrationEffect.Prebaked(android.os.Parcel);
+    ctor public VibrationEffect.Prebaked(int, boolean);
+    method public long getDuration();
+    method public int getEffectStrength();
+    method public int getId();
+    method public void setEffectStrength(int);
+    method public boolean shouldFallback();
+    method public void validate();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.os.VibrationEffect.Prebaked> CREATOR;
+  }
+
+  public static class VibrationEffect.Waveform extends android.os.VibrationEffect implements android.os.Parcelable {
+    ctor public VibrationEffect.Waveform(android.os.Parcel);
+    ctor public VibrationEffect.Waveform(long[], int[], int);
+    method public int[] getAmplitudes();
+    method public long getDuration();
+    method public int getRepeatIndex();
+    method public long[] getTimings();
+    method public android.os.VibrationEffect.Waveform scale(float, int);
+    method public void validate();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.os.VibrationEffect.Waveform> CREATOR;
   }
 
 }
@@ -786,6 +878,10 @@ package android.telephony {
 
   public class ServiceState implements android.os.Parcelable {
     method public void setCdmaSystemAndNetworkId(int, int);
+    method public void setCellBandwidths(int[]);
+    method public void setChannelNumber(int);
+    method public void setRilDataRadioTechnology(int);
+    method public void setRilVoiceRadioTechnology(int);
   }
 
   public class TelephonyManager {

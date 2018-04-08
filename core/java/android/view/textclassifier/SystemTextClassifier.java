@@ -28,7 +28,6 @@ import android.service.textclassifier.ITextClassifierService;
 import android.service.textclassifier.ITextLinksCallback;
 import android.service.textclassifier.ITextSelectionCallback;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.internal.util.Preconditions;
@@ -49,13 +48,6 @@ public final class SystemTextClassifier implements TextClassifier {
     private final TextClassificationConstants mSettings;
     private final TextClassifier mFallback;
     private final String mPackageName;
-
-    private final Object mLoggerLock = new Object();
-    @GuardedBy("mLoggerLock")
-    private Logger.Config mLoggerConfig;
-    @GuardedBy("mLoggerLock")
-    private Logger mLogger;
-    @GuardedBy("mLoggerLock")
     private TextClassificationSessionId mSessionId;
 
     public SystemTextClassifier(Context context, TextClassificationConstants settings)
@@ -144,27 +136,6 @@ public final class SystemTextClassifier implements TextClassifier {
     public int getMaxGenerateLinksTextLength() {
         // TODO: retrieve this from the bound service.
         return mFallback.getMaxGenerateLinksTextLength();
-    }
-
-    @Override
-    public Logger getLogger(@NonNull Logger.Config config) {
-        Preconditions.checkNotNull(config);
-        synchronized (mLoggerLock) {
-            if (mLogger == null || !config.equals(mLoggerConfig)) {
-                mLoggerConfig = config;
-                mLogger = new Logger(config) {
-                    @Override
-                    public void writeEvent(SelectionEvent event) {
-                        try {
-                            mManagerService.onSelectionEvent(mSessionId, event);
-                        } catch (RemoteException e) {
-                            Log.e(LOG_TAG, "Error reporting selection event.", e);
-                        }
-                    }
-                };
-            }
-        }
-        return mLogger;
     }
 
     @Override

@@ -2001,6 +2001,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     // Try starting an animation.
                     if (mWinAnimator.applyAnimationLocked(transit, false)) {
                         mAnimatingExit = true;
+
+                        // mAnimatingExit affects canAffectSystemUiFlags(). Run layout such that
+                        // any change from that is performed immediately.
+                        setDisplayLayoutNeeded();
+                        mService.requestTraversal();
                     }
                     //TODO (multidisplay): Magnification is supported only for the default display.
                     if (mService.mAccessibilityController != null && displayId == DEFAULT_DISPLAY) {

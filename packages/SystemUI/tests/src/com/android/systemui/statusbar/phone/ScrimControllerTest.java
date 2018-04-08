@@ -246,7 +246,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void scrimBlanksBeforeLeavingAoD() {
+    public void scrimBlanksBeforeLeavingAod() {
         // Simulate unlock with fingerprint
         mScrimController.transitionTo(ScrimState.AOD);
         mScrimController.finishAnimationsImmediately();
@@ -453,6 +453,20 @@ public class ScrimControllerTest extends SysuiTestCase {
                     mScrimBehind.getViewAlpha() != 0 && !eatsTouches.contains(state),
                     mScrimBehind.isClickable());
         }
+    }
+
+    @Test
+    public void testAnimatesTransitionToAod() {
+        when(mDozeParamenters.shouldControlScreenOff()).thenReturn(false);
+        ScrimState.AOD.prepare(ScrimState.KEYGUARD);
+        Assert.assertFalse("No animation when ColorFade kicks in",
+                ScrimState.AOD.getAnimateChange());
+
+        reset(mDozeParamenters);
+        when(mDozeParamenters.shouldControlScreenOff()).thenReturn(true);
+        ScrimState.AOD.prepare(ScrimState.KEYGUARD);
+        Assert.assertTrue("Animate scrims when ColorFade won't be triggered",
+                ScrimState.AOD.getAnimateChange());
     }
 
     /**

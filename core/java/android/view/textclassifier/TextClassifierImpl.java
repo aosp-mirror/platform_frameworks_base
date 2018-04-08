@@ -94,11 +94,7 @@ public final class TextClassifierImpl implements TextClassifier {
 
     private final Object mLoggerLock = new Object();
     @GuardedBy("mLoggerLock") // Do not access outside this lock.
-    private Logger.Config mLoggerConfig;
-    @GuardedBy("mLoggerLock") // Do not access outside this lock.
-    private Logger mLogger;
-    @GuardedBy("mLoggerLock") // Do not access outside this lock.
-    private Logger mLogger2;  // This is the new logger. Will replace mLogger.
+    private SelectionSessionLogger mSessionLogger;
 
     private final TextClassificationConstants mSettings;
 
@@ -283,28 +279,14 @@ public final class TextClassifierImpl implements TextClassifier {
         }
     }
 
-    /** @inheritDoc */
-    @Override
-    public Logger getLogger(@NonNull Logger.Config config) {
-        Preconditions.checkNotNull(config);
-        synchronized (mLoggerLock) {
-            if (mLogger == null || !config.equals(mLoggerConfig)) {
-                mLoggerConfig = config;
-                mLogger = new DefaultLogger(config);
-            }
-        }
-        return mLogger;
-    }
-
     @Override
     public void onSelectionEvent(SelectionEvent event) {
         Preconditions.checkNotNull(event);
         synchronized (mLoggerLock) {
-            if (mLogger2 == null) {
-                mLogger2 = new DefaultLogger(
-                        new Logger.Config(mContext, WIDGET_TYPE_UNKNOWN, null));
+            if (mSessionLogger == null) {
+                mSessionLogger = new SelectionSessionLogger();
             }
-            mLogger2.writeEvent(event);
+            mSessionLogger.writeEvent(event);
         }
     }
 
@@ -331,7 +313,7 @@ public final class TextClassifierImpl implements TextClassifier {
 
     private String createId(String text, int start, int end) {
         synchronized (mLock) {
-            return DefaultLogger.createId(text, start, end, mContext, mModel.getVersion(),
+            return SelectionSessionLogger.createId(text, start, end, mContext, mModel.getVersion(),
                     mModel.getSupportedLocales());
         }
     }

@@ -3902,7 +3902,7 @@ public class Notification implements Parcelable
          * @deprecated use {@link #addPerson(Person)}
          */
         public Builder addPerson(String uri) {
-            addPerson(new Person().setUri(uri));
+            addPerson(new Person.Builder().setUri(uri).build());
             return this;
         }
 
@@ -6384,7 +6384,7 @@ public class Notification implements Parcelable
          * @deprecated use {@code MessagingStyle(Person)}
          */
         public MessagingStyle(@NonNull CharSequence userDisplayName) {
-            this(new Person().setName(userDisplayName));
+            this(new Person.Builder().setName(userDisplayName).build());
         }
 
         /**
@@ -6431,6 +6431,7 @@ public class Notification implements Parcelable
         /**
          * @return the user to be displayed for any replies sent by the user
          */
+        @NonNull
         public Person getUser() {
             return mUser;
         }
@@ -6489,7 +6490,7 @@ public class Notification implements Parcelable
          */
         public MessagingStyle addMessage(CharSequence text, long timestamp, CharSequence sender) {
             return addMessage(text, timestamp,
-                    sender == null ? null : new Person().setName(sender));
+                    sender == null ? null : new Person.Builder().setName(sender).build());
         }
 
         /**
@@ -6505,7 +6506,8 @@ public class Notification implements Parcelable
          *
          * @return this object for method chaining
          */
-        public MessagingStyle addMessage(CharSequence text, long timestamp, Person sender) {
+        public MessagingStyle addMessage(@NonNull CharSequence text, long timestamp,
+                @Nullable Person sender) {
             return addMessage(new Message(text, timestamp, sender));
         }
 
@@ -6661,7 +6663,7 @@ public class Notification implements Parcelable
             mUser = extras.getParcelable(EXTRA_MESSAGING_PERSON);
             if (mUser == null) {
                 CharSequence displayName = extras.getCharSequence(EXTRA_SELF_DISPLAY_NAME);
-                mUser = new Person().setName(displayName);
+                mUser = new Person.Builder().setName(displayName).build();
             }
             mConversationTitle = extras.getCharSequence(EXTRA_CONVERSATION_TITLE);
             Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
@@ -6916,7 +6918,8 @@ public class Notification implements Parcelable
              *  @deprecated use {@code Message(CharSequence, long, Person)}
              */
             public Message(CharSequence text, long timestamp, CharSequence sender){
-                this(text, timestamp, sender == null ? null : new Person().setName(sender));
+                this(text, timestamp, sender == null ? null
+                        : new Person.Builder().setName(sender).build());
             }
 
             /**
@@ -6927,13 +6930,14 @@ public class Notification implements Parcelable
              * Should be <code>null</code> for messages by the current user, in which case
              * the platform will insert the user set in {@code MessagingStyle(Person)}.
              * <p>
-             * The person provided should contain an Icon, set with {@link Person#setIcon(Icon)}
-             * and also have a name provided with {@link Person#setName(CharSequence)}. If multiple
-             * users have the same name, consider providing a key with {@link Person#setKey(String)}
-             * in order to differentiate between the different users.
+             * The person provided should contain an Icon, set with
+             * {@link Person.Builder#setIcon(Icon)} and also have a name provided
+             * with {@link Person.Builder#setName(CharSequence)}. If multiple users have the same
+             * name, consider providing a key with {@link Person.Builder#setKey(String)} in order
+             * to differentiate between the different users.
              * </p>
              */
-            public Message(CharSequence text, long timestamp, @Nullable Person sender){
+            public Message(@NonNull CharSequence text, long timestamp, @Nullable Person sender) {
                 mText = text;
                 mTimestamp = timestamp;
                 mSender = sender;
@@ -7092,7 +7096,7 @@ public class Notification implements Parcelable
                             // the native api instead
                             CharSequence senderName = bundle.getCharSequence(KEY_SENDER);
                             if (senderName != null) {
-                                senderPerson = new Person().setName(senderName);
+                                senderPerson = new Person.Builder().setName(senderName).build();
                             }
                         }
                         Message message = new Message(bundle.getCharSequence(KEY_TEXT),
@@ -7785,217 +7789,6 @@ public class Notification implements Parcelable
             }
             return remoteViews;
         }
-    }
-
-    /**
-     * A Person associated with this Notification.
-     */
-    public static final class Person implements Parcelable {
-        @Nullable private CharSequence mName;
-        @Nullable private Icon mIcon;
-        @Nullable private String mUri;
-        @Nullable private String mKey;
-        private boolean mBot;
-        private boolean mImportant;
-
-        protected Person(Parcel in) {
-            mName = in.readCharSequence();
-            if (in.readInt() != 0) {
-                mIcon = Icon.CREATOR.createFromParcel(in);
-            }
-            mUri = in.readString();
-            mKey = in.readString();
-            mImportant = in.readBoolean();
-            mBot = in.readBoolean();
-        }
-
-        /**
-         * Create a new person.
-         */
-        public Person() {
-        }
-
-        /**
-         * Give this person a name.
-         *
-         * @param name the name of this person
-         */
-        public Person setName(@Nullable CharSequence name) {
-            this.mName = name;
-            return this;
-        }
-
-        /**
-         * Add an icon for this person.
-         * <br />
-         * This is currently only used for {@link MessagingStyle} notifications and should not be
-         * provided otherwise, in order to save memory. The system will prefer this icon over any
-         * images that are resolved from the URI.
-         *
-         * @param icon the icon of the person
-         */
-        public Person setIcon(@Nullable Icon icon) {
-            this.mIcon = icon;
-            return this;
-        }
-
-        /**
-         * Set a URI associated with this person.
-         *
-         * <P>
-         * Depending on user preferences, adding a URI to a Person may allow the notification to
-         * pass through interruption filters, if this notification is of
-         * category {@link #CATEGORY_CALL} or {@link #CATEGORY_MESSAGE}.
-         * The addition of people may also cause this notification to appear more prominently in
-         * the user interface.
-         * </P>
-         *
-         * <P>
-         * The person should be specified by the {@code String} representation of a
-         * {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}.
-         * </P>
-         *
-         * <P>The system will also attempt to resolve {@code mailto:} and {@code tel:} schema
-         * URIs.  The path part of these URIs must exist in the contacts database, in the
-         * appropriate column, or the reference will be discarded as invalid. Telephone schema
-         * URIs will be resolved by {@link android.provider.ContactsContract.PhoneLookup}.
-         * </P>
-         *
-         * @param uri a URI for the person
-         */
-        public Person setUri(@Nullable String uri) {
-            mUri = uri;
-            return this;
-        }
-
-        /**
-         * Add a key to this person in order to uniquely identify it.
-         * This is especially useful if the name doesn't uniquely identify this person or if the
-         * display name is a short handle of the actual name.
-         *
-         * <P>If no key is provided, the name serves as as the key for the purpose of
-         * identification.</P>
-         *
-         * @param key the key that uniquely identifies this person
-         */
-        public Person setKey(@Nullable String key) {
-            mKey = key;
-            return this;
-        }
-
-        /**
-         * Sets whether this is an important person. Use this method to denote users who frequently
-         * interact with the user of this device, when it is not possible to refer to the user
-         * by {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}.
-         *
-         * @param isImportant {@code true} if this is an important person, {@code false} otherwise.
-         */
-        public Person setImportant(boolean isImportant) {
-            mImportant = isImportant;
-            return this;
-        }
-
-        /**
-         * Sets whether this person is a machine rather than a human.
-         *
-         * @param isBot {@code true}  if this person is a machine, {@code false} otherwise.
-         */
-        public Person setBot(boolean isBot) {
-            mBot = isBot;
-            return this;
-        }
-
-        /**
-         * @return the uri provided for this person or {@code null} if no Uri was provided
-         */
-        @Nullable
-        public String getUri() {
-            return mUri;
-        }
-
-        /**
-         * @return the name provided for this person or {@code null} if no name was provided
-         */
-        @Nullable
-        public CharSequence getName() {
-            return mName;
-        }
-
-        /**
-         * @return the icon provided for this person or {@code null} if no icon was provided
-         */
-        @Nullable
-        public Icon getIcon() {
-            return mIcon;
-        }
-
-        /**
-         * @return the key provided for this person or {@code null} if no key was provided
-         */
-        @Nullable
-        public String getKey() {
-            return mKey;
-        }
-
-        /**
-         * @return whether this Person is a machine.
-         */
-        public boolean isBot() {
-            return mBot;
-        }
-
-        /**
-         * @return whether this Person is important.
-         */
-        public boolean isImportant() {
-            return mImportant;
-        }
-
-        /**
-         * @return the URI associated with this person, or "name:mName" otherwise
-         *  @hide
-         */
-        public String resolveToLegacyUri() {
-            if (mUri != null) {
-                return mUri;
-            }
-            if (mName != null) {
-                return "name:" + mName;
-            }
-            return "";
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, @WriteFlags int flags) {
-            dest.writeCharSequence(mName);
-            if (mIcon != null) {
-                dest.writeInt(1);
-                mIcon.writeToParcel(dest, 0);
-            } else {
-                dest.writeInt(0);
-            }
-            dest.writeString(mUri);
-            dest.writeString(mKey);
-            dest.writeBoolean(mImportant);
-            dest.writeBoolean(mBot);
-        }
-
-        public static final Creator<Person> CREATOR = new Creator<Person>() {
-            @Override
-            public Person createFromParcel(Parcel in) {
-                return new Person(in);
-            }
-
-            @Override
-            public Person[] newArray(int size) {
-                return new Person[size];
-            }
-        };
     }
 
     // When adding a new Style subclass here, don't forget to update

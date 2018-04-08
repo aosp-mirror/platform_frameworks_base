@@ -8013,29 +8013,35 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private VibrationEffect getVibrationEffect(int effectId) {
         long[] pattern;
         switch (effectId) {
-            case HapticFeedbackConstants.LONG_PRESS:
-                pattern = mLongPressVibePattern;
-                break;
             case HapticFeedbackConstants.CLOCK_TICK:
+            case HapticFeedbackConstants.CONTEXT_CLICK:
                 return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
+            case HapticFeedbackConstants.KEYBOARD_RELEASE:
+            case HapticFeedbackConstants.TEXT_HANDLE_MOVE:
+            case HapticFeedbackConstants.VIRTUAL_KEY_RELEASE:
+            case HapticFeedbackConstants.ENTRY_BUMP:
+            case HapticFeedbackConstants.DRAG_CROSSING:
+            case HapticFeedbackConstants.GESTURE_END:
+                return VibrationEffect.get(VibrationEffect.EFFECT_TICK, false);
+            case HapticFeedbackConstants.KEYBOARD_TAP: // == KEYBOARD_PRESS
+            case HapticFeedbackConstants.VIRTUAL_KEY:
+            case HapticFeedbackConstants.EDGE_RELEASE:
+            case HapticFeedbackConstants.CONFIRM:
+            case HapticFeedbackConstants.GESTURE_START:
+                return VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
+            case HapticFeedbackConstants.LONG_PRESS:
+            case HapticFeedbackConstants.EDGE_SQUEEZE:
+                return VibrationEffect.get(VibrationEffect.EFFECT_HEAVY_CLICK);
+            case HapticFeedbackConstants.REJECT:
+                return VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
+
             case HapticFeedbackConstants.CALENDAR_DATE:
                 pattern = mCalendarDateVibePattern;
                 break;
             case HapticFeedbackConstants.SAFE_MODE_ENABLED:
                 pattern = mSafeModeEnabledVibePattern;
                 break;
-            case HapticFeedbackConstants.CONTEXT_CLICK:
-                return VibrationEffect.get(VibrationEffect.EFFECT_TICK);
-            case HapticFeedbackConstants.VIRTUAL_KEY:
-                return VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
-            case HapticFeedbackConstants.VIRTUAL_KEY_RELEASE:
-                return VibrationEffect.get(VibrationEffect.EFFECT_TICK, false);
-            case HapticFeedbackConstants.KEYBOARD_PRESS:  // == HapticFeedbackConstants.KEYBOARD_TAP
-                return VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
-            case HapticFeedbackConstants.KEYBOARD_RELEASE:
-                return VibrationEffect.get(VibrationEffect.EFFECT_TICK, false);
-            case HapticFeedbackConstants.TEXT_HANDLE_MOVE:
-                return VibrationEffect.get(VibrationEffect.EFFECT_TICK, false);
+
             default:
                 return null;
         }

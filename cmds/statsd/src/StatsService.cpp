@@ -178,23 +178,34 @@ status_t StatsService::dump(int fd, const Vector<String16>& args) {
     }
 
     bool verbose = false;
+    bool proto = false;
     if (args.size() > 0 && !args[0].compare(String16("-v"))) {
         verbose = true;
     }
+    if (args.size() > 0 && !args[args.size()-1].compare(String16("--proto"))) {
+        proto = true;
+    }
 
-    // TODO: Proto format for incident reports
-    dump_impl(out, verbose);
+    dump_impl(out, verbose, proto);
 
     fclose(out);
     return NO_ERROR;
 }
 
 /**
- * Write debugging data about statsd in text format.
+ * Write debugging data about statsd in text or proto format.
  */
-void StatsService::dump_impl(FILE* out, bool verbose) {
-    StatsdStats::getInstance().dumpStats(out);
-    mProcessor->dumpStates(out, verbose);
+void StatsService::dump_impl(FILE* out, bool verbose, bool proto) {
+    if (proto) {
+        vector<uint8_t> data;
+        StatsdStats::getInstance().dumpStats(&data, false); // does not reset statsdStats.
+        for (size_t i = 0; i < data.size(); i ++) {
+            fprintf(out, "%c", data[i]);
+        }
+    } else {
+        StatsdStats::getInstance().dumpStats(out);
+        mProcessor->dumpStates(out, verbose);
+    }
 }
 
 /**
@@ -325,6 +336,7 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out, "\n");
     fprintf(out, "usage: adb shell cmd stats print-stats\n");
     fprintf(out, "  Prints some basic stats.\n");
+    fprintf(out, "  --proto       Print proto binary instead of string format.\n");
     fprintf(out, "\n");
     fprintf(out, "\n");
     fprintf(out, "usage: adb shell cmd stats clear-puller-cache\n");
@@ -524,13 +536,28 @@ status_t StatsService::cmd_dump_report(FILE* out, FILE* err, const Vector<String
 }
 
 status_t StatsService::cmd_print_stats(FILE* out, const Vector<String8>& args) {
-    vector<ConfigKey> configs = mConfigManager->GetAllConfigKeys();
-    for (const ConfigKey& key : configs) {
-        fprintf(out, "Config %s uses %zu bytes\n", key.ToString().c_str(),
-                mProcessor->GetMetricsSize(key));
+    int argCount = args.size();
+    bool proto = false;
+    if (!std::strcmp("--proto", args[argCount-1].c_str())) {
+        proto = true;
+        argCount -= 1;
     }
     StatsdStats& statsdStats = StatsdStats::getInstance();
-    statsdStats.dumpStats(out);
+    if (proto) {
+        vector<uint8_t> data;
+        statsdStats.dumpStats(&data, false); // does not reset statsdStats.
+        for (size_t i = 0; i < data.size(); i ++) {
+            fprintf(out, "%c", data[i]);
+        }
+
+    } else {
+        vector<ConfigKey> configs = mConfigManager->GetAllConfigKeys();
+        for (const ConfigKey& key : configs) {
+            fprintf(out, "Config %s uses %zu bytes\n", key.ToString().c_str(),
+                    mProcessor->GetMetricsSize(key));
+        }
+        statsdStats.dumpStats(out);
+    }
     return NO_ERROR;
 }
 

@@ -3574,6 +3574,7 @@ final public class MediaCodec {
         private final static int TYPE_YUV = 1;
 
         private final int mTransform = 0; //Default no transform
+        private final int mScalingMode = 0; //Default frozen scaling mode
 
         @Override
         public int getFormat() {
@@ -3597,6 +3598,12 @@ final public class MediaCodec {
         public int getTransform() {
             throwISEIfImageIsInvalid();
             return mTransform;
+        }
+
+        @Override
+        public int getScalingMode() {
+            throwISEIfImageIsInvalid();
+            return mScalingMode;
         }
 
         @Override

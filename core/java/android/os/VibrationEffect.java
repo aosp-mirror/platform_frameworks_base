@@ -17,13 +17,12 @@
 package android.os;
 
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.hardware.vibrator.V1_0.EffectStrength;
 import android.hardware.vibrator.V1_2.Effect;
 import android.net.Uri;
 import android.util.MathUtils;
-
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Arrays;
 
@@ -100,7 +99,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(Uri, Context)
      * @hide
      */
-    @VisibleForTesting
+    @TestApi
     public static final int[] RINGTONES = {
         Effect.RINGTONE_1,
         Effect.RINGTONE_2,
@@ -219,6 +218,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @return The desired effect.
      * @hide
      */
+    @TestApi
     public static VibrationEffect get(int effectId) {
         return get(effectId, true);
     }
@@ -245,6 +245,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @return The desired effect.
      * @hide
      */
+    @TestApi
     public static VibrationEffect get(int effectId, boolean fallback) {
         VibrationEffect effect = new Prebaked(effectId, fallback);
         effect.validate();
@@ -267,6 +268,7 @@ public abstract class VibrationEffect implements Parcelable {
      *
      * @hide
      */
+    @TestApi
     @Nullable
     public static VibrationEffect get(Uri uri, Context context) {
         String[] uris = context.getResources().getStringArray(
@@ -307,12 +309,14 @@ public abstract class VibrationEffect implements Parcelable {
      * This assumes that the previous value was in the range [0, MAX_AMPLITUDE]
      * @hide
      */
+    @TestApi
     protected static int scale(int amplitude, float gamma, int maxAmplitude) {
         float val = MathUtils.pow(amplitude / (float) MAX_AMPLITUDE, gamma);
         return (int) (val * maxAmplitude);
     }
 
     /** @hide */
+    @TestApi
     public static class OneShot extends VibrationEffect implements Parcelable {
         private final long mDuration;
         private final int mAmplitude;
@@ -413,6 +417,7 @@ public abstract class VibrationEffect implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public static class Waveform extends VibrationEffect implements Parcelable {
         private final long[] mTimings;
         private final int[] mAmplitudes;
@@ -576,6 +581,7 @@ public abstract class VibrationEffect implements Parcelable {
     }
 
     /** @hide */
+    @TestApi
     public static class Prebaked extends VibrationEffect implements Parcelable {
         private final int mEffectId;
         private final boolean mFallback;
