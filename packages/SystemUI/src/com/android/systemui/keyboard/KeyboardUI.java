@@ -613,7 +613,7 @@ public class KeyboardUI extends SystemUI implements InputManager.OnTabletModeCha
                                           int bluetoothProfile) { }
 
         @Override
-        public void onProfileAudioStateChanged(int bluetoothProfile, int state) { }
+        public void onAudioModeChanged() { }
     }
 
     private final class BluetoothErrorListener implements Utils.ErrorListener {

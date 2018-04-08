@@ -27,6 +27,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.android.settingslib.R;
@@ -118,6 +119,12 @@ public class BluetoothEventManager {
                    new ActiveDeviceChangedHandler());
         addHandler(BluetoothHearingAid.ACTION_ACTIVE_DEVICE_CHANGED,
                    new ActiveDeviceChangedHandler());
+
+        // Headset state changed broadcasts
+        addHandler(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED,
+                new AudioModeChangedHandler());
+        addHandler(TelephonyManager.ACTION_PHONE_STATE_CHANGED,
+                new AudioModeChangedHandler());
 
         mContext.registerReceiver(mBroadcastReceiver, mAdapterIntentFilter, null, mReceiverHandler);
         mContext.registerReceiver(mProfileBroadcastReceiver, mProfileIntentFilter, null, mReceiverHandler);
@@ -453,6 +460,27 @@ public class BluetoothEventManager {
         synchronized (mCallbacks) {
             for (BluetoothCallback callback : mCallbacks) {
                 callback.onActiveDeviceChanged(activeDevice, bluetoothProfile);
+            }
+        }
+    }
+
+    private class AudioModeChangedHandler implements Handler {
+
+        @Override
+        public void onReceive(Context context, Intent intent, BluetoothDevice device) {
+            final String action = intent.getAction();
+            if (action == null) {
+                Log.w(TAG, "AudioModeChangedHandler() action is null");
+                return;
+            }
+            dispatchAudioModeChanged();
+        }
+    }
+
+    private void dispatchAudioModeChanged() {
+        synchronized (mCallbacks) {
+            for (BluetoothCallback callback : mCallbacks) {
+                callback.onAudioModeChanged();
             }
         }
     }
