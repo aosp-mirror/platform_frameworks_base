@@ -40,7 +40,7 @@
             android:id="@+id/home"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            systemui:intent="intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.HOME;end"
+            systemui:intent="intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.HOME;launchFlags=0x14000000;end"
             android:src="@drawable/car_ic_overview"
             android:background="?android:attr/selectableItemBackground"
             android:paddingTop="30dp"
