@@ -618,6 +618,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mTranslucentDecorEnabled = true;
     boolean mUseTvRouting;
     int mVeryLongPressTimeout;
+    boolean mAllowStartActivityForLongPressOnPowerDuringSetup;
 
     private boolean mHandleVolumeKeysInWM;
 
@@ -1622,7 +1623,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     : mKeyguardDelegate.isShowing();
             if (!keyguardActive) {
                 Intent intent = new Intent(Intent.ACTION_VOICE_ASSIST);
-                startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
+                if (mAllowStartActivityForLongPressOnPowerDuringSetup) {
+                    mContext.startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
+                } else {
+                    startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
+                }
             }
             break;
         }
@@ -2134,6 +2139,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_shortPressOnSleepBehavior);
         mVeryLongPressTimeout = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_veryLongPressTimeout);
+        mAllowStartActivityForLongPressOnPowerDuringSetup = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_allowStartActivityForLongPressOnPowerInSetup);
 
         mUseTvRouting = AudioSystem.getPlatformType(mContext) == AudioSystem.PLATFORM_TELEVISION;
 
@@ -8660,6 +8667,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pw.print(prefix);
                 pw.print("mShortPressOnWindowBehavior=");
                 pw.println(shortPressOnWindowBehaviorToString(mShortPressOnWindowBehavior));
+        pw.print(prefix);
+                pw.print("mAllowStartActivityForLongPressOnPowerDuringSetup=");
+                pw.println(mAllowStartActivityForLongPressOnPowerDuringSetup);
         pw.print(prefix);
                 pw.print("mHasSoftInput="); pw.print(mHasSoftInput);
                 pw.print(" mDismissImeOnBackKeyPressed="); pw.println(mDismissImeOnBackKeyPressed);
