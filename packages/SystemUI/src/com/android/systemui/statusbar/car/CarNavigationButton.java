@@ -24,8 +24,8 @@ public class CarNavigationButton extends com.android.keyguard.AlphaOptimizedImag
     private String mLongIntent;
     private boolean mBroadcastIntent;
     private boolean mSelected = false;
-    private float mSelectedAlpha;
-    private float mUnselectedAlpha;
+    private float mSelectedAlpha = 1f;
+    private float mUnselectedAlpha = 1f;
     private int mSelectedIconResourceId;
     private int mIconResourceId;
 
