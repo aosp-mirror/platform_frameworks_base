@@ -72,6 +72,7 @@ public class SettingsBackupTest {
                     Settings.System.NOTIFICATION_SOUND_CACHE, // internal cache
                     Settings.System.POINTER_LOCATION, // backup candidate?
                     Settings.System.RINGTONE_CACHE, // internal cache
+                    Settings.System.SCREEN_BRIGHTNESS, // removed in P
                     Settings.System.SETUP_WIZARD_HAS_RUN, // Only used by SuW
                     Settings.System.SHOW_GTALK_SERVICE_STATUS, // candidate for backup?
                     Settings.System.SHOW_TOUCHES, // bug?

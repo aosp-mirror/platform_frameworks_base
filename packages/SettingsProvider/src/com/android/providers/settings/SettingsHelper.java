@@ -144,10 +144,7 @@ public class SettingsHelper {
         }
 
         try {
-            if (Settings.System.SCREEN_BRIGHTNESS.equals(name)) {
-                setBrightness(Integer.parseInt(value));
-                // fall through to the ordinary write to settings
-            } else if (Settings.System.SOUND_EFFECTS_ENABLED.equals(name)) {
+            if (Settings.System.SOUND_EFFECTS_ENABLED.equals(name)) {
                 setSoundEffects(Integer.parseInt(value) == 1);
                 // fall through to the ordinary write to settings
             } else if (Settings.Secure.LOCATION_PROVIDERS_ALLOWED.equals(name)) {
@@ -303,10 +300,6 @@ public class SettingsHelper {
         } else {
             mAudioManager.unloadSoundEffects();
         }
-    }
-
-    private void setBrightness(int brightness) {
-        mContext.getSystemService(DisplayManager.class).setTemporaryBrightness(brightness);
     }
 
     /* package */ byte[] getLocaleData() {
