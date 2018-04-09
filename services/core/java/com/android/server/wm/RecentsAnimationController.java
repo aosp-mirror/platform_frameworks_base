@@ -51,6 +51,7 @@ import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.google.android.collect.Sets;
 
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
@@ -290,8 +291,10 @@ public class RecentsAnimationController implements DeathRecipient {
         mService.mWindowPlacerLocked.performSurfacePlacement();
     }
 
-    private void addAnimation(Task task, boolean isRecentTaskInvisible) {
+    @VisibleForTesting
+    AnimationAdapter addAnimation(Task task, boolean isRecentTaskInvisible) {
         if (DEBUG) Log.d(TAG, "addAnimation(" + task.getName() + ")");
+        // TODO: Refactor this to use the task's animator
         final SurfaceAnimator anim = new SurfaceAnimator(task, null /* animationFinishedCallback */,
                 mService);
         final TaskAnimationAdapter taskAdapter = new TaskAnimationAdapter(task,
@@ -299,6 +302,15 @@ public class RecentsAnimationController implements DeathRecipient {
         anim.startAnimation(task.getPendingTransaction(), taskAdapter, false /* hidden */);
         task.commitPendingTransaction();
         mPendingAnimations.add(taskAdapter);
+        return taskAdapter;
+    }
+
+    @VisibleForTesting
+    void removeAnimation(TaskAnimationAdapter taskAdapter) {
+        if (DEBUG) Log.d(TAG, "removeAnimation(" + taskAdapter.mTask.getName() + ")");
+        taskAdapter.mTask.setCanAffectSystemUiFlags(true);
+        taskAdapter.mCapturedFinishCallback.onAnimationFinished(taskAdapter);
+        mPendingAnimations.remove(taskAdapter);
     }
 
     void startAnimation() {
@@ -311,12 +323,21 @@ public class RecentsAnimationController implements DeathRecipient {
         try {
             final ArrayList<RemoteAnimationTarget> appAnimations = new ArrayList<>();
             for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
-                final RemoteAnimationTarget target =
-                        mPendingAnimations.get(i).createRemoteAnimationApp();
+                final TaskAnimationAdapter taskAdapter = mPendingAnimations.get(i);
+                final RemoteAnimationTarget target = taskAdapter.createRemoteAnimationApp();
                 if (target != null) {
                     appAnimations.add(target);
+                } else {
+                    removeAnimation(taskAdapter);
                 }
             }
+
+            // Skip the animation if there is nothing to animate
+            if (appAnimations.isEmpty()) {
+                cancelAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
+                return;
+            }
+
             final RemoteAnimationTarget[] appTargets = appAnimations.toArray(
                     new RemoteAnimationTarget[appAnimations.size()]);
             mPendingStart = false;
@@ -365,14 +386,12 @@ public class RecentsAnimationController implements DeathRecipient {
         if (DEBUG) Log.d(TAG, "cleanupAnimation(): mPendingAnimations="
                 + mPendingAnimations.size());
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
-            final TaskAnimationAdapter adapter = mPendingAnimations.get(i);
-            adapter.mTask.setCanAffectSystemUiFlags(true);
+            final TaskAnimationAdapter taskAdapter = mPendingAnimations.get(i);
             if (reorderMode == REORDER_MOVE_TO_TOP || reorderMode == REORDER_KEEP_IN_PLACE) {
-                adapter.mTask.dontAnimateDimExit();
+                taskAdapter.mTask.dontAnimateDimExit();
             }
-            adapter.mCapturedFinishCallback.onAnimationFinished(adapter);
+            removeAnimation(taskAdapter);
         }
-        mPendingAnimations.clear();
 
         mRunner.asBinder().unlinkToDeath(this, 0);
         // Clear associated input consumers
@@ -457,7 +476,8 @@ public class RecentsAnimationController implements DeathRecipient {
         return false;
     }
 
-    private class TaskAnimationAdapter implements AnimationAdapter {
+    @VisibleForTesting
+    class TaskAnimationAdapter implements AnimationAdapter {
 
         private final Task mTask;
         private SurfaceControl mCapturedLeash;
