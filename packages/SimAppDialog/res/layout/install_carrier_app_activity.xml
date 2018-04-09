@@ -20,7 +20,7 @@
     android:id="@+id/setup_wizard_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:icon="@drawable/ic_signal_cellular_alt_rounded_24px"
+    android:icon="@drawable/ic_signal_cellular_alt_rounded"
     app:suwHeaderText="@string/install_carrier_app_title"
     app:suwFooter="@layout/install_carrier_app_footer">
 
@@ -37,21 +37,6 @@
             android:text="@string/install_carrier_app_description_default"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
-
-        <com.android.setupwizardlib.view.FillContentLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
-
-            <!-- TODO(b/72511181): final illo and content description update -->
-            <ImageView
-                android:src="@drawable/placeholder"
-                style="@style/SuwContentIllustration"
-                android:contentDescription="@null"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
-
-        </com.android.setupwizardlib.view.FillContentLayout>
     </LinearLayout>
 
 </com.android.setupwizardlib.GlifLayout>
