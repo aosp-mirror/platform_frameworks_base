@@ -4998,6 +4998,14 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onNotificationClicked(StatusBarNotification sbn, ExpandableNotificationRow row) {
+        RemoteInputController controller = mRemoteInputManager.getController();
+        if (controller.isRemoteInputActive(row.getEntry())
+                && !TextUtils.isEmpty(row.getActiveRemoteInputText())) {
+            // We have an active remote input typed and the user clicked on the notification.
+            // this was probably unintentional, so we're closing the edit text instead.
+            controller.closeRemoteInputs();
+            return;
+        }
         Notification notification = sbn.getNotification();
         final PendingIntent intent = notification.contentIntent != null
                 ? notification.contentIntent
@@ -5061,12 +5069,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     Intent fillInIntent = null;
                     Entry entry = row.getEntry();
                     CharSequence remoteInputText = null;
-                    RemoteInputController controller = mRemoteInputManager.getController();
-                    if (controller.isRemoteInputActive(entry)) {
-                        remoteInputText = row.getActiveRemoteInputText();
-                    }
-                    if (TextUtils.isEmpty(remoteInputText)
-                            && !TextUtils.isEmpty(entry.remoteInputText)) {
+                    if (!TextUtils.isEmpty(entry.remoteInputText)) {
                         remoteInputText = entry.remoteInputText;
                     }
                     if (!TextUtils.isEmpty(remoteInputText)
