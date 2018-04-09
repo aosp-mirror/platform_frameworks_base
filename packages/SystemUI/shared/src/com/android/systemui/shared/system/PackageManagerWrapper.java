@@ -18,22 +18,23 @@ package com.android.systemui.shared.system;
 
 import android.app.AppGlobals;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.RemoteException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class PackageManagerWrapper {
 
-    private static final String TAG = "PackageManagerWrapper";
-
     private static final PackageManagerWrapper sInstance = new PackageManagerWrapper();
 
     private static final IPackageManager mIPackageManager = AppGlobals.getPackageManager();
+
+    public static final String ACTION_PREFERRED_ACTIVITY_CHANGED =
+            Intent.ACTION_PREFERRED_ACTIVITY_CHANGED;
 
     public static PackageManagerWrapper getInstance() {
         return sInstance;
@@ -53,40 +54,15 @@ public class PackageManagerWrapper {
     }
 
     /**
-     * @return true if the packageName belongs to the current preferred home app on the device.
-     *
-     * If will also return false if there are multiple home apps and the user has not picked any
-     * preferred home, in which case the user would see a disambiguation screen on going to home.
+     * Report the set of 'Home' activity candidates, plus (if any) which of them
+     * is the current "always use this one" setting.
      */
-    public boolean isDefaultHomeActivity(String packageName) {
-        List<ResolveInfo> allHomeCandidates = new ArrayList<>();
-        ComponentName home;
+    public ComponentName getHomeActivities(List<ResolveInfo> allHomeCandidates) {
         try {
-            home = mIPackageManager.getHomeActivities(allHomeCandidates);
+            return mIPackageManager.getHomeActivities(allHomeCandidates);
         } catch (RemoteException e) {
             e.printStackTrace();
-            return false;
+            return null;
         }
-
-        if (home != null && packageName.equals(home.getPackageName())) {
-            return true;
-        }
-
-        // Find the launcher with the highest priority and return that component if there are no
-        // other home activity with the same priority.
-        int lastPriority = Integer.MIN_VALUE;
-        ComponentName lastComponent = null;
-        final int size = allHomeCandidates.size();
-        for (int i = 0; i < size; i++) {
-            final ResolveInfo ri = allHomeCandidates.get(i);
-            if (ri.priority > lastPriority) {
-                lastComponent = ri.activityInfo.getComponentName();
-                lastPriority = ri.priority;
-            } else if (ri.priority == lastPriority) {
-                // Two components found with same priority.
-                lastComponent = null;
-            }
-        }
-        return lastComponent != null && packageName.equals(lastComponent.getPackageName());
     }
 }
