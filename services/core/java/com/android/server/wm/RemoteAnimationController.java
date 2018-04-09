@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static com.android.server.wm.AnimationAdapterProto.REMOTE;
 import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_REMOTE_ANIMATIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
@@ -49,7 +50,9 @@ import java.util.ArrayList;
  * Helper class to run app animations in a remote process.
  */
 class RemoteAnimationController implements DeathRecipient {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "RemoteAnimationController" : TAG_WM;
+    private static final String TAG = TAG_WITH_CLASS_NAME
+            || (DEBUG_REMOTE_ANIMATIONS && !DEBUG_APP_TRANSITIONS)
+                    ? "RemoteAnimationController" : TAG_WM;
     private static final long TIMEOUT_MS = 2000;
 
     private final WindowManagerService mService;
@@ -57,7 +60,7 @@ class RemoteAnimationController implements DeathRecipient {
     private final ArrayList<RemoteAnimationAdapterWrapper> mPendingAnimations = new ArrayList<>();
     private final Rect mTmpRect = new Rect();
     private final Handler mHandler;
-    private final Runnable mTimeoutRunnable = this::cancelAnimation;
+    private final Runnable mTimeoutRunnable = () -> cancelAnimation("timeoutRunnable");
 
     private FinishedCallback mFinishedCallback;
     private boolean mCanceled;
@@ -79,6 +82,7 @@ class RemoteAnimationController implements DeathRecipient {
      */
     AnimationAdapter createAnimationAdapter(AppWindowToken appWindowToken, Point position,
             Rect stackBounds) {
+        if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "createAnimationAdapter(): token=" + appWindowToken);
         final RemoteAnimationAdapterWrapper adapter = new RemoteAnimationAdapterWrapper(
                 appWindowToken, position, stackBounds);
         mPendingAnimations.add(adapter);
@@ -89,7 +93,10 @@ class RemoteAnimationController implements DeathRecipient {
      * Called when the transition is ready to be started, and all leashes have been set up.
      */
     void goodToGo() {
+        if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "goodToGo()");
         if (mPendingAnimations.isEmpty() || mCanceled) {
+            if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "goodToGo(): Animation finished before good to go, canceled="
+                    + mCanceled + " mPendingAnimations=" + mPendingAnimations.size());
             onAnimationFinished();
             return;
         }
@@ -101,6 +108,7 @@ class RemoteAnimationController implements DeathRecipient {
 
         final RemoteAnimationTarget[] animations = createAnimations();
         if (animations.length == 0) {
+            if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "goodToGo(): No apps to animate");
             onAnimationFinished();
             return;
         }
@@ -112,14 +120,20 @@ class RemoteAnimationController implements DeathRecipient {
                 Slog.e(TAG, "Failed to start remote animation", e);
                 onAnimationFinished();
             }
+            if (DEBUG_REMOTE_ANIMATIONS) {
+                Slog.d(TAG, "startAnimation(): Notify animation start:");
+                for (int i = 0; i < mPendingAnimations.size(); i++) {
+                    Slog.d(TAG, "\t" + mPendingAnimations.get(i).mAppWindowToken);
+                }
+            } else if (DEBUG_APP_TRANSITIONS) {
+                writeStartDebugStatement();
+            }
         });
         sendRunningRemoteAnimation(true);
-        if (DEBUG_APP_TRANSITIONS) {
-            writeStartDebugStatement();
-        }
     }
 
-    private void cancelAnimation() {
+    private void cancelAnimation(String reason) {
+        if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "cancelAnimation(): reason=" + reason);
         synchronized (mService.getWindowManagerLock()) {
             if (mCanceled) {
                 return;
@@ -142,14 +156,16 @@ class RemoteAnimationController implements DeathRecipient {
     }
 
     private RemoteAnimationTarget[] createAnimations() {
+        if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "createAnimations()");
         final ArrayList<RemoteAnimationTarget> targets = new ArrayList<>();
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final RemoteAnimationAdapterWrapper wrapper = mPendingAnimations.get(i);
-            final RemoteAnimationTarget target =
-                    mPendingAnimations.get(i).createRemoteAppAnimation();
+            final RemoteAnimationTarget target = wrapper.createRemoteAppAnimation();
             if (target != null) {
+                if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "\tAdd token=" + wrapper.mAppWindowToken);
                 targets.add(target);
             } else {
+                if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "\tRemove token=" + wrapper.mAppWindowToken);
 
                 // We can't really start an animation but we still need to make sure to finish the
                 // pending animation that was started by SurfaceAnimator
@@ -163,22 +179,29 @@ class RemoteAnimationController implements DeathRecipient {
     }
 
     private void onAnimationFinished() {
+        if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "onAnimationFinished(): mPendingAnimations="
+                + mPendingAnimations.size());
         mHandler.removeCallbacks(mTimeoutRunnable);
         mRemoteAnimationAdapter.getRunner().asBinder().unlinkToDeath(this, 0);
         synchronized (mService.mWindowMap) {
             releaseFinishedCallback();
             mService.openSurfaceTransaction();
             try {
+                if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "onAnimationFinished(): Notify animation finished:");
                 for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
                     final RemoteAnimationAdapterWrapper adapter = mPendingAnimations.get(i);
                     adapter.mCapturedFinishCallback.onAnimationFinished(adapter);
+                    if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "\t" + adapter.mAppWindowToken);
                 }
+            } catch (Exception e) {
+                Slog.e(TAG, "Failed to finish remote animation", e);
+                throw e;
             } finally {
                 mService.closeSurfaceTransaction("RemoteAnimationController#finished");
             }
         }
         sendRunningRemoteAnimation(false);
-        if (DEBUG_APP_TRANSITIONS) Slog.i(TAG, "Finishing remote animation");
+        if (DEBUG_REMOTE_ANIMATIONS) Slog.i(TAG, "Finishing remote animation");
     }
 
     private void invokeAnimationCancelled() {
@@ -206,7 +229,7 @@ class RemoteAnimationController implements DeathRecipient {
 
     @Override
     public void binderDied() {
-        cancelAnimation();
+        cancelAnimation("binderDied");
     }
 
     private static final class FinishedCallback extends IRemoteAnimationFinishedCallback.Stub {
@@ -219,6 +242,7 @@ class RemoteAnimationController implements DeathRecipient {
 
         @Override
         public void onAnimationFinished() throws RemoteException {
+            if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "app-onAnimationFinished(): mOuter=" + mOuter);
             final long token = Binder.clearCallingIdentity();
             try {
                 if (mOuter != null) {
@@ -238,6 +262,7 @@ class RemoteAnimationController implements DeathRecipient {
          * to prevent memory leak.
          */
         void release() {
+            if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "app-release(): mOuter=" + mOuter);
             mOuter = null;
         }
     };
@@ -301,6 +326,7 @@ class RemoteAnimationController implements DeathRecipient {
         @Override
         public void startAnimation(SurfaceControl animationLeash, Transaction t,
                 OnAnimationFinishedCallback finishCallback) {
+            if (DEBUG_REMOTE_ANIMATIONS) Slog.d(TAG, "startAnimation");
 
             // Restore z-layering, position and stack crop until client has a chance to modify it.
             t.setLayer(animationLeash, mAppWindowToken.getPrefixOrderIndex());
