@@ -77,6 +77,55 @@ public class HapticFeedbackConstants {
     public static final int TEXT_HANDLE_MOVE = 9;
 
     /**
+     * The user unlocked the device
+     * @hide
+     */
+    public static final int ENTRY_BUMP = 10;
+
+    /**
+     * The user has moved the dragged object within a droppable area.
+     * @hide
+     */
+    public static final int DRAG_CROSSING = 11;
+
+    /**
+     * The user has started a gesture (e.g. on the soft keyboard).
+     * @hide
+     */
+    public static final int GESTURE_START = 12;
+
+    /**
+     * The user has finished a gesture (e.g. on the soft keyboard).
+     * @hide
+     */
+    public static final int GESTURE_END = 13;
+
+    /**
+     * The user's squeeze crossed the gesture's initiation threshold.
+     * @hide
+     */
+    public static final int EDGE_SQUEEZE = 14;
+
+    /**
+     * The user's squeeze crossed the gesture's release threshold.
+     * @hide
+     */
+    public static final int EDGE_RELEASE = 15;
+
+    /**
+     * A haptic effect to signal the confirmation or successful completion of a user
+     * interaction.
+     * @hide
+     */
+    public static final int CONFIRM = 16;
+
+    /**
+     * A haptic effect to signal the rejection or failure of a user interaction.
+     * @hide
+     */
+    public static final int REJECT = 17;
+
+    /**
      * The phone has booted with safe mode enabled.
      * This is a private constant.  Feel free to renumber as desired.
      * @hide
