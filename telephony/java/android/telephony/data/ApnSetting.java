@@ -24,12 +24,14 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.Telephony;
+import android.provider.Telephony.Carriers;
 import android.telephony.Rlog;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.InetAddress;
@@ -54,20 +56,26 @@ public class ApnSetting implements Parcelable {
     private static final String LOG_TAG = "ApnSetting";
     private static final boolean VDBG = false;
 
-    private static final Map<String, Integer> APN_TYPE_STRING_MAP;
-    private static final Map<Integer, String> APN_TYPE_INT_MAP;
-    private static final Map<String, Integer> PROTOCOL_STRING_MAP;
-    private static final Map<Integer, String> PROTOCOL_INT_MAP;
-    private static final Map<String, Integer> MVNO_TYPE_STRING_MAP;
-    private static final Map<Integer, String> MVNO_TYPE_INT_MAP;
-    private static final int NOT_IN_MAP_INT = -1;
-    private static final int NO_PORT_SPECIFIED = -1;
+    private static final String V2_FORMAT_REGEX = "^\\[ApnSettingV2\\]\\s*";
+    private static final String V3_FORMAT_REGEX = "^\\[ApnSettingV3\\]\\s*";
+    private static final String V4_FORMAT_REGEX = "^\\[ApnSettingV4\\]\\s*";
+    private static final String V5_FORMAT_REGEX = "^\\[ApnSettingV5\\]\\s*";
 
-    /** All APN types except IA. */
-    private static final int TYPE_ALL_BUT_IA = ApnTypes.ALL & (~ApnTypes.IA);
+    /**
+     * Default value for mtu if it's not set. Moved from PhoneConstants.
+     * @hide
+     */
+    public static final int UNSET_MTU = 0;
+    private static final int UNSPECIFIED_INT = -1;
+    private static final String UNSPECIFIED_STRING = "";
 
-    /** APN type for default data traffic and HiPri traffic. */
-    public static final int TYPE_DEFAULT = ApnTypes.DEFAULT | ApnTypes.HIPRI;
+    /**
+     * All APN types.
+     * @hide
+     */
+    public static final int TYPE_ALL = ApnTypes.ALL;
+    /** APN type for default data traffic. */
+    public static final int TYPE_DEFAULT = ApnTypes.DEFAULT;
     /** APN type for MMS traffic. */
     public static final int TYPE_MMS = ApnTypes.MMS;
     /** APN type for SUPL assisted GPS. */
@@ -166,9 +174,16 @@ public class ApnSetting implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface MvnoType {}
 
+    private static final Map<String, Integer> APN_TYPE_STRING_MAP;
+    private static final Map<Integer, String> APN_TYPE_INT_MAP;
+    private static final Map<String, Integer> PROTOCOL_STRING_MAP;
+    private static final Map<Integer, String> PROTOCOL_INT_MAP;
+    private static final Map<String, Integer> MVNO_TYPE_STRING_MAP;
+    private static final Map<Integer, String> MVNO_TYPE_INT_MAP;
+
     static {
         APN_TYPE_STRING_MAP = new ArrayMap<String, Integer>();
-        APN_TYPE_STRING_MAP.put("*", TYPE_ALL_BUT_IA);
+        APN_TYPE_STRING_MAP.put("*", TYPE_ALL);
         APN_TYPE_STRING_MAP.put("default", TYPE_DEFAULT);
         APN_TYPE_STRING_MAP.put("mms", TYPE_MMS);
         APN_TYPE_STRING_MAP.put("supl", TYPE_SUPL);
@@ -216,10 +231,10 @@ public class ApnSetting implements Parcelable {
 
     private final String mEntryName;
     private final String mApnName;
-    private final InetAddress mProxyAddress;
+    private final String mProxyAddress;
     private final int mProxyPort;
     private final Uri mMmsc;
-    private final InetAddress mMmsProxyAddress;
+    private final String mMmsProxyAddress;
     private final int mMmsProxyPort;
     private final String mUser;
     private final String mPassword;
@@ -244,6 +259,8 @@ public class ApnSetting implements Parcelable {
 
     private final int mMvnoType;
     private final String mMvnoMatchData;
+
+    private final int mApnSetId;
 
     private boolean mPermanentFailed = false;
 
@@ -322,6 +339,21 @@ public class ApnSetting implements Parcelable {
     }
 
     /**
+     * Returns the APN set id.
+     *
+     * APNs that are part of the same set should be preferred together, e.g. if the
+     * user selects a default APN with apnSetId=1, then we will prefer all APNs with apnSetId = 1.
+     *
+     * If the apnSetId = Carriers.NO_SET_SET(=0) then the APN is not part of a set.
+     *
+     * @return the APN set id
+     * @hide
+     */
+    public int getApnSetId() {
+        return mApnSetId;
+    }
+
+    /**
      * Indicates this APN setting is permanently failed and cannot be
      * retried by the retry manager anymore.
      *
@@ -367,8 +399,19 @@ public class ApnSetting implements Parcelable {
      * This is a known problem and will be addressed in a future release.
      *
      * @return the HTTP proxy address or {@code null} if DNS isn’t available to resolve a hostname
+     * @deprecated use {@link #getProxyAddressAsString()} instead.
      */
+    @Deprecated
     public InetAddress getProxyAddress() {
+        return inetAddressFromString(mProxyAddress);
+    }
+
+    /**
+     * Returns the proxy address of the APN.
+     *
+     * @return proxy address.
+     */
+    public String getProxyAddressAsString() {
         return mProxyAddress;
     }
 
@@ -396,8 +439,19 @@ public class ApnSetting implements Parcelable {
      * restriction. This is a known problem and will be addressed in a future release.
      *
      * @return the MMS proxy address or {@code null} if DNS isn’t available to resolve a hostname
+     * @deprecated use {@link #getMmsProxyAddressAsString()} instead.
      */
+    @Deprecated
     public InetAddress getMmsProxyAddress() {
+        return inetAddressFromString(mMmsProxyAddress);
+    }
+
+    /**
+     * Returns the MMS proxy address of the APN.
+     *
+     * @return MMS proxy address.
+     */
+    public String getMmsProxyAddressAsString() {
         return mMmsProxyAddress;
     }
 
@@ -563,25 +617,27 @@ public class ApnSetting implements Parcelable {
         this.mMaxConnsTime = builder.mMaxConnsTime;
         this.mMvnoType = builder.mMvnoType;
         this.mMvnoMatchData = builder.mMvnoMatchData;
+        this.mApnSetId = builder.mApnSetId;
     }
 
     /** @hide */
     public static ApnSetting makeApnSetting(int id, String operatorNumeric, String entryName,
-            String apnName, InetAddress proxy, int port, Uri mmsc, InetAddress mmsProxy,
-            int mmsPort, String user, String password, int authType, int mApnTypeBitmask,
-            int protocol, int roamingProtocol, boolean carrierEnabled,
-            int networkTypeBitmask, int profileId, boolean modemCognitive, int maxConns,
-            int waitTime, int maxConnsTime, int mtu, int mvnoType, String mvnoMatchData) {
+            String apnName, String proxyAddress, int proxyPort, Uri mmsc,
+            String mmsProxyAddress, int mmsProxyPort, String user, String password,
+            int authType, int mApnTypeBitmask, int protocol, int roamingProtocol,
+            boolean carrierEnabled, int networkTypeBitmask, int profileId, boolean modemCognitive,
+            int maxConns, int waitTime, int maxConnsTime, int mtu, int mvnoType,
+            String mvnoMatchData, int apnSetId) {
         return new Builder()
                 .setId(id)
                 .setOperatorNumeric(operatorNumeric)
                 .setEntryName(entryName)
                 .setApnName(apnName)
-                .setProxyAddress(proxy)
-                .setProxyPort(port)
+                .setProxyAddress(proxyAddress)
+                .setProxyPort(proxyPort)
                 .setMmsc(mmsc)
-                .setMmsProxyAddress(mmsProxy)
-                .setMmsProxyPort(mmsPort)
+                .setMmsProxyAddress(mmsProxyAddress)
+                .setMmsProxyPort(mmsProxyPort)
                 .setUser(user)
                 .setPassword(password)
                 .setAuthType(authType)
@@ -598,12 +654,28 @@ public class ApnSetting implements Parcelable {
                 .setMtu(mtu)
                 .setMvnoType(mvnoType)
                 .setMvnoMatchData(mvnoMatchData)
-                .build();
+                .setApnSetId(apnSetId)
+                .buildWithoutCheck();
+    }
+
+    /** @hide */
+    public static ApnSetting makeApnSetting(int id, String operatorNumeric, String entryName,
+            String apnName, String proxyAddress, int proxyPort, Uri mmsc,
+            String mmsProxyAddress, int mmsProxyPort, String user, String password,
+            int authType, int mApnTypeBitmask, int protocol, int roamingProtocol,
+            boolean carrierEnabled, int networkTypeBitmask, int profileId, boolean modemCognitive,
+            int maxConns, int waitTime, int maxConnsTime, int mtu, int mvnoType,
+            String mvnoMatchData) {
+        return makeApnSetting(id, operatorNumeric, entryName, apnName, proxyAddress, proxyPort,
+            mmsc, mmsProxyAddress, mmsProxyPort, user, password, authType, mApnTypeBitmask,
+            protocol, roamingProtocol, carrierEnabled, networkTypeBitmask, profileId,
+            modemCognitive, maxConns, waitTime, maxConnsTime, mtu, mvnoType, mvnoMatchData,
+            Carriers.NO_SET_SET);
     }
 
     /** @hide */
     public static ApnSetting makeApnSetting(Cursor cursor) {
-        final int apnTypesBitmask = parseTypes(
+        final int apnTypesBitmask = getApnTypesBitmaskFromString(
                 cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.TYPE)));
         int networkTypeBitmask = cursor.getInt(
                 cursor.getColumnIndexOrThrow(Telephony.Carriers.NETWORK_TYPE_BITMASK));
@@ -619,25 +691,25 @@ public class ApnSetting implements Parcelable {
                 cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.NUMERIC)),
                 cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.NAME)),
                 cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.APN)),
-                inetAddressFromString(cursor.getString(
-                        cursor.getColumnIndexOrThrow(Telephony.Carriers.PROXY))),
+                cursor.getString(
+                        cursor.getColumnIndexOrThrow(Telephony.Carriers.PROXY)),
                 portFromString(cursor.getString(
                         cursor.getColumnIndexOrThrow(Telephony.Carriers.PORT))),
                 UriFromString(cursor.getString(
                         cursor.getColumnIndexOrThrow(Telephony.Carriers.MMSC))),
-                inetAddressFromString(cursor.getString(
-                        cursor.getColumnIndexOrThrow(Telephony.Carriers.MMSPROXY))),
+                cursor.getString(
+                        cursor.getColumnIndexOrThrow(Telephony.Carriers.MMSPROXY)),
                 portFromString(cursor.getString(
                         cursor.getColumnIndexOrThrow(Telephony.Carriers.MMSPORT))),
                 cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.USER)),
                 cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.PASSWORD)),
                 cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.AUTH_TYPE)),
                 apnTypesBitmask,
-                nullToNotInMapInt(PROTOCOL_STRING_MAP.get(
-                    cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.PROTOCOL)))),
-                nullToNotInMapInt(PROTOCOL_STRING_MAP.get(
+                getProtocolIntFromString(
+                    cursor.getString(cursor.getColumnIndexOrThrow(Telephony.Carriers.PROTOCOL))),
+                getProtocolIntFromString(
                     cursor.getString(cursor.getColumnIndexOrThrow(
-                        Telephony.Carriers.ROAMING_PROTOCOL)))),
+                        Telephony.Carriers.ROAMING_PROTOCOL))),
                 cursor.getInt(cursor.getColumnIndexOrThrow(
                         Telephony.Carriers.CARRIER_ENABLED)) == 1,
                 networkTypeBitmask,
@@ -649,41 +721,225 @@ public class ApnSetting implements Parcelable {
                 cursor.getInt(cursor.getColumnIndexOrThrow(
                         Telephony.Carriers.MAX_CONNS_TIME)),
                 cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.MTU)),
-                nullToNotInMapInt(MVNO_TYPE_STRING_MAP.get(
+                getMvnoTypeIntFromString(
                     cursor.getString(cursor.getColumnIndexOrThrow(
-                        Telephony.Carriers.MVNO_TYPE)))),
+                        Telephony.Carriers.MVNO_TYPE))),
                 cursor.getString(cursor.getColumnIndexOrThrow(
-                        Telephony.Carriers.MVNO_MATCH_DATA)));
+                        Telephony.Carriers.MVNO_MATCH_DATA)),
+                cursor.getInt(cursor.getColumnIndexOrThrow(Telephony.Carriers.APN_SET_ID)));
     }
 
     /** @hide */
     public static ApnSetting makeApnSetting(ApnSetting apn) {
         return makeApnSetting(apn.mId, apn.mOperatorNumeric, apn.mEntryName, apn.mApnName,
-                apn.mProxyAddress, apn.mProxyPort, apn.mMmsc, apn.mMmsProxyAddress, apn.mMmsProxyPort, apn.mUser,
-                apn.mPassword, apn.mAuthType, apn.mApnTypeBitmask, apn.mProtocol, apn.mRoamingProtocol,
-                apn.mCarrierEnabled, apn.mNetworkTypeBitmask, apn.mProfileId,
-                apn.mModemCognitive, apn.mMaxConns, apn.mWaitTime, apn.mMaxConnsTime, apn.mMtu,
-                apn.mMvnoType, apn.mMvnoMatchData);
+                apn.mProxyAddress, apn.mProxyPort, apn.mMmsc, apn.mMmsProxyAddress,
+                apn.mMmsProxyPort, apn.mUser, apn.mPassword, apn.mAuthType, apn.mApnTypeBitmask,
+                apn.mProtocol, apn.mRoamingProtocol, apn.mCarrierEnabled, apn.mNetworkTypeBitmask,
+                apn.mProfileId, apn.mModemCognitive, apn.mMaxConns, apn.mWaitTime,
+                apn.mMaxConnsTime, apn.mMtu, apn.mMvnoType, apn.mMvnoMatchData, apn.mApnSetId);
     }
 
-    /** @hide */
+    /**
+     * Creates an ApnSetting object from a string.
+     *
+     * @param data the string to read.
+     *
+     * The string must be in one of two formats (newlines added for clarity,
+     * spaces are optional):
+     *
+     * v1 format:
+     *   <carrier>, <apn>, <proxy>, <port>, <user>, <password>, <server>,
+     *   <mmsc>, <mmsproxy>, <mmsport>, <mcc>, <mnc>, <authtype>,
+     *   <type>[| <type>...],
+     *
+     * v2 format:
+     *   [ApnSettingV2] <carrier>, <apn>, <proxy>, <port>, <user>, <password>, <server>,
+     *   <mmsc>, <mmsproxy>, <mmsport>, <mcc>, <mnc>, <authtype>,
+     *   <type>[| <type>...], <protocol>, <roaming_protocol>, <carrierEnabled>, <bearerBitmask>,
+     *
+     * v3 format:
+     *   [ApnSettingV3] <carrier>, <apn>, <proxy>, <port>, <user>, <password>, <server>,
+     *   <mmsc>, <mmsproxy>, <mmsport>, <mcc>, <mnc>, <authtype>,
+     *   <type>[| <type>...], <protocol>, <roaming_protocol>, <carrierEnabled>, <bearerBitmask>,
+     *   <profileId>, <modemCognitive>, <maxConns>, <waitTime>, <maxConnsTime>, <mtu>,
+     *   <mvnoType>, <mvnoMatchData>
+     *
+     * v4 format:
+     *   [ApnSettingV4] <carrier>, <apn>, <proxy>, <port>, <user>, <password>, <server>,
+     *   <mmsc>, <mmsproxy>, <mmsport>, <mcc>, <mnc>, <authtype>,
+     *   <type>[| <type>...], <protocol>, <roaming_protocol>, <carrierEnabled>, <bearerBitmask>,
+     *   <profileId>, <modemCognitive>, <maxConns>, <waitTime>, <maxConnsTime>, <mtu>,
+     *   <mvnoType>, <mvnoMatchData>, <networkTypeBitmask>
+     *
+     * v5 format:
+     *   [ApnSettingV5] <carrier>, <apn>, <proxy>, <port>, <user>, <password>, <server>,
+     *   <mmsc>, <mmsproxy>, <mmsport>, <mcc>, <mnc>, <authtype>,
+     *   <type>[| <type>...], <protocol>, <roaming_protocol>, <carrierEnabled>, <bearerBitmask>,
+     *   <profileId>, <modemCognitive>, <maxConns>, <waitTime>, <maxConnsTime>, <mtu>,
+     *   <mvnoType>, <mvnoMatchData>, <networkTypeBitmask>, <apnSetId>
+     *
+     * Note that the strings generated by {@link #toString()} do not contain the username
+     * and password and thus cannot be read by this method.
+     *
+     * This method may return {@code null} if the input string is invalid.
+     *
+     * @hide
+     */
+    public static ApnSetting fromString(String data) {
+        if (data == null) return null;
+
+        int version;
+        // matches() operates on the whole string, so append .* to the regex.
+        if (data.matches(V5_FORMAT_REGEX + ".*")) {
+            version = 5;
+            data = data.replaceFirst(V5_FORMAT_REGEX, "");
+        } else if (data.matches(V4_FORMAT_REGEX + ".*")) {
+            version = 4;
+            data = data.replaceFirst(V4_FORMAT_REGEX, "");
+        } else if (data.matches(V3_FORMAT_REGEX + ".*")) {
+            version = 3;
+            data = data.replaceFirst(V3_FORMAT_REGEX, "");
+        } else if (data.matches(V2_FORMAT_REGEX + ".*")) {
+            version = 2;
+            data = data.replaceFirst(V2_FORMAT_REGEX, "");
+        } else {
+            version = 1;
+        }
+
+        String[] a = data.split("\\s*,\\s*");
+        if (a.length < 14) {
+            return null;
+        }
+
+        int authType;
+        try {
+            authType = Integer.parseInt(a[12]);
+        } catch (NumberFormatException e) {
+            authType = 0;
+        }
+
+        String[] typeArray;
+        String protocol, roamingProtocol;
+        boolean carrierEnabled;
+        int bearerBitmask = 0;
+        int networkTypeBitmask = 0;
+        int profileId = 0;
+        boolean modemCognitive = false;
+        int maxConns = 0;
+        int waitTime = 0;
+        int maxConnsTime = 0;
+        int mtu = UNSET_MTU;
+        String mvnoType = "";
+        String mvnoMatchData = "";
+        int apnSetId = Carriers.NO_SET_SET;
+        if (version == 1) {
+            typeArray = new String[a.length - 13];
+            System.arraycopy(a, 13, typeArray, 0, a.length - 13);
+            protocol = PROTOCOL_INT_MAP.get(PROTOCOL_IP);
+            roamingProtocol = PROTOCOL_INT_MAP.get(PROTOCOL_IP);
+            carrierEnabled = true;
+        } else {
+            if (a.length < 18) {
+                return null;
+            }
+            typeArray = a[13].split("\\s*\\|\\s*");
+            protocol = a[14];
+            roamingProtocol = a[15];
+            carrierEnabled = Boolean.parseBoolean(a[16]);
+
+            bearerBitmask = ServiceState.getBitmaskFromString(a[17]);
+
+            if (a.length > 22) {
+                modemCognitive = Boolean.parseBoolean(a[19]);
+                try {
+                    profileId = Integer.parseInt(a[18]);
+                    maxConns = Integer.parseInt(a[20]);
+                    waitTime = Integer.parseInt(a[21]);
+                    maxConnsTime = Integer.parseInt(a[22]);
+                } catch (NumberFormatException e) {
+                }
+            }
+            if (a.length > 23) {
+                try {
+                    mtu = Integer.parseInt(a[23]);
+                } catch (NumberFormatException e) {
+                }
+            }
+            if (a.length > 25) {
+                mvnoType = a[24];
+                mvnoMatchData = a[25];
+            }
+            if (a.length > 26) {
+                networkTypeBitmask = ServiceState.getBitmaskFromString(a[26]);
+            }
+            if (a.length > 27) {
+                apnSetId = Integer.parseInt(a[27]);
+            }
+        }
+
+        // If both bearerBitmask and networkTypeBitmask were specified, bearerBitmask would be
+        // ignored.
+        if (networkTypeBitmask == 0) {
+            networkTypeBitmask =
+                ServiceState.convertBearerBitmaskToNetworkTypeBitmask(bearerBitmask);
+        }
+        return makeApnSetting(-1, a[10] + a[11], a[0], a[1], a[2],
+            portFromString(a[3]), UriFromString(a[7]), a[8],
+            portFromString(a[9]), a[4], a[5], authType,
+            getApnTypesBitmaskFromString(TextUtils.join(",", typeArray)),
+            getProtocolIntFromString(protocol), getProtocolIntFromString(roamingProtocol),
+            carrierEnabled, networkTypeBitmask, profileId, modemCognitive, maxConns, waitTime,
+            maxConnsTime, mtu, getMvnoTypeIntFromString(mvnoType), mvnoMatchData, apnSetId);
+    }
+
+    /**
+     * Creates an array of ApnSetting objects from a string.
+     *
+     * @param data the string to read.
+     *
+     * Builds on top of the same format used by fromString, but allows for multiple entries
+     * separated by ";".
+     *
+     * @hide
+     */
+    public static List<ApnSetting> arrayFromString(String data) {
+        List<ApnSetting> retVal = new ArrayList<ApnSetting>();
+        if (TextUtils.isEmpty(data)) {
+            return retVal;
+        }
+        String[] apnStrings = data.split("\\s*;\\s*");
+        for (String apnString : apnStrings) {
+            ApnSetting apn = fromString(apnString);
+            if (apn != null) {
+                retVal.add(apn);
+            }
+        }
+        return retVal;
+    }
+
+    /**
+     * Returns the string representation of ApnSetting.
+     *
+     * This method prints null for unset elements. The output doesn't contain password or user.
+     * @hide
+     */
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("[ApnSettingV4] ")
+        sb.append("[ApnSettingV5] ")
                 .append(mEntryName)
                 .append(", ").append(mId)
                 .append(", ").append(mOperatorNumeric)
                 .append(", ").append(mApnName)
-                .append(", ").append(inetAddressToString(mProxyAddress))
+                .append(", ").append(mProxyAddress)
                 .append(", ").append(UriToString(mMmsc))
-                .append(", ").append(inetAddressToString(mMmsProxyAddress))
+                .append(", ").append(mMmsProxyAddress)
                 .append(", ").append(portToString(mMmsProxyPort))
                 .append(", ").append(portToString(mProxyPort))
                 .append(", ").append(mAuthType).append(", ");
-        final String[] types = deParseTypes(mApnTypeBitmask).split(",");
-        sb.append(TextUtils.join(" | ", types)).append(", ");
-        sb.append(", ").append(mProtocol);
-        sb.append(", ").append(mRoamingProtocol);
+        final String[] types = getApnTypesStringFromBitmask(mApnTypeBitmask).split(",");
+        sb.append(TextUtils.join(" | ", types));
+        sb.append(", ").append(PROTOCOL_INT_MAP.get(mProtocol));
+        sb.append(", ").append(PROTOCOL_INT_MAP.get(mRoamingProtocol));
         sb.append(", ").append(mCarrierEnabled);
         sb.append(", ").append(mProfileId);
         sb.append(", ").append(mModemCognitive);
@@ -691,10 +947,11 @@ public class ApnSetting implements Parcelable {
         sb.append(", ").append(mWaitTime);
         sb.append(", ").append(mMaxConnsTime);
         sb.append(", ").append(mMtu);
-        sb.append(", ").append(mMvnoType);
+        sb.append(", ").append(MVNO_TYPE_INT_MAP.get(mMvnoType));
         sb.append(", ").append(mMvnoMatchData);
         sb.append(", ").append(mPermanentFailed);
         sb.append(", ").append(mNetworkTypeBitmask);
+        sb.append(", ").append(mApnSetId);
         return sb.toString();
     }
 
@@ -703,22 +960,34 @@ public class ApnSetting implements Parcelable {
      * @hide
      */
     public boolean hasMvnoParams() {
-        return (mMvnoType != NOT_IN_MAP_INT) && !TextUtils.isEmpty(mMvnoMatchData);
+        return !TextUtils.isEmpty(getMvnoTypeStringFromInt(mMvnoType))
+            && !TextUtils.isEmpty(mMvnoMatchData);
+    }
+
+    private boolean hasApnType(int type) {
+        return (mApnTypeBitmask & type) == type;
     }
 
     /** @hide */
     public boolean canHandleType(@ApnType int type) {
-        return mCarrierEnabled && ((mApnTypeBitmask & type) == type);
+        if (!mCarrierEnabled) {
+            return false;
+        }
+        // DEFAULT can handle HIPRI.
+        if (hasApnType(type) || (type == TYPE_HIPRI && hasApnType(TYPE_DEFAULT))) {
+            return true;
+        }
+        return false;
     }
 
-    // check whether the types of two APN same (even only one type of each APN is same)
+    // Check whether the types of two APN same (even only one type of each APN is same).
     private boolean typeSameAny(ApnSetting first, ApnSetting second) {
         if (VDBG) {
             StringBuilder apnType1 = new StringBuilder(first.mApnName + ": ");
-            apnType1.append(deParseTypes(first.mApnTypeBitmask));
+            apnType1.append(getApnTypesStringFromBitmask(first.mApnTypeBitmask));
 
             StringBuilder apnType2 = new StringBuilder(second.mApnName + ": ");
-            apnType2.append(deParseTypes(second.mApnTypeBitmask));
+            apnType2.append(getApnTypesStringFromBitmask(second.mApnTypeBitmask));
 
             Rlog.d(LOG_TAG, "APN1: is " + apnType1);
             Rlog.d(LOG_TAG, "APN2: is " + apnType2);
@@ -738,7 +1007,7 @@ public class ApnSetting implements Parcelable {
     }
 
     // TODO - if we have this function we should also have hashCode.
-    // Also should handle changes in type order and perhaps case-insensitivity
+    // Also should handle changes in type order and perhaps case-insensitivity.
     /** @hide */
     public boolean equals(Object o) {
         if (o instanceof ApnSetting == false) {
@@ -771,7 +1040,8 @@ public class ApnSetting implements Parcelable {
                 && Objects.equals(mMtu, other.mMtu)
                 && Objects.equals(mMvnoType, other.mMvnoType)
                 && Objects.equals(mMvnoMatchData, other.mMvnoMatchData)
-                && Objects.equals(mNetworkTypeBitmask, other.mNetworkTypeBitmask);
+                && Objects.equals(mNetworkTypeBitmask, other.mNetworkTypeBitmask)
+                && Objects.equals(mApnSetId, other.mApnSetId);
     }
 
     /**
@@ -815,7 +1085,8 @@ public class ApnSetting implements Parcelable {
                 && Objects.equals(mMaxConnsTime, other.mMaxConnsTime)
                 && Objects.equals(mMtu, other.mMtu)
                 && Objects.equals(mMvnoType, other.mMvnoType)
-                && Objects.equals(mMvnoMatchData, other.mMvnoMatchData);
+                && Objects.equals(mMvnoMatchData, other.mMvnoMatchData)
+                && Objects.equals(mApnSetId, other.mApnSetId);
     }
 
     /**
@@ -831,7 +1102,7 @@ public class ApnSetting implements Parcelable {
                 && Objects.equals(this.mApnName, other.mApnName)
                 && !typeSameAny(this, other)
                 && xorEquals(this.mProxyAddress, other.mProxyAddress)
-                && xorEqualsPort(this.mProxyPort, other.mProxyPort)
+                && xorEqualsInt(this.mProxyPort, other.mProxyPort)
                 && xorEquals(this.mProtocol, other.mProtocol)
                 && xorEquals(this.mRoamingProtocol, other.mRoamingProtocol)
                 && Objects.equals(this.mCarrierEnabled, other.mCarrierEnabled)
@@ -840,29 +1111,64 @@ public class ApnSetting implements Parcelable {
                 && Objects.equals(this.mMvnoMatchData, other.mMvnoMatchData)
                 && xorEquals(this.mMmsc, other.mMmsc)
                 && xorEquals(this.mMmsProxyAddress, other.mMmsProxyAddress)
-                && xorEqualsPort(this.mMmsProxyPort, other.mMmsProxyPort))
-                && Objects.equals(this.mNetworkTypeBitmask, other.mNetworkTypeBitmask);
+                && xorEqualsInt(this.mMmsProxyPort, other.mMmsProxyPort))
+                && Objects.equals(this.mNetworkTypeBitmask, other.mNetworkTypeBitmask)
+                && Objects.equals(mApnSetId, other.mApnSetId);
     }
 
-    // Equal or one is not specified.
-    private boolean xorEquals(String first, String second) {
-        return (Objects.equals(first, second)
-                || TextUtils.isEmpty(first)
-                || TextUtils.isEmpty(second));
-    }
-
-    // Equal or one is not null.
+    // Equal or one is null.
     private boolean xorEquals(Object first, Object second) {
         return first == null || second == null || first.equals(second);
     }
 
     // Equal or one is not specified.
-    private boolean xorEqualsPort(int first, int second) {
-        return first == NO_PORT_SPECIFIED || second == NO_PORT_SPECIFIED
+    private boolean xorEqualsInt(int first, int second) {
+        return first == UNSPECIFIED_INT || second == UNSPECIFIED_INT
             || Objects.equals(first, second);
     }
 
-    private String deParseTypes(int apnTypeBitmask) {
+    private String nullToEmpty(String stringValue) {
+        return stringValue == null ? UNSPECIFIED_STRING : stringValue;
+    }
+
+    /**
+     * @hide
+     * Called by {@link android.app.admin.DevicePolicyManager} to convert this APN into
+     * ContentValue. If a field is not specified then we put "" instead of null.
+     */
+    public ContentValues toContentValues() {
+        ContentValues apnValue = new ContentValues();
+        apnValue.put(Telephony.Carriers.NUMERIC, nullToEmpty(mOperatorNumeric));
+        apnValue.put(Telephony.Carriers.NAME, nullToEmpty(mEntryName));
+        apnValue.put(Telephony.Carriers.APN, nullToEmpty(mApnName));
+        apnValue.put(Telephony.Carriers.PROXY, nullToEmpty(mProxyAddress));
+        apnValue.put(Telephony.Carriers.PORT, nullToEmpty(portToString(mProxyPort)));
+        apnValue.put(Telephony.Carriers.MMSC, nullToEmpty(UriToString(mMmsc)));
+        apnValue.put(Telephony.Carriers.MMSPORT, nullToEmpty(portToString(mMmsProxyPort)));
+        apnValue.put(Telephony.Carriers.MMSPROXY, nullToEmpty(
+                mMmsProxyAddress));
+        apnValue.put(Telephony.Carriers.USER, nullToEmpty(mUser));
+        apnValue.put(Telephony.Carriers.PASSWORD, nullToEmpty(mPassword));
+        apnValue.put(Telephony.Carriers.AUTH_TYPE, mAuthType);
+        String apnType = getApnTypesStringFromBitmask(mApnTypeBitmask);
+        apnValue.put(Telephony.Carriers.TYPE, nullToEmpty(apnType));
+        apnValue.put(Telephony.Carriers.PROTOCOL,
+                getProtocolStringFromInt(mProtocol));
+        apnValue.put(Telephony.Carriers.ROAMING_PROTOCOL,
+                getProtocolStringFromInt(mRoamingProtocol));
+        apnValue.put(Telephony.Carriers.CARRIER_ENABLED, mCarrierEnabled);
+        apnValue.put(Telephony.Carriers.MVNO_TYPE, getMvnoTypeStringFromInt(mMvnoType));
+        apnValue.put(Telephony.Carriers.NETWORK_TYPE_BITMASK, mNetworkTypeBitmask);
+
+        return apnValue;
+    }
+
+    /**
+     * @param apnTypeBitmask bitmask of APN types.
+     * @return comma delimited list of APN types.
+     * @hide
+     */
+    public static String getApnTypesStringFromBitmask(int apnTypeBitmask) {
         List<String> types = new ArrayList<>();
         for (Integer type : APN_TYPE_INT_MAP.keySet()) {
             if ((apnTypeBitmask & type) == type) {
@@ -872,54 +1178,19 @@ public class ApnSetting implements Parcelable {
         return TextUtils.join(",", types);
     }
 
-    private String nullToEmpty(String stringValue) {
-        return stringValue == null ? "" : stringValue;
-    }
-
-    /** @hide */
-    // Called by DPM.
-    public ContentValues toContentValues() {
-        ContentValues apnValue = new ContentValues();
-        apnValue.put(Telephony.Carriers.NUMERIC, nullToEmpty(mOperatorNumeric));
-        apnValue.put(Telephony.Carriers.NAME, nullToEmpty(mEntryName));
-        apnValue.put(Telephony.Carriers.APN, nullToEmpty(mApnName));
-        apnValue.put(Telephony.Carriers.PROXY, mProxyAddress == null ? ""
-            : inetAddressToString(mProxyAddress));
-        apnValue.put(Telephony.Carriers.PORT, portToString(mProxyPort));
-        apnValue.put(Telephony.Carriers.MMSC, mMmsc == null ? "" : UriToString(mMmsc));
-        apnValue.put(Telephony.Carriers.MMSPORT, portToString(mMmsProxyPort));
-        apnValue.put(Telephony.Carriers.MMSPROXY, mMmsProxyAddress == null
-                ? "" : inetAddressToString(mMmsProxyAddress));
-        apnValue.put(Telephony.Carriers.USER, nullToEmpty(mUser));
-        apnValue.put(Telephony.Carriers.PASSWORD, nullToEmpty(mPassword));
-        apnValue.put(Telephony.Carriers.AUTH_TYPE, mAuthType);
-        String apnType = deParseTypes(mApnTypeBitmask);
-        apnValue.put(Telephony.Carriers.TYPE, nullToEmpty(apnType));
-        apnValue.put(Telephony.Carriers.PROTOCOL,
-            nullToEmpty(PROTOCOL_INT_MAP.get(mProtocol)));
-        apnValue.put(Telephony.Carriers.ROAMING_PROTOCOL,
-            nullToEmpty(PROTOCOL_INT_MAP.get(mRoamingProtocol)));
-        apnValue.put(Telephony.Carriers.CARRIER_ENABLED, mCarrierEnabled);
-        apnValue.put(Telephony.Carriers.MVNO_TYPE,
-            nullToEmpty(MVNO_TYPE_INT_MAP.get(mMvnoType)));
-        apnValue.put(Telephony.Carriers.NETWORK_TYPE_BITMASK, mNetworkTypeBitmask);
-
-        return apnValue;
-    }
-
     /**
-     * @param types comma delimited list of APN types
-     * @return bitmask of APN types
+     * @param types comma delimited list of APN types.
+     * @return bitmask of APN types.
      * @hide
      */
-    public static int parseTypes(String types) {
+    public static int getApnTypesBitmaskFromString(String types) {
         // If unset, set to ALL.
         if (TextUtils.isEmpty(types)) {
-            return TYPE_ALL_BUT_IA;
+            return TYPE_ALL;
         } else {
             int result = 0;
             for (String str : types.split(",")) {
-                Integer type = APN_TYPE_STRING_MAP.get(str);
+                Integer type = APN_TYPE_STRING_MAP.get(str.toLowerCase());
                 if (type != null) {
                     result |= type;
                 }
@@ -928,15 +1199,40 @@ public class ApnSetting implements Parcelable {
         }
     }
 
+    /** @hide */
+    public static int getMvnoTypeIntFromString(String mvnoType) {
+        Integer mvnoTypeInt = MVNO_TYPE_STRING_MAP.get(mvnoType);
+        return  mvnoTypeInt == null ? UNSPECIFIED_INT : mvnoTypeInt;
+    }
+
+    /** @hide */
+    public static String getMvnoTypeStringFromInt(int mvnoType) {
+        String mvnoTypeString = MVNO_TYPE_INT_MAP.get(mvnoType);
+        return  mvnoTypeString == null ? UNSPECIFIED_STRING : mvnoTypeString;
+    }
+
+    /** @hide */
+    public static int getProtocolIntFromString(String protocol) {
+        Integer protocolInt = PROTOCOL_STRING_MAP.get(protocol);
+        return  protocolInt == null ? UNSPECIFIED_INT : protocolInt;
+    }
+
+    /** @hide */
+    public static String getProtocolStringFromInt(int protocol) {
+        String protocolString = PROTOCOL_INT_MAP.get(protocol);
+        return  protocolString == null ? UNSPECIFIED_STRING : protocolString;
+    }
+
     private static Uri UriFromString(String uri) {
         return TextUtils.isEmpty(uri) ? null : Uri.parse(uri);
     }
 
     private static String UriToString(Uri uri) {
-        return uri == null ? "" : uri.toString();
+        return uri == null ? null : uri.toString();
     }
 
-    private static InetAddress inetAddressFromString(String inetAddress) {
+    /** @hide */
+    public static InetAddress inetAddressFromString(String inetAddress) {
         if (TextUtils.isEmpty(inetAddress)) {
             return null;
         }
@@ -948,7 +1244,8 @@ public class ApnSetting implements Parcelable {
         }
     }
 
-    private static String inetAddressToString(InetAddress inetAddress) {
+    /** @hide */
+    public static String inetAddressToString(InetAddress inetAddress) {
         if (inetAddress == null) {
             return null;
         }
@@ -965,7 +1262,7 @@ public class ApnSetting implements Parcelable {
     }
 
     private static int portFromString(String strPort) {
-        int port = NO_PORT_SPECIFIED;
+        int port = UNSPECIFIED_INT;
         if (!TextUtils.isEmpty(strPort)) {
             try {
                 port = Integer.parseInt(strPort);
@@ -977,7 +1274,7 @@ public class ApnSetting implements Parcelable {
     }
 
     private static String portToString(int port) {
-        return port == NO_PORT_SPECIFIED ? "" : Integer.toString(port);
+        return port == UNSPECIFIED_INT ? null : Integer.toString(port);
     }
 
     // Implement Parcelable.
@@ -994,10 +1291,10 @@ public class ApnSetting implements Parcelable {
         dest.writeString(mOperatorNumeric);
         dest.writeString(mEntryName);
         dest.writeString(mApnName);
-        dest.writeValue(mProxyAddress);
+        dest.writeString(mProxyAddress);
         dest.writeInt(mProxyPort);
         dest.writeValue(mMmsc);
-        dest.writeValue(mMmsProxyAddress);
+        dest.writeString(mMmsProxyAddress);
         dest.writeInt(mMmsProxyPort);
         dest.writeString(mUser);
         dest.writeString(mPassword);
@@ -1005,7 +1302,7 @@ public class ApnSetting implements Parcelable {
         dest.writeInt(mApnTypeBitmask);
         dest.writeInt(mProtocol);
         dest.writeInt(mRoamingProtocol);
-        dest.writeInt(mCarrierEnabled ? 1: 0);
+        dest.writeBoolean(mCarrierEnabled);
         dest.writeInt(mMvnoType);
         dest.writeInt(mNetworkTypeBitmask);
     }
@@ -1015,10 +1312,10 @@ public class ApnSetting implements Parcelable {
         final String operatorNumeric = in.readString();
         final String entryName = in.readString();
         final String apnName = in.readString();
-        final InetAddress proxy = (InetAddress)in.readValue(InetAddress.class.getClassLoader());
+        final String proxy = in.readString();
         final int port = in.readInt();
         final Uri mmsc = (Uri)in.readValue(Uri.class.getClassLoader());
-        final InetAddress mmsProxy = (InetAddress)in.readValue(InetAddress.class.getClassLoader());
+        final String mmsProxy = in.readString();
         final int mmsPort = in.readInt();
         final String user = in.readString();
         final String password = in.readString();
@@ -1026,7 +1323,7 @@ public class ApnSetting implements Parcelable {
         final int apnTypesBitmask = in.readInt();
         final int protocol = in.readInt();
         final int roamingProtocol = in.readInt();
-        final boolean carrierEnabled = in.readInt() > 0;
+        final boolean carrierEnabled = in.readBoolean();
         final int mvnoType = in.readInt();
         final int networkTypeBitmask = in.readInt();
 
@@ -1048,10 +1345,6 @@ public class ApnSetting implements Parcelable {
                     return new ApnSetting[size];
                 }
             };
-
-    private static int nullToNotInMapInt(Integer value) {
-        return value == null ? NOT_IN_MAP_INT : value;
-    }
 
     /**
      * Provides a convenient way to set the fields of a {@link ApnSetting} when creating a new
@@ -1089,19 +1382,19 @@ public class ApnSetting implements Parcelable {
     public static class Builder{
         private String mEntryName;
         private String mApnName;
-        private InetAddress mProxyAddress;
-        private int mProxyPort = NO_PORT_SPECIFIED;
+        private String mProxyAddress;
+        private int mProxyPort = UNSPECIFIED_INT;
         private Uri mMmsc;
-        private InetAddress mMmsProxyAddress;
-        private int mMmsProxyPort = NO_PORT_SPECIFIED;
+        private String mMmsProxyAddress;
+        private int mMmsProxyPort = UNSPECIFIED_INT;
         private String mUser;
         private String mPassword;
         private int mAuthType;
         private int mApnTypeBitmask;
         private int mId;
         private String mOperatorNumeric;
-        private int mProtocol = NOT_IN_MAP_INT;
-        private int mRoamingProtocol = NOT_IN_MAP_INT;
+        private int mProtocol = UNSPECIFIED_INT;
+        private int mRoamingProtocol = UNSPECIFIED_INT;
         private int mMtu;
         private int mNetworkTypeBitmask;
         private boolean mCarrierEnabled;
@@ -1110,8 +1403,9 @@ public class ApnSetting implements Parcelable {
         private int mMaxConns;
         private int mWaitTime;
         private int mMaxConnsTime;
-        private int mMvnoType = NOT_IN_MAP_INT;
+        private int mMvnoType = UNSPECIFIED_INT;
         private String mMvnoMatchData;
+        private int mApnSetId;
 
         /**
          * Default constructor for Builder.
@@ -1206,6 +1500,17 @@ public class ApnSetting implements Parcelable {
         }
 
         /**
+         * Sets the APN set id for the APN.
+         *
+         * @param apnSetId the set id for the APN
+         * @hide
+         */
+        public Builder setApnSetId(int apnSetId) {
+            this.mApnSetId = apnSetId;
+            return this;
+        }
+
+        /**
          * Sets a human-readable name that describes the APN.
          *
          * @param entryName the entry name to set for the APN
@@ -1237,8 +1542,20 @@ public class ApnSetting implements Parcelable {
          * hostname and a dummy IP address. See {@link ApnSetting.Builder above} for an example.
          *
          * @param proxy the proxy address to set for the APN
+         * @deprecated use {@link #setProxyAddress(String)} instead.
          */
+        @Deprecated
         public Builder setProxyAddress(InetAddress proxy) {
+            this.mProxyAddress = inetAddressToString(proxy);
+            return this;
+        }
+
+        /**
+         * Sets the proxy address of the APN.
+         *
+         * @param proxy the proxy address to set for the APN
+         */
+        public Builder setProxyAddress(String proxy) {
             this.mProxyAddress = proxy;
             return this;
         }
@@ -1276,8 +1593,20 @@ public class ApnSetting implements Parcelable {
          * hostname and a dummy IP address. See {@link ApnSetting.Builder above} for an example.
          *
          * @param mmsProxy the MMS proxy address to set for the APN
+         * @deprecated use {@link #setMmsProxyAddress(String)} instead.
          */
+        @Deprecated
         public Builder setMmsProxyAddress(InetAddress mmsProxy) {
+            this.mMmsProxyAddress = inetAddressToString(mmsProxy);
+            return this;
+        }
+
+        /**
+         * Sets the MMS proxy address of the APN.
+         *
+         * @param mmsProxy the MMS proxy address to set for the APN
+         */
+        public Builder setMmsProxyAddress(String mmsProxy) {
             this.mMmsProxyAddress = mmsProxy;
             return this;
         }
@@ -1417,6 +1746,16 @@ public class ApnSetting implements Parcelable {
                 || TextUtils.isEmpty(mEntryName)) {
                 return null;
             }
+            return new ApnSetting(this);
+        }
+
+        /**
+         * Builds {@link ApnSetting} from this builder. This function doesn't check if
+         * {@link #setApnName(String)} or {@link #setEntryName(String)}, or
+         * {@link #setApnTypeBitmask(int)} is empty.
+         * @hide
+         */
+        public ApnSetting buildWithoutCheck() {
             return new ApnSetting(this);
         }
     }
