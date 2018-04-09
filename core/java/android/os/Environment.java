@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.annotation.TestApi;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.os.storage.StorageManager;
@@ -1033,6 +1034,7 @@ public class Environment {
      *
      * @hide
      */
+    @TestApi
     public static File buildPath(File base, String... segments) {
         File cur = base;
         for (String segment : segments) {
