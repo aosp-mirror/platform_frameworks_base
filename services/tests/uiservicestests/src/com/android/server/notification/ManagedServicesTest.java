@@ -343,7 +343,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
             parser.setInput(new BufferedInputStream(
                     new ByteArrayInputStream(baos.toByteArray())), null);
             parser.nextTag();
-            service.readXml(parser);
+            service.readXml(parser, null);
 
             verifyExpectedApprovedEntries(service);
             assertFalse(service.isPackageOrComponentAllowed("this.is.a.package.name", 0));
@@ -665,7 +665,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.toString().getBytes())), null);
         parser.nextTag();
-        service.readXml(parser);
+        service.readXml(parser, null);
     }
 
     private void addExpectedServices(final ManagedServices service, final List<String> packages,
