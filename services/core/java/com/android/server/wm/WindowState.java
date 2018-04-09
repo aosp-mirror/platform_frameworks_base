@@ -4310,7 +4310,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // If a freeform window is animating from a position where it would be cutoff, it would be
         // cutoff during the animation. We don't want that, so for the duration of the animation
         // we ignore the decor cropping and depend on layering to position windows correctly.
-        final boolean cropToDecor = !(inFreeformWindowingMode() && isAnimatingLw());
+
+        // We also ignore cropping when the window is currently being drag resized in split screen
+        // to prevent issues with the crop for screenshot.
+        final boolean cropToDecor =
+                !(inFreeformWindowingMode() && isAnimatingLw()) && !isDockedResizing();
         if (cropToDecor) {
             // Intersect with the decor rect, offsetted by window position.
             systemDecorRect.intersect(decorRect.left - left, decorRect.top - top,
