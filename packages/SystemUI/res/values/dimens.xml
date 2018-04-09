@@ -930,6 +930,11 @@
     <dimen name="smart_reply_button_font_size">14sp</dimen>
     <dimen name="smart_reply_button_line_spacing_extra">6sp</dimen> <!-- Total line height 20sp. -->
 
+    <!-- A reasonable upper bound for the height of the smart reply button. The measuring code
+            needs to start with a guess for the maximum size. Currently two-line smart reply buttons
+            add about 88dp of height to the notifications. -->
+    <dimen name="smart_reply_button_max_height">100dp</dimen>
+
     <!-- Fingerprint Dialog values -->
     <dimen name="fingerprint_dialog_fp_icon_size">64dp</dimen>
     <dimen name="fingerprint_dialog_animation_translation_offset">350dp</dimen>
