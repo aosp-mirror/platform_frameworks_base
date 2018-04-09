@@ -46,6 +46,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.DisplayMetrics;
@@ -56,7 +57,9 @@ import android.view.Surface;
 
 import com.android.server.wm.utils.WmDisplayCutout;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -72,6 +75,7 @@ import java.util.List;
 public class DisplayContentTests extends WindowTestsBase {
 
     @Test
+    @FlakyTest(bugId = 77772044)
     public void testForAllWindows() throws Exception {
         final WindowState exitingAppWindow = createWindow(null, TYPE_BASE_APPLICATION,
                 mDisplayContent, "exiting app");
@@ -495,24 +499,24 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(displayContent.mBaseDisplayDensity, expectedBaseDensity);
     }
 
-    private void assertForAllWindowsOrder(List<WindowState> expectedWindows) {
-        final LinkedList<WindowState> actualWindows = new LinkedList();
+    private void assertForAllWindowsOrder(List<WindowState> expectedWindowsBottomToTop) {
+        final LinkedList<WindowState> actualWindows = new LinkedList<>();
 
         // Test forward traversal.
         mDisplayContent.forAllWindows(actualWindows::addLast, false /* traverseTopToBottom */);
-        assertEquals(expectedWindows.size(), actualWindows.size());
-        for (WindowState w : expectedWindows) {
-            assertEquals(w, actualWindows.pollFirst());
-        }
-        assertTrue(actualWindows.isEmpty());
+        assertThat("bottomToTop", actualWindows, is(expectedWindowsBottomToTop));
+
+        actualWindows.clear();
 
         // Test backward traversal.
         mDisplayContent.forAllWindows(actualWindows::addLast, true /* traverseTopToBottom */);
-        assertEquals(expectedWindows.size(), actualWindows.size());
-        for (WindowState w : expectedWindows) {
-            assertEquals(w, actualWindows.pollLast());
-        }
-        assertTrue(actualWindows.isEmpty());
+        assertThat("topToBottom", actualWindows, is(reverseList(expectedWindowsBottomToTop)));
+    }
+
+    private static List<WindowState> reverseList(List<WindowState> list) {
+        final ArrayList<WindowState> result = new ArrayList<>(list);
+        Collections.reverse(result);
+        return result;
     }
 
     private MotionEvent createTapEvent(float x, float y, boolean isDownEvent) {
