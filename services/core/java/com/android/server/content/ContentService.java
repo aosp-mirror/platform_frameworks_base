@@ -79,7 +79,7 @@ import java.util.List;
  */
 public final class ContentService extends IContentService.Stub {
     static final String TAG = "ContentService";
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
 
     public static class Lifecycle extends SystemService {
         private ContentService mService;
