@@ -3899,7 +3899,11 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public boolean onBackPressed() {
-        if (mStatusBarKeyguardViewManager.onBackPressed()) {
+        boolean isScrimmedBouncer = mScrimController.getState() == ScrimState.BOUNCER_SCRIMMED;
+        if (mStatusBarKeyguardViewManager.onBackPressed(isScrimmedBouncer /* hideImmediately */)) {
+            if (!isScrimmedBouncer) {
+                mNotificationPanel.expandWithoutQs();
+            }
             return true;
         }
         if (mNotificationPanel.isQsExpanded()) {
