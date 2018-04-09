@@ -261,6 +261,7 @@ public final class OverlayInfo implements Parcelable {
         result = prime * result + state;
         result = prime * result + ((packageName == null) ? 0 : packageName.hashCode());
         result = prime * result + ((targetPackageName == null) ? 0 : targetPackageName.hashCode());
+        result = prime * result + ((category == null) ? 0 : category.hashCode());
         result = prime * result + ((baseCodePath == null) ? 0 : baseCodePath.hashCode());
         return result;
     }
