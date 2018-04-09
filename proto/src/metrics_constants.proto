@@ -5578,6 +5578,11 @@ message MetricsEvent {
     // OS: P
     WIFI_SCANNING_NEEDED_DIALOG = 1373;
 
+    // OPEN: Settings > System > Gestures > Swipe up gesture
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_GESTURE_SWIPE_UP = 1374;
+
     // ---- End P Constants, all P constants go above this line ----
 
     // First Q constant in master goes here:
