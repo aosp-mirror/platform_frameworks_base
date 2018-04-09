@@ -121,7 +121,7 @@ import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.DataUnit;
 import android.util.Log;
-import android.util.Pair;
+import android.util.Range;
 import android.util.RecurrenceRule;
 
 import com.android.internal.telephony.PhoneConstants;
@@ -821,11 +821,11 @@ public class NetworkPolicyManagerServiceTest {
     private static long computeLastCycleBoundary(long currentTime, NetworkPolicy policy) {
         RecurrenceRule.sClock = Clock.fixed(Instant.ofEpochMilli(currentTime),
                 ZoneId.systemDefault());
-        final Iterator<Pair<ZonedDateTime, ZonedDateTime>> it = policy.cycleIterator();
+        final Iterator<Range<ZonedDateTime>> it = policy.cycleIterator();
         while (it.hasNext()) {
-            final Pair<ZonedDateTime, ZonedDateTime> cycle = it.next();
-            if (cycle.first.toInstant().toEpochMilli() < currentTime) {
-                return cycle.first.toInstant().toEpochMilli();
+            final Range<ZonedDateTime> cycle = it.next();
+            if (cycle.getLower().toInstant().toEpochMilli() < currentTime) {
+                return cycle.getLower().toInstant().toEpochMilli();
             }
         }
         throw new IllegalStateException(
@@ -835,7 +835,7 @@ public class NetworkPolicyManagerServiceTest {
     private static long computeNextCycleBoundary(long currentTime, NetworkPolicy policy) {
         RecurrenceRule.sClock = Clock.fixed(Instant.ofEpochMilli(currentTime),
                 ZoneId.systemDefault());
-        return policy.cycleIterator().next().second.toInstant().toEpochMilli();
+        return policy.cycleIterator().next().getUpper().toInstant().toEpochMilli();
     }
 
     @Test
