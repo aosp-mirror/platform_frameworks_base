@@ -51,7 +51,6 @@ import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
 
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.MimeIconUtils;
 import com.android.internal.util.Preconditions;
 
@@ -602,6 +601,8 @@ public abstract class ContentResolver {
             try {
                 return provider.getType(url);
             } catch (RemoteException e) {
+                // Arbitrary and not worth documenting, as Activity
+                // Manager will kill this process shortly anyway.
                 return null;
             } catch (java.lang.Exception e) {
                 Log.w(TAG, "Failed to get type for: " + url + " (" + e.getMessage() + ")");
@@ -620,9 +621,7 @@ public abstract class ContentResolver {
                     ContentProvider.getUriWithoutUserId(url), resolveUserId(url));
             return type;
         } catch (RemoteException e) {
-            // Arbitrary and not worth documenting, as Activity
-            // Manager will kill this process shortly anyway.
-            return null;
+            throw e.rethrowFromSystemServer();
         } catch (java.lang.Exception e) {
             Log.w(TAG, "Failed to get type for: " + url + " (" + e.getMessage() + ")");
             return null;
@@ -1964,6 +1963,7 @@ public abstract class ContentResolver {
             getContentService().registerContentObserver(uri, notifyForDescendents,
                     observer.getContentObserver(), userHandle, mTargetSdkVersion);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1982,6 +1982,7 @@ public abstract class ContentResolver {
                         contentObserver);
             }
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2089,6 +2090,7 @@ public abstract class ContentResolver {
                     syncToNetwork ? NOTIFY_SYNC_TO_NETWORK : 0,
                     userHandle, mTargetSdkVersion);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2105,6 +2107,7 @@ public abstract class ContentResolver {
                     observer != null && observer.deliverSelfNotifications(), flags,
                     userHandle, mTargetSdkVersion);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2126,6 +2129,7 @@ public abstract class ContentResolver {
                     ContentProvider.getUriWithoutUserId(uri), modeFlags, /* toPackage= */ null,
                     resolveUserId(uri));
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2141,6 +2145,7 @@ public abstract class ContentResolver {
                     ContentProvider.getUriWithoutUserId(uri), modeFlags, toPackage,
                     resolveUserId(uri));
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2160,6 +2165,7 @@ public abstract class ContentResolver {
                     ContentProvider.getUriWithoutUserId(uri), modeFlags, /* toPackage= */ null,
                     resolveUserId(uri));
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2178,7 +2184,7 @@ public abstract class ContentResolver {
             return ActivityManager.getService()
                     .getPersistedUriPermissions(mPackageName, true).getList();
         } catch (RemoteException e) {
-            throw new RuntimeException("Activity manager has died", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2194,7 +2200,7 @@ public abstract class ContentResolver {
             return ActivityManager.getService()
                     .getPersistedUriPermissions(mPackageName, false).getList();
         } catch (RemoteException e) {
-            throw new RuntimeException("Activity manager has died", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2273,7 +2279,7 @@ public abstract class ContentResolver {
         try {
             getContentService().syncAsUser(request, userId);
         } catch(RemoteException e) {
-            // Shouldn't happen.
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2285,7 +2291,7 @@ public abstract class ContentResolver {
         try {
             getContentService().sync(request);
         } catch(RemoteException e) {
-            // Shouldn't happen.
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2349,6 +2355,7 @@ public abstract class ContentResolver {
         try {
             getContentService().cancelSync(account, authority, null);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2360,6 +2367,7 @@ public abstract class ContentResolver {
         try {
             getContentService().cancelSyncAsUser(account, authority, null, userId);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2371,7 +2379,7 @@ public abstract class ContentResolver {
         try {
             return getContentService().getSyncAdapterTypes();
         } catch (RemoteException e) {
-            throw new RuntimeException("the ContentService should always be reachable", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2383,7 +2391,7 @@ public abstract class ContentResolver {
         try {
             return getContentService().getSyncAdapterTypesAsUser(userId);
         } catch (RemoteException e) {
-            throw new RuntimeException("the ContentService should always be reachable", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2397,8 +2405,8 @@ public abstract class ContentResolver {
         try {
             return getContentService().getSyncAdapterPackagesForAuthorityAsUser(authority, userId);
         } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
-        return ArrayUtils.emptyArray(String.class);
     }
 
     /**
@@ -2414,7 +2422,7 @@ public abstract class ContentResolver {
         try {
             return getContentService().getSyncAutomatically(account, authority);
         } catch (RemoteException e) {
-            throw new RuntimeException("the ContentService should always be reachable", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2427,7 +2435,7 @@ public abstract class ContentResolver {
         try {
             return getContentService().getSyncAutomaticallyAsUser(account, authority, userId);
         } catch (RemoteException e) {
-            throw new RuntimeException("the ContentService should always be reachable", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2453,8 +2461,7 @@ public abstract class ContentResolver {
         try {
             getContentService().setSyncAutomaticallyAsUser(account, authority, sync, userId);
         } catch (RemoteException e) {
-            // exception ignored; if this is thrown then it means the runtime is in the midst of
-            // being restarted
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2500,8 +2507,7 @@ public abstract class ContentResolver {
         try {
              getContentService().addPeriodicSync(account, authority, extras, pollFrequency);
         } catch (RemoteException e) {
-            // exception ignored; if this is thrown then it means the runtime is in the midst of
-            // being restarted
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2540,7 +2546,7 @@ public abstract class ContentResolver {
         try {
             getContentService().removePeriodicSync(account, authority, extras);
         } catch (RemoteException e) {
-            throw new RuntimeException("the ContentService should always be reachable", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2564,8 +2570,7 @@ public abstract class ContentResolver {
         try {
             getContentService().cancelRequest(request);
         } catch (RemoteException e) {
-            // exception ignored; if this is thrown then it means the runtime is in the midst of
-            // being restarted
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2582,7 +2587,7 @@ public abstract class ContentResolver {
         try {
             return getContentService().getPeriodicSyncs(account, authority, null);
         } catch (RemoteException e) {
-            throw new RuntimeException("the ContentService should always be reachable", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2596,7 +2601,7 @@ public abstract class ContentResolver {
         try {
             return getContentService().getIsSyncable(account, authority);
         } catch (RemoteException e) {
-            throw new RuntimeException("the ContentService should always be reachable", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2609,7 +2614,7 @@ public abstract class ContentResolver {
         try {
             return getContentService().getIsSyncableAsUser(account, authority, userId);
         } catch (RemoteException e) {
-            throw new RuntimeException("the ContentService should always be reachable", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2623,8 +2628,7 @@ public abstract class ContentResolver {
         try {
             getContentService().setIsSyncable(account, authority, syncable);
         } catch (RemoteException e) {
-            // exception ignored; if this is thrown then it means the runtime is in the midst of
-            // being restarted
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2640,7 +2644,7 @@ public abstract class ContentResolver {
         try {
             return getContentService().getMasterSyncAutomatically();
         } catch (RemoteException e) {
-            throw new RuntimeException("the ContentService should always be reachable", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2652,7 +2656,7 @@ public abstract class ContentResolver {
         try {
             return getContentService().getMasterSyncAutomaticallyAsUser(userId);
         } catch (RemoteException e) {
-            throw new RuntimeException("the ContentService should always be reachable", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2676,8 +2680,7 @@ public abstract class ContentResolver {
         try {
             getContentService().setMasterSyncAutomaticallyAsUser(sync, userId);
         } catch (RemoteException e) {
-            // exception ignored; if this is thrown then it means the runtime is in the midst of
-            // being restarted
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2701,7 +2704,7 @@ public abstract class ContentResolver {
         try {
             return getContentService().isSyncActive(account, authority, null);
         } catch (RemoteException e) {
-            throw new RuntimeException("the ContentService should always be reachable", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2727,7 +2730,7 @@ public abstract class ContentResolver {
             }
             return syncs.get(0);
         } catch (RemoteException e) {
-            throw new RuntimeException("the ContentService should always be reachable", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2744,7 +2747,7 @@ public abstract class ContentResolver {
         try {
             return getContentService().getCurrentSyncs();
         } catch (RemoteException e) {
-            throw new RuntimeException("the ContentService should always be reachable", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2756,7 +2759,7 @@ public abstract class ContentResolver {
         try {
             return getContentService().getCurrentSyncsAsUser(userId);
         } catch (RemoteException e) {
-            throw new RuntimeException("the ContentService should always be reachable", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2771,7 +2774,7 @@ public abstract class ContentResolver {
         try {
             return getContentService().getSyncStatus(account, authority, null);
         } catch (RemoteException e) {
-            throw new RuntimeException("the ContentService should always be reachable", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2784,7 +2787,7 @@ public abstract class ContentResolver {
         try {
             return getContentService().getSyncStatusAsUser(account, authority, null, userId);
         } catch (RemoteException e) {
-            throw new RuntimeException("the ContentService should always be reachable", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2809,7 +2812,7 @@ public abstract class ContentResolver {
         try {
             return getContentService().isSyncPendingAsUser(account, authority, null, userId);
         } catch (RemoteException e) {
-            throw new RuntimeException("the ContentService should always be reachable", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2841,7 +2844,7 @@ public abstract class ContentResolver {
             getContentService().addStatusChangeListener(mask, observer);
             return observer;
         } catch (RemoteException e) {
-            throw new RuntimeException("the ContentService should always be reachable", e);
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2856,8 +2859,7 @@ public abstract class ContentResolver {
         try {
             getContentService().removeStatusChangeListener((ISyncStatusObserver.Stub) handle);
         } catch (RemoteException e) {
-            // exception ignored; if this is thrown then it means the runtime is in the midst of
-            // being restarted
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -3027,9 +3029,7 @@ public abstract class ContentResolver {
             return sContentService;
         }
         IBinder b = ServiceManager.getService(CONTENT_SERVICE_NAME);
-        if (false) Log.v("ContentService", "default service binder = " + b);
         sContentService = IContentService.Stub.asInterface(b);
-        if (false) Log.v("ContentService", "default service = " + sContentService);
         return sContentService;
     }
 
@@ -3038,7 +3038,7 @@ public abstract class ContentResolver {
         return mPackageName;
     }
 
-    private static IContentService sContentService;
+    private static volatile IContentService sContentService;
     private final Context mContext;
 
     final String mPackageName;
