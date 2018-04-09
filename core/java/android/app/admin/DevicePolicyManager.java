@@ -6198,6 +6198,7 @@ public class DevicePolicyManager {
      * @hide
      */
      @SystemApi
+     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
      public @Nullable List<String> getPermittedAccessibilityServices(int userId) {
         throwIfParentInstance("getPermittedAccessibilityServices");
         if (mService != null) {
