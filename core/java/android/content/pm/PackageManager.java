@@ -3952,6 +3952,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @TestApi
     public abstract @NonNull String getServicesSystemSharedLibraryPackageName();
 
     /**
@@ -3961,6 +3962,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
+    @TestApi
     public abstract @NonNull String getSharedSystemSharedLibraryPackageName();
 
     /**
