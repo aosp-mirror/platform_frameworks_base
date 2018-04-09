@@ -492,6 +492,11 @@ package android.media {
     method public int getProgramId();
   }
 
+  public final class PlaybackParams implements android.os.Parcelable {
+    method public int getAudioStretchMode();
+    method public android.media.PlaybackParams setAudioStretchMode(int);
+  }
+
   public static final class VolumeShaper.Configuration.Builder {
     method public android.media.VolumeShaper.Configuration.Builder setOptionFlags(int);
   }
