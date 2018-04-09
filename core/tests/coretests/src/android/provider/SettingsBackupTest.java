@@ -412,6 +412,7 @@ public class SettingsBackupTest {
                     Settings.Global.UNINSTALLED_INSTANT_APP_MIN_CACHE_PERIOD,
                     Settings.Global.UNINSTALLED_INSTANT_APP_MAX_CACHE_PERIOD,
                     Settings.Global.UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD,
+                    Settings.Global.UNGAZE_SLEEP_ENABLED,
                     Settings.Global.UNLOCK_SOUND,
                     Settings.Global.USE_GOOGLE_MAIL,
                     Settings.Global.VT_IMS_ENABLED,
