@@ -16,11 +16,6 @@
 
 package android.graphics.drawable;
 
-import com.android.internal.R;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.annotation.AttrRes;
 import android.annotation.ColorInt;
 import android.annotation.IntRange;
@@ -56,6 +51,11 @@ import android.util.StateSet;
 import android.util.TypedValue;
 import android.util.Xml;
 import android.view.View;
+
+import com.android.internal.R;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -1516,12 +1516,11 @@ public abstract class Drawable {
         }
 
         final int color = tint.getColorForState(getState(), Color.TRANSPARENT);
-        if (tintFilter == null) {
+        if (tintFilter == null || tintFilter.getColor() != color
+                || tintFilter.getMode() != tintMode) {
             return new PorterDuffColorFilter(color, tintMode);
         }
 
-        tintFilter.setColor(color);
-        tintFilter.setMode(tintMode);
         return tintFilter;
     }
 

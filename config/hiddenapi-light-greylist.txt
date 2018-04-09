@@ -793,8 +793,6 @@ Landroid/graphics/NinePatch$InsetStruct;-><init>(IIIIIIIIFIF)V
 Landroid/graphics/NinePatch;->mBitmap:Landroid/graphics/Bitmap;
 Landroid/graphics/Picture;->mNativePicture:J
 Landroid/graphics/PixelXorXfermode;-><init>(I)V
-Landroid/graphics/PorterDuffColorFilter;->setColor(I)V
-Landroid/graphics/PorterDuffColorFilter;->setMode(Landroid/graphics/PorterDuff$Mode;)V
 Landroid/graphics/Rect;->scale(F)V
 Landroid/graphics/Region;-><init>(JI)V
 Landroid/graphics/Region;->mNativeRegion:J
