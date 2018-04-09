@@ -1899,7 +1899,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 winAnimator.setOpaqueLocked(false);
             }
 
-            boolean imMayMove = (flagChanges & (FLAG_ALT_FOCUSABLE_IM | FLAG_NOT_FOCUSABLE)) != 0;
+            final int oldVisibility = win.mViewVisibility;
+
+            // If the window is becoming visible, visibleOrAdding may change which may in turn
+            // change the IME target.
+            final boolean becameVisible =
+                    (oldVisibility == View.INVISIBLE || oldVisibility == View.GONE)
+                            && viewVisibility == View.VISIBLE;
+            boolean imMayMove = (flagChanges & (FLAG_ALT_FOCUSABLE_IM | FLAG_NOT_FOCUSABLE)) != 0
+                    || becameVisible;
             final boolean isDefaultDisplay = win.isDefaultDisplay();
             boolean focusMayChange = isDefaultDisplay && (win.mViewVisibility != viewVisibility
                     || ((flagChanges & FLAG_NOT_FOCUSABLE) != 0)
@@ -1915,7 +1923,6 @@ public class WindowManagerService extends IWindowManager.Stub
             win.mRelayoutCalled = true;
             win.mInRelayout = true;
 
-            final int oldVisibility = win.mViewVisibility;
             win.mViewVisibility = viewVisibility;
             if (DEBUG_SCREEN_ON) {
                 RuntimeException stack = new RuntimeException();
