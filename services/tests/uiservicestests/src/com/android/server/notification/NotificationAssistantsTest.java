@@ -124,7 +124,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.toString().getBytes())), null);
         parser.nextTag();
-        mAssistants.readXml(parser);
+        mAssistants.readXml(parser, null);
 
         verify(mNm, never()).readDefaultAssistant(anyInt());
         verify(mAssistants, times(1)).addApprovedList(

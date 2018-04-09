@@ -235,6 +235,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 
 /** {@hide} */
 public class NotificationManagerService extends SystemService {
@@ -400,6 +401,7 @@ public class NotificationManagerService extends SystemService {
     private boolean mIsTelevision;
 
     private MetricsLogger mMetricsLogger;
+    private Predicate<String> mAllowedManagedServicePackages;
 
     private static class Archive {
         final int mBufferSize;
@@ -521,18 +523,15 @@ public class NotificationManagerService extends SystemService {
             } else if (RankingHelper.TAG_RANKING.equals(parser.getName())){
                 mRankingHelper.readXml(parser, forRestore);
             }
-            // No non-system managed services are allowed on low ram devices
-            if (canUseManagedServices()) {
-                if (mListeners.getConfig().xmlTag.equals(parser.getName())) {
-                    mListeners.readXml(parser);
-                    migratedManagedServices = true;
-                } else if (mAssistants.getConfig().xmlTag.equals(parser.getName())) {
-                    mAssistants.readXml(parser);
-                    migratedManagedServices = true;
-                } else if (mConditionProviders.getConfig().xmlTag.equals(parser.getName())) {
-                    mConditionProviders.readXml(parser);
-                    migratedManagedServices = true;
-                }
+            if (mListeners.getConfig().xmlTag.equals(parser.getName())) {
+                mListeners.readXml(parser, mAllowedManagedServicePackages);
+                migratedManagedServices = true;
+            } else if (mAssistants.getConfig().xmlTag.equals(parser.getName())) {
+                mAssistants.readXml(parser, mAllowedManagedServicePackages);
+                migratedManagedServices = true;
+            } else if (mConditionProviders.getConfig().xmlTag.equals(parser.getName())) {
+                mConditionProviders.readXml(parser, mAllowedManagedServicePackages);
+                migratedManagedServices = true;
             }
         }
 
@@ -1427,6 +1426,9 @@ public class NotificationManagerService extends SystemService {
 
         // This is a MangedServices object that keeps track of the assistant.
         mAssistants = notificationAssistants;
+
+        // Needs to be set before loadPolicyFile
+        mAllowedManagedServicePackages = this::canUseManagedServices;
 
         mPolicyFile = policyFile;
         loadPolicyFile();
@@ -3212,7 +3214,7 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystemOrShell();
             final long identity = Binder.clearCallingIdentity();
             try {
-                if (canUseManagedServices()) {
+                if (mAllowedManagedServicePackages.test(pkg)) {
                     mConditionProviders.setPackageOrComponentEnabled(
                             pkg, userId, true, granted);
 
@@ -3344,7 +3346,7 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystemOrShell();
             final long identity = Binder.clearCallingIdentity();
             try {
-                if (canUseManagedServices()) {
+                if (mAllowedManagedServicePackages.test(listener.getPackageName())) {
                     mConditionProviders.setPackageOrComponentEnabled(listener.flattenToString(),
                             userId, false, granted);
                     mListeners.setPackageOrComponentEnabled(listener.flattenToString(),
@@ -3370,7 +3372,7 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystemOrShell();
             final long identity = Binder.clearCallingIdentity();
             try {
-                if (canUseManagedServices()) {
+                if (mAllowedManagedServicePackages.test(assistant.getPackageName())) {
                     mConditionProviders.setPackageOrComponentEnabled(assistant.flattenToString(),
                             userId, false, granted);
                     mAssistants.setPackageOrComponentEnabled(assistant.flattenToString(),
@@ -6073,9 +6075,19 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
-    private boolean canUseManagedServices() {
-        return !mActivityManager.isLowRamDevice()
+    @VisibleForTesting
+    boolean canUseManagedServices(String pkg) {
+        boolean canUseManagedServices = !mActivityManager.isLowRamDevice()
                 || mPackageManagerClient.hasSystemFeature(PackageManager.FEATURE_WATCH);
+
+        for (String whitelisted : getContext().getResources().getStringArray(
+                R.array.config_allowedManagedServicesOnLowRamDevices)) {
+            if (whitelisted.equals(pkg)) {
+                canUseManagedServices = true;
+            }
+        }
+
+        return canUseManagedServices;
     }
 
     private class TrimCache {

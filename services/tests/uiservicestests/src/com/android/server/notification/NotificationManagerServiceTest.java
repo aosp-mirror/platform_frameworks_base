@@ -79,6 +79,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -102,6 +103,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 
+import com.android.internal.R;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.server.UiServiceTestCase;
 import com.android.server.lights.Light;
@@ -157,6 +159,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     @Mock
     ActivityManager mActivityManager;
     NotificationManagerService.WorkerHandler mHandler;
+    @Mock
+    Resources mResources;
 
     private NotificationChannel mTestNotificationChannel = new NotificationChannel(
             TEST_CHANNEL_ID, TEST_CHANNEL_ID, NotificationManager.IMPORTANCE_DEFAULT);
@@ -388,7 +392,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testCreateNotificationChannels_NullChannelThrowsException() throws Exception {
         try {
             mBinderService.createNotificationChannels(PKG,
-                    new ParceledListSlice(Arrays.asList(null)));
+                    new ParceledListSlice(Arrays.asList((Object[])null)));
             fail("Exception should be thrown immediately.");
         } catch (NullPointerException e) {
             // pass
@@ -2202,9 +2206,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 + "</notification-policy>";
         mService.readPolicyXml(
                 new BufferedInputStream(new ByteArrayInputStream(upgradeXml.getBytes())), false);
-        verify(mListeners, times(1)).readXml(any());
-        verify(mConditionProviders, times(1)).readXml(any());
-        verify(mAssistants, times(1)).readXml(any());
+        verify(mListeners, times(1)).readXml(any(), any());
+        verify(mConditionProviders, times(1)).readXml(any(), any());
+        verify(mAssistants, times(1)).readXml(any(), any());
 
         // numbers are inflated for setup
         verify(mListeners, times(1)).migrateToXml();
@@ -2221,9 +2225,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 + "</notification-policy>";
         mService.readPolicyXml(
                 new BufferedInputStream(new ByteArrayInputStream(preupgradeXml.getBytes())), false);
-        verify(mListeners, never()).readXml(any());
-        verify(mConditionProviders, never()).readXml(any());
-        verify(mAssistants, never()).readXml(any());
+        verify(mListeners, never()).readXml(any(), any());
+        verify(mConditionProviders, never()).readXml(any(), any());
+        verify(mAssistants, never()).readXml(any(), any());
 
         // numbers are inflated for setup
         verify(mListeners, times(2)).migrateToXml();
@@ -2783,5 +2787,71 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
         verify(mListeners, times(1)).notifyHiddenLocked(captor.capture());
         assertEquals(0, captor.getValue().size());
+    }
+
+    @Test
+    public void testCanUseManagedServicesLowRamNoWatchNullPkg() {
+        when(mPackageManagerClient.hasSystemFeature(FEATURE_WATCH)).thenReturn(false);
+        when(mActivityManager.isLowRamDevice()).thenReturn(true);
+        when(mResources.getStringArray(R.array.config_allowedManagedServicesOnLowRamDevices))
+                .thenReturn(new String[] {"a", "b", "c"});
+        when(mContext.getResources()).thenReturn(mResources);
+
+        assertEquals(false, mService.canUseManagedServices(null));
+    }
+
+    @Test
+    public void testCanUseManagedServicesLowRamNoWatchValidPkg() {
+        when(mPackageManagerClient.hasSystemFeature(FEATURE_WATCH)).thenReturn(false);
+        when(mActivityManager.isLowRamDevice()).thenReturn(true);
+        when(mResources.getStringArray(R.array.config_allowedManagedServicesOnLowRamDevices))
+                .thenReturn(new String[] {"a", "b", "c"});
+        when(mContext.getResources()).thenReturn(mResources);
+
+        assertEquals(true, mService.canUseManagedServices("b"));
+    }
+
+    @Test
+    public void testCanUseManagedServicesLowRamNoWatchNoValidPkg() {
+        when(mPackageManagerClient.hasSystemFeature(FEATURE_WATCH)).thenReturn(false);
+        when(mActivityManager.isLowRamDevice()).thenReturn(true);
+        when(mResources.getStringArray(R.array.config_allowedManagedServicesOnLowRamDevices))
+                .thenReturn(new String[] {"a", "b", "c"});
+        when(mContext.getResources()).thenReturn(mResources);
+
+        assertEquals(false, mService.canUseManagedServices("d"));
+    }
+
+    @Test
+    public void testCanUseManagedServicesLowRamWatchNoValidPkg() {
+        when(mPackageManagerClient.hasSystemFeature(FEATURE_WATCH)).thenReturn(true);
+        when(mActivityManager.isLowRamDevice()).thenReturn(true);
+        when(mResources.getStringArray(R.array.config_allowedManagedServicesOnLowRamDevices))
+                .thenReturn(new String[] {"a", "b", "c"});
+        when(mContext.getResources()).thenReturn(mResources);
+
+        assertEquals(true, mService.canUseManagedServices("d"));
+    }
+
+    @Test
+    public void testCanUseManagedServicesNoLowRamNoWatchValidPkg() {
+        when(mPackageManagerClient.hasSystemFeature(FEATURE_WATCH)).thenReturn(false);
+        when(mActivityManager.isLowRamDevice()).thenReturn(false);
+        when(mResources.getStringArray(R.array.config_allowedManagedServicesOnLowRamDevices))
+                .thenReturn(new String[] {"a", "b", "c"});
+        when(mContext.getResources()).thenReturn(mResources);
+
+        assertEquals(true, mService.canUseManagedServices("d"));
+    }
+
+    @Test
+    public void testCanUseManagedServicesNoLowRamWatchValidPkg() {
+        when(mPackageManagerClient.hasSystemFeature(FEATURE_WATCH)).thenReturn(true);
+        when(mActivityManager.isLowRamDevice()).thenReturn(false);
+        when(mResources.getStringArray(R.array.config_allowedManagedServicesOnLowRamDevices))
+                .thenReturn(new String[] {"a", "b", "c"});
+        when(mContext.getResources()).thenReturn(mResources);
+
+        assertEquals(true, mService.canUseManagedServices("d"));
     }
 }
