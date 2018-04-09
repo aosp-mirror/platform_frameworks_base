@@ -4943,9 +4943,9 @@
     <!-- Title for the notification channel notifying user of do not disturb system changes (i.e. Do Not Disturb has changed). [CHAR LIMIT=NONE] -->
     <string name="notification_channel_do_not_disturb">Do Not Disturb</string>
     <!-- Title of notification indicating do not disturb visual interruption settings have changed when upgrading to P -->
-    <string name="zen_upgrade_notification_visd_title">Do Not Disturb is hiding notifications to help you focus</string>
+    <string name="zen_upgrade_notification_visd_title">New: Do Not Disturb is hiding notifications</string>
     <!-- Content of notification indicating users can tap on the notification to go to dnd behavior settings -->
-    <string name="zen_upgrade_notification_visd_content">This is new behavior. Tap to change.</string>
+    <string name="zen_upgrade_notification_visd_content">Tap to learn more and change.</string>
     <!-- Title of notification indicating do not disturb settings have changed when upgrading to P -->
     <string name="zen_upgrade_notification_title">Do Not Disturb has changed</string>
     <!-- Content of notification indicating users can tap on the notification to go to dnd behavior settings -->

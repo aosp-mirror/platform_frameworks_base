@@ -1338,6 +1338,32 @@ public class NotificationManager {
             return false;
         }
 
+        /**
+         * @hide
+         */
+        public static int toggleScreenOffEffectsSuppressed(int currentEffects, boolean suppress) {
+            return toggleEffects(currentEffects, SCREEN_OFF_SUPPRESSED_EFFECTS, suppress);
+        }
+
+        /**
+         * @hide
+         */
+        public static int toggleScreenOnEffectsSuppressed(int currentEffects, boolean suppress) {
+            return toggleEffects(currentEffects, SCREEN_ON_SUPPRESSED_EFFECTS, suppress);
+        }
+
+        private static int toggleEffects(int currentEffects, int[] effects, boolean suppress) {
+            for (int i = 0; i < effects.length; i++) {
+                final int effect = effects[i];
+                if (suppress) {
+                    currentEffects |= effect;
+                } else {
+                    currentEffects &= ~effect;
+                }
+            }
+            return currentEffects;
+        }
+
         public static String suppressedEffectsToString(int effects) {
             if (effects <= 0) return "";
             final StringBuilder sb = new StringBuilder();
