@@ -30,6 +30,31 @@ import org.junit.runner.RunWith;
 public class SelectionEventTest {
 
     @Test
+    public void testCreateSelectionActionEvent_valid() {
+        SelectionEvent.createSelectionActionEvent(0, 1, SelectionEvent.ACTION_OVERTYPE);
+        SelectionEvent.createSelectionActionEvent(0, 1, SelectionEvent.ACTION_COPY);
+        SelectionEvent.createSelectionActionEvent(0, 1, SelectionEvent.ACTION_PASTE);
+        SelectionEvent.createSelectionActionEvent(0, 1, SelectionEvent.ACTION_CUT);
+        SelectionEvent.createSelectionActionEvent(0, 1, SelectionEvent.ACTION_SHARE);
+        SelectionEvent.createSelectionActionEvent(0, 1, SelectionEvent.ACTION_SMART_SHARE);
+        SelectionEvent.createSelectionActionEvent(0, 1, SelectionEvent.ACTION_DRAG);
+        SelectionEvent.createSelectionActionEvent(0, 1, SelectionEvent.ACTION_ABANDON);
+        SelectionEvent.createSelectionActionEvent(0, 1, SelectionEvent.ACTION_OTHER);
+        SelectionEvent.createSelectionActionEvent(0, 1, SelectionEvent.ACTION_SELECT_ALL);
+        SelectionEvent.createSelectionActionEvent(0, 1, SelectionEvent.ACTION_RESET);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCreateSelectionActionEvent_badRange() {
+        SelectionEvent.createSelectionActionEvent(0, -1, SelectionEvent.ACTION_OVERTYPE);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testCreateSelectionActionEvent_badAction() {
+        SelectionEvent.createSelectionActionEvent(0, 1, SelectionEvent.EVENT_SELECTION_STARTED);
+    }
+
+    @Test
     public void testParcel() {
         final SelectionEvent event = SelectionEvent.createSelectionStartedEvent(
                 SelectionEvent.INVOCATION_MANUAL, 0);
