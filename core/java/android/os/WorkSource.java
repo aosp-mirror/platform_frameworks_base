@@ -924,13 +924,17 @@ public class WorkSource implements Parcelable {
         /** @hide */
         @VisibleForTesting
         public int[] getUids() {
-            return mUids;
+            int[] uids = new int[mSize];
+            System.arraycopy(mUids, 0, uids, 0, mSize);
+            return uids;
         }
 
         /** @hide */
         @VisibleForTesting
         public String[] getTags() {
-            return mTags;
+            String[] tags = new String[mSize];
+            System.arraycopy(mTags, 0, tags, 0, mSize);
+            return tags;
         }
 
         /** @hide */
