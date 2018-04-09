@@ -512,12 +512,15 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     /**
      * Notifies this manager that the back button has been pressed.
      *
+     * @param hideImmediately Hide bouncer when {@code true}, keep it around otherwise.
+     *                        Non-scrimmed bouncers have a special animation tied to the expansion
+     *                        of the notification panel.
      * @return whether the back press has been handled
      */
-    public boolean onBackPressed() {
+    public boolean onBackPressed(boolean hideImmediately) {
         if (mBouncer.isShowing()) {
             mStatusBar.endAffordanceLaunch();
-            reset(true /* hideBouncerWhenShowing */);
+            reset(hideImmediately);
             return true;
         }
         return false;
