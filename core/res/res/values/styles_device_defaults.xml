@@ -246,8 +246,12 @@ easier.
     <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle" parent="TextAppearance.Material.Widget.ActionBar.Subtitle"/>
     <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Title" parent="TextAppearance.Material.Widget.ActionMode.Title"/>
     <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Subtitle" parent="TextAppearance.Material.Widget.ActionMode.Subtitle"/>
-    <style name="TextAppearance.DeviceDefault.WindowTitle" parent="TextAppearance.Material.WindowTitle"/>
-    <style name="TextAppearance.DeviceDefault.DialogWindowTitle" parent="TextAppearance.Material.DialogWindowTitle"/>
+    <style name="TextAppearance.DeviceDefault.WindowTitle" parent="TextAppearance.Material.WindowTitle">
+        <item name="fontFamily">@string/config_headlineFontFamilyMedium</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.DialogWindowTitle" parent="TextAppearance.Material.DialogWindowTitle">
+        <item name="fontFamily">@string/config_headlineFontFamilyMedium</item>
+    </style>
     <!-- @deprecated Action bars are now themed using the inheritable android:theme attribute. -->
     <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Title.Inverse" parent="TextAppearance.Material.Widget.ActionBar.Title.Inverse"/>
     <!-- @deprecated Action bars are now themed using the inheritable android:theme attribute. -->
@@ -280,11 +284,15 @@ easier.
     <style name="Animation.DeviceDefault.Dialog" parent="Animation.Material.Dialog"/>
 
     <!-- DialogWindowTitle Styles -->
-    <style name="DialogWindowTitle.DeviceDefault" parent="DialogWindowTitle.Material"/>
-    <style name="DialogWindowTitle.DeviceDefault.Light" parent="DialogWindowTitle.Material.Light"/>
+    <style name="DialogWindowTitle.DeviceDefault" parent="DialogWindowTitle.Material">
+        <item name="textAppearance">@style/TextAppearance.DeviceDefault.DialogWindowTitle</item>
+    </style>
+    <style name="DialogWindowTitle.DeviceDefault.Light"/>
 
     <!-- WindowTitle Styles -->
-    <style name="WindowTitle.DeviceDefault" parent="WindowTitle.Material"/>
+    <style name="WindowTitle.DeviceDefault" parent="WindowTitle.Material">
+        <item name="textAppearance">@style/TextAppearance.DeviceDefault.WindowTitle</item>
+    </style>
     <style name="WindowTitleBackground.DeviceDefault" parent="WindowTitleBackground.Material"/>
 
     <!-- Other Styles -->
