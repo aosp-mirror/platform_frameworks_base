@@ -3058,6 +3058,12 @@ public class Activity extends ContextThemeWrapper
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             onUserInteraction();
         }
+        /**
+         * 最终调用了DecorView的super.dispatchTouchEvent方法，即ViewGroup的dispatchTouchEvent
+         * 如果该方法返回false，将执行Activity的onTouchEvent方法。
+         * flase表示没有子View消费触控事件，最终由Activity的onTouchEvent方法消费触控事件
+         * true表示由子View中某个View消费触控事件，执行ViewGroup的事件分发。
+         */
         if (getWindow().superDispatchTouchEvent(ev)) {
             return true;
         }

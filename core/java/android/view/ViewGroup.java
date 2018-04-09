@@ -2168,8 +2168,14 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             // Check for interception.
             final boolean intercepted;
+            /**
+             * 正常情况下，down事件的是执行onInterceptTouchEvent,如果返回true，表示拦截本次触控事件，那么根据后续代码可以得到
+             * mFirstTouchTarget==null，move事件的时候不会执行onInterceptTouchEvent事件。后续会执行当前View的onTouchEvent事件。
+             * 代码在{@link #dispatchTransformedTouchEvent}中。
+             */
             if (actionMasked == MotionEvent.ACTION_DOWN
                     || mFirstTouchTarget != null) {
+                //调用requestDisallowInterceptTouchEvent方法改变 mGroupFlags参数的值。
                 final boolean disallowIntercept = (mGroupFlags & FLAG_DISALLOW_INTERCEPT) != 0;
                 if (!disallowIntercept) {
                     intercepted = onInterceptTouchEvent(ev);

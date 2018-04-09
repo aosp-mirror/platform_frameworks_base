@@ -260,7 +260,7 @@ public final class WindowManagerGlobal {
         return null;
     }
 
-    public void addView(View view, ViewGroup.LayoutParams params,
+    public void addView(View WindowManag, ViewGroup.LayoutParams params,
             Display display, Window parentWindow) {
         if (view == null) {
             throw new IllegalArgumentException("view must not be null");
@@ -301,6 +301,7 @@ public final class WindowManagerGlobal {
                         }
                     }
                 };
+                //使用Runnable做Callback回调
                 SystemProperties.addChangeCallback(mSystemPropertyUpdater);
             }
 

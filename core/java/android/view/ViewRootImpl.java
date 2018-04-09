@@ -637,6 +637,7 @@ public final class ViewRootImpl implements ViewParent,
                     mOrigWindowType = mWindowAttributes.type;
                     mAttachInfo.mRecomputeGlobalAttributes = true;
                     collectViewAttributes();
+                    //通过IWindowSession通知WindowManagerService,去显示。
                     res = mWindowSession.addToDisplay(mWindow, mSeq, mWindowAttributes,
                             getHostVisibility(), mDisplay.getDisplayId(),
                             mAttachInfo.mContentInsets, mAttachInfo.mStableInsets,
@@ -743,7 +744,7 @@ public final class ViewRootImpl implements ViewParent,
                 // Set up the input pipeline.
                 CharSequence counterSuffix = attrs.getTitle();
                 mSyntheticInputStage = new SyntheticInputStage();
-                InputStage viewPostImeStage = new ViewPostImeInputStage(mSyntheticInputStage);
+                InputStage viewPostImeStage = new ViewPostImeInputStage(mSyntheticInputStage);//处理view触控事件的类
                 InputStage nativePostImeStage = new NativePostImeInputStage(viewPostImeStage,
                         "aq:native-post-ime:" + counterSuffix);
                 InputStage earlyPostImeStage = new EarlyPostImeInputStage(nativePostImeStage);
@@ -1755,6 +1756,9 @@ public final class ViewRootImpl implements ViewParent,
                     }
                     mChoreographer.mFrameInfo.addFlags(FrameInfo.FLAG_WINDOW_LAYOUT_CHANGED);
                 }
+                /**
+                 * 跟WMS交互，处理Window在Surface上的展示 ？
+                 */
                 relayoutResult = relayoutWindow(params, viewVisibility, insetsPending);
 
                 if (DEBUG_LAYOUT) Log.v(mTag, "relayout: frame=" + frame.toShortString()
@@ -4290,7 +4294,10 @@ public final class ViewRootImpl implements ViewParent,
 
     /**
      * Delivers post-ime input events to the view hierarchy.
+     *
+     * note: dispatch touchevent by zhangshao
      */
+
     final class ViewPostImeInputStage extends InputStage {
         public ViewPostImeInputStage(InputStage next) {
             super(next);
