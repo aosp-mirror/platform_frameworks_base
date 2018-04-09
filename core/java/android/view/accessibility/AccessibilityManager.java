@@ -571,7 +571,7 @@ public final class AccessibilityManager {
      * @hide
      */
     public int addAccessibilityInteractionConnection(IWindow windowToken,
-            IAccessibilityInteractionConnection connection) {
+            String packageName, IAccessibilityInteractionConnection connection) {
         final IAccessibilityManager service;
         final int userId;
         synchronized (mLock) {
@@ -582,7 +582,8 @@ public final class AccessibilityManager {
             userId = mUserId;
         }
         try {
-            return service.addAccessibilityInteractionConnection(windowToken, connection, userId);
+            return service.addAccessibilityInteractionConnection(windowToken, connection,
+                    packageName, userId);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while adding an accessibility interaction connection. ", re);
         }
