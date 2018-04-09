@@ -738,6 +738,23 @@ public class Typeface {
     /**
      * Creates a typeface object that best matches the specified existing typeface and the specified
      * weight and italic style
+     * <p>Below are numerical values and corresponding common weight names.</p>
+     * <table>
+     * <thead>
+     * <tr><th>Value</th><th>Common weight name</th></tr>
+     * </thead>
+     * <tbody>
+     * <tr><td>100</td><td>Thin</td></tr>
+     * <tr><td>200</td><td>Extra Light</td></tr>
+     * <tr><td>300</td><td>Light</td></tr>
+     * <tr><td>400</td><td>Normal</td></tr>
+     * <tr><td>500</td><td>Medium</td></tr>
+     * <tr><td>600</td><td>Semi Bold</td></tr>
+     * <tr><td>700</td><td>Bold</td></tr>
+     * <tr><td>800</td><td>Extra Bold</td></tr>
+     * <tr><td>900</td><td>Black</td></tr>
+     * </tbody>
+     * </table>
      *
      * <p>
      * This method is thread safe.
@@ -749,6 +766,9 @@ public class Typeface {
      * @param italic {@code true} if italic style is desired to be drawn. Otherwise, {@code false}
      * @return A {@link Typeface} object for drawing specified weight and italic style. Never
      *         returns {@code null}
+     *
+     * @see #getWeight()
+     * @see #isItalic()
      */
     public static @NonNull Typeface create(@Nullable Typeface family,
             @IntRange(from = 1, to = 1000) int weight, boolean italic) {
