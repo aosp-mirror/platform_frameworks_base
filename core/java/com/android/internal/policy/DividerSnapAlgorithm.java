@@ -344,7 +344,7 @@ public class DividerSnapAlgorithm {
             if (dockedSide == DOCKED_LEFT) {
                 position += mInsets.left;
             } else if (dockedSide == DOCKED_RIGHT) {
-                position = mDisplayWidth - position - mInsets.right;
+                position = mDisplayWidth - position - mInsets.right - mDividerSize;
             }
         }
         mTargets.add(new SnapTarget(position, position, SnapTarget.FLAG_NONE));
