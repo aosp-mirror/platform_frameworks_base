@@ -19,7 +19,6 @@
 
 #include "Properties.h"
 #include "hwui/Typeface.h"
-#include "protos/hwui.pb.h"
 
 #include <benchmark/benchmark.h>
 #include <getopt.h>

@@ -108,7 +108,6 @@ public:
 
     ANDROID_API void output();
     ANDROID_API int getDebugSize();
-    void copyTo(proto::RenderNode* node);
 
     bool isRenderable() const { return mDisplayList && !mDisplayList->isEmpty(); }
 

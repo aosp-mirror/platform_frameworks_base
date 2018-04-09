@@ -109,8 +109,6 @@ public:
     ANDROID_API static void setProcessStatsBuffer(int fd);
     ANDROID_API int getRenderThreadTid();
 
-    ANDROID_API void serializeDisplayListTree();
-
     ANDROID_API void addRenderNode(RenderNode* node, bool placeFront);
     ANDROID_API void removeRenderNode(RenderNode* node);
     ANDROID_API void drawRenderNode(RenderNode* node);

@@ -29,9 +29,6 @@
 #include "utils/StringUtils.h"
 #include "utils/TraceUtils.h"
 
-#include "protos/ProtoHelpers.h"
-#include "protos/hwui.pb.h"
-
 #include <SkPathOps.h>
 #include <algorithm>
 #include <sstream>
@@ -99,77 +96,6 @@ void RenderNode::output(std::ostream& output, uint32_t level) {
     }
     output << std::string(level * 2, ' ') << "/RenderNode(" << getName() << " " << this << ")";
     output << std::endl;
-}
-
-void RenderNode::copyTo(proto::RenderNode* pnode) {
-    pnode->set_id(static_cast<uint64_t>(reinterpret_cast<uintptr_t>(this)));
-    pnode->set_name(mName.string(), mName.length());
-
-    proto::RenderProperties* pprops = pnode->mutable_properties();
-    pprops->set_left(properties().getLeft());
-    pprops->set_top(properties().getTop());
-    pprops->set_right(properties().getRight());
-    pprops->set_bottom(properties().getBottom());
-    pprops->set_clip_flags(properties().getClippingFlags());
-    pprops->set_alpha(properties().getAlpha());
-    pprops->set_translation_x(properties().getTranslationX());
-    pprops->set_translation_y(properties().getTranslationY());
-    pprops->set_translation_z(properties().getTranslationZ());
-    pprops->set_elevation(properties().getElevation());
-    pprops->set_rotation(properties().getRotation());
-    pprops->set_rotation_x(properties().getRotationX());
-    pprops->set_rotation_y(properties().getRotationY());
-    pprops->set_scale_x(properties().getScaleX());
-    pprops->set_scale_y(properties().getScaleY());
-    pprops->set_pivot_x(properties().getPivotX());
-    pprops->set_pivot_y(properties().getPivotY());
-    pprops->set_has_overlapping_rendering(properties().getHasOverlappingRendering());
-    pprops->set_pivot_explicitly_set(properties().isPivotExplicitlySet());
-    pprops->set_project_backwards(properties().getProjectBackwards());
-    pprops->set_projection_receiver(properties().isProjectionReceiver());
-    set(pprops->mutable_clip_bounds(), properties().getClipBounds());
-
-    const Outline& outline = properties().getOutline();
-    if (outline.getType() != Outline::Type::None) {
-        proto::Outline* poutline = pprops->mutable_outline();
-        poutline->clear_path();
-        if (outline.getType() == Outline::Type::Empty) {
-            poutline->set_type(proto::Outline_Type_Empty);
-        } else if (outline.getType() == Outline::Type::ConvexPath) {
-            poutline->set_type(proto::Outline_Type_ConvexPath);
-            if (const SkPath* path = outline.getPath()) {
-                set(poutline->mutable_path(), *path);
-            }
-        } else if (outline.getType() == Outline::Type::RoundRect) {
-            poutline->set_type(proto::Outline_Type_RoundRect);
-        } else {
-            ALOGW("Uknown outline type! %d", static_cast<int>(outline.getType()));
-            poutline->set_type(proto::Outline_Type_None);
-        }
-        poutline->set_should_clip(outline.getShouldClip());
-        poutline->set_alpha(outline.getAlpha());
-        poutline->set_radius(outline.getRadius());
-        set(poutline->mutable_bounds(), outline.getBounds());
-    } else {
-        pprops->clear_outline();
-    }
-
-    const RevealClip& revealClip = properties().getRevealClip();
-    if (revealClip.willClip()) {
-        proto::RevealClip* prevealClip = pprops->mutable_reveal_clip();
-        prevealClip->set_x(revealClip.getX());
-        prevealClip->set_y(revealClip.getY());
-        prevealClip->set_radius(revealClip.getRadius());
-    } else {
-        pprops->clear_reveal_clip();
-    }
-
-    pnode->clear_children();
-    if (mDisplayList) {
-        for (auto&& child : mDisplayList->getChildren()) {
-            child->renderNode->copyTo(pnode->add_children());
-        }
-    }
 }
 
 int RenderNode::getDebugSize() {
