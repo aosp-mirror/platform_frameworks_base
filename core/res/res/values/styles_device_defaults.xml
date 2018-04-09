@@ -128,6 +128,9 @@ easier.
     <style name="Widget.DeviceDefault.TextSelectHandle" parent="Widget.Material.TextSelectHandle"/>
     <style name="Widget.DeviceDefault.TextView.ListSeparator" parent="Widget.Material.TextView.ListSeparator"/>
     <style name="Widget.DeviceDefault.TimePicker" parent="Widget.Material.TimePicker"/>
+    <style name="Widget.DeviceDefault.Toolbar" parent="Widget.Material.Toolbar">
+        <item name="titleTextAppearance">@style/TextAppearance.DeviceDefault.Widget.Toolbar.Title</item>
+    </style>
 
     <style name="Widget.DeviceDefault.Light" parent="Widget.Material.Light"/>
     <style name="Widget.DeviceDefault.Light.Button" parent="Widget.Material.Light.Button"/>
@@ -186,7 +189,9 @@ easier.
     <style name="Widget.DeviceDefault.Light.ActionBar.TabView" parent="Widget.Material.Light.ActionBar.TabView"/>
     <style name="Widget.DeviceDefault.Light.ActionBar.TabText" parent="Widget.Material.Light.ActionBar.TabText"/>
     <style name="Widget.DeviceDefault.Light.ActionBar.TabBar" parent="Widget.Material.Light.ActionBar.TabBar"/>
-    <style name="Widget.DeviceDefault.Light.ActionBar.Solid" parent="Widget.Material.Light.ActionBar.Solid"/>
+    <style name="Widget.DeviceDefault.Light.ActionBar.Solid" parent="Widget.Material.Light.ActionBar.Solid">
+        <item name="titleTextStyle">@style/TextAppearance.DeviceDefault.Widget.ActionBar.Title</item>
+    </style>
     <!-- @deprecated Action bars are now themed using the inheritable android:theme attribute. -->
     <style name="Widget.DeviceDefault.Light.ActionBar.Solid.Inverse" parent="Widget.Holo.Light.ActionBar.Solid.Inverse"/>
     <!-- @deprecated Action bars are now themed using the inheritable android:theme attribute. -->
@@ -242,7 +247,9 @@ easier.
     <style name="TextAppearance.DeviceDefault.Widget.PopupMenu" parent="TextAppearance.Material.Widget.PopupMenu"/>
     <style name="TextAppearance.DeviceDefault.Widget.PopupMenu.Large" parent="TextAppearance.Material.Widget.PopupMenu.Large"/>
     <style name="TextAppearance.DeviceDefault.Widget.PopupMenu.Small" parent="TextAppearance.Material.Widget.PopupMenu.Small"/>
-    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Title" parent="TextAppearance.Material.Widget.ActionBar.Title"/>
+    <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Title" parent="TextAppearance.Material.Widget.ActionBar.Title">
+        <item name="fontFamily">@string/config_headlineFontFamilyMedium</item>
+    </style>
     <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle" parent="TextAppearance.Material.Widget.ActionBar.Subtitle"/>
     <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Title" parent="TextAppearance.Material.Widget.ActionMode.Title"/>
     <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Subtitle" parent="TextAppearance.Material.Widget.ActionMode.Subtitle"/>
@@ -261,6 +268,7 @@ easier.
     <!-- @deprecated Action bars are now themed using the inheritable android:theme attribute. -->
     <style name="TextAppearance.DeviceDefault.Widget.ActionMode.Subtitle.Inverse" parent="TextAppearance.Material.Widget.ActionMode.Subtitle.Inverse"/>
     <style name="TextAppearance.DeviceDefault.Widget.ActionBar.Menu" parent="TextAppearance.Material.Widget.ActionBar.Menu"/>
+    <style name="TextAppearance.DeviceDefault.Widget.Toolbar.Title" parent="TextAppearance.DeviceDefault.Widget.ActionBar.Title" />
 
     <!-- Preference Styles -->
     <style name="Preference.DeviceDefault" parent="Preference.Material"/>
