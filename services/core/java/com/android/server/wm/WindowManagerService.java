@@ -1224,6 +1224,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.w(TAG_WM, "Attempted to add window with exiting application token "
                           + token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_APP_EXITING;
+                } else if (type == TYPE_APPLICATION_STARTING && atoken.startingWindow != null) {
+                    Slog.w(TAG_WM, "Attempted to add starting window to token with already existing"
+                            + " starting window");
+                    return WindowManagerGlobal.ADD_DUPLICATE_ADD;
                 }
             } else if (rootType == TYPE_INPUT_METHOD) {
                 if (token.windowType != TYPE_INPUT_METHOD) {
