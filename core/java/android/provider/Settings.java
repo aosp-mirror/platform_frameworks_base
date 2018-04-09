@@ -10809,6 +10809,15 @@ public final class Settings {
                 = "time_only_mode_constants";
 
         /**
+         * Whether of not to send keycode sleep for ungaze when Home is the foreground activity on
+         * watch type devices.
+         * Type: int (0 for false, 1 for true)
+         * Default: 0
+         * @hide
+         */
+        public static final String UNGAZE_SLEEP_ENABLED = "ungaze_sleep_enabled";
+
+        /**
          * Whether or not Network Watchlist feature is enabled.
          * Type: int (0 for false, 1 for true)
          * Default: 0
