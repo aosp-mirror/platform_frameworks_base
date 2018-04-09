@@ -26,6 +26,7 @@ import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.NotificationHeaderView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -1627,6 +1628,42 @@ public class NotificationContentView extends FrameLayout {
         }
         if (mHeadsUpRemoteInput != null && mHeadsUpRemoteInput.isActive()) {
             return mHeadsUpRemoteInput.getText();
+        }
+        return null;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        float y = ev.getY();
+        // We still want to distribute touch events to the remote input even if it's outside the
+        // view boundary. We're therefore manually dispatching these events to the remote view
+        RemoteInputView riv = getRemoteInputForView(getViewForVisibleType(mVisibleType));
+        if (riv != null && riv.getVisibility() == VISIBLE) {
+            int inputStart = mUnrestrictedContentHeight - riv.getHeight();
+            if (y <= mUnrestrictedContentHeight && y >= inputStart) {
+                ev.offsetLocation(0, -inputStart);
+                return riv.dispatchTouchEvent(ev);
+            }
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
+    /**
+     * Overridden to make sure touches to the reply action bar actually go through to this view
+     */
+    @Override
+    public boolean pointInView(float localX, float localY, float slop) {
+        float top = mClipTopAmount;
+        float bottom = mUnrestrictedContentHeight;
+        return localX >= -slop && localY >= top - slop && localX < ((mRight - mLeft) + slop) &&
+                localY < (bottom + slop);
+    }
+
+    private RemoteInputView getRemoteInputForView(View child) {
+        if (child == mExpandedChild) {
+            return mExpandedRemoteInput;
+        } else if (child == mHeadsUpChild) {
+            return mHeadsUpRemoteInput;
         }
         return null;
     }
