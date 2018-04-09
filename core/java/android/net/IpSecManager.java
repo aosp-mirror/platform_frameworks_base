@@ -337,6 +337,9 @@ public final class IpSecManager {
      */
     public void applyTransportModeTransform(@NonNull Socket socket,
             @PolicyDirection int direction, @NonNull IpSecTransform transform) throws IOException {
+        // Ensure creation of FD. See b/77548890 for more details.
+        socket.getSoLinger();
+
         applyTransportModeTransform(socket.getFileDescriptor$(), direction, transform);
     }
 
@@ -441,6 +444,9 @@ public final class IpSecManager {
      * @throws IOException indicating that the transform could not be removed from the socket
      */
     public void removeTransportModeTransforms(@NonNull Socket socket) throws IOException {
+        // Ensure creation of FD. See b/77548890 for more details.
+        socket.getSoLinger();
+
         removeTransportModeTransforms(socket.getFileDescriptor$());
     }
 
