@@ -22,8 +22,8 @@
 #include "GlLayer.h"
 #include "OpenGLReadback.h"
 #include "ProfileRenderer.h"
-#include "renderstate/RenderState.h"
 #include "TreeInfo.h"
+#include "renderstate/RenderState.h"
 
 #include <cutils/properties.h>
 #include <strings.h>
@@ -203,8 +203,7 @@ static bool layerMatchesWH(OffscreenBuffer* layer, int width, int height) {
 
 bool OpenGLPipeline::createOrUpdateLayer(RenderNode* node,
                                          const DamageAccumulator& damageAccumulator,
-                                         bool wideColorGamut,
-                                         ErrorHandler* errorHandler) {
+                                         bool wideColorGamut, ErrorHandler* errorHandler) {
     RenderState& renderState = mRenderThread.renderState();
     OffscreenBufferPool& layerPool = renderState.layerPool();
     bool transformUpdateNeeded = false;

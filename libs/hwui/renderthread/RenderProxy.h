@@ -119,7 +119,23 @@ public:
 
     ANDROID_API void addFrameMetricsObserver(FrameMetricsObserver* observer);
     ANDROID_API void removeFrameMetricsObserver(FrameMetricsObserver* observer);
-    ANDROID_API long getDroppedFrameReportCount();
+
+    /**
+     * Sets a render-ahead depth on the backing renderer. This will increase latency by
+     * <swapInterval> * renderAhead and increase memory usage by (3 + renderAhead) * <resolution>.
+     * In return the renderer will be less susceptible to jitter, resulting in a smoother animation.
+     *
+     * Not recommended to use in response to anything touch driven, but for canned animations
+     * where latency is not a concern careful use may be beneficial.
+     *
+     * Note that when increasing this there will be a frame gap of N frames where N is
+     * renderAhead - <current renderAhead>. When decreasing this if there are any pending
+     * frames they will retain their prior renderAhead value, so it will take a few frames
+     * for the decrease to flush through.
+     *
+     * @param renderAhead How far to render ahead, must be in the range [0..2]
+     */
+    ANDROID_API void setRenderAheadDepth(int renderAhead);
 
     ANDROID_API static int copySurfaceInto(sp<Surface>& surface, int left, int top, int right,
                                            int bottom, SkBitmap* bitmap);

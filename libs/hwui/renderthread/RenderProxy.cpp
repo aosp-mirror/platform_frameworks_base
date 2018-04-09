@@ -290,6 +290,12 @@ void RenderProxy::removeFrameMetricsObserver(FrameMetricsObserver* observerPtr) 
     });
 }
 
+void RenderProxy::setRenderAheadDepth(int renderAhead) {
+    mRenderThread.queue().post([ context = mContext, renderAhead ]() {
+        context->setRenderAheadDepth(renderAhead);
+    });
+}
+
 int RenderProxy::copySurfaceInto(sp<Surface>& surface, int left, int top, int right, int bottom,
                                  SkBitmap* bitmap) {
     auto& thread = RenderThread::getInstance();

@@ -83,6 +83,7 @@ static struct {
     bool glColorSpace = false;
     bool scRGB = false;
     bool contextPriority = false;
+    bool presentTime = false;
 } EglExtensions;
 
 EglManager::EglManager(RenderThread& thread)
@@ -170,6 +171,7 @@ void EglManager::initExtensions() {
     EglExtensions.scRGB = extensions.has("EGL_EXT_gl_colorspace_scrgb");
 #endif
     EglExtensions.contextPriority = extensions.has("EGL_IMG_context_priority");
+    EglExtensions.presentTime = extensions.has("EGL_ANDROID_presentation_time");
 }
 
 bool EglManager::hasEglContext() {
@@ -242,7 +244,7 @@ void EglManager::loadConfigs() {
                              &numConfigs) ||
             numConfigs != 1) {
             ALOGE("Device claims wide gamut support, cannot find matching config, error = %s",
-                    eglErrorString());
+                  eglErrorString());
             EglExtensions.pixelFormatFloat = false;
         }
     }
@@ -435,6 +437,13 @@ bool EglManager::swapBuffers(const Frame& frame, const SkRect& screenDirty) {
     if (CC_UNLIKELY(Properties::waitForGpuCompletion)) {
         ATRACE_NAME("Finishing GPU work");
         fence();
+    }
+
+    if (EglExtensions.presentTime && Properties::usePresentTime) {
+        if (!eglPresentationTimeANDROID(mEglDisplay, frame.mSurface, frame.mPresentTime)) {
+            LOG_ALWAYS_FATAL("Failed to set presentation time on surface %p, error=%s",
+                             (void*)frame.mSurface, eglErrorString());
+        }
     }
 
     EGLint rects[4];
