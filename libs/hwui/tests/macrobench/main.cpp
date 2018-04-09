@@ -67,7 +67,7 @@ OPTIONS:
   --onscreen           Render tests on device screen. By default tests
                        are offscreen rendered
   --benchmark_format   Set output format. Possible values are tabular, json, csv
-  --renderer=TYPE      Sets the render pipeline to use. May be opengl, skiagl, or skiavk
+  --renderer=TYPE      Sets the render pipeline to use. May be skiagl or skiavk
   --render-ahead=NUM   Sets how far to render-ahead. Must be 0 (default), 1, or 2.
 )");
 }
@@ -148,9 +148,7 @@ static bool setBenchmarkFormat(const char* format) {
 }
 
 static bool setRenderer(const char* renderer) {
-    if (!strcmp(renderer, "opengl")) {
-        Properties::overrideRenderPipelineType(RenderPipelineType::OpenGL);
-    } else if (!strcmp(renderer, "skiagl")) {
+    if (!strcmp(renderer, "skiagl")) {
         Properties::overrideRenderPipelineType(RenderPipelineType::SkiaGL);
     } else if (!strcmp(renderer, "skiavk")) {
         Properties::overrideRenderPipelineType(RenderPipelineType::SkiaVulkan);

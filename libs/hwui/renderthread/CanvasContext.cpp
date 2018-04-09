@@ -69,9 +69,6 @@ CanvasContext* CanvasContext::create(RenderThread& thread, bool translucent,
     auto renderType = Properties::getRenderPipelineType();
 
     switch (renderType) {
-        case RenderPipelineType::OpenGL:
-            return new CanvasContext(thread, translucent, rootRenderNode, contextFactory,
-                                     std::make_unique<OpenGLPipeline>(thread));
         case RenderPipelineType::SkiaGL:
             return new CanvasContext(thread, translucent, rootRenderNode, contextFactory,
                                      std::make_unique<skiapipeline::SkiaOpenGLPipeline>(thread));
@@ -86,28 +83,13 @@ CanvasContext* CanvasContext::create(RenderThread& thread, bool translucent,
 }
 
 void CanvasContext::destroyLayer(RenderNode* node) {
-    auto renderType = Properties::getRenderPipelineType();
-    switch (renderType) {
-        case RenderPipelineType::OpenGL:
-            OpenGLPipeline::destroyLayer(node);
-            break;
-        case RenderPipelineType::SkiaGL:
-        case RenderPipelineType::SkiaVulkan:
-            skiapipeline::SkiaPipeline::destroyLayer(node);
-            break;
-        default:
-            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t)renderType);
-            break;
-    }
+    skiapipeline::SkiaPipeline::destroyLayer(node);
 }
 
 void CanvasContext::invokeFunctor(const RenderThread& thread, Functor* functor) {
     ATRACE_CALL();
     auto renderType = Properties::getRenderPipelineType();
     switch (renderType) {
-        case RenderPipelineType::OpenGL:
-            OpenGLPipeline::invokeFunctor(thread, functor);
-            break;
         case RenderPipelineType::SkiaGL:
             skiapipeline::SkiaOpenGLPipeline::invokeFunctor(thread, functor);
             break;
@@ -121,19 +103,7 @@ void CanvasContext::invokeFunctor(const RenderThread& thread, Functor* functor) 
 }
 
 void CanvasContext::prepareToDraw(const RenderThread& thread, Bitmap* bitmap) {
-    auto renderType = Properties::getRenderPipelineType();
-    switch (renderType) {
-        case RenderPipelineType::OpenGL:
-            OpenGLPipeline::prepareToDraw(thread, bitmap);
-            break;
-        case RenderPipelineType::SkiaGL:
-        case RenderPipelineType::SkiaVulkan:
-            skiapipeline::SkiaPipeline::prepareToDraw(thread, bitmap);
-            break;
-        default:
-            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t)renderType);
-            break;
-    }
+    skiapipeline::SkiaPipeline::prepareToDraw(thread, bitmap);
 }
 
 CanvasContext::CanvasContext(RenderThread& thread, bool translucent, RenderNode* rootRenderNode,
@@ -586,37 +556,15 @@ void CanvasContext::destroyHardwareResources() {
 }
 
 void CanvasContext::trimMemory(RenderThread& thread, int level) {
-    auto renderType = Properties::getRenderPipelineType();
-    switch (renderType) {
-        case RenderPipelineType::OpenGL: {
-            // No context means nothing to free
-            if (!thread.eglManager().hasEglContext()) return;
-            ATRACE_CALL();
-            if (level >= TRIM_MEMORY_COMPLETE) {
-                thread.renderState().flush(Caches::FlushMode::Full);
-                thread.eglManager().destroy();
-            } else if (level >= TRIM_MEMORY_UI_HIDDEN) {
-                thread.renderState().flush(Caches::FlushMode::Moderate);
-            }
-            break;
-        }
-        case RenderPipelineType::SkiaGL:
-        case RenderPipelineType::SkiaVulkan: {
-            // No context means nothing to free
-            if (!thread.getGrContext()) return;
-            ATRACE_CALL();
-            if (level >= TRIM_MEMORY_COMPLETE) {
-                thread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::Complete);
-                thread.eglManager().destroy();
-                thread.vulkanManager().destroy();
-            } else if (level >= TRIM_MEMORY_UI_HIDDEN) {
-                thread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::UiHidden);
-            }
-            break;
-        }
-        default:
-            LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t)renderType);
-            break;
+    ATRACE_CALL();
+    if (!thread.getGrContext()) return;
+    ATRACE_CALL();
+    if (level >= TRIM_MEMORY_COMPLETE) {
+        thread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::Complete);
+        thread.eglManager().destroy();
+        thread.vulkanManager().destroy();
+    } else if (level >= TRIM_MEMORY_UI_HIDDEN) {
+        thread.cacheManager().trimMemory(CacheManager::TrimMemoryMode::UiHidden);
     }
 }
 

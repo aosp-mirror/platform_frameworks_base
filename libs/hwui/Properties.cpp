@@ -193,15 +193,12 @@ RenderPipelineType Properties::getRenderPipelineType() {
     }
     char prop[PROPERTY_VALUE_MAX];
     property_get(PROPERTY_RENDERER, prop, "skiagl");
-    if (!strcmp(prop, "skiagl")) {
-        ALOGD("Skia GL Pipeline");
-        sRenderPipelineType = RenderPipelineType::SkiaGL;
-    } else if (!strcmp(prop, "skiavk")) {
+    if (!strcmp(prop, "skiavk")) {
         ALOGD("Skia Vulkan Pipeline");
         sRenderPipelineType = RenderPipelineType::SkiaVulkan;
-    } else {  //"opengl"
-        ALOGD("HWUI GL Pipeline");
-        sRenderPipelineType = RenderPipelineType::OpenGL;
+    } else {  //"skiagl"
+        ALOGD("Skia GL Pipeline");
+        sRenderPipelineType = RenderPipelineType::SkiaGL;
     }
     return sRenderPipelineType;
 }

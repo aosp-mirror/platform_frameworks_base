@@ -175,16 +175,6 @@ void RenderThread::dumpGraphicsMemory(int fd) {
     String8 pipeline;
     auto renderType = Properties::getRenderPipelineType();
     switch (renderType) {
-        case RenderPipelineType::OpenGL: {
-            if (Caches::hasInstance()) {
-                cachesOutput.appendFormat("Caches:\n");
-                Caches::getInstance().dumpMemoryUsage(cachesOutput);
-            } else {
-                cachesOutput.appendFormat("No caches instance.");
-            }
-            pipeline.appendFormat("FrameBuilder");
-            break;
-        }
         case RenderPipelineType::SkiaGL: {
             mCacheManager->dumpMemoryUsage(cachesOutput, mRenderState);
             pipeline.appendFormat("Skia (OpenGL)");
@@ -208,9 +198,6 @@ Readback& RenderThread::readback() {
     if (!mReadback) {
         auto renderType = Properties::getRenderPipelineType();
         switch (renderType) {
-            case RenderPipelineType::OpenGL:
-                mReadback = new OpenGLReadbackImpl(*this);
-                break;
             case RenderPipelineType::SkiaGL:
                 mReadback = new skiapipeline::SkiaOpenGLReadback(*this);
                 break;
@@ -344,8 +331,6 @@ void RenderThread::pushBackFrameCallback(IFrameCallback* callback) {
 sk_sp<Bitmap> RenderThread::allocateHardwareBitmap(SkBitmap& skBitmap) {
     auto renderType = Properties::getRenderPipelineType();
     switch (renderType) {
-        case RenderPipelineType::OpenGL:
-            return OpenGLPipeline::allocateHardwareBitmap(*this, skBitmap);
         case RenderPipelineType::SkiaGL:
             return skiapipeline::SkiaOpenGLPipeline::allocateHardwareBitmap(*this, skBitmap);
         case RenderPipelineType::SkiaVulkan:
