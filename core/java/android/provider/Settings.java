@@ -8938,6 +8938,20 @@ public final class Settings {
        /** {@hide} */
        public static final String NETSTATS_UID_TAG_DELETE_AGE = "netstats_uid_tag_delete_age";
 
+       /** {@hide} */
+       public static final String NETPOLICY_QUOTA_ENABLED = "netpolicy_quota_enabled";
+       /** {@hide} */
+       public static final String NETPOLICY_QUOTA_UNLIMITED = "netpolicy_quota_unlimited";
+       /** {@hide} */
+       public static final String NETPOLICY_QUOTA_LIMITED = "netpolicy_quota_limited";
+       /** {@hide} */
+       public static final String NETPOLICY_QUOTA_FRAC_JOBS = "netpolicy_quota_frac_jobs";
+       /** {@hide} */
+       public static final String NETPOLICY_QUOTA_FRAC_MULTIPATH = "netpolicy_quota_frac_multipath";
+
+       /** {@hide} */
+       public static final String NETPOLICY_OVERRIDE_ENABLED = "netpolicy_override_enabled";
+
        /**
         * User preference for which network(s) should be used. Only the
         * connectivity service should touch this.
