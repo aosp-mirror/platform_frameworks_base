@@ -129,16 +129,16 @@ public class InputMethodUtils {
     }
     // ----------------------------------------------------------------------
 
-    public static boolean isSystemIme(InputMethodInfo inputMethod) {
-        return (inputMethod.getServiceInfo().applicationInfo.flags
-                & ApplicationInfo.FLAG_SYSTEM) != 0;
+    @Deprecated
+    public static boolean isSystemIme(@NonNull InputMethodInfo inputMethod) {
+        return inputMethod.isSystem();
     }
 
     public static boolean isSystemImeThatHasSubtypeOf(final InputMethodInfo imi,
             final Context context, final boolean checkDefaultAttribute,
             @Nullable final Locale requiredLocale, final boolean checkCountry,
             final String requiredSubtypeMode) {
-        if (!isSystemIme(imi)) {
+        if (!imi.isSystem()) {
             return false;
         }
         if (checkDefaultAttribute && !imi.isDefault(context)) {
@@ -182,7 +182,7 @@ public class InputMethodUtils {
 
     private static boolean isSystemAuxilialyImeThatHasAutomaticSubtype(final InputMethodInfo imi,
             final Context context, final boolean checkDefaultAttribute) {
-        if (!isSystemIme(imi)) {
+        if (!imi.isSystem()) {
             return false;
         }
         if (checkDefaultAttribute && !imi.isDefault(context)) {
@@ -435,12 +435,11 @@ public class InputMethodUtils {
             if (imi.isAuxiliaryIme()) {
                 continue;
             }
-            if (InputMethodUtils.isSystemIme(imi)
-                    && containsSubtypeOf(imi, ENGLISH_LOCALE, false /* checkCountry */,
-                            SUBTYPE_MODE_KEYBOARD)) {
+            if (imi.isSystem() && containsSubtypeOf(
+                    imi, ENGLISH_LOCALE, false /* checkCountry */, SUBTYPE_MODE_KEYBOARD)) {
                 return imi;
             }
-            if (firstFoundSystemIme < 0 && InputMethodUtils.isSystemIme(imi)) {
+            if (firstFoundSystemIme < 0 && imi.isSystem()) {
                 firstFoundSystemIme = i;
             }
         }
