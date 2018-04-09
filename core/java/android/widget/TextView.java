@@ -9380,7 +9380,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final int selectionStart = getSelectionStart();
         final int selectionEnd = getSelectionEnd();
 
-        return selectionStart >= 0 && selectionStart != selectionEnd;
+        return selectionStart >= 0 && selectionEnd > 0 && selectionStart != selectionEnd;
     }
 
     String getSelectedText() {

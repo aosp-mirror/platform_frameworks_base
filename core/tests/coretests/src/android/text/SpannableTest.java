@@ -16,6 +16,8 @@
 
 package android.text;
 
+import static org.junit.Assert.assertEquals;
+
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -23,6 +25,8 @@ import android.test.MoreAsserts;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.concurrent.CountDownLatch;
 
 @Presubmit
 @SmallTest
@@ -52,5 +56,35 @@ public abstract class SpannableTest {
         MoreAsserts.assertEquals(new Object[]{emptySpan, unemptySpan}, spans);
         spans = spannable.getSpans(2, 2, Object.class);
         MoreAsserts.assertEquals(new Object[]{unemptySpan}, spans);
+    }
+
+    @Test
+    public void testRemoveSpanWithIntermediateFlag() {
+        Spannable spannable = newSpannableWithText("abcdef");
+        Object emptySpan = new Object();
+        spannable.setSpan(emptySpan, 1, 1, 0);
+        Object unemptySpan = new Object();
+        spannable.setSpan(unemptySpan, 1, 2, 0);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        SpanWatcher watcher = new SpanWatcher() {
+            @Override
+            public void onSpanAdded(Spannable text, Object what, int start, int end) {}
+
+            @Override
+            public void onSpanRemoved(Spannable text, Object what, int start, int end) {
+                latch.countDown();
+            }
+
+            @Override
+            public void onSpanChanged(Spannable text, Object what, int ostart, int oend, int nstart,
+                    int nend) {}
+        };
+        spannable.setSpan(watcher, 0, 2, 0);
+
+        spannable.removeSpan(emptySpan, Spanned.SPAN_INTERMEDIATE);
+        assertEquals(1, latch.getCount());
+        spannable.removeSpan(unemptySpan);
+        assertEquals(0, latch.getCount());
     }
 }
