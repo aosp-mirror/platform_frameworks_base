@@ -2946,7 +2946,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                             ? Collections.emptyList()
                             : Arrays.asList(exemptions.split(","));
                 }
-                zygoteProcess.setApiBlacklistExemptions(mExemptions);
+                if (!zygoteProcess.setApiBlacklistExemptions(mExemptions)) {
+                  Slog.e(TAG, "Failed to set API blacklist exemptions!");
+                  // leave mExemptionsStr as is, so we don't try to send the same list again.
+                  mExemptions = Collections.emptyList();
+                }
             }
             int logSampleRate = Settings.Global.getInt(mContext.getContentResolver(),
                     Settings.Global.HIDDEN_API_ACCESS_LOG_SAMPLING_RATE, -1);
