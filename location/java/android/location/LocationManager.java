@@ -29,6 +29,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -388,6 +389,18 @@ public class LocationManager {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public String[] getBackgroundThrottlingWhitelist() {
+        try {
+            return mService.getBackgroundThrottlingWhitelist();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

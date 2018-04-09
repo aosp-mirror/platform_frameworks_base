@@ -82,6 +82,7 @@ public final class UserHandle implements Parcelable {
     public static final int USER_SERIAL_SYSTEM = 0;
 
     /** @hide A user handle to indicate the "system" user of the device */
+    @TestApi
     public static final UserHandle SYSTEM = new UserHandle(USER_SYSTEM);
 
     /**

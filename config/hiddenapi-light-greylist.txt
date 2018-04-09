@@ -1512,7 +1512,6 @@ Landroid/os/UserHandle;-><init>(I)V
 Landroid/os/UserHandle;->MU_ENABLED:Z
 Landroid/os/UserHandle;->OWNER:Landroid/os/UserHandle;
 Landroid/os/UserHandle;->PER_USER_RANGE:I
-Landroid/os/UserHandle;->SYSTEM:Landroid/os/UserHandle;
 Landroid/os/UserHandle;->USER_ALL:I
 Landroid/os/UserHandle;->USER_CURRENT:I
 Landroid/os/UserHandle;->USER_CURRENT_OR_SELF:I
