@@ -3164,12 +3164,17 @@ package android.os {
   public class HidlSupport {
     method public static boolean deepEquals(java.lang.Object, java.lang.Object);
     method public static int deepHashCode(java.lang.Object);
+    method public static int getPidIfSharable();
     method public static boolean interfacesEqual(android.os.IHwInterface, java.lang.Object);
   }
 
   public abstract class HwBinder implements android.os.IHwBinder {
     method public static final void configureRpcThreadpool(long, boolean);
+    method public static void enableInstrumentation();
+    method public static final android.os.IHwBinder getService(java.lang.String, java.lang.String) throws java.util.NoSuchElementException, android.os.RemoteException;
+    method public static final android.os.IHwBinder getService(java.lang.String, java.lang.String, boolean) throws java.util.NoSuchElementException, android.os.RemoteException;
     method public static final void joinRpcThreadpool();
+    method public final void transact(int, android.os.HwParcel, android.os.HwParcel, int) throws android.os.RemoteException;
   }
 
   public class HwBlob {
@@ -3269,6 +3274,8 @@ package android.os {
 
   public abstract interface IHwBinder {
     method public abstract boolean linkToDeath(android.os.IHwBinder.DeathRecipient, long);
+    method public abstract android.os.IHwInterface queryLocalInterface(java.lang.String);
+    method public abstract void transact(int, android.os.HwParcel, android.os.HwParcel, int) throws android.os.RemoteException;
     method public abstract boolean unlinkToDeath(android.os.IHwBinder.DeathRecipient);
   }
 
