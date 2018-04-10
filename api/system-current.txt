@@ -3169,11 +3169,14 @@ package android.os {
   }
 
   public abstract class HwBinder implements android.os.IHwBinder {
+    ctor public HwBinder();
     method public static final void configureRpcThreadpool(long, boolean);
     method public static void enableInstrumentation();
     method public static final android.os.IHwBinder getService(java.lang.String, java.lang.String) throws java.util.NoSuchElementException, android.os.RemoteException;
     method public static final android.os.IHwBinder getService(java.lang.String, java.lang.String, boolean) throws java.util.NoSuchElementException, android.os.RemoteException;
     method public static final void joinRpcThreadpool();
+    method public abstract void onTransact(int, android.os.HwParcel, android.os.HwParcel, int) throws android.os.RemoteException;
+    method public final void registerService(java.lang.String) throws android.os.RemoteException;
     method public final void transact(int, android.os.HwParcel, android.os.HwParcel, int) throws android.os.RemoteException;
   }
 
