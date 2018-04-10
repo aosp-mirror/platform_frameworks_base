@@ -238,6 +238,7 @@ public class NotificationPanelView extends PanelView implements
     private boolean mIsFullWidth;
     private float mDarkAmount;
     private float mDarkAmountTarget;
+    private boolean mPulsing;
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private boolean mNoVisibleNotifications = true;
     private ValueAnimator mDarkAnimator;
@@ -477,7 +478,7 @@ public class NotificationPanelView extends PanelView implements
                     mKeyguardStatusView.getHeight(),
                     mDarkAmount,
                     mStatusBar.isKeyguardCurrentlySecure(),
-                    mTracking,
+                    mPulsing,
                     mBouncerTop);
             mClockPositionAlgorithm.run(mClockPositionResult);
             if (animate || mClockAnimator != null) {
@@ -2689,14 +2690,8 @@ public class NotificationPanelView extends PanelView implements
         positionClockAndNotifications();
     }
 
-    public void setNoVisibleNotifications(boolean noNotifications) {
-        mNoVisibleNotifications = noNotifications;
-        if (mQs != null) {
-            mQs.setHasNotifications(!noNotifications);
-        }
-    }
-
     public void setPulsing(boolean pulsing) {
+        mPulsing = pulsing;
         mKeyguardStatusView.setPulsing(pulsing);
         positionClockAndNotifications();
         mNotificationStackScroller.setPulsing(pulsing, mKeyguardStatusView.getLocationOnScreen()[1]
