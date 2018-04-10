@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1166,7 +1167,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface HiddenApiEnforcementPolicy {}
 
-    private boolean isValidHiddenApiEnforcementPolicy(int policy) {
+    /** @hide */
+    public static boolean isValidHiddenApiEnforcementPolicy(int policy) {
         return policy >= HIDDEN_API_ENFORCEMENT_DEFAULT && policy <= HIDDEN_API_ENFORCEMENT_MAX;
     }
 
@@ -1686,13 +1688,17 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * @hide
      */
     public @HiddenApiEnforcementPolicy int getHiddenApiEnforcementPolicy() {
-        if (mHiddenApiPolicy != HIDDEN_API_ENFORCEMENT_DEFAULT) {
-            return mHiddenApiPolicy;
-        }
         if (isAllowedToUseHiddenApis()) {
             return HIDDEN_API_ENFORCEMENT_NONE;
         }
-        return HIDDEN_API_ENFORCEMENT_BLACK;
+        if (mHiddenApiPolicy != HIDDEN_API_ENFORCEMENT_DEFAULT) {
+            return mHiddenApiPolicy;
+        }
+        if (targetSdkVersion <= Build.VERSION_CODES.O_MR1) {
+            return HIDDEN_API_ENFORCEMENT_BLACK;
+        } else {
+            return HIDDEN_API_ENFORCEMENT_DARK_GREY_AND_BLACK;
+        }
     }
 
     /**
@@ -1703,6 +1709,31 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             throw new IllegalArgumentException("Invalid API enforcement policy: " + policy);
         }
         mHiddenApiPolicy = policy;
+    }
+
+    /**
+     * Updates the hidden API enforcement policy for this app from the given values, if appropriate.
+     *
+     * This will have no effect if this app is not subject to hidden API enforcement, i.e. if it
+     * is on the package whitelist.
+     *
+     * @param policyPreP configured policy for pre-P apps, or {@link
+     *        #HIDDEN_API_ENFORCEMENT_DEFAULT} if nothing configured.
+     * @param policyP configured policy for apps targeting P or later, or {@link
+     *        #HIDDEN_API_ENFORCEMENT_DEFAULT} if nothing configured.
+     * @hide
+     */
+    public void maybeUpdateHiddenApiEnforcementPolicy(
+            @HiddenApiEnforcementPolicy int policyPreP, @HiddenApiEnforcementPolicy int policyP) {
+        if (isPackageWhitelistedForHiddenApis()) {
+            return;
+        }
+        if (targetSdkVersion <= Build.VERSION_CODES.O_MR1) {
+            setHiddenApiEnforcementPolicy(policyPreP);
+        } else if (targetSdkVersion > Build.VERSION_CODES.O_MR1) {
+            setHiddenApiEnforcementPolicy(policyP);
+        }
+
     }
 
     /**
