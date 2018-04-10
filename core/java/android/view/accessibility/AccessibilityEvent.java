@@ -201,6 +201,7 @@ import java.util.List;
  * <em>Properties:</em></br>
  * <ul>
  *   <li>{@link #getEventType()} - The type of the event.</li>
+ *   <li>{@link #getContentChangeTypes()} - The type of state changes.</li>
  *   <li>{@link #getSource()} - The source info (for registered clients).</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
@@ -849,16 +850,17 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     }
 
     /**
-     * Gets the bit mask of change types signaled by an
-     * {@link #TYPE_WINDOW_CONTENT_CHANGED} event. A single event may represent
-     * multiple change types.
+     * Gets the bit mask of change types signaled by a
+     * {@link #TYPE_WINDOW_CONTENT_CHANGED} event or {@link #TYPE_WINDOW_STATE_CHANGED}. A single
+     * event may represent multiple change types.
      *
      * @return The bit mask of change types. One or more of:
      *         <ul>
-     *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION}
-     *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_SUBTREE}
-     *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_TEXT}
-     *         <li>{@link AccessibilityEvent#CONTENT_CHANGE_TYPE_UNDEFINED}
+     *         <li>{@link #CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION}
+     *         <li>{@link #CONTENT_CHANGE_TYPE_SUBTREE}
+     *         <li>{@link #CONTENT_CHANGE_TYPE_TEXT}
+     *         <li>{@link #CONTENT_CHANGE_TYPE_PANE_TITLE}
+     *         <li>{@link #CONTENT_CHANGE_TYPE_UNDEFINED}
      *         </ul>
      */
     @ContentChangeTypes
@@ -877,6 +879,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
             }
             case CONTENT_CHANGE_TYPE_SUBTREE: return "CONTENT_CHANGE_TYPE_SUBTREE";
             case CONTENT_CHANGE_TYPE_TEXT: return "CONTENT_CHANGE_TYPE_TEXT";
+            case CONTENT_CHANGE_TYPE_PANE_TITLE: return "CONTENT_CHANGE_TYPE_PANE_TITLE";
             case CONTENT_CHANGE_TYPE_UNDEFINED: return "CONTENT_CHANGE_TYPE_UNDEFINED";
             default: return Integer.toHexString(type);
         }
@@ -1285,7 +1288,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         }
         if (!DEBUG_CONCISE_TOSTRING || mWindowChangeTypes != 0) {
             builder.append("; WindowChangeTypes: ").append(
-                    contentChangeTypesToString(mWindowChangeTypes));
+                    windowChangeTypesToString(mWindowChangeTypes));
         }
         super.appendTo(builder);
         if (DEBUG || DEBUG_CONCISE_TOSTRING) {
