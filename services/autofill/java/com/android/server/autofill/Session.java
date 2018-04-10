@@ -1387,7 +1387,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 mUiLatencyHistory.log(historyLog.toString());
 
                 final LogMaker metricsLog = newLogMaker(MetricsEvent.AUTOFILL_UI_LATENCY)
-                        .setCounterValue((int) duration);
+                        .addTaggedData(MetricsEvent.FIELD_AUTOFILL_DURATION, duration);
                 mMetricsLogger.write(metricsLog);
             }
         }
