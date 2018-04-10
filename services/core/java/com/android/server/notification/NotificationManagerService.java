@@ -2066,7 +2066,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled) {
-            checkCallerIsSystem();
+            enforceSystemOrSystemUI("setNotificationsEnabledForPackage");
 
             mRankingHelper.setEnabled(pkg, uid, enabled);
             // Now, cancel any outstanding notifications that are part of a just-disabled app
