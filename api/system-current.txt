@@ -3161,6 +3161,125 @@ package android.os {
     field public static final java.lang.String ACTION_UPDATE_TZDATA = "android.intent.action.UPDATE_TZDATA";
   }
 
+  public class HidlSupport {
+    method public static boolean deepEquals(java.lang.Object, java.lang.Object);
+    method public static int deepHashCode(java.lang.Object);
+    method public static boolean interfacesEqual(android.os.IHwInterface, java.lang.Object);
+  }
+
+  public abstract class HwBinder implements android.os.IHwBinder {
+    method public static final void configureRpcThreadpool(long, boolean);
+    method public static final void joinRpcThreadpool();
+  }
+
+  public class HwBlob {
+    ctor public HwBlob(int);
+    method public final void copyToBoolArray(long, boolean[], int);
+    method public final void copyToDoubleArray(long, double[], int);
+    method public final void copyToFloatArray(long, float[], int);
+    method public final void copyToInt16Array(long, short[], int);
+    method public final void copyToInt32Array(long, int[], int);
+    method public final void copyToInt64Array(long, long[], int);
+    method public final void copyToInt8Array(long, byte[], int);
+    method public final boolean getBool(long);
+    method public final double getDouble(long);
+    method public final float getFloat(long);
+    method public final short getInt16(long);
+    method public final int getInt32(long);
+    method public final long getInt64(long);
+    method public final byte getInt8(long);
+    method public final java.lang.String getString(long);
+    method public final long handle();
+    method public final void putBlob(long, android.os.HwBlob);
+    method public final void putBool(long, boolean);
+    method public final void putBoolArray(long, boolean[]);
+    method public final void putDouble(long, double);
+    method public final void putDoubleArray(long, double[]);
+    method public final void putFloat(long, float);
+    method public final void putFloatArray(long, float[]);
+    method public final void putInt16(long, short);
+    method public final void putInt16Array(long, short[]);
+    method public final void putInt32(long, int);
+    method public final void putInt32Array(long, int[]);
+    method public final void putInt64(long, long);
+    method public final void putInt64Array(long, long[]);
+    method public final void putInt8(long, byte);
+    method public final void putInt8Array(long, byte[]);
+    method public final void putString(long, java.lang.String);
+    method public static java.lang.Boolean[] wrapArray(boolean[]);
+    method public static java.lang.Long[] wrapArray(long[]);
+    method public static java.lang.Byte[] wrapArray(byte[]);
+    method public static java.lang.Short[] wrapArray(short[]);
+    method public static java.lang.Integer[] wrapArray(int[]);
+    method public static java.lang.Float[] wrapArray(float[]);
+    method public static java.lang.Double[] wrapArray(double[]);
+  }
+
+  public class HwParcel {
+    ctor public HwParcel();
+    method public final void enforceInterface(java.lang.String);
+    method public final boolean readBool();
+    method public final java.util.ArrayList<java.lang.Boolean> readBoolVector();
+    method public final android.os.HwBlob readBuffer(long);
+    method public final double readDouble();
+    method public final java.util.ArrayList<java.lang.Double> readDoubleVector();
+    method public final android.os.HwBlob readEmbeddedBuffer(long, long, long, boolean);
+    method public final float readFloat();
+    method public final java.util.ArrayList<java.lang.Float> readFloatVector();
+    method public final short readInt16();
+    method public final java.util.ArrayList<java.lang.Short> readInt16Vector();
+    method public final int readInt32();
+    method public final java.util.ArrayList<java.lang.Integer> readInt32Vector();
+    method public final long readInt64();
+    method public final java.util.ArrayList<java.lang.Long> readInt64Vector();
+    method public final byte readInt8();
+    method public final java.util.ArrayList<java.lang.Byte> readInt8Vector();
+    method public final java.lang.String readString();
+    method public final java.util.ArrayList<java.lang.String> readStringVector();
+    method public final android.os.IHwBinder readStrongBinder();
+    method public final void release();
+    method public final void releaseTemporaryStorage();
+    method public final void send();
+    method public final void verifySuccess();
+    method public final void writeBool(boolean);
+    method public final void writeBoolVector(java.util.ArrayList<java.lang.Boolean>);
+    method public final void writeBuffer(android.os.HwBlob);
+    method public final void writeDouble(double);
+    method public final void writeDoubleVector(java.util.ArrayList<java.lang.Double>);
+    method public final void writeFloat(float);
+    method public final void writeFloatVector(java.util.ArrayList<java.lang.Float>);
+    method public final void writeInt16(short);
+    method public final void writeInt16Vector(java.util.ArrayList<java.lang.Short>);
+    method public final void writeInt32(int);
+    method public final void writeInt32Vector(java.util.ArrayList<java.lang.Integer>);
+    method public final void writeInt64(long);
+    method public final void writeInt64Vector(java.util.ArrayList<java.lang.Long>);
+    method public final void writeInt8(byte);
+    method public final void writeInt8Vector(java.util.ArrayList<java.lang.Byte>);
+    method public final void writeInterfaceToken(java.lang.String);
+    method public final void writeStatus(int);
+    method public final void writeString(java.lang.String);
+    method public final void writeStringVector(java.util.ArrayList<java.lang.String>);
+    method public final void writeStrongBinder(android.os.IHwBinder);
+    field public static final int STATUS_SUCCESS = 0; // 0x0
+  }
+
+  public static abstract class HwParcel.Status implements java.lang.annotation.Annotation {
+  }
+
+  public abstract interface IHwBinder {
+    method public abstract boolean linkToDeath(android.os.IHwBinder.DeathRecipient, long);
+    method public abstract boolean unlinkToDeath(android.os.IHwBinder.DeathRecipient);
+  }
+
+  public static abstract interface IHwBinder.DeathRecipient {
+    method public abstract void serviceDied(long);
+  }
+
+  public abstract interface IHwInterface {
+    method public abstract android.os.IHwBinder asBinder();
+  }
+
   public class IncidentManager {
     method public void reportIncident(android.os.IncidentReportArgs);
     method public void reportIncident(java.lang.String, byte[]);

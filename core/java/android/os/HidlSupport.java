@@ -16,6 +16,8 @@
 
 package android.os;
 
+import android.annotation.SystemApi;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -25,6 +27,7 @@ import java.util.Objects;
 import java.util.stream.IntStream;
 
 /** @hide */
+@SystemApi
 public class HidlSupport {
     /**
      * Similar to Objects.deepEquals, but also take care of lists.
@@ -36,7 +39,9 @@ public class HidlSupport {
      * 2.3 Both are Lists, elements are checked recursively
      * 2.4 (If both are collections other than lists or maps, throw an error)
      * 2.5 lft.equals(rgt) returns true
+     * @hide
      */
+    @SystemApi
     public static boolean deepEquals(Object lft, Object rgt) {
         if (lft == rgt) {
             return true;
@@ -91,6 +96,7 @@ public class HidlSupport {
      * and should be avoided).
      *
      * @param <E> Inner object type.
+     * @hide
      */
     public static final class Mutable<E> {
         public E value;
@@ -106,7 +112,9 @@ public class HidlSupport {
 
     /**
      * Similar to Arrays.deepHashCode, but also take care of lists.
+     * @hide
      */
+    @SystemApi
     public static int deepHashCode(Object o) {
         if (o == null) {
             return 0;
@@ -133,6 +141,7 @@ public class HidlSupport {
         return o.hashCode();
     }
 
+    /** @hide */
     private static void throwErrorIfUnsupportedType(Object o) {
         if (o instanceof Collection<?> && !(o instanceof List<?>)) {
             throw new UnsupportedOperationException(
@@ -146,6 +155,7 @@ public class HidlSupport {
         }
     }
 
+    /** @hide */
     private static int primitiveArrayHashCode(Object o) {
         Class<?> elementType = o.getClass().getComponentType();
         if (elementType == boolean.class) {
@@ -185,7 +195,9 @@ public class HidlSupport {
      * - If both interfaces are stubs, asBinder() returns the object itself. By default,
      *   auto-generated IFoo.Stub does not override equals(), but an implementation can
      *   optionally override it, and {@code interfacesEqual} will use it here.
+     * @hide
      */
+    @SystemApi
     public static boolean interfacesEqual(IHwInterface lft, Object rgt) {
         if (lft == rgt) {
             return true;
@@ -201,6 +213,10 @@ public class HidlSupport {
 
     /**
      * Return PID of process if sharable to clients.
+     * @hide
      */
     public static native int getPidIfSharable();
+
+    /** @hide */
+    public HidlSupport() {}
 }
