@@ -19,7 +19,7 @@ package android.net;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.BackupUtils;
-import android.util.Pair;
+import android.util.Range;
 import android.util.RecurrenceRule;
 
 import com.android.internal.util.Preconditions;
@@ -136,7 +136,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
         return 0;
     }
 
-    public Iterator<Pair<ZonedDateTime, ZonedDateTime>> cycleIterator() {
+    public Iterator<Range<ZonedDateTime>> cycleIterator() {
         return cycleRule.cycleIterator();
     }
 

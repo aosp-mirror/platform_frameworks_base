@@ -35,7 +35,6 @@ import android.view.inputmethod.InputMethodSubtype;
 import android.widget.Toast;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.inputmethod.InputMethodUtils;
 import com.android.settingslib.R;
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.RestrictedSwitchPreference;
@@ -124,7 +123,7 @@ public class InputMethodPreference extends RestrictedSwitchPreference implements
             setIntent(intent);
         }
         mInputMethodSettingValues = InputMethodSettingValuesWrapper.getInstance(context);
-        mHasPriorityInSorting = InputMethodUtils.isSystemIme(imi)
+        mHasPriorityInSorting = imi.isSystem()
                 && mInputMethodSettingValues.isValidSystemNonAuxAsciiCapableIme(imi, context);
         setOnPreferenceClickListener(this);
         setOnPreferenceChangeListener(this);
@@ -153,7 +152,7 @@ public class InputMethodPreference extends RestrictedSwitchPreference implements
             setCheckedInternal(false);
             return false;
         }
-        if (InputMethodUtils.isSystemIme(mImi)) {
+        if (mImi.isSystem()) {
             // Enable a system IME. No need to show a security warning dialog,
             // but we might need to prompt if it's not Direct Boot aware.
             // TV doesn't doesn't need to worry about this, but other platforms should show

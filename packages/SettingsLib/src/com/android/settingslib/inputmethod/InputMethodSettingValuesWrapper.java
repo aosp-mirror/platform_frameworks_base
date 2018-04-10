@@ -129,7 +129,7 @@ public class InputMethodSettingValuesWrapper {
 
         return enabledValidSystemNonAuxAsciiCapableImeCount <= 1
                 && !(enabledValidSystemNonAuxAsciiCapableImeCount == 1 && !isEnabled)
-                && InputMethodUtils.isSystemIme(imi)
+                && imi.isSystem()
                 && isValidSystemNonAuxAsciiCapableIme(imi, context);
 
     }

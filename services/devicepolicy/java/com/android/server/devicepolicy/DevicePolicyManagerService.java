@@ -8482,6 +8482,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!mHasFeature) {
             return null;
         }
+        enforceManageUsers();
         synchronized (getLockObject()) {
             List<String> result = null;
             // If we have multiple profiles we return the intersection of the

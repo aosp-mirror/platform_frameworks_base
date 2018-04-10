@@ -201,12 +201,12 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 AudioAttributes.USAGE_MEDIA);
         verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
                 AudioAttributes.USAGE_GAME);
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
+                AudioAttributes.USAGE_UNKNOWN);
 
         // Alarms only will silence system noises (but not vibrations)
         verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
                 AudioAttributes.USAGE_ASSISTANCE_SONIFICATION, AppOpsManager.OP_PLAY_AUDIO);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
-                AudioAttributes.USAGE_UNKNOWN);
     }
 
     @Test

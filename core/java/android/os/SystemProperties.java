@@ -19,6 +19,7 @@ package android.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.util.Log;
 import android.util.MutableInt;
 
@@ -35,6 +36,7 @@ import java.util.HashMap;
  * {@hide}
  */
 @SystemApi
+@TestApi
 public class SystemProperties {
     private static final String TAG = "SystemProperties";
     private static final boolean TRACK_KEY_ACCESS = false;
@@ -110,6 +112,7 @@ public class SystemProperties {
      */
     @NonNull
     @SystemApi
+    @TestApi
     public static String get(@NonNull String key, @Nullable String def) {
         if (TRACK_KEY_ACCESS) onKeyAccess(key);
         return native_get(key, def);

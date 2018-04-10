@@ -37,6 +37,8 @@ public:
     // for what this means
     int32_t bufferAge() const { return mBufferAge; }
 
+    void setPresentTime(int64_t presentTime) { mPresentTime = presentTime; }
+
 private:
     Frame() {}
     friend class EglManager;
@@ -44,6 +46,7 @@ private:
     int32_t mWidth;
     int32_t mHeight;
     int32_t mBufferAge;
+    int64_t mPresentTime;
 
     EGLSurface mSurface;
 

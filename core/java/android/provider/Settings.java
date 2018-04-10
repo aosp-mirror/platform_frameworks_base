@@ -3113,6 +3113,9 @@ public final class Settings {
          */
         public static final String DISPLAY_COLOR_MODE = "display_color_mode";
 
+        private static final Validator DISPLAY_COLOR_MODE_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 2);
+
         /**
          * The amount of time in milliseconds before the device goes to sleep or begins
          * to dream after a period of inactivity.  This value is also known as the
@@ -4100,6 +4103,7 @@ public final class Settings {
             SHOW_BATTERY_PERCENT,
             NOTIFICATION_VIBRATION_INTENSITY,
             HAPTIC_FEEDBACK_INTENSITY,
+            DISPLAY_COLOR_MODE
         };
 
         /**
@@ -4212,6 +4216,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(LOCK_TO_APP_ENABLED);
             PRIVATE_SETTINGS.add(EGG_MODE);
             PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT);
+            PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE);
         }
 
         /**
@@ -4233,6 +4238,7 @@ public final class Settings {
             VALIDATORS.put(NEXT_ALARM_FORMATTED, NEXT_ALARM_FORMATTED_VALIDATOR);
             VALIDATORS.put(FONT_SCALE, FONT_SCALE_VALIDATOR);
             VALIDATORS.put(DIM_SCREEN, DIM_SCREEN_VALIDATOR);
+            VALIDATORS.put(DISPLAY_COLOR_MODE, DISPLAY_COLOR_MODE_VALIDATOR);
             VALIDATORS.put(SCREEN_OFF_TIMEOUT, SCREEN_OFF_TIMEOUT_VALIDATOR);
             VALIDATORS.put(SCREEN_BRIGHTNESS_FOR_VR, SCREEN_BRIGHTNESS_FOR_VR_VALIDATOR);
             VALIDATORS.put(SCREEN_BRIGHTNESS_MODE, SCREEN_BRIGHTNESS_MODE_VALIDATOR);
@@ -7384,6 +7390,17 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
+         * Whether the swipe up gesture to switch apps should be enabled.
+         *
+         * @hide
+         */
+        public static final String SWIPE_UP_TO_SWITCH_APPS_ENABLED =
+                "swipe_up_to_switch_apps_enabled";
+
+        private static final Validator SWIPE_UP_TO_SWITCH_APPS_ENABLED_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * Whether or not the smart camera lift trigger that launches the camera when the user moves
          * the phone into a position for taking photos should be enabled.
          *
@@ -7894,6 +7911,7 @@ public final class Settings {
             NIGHT_DISPLAY_AUTO_MODE,
             SYNC_PARENT_SOUNDS,
             CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
+            SWIPE_UP_TO_SWITCH_APPS_ENABLED,
             CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED,
             SYSTEM_NAVIGATION_KEYS_ENABLED,
             QS_TILES,
@@ -8027,6 +8045,8 @@ public final class Settings {
             VALIDATORS.put(SYNC_PARENT_SOUNDS, SYNC_PARENT_SOUNDS_VALIDATOR);
             VALIDATORS.put(CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
                     CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED_VALIDATOR);
+            VALIDATORS.put(SWIPE_UP_TO_SWITCH_APPS_ENABLED,
+                    SWIPE_UP_TO_SWITCH_APPS_ENABLED_VALIDATOR);
             VALIDATORS.put(CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED,
                     CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED_VALIDATOR);
             VALIDATORS.put(SYSTEM_NAVIGATION_KEYS_ENABLED,
@@ -8937,6 +8957,20 @@ public final class Settings {
        public static final String NETSTATS_UID_TAG_ROTATE_AGE = "netstats_uid_tag_rotate_age";
        /** {@hide} */
        public static final String NETSTATS_UID_TAG_DELETE_AGE = "netstats_uid_tag_delete_age";
+
+       /** {@hide} */
+       public static final String NETPOLICY_QUOTA_ENABLED = "netpolicy_quota_enabled";
+       /** {@hide} */
+       public static final String NETPOLICY_QUOTA_UNLIMITED = "netpolicy_quota_unlimited";
+       /** {@hide} */
+       public static final String NETPOLICY_QUOTA_LIMITED = "netpolicy_quota_limited";
+       /** {@hide} */
+       public static final String NETPOLICY_QUOTA_FRAC_JOBS = "netpolicy_quota_frac_jobs";
+       /** {@hide} */
+       public static final String NETPOLICY_QUOTA_FRAC_MULTIPATH = "netpolicy_quota_frac_multipath";
+
+       /** {@hide} */
+       public static final String NETPOLICY_OVERRIDE_ENABLED = "netpolicy_override_enabled";
 
        /**
         * User preference for which network(s) should be used. Only the
@@ -10809,6 +10843,15 @@ public final class Settings {
                 = "time_only_mode_constants";
 
         /**
+         * Whether of not to send keycode sleep for ungaze when Home is the foreground activity on
+         * watch type devices.
+         * Type: int (0 for false, 1 for true)
+         * Default: 0
+         * @hide
+         */
+        public static final String UNGAZE_SLEEP_ENABLED = "ungaze_sleep_enabled";
+
+        /**
          * Whether or not Network Watchlist feature is enabled.
          * Type: int (0 for false, 1 for true)
          * Default: 0
@@ -11086,6 +11129,14 @@ public final class Settings {
          * extended lifetime is used.
          */
         public static final String ALWAYS_FINISH_ACTIVITIES = "always_finish_activities";
+
+        /**
+         * If nonzero, all system error dialogs will be hidden.  For example, the
+         * crash and ANR dialogs will not be shown, and the system will just proceed
+         * as if they had been accepted by the user.
+         * @hide
+         */
+        public static final String HIDE_ERROR_DIALOGS = "hide_error_dialogs";
 
         /**
          * Use Dock audio output for media:

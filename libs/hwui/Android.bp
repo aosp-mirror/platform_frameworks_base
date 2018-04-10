@@ -269,12 +269,7 @@ cc_defaults {
         "TextureCache.cpp",
         "VectorDrawable.cpp",
         "VkLayer.cpp",
-        "protos/hwui.proto",
     ],
-
-    proto: {
-        export_proto_headers: true,
-    },
 
     export_include_dirs: ["."],
     export_shared_lib_headers: ["libRScpp"],

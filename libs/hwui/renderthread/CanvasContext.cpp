@@ -17,6 +17,7 @@
 #include "CanvasContext.h"
 #include <GpuMemoryTracker.h>
 
+#include "../Properties.h"
 #include "AnimationContext.h"
 #include "Caches.h"
 #include "EglManager.h"
@@ -29,15 +30,12 @@
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
 #include "pipeline/skia/SkiaPipeline.h"
 #include "pipeline/skia/SkiaVulkanPipeline.h"
-#include "protos/hwui.pb.h"
 #include "renderstate/RenderState.h"
 #include "renderstate/Stencil.h"
 #include "utils/GLUtils.h"
 #include "utils/TimeUtils.h"
-#include "../Properties.h"
 
 #include <cutils/properties.h>
-#include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <private/hwui/DrawGlInfo.h>
 #include <strings.h>
 
@@ -49,8 +47,6 @@
 
 #define TRIM_MEMORY_COMPLETE 80
 #define TRIM_MEMORY_UI_HIDDEN 20
-
-#define ENABLE_RENDERNODE_SERIALIZATION false
 
 #define LOG_FRAMETIME_MMA 0
 
@@ -194,6 +190,7 @@ void CanvasContext::setSurface(sp<Surface>&& surface) {
     if (hasSurface) {
         mHaveNewSurface = true;
         mSwapHistory.clear();
+        updateBufferCount();
     } else {
         mRenderThread.removeFrameCallback(this);
     }
@@ -427,6 +424,9 @@ void CanvasContext::draw() {
 
     waitOnFences();
 
+    frame.setPresentTime(mCurrentFrameInfo->get(FrameInfoIndex::Vsync) +
+                         (mRenderThread.timeLord().frameIntervalNanos() * (mRenderAheadDepth + 1)));
+
     bool requireSwap = false;
     bool didSwap =
             mRenderPipeline->swapBuffers(frame, drew, windowDirty, mCurrentFrameInfo, &requireSwap);
@@ -633,39 +633,6 @@ void CanvasContext::setName(const std::string&& name) {
     mJankTracker.setDescription(JankTrackerType::Window, std::move(name));
 }
 
-void CanvasContext::serializeDisplayListTree() {
-#if ENABLE_RENDERNODE_SERIALIZATION
-    using namespace google::protobuf::io;
-    char package[128];
-    // Check whether tracing is enabled for this process.
-    FILE* file = fopen("/proc/self/cmdline", "r");
-    if (file) {
-        if (!fgets(package, 128, file)) {
-            ALOGE("Error reading cmdline: %s (%d)", strerror(errno), errno);
-            fclose(file);
-            return;
-        }
-        fclose(file);
-    } else {
-        ALOGE("Error opening /proc/self/cmdline: %s (%d)", strerror(errno), errno);
-        return;
-    }
-    char path[1024];
-    snprintf(path, 1024, "/data/data/%s/cache/rendertree_dump", package);
-    int fd = open(path, O_CREAT | O_WRONLY, S_IRWXU | S_IRGRP | S_IROTH);
-    if (fd == -1) {
-        ALOGD("Failed to open '%s'", path);
-        return;
-    }
-    proto::RenderNode tree;
-    // TODO: Streaming writes?
-    mRootRenderNode->copyTo(&tree);
-    std::string data = tree.SerializeAsString();
-    write(fd, data.c_str(), data.length());
-    close(fd);
-#endif
-}
-
 void CanvasContext::waitOnFences() {
     if (mFrameFences.size()) {
         ATRACE_CALL();
@@ -703,6 +670,26 @@ int64_t CanvasContext::getFrameNumber() {
         mFrameNumber = static_cast<int64_t>(mNativeSurface->getNextFrameNumber());
     }
     return mFrameNumber;
+}
+
+void overrideBufferCount(const sp<Surface>& surface, int bufferCount) {
+    struct SurfaceExposer : Surface {
+        using Surface::setBufferCount;
+    };
+    // Protected is just a sign, not a cop
+    ((*surface.get()).*&SurfaceExposer::setBufferCount)(bufferCount);
+}
+
+void CanvasContext::updateBufferCount() {
+    overrideBufferCount(mNativeSurface, 3 + mRenderAheadDepth);
+}
+
+void CanvasContext::setRenderAheadDepth(int renderAhead) {
+    if (renderAhead < 0 || renderAhead > 2 || renderAhead == mRenderAheadDepth) {
+        return;
+    }
+    mRenderAheadDepth = renderAhead;
+    updateBufferCount();
 }
 
 SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {

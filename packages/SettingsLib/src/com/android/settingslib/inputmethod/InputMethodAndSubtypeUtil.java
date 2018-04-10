@@ -35,7 +35,6 @@ import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.app.LocaleHelper;
-import com.android.internal.inputmethod.InputMethodUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -176,7 +175,7 @@ public class InputMethodAndSubtypeUtil {
                     ((TwoStatePreference) pref).isChecked()
                     : enabledIMEsAndSubtypesMap.containsKey(imiId);
             final boolean isCurrentInputMethod = imiId.equals(currentInputMethodId);
-            final boolean systemIme = InputMethodUtils.isSystemIme(imi);
+            final boolean systemIme = imi.isSystem();
             if ((!hasHardKeyboard && InputMethodSettingValuesWrapper.getInstance(
                     context.getActivity()).isAlwaysCheckedIme(imi, context.getActivity()))
                     || isImeChecked) {

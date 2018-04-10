@@ -212,12 +212,11 @@ public class PermissionManagerService {
             return PackageManager.PERMISSION_DENIED;
         }
 
-        final PackageParser.Package pkg = mPackageManagerInt.getPackage(pkgName);
-        if (pkg != null && pkg.mExtras != null) {
-            if (mPackageManagerInt.filterAppAccess(pkg, callingUid, userId)) {
+        final PackageSetting ps = (PackageSetting) mPackageManagerInt.getPackageSetting(pkgName);
+        if (ps != null && ps.getPackage() != null) {
+            if (mPackageManagerInt.filterAppAccess(ps.getPackage(), callingUid, userId)) {
                 return PackageManager.PERMISSION_DENIED;
             }
-            final PackageSetting ps = (PackageSetting) pkg.mExtras;
             final boolean instantApp = ps.getInstantApp(userId);
             final PermissionsState permissionsState = ps.getPermissionsState();
             if (permissionsState.hasPermission(permName, userId)) {

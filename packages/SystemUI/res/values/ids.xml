@@ -98,5 +98,8 @@
     <item type="id" name="status_bar_view_state_tag" />
 
     <item type="id" name="display_cutout" />
+
+    <!-- Optional cancel button on Keyguard -->
+    <item type="id" name="cancel_button"/>
 </resources>
 

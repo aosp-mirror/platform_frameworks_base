@@ -19,7 +19,6 @@
 
 #include "Properties.h"
 #include "hwui/Typeface.h"
-#include "protos/hwui.pb.h"
 
 #include <benchmark/benchmark.h>
 #include <getopt.h>
@@ -68,6 +67,7 @@ OPTIONS:
                        are offscreen rendered
   --benchmark_format   Set output format. Possible values are tabular, json, csv
   --renderer=TYPE      Sets the render pipeline to use. May be opengl, skiagl, or skiavk
+  --render-ahead=NUM   Sets how far to render-ahead. Must be 0 (default), 1, or 2.
 )");
 }
 
@@ -173,6 +173,7 @@ enum {
     Onscreen,
     Offscreen,
     Renderer,
+    RenderAhead,
 };
 }
 
@@ -188,6 +189,7 @@ static const struct option LONG_OPTIONS[] = {
         {"onscreen", no_argument, nullptr, LongOpts::Onscreen},
         {"offscreen", no_argument, nullptr, LongOpts::Offscreen},
         {"renderer", required_argument, nullptr, LongOpts::Renderer},
+        {"render-ahead", required_argument, nullptr, LongOpts::RenderAhead},
         {0, 0, 0, 0}};
 
 static const char* SHORT_OPTIONS = "c:r:h";
@@ -284,6 +286,16 @@ void parseOptions(int argc, char* argv[]) {
 
             case LongOpts::Offscreen:
                 gOpts.renderOffscreen = true;
+                break;
+
+            case LongOpts::RenderAhead:
+                if (!optarg) {
+                    error = true;
+                }
+                gOpts.renderAhead = atoi(optarg);
+                if (gOpts.renderAhead < 0 || gOpts.renderAhead > 2) {
+                    error = true;
+                }
                 break;
 
             case 'h':

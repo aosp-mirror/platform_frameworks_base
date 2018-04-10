@@ -245,6 +245,8 @@ package android.content.pm {
     method public abstract int getInstallReason(java.lang.String, android.os.UserHandle);
     method public abstract java.lang.String[] getNamesForUids(int[]);
     method public abstract java.lang.String getPermissionControllerPackageName();
+    method public abstract java.lang.String getServicesSystemSharedLibraryPackageName();
+    method public abstract java.lang.String getSharedSystemSharedLibraryPackageName();
     method public abstract boolean isPermissionReviewModeEnabled();
     field public static final java.lang.String FEATURE_ADOPTABLE_STORAGE = "android.software.adoptable_storage";
     field public static final java.lang.String FEATURE_FILE_BASED_ENCRYPTION = "android.software.file_based_encryption";
@@ -465,6 +467,10 @@ package android.location {
     method public void setType(int);
   }
 
+  public class LocationManager {
+    method public java.lang.String[] getBackgroundThrottlingWhitelist();
+  }
+
 }
 
 package android.media {
@@ -484,6 +490,11 @@ package android.media {
     ctor public AudioPresentation(int, int, java.util.Map<java.lang.String, java.lang.String>, java.lang.String, int, boolean, boolean, boolean);
     method public int getPresentationId();
     method public int getProgramId();
+  }
+
+  public final class PlaybackParams implements android.os.Parcelable {
+    method public int getAudioStretchMode();
+    method public android.media.PlaybackParams setAudioStretchMode(int);
   }
 
   public static final class VolumeShaper.Configuration.Builder {
@@ -542,6 +553,15 @@ package android.os {
   public static class Build.VERSION {
     field public static final int FIRST_SDK_INT;
     field public static final int RESOURCES_SDK_INT;
+  }
+
+  public class DeviceIdleManager {
+    method public java.lang.String[] getSystemPowerWhitelist();
+    method public java.lang.String[] getSystemPowerWhitelistExceptIdle();
+  }
+
+  public class Environment {
+    method public static java.io.File buildPath(java.io.File, java.lang.String...);
   }
 
   public class IncidentManager {
@@ -611,12 +631,18 @@ package android.os {
     method public abstract void log(android.os.StrictMode.ViolationInfo);
   }
 
+  public class SystemProperties {
+    method public static java.lang.String get(java.lang.String, java.lang.String);
+  }
+
   public final class UserHandle implements android.os.Parcelable {
     method public static int getAppId(int);
     method public int getIdentifier();
+    field public static final android.os.UserHandle SYSTEM;
   }
 
   public class UserManager {
+    method public static boolean isSplitSystemUser();
     field public static final java.lang.String ACTION_USER_RESTRICTIONS_CHANGED = "android.os.action.USER_RESTRICTIONS_CHANGED";
   }
 

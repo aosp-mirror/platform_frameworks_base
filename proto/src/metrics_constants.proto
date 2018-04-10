@@ -4779,7 +4779,7 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     ACTION_MOBILE_NETWORK_MANUAL_SELECT_NETWORK = 1210;
 
-    // FIELD - Manually selected mobile network
+    // Not used anymore.
     FIELD_MOBILE_NETWORK = 1211;
 
     // OPEN: Settings > Network & Internet > Mobile network > Access Point Names
@@ -5577,6 +5577,16 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: P
     WIFI_SCANNING_NEEDED_DIALOG = 1373;
+
+    // OPEN: Settings > System > Gestures > Swipe up gesture
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_GESTURE_SWIPE_UP = 1374;
+
+    // OPEN: Settings > Storage > Dialog to format a storage volume
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_VOLUME_FORMAT = 1375;
 
     // ---- End P Constants, all P constants go above this line ----
 

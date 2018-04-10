@@ -274,10 +274,6 @@ void RenderProxy::setFrameCallback(std::function<void(int64_t)>&& callback) {
     mDrawFrameTask.setFrameCallback(std::move(callback));
 }
 
-void RenderProxy::serializeDisplayListTree() {
-    mRenderThread.queue().post([=]() { mContext->serializeDisplayListTree(); });
-}
-
 void RenderProxy::addFrameMetricsObserver(FrameMetricsObserver* observerPtr) {
     mRenderThread.queue().post([ this, observer = sp{observerPtr} ]() {
         mContext->addFrameMetricsObserver(observer.get());
@@ -287,6 +283,12 @@ void RenderProxy::addFrameMetricsObserver(FrameMetricsObserver* observerPtr) {
 void RenderProxy::removeFrameMetricsObserver(FrameMetricsObserver* observerPtr) {
     mRenderThread.queue().post([ this, observer = sp{observerPtr} ]() {
         mContext->removeFrameMetricsObserver(observer.get());
+    });
+}
+
+void RenderProxy::setRenderAheadDepth(int renderAhead) {
+    mRenderThread.queue().post([ context = mContext, renderAhead ]() {
+        context->setRenderAheadDepth(renderAhead);
     });
 }
 

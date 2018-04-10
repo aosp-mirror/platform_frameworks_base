@@ -114,7 +114,7 @@ void VulkanManager::initialize() {
     sk_sp<GrContext> grContext(GrContext::MakeVulkan(mBackendContext, options));
     LOG_ALWAYS_FATAL_IF(!grContext.get());
     mRenderThread.setGrContext(grContext);
-    DeviceInfo::initialize(mRenderThread.getGrContext()->caps()->maxRenderTargetSize());
+    DeviceInfo::initialize(mRenderThread.getGrContext()->maxRenderTargetSize());
 
     if (Properties::enablePartialUpdates && Properties::useBufferAge) {
         mSwapBehavior = SwapBehavior::BufferAge;

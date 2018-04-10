@@ -696,6 +696,29 @@ public class NotificationInfoTest extends SysuiTestCase {
         assertEquals(GONE, settingsLink.getVisibility());
     }
 
+    @Test
+    public void testBindHeader_noSettingsLinkWhenIsForBlockingHelper() throws Exception {
+        final String settingsText = "work chats";
+        final ResolveInfo ri = new ResolveInfo();
+        ri.activityInfo = new ActivityInfo();
+        ri.activityInfo.packageName = TEST_PACKAGE_NAME;
+        ri.activityInfo.name = "something";
+        List<ResolveInfo> ris = new ArrayList<>();
+        ris.add(ri);
+        when(mMockPackageManager.queryIntentActivities(any(), anyInt())).thenReturn(ris);
+        mNotificationChannel.setImportance(IMPORTANCE_LOW);
+        Notification n = new Notification.Builder(mContext, mNotificationChannel.getId())
+                .setSettingsText(settingsText).build();
+        StatusBarNotification sbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME,
+                0, null, 0, 0, n, UserHandle.CURRENT, null, 0);
+
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, sbn, null, null, null, false, true,
+                true);
+        final TextView settingsLink = mNotificationInfo.findViewById(R.id.app_settings);
+        assertEquals(GONE, settingsLink.getVisibility());
+    }
+
 
     @Test
     public void testWillBeRemovedReturnsFalseBeforeBind() throws Exception {

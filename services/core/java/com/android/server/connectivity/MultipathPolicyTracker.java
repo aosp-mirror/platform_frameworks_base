@@ -57,6 +57,7 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.DebugUtils;
 import android.util.Pair;
+import android.util.Range;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -266,9 +267,9 @@ public class MultipathPolicyTracker {
         }
 
         private long getRemainingDailyBudget(long limitBytes,
-                Pair<ZonedDateTime, ZonedDateTime> cycle) {
-            final long start = cycle.first.toInstant().toEpochMilli();
-            final long end = cycle.second.toInstant().toEpochMilli();
+                Range<ZonedDateTime> cycle) {
+            final long start = cycle.getLower().toInstant().toEpochMilli();
+            final long end = cycle.getUpper().toInstant().toEpochMilli();
             final long totalBytes = getNetworkTotalBytes(start, end);
             final long remainingBytes = totalBytes == -1 ? 0 : Math.max(0, limitBytes - totalBytes);
             // 1 + ((end - now - 1) / millisInDay with integers is equivalent to:
@@ -389,7 +390,7 @@ public class MultipathPolicyTracker {
 
     private static boolean hasActiveCycle(NetworkPolicy policy) {
         return policy.hasCycle() && policy.lastLimitSnooze <
-                policy.cycleIterator().next().first.toInstant().toEpochMilli();
+                policy.cycleIterator().next().getLower().toInstant().toEpochMilli();
     }
 
     // Only ever updated on the handler thread. Accessed from other binder threads to retrieve

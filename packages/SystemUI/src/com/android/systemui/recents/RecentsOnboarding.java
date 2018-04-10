@@ -21,7 +21,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -62,6 +61,7 @@ public class RecentsOnboarding {
 
     private static final String TAG = "RecentsOnboarding";
     private static final boolean RESET_PREFS_FOR_DEBUG = false;
+    private static final boolean ONBOARDING_ENABLED = false;
     private static final long SHOW_DELAY_MS = 500;
     private static final long SHOW_HIDE_DURATION_MS = 300;
     // Don't show the onboarding until the user has launched this number of apps.
@@ -184,6 +184,9 @@ public class RecentsOnboarding {
     }
 
     public void onConnectedToLauncher() {
+        if (!ONBOARDING_ENABLED) {
+            return;
+        }
         boolean alreadySeenRecentsOnboarding = Prefs.getBoolean(mContext,
                 Prefs.Key.HAS_SEEN_RECENTS_ONBOARDING, false);
         if (!mTaskListenerRegistered && !alreadySeenRecentsOnboarding) {

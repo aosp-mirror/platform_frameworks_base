@@ -1404,7 +1404,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private void resetDefaultImeLocked(Context context) {
         // Do not reset the default (current) IME when it is a 3rd-party IME
-        if (mCurMethodId != null && !InputMethodUtils.isSystemIme(mMethodMap.get(mCurMethodId))) {
+        if (mCurMethodId != null && !mMethodMap.get(mCurMethodId).isSystem()) {
             return;
         }
         final List<InputMethodInfo> suitableImes = InputMethodUtils.getDefaultEnabledImes(
@@ -3068,7 +3068,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             : mCurrentSubtype.getLocale();
                     for (int i = 0; i < N; ++i) {
                         final InputMethodInfo imi = enabled.get(i);
-                        if (imi.getSubtypeCount() > 0 && InputMethodUtils.isSystemIme(imi)) {
+                        if (imi.getSubtypeCount() > 0 && imi.isSystem()) {
                             InputMethodSubtype keyboardSubtype =
                                     InputMethodUtils.findLastResortApplicableSubtypeLocked(mRes,
                                             InputMethodUtils.getSubtypes(imi),
