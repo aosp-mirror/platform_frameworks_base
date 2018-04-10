@@ -11791,6 +11791,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return null;
     }
 
+    /** @hide */
+    View getSelfOrParentImportantForA11y() {
+        if (isImportantForAccessibility()) return this;
+        ViewParent parent = getParentForAccessibility();
+        if (parent instanceof View) return (View) parent;
+        return null;
+    }
+
     /**
      * Adds the children of this View relevant for accessibility to the given list
      * as output. Since some Views are not important for accessibility the added
@@ -15006,10 +15014,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void setAlpha(@FloatRange(from=0.0, to=1.0) float alpha) {
         ensureTransformationInfo();
         if (mTransformationInfo.mAlpha != alpha) {
-            // Report visibility changes, which can affect children, to accessibility
-            if ((alpha == 0) ^ (mTransformationInfo.mAlpha == 0)) {
-                notifySubtreeAccessibilityStateChangedIfNeeded();
-            }
+            float oldAlpha = mTransformationInfo.mAlpha;
             mTransformationInfo.mAlpha = alpha;
             if (onSetAlpha((int) (alpha * 255))) {
                 mPrivateFlags |= PFLAG_ALPHA_SET;
@@ -15020,6 +15025,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mPrivateFlags &= ~PFLAG_ALPHA_SET;
                 invalidateViewProperty(true, false);
                 mRenderNode.setAlpha(getFinalAlpha());
+            }
+            // Report visibility changes, which can affect children, to accessibility
+            if ((alpha == 0) ^ (oldAlpha == 0)) {
+                notifySubtreeAccessibilityStateChangedIfNeeded();
             }
         }
     }

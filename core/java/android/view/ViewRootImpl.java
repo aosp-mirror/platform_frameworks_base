@@ -8305,6 +8305,12 @@ public final class ViewRootImpl implements ViewParent,
 
         public View mSource;
         public long mLastEventTimeMillis;
+        /**
+         * Override for {@link AccessibilityEvent#originStackTrace} to provide the stack trace
+         * of the original {@link #runOrPost} call instead of one for sending the delayed event
+         * from a looper.
+         */
+        public StackTraceElement[] mOrigin;
 
         @Override
         public void run() {
@@ -8322,6 +8328,7 @@ public final class ViewRootImpl implements ViewParent,
                 AccessibilityEvent event = AccessibilityEvent.obtain();
                 event.setEventType(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
                 event.setContentChangeTypes(mChangeTypes);
+                if (AccessibilityEvent.DEBUG_ORIGIN) event.originStackTrace = mOrigin;
                 source.sendAccessibilityEventUnchecked(event);
             } else {
                 mLastEventTimeMillis = 0;
@@ -8329,6 +8336,7 @@ public final class ViewRootImpl implements ViewParent,
             // In any case reset to initial state.
             source.resetSubtreeAccessibilityStateChanged();
             mChangeTypes = 0;
+            if (AccessibilityEvent.DEBUG_ORIGIN) mOrigin = null;
         }
 
         public void runOrPost(View source, int changeType) {
@@ -8352,12 +8360,18 @@ public final class ViewRootImpl implements ViewParent,
                 // If there is no common predecessor, then mSource points to
                 // a removed view, hence in this case always prefer the source.
                 View predecessor = getCommonPredecessor(mSource, source);
+                if (predecessor != null) {
+                    predecessor = predecessor.getSelfOrParentImportantForA11y();
+                }
                 mSource = (predecessor != null) ? predecessor : source;
                 mChangeTypes |= changeType;
                 return;
             }
             mSource = source;
             mChangeTypes = changeType;
+            if (AccessibilityEvent.DEBUG_ORIGIN) {
+                mOrigin = Thread.currentThread().getStackTrace();
+            }
             final long timeSinceLastMillis = SystemClock.uptimeMillis() - mLastEventTimeMillis;
             final long minEventIntevalMillis =
                     ViewConfiguration.getSendRecurringAccessibilityEventsInterval();
