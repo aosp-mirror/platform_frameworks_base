@@ -229,7 +229,8 @@ public class PhoneWindowManagerTestBase {
         void addWindow(WindowState state) {
             if (state instanceof FakeWindowState) {
                 ((FakeWindowState) state).surfaceLayer =
-                        getWindowLayerFromTypeLw(state.getAttrs().type);
+                        getWindowLayerFromTypeLw(state.getAttrs().type,
+                                true /* canAddInternalSystemWindow */);
             }
             adjustWindowParamsLw(state, state.getAttrs(), true /* hasStatusBarPermission */);
             assertEquals(WindowManagerGlobal.ADD_OKAY, prepareAddWindowLw(state, state.getAttrs()));
