@@ -1255,6 +1255,7 @@ package android.hardware.display {
     method public android.hardware.display.BrightnessConfiguration getBrightnessConfiguration();
     method public java.util.List<android.hardware.display.BrightnessChangeEvent> getBrightnessEvents();
     method public android.hardware.display.BrightnessConfiguration getDefaultBrightnessConfiguration();
+    method public android.util.Pair<float[], float[]> getMinimumBrightnessCurve();
     method public android.graphics.Point getStableDisplaySize();
     method public void setBrightnessConfiguration(android.hardware.display.BrightnessConfiguration);
     method public void setSaturationLevel(float);
