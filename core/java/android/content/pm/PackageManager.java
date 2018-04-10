@@ -6137,7 +6137,9 @@ public abstract class PackageManager {
      * signed.  This should be used instead of {@code getPackageInfo} with {@code GET_SIGNATURES}
      * since it takes into account the possibility of signing certificate rotation, except in the
      * case of packages that are signed by multiple certificates, for which signing certificate
-     * rotation is not supported.
+     * rotation is not supported.  This method is analogous to using {@code getPackageInfo} with
+     * {@code GET_SIGNING_CERTIFICATES} and then searching through the resulting {@code
+     * signingCertificateHistory} field to see if the desired certificate is present.
      *
      * @param packageName package whose signing certificates to check
      * @param certificate signing certificate for which to search
@@ -6151,13 +6153,19 @@ public abstract class PackageManager {
     }
 
     /**
-     * Searches the set of signing certificates by which the given uid has proven to have been
-     * signed.  This should be used instead of {@code getPackageInfo} with {@code GET_SIGNATURES}
+     * Searches the set of signing certificates by which the package(s) for the given uid has proven
+     * to have been signed.  For multiple packages sharing the same uid, this will return the
+     * signing certificates found in the signing history of the "newest" package, where "newest"
+     * indicates the package with the newest signing certificate in the shared uid group.  This
+     * method should be used instead of {@code getPackageInfo} with {@code GET_SIGNATURES}
      * since it takes into account the possibility of signing certificate rotation, except in the
      * case of packages that are signed by multiple certificates, for which signing certificate
-     * rotation is not supported.
+     * rotation is not supported. This method is analogous to using {@code getPackagesForUid}
+     * followed by {@code getPackageInfo} with {@code GET_SIGNING_CERTIFICATES}, selecting the
+     * {@code PackageInfo} of the newest-signed bpackage , and finally searching through the
+     * resulting {@code signingCertificateHistory} field to see if the desired certificate is there.
      *
-     * @param uid package whose signing certificates to check
+     * @param uid uid whose signing certificates to check
      * @param certificate signing certificate for which to search
      * @param type representation of the {@code certificate}
      * @return true if this package was or is signed by exactly the certificate {@code certificate}
