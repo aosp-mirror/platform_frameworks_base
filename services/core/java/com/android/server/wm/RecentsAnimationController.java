@@ -111,7 +111,9 @@ public class RecentsAnimationController implements DeathRecipient {
     // minimized
     private boolean mSplitScreenMinimized;
 
-    private Rect mTmpRect = new Rect();
+    private final Rect mTmpRect = new Rect();
+
+    private boolean mLinkedToDeathOfRunner;
 
     public interface RecentsAnimationCallbacks {
         void onAnimationFinished(@ReorderMode int reorderMode);
@@ -267,7 +269,7 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         try {
-            mRunner.asBinder().linkToDeath(this, 0);
+            linkToDeathOfRunner();
         } catch (RemoteException e) {
             cancelAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
             return;
@@ -393,7 +395,7 @@ public class RecentsAnimationController implements DeathRecipient {
             removeAnimation(taskAdapter);
         }
 
-        mRunner.asBinder().unlinkToDeath(this, 0);
+        unlinkToDeathOfRunner();
         // Clear associated input consumers
         mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
         mService.destroyInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
@@ -401,6 +403,20 @@ public class RecentsAnimationController implements DeathRecipient {
 
     void scheduleFailsafe() {
         mService.mH.postDelayed(mFailsafeRunnable, FAILSAFE_DELAY);
+    }
+
+    private void linkToDeathOfRunner() throws RemoteException {
+        if (!mLinkedToDeathOfRunner) {
+            mRunner.asBinder().linkToDeath(this, 0);
+            mLinkedToDeathOfRunner = true;
+        }
+    }
+
+    private void unlinkToDeathOfRunner() {
+        if (mLinkedToDeathOfRunner) {
+            mRunner.asBinder().unlinkToDeath(this, 0);
+            mLinkedToDeathOfRunner = false;
+        }
     }
 
     @Override
