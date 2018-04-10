@@ -15,10 +15,13 @@
  */
 package com.android.systemui.shared.recents.model;
 
+import static android.content.pm.PackageManager.MATCH_ANY_USER;
+
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -108,10 +111,12 @@ public abstract class IconLoader {
         }
         if (desc.getIconResource() != 0) {
             try {
-                Context packageContext = mContext.createPackageContextAsUser(
-                        taskKey.getPackageName(), 0, UserHandle.of(userId));
-                return createBadgedDrawable(packageContext.getDrawable(desc.getIconResource()),
-                        userId, desc);
+                PackageManager pm = mContext.getPackageManager();
+                ApplicationInfo appInfo = pm.getApplicationInfo(taskKey.getPackageName(),
+                        MATCH_ANY_USER);
+                Resources res = pm.getResourcesForApplication(appInfo);
+                return createBadgedDrawable(res.getDrawable(desc.getIconResource(), null), userId,
+                        desc);
             } catch (Resources.NotFoundException|PackageManager.NameNotFoundException e) {
                 Log.e(TAG, "Could not find icon drawable from resource", e);
             }
