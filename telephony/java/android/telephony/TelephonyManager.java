@@ -5156,7 +5156,12 @@ public class TelephonyManager {
      * {@link #AUTHTYPE_EAP_SIM}
      * @param data authentication challenge data, base64 encoded.
      * See 3GPP TS 31.102 7.1.2 for more details.
-     * @return the response of authentication, or null if not available
+     * @return the response of authentication. This value will be null in the following cases:
+     *   Authentication error, incorrect MAC
+     *   Authentication error, security context not supported
+     *   Key freshness failure
+     *   Authentication error, no memory space available
+     *   Authentication error, no memory space available in EFMUK
      */
     // TODO(b/73660190): This should probably require MODIFY_PHONE_STATE, not
     // READ_PRIVILEGED_PHONE_STATE. It certainly shouldn't reference the permission in Javadoc since
@@ -5177,7 +5182,13 @@ public class TelephonyManager {
      * {@link #AUTHTYPE_EAP_SIM}
      * @param data authentication challenge data, base64 encoded.
      * See 3GPP TS 31.102 7.1.2 for more details.
-     * @return the response of authentication, or null if not available
+     * @return the response of authentication. This value will be null in the following cases only
+     * (see 3GPP TS 31.102 7.3.1):
+     *   Authentication error, incorrect MAC
+     *   Authentication error, security context not supported
+     *   Key freshness failure
+     *   Authentication error, no memory space available
+     *   Authentication error, no memory space available in EFMUK
      * @hide
      */
     public String getIccAuthentication(int subId, int appType, int authType, String data) {
