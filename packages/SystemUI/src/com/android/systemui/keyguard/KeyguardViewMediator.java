@@ -1184,6 +1184,10 @@ public class KeyguardViewMediator extends SystemUI {
         Trace.endSection();
     }
 
+    public boolean isHiding() {
+        return mHiding;
+    }
+
     /**
      * Handles SET_OCCLUDED message sent by setOccluded()
      */
