@@ -40,6 +40,10 @@ public final class Formatter {
     public static final int FLAG_SHORTER = 1 << 0;
     /** {@hide} */
     public static final int FLAG_CALCULATE_ROUNDED = 1 << 1;
+    /** {@hide} */
+    public static final int FLAG_SI_UNITS = 1 << 2;
+    /** {@hide} */
+    public static final int FLAG_IEC_UNITS = 1 << 3;
 
     /** {@hide} */
     public static class BytesResult {
@@ -90,7 +94,7 @@ public final class Formatter {
         if (context == null) {
             return "";
         }
-        final BytesResult res = formatBytes(context.getResources(), sizeBytes, 0);
+        final BytesResult res = formatBytes(context.getResources(), sizeBytes, FLAG_SI_UNITS);
         return bidiWrap(context, context.getString(com.android.internal.R.string.fileSizeSuffix,
                 res.value, res.units));
     }
@@ -103,41 +107,43 @@ public final class Formatter {
         if (context == null) {
             return "";
         }
-        final BytesResult res = formatBytes(context.getResources(), sizeBytes, FLAG_SHORTER);
+        final BytesResult res = formatBytes(context.getResources(), sizeBytes,
+                FLAG_SI_UNITS | FLAG_SHORTER);
         return bidiWrap(context, context.getString(com.android.internal.R.string.fileSizeSuffix,
                 res.value, res.units));
     }
 
     /** {@hide} */
     public static BytesResult formatBytes(Resources res, long sizeBytes, int flags) {
+        final int unit = ((flags & FLAG_IEC_UNITS) != 0) ? 1024 : 1000;
         final boolean isNegative = (sizeBytes < 0);
         float result = isNegative ? -sizeBytes : sizeBytes;
         int suffix = com.android.internal.R.string.byteShort;
         long mult = 1;
         if (result > 900) {
             suffix = com.android.internal.R.string.kilobyteShort;
-            mult = 1000;
-            result = result / 1000;
+            mult = unit;
+            result = result / unit;
         }
         if (result > 900) {
             suffix = com.android.internal.R.string.megabyteShort;
-            mult *= 1000;
-            result = result / 1000;
+            mult *= unit;
+            result = result / unit;
         }
         if (result > 900) {
             suffix = com.android.internal.R.string.gigabyteShort;
-            mult *= 1000;
-            result = result / 1000;
+            mult *= unit;
+            result = result / unit;
         }
         if (result > 900) {
             suffix = com.android.internal.R.string.terabyteShort;
-            mult *= 1000;
-            result = result / 1000;
+            mult *= unit;
+            result = result / unit;
         }
         if (result > 900) {
             suffix = com.android.internal.R.string.petabyteShort;
-            mult *= 1000;
-            result = result / 1000;
+            mult *= unit;
+            result = result / unit;
         }
         // Note we calculate the rounded long by ourselves, but still let String.format()
         // compute the rounded value. String.format("%f", 0.1) might not return "0.1" due to
