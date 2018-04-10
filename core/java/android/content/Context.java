@@ -3780,7 +3780,7 @@ public abstract class Context {
     public static final String DROPBOX_SERVICE = "dropbox";
 
     /**
-     * System service name for the DeviceIdleController.  There is no Java API for this.
+     * System service name for the DeviceIdleManager.
      * @see #getSystemService(String)
      * @hide
      */

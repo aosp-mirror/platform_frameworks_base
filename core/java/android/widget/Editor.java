@@ -6031,7 +6031,9 @@ public class Editor {
             mSwitchedLines = false;
             final int selectionStart = mTextView.getSelectionStart();
             final int selectionEnd = mTextView.getSelectionEnd();
-            if (selectionStart > selectionEnd) {
+            if (selectionStart < 0 || selectionEnd < 0) {
+                Selection.removeSelection((Spannable) mTextView.getText());
+            } else if (selectionStart > selectionEnd) {
                 Selection.setSelection((Spannable) mTextView.getText(),
                         selectionEnd, selectionStart);
             }

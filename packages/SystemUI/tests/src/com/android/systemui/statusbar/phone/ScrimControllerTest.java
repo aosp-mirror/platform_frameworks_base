@@ -469,6 +469,14 @@ public class ScrimControllerTest extends SysuiTestCase {
                 ScrimState.AOD.getAnimateChange());
     }
 
+    @Test
+    public void testViewsDontHaveFocusHighlight() {
+        Assert.assertFalse("Scrim shouldn't have focus highlight",
+                mScrimInFront.getDefaultFocusHighlightEnabled());
+        Assert.assertFalse("Scrim shouldn't have focus highlight",
+                mScrimBehind.getDefaultFocusHighlightEnabled());
+    }
+
     /**
      * Conserves old notification density after leaving state and coming back.
      *

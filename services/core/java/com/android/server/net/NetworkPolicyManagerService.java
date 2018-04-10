@@ -70,6 +70,12 @@ import static android.net.NetworkTemplate.MATCH_MOBILE;
 import static android.net.NetworkTemplate.MATCH_WIFI;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.TrafficStats.MB_IN_BYTES;
+import static android.provider.Settings.Global.NETPOLICY_OVERRIDE_ENABLED;
+import static android.provider.Settings.Global.NETPOLICY_QUOTA_ENABLED;
+import static android.provider.Settings.Global.NETPOLICY_QUOTA_FRAC_JOBS;
+import static android.provider.Settings.Global.NETPOLICY_QUOTA_FRAC_MULTIPATH;
+import static android.provider.Settings.Global.NETPOLICY_QUOTA_LIMITED;
+import static android.provider.Settings.Global.NETPOLICY_QUOTA_UNLIMITED;
 import static android.telephony.CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED;
 import static android.telephony.CarrierConfigManager.DATA_CYCLE_THRESHOLD_DISABLED;
 import static android.telephony.CarrierConfigManager.DATA_CYCLE_USE_PLATFORM_DEFAULT;
@@ -115,6 +121,7 @@ import android.app.PendingIntent;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -188,6 +195,7 @@ import android.util.AtomicFile;
 import android.util.DataUnit;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Range;
 import android.util.RecurrenceRule;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -350,6 +358,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * Indicates the maximum wait time for admin data to be available;
      */
     private static final long WAIT_FOR_ADMIN_DATA_TIMEOUT_MS = 10_000;
+
+    private static final long QUOTA_UNLIMITED_DEFAULT = DataUnit.MEBIBYTES.toBytes(20);
+    private static final float QUOTA_LIMITED_DEFAULT = 0.1f;
+    private static final float QUOTA_FRAC_JOBS_DEFAULT = 0.5f;
+    private static final float QUOTA_FRAC_MULTIPATH_DEFAULT = 0.5f;
 
     private static final int MSG_RULES_CHANGED = 1;
     private static final int MSG_METERED_IFACES_CHANGED = 2;
@@ -1739,10 +1752,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
         mMeteredIfaces = newMeteredIfaces;
 
+        final ContentResolver cr = mContext.getContentResolver();
+        final boolean quotaEnabled = Settings.Global.getInt(cr,
+                NETPOLICY_QUOTA_ENABLED, 1) != 0;
+        final long quotaUnlimited = Settings.Global.getLong(cr,
+                NETPOLICY_QUOTA_UNLIMITED, QUOTA_UNLIMITED_DEFAULT);
+        final float quotaLimited = Settings.Global.getFloat(cr,
+                NETPOLICY_QUOTA_LIMITED, QUOTA_LIMITED_DEFAULT);
+
         // Finally, calculate our opportunistic quotas
-        // TODO: add experiments support to disable or tweak ratios
         mSubscriptionOpportunisticQuota.clear();
         for (NetworkState state : states) {
+            if (!quotaEnabled) continue;
             if (state.network == null) continue;
             final int subId = getSubIdLocked(state.network);
             final SubscriptionPlan plan = getPrimarySubscriptionPlanLocked(subId);
@@ -1754,14 +1775,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 quotaBytes = OPPORTUNISTIC_QUOTA_UNKNOWN;
             } else if (limitBytes == SubscriptionPlan.BYTES_UNLIMITED) {
                 // Unlimited data; let's use 20MiB/day (600MiB/month)
-                quotaBytes = DataUnit.MEBIBYTES.toBytes(20);
+                quotaBytes = quotaUnlimited;
             } else {
                 // Limited data; let's only use 10% of remaining budget
-                final Pair<ZonedDateTime, ZonedDateTime> cycle = plan.cycleIterator().next();
-                final long start = cycle.first.toInstant().toEpochMilli();
-                final long end = cycle.second.toInstant().toEpochMilli();
+                final Range<ZonedDateTime> cycle = plan.cycleIterator().next();
+                final long start = cycle.getLower().toInstant().toEpochMilli();
+                final long end = cycle.getUpper().toInstant().toEpochMilli();
                 final Instant now = mClock.instant();
-                final long startOfDay = ZonedDateTime.ofInstant(now, cycle.first.getZone())
+                final long startOfDay = ZonedDateTime.ofInstant(now, cycle.getLower().getZone())
                         .truncatedTo(ChronoUnit.DAYS)
                         .toInstant().toEpochMilli();
                 final long totalBytes = getTotalBytes(
@@ -1772,7 +1793,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 final long remainingDays =
                         1 + ((end - now.toEpochMilli() - 1) / TimeUnit.DAYS.toMillis(1));
 
-                quotaBytes = Math.max(0, (remainingBytes / remainingDays) / 10);
+                quotaBytes = Math.max(0, (long) ((remainingBytes / remainingDays) * quotaLimited));
             }
 
             mSubscriptionOpportunisticQuota.put(subId, quotaBytes);
@@ -3048,11 +3069,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
         }
 
-        mHandler.sendMessage(mHandler.obtainMessage(MSG_SUBSCRIPTION_OVERRIDE,
-                overrideMask, overrideValue, subId));
-        if (timeoutMillis > 0) {
-            mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SUBSCRIPTION_OVERRIDE,
-                    overrideMask, 0, subId), timeoutMillis);
+        // Only allow overrides when feature is enabled. However, we always
+        // allow disabling of overrides for safety reasons.
+        final boolean overrideEnabled = Settings.Global.getInt(mContext.getContentResolver(),
+                NETPOLICY_OVERRIDE_ENABLED, 1) != 0;
+        if (overrideEnabled || overrideValue == 0) {
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_SUBSCRIPTION_OVERRIDE,
+                    overrideMask, overrideValue, subId));
+            if (timeoutMillis > 0) {
+                mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SUBSCRIPTION_OVERRIDE,
+                        overrideMask, 0, subId), timeoutMillis);
+            }
         }
     }
 
@@ -4695,10 +4722,23 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         @Override
         public long getSubscriptionOpportunisticQuota(Network network, int quotaType) {
+            final long quotaBytes;
             synchronized (mNetworkPoliciesSecondLock) {
-                // TODO: handle splitting quota between use-cases
-                return mSubscriptionOpportunisticQuota.get(getSubIdLocked(network),
+                quotaBytes = mSubscriptionOpportunisticQuota.get(getSubIdLocked(network),
                         OPPORTUNISTIC_QUOTA_UNKNOWN);
+            }
+            if (quotaBytes == OPPORTUNISTIC_QUOTA_UNKNOWN) {
+                return OPPORTUNISTIC_QUOTA_UNKNOWN;
+            }
+
+            if (quotaType == QUOTA_TYPE_JOBS) {
+                return (long) (quotaBytes * Settings.Global.getFloat(mContext.getContentResolver(),
+                        NETPOLICY_QUOTA_FRAC_JOBS, QUOTA_FRAC_JOBS_DEFAULT));
+            } else if (quotaType == QUOTA_TYPE_MULTIPATH) {
+                return (long) (quotaBytes * Settings.Global.getFloat(mContext.getContentResolver(),
+                        NETPOLICY_QUOTA_FRAC_MULTIPATH, QUOTA_FRAC_MULTIPATH_DEFAULT));
+            } else {
+                return OPPORTUNISTIC_QUOTA_UNKNOWN;
             }
         }
 

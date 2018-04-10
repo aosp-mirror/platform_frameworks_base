@@ -16,6 +16,9 @@
 
 package com.android.settingslib;
 
+import static com.android.settingslib.TwoTargetPreference.ICON_SIZE_DEFAULT;
+import static com.android.settingslib.TwoTargetPreference.ICON_SIZE_MEDIUM;
+import static com.android.settingslib.TwoTargetPreference.ICON_SIZE_SMALL;
 import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -75,8 +78,8 @@ public class TwoTargetPreferenceTest {
     }
 
     @Test
-    public void bind_smallIcon_shouldUseSmallIcon() {
-        mPreference.setUseSmallIcon(true);
+    public void bind_smallIcon_shouldUseSmallIconSize() {
+        mPreference.setIconSize(ICON_SIZE_SMALL);
 
         mPreference.onBindViewHolder(mViewHolder);
 
@@ -91,8 +94,24 @@ public class TwoTargetPreferenceTest {
     }
 
     @Test
-    public void bind_normalIcon_shouldUseNormalIcon() {
-        mPreference.setUseSmallIcon(false);
+    public void bind_mediumIcon_shouldUseMediumIconSize() {
+        mPreference.setIconSize(ICON_SIZE_MEDIUM);
+
+        mPreference.onBindViewHolder(mViewHolder);
+
+        final int size = mContext.getResources().getDimensionPixelSize(
+                R.dimen.two_target_pref_medium_icon_size);
+        final LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mViewHolder
+                .findViewById(android.R.id.icon)
+                .getLayoutParams();
+
+        assertThat(layoutParams.width).isEqualTo(size);
+        assertThat(layoutParams.height).isEqualTo(size);
+    }
+
+    @Test
+    public void bind_defaultIcon_shouldUseDefaultIconSize() {
+        mPreference.setIconSize(ICON_SIZE_DEFAULT);
 
         mPreference.onBindViewHolder(mViewHolder);
 

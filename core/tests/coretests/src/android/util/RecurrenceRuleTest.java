@@ -57,13 +57,13 @@ public class RecurrenceRuleTest extends TestCase {
 
         assertTrue(r.isMonthly());
 
-        final Iterator<Pair<ZonedDateTime, ZonedDateTime>> it = r.cycleIterator();
+        final Iterator<Range<ZonedDateTime>> it = r.cycleIterator();
         assertTrue(it.hasNext());
-        assertEquals(Pair.create(
+        assertEquals(new Range<>(
                 ZonedDateTime.parse("2015-11-14T00:00:00.00Z"),
                 ZonedDateTime.parse("2015-12-14T00:00:00.00Z")), it.next());
         assertTrue(it.hasNext());
-        assertEquals(Pair.create(
+        assertEquals(new Range<>(
                 ZonedDateTime.parse("2015-10-14T00:00:00.00Z"),
                 ZonedDateTime.parse("2015-11-14T00:00:00.00Z")), it.next());
     }
@@ -77,13 +77,13 @@ public class RecurrenceRuleTest extends TestCase {
 
         assertFalse(r.isMonthly());
 
-        final Iterator<Pair<ZonedDateTime, ZonedDateTime>> it = r.cycleIterator();
+        final Iterator<Range<ZonedDateTime>> it = r.cycleIterator();
         assertTrue(it.hasNext());
-        assertEquals(Pair.create(
+        assertEquals(new Range<>(
                 ZonedDateTime.parse("2010-11-17T00:11:00.00Z"),
                 ZonedDateTime.parse("2010-11-20T00:11:00.00Z")), it.next());
         assertTrue(it.hasNext());
-        assertEquals(Pair.create(
+        assertEquals(new Range<>(
                 ZonedDateTime.parse("2010-11-14T00:11:00.00Z"),
                 ZonedDateTime.parse("2010-11-17T00:11:00.00Z")), it.next());
         assertFalse(it.hasNext());
@@ -98,9 +98,9 @@ public class RecurrenceRuleTest extends TestCase {
 
         assertFalse(r.isMonthly());
 
-        final Iterator<Pair<ZonedDateTime, ZonedDateTime>> it = r.cycleIterator();
+        final Iterator<Range<ZonedDateTime>> it = r.cycleIterator();
         assertTrue(it.hasNext());
-        assertEquals(Pair.create(
+        assertEquals(new Range<>(
                 ZonedDateTime.parse("2010-11-14T00:11:00.000Z"),
                 ZonedDateTime.parse("2010-11-20T00:11:00.000Z")), it.next());
         assertFalse(it.hasNext());
@@ -112,7 +112,7 @@ public class RecurrenceRuleTest extends TestCase {
 
         assertFalse(r.isMonthly());
 
-        final Iterator<Pair<ZonedDateTime, ZonedDateTime>> it = r.cycleIterator();
+        final Iterator<Range<ZonedDateTime>> it = r.cycleIterator();
         assertFalse(it.hasNext());
     }
 
@@ -122,22 +122,22 @@ public class RecurrenceRuleTest extends TestCase {
                 ZonedDateTime.parse("2030-01-31T00:00:00.000Z"),
                 Period.ofMonths(1));
 
-        final Iterator<Pair<ZonedDateTime, ZonedDateTime>> it = r.cycleIterator();
+        final Iterator<Range<ZonedDateTime>> it = r.cycleIterator();
         ZonedDateTime lastStart = null;
         int months = 0;
         while (it.hasNext()) {
-            final Pair<ZonedDateTime, ZonedDateTime> cycle = it.next();
+            final Range<ZonedDateTime> cycle = it.next();
 
             // Make sure cycle has reasonable length
-            final long length = cycle.second.toEpochSecond() - cycle.first.toEpochSecond();
+            final long length = cycle.getUpper().toEpochSecond() - cycle.getLower().toEpochSecond();
             assertTrue(cycle + " must be more than 4 weeks", length >= 2419200);
             assertTrue(cycle + " must be less than 5 weeks", length <= 3024000);
 
             // Make sure we have no gaps
             if (lastStart != null) {
-                assertEquals(lastStart, cycle.second);
+                assertEquals(lastStart, cycle.getUpper());
             }
-            lastStart = cycle.first;
+            lastStart = cycle.getLower();
             months++;
         }
 

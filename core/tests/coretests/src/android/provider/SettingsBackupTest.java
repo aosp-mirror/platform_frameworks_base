@@ -60,7 +60,6 @@ public class SettingsBackupTest {
                     Settings.System.ALARM_ALERT, // backup candidate?
                     Settings.System.ALARM_ALERT_CACHE, // internal cache
                     Settings.System.APPEND_FOR_LAST_AUDIBLE, // suffix deprecated since API 2
-                    Settings.System.DISPLAY_COLOR_MODE, // bug?
                     Settings.System.EGG_MODE, // I am the lolrus
                     Settings.System.END_BUTTON_BEHAVIOR, // bug?
                     Settings.System
@@ -72,6 +71,7 @@ public class SettingsBackupTest {
                     Settings.System.NOTIFICATION_SOUND_CACHE, // internal cache
                     Settings.System.POINTER_LOCATION, // backup candidate?
                     Settings.System.RINGTONE_CACHE, // internal cache
+                    Settings.System.SCREEN_BRIGHTNESS, // removed in P
                     Settings.System.SETUP_WIZARD_HAS_RUN, // Only used by SuW
                     Settings.System.SHOW_GTALK_SERVICE_STATUS, // candidate for backup?
                     Settings.System.SHOW_TOUCHES, // bug?
@@ -301,6 +301,12 @@ public class SettingsBackupTest {
                     Settings.Global.NETSTATS_UID_TAG_DELETE_AGE,
                     Settings.Global.NETSTATS_UID_TAG_PERSIST_BYTES,
                     Settings.Global.NETSTATS_UID_TAG_ROTATE_AGE,
+                    Settings.Global.NETPOLICY_QUOTA_ENABLED,
+                    Settings.Global.NETPOLICY_QUOTA_UNLIMITED,
+                    Settings.Global.NETPOLICY_QUOTA_LIMITED,
+                    Settings.Global.NETPOLICY_QUOTA_FRAC_JOBS,
+                    Settings.Global.NETPOLICY_QUOTA_FRAC_MULTIPATH,
+                    Settings.Global.NETPOLICY_OVERRIDE_ENABLED,
                     Settings.Global.NETWORK_AVOID_BAD_WIFI,
                     Settings.Global.NETWORK_DEFAULT_DAILY_MULTIPATH_QUOTA_BYTES,
                     Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE,
@@ -411,6 +417,7 @@ public class SettingsBackupTest {
                     Settings.Global.UNINSTALLED_INSTANT_APP_MIN_CACHE_PERIOD,
                     Settings.Global.UNINSTALLED_INSTANT_APP_MAX_CACHE_PERIOD,
                     Settings.Global.UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD,
+                    Settings.Global.UNGAZE_SLEEP_ENABLED,
                     Settings.Global.UNLOCK_SOUND,
                     Settings.Global.USE_GOOGLE_MAIL,
                     Settings.Global.VT_IMS_ENABLED,

@@ -514,7 +514,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             autoTriggerThreshold = 15;
         }
 
-        BatterySaverUtils.scheduleAutoBatterySaver(mContext, autoTriggerThreshold);
+        BatterySaverUtils.ensureAutoBatterySaver(mContext, autoTriggerThreshold);
         showAutoSaverEnabledConfirmation();
     }
 

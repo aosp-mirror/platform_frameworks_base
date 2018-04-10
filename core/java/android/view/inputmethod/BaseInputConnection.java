@@ -522,7 +522,7 @@ public class BaseInputConnection implements InputConnection {
             b = tmp;
         }
 
-        if (a == b) return null;
+        if (a == b || a < 0) return null;
 
         if ((flags&GET_TEXT_WITH_STYLES) != 0) {
             return content.subSequence(a, b);

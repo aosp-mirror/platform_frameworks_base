@@ -105,10 +105,12 @@ import android.nfc.NfcManager;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Build;
+import android.os.DeviceIdleManager;
 import android.os.DropBoxManager;
 import android.os.HardwarePropertiesManager;
 import android.os.IBatteryPropertiesRegistrar;
 import android.os.IBinder;
+import android.os.IDeviceIdleController;
 import android.os.IHardwarePropertiesManager;
 import android.os.IPowerManager;
 import android.os.IRecoverySystem;
@@ -984,6 +986,17 @@ final class SystemServiceRegistry {
                                 ctx.mMainThread.getHandler());
                     }
             });
+
+        registerService(Context.DEVICE_IDLE_CONTROLLER, DeviceIdleManager.class,
+                new CachedServiceFetcher<DeviceIdleManager>() {
+                    @Override
+                    public DeviceIdleManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IDeviceIdleController service = IDeviceIdleController.Stub.asInterface(
+                                ServiceManager.getServiceOrThrow(
+                                        Context.DEVICE_IDLE_CONTROLLER));
+                        return new DeviceIdleManager(ctx.getOuterContext(), service);
+                    }});
     }
 
     /**

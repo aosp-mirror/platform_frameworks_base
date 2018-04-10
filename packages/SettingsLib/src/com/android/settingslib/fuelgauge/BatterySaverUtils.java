@@ -148,15 +148,32 @@ public class BatterySaverUtils {
         Secure.putInt(context.getContentResolver(), Secure.LOW_POWER_WARNING_ACKNOWLEDGED, 1);
     }
 
+    /**
+     * Don't show the automatic battery suggestion notification in the future.
+     */
     public static void suppressAutoBatterySaver(Context context) {
         Secure.putInt(context.getContentResolver(),
                 Secure.SUPPRESS_AUTO_BATTERY_SAVER_SUGGESTION, 1);
     }
 
-    public static void scheduleAutoBatterySaver(Context context, int level) {
+    /**
+     * Set the automatic battery saver trigger level to {@code level}.
+     */
+    public static void setAutoBatterySaverTriggerLevel(Context context, int level) {
+        if (level > 0) {
+            suppressAutoBatterySaver(context);
+        }
+        Global.putInt(context.getContentResolver(), Global.LOW_POWER_MODE_TRIGGER_LEVEL, level);
+    }
+
+    /**
+     * Set the automatic battery saver trigger level to {@code level}, but only when
+     * automatic battery saver isn't enabled yet.
+     */
+    public static void ensureAutoBatterySaver(Context context, int level) {
         if (Global.getInt(context.getContentResolver(), Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0)
                 == 0) {
-            Global.putInt(context.getContentResolver(), Global.LOW_POWER_MODE_TRIGGER_LEVEL, level);
+            setAutoBatterySaverTriggerLevel(context, level);
         }
     }
 }

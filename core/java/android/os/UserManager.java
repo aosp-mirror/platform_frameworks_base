@@ -1149,6 +1149,7 @@ public class UserManager {
      * primary user are two separate users. Previously system user and primary user are combined as
      * a single owner user.  see @link {android.os.UserHandle#USER_OWNER}
      */
+    @TestApi
     public static boolean isSplitSystemUser() {
         return RoSystemProperties.FW_SYSTEM_USER_SPLIT;
     }

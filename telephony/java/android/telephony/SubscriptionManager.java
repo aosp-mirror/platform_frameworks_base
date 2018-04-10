@@ -477,6 +477,9 @@ public class SubscriptionManager {
      * <p>
      * Contains {@link #EXTRA_SUBSCRIPTION_INDEX} to indicate which subscription
      * the user is interested in.
+     * <p>
+     * Receivers should protect themselves by checking that the sender holds the
+     * {@code android.permission.MANAGE_SUBSCRIPTION_PLANS} permission.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @SystemApi
@@ -1719,6 +1722,8 @@ public class SubscriptionManager {
      * </ul>
      *
      * @param subId the subscriber this relationship applies to
+     * @throws SecurityException if the caller doesn't meet the requirements
+     *             outlined above.
      */
     @SystemApi
     public @NonNull List<SubscriptionPlan> getSubscriptionPlans(int subId) {
@@ -1744,10 +1749,13 @@ public class SubscriptionManager {
      * {@link CarrierConfigManager#KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING}.
      * </ul>
      *
-     * @param subId the subscriber this relationship applies to
+     * @param subId the subscriber this relationship applies to. An empty list
+     *            may be sent to clear any existing plans.
      * @param plans the list of plans. The first plan is always the primary and
      *            most important plan. Any additional plans are secondary and
      *            may not be displayed or used by decision making logic.
+     * @throws SecurityException if the caller doesn't meet the requirements
+     *             outlined above.
      */
     @SystemApi
     public void setSubscriptionPlans(int subId, @NonNull List<SubscriptionPlan> plans) {
@@ -1788,6 +1796,8 @@ public class SubscriptionManager {
      *            be automatically cleared, or {@code 0} to leave in the
      *            requested state until explicitly cleared, or the next reboot,
      *            whichever happens first.
+     * @throws SecurityException if the caller doesn't meet the requirements
+     *             outlined above.
      */
     @SystemApi
     public void setSubscriptionOverrideUnmetered(int subId, boolean overrideUnmetered,
@@ -1822,6 +1832,8 @@ public class SubscriptionManager {
      *            be automatically cleared, or {@code 0} to leave in the
      *            requested state until explicitly cleared, or the next reboot,
      *            whichever happens first.
+     * @throws SecurityException if the caller doesn't meet the requirements
+     *             outlined above.
      */
     @SystemApi
     public void setSubscriptionOverrideCongested(int subId, boolean overrideCongested,

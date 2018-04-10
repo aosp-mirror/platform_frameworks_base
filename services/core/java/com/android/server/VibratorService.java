@@ -53,6 +53,7 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.DebugUtils;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.InputDevice;
 import android.media.AudioAttributes;
 
@@ -91,7 +92,7 @@ public class VibratorService extends IVibratorService.Stub
     private final boolean mAllowPriorityVibrationsInLowPowerMode;
     private final boolean mSupportsAmplitudeControl;
     private final int mDefaultVibrationAmplitude;
-    private final VibrationEffect[] mFallbackEffects;
+    private final SparseArray<VibrationEffect> mFallbackEffects;
     private final WorkSource mTmpWorkSource = new WorkSource();
     private final Handler mH = new Handler();
     private final Object mLock = new Object();
@@ -177,6 +178,7 @@ public class VibratorService extends IVibratorService.Stub
                 switch (prebaked.getId()) {
                     case VibrationEffect.EFFECT_CLICK:
                     case VibrationEffect.EFFECT_DOUBLE_CLICK:
+                    case VibrationEffect.EFFECT_HEAVY_CLICK:
                     case VibrationEffect.EFFECT_TICK:
                         return true;
                     default:
@@ -293,7 +295,11 @@ public class VibratorService extends IVibratorService.Stub
                 com.android.internal.R.array.config_clockTickVibePattern);
         VibrationEffect tickEffect = createEffect(tickEffectTimings);
 
-        mFallbackEffects = new VibrationEffect[] { clickEffect, doubleClickEffect, tickEffect };
+        mFallbackEffects = new SparseArray<VibrationEffect>();
+        mFallbackEffects.put(VibrationEffect.EFFECT_CLICK, clickEffect);
+        mFallbackEffects.put(VibrationEffect.EFFECT_DOUBLE_CLICK, doubleClickEffect);
+        mFallbackEffects.put(VibrationEffect.EFFECT_TICK, tickEffect);
+        mFallbackEffects.put(VibrationEffect.EFFECT_HEAVY_CLICK, clickEffect);
     }
 
     private static VibrationEffect createEffect(long[] timings) {
@@ -960,10 +966,7 @@ public class VibratorService extends IVibratorService.Stub
     }
 
     private VibrationEffect getFallbackEffect(int effectId) {
-        if (effectId < 0 || effectId >= mFallbackEffects.length) {
-            return null;
-        }
-        return mFallbackEffects[effectId];
+        return mFallbackEffects.get(effectId);
     }
 
     /**

@@ -196,6 +196,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         }
         mState = ScrimState.UNINITIALIZED;
 
+        mScrimBehind.setDefaultFocusHighlightEnabled(false);
+        mScrimInFront.setDefaultFocusHighlightEnabled(false);
+
         updateScrims();
     }
 

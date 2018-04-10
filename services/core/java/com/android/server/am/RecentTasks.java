@@ -534,8 +534,8 @@ class RecentTasks {
             final TaskRecord tr = mTasks.get(i);
             final String taskPackageName =
                     tr.getBaseIntent().getComponent().getPackageName();
-            if (tr.userId != userId) return;
-            if (!taskPackageName.equals(packageName)) return;
+            if (tr.userId != userId) continue;
+            if (!taskPackageName.equals(packageName)) continue;
 
             mService.mStackSupervisor.removeTaskByIdLocked(tr.taskId, true, REMOVE_FROM_RECENTS,
                     "remove-package-task");
