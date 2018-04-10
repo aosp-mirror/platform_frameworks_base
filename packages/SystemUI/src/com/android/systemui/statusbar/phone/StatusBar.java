@@ -1452,7 +1452,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     @VisibleForTesting
     protected void updateFooter() {
         boolean showFooterView = mState != StatusBarState.KEYGUARD
-                && mEntryManager.getNotificationData().getActiveNotifications().size() != 0;
+                && mEntryManager.getNotificationData().getActiveNotifications().size() != 0
+                && !mRemoteInputManager.getController().isRemoteInputActive();
         boolean showDismissView = mClearAllEnabled && mState != StatusBarState.KEYGUARD
                 && hasActiveClearableNotifications();
 
@@ -2832,6 +2833,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                             boolean remoteInputActive) {
                         mHeadsUpManager.setRemoteInputActive(entry, remoteInputActive);
                         entry.row.notifyHeightChanged(true /* needsAnimation */);
+                        updateFooter();
                     }
                     public void lockScrollTo(NotificationData.Entry entry) {
                         mStackScroller.lockScrollTo(entry.row);

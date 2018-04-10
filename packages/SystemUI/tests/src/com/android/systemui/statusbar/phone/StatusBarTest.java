@@ -95,6 +95,7 @@ import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
+import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
@@ -139,6 +140,8 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NotificationListener mNotificationListener;
     @Mock private KeyguardViewMediator mKeyguardViewMediator;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
+    @Mock private NotificationRemoteInputManager mRemoteInputManager;
+    @Mock private RemoteInputController mRemoteInputController;
 
     private TestableStatusBar mStatusBar;
     private FakeMetricsLogger mMetricsLogger;
@@ -200,13 +203,14 @@ public class StatusBarTest extends SysuiTestCase {
 
         mEntryManager = new TestableNotificationEntryManager(mSystemServicesProxy, mPowerManager,
                 mContext);
+        when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
         mStatusBar = new TestableStatusBar(mStatusBarKeyguardViewManager, mUnlockMethodCache,
                 mKeyguardIndicationController, mStackScroller, mHeadsUpManager,
                 mPowerManager, mNotificationPanelView, mBarService, mNotificationListener,
                 mNotificationLogger, mVisualStabilityManager, mViewHierarchyManager,
                 mEntryManager, mScrimController, mFingerprintUnlockController,
                 mock(ActivityLaunchAnimator.class), mKeyguardViewMediator,
-                mock(NotificationRemoteInputManager.class), mock(NotificationGroupManager.class),
+                mRemoteInputManager, mock(NotificationGroupManager.class),
                 mock(FalsingManager.class), mock(StatusBarWindowManager.class),
                 mock(NotificationIconAreaController.class), mock(DozeScrimController.class),
                 mock(NotificationShelf.class), mLockscreenUserManager,
@@ -585,6 +589,23 @@ public class StatusBarTest extends SysuiTestCase {
 
         mStatusBar.updateFooter();
         verify(mStackScroller).updateFooterView(false, false);
+    }
+
+    @Test
+    public void testUpdateFooter_remoteInput() {
+        mStatusBar.setBarStateForTest(StatusBarState.SHADE);
+        ArrayList<Entry> entries = new ArrayList<>();
+        entries.add(mock(Entry.class));
+        when(mNotificationData.getActiveNotifications()).thenReturn(entries);
+
+        ExpandableNotificationRow row = mock(ExpandableNotificationRow.class);
+        when(row.canViewBeDismissed()).thenReturn(true);
+        when(mStackScroller.getChildCount()).thenReturn(1);
+        when(mStackScroller.getChildAt(anyInt())).thenReturn(row);
+        when(mRemoteInputController.isRemoteInputActive()).thenReturn(true);
+
+        mStatusBar.updateFooter();
+        verify(mStackScroller).updateFooterView(false, true);
     }
 
     @Test
