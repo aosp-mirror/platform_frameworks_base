@@ -61,7 +61,7 @@ public class InputMethodAndSubtypeUtil {
 
     // InputMethods and subtypes are saved in the settings as follows:
     // ime0;subtype0;subtype1:ime1;subtype0:ime2:ime3;subtype0;subtype1
-    private static String buildInputMethodsAndSubtypesString(
+    public static String buildInputMethodsAndSubtypesString(
             final HashMap<String, HashSet<String>> imeToSubtypesMap) {
         final StringBuilder builder = new StringBuilder();
         for (final String imi : imeToSubtypesMap.keySet()) {
@@ -116,7 +116,7 @@ public class InputMethodAndSubtypeUtil {
         return parseInputMethodsAndSubtypesString(enabledInputMethodsStr);
     }
 
-    private static HashMap<String, HashSet<String>> parseInputMethodsAndSubtypesString(
+    public static HashMap<String, HashSet<String>> parseInputMethodsAndSubtypesString(
             final String inputMethodsAndSubtypesString) {
         final HashMap<String, HashSet<String>> subtypesMap = new HashMap<>();
         if (TextUtils.isEmpty(inputMethodsAndSubtypesString)) {
