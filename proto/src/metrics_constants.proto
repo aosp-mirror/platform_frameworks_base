@@ -5583,6 +5583,11 @@ message MetricsEvent {
     // OS: P
     SETTINGS_GESTURE_SWIPE_UP = 1374;
 
+    // OPEN: Settings > Storage > Dialog to format a storage volume
+    // CATEGORY: SETTINGS
+    // OS: P
+    DIALOG_VOLUME_FORMAT = 1375;
+
     // ---- End P Constants, all P constants go above this line ----
 
     // First Q constant in master goes here:
