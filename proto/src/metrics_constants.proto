@@ -5613,6 +5613,11 @@ message MetricsEvent {
     // OS: P
     SETTINGS_ZEN_ONBOARDING = 1380;
 
+    // OPEN: Settings > Display > Auto brightness
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_AUTO_BRIGHTNESS = 1381;
+
     // ---- End P Constants, all P constants go above this line ----
 
     // First Q constant in master goes here:
