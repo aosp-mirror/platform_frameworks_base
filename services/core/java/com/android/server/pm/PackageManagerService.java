@@ -1523,7 +1523,6 @@ public class PackageManagerService extends IPackageManager.Stub
                                     Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER,
                                             params.traceMethod, params.traceCookie);
                                 }
-                                return;
                             }
                             mPendingInstalls.clear();
                         } else {
