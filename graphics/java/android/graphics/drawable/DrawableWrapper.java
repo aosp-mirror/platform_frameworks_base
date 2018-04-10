@@ -16,11 +16,6 @@
 
 package android.graphics.drawable;
 
-import com.android.internal.R;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.ActivityInfo.Config;
@@ -35,9 +30,15 @@ import android.graphics.Outline;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.Xfermode;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.View;
+
+import com.android.internal.R;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 
@@ -74,6 +75,16 @@ public abstract class DrawableWrapper extends Drawable implements Drawable.Callb
         if (mState != null && mState.mDrawableState != null) {
             final Drawable dr = mState.mDrawableState.newDrawable(res);
             setDrawable(dr);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void setXfermode(Xfermode mode) {
+        if (mDrawable != null) {
+            mDrawable.setXfermode(mode);
         }
     }
 
