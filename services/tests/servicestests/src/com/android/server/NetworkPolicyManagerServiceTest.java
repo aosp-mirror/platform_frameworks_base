@@ -18,6 +18,7 @@ package com.android.server;
 
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_WIFI;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
@@ -30,6 +31,7 @@ import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
+import static android.net.NetworkTemplate.buildTemplateWifi;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.telephony.CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED;
 import static android.telephony.CarrierConfigManager.DATA_CYCLE_THRESHOLD_DISABLED;
@@ -43,6 +45,7 @@ import static android.text.format.Time.TIMEZONE_UTC;
 
 import static com.android.server.net.NetworkPolicyManagerInternal.QUOTA_TYPE_JOBS;
 import static com.android.server.net.NetworkPolicyManagerInternal.QUOTA_TYPE_MULTIPATH;
+import static com.android.server.net.NetworkPolicyManagerService.OPPORTUNISTIC_QUOTA_UNKNOWN;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT_SNOOZED;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_RAPID;
@@ -65,6 +68,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -201,7 +205,8 @@ public class NetworkPolicyManagerServiceTest {
     private static final int TEST_SUB_ID = 42;
     private static final int TEST_NET_ID = 24;
 
-    private static NetworkTemplate sTemplateWifi = NetworkTemplate.buildTemplateWifi(TEST_SSID);
+    private static NetworkTemplate sTemplateWifi = buildTemplateWifi(TEST_SSID);
+    private static NetworkTemplate sTemplateMobileAll = buildTemplateMobileAll(TEST_IMSI);
 
     /**
      * Path on assets where files used by {@link NetPolicyXml} are located.
@@ -221,12 +226,16 @@ public class NetworkPolicyManagerServiceTest {
     private @Mock IActivityManager mActivityManager;
     private @Mock INetworkManagementService mNetworkManager;
     private @Mock IConnectivityManager mConnManager;
+    private @Mock ConnectivityManager mConnectivityManager;
     private @Mock NotificationManager mNotifManager;
     private @Mock PackageManager mPackageManager;
     private @Mock IPackageManager mIpm;
     private @Mock SubscriptionManager mSubscriptionManager;
     private @Mock CarrierConfigManager mCarrierConfigManager;
     private @Mock TelephonyManager mTelephonyManager;
+
+    private ArgumentCaptor<ConnectivityManager.NetworkCallback> mNetworkCallbackCaptor =
+            ArgumentCaptor.forClass(ConnectivityManager.NetworkCallback.class);
 
     private ActivityManagerInternal mActivityManagerInternal;
     private NetworkStatsManagerInternal mStatsService;
@@ -331,6 +340,8 @@ public class NetworkPolicyManagerServiceTest {
                         return mTelephonyManager;
                     case Context.NOTIFICATION_SERVICE:
                         return mNotifManager;
+                    case Context.CONNECTIVITY_SERVICE:
+                        return mConnectivityManager;
                     default:
                         return super.getSystemService(name);
                 }
@@ -394,6 +405,8 @@ public class NetworkPolicyManagerServiceTest {
                 .thenReturn(buildApplicationInfo(PKG_NAME_C));
         when(mNetworkManager.isBandwidthControlEnabled()).thenReturn(true);
         when(mNetworkManager.setDataSaverModeEnabled(anyBoolean())).thenReturn(true);
+        doNothing().when(mConnectivityManager)
+                .registerNetworkCallback(any(), mNetworkCallbackCaptor.capture());
 
         // Prepare NPMS.
         mService.systemReady(mService.networkScoreAndNetworkManagementServiceReady());
@@ -1015,10 +1028,8 @@ public class NetworkPolicyManagerServiceTest {
         mService.updateNetworks();
 
         // Define simple data plan
-        final SubscriptionPlan plan = SubscriptionPlan.Builder
-                .createRecurringMonthly(ZonedDateTime.parse("2015-11-01T00:00:00.00Z"))
-                .setDataLimit(DataUnit.MEGABYTES.toBytes(1800), LIMIT_BEHAVIOR_DISABLED)
-                .build();
+        final SubscriptionPlan plan = buildMonthlyDataPlan(
+                ZonedDateTime.parse("2015-11-01T00:00:00.00Z"), DataUnit.MEGABYTES.toBytes(1800));
         mService.setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[] { plan },
                 mServiceContext.getOpPackageName());
 
@@ -1122,10 +1133,8 @@ public class NetworkPolicyManagerServiceTest {
         mService.updateNetworks();
 
         // Define simple data plan which gives us effectively 60MB/day
-        final SubscriptionPlan plan = SubscriptionPlan.Builder
-                .createRecurringMonthly(ZonedDateTime.parse("2015-11-01T00:00:00.00Z"))
-                .setDataLimit(DataUnit.MEGABYTES.toBytes(1800), LIMIT_BEHAVIOR_DISABLED)
-                .build();
+        final SubscriptionPlan plan = buildMonthlyDataPlan(
+                ZonedDateTime.parse("2015-11-01T00:00:00.00Z"), DataUnit.MEGABYTES.toBytes(1800));
         mService.setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[] { plan },
                 mServiceContext.getOpPackageName());
 
@@ -1497,21 +1506,13 @@ public class NetworkPolicyManagerServiceTest {
         final NetworkStatsHistory history = new NetworkStatsHistory(TimeUnit.HOURS.toMillis(1));
         final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 0);
         when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
-                .thenAnswer(new Answer<Long>() {
-                    @Override
-                    public Long answer(InvocationOnMock invocation) throws Throwable {
-                        final NetworkStatsHistory.Entry entry = history.getValues(
-                                invocation.getArgument(1), invocation.getArgument(2), null);
-                        return entry.rxBytes + entry.txBytes;
-                    }
+                .thenAnswer(invocation -> {
+                    final NetworkStatsHistory.Entry entry = history.getValues(
+                            invocation.getArgument(1), invocation.getArgument(2), null);
+                    return entry.rxBytes + entry.txBytes;
                 });
         when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
-                .thenAnswer(new Answer<NetworkStats>() {
-                    @Override
-                    public NetworkStats answer(InvocationOnMock invocation) throws Throwable {
-                        return stats;
-                    }
-                });
+                .thenReturn(stats);
 
         // Get active mobile network in place
         expectMobileDefaults();
@@ -1535,17 +1536,18 @@ public class NetworkPolicyManagerServiceTest {
             mService.updateNetworks();
 
             // No quotas
-            assertEquals(-1, internal.getSubscriptionOpportunisticQuota(net, QUOTA_TYPE_JOBS));
-            assertEquals(-1, internal.getSubscriptionOpportunisticQuota(net, QUOTA_TYPE_MULTIPATH));
+            assertEquals(OPPORTUNISTIC_QUOTA_UNKNOWN,
+                    internal.getSubscriptionOpportunisticQuota(net, QUOTA_TYPE_JOBS));
+            assertEquals(OPPORTUNISTIC_QUOTA_UNKNOWN,
+                    internal.getSubscriptionOpportunisticQuota(net, QUOTA_TYPE_MULTIPATH));
         }
 
         // Limited data plan
         {
-            final SubscriptionPlan plan = SubscriptionPlan.Builder
-                    .createRecurringMonthly(ZonedDateTime.parse("2015-11-01T00:00:00.00Z"))
-                    .setDataLimit(DataUnit.MEGABYTES.toBytes(1800), LIMIT_BEHAVIOR_DISABLED)
-                    .build();
-            mService.setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[] { plan },
+            final SubscriptionPlan plan = buildMonthlyDataPlan(
+                    ZonedDateTime.parse("2015-11-01T00:00:00.00Z"),
+                    DataUnit.MEGABYTES.toBytes(1800));
+            mService.setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[]{plan},
                     mServiceContext.getOpPackageName());
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
@@ -1561,13 +1563,45 @@ public class NetworkPolicyManagerServiceTest {
                     internal.getSubscriptionOpportunisticQuota(net, QUOTA_TYPE_MULTIPATH));
         }
 
+        // Limited data plan, over quota
+        {
+            final SubscriptionPlan plan = buildMonthlyDataPlan(
+                    ZonedDateTime.parse("2015-11-01T00:00:00.00Z"),
+                    DataUnit.MEGABYTES.toBytes(100));
+            mService.setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[]{plan},
+                    mServiceContext.getOpPackageName());
+
+            reset(mTelephonyManager, mNetworkManager, mNotifManager);
+            expectMobileDefaults();
+
+            mService.updateNetworks();
+
+            assertEquals(0L, internal.getSubscriptionOpportunisticQuota(net, QUOTA_TYPE_JOBS));
+            assertEquals(0L, internal.getSubscriptionOpportunisticQuota(net, QUOTA_TYPE_MULTIPATH));
+        }
+
+        // Roaming
+        {
+            final SubscriptionPlan plan = buildMonthlyDataPlan(
+                    ZonedDateTime.parse("2015-11-01T00:00:00.00Z"), BYTES_UNLIMITED);
+            mService.setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[]{plan},
+                    mServiceContext.getOpPackageName());
+
+            reset(mTelephonyManager, mNetworkManager, mNotifManager);
+            expectMobileDefaults();
+            expectNetworkState(true /* roaming */);
+
+            mService.updateNetworks();
+
+            assertEquals(0L, internal.getSubscriptionOpportunisticQuota(net, QUOTA_TYPE_JOBS));
+            assertEquals(0L, internal.getSubscriptionOpportunisticQuota(net, QUOTA_TYPE_MULTIPATH));
+        }
+
         // Unlimited data plan
         {
-            final SubscriptionPlan plan = SubscriptionPlan.Builder
-                    .createRecurringMonthly(ZonedDateTime.parse("2015-11-01T00:00:00.00Z"))
-                    .setDataLimit(BYTES_UNLIMITED, LIMIT_BEHAVIOR_DISABLED)
-                    .build();
-            mService.setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[] { plan },
+            final SubscriptionPlan plan = buildMonthlyDataPlan(
+                    ZonedDateTime.parse("2015-11-01T00:00:00.00Z"), BYTES_UNLIMITED);
+            mService.setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[]{plan},
                     mServiceContext.getOpPackageName());
 
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
@@ -1580,7 +1614,25 @@ public class NetworkPolicyManagerServiceTest {
                     internal.getSubscriptionOpportunisticQuota(net, QUOTA_TYPE_JOBS));
             assertEquals(DataUnit.MEBIBYTES.toBytes(10),
                     internal.getSubscriptionOpportunisticQuota(net, QUOTA_TYPE_MULTIPATH));
+
+            // Capabilities change to roaming
+            final ConnectivityManager.NetworkCallback callback = mNetworkCallbackCaptor.getValue();
+            assertNotNull(callback);
+            expectNetworkState(true /* roaming */);
+            callback.onCapabilitiesChanged(
+                    new Network(TEST_NET_ID),
+                    buildNetworkCapabilities(TEST_SUB_ID, true /* roaming */));
+
+            assertEquals(0, internal.getSubscriptionOpportunisticQuota(
+                    new Network(TEST_NET_ID), NetworkPolicyManagerInternal.QUOTA_TYPE_MULTIPATH));
         }
+    }
+
+    private SubscriptionPlan buildMonthlyDataPlan(ZonedDateTime start, long limitBytes) {
+        return SubscriptionPlan.Builder
+                .createRecurringMonthly(start)
+                .setDataLimit(limitBytes, LIMIT_BEHAVIOR_DISABLED)
+                .build();
     }
 
     private ApplicationInfo buildApplicationInfo(String label) {
@@ -1602,9 +1654,12 @@ public class NetworkPolicyManagerServiceTest {
         return lp;
     }
 
-    private NetworkCapabilities buildNetworkCapabilities(int subId) {
+    private NetworkCapabilities buildNetworkCapabilities(int subId, boolean roaming) {
         final NetworkCapabilities nc = new NetworkCapabilities();
         nc.addTransportType(TRANSPORT_CELLULAR);
+        if (!roaming) {
+            nc.addCapability(NET_CAPABILITY_NOT_ROAMING);
+        }
         nc.setNetworkSpecifier(new StringNetworkSpecifier(String.valueOf(subId)));
         return nc;
     }
@@ -1658,16 +1713,20 @@ public class NetworkPolicyManagerServiceTest {
                 hasIt ? PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED);
     }
 
+    private void expectNetworkState(boolean roaming) throws Exception {
+        when(mConnManager.getAllNetworkState()).thenReturn(new NetworkState[] {
+                new NetworkState(buildNetworkInfo(),
+                        buildLinkProperties(TEST_IFACE),
+                        buildNetworkCapabilities(TEST_SUB_ID, roaming),
+                        new Network(TEST_NET_ID), TEST_IMSI, null)
+        });
+    }
+
     private void expectMobileDefaults() throws Exception {
         when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(
                 new int[] { TEST_SUB_ID });
         when(mTelephonyManager.getSubscriberId(TEST_SUB_ID)).thenReturn(TEST_IMSI);
-        when(mConnManager.getAllNetworkState()).thenReturn(new NetworkState[] {
-                new NetworkState(buildNetworkInfo(),
-                        buildLinkProperties(TEST_IFACE),
-                        buildNetworkCapabilities(TEST_SUB_ID),
-                        new Network(TEST_NET_ID), TEST_IMSI, null)
-        });
+        expectNetworkState(false /* roaming */);
     }
 
     private void verifyAdvisePersistThreshold() throws Exception {
