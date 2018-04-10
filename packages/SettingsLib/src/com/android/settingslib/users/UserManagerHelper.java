@@ -348,6 +348,9 @@ public final class UserManagerHelper {
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_INFO_CHANGED);
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
+        filter.addAction(Intent.ACTION_USER_STOPPED);
+        filter.addAction(Intent.ACTION_USER_UNLOCKED);
         mContext.registerReceiverAsUser(mUserChangeReceiver, UserHandle.ALL, filter, null, null);
     }
 
