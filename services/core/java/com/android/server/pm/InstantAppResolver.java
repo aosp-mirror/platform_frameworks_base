@@ -256,8 +256,6 @@ public abstract class InstantAppResolver {
         int flags = origIntent.getFlags();
         final Intent intent = new Intent();
         intent.setFlags(flags
-                | Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_CLEAR_TASK
                 | Intent.FLAG_ACTIVITY_NO_HISTORY
                 | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         if (token != null) {
