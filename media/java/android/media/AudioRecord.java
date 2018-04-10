@@ -1628,7 +1628,6 @@ public class AudioRecord implements AudioRouting
         int status = native_get_active_microphones(activeMicrophones);
         if (status != AudioManager.SUCCESS) {
             Log.e(TAG, "getActiveMicrophones failed:" + status);
-            return new ArrayList<MicrophoneInfo>();
         }
         AudioManager.setPortIdForMicrophones(activeMicrophones);
 
