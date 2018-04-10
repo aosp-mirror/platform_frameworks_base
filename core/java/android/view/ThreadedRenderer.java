@@ -907,10 +907,6 @@ public final class ThreadedRenderer {
                 animator.getAnimatorNativePtr());
     }
 
-    public void serializeDisplayListTree() {
-        nSerializeDisplayListTree(mNativeProxy);
-    }
-
     public static int copySurfaceInto(Surface surface, Rect srcRect, Bitmap bitmap) {
         if (srcRect == null) {
             // Empty rect means entire surface
@@ -1201,8 +1197,6 @@ public final class ThreadedRenderer {
     private static native void nFence(long nativeProxy);
     private static native void nStopDrawing(long nativeProxy);
     private static native void nNotifyFramePending(long nativeProxy);
-
-    private static native void nSerializeDisplayListTree(long nativeProxy);
 
     private static native void nDumpProfileInfo(long nativeProxy, FileDescriptor fd,
             @DumpFlags int dumpFlags);

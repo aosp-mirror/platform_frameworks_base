@@ -155,8 +155,6 @@ public:
 
     void setName(const std::string&& name);
 
-    void serializeDisplayListTree();
-
     void addRenderNode(RenderNode* node, bool placeFront);
     void removeRenderNode(RenderNode* node);
 
