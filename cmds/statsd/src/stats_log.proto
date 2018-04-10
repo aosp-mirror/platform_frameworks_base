@@ -305,4 +305,6 @@ message StatsdStatsReport {
         optional int64 elapsed_timestamp_nanos = 2;
     }
     repeated SkippedLogEventStats skipped_log_event_stats = 13;
+
+    repeated int64 log_loss_stats = 14;
 }

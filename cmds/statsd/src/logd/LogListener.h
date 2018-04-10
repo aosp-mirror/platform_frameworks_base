@@ -33,7 +33,7 @@ public:
     LogListener();
     virtual ~LogListener();
 
-    virtual void OnLogEvent(LogEvent* msg) = 0;
+    virtual void OnLogEvent(LogEvent* msg, bool reconnectionStarts) = 0;
 };
 
 }  // namespace statsd
