@@ -39,6 +39,7 @@ import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED
 import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_WHITELISTED;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
@@ -503,6 +504,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     /** Map from network ID to last observed meteredness state */
     @GuardedBy("mNetworkPoliciesSecondLock")
     private final SparseBooleanArray mNetworkMetered = new SparseBooleanArray();
+
+    /** Map from network ID to last observed roaming state */
+    @GuardedBy("mNetworkPoliciesSecondLock")
+    private final SparseBooleanArray mNetworkRoaming = new SparseBooleanArray();
 
     /** Map from netId to subId as of last update */
     @GuardedBy("mNetworkPoliciesSecondLock")
@@ -1019,6 +1024,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     };
 
+    private static boolean updateCapabilityChange(SparseBooleanArray lastValues, boolean newValue,
+            Network network) {
+        final boolean lastValue = lastValues.get(network.netId, false);
+        final boolean changed = (lastValue != newValue) || lastValues.indexOfKey(network.netId) < 0;
+        if (changed) {
+            lastValues.put(network.netId, newValue);
+        }
+        return changed;
+    }
+
     private final NetworkCallback mNetworkCallback = new NetworkCallback() {
         @Override
         public void onCapabilitiesChanged(Network network,
@@ -1026,13 +1041,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if (network == null || networkCapabilities == null) return;
 
             synchronized (mNetworkPoliciesSecondLock) {
-                final boolean oldMetered = mNetworkMetered.get(network.netId, false);
                 final boolean newMetered = !networkCapabilities
                         .hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
+                final boolean meteredChanged = updateCapabilityChange(
+                        mNetworkMetered, newMetered, network);
 
-                if ((oldMetered != newMetered) || mNetworkMetered.indexOfKey(network.netId) < 0) {
+                final boolean newRoaming = !networkCapabilities
+                        .hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING);
+                final boolean roamingChanged = updateCapabilityChange(
+                        mNetworkRoaming, newRoaming, network);
+
+                if (meteredChanged || roamingChanged) {
                     mLogger.meterednessChanged(network.netId, newMetered);
-                    mNetworkMetered.put(network.netId, newMetered);
                     updateNetworkRulesNL();
                 }
             }
@@ -1771,7 +1791,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             final long quotaBytes;
             final long limitBytes = plan.getDataLimitBytes();
-            if (limitBytes == SubscriptionPlan.BYTES_UNKNOWN) {
+            if (!state.networkCapabilities.hasCapability(NET_CAPABILITY_NOT_ROAMING)) {
+                // Clamp to 0 when roaming
+                quotaBytes = 0;
+            } else if (limitBytes == SubscriptionPlan.BYTES_UNKNOWN) {
                 quotaBytes = OPPORTUNISTIC_QUOTA_UNKNOWN;
             } else if (limitBytes == SubscriptionPlan.BYTES_UNLIMITED) {
                 // Unlimited data; let's use 20MiB/day (600MiB/month)
