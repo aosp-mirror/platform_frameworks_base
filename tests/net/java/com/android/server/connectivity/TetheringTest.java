@@ -355,7 +355,6 @@ public class TetheringTest {
     @Test
     public void canRequireProvisioning() {
         setupForRequiredProvisioning();
-        sendConfigurationChanged();
         assertTrue(mTethering.isTetherProvisioningRequired());
     }
 
@@ -364,7 +363,6 @@ public class TetheringTest {
         setupForRequiredProvisioning();
         when(mContext.getSystemService(Context.CARRIER_CONFIG_SERVICE))
                 .thenReturn(null);
-        sendConfigurationChanged();
         // Couldn't get the CarrierConfigManager, but still had a declared provisioning app.
         // We therefore still require provisioning.
         assertTrue(mTethering.isTetherProvisioningRequired());
@@ -374,7 +372,6 @@ public class TetheringTest {
     public void toleratesCarrierConfigMissing() {
         setupForRequiredProvisioning();
         when(mCarrierConfigManager.getConfig()).thenReturn(null);
-        sendConfigurationChanged();
         // We still have a provisioning app configured, so still require provisioning.
         assertTrue(mTethering.isTetherProvisioningRequired());
     }
@@ -411,11 +408,6 @@ public class TetheringTest {
         intent.putExtra(USB_CONNECTED, connected);
         intent.putExtra(USB_CONFIGURED, configured);
         intent.putExtra(USB_FUNCTION_RNDIS, rndisFunction);
-        mServiceContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
-    }
-
-    private void sendConfigurationChanged() {
-        final Intent intent = new Intent(Intent.ACTION_CONFIGURATION_CHANGED);
         mServiceContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 

@@ -21,23 +21,14 @@ import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
 import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
-import static com.android.internal.R.array.config_mobile_hotspot_provision_app;
-import static com.android.internal.R.array.config_tether_bluetooth_regexs;
-import static com.android.internal.R.array.config_tether_dhcp_range;
-import static com.android.internal.R.array.config_tether_usb_regexs;
-import static com.android.internal.R.array.config_tether_upstream_types;
-import static com.android.internal.R.array.config_tether_wifi_regexs;
-import static com.android.internal.R.string.config_mobile_hotspot_provision_app_no_ui;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
-import android.net.util.SharedLog;
 import android.telephony.TelephonyManager;
-import android.text.TextUtils;
+import android.net.util.SharedLog;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.R;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -59,8 +50,6 @@ import java.util.StringJoiner;
  */
 public class TetheringConfiguration {
     private static final String TAG = TetheringConfiguration.class.getSimpleName();
-
-    private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     @VisibleForTesting
     public static final int DUN_NOT_REQUIRED = 0;
@@ -90,18 +79,18 @@ public class TetheringConfiguration {
     public final String[] dhcpRanges;
     public final String[] defaultIPv4DNS;
 
-    public final String[] provisioningApp;
-    public final String provisioningAppNoUi;
-
     public TetheringConfiguration(Context ctx, SharedLog log) {
         final SharedLog configLog = log.forSubComponent("config");
 
-        tetherableUsbRegexs = getResourceStringArray(ctx, config_tether_usb_regexs);
+        tetherableUsbRegexs = ctx.getResources().getStringArray(
+                com.android.internal.R.array.config_tether_usb_regexs);
         // TODO: Evaluate deleting this altogether now that Wi-Fi always passes
         // us an interface name. Careful consideration needs to be given to
         // implications for Settings and for provisioning checks.
-        tetherableWifiRegexs = getResourceStringArray(ctx, config_tether_wifi_regexs);
-        tetherableBluetoothRegexs = getResourceStringArray(ctx, config_tether_bluetooth_regexs);
+        tetherableWifiRegexs = ctx.getResources().getStringArray(
+                com.android.internal.R.array.config_tether_wifi_regexs);
+        tetherableBluetoothRegexs = ctx.getResources().getStringArray(
+                com.android.internal.R.array.config_tether_bluetooth_regexs);
 
         dunCheck = checkDunRequired(ctx);
         configLog.log("DUN check returned: " + dunCheckString(dunCheck));
@@ -111,9 +100,6 @@ public class TetheringConfiguration {
 
         dhcpRanges = getDhcpRanges(ctx);
         defaultIPv4DNS = copy(DEFAULT_IPV4_DNS);
-
-        provisioningApp = getResourceStringArray(ctx, config_mobile_hotspot_provision_app);
-        provisioningAppNoUi = getProvisioningAppNoUi(ctx);
 
         configLog.log(toString());
     }
@@ -130,10 +116,6 @@ public class TetheringConfiguration {
         return matchesDownstreamRegexs(iface, tetherableBluetoothRegexs);
     }
 
-    public boolean hasMobileHotspotProvisionApp() {
-        return !TextUtils.isEmpty(provisioningAppNoUi);
-    }
-
     public void dump(PrintWriter pw) {
         dumpStringArray(pw, "tetherableUsbRegexs", tetherableUsbRegexs);
         dumpStringArray(pw, "tetherableWifiRegexs", tetherableWifiRegexs);
@@ -147,10 +129,6 @@ public class TetheringConfiguration {
 
         dumpStringArray(pw, "dhcpRanges", dhcpRanges);
         dumpStringArray(pw, "defaultIPv4DNS", defaultIPv4DNS);
-
-        dumpStringArray(pw, "provisioningApp", provisioningApp);
-        pw.print("provisioningAppNoUi: ");
-        pw.println(provisioningAppNoUi);
     }
 
     public String toString() {
@@ -162,8 +140,6 @@ public class TetheringConfiguration {
         sj.add(String.format("isDunRequired:%s", isDunRequired));
         sj.add(String.format("preferredUpstreamIfaceTypes:%s",
                 makeString(preferredUpstreamNames(preferredUpstreamIfaceTypes))));
-        sj.add(String.format("provisioningApp:%s", makeString(provisioningApp)));
-        sj.add(String.format("provisioningAppNoUi:%s", provisioningAppNoUi));
         return String.format("TetheringConfiguration{%s}", sj.toString());
     }
 
@@ -183,7 +159,6 @@ public class TetheringConfiguration {
     }
 
     private static String makeString(String[] strings) {
-        if (strings == null) return "null";
         final StringJoiner sj = new StringJoiner(",", "[", "]");
         for (String s : strings) sj.add(s);
         return sj.toString();
@@ -220,7 +195,8 @@ public class TetheringConfiguration {
     }
 
     private static Collection<Integer> getUpstreamIfaceTypes(Context ctx, int dunCheck) {
-        final int ifaceTypes[] = ctx.getResources().getIntArray(config_tether_upstream_types);
+        final int ifaceTypes[] = ctx.getResources().getIntArray(
+                com.android.internal.R.array.config_tether_upstream_types);
         final ArrayList<Integer> upstreamIfaceTypes = new ArrayList<>(ifaceTypes.length);
         for (int i : ifaceTypes) {
             switch (i) {
@@ -271,28 +247,12 @@ public class TetheringConfiguration {
     }
 
     private static String[] getDhcpRanges(Context ctx) {
-        final String[] fromResource = getResourceStringArray(ctx, config_tether_dhcp_range);
+        final String[] fromResource = ctx.getResources().getStringArray(
+                com.android.internal.R.array.config_tether_dhcp_range);
         if ((fromResource.length > 0) && (fromResource.length % 2 == 0)) {
             return fromResource;
         }
         return copy(DHCP_DEFAULT_RANGE);
-    }
-
-    private static String getProvisioningAppNoUi(Context ctx) {
-        try {
-            return ctx.getResources().getString(config_mobile_hotspot_provision_app_no_ui);
-        } catch (Resources.NotFoundException e) {
-            return "";
-        }
-    }
-
-    private static String[] getResourceStringArray(Context ctx, int resId) {
-        try {
-            final String[] strArray = ctx.getResources().getStringArray(resId);
-            return (strArray != null) ? strArray : EMPTY_STRING_ARRAY;
-        } catch (Resources.NotFoundException e404) {
-            return EMPTY_STRING_ARRAY;
-        }
     }
 
     private static String[] copy(String[] strarray) {
