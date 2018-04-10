@@ -205,6 +205,13 @@ public class KeyguardPasswordView extends KeyguardAbsKeyInputView
             }
         });
 
+        View cancelBtn = findViewById(R.id.cancel_button);
+        if (cancelBtn != null) {
+            cancelBtn.setOnClickListener(view -> {
+                mCallback.reset();
+            });
+        }
+
         // If there's more than one IME, enable the IME switcher button
         updateSwitchImeButton();
 
