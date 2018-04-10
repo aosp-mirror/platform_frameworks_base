@@ -397,6 +397,14 @@ public class RecentsAnimationController implements DeathRecipient {
         // Clear associated input consumers
         mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
         mService.destroyInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
+
+        // We have deferred all notifications to the target app as a part of the recents animation,
+        // so if we are actually transitioning there, notify again here
+        if (mTargetAppToken != null) {
+            if (reorderMode == REORDER_MOVE_TO_TOP || reorderMode == REORDER_KEEP_IN_PLACE) {
+                mService.mAppTransition.notifyAppTransitionFinishedLocked(mTargetAppToken.token);
+            }
+        }
     }
 
     void scheduleFailsafe() {
@@ -445,6 +453,10 @@ public class RecentsAnimationController implements DeathRecipient {
             return true;
         }
         return false;
+    }
+
+    boolean isTargetApp(AppWindowToken token) {
+        return mTargetAppToken != null && token == mTargetAppToken;
     }
 
     private boolean isTargetOverWallpaper() {
