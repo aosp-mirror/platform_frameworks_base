@@ -61,6 +61,7 @@ class RemoteAnimationController implements DeathRecipient {
 
     private FinishedCallback mFinishedCallback;
     private boolean mCanceled;
+    private boolean mLinkedToDeathOfRunner;
 
     RemoteAnimationController(WindowManagerService service,
             RemoteAnimationAdapter remoteAnimationAdapter, Handler handler) {
@@ -106,7 +107,7 @@ class RemoteAnimationController implements DeathRecipient {
         }
         mService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
             try {
-                mRemoteAnimationAdapter.getRunner().asBinder().linkToDeath(this, 0);
+                linkToDeathOfRunner();
                 mRemoteAnimationAdapter.getRunner().onAnimationStart(animations, mFinishedCallback);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to start remote animation", e);
@@ -164,8 +165,8 @@ class RemoteAnimationController implements DeathRecipient {
 
     private void onAnimationFinished() {
         mHandler.removeCallbacks(mTimeoutRunnable);
-        mRemoteAnimationAdapter.getRunner().asBinder().unlinkToDeath(this, 0);
         synchronized (mService.mWindowMap) {
+            unlinkToDeathOfRunner();
             releaseFinishedCallback();
             mService.openSurfaceTransaction();
             try {
@@ -202,6 +203,20 @@ class RemoteAnimationController implements DeathRecipient {
             throw new RuntimeException("Calling pid of remote animation was null");
         }
         mService.sendSetRunningRemoteAnimation(pid, running);
+    }
+
+    private void linkToDeathOfRunner() throws RemoteException {
+        if (!mLinkedToDeathOfRunner) {
+            mRemoteAnimationAdapter.getRunner().asBinder().linkToDeath(this, 0);
+            mLinkedToDeathOfRunner = true;
+        }
+    }
+
+    private void unlinkToDeathOfRunner() {
+        if (mLinkedToDeathOfRunner) {
+            mRemoteAnimationAdapter.getRunner().asBinder().unlinkToDeath(this, 0);
+            mLinkedToDeathOfRunner = false;
+        }
     }
 
     @Override
