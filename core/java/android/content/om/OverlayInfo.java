@@ -18,7 +18,6 @@ package android.content.om;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -126,6 +125,23 @@ public final class OverlayInfo implements Parcelable {
     public final int userId;
 
     /**
+     * Priority as read from the manifest. Used if isStatic is true. Not
+     * intended to be exposed to 3rd party.
+     *
+     * @hide
+     */
+    public final int priority;
+
+    /**
+     * isStatic as read from the manifest. If true, the overlay is
+     * unconditionally loaded and cannot be unloaded. Not intended to be
+     * exposed to 3rd party.
+     *
+     * @hide
+     */
+    public final boolean isStatic;
+
+    /**
      * Create a new OverlayInfo based on source with an updated state.
      *
      * @param source the source OverlayInfo to base the new instance on
@@ -133,17 +149,20 @@ public final class OverlayInfo implements Parcelable {
      */
     public OverlayInfo(@NonNull OverlayInfo source, @State int state) {
         this(source.packageName, source.targetPackageName, source.category, source.baseCodePath,
-                state, source.userId);
+                state, source.userId, source.priority, source.isStatic);
     }
 
     public OverlayInfo(@NonNull String packageName, @NonNull String targetPackageName,
-            @Nullable String category, @NonNull String baseCodePath, int state, int userId) {
+            @NonNull String category, @NonNull String baseCodePath, int state, int userId,
+            int priority, boolean isStatic) {
         this.packageName = packageName;
         this.targetPackageName = targetPackageName;
         this.category = category;
         this.baseCodePath = baseCodePath;
         this.state = state;
         this.userId = userId;
+        this.priority = priority;
+        this.isStatic = isStatic;
         ensureValidState();
     }
 
@@ -154,6 +173,8 @@ public final class OverlayInfo implements Parcelable {
         baseCodePath = source.readString();
         state = source.readInt();
         userId = source.readInt();
+        priority = source.readInt();
+        isStatic = source.readBoolean();
         ensureValidState();
     }
 
@@ -194,6 +215,8 @@ public final class OverlayInfo implements Parcelable {
         dest.writeString(baseCodePath);
         dest.writeInt(state);
         dest.writeInt(userId);
+        dest.writeInt(priority);
+        dest.writeBoolean(isStatic);
     }
 
     public static final Parcelable.Creator<OverlayInfo> CREATOR =

@@ -528,7 +528,7 @@ final class OverlayManagerSettings {
         private OverlayInfo getOverlayInfo() {
             if (mCache == null) {
                 mCache = new OverlayInfo(mPackageName, mTargetPackageName, mCategory, mBaseCodePath,
-                        mState, mUserId);
+                        mState, mUserId, mPriority, mIsStatic);
             }
             return mCache;
         }
