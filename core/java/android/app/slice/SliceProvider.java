@@ -44,6 +44,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A SliceProvider allows an app to provide content to be displayed in system spaces. This content
@@ -197,6 +198,14 @@ public abstract class SliceProvider extends ContentProvider {
      * @see {@link Slice}.
      * @see {@link Slice#HINT_PARTIAL}
      */
+    public Slice onBindSlice(Uri sliceUri, Set<SliceSpec> supportedSpecs) {
+        return onBindSlice(sliceUri, new ArrayList<>(supportedSpecs));
+    }
+
+    /**
+     * @deprecated TO BE REMOVED
+     */
+    @Deprecated
     public Slice onBindSlice(Uri sliceUri, List<SliceSpec> supportedSpecs) {
         return null;
     }
