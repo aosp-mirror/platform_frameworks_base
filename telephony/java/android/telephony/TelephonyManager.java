@@ -2758,8 +2758,8 @@ public class TelephonyManager {
      * physical slot index 0, to the logical slot 1. The index of the array means the index of the
      * logical slots.
      *
-     * @param physicalSlots Index i in the array representing physical slot for phone i. The array
-     *        size should be same as {@link #getPhoneCount()}.
+     * @param physicalSlots The content of the array represents the physical slot index. The array
+     *        size should be same as {@link #getUiccSlotsInfo()}.
      * @return boolean Return true if the switch succeeds, false if the switch fails.
      * @hide
      */
