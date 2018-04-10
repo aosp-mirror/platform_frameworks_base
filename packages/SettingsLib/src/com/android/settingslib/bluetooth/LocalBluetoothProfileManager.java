@@ -34,12 +34,14 @@ import android.bluetooth.BluetoothUuid;
 import android.content.Context;
 import android.content.Intent;
 import android.os.ParcelUuid;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import com.android.internal.R;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
 
 /**
  * LocalBluetoothProfileManager provides access to the LocalBluetoothProfile
@@ -130,7 +132,7 @@ public class LocalBluetoothProfileManager {
         addProfile(mHidProfile, HidProfile.NAME,
                 BluetoothHidHost.ACTION_CONNECTION_STATE_CHANGED);
 
-        mPanProfile = new PanProfile(context);
+        mPanProfile = new PanProfile(context, mLocalAdapter);
         addPanProfile(mPanProfile, PanProfile.NAME,
                 BluetoothPan.ACTION_CONNECTION_STATE_CHANGED);
 
@@ -486,6 +488,16 @@ public class LocalBluetoothProfileManager {
         return mHearingAidProfile;
     }
 
+    @VisibleForTesting
+    HidProfile getHidProfile() {
+        return mHidProfile;
+    }
+
+    @VisibleForTesting
+    HidDeviceProfile getHidDeviceProfile() {
+        return mHidDeviceProfile;
+    }
+
     /**
      * Fill in a list of LocalBluetoothProfile objects that are supported by
      * the local device and the remote device.
@@ -553,7 +565,7 @@ public class LocalBluetoothProfileManager {
             removedProfiles.remove(mHidProfile);
         }
 
-        if (mHidProfile != null && mHidDeviceProfile.getConnectionStatus(device)
+        if (mHidDeviceProfile != null && mHidDeviceProfile.getConnectionStatus(device)
                 != BluetoothProfile.STATE_DISCONNECTED) {
             profiles.add(mHidDeviceProfile);
             removedProfiles.remove(mHidDeviceProfile);
