@@ -405,7 +405,10 @@
     <string name="accessibility_cell_data_on">Mobile Data On</string>
 
     <!-- Content description of the cell data being disabled. [CHAR LIMIT=NONE] -->
-    <string name="cell_data_off">Mobile data off</string>
+    <string name="cell_data_off_content_description">Mobile data off</string>
+
+    <!-- Content description of the cell data being disabled but shortened. [CHAR LIMIT=20] -->
+    <string name="cell_data_off">Off</string>
 
     <!-- Content description of the bluetooth tethering icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_bluetooth_tether">Bluetooth tethering.</string>
