@@ -1179,6 +1179,23 @@ public final class Settings {
     public static final String ACTION_ZEN_MODE_SETTINGS = "android.settings.ZEN_MODE_SETTINGS";
 
     /**
+     * Activity Action: Show Zen Mode visual effects configuration settings.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ZEN_MODE_BLOCKED_EFFECTS_SETTINGS =
+            "android.settings.ZEN_MODE_BLOCKED_EFFECTS_SETTINGS";
+
+    /**
+     * Activity Action: Show Zen Mode onboarding activity.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ZEN_MODE_ONBOARDING = "android.settings.ZEN_MODE_ONBOARDING";
+
+    /**
      * Activity Action: Show Zen Mode (aka Do Not Disturb) priority configuration settings.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)

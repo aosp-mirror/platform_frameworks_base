@@ -32,6 +32,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
+import android.graphics.drawable.Icon;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
@@ -1198,8 +1199,6 @@ public class ZenModeHelper {
 
     @VisibleForTesting
     protected Notification createZenUpgradeNotification() {
-        Intent intent = new Intent(Settings.ACTION_ZEN_MODE_SETTINGS)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         final Bundle extras = new Bundle();
         extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
                 mContext.getResources().getString(R.string.global_action_settings));
@@ -1210,15 +1209,20 @@ public class ZenModeHelper {
             title = R.string.zen_upgrade_notification_visd_title;
             content = R.string.zen_upgrade_notification_visd_content;
         }
+        Intent onboardingIntent = new Intent(Settings.ZEN_MODE_ONBOARDING);
+        onboardingIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         return new Notification.Builder(mContext, SystemNotificationChannels.DO_NOT_DISTURB)
+                .setAutoCancel(true)
                 .setSmallIcon(R.drawable.ic_settings_24dp)
+                .setLargeIcon(Icon.createWithResource(mContext, R.drawable.ic_zen_24dp))
                 .setContentTitle(mContext.getResources().getString(title))
                 .setContentText(mContext.getResources().getString(content))
+                .setContentIntent(PendingIntent.getActivity(mContext, 0, onboardingIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT))
                 .setAutoCancel(true)
                 .setLocalOnly(true)
                 .addExtras(extras)
                 .setStyle(new Notification.BigTextStyle())
-                .setContentIntent(PendingIntent.getActivity(mContext, 0, intent, 0, null))
                 .build();
     }
 
