@@ -93,6 +93,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -2786,7 +2787,7 @@ class PackageManagerShellCommand extends ShellCommand {
     }
 
     private static class LocalIntentReceiver {
-        private final SynchronousQueue<Intent> mResult = new SynchronousQueue<>();
+        private final LinkedBlockingQueue<Intent> mResult = new LinkedBlockingQueue<>();
 
         private IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
             @Override
