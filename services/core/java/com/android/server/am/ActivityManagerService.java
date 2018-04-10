@@ -26620,7 +26620,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 record.waitingForNetwork = false;
                 final long totalTime = SystemClock.uptimeMillis() - startTime;
                 if (totalTime >= mWaitForNetworkTimeoutMs || DEBUG_NETWORK) {
-                    Slog.wtf(TAG_NETWORK, "Total time waited for network rules to get updated: "
+                    Slog.w(TAG_NETWORK, "Total time waited for network rules to get updated: "
                             + totalTime + ". Uid: " + callingUid + " procStateSeq: "
                             + procStateSeq + " UidRec: " + record
                             + " validateUidRec: " + mValidateUids.get(callingUid));
