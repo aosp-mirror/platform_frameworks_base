@@ -31,6 +31,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayAdjustments;
@@ -557,6 +558,24 @@ public final class DisplayManagerGlobal {
     public void setTemporaryAutoBrightnessAdjustment(float adjustment) {
         try {
             mDm.setTemporaryAutoBrightnessAdjustment(adjustment);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the minimum brightness curve, which guarantess that any brightness curve that dips
+     * below it is rejected by the system.
+     * This prevent auto-brightness from setting the screen so dark as to prevent the user from
+     * resetting or disabling it, and maps lux to the absolute minimum nits that are still readable
+     * in that ambient brightness.
+     *
+     * @return The minimum brightness curve (as lux values and their corresponding nits values).
+     */
+    public Pair<float[], float[]> getMinimumBrightnessCurve() {
+        try {
+            Curve curve = mDm.getMinimumBrightnessCurve();
+            return Pair.create(curve.getX(), curve.getY());
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
