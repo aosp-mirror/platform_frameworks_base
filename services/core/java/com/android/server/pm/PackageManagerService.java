@@ -14021,7 +14021,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 "setPackagesSuspended for user " + userId);
         if (callingUid != Process.ROOT_UID &&
                 !UserHandle.isSameApp(getPackageUid(callingPackage, 0, userId), callingUid)) {
-            throw new IllegalArgumentException("callingPackage " + callingPackage + " does not"
+            throw new IllegalArgumentException("CallingPackage " + callingPackage + " does not"
                     + " belong to calling app id " + UserHandle.getAppId(callingUid));
         }
 
@@ -14045,20 +14045,18 @@ public class PackageManagerService extends IPackageManager.Stub
                     final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
                     if (pkgSetting == null
                             || filterAppAccessLPr(pkgSetting, callingUid, userId)) {
-                        Slog.w(TAG, "Could not find package setting for package \"" + packageName
-                                + "\". Skipping suspending/un-suspending.");
+                        Slog.w(TAG, "Could not find package setting for package: " + packageName
+                                + ". Skipping suspending/un-suspending.");
                         unactionedPackages.add(packageName);
                         continue;
                     }
-                    if (pkgSetting.getSuspended(userId) != suspended) {
-                        if (!canSuspendPackageForUserLocked(packageName, userId)) {
-                            unactionedPackages.add(packageName);
-                            continue;
-                        }
-                        pkgSetting.setSuspended(suspended, callingPackage, dialogMessage, appExtras,
-                                launcherExtras, userId);
-                        changedPackagesList.add(packageName);
+                    if (!canSuspendPackageForUserLocked(packageName, userId)) {
+                        unactionedPackages.add(packageName);
+                        continue;
                     }
+                    pkgSetting.setSuspended(suspended, callingPackage, dialogMessage, appExtras,
+                            launcherExtras, userId);
+                    changedPackagesList.add(packageName);
                 }
             }
         } finally {
@@ -14073,7 +14071,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 scheduleWritePackageRestrictionsLocked(userId);
             }
         }
-
         return unactionedPackages.toArray(new String[unactionedPackages.size()]);
     }
 
@@ -14081,7 +14078,8 @@ public class PackageManagerService extends IPackageManager.Stub
     public PersistableBundle getSuspendedPackageAppExtras(String packageName, int userId) {
         final int callingUid = Binder.getCallingUid();
         if (getPackageUid(packageName, 0, userId) != callingUid) {
-            mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS, null);
+            throw new SecurityException("Calling package " + packageName
+                    + " does not belong to calling uid " + callingUid);
         }
         synchronized (mPackages) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
@@ -14093,25 +14091,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 return packageUserState.suspendedAppExtras;
             }
             return null;
-        }
-    }
-
-    @Override
-    public void setSuspendedPackageAppExtras(String packageName, PersistableBundle appExtras,
-            int userId) {
-        final int callingUid = Binder.getCallingUid();
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS, null);
-        synchronized (mPackages) {
-            final PackageSetting ps = mSettings.mPackages.get(packageName);
-            if (ps == null || filterAppAccessLPr(ps, callingUid, userId)) {
-                throw new IllegalArgumentException("Unknown target package: " + packageName);
-            }
-            final PackageUserState packageUserState = ps.readUserState(userId);
-            if (packageUserState.suspended) {
-                packageUserState.suspendedAppExtras = appExtras;
-                sendMyPackageSuspendedOrUnsuspended(new String[] {packageName}, true, appExtras,
-                        userId);
-            }
         }
     }
 
@@ -14169,17 +14148,25 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    void onSuspendingPackageRemoved(String packageName, int userId) {
-        final int[] userIds = (userId == UserHandle.USER_ALL) ? sUserManager.getUserIds()
-                : new int[] {userId};
-        synchronized (mPackages) {
-            for (PackageSetting ps : mSettings.mPackages.values()) {
-                for (int user : userIds) {
-                    final PackageUserState pus = ps.readUserState(user);
+    void onSuspendingPackageRemoved(String packageName, int removedForUser) {
+        final int[] userIds = (removedForUser == UserHandle.USER_ALL) ? sUserManager.getUserIds()
+                : new int[] {removedForUser};
+        for (int userId : userIds) {
+            List<String> affectedPackages = new ArrayList<>();
+            synchronized (mPackages) {
+                for (PackageSetting ps : mSettings.mPackages.values()) {
+                    final PackageUserState pus = ps.readUserState(userId);
                     if (pus.suspended && packageName.equals(pus.suspendingPackage)) {
-                        ps.setSuspended(false, null, null, null, null, user);
+                        ps.setSuspended(false, null, null, null, null, userId);
+                        affectedPackages.add(ps.name);
                     }
                 }
+            }
+            if (!affectedPackages.isEmpty()) {
+                final String[] packageArray = affectedPackages.toArray(
+                        new String[affectedPackages.size()]);
+                sendMyPackageSuspendedOrUnsuspended(packageArray, false, null, userId);
+                sendPackagesSuspendedForUser(packageArray, userId, false, null);
             }
         }
     }
