@@ -222,6 +222,9 @@ class AutomaticBrightnessController {
     }
 
     public int getAutomaticScreenBrightness() {
+        if (!mAmbientLuxValid) {
+            return -1;
+        }
         if (mDisplayPolicy == DisplayPowerRequest.POLICY_DOZE) {
             return (int) (mScreenAutoBrightness * mDozeScaleFactor);
         }
@@ -346,6 +349,7 @@ class AutomaticBrightnessController {
         pw.println("  mLightSensorEnabled=" + mLightSensorEnabled);
         pw.println("  mLightSensorEnableTime=" + TimeUtils.formatUptime(mLightSensorEnableTime));
         pw.println("  mAmbientLux=" + mAmbientLux);
+        pw.println("  mAmbientLuxValid=" + mAmbientLuxValid);
         pw.println("  mAmbientLightHorizon=" + mAmbientLightHorizon);
         pw.println("  mBrighteningLuxThreshold=" + mBrighteningLuxThreshold);
         pw.println("  mDarkeningLuxThreshold=" + mDarkeningLuxThreshold);
