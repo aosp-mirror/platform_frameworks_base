@@ -16,6 +16,8 @@
 
 package android.app.slice;
 
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -99,22 +101,6 @@ public class SliceManager {
     private final ISliceManager mService;
     private final Context mContext;
     private final IBinder mToken = new Binder();
-
-    /**
-     * Permission denied.
-     * @hide
-     */
-    public static final int PERMISSION_DENIED = -1;
-    /**
-     * Permission granted.
-     * @hide
-     */
-    public static final int PERMISSION_GRANTED = 0;
-    /**
-     * Permission just granted by the user, and should be granted uri permission as well.
-     * @hide
-     */
-    public static final int PERMISSION_USER_GRANTED = 1;
 
     /**
      * @hide
@@ -417,9 +403,11 @@ public class SliceManager {
      * @see #grantSlicePermission(String, Uri)
      */
     public @PermissionResult int checkSlicePermission(@NonNull Uri uri, int pid, int uid) {
-        // TODO: Switch off Uri permissions.
-        return mContext.checkUriPermission(uri, pid, uid,
-                Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        try {
+            return mService.checkSlicePermission(uri, null, pid, uid, null);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -431,11 +419,11 @@ public class SliceManager {
      * @see #revokeSlicePermission
      */
     public void grantSlicePermission(@NonNull String toPackage, @NonNull Uri uri) {
-        // TODO: Switch off Uri permissions.
-        mContext.grantUriPermission(toPackage, uri,
-                Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-                        | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                        | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
+        try {
+            mService.grantSlicePermission(mContext.getPackageName(), toPackage, uri);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -453,11 +441,11 @@ public class SliceManager {
      * @see #grantSlicePermission
      */
     public void revokeSlicePermission(@NonNull String toPackage, @NonNull Uri uri) {
-        // TODO: Switch off Uri permissions.
-        mContext.revokeUriPermission(toPackage, uri,
-                Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-                        | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                        | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
+        try {
+            mService.revokeSlicePermission(mContext.getPackageName(), toPackage, uri);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -477,16 +465,6 @@ public class SliceManager {
             if (result == PERMISSION_DENIED) {
                 throw new SecurityException("User " + uid + " does not have slice permission for "
                         + uri + ".");
-            }
-            if (result == PERMISSION_USER_GRANTED) {
-                // We just had a user grant of this permission and need to grant this to the app
-                // permanently.
-                mContext.grantUriPermission(pkg, uri.buildUpon().path("").build(),
-                        Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-                                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                                | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
-                // Notify a change has happened because we just granted a permission.
-                mContext.getContentResolver().notifyChange(uri, null);
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
