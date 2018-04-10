@@ -47,7 +47,7 @@ import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.IntArray;
 import android.util.MathUtils;
-import android.util.Pair;
+import android.util.Range;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
@@ -266,11 +266,11 @@ public class NetworkStatsCollection implements FileRotator.Reader {
         long collectEnd = end;
 
         if (augmentEnd != SubscriptionPlan.TIME_UNKNOWN) {
-            final Iterator<Pair<ZonedDateTime, ZonedDateTime>> it = augmentPlan.cycleIterator();
+            final Iterator<Range<ZonedDateTime>> it = augmentPlan.cycleIterator();
             while (it.hasNext()) {
-                final Pair<ZonedDateTime, ZonedDateTime> cycle = it.next();
-                final long cycleStart = cycle.first.toInstant().toEpochMilli();
-                final long cycleEnd = cycle.second.toInstant().toEpochMilli();
+                final Range<ZonedDateTime> cycle = it.next();
+                final long cycleStart = cycle.getLower().toInstant().toEpochMilli();
+                final long cycleEnd = cycle.getUpper().toInstant().toEpochMilli();
                 if (cycleStart <= augmentEnd && augmentEnd < cycleEnd) {
                     augmentStart = cycleStart;
                     collectStart = Long.min(collectStart, augmentStart);
