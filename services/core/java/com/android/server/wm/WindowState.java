@@ -4101,11 +4101,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mDestroying = true;
 
         final boolean hasSurface = mWinAnimator.hasSurface();
-        if (hasSurface) {
-            // Use pendingTransaction here so hide is done the same transaction as the other
-            // animations when exiting
-            mWinAnimator.hide(getPendingTransaction(), "onExitAnimationDone");
-        }
+
+        // Use pendingTransaction here so hide is done the same transaction as the other
+        // animations when exiting
+        mWinAnimator.hide(getPendingTransaction(), "onExitAnimationDone");
 
         // If we have an app token, we ask it to destroy the surface for us, so that it can take
         // care to ensure the activity has actually stopped and the surface is not still in use.
