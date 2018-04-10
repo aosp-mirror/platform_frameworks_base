@@ -5616,46 +5616,6 @@ public abstract class PackageManager {
     }
 
     /**
-     * Retrieve the {@link PersistableBundle} that was passed as {@code appExtras} when the given
-     * package was suspended.
-     *
-     * <p> The caller must hold permission {@link Manifest.permission#SUSPEND_APPS} to use this
-     * api.</p>
-     *
-     * @param packageName The package to retrieve extras for.
-     * @return The {@code appExtras} for the suspended package.
-     *
-     * @see #setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle, String)
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.SUSPEND_APPS)
-    public @Nullable PersistableBundle getSuspendedPackageAppExtras(String packageName) {
-        throw new UnsupportedOperationException("getSuspendedPackageAppExtras not implemented");
-    }
-
-    /**
-     * Set the app extras for a suspended package. This method can be used to update the appExtras
-     * for a package that was earlier suspended using
-     * {@link #setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle,
-     * String)}
-     * Does nothing if the given package is not already in a suspended state.
-     *
-     * @param packageName The package for which the appExtras need to be updated
-     * @param appExtras The new appExtras for the given package
-     *
-     * @see #setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle, String)
-     *
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.SUSPEND_APPS)
-    public void setSuspendedPackageAppExtras(String packageName,
-            @Nullable PersistableBundle appExtras) {
-        throw new UnsupportedOperationException("setSuspendedPackageAppExtras not implemented");
-    }
-
-    /**
      * Returns any extra information supplied as {@code appExtras} to the system when the calling
      * app was suspended.
      *
