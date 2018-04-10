@@ -246,6 +246,7 @@ public class SettingsBackupTest {
                     Settings.Global.HDMI_CONTROL_ENABLED,
                     Settings.Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
                     Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
+                    Settings.Global.HIDE_ERROR_DIALOGS,
                     Settings.Global.HTTP_PROXY,
                     HYBRID_SYSUI_BATTERY_WARNING_FLAGS,
                     Settings.Global.INET_CONDITION_DEBOUNCE_DOWN_DELAY,

@@ -118,6 +118,7 @@ import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RTL;
+import static android.provider.Settings.Global.HIDE_ERROR_DIALOGS;
 import static android.provider.Settings.Global.NETWORK_ACCESS_TIMEOUT_MS;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.provider.Settings.System.FONT_SCALE;
@@ -1282,17 +1283,24 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private final class FontScaleSettingObserver extends ContentObserver {
         private final Uri mFontScaleUri = Settings.System.getUriFor(FONT_SCALE);
+        private final Uri mHideErrorDialogsUri = Settings.Global.getUriFor(HIDE_ERROR_DIALOGS);
 
         public FontScaleSettingObserver() {
             super(mHandler);
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(mFontScaleUri, false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(mHideErrorDialogsUri, false, this,
+                    UserHandle.USER_ALL);
         }
 
         @Override
         public void onChange(boolean selfChange, Uri uri, @UserIdInt int userId) {
             if (mFontScaleUri.equals(uri)) {
                 updateFontScaleIfNeeded(userId);
+            } else if (mHideErrorDialogsUri.equals(uri)) {
+                synchronized (ActivityManagerService.this) {
+                    updateShouldShowDialogsLocked(getGlobalConfiguration());
+                }
             }
         }
     }
@@ -22449,7 +22457,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mUserController.getCurrentUserId());
 
         // TODO: If our config changes, should we auto dismiss any currently showing dialogs?
-        mShowDialogs = shouldShowDialogs(mTempConfig);
+        updateShouldShowDialogsLocked(mTempConfig);
 
         AttributeCache ac = AttributeCache.instance();
         if (ac != null) {
@@ -22704,7 +22712,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * A thought: SystemUI might also want to get told about this, the Power
      * dialog / global actions also might want different behaviors.
      */
-    private static boolean shouldShowDialogs(Configuration config) {
+    private void updateShouldShowDialogsLocked(Configuration config) {
         final boolean inputMethodExists = !(config.keyboard == Configuration.KEYBOARD_NOKEYS
                                    && config.touchscreen == Configuration.TOUCHSCREEN_NOTOUCH
                                    && config.navigation == Configuration.NAVIGATION_NONAV);
@@ -22713,7 +22721,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 && !(modeType == Configuration.UI_MODE_TYPE_WATCH && Build.IS_USER)
                 && modeType != Configuration.UI_MODE_TYPE_TELEVISION
                 && modeType != Configuration.UI_MODE_TYPE_VR_HEADSET);
-        return inputMethodExists && uiModeSupportsDialogs;
+        final boolean hideDialogsSet = Settings.Global.getInt(mContext.getContentResolver(),
+                HIDE_ERROR_DIALOGS, 0) != 0;
+        mShowDialogs = inputMethodExists && uiModeSupportsDialogs && !hideDialogsSet;
     }
 
     @Override

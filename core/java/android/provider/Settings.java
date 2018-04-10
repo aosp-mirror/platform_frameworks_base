@@ -11123,6 +11123,14 @@ public final class Settings {
         public static final String ALWAYS_FINISH_ACTIVITIES = "always_finish_activities";
 
         /**
+         * If nonzero, all system error dialogs will be hidden.  For example, the
+         * crash and ANR dialogs will not be shown, and the system will just proceed
+         * as if they had been accepted by the user.
+         * @hide
+         */
+        public static final String HIDE_ERROR_DIALOGS = "hide_error_dialogs";
+
+        /**
          * Use Dock audio output for media:
          *      0 = disabled
          *      1 = enabled
