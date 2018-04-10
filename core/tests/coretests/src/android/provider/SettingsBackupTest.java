@@ -60,7 +60,6 @@ public class SettingsBackupTest {
                     Settings.System.ALARM_ALERT, // backup candidate?
                     Settings.System.ALARM_ALERT_CACHE, // internal cache
                     Settings.System.APPEND_FOR_LAST_AUDIBLE, // suffix deprecated since API 2
-                    Settings.System.DISPLAY_COLOR_MODE, // bug?
                     Settings.System.EGG_MODE, // I am the lolrus
                     Settings.System.END_BUTTON_BEHAVIOR, // bug?
                     Settings.System
