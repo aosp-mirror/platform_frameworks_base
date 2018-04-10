@@ -37,19 +37,20 @@ public class FullscreenUserSwitcher {
     private final UserGridRecyclerView mUserGridView;
     private final ProgressBar mSwitchingUsers;
     private final int mShortAnimDuration;
+    private final StatusBar mStatusBar;
 
     private boolean mShowing;
 
     public FullscreenUserSwitcher(StatusBar statusBar, ViewStub containerStub, Context context) {
+        mStatusBar = statusBar;
         mParent = containerStub.inflate();
         mContainer = mParent.findViewById(R.id.container);
         mUserGridView = mContainer.findViewById(R.id.user_grid);
-        mUserGridView.setStatusBar(statusBar);
         GridLayoutManager layoutManager = new GridLayoutManager(context,
                 context.getResources().getInteger(R.integer.user_fullscreen_switcher_num_col));
         mUserGridView.setLayoutManager(layoutManager);
         mUserGridView.buildAdapter();
-        mUserGridView.setUserSelectionListener(record -> toggleSwitchInProgress(true));
+        mUserGridView.setUserSelectionListener(this::onUserSelected);
 
         mShortAnimDuration = mContainer.getResources()
             .getInteger(android.R.integer.config_shortAnimTime);
@@ -57,8 +58,35 @@ public class FullscreenUserSwitcher {
         mSwitchingUsers = mParent.findViewById(R.id.switching_users);
     }
 
+    public void show() {
+        if (mShowing) {
+            return;
+        }
+        mShowing = true;
+        mParent.setVisibility(View.VISIBLE);
+    }
+
+    public void hide() {
+        mShowing = false;
+        toggleSwitchInProgress(false);
+        mParent.setVisibility(View.GONE);
+    }
+
     public void onUserSwitched(int newUserId) {
-        mUserGridView.onUserSwitched(newUserId);
+        mParent.post(this::showOfflineAuthUi);
+    }
+
+    private void onUserSelected(UserGridRecyclerView.UserRecord record) {
+        if (record.mIsForeground) {
+            showOfflineAuthUi();
+            return;
+        }
+        toggleSwitchInProgress(true);
+    }
+
+    private void showOfflineAuthUi() {
+        mStatusBar.executeRunnableDismissingKeyguard(null/* runnable */, null /* cancelAction */,
+                true /* dismissShade */, true /* afterKeyguardGone */, true /* deferred */);
     }
 
     private void toggleSwitchInProgress(boolean inProgress) {
@@ -90,19 +118,5 @@ public class FullscreenUserSwitcher {
                     outgoing.setVisibility(View.GONE);
                 }
             });
-    }
-
-    public void show() {
-        if (mShowing) {
-            return;
-        }
-        mShowing = true;
-        mParent.setVisibility(View.VISIBLE);
-    }
-
-    public void hide() {
-        mShowing = false;
-        toggleSwitchInProgress(false);
-        mParent.setVisibility(View.GONE);
     }
 }
