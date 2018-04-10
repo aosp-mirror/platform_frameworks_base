@@ -616,4 +616,16 @@ public abstract class PackageManagerInternal {
      */
     public abstract boolean isDataRestoreSafe(@NonNull Signature restoringFromSig,
             @NonNull String packageName);
+
+
+    /**
+     * Returns true if the the signing information for {@code clientUid} is sufficient to gain
+     * access gated by {@code capability}.  This can happen if the two UIDs have the same signing
+     * information, if the signing information {@code clientUid} indicates that it has the signing
+     * certificate for {@code serverUid} in its signing history (if it was previously signed by it),
+     * or if the signing certificate for {@code clientUid} is in ths signing history for {@code
+     * serverUid} and with the {@code capability} specified.
+     */
+    public abstract boolean hasSignatureCapability(int serverUid, int clientUid,
+            @PackageParser.SigningDetails.CertCapabilities int capability);
 }
