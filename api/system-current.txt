@@ -1030,7 +1030,7 @@ package android.content.pm {
     method public abstract void grantRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public abstract int installExistingPackage(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract int installExistingPackage(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
-    method public boolean isPackageSuspended(java.lang.String);
+    method public boolean isPackageSuspended(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceiversAsUser(android.content.Intent, int, android.os.UserHandle);
     method public abstract void registerDexModule(java.lang.String, android.content.pm.PackageManager.DexModuleRegisterCallback);
     method public abstract void removeOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
