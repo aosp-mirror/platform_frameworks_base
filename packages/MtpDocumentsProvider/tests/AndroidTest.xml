@@ -23,5 +23,6 @@
     <test class="com.android.tradefed.testtype.InstrumentationTest" >
         <option name="package" value="com.android.mtp.tests" />
         <option name="runner" value="com.android.mtp.TestResultInstrumentation" />
+        <option name="hidden-api-checks" value="false"/>
     </test>
 </configuration>

@@ -25,5 +25,6 @@
     <option name="test-tag" value="FrameworksUtilTests" />
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.android.frameworks.utiltests" />
+        <option name="hidden-api-checks" value="false"/>
     </test>
 </configuration>
