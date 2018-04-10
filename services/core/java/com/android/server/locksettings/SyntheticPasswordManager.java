@@ -534,17 +534,33 @@ public class SyntheticPasswordManager {
 
     private void destroyWeaverSlot(long handle, int userId) {
         int slot = loadWeaverSlot(handle, userId);
+        destroyState(WEAVER_SLOT_NAME, handle, userId);
         if (slot != INVALID_WEAVER_SLOT) {
-            try {
-                weaverEnroll(slot, null, null);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to destroy slot", e);
+            Set<Integer> usedSlots = getUsedWeaverSlots();
+            if (!usedSlots.contains(slot)) {
+                Log.i(TAG, "Destroy weaver slot " + slot + " for user " + userId);
+                try {
+                    weaverEnroll(slot, null, null);
+                } catch (RemoteException e) {
+                    Log.w(TAG, "Failed to destroy slot", e);
+                }
+            } else {
+                Log.w(TAG, "Skip destroying reused weaver slot " + slot + " for user " + userId);
             }
         }
-        destroyState(WEAVER_SLOT_NAME, handle, userId);
     }
 
-    private int getNextAvailableWeaverSlot() {
+    /**
+     * Return the set of weaver slots that are currently in use by all users on the device.
+     * <p>
+     * <em>Note:</em> Users who are in the process of being deleted are not tracked here
+     * (due to them being marked as partial in UserManager so not visible from
+     * {@link UserManager#getUsers}). As a result their weaver slots will not be considered
+     * taken and can be reused by new users. Care should be taken when cleaning up the
+     * deleted user in {@link #removeUser}, to prevent a reused slot from being erased
+     * unintentionally.
+     */
+    private Set<Integer> getUsedWeaverSlots() {
         Map<Integer, List<Long>> slotHandles = mStorage.listSyntheticPasswordHandlesForAllUsers(
                 WEAVER_SLOT_NAME);
         HashSet<Integer> slots = new HashSet<>();
@@ -554,8 +570,13 @@ public class SyntheticPasswordManager {
                 slots.add(slot);
             }
         }
+        return slots;
+    }
+
+    private int getNextAvailableWeaverSlot() {
+        Set<Integer> usedSlots = getUsedWeaverSlots();
         for (int i = 0; i < mWeaverConfig.slots; i++) {
-            if (!slots.contains(i)) {
+            if (!usedSlots.contains(i)) {
                 return i;
             }
         }
@@ -592,6 +613,7 @@ public class SyntheticPasswordManager {
         if (isWeaverAvailable()) {
             // Weaver based user password
             int weaverSlot = getNextAvailableWeaverSlot();
+            Log.i(TAG, "Weaver enroll password to slot " + weaverSlot + " for user " + userId);
             byte[] weaverSecret = weaverEnroll(weaverSlot, passwordTokenToWeaverKey(pwdToken), null);
             if (weaverSecret == null) {
                 Log.e(TAG, "Fail to enroll user password under weaver " + userId);
@@ -749,6 +771,7 @@ public class SyntheticPasswordManager {
         if (isWeaverAvailable()) {
             int slot = getNextAvailableWeaverSlot();
             try {
+                Log.i(TAG, "Weaver enroll token to slot " + slot + " for user " + userId);
                 weaverEnroll(slot, null, tokenData.weaverSecret);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to enroll weaver secret when activating token", e);
