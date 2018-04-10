@@ -91,7 +91,7 @@ class NetworkWatchlistShellCommand extends ShellCommand {
         final long ident = Binder.clearCallingIdentity();
         try {
             // Reset last report time
-            if (!WatchlistConfig.getInstance().isConfigSecure()) {
+            if (WatchlistConfig.getInstance().isConfigSecure()) {
                 pw.println("Error: Cannot force generate report under production config");
                 return -1;
             }
