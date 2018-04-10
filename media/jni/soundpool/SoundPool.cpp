@@ -809,7 +809,11 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
             mAudioTrack = newTrack;
             ALOGV("using new track %p for sample %d", newTrack.get(), sample->sampleID());
         }
-        newTrack->setVolume(leftVolume, rightVolume);
+        if (mMuted) {
+            newTrack->setVolume(0.0f, 0.0f);
+        } else {
+            newTrack->setVolume(leftVolume, rightVolume);
+        }
         newTrack->setLoop(0, frameCount, loop);
         mPos = 0;
         mSample = sample;
