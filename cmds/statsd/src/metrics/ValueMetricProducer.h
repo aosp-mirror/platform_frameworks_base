@@ -135,6 +135,9 @@ private:
         int tainted;
         // Running sum of known pairs in this bucket
         long sum;
+        // If this dimension has any non-tainted value. If not, don't report the
+        // dimension.
+        bool hasValue;
     } Interval;
 
     std::unordered_map<MetricDimensionKey, Interval> mCurrentSlicedBucket;

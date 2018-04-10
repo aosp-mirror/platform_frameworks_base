@@ -334,6 +334,7 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
                 } else {
                     interval.sum += value;
                 }
+                interval.hasValue = true;
                 interval.startUpdated = false;
             } else {
                 VLOG("No start for matching end %ld", value);
@@ -342,6 +343,7 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
         }
     } else {    // for pushed events
         interval.sum += value;
+        interval.hasValue = true;
     }
 
     long wholeBucketVal = interval.sum;
@@ -393,10 +395,12 @@ void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
     for (const auto& slice : mCurrentSlicedBucket) {
         tainted += slice.second.tainted;
         tainted += slice.second.startUpdated;
-        info.mValue = slice.second.sum;
-        // it will auto create new vector of ValuebucketInfo if the key is not found.
-        auto& bucketList = mPastBuckets[slice.first];
-        bucketList.push_back(info);
+        if (slice.second.hasValue) {
+            info.mValue = slice.second.sum;
+            // it will auto create new vector of ValuebucketInfo if the key is not found.
+            auto& bucketList = mPastBuckets[slice.first];
+            bucketList.push_back(info);
+        }
     }
     VLOG("%d tainted pairs in the bucket", tainted);
 
