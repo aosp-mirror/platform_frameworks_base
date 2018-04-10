@@ -126,6 +126,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
                 final OverlayInfo oi = overlaysForTarget.get(i);
                 String status;
                 switch (oi.state) {
+                    case OverlayInfo.STATE_ENABLED_STATIC:
                     case OverlayInfo.STATE_ENABLED:
                         status = "[x]";
                         break;

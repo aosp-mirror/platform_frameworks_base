@@ -38,6 +38,7 @@ public final class OverlayInfo implements Parcelable {
             STATE_NO_IDMAP,
             STATE_DISABLED,
             STATE_ENABLED,
+            STATE_ENABLED_STATIC,
             STATE_TARGET_UPGRADING,
             STATE_OVERLAY_UPGRADING,
     })
@@ -90,7 +91,16 @@ public final class OverlayInfo implements Parcelable {
     public static final int STATE_OVERLAY_UPGRADING = 5;
 
     /**
-     * Category for theme overlays.
+     * The overlay package is currently enabled because it is marked as
+     * 'static'. It cannot be disabled but will change state if for instance
+     * its target is uninstalled.
+     */
+    public static final int STATE_ENABLED_STATIC = 6;
+
+    /**
+     * Overlay category: theme.
+     * <p>
+     * Change how Android (including the status bar, dialogs, ...) looks.
      */
     public static final String CATEGORY_THEME = "android.theme";
 
@@ -194,6 +204,7 @@ public final class OverlayInfo implements Parcelable {
             case STATE_NO_IDMAP:
             case STATE_DISABLED:
             case STATE_ENABLED:
+            case STATE_ENABLED_STATIC:
             case STATE_TARGET_UPGRADING:
             case STATE_OVERLAY_UPGRADING:
                 break;
@@ -243,6 +254,7 @@ public final class OverlayInfo implements Parcelable {
     public boolean isEnabled() {
         switch (state) {
             case STATE_ENABLED:
+            case STATE_ENABLED_STATIC:
                 return true;
             default:
                 return false;
@@ -267,6 +279,8 @@ public final class OverlayInfo implements Parcelable {
                 return "STATE_DISABLED";
             case STATE_ENABLED:
                 return "STATE_ENABLED";
+            case STATE_ENABLED_STATIC:
+                return "STATE_ENABLED_STATIC";
             case STATE_TARGET_UPGRADING:
                 return "STATE_TARGET_UPGRADING";
             case STATE_OVERLAY_UPGRADING:
