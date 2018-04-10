@@ -210,7 +210,7 @@ class SafeActivityOptions {
         // Check if someone tries to launch an unwhitelisted activity into LockTask mode.
         final boolean lockTaskMode = options.getLockTaskMode();
         if (aInfo != null && lockTaskMode
-                && !supervisor.mService.mLockTaskController.isPackageWhitelisted(
+                && !supervisor.mService.getLockTaskController().isPackageWhitelisted(
                         UserHandle.getUserId(callingUid), aInfo.packageName)) {
             final String msg = "Permission Denial: starting " + getIntentString(intent)
                     + " from " + callerApp + " (pid=" + callingPid

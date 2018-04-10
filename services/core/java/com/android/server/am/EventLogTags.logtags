@@ -134,3 +134,6 @@ option java_package com.android.server.am
 30059 am_on_start_called (User|1|5),(Component Name|3),(Reason|3)
 # The activity's onDestroy has been called.
 30060 am_on_destroy_called (User|1|5),(Component Name|3),(Reason|3)
+
+# The task is being removed from its parent stack
+30061 am_remove_task (Task ID|1|5), (Stack ID|1|5)
