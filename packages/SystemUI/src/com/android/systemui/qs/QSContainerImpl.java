@@ -16,17 +16,19 @@
 
 package com.android.systemui.qs;
 
+import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
+
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.android.settingslib.Utils;
 import com.android.systemui.R;
+import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.qs.customize.QSCustomizer;
+import com.android.systemui.statusbar.CommandQueue;
 
 /**
  * Wrapper view with background which contains {@link QSPanel} and {@link BaseStatusBarHeader}
@@ -48,6 +50,7 @@ public class QSContainerImpl extends FrameLayout {
     private View mStatusBarBackground;
 
     private int mSideMargins;
+    private boolean mQsDisabled;
 
     public QSContainerImpl(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -96,6 +99,16 @@ public class QSContainerImpl extends FrameLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if (mQsDisabled) {
+            // Only show the status bar contents in QQS header when QS is disabled.
+            mHeader.measure(widthMeasureSpec, heightMeasureSpec);
+            LayoutParams layoutParams = (LayoutParams) mHeader.getLayoutParams();
+            int height = layoutParams.topMargin + layoutParams.bottomMargin
+                    + mHeader.getMeasuredHeight();
+            super.onMeasure(
+                    widthMeasureSpec, MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
+            return;
+        }
         // Since we control our own bottom, be whatever size we want.
         // Otherwise the QSPanel ends up with 0 height when the window is only the
         // size of the status bar.
@@ -119,6 +132,15 @@ public class QSContainerImpl extends FrameLayout {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         updateExpansion();
+    }
+
+    public void disable(int state1, int state2, boolean animate) {
+        final boolean disabled = (state2 & DISABLE2_QUICK_SETTINGS) != 0;
+        if (disabled == mQsDisabled) return;
+        mQsDisabled = disabled;
+        mBackgroundGradient.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
+        mQSPanel.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
+        mQSFooter.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
     }
 
     private void updateResources() {

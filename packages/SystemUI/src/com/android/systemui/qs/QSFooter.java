@@ -69,4 +69,6 @@ public interface QSFooter {
      */
     @Nullable
     View getExpandView();
+
+    default void disable(int state1, int state2, boolean animate) {}
 }
