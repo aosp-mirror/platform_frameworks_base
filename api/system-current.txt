@@ -3077,37 +3077,6 @@ package android.net {
     method public void onTetheringStarted();
   }
 
-  public final class IpSecManager {
-    method public void applyTunnelModeTransform(android.net.IpSecManager.IpSecTunnelInterface, int, android.net.IpSecTransform) throws java.io.IOException;
-    method public android.net.IpSecManager.IpSecTunnelInterface createIpSecTunnelInterface(java.net.InetAddress, java.net.InetAddress, android.net.Network) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException;
-  }
-
-  public static final class IpSecManager.IpSecTunnelInterface implements java.lang.AutoCloseable {
-    method public void addAddress(java.net.InetAddress, int) throws java.io.IOException;
-    method public void close();
-    method public java.lang.String getInterfaceName();
-    method public void removeAddress(java.net.InetAddress, int) throws java.io.IOException;
-  }
-
-  public final class IpSecTransform implements java.lang.AutoCloseable {
-    method public void startNattKeepalive(android.net.IpSecTransform.NattKeepaliveCallback, int, android.os.Handler) throws java.io.IOException;
-    method public void stopNattKeepalive();
-  }
-
-  public static class IpSecTransform.Builder {
-    method public android.net.IpSecTransform buildTunnelModeTransform(java.net.InetAddress, android.net.IpSecManager.SecurityParameterIndex) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException, android.net.IpSecManager.SpiUnavailableException;
-  }
-
-  public static class IpSecTransform.NattKeepaliveCallback {
-    ctor public IpSecTransform.NattKeepaliveCallback();
-    method public void onError(int);
-    method public void onStarted();
-    method public void onStopped();
-    field public static final int ERROR_HARDWARE_ERROR = 3; // 0x3
-    field public static final int ERROR_HARDWARE_UNSUPPORTED = 2; // 0x2
-    field public static final int ERROR_INVALID_NETWORK = 1; // 0x1
-  }
-
   public final class NetworkCapabilities implements android.os.Parcelable {
     field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
   }
