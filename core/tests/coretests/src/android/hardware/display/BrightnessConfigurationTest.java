@@ -41,7 +41,7 @@ public class BrightnessConfigurationTest {
     };
 
     private static final float[] NITS_LEVELS = {
-        0.5f,
+        1f,
         90f,
         100f,
     };
