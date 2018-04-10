@@ -371,7 +371,7 @@
     <dimen name="qs_header_alarm_icon_size">18dp</dimen>
     <dimen name="qs_header_alarm_text_margin_start">6dp</dimen>
     <dimen name="qs_footer_padding_start">16dp</dimen>
-    <dimen name="qs_footer_padding_end">24dp</dimen>
+    <dimen name="qs_footer_padding_end">16dp</dimen>
     <dimen name="qs_footer_icon_size">16dp</dimen>
 
     <dimen name="qs_notif_collapsed_space">64dp</dimen>
