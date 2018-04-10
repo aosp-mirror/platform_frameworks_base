@@ -34,10 +34,6 @@ import android.os.LocaleList;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.text.TextUtils.SimpleStringSplitter;
-import android.util.ArrayMap;
-import android.util.ArraySet;
-import android.util.Log;
 import android.util.Pair;
 import android.util.Printer;
 import android.util.Slog;
@@ -783,58 +779,6 @@ public class InputMethodUtils {
     }
 
     /**
-     * Parses the setting stored input methods and subtypes string value.
-     *
-     * @param inputMethodsAndSubtypesString The input method subtypes value stored in settings.
-     * @return Map from input method ID to set of input method subtypes IDs.
-     */
-    @VisibleForTesting
-    public static ArrayMap<String, ArraySet<String>> parseInputMethodsAndSubtypesString(
-            @Nullable final String inputMethodsAndSubtypesString) {
-
-        final ArrayMap<String, ArraySet<String>> imeMap = new ArrayMap<>();
-        if (TextUtils.isEmpty(inputMethodsAndSubtypesString)) {
-            return imeMap;
-        }
-
-        final SimpleStringSplitter typeSplitter =
-                new SimpleStringSplitter(INPUT_METHOD_SEPARATOR);
-        final SimpleStringSplitter subtypeSplitter =
-                new SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATOR);
-
-        List<Pair<String, ArrayList<String>>> allImeSettings =
-                InputMethodSettings.buildInputMethodsAndSubtypeList(inputMethodsAndSubtypesString,
-                        typeSplitter,
-                        subtypeSplitter);
-        for (Pair<String, ArrayList<String>> ime : allImeSettings) {
-            ArraySet<String> subtypes = new ArraySet<>();
-            if (ime.second != null) {
-                subtypes.addAll(ime.second);
-            }
-            imeMap.put(ime.first, subtypes);
-        }
-        return imeMap;
-    }
-
-    @NonNull
-    public static String buildInputMethodsAndSubtypesString(
-            @NonNull final ArrayMap<String, ArraySet<String>> map) {
-        // we want to use the canonical InputMethodSettings implementation,
-        // so we convert data structures first.
-        List<Pair<String, ArrayList<String>>> imeMap = new ArrayList<>(4);
-        for (ArrayMap.Entry<String, ArraySet<String>> entry : map.entrySet()) {
-            final String imeName = entry.getKey();
-            final ArraySet<String> subtypeSet = entry.getValue();
-            final ArrayList<String> subtypes = new ArrayList<>(2);
-            if (subtypeSet != null) {
-                subtypes.addAll(subtypeSet);
-            }
-            imeMap.add(new Pair<>(imeName, subtypes));
-        }
-        return InputMethodSettings.buildInputMethodsSettingString(imeMap);
-    }
-
-    /**
      * Utility class for putting and getting settings for InputMethod
      * TODO: Move all putters and getters of settings to this class.
      */
@@ -871,21 +815,7 @@ public class InputMethodUtils {
             }
         }
 
-        public static String buildInputMethodsSettingString(
-                List<Pair<String, ArrayList<String>>> allImeSettingsMap) {
-            final StringBuilder b = new StringBuilder();
-            boolean needsSeparator = false;
-            for (Pair<String, ArrayList<String>> ime : allImeSettingsMap) {
-                if (needsSeparator) {
-                    b.append(INPUT_METHOD_SEPARATOR);
-                }
-                buildEnabledInputMethodsSettingString(b, ime);
-                needsSeparator = true;
-            }
-            return b.toString();
-        }
-
-        public static List<Pair<String, ArrayList<String>>> buildInputMethodsAndSubtypeList(
+        private static List<Pair<String, ArrayList<String>>> buildInputMethodsAndSubtypeList(
                 String enabledInputMethodsStr,
                 TextUtils.SimpleStringSplitter inputMethodSplitter,
                 TextUtils.SimpleStringSplitter subtypeSplitter) {
