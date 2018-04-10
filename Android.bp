@@ -853,6 +853,8 @@ optional_subdirs = [
     "core/tests/utiltests/jni",
 ]
 
+// TODO(b/77285514): remove this once the last few hidl interfaces have been
+// updated to use hwbinder.stubs.
 java_library {
     name: "hwbinder",
     no_framework_libs: true,
@@ -1071,4 +1073,35 @@ droiddoc {
     removed_api_filename: "test-removed.txt",
     exact_api_filename: "test-exact.txt",
     args: framework_docs_args + " -referenceonly -showAnnotation android.annotation.TestApi -nodocs",
+}
+
+droiddoc {
+    name: "hwbinder-stubs-docs",
+    srcs: [
+        "core/java/android/os/HidlSupport.java",
+        "core/java/android/annotation/IntDef.java",
+        "core/java/android/annotation/NonNull.java",
+        "core/java/android/annotation/SystemApi.java",
+        "core/java/android/os/HwBinder.java",
+        "core/java/android/os/HwBlob.java",
+        "core/java/android/os/HwParcel.java",
+        "core/java/android/os/IHwBinder.java",
+        "core/java/android/os/IHwInterface.java",
+        "core/java/android/os/DeadObjectException.java",
+        "core/java/android/os/DeadSystemException.java",
+        "core/java/android/os/RemoteException.java",
+        "core/java/android/util/AndroidException.java",
+    ],
+    custom_template: "droiddoc-templates-sdk",
+    installable: false,
+    no_framework_libs: true,
+    args: "-showAnnotation android.annotation.SystemApi -nodocs -stubsourceonly",
+}
+
+java_library_static {
+    name: "hwbinder.stubs",
+    sdk_version: "core_current",
+    srcs: [
+        ":hwbinder-stubs-docs",
+    ],
 }
