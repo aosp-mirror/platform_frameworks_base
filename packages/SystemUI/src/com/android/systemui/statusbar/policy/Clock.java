@@ -16,9 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import libcore.icu.LocaleData;
-
-import android.app.ActivityManager;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -46,12 +43,15 @@ import com.android.systemui.Dependency;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
+import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
+
+import libcore.icu.LocaleData;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -65,6 +65,9 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
         DarkReceiver, ConfigurationListener {
 
     public static final String CLOCK_SECONDS = "clock_seconds";
+
+    private final CurrentUserTracker mCurrentUserTracker;
+    private int mCurrentUserId;
 
     private boolean mClockVisibleByPolicy = true;
     private boolean mClockVisibleByUser = true;
@@ -117,6 +120,12 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
         } finally {
             a.recycle();
         }
+        mCurrentUserTracker = new CurrentUserTracker(context) {
+            @Override
+            public void onUserSwitched(int newUserId) {
+                mCurrentUserId = newUserId;
+            }
+        };
     }
 
     @Override
@@ -141,6 +150,8 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
             if (mShowDark) {
                 Dependency.get(DarkIconDispatcher.class).addDarkReceiver(this);
             }
+            mCurrentUserTracker.startTracking();
+            mCurrentUserId = mCurrentUserTracker.getCurrentUserId();
         }
 
         // NOTE: It's safe to do these after registering the receiver since the receiver always runs
@@ -166,6 +177,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
             if (mShowDark) {
                 Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(this);
             }
+            mCurrentUserTracker.stopTracking();
         }
     }
 
@@ -302,7 +314,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
 
     private final CharSequence getSmallTime() {
         Context context = getContext();
-        boolean is24 = DateFormat.is24HourFormat(context, ActivityManager.getCurrentUser());
+        boolean is24 = DateFormat.is24HourFormat(context, mCurrentUserId);
         LocaleData d = LocaleData.get(context.getResources().getConfiguration().locale);
 
         final char MAGIC1 = '\uEF00';
@@ -392,8 +404,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
             } else if (hhmm != null && hhmm.length() == 4) {
                 int hh = Integer.parseInt(hhmm.substring(0, 2));
                 int mm = Integer.parseInt(hhmm.substring(2));
-                boolean is24 = DateFormat.is24HourFormat(
-                        getContext(), ActivityManager.getCurrentUser());
+                boolean is24 = DateFormat.is24HourFormat(getContext(), mCurrentUserId);
                 if (is24) {
                     mCalendar.set(Calendar.HOUR_OF_DAY, hh);
                 } else {
