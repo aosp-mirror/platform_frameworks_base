@@ -1589,14 +1589,20 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     void pauseKeyDispatchingLocked() {
         if (!keysPaused) {
             keysPaused = true;
-            mWindowContainerController.pauseKeyDispatching();
+
+            if (mWindowContainerController != null) {
+                mWindowContainerController.pauseKeyDispatching();
+            }
         }
     }
 
     void resumeKeyDispatchingLocked() {
         if (keysPaused) {
             keysPaused = false;
-            mWindowContainerController.resumeKeyDispatching();
+
+            if (mWindowContainerController != null) {
+                mWindowContainerController.resumeKeyDispatching();
+            }
         }
     }
 
