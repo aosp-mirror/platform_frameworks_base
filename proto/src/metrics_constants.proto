@@ -5644,6 +5644,10 @@ message MetricsEvent {
     // OS: P
     ACTION_VOLUME_SETTINGS = 1386;
 
+    // ACTION: Settings > Anomaly receiver > Anomaly ignored, don't show up in battery settings
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ANOMALY_IGNORED = 1387;
 
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
