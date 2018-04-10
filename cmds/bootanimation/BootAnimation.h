@@ -22,6 +22,7 @@
 
 #include <androidfw/AssetManager.h>
 #include <utils/Thread.h>
+#include <binder/IBinder.h>
 
 #include <EGL/egl.h>
 #include <GLES/gl.h>
