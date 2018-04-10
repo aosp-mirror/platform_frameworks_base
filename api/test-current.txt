@@ -492,6 +492,27 @@ package android.media {
     method public int getProgramId();
   }
 
+  public final class BufferingParams implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getInitialMarkMs();
+    method public int getResumePlaybackMarkMs();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.media.BufferingParams> CREATOR;
+  }
+
+  public static class BufferingParams.Builder {
+    ctor public BufferingParams.Builder();
+    ctor public BufferingParams.Builder(android.media.BufferingParams);
+    method public android.media.BufferingParams build();
+    method public android.media.BufferingParams.Builder setInitialMarkMs(int);
+    method public android.media.BufferingParams.Builder setResumePlaybackMarkMs(int);
+  }
+
+  public class MediaPlayer implements android.media.AudioRouting android.media.VolumeAutomation {
+    method public android.media.BufferingParams getBufferingParams();
+    method public void setBufferingParams(android.media.BufferingParams);
+  }
+
   public final class PlaybackParams implements android.os.Parcelable {
     method public int getAudioStretchMode();
     method public android.media.PlaybackParams setAudioStretchMode(int);
