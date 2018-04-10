@@ -3113,6 +3113,9 @@ public final class Settings {
          */
         public static final String DISPLAY_COLOR_MODE = "display_color_mode";
 
+        private static final Validator DISPLAY_COLOR_MODE_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 2);
+
         /**
          * The amount of time in milliseconds before the device goes to sleep or begins
          * to dream after a period of inactivity.  This value is also known as the
@@ -4092,6 +4095,7 @@ public final class Settings {
             SHOW_BATTERY_PERCENT,
             NOTIFICATION_VIBRATION_INTENSITY,
             HAPTIC_FEEDBACK_INTENSITY,
+            DISPLAY_COLOR_MODE
         };
 
         /**
@@ -4204,6 +4208,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(LOCK_TO_APP_ENABLED);
             PRIVATE_SETTINGS.add(EGG_MODE);
             PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT);
+            PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE);
         }
 
         /**
@@ -4225,6 +4230,7 @@ public final class Settings {
             VALIDATORS.put(NEXT_ALARM_FORMATTED, NEXT_ALARM_FORMATTED_VALIDATOR);
             VALIDATORS.put(FONT_SCALE, FONT_SCALE_VALIDATOR);
             VALIDATORS.put(DIM_SCREEN, DIM_SCREEN_VALIDATOR);
+            VALIDATORS.put(DISPLAY_COLOR_MODE, DISPLAY_COLOR_MODE_VALIDATOR);
             VALIDATORS.put(SCREEN_OFF_TIMEOUT, SCREEN_OFF_TIMEOUT_VALIDATOR);
             VALIDATORS.put(SCREEN_BRIGHTNESS_FOR_VR, SCREEN_BRIGHTNESS_FOR_VR_VALIDATOR);
             VALIDATORS.put(SCREEN_BRIGHTNESS_MODE, SCREEN_BRIGHTNESS_MODE_VALIDATOR);
