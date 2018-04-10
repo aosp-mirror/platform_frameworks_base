@@ -303,10 +303,9 @@ public class MeasuredParagraph {
      *
      * This is available only if the MeasuredParagraph is computed with buildForStaticLayout.
      */
-    public void getBounds(@NonNull Paint paint, @IntRange(from = 0) int start,
-            @IntRange(from = 0) int end, @NonNull Rect bounds) {
-        nGetBounds(mNativePtr, mCopiedBuffer, paint.getNativeInstance(), start, end,
-                paint.getBidiFlags(), bounds);
+    public void getBounds(@IntRange(from = 0) int start, @IntRange(from = 0) int end,
+            @NonNull Rect bounds) {
+        nGetBounds(mNativePtr, mCopiedBuffer, start, end, bounds);
     }
 
     /**
@@ -743,6 +742,6 @@ public class MeasuredParagraph {
     @CriticalNative
     private static native int nGetMemoryUsage(/* Non Zero */ long nativePtr);
 
-    private static native void nGetBounds(long nativePtr, char[] buf, long paintPtr, int start,
-            int end, int bidiFlag, Rect rect);
+    private static native void nGetBounds(long nativePtr, char[] buf, int start, int end,
+            Rect rect);
 }
