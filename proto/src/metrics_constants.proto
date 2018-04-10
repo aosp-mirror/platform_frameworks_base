@@ -4779,7 +4779,7 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     ACTION_MOBILE_NETWORK_MANUAL_SELECT_NETWORK = 1210;
 
-    // FIELD - Manually selected mobile network
+    // Not used anymore.
     FIELD_MOBILE_NETWORK = 1211;
 
     // OPEN: Settings > Network & Internet > Mobile network > Access Point Names
