@@ -20,11 +20,9 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.qs.customize.QSCustomizer;
 
@@ -85,6 +83,7 @@ public class QSContainerImpl extends FrameLayout {
         }
 
         updateResources();
+        mSizePoint.set(0, 0); // Will be retrieved on next measure pass.
     }
 
     @Override
@@ -110,9 +109,8 @@ public class QSContainerImpl extends FrameLayout {
 
         // QSCustomizer will always be the height of the screen, but do this after
         // other measuring to avoid changing the height of the QS.
-        getDisplay().getRealSize(mSizePoint);
         mQSCustomizer.measure(widthMeasureSpec,
-                MeasureSpec.makeMeasureSpec(mSizePoint.y, MeasureSpec.EXACTLY));
+                MeasureSpec.makeMeasureSpec(getDisplayHeight(), MeasureSpec.EXACTLY));
     }
 
     @Override
@@ -174,5 +172,12 @@ public class QSContainerImpl extends FrameLayout {
         FrameLayout.LayoutParams lp = (LayoutParams) view.getLayoutParams();
         lp.rightMargin = mSideMargins;
         lp.leftMargin = mSideMargins;
+    }
+
+    private int getDisplayHeight() {
+        if (mSizePoint.y == 0) {
+            getDisplay().getRealSize(mSizePoint);
+        }
+        return mSizePoint.y;
     }
 }
