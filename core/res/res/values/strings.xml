@@ -4515,7 +4515,7 @@
     <string name="package_deleted_device_owner">Deleted by your admin</string>
 
     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description -->
-    <string name="battery_saver_description">To extend battery life, Battery Saver reduces your device\'s performance and limits or turns off vibration, location services, and background data. Email, messaging, and other apps that rely on syncing may not update unless you open them.\n\nBattery Saver turns off automatically when your device is charging.</string>
+    <string name="battery_saver_description">To extend your battery life, Battery Saver turns off some device features and restricts apps.</string>
 
     <!-- [CHAR_LIMIT=NONE] Data saver: Feature description -->
     <string name="data_saver_description">To help reduce data usage, Data Saver prevents some apps from sending or receiving data in the background. An app you’re currently using can access data, but may do so less frequently. This may mean, for example, that images don’t display until you tap them.</string>
