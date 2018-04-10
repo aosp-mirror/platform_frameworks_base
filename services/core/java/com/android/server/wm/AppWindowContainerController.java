@@ -113,63 +113,73 @@ public class AppWindowContainerController
         mListener.onWindowsGone();
     };
 
-    private final Runnable mAddStartingWindow = () -> {
-        final StartingData startingData;
-        final AppWindowToken container;
+    private final Runnable mAddStartingWindow = new Runnable() {
 
-        synchronized (mWindowMap) {
-            if (mContainer == null) {
-                if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "mContainer was null while trying to"
-                        + " add starting window");
+        @Override
+        public void run() {
+            final StartingData startingData;
+            final AppWindowToken container;
+
+            synchronized (mWindowMap) {
+                if (mContainer == null) {
+                    if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "mContainer was null while trying to"
+                            + " add starting window");
+                    return;
+                }
+
+                // There can only be one adding request, silly caller!
+                mService.mAnimationHandler.removeCallbacks(this);
+
+                startingData = mContainer.startingData;
+                container = mContainer;
+            }
+
+            if (startingData == null) {
+                // Animation has been canceled... do nothing.
+                if (DEBUG_STARTING_WINDOW)
+                    Slog.v(TAG_WM, "startingData was nulled out before handling"
+                            + " mAddStartingWindow: " + mContainer);
                 return;
             }
-            startingData = mContainer.startingData;
-            container = mContainer;
-        }
 
-        if (startingData == null) {
-            // Animation has been canceled... do nothing.
-            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "startingData was nulled out before handling"
-                    + " mAddStartingWindow: " + mContainer);
-            return;
-        }
+            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Add starting "
+                    + AppWindowContainerController.this + ": startingData="
+                    + container.startingData);
 
-        if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Add starting "
-                + this + ": startingData=" + container.startingData);
-
-        StartingSurface surface = null;
-        try {
-            surface = startingData.createStartingSurface(container);
-        } catch (Exception e) {
-            Slog.w(TAG_WM, "Exception when adding starting window", e);
-        }
-        if (surface != null) {
-            boolean abort = false;
-            synchronized(mWindowMap) {
-                // If the window was successfully added, then
-                // we need to remove it.
-                if (container.removed || container.startingData == null) {
-                    if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM,
-                            "Aborted starting " + container
-                                    + ": removed=" + container.removed
-                                    + " startingData=" + container.startingData);
-                    container.startingWindow = null;
-                    container.startingData = null;
-                    abort = true;
-                } else {
-                    container.startingSurface = surface;
+            StartingSurface surface = null;
+            try {
+                surface = startingData.createStartingSurface(container);
+            } catch (Exception e) {
+                Slog.w(TAG_WM, "Exception when adding starting window", e);
+            }
+            if (surface != null) {
+                boolean abort = false;
+                synchronized (mWindowMap) {
+                    // If the window was successfully added, then
+                    // we need to remove it.
+                    if (container.removed || container.startingData == null) {
+                        if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM,
+                                "Aborted starting " + container
+                                        + ": removed=" + container.removed
+                                        + " startingData=" + container.startingData);
+                        container.startingWindow = null;
+                        container.startingData = null;
+                        abort = true;
+                    } else {
+                        container.startingSurface = surface;
+                    }
+                    if (DEBUG_STARTING_WINDOW && !abort) Slog.v(TAG_WM,
+                            "Added starting " + mContainer
+                                    + ": startingWindow="
+                                    + container.startingWindow + " startingView="
+                                    + container.startingSurface);
                 }
-                if (DEBUG_STARTING_WINDOW && !abort) Slog.v(TAG_WM,
-                        "Added starting " + mContainer
-                                + ": startingWindow="
-                                + container.startingWindow + " startingView="
-                                + container.startingSurface);
+                if (abort) {
+                    surface.remove();
+                }
+            } else if (DEBUG_STARTING_WINDOW) {
+                Slog.v(TAG_WM, "Surface returned was null: " + mContainer);
             }
-            if (abort) {
-                surface.remove();
-            }
-        } else if (DEBUG_STARTING_WINDOW) {
-            Slog.v(TAG_WM, "Surface returned was null: " + mContainer);
         }
     };
 
@@ -558,8 +568,10 @@ public class AppWindowContainerController
         // Note: we really want to do sendMessageAtFrontOfQueue() because we
         // want to process the message ASAP, before any other queued
         // messages.
-        if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Enqueueing ADD_STARTING");
-        mService.mAnimationHandler.postAtFrontOfQueue(mAddStartingWindow);
+        if (!mService.mAnimationHandler.hasCallbacks(mAddStartingWindow)) {
+            if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "Enqueueing ADD_STARTING");
+            mService.mAnimationHandler.postAtFrontOfQueue(mAddStartingWindow);
+        }
     }
 
     private boolean createSnapshot(TaskSnapshot snapshot) {
