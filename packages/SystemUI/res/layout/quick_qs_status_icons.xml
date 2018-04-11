@@ -21,7 +21,7 @@
     android:layout_marginTop="8dp"
     android:layout_marginBottom="14dp"
     android:layout_below="@id/quick_status_bar_system_icons"
-    android:paddingEnd="@dimen/signal_cluster_battery_padding" >
+    android:paddingEnd="@dimen/qs_header_tile_margin_horizontal" >
 
     <com.android.systemui.statusbar.phone.StatusIconContainer
         android:id="@+id/statusIcons"
