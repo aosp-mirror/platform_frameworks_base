@@ -42,7 +42,7 @@ import java.util.Arrays;
  */
 public abstract class BrightnessMappingStrategy {
     private static final String TAG = "BrightnessMappingStrategy";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private static final float LUX_GRAD_SMOOTHING = 0.25f;
     private static final float MAX_GRAD = 1.0f;
@@ -352,9 +352,9 @@ public abstract class BrightnessMappingStrategy {
             // current^gamma = desired => gamma = log[current](desired)
             gamma = MathUtils.log(desiredBrightness) / MathUtils.log(currentBrightness);
             // max^-adjustment = gamma => adjustment = -log[max](gamma)
-            adjustment = -MathUtils.constrain(
-                    MathUtils.log(gamma) / MathUtils.log(maxGamma), -1, 1);
+            adjustment = -MathUtils.log(gamma) / MathUtils.log(maxGamma);
         }
+        adjustment = MathUtils.constrain(adjustment, -1, +1);
         if (DEBUG) {
             Slog.d(TAG, "inferAutoBrightnessAdjustment: " + maxGamma + "^" + -adjustment + "=" +
                     MathUtils.pow(maxGamma, -adjustment) + " == " + gamma);

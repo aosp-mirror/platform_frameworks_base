@@ -32,7 +32,9 @@ import android.hardware.display.BrightnessConfiguration;
 import android.os.PowerManager;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.MathUtils;
 import android.util.Spline;
+import android.util.Slog;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -90,6 +92,29 @@ public class BrightnessMappingStrategyTest {
 
     private static final float[] EMPTY_FLOAT_ARRAY = new float[0];
     private static final int[] EMPTY_INT_ARRAY = new int[0];
+
+    private static final float MAXIMUM_GAMMA = 3.0f;
+    private static final int[] GAMMA_CORRECTION_LUX = {
+        0,
+        100,
+        1000,
+        2500,
+        4000,
+        4900,
+        5000
+    };
+    private static final float[] GAMMA_CORRECTION_NITS = {
+        1.0f,
+        10.55f,
+        96.5f,
+        239.75f,
+        383.0f,
+        468.95f,
+        478.5f,
+    };
+    private static final Spline GAMMA_CORRECTION_SPLINE = Spline.createSpline(
+            new float[] { 0.0f, 100.0f, 1000.0f, 2500.0f, 4000.0f, 4900.0f, 5000.0f },
+            new float[] { 0.035f, 0.035f, 0.221f, 0.523f, 0.797f, 0.980f, 1.0f });
 
     @Test
     public void testSimpleStrategyMappingAtControlPoints() {
@@ -325,7 +350,7 @@ public class BrightnessMappingStrategyTest {
         }
 
         // Now set the middle of the lux range to something just above the minimum.
-        final float minBrightness = strategy.getBrightness(LUX_LEVELS[0]);
+        float minBrightness = strategy.getBrightness(LUX_LEVELS[0]);
         strategy.addUserDataPoint(LUX_LEVELS[idx], minBrightness + 0.01f);
 
         // Then make sure the curve is still monotonic.
@@ -340,7 +365,8 @@ public class BrightnessMappingStrategyTest {
         // And that the lowest lux level still gives the absolute minimum brightness. This should
         // be true assuming that there are more than two lux levels in the curve since we picked a
         // brightness just barely above the minimum for the middle of the curve.
-        assertEquals(minBrightness, strategy.getBrightness(LUX_LEVELS[0]), 0.001 /*tolerance*/);
+        minBrightness = (float) MathUtils.pow(minBrightness, MAXIMUM_GAMMA); // Gamma correction.
+        assertEquals(minBrightness, strategy.getBrightness(LUX_LEVELS[0]), 0.01 /*tolerance*/);
     }
 
     private static float[] toFloatArray(int[] vals) {
@@ -396,6 +422,9 @@ public class BrightnessMappingStrategyTest {
         when(mockResources.getInteger(
                 com.android.internal.R.integer.config_screenBrightnessSettingMaximum))
                 .thenReturn(255);
+        when(mockResources.getFraction(
+                com.android.internal.R.fraction.config_autoBrightnessAdjustmentMaxGamma, 1, 1))
+                .thenReturn(MAXIMUM_GAMMA);
         return mockResources;
     }
 
@@ -419,4 +448,121 @@ public class BrightnessMappingStrategyTest {
         return mockArray;
     }
 
+    // Gamma correction tests.
+    // x0 = 100   y0 = ~0.01
+    // x1 = 1000  y1 = ~0.20
+    // x2 = 2500  y2 = ~0.50
+    // x3 = 4000  y3 = ~0.80
+    // x4 = 4900  y4 = ~0.99
+
+    @Test
+    public void testGammaCorrectionLowChangeAtCenter() {
+        // If we set a user data point at (x2, y2^0.5), i.e. gamma = 0.5, it should bump the rest
+        // of the spline accordingly.
+        final int x1 = 1000;
+        final int x2 = 2500;
+        final int x3 = 4000;
+        final float y1 = GAMMA_CORRECTION_SPLINE.interpolate(x1);
+        final float y2 = GAMMA_CORRECTION_SPLINE.interpolate(x2);
+        final float y3 = GAMMA_CORRECTION_SPLINE.interpolate(x3);
+        Resources resources = createResources(GAMMA_CORRECTION_LUX, GAMMA_CORRECTION_NITS,
+                DISPLAY_LEVELS_NITS, DISPLAY_LEVELS_BACKLIGHT);
+        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(resources);
+        // Let's start with a sanity check:
+        assertEquals(y1, strategy.getBrightness(x1), 0.01f /* tolerance */);
+        assertEquals(y2, strategy.getBrightness(x2), 0.01f /* tolerance */);
+        assertEquals(y3, strategy.getBrightness(x3), 0.01f /* tolerance */);
+        // OK, let's roll:
+        float gamma = 0.5f;
+        strategy.addUserDataPoint(x2, (float) MathUtils.pow(y2, gamma));
+        assertEquals(MathUtils.pow(y1, gamma), strategy.getBrightness(x1), 0.01f /* tolerance */);
+        assertEquals(MathUtils.pow(y2, gamma), strategy.getBrightness(x2), 0.01f /* tolerance */);
+        assertEquals(MathUtils.pow(y3, gamma), strategy.getBrightness(x3), 0.01f /* tolerance */);
+        // The adjustment should be +0.63 (manual calculation).
+        assertEquals(+0.63f, strategy.getAutoBrightnessAdjustment(), 0.01f /* tolerance */);
+    }
+
+    @Test
+    public void testGammaCorrectionHighChangeAtCenter() {
+        // This time we set a user data point at (x2, y2^0.25), i.e. gamma = 0.3 (the minimum),
+        // which should bump the rest of the spline accordingly, and further correct x2 to hit
+        // y2^0.25 (not y2^0.3).
+        final int x1 = 1000;
+        final int x2 = 2500;
+        final int x3 = 4000;
+        final float y1 = GAMMA_CORRECTION_SPLINE.interpolate(x1);
+        final float y2 = GAMMA_CORRECTION_SPLINE.interpolate(x2);
+        final float y3 = GAMMA_CORRECTION_SPLINE.interpolate(x3);
+        Resources resources = createResources(GAMMA_CORRECTION_LUX, GAMMA_CORRECTION_NITS,
+                DISPLAY_LEVELS_NITS, DISPLAY_LEVELS_BACKLIGHT);
+        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(resources);
+        // Sanity check:
+        assertEquals(y1, strategy.getBrightness(x1), 0.01f /* tolerance */);
+        assertEquals(y2, strategy.getBrightness(x2), 0.01f /* tolerance */);
+        assertEquals(y3, strategy.getBrightness(x3), 0.01f /* tolerance */);
+        // Let's roll:
+        float gamma = 0.25f;
+        final float minGamma = 1.0f / MAXIMUM_GAMMA;
+        strategy.addUserDataPoint(x2, (float) MathUtils.pow(y2, gamma));
+        assertEquals(MathUtils.pow(y1, minGamma), strategy.getBrightness(x1),
+                0.01f /* tolerance */);
+        assertEquals(MathUtils.pow(y2, gamma),    strategy.getBrightness(x2),
+                0.01f /* tolerance */);
+        assertEquals(MathUtils.pow(y3, minGamma), strategy.getBrightness(x3),
+                0.01f /* tolerance */);
+        // The adjustment should be +1.0 (maximum adjustment).
+        assertEquals(+1.0f, strategy.getAutoBrightnessAdjustment(), 0.01f /* tolerance */);
+    }
+
+    @Test
+    public void testGammaCorrectionExtremeChangeAtCenter() {
+        // Extreme changes (e.g. setting brightness to 0.0 or 1.0) can't be gamma corrected, so we
+        // just make sure the adjustment reflects the change.
+        Resources resources = createResources(GAMMA_CORRECTION_LUX, GAMMA_CORRECTION_NITS,
+                DISPLAY_LEVELS_NITS, DISPLAY_LEVELS_BACKLIGHT);
+        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(resources);
+        assertEquals(0.0f, strategy.getAutoBrightnessAdjustment(), 0.01f /* tolerance */);
+        strategy.addUserDataPoint(2500, 1.0f);
+        assertEquals(+1.0f, strategy.getAutoBrightnessAdjustment(), 0.01f /* tolerance */);
+        strategy.addUserDataPoint(2500, 0.0f);
+        assertEquals(-1.0f, strategy.getAutoBrightnessAdjustment(), 0.01f /* tolerance */);
+    }
+
+    @Test
+    public void testGammaCorrectionChangeAtEdges() {
+        // The algorithm behaves differently at the edges, because gamma correction there tends to
+        // be extreme. If we add a user data point at (x0, y0+0.3), the adjustment should be
+        // 0.3*2 = 0.6, resulting in a gamma of 3**-0.6 = ~0.52.
+        final int x0 = 100;
+        final int x2 = 2500;
+        final int x4 = 4900;
+        final float y0 = GAMMA_CORRECTION_SPLINE.interpolate(x0);
+        final float y2 = GAMMA_CORRECTION_SPLINE.interpolate(x2);
+        final float y4 = GAMMA_CORRECTION_SPLINE.interpolate(x4);
+        Resources resources = createResources(GAMMA_CORRECTION_LUX, GAMMA_CORRECTION_NITS,
+                DISPLAY_LEVELS_NITS, DISPLAY_LEVELS_BACKLIGHT);
+        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(resources);
+        // Sanity, as per tradition:
+        assertEquals(y0, strategy.getBrightness(x0), 0.01f /* tolerance */);
+        assertEquals(y2, strategy.getBrightness(x2), 0.01f /* tolerance */);
+        assertEquals(y4, strategy.getBrightness(x4), 0.01f /* tolerance */);
+        // Rollin':
+        float increase = 0.3f;
+        float adjustment = increase * 2;
+        float gamma = (float) MathUtils.pow(MAXIMUM_GAMMA, -adjustment);
+        strategy.addUserDataPoint(x0, y0 + increase);
+        assertEquals(y0 + increase, strategy.getBrightness(x0), 0.01f /* tolerance */);
+        assertEquals(MathUtils.pow(y2, gamma), strategy.getBrightness(x2), 0.01f /* tolerance */);
+        assertEquals(MathUtils.pow(y4, gamma), strategy.getBrightness(x4), 0.01f /* tolerance */);
+        assertEquals(adjustment, strategy.getAutoBrightnessAdjustment(), 0.01f /* tolerance */);
+        // Similarly, if we set a user data point at (x4, 1.0), the adjustment should be (1-y4)*2.
+        increase = 1.0f - y4;
+        adjustment = increase * 2;
+        gamma = (float) MathUtils.pow(MAXIMUM_GAMMA, -adjustment);
+        strategy.addUserDataPoint(x4, 1.0f);
+        assertEquals(MathUtils.pow(y0, gamma), strategy.getBrightness(x0), 0.01f /* tolerance */);
+        assertEquals(MathUtils.pow(y2, gamma), strategy.getBrightness(x2), 0.01f /* tolerance */);
+        assertEquals(1.0f, strategy.getBrightness(x4), 0.01f /* tolerance */);
+        assertEquals(adjustment, strategy.getAutoBrightnessAdjustment(), 0.01f /* tolerance */);
+    }
 }
