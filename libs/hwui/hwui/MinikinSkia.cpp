@@ -81,7 +81,6 @@ void MinikinFontSkia::GetFontExtent(minikin::MinikinExtent* extent,
     skPaint.getFontMetrics(&metrics);
     extent->ascent = metrics.fAscent;
     extent->descent = metrics.fDescent;
-    extent->line_gap = metrics.fLeading;
 }
 
 SkTypeface* MinikinFontSkia::GetSkTypeface() const {
