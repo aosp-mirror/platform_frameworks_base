@@ -5618,6 +5618,24 @@ message MetricsEvent {
     // OS: P
     SETTINGS_AUTO_BRIGHTNESS = 1381;
 
+    // OPEN: Smart replies in a notification seen at least once
+    // CATEGORY: NOTIFICATION
+    //   PACKAGE: App that posted the notification
+    //   SUBTYPE: Number of smart replies.
+    // OS: P
+    SMART_REPLY_VISIBLE = 1382;
+
+    // ACTION: Smart reply in a notification clicked.
+    // CATEGORY: NOTIFICATION
+    //   PACKAGE: App that posted the notification
+    //   SUBTYPE: Index of smart reply clicked.
+    // OS: P
+    SMART_REPLY_ACTION = 1383;
+
+    // Tagged data for SMART_REPLY_VISIBLE. Count of number of smart replies.
+    // OS: P
+    NOTIFICATION_SMART_REPLY_COUNT = 1384;
+
     // ---- End P Constants, all P constants go above this line ----
 
     // First Q constant in master goes here:
