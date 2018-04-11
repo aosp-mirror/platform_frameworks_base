@@ -302,10 +302,14 @@ public class UserManagerHelperTest {
         // Verify the presence of each intent in the filter.
         // Verify the exact number of filters. Every time a new intent is added, this test should
         // get updated.
-        assertThat(filterCaptor.getValue().countActions()).isEqualTo(3);
+        assertThat(filterCaptor.getValue().countActions()).isEqualTo(6);
         assertThat(filterCaptor.getValue().hasAction(Intent.ACTION_USER_REMOVED)).isTrue();
         assertThat(filterCaptor.getValue().hasAction(Intent.ACTION_USER_ADDED)).isTrue();
         assertThat(filterCaptor.getValue().hasAction(Intent.ACTION_USER_INFO_CHANGED)).isTrue();
+        assertThat(filterCaptor.getValue().hasAction(Intent.ACTION_USER_SWITCHED)).isTrue();
+        assertThat(filterCaptor.getValue().hasAction(Intent.ACTION_USER_STOPPED)).isTrue();
+        assertThat(filterCaptor.getValue().hasAction(Intent.ACTION_USER_UNLOCKED)).isTrue();
+
 
         // Verify that calling the receiver calls the listener.
         receiverCaptor.getValue().onReceive(mContext, new Intent());
