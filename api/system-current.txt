@@ -383,12 +383,18 @@ package android.app {
   }
 
   public final class StatsManager {
+    method public void addConfig(long, byte[]) throws android.app.StatsManager.StatsUnavailableException;
     method public boolean addConfiguration(long, byte[]);
     method public byte[] getData(long);
     method public byte[] getMetadata();
+    method public byte[] getReports(long) throws android.app.StatsManager.StatsUnavailableException;
+    method public byte[] getStatsMetadata() throws android.app.StatsManager.StatsUnavailableException;
+    method public void removeConfig(long) throws android.app.StatsManager.StatsUnavailableException;
     method public boolean removeConfiguration(long);
+    method public void setBroadcastSubscriber(android.app.PendingIntent, long, long) throws android.app.StatsManager.StatsUnavailableException;
     method public boolean setBroadcastSubscriber(long, long, android.app.PendingIntent);
     method public boolean setDataFetchOperation(long, android.app.PendingIntent);
+    method public void setFetchReportsOperation(android.app.PendingIntent, long) throws android.app.StatsManager.StatsUnavailableException;
     field public static final java.lang.String ACTION_STATSD_STARTED = "android.app.action.STATSD_STARTED";
     field public static final java.lang.String EXTRA_STATS_BROADCAST_SUBSCRIBER_COOKIES = "android.app.extra.STATS_BROADCAST_SUBSCRIBER_COOKIES";
     field public static final java.lang.String EXTRA_STATS_CONFIG_KEY = "android.app.extra.STATS_CONFIG_KEY";
@@ -396,6 +402,11 @@ package android.app {
     field public static final java.lang.String EXTRA_STATS_DIMENSIONS_VALUE = "android.app.extra.STATS_DIMENSIONS_VALUE";
     field public static final java.lang.String EXTRA_STATS_SUBSCRIPTION_ID = "android.app.extra.STATS_SUBSCRIPTION_ID";
     field public static final java.lang.String EXTRA_STATS_SUBSCRIPTION_RULE_ID = "android.app.extra.STATS_SUBSCRIPTION_RULE_ID";
+  }
+
+  public static class StatsManager.StatsUnavailableException extends android.util.AndroidException {
+    ctor public StatsManager.StatsUnavailableException(java.lang.String);
+    ctor public StatsManager.StatsUnavailableException(java.lang.String, java.lang.Throwable);
   }
 
   public class VrManager {

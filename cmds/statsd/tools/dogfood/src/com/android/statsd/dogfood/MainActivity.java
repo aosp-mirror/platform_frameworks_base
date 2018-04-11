@@ -19,6 +19,7 @@ import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.IntentService;
 import android.app.StatsManager;
+import android.app.StatsManager.StatsUnavailableException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -171,12 +172,16 @@ public class MainActivity extends Activity {
                     return;
                 }
                 if (mStatsManager != null) {
-                    byte[] data = mStatsManager.getData(CONFIG_ID);
-                    if (data != null) {
-                        displayData(data);
-                    } else {
-                        mReportText.setText("Failed!");
+                    try {
+                        byte[] data = mStatsManager.getReports(CONFIG_ID);
+                        if (data != null) {
+                            displayData(data);
+                            return;
+                        }
+                    } catch (StatsUnavailableException e) {
+                        Log.e(TAG, "Failed to get data from statsd", e);
                     }
+                    mReportText.setText("Failed!");
                 }
             }
         });
@@ -194,10 +199,11 @@ public class MainActivity extends Activity {
                     byte[] config = new byte[inputStream.available()];
                     inputStream.read(config);
                     if (mStatsManager != null) {
-                        if (mStatsManager.addConfiguration(CONFIG_ID, config)) {
+                        try {
+                            mStatsManager.addConfig(CONFIG_ID, config);
                             Toast.makeText(
                                     MainActivity.this, "Config pushed", Toast.LENGTH_LONG).show();
-                        } else {
+                        } catch (StatsUnavailableException | IllegalArgumentException e) {
                             Toast.makeText(MainActivity.this, "Config push FAILED!",
                                     Toast.LENGTH_LONG).show();
                         }
@@ -218,11 +224,12 @@ public class MainActivity extends Activity {
                         return;
                     }
                     if (mStatsManager != null) {
-                        if (mStatsManager.setDataFetchOperation(CONFIG_ID, pi)) {
+                        try {
+                            mStatsManager.setFetchReportsOperation(pi, CONFIG_ID);
                             Toast.makeText(MainActivity.this,
                                     "Receiver specified to pending intent", Toast.LENGTH_LONG)
                                     .show();
-                        } else {
+                        } catch (StatsUnavailableException e) {
                             Toast.makeText(MainActivity.this, "Statsd did not set receiver",
                                     Toast.LENGTH_LONG)
                                     .show();
@@ -241,10 +248,11 @@ public class MainActivity extends Activity {
                         return;
                     }
                     if (mStatsManager != null) {
-                        if (mStatsManager.setDataFetchOperation(CONFIG_ID, null)) {
+                        try {
+                            mStatsManager.setFetchReportsOperation(null, CONFIG_ID);
                             Toast.makeText(MainActivity.this, "Receiver remove", Toast.LENGTH_LONG)
                                     .show();
-                        } else {
+                        } catch (StatsUnavailableException e) {
                             Toast.makeText(MainActivity.this, "Statsd did not remove receiver",
                                     Toast.LENGTH_LONG)
                                     .show();
