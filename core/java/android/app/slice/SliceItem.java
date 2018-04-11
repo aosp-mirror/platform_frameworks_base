@@ -46,7 +46,7 @@ import java.util.List;
  * <li>{@link #FORMAT_IMAGE}</li>
  * <li>{@link #FORMAT_ACTION}</li>
  * <li>{@link #FORMAT_INT}</li>
- * <li>{@link #FORMAT_TIMESTAMP}</li>
+ * <li>{@link #FORMAT_LONG}</li>
  * <li>{@link #FORMAT_REMOTE_INPUT}</li>
  * <li>{@link #FORMAT_BUNDLE}</li>
  *
@@ -103,6 +103,7 @@ public final class SliceItem implements Parcelable {
     public static final String FORMAT_LONG = "long";
     /**
      * @deprecated TO BE REMOVED
+     * @removed
      */
     @Deprecated
     public static final String FORMAT_TIMESTAMP = FORMAT_LONG;
@@ -168,7 +169,7 @@ public final class SliceItem implements Parcelable {
      * <li>{@link #FORMAT_IMAGE}</li>
      * <li>{@link #FORMAT_ACTION}</li>
      * <li>{@link #FORMAT_INT}</li>
-     * <li>{@link #FORMAT_TIMESTAMP}</li>
+     * <li>{@link #FORMAT_LONG}</li>
      * <li>{@link #FORMAT_REMOTE_INPUT}</li>
      * <li>{@link #FORMAT_BUNDLE}</li>
      * @see #getSubType() ()
@@ -249,8 +250,17 @@ public final class SliceItem implements Parcelable {
     }
 
     /**
-     * @return The timestamp held by this {@link #FORMAT_TIMESTAMP} SliceItem
+     * @return The long held by this {@link #FORMAT_LONG} SliceItem
      */
+    public long getLong() {
+        return (Long) mObj;
+    }
+
+    /**
+     * @deprecated replaced by {@link #getLong()}
+     * @removed
+     */
+    @Deprecated
     public long getTimestamp() {
         return (Long) mObj;
     }
