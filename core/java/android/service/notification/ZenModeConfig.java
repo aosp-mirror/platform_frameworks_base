@@ -83,7 +83,8 @@ public class ZenModeConfig implements Parcelable {
     private static final int DAY_MINUTES = 24 * 60;
     private static final int ZERO_VALUE_MS = 10 * SECONDS_MS;
 
-    // Default allow categories set in readXml() from default_zen_mode_config.xml, fallback values:
+    // Default allow categories set in readXml() from default_zen_mode_config.xml,
+    // fallback/upgrade values:
     private static final boolean DEFAULT_ALLOW_ALARMS = true;
     private static final boolean DEFAULT_ALLOW_MEDIA = true;
     private static final boolean DEFAULT_ALLOW_SYSTEM = false;
@@ -97,7 +98,7 @@ public class ZenModeConfig implements Parcelable {
     private static final int DEFAULT_SUPPRESSED_VISUAL_EFFECTS =
             Policy.getAllSuppressedVisualEffects();
 
-    public static final int XML_VERSION = 6;
+    public static final int XML_VERSION = 7;
     public static final String ZEN_TAG = "zen";
     private static final String ZEN_ATT_VERSION = "version";
     private static final String ZEN_ATT_USER = "user";
