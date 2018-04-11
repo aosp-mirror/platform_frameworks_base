@@ -45,8 +45,8 @@ public class QuickViewConstants {
      * Feature to delete an individual document. Quick viewer implementations must use
      * Storage Access Framework to both verify delete permission and to delete content.
      *
-     * @see DocumentsContract#Document#FLAG_SUPPORTS_DELETE
-     * @see DocumentsContract#deleteDocument(ContentResolver resolver, Uri documentUri)
+     * @see DocumentsContract.Document#FLAG_SUPPORTS_DELETE
+     * @see DocumentsContract#deleteDocument(ContentResolver, Uri)
      */
     public static final String FEATURE_DELETE = "android:delete";
 

@@ -54,7 +54,7 @@ public class SpannableStringNoCopyTest {
         first.setSpan(new UnderlineSpan(), 0, first.length(), Spanned.SPAN_PRIORITY);
 
         // Do not copy NoCopySpan if specified so.
-        final SpannedString copied = new SpannedString(first, false /* copyNoCopySpan */);
+        final SpannedString copied = new SpannedString(first, true /* ignoreNoCopySpan */);
         final Object[] spans = copied.getSpans(0, copied.length(), Object.class);
         assertNotNull(spans);
         assertEquals(2, spans.length);
@@ -87,7 +87,7 @@ public class SpannableStringNoCopyTest {
 
         // Do not copy NoCopySpan if specified so.
         final SpannedString copied = new SpannedString(
-                new CustomSpannable(first), false /* copyNoCopySpan */);
+                new CustomSpannable(first), true /* ignoreNoCopySpan */);
         final Object[] spans = copied.getSpans(0, copied.length(), Object.class);
         assertNotNull(spans);
         assertEquals(2, spans.length);

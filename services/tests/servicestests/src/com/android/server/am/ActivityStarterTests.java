@@ -23,6 +23,7 @@ import static android.app.ActivityManager.START_FORWARD_AND_REQUEST_CONFLICT;
 import static android.app.ActivityManager.START_INTENT_NOT_RESOLVED;
 import static android.app.ActivityManager.START_NOT_VOICE_COMPATIBLE;
 import static android.app.ActivityManager.START_PERMISSION_DENIED;
+import static android.app.ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
 import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_SWITCHES_CANCELED;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
@@ -34,6 +35,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 
 import android.app.ActivityOptions;
 import android.app.IApplicationThread;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.WindowLayout;
@@ -73,6 +75,8 @@ import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.am.ActivityStarter.Factory;
 import com.android.server.am.LaunchParamsController.LaunchParamsModifier;
 import com.android.server.am.TaskRecord.TaskRecordFactory;
+
+import java.util.ArrayList;
 
 /**
  * Tests for the {@link ActivityStarter} class.
@@ -301,13 +305,14 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 anyBoolean(), any(), any(), any());
 
         // instrument the stack and task used.
-        final ActivityStack stack = spy(mService.mStackSupervisor.getDefaultDisplay().createStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */));
-        final TaskRecord task =
-                spy(new TaskBuilder(mService.mStackSupervisor).setStack(stack).build());
+        final ActivityStack stack = mService.mStackSupervisor.getDefaultDisplay().createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final TaskRecord task = new TaskBuilder(mService.mStackSupervisor)
+                .setCreateStack(false)
+                .build();
 
         // supervisor needs a focused stack.
-        mService.mStackSupervisor.mFocusedStack = task.getStack();
+        mService.mStackSupervisor.mFocusedStack = stack;
 
         // use factory that only returns spy task.
         final TaskRecordFactory factory = mock(TaskRecordFactory.class);
@@ -321,14 +326,6 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 .getLaunchStack(any(), any(), any(), anyBoolean());
         doReturn(stack).when(mService.mStackSupervisor)
                 .getLaunchStack(any(), any(), any(), anyBoolean(), anyInt());
-
-        // ignore the start request.
-        doNothing().when(stack)
-                .startActivityLocked(any(), any(), anyBoolean(), anyBoolean(), any());
-
-        // ignore requests to create window container.
-        doNothing().when(task).createWindowContainer(anyBoolean(), anyBoolean());
-
 
         final Intent intent = new Intent();
         intent.addFlags(launchFlags);
@@ -447,5 +444,31 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         // Ensure result is moving task to front.
         assertEquals(result, START_TASK_TO_FRONT);
+    }
+
+    /**
+     * Tests activity is cleaned up properly in a task mode violation.
+     */
+    @Test
+    public void testTaskModeViolation() {
+        final ActivityDisplay display = mService.mStackSupervisor.getDefaultDisplay();
+        assertNoTasks(display);
+
+        final ActivityStarter starter = prepareStarter(0);
+
+        final LockTaskController lockTaskController = mService.getLockTaskController();
+        doReturn(true).when(lockTaskController).isLockTaskModeViolation(any());
+
+        final int result = starter.setReason("testTaskModeViolation").execute();
+
+        assertEquals(START_RETURN_LOCK_TASK_MODE_VIOLATION, result);
+        assertNoTasks(display);
+    }
+
+    private void assertNoTasks(ActivityDisplay display) {
+        for (int i = display.getChildCount() - 1; i >= 0; --i) {
+            final ActivityStack stack = display.getChildAt(i);
+            assertTrue(stack.getAllTasks().isEmpty());
+        }
     }
 }

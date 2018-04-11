@@ -1027,7 +1027,6 @@ package android.content.pm {
     method public abstract java.util.List<android.content.pm.IntentFilterVerificationInfo> getIntentFilterVerifications(java.lang.String);
     method public abstract int getIntentVerificationStatusAsUser(java.lang.String, int);
     method public abstract int getPermissionFlags(java.lang.String, java.lang.String, android.os.UserHandle);
-    method public android.os.PersistableBundle getSuspendedPackageAppExtras(java.lang.String);
     method public abstract void grantRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public abstract int installExistingPackage(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract int installExistingPackage(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -1039,7 +1038,6 @@ package android.content.pm {
     method public abstract boolean setDefaultBrowserPackageNameAsUser(java.lang.String, int);
     method public void setHarmfulAppWarning(java.lang.String, java.lang.CharSequence);
     method public java.lang.String[] setPackagesSuspended(java.lang.String[], boolean, android.os.PersistableBundle, android.os.PersistableBundle, java.lang.String);
-    method public void setSuspendedPackageAppExtras(java.lang.String, android.os.PersistableBundle);
     method public abstract void setUpdateAvailable(java.lang.String, boolean);
     method public abstract boolean updateIntentVerificationStatusAsUser(java.lang.String, int, int);
     method public abstract void updatePermissionFlags(java.lang.String, java.lang.String, int, int, android.os.UserHandle);
@@ -1255,6 +1253,7 @@ package android.hardware.display {
     method public android.hardware.display.BrightnessConfiguration getBrightnessConfiguration();
     method public java.util.List<android.hardware.display.BrightnessChangeEvent> getBrightnessEvents();
     method public android.hardware.display.BrightnessConfiguration getDefaultBrightnessConfiguration();
+    method public android.util.Pair<float[], float[]> getMinimumBrightnessCurve();
     method public android.graphics.Point getStableDisplaySize();
     method public void setBrightnessConfiguration(android.hardware.display.BrightnessConfiguration);
     method public void setSaturationLevel(float);

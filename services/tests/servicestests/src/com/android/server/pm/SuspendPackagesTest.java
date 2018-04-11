@@ -297,7 +297,7 @@ public class SuspendPackagesTest {
                 intentFromApp.getBundleExtra(SuspendTestReceiver.EXTRA_SUSPENDED_APP_EXTRAS));
         final PersistableBundle extras2 = getExtras("testMyPackageSuspendedOnChangingExtras", 2,
                 "2", 0.2);
-        mPackageManager.setSuspendedPackageAppExtras(TEST_APP_PACKAGE_NAME, extras2);
+        suspendTestPackage(extras2, null, null);
         intentFromApp = mAppCommsReceiver.receiveIntentFromApp();
         assertEquals("MY_PACKAGE_SUSPENDED delivery not reported",
                 ACTION_REPORT_MY_PACKAGE_SUSPENDED, intentFromApp.getAction());

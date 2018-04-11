@@ -24,6 +24,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
+import static android.net.NetworkPolicy.WARNING_DISABLED;
 import static android.provider.Settings.Global.NETWORK_DEFAULT_DAILY_MULTIPATH_QUOTA_BYTES;
 
 import static com.android.server.net.NetworkPolicyManagerInternal.QUOTA_TYPE_MULTIPATH;
@@ -55,12 +56,14 @@ import android.net.Uri;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.util.DataUnit;
 import android.util.DebugUtils;
 import android.util.Pair;
 import android.util.Range;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.net.NetworkPolicyManagerInternal;
@@ -71,6 +74,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -96,8 +100,10 @@ public class MultipathPolicyTracker {
     private final Clock mClock;
     private final Dependencies mDeps;
     private final ContentResolver mResolver;
-    private final SettingsObserver mSettingsObserver;
     private final ConfigChangeReceiver mConfigChangeReceiver;
+
+    @VisibleForTesting
+    final ContentObserver mSettingsObserver;
 
     private ConnectivityManager mCM;
     private NetworkPolicyManager mNPM;
@@ -288,12 +294,16 @@ public class MultipathPolicyTracker {
 
             final NetworkPolicy[] policies = mNPM.getNetworkPolicies();
             for (NetworkPolicy policy : policies) {
-                if (hasActiveCycle(policy) && policy.template.matches(identity)) {
+                if (policy.hasCycle() && policy.template.matches(identity)) {
+                    final long cycleStart = policy.cycleIterator().next().getLower()
+                            .toInstant().toEpochMilli();
                     // Prefer user-defined warning, otherwise use hard limit
-                    final long policyBytes = (policy.warningBytes == LIMIT_DISABLED)
-                            ? policy.limitBytes : policy.warningBytes;
+                    final long activeWarning = getActiveWarning(policy, cycleStart);
+                    final long policyBytes = (activeWarning == WARNING_DISABLED)
+                            ? getActiveLimit(policy, cycleStart)
+                            : activeWarning;
 
-                    if (policyBytes != LIMIT_DISABLED) {
+                    if (policyBytes != LIMIT_DISABLED && policyBytes != WARNING_DISABLED) {
                         final long policyBudget = getRemainingDailyBudget(policyBytes,
                                 policy.cycleIterator().next());
                         minQuota = Math.min(minQuota, policyBudget);
@@ -324,11 +334,11 @@ public class MultipathPolicyTracker {
                 if (DBG) Slog.d(TAG, "Setting quota: " + quota + " bytes");
             }
 
+            // TODO: re-register if day changed: budget may have run out but should be refreshed.
             if (haveMultipathBudget() && quota == mQuota) {
-                // If we already have a usage callback pending , there's no need to re-register it
+                // If there is already a usage callback pending , there's no need to re-register it
                 // if the quota hasn't changed. The callback will simply fire as expected when the
-                // budget is spent. Also: if we re-register the callback when we're below the
-                // UsageCallback's minimum value of 2MB, we'll overshoot the budget.
+                // budget is spent.
                 if (DBG) Slog.d(TAG, "Quota still " + quota + ", not updating.");
                 return;
             }
@@ -338,7 +348,17 @@ public class MultipathPolicyTracker {
             // ourselves any budget to work with.
             final long usage = getDailyNonDefaultDataUsage();
             final long budget = (usage == -1) ? 0 : Math.max(0, quota - usage);
-            if (budget > 0) {
+
+            // Only consider budgets greater than MIN_THRESHOLD_BYTES, otherwise the callback will
+            // fire late, after data usage went over budget. Also budget should be 0 if remaining
+            // data is close to 0.
+            // This is necessary because the usage callback does not accept smaller thresholds.
+            // Because it snaps everything to MIN_THRESHOLD_BYTES, the lesser of the two evils is
+            // to snap to 0 here.
+            // This will only be called if the total quota for the day changed, not if usage changed
+            // since last time, so even if this is called very often the budget will not snap to 0
+            // as soon as there are less than 2MB left for today.
+            if (budget > NetworkStatsManager.MIN_THRESHOLD_BYTES) {
                 if (DBG) Slog.d(TAG, "Setting callback for " + budget +
                         " bytes on network " + network);
                 registerUsageCallback(budget);
@@ -388,9 +408,16 @@ public class MultipathPolicyTracker {
         }
     }
 
-    private static boolean hasActiveCycle(NetworkPolicy policy) {
-        return policy.hasCycle() && policy.lastLimitSnooze <
-                policy.cycleIterator().next().getLower().toInstant().toEpochMilli();
+    private static long getActiveWarning(NetworkPolicy policy, long cycleStart) {
+        return policy.lastWarningSnooze < cycleStart
+                ? policy.warningBytes
+                : WARNING_DISABLED;
+    }
+
+    private static long getActiveLimit(NetworkPolicy policy, long cycleStart) {
+        return policy.lastLimitSnooze < cycleStart
+                ? policy.limitBytes
+                : LIMIT_DISABLED;
     }
 
     // Only ever updated on the handler thread. Accessed from other binder threads to retrieve

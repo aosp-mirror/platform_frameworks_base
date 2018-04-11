@@ -90,7 +90,7 @@ TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_AND_CombinationCondi
                     TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
 
             auto processor = CreateStatsLogProcessor(
-                    bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+                    bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
             EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
             EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
 
@@ -404,7 +404,7 @@ TEST(DimensionInConditionE2eTest, TestDurationMetric_Link_AND_CombinationConditi
                     TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
 
             auto processor = CreateStatsLogProcessor(
-                    bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+                    bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
             EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
             EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
 
@@ -648,7 +648,7 @@ TEST(DimensionInConditionE2eTest, TestDurationMetric_PartialLink_AND_Combination
                 TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
 
         auto processor = CreateStatsLogProcessor(
-                bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+                bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
         EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
         EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
 

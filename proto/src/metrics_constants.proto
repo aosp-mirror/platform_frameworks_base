@@ -5588,6 +5588,36 @@ message MetricsEvent {
     // OS: P
     DIALOG_VOLUME_FORMAT = 1375;
 
+    // OPEN: DND onboarding activity > screen on checkbox
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ONBOARDING_SCREEN_ON = 1376;
+
+    // OPEN: DND onboarding activity > screen off checkbox
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ONBOARDING_SCREEN_OFF = 1377;
+
+    // OPEN: DND onboarding activity > Ok button
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ONBOARDING_OK = 1378;
+
+    // OPEN: DND onboarding activity > Settings link
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ZEN_ONBOARDING_SETTINGS = 1379;
+
+    // OPEN: DND onboarding activity
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_ZEN_ONBOARDING = 1380;
+
+    // OPEN: Settings > Display > Auto brightness
+    // CATEGORY: SETTINGS
+    // OS: P
+    SETTINGS_AUTO_BRIGHTNESS = 1381;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

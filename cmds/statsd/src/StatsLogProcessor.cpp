@@ -72,13 +72,13 @@ const int FIELD_ID_CURRENT_REPORT_WALL_CLOCK_NANOS = 6;
 StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
                                      const sp<AlarmMonitor>& anomalyAlarmMonitor,
                                      const sp<AlarmMonitor>& periodicAlarmMonitor,
-                                     const long timeBaseSec,
+                                     const int64_t timeBaseNs,
                                      const std::function<void(const ConfigKey&)>& sendBroadcast)
     : mUidMap(uidMap),
       mAnomalyAlarmMonitor(anomalyAlarmMonitor),
       mPeriodicAlarmMonitor(periodicAlarmMonitor),
       mSendBroadcast(sendBroadcast),
-      mTimeBaseSec(timeBaseSec),
+      mTimeBaseNs(timeBaseNs),
       mLastLogTimestamp(0) {
 }
 
@@ -210,7 +210,7 @@ void StatsLogProcessor::OnConfigUpdatedLocked(
         const int64_t timestampNs, const ConfigKey& key, const StatsdConfig& config) {
     VLOG("Updated configuration for key %s", key.ToString().c_str());
     sp<MetricsManager> newMetricsManager =
-        new MetricsManager(key, config, mTimeBaseSec, (timestampNs - 1) / NS_PER_SEC + 1, mUidMap,
+        new MetricsManager(key, config, mTimeBaseNs, timestampNs, mUidMap,
                            mAnomalyAlarmMonitor, mPeriodicAlarmMonitor);
     auto it = mMetricsManagers.find(key);
     if (it != mMetricsManagers.end()) {
@@ -436,6 +436,10 @@ void StatsLogProcessor::WriteDataToDiskLocked() {
 void StatsLogProcessor::WriteDataToDisk() {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
     WriteDataToDiskLocked();
+}
+
+void StatsLogProcessor::informPullAlarmFired(const int64_t timestampNs) {
+    mStatsPullerManager.OnAlarmFired(timestampNs);
 }
 
 }  // namespace statsd

@@ -1102,35 +1102,37 @@ final class AccessibilityController {
                         }
                     }
 
-                    // Account for the space this window takes if the window
-                    // is not an accessibility overlay which does not change
-                    // the reported windows.
                     if (windowState.mAttrs.type !=
                             WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY) {
+
+                        // Account for the space this window takes if the window
+                        // is not an accessibility overlay which does not change
+                        // the reported windows.
                         unaccountedSpace.op(boundsInScreen, unaccountedSpace,
                                 Region.Op.REVERSE_DIFFERENCE);
-                    }
 
-                    // If a window is modal it prevents other windows from being touched
-                    if ((flags & (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                            | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)) == 0) {
-                        // Account for all space in the task, whether the windows in it are
-                        // touchable or not. The modal window blocks all touches from the task's
-                        // area.
-                        unaccountedSpace.op(windowState.getDisplayFrameLw(), unaccountedSpace,
-                                Region.Op.REVERSE_DIFFERENCE);
+                        // If a window is modal it prevents other windows from being touched
+                        if ((flags & (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)) == 0) {
+                            // Account for all space in the task, whether the windows in it are
+                            // touchable or not. The modal window blocks all touches from the task's
+                            // area.
+                            unaccountedSpace.op(windowState.getDisplayFrameLw(), unaccountedSpace,
+                                    Region.Op.REVERSE_DIFFERENCE);
 
-                        if (task != null) {
-                            // If the window is associated with a particular task, we can skip the
-                            // rest of the windows for that task.
-                            skipRemainingWindowsForTasks.add(task.mTaskId);
-                            continue;
-                        } else {
-                            // If the window is not associated with a particular task, then it is
-                            // globally modal. In this case we can skip all remaining windows.
-                            break;
+                            if (task != null) {
+                                // If the window is associated with a particular task, we can skip the
+                                // rest of the windows for that task.
+                                skipRemainingWindowsForTasks.add(task.mTaskId);
+                                continue;
+                            } else {
+                                // If the window is not associated with a particular task, then it is
+                                // globally modal. In this case we can skip all remaining windows.
+                                break;
+                            }
                         }
                     }
+
                     // We figured out what is touchable for the entire screen - done.
                     if (unaccountedSpace.isEmpty()) {
                         break;

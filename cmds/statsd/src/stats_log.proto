@@ -97,9 +97,9 @@ message ValueMetricData {
 }
 
 message GaugeBucketInfo {
-  optional int64 start_bucket_nanos = 1;
+  optional int64 start_bucket_elapsed_nanos = 1;
 
-  optional int64 end_bucket_nanos = 2;
+  optional int64 end_bucket_elapsed_nanos = 2;
 
   repeated Atom atom = 3;
 

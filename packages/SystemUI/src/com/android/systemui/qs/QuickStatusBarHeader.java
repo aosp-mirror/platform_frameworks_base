@@ -68,7 +68,7 @@ import java.util.Locale;
  * battery) and also contains the {@link QuickQSPanel} along with some of the panel's inner
  * contents.
  */
-public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue.Callbacks,
+public class QuickStatusBarHeader extends RelativeLayout implements
         View.OnClickListener, NextAlarmController.NextAlarmChangeCallback {
     private static final String TAG = "QuickStatusBarHeader";
     private static final boolean DEBUG = false;
@@ -249,8 +249,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
                 com.android.internal.R.dimen.quick_qs_offset_height);
         mSystemIconsView.setLayoutParams(mSystemIconsView.getLayoutParams());
 
-        getLayoutParams().height =
-                resources.getDimensionPixelSize(com.android.internal.R.dimen.quick_qs_total_height);
+        getLayoutParams().height = resources.getDimensionPixelSize(mQsDisabled
+                ? com.android.internal.R.dimen.quick_qs_offset_height
+                : com.android.internal.R.dimen.quick_qs_total_height);
         setLayoutParams(getLayoutParams());
 
         updateStatusIconAlphaAnimator();
@@ -320,20 +321,18 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
                 TOOLTIP_NOT_YET_SHOWN_COUNT);
     }
 
-    @Override
     public void disable(int state1, int state2, boolean animate) {
         final boolean disabled = (state2 & DISABLE2_QUICK_SETTINGS) != 0;
         if (disabled == mQsDisabled) return;
         mQsDisabled = disabled;
         mHeaderQsPanel.setDisabledByPolicy(disabled);
-        final int rawHeight = (int) getResources().getDimension(
-                com.android.internal.R.dimen.quick_qs_total_height);
-        getLayoutParams().height = disabled ? (rawHeight - mHeaderQsPanel.getHeight()) : rawHeight;
+        mHeaderTextContainerView.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
+        mQuickQsStatusIcons.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
+        updateResources();
     }
 
     @Override
     public void onAttachedToWindow() {
-        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallbacks(this);
         Dependency.get(StatusBarIconController.class).addIconGroup(mIconManager);
         requestApplyInsets();
     }
@@ -354,7 +353,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
     @VisibleForTesting
     public void onDetachedFromWindow() {
         setListening(false);
-        SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).removeCallbacks(this);
         Dependency.get(StatusBarIconController.class).removeIconGroup(mIconManager);
         super.onDetachedFromWindow();
     }

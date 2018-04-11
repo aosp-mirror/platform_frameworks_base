@@ -16,6 +16,8 @@
 
 package android.app.slice;
 
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -38,6 +40,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -47,6 +50,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Class to handle interactions with {@link Slice}s.
@@ -101,22 +105,6 @@ public class SliceManager {
     private final IBinder mToken = new Binder();
 
     /**
-     * Permission denied.
-     * @hide
-     */
-    public static final int PERMISSION_DENIED = -1;
-    /**
-     * Permission granted.
-     * @hide
-     */
-    public static final int PERMISSION_GRANTED = 0;
-    /**
-     * Permission just granted by the user, and should be granted uri permission as well.
-     * @hide
-     */
-    public static final int PERMISSION_USER_GRANTED = 1;
-
-    /**
      * @hide
      */
     public SliceManager(Context context, Handler handler) throws ServiceNotFoundException {
@@ -140,13 +128,21 @@ public class SliceManager {
      * @see Intent#ACTION_ASSIST
      * @see Intent#CATEGORY_HOME
      */
-    public void pinSlice(@NonNull Uri uri, @NonNull List<SliceSpec> specs) {
+    public void pinSlice(@NonNull Uri uri, @NonNull Set<SliceSpec> specs) {
         try {
             mService.pinSlice(mContext.getPackageName(), uri,
                     specs.toArray(new SliceSpec[specs.size()]), mToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * @deprecated TO BE REMOVED
+     */
+    @Deprecated
+    public void pinSlice(@NonNull Uri uri, @NonNull List<SliceSpec> specs) {
+        pinSlice(uri, new ArraySet<>(specs));
     }
 
     /**
@@ -189,9 +185,10 @@ public class SliceManager {
      * into account all clients and returns only specs supported by all.
      * @see SliceSpec
      */
-    public @NonNull List<SliceSpec> getPinnedSpecs(Uri uri) {
+    public @NonNull Set<SliceSpec> getPinnedSpecs(Uri uri) {
         try {
-            return Arrays.asList(mService.getPinnedSpecs(uri, mContext.getPackageName()));
+            return new ArraySet<>(Arrays.asList(mService.getPinnedSpecs(uri,
+                    mContext.getPackageName())));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -240,7 +237,7 @@ public class SliceManager {
      * @return The Slice provided by the app or null if none is given.
      * @see Slice
      */
-    public @Nullable Slice bindSlice(@NonNull Uri uri, @NonNull List<SliceSpec> supportedSpecs) {
+    public @Nullable Slice bindSlice(@NonNull Uri uri, @NonNull Set<SliceSpec> supportedSpecs) {
         Preconditions.checkNotNull(uri, "uri");
         ContentResolver resolver = mContext.getContentResolver();
         try (ContentProviderClient provider = resolver.acquireContentProviderClient(uri)) {
@@ -262,6 +259,14 @@ public class SliceManager {
             // Manager will kill this process shortly anyway.
             return null;
         }
+    }
+
+    /**
+     * @deprecated TO BE REMOVED
+     */
+    @Deprecated
+    public @Nullable Slice bindSlice(@NonNull Uri uri, @NonNull List<SliceSpec> supportedSpecs) {
+        return bindSlice(uri, new ArraySet<>(supportedSpecs));
     }
 
     /**
@@ -351,7 +356,7 @@ public class SliceManager {
      * @see Intent
      */
     public @Nullable Slice bindSlice(@NonNull Intent intent,
-            @NonNull List<SliceSpec> supportedSpecs) {
+            @NonNull Set<SliceSpec> supportedSpecs) {
         Preconditions.checkNotNull(intent, "intent");
         Preconditions.checkArgument(intent.getComponent() != null || intent.getPackage() != null
                 || intent.getData() != null,
@@ -402,6 +407,16 @@ public class SliceManager {
     }
 
     /**
+     * @deprecated TO BE REMOVED.
+     */
+    @Deprecated
+    @Nullable
+    public Slice bindSlice(@NonNull Intent intent,
+            @NonNull List<SliceSpec> supportedSpecs) {
+        return bindSlice(intent, new ArraySet<>(supportedSpecs));
+    }
+
+    /**
      * Determine whether a particular process and user ID has been granted
      * permission to access a specific slice URI.
      *
@@ -417,9 +432,11 @@ public class SliceManager {
      * @see #grantSlicePermission(String, Uri)
      */
     public @PermissionResult int checkSlicePermission(@NonNull Uri uri, int pid, int uid) {
-        // TODO: Switch off Uri permissions.
-        return mContext.checkUriPermission(uri, pid, uid,
-                Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        try {
+            return mService.checkSlicePermission(uri, null, pid, uid, null);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -431,11 +448,11 @@ public class SliceManager {
      * @see #revokeSlicePermission
      */
     public void grantSlicePermission(@NonNull String toPackage, @NonNull Uri uri) {
-        // TODO: Switch off Uri permissions.
-        mContext.grantUriPermission(toPackage, uri,
-                Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-                        | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                        | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
+        try {
+            mService.grantSlicePermission(mContext.getPackageName(), toPackage, uri);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -453,11 +470,11 @@ public class SliceManager {
      * @see #grantSlicePermission
      */
     public void revokeSlicePermission(@NonNull String toPackage, @NonNull Uri uri) {
-        // TODO: Switch off Uri permissions.
-        mContext.revokeUriPermission(toPackage, uri,
-                Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-                        | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                        | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
+        try {
+            mService.revokeSlicePermission(mContext.getPackageName(), toPackage, uri);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -477,16 +494,6 @@ public class SliceManager {
             if (result == PERMISSION_DENIED) {
                 throw new SecurityException("User " + uid + " does not have slice permission for "
                         + uri + ".");
-            }
-            if (result == PERMISSION_USER_GRANTED) {
-                // We just had a user grant of this permission and need to grant this to the app
-                // permanently.
-                mContext.grantUriPermission(pkg, uri.buildUpon().path("").build(),
-                        Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-                                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                                | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
-                // Notify a change has happened because we just granted a permission.
-                mContext.getContentResolver().notifyChange(uri, null);
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

@@ -436,18 +436,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     /**
-     * Returns whether this row is considered non-blockable (e.g. it's a non-blockable system notif,
-     * covers multiple channels, or is in a whitelist).
+     * Returns whether this row is considered non-blockable (i.e. it's a non-blockable system notif
+     * or is in a whitelist).
      */
     public boolean getIsNonblockable() {
         boolean isNonblockable = Dependency.get(NotificationBlockingHelperManager.class)
                 .isNonblockablePackage(mStatusBarNotification.getPackageName());
-
-        // Only bother with going through the children if the row is still blockable based on the
-        // number of unique channels.
-        if (!isNonblockable) {
-            isNonblockable = getNumUniqueChannels() > 1;
-        }
 
         // If the SystemNotifAsyncTask hasn't finished running or retrieved a value, we'll try once
         // again, but in-place on the main thread this time. This should rarely ever get called.

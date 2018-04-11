@@ -101,7 +101,7 @@ TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_single_bucket) {
         TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000;
 
     ConfigKey cfgKey;
-    auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     EXPECT_EQ(1u, processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers.size());
@@ -278,7 +278,7 @@ TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_multiple_buckets) {
         TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000;
 
     ConfigKey cfgKey;
-    auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     EXPECT_EQ(1u, processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers.size());
@@ -391,7 +391,7 @@ TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_long_refractory_period) {
     config.mutable_alert(0)->set_refractory_period_secs(refractory_period_sec);
 
     ConfigKey cfgKey;
-    auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     EXPECT_EQ(1u, processor->mMetricsManagers.begin()->second->mAllAnomalyTrackers.size());

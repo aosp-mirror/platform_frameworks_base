@@ -1179,6 +1179,23 @@ public final class Settings {
     public static final String ACTION_ZEN_MODE_SETTINGS = "android.settings.ZEN_MODE_SETTINGS";
 
     /**
+     * Activity Action: Show Zen Mode visual effects configuration settings.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ZEN_MODE_BLOCKED_EFFECTS_SETTINGS =
+            "android.settings.ZEN_MODE_BLOCKED_EFFECTS_SETTINGS";
+
+    /**
+     * Activity Action: Show Zen Mode onboarding activity.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ZEN_MODE_ONBOARDING = "android.settings.ZEN_MODE_ONBOARDING";
+
+    /**
      * Activity Action: Show Zen Mode (aka Do Not Disturb) priority configuration settings.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -11123,6 +11140,14 @@ public final class Settings {
         public static final String ALWAYS_FINISH_ACTIVITIES = "always_finish_activities";
 
         /**
+         * If nonzero, all system error dialogs will be hidden.  For example, the
+         * crash and ANR dialogs will not be shown, and the system will just proceed
+         * as if they had been accepted by the user.
+         * @hide
+         */
+        public static final String HIDE_ERROR_DIALOGS = "hide_error_dialogs";
+
+        /**
          * Use Dock audio output for media:
          *      0 = disabled
          *      1 = enabled
@@ -11739,6 +11764,29 @@ public final class Settings {
         @TestApi
         public static final String HIDDEN_API_BLACKLIST_EXEMPTIONS =
                 "hidden_api_blacklist_exemptions";
+
+        /**
+         * Hidden API enforcement policy for apps targeting SDK versions prior to the latest
+         * version.
+         *
+         * Values correspond to @{@link
+         * android.content.pm.ApplicationInfo.HiddenApiEnforcementPolicy}
+         *
+         * @hide
+         */
+        public static final String HIDDEN_API_POLICY_PRE_P_APPS =
+                "hidden_api_policy_pre_p_apps";
+
+        /**
+         * Hidden API enforcement policy for apps targeting the current SDK version.
+         *
+         * Values correspond to @{@link
+         * android.content.pm.ApplicationInfo.HiddenApiEnforcementPolicy}
+         *
+         * @hide
+         */
+        public static final String HIDDEN_API_POLICY_P_APPS =
+                "hidden_api_policy_p_apps";
 
         /**
          * Timeout for a single {@link android.media.soundtrigger.SoundTriggerDetectionService}

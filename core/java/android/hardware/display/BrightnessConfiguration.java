@@ -86,7 +86,9 @@ public final class BrightnessConfiguration implements Parcelable {
             sb.append("(").append(mLux[i]).append(", ").append(mNits[i]).append(")");
         }
         sb.append("], '");
-        sb.append(mDescription);
+        if (mDescription != null) {
+            sb.append(mDescription);
+        }
         sb.append("'}");
         return sb.toString();
     }
@@ -96,7 +98,9 @@ public final class BrightnessConfiguration implements Parcelable {
         int result = 1;
         result = result * 31 + Arrays.hashCode(mLux);
         result = result * 31 + Arrays.hashCode(mNits);
-        result = result * 31 + mDescription.hashCode();
+        if (mDescription != null) {
+            result = result * 31 + mDescription.hashCode();
+        }
         return result;
     }
 

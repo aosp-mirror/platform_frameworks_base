@@ -265,11 +265,11 @@ public abstract class KeyguardAbsKeyInputView extends LinearLayout
             mPendingLockCheck.cancel(false);
             mPendingLockCheck = null;
         }
+        reset();
     }
 
     @Override
     public void onResume(int reason) {
-        reset();
     }
 
     @Override

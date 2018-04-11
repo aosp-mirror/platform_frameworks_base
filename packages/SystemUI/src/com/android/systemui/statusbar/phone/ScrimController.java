@@ -111,7 +111,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     private final Context mContext;
     protected final ScrimView mScrimBehind;
     protected final ScrimView mScrimInFront;
-    private final LightBarController mLightBarController;
     private final UnlockMethodCache mUnlockMethodCache;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DozeParameters mDozeParameters;
@@ -145,6 +144,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     private int mCurrentBehindTint;
     private boolean mWallpaperVisibilityTimedOut;
     private int mScrimsVisibility;
+    private final Consumer<GradientColors> mScrimInFrontColorListener;
+    private final Consumer<Float> mScrimBehindAlphaListener;
     private final Consumer<Integer> mScrimVisibleListener;
     private boolean mBlankScreen;
     private boolean mScreenBlankingCallbackCalled;
@@ -161,17 +162,20 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     private boolean mWakeLockHeld;
     private boolean mKeyguardOccluded;
 
-    public ScrimController(LightBarController lightBarController, ScrimView scrimBehind,
-            ScrimView scrimInFront, Consumer<Integer> scrimVisibleListener,
-            DozeParameters dozeParameters, AlarmManager alarmManager) {
+    public ScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
+            Consumer<Float> scrimBehindAlphaListener,
+            Consumer<GradientColors> scrimInFrontColorListener,
+            Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
+            AlarmManager alarmManager) {
         mScrimBehind = scrimBehind;
         mScrimInFront = scrimInFront;
+        mScrimBehindAlphaListener = scrimBehindAlphaListener;
+        mScrimInFrontColorListener = scrimInFrontColorListener;
         mScrimVisibleListener = scrimVisibleListener;
         mContext = scrimBehind.getContext();
         mUnlockMethodCache = UnlockMethodCache.getInstance(mContext);
         mDarkenWhileDragging = !mUnlockMethodCache.canSkipBouncer();
         mKeyguardUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
-        mLightBarController = lightBarController;
         mScrimBehindAlphaResValue = mContext.getResources().getFloat(R.dimen.scrim_behind_alpha);
         mTimeTicker = new AlarmTimeout(alarmManager, this::onHideWallpaperTimeout,
                 "hide_aod_wallpaper", new Handler());
@@ -370,6 +374,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
             setOrAdaptCurrentAnimation(mScrimBehind);
             setOrAdaptCurrentAnimation(mScrimInFront);
+
+            mScrimBehindAlphaListener.accept(mScrimBehind.getViewAlpha());
         }
     }
 
@@ -478,7 +484,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             float minOpacity = ColorUtils.calculateMinimumBackgroundAlpha(textColor, mainColor,
                     4.5f /* minimumContrast */) / 255f;
             mScrimBehindAlpha = Math.max(mScrimBehindAlphaResValue, minOpacity);
-            mLightBarController.setScrimColor(mScrimInFront.getColors());
+            mScrimInFrontColorListener.accept(mScrimInFront.getColors());
         }
 
         // We want to override the back scrim opacity for the AOD state
@@ -705,9 +711,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             }
         }
 
-        // TODO factor mLightBarController out of this class
         if (scrim == mScrimBehind) {
-            mLightBarController.setScrimAlpha(alpha);
+            mScrimBehindAlphaListener.accept(alpha);
         }
 
         final boolean wantsAlphaUpdate = alpha != currentAlpha;

@@ -1810,6 +1810,8 @@
   <java-symbol type="array" name="config_dynamicHysteresisBrightLevels" />
   <java-symbol type="array" name="config_dynamicHysteresisDarkLevels" />
   <java-symbol type="array" name="config_dynamicHysteresisLuxLevels" />
+  <java-symbol type="array" name="config_minimumBrightnessCurveLux" />
+  <java-symbol type="array" name="config_minimumBrightnessCurveNits" />
   <java-symbol type="array" name="config_protectedNetworks" />
   <java-symbol type="array" name="config_statusBarIcons" />
   <java-symbol type="array" name="config_tether_bluetooth_regexs" />
@@ -2547,6 +2549,7 @@
   <java-symbol type="drawable" name="ic_settings_24dp" />
   <java-symbol type="drawable" name="ic_storage_48dp" />
   <java-symbol type="drawable" name="ic_usb_48dp" />
+  <java-symbol type="drawable" name="ic_zen_24dp" />
 
   <!-- Floating toolbar -->
   <java-symbol type="id" name="floating_toolbar_menu_item_image" />
