@@ -489,13 +489,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      */
     void onActivityStateChanged(ActivityRecord record, ActivityState state, String reason) {
         if (record == mResumedActivity && state != RESUMED) {
-            clearResumedActivity(reason + " - onActivityStateChanged");
+            setResumedActivity(null, reason + " - onActivityStateChanged");
         }
 
         if (state == RESUMED) {
             if (DEBUG_STACK) Slog.v(TAG_STACK, "set resumed activity to:" + record + " reason:"
                     + reason);
-            mResumedActivity = record;
+            setResumedActivity(record, reason + " - onActivityStateChanged");
             mService.setResumedActivityUncheckLocked(record, reason);
             mStackSupervisor.mRecentTasks.add(record.getTask());
         }
@@ -2309,14 +2309,14 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return mResumedActivity;
     }
 
-    /**
-     * Clears reference to currently resumed activity.
-     */
-    private void clearResumedActivity(String reason) {
-        if (DEBUG_STACK) Slog.d(TAG_STACK, "clearResumedActivity: " + mResumedActivity + " reason:"
-                + reason);
+    private void setResumedActivity(ActivityRecord r, String reason) {
+        if (mResumedActivity == r) {
+            return;
+        }
 
-        mResumedActivity = null;
+        if (DEBUG_STACK) Slog.d(TAG_STACK, "setResumedActivity stack:" + this + " + from: "
+                + mResumedActivity + " to:" + r + " reason:" + reason);
+        mResumedActivity = r;
     }
 
     @GuardedBy("mService")
@@ -4022,14 +4022,20 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * an activity moves away from the stack.
      */
     void onActivityRemovedFromStack(ActivityRecord r) {
-        if (mResumedActivity == r) {
-            clearResumedActivity("onActivityRemovedFromStack");
+        removeTimeoutsForActivityLocked(r);
+
+        if (mResumedActivity != null && mResumedActivity == r) {
+            setResumedActivity(null, "onActivityRemovedFromStack");
         }
-        if (mPausingActivity == r) {
+        if (mPausingActivity != null && mPausingActivity == r) {
             mPausingActivity = null;
         }
+    }
 
-        removeTimeoutsForActivityLocked(r);
+    void onActivityAddedToStack(ActivityRecord r) {
+        if(r.getState() == RESUMED) {
+            setResumedActivity(r, "onActivityAddedToStack");
+        }
     }
 
     /**
