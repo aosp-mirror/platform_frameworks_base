@@ -103,7 +103,42 @@ public class ActivityStackTests extends ActivityTestsBase {
         assertEquals(mStack.getResumedActivity(), r);
         r.setState(PAUSING, "testResumedActivity");
         assertEquals(mStack.getResumedActivity(), null);
+    }
 
+    @Test
+    public void testResumedActivityFromTaskReparenting() {
+        final ActivityRecord r = new ActivityBuilder(mService).setTask(mTask).build();
+        // Ensure moving task between two stacks updates resumed activity
+        r.setState(RESUMED, "testResumedActivityFromTaskReparenting");
+        assertEquals(mStack.getResumedActivity(), r);
+
+        final ActivityStack destStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+
+        mTask.reparent(destStack, true /* toTop */, TaskRecord.REPARENT_KEEP_STACK_AT_FRONT,
+                false /* animate */, true /* deferResume*/,
+                "testResumedActivityFromTaskReparenting");
+
+        assertEquals(mStack.getResumedActivity(), null);
+        assertEquals(destStack.getResumedActivity(), r);
+    }
+
+    @Test
+    public void testResumedActivityFromActivityReparenting() {
+        final ActivityRecord r = new ActivityBuilder(mService).setTask(mTask).build();
+        // Ensure moving task between two stacks updates resumed activity
+        r.setState(RESUMED, "testResumedActivityFromActivityReparenting");
+        assertEquals(mStack.getResumedActivity(), r);
+
+        final ActivityStack destStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final TaskRecord destTask = new TaskBuilder(mSupervisor).setStack(destStack).build();
+
+        mTask.removeActivity(r);
+        destTask.addActivityToTop(r);
+
+        assertEquals(mStack.getResumedActivity(), null);
+        assertEquals(destStack.getResumedActivity(), r);
     }
 
     @Test
@@ -543,5 +578,4 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         assertEquals(expected, mStack.shouldSleepActivities());
     }
-
 }
