@@ -926,25 +926,24 @@ public class SoundTriggerService extends SystemService {
                             Slog.w(TAG, mPuuid + ": Dropped operation as too many operations were "
                                     + "run in last 24 hours");
                         }
-                        return;
-                    }
+                    } else {
+                        mNumOps.addOp(currentTime);
 
-                    mNumOps.addOp(currentTime);
+                        // Find a free opID
+                        int opId = mNumTotalOpsPerformed;
+                        do {
+                            mNumTotalOpsPerformed++;
+                        } while (mRunningOpIds.contains(opId));
 
-                    // Find a free opID
-                    int opId = mNumTotalOpsPerformed;
-                    do {
-                        mNumTotalOpsPerformed++;
-                    } while (mRunningOpIds.contains(opId));
+                        // Run OP
+                        try {
+                            if (DEBUG) Slog.v(TAG, mPuuid + ": runOp " + opId);
 
-                    // Run OP
-                    try {
-                        if (DEBUG) Slog.v(TAG, mPuuid + ": runOp " + opId);
-
-                        op.run(opId, mService);
-                        mRunningOpIds.add(opId);
-                    } catch (Exception e) {
-                        Slog.e(TAG, mPuuid + ": Could not run operation " + opId, e);
+                            op.run(opId, mService);
+                            mRunningOpIds.add(opId);
+                        } catch (Exception e) {
+                            Slog.e(TAG, mPuuid + ": Could not run operation " + opId, e);
+                        }
                     }
 
                     // Unbind from service if no operations are left (i.e. if the operation failed)
