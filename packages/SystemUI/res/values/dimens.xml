@@ -136,6 +136,10 @@
          views where the distance can't be measured -->
     <dimen name="notification_icon_appear_padding">15dp</dimen>
 
+    <!-- Vertical translation of the shelf during animation that happens after the
+    notification panel collapses -->
+    <dimen name="shelf_appear_translation">9dp</dimen>
+
     <!-- The amount the content shifts upwards when transforming into the icon -->
     <dimen name="notification_icon_transform_content_shift">32dp</dimen>
 
