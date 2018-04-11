@@ -186,7 +186,6 @@ void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
         flushIfNeededLocked(dumpTimeNs);
     }
 
-    flushIfNeededLocked(dumpTimeNs);
     if (mPastBuckets.empty()) {
         return;
     }
@@ -538,7 +537,14 @@ void GaugeMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs) {
 size_t GaugeMetricProducer::byteSizeLocked() const {
     size_t totalSize = 0;
     for (const auto& pair : mPastBuckets) {
-        totalSize += pair.second.size() * kBucketSize;
+        for (const auto& bucket : pair.second) {
+            totalSize += bucket.mGaugeAtoms.size() * sizeof(GaugeAtom);
+            for (const auto& atom : bucket.mGaugeAtoms) {
+                if (atom.mFields != nullptr) {
+                    totalSize += atom.mFields->size() * sizeof(FieldValue);
+                }
+            }
+        }
     }
     return totalSize;
 }
