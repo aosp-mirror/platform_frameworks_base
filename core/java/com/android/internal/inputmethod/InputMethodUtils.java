@@ -125,11 +125,6 @@ public class InputMethodUtils {
     }
     // ----------------------------------------------------------------------
 
-    @Deprecated
-    public static boolean isSystemIme(@NonNull InputMethodInfo inputMethod) {
-        return inputMethod.isSystem();
-    }
-
     public static boolean isSystemImeThatHasSubtypeOf(final InputMethodInfo imi,
             final Context context, final boolean checkDefaultAttribute,
             @Nullable final Locale requiredLocale, final boolean checkCountry,
