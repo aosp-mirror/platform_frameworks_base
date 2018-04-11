@@ -53,9 +53,7 @@ SkColor TestUtils::interpolateColor(float fraction, SkColor start, SkColor end) 
 sp<DeferredLayerUpdater> TestUtils::createTextureLayerUpdater(
         renderthread::RenderThread& renderThread) {
     android::uirenderer::renderthread::IRenderPipeline* pipeline;
-    if (Properties::getRenderPipelineType() == RenderPipelineType::OpenGL) {
-        pipeline = new renderthread::OpenGLPipeline(renderThread);
-    } else if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
+    if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
         pipeline = new skiapipeline::SkiaOpenGLPipeline(renderThread);
     } else {
         pipeline = new skiapipeline::SkiaVulkanPipeline(renderThread);

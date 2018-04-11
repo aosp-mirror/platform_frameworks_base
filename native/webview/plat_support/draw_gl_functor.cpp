@@ -21,7 +21,6 @@
 
 #include "draw_gl.h"
 
-#include <Properties.h>
 #include <errno.h>
 #include <jni.h>
 #include <private/hwui/DrawGlInfo.h>
@@ -54,13 +53,7 @@ class DrawGLFunctor : public Functor {
     }
 
     AwDrawGLInfo aw_info;
-    // TODO(boliu): Remove property check once OpenGL fallback is removed.
-    auto render_pipeline_type =
-        android::uirenderer::Properties::getRenderPipelineType();
-    aw_info.version = (render_pipeline_type ==
-                       android::uirenderer::RenderPipelineType::OpenGL)
-                          ? 2
-                          : kAwDrawGLInfoVersion;
+    aw_info.version = kAwDrawGLInfoVersion;
     switch (what) {
       case DrawGlInfo::kModeDraw: {
         aw_info.mode = AwDrawGLInfo::kModeDraw;

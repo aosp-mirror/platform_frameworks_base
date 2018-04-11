@@ -206,7 +206,7 @@ enum class OverdrawColorSet { Default = 0, Deuteranomaly };
 
 enum class StencilClipDebug { Hide, ShowHighlight, ShowRegion };
 
-enum class RenderPipelineType { OpenGL = 0, SkiaGL, SkiaVulkan, NotInitialized = 128 };
+enum class RenderPipelineType { SkiaGL, SkiaVulkan, NotInitialized = 128 };
 
 /**
  * Renderthread-only singleton which manages several static rendering properties. Most of these
