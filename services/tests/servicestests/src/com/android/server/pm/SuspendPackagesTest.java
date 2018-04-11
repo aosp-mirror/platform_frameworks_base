@@ -32,6 +32,7 @@ import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.BaseBundle;
 import android.os.Bundle;
 import android.os.Handler;
@@ -68,6 +69,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @LargeTest
 public class SuspendPackagesTest {
     private static final String TAG = SuspendPackagesTest.class.getSimpleName();
+    private static final String TEST_APP_LABEL = "Suspend Test App";
     private static final String TEST_APP_PACKAGE_NAME = SuspendTestReceiver.PACKAGE_NAME;
     private static final String[] PACKAGES_TO_SUSPEND = new String[]{TEST_APP_PACKAGE_NAME};
 
@@ -446,23 +448,24 @@ public class SuspendPackagesTest {
         turnScreenOn();
         mAppCommsReceiver.register(mReceiverHandler, ACTION_REPORT_MORE_DETAILS_ACTIVITY_STARTED,
                 ACTION_REPORT_TEST_ACTIVITY_STARTED);
-        final String testMessage = "This is a test message";
+        final String testMessage = "This is a test message to report suspension of %1$s";
         suspendTestPackage(null, null, testMessage);
         startTestAppActivity();
         assertNull("No broadcast was expected from app", mAppCommsReceiver.pollForIntent(2));
-        assertNotNull("Given dialog message not shown",
-                mUiDevice.wait(Until.findObject(By.text(testMessage)), 5000));
-        final String buttonText = "More details";
+        assertNotNull("Given dialog message not shown", mUiDevice.wait(
+                Until.findObject(By.text(String.format(testMessage, TEST_APP_LABEL))), 5000));
+        final String buttonText = mContext.getResources().getString(Resources.getSystem()
+                .getIdentifier("app_suspended_more_details", "string", "android"));
         final UiObject2 moreDetailsButton = mUiDevice.findObject(
                 By.clickable(true).text(buttonText));
-        assertNotNull("\"More Details\" button not shown", moreDetailsButton);
+        assertNotNull(buttonText + " button not shown", moreDetailsButton);
         moreDetailsButton.click();
         final Intent intentFromApp = mAppCommsReceiver.receiveIntentFromApp();
-        assertEquals("\"More Details\" activity start not reported",
+        assertEquals(buttonText + " activity start not reported",
                 ACTION_REPORT_MORE_DETAILS_ACTIVITY_STARTED, intentFromApp.getAction());
         final String receivedPackageName = intentFromApp.getStringExtra(
                 EXTRA_RECEIVED_PACKAGE_NAME);
-        assertEquals("Wrong package name received by \"More Details\" activity",
+        assertEquals("Wrong package name received by " + buttonText + " activity",
                 TEST_APP_PACKAGE_NAME, receivedPackageName);
     }
 
