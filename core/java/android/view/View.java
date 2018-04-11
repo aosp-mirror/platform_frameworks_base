@@ -697,6 +697,7 @@ import java.util.function.Predicate;
  * security policy. See also {@link MotionEvent#FLAG_WINDOW_IS_OBSCURED}.
  * </p>
  *
+ * @attr ref android.R.styleable#View_accessibilityHeading
  * @attr ref android.R.styleable#View_alpha
  * @attr ref android.R.styleable#View_background
  * @attr ref android.R.styleable#View_clickable
@@ -2955,7 +2956,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *     1                             PFLAG3_SCREEN_READER_FOCUSABLE
      *    1                              PFLAG3_AGGREGATED_VISIBLE
      *   1                               PFLAG3_AUTOFILLID_EXPLICITLY_SET
-     *  1                                available
+     *  1                                PFLAG3_ACCESSIBILITY_HEADING
      * |-------|-------|-------|-------|
      */
 
@@ -3251,6 +3252,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link #setAutofillId(AutofillId)}.
      */
     private static final int PFLAG3_AUTOFILLID_EXPLICITLY_SET = 0x40000000;
+
+    /**
+     * Indicates if the View is a heading for accessibility purposes
+     */
+    private static final int PFLAG3_ACCESSIBILITY_HEADING = 0x80000000;
 
     /* End of masks for mPrivateFlags3 */
 
@@ -5475,6 +5481,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 case R.styleable.View_outlineAmbientShadowColor:
                     setOutlineAmbientShadowColor(a.getColor(attr, Color.BLACK));
                     break;
+                case com.android.internal.R.styleable.View_accessibilityHeading:
+                    setAccessibilityHeading(a.getBoolean(attr, false));
             }
         }
 
@@ -8795,6 +8803,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         info.addAction(AccessibilityAction.ACTION_SHOW_ON_SCREEN);
         populateAccessibilityNodeInfoDrawingOrderInParent(info);
         info.setPaneTitle(mAccessibilityPaneTitle);
+        info.setHeading(isAccessibilityHeading());
     }
 
     /**
@@ -10782,11 +10791,37 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                              accessibility tools.
      */
     public void setScreenReaderFocusable(boolean screenReaderFocusable) {
+        updatePflags3AndNotifyA11yIfChanged(PFLAG3_SCREEN_READER_FOCUSABLE, screenReaderFocusable);
+    }
+
+    /**
+     * Gets whether this view is a heading for accessibility purposes.
+     *
+     * @return {@code true} if the view is a heading, {@code false} otherwise.
+     *
+     * @attr ref android.R.styleable#View_accessibilityHeading
+     */
+    public boolean isAccessibilityHeading() {
+        return (mPrivateFlags3 & PFLAG3_ACCESSIBILITY_HEADING) != 0;
+    }
+
+    /**
+     * Set if view is a heading for a section of content for accessibility purposes.
+     *
+     * @param isHeading {@code true} if the view is a heading, {@code false} otherwise.
+     *
+     * @attr ref android.R.styleable#View_accessibilityHeading
+     */
+    public void setAccessibilityHeading(boolean isHeading) {
+        updatePflags3AndNotifyA11yIfChanged(PFLAG3_ACCESSIBILITY_HEADING, isHeading);
+    }
+
+    private void updatePflags3AndNotifyA11yIfChanged(int mask, boolean newValue) {
         int pflags3 = mPrivateFlags3;
-        if (screenReaderFocusable) {
-            pflags3 |= PFLAG3_SCREEN_READER_FOCUSABLE;
+        if (newValue) {
+            pflags3 |= mask;
         } else {
-            pflags3 &= ~PFLAG3_SCREEN_READER_FOCUSABLE;
+            pflags3 &= ~mask;
         }
 
         if (pflags3 != mPrivateFlags3) {
