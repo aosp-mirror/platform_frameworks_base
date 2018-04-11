@@ -27,6 +27,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.Signature;
+import android.content.pm.SigningInfo;
 import android.os.Process;
 import android.util.Slog;
 
@@ -203,15 +204,16 @@ public class AppBackupUtils {
             return false;
         }
 
-        Signature[][] deviceHistorySigs = target.signingCertificateHistory;
-        if (ArrayUtils.isEmpty(deviceHistorySigs)) {
-            Slog.w(TAG, "signingCertificateHistory is empty, app was either unsigned or the flag" +
+        SigningInfo signingInfo = target.signingInfo;
+        if (signingInfo == null) {
+            Slog.w(TAG, "signingInfo is empty, app was either unsigned or the flag" +
                     " PackageManager#GET_SIGNING_CERTIFICATES was not specified");
             return false;
         }
 
         if (DEBUG) {
-            Slog.v(TAG, "signaturesMatch(): stored=" + storedSigs + " device=" + deviceHistorySigs);
+            Slog.v(TAG, "signaturesMatch(): stored=" + storedSigs + " device="
+                    + signingInfo.getApkContentsSigners());
         }
 
         final int nStored = storedSigs.length;
@@ -225,8 +227,8 @@ public class AppBackupUtils {
         } else {
             // the app couldn't have rotated keys, since it was signed with multiple sigs - do
             // a check to see if we find a match for all stored sigs
-            // since app hasn't rotated key, we only need to check with deviceHistorySigs[0]
-            Signature[] deviceSigs = deviceHistorySigs[0];
+            // since app hasn't rotated key, we only need to check with its current signers
+            Signature[] deviceSigs = signingInfo.getApkContentsSigners();
             int nDevice = deviceSigs.length;
 
             // ensure that each stored sig matches an on-device sig

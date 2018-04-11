@@ -27,8 +27,10 @@ import static org.mockito.Mockito.when;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.Package;
 import android.content.pm.Signature;
+import android.content.pm.SigningInfo;
 import android.test.MoreAsserts;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
@@ -94,7 +96,13 @@ public class BackupUtilsTest {
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1}};
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_1},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = BackupUtils.signaturesMatch(null, packageInfo,
@@ -108,7 +116,13 @@ public class BackupUtilsTest {
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1}};
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_1},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         ArrayList<byte[]> storedSigHashes = new ArrayList<>();
@@ -125,7 +139,7 @@ public class BackupUtilsTest {
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[0][0];
+        packageInfo.signingInfo = null;
         packageInfo.applicationInfo = new ApplicationInfo();
 
         ArrayList<byte[]> storedSigHashes = new ArrayList<>();
@@ -142,7 +156,7 @@ public class BackupUtilsTest {
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = null;
+        packageInfo.signingInfo = null;
         packageInfo.applicationInfo = new ApplicationInfo();
 
         ArrayList<byte[]> storedSigHashes = new ArrayList<>();
@@ -158,7 +172,7 @@ public class BackupUtilsTest {
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = null;
+        packageInfo.signingInfo = null;
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = BackupUtils.signaturesMatch(null, packageInfo,
@@ -172,7 +186,7 @@ public class BackupUtilsTest {
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[0][0];
+        packageInfo.signingInfo = null;
         packageInfo.applicationInfo = new ApplicationInfo();
 
         ArrayList<byte[]> storedSigHashes = new ArrayList<>();
@@ -186,9 +200,13 @@ public class BackupUtilsTest {
     public void signaturesMatch_equalSignatures_returnsTrue() throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[][] {
-                {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3}
-        };
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         ArrayList<byte[]> storedSigHashes = new ArrayList<>();
@@ -205,9 +223,13 @@ public class BackupUtilsTest {
     public void signaturesMatch_extraSignatureInTarget_returnsTrue() throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[][] {
-                {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3}
-        };
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         ArrayList<byte[]> storedSigHashes = new ArrayList<>();
@@ -223,7 +245,13 @@ public class BackupUtilsTest {
     public void signaturesMatch_extraSignatureInStored_returnsFalse() throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1, SIGNATURE_2}};
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_1, SIGNATURE_2},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         ArrayList<byte[]> storedSigHashes = new ArrayList<>();
@@ -240,9 +268,13 @@ public class BackupUtilsTest {
     public void signaturesMatch_oneNonMatchingSignature_returnsFalse() throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[][] {
-                {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3}
-        };
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         ArrayList<byte[]> storedSigHashes = new ArrayList<>();
@@ -260,7 +292,13 @@ public class BackupUtilsTest {
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1}};
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_1},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(SIGNATURE_HASH_1,
@@ -279,7 +317,13 @@ public class BackupUtilsTest {
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1}, {SIGNATURE_2}};
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_1, SIGNATURE_2},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         // we know SIGNATURE_1 is in history, and we want to assume it has
@@ -301,7 +345,13 @@ public class BackupUtilsTest {
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1}, {SIGNATURE_2}};
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_1, SIGNATURE_2},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         // we know SIGNATURE_1 is in history, but we want to assume it does not have

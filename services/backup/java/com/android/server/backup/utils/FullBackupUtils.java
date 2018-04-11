@@ -22,6 +22,7 @@ import static com.android.server.backup.BackupManagerService.TAG;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.content.pm.SigningInfo;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
@@ -106,12 +107,13 @@ public class FullBackupUtils {
         printer.println(withApk ? "1" : "0");
 
         // write the signature block
-        Signature[][] signingHistory = pkg.signingCertificateHistory;
-        if (signingHistory == null) {
+        SigningInfo signingInfo = pkg.signingInfo;
+        if (signingInfo == null) {
             printer.println("0");
         } else {
             // retrieve the newest sigs to write
-            Signature[] signatures = signingHistory[signingHistory.length - 1];
+            // TODO (b/73988180) use entire signing history in case of rollbacks
+            Signature[] signatures = signingInfo.getApkContentsSigners();
             printer.println(Integer.toString(signatures.length));
             for (Signature sig : signatures) {
                 printer.println(sig.toCharsString());
