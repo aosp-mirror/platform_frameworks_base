@@ -962,6 +962,10 @@ package android.telephony {
 
 package android.telephony.mbms {
 
+  public static class DownloadRequest.Builder {
+    method public android.telephony.mbms.DownloadRequest.Builder setServiceId(java.lang.String);
+  }
+
   public final class FileInfo implements android.os.Parcelable {
     ctor public FileInfo(android.net.Uri, java.lang.String);
   }
