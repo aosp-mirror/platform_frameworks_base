@@ -19,6 +19,7 @@ package android.security.keystore;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.KeyguardManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.security.GateKeeper;
@@ -1227,6 +1228,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          *
          * Sets whether to include a temporary unique ID field in the attestation certificate.
          */
+        @TestApi
         @NonNull
         public Builder setUniqueIdIncluded(boolean uniqueIdIncluded) {
             mUniqueIdIncluded = uniqueIdIncluded;
