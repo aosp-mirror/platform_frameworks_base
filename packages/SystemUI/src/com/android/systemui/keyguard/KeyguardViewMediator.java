@@ -357,7 +357,12 @@ public class KeyguardViewMediator extends SystemUI {
             // ActivityManagerService) will not reconstruct the keyguard if it is already showing.
             synchronized (KeyguardViewMediator.this) {
                 resetKeyguardDonePendingLocked();
-                resetStateLocked();
+                if (mLockPatternUtils.isLockScreenDisabled(userId)) {
+                    // If we switching to a user that has keyguard disabled, dismiss keyguard.
+                    dismiss(null /* callback */, null /* message */);
+                } else {
+                    resetStateLocked();
+                }
                 adjustStatusBarLocked();
             }
         }
