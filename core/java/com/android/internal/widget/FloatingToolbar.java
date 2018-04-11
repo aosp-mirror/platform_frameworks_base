@@ -1706,6 +1706,7 @@ public final class FloatingToolbar {
         contentContainer.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         contentContainer.setTag(FLOATING_TOOLBAR_TAG);
+        contentContainer.setClipToOutline(true);
         return contentContainer;
     }
 
