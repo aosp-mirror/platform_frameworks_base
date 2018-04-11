@@ -39,6 +39,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -4837,13 +4838,47 @@ public class Editor {
             return true;
         }
 
-        private boolean handleOverlapsMagnifier() {
-            final int handleY = mContainer.getDecorViewLayoutParams().y;
-            final int magnifierBottomWhenAtWindowTop =
-                    mTextView.getRootWindowInsets().getSystemWindowInsetTop()
-                        + mMagnifierAnimator.mMagnifier.getHeight();
-            return handleY <= magnifierBottomWhenAtWindowTop;
+        private boolean handleOverlapsMagnifier(@NonNull final HandleView handle,
+                @NonNull final Rect magnifierRect) {
+            final PopupWindow window = handle.mContainer;
+            if (!window.hasDecorView()) {
+                return false;
+            }
+            final Rect handleRect = new Rect(
+                    window.getDecorViewLayoutParams().x,
+                    window.getDecorViewLayoutParams().y,
+                    window.getDecorViewLayoutParams().x + window.getContentView().getWidth(),
+                    window.getDecorViewLayoutParams().y + window.getContentView().getHeight());
+            return Rect.intersects(handleRect, magnifierRect);
         }
+
+        private @Nullable HandleView getOtherSelectionHandle() {
+            final SelectionModifierCursorController controller = getSelectionController();
+            if (controller == null || !controller.isActive()) {
+                return null;
+            }
+            return controller.mStartHandle != this
+                    ? controller.mStartHandle
+                    : controller.mEndHandle;
+        }
+
+        private final Magnifier.Callback mHandlesVisibilityCallback = new Magnifier.Callback() {
+            @Override
+            public void onOperationComplete() {
+                final Point magnifierTopLeft = mMagnifierAnimator.mMagnifier.getWindowCoords();
+                if (magnifierTopLeft == null) {
+                    return;
+                }
+                final Rect magnifierRect = new Rect(magnifierTopLeft.x, magnifierTopLeft.y,
+                        magnifierTopLeft.x + mMagnifierAnimator.mMagnifier.getWidth(),
+                        magnifierTopLeft.y + mMagnifierAnimator.mMagnifier.getHeight());
+                setVisible(!handleOverlapsMagnifier(HandleView.this, magnifierRect));
+                final HandleView otherHandle = getOtherSelectionHandle();
+                if (otherHandle != null) {
+                    otherHandle.setVisible(!handleOverlapsMagnifier(otherHandle, magnifierRect));
+                }
+            }
+        };
 
         protected final void updateMagnifier(@NonNull final MotionEvent event) {
             if (mMagnifierAnimator == null) {
@@ -4858,12 +4893,8 @@ public class Editor {
                 mRenderCursorRegardlessTiming = true;
                 mTextView.invalidateCursorPath();
                 suspendBlink();
-                // Hide handle if it overlaps the magnifier.
-                if (handleOverlapsMagnifier()) {
-                    setVisible(false);
-                } else {
-                    setVisible(true);
-                }
+                mMagnifierAnimator.mMagnifier
+                        .setOnOperationCompleteCallback(mHandlesVisibilityCallback);
 
                 mMagnifierAnimator.show(showPosInView.x, showPosInView.y);
             } else {
@@ -4877,6 +4908,10 @@ public class Editor {
                 mRenderCursorRegardlessTiming = false;
                 resumeBlink();
                 setVisible(true);
+                final HandleView otherHandle = getOtherSelectionHandle();
+                if (otherHandle != null) {
+                    otherHandle.setVisible(true);
+                }
             }
         }
 
