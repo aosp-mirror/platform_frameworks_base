@@ -100,10 +100,20 @@ static Maybe<ResourcePathData> ExtractResourcePathData(const std::string& path,
   std::string& filename = parts[parts.size() - 1];
   StringPiece name = filename;
   StringPiece extension;
-  size_t dot_pos = filename.find('.');
-  if (dot_pos != std::string::npos) {
-    extension = name.substr(dot_pos + 1, filename.size() - (dot_pos + 1));
-    name = name.substr(0, dot_pos);
+
+  const std::string kNinePng = ".9.png";
+  if (filename.size() > kNinePng.size()
+      && std::equal(kNinePng.rbegin(), kNinePng.rend(), filename.rbegin())) {
+    // Split on .9.png if this extension is present at the end of the file path
+    name = name.substr(0, filename.size() - kNinePng.size());
+    extension = "9.png";
+  } else {
+    // Split on the last period occurrence
+    size_t dot_pos = filename.rfind('.');
+    if (dot_pos != std::string::npos) {
+      extension = name.substr(dot_pos + 1, filename.size() - (dot_pos + 1));
+      name = name.substr(0, dot_pos);
+    }
   }
 
   return ResourcePathData{Source(path),          dir_str.to_string(),    name.to_string(),
@@ -768,12 +778,13 @@ int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
       // We use a different extension (not necessary anymore, but avoids altering the existing
       // build system logic).
       path_data.extension = "arsc";
+
     } else if (const ResourceType* type = ParseResourceType(path_data.resource_dir)) {
       if (*type != ResourceType::kRaw) {
         if (path_data.extension == "xml") {
           compile_func = &CompileXml;
-        } else if ((!options.no_png_crunch && path_data.extension == "png") ||
-                   path_data.extension == "9.png") {
+        } else if ((!options.no_png_crunch && path_data.extension == "png")
+            || path_data.extension == "9.png") {
           compile_func = &CompilePng;
         }
       }
@@ -781,6 +792,17 @@ int Compile(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
       context.GetDiagnostics()->Error(DiagMessage()
                                       << "invalid file path '" << path_data.source << "'");
       error = true;
+      continue;
+    }
+
+    // Treat periods as a reserved character that should not be present in a file name
+    // Legacy support for AAPT which did not reserve periods
+    if (compile_func != &CompileFile && !options.legacy_mode
+        && std::count(path_data.name.begin(), path_data.name.end(), '.') != 0) {
+      error = true;
+      context.GetDiagnostics()->Error(DiagMessage() << "resource file '" << path_data.source.path
+                                                    << "' name cannot contain '.' other than for"
+                                                    << "specifying the extension");
       continue;
     }
 
