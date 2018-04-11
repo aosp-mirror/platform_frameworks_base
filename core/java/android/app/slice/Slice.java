@@ -21,13 +21,19 @@ import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.IContentProvider;
+import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
 
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -568,5 +574,46 @@ public final class Slice implements Parcelable {
             }
         }
         return sb.toString();
+    }
+
+    /**
+     * @deprecated TO BE REMOVED.
+     */
+    @Deprecated
+    public static @Nullable Slice bindSlice(ContentResolver resolver,
+            @NonNull Uri uri, @NonNull List<SliceSpec> supportedSpecs) {
+        Preconditions.checkNotNull(uri, "uri");
+        IContentProvider provider = resolver.acquireProvider(uri);
+        if (provider == null) {
+            throw new IllegalArgumentException("Unknown URI " + uri);
+        }
+        try {
+            Bundle extras = new Bundle();
+            extras.putParcelable(SliceProvider.EXTRA_BIND_URI, uri);
+            extras.putParcelableArrayList(SliceProvider.EXTRA_SUPPORTED_SPECS,
+                    new ArrayList<>(supportedSpecs));
+            final Bundle res = provider.call(resolver.getPackageName(), SliceProvider.METHOD_SLICE,
+                    null, extras);
+            Bundle.setDefusable(res, true);
+            if (res == null) {
+                return null;
+            }
+            return res.getParcelable(SliceProvider.EXTRA_SLICE);
+        } catch (RemoteException e) {
+            // Arbitrary and not worth documenting, as Activity
+            // Manager will kill this process shortly anyway.
+            return null;
+        } finally {
+            resolver.releaseProvider(provider);
+        }
+    }
+
+    /**
+     * @deprecated TO BE REMOVED.
+     */
+    @Deprecated
+    public static @Nullable Slice bindSlice(Context context, @NonNull Intent intent,
+            @NonNull List<SliceSpec> supportedSpecs) {
+        return context.getSystemService(SliceManager.class).bindSlice(intent, supportedSpecs);
     }
 }
