@@ -3956,9 +3956,14 @@ public class NotificationManagerService extends SystemService {
                     + ", notificationUid=" + notificationUid
                     + ", notification=" + notification;
             Log.e(TAG, noChannelStr);
-            doChannelWarningToast("Developer warning for package \"" + pkg + "\"\n" +
-                    "Failed to post notification on channel \"" + channelId + "\"\n" +
-                    "See log for more details");
+            boolean appNotificationsOff = mRankingHelper.getImportance(pkg, notificationUid)
+                    == NotificationManager.IMPORTANCE_NONE;
+
+            if (!appNotificationsOff) {
+                doChannelWarningToast("Developer warning for package \"" + pkg + "\"\n" +
+                        "Failed to post notification on channel \"" + channelId + "\"\n" +
+                        "See log for more details");
+            }
             return;
         }
 
