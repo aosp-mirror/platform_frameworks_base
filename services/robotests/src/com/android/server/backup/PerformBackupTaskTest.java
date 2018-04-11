@@ -468,9 +468,6 @@ public class PerformBackupTaskTest {
         verify(agentMock.agent).onQuotaExceeded(anyLong(), anyLong());
     }
 
-    // TODO: Giving NPE at PerformBackupTask:524 because mCurrentPackage is null (PackageManager
-    // rightfully threw NameNotFoundException). Remove @Ignore when fixed.
-    @Ignore
     @Test
     public void testRunTask_whenAgentUnknown() throws Exception {
         // Not calling setUpAgent()
