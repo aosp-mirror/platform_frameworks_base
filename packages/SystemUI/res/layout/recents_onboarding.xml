@@ -14,32 +14,48 @@
      limitations under the License.
 -->
 
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="48dp"
-    android:layout_width="match_parent"
-    android:background="@android:color/black"
-    android:layout_gravity="center">
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider"
-        android:gravity="top"/>
-    <TextView
-        android:id="@+id/onboarding_text"
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
+    android:paddingBottom="13dp"
+    android:orientation="vertical">
+
+    <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"
-        android:drawableBottom="@drawable/ic_chevron_up"/>
-    <ImageView
-        android:id="@+id/dismiss"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:padding="12dp"
-        android:layout_marginEnd="6dp"
-        android:src="@drawable/ic_close_white"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:layout_gravity="center_vertical|end"/>
-</FrameLayout>
+        android:layout_height="40dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="4dp"
+        android:background="@drawable/recents_onboarding_toast_rounded_background"
+        android:layout_gravity="center_horizontal"
+        android:elevation="2dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/onboarding_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"/>
+        <ImageView
+            android:id="@+id/dismiss"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_vertical"
+            android:padding="10dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp"
+            android:alpha="0.7"
+            android:src="@drawable/ic_close_white"
+            android:background="?android:attr/selectableItemBackgroundBorderless"/>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/arrow"
+        android:elevation="2dp"
+        android:layout_width="10dp"
+        android:layout_height="8dp"
+        android:layout_marginTop="-2dp"
+        android:layout_gravity="center_horizontal"/>
+</LinearLayout>
