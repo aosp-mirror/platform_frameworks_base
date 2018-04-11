@@ -2230,7 +2230,7 @@ Landroid/view/IWindowManager$Stub$Proxy;->getDockedStackSide()I
 Landroid/view/IWindowManager$Stub$Proxy;->getInitialDisplayDensity(I)I
 Landroid/view/IWindowManager$Stub$Proxy;->hasNavigationBar()Z
 Landroid/view/IWindowManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
-Landroid/view/IWindowSession$Stub$Proxy;->relayout(Landroid/view/IWindow;ILandroid/view/WindowManager$LayoutParams;IIIILandroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/view/DisplayCutout$ParcelableWrapper;Landroid/util/MergedConfiguration;Landroid/view/Surface;)I
+Landroid/view/IWindowSession$Stub$Proxy;->relayout(Landroid/view/IWindow;ILandroid/view/WindowManager$LayoutParams;IIIIJLandroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/graphics/Rect;Landroid/view/DisplayCutout$ParcelableWrapper;Landroid/util/MergedConfiguration;Landroid/view/Surface;)I
 Landroid/view/KeyCharacterMap$FallbackAction;->keyCode:I
 Landroid/view/KeyCharacterMap$FallbackAction;->metaState:I
 Landroid/view/KeyCharacterMap;-><init>(J)V
