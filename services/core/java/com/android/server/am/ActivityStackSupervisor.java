@@ -667,6 +667,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return mFocusedStack;
     }
 
+    boolean isFocusable(ConfigurationContainer container, boolean alwaysFocusable) {
+        if (container.inSplitScreenPrimaryWindowingMode() && mIsDockMinimized) {
+            return false;
+        }
+
+        return container.getWindowConfiguration().canReceiveKeys() || alwaysFocusable;
+    }
+
     ActivityStack getLastStack() {
         return mLastFocusedStack;
     }
