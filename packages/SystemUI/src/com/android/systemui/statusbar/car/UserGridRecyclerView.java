@@ -109,12 +109,12 @@ public class UserGridRecyclerView extends RecyclerView implements
         }
 
         // Add guest user record if the current user is not a guest
-        if (!mUserManagerHelper.isGuestUser()) {
+        if (!mUserManagerHelper.foregroundUserIsGuestUser()) {
             userRecords.add(addGuestUserRecord());
         }
 
         // Add add user record if the current user can add users
-        if (mUserManagerHelper.canAddUsers()) {
+        if (mUserManagerHelper.foregroundUserCanAddUsers()) {
             userRecords.add(addUserRecord());
         }
 
