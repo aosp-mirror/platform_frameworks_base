@@ -60,6 +60,12 @@ public class WindowCallbacksCompat {
         }
     };
 
+    private final View mView;
+
+    public WindowCallbacksCompat(View view) {
+        mView = view;
+    }
+
     public void onWindowSizeIsChanging(Rect newBounds, boolean fullscreen, Rect systemInsets,
             Rect stableInsets) { }
 
@@ -72,12 +78,20 @@ public class WindowCallbacksCompat {
         return false;
     }
 
-    public void onRequestDraw(boolean reportNextDraw) { }
+    public void onRequestDraw(boolean reportNextDraw) {
+        if (reportNextDraw) {
+            reportDrawFinish();
+        }
+    }
 
     public void onPostDraw(Canvas canvas) { }
 
-    public final boolean addToView(View view) {
-        ViewRootImpl root = view.getViewRootImpl();
+    public void reportDrawFinish() {
+        mView.getViewRootImpl().reportDrawFinish();
+    }
+
+    public boolean attach() {
+        ViewRootImpl root = mView.getViewRootImpl();
         if (root != null) {
             root.addWindowCallbacks(mWindowCallbacks);
             root.requestInvalidateRootRenderNode();
@@ -86,8 +100,8 @@ public class WindowCallbacksCompat {
         return false;
     }
 
-    public final void removeFromView(View view) {
-        ViewRootImpl root = view.getViewRootImpl();
+    public void detach() {
+        ViewRootImpl root = mView.getViewRootImpl();
         if (root != null) {
             root.removeWindowCallbacks(mWindowCallbacks);
         }
