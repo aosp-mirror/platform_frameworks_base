@@ -50,6 +50,18 @@ def format(fg=None, bg=None, bright=False, bold=False, dim=False, reset=False):
     return "\033[%sm" % (";".join(codes))
 
 
+def ident(raw):
+    """Strips superficial signature changes, giving us a strong key that
+    can be used to identify members across API levels."""
+    raw = raw.replace(" deprecated ", " ")
+    raw = raw.replace(" synchronized ", " ")
+    raw = raw.replace(" final ", " ")
+    raw = re.sub("<.+?>", "", raw)
+    if " throws " in raw:
+        raw = raw[:raw.index(" throws ")]
+    return raw
+
+
 class Field():
     def __init__(self, clazz, line, raw, blame):
         self.clazz = clazz
@@ -69,8 +81,7 @@ class Field():
             self.value = raw[3].strip(';"')
         else:
             self.value = None
-
-        self.ident = self.raw.replace(" deprecated ", " ")
+        self.ident = ident(self.raw)
 
     def __hash__(self):
         return hash(self.raw)
@@ -105,15 +116,7 @@ class Method():
         for r in raw[2:]:
             if r == "throws": target = self.throws
             else: target.append(r)
-
-        # identity for compat purposes
-        ident = self.raw
-        ident = ident.replace(" deprecated ", " ")
-        ident = ident.replace(" synchronized ", " ")
-        ident = re.sub("<.+?>", "", ident)
-        if " throws " in ident:
-            ident = ident[:ident.index(" throws ")]
-        self.ident = ident
+        self.ident = ident(self.raw)
 
     def __hash__(self):
         return hash(self.raw)
@@ -1469,6 +1472,40 @@ def verify_compat(cur, prev):
     return failures
 
 
+def show_deprecations_at_birth(cur, prev):
+    """Show API deprecations at birth."""
+    global failures
+
+    # Remove all existing things so we're left with new
+    for prev_clazz in prev.values():
+        cur_clazz = cur[prev_clazz.fullname]
+
+        sigs = { i.ident: i for i in prev_clazz.ctors }
+        cur_clazz.ctors = [ i for i in cur_clazz.ctors if i.ident not in sigs ]
+        sigs = { i.ident: i for i in prev_clazz.methods }
+        cur_clazz.methods = [ i for i in cur_clazz.methods if i.ident not in sigs ]
+        sigs = { i.ident: i for i in prev_clazz.fields }
+        cur_clazz.fields = [ i for i in cur_clazz.fields if i.ident not in sigs ]
+
+        # Forget about class entirely when nothing new
+        if len(cur_clazz.ctors) == 0 and len(cur_clazz.methods) == 0 and len(cur_clazz.fields) == 0:
+            del cur[prev_clazz.fullname]
+
+    for clazz in cur.values():
+        if " deprecated " in clazz.raw and not clazz.fullname in prev:
+            error(clazz, None, None, "Found API deprecation at birth")
+
+        for i in clazz.ctors + clazz.methods + clazz.fields:
+            if " deprecated " in i.raw:
+                error(clazz, i, None, "Found API deprecation at birth")
+
+    print "%s Deprecated at birth %s\n" % ((format(fg=WHITE, bg=BLUE, bold=True),
+                                            format(reset=True)))
+    for f in sorted(failures):
+        print failures[f]
+        print
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Enforces common Android public API design \
             patterns. It ignores lint messages from a previous API level, if provided.")
@@ -1481,6 +1518,8 @@ if __name__ == "__main__":
             help="Allow references to Google")
     parser.add_argument("--show-noticed", action='store_const', const=True,
             help="Show API changes noticed")
+    parser.add_argument("--show-deprecations-at-birth", action='store_const', const=True,
+            help="Show API deprecations at birth")
     args = vars(parser.parse_args())
 
     if args['no_color']:
@@ -1491,6 +1530,14 @@ if __name__ == "__main__":
 
     current_file = args['current.txt']
     previous_file = args['previous.txt']
+
+    if args['show_deprecations_at_birth']:
+        with current_file as f:
+            cur = _parse_stream(f)
+        with previous_file as f:
+            prev = _parse_stream(f)
+        show_deprecations_at_birth(cur, prev)
+        sys.exit()
 
     with current_file as f:
         cur_fail, cur_noticed = examine_stream(f)
