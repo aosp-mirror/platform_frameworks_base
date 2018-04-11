@@ -145,6 +145,8 @@ public class KeyguardViewMediator extends SystemUI {
     private static final String DELAYED_LOCK_PROFILE_ACTION =
             "com.android.internal.policy.impl.PhoneWindowManager.DELAYED_LOCK";
 
+    private static final String SYSTEMUI_PERMISSION = "com.android.systemui.permission.SELF";
+
     // used for handler messages
     private static final int SHOW = 1;
     private static final int HIDE = 2;
@@ -688,10 +690,14 @@ public class KeyguardViewMediator extends SystemUI {
         mShowKeyguardWakeLock.setReferenceCounted(false);
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(DELAYED_KEYGUARD_ACTION);
-        filter.addAction(DELAYED_LOCK_PROFILE_ACTION);
         filter.addAction(Intent.ACTION_SHUTDOWN);
         mContext.registerReceiver(mBroadcastReceiver, filter);
+
+        final IntentFilter delayedActionFilter = new IntentFilter();
+        delayedActionFilter.addAction(DELAYED_KEYGUARD_ACTION);
+        delayedActionFilter.addAction(DELAYED_LOCK_PROFILE_ACTION);
+        mContext.registerReceiver(mDelayedLockBroadcastReceiver, delayedActionFilter,
+                SYSTEMUI_PERMISSION, null /* scheduler */);
 
         mKeyguardDisplayManager = new KeyguardDisplayManager(mContext, mViewMediatorCallback);
 
@@ -1456,7 +1462,10 @@ public class KeyguardViewMediator extends SystemUI {
         }
     }
 
-    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+    /**
+     * This broadcast receiver should be registered with the SystemUI permission.
+     */
+    private final BroadcastReceiver mDelayedLockBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (DELAYED_KEYGUARD_ACTION.equals(intent.getAction())) {
@@ -1478,7 +1487,14 @@ public class KeyguardViewMediator extends SystemUI {
                         }
                     }
                 }
-            } else if (Intent.ACTION_SHUTDOWN.equals(intent.getAction())) {
+            }
+        }
+    };
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_SHUTDOWN.equals(intent.getAction())) {
                 synchronized (KeyguardViewMediator.this){
                     mShuttingDown = true;
                 }
