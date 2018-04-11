@@ -24,15 +24,16 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.CornerPathEffect;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.RippleDrawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -76,17 +77,13 @@ public class RecentsOnboarding {
     private final View mLayout;
     private final TextView mTextView;
     private final ImageView mDismissView;
-    private final ColorDrawable mBackgroundDrawable;
-    private final int mDarkBackgroundColor;
-    private final int mLightBackgroundColor;
-    private final int mDarkContentColor;
-    private final int mLightContentColor;
-    private final RippleDrawable mDarkRipple;
-    private final RippleDrawable mLightRipple;
+    private final View mArrowView;
+    private final int mOnboardingToastColor;
+    private final int mOnboardingToastArrowRadius;
+    private int mNavBarHeight;
 
     private boolean mTaskListenerRegistered;
     private boolean mLayoutAttachedToWindow;
-    private boolean mBackgroundIsLight;
     private int mLastTaskId;
     private boolean mHasDismissed;
     private int mNumAppsLaunchedSinceDismiss;
@@ -159,23 +156,29 @@ public class RecentsOnboarding {
         mLayout = LayoutInflater.from(mContext).inflate(R.layout.recents_onboarding, null);
         mTextView = mLayout.findViewById(R.id.onboarding_text);
         mDismissView = mLayout.findViewById(R.id.dismiss);
-        mDarkBackgroundColor = res.getColor(android.R.color.background_dark);
-        mLightBackgroundColor = res.getColor(android.R.color.background_light);
-        mDarkContentColor = res.getColor(R.color.primary_text_default_material_light);
-        mLightContentColor = res.getColor(R.color.primary_text_default_material_dark);
-        mDarkRipple = new RippleDrawable(res.getColorStateList(R.color.ripple_material_light),
-                null, null);
-        mLightRipple = new RippleDrawable(res.getColorStateList(R.color.ripple_material_dark),
-                null, null);
-        mBackgroundDrawable = new ColorDrawable(mDarkBackgroundColor);
+        mArrowView = mLayout.findViewById(R.id.arrow);
+
+        TypedValue typedValue = new TypedValue();
+        context.getTheme().resolveAttribute(android.R.attr.colorAccent, typedValue, true);
+        mOnboardingToastColor = res.getColor(typedValue.resourceId);
+        mOnboardingToastArrowRadius = res.getDimensionPixelSize(
+                R.dimen.recents_onboarding_toast_arrow_corner_radius);
 
         mLayout.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
-        mLayout.setBackground(mBackgroundDrawable);
         mDismissView.setOnClickListener(v -> {
             hide(true);
             mHasDismissed = true;
             mNumAppsLaunchedSinceDismiss = 0;
         });
+
+        ViewGroup.LayoutParams arrowLp = mArrowView.getLayoutParams();
+        ShapeDrawable arrowDrawable = new ShapeDrawable(TriangleShape.create(
+                arrowLp.width, arrowLp.height, false));
+        Paint arrowPaint = arrowDrawable.getPaint();
+        arrowPaint.setColor(mOnboardingToastColor);
+        // The corner path effect won't be reflected in the shadow, but shouldn't be noticeable.
+        arrowPaint.setPathEffect(new CornerPathEffect(mOnboardingToastArrowRadius));
+        mArrowView.setBackground(arrowDrawable);
 
         if (RESET_PREFS_FOR_DEBUG) {
             Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_RECENTS_ONBOARDING, false);
@@ -234,6 +237,7 @@ public class RecentsOnboarding {
         int orientation = mContext.getResources().getConfiguration().orientation;
         if (!mLayoutAttachedToWindow && orientation == Configuration.ORIENTATION_PORTRAIT) {
             mLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+
             mWindowManager.addView(mLayout, getWindowLayoutParams());
             int layoutHeight = mLayout.getHeight();
             if (layoutHeight == 0) {
@@ -281,29 +285,18 @@ public class RecentsOnboarding {
         }
     }
 
-    public void setContentDarkIntensity(float contentDarkIntensity) {
-        boolean backgroundIsLight = contentDarkIntensity > 0.5f;
-        if (backgroundIsLight != mBackgroundIsLight) {
-            mBackgroundIsLight = backgroundIsLight;
-            mBackgroundDrawable.setColor(mBackgroundIsLight
-                    ? mLightBackgroundColor : mDarkBackgroundColor);
-            int contentColor = mBackgroundIsLight ? mDarkContentColor : mLightContentColor;
-            mTextView.setTextColor(contentColor);
-            mTextView.getCompoundDrawables()[3].setColorFilter(contentColor,
-                    PorterDuff.Mode.SRC_IN);
-            mDismissView.setColorFilter(contentColor);
-            mDismissView.setBackground(mBackgroundIsLight ? mDarkRipple : mLightRipple);
-        }
+    public void setNavBarHeight(int navBarHeight) {
+        mNavBarHeight = navBarHeight;
     }
 
     private WindowManager.LayoutParams getWindowLayoutParams() {
-        int flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
+        int flags = WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                 | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG,
+                0, -mNavBarHeight / 2,
+                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                 flags,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;

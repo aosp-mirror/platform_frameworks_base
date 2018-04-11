@@ -845,6 +845,9 @@
     <!-- The size of the drag hint text. -->
     <dimen name="recents_drag_hint_text_size">14sp</dimen>
 
+    <!-- The size of corner radius of the arrow in the onboarding toast. -->
+    <dimen name="recents_onboarding_toast_arrow_corner_radius">2dp</dimen>
+
     <!-- The min alpha to apply to a task affiliation group color. -->
     <item name="recents_task_affiliation_color_min_alpha_percentage" format="float" type="dimen">0.6</item>
 
