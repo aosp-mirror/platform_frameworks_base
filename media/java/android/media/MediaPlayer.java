@@ -19,6 +19,7 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -1680,6 +1681,7 @@ public class MediaPlayer extends PlayerBase
      * @hide
      */
     @NonNull
+    @TestApi
     public native BufferingParams getBufferingParams();
 
     /**
@@ -1696,6 +1698,7 @@ public class MediaPlayer extends PlayerBase
      * @throws IllegalArgumentException if params is invalid or not supported.
      * @hide
      */
+    @TestApi
     public native void setBufferingParams(@NonNull BufferingParams params);
 
     /**
