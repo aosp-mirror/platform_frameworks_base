@@ -1077,13 +1077,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     boolean isFocusable() {
-        if (getWindowConfiguration().canReceiveKeys()) {
-            return true;
-        }
-        // The stack isn't focusable. See if its top activity is focusable to force focus on the
-        // stack.
         final ActivityRecord r = topRunningActivityLocked();
-        return r != null && r.isFocusable();
+        return mStackSupervisor.isFocusable(this, r != null && r.isFocusable());
     }
 
     final boolean isAttached() {
