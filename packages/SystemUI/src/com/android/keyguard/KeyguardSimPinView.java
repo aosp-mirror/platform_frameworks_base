@@ -78,6 +78,11 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
                     }
                     break;
                 }
+                case READY: {
+                    mRemainingAttempts = -1;
+                    resetState();
+                    break;
+                }
                 default:
                     resetState();
             }
