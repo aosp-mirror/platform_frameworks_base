@@ -35,7 +35,7 @@ void SendConfig(StatsService& service, const StatsdConfig& config) {
     config.SerializeToString(&str);
     std::vector<uint8_t> configAsVec(str.begin(), str.end());
     bool success;
-    service.addConfiguration(kConfigKey, configAsVec, &success);
+    service.addConfiguration(kConfigKey, configAsVec);
 }
 
 ConfigMetricsReport GetReports(StatsService& service) {
