@@ -68,7 +68,7 @@ TEST(ValueMetricProducerTest, TestNonDimensionalEvents) {
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
 
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      tagId, bucketStartTimeNs, pullerManager);
+                                      tagId, bucketStartTimeNs, bucketStartTimeNs, pullerManager);
     valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     vector<shared_ptr<LogEvent>> allData;
@@ -168,7 +168,7 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
             }));
 
     ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, tagId, bucketStartTimeNs,
-                                      pullerManager);
+                                      bucketStartTimeNs, pullerManager);
     valueProducer.setBucketSize(60 * NS_PER_SEC);
     valueProducer.onConditionChanged(true, bucketStartTimeNs + 8);
 
@@ -221,7 +221,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade) {
     shared_ptr<MockStatsPullerManager> pullerManager =
             make_shared<StrictMock<MockStatsPullerManager>>();
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, -1, bucketStartTimeNs,
-                                      pullerManager);
+                                      bucketStartTimeNs, pullerManager);
     valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
@@ -277,7 +277,7 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade) {
                 return true;
             }));
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, tagId, bucketStartTimeNs,
-                                      pullerManager);
+                                      bucketStartTimeNs, pullerManager);
     valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     vector<shared_ptr<LogEvent>> allData;
@@ -320,7 +320,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
             make_shared<StrictMock<MockStatsPullerManager>>();
 
     ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, -1, bucketStartTimeNs,
-                                      pullerManager);
+                                      bucketStartTimeNs, pullerManager);
     valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
@@ -368,7 +368,7 @@ TEST(ValueMetricProducerTest, TestAnomalyDetection) {
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      -1 /*not pulled*/, bucketStartTimeNs);
+                                      -1 /*not pulled*/, bucketStartTimeNs, bucketStartTimeNs);
     valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     sp<AnomalyTracker> anomalyTracker = valueProducer.addAnomalyTracker(alert, alarmMonitor);
@@ -447,7 +447,7 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryNoCondition) {
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
 
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      tagId, bucketStartTimeNs, pullerManager);
+                                      tagId, bucketStartTimeNs, bucketStartTimeNs, pullerManager);
     valueProducer.setBucketSize(60 * NS_PER_SEC);
 
     vector<shared_ptr<LogEvent>> allData;
@@ -556,7 +556,7 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition) {
             }));
 
     ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, tagId, bucketStartTimeNs,
-                                      pullerManager);
+                                      bucketStartTimeNs, pullerManager);
     valueProducer.setBucketSize(60 * NS_PER_SEC);
     valueProducer.onConditionChanged(true, bucketStartTimeNs + 8);
 
@@ -650,7 +650,7 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition2) {
             }));
 
     ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, tagId, bucketStartTimeNs,
-                                      pullerManager);
+                                      bucketStartTimeNs, pullerManager);
     valueProducer.setBucketSize(60 * NS_PER_SEC);
     valueProducer.onConditionChanged(true, bucketStartTimeNs + 8);
 
@@ -742,7 +742,7 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition3) {
             }));
 
     ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, tagId, bucketStartTimeNs,
-                                      pullerManager);
+                                      bucketStartTimeNs, pullerManager);
     valueProducer.setBucketSize(60 * NS_PER_SEC);
     valueProducer.onConditionChanged(true, bucketStartTimeNs + 8);
 

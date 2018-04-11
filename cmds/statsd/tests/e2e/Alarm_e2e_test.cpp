@@ -51,7 +51,7 @@ TEST(AlarmE2eTest, TestMultipleAlarms) {
     int64_t bucketStartTimeNs = 10000000000;
 
     ConfigKey cfgKey;
-    auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     EXPECT_EQ(2u, processor->mMetricsManagers.begin()->second->mAllPeriodicAlarmTrackers.size());

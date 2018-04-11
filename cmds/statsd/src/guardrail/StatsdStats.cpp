@@ -395,6 +395,14 @@ void StatsdStats::resetInternalLocked() {
     }
 }
 
+string buildTimeString(int64_t timeSec) {
+    time_t t = timeSec;
+    struct tm* tm = localtime(&t);
+    char timeBuffer[80];
+    strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d %I:%M%p\n", tm);
+    return string(timeBuffer);
+}
+
 void StatsdStats::dumpStats(FILE* out) const {
     lock_guard<std::mutex> lock(mLock);
     time_t t = mStartTimeSec;
@@ -437,15 +445,19 @@ void StatsdStats::dumpStats(FILE* out) const {
         }
 
         for (const auto& broadcastTime : configStats->broadcast_sent_time_sec) {
-            fprintf(out, "\tbroadcast time: %d\n", broadcastTime);
+            fprintf(out, "\tbroadcast time: %s(%lld)\n",
+                    buildTimeString(broadcastTime).c_str(), (long long)broadcastTime);
         }
 
         for (const auto& dataDropTime : configStats->data_drop_time_sec) {
-            fprintf(out, "\tdata drop time: %d\n", dataDropTime);
+            fprintf(out, "\tdata drop time: %s(%lld)\n",
+                    buildTimeString(dataDropTime).c_str(), (long long)dataDropTime);
         }
 
         for (const auto& dump : configStats->dump_report_stats) {
-            fprintf(out, "\tdump report time: %d bytes: %lld\n", dump.first, (long long)dump.second);
+            fprintf(out, "\tdump report time: %s(%lld) bytes: %lld\n",
+                    buildTimeString(dump.first).c_str(), (long long)dump.first,
+                    (long long)dump.second);
         }
 
         for (const auto& stats : pair.second->matcher_stats) {

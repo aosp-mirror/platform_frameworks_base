@@ -40,12 +40,12 @@ namespace statsd {
 // be a no-op.
 class MetricProducer : public virtual PackageInfoListener {
 public:
-    MetricProducer(const int64_t& metricId, const ConfigKey& key, const int64_t startTimeNs,
+    MetricProducer(const int64_t& metricId, const ConfigKey& key, const int64_t timeBaseNs,
                    const int conditionIndex, const sp<ConditionWizard>& wizard)
         : mMetricId(metricId),
           mConfigKey(key),
-          mStartTimeNs(startTimeNs),
-          mCurrentBucketStartTimeNs(startTimeNs),
+          mTimeBaseNs(timeBaseNs),
+          mCurrentBucketStartTimeNs(timeBaseNs),
           mCurrentBucketNum(0),
           mCondition(conditionIndex >= 0 ? false : true),
           mConditionSliced(false),
@@ -165,6 +165,11 @@ public:
         dropDataLocked(dropTimeNs);
     }
 
+    // For test only.
+    inline int64_t getCurrentBucketNum() const {
+        return mCurrentBucketNum;
+    }
+
 protected:
     virtual void onConditionChangedLocked(const bool condition, const int64_t eventTime) = 0;
     virtual void onSlicedConditionMayChangeLocked(bool overallCondition,
@@ -204,7 +209,7 @@ protected:
     // Convenience to compute the current bucket's end time, which is always aligned with the
     // start time of the metric.
     int64_t getCurrentBucketEndTimeNs() const {
-        return mStartTimeNs + (mCurrentBucketNum + 1) * mBucketSizeNs;
+        return mTimeBaseNs + (mCurrentBucketNum + 1) * mBucketSizeNs;
     }
 
     virtual void dropDataLocked(const int64_t dropTimeNs) = 0;
@@ -215,7 +220,7 @@ protected:
 
     // The time when this metric producer was first created. The end time for the current bucket
     // can be computed from this based on mCurrentBucketNum.
-    int64_t mStartTimeNs;
+    int64_t mTimeBaseNs;
 
     // Start time may not be aligned with the start of statsd if there is an app upgrade in the
     // middle of a bucket.

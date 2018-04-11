@@ -275,10 +275,8 @@ void StatsPullerManagerImpl::UnRegisterReceiver(int tagId, wp<PullDataReceiver> 
     }
 }
 
-void StatsPullerManagerImpl::OnAlarmFired() {
+void StatsPullerManagerImpl::OnAlarmFired(const int64_t currentTimeNs) {
     AutoMutex _l(mLock);
-
-    int64_t currentTimeNs = getElapsedRealtimeNs();
 
     int64_t minNextPullTimeNs = LONG_MAX;
 
@@ -288,7 +286,7 @@ void StatsPullerManagerImpl::OnAlarmFired() {
         vector<ReceiverInfo*> receivers = vector<ReceiverInfo*>();
         if (pair.second.size() != 0) {
             for (ReceiverInfo& receiverInfo : pair.second) {
-                if (receiverInfo.nextPullTimeNs < currentTimeNs) {
+                if (receiverInfo.nextPullTimeNs <= currentTimeNs) {
                     receivers.push_back(&receiverInfo);
                 } else {
                     if (receiverInfo.nextPullTimeNs < minNextPullTimeNs) {
@@ -311,10 +309,9 @@ void StatsPullerManagerImpl::OnAlarmFired() {
                     receiverPtr->onDataPulled(data);
                     // we may have just come out of a coma, compute next pull time
                     receiverInfo->nextPullTimeNs =
-                            ceil((double_t)(currentTimeNs - receiverInfo->nextPullTimeNs) /
-                                 receiverInfo->intervalNs) *
-                                    receiverInfo->intervalNs +
-                            receiverInfo->nextPullTimeNs;
+                            (currentTimeNs - receiverInfo->nextPullTimeNs) /
+                                receiverInfo->intervalNs * receiverInfo->intervalNs +
+                            receiverInfo->intervalNs + receiverInfo->nextPullTimeNs;
                     if (receiverInfo->nextPullTimeNs < minNextPullTimeNs) {
                         minNextPullTimeNs = receiverInfo->nextPullTimeNs;
                     }

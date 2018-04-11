@@ -33,11 +33,12 @@ namespace os {
 namespace statsd {
 
 struct GaugeAtom {
-    GaugeAtom(std::shared_ptr<vector<FieldValue>> fields, int64_t timeNs)
-        : mFields(fields), mTimestamps(timeNs) {
+    GaugeAtom(std::shared_ptr<vector<FieldValue>> fields, int64_t elapsedTimeNs, int wallClockNs)
+        : mFields(fields), mElapsedTimestamps(elapsedTimeNs), mWallClockTimestampNs(wallClockNs) {
     }
     std::shared_ptr<vector<FieldValue>> mFields;
-    int64_t mTimestamps;
+    int64_t mElapsedTimestamps;
+    int64_t mWallClockTimestampNs;
 };
 
 struct GaugeBucket {
@@ -57,7 +58,7 @@ class GaugeMetricProducer : public virtual MetricProducer, public virtual PullDa
 public:
     GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& gaugeMetric,
                         const int conditionIndex, const sp<ConditionWizard>& wizard,
-                        const int pullTagId, const int64_t startTimeNs);
+                        const int pullTagId, const int64_t timeBaseNs, const int64_t startTimeNs);
 
     virtual ~GaugeMetricProducer();
 
@@ -76,7 +77,7 @@ public:
         flushCurrentBucketLocked(eventTimeNs);
         mCurrentBucketStartTimeNs = eventTimeNs;
         if (mPullTagId != -1) {
-            pullLocked();
+            pullLocked(eventTimeNs);
         }
     };
 
@@ -94,7 +95,8 @@ private:
     // for testing
     GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& gaugeMetric,
                         const int conditionIndex, const sp<ConditionWizard>& wizard,
-                        const int pullTagId, const int64_t startTimeNs,
+                        const int pullTagId,
+                        const int64_t timeBaseNs, const int64_t startTimeNs,
                         std::shared_ptr<StatsPullerManager> statsPullerManager);
 
     // Internal interface to handle condition change.
@@ -115,7 +117,7 @@ private:
 
     void flushCurrentBucketLocked(const int64_t& eventTimeNs) override;
 
-    void pullLocked();
+    void pullLocked(const int64_t timestampNs);
 
     int mTagId;
 
