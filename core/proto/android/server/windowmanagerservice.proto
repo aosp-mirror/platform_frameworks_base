@@ -220,6 +220,7 @@ message StackProto {
   optional float adjust_ime_amount = 10;
   optional float adjust_divider_amount = 11;
   optional .android.graphics.RectProto adjusted_bounds = 12;
+  optional bool animating_bounds = 13;
 }
 
 /* represents Task */
