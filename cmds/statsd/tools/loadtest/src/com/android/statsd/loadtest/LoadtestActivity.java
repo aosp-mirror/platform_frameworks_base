@@ -355,7 +355,13 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
             return null;
         }
         if (mStatsManager != null) {
-            byte[] data = mStatsManager.getMetadata();
+            byte[] data;
+            try {
+                data = mStatsManager.getStatsMetadata();
+            } catch (StatsManager.StatsUnavailableException e) {
+                Log.e(TAG, "Failed to get data from statsd", e);
+                return null;
+            }
             if (data != null) {
                 StatsdStatsReport report = null;
                 boolean good = false;
@@ -375,7 +381,13 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
             return null;
         }
         if (mStatsManager != null) {
-            byte[] data = mStatsManager.getData(ConfigFactory.CONFIG_ID);
+            byte[] data;
+            try {
+                data = mStatsManager.getReports(ConfigFactory.CONFIG_ID);
+            } catch (StatsManager.StatsUnavailableException e) {
+                Log.e(TAG, "Failed to get data from statsd", e);
+                return null;
+            }
             if (data != null) {
                 ConfigMetricsReportList reports = null;
                 try {
@@ -563,10 +575,11 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
         // TODO: Clear all configs instead of specific ones.
         if (mStatsManager != null) {
             if (mStarted) {
-                if (!mStatsManager.removeConfiguration(ConfigFactory.CONFIG_ID)) {
+                try {
+                    mStatsManager.removeConfig(ConfigFactory.CONFIG_ID);
                     Log.d(TAG, "Removed loadtest statsd configs.");
-                } else {
-                    Log.d(TAG, "Failed to remove loadtest configs.");
+                } catch (StatsManager.StatsUnavailableException e) {
+                    Log.e(TAG, "Failed to remove loadtest configs.", e);
                 }
             }
         }
@@ -574,12 +587,13 @@ public class LoadtestActivity extends Activity implements AdapterView.OnItemSele
 
     private boolean setConfig(ConfigFactory.ConfigMetadata configData) {
         if (mStatsManager != null) {
-            if (mStatsManager.addConfiguration(ConfigFactory.CONFIG_ID, configData.bytes)) {
+            try {
+                mStatsManager.addConfig(ConfigFactory.CONFIG_ID, configData.bytes);
                 mNumMetrics = configData.numMetrics;
                 Log.d(TAG, "Config pushed to statsd");
                 return true;
-            } else {
-                Log.d(TAG, "Failed to push config to statsd");
+            } catch (StatsManager.StatsUnavailableException | IllegalArgumentException e) {
+                Log.e(TAG, "Failed to push config to statsd", e);
             }
         }
         return false;
