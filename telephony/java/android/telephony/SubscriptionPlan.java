@@ -254,6 +254,9 @@ public final class SubscriptionPlan implements Parcelable {
          * @param period The period after which the plan automatically recurs.
          */
         public static Builder createRecurring(ZonedDateTime start, Period period) {
+            if (period.isZero() || period.isNegative()) {
+                throw new IllegalArgumentException("Period " + period + " must be positive");
+            }
             return new Builder(start, null, period);
         }
 

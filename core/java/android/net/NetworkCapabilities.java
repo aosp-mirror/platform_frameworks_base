@@ -254,9 +254,8 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * Indicates that this network is not congested.
      * <p>
-     * When a network is congested, the device should defer network traffic that
-     * can be done at a later time without breaking developer contracts.
-     * @hide
+     * When a network is congested, applications should defer network traffic
+     * that can be done at a later time, such as uploading analytics.
      */
     public static final int NET_CAPABILITY_NOT_CONGESTED = 20;
 

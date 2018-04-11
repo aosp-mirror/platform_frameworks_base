@@ -80,6 +80,9 @@ import static android.provider.Settings.Global.NETPOLICY_QUOTA_UNLIMITED;
 import static android.telephony.CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED;
 import static android.telephony.CarrierConfigManager.DATA_CYCLE_THRESHOLD_DISABLED;
 import static android.telephony.CarrierConfigManager.DATA_CYCLE_USE_PLATFORM_DEFAULT;
+import static android.telephony.CarrierConfigManager.KEY_DATA_LIMIT_NOTIFICATION_BOOL;
+import static android.telephony.CarrierConfigManager.KEY_DATA_RAPID_NOTIFICATION_BOOL;
+import static android.telephony.CarrierConfigManager.KEY_DATA_WARNING_NOTIFICATION_BOOL;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 import static com.android.internal.util.ArrayUtils.appendInt;
@@ -1093,8 +1096,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final long now = mClock.millis();
         for (int i = mNetworkPolicy.size()-1; i >= 0; i--) {
             final NetworkPolicy policy = mNetworkPolicy.valueAt(i);
+            final int subId = findRelevantSubId(policy.template);
+
             // ignore policies that aren't relevant to user
-            if (!isTemplateRelevant(policy.template)) continue;
+            if (subId == INVALID_SUBSCRIPTION_ID) continue;
             if (!policy.hasCycle()) continue;
 
             final Pair<ZonedDateTime, ZonedDateTime> cycle = NetworkPolicyManager
@@ -1103,28 +1108,43 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final long cycleEnd = cycle.second.toInstant().toEpochMilli();
             final long totalBytes = getTotalBytes(policy.template, cycleStart, cycleEnd);
 
-            // Notify when data usage is over warning/limit
-            if (policy.isOverLimit(totalBytes)) {
-                final boolean snoozedThisCycle = policy.lastLimitSnooze >= cycleStart;
-                if (snoozedThisCycle) {
-                    enqueueNotification(policy, TYPE_LIMIT_SNOOZED, totalBytes, null);
-                } else {
-                    enqueueNotification(policy, TYPE_LIMIT, totalBytes, null);
-                    notifyOverLimitNL(policy.template);
+            // Carrier might want to manage notifications themselves
+            final PersistableBundle config = mCarrierConfigManager.getConfigForSubId(subId);
+            final boolean notifyWarning = getBooleanDefeatingNullable(config,
+                    KEY_DATA_WARNING_NOTIFICATION_BOOL, true);
+            final boolean notifyLimit = getBooleanDefeatingNullable(config,
+                    KEY_DATA_LIMIT_NOTIFICATION_BOOL, true);
+            final boolean notifyRapid = getBooleanDefeatingNullable(config,
+                    KEY_DATA_RAPID_NOTIFICATION_BOOL, true);
+
+            // Notify when data usage is over warning
+            if (notifyWarning) {
+                if (policy.isOverWarning(totalBytes) && !policy.isOverLimit(totalBytes)) {
+                    final boolean snoozedThisCycle = policy.lastWarningSnooze >= cycleStart;
+                    if (!snoozedThisCycle) {
+                        enqueueNotification(policy, TYPE_WARNING, totalBytes, null);
+                    }
                 }
+            }
 
-            } else {
-                notifyUnderLimitNL(policy.template);
-
-                final boolean snoozedThisCycle = policy.lastWarningSnooze >= cycleStart;
-                if (policy.isOverWarning(totalBytes) && !snoozedThisCycle) {
-                    enqueueNotification(policy, TYPE_WARNING, totalBytes, null);
+            // Notify when data usage is over limit
+            if (notifyLimit) {
+                if (policy.isOverLimit(totalBytes)) {
+                    final boolean snoozedThisCycle = policy.lastLimitSnooze >= cycleStart;
+                    if (snoozedThisCycle) {
+                        enqueueNotification(policy, TYPE_LIMIT_SNOOZED, totalBytes, null);
+                    } else {
+                        enqueueNotification(policy, TYPE_LIMIT, totalBytes, null);
+                        notifyOverLimitNL(policy.template);
+                    }
+                } else {
+                    notifyUnderLimitNL(policy.template);
                 }
             }
 
             // Warn if average usage over last 4 days is on track to blow pretty
             // far past the plan limits.
-            if (policy.limitBytes != LIMIT_DISABLED) {
+            if (notifyRapid && policy.limitBytes != LIMIT_DISABLED) {
                 final long recentDuration = TimeUnit.DAYS.toMillis(4);
                 final long recentStart = now - recentDuration;
                 final long recentEnd = now;
@@ -1201,27 +1221,26 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * current device state, such as when
      * {@link TelephonyManager#getSubscriberId()} matches. This is regardless of
      * data connection status.
+     *
+     * @return relevant subId, or {@link #INVALID_SUBSCRIPTION_ID} when no
+     *         matching subId found.
      */
-    private boolean isTemplateRelevant(NetworkTemplate template) {
-        if (template.isMatchRuleMobile()) {
-            final TelephonyManager tele = mContext.getSystemService(TelephonyManager.class);
-            final SubscriptionManager sub = mContext.getSystemService(SubscriptionManager.class);
+    private int findRelevantSubId(NetworkTemplate template) {
+        final TelephonyManager tele = mContext.getSystemService(TelephonyManager.class);
+        final SubscriptionManager sub = mContext.getSystemService(SubscriptionManager.class);
 
-            // Mobile template is relevant when any active subscriber matches
-            final int[] subIds = ArrayUtils.defeatNullable(sub.getActiveSubscriptionIdList());
-            for (int subId : subIds) {
-                final String subscriberId = tele.getSubscriberId(subId);
-                final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
-                        TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true,
-                        true);
-                if (template.matches(probeIdent)) {
-                    return true;
-                }
+        // Mobile template is relevant when any active subscriber matches
+        final int[] subIds = ArrayUtils.defeatNullable(sub.getActiveSubscriptionIdList());
+        for (int subId : subIds) {
+            final String subscriberId = tele.getSubscriberId(subId);
+            final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
+                    TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true,
+                    true);
+            if (template.matches(probeIdent)) {
+                return subId;
             }
-            return false;
-        } else {
-            return true;
         }
+        return INVALID_SUBSCRIPTION_ID;
     }
 
     /**
@@ -3086,9 +3105,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // We can only override when carrier told us about plans
         synchronized (mNetworkPoliciesSecondLock) {
-            if (ArrayUtils.isEmpty(mSubscriptionPlans.get(subId))) {
+            final SubscriptionPlan plan = getPrimarySubscriptionPlanLocked(subId);
+            if (plan == null
+                    || plan.getDataLimitBehavior() == SubscriptionPlan.LIMIT_BEHAVIOR_UNKNOWN) {
                 throw new IllegalStateException(
-                        "Must provide SubscriptionPlan information before overriding");
+                        "Must provide valid SubscriptionPlan to enable overriding");
             }
         }
 
@@ -4831,7 +4852,21 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @GuardedBy("mNetworkPoliciesSecondLock")
     private SubscriptionPlan getPrimarySubscriptionPlanLocked(int subId) {
         final SubscriptionPlan[] plans = mSubscriptionPlans.get(subId);
-        return ArrayUtils.isEmpty(plans) ? null : plans[0];
+        if (!ArrayUtils.isEmpty(plans)) {
+            for (SubscriptionPlan plan : plans) {
+                if (plan.getCycleRule().isRecurring()) {
+                    // Recurring plans will always have an active cycle
+                    return plan;
+                } else {
+                    // Non-recurring plans need manual test for active cycle
+                    final Range<ZonedDateTime> cycle = plan.cycleIterator().next();
+                    if (cycle.contains(ZonedDateTime.now(mClock))) {
+                        return plan;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -4876,6 +4911,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private static @NonNull NetworkState[] defeatNullable(@Nullable NetworkState[] val) {
         return (val != null) ? val : new NetworkState[0];
+    }
+
+    private static boolean getBooleanDefeatingNullable(@Nullable PersistableBundle bundle,
+            String key, boolean defaultValue) {
+        return (bundle != null) ? bundle.getBoolean(key, defaultValue) : defaultValue;
     }
 
     private class NotificationId {
