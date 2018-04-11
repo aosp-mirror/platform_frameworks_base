@@ -345,6 +345,7 @@ message SystemProto {
       OVERCOUNTED = 10;
       CAMERA = 11;
       MEMORY = 12;
+      AMBIENT_DISPLAY = 13;
     };
     optional Sipper name = 1;
     // UID, only valid for the USER sipper.

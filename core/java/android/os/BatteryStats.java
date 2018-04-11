@@ -3814,6 +3814,9 @@ public abstract class BatteryStats implements Parcelable {
                 final BatterySipper bs = sippers.get(i);
                 String label;
                 switch (bs.drainType) {
+                    case AMBIENT_DISPLAY:
+                        label = "ambi";
+                        break;
                     case IDLE:
                         label="idle";
                         break;
@@ -4975,6 +4978,9 @@ public abstract class BatteryStats implements Parcelable {
                 final BatterySipper bs = sippers.get(i);
                 pw.print(prefix);
                 switch (bs.drainType) {
+                    case AMBIENT_DISPLAY:
+                        pw.print("    Ambient display: ");
+                        break;
                     case IDLE:
                         pw.print("    Idle: ");
                         break;
@@ -7777,6 +7783,9 @@ public abstract class BatteryStats implements Parcelable {
                 int n = SystemProto.PowerUseItem.UNKNOWN_SIPPER;
                 int uid = 0;
                 switch (bs.drainType) {
+                    case AMBIENT_DISPLAY:
+                        n = SystemProto.PowerUseItem.AMBIENT_DISPLAY;
+                        break;
                     case IDLE:
                         n = SystemProto.PowerUseItem.IDLE;
                         break;
