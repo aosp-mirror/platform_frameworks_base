@@ -276,8 +276,6 @@ public class StackScrollAlgorithm {
                 if (i >= firstHiddenIndex) {
                     // we need normal padding now, to be in sync with what the stack calculates
                     lastView = null;
-                    ExpandableViewState viewState = resultState.getViewStateForView(v);
-                    viewState.hidden = true;
                 }
                 notGoneIndex = updateNotGoneIndex(resultState, state, notGoneIndex, v);
                 float increasedPadding = v.getIncreasedPaddingAmount();
