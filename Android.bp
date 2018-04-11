@@ -1105,3 +1105,27 @@ java_library_static {
         ":hwbinder-stubs-docs",
     ],
 }
+
+filegroup {
+    name: "apache-http-stubs-sources",
+    srcs: [
+        "core/java/org/apache/http/conn/ConnectTimeoutException.java",
+        "core/java/org/apache/http/conn/scheme/HostNameResolver.java",
+        "core/java/org/apache/http/conn/scheme/LayeredSocketFactory.java",
+        "core/java/org/apache/http/conn/scheme/SocketFactory.java",
+        "core/java/org/apache/http/conn/ssl/AbstractVerifier.java",
+        "core/java/org/apache/http/conn/ssl/AllowAllHostnameVerifier.java",
+        "core/java/org/apache/http/conn/ssl/AndroidDistinguishedNameParser.java",
+        "core/java/org/apache/http/conn/ssl/BrowserCompatHostnameVerifier.java",
+        "core/java/org/apache/http/conn/ssl/SSLSocketFactory.java",
+        "core/java/org/apache/http/conn/ssl/StrictHostnameVerifier.java",
+        "core/java/org/apache/http/conn/ssl/X509HostnameVerifier.java",
+        "core/java/org/apache/http/params/CoreConnectionPNames.java",
+        "core/java/org/apache/http/params/HttpConnectionParams.java",
+        "core/java/org/apache/http/params/HttpParams.java",
+        "core/java/android/net/http/HttpResponseCache.java",
+        "core/java/android/net/http/SslCertificate.java",
+        "core/java/android/net/http/SslError.java",
+        "core/java/com/android/internal/util/HexDump.java",
+    ],
+}
