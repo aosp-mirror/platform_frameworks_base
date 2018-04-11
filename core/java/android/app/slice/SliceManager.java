@@ -277,12 +277,12 @@ public class SliceManager {
      * <ol>
      *  <li> If the intent contains data that {@link ContentResolver#getType} is
      *  {@link SliceProvider#SLICE_TYPE} then the data will be returned.</li>
-     *  <li>If the intent with {@link #CATEGORY_SLICE} added resolves to a provider, then
-     *  the provider will be asked to {@link SliceProvider#onMapIntentToUri} and that result
-     *  will be returned.</li>
-     *  <li>Lastly, if the intent explicitly points at an activity, and that activity has
+     *  <li>If the intent explicitly points at an activity, and that activity has
      *  meta-data for key {@link #SLICE_METADATA_KEY}, then the Uri specified there will be
      *  returned.</li>
+     *  <li>Lastly, if the intent with {@link #CATEGORY_SLICE} added resolves to a provider, then
+     *  the provider will be asked to {@link SliceProvider#onMapIntentToUri} and that result
+     *  will be returned.</li>
      *  <li>If no slice is found, then {@code null} is returned.</li>
      * </ol>
      * @param intent The intent associated with a slice.
@@ -292,37 +292,12 @@ public class SliceManager {
      * @see Intent
      */
     public @Nullable Uri mapIntentToUri(@NonNull Intent intent) {
-        Preconditions.checkNotNull(intent, "intent");
-        Preconditions.checkArgument(intent.getComponent() != null || intent.getPackage() != null
-                || intent.getData() != null,
-                "Slice intent must be explicit %s", intent);
         ContentResolver resolver = mContext.getContentResolver();
-
-        // Check if the intent has data for the slice uri on it and use that
-        final Uri intentData = intent.getData();
-        if (intentData != null && SliceProvider.SLICE_TYPE.equals(resolver.getType(intentData))) {
-            return intentData;
-        }
+        final Uri staticUri = resolveStatic(intent, resolver);
+        if (staticUri != null) return staticUri;
         // Otherwise ask the app
-        Intent queryIntent = new Intent(intent);
-        if (!queryIntent.hasCategory(CATEGORY_SLICE)) {
-            queryIntent.addCategory(CATEGORY_SLICE);
-        }
-        List<ResolveInfo> providers =
-                mContext.getPackageManager().queryIntentContentProviders(queryIntent, 0);
-        if (providers == null || providers.isEmpty()) {
-            // There are no providers, see if this activity has a direct link.
-            ResolveInfo resolve = mContext.getPackageManager().resolveActivity(intent,
-                    PackageManager.GET_META_DATA);
-            if (resolve != null && resolve.activityInfo != null
-                    && resolve.activityInfo.metaData != null
-                    && resolve.activityInfo.metaData.containsKey(SLICE_METADATA_KEY)) {
-                return Uri.parse(
-                        resolve.activityInfo.metaData.getString(SLICE_METADATA_KEY));
-            }
-            return null;
-        }
-        String authority = providers.get(0).providerInfo.authority;
+        String authority = getAuthority(intent);
+        if (authority == null) return null;
         Uri uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(authority).build();
         try (ContentProviderClient provider = resolver.acquireContentProviderClient(uri)) {
@@ -343,10 +318,43 @@ public class SliceManager {
         }
     }
 
+    private String getAuthority(Intent intent) {
+        Intent queryIntent = new Intent(intent);
+        if (!queryIntent.hasCategory(CATEGORY_SLICE)) {
+            queryIntent.addCategory(CATEGORY_SLICE);
+        }
+        List<ResolveInfo> providers =
+                mContext.getPackageManager().queryIntentContentProviders(queryIntent, 0);
+        return providers != null && !providers.isEmpty() ? providers.get(0).providerInfo.authority
+                : null;
+    }
+
+    private Uri resolveStatic(@NonNull Intent intent, ContentResolver resolver) {
+        Preconditions.checkNotNull(intent, "intent");
+        Preconditions.checkArgument(intent.getComponent() != null || intent.getPackage() != null
+                || intent.getData() != null,
+                "Slice intent must be explicit %s", intent);
+
+        // Check if the intent has data for the slice uri on it and use that
+        final Uri intentData = intent.getData();
+        if (intentData != null && SliceProvider.SLICE_TYPE.equals(resolver.getType(intentData))) {
+            return intentData;
+        }
+        // There are no providers, see if this activity has a direct link.
+        ResolveInfo resolve = mContext.getPackageManager().resolveActivity(intent,
+                PackageManager.GET_META_DATA);
+        if (resolve != null && resolve.activityInfo != null
+                && resolve.activityInfo.metaData != null
+                && resolve.activityInfo.metaData.containsKey(SLICE_METADATA_KEY)) {
+            return Uri.parse(
+                    resolve.activityInfo.metaData.getString(SLICE_METADATA_KEY));
+        }
+        return null;
+    }
+
     /**
-     * Turns a slice intent into slice content. Expects an explicit intent. If there is no
-     * {@link android.content.ContentProvider} associated with the given intent this will throw
-     * {@link IllegalArgumentException}.
+     * Turns a slice intent into slice content. Is a shortcut to perform the action
+     * of both {@link #mapIntentToUri(Intent)} and {@link #bindSlice(Uri, List)} at once.
      *
      * @param intent The intent associated with a slice.
      * @param supportedSpecs List of supported specs.
@@ -362,28 +370,11 @@ public class SliceManager {
                 || intent.getData() != null,
                 "Slice intent must be explicit %s", intent);
         ContentResolver resolver = mContext.getContentResolver();
-
-        // Check if the intent has data for the slice uri on it and use that
-        final Uri intentData = intent.getData();
-        if (intentData != null && SliceProvider.SLICE_TYPE.equals(resolver.getType(intentData))) {
-            return bindSlice(intentData, supportedSpecs);
-        }
+        final Uri staticUri = resolveStatic(intent, resolver);
+        if (staticUri != null) return bindSlice(staticUri, supportedSpecs);
         // Otherwise ask the app
-        List<ResolveInfo> providers =
-                mContext.getPackageManager().queryIntentContentProviders(intent, 0);
-        if (providers == null || providers.isEmpty()) {
-            // There are no providers, see if this activity has a direct link.
-            ResolveInfo resolve = mContext.getPackageManager().resolveActivity(intent,
-                    PackageManager.GET_META_DATA);
-            if (resolve != null && resolve.activityInfo != null
-                    && resolve.activityInfo.metaData != null
-                    && resolve.activityInfo.metaData.containsKey(SLICE_METADATA_KEY)) {
-                return bindSlice(Uri.parse(resolve.activityInfo.metaData
-                        .getString(SLICE_METADATA_KEY)), supportedSpecs);
-            }
-            return null;
-        }
-        String authority = providers.get(0).providerInfo.authority;
+        String authority = getAuthority(intent);
+        if (authority == null) return null;
         Uri uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(authority).build();
         try (ContentProviderClient provider = resolver.acquireContentProviderClient(uri)) {
@@ -392,8 +383,6 @@ public class SliceManager {
             }
             Bundle extras = new Bundle();
             extras.putParcelable(SliceProvider.EXTRA_INTENT, intent);
-            extras.putParcelableArrayList(SliceProvider.EXTRA_SUPPORTED_SPECS,
-                    new ArrayList<>(supportedSpecs));
             final Bundle res = provider.call(SliceProvider.METHOD_MAP_INTENT, null, extras);
             if (res == null) {
                 return null;
