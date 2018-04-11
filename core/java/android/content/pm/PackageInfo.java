@@ -244,7 +244,7 @@ public class PackageInfo implements Parcelable {
      * the first position to be the same across updates.
      *
      * <strong>Deprecated</strong> This has been replaced by the
-     * {@link PackageInfo#signingCertificateHistory} field, which takes into
+     * {@link PackageInfo#signingInfo} field, which takes into
      * account signing certificate rotation.  For backwards compatibility in
      * the event of signing certificate rotation, this will return the oldest
      * reported signing certificate, so that an application will appear to
@@ -256,29 +256,15 @@ public class PackageInfo implements Parcelable {
     public Signature[] signatures;
 
     /**
-     * Array of all signatures arrays read from the package file, potentially
+     * Signing information read from the package file, potentially
      * including past signing certificates no longer used after signing
-     * certificate rotation.  Though signing certificate rotation is only
-     * available for apps with a single signing certificate, this provides an
-     * array of arrays so that packages signed with multiple signing
-     * certificates can still return all signers.  This is only filled in if
+     * certificate rotation.  This is only filled in if
      * the flag {@link PackageManager#GET_SIGNING_CERTIFICATES} was set.
      *
-     * A package must be singed with at least one certificate, which is at
-     * position zero in the array.  An application may be signed by multiple
-     * certificates, which would be in the array at position zero in an
-     * indeterminate order.  A package may also have a history of certificates
-     * due to signing certificate rotation.  In this case, the array will be
-     * populated by a series of single-entry arrays corresponding to a signing
-     * certificate of the package.
-     *
-     * <strong>Note:</strong> Signature ordering is not guaranteed to be
-     * stable which means that a package signed with certificates A and B is
-     * equivalent to being signed with certificates B and A. This means that
-     * in case multiple signatures are reported you cannot assume the one at
-     * the first position will be the same across updates.
+     * Use this field instead of the deprecated {@code signatures} field.
+     * See {@link SigningInfo} for more information on its contents.
      */
-    public Signature[][] signingCertificateHistory;
+    public SigningInfo signingInfo;
 
     /**
      * Application specified preferred configuration
@@ -476,17 +462,11 @@ public class PackageInfo implements Parcelable {
         dest.writeBoolean(mOverlayIsStatic);
         dest.writeInt(compileSdkVersion);
         dest.writeString(compileSdkVersionCodename);
-        writeSigningCertificateHistoryToParcel(dest, parcelableFlags);
-    }
-
-    private void writeSigningCertificateHistoryToParcel(Parcel dest, int parcelableFlags) {
-        if (signingCertificateHistory != null) {
-            dest.writeInt(signingCertificateHistory.length);
-            for (int i = 0; i < signingCertificateHistory.length; i++) {
-                dest.writeTypedArray(signingCertificateHistory[i], parcelableFlags);
-            }
+        if (signingInfo != null) {
+            dest.writeInt(1);
+            signingInfo.writeToParcel(dest, parcelableFlags);
         } else {
-            dest.writeInt(-1);
+            dest.writeInt(0);
         }
     }
 
@@ -544,7 +524,10 @@ public class PackageInfo implements Parcelable {
         mOverlayIsStatic = source.readBoolean();
         compileSdkVersion = source.readInt();
         compileSdkVersionCodename = source.readString();
-        readSigningCertificateHistoryFromParcel(source);
+        int hasSigningInfo = source.readInt();
+        if (hasSigningInfo != 0) {
+            signingInfo = SigningInfo.CREATOR.createFromParcel(source);
+        }
 
         // The component lists were flattened with the redundant ApplicationInfo
         // instances omitted.  Distribute the canonical one here as appropriate.
@@ -553,16 +536,6 @@ public class PackageInfo implements Parcelable {
             propagateApplicationInfo(applicationInfo, receivers);
             propagateApplicationInfo(applicationInfo, services);
             propagateApplicationInfo(applicationInfo, providers);
-        }
-    }
-
-    private void readSigningCertificateHistoryFromParcel(Parcel source) {
-        int len = source.readInt();
-        if (len != -1) {
-            signingCertificateHistory = new Signature[len][];
-            for (int i = 0; i < len; i++) {
-                signingCertificateHistory[i] = source.createTypedArray(Signature.CREATOR);
-            }
         }
     }
 

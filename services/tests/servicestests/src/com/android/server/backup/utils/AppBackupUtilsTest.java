@@ -26,7 +26,9 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageParser;
 import android.content.pm.Signature;
+import android.content.pm.SigningInfo;
 import android.os.Process;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
@@ -395,7 +397,13 @@ public class AppBackupUtilsTest {
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1}};
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_1},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(null, packageInfo,
@@ -409,7 +417,13 @@ public class AppBackupUtilsTest {
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1}};
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_1},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo,
@@ -425,7 +439,7 @@ public class AppBackupUtilsTest {
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[0][0];
+        packageInfo.signingInfo = null;
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(new Signature[] {SIGNATURE_1}, packageInfo,
@@ -440,7 +454,7 @@ public class AppBackupUtilsTest {
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = null;
+        packageInfo.signingInfo = null;
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(new Signature[] {SIGNATURE_1}, packageInfo,
@@ -453,7 +467,7 @@ public class AppBackupUtilsTest {
     public void signaturesMatch_disallowsUnsignedApps_bothSignaturesNull_returnsFalse()
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
-        packageInfo.signingCertificateHistory = null;
+        packageInfo.signingInfo = null;
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(null, packageInfo,
@@ -467,7 +481,7 @@ public class AppBackupUtilsTest {
             throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[0][0];
+        packageInfo.signingInfo = null;
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(new Signature[0], packageInfo,
@@ -484,9 +498,13 @@ public class AppBackupUtilsTest {
 
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[][] {
-                {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3}
-        };
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(
@@ -503,9 +521,13 @@ public class AppBackupUtilsTest {
 
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[][] {
-                {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3}
-        };
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(
@@ -522,9 +544,13 @@ public class AppBackupUtilsTest {
 
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[][] {
-                {signature1Copy, signature2Copy}
-        };
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {signature1Copy, signature2Copy},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(
@@ -541,9 +567,13 @@ public class AppBackupUtilsTest {
 
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[][] {
-                {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3}
-        };
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_1, SIGNATURE_2, SIGNATURE_3},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         boolean result = AppBackupUtils.signaturesMatch(
@@ -560,7 +590,13 @@ public class AppBackupUtilsTest {
 
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1}};
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_1},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(signature1Copy,
@@ -579,7 +615,13 @@ public class AppBackupUtilsTest {
 
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1}, {SIGNATURE_2}};
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_2},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        new Signature[] {SIGNATURE_1, SIGNATURE_2},
+                        new int[] {0, 0}));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         // we know signature1Copy is in history, and we want to assume it has
@@ -601,7 +643,13 @@ public class AppBackupUtilsTest {
 
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test";
-        packageInfo.signingCertificateHistory = new Signature[][] {{SIGNATURE_1}, {SIGNATURE_2}};
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {SIGNATURE_2},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        new Signature[] {SIGNATURE_1, SIGNATURE_2},
+                        new int[] {0, 0}));
         packageInfo.applicationInfo = new ApplicationInfo();
 
         // we know signature1Copy is in history, but we want to assume it does not have
