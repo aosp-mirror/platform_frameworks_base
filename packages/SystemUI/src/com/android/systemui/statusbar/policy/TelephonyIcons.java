@@ -208,7 +208,7 @@ class TelephonyIcons {
             0,
             0,
             AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0],
-            R.string.cell_data_off,
+            R.string.cell_data_off_content_description,
             0,
             false);
 }
