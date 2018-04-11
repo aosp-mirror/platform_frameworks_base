@@ -764,6 +764,15 @@ package android.provider {
 
 }
 
+package android.security {
+
+  public class KeyStoreException extends java.lang.Exception {
+    ctor public KeyStoreException(int, java.lang.String);
+    method public int getErrorCode();
+  }
+
+}
+
 package android.security.keystore {
 
   public abstract class AttestationUtils {
@@ -771,6 +780,10 @@ package android.security.keystore {
     field public static final int ID_TYPE_IMEI = 2; // 0x2
     field public static final int ID_TYPE_MEID = 3; // 0x3
     field public static final int ID_TYPE_SERIAL = 1; // 0x1
+  }
+
+  public static final class KeyGenParameterSpec.Builder {
+    method public android.security.keystore.KeyGenParameterSpec.Builder setUniqueIdIncluded(boolean);
   }
 
   public final class KeyProtection implements java.security.KeyStore.ProtectionParameter {
