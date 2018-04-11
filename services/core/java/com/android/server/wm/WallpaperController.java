@@ -620,7 +620,7 @@ class WallpaperController {
             // If there was a recents animation in progress, cancel that animation
             if (mService.getRecentsAnimationController() != null) {
                 mService.getRecentsAnimationController().cancelAnimation(
-                        REORDER_MOVE_TO_ORIGINAL_POSITION);
+                        REORDER_MOVE_TO_ORIGINAL_POSITION, "wallpaperDrawPendingTimeout");
             }
             return true;
         }
