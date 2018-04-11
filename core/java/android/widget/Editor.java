@@ -123,6 +123,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 import com.android.internal.util.Preconditions;
+import com.android.internal.view.FloatingActionMode;
 import com.android.internal.widget.EditableInputConnection;
 
 import java.lang.annotation.Retention;
@@ -2214,6 +2215,15 @@ public class Editor {
 
         ActionMode.Callback actionModeCallback = new TextActionModeCallback(actionMode);
         mTextActionMode = mTextView.startActionMode(actionModeCallback, ActionMode.TYPE_FLOATING);
+
+        final boolean selectableText = mTextView.isTextEditable() || mTextView.isTextSelectable();
+        if (actionMode == TextActionMode.TEXT_LINK && !selectableText
+                && mTextActionMode instanceof FloatingActionMode) {
+            // Make the toolbar outside-touchable so that it can be dismissed when the user clicks
+            // outside of it.
+            ((FloatingActionMode) mTextActionMode).setOutsideTouchable(true,
+                    () -> stopTextActionMode());
+        }
 
         final boolean selectionStarted = mTextActionMode != null;
         if (selectionStarted

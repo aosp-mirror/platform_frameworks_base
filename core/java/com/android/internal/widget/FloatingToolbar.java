@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -257,6 +258,22 @@ public final class FloatingToolbar {
      */
     public boolean isHidden() {
         return mPopup.isHidden();
+    }
+
+    /**
+     * If this is set to true, the action mode view will dismiss itself on touch events outside of
+     * its window. If the toolbar is already showing, it will be re-shown so that this setting takes
+     * effect immediately.
+     *
+     * @param outsideTouchable whether or not this action mode is "outside touchable"
+     * @param onDismiss optional. Sets a callback for when this action mode popup dismisses itself
+     */
+    public void setOutsideTouchable(
+            boolean outsideTouchable, @Nullable PopupWindow.OnDismissListener onDismiss) {
+        if (mPopup.setOutsideTouchable(outsideTouchable, onDismiss) && isShowing()) {
+            dismiss();
+            doShow();
+        }
     }
 
     private void doShow() {
@@ -510,6 +527,32 @@ public final class FloatingToolbar {
                             mPopupWindow.dismiss();
                         }
                     });
+        }
+
+        /**
+         * Makes this toolbar "outside touchable" and sets the onDismissListener.
+         * This will take effect the next time the toolbar is re-shown.
+         *
+         * @param outsideTouchable if true, the popup will be made "outside touchable" and
+         *      "non focusable". The reverse will happen if false.
+         * @param onDismiss
+         *
+         * @return true if the "outsideTouchable" setting was modified. Otherwise returns false
+         *
+         * @see PopupWindow#setOutsideTouchable(boolean)
+         * @see PopupWindow#setFocusable(boolean)
+         * @see PopupWindow.OnDismissListener
+         */
+        public boolean setOutsideTouchable(
+                boolean outsideTouchable, @Nullable PopupWindow.OnDismissListener onDismiss) {
+            boolean ret = false;
+            if (mPopupWindow.isOutsideTouchable() ^ outsideTouchable) {
+                mPopupWindow.setOutsideTouchable(outsideTouchable);
+                mPopupWindow.setFocusable(!outsideTouchable);
+                ret = true;
+            }
+            mPopupWindow.setOnDismissListener(onDismiss);
+            return ret;
         }
 
         /**
