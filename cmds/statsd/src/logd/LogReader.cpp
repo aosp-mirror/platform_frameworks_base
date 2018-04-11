@@ -113,7 +113,8 @@ int LogReader::connect_and_read() {
             LogEvent event(msg);
 
             // Call the listener
-            mListener->OnLogEvent(&event);
+            mListener->OnLogEvent(&event,
+                                  lineCount == 1 /* indicate whether it's a new connection */);
         }
     }
 
