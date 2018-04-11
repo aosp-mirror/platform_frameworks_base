@@ -56,6 +56,7 @@ import android.net.Uri;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.util.DataUnit;
 import android.util.DebugUtils;
 import android.util.Pair;
 import android.util.Range;
@@ -333,11 +334,11 @@ public class MultipathPolicyTracker {
                 if (DBG) Slog.d(TAG, "Setting quota: " + quota + " bytes");
             }
 
+            // TODO: re-register if day changed: budget may have run out but should be refreshed.
             if (haveMultipathBudget() && quota == mQuota) {
-                // If we already have a usage callback pending , there's no need to re-register it
+                // If there is already a usage callback pending , there's no need to re-register it
                 // if the quota hasn't changed. The callback will simply fire as expected when the
-                // budget is spent. Also: if we re-register the callback when we're below the
-                // UsageCallback's minimum value of 2MB, we'll overshoot the budget.
+                // budget is spent.
                 if (DBG) Slog.d(TAG, "Quota still " + quota + ", not updating.");
                 return;
             }
@@ -347,7 +348,17 @@ public class MultipathPolicyTracker {
             // ourselves any budget to work with.
             final long usage = getDailyNonDefaultDataUsage();
             final long budget = (usage == -1) ? 0 : Math.max(0, quota - usage);
-            if (budget > 0) {
+
+            // Only consider budgets greater than MIN_THRESHOLD_BYTES, otherwise the callback will
+            // fire late, after data usage went over budget. Also budget should be 0 if remaining
+            // data is close to 0.
+            // This is necessary because the usage callback does not accept smaller thresholds.
+            // Because it snaps everything to MIN_THRESHOLD_BYTES, the lesser of the two evils is
+            // to snap to 0 here.
+            // This will only be called if the total quota for the day changed, not if usage changed
+            // since last time, so even if this is called very often the budget will not snap to 0
+            // as soon as there are less than 2MB left for today.
+            if (budget > NetworkStatsManager.MIN_THRESHOLD_BYTES) {
                 if (DBG) Slog.d(TAG, "Setting callback for " + budget +
                         " bytes on network " + network);
                 registerUsageCallback(budget);
