@@ -375,13 +375,13 @@ public final class TextClassification implements Parcelable {
      */
     public static final class Builder {
 
-        @NonNull private String mText;
         @NonNull private List<RemoteAction> mActions = new ArrayList<>();
         @NonNull private final Map<String, Float> mEntityConfidence = new ArrayMap<>();
-        @Nullable Drawable mLegacyIcon;
-        @Nullable String mLegacyLabel;
-        @Nullable Intent mLegacyIntent;
-        @Nullable OnClickListener mLegacyOnClickListener;
+        @Nullable private String mText;
+        @Nullable private Drawable mLegacyIcon;
+        @Nullable private String mLegacyLabel;
+        @Nullable private Intent mLegacyIntent;
+        @Nullable private OnClickListener mLegacyOnClickListener;
         @Nullable private String mId;
 
         /**
