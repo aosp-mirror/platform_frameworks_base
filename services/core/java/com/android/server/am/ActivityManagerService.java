@@ -16997,6 +16997,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.println("ms");
                 }
                 mUidObservers.finishBroadcast();
+
+                pw.println();
+                pw.println("  ServiceManager statistics:");
+                ServiceManager.sStatLogger.dump(pw, "    ");
+                pw.println();
             }
         }
         pw.println("  mForceBackgroundCheck=" + mForceBackgroundCheck);

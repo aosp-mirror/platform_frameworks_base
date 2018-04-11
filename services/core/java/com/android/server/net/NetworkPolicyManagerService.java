@@ -215,6 +215,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.StatLogger;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
@@ -538,6 +539,19 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     // rules enforced, such as system, phone, and radio UIDs.
 
     // TODO: migrate notifications to SystemUI
+
+
+    interface Stats {
+        int UPDATE_NETWORK_ENABLED = 0;
+        int IS_UID_NETWORKING_BLOCKED = 1;
+
+        int COUNT = IS_UID_NETWORKING_BLOCKED + 1;
+    }
+
+    public final StatLogger mStatLogger = new StatLogger(new String[] {
+            "updateNetworkEnabledNL()",
+            "isUidNetworkingBlocked()",
+    });
 
     public NetworkPolicyManagerService(Context context, IActivityManager activityManager,
             INetworkManagementService networkManagement) {
@@ -1551,6 +1565,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // TODO: reset any policy-disabled networks when any policy is removed
         // completely, which is currently rare case.
 
+        final long startTime = mStatLogger.getTime();
+
         for (int i = mNetworkPolicy.size()-1; i >= 0; i--) {
             final NetworkPolicy policy = mNetworkPolicy.valueAt(i);
             // shortcut when policy has no limit
@@ -1572,6 +1588,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             setNetworkTemplateEnabled(policy.template, networkEnabled);
         }
+
+        mStatLogger.logDurationStat(Stats.UPDATE_NETWORK_ENABLED, startTime);
     }
 
     /**
@@ -3256,6 +3274,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
                 fout.decreaseIndent();
 
+                fout.println();
+                mStatLogger.dump(fout);
+
                 mLogger.dumpLogs(fout);
             }
         }
@@ -4615,8 +4636,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @Override
     public boolean isUidNetworkingBlocked(int uid, boolean isNetworkMetered) {
+        final long startTime = mStatLogger.getTime();
+
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
-        return isUidNetworkingBlockedInternal(uid, isNetworkMetered);
+        final boolean ret = isUidNetworkingBlockedInternal(uid, isNetworkMetered);
+
+        mStatLogger.logDurationStat(Stats.IS_UID_NETWORKING_BLOCKED, startTime);
+
+        return ret;
     }
 
     private boolean isUidNetworkingBlockedInternal(int uid, boolean isNetworkMetered) {
@@ -4691,11 +4718,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
          */
         @Override
         public boolean isUidNetworkingBlocked(int uid, String ifname) {
+            final long startTime = mStatLogger.getTime();
+
             final boolean isNetworkMetered;
             synchronized (mNetworkPoliciesSecondLock) {
                 isNetworkMetered = mMeteredIfaces.contains(ifname);
             }
-            return isUidNetworkingBlockedInternal(uid, isNetworkMetered);
+            final boolean ret = isUidNetworkingBlockedInternal(uid, isNetworkMetered);
+
+            mStatLogger.logDurationStat(Stats.IS_UID_NETWORKING_BLOCKED, startTime);
+
+            return ret;
         }
 
         @Override
