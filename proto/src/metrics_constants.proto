@@ -5636,6 +5636,15 @@ message MetricsEvent {
     // OS: P
     NOTIFICATION_SMART_REPLY_COUNT = 1384;
 
+    // Volume dialog > ringer toggle
+    // OS: P
+    ACTION_VOLUME_RINGER_TOGGLE = 1385;
+
+    // Volume dialog > settings button
+    // OS: P
+    ACTION_VOLUME_SETTINGS = 1386;
+
+
     // ---- End P Constants, all P constants go above this line ----
 
     // First Q constant in master goes here:

@@ -415,6 +415,7 @@ public class VolumeDialogImpl implements VolumeDialog {
         mSettingsView.setVisibility(
                 mDeviceProvisionedController.isDeviceProvisioned() ? VISIBLE : GONE);
         mSettingsIcon.setOnClickListener(v -> {
+            Events.writeEvent(mContext, Events.EVENT_SETTINGS_CLICK);
             Intent intent = new Intent(Settings.ACTION_SOUND_SETTINGS);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             dismissH(DISMISS_REASON_SETTINGS_CLICKED);
@@ -424,8 +425,6 @@ public class VolumeDialogImpl implements VolumeDialog {
 
     public void initRingerH() {
         mRingerIcon.setOnClickListener(v -> {
-            Events.writeEvent(mContext, Events.EVENT_ICON_CLICK, AudioManager.STREAM_RING,
-                    mRingerIcon.getTag());
             Prefs.putBoolean(mContext, Prefs.Key.TOUCHED_RINGER_TOGGLE, true);
             final StreamState ss = mState.states.get(AudioManager.STREAM_RING);
             if (ss == null) {
@@ -449,6 +448,7 @@ public class VolumeDialogImpl implements VolumeDialog {
                     mController.setStreamVolume(AudioManager.STREAM_RING, 1);
                 }
             }
+            Events.writeEvent(mContext, Events.EVENT_RINGER_TOGGLE, newRingerMode);
             updateRingerH();
             provideTouchFeedbackH(newRingerMode);
             mController.setRingerMode(newRingerMode, false);
