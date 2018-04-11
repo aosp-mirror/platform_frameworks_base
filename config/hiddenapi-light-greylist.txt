@@ -228,10 +228,8 @@ Landroid/app/AppOpsManager;->OP_VIBRATE:I
 Landroid/app/AppOpsManager;->OP_WIFI_SCAN:I
 Landroid/app/AppOpsManager;->OP_WRITE_CONTACTS:I
 Landroid/app/AppOpsManager;->OP_WRITE_SMS:I
-Landroid/app/AppOpsManager;->permissionToOpCode(Ljava/lang/String;)I
 Landroid/app/AppOpsManager;->setRestriction(III[Ljava/lang/String;)V
 Landroid/app/AppOpsManager;->sOpPerms:[Ljava/lang/String;
-Landroid/app/AppOpsManager;->strOpToOp(Ljava/lang/String;)I
 Landroid/app/backup/BackupDataInput$EntityHeader;->dataSize:I
 Landroid/app/backup/BackupDataInput$EntityHeader;->key:Ljava/lang/String;
 Landroid/app/backup/BackupDataInputStream;->dataSize:I

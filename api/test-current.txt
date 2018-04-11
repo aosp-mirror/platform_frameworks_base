@@ -1,10 +1,13 @@
 package android {
 
   public static final class Manifest.permission {
+    field public static final java.lang.String ACCESS_NOTIFICATIONS = "android.permission.ACCESS_NOTIFICATIONS";
     field public static final java.lang.String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
     field public static final java.lang.String BRIGHTNESS_SLIDER_USAGE = "android.permission.BRIGHTNESS_SLIDER_USAGE";
+    field public static final java.lang.String CHANGE_APP_IDLE_STATE = "android.permission.CHANGE_APP_IDLE_STATE";
     field public static final java.lang.String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
     field public static final java.lang.String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
+    field public static final java.lang.String READ_CELL_BROADCASTS = "android.permission.READ_CELL_BROADCASTS";
   }
 
 }
@@ -61,9 +64,12 @@ package android.app {
   public class AppOpsManager {
     method public static java.lang.String[] getOpStrs();
     method public boolean isOperationActive(int, int, java.lang.String);
+    method public static java.lang.String opToPermission(int);
+    method public static int permissionToOpCode(java.lang.String);
     method public void setMode(int, int, java.lang.String, int);
     method public void startWatchingActive(int[], android.app.AppOpsManager.OnOpActiveChangedListener);
     method public void stopWatchingActive(android.app.AppOpsManager.OnOpActiveChangedListener);
+    method public static int strOpToOp(java.lang.String);
     field public static final java.lang.String OPSTR_ACCEPT_HANDOVER = "android:accept_handover";
     field public static final java.lang.String OPSTR_ACCESS_NOTIFICATIONS = "android:access_notifications";
     field public static final java.lang.String OPSTR_ACTIVATE_VPN = "android:activate_vpn";
@@ -109,6 +115,7 @@ package android.app {
     field public static final java.lang.String OPSTR_WRITE_WALLPAPER = "android:write_wallpaper";
     field public static final int OP_RECORD_AUDIO = 27; // 0x1b
     field public static final int OP_SYSTEM_ALERT_WINDOW = 24; // 0x18
+    field public static final int _NUM_OP = 77; // 0x4d
   }
 
   public static abstract interface AppOpsManager.OnOpActiveChangedListener {
@@ -222,9 +229,14 @@ package android.content {
   }
 
   public abstract class Context {
+    method public abstract java.lang.String getOpPackageName();
     method public android.os.UserHandle getUser();
     method public int getUserId();
     method public void setAutofillCompatibilityEnabled(boolean);
+  }
+
+  public class ContextWrapper extends android.content.Context {
+    method public java.lang.String getOpPackageName();
   }
 
 }
@@ -471,6 +483,10 @@ package android.location {
     method public void setType(int);
   }
 
+  public class Location implements android.os.Parcelable {
+    method public void makeComplete();
+  }
+
   public class LocationManager {
     method public java.lang.String[] getBackgroundThrottlingWhitelist();
   }
@@ -667,6 +683,7 @@ package android.os {
   public final class UserHandle implements android.os.Parcelable {
     method public static int getAppId(int);
     method public int getIdentifier();
+    method public static boolean isApp(int);
     field public static final android.os.UserHandle SYSTEM;
   }
 
@@ -736,6 +753,14 @@ package android.print {
 }
 
 package android.provider {
+
+  public static final class ContactsContract.CommonDataKinds.Phone implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
+    field public static final android.net.Uri ENTERPRISE_CONTENT_URI;
+  }
+
+  public static final class ContactsContract.RawContactsEntity implements android.provider.BaseColumns android.provider.ContactsContract.DataColumns android.provider.ContactsContract.RawContactsColumns {
+    field public static final android.net.Uri CORP_CONTENT_URI;
+  }
 
   public final class Settings {
     field public static final java.lang.String ACTION_ENTERPRISE_PRIVACY_SETTINGS = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
@@ -965,6 +990,7 @@ package android.telephony {
     method public void setCarrierTestOverride(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String);
     field public static final int UNKNOWN_CARRIER_ID_LIST_VERSION = -1; // 0xffffffff
   }
+
 }
 
 package android.telephony.mbms {

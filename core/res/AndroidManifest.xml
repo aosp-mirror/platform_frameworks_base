@@ -726,7 +726,7 @@
         android:description="@string/permdesc_receiveMms"
         android:protectionLevel="dangerous" />
 
-    <!-- Allows an application to read previously received cell broadcast
+    <!-- @TestApi Allows an application to read previously received cell broadcast
          messages and to register a content observer to get notifications when
          a cell broadcast has been received and added to the database. For
          emergency alerts, the database is updated immediately after the
@@ -3324,7 +3324,7 @@
     <permission android:name="android.permission.OBSERVE_APP_USAGE"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @hide @SystemApi Allows an application to change the app idle state of an app.
+    <!-- @hide @TestApi @SystemApi Allows an application to change the app idle state of an app.
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.CHANGE_APP_IDLE_STATE"
         android:protectionLevel="signature|privileged" />
@@ -3550,7 +3550,7 @@
     <permission android:name="android.permission.UPDATE_LOCK"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @SystemApi Allows an application to read the current set of notifications, including
+    <!-- @SystemApi @TestApi Allows an application to read the current set of notifications, including
          any metadata and intents attached.
          @hide -->
     <permission android:name="android.permission.ACCESS_NOTIFICATIONS"

@@ -317,6 +317,7 @@ public class AppOpsManager {
     /** @hide Any app start foreground service. */
     public static final int OP_START_FOREGROUND = 76;
     /** @hide */
+    @TestApi
     public static final int _NUM_OP = 77;
 
     /** Access to coarse location information. */
@@ -1376,6 +1377,7 @@ public class AppOpsManager {
      * Retrieve the permission associated with an operation, or null if there is not one.
      * @hide
      */
+    @TestApi
     public static String opToPermission(int op) {
         return sOpPerms[op];
     }
@@ -1394,6 +1396,7 @@ public class AppOpsManager {
      * to the corresponding app op.
      * @hide
      */
+    @TestApi
     public static int permissionToOpCode(String permission) {
         Integer boxedOpCode = sPermToOp.get(permission);
         return boxedOpCode != null ? boxedOpCode : OP_NONE;
@@ -1993,6 +1996,7 @@ public class AppOpsManager {
     /**
      * {@hide}
      */
+    @TestApi
     public static int strOpToOp(String op) {
         Integer val = sOpStrToOp.get(op);
         if (val == null) {

@@ -17,6 +17,7 @@
 package android.location;
 
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -999,6 +1000,7 @@ public class Location implements Parcelable {
      * @see #isComplete
      * @hide
      */
+    @TestApi
     @SystemApi
     public void makeComplete() {
         if (mProvider == null) mProvider = "?";
