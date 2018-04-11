@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -285,6 +286,18 @@ public class RecoveryController {
         ILockSettings lockSettings =
                 ILockSettings.Stub.asInterface(ServiceManager.getService("lock_settings"));
         return new RecoveryController(lockSettings, KeyStore.getInstance());
+    }
+
+    /**
+     * Checks whether the recoverable key store is currently available.
+     *
+     * <p>If it returns true, the device must currently be using a screen lock that is supported for
+     * use with the recoverable key store, i.e. AOSP PIN, pattern or password.
+     */
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
+    public static boolean isRecoverableKeyStoreEnabled(@NonNull Context context) {
+        KeyguardManager keyguardManager = context.getSystemService(KeyguardManager.class);
+        return keyguardManager != null && keyguardManager.isDeviceSecure();
     }
 
     /**
