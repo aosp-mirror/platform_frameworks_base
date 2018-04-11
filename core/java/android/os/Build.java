@@ -911,6 +911,8 @@ public class Build {
          * <li>{@link android.app.Service#startForeground Service.startForeground} requires
          * that apps hold the permission
          * {@link android.Manifest.permission#FOREGROUND_SERVICE}.</li>
+         * <li>{@link android.widget.LinearLayout} will always remeasure weighted children,
+         * even if there is no excess space.</li>
          * </ul>
          */
         public static final int P = CUR_DEVELOPMENT; // STOPSHIP Replace with the real version.
