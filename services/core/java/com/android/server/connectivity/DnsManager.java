@@ -49,6 +49,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -211,6 +212,8 @@ public class DnsManager {
         }
 
         // Validation statuses of <hostname, ipAddress> pairs for a single netId
+        // Caution : not thread-safe. As mentioned in the top file comment, all
+        // methods of this class must only be called on ConnectivityService's thread.
         private Map<Pair<String, InetAddress>, ValidationStatus> mValidationMap;
 
         private PrivateDnsValidationStatuses() {
@@ -261,6 +264,16 @@ public class DnsManager {
             } else {
                 mValidationMap.put(p, ValidationStatus.FAILED);
             }
+        }
+
+        private LinkProperties fillInValidatedPrivateDns(LinkProperties lp) {
+            lp.setValidatedPrivateDnsServers(Collections.EMPTY_LIST);
+            mValidationMap.forEach((key, value) -> {
+                    if (value == ValidationStatus.SUCCEEDED) {
+                        lp.addValidatedPrivateDnsServer(key.second);
+                    }
+                });
+            return lp;
         }
     }
 
@@ -315,23 +328,19 @@ public class DnsManager {
                 PRIVATE_DNS_OFF);
 
         final boolean useTls = privateDnsCfg.useTls;
+        final PrivateDnsValidationStatuses statuses =
+                useTls ? mPrivateDnsValidationMap.get(netId) : null;
+        final boolean validated = (null != statuses) && statuses.hasValidatedServer();
         final boolean strictMode = privateDnsCfg.inStrictMode();
-        final String tlsHostname = strictMode ? privateDnsCfg.hostname : "";
+        final String tlsHostname = strictMode ? privateDnsCfg.hostname : null;
+        final boolean usingPrivateDns = strictMode || validated;
 
-        if (strictMode) {
-            lp.setUsePrivateDns(true);
-            lp.setPrivateDnsServerName(tlsHostname);
-        } else if (useTls) {
-            // We are in opportunistic mode. Private DNS should be used if there
-            // is a known DNS-over-TLS validated server.
-            boolean validated = mPrivateDnsValidationMap.containsKey(netId) &&
-                    mPrivateDnsValidationMap.get(netId).hasValidatedServer();
-            lp.setUsePrivateDns(validated);
-            lp.setPrivateDnsServerName(null);
+        lp.setUsePrivateDns(usingPrivateDns);
+        lp.setPrivateDnsServerName(tlsHostname);
+        if (usingPrivateDns && null != statuses) {
+            statuses.fillInValidatedPrivateDns(lp);
         } else {
-            // Private DNS is disabled.
-            lp.setUsePrivateDns(false);
-            lp.setPrivateDnsServerName(null);
+            lp.setValidatedPrivateDnsServers(Collections.EMPTY_LIST);
         }
     }
 
