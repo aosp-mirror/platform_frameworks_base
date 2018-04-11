@@ -18,7 +18,6 @@ package android.telephony;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -31,7 +30,6 @@ import java.util.Objects;
  * Description of a mobile network registration state
  * @hide
  */
-@SystemApi
 public class NetworkRegistrationState implements Parcelable {
     /**
      * Network domain
