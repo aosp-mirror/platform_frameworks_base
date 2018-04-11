@@ -2187,8 +2187,12 @@ public class ApplicationPackageManager extends PackageManager {
 
     /** @hide */
     @Override
-    public boolean isPackageSuspended(String packageName) {
-        return isPackageSuspendedForUser(packageName, mContext.getUserId());
+    public boolean isPackageSuspended(String packageName) throws NameNotFoundException {
+        try {
+            return isPackageSuspendedForUser(packageName, mContext.getUserId());
+        } catch (IllegalArgumentException ie) {
+            throw new NameNotFoundException(packageName);
+        }
     }
 
     @Override

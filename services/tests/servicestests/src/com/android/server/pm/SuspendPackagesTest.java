@@ -242,7 +242,7 @@ public class SuspendPackagesTest {
     }
 
     @Test
-    public void testIsPackageSuspended() {
+    public void testIsPackageSuspended() throws Exception {
         suspendTestPackage(null, null, null);
         assertTrue("isPackageSuspended is false",
                 mPackageManager.isPackageSuspended(TEST_APP_PACKAGE_NAME));
@@ -370,8 +370,8 @@ public class SuspendPackagesTest {
             }
 
             @Override
-            public void onPackagesSuspended(String[] packageNames, Bundle launcherExtras,
-                    UserHandle user) {
+            public void onPackagesSuspended(String[] packageNames, UserHandle user,
+                    Bundle launcherExtras) {
                 final StringBuilder errorString = new StringBuilder();
                 if (!Arrays.equals(packageNames, PACKAGES_TO_SUSPEND)) {
                     errorString.append("Received unexpected packageNames in onPackagesSuspended:");
