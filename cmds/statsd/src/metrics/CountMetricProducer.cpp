@@ -92,7 +92,7 @@ CountMetricProducer::CountMetricProducer(const ConfigKey& key, const CountMetric
     mConditionSliced = (metric.links().size() > 0) || (mDimensionsInCondition.size() > 0);
 
     VLOG("metric %lld created. bucket size %lld start_time: %lld", (long long)metric.id(),
-         (long long)mBucketSizeNs, (long long)mStartTimeNs);
+         (long long)mBucketSizeNs, (long long)mTimeBaseNs);
 }
 
 CountMetricProducer::~CountMetricProducer() {

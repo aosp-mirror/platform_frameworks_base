@@ -122,7 +122,7 @@ DurationMetricProducer::DurationMetricProducer(const ConfigKey& key, const Durat
         }
     }
     VLOG("metric %lld created. bucket size %lld start_time: %lld", (long long)metric.id(),
-         (long long)mBucketSizeNs, (long long)mStartTimeNs);
+         (long long)mBucketSizeNs, (long long)mTimeBaseNs);
 }
 
 DurationMetricProducer::~DurationMetricProducer() {
@@ -154,13 +154,13 @@ unique_ptr<DurationTracker> DurationMetricProducer::createDurationTracker(
             return make_unique<OringDurationTracker>(
                     mConfigKey, mMetricId, eventKey, mWizard, mConditionTrackerIndex,
                     mDimensionsInCondition, mNested, mCurrentBucketStartTimeNs, mCurrentBucketNum,
-                    mStartTimeNs, mBucketSizeNs, mConditionSliced,
+                    mTimeBaseNs, mBucketSizeNs, mConditionSliced,
                     mHasLinksToAllConditionDimensionsInTracker, mAnomalyTrackers);
         case DurationMetric_AggregationType_MAX_SPARSE:
             return make_unique<MaxDurationTracker>(
                     mConfigKey, mMetricId, eventKey, mWizard, mConditionTrackerIndex,
                     mDimensionsInCondition, mNested, mCurrentBucketStartTimeNs, mCurrentBucketNum,
-                    mStartTimeNs, mBucketSizeNs, mConditionSliced,
+                    mTimeBaseNs, mBucketSizeNs, mConditionSliced,
                     mHasLinksToAllConditionDimensionsInTracker, mAnomalyTrackers);
     }
 }
@@ -650,7 +650,7 @@ void DurationMetricProducer::onMatchedLogEventInternalLocked(
 void DurationMetricProducer::onMatchedLogEventLocked(const size_t matcherIndex,
                                                      const LogEvent& event) {
     int64_t eventTimeNs = event.GetElapsedTimestampNs();
-    if (eventTimeNs < mStartTimeNs) {
+    if (eventTimeNs < mTimeBaseNs) {
         return;
     }
 

@@ -28,6 +28,9 @@ namespace statsd {
 // Create AtomMatcher proto to simply match a specific atom type.
 AtomMatcher CreateSimpleAtomMatcher(const string& name, int atomId);
 
+// Create AtomMatcher proto for temperature atom.
+AtomMatcher CreateTemperatureAtomMatcher();
+
 // Create AtomMatcher proto for scheduled job state changed.
 AtomMatcher CreateScheduledJobStateChangedAtomMatcher();
 
@@ -172,8 +175,9 @@ std::unique_ptr<LogEvent> CreateIsolatedUidChangedEvent(
 AttributionNodeInternal CreateAttribution(const int& uid, const string& tag);
 
 // Create a statsd log event processor upon the start time in seconds, config and key.
-sp<StatsLogProcessor> CreateStatsLogProcessor(const long timeBaseSec, const StatsdConfig& config,
-                                              const ConfigKey& key);
+sp<StatsLogProcessor> CreateStatsLogProcessor(const int64_t timeBaseNs,
+                                              const int64_t currentTimeNs,
+                                              const StatsdConfig& config, const ConfigKey& key);
 
 // Util function to sort the log events by timestamp.
 void sortLogEventsByTimestamp(std::vector<std::unique_ptr<LogEvent>> *events);

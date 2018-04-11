@@ -107,7 +107,7 @@ TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks1) {
         TimeUnitToBucketSizeInMillis(config.count_metric(0).bucket()) * 1000000LL;
 
     ConfigKey cfgKey;
-    auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
 
@@ -224,7 +224,8 @@ TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks2) {
             TimeUnitToBucketSizeInMillis(config.count_metric(0).bucket()) * 1000000LL;
 
     ConfigKey cfgKey;
-    auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+    auto processor = CreateStatsLogProcessor(
+            bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
 

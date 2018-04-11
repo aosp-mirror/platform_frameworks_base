@@ -81,7 +81,7 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
     StatsPuller::SetUidMap(mUidMap);
     mConfigManager = new ConfigManager();
     mProcessor = new StatsLogProcessor(mUidMap, mAnomalyAlarmMonitor, mPeriodicAlarmMonitor,
-                                       getElapsedRealtimeSec(), [this](const ConfigKey& key) {
+                                       getElapsedRealtimeNs(), [this](const ConfigKey& key) {
         sp<IStatsCompanionService> sc = getStatsCompanionService();
         auto receiver = mConfigManager->GetConfigReceiver(key);
         if (sc == nullptr) {
@@ -745,7 +745,7 @@ Status StatsService::informPollAlarmFired() {
                                          "Only system uid can call informPollAlarmFired");
     }
 
-    mStatsPullerManager.OnAlarmFired();
+    mProcessor->informPullAlarmFired(getElapsedRealtimeNs());
 
     VLOG("StatsService::informPollAlarmFired succeeded");
 

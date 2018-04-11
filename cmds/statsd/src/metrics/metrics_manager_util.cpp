@@ -262,7 +262,8 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
     return true;
 }
 
-bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long timeBaseSec,
+bool initMetrics(const ConfigKey& key, const StatsdConfig& config,
+                 const int64_t timeBaseTimeNs, const int64_t currentTimeNs,
                  UidMap& uidMap, const unordered_map<int64_t, int>& logTrackerMap,
                  const unordered_map<int64_t, int>& conditionTrackerMap,
                  const vector<sp<LogMatchingTracker>>& allAtomMatchers,
@@ -276,8 +277,6 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long ti
                                 config.event_metric_size() + config.value_metric_size();
     allMetricProducers.reserve(allMetricsCount);
     StatsPullerManager statsPullerManager;
-
-    uint64_t startTimeNs = timeBaseSec * NS_PER_SEC;
 
     // Build MetricProducers for each metric defined in config.
     // build CountMetricProducer
@@ -314,7 +313,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long ti
         }
 
         sp<MetricProducer> countProducer =
-                new CountMetricProducer(key, metric, conditionIndex, wizard, startTimeNs);
+                new CountMetricProducer(key, metric, conditionIndex, wizard, timeBaseTimeNs);
         allMetricProducers.push_back(countProducer);
     }
 
@@ -384,7 +383,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long ti
 
         sp<MetricProducer> durationMetric = new DurationMetricProducer(
                 key, metric, conditionIndex, trackerIndices[0], trackerIndices[1],
-                trackerIndices[2], nesting, wizard, internalDimensions, startTimeNs);
+                trackerIndices[2], nesting, wizard, internalDimensions, timeBaseTimeNs);
 
         allMetricProducers.push_back(durationMetric);
     }
@@ -420,7 +419,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long ti
         }
 
         sp<MetricProducer> eventMetric =
-                new EventMetricProducer(key, metric, conditionIndex, wizard, startTimeNs);
+                new EventMetricProducer(key, metric, conditionIndex, wizard, timeBaseTimeNs);
 
         allMetricProducers.push_back(eventMetric);
     }
@@ -467,7 +466,8 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long ti
         }
 
         sp<MetricProducer> valueProducer = new ValueMetricProducer(key, metric, conditionIndex,
-                                                                   wizard, pullTagId, startTimeNs);
+                                                                   wizard, pullTagId,
+                                                                   timeBaseTimeNs, currentTimeNs);
         allMetricProducers.push_back(valueProducer);
     }
 
@@ -526,7 +526,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long ti
         }
 
         sp<MetricProducer> gaugeProducer = new GaugeMetricProducer(
-                key, metric, conditionIndex, wizard, pullTagId, startTimeNs);
+                key, metric, conditionIndex, wizard, pullTagId, timeBaseTimeNs, currentTimeNs);
         allMetricProducers.push_back(gaugeProducer);
     }
     for (int i = 0; i < config.no_report_metric_size(); ++i) {
@@ -601,11 +601,11 @@ bool initAlerts(const StatsdConfig& config,
 
 bool initAlarms(const StatsdConfig& config, const ConfigKey& key,
                 const sp<AlarmMonitor>& periodicAlarmMonitor,
-                const long timeBaseSec, const long currentTimeSec,
+                const int64_t timeBaseNs, const int64_t currentTimeNs,
                 vector<sp<AlarmTracker>>& allAlarmTrackers) {
     unordered_map<int64_t, int> alarmTrackerMap;
-    uint64_t startMillis = (uint64_t)timeBaseSec * MS_PER_SEC;
-    uint64_t currentTimeMillis = (uint64_t)currentTimeSec * MS_PER_SEC;
+    int64_t startMillis = timeBaseNs / 1000 / 1000;
+    int64_t currentTimeMillis = currentTimeNs / 1000 /1000;
     for (int i = 0; i < config.alarm_size(); i++) {
         const Alarm& alarm = config.alarm(i);
         if (alarm.offset_millis() <= 0) {
@@ -646,8 +646,9 @@ bool initAlarms(const StatsdConfig& config, const ConfigKey& key,
 
 bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& uidMap,
                       const sp<AlarmMonitor>& anomalyAlarmMonitor,
-                      const sp<AlarmMonitor>& periodicAlarmMonitor, const long timeBaseSec,
-                      const long currentTimeSec, set<int>& allTagIds,
+                      const sp<AlarmMonitor>& periodicAlarmMonitor,
+                      const int64_t timeBaseNs, const int64_t currentTimeNs,
+                      set<int>& allTagIds,
                       vector<sp<LogMatchingTracker>>& allAtomMatchers,
                       vector<sp<ConditionTracker>>& allConditionTrackers,
                       vector<sp<MetricProducer>>& allMetricProducers,
@@ -673,7 +674,8 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
         return false;
     }
 
-    if (!initMetrics(key, config, timeBaseSec, uidMap, logTrackerMap, conditionTrackerMap,
+    if (!initMetrics(key, config, timeBaseNs, currentTimeNs, uidMap,
+                     logTrackerMap, conditionTrackerMap,
                      allAtomMatchers, allConditionTrackers, allMetricProducers,
                      conditionToMetricMap, trackerToMetricMap, metricProducerMap,
                      noReportMetricIds)) {
@@ -686,7 +688,7 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
         return false;
     }
     if (!initAlarms(config, key, periodicAlarmMonitor,
-                    timeBaseSec, currentTimeSec, allPeriodicAlarmTrackers)) {
+                    timeBaseNs, currentTimeNs, allPeriodicAlarmTrackers)) {
         ALOGE("initAlarms failed");
         return false;
     }
