@@ -162,7 +162,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         updateResources();
 
         Rect tintArea = new Rect(0, 0, 0, 0);
-        int colorForeground = Utils.getColorAttr(getContext(), android.R.attr.colorForeground);
+        int colorForeground = Utils.getColorAttrDefaultColor(getContext(),
+                android.R.attr.colorForeground);
         float intensity = getColorIntensity(colorForeground);
         int fillColor = fillColorForIntensity(intensity, getContext());
 

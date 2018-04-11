@@ -132,13 +132,17 @@ public class SignalDrawable extends Drawable {
 
     public SignalDrawable(Context context) {
         mDarkModeBackgroundColor =
-                Utils.getDefaultColor(context, R.color.dark_mode_icon_color_dual_tone_background);
+                Utils.getColorStateListDefaultColor(context,
+                        R.color.dark_mode_icon_color_dual_tone_background);
         mDarkModeFillColor =
-                Utils.getDefaultColor(context, R.color.dark_mode_icon_color_dual_tone_fill);
+                Utils.getColorStateListDefaultColor(context,
+                        R.color.dark_mode_icon_color_dual_tone_fill);
         mLightModeBackgroundColor =
-                Utils.getDefaultColor(context, R.color.light_mode_icon_color_dual_tone_background);
+                Utils.getColorStateListDefaultColor(context,
+                        R.color.light_mode_icon_color_dual_tone_background);
         mLightModeFillColor =
-                Utils.getDefaultColor(context, R.color.light_mode_icon_color_dual_tone_fill);
+                Utils.getColorStateListDefaultColor(context,
+                        R.color.light_mode_icon_color_dual_tone_fill);
         mIntrinsicSize = context.getResources().getDimensionPixelSize(R.dimen.signal_icon_size);
 
         mHandler = new Handler();

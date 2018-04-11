@@ -95,7 +95,7 @@ final class WirelessChargingView extends View {
 
     private void setupPaint() {
         mPaint = new Paint();
-        mPaint.setColor(Utils.getColorAttr(mContext, R.attr.wallpaperTextColor));
+        mPaint.setColor(Utils.getColorAttrDefaultColor(mContext, R.attr.wallpaperTextColor));
     }
 
     public void setPaintColor(int color) {

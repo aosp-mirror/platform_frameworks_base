@@ -164,8 +164,8 @@ public class BatteryMeterView extends LinearLayout implements
 
         if (mUseWallpaperTextColors) {
             updateColors(
-                    Utils.getColorAttr(mContext, R.attr.wallpaperTextColor),
-                    Utils.getColorAttr(mContext, R.attr.wallpaperTextColorSecondary));
+                    Utils.getColorAttrDefaultColor(mContext, R.attr.wallpaperTextColor),
+                    Utils.getColorAttrDefaultColor(mContext, R.attr.wallpaperTextColorSecondary));
         } else {
             updateColors(mNonAdaptedForegroundColor, mNonAdaptedBackgroundColor);
         }
@@ -180,10 +180,13 @@ public class BatteryMeterView extends LinearLayout implements
                 Utils.getThemeAttr(context, R.attr.darkIconTheme));
         Context dualToneLightTheme = new ContextThemeWrapper(context,
                 Utils.getThemeAttr(context, R.attr.lightIconTheme));
-        mDarkModeBackgroundColor = Utils.getColorAttr(dualToneDarkTheme, R.attr.backgroundColor);
-        mDarkModeFillColor = Utils.getColorAttr(dualToneDarkTheme, R.attr.fillColor);
-        mLightModeBackgroundColor = Utils.getColorAttr(dualToneLightTheme, R.attr.backgroundColor);
-        mLightModeFillColor = Utils.getColorAttr(dualToneLightTheme, R.attr.fillColor);
+        mDarkModeBackgroundColor = Utils.getColorAttrDefaultColor(dualToneDarkTheme,
+                R.attr.backgroundColor);
+        mDarkModeFillColor = Utils.getColorAttrDefaultColor(dualToneDarkTheme,
+                R.attr.fillColor);
+        mLightModeBackgroundColor = Utils.getColorAttrDefaultColor(dualToneLightTheme,
+                R.attr.backgroundColor);
+        mLightModeFillColor = Utils.getColorAttrDefaultColor(dualToneLightTheme, R.attr.fillColor);
     }
 
     @Override

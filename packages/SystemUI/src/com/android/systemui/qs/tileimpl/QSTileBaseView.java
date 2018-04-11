@@ -94,10 +94,10 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         setBackground(mTileBackground);
 
-        mColorActive = Utils.getColorAttr(context, android.R.attr.colorAccent);
+        mColorActive = Utils.getColorAttrDefaultColor(context, android.R.attr.colorAccent);
         mColorDisabled = Utils.getDisabled(context,
-                Utils.getColorAttr(context, android.R.attr.textColorTertiary));
-        mColorInactive = Utils.getColorAttr(context, android.R.attr.textColorSecondary);
+                Utils.getColorAttrDefaultColor(context, android.R.attr.textColorTertiary));
+        mColorInactive = Utils.getColorAttrDefaultColor(context, android.R.attr.textColorSecondary);
 
         setPadding(0, 0, 0, 0);
         setClipChildren(false);

@@ -3882,7 +3882,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mUsingLightTheme = lightTheme;
         Context context = new ContextThemeWrapper(mContext,
                 lightTheme ? R.style.Theme_SystemUI_Light : R.style.Theme_SystemUI);
-        final int textColor = Utils.getColorAttr(context, R.attr.wallpaperTextColor);
+        final int textColor = Utils.getColorAttrDefaultColor(context, R.attr.wallpaperTextColor);
         mFooterView.setTextColor(textColor);
         mEmptyShadeView.setTextColor(textColor);
     }

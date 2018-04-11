@@ -387,11 +387,11 @@ public abstract class QSTileImpl<TState extends State> implements QSTile {
         switch (state) {
             case Tile.STATE_UNAVAILABLE:
                 return Utils.getDisabled(context,
-                        Utils.getColorAttr(context, android.R.attr.textColorSecondary));
+                        Utils.getColorAttrDefaultColor(context, android.R.attr.textColorSecondary));
             case Tile.STATE_INACTIVE:
-                return Utils.getColorAttr(context, android.R.attr.textColorSecondary);
+                return Utils.getColorAttrDefaultColor(context, android.R.attr.textColorSecondary);
             case Tile.STATE_ACTIVE:
-                return Utils.getColorAttr(context, android.R.attr.colorPrimary);
+                return Utils.getColorAttrDefaultColor(context, android.R.attr.colorPrimary);
             default:
                 Log.e("QSTile", "Invalid state " + state);
                 return 0;

@@ -106,7 +106,8 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
         d.setContentView(R.layout.shutdown_dialog);
         d.setCancelable(false);
 
-        int color = Utils.getColorAttr(mContext, com.android.systemui.R.attr.wallpaperTextColor);
+        int color = Utils.getColorAttrDefaultColor(mContext,
+                com.android.systemui.R.attr.wallpaperTextColor);
         boolean onKeyguard = mContext.getSystemService(
                 KeyguardManager.class).isKeyguardLocked();
 
