@@ -828,6 +828,14 @@ public class TaskStack extends WindowContainer<Task> implements
             }
         }
 
+        if (inSplitScreenSecondaryWindowingMode()) {
+            // When the stack is resized due to entering split screen secondary, offset the
+            // windows to compensate for the new stack position.
+            forAllWindows(w -> {
+                w.mWinAnimator.setOffsetPositionForStackResize(true);
+            }, true);
+        }
+
         updateDisplayInfo(bounds);
         updateSurfaceBounds();
     }

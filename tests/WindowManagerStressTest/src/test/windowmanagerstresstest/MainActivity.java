@@ -102,7 +102,7 @@ public class MainActivity extends Activity {
                 Thread t = new Thread(() -> {
                     try {
                         WindowManagerGlobal.getWindowSession().relayout(window,
-                                window.mSeq, mLayoutParams, -1, -1, View.VISIBLE, 0, mTmpRect,
+                                window.mSeq, mLayoutParams, -1, -1, View.VISIBLE, 0, -1, mTmpRect,
                                 mTmpRect, mTmpRect, mTmpRect, mTmpRect, mTmpRect, mTmpRect,
                                 new DisplayCutout.ParcelableWrapper(), new MergedConfiguration(),
                                 new Surface());

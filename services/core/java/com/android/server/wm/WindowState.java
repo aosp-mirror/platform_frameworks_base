@@ -636,6 +636,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private PowerManagerWrapper mPowerManagerWrapper;
 
     /**
+     * A frame number in which changes requested in this layout will be rendered.
+     */
+    private long mFrameNumber = -1;
+
+    /**
      * Compares two window sub-layers and returns -1 if the first is lesser than the second in terms
      * of z-order and 1 otherwise.
      */
@@ -4655,7 +4660,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 mLastSurfaceInsets.set(mAttrs.surfaceInsets);
                 t.deferTransactionUntil(mSurfaceControl,
                         mWinAnimator.mSurfaceController.mSurfaceControl.getHandle(),
-                        mAttrs.frameNumber);
+                        getFrameNumber());
             }
         }
     }
@@ -4769,6 +4774,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public boolean isInputMethodTarget() {
         return mService.mInputMethodTarget == this;
+    }
+
+    long getFrameNumber() {
+        return mFrameNumber;
+    }
+
+    void setFrameNumber(long frameNumber) {
+        mFrameNumber = frameNumber;
     }
 
     private final class MoveAnimationSpec implements AnimationSpec {
