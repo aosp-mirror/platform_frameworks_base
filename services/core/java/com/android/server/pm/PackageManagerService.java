@@ -14135,9 +14135,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 true /* requireFullPermission */, false /* checkShell */,
                 "isPackageSuspendedForUser for user " + userId);
-        if (getPackageUid(packageName, 0, userId) != callingUid) {
-            mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS, null);
-        }
         synchronized (mPackages) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
             if (ps == null || filterAppAccessLPr(ps, callingUid, userId)) {
