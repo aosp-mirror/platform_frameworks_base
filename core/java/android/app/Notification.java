@@ -3115,7 +3115,6 @@ public class Notification implements Parcelable
         private int mTextColorsAreForBackground = COLOR_INVALID;
         private int mPrimaryTextColor = COLOR_INVALID;
         private int mSecondaryTextColor = COLOR_INVALID;
-        private int mActionBarColor = COLOR_INVALID;
         private int mBackgroundColor = COLOR_INVALID;
         private int mForegroundColor = COLOR_INVALID;
         /**
@@ -4359,16 +4358,6 @@ public class Notification implements Parcelable
             return mSecondaryTextColor;
         }
 
-        private int getActionBarColor() {
-            ensureColors();
-            return mActionBarColor;
-        }
-
-        private int getActionBarColorDeEmphasized() {
-            int backgroundColor = getBackgroundColor();
-            return NotificationColorUtil.getShiftedColor(backgroundColor, 12);
-        }
-
         private void setTextViewColorSecondary(RemoteViews contentView, int id) {
             ensureColors();
             contentView.setTextColor(id, mSecondaryTextColor);
@@ -4378,7 +4367,6 @@ public class Notification implements Parcelable
             int backgroundColor = getBackgroundColor();
             if (mPrimaryTextColor == COLOR_INVALID
                     || mSecondaryTextColor == COLOR_INVALID
-                    || mActionBarColor == COLOR_INVALID
                     || mTextColorsAreForBackground != backgroundColor) {
                 mTextColorsAreForBackground = backgroundColor;
                 if (!hasForegroundColor() || !isColorized()) {
@@ -4451,8 +4439,6 @@ public class Notification implements Parcelable
                         }
                     }
                 }
-                mActionBarColor = NotificationColorUtil.resolveActionBarColor(mContext,
-                        backgroundColor);
             }
         }
 
@@ -4761,8 +4747,8 @@ public class Notification implements Parcelable
                     validRemoteInput |= actionHasValidInput;
 
                     final RemoteViews button = generateActionButton(action, emphazisedMode,
-                            i % 2 != 0, p.ambient);
-                    if (actionHasValidInput) {
+                            p.ambient);
+                    if (actionHasValidInput && !emphazisedMode) {
                         // Clear the drawable
                         button.setInt(R.id.action0, "setBackgroundResource", 0);
                     }
@@ -5069,7 +5055,7 @@ public class Notification implements Parcelable
         }
 
         private RemoteViews generateActionButton(Action action, boolean emphazisedMode,
-                boolean oddAction, boolean ambient) {
+                boolean ambient) {
             final boolean tombstone = (action.actionIntent == null);
             RemoteViews button = new BuilderRemoteViews(mContext.getApplicationInfo(),
                     emphazisedMode ? getEmphasizedActionLayoutResource()
@@ -5082,35 +5068,42 @@ public class Notification implements Parcelable
             if (action.mRemoteInputs != null) {
                 button.setRemoteInputs(R.id.action0, action.mRemoteInputs);
             }
-            // TODO: handle emphasized mode / actions right
             if (emphazisedMode) {
                 // change the background bgColor
-                int bgColor;
-                if (isColorized()) {
-                    bgColor = oddAction ? getActionBarColor() : getActionBarColorDeEmphasized();
-                } else {
-                    bgColor = mContext.getColor(oddAction ? R.color.notification_action_list
-                            : R.color.notification_action_list_dark);
-                }
-                button.setDrawableTint(R.id.button_holder, true,
-                        bgColor, PorterDuff.Mode.SRC_ATOP);
                 CharSequence title = action.title;
                 ColorStateList[] outResultColor = null;
+                int background = resolveBackgroundColor();
                 if (isLegacy()) {
                     title = NotificationColorUtil.clearColorSpans(title);
                 } else {
                     outResultColor = new ColorStateList[1];
-                    title = ensureColorSpanContrast(title, bgColor, outResultColor);
+                    title = ensureColorSpanContrast(title, background, outResultColor);
                 }
                 button.setTextViewText(R.id.action0, processTextSpans(title));
                 setTextViewColorPrimary(button, R.id.action0);
-                if (outResultColor != null && outResultColor[0] != null) {
-                    // We need to set the text color as well since changing a text to uppercase
-                    // clears its spans.
-                    button.setTextColor(R.id.action0, outResultColor[0]);
+                int rippleColor;
+                boolean hasColorOverride = outResultColor != null && outResultColor[0] != null;
+                if (hasColorOverride) {
+                    // There's a span spanning the full text, let's take it and use it as the
+                    // background color
+                    background = outResultColor[0].getDefaultColor();
+                    int textColor = NotificationColorUtil.resolvePrimaryColor(mContext,
+                            background);
+                    button.setTextColor(R.id.action0, textColor);
+                    rippleColor = textColor;
                 } else if (mN.color != COLOR_DEFAULT && !isColorized() && mTintActionButtons) {
-                    button.setTextColor(R.id.action0,resolveContrastColor());
+                    rippleColor = resolveContrastColor();
+                    button.setTextColor(R.id.action0, rippleColor);
+                } else {
+                    rippleColor = getPrimaryTextColor();
                 }
+                // We only want about 20% alpha for the ripple
+                rippleColor = (rippleColor & 0x00ffffff) | 0x33000000;
+                button.setColorStateList(R.id.action0, "setRippleColor",
+                        ColorStateList.valueOf(rippleColor));
+                button.setColorStateList(R.id.action0, "setButtonBackground",
+                        ColorStateList.valueOf(background));
+                button.setBoolean(R.id.action0, "setHasStroke", !hasColorOverride);
             } else {
                 button.setTextViewText(R.id.action0, processTextSpans(
                         processLegacyText(action.title)));
@@ -5160,31 +5153,35 @@ public class Notification implements Parcelable
                             }
                             textColor = new ColorStateList(textColor.getStates().clone(),
                                     newColors);
+                            if (fullLength) {
+                                outResultColor[0] = textColor;
+                                // Let's drop the color from the span
+                                textColor = null;
+                            }
                             resultSpan = new TextAppearanceSpan(
                                     originalSpan.getFamily(),
                                     originalSpan.getTextStyle(),
                                     originalSpan.getTextSize(),
                                     textColor,
                                     originalSpan.getLinkTextColor());
-                            if (fullLength) {
-                                outResultColor[0] = new ColorStateList(
-                                        textColor.getStates().clone(), newColors);
-                            }
                         }
                     } else if (resultSpan instanceof ForegroundColorSpan) {
                         ForegroundColorSpan originalSpan = (ForegroundColorSpan) resultSpan;
                         int foregroundColor = originalSpan.getForegroundColor();
                         foregroundColor = NotificationColorUtil.ensureLargeTextContrast(
                                 foregroundColor, background, mInNightMode);
-                        resultSpan = new ForegroundColorSpan(foregroundColor);
                         if (fullLength) {
                             outResultColor[0] = ColorStateList.valueOf(foregroundColor);
+                            resultSpan = null;
+                        } else {
+                            resultSpan = new ForegroundColorSpan(foregroundColor);
                         }
                     } else {
                         resultSpan = span;
                     }
-
-                    builder.setSpan(resultSpan, spanStart, spanEnd, ss.getSpanFlags(span));
+                    if (resultSpan != null) {
+                        builder.setSpan(resultSpan, spanStart, spanEnd, ss.getSpanFlags(span));
+                    }
                 }
                 return builder;
             }
@@ -5513,6 +5510,18 @@ public class Notification implements Parcelable
             } else {
                 return COLOR_DEFAULT;
             }
+        }
+
+        /**
+         * Same as getBackgroundColor but also resolved the default color to the background.
+         */
+        private int resolveBackgroundColor() {
+            int backgroundColor = getBackgroundColor();
+            if (backgroundColor == COLOR_DEFAULT) {
+                backgroundColor = mContext.getColor(
+                        com.android.internal.R.color.notification_material_background_color);
+            }
+            return backgroundColor;
         }
 
         private boolean isColorized() {
