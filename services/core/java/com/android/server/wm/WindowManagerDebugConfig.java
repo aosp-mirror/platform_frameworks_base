@@ -74,6 +74,9 @@ public class WindowManagerDebugConfig {
     static final boolean SHOW_STACK_CRAWLS = false;
     static final boolean DEBUG_WINDOW_CROP = false;
     static final boolean DEBUG_UNKNOWN_APP_VISIBILITY = false;
+    // TODO (b/73188263): Reset debugging flags
+    static final boolean DEBUG_RECENTS_ANIMATIONS = true;
+    static final boolean DEBUG_REMOTE_ANIMATIONS = DEBUG_APP_TRANSITIONS || true;
 
     static final String TAG_KEEP_SCREEN_ON = "DebugKeepScreenOn";
     static final boolean DEBUG_KEEP_SCREEN_ON = false;

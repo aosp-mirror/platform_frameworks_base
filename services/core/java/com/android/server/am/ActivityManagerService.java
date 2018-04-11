@@ -5292,7 +5292,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (this) {
                 mWindowManager.cancelRecentsAnimation(restoreHomeStackPosition
                         ? REORDER_MOVE_TO_ORIGINAL_POSITION
-                        : REORDER_KEEP_IN_PLACE);
+                        : REORDER_KEEP_IN_PLACE, "cancelRecentsAnimation");
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
