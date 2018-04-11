@@ -4588,8 +4588,16 @@ public class Notification implements Parcelable
                 bindHeaderChronometerAndTime(contentView);
                 bindProfileBadge(contentView);
             }
+            bindActivePermissions(contentView);
             bindExpandButton(contentView);
             mN.mUsesStandardHeader = true;
+        }
+
+        private void bindActivePermissions(RemoteViews contentView) {
+            int color = isColorized() ? getPrimaryTextColor() : getSecondaryTextColor();
+            contentView.setDrawableTint(R.id.camera, false, color, PorterDuff.Mode.SRC_ATOP);
+            contentView.setDrawableTint(R.id.mic, false, color, PorterDuff.Mode.SRC_ATOP);
+            contentView.setDrawableTint(R.id.overlay, false, color, PorterDuff.Mode.SRC_ATOP);
         }
 
         private void bindExpandButton(RemoteViews contentView) {

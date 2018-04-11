@@ -138,7 +138,6 @@
             android:layout_width="?attr/notificationHeaderIconSize"
             android:layout_height="?attr/notificationHeaderIconSize"
             android:src="@drawable/ic_camera"
-            android:tint="@color/notification_secondary_text_color_light"
             android:background="?android:selectableItemBackgroundBorderless"
             android:visibility="gone"
             />
@@ -147,7 +146,6 @@
             android:layout_width="?attr/notificationHeaderIconSize"
             android:layout_height="?attr/notificationHeaderIconSize"
             android:src="@drawable/ic_mic"
-            android:tint="@color/notification_secondary_text_color_light"
             android:background="?android:selectableItemBackgroundBorderless"
             android:layout_marginStart="4dp"
             android:visibility="gone"
@@ -157,7 +155,6 @@
             android:layout_width="?attr/notificationHeaderIconSize"
             android:layout_height="?attr/notificationHeaderIconSize"
             android:src="@drawable/ic_alert_window_layer"
-            android:tint="@color/notification_secondary_text_color_light"
             android:background="?android:selectableItemBackgroundBorderless"
             android:layout_marginStart="4dp"
             android:visibility="gone"
