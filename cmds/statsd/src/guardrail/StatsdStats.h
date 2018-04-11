@@ -102,9 +102,7 @@ public:
     // The max number of old config stats we keep.
     const static int kMaxIceBoxSize = 20;
 
-    const static int kMaxLoggerErrors = 10;
-
-    const static int kMaxSkippedLogEvents = 200;
+    const static int kMaxLoggerErrors = 20;
 
     const static int kMaxTimestampCount = 20;
 
@@ -280,7 +278,7 @@ public:
     /**
      * Records statsd skipped an event.
      */
-    void noteLogEventSkipped(int tag, int64_t timestamp);
+    void noteLogLost(int64_t timestamp);
 
     /**
      * Reset the historical stats. Including all stats in icebox, and the tracked stats about
@@ -337,8 +335,8 @@ private:
     // Logd errors. Size capped by kMaxLoggerErrors.
     std::list<const std::pair<int, int>> mLoggerErrors;
 
-    // Skipped log events.
-    std::list<const std::pair<int, int64_t>> mSkippedLogEvents;
+    // Timestamps when we detect log loss after logd reconnect.
+    std::list<int64_t> mLogLossTimestampNs;
 
     // Stores the number of times statsd modified the anomaly alarm registered with
     // StatsCompanionService.

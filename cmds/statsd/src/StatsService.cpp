@@ -818,8 +818,8 @@ void StatsService::Startup() {
     mConfigManager->Startup();
 }
 
-void StatsService::OnLogEvent(LogEvent* event) {
-    mProcessor->OnLogEvent(event);
+void StatsService::OnLogEvent(LogEvent* event, bool reconnectionStarts) {
+    mProcessor->OnLogEvent(event, reconnectionStarts);
 }
 
 Status StatsService::getData(int64_t key, vector<uint8_t>* output) {
