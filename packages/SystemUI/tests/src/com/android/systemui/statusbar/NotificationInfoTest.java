@@ -421,6 +421,66 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
+    public void testHandleCloseControls_setsNotificationsDisabledForMultipleChannelNotifications()
+            throws Exception {
+        mNotificationChannel.setImportance(IMPORTANCE_LOW);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel /* notificationChannel */,
+                10 /* numUniqueChannelsInRow */, mSbn, null /* checkSaveListener */,
+                null /* onSettingsClick */, null /* onAppSettingsClick */ ,
+                false /* isNonblockable */);
+
+        mNotificationInfo.findViewById(R.id.block).performClick();
+        waitForUndoButton();
+        mNotificationInfo.handleCloseControls(true, false);
+
+        mTestableLooper.processAllMessages();
+        verify(mMockINotificationManager, times(1))
+                .setNotificationsEnabledWithImportanceLockForPackage(
+                        anyString(), eq(TEST_UID), eq(false));
+    }
+
+
+    @Test
+    public void testHandleCloseControls_keepsNotificationsEnabledForMultipleChannelNotifications()
+            throws Exception {
+        mNotificationChannel.setImportance(IMPORTANCE_LOW);
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel /* notificationChannel */,
+                10 /* numUniqueChannelsInRow */, mSbn, null /* checkSaveListener */,
+                null /* onSettingsClick */, null /* onAppSettingsClick */ ,
+                false /* isNonblockable */);
+
+        mNotificationInfo.findViewById(R.id.block).performClick();
+        waitForUndoButton();
+        mNotificationInfo.handleCloseControls(true, false);
+
+        mTestableLooper.processAllMessages();
+        verify(mMockINotificationManager, times(1))
+                .setNotificationsEnabledWithImportanceLockForPackage(
+                        anyString(), eq(TEST_UID), eq(false));
+    }
+
+    @Test
+    public void testCloseControls_blockingHelperSavesImportanceForMultipleChannelNotifications()
+            throws Exception {
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel /* notificationChannel */,
+                10 /* numUniqueChannelsInRow */, mSbn, null /* checkSaveListener */,
+                null /* onSettingsClick */, null /* onAppSettingsClick */ ,
+                false /* isNonblockable */, true /* isForBlockingHelper */,
+                true /* isUserSentimentNegative */);
+
+        mNotificationInfo.findViewById(R.id.keep).performClick();
+
+        verify(mBlockingHelperManager).dismissCurrentBlockingHelper();
+        mTestableLooper.processAllMessages();
+        verify(mMockINotificationManager, times(1))
+                .setNotificationsEnabledWithImportanceLockForPackage(
+                        anyString(), eq(TEST_UID), eq(true));
+    }
+
+    @Test
     public void testCloseControls_blockingHelperDismissedIfShown() throws Exception {
         mNotificationInfo.bindNotification(
                 mMockPackageManager,
