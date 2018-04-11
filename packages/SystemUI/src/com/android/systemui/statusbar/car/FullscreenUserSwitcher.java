@@ -21,7 +21,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewStub;
-import android.widget.ProgressBar;
 
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -35,7 +34,6 @@ public class FullscreenUserSwitcher {
     private final View mContainer;
     private final View mParent;
     private final UserGridRecyclerView mUserGridView;
-    private final ProgressBar mSwitchingUsers;
     private final int mShortAnimDuration;
     private final StatusBar mStatusBar;
 
@@ -54,8 +52,6 @@ public class FullscreenUserSwitcher {
 
         mShortAnimDuration = mContainer.getResources()
             .getInteger(android.R.integer.config_shortAnimTime);
-
-        mSwitchingUsers = mParent.findViewById(R.id.switching_users);
     }
 
     public void show() {
@@ -91,10 +87,11 @@ public class FullscreenUserSwitcher {
 
     private void toggleSwitchInProgress(boolean inProgress) {
         if (inProgress) {
-            crossFade(mSwitchingUsers, mContainer);
+            crossFade(mParent, mContainer);
         } else {
-            crossFade(mContainer, mSwitchingUsers);
+            crossFade(mContainer, mParent);
         }
+
     }
 
     private void crossFade(View incoming, View outgoing) {

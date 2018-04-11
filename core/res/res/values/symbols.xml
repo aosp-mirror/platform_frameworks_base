@@ -3344,4 +3344,19 @@
 
   <java-symbol type="integer" name="config_lowBatteryAutoTriggerDefaultLevel" />
 
+  <!-- For car devices -->
+  <java-symbol type="string" name="car_loading_profile" />
+  <java-symbol type="color" name="car_body1_light" />
+  <java-symbol type="color" name="car_user_switcher_user_image_bgcolor" />
+  <java-symbol type="color" name="car_user_switcher_user_image_fgcolor" />
+  <java-symbol type="color" name="car_card_dark" />
+  <java-symbol type="dimen" name="car_body1_size" />
+  <java-symbol type="dimen" name="car_padding_4" />
+  <java-symbol type="dimen" name="car_fullscreen_user_pod_icon_text_size" />
+  <java-symbol type="dimen" name="car_fullscreen_user_pod_image_avatar_height" />
+  <java-symbol type="dimen" name="car_fullscreen_user_pod_image_avatar_width" />
+  <java-symbol type="layout" name="car_user_switching_dialog" />
+  <java-symbol type="id" name="user_loading_avatar" />
+  <java-symbol type="id" name="user_loading" />
+
 </resources>
