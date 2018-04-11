@@ -21,6 +21,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.Signature;
+import android.content.pm.SigningInfo;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -164,12 +165,13 @@ class ShortcutPackageInfo {
             ShortcutService s, String packageName, @UserIdInt int packageUserId) {
         final PackageInfo pi = s.getPackageInfoWithSignatures(packageName, packageUserId);
         // retrieve the newest sigs
-        Signature[][] signingHistory = pi.signingCertificateHistory;
-        if (signingHistory == null || signingHistory.length == 0) {
+        SigningInfo signingInfo = pi.signingInfo;
+        if (signingInfo == null) {
             Slog.e(TAG, "Can't get signatures: package=" + packageName);
             return null;
         }
-        Signature[] signatures = signingHistory[signingHistory.length - 1];
+        // TODO (b/73988180) use entire signing history in case of rollbacks
+        Signature[] signatures = signingInfo.getApkContentsSigners();
         final ShortcutPackageInfo ret = new ShortcutPackageInfo(pi.getLongVersionCode(),
                 pi.lastUpdateTime, BackupUtils.hashSignatureArray(signatures), /* shadow=*/ false);
 
@@ -192,13 +194,14 @@ class ShortcutPackageInfo {
             return;
         }
         // retrieve the newest sigs
-        Signature[][] signingHistory = pi.signingCertificateHistory;
-        if (signingHistory == null || signingHistory.length == 0) {
+        SigningInfo signingInfo = pi.signingInfo;
+        if (signingInfo == null) {
             Slog.w(TAG, "Not refreshing signature for " + pkg.getPackageName()
-                    + " since it appears to have no signature history.");
+                    + " since it appears to have no signing info.");
             return;
         }
-        Signature[] signatures = signingHistory[signingHistory.length - 1];
+        // TODO (b/73988180) use entire signing history in case of rollbacks
+        Signature[] signatures = signingInfo.getApkContentsSigners();
         mSigHashes = BackupUtils.hashSignatureArray(signatures);
     }
 

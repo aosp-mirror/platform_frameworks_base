@@ -27,6 +27,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.Signature;
+import android.content.pm.SigningInfo;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.util.Slog;
@@ -240,12 +241,13 @@ public class PackageManagerBackupAgent extends BackupAgent {
                         PackageManager.GET_SIGNING_CERTIFICATES);
                 homeInstaller = mPackageManager.getInstallerPackageName(home.getPackageName());
                 homeVersion = homeInfo.getLongVersionCode();
-                Signature[][] signingHistory = homeInfo.signingCertificateHistory;
-                if (signingHistory == null || signingHistory.length == 0) {
-                    Slog.e(TAG, "Home app has no signing history");
+                SigningInfo signingInfo = homeInfo.signingInfo;
+                if (signingInfo == null) {
+                    Slog.e(TAG, "Home app has no signing information");
                 } else {
                     // retrieve the newest sigs to back up
-                    Signature[] homeInfoSignatures = signingHistory[signingHistory.length - 1];
+                    // TODO (b/73988180) use entire signing history in case of rollbacks
+                    Signature[] homeInfoSignatures = signingInfo.getApkContentsSigners();
                     homeSigHashes = BackupUtils.hashSignatureArray(homeInfoSignatures);
                 }
             } catch (NameNotFoundException e) {
@@ -334,8 +336,8 @@ public class PackageManagerBackupAgent extends BackupAgent {
                         }
                     }
 
-                    Signature[][] signingHistory = info.signingCertificateHistory;
-                    if (signingHistory == null || signingHistory.length == 0) {
+                    SigningInfo signingInfo = info.signingInfo;
+                    if (signingInfo == null) {
                         Slog.w(TAG, "Not backing up package " + packName
                                 + " since it appears to have no signatures.");
                         continue;
@@ -358,7 +360,7 @@ public class PackageManagerBackupAgent extends BackupAgent {
                         outputBufferStream.writeInt(info.versionCode);
                     }
                     // retrieve the newest sigs to back up
-                    Signature[] infoSignatures = signingHistory[signingHistory.length - 1];
+                    Signature[] infoSignatures = signingInfo.getApkContentsSigners();
                     writeSignatureHashArray(outputBufferStream,
                             BackupUtils.hashSignatureArray(infoSignatures));
 

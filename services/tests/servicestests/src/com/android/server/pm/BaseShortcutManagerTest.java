@@ -58,11 +58,13 @@ import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageParser;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.Signature;
+import android.content.pm.SigningInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -102,6 +104,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1039,8 +1043,13 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         pi.versionCode = version;
         pi.applicationInfo.setVersionCode(version);
         pi.signatures = null;
-        pi.signingCertificateHistory = new Signature[][] {genSignatures(signatures)};
-
+        pi.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        genSignatures(signatures),
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         return pi;
     }
 
@@ -1128,7 +1137,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         if (getSignatures) {
             ret.signatures = null;
-            ret.signingCertificateHistory = pi.signingCertificateHistory;
+            ret.signingInfo = pi.signingInfo;
         }
 
         return ret;

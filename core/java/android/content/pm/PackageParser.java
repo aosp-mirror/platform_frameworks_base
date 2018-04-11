@@ -810,21 +810,11 @@ public class PackageParser {
 
         // replacement for GET_SIGNATURES
         if ((flags & PackageManager.GET_SIGNING_CERTIFICATES) != 0) {
-            if (p.mSigningDetails.hasPastSigningCertificates()) {
-                // Package has included signing certificate rotation information.  Convert each
-                // entry to an array
-                int numberOfSigs = p.mSigningDetails.pastSigningCertificates.length;
-                pi.signingCertificateHistory = new Signature[numberOfSigs][];
-                for (int i = 0; i < numberOfSigs; i++) {
-                    pi.signingCertificateHistory[i] =
-                            new Signature[] { p.mSigningDetails.pastSigningCertificates[i] };
-                }
-            } else if (p.mSigningDetails.hasSignatures()) {
-                // otherwise keep old behavior
-                int numberOfSigs = p.mSigningDetails.signatures.length;
-                pi.signingCertificateHistory = new Signature[1][numberOfSigs];
-                System.arraycopy(p.mSigningDetails.signatures, 0,
-                        pi.signingCertificateHistory[0], 0, numberOfSigs);
+            if (p.mSigningDetails != SigningDetails.UNKNOWN) {
+                // only return a valid SigningInfo if there is signing information to report
+                pi.signingInfo = new SigningInfo(p.mSigningDetails);
+            } else {
+                pi.signingInfo = null;
             }
         }
         return pi;
