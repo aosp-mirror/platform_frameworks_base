@@ -38,9 +38,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="1dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginStart="16dp"
         android:layout_gravity="center_vertical"
         android:gravity="end" >
 
@@ -48,18 +46,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical|start"
-            android:layout_margin="15dp"
+            android:layout_marginEnd="8dp"
             android:visibility="gone"
             layout="@layout/mobile_signal_group" />
 
         <com.android.keyguard.CarrierText
             android:id="@+id/qs_carrier_text"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="8dp"
+            android:layout_gravity="center_vertical|start"
             android:layout_marginEnd="32dp"
-            android:gravity="center_vertical|start"
             android:ellipsize="marquee"
             android:textAppearance="@style/TextAppearance.QS.TileLabel"
             android:textColor="?android:attr/textColorPrimary"
