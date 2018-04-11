@@ -353,4 +353,20 @@ public class BatteryManager {
     public static boolean isPlugWired(int plugType) {
         return plugType == BATTERY_PLUGGED_USB || plugType == BATTERY_PLUGGED_AC;
     }
+
+    /**
+     * Compute an approximation for how much time (in milliseconds) remains until the battery is
+     * fully charged. Returns -1 if no time can be computed: either there is not enough current
+     * data to make a decision or the battery is currently discharging.
+     *
+     * @return how much time is left, in milliseconds, until the battery is fully charged or -1 if
+     *         the computation fails
+     */
+    public long computeChargeTimeRemaining() {
+        try {
+            return mBatteryStats.computeChargeTimeRemaining();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
