@@ -96,7 +96,8 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
             TimeUnitToBucketSizeInMillis(config.gauge_metric(0).bucket()) * 1000000;
 
         ConfigKey cfgKey;
-        auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+        auto processor = CreateStatsLogProcessor(
+                bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
         EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
         EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
 
@@ -169,9 +170,11 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
             EXPECT_EQ(2, data.bucket_info(0).atom_size());
             EXPECT_EQ(2, data.bucket_info(0).elapsed_timestamp_nanos_size());
             EXPECT_EQ(2, data.bucket_info(0).wall_clock_timestamp_nanos_size());
-            EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_nanos());
-            EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_nanos());
-            EXPECT_EQ(AppStartOccurred::HOT, data.bucket_info(0).atom(0).app_start_occurred().type());
+            EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
+            EXPECT_EQ(bucketStartTimeNs + bucketSizeNs,
+                      data.bucket_info(0).end_bucket_elapsed_nanos());
+            EXPECT_EQ(AppStartOccurred::HOT,
+                      data.bucket_info(0).atom(0).app_start_occurred().type());
             EXPECT_EQ("activity_name2",
                       data.bucket_info(0).atom(0).app_start_occurred().activity_name());
             EXPECT_EQ(102L,
@@ -186,8 +189,10 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
             EXPECT_EQ(1, data.bucket_info(1).atom_size());
             EXPECT_EQ(1, data.bucket_info(1).elapsed_timestamp_nanos_size());
             EXPECT_EQ(1, data.bucket_info(1).wall_clock_timestamp_nanos_size());
-            EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(1).start_bucket_nanos());
-            EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs, data.bucket_info(1).end_bucket_nanos());
+            EXPECT_EQ(bucketStartTimeNs + bucketSizeNs,
+                      data.bucket_info(1).start_bucket_elapsed_nanos());
+            EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
+                      data.bucket_info(1).end_bucket_elapsed_nanos());
             EXPECT_EQ(AppStartOccurred::WARM,
                       data.bucket_info(1).atom(0).app_start_occurred().type());
             EXPECT_EQ("activity_name4",
@@ -199,9 +204,9 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
             EXPECT_EQ(2, data.bucket_info(2).elapsed_timestamp_nanos_size());
             EXPECT_EQ(2, data.bucket_info(2).wall_clock_timestamp_nanos_size());
             EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
-                      data.bucket_info(2).start_bucket_nanos());
+                      data.bucket_info(2).start_bucket_elapsed_nanos());
             EXPECT_EQ(bucketStartTimeNs + 3 * bucketSizeNs,
-                      data.bucket_info(2).end_bucket_nanos());
+                      data.bucket_info(2).end_bucket_elapsed_nanos());
             EXPECT_EQ(AppStartOccurred::COLD,
                       data.bucket_info(2).atom(0).app_start_occurred().type());
             EXPECT_EQ("activity_name5",
@@ -218,9 +223,11 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
             EXPECT_EQ(1, data.bucket_info(0).atom_size());
             EXPECT_EQ(1, data.bucket_info(0).elapsed_timestamp_nanos_size());
             EXPECT_EQ(1, data.bucket_info(0).wall_clock_timestamp_nanos_size());
-            EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_nanos());
-            EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_nanos());
-            EXPECT_EQ(AppStartOccurred::HOT, data.bucket_info(0).atom(0).app_start_occurred().type());
+            EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
+            EXPECT_EQ(bucketStartTimeNs + bucketSizeNs,
+                      data.bucket_info(0).end_bucket_elapsed_nanos());
+            EXPECT_EQ(AppStartOccurred::HOT,
+                      data.bucket_info(0).atom(0).app_start_occurred().type());
             EXPECT_EQ("activity_name2",
                       data.bucket_info(0).atom(0).app_start_occurred().activity_name());
             EXPECT_EQ(102L,
@@ -229,8 +236,10 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
             EXPECT_EQ(1, data.bucket_info(1).atom_size());
             EXPECT_EQ(1, data.bucket_info(1).elapsed_timestamp_nanos_size());
             EXPECT_EQ(1, data.bucket_info(1).wall_clock_timestamp_nanos_size());
-            EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(1).start_bucket_nanos());
-            EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs, data.bucket_info(1).end_bucket_nanos());
+            EXPECT_EQ(bucketStartTimeNs + bucketSizeNs,
+                      data.bucket_info(1).start_bucket_elapsed_nanos());
+            EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
+                      data.bucket_info(1).end_bucket_elapsed_nanos());
             EXPECT_EQ(AppStartOccurred::WARM,
                       data.bucket_info(1).atom(0).app_start_occurred().type());
             EXPECT_EQ("activity_name4",
@@ -242,9 +251,9 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
             EXPECT_EQ(1, data.bucket_info(2).elapsed_timestamp_nanos_size());
             EXPECT_EQ(1, data.bucket_info(2).wall_clock_timestamp_nanos_size());
             EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
-                      data.bucket_info(2).start_bucket_nanos());
+                      data.bucket_info(2).start_bucket_elapsed_nanos());
             EXPECT_EQ(bucketStartTimeNs + 3 * bucketSizeNs,
-                      data.bucket_info(2).end_bucket_nanos());
+                      data.bucket_info(2).end_bucket_elapsed_nanos());
             EXPECT_EQ(AppStartOccurred::COLD,
                       data.bucket_info(2).atom(0).app_start_occurred().type());
             EXPECT_EQ("activity_name5",
@@ -264,8 +273,10 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
         EXPECT_EQ(1, data.bucket_info(0).atom_size());
         EXPECT_EQ(1, data.bucket_info(0).elapsed_timestamp_nanos_size());
         EXPECT_EQ(1, data.bucket_info(0).wall_clock_timestamp_nanos_size());
-        EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs, data.bucket_info(0).start_bucket_nanos());
-        EXPECT_EQ(bucketStartTimeNs + 3 * bucketSizeNs, data.bucket_info(0).end_bucket_nanos());
+        EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
+                  data.bucket_info(0).start_bucket_elapsed_nanos());
+        EXPECT_EQ(bucketStartTimeNs + 3 * bucketSizeNs,
+                  data.bucket_info(0).end_bucket_elapsed_nanos());
         EXPECT_EQ(AppStartOccurred::COLD, data.bucket_info(0).atom(0).app_start_occurred().type());
         EXPECT_EQ("activity_name7",
                   data.bucket_info(0).atom(0).app_start_occurred().activity_name());

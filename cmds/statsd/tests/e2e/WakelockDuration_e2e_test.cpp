@@ -121,7 +121,7 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration1) 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs =
             TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
-    auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     FeedEvents(config, processor);
@@ -154,7 +154,7 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration2) 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs =
             TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
-    auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     FeedEvents(config, processor);
@@ -188,7 +188,7 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration3) 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs =
             TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
-    auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     FeedEvents(config, processor);
@@ -231,7 +231,7 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration1) 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs =
             TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
-    auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     FeedEvents(config, processor);
@@ -256,7 +256,7 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration2) 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs =
             TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
-    auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     FeedEvents(config, processor);
@@ -284,7 +284,7 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration3) 
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs =
             TimeUnitToBucketSizeInMillis(config.duration_metric(0).bucket()) * 1000000LL;
-    auto processor = CreateStatsLogProcessor(bucketStartTimeNs / NS_PER_SEC, config, cfgKey);
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     FeedEvents(config, processor);

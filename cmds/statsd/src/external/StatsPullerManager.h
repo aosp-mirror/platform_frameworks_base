@@ -40,8 +40,8 @@ class StatsPullerManager {
         return mPullerManager.PullerForMatcherExists(tagId);
     }
 
-    void OnAlarmFired() {
-        mPullerManager.OnAlarmFired();
+    void OnAlarmFired(const int64_t currentTimeNs) {
+        mPullerManager.OnAlarmFired(currentTimeNs);
     }
 
     virtual bool Pull(const int tagId, const int64_t timesNs,

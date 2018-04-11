@@ -37,7 +37,7 @@ namespace statsd {
 class MetricsManager : public PackageInfoListener {
 public:
     MetricsManager(const ConfigKey& configKey, const StatsdConfig& config,
-                   const long timeBaseSec, const long currentTimeSec,
+                   const int64_t timeBaseNs, const int64_t currentTimeNs,
                    const sp<UidMap>& uidMap, const sp<AlarmMonitor>& anomalyAlarmMonitor,
                    const sp<AlarmMonitor>& periodicAlarmMonitor);
 
@@ -187,6 +187,11 @@ private:
     FRIEND_TEST(AttributionE2eTest, TestAttributionMatchAndSliceByFirstUid);
     FRIEND_TEST(AttributionE2eTest, TestAttributionMatchAndSliceByChain);
     FRIEND_TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent);
+    FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents);
+    FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm);
+    FRIEND_TEST(GaugeMetricE2eTest, TestAllConditionChangesSamplePulledEvents);
+    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents);
+    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm);
     FRIEND_TEST(DimensionInConditionE2eTest, TestCreateCountMetric_NoLink_OR_CombinationCondition);
     FRIEND_TEST(DimensionInConditionE2eTest, TestCreateCountMetric_Link_OR_CombinationCondition);
     FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetric_NoLink_OR_CombinationCondition);
