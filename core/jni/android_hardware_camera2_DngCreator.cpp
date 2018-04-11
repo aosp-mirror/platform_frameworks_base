@@ -1723,13 +1723,13 @@ static sp<TiffWriter> DngCreator_setup(JNIEnv* env, jobject thiz, uint32_t image
 
         // Adjust the bad pixel coordinates to be relative to the origin of the active area DNG tag
         std::vector<uint32_t> v;
-        for (size_t i = 0; i < entry3.count; i+=2) {
+        for (size_t i = 0; i < entry3.count; i += 2) {
             int32_t x = entry3.data.i32[i];
             int32_t y = entry3.data.i32[i + 1];
             x -= static_cast<int32_t>(xmin);
             y -= static_cast<int32_t>(ymin);
             if (x < 0 || y < 0 || static_cast<uint32_t>(x) >= width ||
-                    static_cast<uint32_t>(y) >= width) {
+                    static_cast<uint32_t>(y) >= height) {
                 continue;
             }
             v.push_back(x);
