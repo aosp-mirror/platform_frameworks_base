@@ -673,8 +673,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     }
 
     /**
-     * Returns {@code true} if the screen must be unlocked for this key to be used for encryption or
-     * signing. Decryption and signature verification will still be available when the screen is
+     * Returns {@code true} if the screen must be unlocked for this key to be used for decryption or
+     * signing. Encryption and signature verification will still be available when the screen is
      * locked.
      *
      * @see Builder#setUnlockedDeviceRequired(boolean)

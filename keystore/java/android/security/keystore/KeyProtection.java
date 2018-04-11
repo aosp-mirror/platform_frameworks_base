@@ -19,6 +19,7 @@ package android.security.keystore;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.KeyguardManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.security.GateKeeper;
@@ -496,6 +497,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
      * @see KeymasterUtils#addUserAuthArgs
      * @hide
      */
+    @TestApi
     public long getBoundToSpecificSecureUserId() {
         return mBoundToSecureUserId;
     }
@@ -511,8 +513,8 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
     }
 
     /**
-     * Returns {@code true} if the screen must be unlocked for this key to be used for encryption or
-     * signing. Decryption and signature verification will still be available when the screen is
+     * Returns {@code true} if the screen must be unlocked for this key to be used for decryption or
+     * signing. Encryption and signature verification will still be available when the screen is
      * locked.
      *
      * @see Builder#setUnlockedDeviceRequired(boolean)
@@ -913,6 +915,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
          * @see KeyProtection#getBoundToSpecificSecureUserId()
          * @hide
          */
+        @TestApi
         public Builder setBoundToSpecificSecureUserId(long secureUserId) {
             mBoundToSecureUserId = secureUserId;
             return this;
