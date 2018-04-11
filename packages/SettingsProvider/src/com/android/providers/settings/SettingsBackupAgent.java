@@ -253,6 +253,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                     && !RESTORE_FROM_HIGHER_SDK_INT_SUPPORTED_KEYS.contains(key)) {
                 Log.w(TAG, "Not restoring unrecognized key '"
                         + key + "' from future version " + appVersionCode);
+                data.skipEntityData();
                 continue;
             }
 
