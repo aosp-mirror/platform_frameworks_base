@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -37,6 +38,7 @@ public class CarFacetButton extends LinearLayout {
     private AlphaOptimizedImageButton mIcon;
     private AlphaOptimizedImageButton mMoreIcon;
     private boolean mSelected = false;
+    private String[] mComponentNames;
     /** App categories that are to be used with this widget */
     private String[] mFacetCategories;
     /** App packages that are allowed to be used with this widget */
@@ -75,6 +77,8 @@ public class CarFacetButton extends LinearLayout {
         String longPressIntentString = typedArray.getString(R.styleable.CarFacetButton_longIntent);
         String categoryString = typedArray.getString(R.styleable.CarFacetButton_categories);
         String packageString = typedArray.getString(R.styleable.CarFacetButton_packages);
+        String componentNameString =
+                typedArray.getString(R.styleable.CarFacetButton_componentNames);
         try {
             final Intent intent = Intent.parseUri(intentString, Intent.URI_INTENT_SCHEME);
             intent.putExtra(EXTRA_FACET_ID, Integer.toString(getId()));
@@ -87,17 +91,20 @@ public class CarFacetButton extends LinearLayout {
                 mFacetCategories = categoryString.split(FACET_FILTER_DELIMITER);
                 intent.putExtra(EXTRA_FACET_CATEGORIES, mFacetCategories);
             }
+            if (componentNameString != null) {
+                mComponentNames = componentNameString.split(FACET_FILTER_DELIMITER);
+            }
 
             setOnClickListener(v -> {
                 intent.putExtra(EXTRA_FACET_LAUNCH_PICKER, mSelected);
-                mContext.startActivity(intent);
+                mContext.startActivityAsUser(intent, UserHandle.CURRENT);
             });
 
             if (longPressIntentString != null) {
                 final Intent longPressIntent = Intent.parseUri(longPressIntentString,
                         Intent.URI_INTENT_SCHEME);
                 setOnLongClickListener(v -> {
-                    mContext.startActivity(longPressIntent);
+                    mContext.startActivityAsUser(longPressIntent, UserHandle.CURRENT);
                     return true;
                 });
             }
@@ -146,6 +153,13 @@ public class CarFacetButton extends LinearLayout {
             return new String[0];
         }
         return mFacetPackages;
+    }
+
+    public String[] getComponentName() {
+        if (mComponentNames == null) {
+            return new String[0];
+        }
+        return mComponentNames;
     }
 
     /**

@@ -29,6 +29,8 @@
         <attr name="categories" format="string"/>
         <!-- package names that will be added as extras to the fired intents -->
         <attr name="packages" format="string" />
+        <!-- componentName names that will be used for detecting selected state -->
+        <attr name="componentNames" format="string" />
         <!-- Alpha value to used when in selected state.  Defaults 1f  -->
         <attr name="selectedAlpha" format="float" />
         <!-- Alpha value to used when in un-selected state.  Defaults 0.7f  -->
