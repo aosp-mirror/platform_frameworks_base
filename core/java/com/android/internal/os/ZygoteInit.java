@@ -26,8 +26,8 @@ import android.icu.text.DecimalFormatSymbols;
 import android.icu.util.ULocale;
 import android.opengl.EGL14;
 import android.os.Build;
-import android.os.IInstalld;
 import android.os.Environment;
+import android.os.IInstalld;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -44,16 +44,16 @@ import android.system.OsConstants;
 import android.system.StructCapUserData;
 import android.system.StructCapUserHeader;
 import android.text.Hyphenator;
-import android.util.TimingsTraceLog;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
+import android.util.TimingsTraceLog;
 import android.webkit.WebViewFactory;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
-
 import com.android.internal.util.Preconditions;
+
 import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
 import dalvik.system.ZygoteHooks;
@@ -67,8 +67,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.security.Security;
 import java.security.Provider;
+import java.security.Security;
 
 /**
  * Startup class for the zygote process.
@@ -516,6 +516,10 @@ public class ZygoteInit {
 
     public static void setApiBlacklistExemptions(String[] exemptions) {
         VMRuntime.getRuntime().setHiddenApiExemptions(exemptions);
+    }
+
+    public static void setHiddenApiAccessLogSampleRate(int percent) {
+        VMRuntime.getRuntime().setHiddenApiAccessLogSamplingRate(percent);
     }
 
     /**
