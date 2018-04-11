@@ -39,34 +39,34 @@ public class InputMethodAndSubtypeUtilTest {
     }
 
     @Test
-    public void testParseInputMethodsAndSubtypesString_EmptyString() {
+    public void parseInputMethodsAndSubtypesString_EmptyString() {
         assertThat(InputMethodAndSubtypeUtil.parseInputMethodsAndSubtypesString("")).isEmpty();
         assertThat(InputMethodAndSubtypeUtil.parseInputMethodsAndSubtypesString(null)).isEmpty();
     }
 
     @Test
-    public void testParseInputMethodsAndSubtypesString_SingleImeNoSubtype() {
+    public void parseInputMethodsAndSubtypesString_SingleImeNoSubtype() {
         HashMap<String, HashSet<String>> r =
                 InputMethodAndSubtypeUtil.parseInputMethodsAndSubtypesString("ime0");
         assertThat(r).containsExactly("ime0", EMPTY_STRING_SET);
     }
 
     @Test
-    public void testParseInputMethodsAndSubtypesString_MultipleImesNoSubtype() {
+    public void parseInputMethodsAndSubtypesString_MultipleImesNoSubtype() {
         HashMap<String, HashSet<String>> r =
                 InputMethodAndSubtypeUtil.parseInputMethodsAndSubtypesString("ime0:ime1");
         assertThat(r).containsExactly("ime0", EMPTY_STRING_SET, "ime1", EMPTY_STRING_SET);
     }
 
     @Test
-    public void testParseInputMethodsAndSubtypesString_SingleImeSingleSubtype() {
+    public void parseInputMethodsAndSubtypesString_SingleImeSingleSubtype() {
         HashMap<String, HashSet<String>> r =
                 InputMethodAndSubtypeUtil.parseInputMethodsAndSubtypesString("ime0;subtype0");
         assertThat(r).containsExactly("ime0", asHashSet("subtype0"));
     }
 
     @Test
-    public void testParseInputMethodsAndSubtypesString_SingleImeDuplicateSameSubtypes() {
+    public void parseInputMethodsAndSubtypesString_SingleImeDuplicateSameSubtypes() {
         HashMap<String, HashSet<String>> r =
                 InputMethodAndSubtypeUtil.parseInputMethodsAndSubtypesString(
                         "ime0;subtype0;subtype0");
@@ -74,7 +74,7 @@ public class InputMethodAndSubtypeUtilTest {
     }
 
     @Test
-    public void testParseInputMethodsAndSubtypesString_SingleImeMultipleSubtypes() {
+    public void parseInputMethodsAndSubtypesString_SingleImeMultipleSubtypes() {
         HashMap<String, HashSet<String>> r =
                 InputMethodAndSubtypeUtil.parseInputMethodsAndSubtypesString(
                         "ime0;subtype0;subtype1");
@@ -82,7 +82,7 @@ public class InputMethodAndSubtypeUtilTest {
     }
 
     @Test
-    public void testParseInputMethodsAndSubtypesString_MultiplePairsOfImeSubtype() {
+    public void parseInputMethodsAndSubtypesString_MultiplePairsOfImeSubtype() {
         assertThat(InputMethodAndSubtypeUtil.parseInputMethodsAndSubtypesString(
                 "ime0;subtype0:ime1;subtype1"))
                 .containsExactly("ime0", asHashSet("subtype0"), "ime1", asHashSet("subtype1"));
@@ -98,7 +98,7 @@ public class InputMethodAndSubtypeUtilTest {
     }
 
     @Test
-    public void testParseInputMethodsAndSubtypesString_MixedImeSubtypePairsAndImeNoSubtype() {
+    public void parseInputMethodsAndSubtypesString_MixedImeSubtypePairsAndImeNoSubtype() {
         HashMap<String, HashSet<String>> r =
                 InputMethodAndSubtypeUtil.parseInputMethodsAndSubtypesString(
                         "ime0;subtype0;subtype1:ime1;subtype1;subtype2:ime2");
@@ -108,13 +108,13 @@ public class InputMethodAndSubtypeUtilTest {
     }
 
     @Test
-    public void testBuildInputMethodsAndSubtypesString_EmptyInput() {
+    public void buildInputMethodsAndSubtypesString_EmptyInput() {
         HashMap<String, HashSet<String>> map = new HashMap<>();
         assertThat(map).isEmpty();
     }
 
     @Test
-    public void testBuildInputMethodsAndSubtypesString_SingleIme() {
+    public void buildInputMethodsAndSubtypesString_SingleIme() {
         HashMap<String, HashSet<String>> map = new HashMap<>();
         map.put("ime0", new HashSet<>());
         String result = InputMethodAndSubtypeUtil.buildInputMethodsAndSubtypesString(map);
@@ -122,7 +122,7 @@ public class InputMethodAndSubtypeUtilTest {
     }
 
     @Test
-    public void testBuildInputMethodsAndSubtypesString_SingleImeSingleSubtype() {
+    public void buildInputMethodsAndSubtypesString_SingleImeSingleSubtype() {
         HashMap<String, HashSet<String>> map = new HashMap<>();
         map.put("ime0", asHashSet("subtype0"));
         String result = InputMethodAndSubtypeUtil.buildInputMethodsAndSubtypesString(map);
@@ -130,7 +130,7 @@ public class InputMethodAndSubtypeUtilTest {
     }
 
     @Test
-    public void testBuildInputMethodsAndSubtypesString_SingleImeMultipleSubtypes() {
+    public void buildInputMethodsAndSubtypesString_SingleImeMultipleSubtypes() {
         HashMap<String, HashSet<String>> map = new HashMap<>();
         map.put("ime0", asHashSet("subtype0", "subtype1"));
         String result = InputMethodAndSubtypeUtil.buildInputMethodsAndSubtypesString(map);
@@ -142,7 +142,7 @@ public class InputMethodAndSubtypeUtilTest {
     }
 
     @Test
-    public void testBuildInputMethodsAndSubtypesString_MultipleImesNoSubtypes() {
+    public void buildInputMethodsAndSubtypesString_MultipleImesNoSubtypes() {
         HashMap<String, HashSet<String>> map = new HashMap<>();
         map.put("ime0", EMPTY_STRING_SET);
         map.put("ime1", EMPTY_STRING_SET);
@@ -155,7 +155,7 @@ public class InputMethodAndSubtypeUtilTest {
     }
 
     @Test
-    public void testBuildInputMethodsAndSubtypesString_MultipleImesWithAndWithoutSubtypes() {
+    public void buildInputMethodsAndSubtypesString_MultipleImesWithAndWithoutSubtypes() {
         HashMap<String, HashSet<String>> map = new HashMap<>();
         map.put("ime0", asHashSet("subtype0", "subtype1"));
         map.put("ime1", EMPTY_STRING_SET);
@@ -169,7 +169,7 @@ public class InputMethodAndSubtypeUtilTest {
     }
 
     @Test
-    public void testBuildInputMethodsAndSubtypesString_MultipleImesWithSubtypes() {
+    public void buildInputMethodsAndSubtypesString_MultipleImesWithSubtypes() {
         HashMap<String, HashSet<String>> map = new HashMap<>();
         map.put("ime0", asHashSet("subtype0", "subtype1"));
         map.put("ime1", asHashSet("subtype2", "subtype3"));
