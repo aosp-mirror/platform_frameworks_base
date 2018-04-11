@@ -45,6 +45,7 @@ import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DisplayCutout;
+import android.view.DisplayCutout.ParcelableWrapper;
 import android.view.IWindow;
 import android.view.IWindowId;
 import android.view.IWindowSession;
@@ -218,7 +219,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             int viewVisibility, int displayId, Rect outContentInsets, Rect outStableInsets) {
         return mService.addWindow(this, window, seq, attrs, viewVisibility, displayId,
                 new Rect() /* outFrame */, outContentInsets, outStableInsets, null /* outOutsets */,
-                null /* cutout */, null /* outInputChannel */);
+                new ParcelableWrapper() /* cutout */, null /* outInputChannel */);
     }
 
     @Override
