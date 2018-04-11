@@ -4704,11 +4704,13 @@
     <string name="locale_search_menu">Search</string>
 
     <!-- Title of the dialog that is shown when the user tries to launch a suspended application [CHAR LIMIT=30] -->
-    <string name="app_suspended_title">Action not allowed</string>
+    <string name="app_suspended_title">Can\u2019t open app</string>
     <!-- Default message shown in the dialog that is shown when the user tries to launch a suspended application [CHAR LIMIT=NONE] -->
-    <string name="app_suspended_default_message">The application <xliff:g id="app_name" example="GMail">%1$s</xliff:g> is currently disabled.</string>
+    <string name="app_suspended_default_message">
+        The app <xliff:g id="app_name" example="Gmail">%1$s</xliff:g> isn\u2019t available right now. This is managed by <xliff:g id="app_name" example="Settings">%2$s</xliff:g>.
+    </string>
     <!-- Title of the button to show users more details about why the app has been suspended [CHAR LIMIT=50]-->
-    <string name="app_suspended_more_details">More details</string>
+    <string name="app_suspended_more_details">Learn more</string>
 
     <!-- Title of a dialog. The string is asking if the user wants to turn on their work profile, which contains work apps that are managed by their employer. "Work" is an adjective. [CHAR LIMIT=30] -->
     <string name="work_mode_off_title">Turn on work profile?</string>

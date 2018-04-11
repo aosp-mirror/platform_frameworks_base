@@ -17,7 +17,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.servicestests.apps.suspendtestapp">
 
-    <application>
+    <application android:label="Suspend Test App">
         <activity android:name=".SuspendTestActivity"
                   android:exported="true" />
         <receiver android:name=".SuspendTestReceiver"
