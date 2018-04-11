@@ -103,6 +103,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 /**
  * Fragment containing the NavigationBarFragment. Contains logic for what happens
@@ -1109,8 +1110,11 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         public void onActivityRequestedOrientationChanged(int taskId, int requestedOrientation) {
             // Only hide the icon if the top task changes its requestedOrientation
             // Launcher can alter its requestedOrientation while it's not on top, don't hide on this
-            final boolean top = ActivityManagerWrapper.getInstance().getRunningTask().id == taskId;
-            if (top) setRotateSuggestionButtonState(false);
+            Optional.ofNullable(ActivityManagerWrapper.getInstance())
+                    .map(ActivityManagerWrapper::getRunningTask)
+                    .ifPresent(a -> {
+                        if (a.id == taskId) setRotateSuggestionButtonState(false);
+                    });
         }
     }
 
