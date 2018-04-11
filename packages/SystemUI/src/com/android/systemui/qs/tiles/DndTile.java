@@ -143,26 +143,41 @@ public class DndTile extends QSTileImpl<BooleanState> {
     public void showDetail(boolean show) {
         int zenDuration = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.ZEN_DURATION, 0);
-        switch (zenDuration) {
-            case Settings.Global.ZEN_DURATION_PROMPT:
-                mUiHandler.post(() -> {
-                    Dialog mDialog = new EnableZenModeDialog(mContext).createDialog();
-                    mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
-                    SystemUIDialog.setShowForAllUsers(mDialog, true);
-                    SystemUIDialog.registerDismissListener(mDialog);
-                    SystemUIDialog.setWindowOnTop(mDialog);
-                    mUiHandler.post(() -> mDialog.show());
-                    mHost.collapsePanels();
-                });
-                break;
-            case Settings.Global.ZEN_DURATION_FOREVER:
-                mController.setZen(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
-                break;
-            default:
-                Uri conditionId = ZenModeConfig.toTimeCondition(mContext, zenDuration,
-                        ActivityManager.getCurrentUser(), true).id;
-                mController.setZen(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,
-                        conditionId, TAG);
+        boolean showOnboarding = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 0) != 0;
+        if (showOnboarding) {
+            // don't show on-boarding again or notification ever
+            Settings.Global.putInt(mContext.getContentResolver(),
+                    Global.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
+            // turn on DND
+            mController.setZen(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
+            // show on-boarding screen
+            Intent intent = new Intent(Settings.ZEN_MODE_ONBOARDING);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(intent, 0);
+        } else {
+            switch (zenDuration) {
+                case Settings.Global.ZEN_DURATION_PROMPT:
+                    mUiHandler.post(() -> {
+                        Dialog mDialog = new EnableZenModeDialog(mContext).createDialog();
+                        mDialog.getWindow().setType(
+                                WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+                        SystemUIDialog.setShowForAllUsers(mDialog, true);
+                        SystemUIDialog.registerDismissListener(mDialog);
+                        SystemUIDialog.setWindowOnTop(mDialog);
+                        mUiHandler.post(() -> mDialog.show());
+                        mHost.collapsePanels();
+                    });
+                    break;
+                case Settings.Global.ZEN_DURATION_FOREVER:
+                    mController.setZen(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
+                    break;
+                default:
+                    Uri conditionId = ZenModeConfig.toTimeCondition(mContext, zenDuration,
+                            ActivityManager.getCurrentUser(), true).id;
+                    mController.setZen(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                            conditionId, TAG);
+            }
         }
     }
 
