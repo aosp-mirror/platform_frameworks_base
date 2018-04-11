@@ -26,8 +26,12 @@ public class FullBackupDataOutput {
 
     /**
      * Returns flags with additional information about the backup transport. For supported flags see
-     * {@link android.app.backup.BackupAgent}
+     * {@link android.app.backup.BackupAgent}.
      *
+     * <p>Returns the same flags that {@link BackupTransport#getTransportFlags()} returns.
+     *
+     * @see BackupAgent#FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED
+     * @see BackupAgent#FLAG_DEVICE_TO_DEVICE_TRANSFER
      * @see BackupDataOutput#getTransportFlags()
      */
     public int getTransportFlags() {
