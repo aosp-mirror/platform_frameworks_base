@@ -26,6 +26,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
@@ -272,12 +273,18 @@ public class ScrimView extends View implements ConfigurationController.Configura
                     tintAmount);
             drawable.setColors(mainTinted, secondaryTinted, animated);
         } else {
-            if (mColorFilter == null) {
-                mColorFilter = new PorterDuffColorFilter(mTintColor, PorterDuff.Mode.SRC_OVER);
+            boolean hasAlpha = Color.alpha(mTintColor) != 0;
+            if (hasAlpha) {
+                PorterDuff.Mode targetMode = mColorFilter == null ? Mode.SRC_OVER :
+                    mColorFilter.getMode();
+                if (mColorFilter == null || mColorFilter.getColor() != mTintColor) {
+                    mColorFilter = new PorterDuffColorFilter(mTintColor, targetMode);
+                }
             } else {
-                mColorFilter.setColor(mTintColor);
+                mColorFilter = null;
             }
-            mDrawable.setColorFilter(Color.alpha(mTintColor) == 0 ? null : mColorFilter);
+
+            mDrawable.setColorFilter(mColorFilter);
             mDrawable.invalidateSelf();
         }
 
