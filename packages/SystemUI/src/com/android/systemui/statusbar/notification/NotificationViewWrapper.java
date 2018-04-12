@@ -205,4 +205,12 @@ public abstract class NotificationViewWrapper implements TransformableView {
 
     public void setHeaderVisibleAmount(float headerVisibleAmount) {
     }
+
+    /**
+     * Get the extra height that needs to be added to this view, such that it can be measured
+     * normally.
+     */
+    public int getExtraMeasureHeight() {
+        return 0;
+    }
 }

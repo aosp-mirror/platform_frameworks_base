@@ -2814,7 +2814,6 @@
 
   <java-symbol type="color" name="notification_action_list" />
   <java-symbol type="color" name="notification_material_background_color" />
-  <java-symbol type="color" name="notification_action_list_dark" />
 
   <!-- Resolver target actions -->
   <java-symbol type="array" name="resolver_target_actions_pin" />
@@ -2864,6 +2863,7 @@
   <java-symbol type="dimen" name="input_extract_action_button_height" />
 
   <java-symbol type="dimen" name="notification_action_list_height" />
+  <java-symbol type="dimen" name="notification_action_emphasized_height" />
 
   <!-- TV Remote Service package -->
   <java-symbol type="string" name="config_tvRemoteServicePackage" />
@@ -2888,8 +2888,6 @@
 
   <!-- Used internally for assistant to launch activity transitions -->
   <java-symbol type="id" name="cross_task_transition" />
-
-  <java-symbol type="id" name="button_holder" />
 
   <java-symbol type="bool" name="config_useRoundIcon" />
 
@@ -3225,6 +3223,9 @@
   <java-symbol type="drawable" name="stat_sys_vitals" />
 
   <java-symbol type="color" name="text_color_primary" />
+  <java-symbol type="color" name="material_grey_300" />
+  <java-symbol type="dimen" name="emphasized_button_stroke_width" />
+  <java-symbol type="dimen" name="button_inset_vertical_material" />
 
   <java-symbol type="array" name="config_batteryPackageTypeSystem" />
   <java-symbol type="array" name="config_batteryPackageTypeService" />
@@ -3271,7 +3272,6 @@
   <java-symbol type="id" name="remote_input_progress" />
   <java-symbol type="id" name="remote_input_send" />
   <java-symbol type="id" name="remote_input" />
-  <java-symbol type="dimen" name="notification_content_margin" />
   <java-symbol type="dimen" name="slice_shortcut_size" />
   <java-symbol type="dimen" name="slice_icon_size" />
   <java-symbol type="dimen" name="slice_padding" />

@@ -14,21 +14,16 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/button_holder"
+<com.android.internal.widget.EmphasizedNotificationButton
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/NotificationEmphasizedAction"
+    android:id="@+id/action0"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginStart="12dp"
     android:layout_weight="1"
-    android:background="#ff000000">
-    <Button
-        style="@android:style/Widget.Material.Light.Button.Borderless.Small"
-        android:id="@+id/action0"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:textColor="@color/notification_default_color"
-        android:singleLine="true"
-        android:ellipsize="end"
-        android:background="@drawable/notification_material_action_background"
-        />
-</FrameLayout>
+    android:gravity="center"
+    android:textColor="@color/notification_default_color"
+    android:singleLine="true"
+    android:ellipsize="end"
+/>

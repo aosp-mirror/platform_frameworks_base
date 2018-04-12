@@ -16,17 +16,15 @@
 
 package com.android.internal.widget;
 
-import android.annotation.Nullable;
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.RemotableViewMethod;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
@@ -45,9 +43,11 @@ public class NotificationActionListLayout extends LinearLayout {
     private int mTotalWidth = 0;
     private ArrayList<Pair<Integer, TextView>> mMeasureOrderTextViews = new ArrayList<>();
     private ArrayList<View> mMeasureOrderOther = new ArrayList<>();
-    private boolean mMeasureLinearly;
-    private int mDefaultPaddingEnd;
-    private Drawable mDefaultBackground;
+    private boolean mEmphasizedMode;
+    private int mDefaultPaddingBottom;
+    private int mDefaultPaddingTop;
+    private int mEmphasizedHeight;
+    private int mRegularHeight;
 
     public NotificationActionListLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -68,7 +68,7 @@ public class NotificationActionListLayout extends LinearLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (mMeasureLinearly) {
+        if (mEmphasizedMode) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
             return;
         }
@@ -219,7 +219,7 @@ public class NotificationActionListLayout extends LinearLayout {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        if (mMeasureLinearly) {
+        if (mEmphasizedMode) {
             super.onLayout(changed, left, top, right, bottom);
             return;
         }
@@ -280,8 +280,21 @@ public class NotificationActionListLayout extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mDefaultPaddingEnd = getPaddingEnd();
-        mDefaultBackground = getBackground();
+        mDefaultPaddingBottom = getPaddingBottom();
+        mDefaultPaddingTop = getPaddingTop();
+        updateHeights();
+    }
+
+    private void updateHeights() {
+        int paddingTop = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_content_margin);
+        // same padding on bottom and at end
+        int paddingBottom = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_content_margin_end);
+        mEmphasizedHeight = paddingBottom + paddingTop + getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_action_emphasized_height);
+        mRegularHeight = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_action_list_height);
     }
 
     /**
@@ -291,11 +304,38 @@ public class NotificationActionListLayout extends LinearLayout {
      */
     @RemotableViewMethod
     public void setEmphasizedMode(boolean emphasizedMode) {
-        mMeasureLinearly = emphasizedMode;
-        setPaddingRelative(getPaddingStart(), getPaddingTop(),
-                emphasizedMode ? 0 : mDefaultPaddingEnd, getPaddingBottom());
-        setBackground(emphasizedMode ? null : mDefaultBackground);
-        requestLayout();
+        mEmphasizedMode = emphasizedMode;
+        int height;
+        if (emphasizedMode) {
+            int paddingTop = getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.notification_content_margin);
+            // same padding on bottom and at end
+            int paddingBottom = getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.notification_content_margin_end);
+            height = mEmphasizedHeight;
+            int buttonPaddingInternal = getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.button_inset_vertical_material);
+            setPaddingRelative(getPaddingStart(),
+                    paddingTop - buttonPaddingInternal,
+                    getPaddingEnd(),
+                    paddingBottom - buttonPaddingInternal);
+        } else {
+            setPaddingRelative(getPaddingStart(),
+                    mDefaultPaddingTop,
+                    getPaddingEnd(),
+                    mDefaultPaddingBottom);
+            height = mRegularHeight;
+        }
+        ViewGroup.LayoutParams layoutParams = getLayoutParams();
+        layoutParams.height = height;
+        setLayoutParams(layoutParams);
+    }
+
+    public int getExtraMeasureHeight() {
+        if (mEmphasizedMode) {
+            return mEmphasizedHeight - mRegularHeight;
+        }
+        return 0;
     }
 
     public static final Comparator<Pair<Integer, TextView>> MEASURE_ORDER_COMPARATOR
