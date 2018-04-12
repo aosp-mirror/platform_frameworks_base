@@ -20,6 +20,10 @@ import android.hardware.face.FaceManager;
 
 /**
  * Interface containing all of the face-specific constants.
+ *
+ * NOTE: The error messages must be consistent between BiometricConstants, Biometric*Constants,
+ *       and the frameworks/support/biometric/.../BiometricConstants files.
+ *
  * @hide
  */
 public interface BiometricFaceConstants {
@@ -31,27 +35,32 @@ public interface BiometricFaceConstants {
      * The hardware is unavailable. Try again later.
      */
     public static final int FACE_ERROR_HW_UNAVAILABLE = 1;
+
     /**
      * Error state returned when the sensor was unable to process the current image.
      */
     public static final int FACE_ERROR_UNABLE_TO_PROCESS = 2;
+
     /**
      * Error state returned when the current request has been running too long. This is intended to
      * prevent programs from waiting for the face authentication sensor indefinitely. The timeout is
      * platform and sensor-specific, but is generally on the order of 30 seconds.
      */
     public static final int FACE_ERROR_TIMEOUT = 3;
+
     /**
      * Error state returned for operations like enrollment; the operation cannot be completed
      * because there's not enough storage remaining to complete the operation.
      */
     public static final int FACE_ERROR_NO_SPACE = 4;
+
     /**
      * The operation was canceled because the face authentication sensor is unavailable. For
      * example, this may happen when the user is switched, the device is locked or another pending
      * operation prevents or disables it.
      */
     public static final int FACE_ERROR_CANCELED = 5;
+
     /**
      * The {@link FaceManager#remove} call failed. Typically this will happen when the
      * provided face id was incorrect.
@@ -59,11 +68,13 @@ public interface BiometricFaceConstants {
      * @hide
      */
     public static final int FACE_ERROR_UNABLE_TO_REMOVE = 6;
+
     /**
      * The operation was canceled because the API is locked out due to too many attempts.
      * This occurs after 5 failed attempts, and lasts for 30 seconds.
      */
     public static final int FACE_ERROR_LOCKOUT = 7;
+
     /**
      * Hardware vendors may extend this list if there are conditions that do not fall under one of
      * the above categories. Vendors are responsible for providing error strings for these errors.
@@ -80,22 +91,33 @@ public interface BiometricFaceConstants {
      * (PIN/Pattern/Password)
      */
     public static final int FACE_ERROR_LOCKOUT_PERMANENT = 9;
+
     /**
      * The user canceled the operation. Upon receiving this, applications should use alternate
      * authentication (e.g. a password). The application should also provide the means to return
      * to face authentication, such as a "use face authentication" button.
      */
     public static final int FACE_ERROR_USER_CANCELED = 10;
+
     /**
      * The user does not have a face enrolled.
      */
     public static final int FACE_ERROR_NOT_ENROLLED = 11;
+
     /**
      * The device does not have a face sensor. This message will propagate if the calling app
      * ignores the result from PackageManager.hasFeature(FEATURE_FACE) and calls
      * this API anyway. Apps should always check for the feature before calling this API.
      */
     public static final int FACE_ERROR_HW_NOT_PRESENT = 12;
+
+    /**
+     * The user pressed the negative button. This is a placeholder that is currently only used
+     * by the support library.
+     * @hide
+     */
+    public static final int FACE_ERROR_NEGATIVE_BUTTON = 13;
+
     /**
      * @hide
      */

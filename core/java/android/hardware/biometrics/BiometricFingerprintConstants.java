@@ -20,6 +20,10 @@ import android.hardware.fingerprint.FingerprintManager;
 
 /**
  * Interface containing all of the fingerprint-specific constants.
+ *
+ * NOTE: The error messages must be consistent between BiometricConstants, Biometric*Constants,
+ *       and the frameworks/support/biometric/.../BiometricConstants files.
+ *
  * @hide
  */
 public interface BiometricFingerprintConstants {
@@ -105,6 +109,13 @@ public interface BiometricFingerprintConstants {
      * The device does not have a fingerprint sensor.
      */
     public static final int FINGERPRINT_ERROR_HW_NOT_PRESENT = 12;
+
+    /**
+     * The user pressed the negative button. This is a placeholder that is currently only used
+     * by the support library.
+     * @hide
+     */
+    public static final int FINGERPRINT_ERROR_NEGATIVE_BUTTON = 13;
 
     /**
      * @hide
