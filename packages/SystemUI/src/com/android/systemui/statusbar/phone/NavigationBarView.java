@@ -871,9 +871,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mCurrentView = mRotatedViews[rot];
         mCurrentView.setVisibility(View.VISIBLE);
         mNavigationInflaterView.setAlternativeOrder(rot == Surface.ROTATION_90);
-        for (int i = 0; i < mButtonDispatchers.size(); i++) {
-            mButtonDispatchers.valueAt(i).setCurrentView(mCurrentView);
-        }
+        mNavigationInflaterView.updateButtonDispatchersCurrentView();
         updateLayoutTransitionsEnabled();
         mCurrentRotation = rot;
     }
