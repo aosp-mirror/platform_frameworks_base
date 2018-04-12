@@ -5644,6 +5644,20 @@ message MetricsEvent {
     // OS: P
     ACTION_VOLUME_SETTINGS = 1386;
 
+    // ACTION: Settings > Anomaly receiver > Anomaly ignored, don't show up in battery settings
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ANOMALY_IGNORED = 1387;
+
+    // ACTION: Settings > Battery settings > Battery tip > Open battery saver page
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_TIP_OPEN_BATTERY_SAVER_PAGE = 1388;
+
+    // FIELD: the version code of an app
+    // CATEGORY: SETTINGS
+    // OS: P
+    FIELD_APP_VERSION_CODE = 1389;
 
     // ---- End P Constants, all P constants go above this line ----
 
