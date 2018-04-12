@@ -2131,6 +2131,26 @@ public class NotificationManagerService extends SystemService {
         }
 
         /**
+         * Updates the enabled state for notifications for the given package (and uid).
+         * Additionally, this method marks the app importance as locked by the user, which means
+         * that notifications from the app will <b>not</b> be considered for showing a
+         * blocking helper.
+         *
+         * @param pkg package that owns the notifications to update
+         * @param uid uid of the app providing notifications
+         * @param enabled whether notifications should be enabled for the app
+         *
+         * @see #setNotificationsEnabledForPackage(String, int, boolean)
+         */
+        @Override
+        public void setNotificationsEnabledWithImportanceLockForPackage(
+                String pkg, int uid, boolean enabled) {
+            setNotificationsEnabledForPackage(pkg, uid, enabled);
+
+            mRankingHelper.setAppImportanceLocked(pkg, uid);
+        }
+
+        /**
          * Use this when you just want to know if notifications are OK for this package.
          */
         @Override
@@ -3616,6 +3636,8 @@ public class NotificationManagerService extends SystemService {
                                 System.currentTimeMillis());
                 summaryRecord = new NotificationRecord(getContext(), summarySbn,
                         notificationRecord.getChannel());
+                summaryRecord.setIsAppImportanceLocked(
+                        notificationRecord.getIsAppImportanceLocked());
                 summaries.put(pkg, summarySbn.getKey());
             }
         }
@@ -4012,6 +4034,7 @@ public class NotificationManagerService extends SystemService {
                 pkg, opPkg, id, tag, notificationUid, callingPid, notification,
                 user, null, System.currentTimeMillis());
         final NotificationRecord r = new NotificationRecord(getContext(), n, channel);
+        r.setIsAppImportanceLocked(mRankingHelper.getIsAppImportanceLocked(pkg, callingUid));
 
         if ((notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0
                 && (channel.getUserLockedFields() & NotificationChannel.USER_LOCKED_IMPORTANCE) == 0

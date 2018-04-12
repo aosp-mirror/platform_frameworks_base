@@ -371,6 +371,7 @@ public class RankingHelperTest extends UiServiceTestCase {
         mHelper.createNotificationChannel(PKG, UID, channel2, false, false);
 
         mHelper.setShowBadge(PKG, UID, true);
+        mHelper.setAppImportanceLocked(PKG, UID);
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG, UID, false, channel1.getId(),
                 channel2.getId(), NotificationChannel.DEFAULT_CHANNEL_ID);
@@ -379,6 +380,7 @@ public class RankingHelperTest extends UiServiceTestCase {
         loadStreamXml(baos, false);
 
         assertTrue(mHelper.canShowBadge(PKG, UID));
+        assertTrue(mHelper.getIsAppImportanceLocked(PKG, UID));
         assertEquals(channel1, mHelper.getNotificationChannel(PKG, UID, channel1.getId(), false));
         compareChannels(channel2,
                 mHelper.getNotificationChannel(PKG, UID, channel2.getId(), false));
@@ -805,6 +807,7 @@ public class RankingHelperTest extends UiServiceTestCase {
         assertEquals(Notification.PRIORITY_DEFAULT, mHelper.getPackagePriority(PKG, UID));
         assertEquals(NotificationManager.VISIBILITY_NO_OVERRIDE,
                 mHelper.getPackageVisibility(PKG, UID));
+        assertFalse(mHelper.getIsAppImportanceLocked(PKG, UID));
 
         NotificationChannel defaultChannel = mHelper.getNotificationChannel(
                 PKG, UID, NotificationChannel.DEFAULT_CHANNEL_ID, false);
@@ -814,6 +817,7 @@ public class RankingHelperTest extends UiServiceTestCase {
         defaultChannel.setBypassDnd(true);
         defaultChannel.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
 
+        mHelper.setAppImportanceLocked(PKG, UID);
         mHelper.updateNotificationChannel(PKG, UID, defaultChannel, true);
 
         // ensure app level fields are changed
@@ -821,6 +825,7 @@ public class RankingHelperTest extends UiServiceTestCase {
         assertEquals(Notification.PRIORITY_MAX, mHelper.getPackagePriority(PKG, UID));
         assertEquals(Notification.VISIBILITY_SECRET, mHelper.getPackageVisibility(PKG, UID));
         assertEquals(IMPORTANCE_NONE, mHelper.getImportance(PKG, UID));
+        assertTrue(mHelper.getIsAppImportanceLocked(PKG, UID));
     }
 
     @Test
