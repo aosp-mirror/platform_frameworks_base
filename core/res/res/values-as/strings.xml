@@ -1013,10 +1013,8 @@
     <string name="email_desc" msgid="3638665569546416795">"বাছনি কৰা ঠিকনাত ইমেইল কৰক"</string>
     <string name="dial" msgid="1253998302767701559">"কল কৰক"</string>
     <string name="dial_desc" msgid="6573723404985517250">"বাছনি কৰা ফ\'ন নাম্বাৰত কল কৰক"</string>
-    <!-- no translation found for map (5441053548030107189) -->
-    <skip />
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map" msgid="5441053548030107189">"মেপ"</string>
+    <string name="map_desc" msgid="1836995341943772348">"বাছনি কৰা ঠিকনাটো বিচাৰি উলিয়াওক"</string>
     <string name="browse" msgid="1245903488306147205">"খোলক"</string>
     <string name="browse_desc" msgid="8220976549618935044">"বাছনি কৰা URL খোলক"</string>
     <string name="sms" msgid="4560537514610063430">"বাৰ্তা"</string>
@@ -1692,7 +1690,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"আপোনাৰ প্ৰশাসকে ইনষ্টল কৰিছে"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"আপোনাৰ প্ৰশাসকে আপেডট কৰিছে"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"আপোনাৰ প্ৰশাসকে মচিছে"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"বেটাৰিৰ জীৱনকাল বৃদ্ধি কৰিবলৈ বেটাৰি সঞ্চয়কাৰী সুবিধাই আপোনাৰ ডিভাইচৰ কাৰ্যদক্ষতা হ্ৰাস কৰে আৰু কম্পন, অৱস্থান সেৱা আৰু নেপথ্য ডেটা সীমিত কৰে বা বন্ধ কৰে। ছিংকৰ ওপৰত নির্ভৰশীল ইমেইল, মেছেজিং আৰু অন্য এপসমূহ আপুনি নোখোলা পৰ্যন্ত আপডেট নহ\'বও পাৰে।\n\nআপোনাৰ ডিভাইচ চ্চার্জ কৰি থকাৰ সময়ত বেটাৰি সঞ্চয়কাৰী সুবিধা স্বয়ংক্ৰিয়ভাৱে বন্ধ হ\'ব।"</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"ডেটা ব্য়ৱহাৰ মাত্ৰা কম কৰিবৰ বাবে ডেটা সঞ্চয়কাৰীয়ে কিছুমান এপক নেপথ্য়ত ডেটা প্ৰেৰণ বা সংগ্ৰহ কৰাত বাধা প্ৰদান কৰে। আপুনি বৰ্তমান ব্য়ৱহাৰ কৰি থকা এটা এপে ডেটা ব্য়ৱহাৰ কৰিব পাৰে, কিন্তু সঘনাই এই কার্য কৰিব নোৱাৰিব পাৰে। ইয়াৰ অৰ্থ এইয়ে হ\'ব পাৰে যে, উদাহৰণস্বৰূপে, আপুনি নিটিপা পর্যন্ত প্ৰতিচ্ছবিসমূহ দেখুওৱা নহ\'ব।"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ডেটা সঞ্চয়কাৰী অন কৰিবনে?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"অন কৰক"</string>
@@ -1779,6 +1778,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"সকলো ভাষা"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"সকলো অঞ্চল"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"অনুসন্ধান কৰক"</string>
+    <!-- no translation found for app_suspended_title (5360409799785895488) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (5876776530189983288) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (2901244470963918402) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"কৰ্মস্থানৰ প্ৰ\'ফাইল অন কৰিবনে?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"আপোনাৰ কৰ্মস্থানৰ এপসমূহ, জাননীসমূহ, ডেটা আৰু কৰ্মস্থানৰ প্ৰ\'ফাইলৰ অইন সুবিধাসমূহ অন কৰা হ\'ব"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"অন কৰক"</string>
@@ -1868,8 +1873,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"কল আৰু জাননীসমূহ মিউট কৰা হ\'ব"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"ছিষ্টেমৰ সালসলনি"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"অসুবিধা নিদিব"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"আপুনি যাতে মনোযোগ দিব পাৰে তাৰ কাৰণে অসুবিধা নিদিবই জাননীসমূহ লুকুৱাই থৈছে"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"এইটো এটা নতুন আচৰণ। সলনি কৰিবলৈ টিপক।"</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"অসুবিধা নিদিব সলনি হৈছে"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"কি কি অৱৰোধ কৰা হৈছে জানিবলৈ টিপক।"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ছিষ্টেম"</string>

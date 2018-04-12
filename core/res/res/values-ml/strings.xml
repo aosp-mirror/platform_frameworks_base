@@ -245,8 +245,8 @@
     <string name="global_action_lockdown" msgid="1099326950891078929">"ലോക്ക്‌ഡൗൺ"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"പുതിയ അറിയിപ്പ്"</string>
-    <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"വെർച്വൽ കീബോർഡ്"</string>
-    <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"കീബോർഡ്"</string>
+    <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"വെർച്വൽ കീബോഡ്"</string>
+    <string name="notification_channel_physical_keyboard" msgid="7297661826966861459">"ഫിസിക്കൽ കീബോഡ്"</string>
     <string name="notification_channel_security" msgid="7345516133431326347">"സുരക്ഷ"</string>
     <string name="notification_channel_car_mode" msgid="3553380307619874564">"കാർ മോഡ്"</string>
     <string name="notification_channel_account" msgid="7577959168463122027">"അക്കൗണ്ട് നില"</string>
@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"വിളിക്കുക"</string>
     <string name="dial_desc" msgid="6573723404985517250">"തിരഞ്ഞെടുത്ത നമ്പറിലേക്ക് കോൾ ചെയ്യുക"</string>
     <string name="map" msgid="5441053548030107189">"മാപ്പ്"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"തിരഞ്ഞെടുത്ത വിലാസം കണ്ടെത്തുക"</string>
     <string name="browse" msgid="1245903488306147205">"തുറക്കുക"</string>
     <string name="browse_desc" msgid="8220976549618935044">"തിരഞ്ഞെടുത്ത URL ഓപ്പൺ ചെയ്യുക"</string>
     <string name="sms" msgid="4560537514610063430">"സന്ദേശം"</string>
@@ -1692,7 +1691,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"നിങ്ങളുടെ അഡ്‌മിൻ ഇൻസ്റ്റാൾ ചെയ്യുന്നത്"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"നിങ്ങളുടെ അഡ്‌മിൻ അപ്‌ഡേറ്റ് ചെയ്യുന്നത്"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"നിങ്ങളുടെ അഡ്‌മിൻ ഇല്ലാതാക്കുന്നത്"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"ബാറ്ററി ലൈഫ് വർദ്ധിപ്പിക്കാൻ, \'ബാറ്ററി സംരക്ഷിക്കൽ\' നിങ്ങളുടെ ഉപകരണത്തിന്റെ പ്രകടനം കുറയ്ക്കുകയും വൈബ്രേഷൻ, ലൊക്കേഷൻ സേവനങ്ങൾ, പശ്ചാത്തല ഡാറ്റ, എന്നിവ പരിമിതപ്പെടുത്തുകയോ ഒാഫാക്കുകയോ ചെയ്യുന്നു. ഇമെയിൽ, സന്ദേശമയയ്‌ക്കൽ, സമന്വയിപ്പിക്കലിനെ ആശ്രയിച്ചുള്ള മറ്റ് ആപ്പുകൾ എന്നിവ നിങ്ങൾ തുറക്കുന്നതുവരെ അപ്‌ഡേറ്റ് ചെയ്യാനിടയില്ല.\n\nനിങ്ങളുടെ ഉപകരണം ചാർജ് ചെയ്യുമ്പോൾ \'ബാറ്ററി സംരക്ഷിക്കൽ\' സ്വമേധയാ ഓഫാകും."</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിന്, പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്‌സിനെ ഡാറ്റ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്സസ്സ് ചെയ്യാൻ കഴിയും, എന്നാൽ കുറഞ്ഞ ആവൃത്തിയിലാണിത് നടക്കുക. ഇതിനർത്ഥം, നിങ്ങൾ ടാപ്പുചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ കാണിക്കുകയില്ല എന്നാണ്."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ഡാറ്റ സേവർ ഓണാക്കണോ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ഓണാക്കുക"</string>
@@ -1779,6 +1779,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"എല്ലാ ഭാഷകളും"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"എല്ലാ പ്രദേശങ്ങളും"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"തിരയുക"</string>
+    <!-- no translation found for app_suspended_title (5360409799785895488) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (5876776530189983288) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (2901244470963918402) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"ഔദ്യോഗിക പ്രൊഫൈൽ ഓണാക്കണോ?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"നിങ്ങളുടെ ഔദ്യോഗിക ആപ്പുകൾ, അറിയിപ്പുകൾ, ഡാറ്റ, മറ്റ് ഔദ്യോഗിക പ്രൊഫൈൽ ഫീച്ചറുകൾ എന്നിവ ഓണാക്കും"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ഓണാക്കുക"</string>
@@ -1868,8 +1874,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"കോളുകളും അറിയിപ്പുകളും മ്യൂട്ട് ചെയ്യപ്പെടും"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"സിസ്‌റ്റത്തിലെ മാറ്റങ്ങൾ"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"ശല്യപ്പെടുത്തരുത്"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"നിങ്ങളെ ഫോക്കസ് ചെയ്യാൻ സഹായിക്കുന്ന അറിയിപ്പുകളെ \'ശല്യപ്പെടുത്തരുത്\' അദൃശ്യമാക്കുന്നു"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"ഇത് പുതിയ പ്രവർത്തനരീതിയാണ്. മാറ്റാൻ ടാപ്പ് ചെയ്യുക."</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\'ശല്യപ്പെടുത്തരുത്\' മാറ്റി"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"എന്തിനെയാണ് ബ്ലോക്ക് ചെയ്‌തതെന്ന് പരിശോധിക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"സിസ്റ്റം"</string>

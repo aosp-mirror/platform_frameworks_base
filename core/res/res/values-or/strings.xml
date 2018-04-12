@@ -1013,10 +1013,8 @@
     <string name="email_desc" msgid="3638665569546416795">"ବାଛି ନେଇଥିବା ଠିକଣାରେ ଇମେଲ୍‌ ପଠାନ୍ତୁ"</string>
     <string name="dial" msgid="1253998302767701559">"କଲ୍ କରନ୍ତୁ"</string>
     <string name="dial_desc" msgid="6573723404985517250">"ବାଛି ନେଇଥିବା ଫୋନ୍‌ ନମ୍ବର୍‌ରେ କଲ୍‌ କରନ୍ତୁ"</string>
-    <!-- no translation found for map (5441053548030107189) -->
-    <skip />
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map" msgid="5441053548030107189">"ମାନଚିତ୍ର"</string>
+    <string name="map_desc" msgid="1836995341943772348">"ଚୟନିତ ଠିକଣାକୁ ଖୋଜନ୍ତୁ"</string>
     <string name="browse" msgid="1245903488306147205">"ଖୋଲନ୍ତୁ"</string>
     <string name="browse_desc" msgid="8220976549618935044">"ବାଛି ନେଇଥିବା URL ଖୋଲନ୍ତୁ"</string>
     <string name="sms" msgid="4560537514610063430">"ମେସେଜ୍‌"</string>
@@ -1692,7 +1690,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଇନଷ୍ଟଲ୍‍ କରିଛନ୍ତି"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଅପଡେଟ୍‍ କରିଛନ୍ତି"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"ଆପଣଙ୍କ ଆଡମିନ୍‌‌ ଡିଲିଟ୍‍ କରିଛନ୍ତି"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"ବ୍ୟାଟେରୀ ଜୀବନକୁ ବଢ଼ାଇବା ପାଇଁ, ବ୍ୟାଟେରୀ ସେଭର୍ ଆପଣଙ୍କ ଡିଭାଇସ୍‌ରେ କେବଳ ଜରୁରୀ ଆପ୍‌ଗୁଡ଼ିକୁ କାର୍ଯ୍ୟକ୍ଷମ ରଖିଥାଏ। ଏହି ସୁବିଧା ଚାଲୁ ହେବା ଦ୍ଵାରା ଭାଇବ୍ରେଶନ୍, ଅବସ୍ଥିତି ସେବା ଓ ବ୍ୟାକଗ୍ରାଉଣ୍ଡ ଡାଟାର ବ୍ୟବହାର କମ୍ କିମ୍ବା ବନ୍ଦ ହୋଇଯାଏ। ଇମେଲ୍, ମେସେଜିଙ୍ଗ ଓ ଅନ୍ୟ ଆପ୍‌ଗୁଡ଼ିକ, ଯାହା ସିଙ୍କ ଉପରେ ନିର୍ଭର କରିଥା’ନ୍ତି, ସେଗୁଡ଼ିକୁ ନଖୋଲିବା ପର୍ଯ୍ୟନ୍ତ ଅପଡେଟ୍ ହେବେନାହିଁ। \n\n ଆପଣଙ୍କ ଡିଭାଇସ୍ ଚାର୍ଜ ହେଉଥିବାବେଳେ ବ୍ୟାଟେରୀ ସେଭର୍ ସ୍ଵଚାଳିତ ଭାବେ ବନ୍ଦ ହୋଇଯାଇଥାଏ।"</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"ଡାଟା ବ୍ୟବହାର କମ୍‍ କରିବାରେ ସାହାଯ୍ୟ କରିବାକୁ, ଡାଟା ସେଭର୍‍ ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡରେ ଡାଟା ପଠାଇବା କିମ୍ବା ପ୍ରାପ୍ତ କରିବାକୁ କିଛି ଆପ୍‍କୁ ବ୍ଲକ୍‌ କରେ। ଆପଣ ବର୍ତ୍ତମାନ ବ୍ୟବହାର କରୁଥିବା ଆପ୍‍, ଡାଟା ଆକ୍ସେସ୍‍ କରିପାରେ, କିନ୍ତୁ ଏହା କମ୍‍ ସମୟରେ କରିପାରେ। ଏହାର ଅର୍ଥ ହୋଇପାରେ, ଯେପରି, ଆପଣ ଟାପ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଯେଉଁ ଇମେଜ୍‍ ଦେଖାଯାଏ ନାହିଁ।"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ଡାଟା ସେଭର୍‌ ଅନ୍ କରିବେ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ଅନ୍ କରନ୍ତୁ"</string>
@@ -1779,6 +1778,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ସମସ୍ତ ଭାଷା"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ସମସ୍ତ ଅଞ୍ଚଳ"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ସର୍ଚ୍ଚ କରନ୍ତୁ"</string>
+    <!-- no translation found for app_suspended_title (5360409799785895488) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (5876776530189983288) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (2901244470963918402) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"ୱର୍କ ପ୍ରୋଫାଇଲ୍‌କୁ ଚାଲୁ କରିବେ?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"ଆପଣଙ୍କର କାର୍ଯ୍ୟକାରୀ ଆପ୍‌, ବିଜ୍ଞପ୍ତି, ଡାଟା ଓ ଅନ୍ୟ ୱର୍କ ପ୍ରୋଫାଇଲ୍‌ଗୁଡ଼ିକ ଚାଲୁ ହୋଇଯିବ"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ଅନ୍ କରନ୍ତୁ"</string>
@@ -1868,8 +1873,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"କଲ୍ ଓ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ନିଃଶବ୍ଦ କରିଦିଆଯିବ"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"ସିଷ୍ଟମ୍‌ରେ ପରିବର୍ତ୍ତନ"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"ଆପଣଙ୍କ ଧ୍ୟାନକୁ ଲଗାଇ ରଖିବା ପାଇଁ, ’ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ’ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ଲୁଚାଇଦେଉଛି"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"ଏହା ନୂତନ କାର୍ଯ୍ୟକଳାପ ଅଟେ। ବଦଳାଇବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"’ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ’ ବଦଳିଯାଇଛି"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"କ’ଣ ଅବରୋଧ ହୋଇଛି ଯାଞ୍ଚ କରିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ସିଷ୍ଟମ୍‌"</string>

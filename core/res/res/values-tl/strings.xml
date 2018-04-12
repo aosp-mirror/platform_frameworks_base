@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Tawagan"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Tawagan ang piniling numero ng telepono"</string>
     <string name="map" msgid="5441053548030107189">"Mapa"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Hanapin ang piniling address"</string>
     <string name="browse" msgid="1245903488306147205">"Buksan"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Buksan ang piniling URL"</string>
     <string name="sms" msgid="4560537514610063430">"Padalhan ng Mensahe"</string>
@@ -1691,7 +1690,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Na-install ng iyong admin"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Na-update ng iyong admin"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Na-delete ng iyong admin"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Para mapatagal ang baterya, binabawasan ng Pangtipid sa Baterya ang performance ng iyong device at nililimitahan at ino-off nito ang pag-vibrate, mga serbisyo ng lokasyon, at data ng background. Maaaring hindi ma-update ang email, pagmemensahe, at iba pang app na umaasa sa pag-sync hangga\'t hindi mo binubuksan ang mga ito.\n\nAwtomatikong mag-o-off ang Pangtipid sa Baterya kapag naka-charge ang iyong device."</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Upang makatulong na mabawasan ang paggamit ng data, pinipigilan ng Data Saver ang ilang app na magpadala o makatanggap ng data sa background. Maaaring mag-access ng data ang isang app na ginagamit mo sa kasalukuyan, ngunit mas bihira na nito magagawa iyon. Halimbawa, maaaring hindi lumabas ang mga larawan hangga\'t hindi mo nata-tap ang mga ito."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"I-on ang Data Saver?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"I-on"</string>
@@ -1778,6 +1778,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Lahat ng wika"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Lahat ng rehiyon"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Maghanap"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"Hindi pinayagan ang pagkilos"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"Kasalukuyang naka-disable ang application na <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"Higit pang detalye"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"I-on ang profile sa trabaho?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Mao-on ang iyong mga app sa trabaho, notification, data, at iba pang feature sa profile sa trabaho"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"I-on"</string>
@@ -1867,8 +1870,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Mamu-mute ang mga tawag at notification"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Mga pagbabago sa system"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Huwag Istorbohin"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"Itinatago ng Huwag Istorbohin ang mga notification para tulungan kang tumuon"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Ito ang bagong gawi. I-tap para baguhin."</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Binago ang Huwag Istorbohin"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"I-tap para tingnan kung ano ang naka-block."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"System"</string>

@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Chiama"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Chiama il numero di telefono selezionato"</string>
     <string name="map" msgid="5441053548030107189">"Mappa"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Localizza l\'indirizzo selezionato"</string>
     <string name="browse" msgid="1245903488306147205">"Apri"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Apri l\'URL selezionato"</string>
     <string name="sms" msgid="4560537514610063430">"Invia messaggio"</string>
@@ -1691,7 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Installato dall\'amministratore"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Aggiornato dall\'amministratore"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Eliminato dall\'amministratore"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Per prolungare la durata della batteria, la funzione Risparmio energetico riduce le prestazioni del dispositivo e limita o disattiva la vibrazione, i servizi di geolocalizzazione e i dati in background. Email, Messaggi e altre app basate sulla sincronizzazione potrebbero non essere aggiornate finché non le apri.\n\nLa funzione Risparmio energetico viene disattivata automaticamente quando il dispositivo è in carica."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"Per aumentare la durata della batteria, il Risparmio energetico disattiva alcune funzioni del dispositivo e limita le app."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Per contribuire a ridurre l\'utilizzo dei dati, la funzione Risparmio dati impedisce ad alcune app di inviare o ricevere dati in background. Un\'app in uso può accedere ai dati, ma potrebbe farlo con meno frequenza. Esempio: le immagini non vengono visualizzate finché non le tocchi."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Attivare Risparmio dati?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Attiva"</string>
@@ -1778,6 +1777,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Tutte le lingue"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Tutte le aree geografiche"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Cerca"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"Azione non consentita"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"L\'app <xliff:g id="APP_NAME">%1$s</xliff:g> è attualmente disattivata."</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"Altri dettagli"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Attivare il profilo di lavoro?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Le tue app di lavoro, le notifiche, i dati e altri elementi del profilo di lavoro saranno attivati."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Attiva"</string>
@@ -1867,8 +1869,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"L\'audio di chiamate e notifiche sarà disattivato"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Modifiche al sistema"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Non disturbare"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"La modalità Non disturbare nasconde le notifiche per favorire la concentrazione"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Si tratta di un nuovo comportamento. Tocca per cambiarlo."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Novità: la modalità Non disturbare nasconde le notifiche"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Tocca per avere ulteriori informazioni e modificare."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"L\'impostazione Non disturbare è cambiata"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tocca per controllare le notifiche bloccate."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistema"</string>

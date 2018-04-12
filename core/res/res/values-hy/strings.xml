@@ -366,7 +366,7 @@
     <string name="permlab_writeSettings" msgid="2226195290955224730">"փոփոխել համակարգի կարգավորումները"</string>
     <string name="permdesc_writeSettings" msgid="7775723441558907181">"Թույլ է տալիս հավելվածին փոփոխել համակարգի կարգավորումների տվյալները: Վնասարար հավելվածները կարող են վնասել ձեր համակարգի կարգավորումները:"</string>
     <string name="permlab_receiveBootCompleted" msgid="5312965565987800025">"աշխատել մեկնարկային ռեժիմով"</string>
-    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Թույլ է տալիս հավելվածին ինքնաշխատ մեկնարկել համակարգի բեռնման ավարտից հետո: Սա կարող է երկարացնել պլանշետի մեկնարկը և թույլ տալ հավելավածին դանդաղեցնել ամբողջ պլանշետի աշխատանքը` միշտ աշխատելով:"</string>
+    <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7390304664116880704">"Թույլ է տալիս հավելվածին ավտոմատ մեկնարկել համակարգի բեռնման ավարտից հետո: Սա կարող է երկարացնել պլանշետի մեկնարկը և թույլ տալ հավելավածին դանդաղեցնել ամբողջ պլանշետի աշխատանքը` միշտ աշխատելով:"</string>
     <string name="permdesc_receiveBootCompleted" product="tv" msgid="4525890122209673621">"Թույլ է տալիս հավելվածին ինքնամեկնարկել համակարգի սկզբնաբեռնումից հետո: Սա կարող է երկարացնել հեռուստացույցի մեկնարկը և թույլ է տալիս հավելվածին դանդաղեցնել ողջ պլանշետի աշխատանքը՝ իր մշտական աշխատանքով:"</string>
     <string name="permdesc_receiveBootCompleted" product="default" msgid="513950589102617504">"Թույլ է տալիս հավելվածին ինքն իրեն սկսել` համակարգի բեռնումն ավարտվելուն պես: Սա կարող է հեռախոսի մեկնարկը դարձնել ավելի երկար և թույլ տալ, որ հավելվածը դանդաղեցնի ընդհանուր հեռախոսի աշխատանքը` միշտ աշխատելով:"</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"ուղարկել կպչուն հաղորդում"</string>
@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Զանգել"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Զանգել ընտրված հեռախոսահամարին"</string>
     <string name="map" msgid="5441053548030107189">"Քարտեզ"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Գտնել ընտրված հասցեն քարտեզում"</string>
     <string name="browse" msgid="1245903488306147205">"Բացել"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Բացել ընտրված URL-ը"</string>
     <string name="sms" msgid="4560537514610063430">"SMS գրել"</string>
@@ -1550,15 +1549,15 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Հեռացնել"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Ձայնը բարձրացնե՞լ խորհուրդ տրվող մակարդակից ավել:\n\nԵրկարատև բարձրաձայն լսելը կարող է վնասել ձեր լսողությունը:"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="8404780875025725199">"Օգտագործե՞լ Մատչելիության դյուրանցումը։"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Մատչելիության գործառույթն օգտագործելու համար սեղմեք և 3 վայրկյան սեղմած պահեք ձայնի ուժգնության երկու կոճակները, երբ գործառույթը միացված է։\n\n Մատչելիության ակտիվ գործառույթը՝\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Գործառույթը կարող եք փոփոխել՝ անցնելով Կարգավորումներ &gt; Մատչելիություն։"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="7256507885737444807">"Մատչելիության գործառույթն օգտագործելու համար սեղմեք և 3 վայրկյան սեղմած պահեք ձայնի ուժգնության երկու կոճակները, երբ գործառույթը միացված է։\n\n Մատչելիության ակտիվ գործառույթը՝\n<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\n\n Գործառույթը կարող եք փոփոխել՝ անցնելով Կարգավորումներ &gt; Հատուկ գործառույթներ։"</string>
     <string name="disable_accessibility_shortcut" msgid="627625354248453445">"Անջատել դյուրանցումը"</string>
     <string name="leave_accessibility_shortcut_on" msgid="7653111894438512680">"Օգտագործել դյուրանցումը"</string>
     <string name="color_inversion_feature_name" msgid="4231186527799958644">"Գունաշրջում"</string>
     <string name="color_correction_feature_name" msgid="6779391426096954933">"Գունաշտկում"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="7771852911861522636">"Մատչելիության դյուրանցումն միացրել է <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="2747243438223109821">"Մատչելիության դյուրանցումն անջատել է <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը"</string>
-    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Ընտրեք որևէ գործառույթ, որը կօգտագործվի Մատչելիություն կոճակին հպելու դեպքում՝"</string>
-    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Գործառույթները փոխելու համար հպեք և պահեք Մատչելիություն կոճակը։"</string>
+    <string name="accessibility_button_prompt_text" msgid="4234556536456854251">"Ընտրեք որևէ գործառույթ, որը կօգտագործվի Հատուկ գործառույթներ կոճակին հպելու դեպքում՝"</string>
+    <string name="accessibility_button_instructional_text" msgid="6942300463612999993">"Գործառույթները փոխելու համար հպեք և պահեք Հատուկ գործառույթներ կոճակը։"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1227146738764986237">"Խոշորացում"</string>
     <string name="user_switched" msgid="3768006783166984410">"Ներկայիս օգտատերը <xliff:g id="NAME">%1$s</xliff:g>:"</string>
     <string name="user_switching_message" msgid="2871009331809089783">"Փոխարկվում է <xliff:g id="NAME">%1$s</xliff:g>-ին..."</string>
@@ -1691,7 +1690,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Տեղադրվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Թարմացվել է ձեր ադմինիստրատորի կողմից"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Ջնջվել է ձեր ադմինիստրատորի կողմից"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Մարտկոցի աշխատաժամանակը երկարացնելու համար տնտեսման ռեժիմում սահմանափակվում են սարքի աշխատանքը, թրթռոցը, տեղորոշման ծառայություններն ու տվյալների ֆոնային փոխանցումը: Տվյալների համաժամեցումից կախված՝ հավելվածները կարող են չթարմացվել, եթե դուք դրանք չգործարկեք:\n\nՍարքի լիցքավորման ժամանակ մարտկոցի տնտեսումն ավտոմատ անջատվում է։"</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Թրաֆիկի տնտեսման ռեժիմում որոշ հավելվածների համար ֆոնային փոխանցումն անջատված է։ Հավելվածը, որն օգտագործում եք, կարող է տվյալներ փոխանցել և ստանալ, սակայն ոչ այնքան հաճախ: Օրինակ՝ պատկերները կցուցադրվեն միայն դրանց վրա սեղմելուց հետո։"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Միացնե՞լ թրաֆիկի խնայումը:"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Միացնել"</string>
@@ -1778,6 +1778,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Բոլոր լեզուները"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Բոլոր տարածաշրջանները"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Որոնում"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"Գործողությունը չի թույլատրվում"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածն արգելափակված է:"</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"Մանրամասն"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Միացնե՞լ աշխատանքային պրոֆիլը"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Ձեր աշխատանքային հավելվածները, ծանուցումները, տվյալները և աշխատանքային պրոֆիլի մյուս գործառույթները կմիանան"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Միացնել"</string>
@@ -1867,8 +1870,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Զանգերի և ծանուցումների համար ձայնն անջատած է"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Համակարգի փոփոխություններ"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Չանհանգստացնել"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"«Չանհանգստացնել» ռեժիմում ծանուցումները կթաքցվեն: Դա կօգնի ձեզ կենտրոնանալ:"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Սա նոր կարգավորում է: Հպեք՝ փոխելու համար:"</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"«Չանհանգստացնել» ռեժիմի կարգավորումները փոխվել են"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Հպեք՝ տեսնելու, թե ինչ է արգելափակվել:"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Համակարգ"</string>

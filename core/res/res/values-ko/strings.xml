@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"전화"</string>
     <string name="dial_desc" msgid="6573723404985517250">"선택한 전화번호로 전화 걸기"</string>
     <string name="map" msgid="5441053548030107189">"지도"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"선택한 주소 위치 확인"</string>
     <string name="browse" msgid="1245903488306147205">"열기"</string>
     <string name="browse_desc" msgid="8220976549618935044">"선택한 URL 열기"</string>
     <string name="sms" msgid="4560537514610063430">"메시지"</string>
@@ -1691,7 +1690,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"관리자에 의해 설치되었습니다."</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"관리자에 의해 업데이트되었습니다."</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"관리자에 의해 삭제되었습니다."</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"배터리 세이버는 배터리 수명 연장을 위해 기기 성능을 줄이며 진동, 위치 서비스 및 백그라운드 데이터를 제한하거나 사용 중지합니다. 이메일, 메시지 및 동기화가 필요한 기타 앱은 앱을 열 때까지 업데이트되지 않을 수 있습니다.\n\n기기가 충전 중일 때는 자동으로 배터리 세이버가 사용 중지됩니다."</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"데이터 사용량을 줄이기 위해 데이터 절약 모드는 일부 앱이 백그라운드에서 데이터를 전송하거나 수신하지 못하도록 합니다. 현재 사용 중인 앱에서 데이터에 액세스할 수 있지만 빈도가 줄어듭니다. 예를 들면, 이미지를 탭하기 전에는 이미지가 표시되지 않습니다."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"데이터 절약 모드를 사용할까요?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"사용 설정"</string>
@@ -1778,6 +1778,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"모든 언어"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"모든 지역"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"검색"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"허용되지 않는 작업"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"<xliff:g id="APP_NAME">%1$s</xliff:g> 애플리케이션이 현재 사용 중지되어 있습니다."</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"세부정보 더보기"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"직장 프로필을 사용 설정하시겠어요?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"업무용 앱, 알림, 데이터 및 기타 직장 프로필 기능이 사용 설정됩니다."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"사용 설정"</string>
@@ -1867,8 +1870,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"전화 및 알림 소리가 음소거됩니다."</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"시스템 변경사항"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"알림 일시중지"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"집중할 수 있도록 알림 일시중지 기능으로 알림 숨김"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"새로운 동작입니다. 변경하려면 탭하세요."</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"알림 일시중지 변경"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"차단된 항목을 확인하려면 탭하세요."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"시스템"</string>

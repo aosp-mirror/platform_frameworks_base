@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"કૉલ કરો"</string>
     <string name="dial_desc" msgid="6573723404985517250">"પસંદ કરેલ ફોન નંબર પર કૉલ કરો"</string>
     <string name="map" msgid="5441053548030107189">"નકશો"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"પસંદ કરેલ સરનામું શોધો"</string>
     <string name="browse" msgid="1245903488306147205">"ખોલો"</string>
     <string name="browse_desc" msgid="8220976549618935044">"પસંદ કરેલ URL ખોલો"</string>
     <string name="sms" msgid="4560537514610063430">"સંદેશ મોકલો"</string>
@@ -1268,7 +1267,7 @@
     <string name="select_keyboard_layout_notification_message" msgid="8084622969903004900">"ભાષા અને લેઆઉટ પસંદ કરવા માટે ટૅપ કરો"</string>
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
-    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"અન્ય ઍપ્લિકેશનોની ટોચે પ્રદર્શિત કરો"</string>
+    <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"અન્ય ઍપથી ઉપર બતાવો"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"<xliff:g id="NAME">%s</xliff:g> અન્ય ઍપ્લિકેશનોની ઉપર પ્રદર્શિત થઈ રહ્યું છે"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> અન્ય ઍપ્લિકેશનો પર દેખાઈ છે"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"જો તમે નથી ઇચ્છતા કે <xliff:g id="NAME">%s</xliff:g> આ સુવિધાનો ઉપયોગ કરે, તો સેટિંગ્સ ખોલવા માટે ટૅપ કરો અને તેને બંધ કરો."</string>
@@ -1399,7 +1398,7 @@
     <string name="sync_undo_deletes" msgid="2941317360600338602">"કાઢી નાખવાનું પૂર્વવત્ કરો"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"હાલ પૂરતું કંઈ કરશો નહીં"</string>
     <string name="choose_account_label" msgid="5655203089746423927">"એક એકાઉન્ટ પસંદ કરો"</string>
-    <string name="add_account_label" msgid="2935267344849993553">"એક એકાઉન્ટ ઉમેરો"</string>
+    <string name="add_account_label" msgid="2935267344849993553">"એકાઉન્ટ ઉમેરો"</string>
     <string name="add_account_button_label" msgid="3611982894853435874">"એકાઉન્ટ ઉમેરો"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"વધારો"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"ઘટાડો"</string>
@@ -1692,7 +1691,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"તમારા વ્યવસ્થાપક દ્વારા ઇન્સ્ટૉલ કરવામાં આવેલ છે"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"તમારા વ્યવસ્થાપક દ્વારા અપડેટ કરવામાં આવેલ છે"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"તમારા વ્યવસ્થાપક દ્વારા કાઢી નાખવામાં આવેલ છે"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"બૅટરીની આવરદા વધારવામાં સહાય કરવા માટે, બૅટરી સેવર તમારા ઉપકરણના કાર્યપ્રદર્શનને ઘટાડે છે અને વાઇબ્રેશન, સ્થાન સેવાઓ અને બૅકગ્રાઉન્ડ ડેટાને સીમિત કરે છે અથવા બંધ કરે છે. ઇમેઇલ, મેસેજિંગ અને અન્ય ઍપ જે સિંક થવા પર આધાર રાખે છે, તેઓ કદાચ તમે ખોલો નહીં ત્યાં સુધી અપડેટ થશે નહીં.\n\nજ્યારે તમારું ઉપકરણ ચાર્જ થઈ રહ્યું હોય ત્યારે બૅટરી સેવર આપમેળે બંધ થઈ જતું હોય છે."</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"ડેટા વપરાશને ઘટાડવામાં સહાય માટે, ડેટા સેવર કેટલીક ઍપ્લિકેશનોને પૃષ્ઠભૂમિમાં ડેટા મોકલવા અથવા પ્રાપ્ત કરવાથી અટકાવે છે. તમે હાલમાં ઉપયોગ કરી રહ્યાં છો તે ઍપ્લિકેશન ડેટાને ઍક્સેસ કરી શકે છે, પરંતુ તે આ ક્યારેક જ કરી શકે છે. આનો અર્થ એ હોઈ શકે છે, ઉદાહરણ તરીકે, છબીઓ ત્યાં સુધી પ્રદર્શિત થશે નહીં જ્યાં સુધી તમે તેને ટૅપ નહીં કરો."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ડેટા સેવર ચાલુ કરીએ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ચાલુ કરો"</string>
@@ -1779,6 +1779,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"બધી ભાષાઓ"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"તમામ પ્રદેશ"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"શોધ"</string>
+    <!-- no translation found for app_suspended_title (5360409799785895488) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (5876776530189983288) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (2901244470963918402) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"કાર્યાલયની પ્રોફાઇલ ચાલુ કરીએ?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"તમારી કાર્યાલયની ઍપ, નોટિફિકેશન, ડેટા અને અન્ય કાર્યાલયની પ્રોફાઇલ સુવિધાઓ ચાલુ કરવામાં આવશે"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ચાલુ કરો"</string>
@@ -1868,8 +1874,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"કૉલ અને નોટિફિકેશન મ્યૂટ કરવામાં આવશે"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"સિસ્ટમના ફેરફારો"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"ખલેલ પાડશો નહીં"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"તમને ફોકસ કરવામાં સહાય કરવા માટે ખલેલ પાડશો નહીં નોટિફિકેશન છુપાવે છે"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"આ નવી વર્તણૂક છે. બદલવા માટે ટૅપ કરો."</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"ખલેલ પાડશો નહીંમાં ફેરફાર થયો છે"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"શું બ્લૉક કરેલ છે તે તપાસવા માટે ટૅપ કરો."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"સિસ્ટમ"</string>

@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"কল"</string>
     <string name="dial_desc" msgid="6573723404985517250">"বেছে নেওয়া ফোন নম্বরে কল করুন"</string>
     <string name="map" msgid="5441053548030107189">"ম্যাপ"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"বেছে নেওয়া ঠিকানাটি ম্যাপে দেখুন"</string>
     <string name="browse" msgid="1245903488306147205">"খুলুন"</string>
     <string name="browse_desc" msgid="8220976549618935044">"বেছে নেওয়া ইউআরএলে যান"</string>
     <string name="sms" msgid="4560537514610063430">"মেসেজ"</string>
@@ -1692,7 +1691,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"আপনার প্রশাসক ইনস্টল করেছেন"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"আপনার প্রশাসক আপডেট করেছেন"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"আপনার প্রশাসক মুছে দিয়েছেন"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"ব্যাটারির চার্জ যাতে আরও বেশিক্ষণ থাকে, তার জন্য ব্যাটারি সেভার আপনার ডিভাইসের পারফরম্যান্স হ্রাস করে এবং ভাইব্রেশন, লোকেশন ভিত্তিক পরিষেবা ও ব্যাকগ্রাউন্ড ডেটা সীমিত অথবা বন্ধ করে দেয়৷ ইমেল, মেসেজ এবং সিঙ্কের উপর নির্ভরশীল অন্যান্য অ্যাপগুলি যতক্ষণ না আপনি নিজে চালু করবেন, ততক্ষণ সেগুলি আপডেট নাও হতে পারে।\n\nডিভাইস চার্জে বসালে ব্যাটারি সেভার নিজে থেকেই বন্ধ হয়ে যায়৷"</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"ডেটার ব্যবহার কমাতে সহায়তা করার জন্য, ডেটা সেভার পটভূমিতে কিছু অ্যাপ্লিকেশনকে ডেটা পাঠাতে বা গ্রহণ করতে বাধা দেয়৷ আপনি বর্তমানে এমন একটি অ্যাপ্লিকেশন ব্যবহার করছেন যেটি ডেটা অ্যাক্সেস করতে পারে, তবে সেটি কমই করে৷ এর ফলে যা হতে পারে, উদাহরণস্বরূপ, আপনি ছবিগুলিতে আলতো চাপ না দেওয়া পর্যন্ত সেগুলি প্রদর্শিত হবে না৷"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ডেটা সেভার চালু করবেন?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"চালু করুন"</string>
@@ -1779,6 +1779,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"সকল ভাষা"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"সমস্ত অঞ্চল"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"খুঁজুন"</string>
+    <!-- no translation found for app_suspended_title (5360409799785895488) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (5876776530189983288) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (2901244470963918402) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"কাজের প্রোফাইল চালু করবেন?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"আপনার কাজের অ্যাপ, বিজ্ঞপ্তি, ডেটা এবং কাজের প্রোফাইলের অন্যান্য বৈশিষ্ট্য চালু করা হবে"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"চালু করুন"</string>
@@ -1868,8 +1874,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"কল এবং বিজ্ঞপ্তিগুলি মিউট করা হবে"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"সিস্টেমে হয়ে থাকা পরিবর্তন"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"বিরক্ত করবেন না"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"আপনি যাতে মন দিয়ে কাজ করতে পারেন তার জন্য \'বিরক্ত করবেন না\' মোড বিজ্ঞপ্তি লুকিয়ে দিচ্ছে"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"এটি নতুন বৈশিষ্ট্য। পরিবর্তন করতে ট্যাপ করুন।"</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\'বিরক্ত করবেন না\' মোডের সেটিং বদলে গেছে"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"কী কী ব্লক করা আছে তা দেখতে ট্যাপ করুন।"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"সিস্টেম"</string>

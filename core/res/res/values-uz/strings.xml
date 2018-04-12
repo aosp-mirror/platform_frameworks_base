@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Chaqiruv"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Belgilangan raqamga telefon qilish"</string>
     <string name="map" msgid="5441053548030107189">"Xarita"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Belgilangan manzilni xaritadan topish"</string>
     <string name="browse" msgid="1245903488306147205">"Ochish"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Belgilangan URL manzilini ochish"</string>
     <string name="sms" msgid="4560537514610063430">"Xabar"</string>
@@ -1692,7 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Administrator tomonidan o‘rnatilgan"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Administrator tomonidan yangilangan"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Administrator tomonidan o‘chirilgan"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Batareya quvvatini uzoqroq vaqtga yetkazish uchun quvvat tejash funksiyasi qurilmangiz unumdorligini kamaytiradi hamda uning tebranishi, joylashuv xizmatlari va orqa fonda internetdan foydalanishini cheklaydi yoki faolsizlantiradi. Sinxronlanishni talab qiladigan e-pochta, xabar almashinuv va boshqa ilovalar esa qachonki ularni ishga tushirganingizda yangilanadi.\n\nQurilma quvvat olayotganda quvvat tejash funksiyasi avtomatik tarzda o‘chadi."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"Batareya quvvatini tejash maqsadida Quvvat tejash rejimida ayrim qurilma funksiyalari faolsizlantiriladi va ilovalar ishlashi cheklanadi."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Trafik tejash rejimida ayrim ilovalar uchun orqa fondan internetdan foydalanish imkoniyati cheklanadi. Siz ishlatayotgan ilova zaruratga qarab internet-trafik sarflashi mumkin, biroq cheklangan miqdorda. Masalan, rasmlar ustiga bosmaguningizcha ular yuklanmaydi."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Trafik tejash yoqilsinmi?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Yoqish"</string>
@@ -1779,6 +1778,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Barcha tillar"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Barcha hududlar"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Qidiruv"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"Bu amalga ruxsat berilmagan"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"<xliff:g id="APP_NAME">%1$s</xliff:g> ilovasi hozirda faolsizlantirilgan."</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"Batafsil"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Ishchi profil yoqilsinmi?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Ishchi ilovalar, bildirishnomalar, ma’lumotlar va boshqa ishchi profil imkoniyatlari yoqiladi"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Yoqish"</string>
@@ -1868,8 +1870,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Chaqiruvlar va bildirishnomalar ovozsiz qilinadi"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Tizimga oid o‘zgarishlar"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Bezovta qilinmasin"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"Bezovta qilinmasin rejimi diqqatingizni jamlash uchun bildirishnomalarni berkitadi"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Bu yangi xatti-harakat. O‘zgartirish uchun bosing."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Yangi: Bezovta qilinmasin rejimi bildirishnomalarni berkitmoqda"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Batafsil axborot olish va o‘zgartirish uchun bosing."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Bezovta qilinmasin rejimi sozlamalari o‘zgartirildi"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Nimalar bloklanganini tekshirish uchun bosing"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Tizim"</string>

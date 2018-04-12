@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"कॉल करा"</string>
     <string name="dial_desc" msgid="6573723404985517250">"निवडलेल्या फोन नंबरवर कॉल करा"</string>
     <string name="map" msgid="5441053548030107189">"नकाशा"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"निवडलेला पत्ता शोधा"</string>
     <string name="browse" msgid="1245903488306147205">"उघडा"</string>
     <string name="browse_desc" msgid="8220976549618935044">"निवडलेली URL उघडा"</string>
     <string name="sms" msgid="4560537514610063430">"संदेश"</string>
@@ -1692,7 +1691,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"आपल्या प्रशासकाने इंस्टॉल केले"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"आपल्या प्रशासकाने अपडेट केले"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"आपल्या प्रशासकाने हटवले"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"बॅटरीचे आयुष्य वाढवण्यासाठी, बॅटरी बचतकर्ता तुमच्या डिव्हाइसचे कार्यप्रदर्शन कमी करतो आणि कंपन, स्थान सेवा आणि बराच पार्श्वभूमी डेटा मर्यादित करतो. संकालनावर अवलंबून असणारे ईमेल, संदेशन आणि इतर अॅप्स तुम्ही उघडल्याशिवाय अपडेट होऊ शकत नाहीत.\n\nतुमचे डिव्हाइस चार्ज होत असते तेव्हा बॅटरी बचतकर्ता स्वयंचलितपणे बंद होतो."</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"डेटा वापर कमी करण्यात मदत करण्यासाठी, डेटा सर्व्हर काही अॅप्सना पार्श्वभूमीमध्ये डेटा पाठविण्यास किंवा प्राप्त करण्यास प्रतिबंधित करतो. आपण सध्या वापरत असलेला अॅप डेटामध्ये प्रवेश करू शकतो परंतु तसे तो खूप कमी वेळा करू शकतो. याचा अर्थ, उदाहरणार्थ, आपण इमेज टॅप करेपर्यंत त्या प्रदर्शित करणार नाहीत असा असू शकतो."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा बचतकर्ता चालू करायचा?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"चालू करा"</string>
@@ -1779,6 +1779,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"सर्व भाषा"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"सर्व प्रदेश"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"शोध"</string>
+    <!-- no translation found for app_suspended_title (5360409799785895488) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (5876776530189983288) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (2901244470963918402) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"कार्य प्रोफाइल चालू ठेवायची?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"तुमची कार्य अ‍ॅप्स, सूचना, डेटा आणि अन्य कार्य प्रोफाइल वैशिष्ट्ये चालू केली जातील"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"चालू करा"</string>
@@ -1868,8 +1874,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"कॉल आणि सूचना म्युट केल्या जातील"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"सिस्टम बदल"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"व्यत्यय आणू नका"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"तुम्हाला लक्ष केंद्रित करण्यात मदत करण्यासाठी व्यत्यय आणू नका सूचना लपवत आहे"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"हे नवीन वर्तन आहे. बदलण्यासाठी टॅप करा."</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"व्यत्यय आणू नका बदलले आहे"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"काय ब्लॉक केले आहे हे तपासण्यासाठी टॅप करा."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"सिस्टम"</string>
