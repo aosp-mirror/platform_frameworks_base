@@ -2968,7 +2968,7 @@ public class TelephonyManager {
             IPhoneSubInfo info = getSubscriberInfo();
             if (info == null)
                 return null;
-            return info.getGroupIdLevel1(mContext.getOpPackageName());
+            return info.getGroupIdLevel1ForSubscriber(getSubId(), mContext.getOpPackageName());
         } catch (RemoteException ex) {
             return null;
         } catch (NullPointerException ex) {
