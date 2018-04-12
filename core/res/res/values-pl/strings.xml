@@ -1054,8 +1054,7 @@
     <string name="dial" msgid="1253998302767701559">"Zadzwoń"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Zadzwoń pod wybrany numer telefonu"</string>
     <string name="map" msgid="5441053548030107189">"Mapa"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Pokaż wybrany adres na mapie"</string>
     <string name="browse" msgid="1245903488306147205">"Otwórz"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Otwórz wybrany adres URL"</string>
     <string name="sms" msgid="4560537514610063430">"Wyślij SMS-a"</string>
@@ -1741,7 +1740,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Zainstalowany przez administratora"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Zaktualizowany przez administratora"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Usunięty przez administratora"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Aby wydłużyć czas pracy baterii, Oszczędzanie baterii ogranicza bądź wyłącza wibracje, usługi lokalizacyjne i przetwarzanie danych w tle. Poczta e-mail, SMS-y i inne synchronizowane aplikacje mogą nie aktualizować swojej zawartości, dopóki ich nie otworzysz.\n\nOszczędzanie baterii wyłącza się automatycznie podczas ładowania urządzenia."</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Oszczędzanie danych uniemożliwia niektórym aplikacjom wysyłanie i odbieranie danych w tle, zmniejszając w ten sposób ich użycie. Aplikacja, z której w tej chwili korzystasz, może uzyskiwać dostęp do danych, ale rzadziej. Może to powodować, że obrazy będą się wyświetlać dopiero po kliknięciu."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Włączyć Oszczędzanie danych?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Włącz"</string>
@@ -1846,6 +1846,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Wszystkie języki"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Wszystkie kraje"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Szukaj"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"Niedozwolona czynność"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> jest obecnie zablokowana."</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"Więcej szczegółów"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Włączyć profil służbowy?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Aplikacje do pracy, powiadomienia, dane i inne funkcje profilu do pracy zostaną włączone"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Włącz"</string>
@@ -1937,8 +1940,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Wyciszenie połączeń i powiadomień"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Zmiany w systemie"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Nie przeszkadzać"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"W trybie Nie przeszkadzać powiadomienia są ukrywane, by Cię nie rozpraszać"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"To nowe działanie. Kliknij, by zmienić."</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Zmiany w trybie Nie przeszkadzać"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Kliknij, by sprawdzić, co jest zablokowane."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"System"</string>

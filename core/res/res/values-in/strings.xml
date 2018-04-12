@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Panggil"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Panggil nomor telepon yang dipilih"</string>
     <string name="map" msgid="5441053548030107189">"Peta"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Mencari alamat yang dipilih"</string>
     <string name="browse" msgid="1245903488306147205">"Buka"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Buka URL yang dipilih"</string>
     <string name="sms" msgid="4560537514610063430">"Pesan"</string>
@@ -1691,8 +1690,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Diinstal oleh admin Anda"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Diupdate oleh admin Anda"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Dihapus oleh admin Anda"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Untuk memperpanjang masa pakai baterai, Penghemat Baterai mengurangi performa perangkat dan membatasi atau menonaktifkan getaran, layanan lokasi, dan data background. Email, messaging, dan aplikasi lain yang mengandalkan sinkronisasi mungkin tidak diupdate, kecuali jika dibuka.\n\nPenghemat Baterai nonaktif otomatis jika perangkat sedang diisi daya baterainya."</string>
-    <string name="data_saver_description" msgid="6015391409098303235">"Untuk membantu mengurangi penggunaan data, Penghemat Kuota Internet mencegah beberapa aplikasi mengirim atau menerima data di latar belakang. Aplikasi yang sedang digunakan dapat mengakses data, tetapi frekuensinya agak lebih jarang. Misalnya saja, gambar hanya akan ditampilkan setelah disentuh."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"Untuk memperpanjang masa pakai baterai Anda, fitur Penghemat Baterai mematikan sebagian fitur perangkat dan membatasi aplikasi."</string>
+    <string name="data_saver_description" msgid="6015391409098303235">"Untuk membantu mengurangi penggunaan data, Penghemat Kuota Internet mencegah beberapa aplikasi mengirim atau menerima data di latar belakang. Aplikasi yang sedang digunakan dapat mengakses data, tetapi frekuensinya agak lebih jarang. Misalnya saja, gambar hanya akan ditampilkan setelah di-tap."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Aktifkan Penghemat Kuota Internet?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktifkan"</string>
     <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="4367877408072000848">
@@ -1778,6 +1777,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Semua bahasa"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Semua wilayah"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Telusuri"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"Tindakan tidak diizinkan"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"Aplikasi <xliff:g id="APP_NAME">%1$s</xliff:g> saat ini dinonaktifkan."</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"Detail selengkapnya"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Aktifkan profil kerja?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Aplikasi kerja, notifikasi, data, dan fitur profil kerja lainnya akan diaktifkan"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Aktifkan"</string>
@@ -1867,8 +1869,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Suara panggilan dan notifikasi akan dinonaktifkan"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Perubahan sistem"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Jangan Ganggu"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"Mode Jangan Ganggu menyembunyikan notifikasi untuk membantu Anda fokus"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Ini adalah perilaku baru. Tap untuk mengubah."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Baru: Mode Jangan Ganggu menyembunyikan notifikasi"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Tap untuk mempelajari lebih lanjut dan mengubah."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Jangan Ganggu telah berubah"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tap untuk memeriksa item yang diblokir."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistem"</string>

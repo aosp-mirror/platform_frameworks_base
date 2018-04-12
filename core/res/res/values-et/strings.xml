@@ -333,7 +333,7 @@
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Võimaldab rakendusel saada üksikasju praegu sünkroonitavate voogude kohta."</string>
     <string name="permlab_sendSms" msgid="7544599214260982981">"saata ja vaadata SMS-sõnumeid"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Võimaldab rakendusel saata SMS-sõnumeid. See võib kaasa tuua ootamatuid tasusid. Pahatahtlikud rakendused võivad teile tekitada kulusid, saates sõnumeid teie kinnituseta."</string>
-    <string name="permlab_readSms" msgid="8745086572213270480">"lugege oma tekstisõnumeid (SMS või MMS)"</string>
+    <string name="permlab_readSms" msgid="8745086572213270480">"Tekstisõnumite (SMS või MMS) lugemine"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"See rakendus saab kõiki teie tahvelarvutisse salvestatud SMS-e (tekstsõnumeid) lugeda."</string>
     <string name="permdesc_readSms" product="tv" msgid="5796670395641116592">"See rakendus saab kõiki teie telerisse salvestatud SMS-e (tekstsõnumeid) lugeda."</string>
     <string name="permdesc_readSms" product="default" msgid="6826832415656437652">"See rakendus saab kõiki teie telefoni salvestatud SMS-e (tekstsõnumeid) lugeda."</string>
@@ -373,7 +373,7 @@
     <string name="permdesc_broadcastSticky" product="tablet" msgid="7749760494399915651">"Võimaldab rakendusel saata püsivaid edastusi, mis jäävad pärast saate lõppemist alles. Ülemäärane kasutamine võib muuta tahvelarvuti aeglaseks või ebastabiilseks, põhjustades selle liiga suure mälukasutuse."</string>
     <string name="permdesc_broadcastSticky" product="tv" msgid="6839285697565389467">"Lubab rakendusel saata püsiülekandeid, mis jäävad alles pärast ülekande lõppemist. Liigne kasutamine võib muuta teleri aeglaseks või ebastabiilseks, sest teler kasutab selleks liigselt mälu."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="2825803764232445091">"Võimaldab rakendusel saata püsivaid edastusi, mis jäävad pärast saate lõppemist alles. Ülemäärane kasutamine võib muuta telefoni aeglaseks või ebastabiilseks, põhjustades selle liiga suure mälukasutuse."</string>
-    <string name="permlab_readContacts" msgid="8348481131899886131">"lugege oma kontakte"</string>
+    <string name="permlab_readContacts" msgid="8348481131899886131">"Kontaktide lugemine"</string>
     <string name="permdesc_readContacts" product="tablet" msgid="5294866856941149639">"Võimaldab rakendusel lugeda andmeid teie tahvelarvutisse salvestatud kontaktide kohta, näiteks seda, kui tihti te kellelegi helistate, meilite või nendega muul viisil suhtlete. See luba võimaldab rakendustel salvestada teie kontaktandmeid ja pahatahtlikud rakendused võivad teie teadmata kontaktandmeid jagada."</string>
     <string name="permdesc_readContacts" product="tv" msgid="1839238344654834087">"Lubab rakendusel lugeda telerisse salvestatud kontaktide andmeid, sh seda, kui sageli olete konkreetsele isikule helistanud, meilinud või temaga muul viisil suhelnud. See luba võimaldab rakendustel kontaktandmeid salvestada ja pahatahtlikud rakendused võivad jagada kontaktandmeid teie teadmata."</string>
     <string name="permdesc_readContacts" product="default" msgid="8440654152457300662">"Võimaldab rakendusel lugeda andmeid teie telefoni salvestatud kontaktide kohta, näiteks seda, kui tihti te kellelegi helistate, meilite või nendega muul viisil suhtlete. See luba võimaldab rakendustel salvestada teie kontaktandmeid ja pahatahtlikud rakendused võivad teie teadmata kontaktandmeid jagada."</string>
@@ -419,7 +419,7 @@
     <string name="permdesc_callPhone" msgid="3740797576113760827">"Võimaldab rakendusel teie sekkumiseta telefoninumbritele helistada. See võib põhjustada ootamatuid tasusid või telefonikõnesid. Pange tähele, et see ei luba rakendusel helistada hädaabinumbritele. Pahatahtlikud rakendused võivad teile kulusid tekitada, tehes telefonikõnesid teie kinnituseta."</string>
     <string name="permlab_accessImsCallService" msgid="3574943847181793918">"juurdepääs IMS-kõneteenusele"</string>
     <string name="permdesc_accessImsCallService" msgid="8992884015198298775">"Võimaldab rakendusel kasutada IMS-teenust kõnede tegemiseks ilma, et peaksite sekkuma."</string>
-    <string name="permlab_readPhoneState" msgid="9178228524507610486">"lugege telefoni olekut ja identiteeti"</string>
+    <string name="permlab_readPhoneState" msgid="9178228524507610486">"Telefoni oleku ja identiteedi lugemine"</string>
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Annab rakendusele juurdepääsu seadme telefonifunktsioonidele. See luba võimaldab rakendusel määrata telefoninumbri ja seadme ID-d ning kontrollida, kas kõne on aktiivne ja kaugnumber on kõne kaudu telefoniga ühendatud."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"kõnede marsruutimine süsteemi kaudu"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Võimaldab rakendusel kõnesid süsteemi kaudu marsruutida, et helistamiskogemust täiustada."</string>
@@ -518,8 +518,8 @@
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Võimaldab rakendusel muuta konto sünkroonimisseadeid. Näiteks saab seda kasutada, et lubada rakenduse Inimesed sünkroonimine kontoga."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"loe sünkroonimisstatistikat"</string>
     <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Võimaldab rakendusel lugeda konto sünkroonimisstatistikat, sh sünkroonimissündmuste ajalugu ja sünkroonitud andmete hulka."</string>
-    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"lugege USB-salvestusruumi sisu"</string>
-    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"lugege oma SD-kaardi sisu"</string>
+    <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"USB-salvestusruumi sisu lugemine"</string>
+    <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"SD-kaardi sisu lugemine"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Lubab rakendusel lugeda USB-salvestusruumi sisu."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="2607362473654975411">"Lubab rakendusel lugeda SD-kaardi sisu."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"muutke, kustut. USB-ruumi sisu"</string>
@@ -853,9 +853,9 @@
     <string name="autofill_parish" msgid="8202206105468820057">"Vald"</string>
     <string name="autofill_area" msgid="3547409050889952423">"Piirkond"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"Emiraat"</string>
-    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"lugege oma veebijärjehoidjaid ja -ajalugu"</string>
+    <string name="permlab_readHistoryBookmarks" msgid="3775265775405106983">"Veebijärjehoidjate ja -ajaloo lugemine"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="8462378226600439658">"Võimaldab rakendusel lugeda kõikide URL-ide ajalugu, mida brauser on külastanud, ja kõiki brauseri järjehoidjaid. Märkus: see luba ei pruugi jõustuda kolmanda osapoole brauseritega või teiste veebisirvimisvõimega rakendustega."</string>
-    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"kirjutage veebijärjehoidjaid ja -ajalugu"</string>
+    <string name="permlab_writeHistoryBookmarks" msgid="3714785165273314490">"Veebijärjehoidjate ja -ajaloo kirjutamine"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="6825527469145760922">"Võimaldab rakendusel muuta tahvelarvutisse salvestatud brauseri ajalugu või järjehoidjaid. See võimaldab rakendusel kustutada või muuta brauseri andmeid. Märkus: see luba ei pruugi jõustuda kolmanda osapoole brauserites või teistes veebisirvimisvõimega rakendustes."</string>
     <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="7007393823197766548">"Lubab rakendusel muuta telerisse salvestatud brauseri ajalugu või järjehoidjaid. See võib lubada rakendusel brauseri andmeid kustutada või muuta. Märkus: seda luba ei või jõustada kolmanda osapoole brauserid või muud veebisirvimise võimalustega rakendused."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="8497389531014185509">"Võimaldab rakendusel muuta telefoni salvestatud brauseri ajalugu või järjehoidjaid. See võimaldab rakendusel kustutada või muuta brauseri andmeid. Märkus: see luba ei pruugi jõustuda kolmanda osapoole brauserites või teistes veebisirvimisvõimega rakendustes."</string>
@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Helista"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Valitud telefoninumbrile helistamine"</string>
     <string name="map" msgid="5441053548030107189">"Kaart"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Valitud aadressi leidmine"</string>
     <string name="browse" msgid="1245903488306147205">"Ava"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Valitud URL-i avamine"</string>
     <string name="sms" msgid="4560537514610063430">"Saada sõnum"</string>
@@ -1691,7 +1690,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Administraator on selle installinud"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Administraator on seda värskendanud"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Administraator on selle kustutanud"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Aku tööea parandamiseks vähendab akusäästja teie seadme toimivust ning piirab vibratsiooni, asukohateenuseid ja taustaandmeid (või lülitab need välja). E-posti, sõnumsidet ja muid sünkroonimisele tuginevaid rakendusi võidakse värskendada ainult siis, kui need avate.\n\nSeadme laadimise ajal lülitatakse akusäästja automaatselt välja."</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Andmekasutuse vähendamiseks keelab andmeside mahu säästja mõne rakenduse puhul andmete taustal saatmise ja vastuvõtmise. Rakendus, mida praegu kasutate, pääseb andmesidele juurde, kuid võib seda teha väiksema sagedusega. Seetõttu võidakse näiteks kujutised kuvada alles siis, kui neid puudutate."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Lül. andmemahu säästja sisse?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Lülita sisse"</string>
@@ -1778,6 +1778,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Kõik keeled"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Kõik piirkonnad"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Otsing"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"Keelatud toiming"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"Rakendus <xliff:g id="APP_NAME">%1$s</xliff:g> on praegu keelatud."</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"Rohkem üksikasju"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Kas lülitada tööprofiil sisse?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Teie töörakendused, märguanded, andmed ja muud tööprofiili funktsioonid lülitatakse sisse"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Lülita sisse"</string>
@@ -1867,8 +1870,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Kõned ja märguanded on vaigistatud"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Süsteemi muudatused"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Mitte segada"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"Režiim Mitte segada peidab märguanded, et saaksite keskenduda"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"See on uus käitumine. Puudutage muutmiseks."</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Režiimi Mitte segada muudeti"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Puudutage, et kontrollida, mis on blokeeritud."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Süsteem"</string>

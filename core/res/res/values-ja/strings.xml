@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"電話"</string>
     <string name="dial_desc" msgid="6573723404985517250">"選択した電話番号に電話をかけます"</string>
     <string name="map" msgid="5441053548030107189">"地図"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"選択した住所を探します"</string>
     <string name="browse" msgid="1245903488306147205">"開く"</string>
     <string name="browse_desc" msgid="8220976549618935044">"選択した URL を開きます"</string>
     <string name="sms" msgid="4560537514610063430">"メッセージ"</string>
@@ -1284,7 +1283,7 @@
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"この端末はこの <xliff:g id="NAME">%s</xliff:g>に対応していません。タップして、対応している形式でセットアップしてください。"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"この端末はこの <xliff:g id="NAME">%s</xliff:g>に対応していません。サポートされるフォーマットで設定するには選択してください。"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g>が不適切に取り外されました"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"コンテンツを消去しないようメディアを取り出してから取り外してください"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"コンテンツの喪失を防ぐため、メディアを取り出してから取り外してください"</string>
     <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g>の取り外し"</string>
     <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"一部の機能が正しく動作しない可能性があります。新しいストレージを挿入してください。"</string>
     <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g>を取り出しています"</string>
@@ -1691,7 +1690,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"管理者によりインストールされています"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"管理者により更新されています"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"管理者により削除されています"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"バッテリーを長持ちさせるため、バッテリー セーバーは端末のパフォーマンスを抑え、バイブレーション、位置情報サービス、バックグラウンド データを制限したり、OFF にしたりします。同期を使用するメールやメッセージなどのアプリは起動しないと更新されない場合があります。\n\nバッテリー セーバーは端末の充電中は自動的に OFF になります。"</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"データセーバーは、一部のアプリによるバックグラウンドでのデータ送受信を停止することでデータ使用量を抑制します。使用中のアプリからデータにアクセスすることはできますが、その頻度は低くなる場合があります。この影響として、たとえば画像はタップしないと表示されないようになります。"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"データセーバーを ON にしますか？"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"ON にする"</string>
@@ -1778,6 +1778,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"すべての言語"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"すべての地域"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"検索"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"操作が許可されていません"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"アプリ <xliff:g id="APP_NAME">%1$s</xliff:g> は現在無効です。"</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"詳細"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"仕事用プロファイルの有効化"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"仕事用のアプリ、通知、データなど、仕事用プロファイルの機能が ON になります"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ON にする"</string>
@@ -1867,8 +1870,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"着信音と通知音をミュートします"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"システムの変更"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"マナーモード"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"マナーモードでは、集中できるよう通知が非表示になります"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"これが新しい動作です。変更するにはタップしてください。"</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"マナーモードが変わりました"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"タップしてブロック対象をご確認ください。"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"システム"</string>

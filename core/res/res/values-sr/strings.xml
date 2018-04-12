@@ -829,7 +829,7 @@
     <string name="factorytest_not_system" msgid="4435201656767276723">"Радња FACTORY_TEST је подржана само за пакете инсталиране у директоријуму /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Није пронађен ниједан пакет који обезбеђује радњу FACTORY_TEST."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"Поново покрени"</string>
-    <string name="js_dialog_title" msgid="1987483977834603872">"На страници на адреси „<xliff:g id="TITLE">%s</xliff:g>“ пише следеће:"</string>
+    <string name="js_dialog_title" msgid="1987483977834603872">"На страници на адреси „<xliff:g id="TITLE">%s</xliff:g>“ пише:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Потврда навигације"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Затвори ову страницу"</string>
@@ -1034,8 +1034,7 @@
     <string name="dial" msgid="1253998302767701559">"Позови"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Позовите изабрани број телефона"</string>
     <string name="map" msgid="5441053548030107189">"Мапа"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Пронађите изабрану адресу"</string>
     <string name="browse" msgid="1245903488306147205">"Отвори"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Отворите изабрани URL"</string>
     <string name="sms" msgid="4560537514610063430">"Пошаљи SMS"</string>
@@ -1053,7 +1052,7 @@
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Нема довољно меморијског простора за систем. Уверите се да имате 250 MB слободног простора и поново покрените."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"Апликација <xliff:g id="APP_NAME">%1$s</xliff:g> је покренута"</string>
     <string name="app_running_notification_text" msgid="1197581823314971177">"Додирните за више информација или заустављање апликације."</string>
-    <string name="ok" msgid="5970060430562524910">"У реду"</string>
+    <string name="ok" msgid="5970060430562524910">"Потврди"</string>
     <string name="cancel" msgid="6442560571259935130">"Откажи"</string>
     <string name="yes" msgid="5362982303337969312">"Потврди"</string>
     <string name="no" msgid="5141531044935541497">"Откажи"</string>
@@ -1349,7 +1348,7 @@
     <string name="ime_action_go" msgid="8320845651737369027">"Иди"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Претражи"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Пошаљи"</string>
-    <string name="ime_action_next" msgid="3138843904009813834">"Следеће"</string>
+    <string name="ime_action_next" msgid="3138843904009813834">"Даље"</string>
     <string name="ime_action_done" msgid="8971516117910934605">"Готово"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Претходно"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Изврши"</string>
@@ -1716,7 +1715,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Инсталирао је администратор"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Ажурирао је администратор"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Избрисао је администратор"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Да би продужила трајање батерије, Уштеда батерије смањује перформансе уређаја и ограничава или искључује вибрацију, услуге локације и позадинске податке. Имејл, размена порука и друге апликације које се ослањају на синхронизацију се можда неће ажурирати ако их не отворите.\n\nУштеда батерије се аутоматски искључује када се уређај пуни."</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Да би се смањила потрошња података, Уштеда података спречава неке апликације да шаљу или примају податке у позадини. Апликација коју тренутно користите може да приступа подацима, али ће то чинити ређе. На пример, слике се неће приказивати док их не додирнете."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Укључити Уштеду података?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Укључи"</string>
@@ -1812,6 +1812,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Сви језици"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Сви региони"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Претражи"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"Радња није дозвољена"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"Апликација <xliff:g id="APP_NAME">%1$s</xliff:g> је тренутно онемогућена."</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"Више детаља"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Да укључимо профил за Work?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Укључиће се пословне апликације, обавештења, подаци и друге функције профила за Work"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Укључи"</string>
@@ -1902,8 +1905,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Мелодија звона за позиве и обавештење је искључена"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Системске промене"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Не узнемиравај"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"Режим Не узнемиравај крије обавештења да би вам помогао да се фокусирате"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Ово је ново понашање. Додирните да бисте променили."</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Режим Не узнемиравај је промењен"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Додирните да бисте проверили шта је блокирано."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Систем"</string>

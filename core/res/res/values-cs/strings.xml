@@ -185,7 +185,7 @@
     <string name="network_logging_notification_title" msgid="6399790108123704477">"Zařízení je spravováno"</string>
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Toto zařízení je spravováno vaší organizací, která může sledovat síťový provoz. Podrobnosti zobrazíte klepnutím."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Zařízení bude vymazáno"</string>
-    <string name="factory_reset_message" msgid="9024647691106150160">"Aplikaci pro správu nelze použít. Zařízení nyní bude vymazáno.\n\nV případě dotazů vám pomůže administrátor organizace."</string>
+    <string name="factory_reset_message" msgid="9024647691106150160">"Aplikaci pro správu nelze použít. Zařízení teď bude vymazáno.\n\nV případě dotazů vám pomůže administrátor organizace."</string>
     <string name="printing_disabled_by" msgid="8936832919072486965">"Aplikace <xliff:g id="OWNER_APP">%s</xliff:g> tisk zakazuje."</string>
     <string name="me" msgid="6545696007631404292">"Já"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Možnosti tabletu"</string>
@@ -775,9 +775,9 @@
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Tablet jste se pokusili nesprávným způsobem odemknout <xliff:g id="NUMBER_0">%1$d</xliff:g>krát. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech se v tabletu obnoví tovární nastavení a veškerá uživatelská data budou ztracena."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"<xliff:g id="NUMBER_0">%1$d</xliff:g>× jste se neúspěšně pokusili odemknout televizi. Po dalších <xliff:g id="NUMBER_1">%2$d</xliff:g> neúspěšných pokusech bude v televizi obnoveno tovární nastavení a veškerá uživatelská data budou ztracena."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Telefon jste se pokusili nesprávným způsobem odemknout <xliff:g id="NUMBER_0">%1$d</xliff:g>krát. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech se v telefonu obnoví tovární nastavení a veškerá uživatelská data budou ztracena."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Tablet jste se pokusili nesprávným způsobem odemknout <xliff:g id="NUMBER">%d</xliff:g>krát. V tabletu se nyní obnoví výchozí tovární nastavení."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"<xliff:g id="NUMBER">%d</xliff:g>× jste se neúspěšně pokusili odemknout televizi. V televizi nyní bude obnoveno tovární nastavení."</string>
-    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Telefon jste se pokusili nesprávným způsobem odemknout <xliff:g id="NUMBER">%d</xliff:g>krát. V telefonu se nyní obnoví výchozí tovární nastavení."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Tablet jste se pokusili nesprávným způsobem odemknout <xliff:g id="NUMBER">%d</xliff:g>krát. V tabletu se teď obnoví výchozí tovární nastavení."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="3195755534096192191">"<xliff:g id="NUMBER">%d</xliff:g>× jste se neúspěšně pokusili odemknout televizi. V televizi teď bude obnoveno tovární nastavení."</string>
+    <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="3025504721764922246">"Telefon jste se pokusili nesprávným způsobem odemknout <xliff:g id="NUMBER">%d</xliff:g>krát. V telefonu se teď obnoví výchozí tovární nastavení."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Sekundy zbývající do dalšího pokusu: <xliff:g id="NUMBER">%d</xliff:g>."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Zapomněli jste gesto?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Odemčení účtu"</string>
@@ -923,7 +923,7 @@
     <string name="weeks" msgid="6509623834583944518">"týd."</string>
     <string name="year" msgid="4001118221013892076">"rokem"</string>
     <string name="years" msgid="6881577717993213522">"lety"</string>
-    <string name="now_string_shortest" msgid="8912796667087856402">"nyní"</string>
+    <string name="now_string_shortest" msgid="8912796667087856402">"teď"</string>
     <plurals name="duration_minutes_shortest" formatted="false" msgid="3957499975064245495">
       <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
       <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
@@ -1054,8 +1054,7 @@
     <string name="dial" msgid="1253998302767701559">"Zavolat"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Zavolat na vybrané telefonní číslo"</string>
     <string name="map" msgid="5441053548030107189">"Mapa"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Vyhledat vybranou adresu"</string>
     <string name="browse" msgid="1245903488306147205">"Otevřít"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Otevřít vybranou adresu URL"</string>
     <string name="sms" msgid="4560537514610063430">"Zpráva"</string>
@@ -1377,7 +1376,7 @@
     <string name="ime_action_default" msgid="2840921885558045721">"Spustit"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Vytočit číslo\n <xliff:g id="NUMBER">%s</xliff:g>."</string>
     <string name="create_contact_using" msgid="4947405226788104538">"Vytvořit kontakt\npro <xliff:g id="NUMBER">%s</xliff:g>."</string>
-    <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Následující aplikace požadují oprávnění k přístupu do vašeho účtu (nyní i v budoucnu)."</string>
+    <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Následující aplikace požadují oprávnění k přístupu do vašeho účtu (teď i v budoucnu)."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Chcete tento požadavek povolit?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Žádost o přístup"</string>
     <string name="allow" msgid="7225948811296386551">"Povolit"</string>
@@ -1588,9 +1587,9 @@
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Již jste se <xliff:g id="NUMBER_0">%1$d</xliff:g>krát pokusili odemknout tablet nesprávným způsobem. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech se v tabletu obnoví tovární nastavení a veškerá uživatelská data budou ztracena."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="5621231220154419413">"<xliff:g id="NUMBER_0">%1$d</xliff:g>× jste se neúspěšně pokusili odemknout televizi. Po dalších <xliff:g id="NUMBER_1">%2$d</xliff:g> neúspěšných pokusech bude v televizi obnoveno tovární nastavení a veškerá uživatelská data budou ztracena."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Již jste se <xliff:g id="NUMBER_0">%1$d</xliff:g>krát pokusili odemknout telefon nesprávným způsobem. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech se v telefonu obnoví tovární nastavení a veškerá uživatelská data budou ztracena."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Již jste se <xliff:g id="NUMBER">%d</xliff:g>krát pokusili odemknout tablet nesprávným způsobem. V tabletu se nyní obnoví výchozí tovární nastavení."</string>
-    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"<xliff:g id="NUMBER">%d</xliff:g>× jste se neúspěšně pokusili odemknout televizi. V televizi nyní bude obnoveno tovární nastavení."</string>
-    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Již jste se <xliff:g id="NUMBER">%d</xliff:g>krát pokusili odemknout telefon nesprávným způsobem. V telefonu se nyní obnoví výchozí tovární nastavení."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Již jste se <xliff:g id="NUMBER">%d</xliff:g>krát pokusili odemknout tablet nesprávným způsobem. V tabletu se teď obnoví výchozí tovární nastavení."</string>
+    <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"<xliff:g id="NUMBER">%d</xliff:g>× jste se neúspěšně pokusili odemknout televizi. V televizi teď bude obnoveno tovární nastavení."</string>
+    <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Již jste se <xliff:g id="NUMBER">%d</xliff:g>krát pokusili odemknout telefon nesprávným způsobem. V telefonu se teď obnoví výchozí tovární nastavení."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Již <xliff:g id="NUMBER_0">%1$d</xliff:g>krát jste nesprávně nakreslili své heslo odemknutí. Po <xliff:g id="NUMBER_1">%2$d</xliff:g>dalších neúspěšných pokusech budete požádáni o odemčení tabletu pomocí e-mailového účtu.\n\n Zkuste to znovu za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"<xliff:g id="NUMBER_0">%1$d</xliff:g>× jste nesprávně načrtli bezpečnostní gesto. Po dalších <xliff:g id="NUMBER_1">%2$d</xliff:g> neúspěšných pokusech budete požádáni o odemčení televize pomocí e-mailového účtu.\n\nOpakujte akci za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Již <xliff:g id="NUMBER_0">%1$d</xliff:g>krát jste nesprávně nakreslili své heslo odemknutí. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> dalších neúspěšných pokusech budete požádáni o odemčení telefonu pomocí e-mailového účtu.\n\n Zkuste to znovu za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
@@ -1741,7 +1740,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Nainstalováno administrátorem"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Aktualizováno administrátorem"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Smazáno administrátorem"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Spořič baterie za účelem prodloužení výdrže baterie snižuje výkon zařízení a omezuje nebo vypíná vibrace, služby určování polohy a data na pozadí. E-mail, aplikace pro zasílání zpráv a další aplikace, které používají synchronizaci, se nemusejí aktualizovat, dokud je neotevřete.\n\nPři nabíjení zařízení se spořič baterie automaticky vypne."</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Spořič dat z důvodu snížení využití dat některým aplikacím brání v odesílání nebo příjmu dat na pozadí. Aplikace, kterou právě používáte, data přenášet může, ale může tak činit méně často. V důsledku toho se například obrázky nemusejí zobrazit, dokud na ně neklepnete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Chcete zapnout Spořič dat?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Zapnout"</string>
@@ -1846,6 +1846,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Všechny jazyky"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Všechny oblasti"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Vyhledávání"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"Akce není povolena"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> je momentálně deaktivována."</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"Další podrobnosti"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Zapnout pracovní profil?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Vaše pracovní aplikace, oznámení, data a ostatní funkce pracovního účtu budou zapnuty"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Zapnout"</string>
@@ -1937,8 +1940,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Volání a oznámení budou ztlumena"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Změny nastavení systému"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Nerušit"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"Režim Nerušit skrývá oznámení, abyste se mohli soustředit"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Toto je nové chování. Změníte ho klepnutím."</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Nastavení režimu Nerušit se změnilo"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Klepnutím zkontrolujete, co je blokováno."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Systém"</string>
