@@ -26,9 +26,9 @@ option java_multiple_files = true;
  * Represents a {@link com.android.server.wm.AppWindowThumbnail} object.
  */
 message AppWindowThumbnailProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional int32 width = 1;
-  optional int32 height = 2;
-  optional SurfaceAnimatorProto surface_animator = 3;
+    optional int32 width = 1;
+    optional int32 height = 2;
+    optional SurfaceAnimatorProto surface_animator = 3;
 }

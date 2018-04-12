@@ -24,7 +24,7 @@ import "frameworks/base/core/proto/android/os/batterystats.proto";
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 message BatteryStatsServiceDumpProto {
-  option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional android.os.BatteryStatsProto batterystats = 1;
+    optional android.os.BatteryStatsProto batterystats = 1;
 }

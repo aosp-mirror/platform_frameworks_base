@@ -33,350 +33,350 @@ package com.android.server.wm;
 option java_multiple_files = true;
 
 message WindowManagerServiceDumpProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional WindowManagerPolicyProto policy = 1;
-  /* window hierarchy root */
-  optional RootWindowContainerProto root_window_container = 2;
-  optional IdentifierProto focused_window = 3;
-  optional string focused_app = 4;
-  optional IdentifierProto input_method_window = 5;
-  optional bool display_frozen = 6;
-  optional int32 rotation = 7;
-  optional int32 last_orientation = 8;
-  optional AppTransitionProto app_transition = 9;
+    optional WindowManagerPolicyProto policy = 1;
+    /* window hierarchy root */
+    optional RootWindowContainerProto root_window_container = 2;
+    optional IdentifierProto focused_window = 3;
+    optional string focused_app = 4;
+    optional IdentifierProto input_method_window = 5;
+    optional bool display_frozen = 6;
+    optional int32 rotation = 7;
+    optional int32 last_orientation = 8;
+    optional AppTransitionProto app_transition = 9;
 }
 
 /* represents DisplayContent */
 message RootWindowContainerProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional WindowContainerProto window_container = 1;
-  repeated DisplayProto displays = 2;
-  /* window references in top down z order */
-  repeated IdentifierProto windows = 3;
+    optional WindowContainerProto window_container = 1;
+    repeated DisplayProto displays = 2;
+    /* window references in top down z order */
+    repeated IdentifierProto windows = 3;
 }
 
 message BarControllerProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional .android.app.StatusBarManagerProto.WindowState state = 1;
-  optional .android.app.StatusBarManagerProto.TransientWindowState transient_state = 2;
+    optional .android.app.StatusBarManagerProto.WindowState state = 1;
+    optional .android.app.StatusBarManagerProto.TransientWindowState transient_state = 2;
 }
 
 message WindowOrientationListenerProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional bool enabled = 1;
-  optional .android.view.SurfaceProto.Rotation rotation = 2;
+    optional bool enabled = 1;
+    optional .android.view.SurfaceProto.Rotation rotation = 2;
 }
 
 message KeyguardServiceDelegateProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional bool showing = 1;
-  optional bool occluded = 2;
-  optional bool secure = 3;
-  enum ScreenState {
-    SCREEN_STATE_OFF = 0;
-    SCREEN_STATE_TURNING_ON = 1;
-    SCREEN_STATE_ON = 2;
-    SCREEN_STATE_TURNING_OFF = 3;
-  }
-  optional ScreenState screen_state = 4;
-  enum InteractiveState {
-    INTERACTIVE_STATE_SLEEP = 0;
-    INTERACTIVE_STATE_WAKING = 1;
-    INTERACTIVE_STATE_AWAKE = 2;
-    INTERACTIVE_STATE_GOING_TO_SLEEP = 3;
-  }
-  optional InteractiveState interactive_state = 5;
+    optional bool showing = 1;
+    optional bool occluded = 2;
+    optional bool secure = 3;
+    enum ScreenState {
+        SCREEN_STATE_OFF = 0;
+        SCREEN_STATE_TURNING_ON = 1;
+        SCREEN_STATE_ON = 2;
+        SCREEN_STATE_TURNING_OFF = 3;
+    }
+    optional ScreenState screen_state = 4;
+    enum InteractiveState {
+        INTERACTIVE_STATE_SLEEP = 0;
+        INTERACTIVE_STATE_WAKING = 1;
+        INTERACTIVE_STATE_AWAKE = 2;
+        INTERACTIVE_STATE_GOING_TO_SLEEP = 3;
+    }
+    optional InteractiveState interactive_state = 5;
 }
 
 /* represents PhoneWindowManager */
 message WindowManagerPolicyProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional int32 last_system_ui_flags = 1;
-  enum UserRotationMode {
-    USER_ROTATION_FREE = 0;
-    USER_ROTATION_LOCKED = 1;
-  }
-  optional UserRotationMode rotation_mode = 2;
-  optional .android.view.SurfaceProto.Rotation rotation = 3;
-  optional .android.content.ActivityInfoProto.ScreenOrientation orientation = 4;
-  optional bool screen_on_fully = 5;
-  optional bool keyguard_draw_complete = 6;
-  optional bool window_manager_draw_complete = 7;
-  optional string focused_app_token = 8;
-  optional IdentifierProto focused_window = 9;
-  optional IdentifierProto top_fullscreen_opaque_window = 10;
-  optional IdentifierProto top_fullscreen_opaque_or_dimming_window = 11;
-  optional bool keyguard_occluded = 12;
-  optional bool keyguard_occluded_changed = 13;
-  optional bool keyguard_occluded_pending = 14;
-  optional bool force_status_bar = 15;
-  optional bool force_status_bar_from_keyguard = 16;
-  optional BarControllerProto status_bar = 17;
-  optional BarControllerProto navigation_bar = 18;
-  optional WindowOrientationListenerProto orientation_listener = 19;
-  optional KeyguardServiceDelegateProto keyguard_delegate = 20;
+    optional int32 last_system_ui_flags = 1;
+    enum UserRotationMode {
+        USER_ROTATION_FREE = 0;
+        USER_ROTATION_LOCKED = 1;
+    }
+    optional UserRotationMode rotation_mode = 2;
+    optional .android.view.SurfaceProto.Rotation rotation = 3;
+    optional .android.content.ActivityInfoProto.ScreenOrientation orientation = 4;
+    optional bool screen_on_fully = 5;
+    optional bool keyguard_draw_complete = 6;
+    optional bool window_manager_draw_complete = 7;
+    optional string focused_app_token = 8;
+    optional IdentifierProto focused_window = 9;
+    optional IdentifierProto top_fullscreen_opaque_window = 10;
+    optional IdentifierProto top_fullscreen_opaque_or_dimming_window = 11;
+    optional bool keyguard_occluded = 12;
+    optional bool keyguard_occluded_changed = 13;
+    optional bool keyguard_occluded_pending = 14;
+    optional bool force_status_bar = 15;
+    optional bool force_status_bar_from_keyguard = 16;
+    optional BarControllerProto status_bar = 17;
+    optional BarControllerProto navigation_bar = 18;
+    optional WindowOrientationListenerProto orientation_listener = 19;
+    optional KeyguardServiceDelegateProto keyguard_delegate = 20;
 }
 
 /* represents AppTransition */
 message AppTransitionProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  enum AppState {
-    APP_STATE_IDLE = 0;
-    APP_STATE_READY = 1;
-    APP_STATE_RUNNING = 2;
-    APP_STATE_TIMEOUT = 3;
-  }
-  optional AppState app_transition_state = 1;
-  /* definitions for constants found in {@link com.android.server.wm.AppTransition} */
-  enum TransitionType {
-    TRANSIT_NONE = 0;
-    TRANSIT_UNSET = -1;
-    TRANSIT_ACTIVITY_OPEN = 6;
-    TRANSIT_ACTIVITY_CLOSE = 7;
-    TRANSIT_TASK_OPEN = 8;
-    TRANSIT_TASK_CLOSE = 9;
-    TRANSIT_TASK_TO_FRONT = 10;
-    TRANSIT_TASK_TO_BACK = 11;
-    TRANSIT_WALLPAPER_CLOSE = 12;
-    TRANSIT_WALLPAPER_OPEN = 13;
-    TRANSIT_WALLPAPER_INTRA_OPEN = 14;
-    TRANSIT_WALLPAPER_INTRA_CLOSE = 15;
-    TRANSIT_TASK_OPEN_BEHIND = 16;
-    TRANSIT_TASK_IN_PLACE = 17;
-    TRANSIT_ACTIVITY_RELAUNCH = 18;
-    TRANSIT_DOCK_TASK_FROM_RECENTS = 19;
-    TRANSIT_KEYGUARD_GOING_AWAY = 20;
-    TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER = 21;
-    TRANSIT_KEYGUARD_OCCLUDE = 22;
-    TRANSIT_KEYGUARD_UNOCCLUDE = 23;
-    TRANSIT_TRANSLUCENT_ACTIVITY_OPEN = 24;
-    TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE = 25;
-  }
-  optional TransitionType last_used_app_transition = 2;
+    enum AppState {
+        APP_STATE_IDLE = 0;
+        APP_STATE_READY = 1;
+        APP_STATE_RUNNING = 2;
+        APP_STATE_TIMEOUT = 3;
+    }
+    optional AppState app_transition_state = 1;
+    /* definitions for constants found in {@link com.android.server.wm.AppTransition} */
+    enum TransitionType {
+        TRANSIT_NONE = 0;
+        TRANSIT_UNSET = -1;
+        TRANSIT_ACTIVITY_OPEN = 6;
+        TRANSIT_ACTIVITY_CLOSE = 7;
+        TRANSIT_TASK_OPEN = 8;
+        TRANSIT_TASK_CLOSE = 9;
+        TRANSIT_TASK_TO_FRONT = 10;
+        TRANSIT_TASK_TO_BACK = 11;
+        TRANSIT_WALLPAPER_CLOSE = 12;
+        TRANSIT_WALLPAPER_OPEN = 13;
+        TRANSIT_WALLPAPER_INTRA_OPEN = 14;
+        TRANSIT_WALLPAPER_INTRA_CLOSE = 15;
+        TRANSIT_TASK_OPEN_BEHIND = 16;
+        TRANSIT_TASK_IN_PLACE = 17;
+        TRANSIT_ACTIVITY_RELAUNCH = 18;
+        TRANSIT_DOCK_TASK_FROM_RECENTS = 19;
+        TRANSIT_KEYGUARD_GOING_AWAY = 20;
+        TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER = 21;
+        TRANSIT_KEYGUARD_OCCLUDE = 22;
+        TRANSIT_KEYGUARD_UNOCCLUDE = 23;
+        TRANSIT_TRANSLUCENT_ACTIVITY_OPEN = 24;
+        TRANSIT_TRANSLUCENT_ACTIVITY_CLOSE = 25;
+    }
+    optional TransitionType last_used_app_transition = 2;
 }
 
 /* represents DisplayContent */
 message DisplayProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional WindowContainerProto window_container = 1;
-  optional int32 id = 2;
-  repeated StackProto stacks = 3;
-  optional DockedStackDividerControllerProto docked_stack_divider_controller = 4;
-  optional PinnedStackControllerProto pinned_stack_controller = 5;
-  /* non app windows */
-  repeated WindowTokenProto above_app_windows = 6;
-  repeated WindowTokenProto below_app_windows = 7;
-  repeated WindowTokenProto ime_windows = 8;
-  optional int32 dpi = 9;
-  optional .android.view.DisplayInfoProto display_info = 10;
-  optional int32 rotation = 11;
-  optional ScreenRotationAnimationProto screen_rotation_animation = 12;
-  optional DisplayFramesProto display_frames = 13;
+    optional WindowContainerProto window_container = 1;
+    optional int32 id = 2;
+    repeated StackProto stacks = 3;
+    optional DockedStackDividerControllerProto docked_stack_divider_controller = 4;
+    optional PinnedStackControllerProto pinned_stack_controller = 5;
+    /* non app windows */
+    repeated WindowTokenProto above_app_windows = 6;
+    repeated WindowTokenProto below_app_windows = 7;
+    repeated WindowTokenProto ime_windows = 8;
+    optional int32 dpi = 9;
+    optional .android.view.DisplayInfoProto display_info = 10;
+    optional int32 rotation = 11;
+    optional ScreenRotationAnimationProto screen_rotation_animation = 12;
+    optional DisplayFramesProto display_frames = 13;
 }
 
 /* represents DisplayFrames */
 message DisplayFramesProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional .android.graphics.RectProto stable_bounds = 1;
+    optional .android.graphics.RectProto stable_bounds = 1;
 }
 
 /* represents DockedStackDividerController */
 message DockedStackDividerControllerProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional bool minimized_dock = 1;
+    optional bool minimized_dock = 1;
 }
 
 /* represents PinnedStackController */
 message PinnedStackControllerProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional .android.graphics.RectProto default_bounds = 1;
-  optional .android.graphics.RectProto movement_bounds = 2;
+    optional .android.graphics.RectProto default_bounds = 1;
+    optional .android.graphics.RectProto movement_bounds = 2;
 }
 
 /* represents TaskStack */
 message StackProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional WindowContainerProto window_container = 1;
-  optional int32 id = 2;
-  repeated TaskProto tasks = 3;
-  optional bool fills_parent = 4;
-  optional .android.graphics.RectProto bounds = 5;
-  optional bool animation_background_surface_is_dimming = 6;
-  optional bool defer_removal = 7;
-  optional float minimize_amount = 8;
-  optional bool adjusted_for_ime = 9;
-  optional float adjust_ime_amount = 10;
-  optional float adjust_divider_amount = 11;
-  optional .android.graphics.RectProto adjusted_bounds = 12;
-  optional bool animating_bounds = 13;
+    optional WindowContainerProto window_container = 1;
+    optional int32 id = 2;
+    repeated TaskProto tasks = 3;
+    optional bool fills_parent = 4;
+    optional .android.graphics.RectProto bounds = 5;
+    optional bool animation_background_surface_is_dimming = 6;
+    optional bool defer_removal = 7;
+    optional float minimize_amount = 8;
+    optional bool adjusted_for_ime = 9;
+    optional float adjust_ime_amount = 10;
+    optional float adjust_divider_amount = 11;
+    optional .android.graphics.RectProto adjusted_bounds = 12;
+    optional bool animating_bounds = 13;
 }
 
 /* represents Task */
 message TaskProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional WindowContainerProto window_container = 1;
-  optional int32 id = 2;
-  repeated AppWindowTokenProto app_window_tokens = 3;
-  optional bool fills_parent = 4;
-  optional .android.graphics.RectProto bounds = 5;
-  optional .android.graphics.RectProto temp_inset_bounds = 6;
-  optional bool defer_removal = 7;
+    optional WindowContainerProto window_container = 1;
+    optional int32 id = 2;
+    repeated AppWindowTokenProto app_window_tokens = 3;
+    optional bool fills_parent = 4;
+    optional .android.graphics.RectProto bounds = 5;
+    optional .android.graphics.RectProto temp_inset_bounds = 6;
+    optional bool defer_removal = 7;
 }
 
 /* represents AppWindowToken */
 message AppWindowTokenProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  /* obtained from ActivityRecord */
-  optional string name = 1 [ (.android.privacy).dest = DEST_EXPLICIT ];
-  optional WindowTokenProto window_token = 2;
-  optional bool last_surface_showing = 3;
-  optional bool is_waiting_for_transition_start =  4;
-  optional bool is_really_animating = 5;
-  optional AppWindowThumbnailProto thumbnail = 6;
-  optional bool fills_parent = 7;
-  optional bool app_stopped = 8;
-  optional bool hidden_requested = 9;
-  optional bool client_hidden = 10;
-  optional bool defer_hiding_client = 11;
-  optional bool reported_drawn = 12;
-  optional bool reported_visible = 13;
-  optional int32 num_interesting_windows = 14;
-  optional int32 num_drawn_windows = 15;
-  optional bool all_drawn = 16;
-  optional bool last_all_drawn = 17;
-  optional bool removed = 18;
-  optional IdentifierProto starting_window = 19;
-  optional bool starting_displayed = 20;
-  optional bool starting_moved = 21;
-  optional bool hidden_set_from_transferred_starting_window = 22;
-  repeated .android.graphics.RectProto frozen_bounds = 23;
+    /* obtained from ActivityRecord */
+    optional string name = 1 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional WindowTokenProto window_token = 2;
+    optional bool last_surface_showing = 3;
+    optional bool is_waiting_for_transition_start = 4;
+    optional bool is_really_animating = 5;
+    optional AppWindowThumbnailProto thumbnail = 6;
+    optional bool fills_parent = 7;
+    optional bool app_stopped = 8;
+    optional bool hidden_requested = 9;
+    optional bool client_hidden = 10;
+    optional bool defer_hiding_client = 11;
+    optional bool reported_drawn = 12;
+    optional bool reported_visible = 13;
+    optional int32 num_interesting_windows = 14;
+    optional int32 num_drawn_windows = 15;
+    optional bool all_drawn = 16;
+    optional bool last_all_drawn = 17;
+    optional bool removed = 18;
+    optional IdentifierProto starting_window = 19;
+    optional bool starting_displayed = 20;
+    optional bool starting_moved = 21;
+    optional bool hidden_set_from_transferred_starting_window = 22;
+    repeated .android.graphics.RectProto frozen_bounds = 23;
 }
 
 /* represents WindowToken */
 message WindowTokenProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional WindowContainerProto window_container = 1;
-  optional int32 hash_code = 2;
-  repeated WindowStateProto windows = 3;
-  optional bool hidden = 4;
-  optional bool waiting_to_show = 5;
-  optional bool paused = 6;
+    optional WindowContainerProto window_container = 1;
+    optional int32 hash_code = 2;
+    repeated WindowStateProto windows = 3;
+    optional bool hidden = 4;
+    optional bool waiting_to_show = 5;
+    optional bool paused = 6;
 }
 
 /* represents WindowState */
 message WindowStateProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional WindowContainerProto window_container = 1;
-  optional IdentifierProto identifier = 2;
-  optional int32 display_id = 3;
-  optional int32 stack_id = 4;
-  optional .android.view.WindowLayoutParamsProto attributes = 5;
-  optional .android.graphics.RectProto given_content_insets = 6;
-  optional .android.graphics.RectProto frame = 7;
-  optional .android.graphics.RectProto containing_frame = 8;
-  optional .android.graphics.RectProto parent_frame = 9;
-  optional .android.graphics.RectProto content_frame = 10;
-  optional .android.graphics.RectProto content_insets = 11;
-  optional .android.graphics.RectProto surface_insets = 12;
-  optional WindowStateAnimatorProto animator = 13;
-  optional bool animating_exit = 14;
-  repeated WindowStateProto child_windows = 15;
-  optional .android.graphics.RectProto surface_position = 16;
-  optional int32 requested_width = 18;
-  optional int32 requested_height = 19;
-  optional int32 view_visibility = 20;
-  optional int32 system_ui_visibility = 21;
-  optional bool has_surface = 22;
-  optional bool is_ready_for_display = 23;
-  optional .android.graphics.RectProto display_frame = 24;
-  optional .android.graphics.RectProto overscan_frame = 25;
-  optional .android.graphics.RectProto visible_frame = 26;
-  optional .android.graphics.RectProto decor_frame = 27;
-  optional .android.graphics.RectProto outset_frame = 28;
-  optional .android.graphics.RectProto overscan_insets = 29;
-  optional .android.graphics.RectProto visible_insets = 30;
-  optional .android.graphics.RectProto stable_insets = 31;
-  optional .android.graphics.RectProto outsets = 32;
-  optional .android.view.DisplayCutoutProto cutout = 33;
-  optional bool remove_on_exit = 34;
-  optional bool destroying = 35;
-  optional bool removed = 36;
-  optional bool is_on_screen = 37;
-  optional bool is_visible = 38;
+    optional WindowContainerProto window_container = 1;
+    optional IdentifierProto identifier = 2;
+    optional int32 display_id = 3;
+    optional int32 stack_id = 4;
+    optional .android.view.WindowLayoutParamsProto attributes = 5;
+    optional .android.graphics.RectProto given_content_insets = 6;
+    optional .android.graphics.RectProto frame = 7;
+    optional .android.graphics.RectProto containing_frame = 8;
+    optional .android.graphics.RectProto parent_frame = 9;
+    optional .android.graphics.RectProto content_frame = 10;
+    optional .android.graphics.RectProto content_insets = 11;
+    optional .android.graphics.RectProto surface_insets = 12;
+    optional WindowStateAnimatorProto animator = 13;
+    optional bool animating_exit = 14;
+    repeated WindowStateProto child_windows = 15;
+    optional .android.graphics.RectProto surface_position = 16;
+    optional int32 requested_width = 18;
+    optional int32 requested_height = 19;
+    optional int32 view_visibility = 20;
+    optional int32 system_ui_visibility = 21;
+    optional bool has_surface = 22;
+    optional bool is_ready_for_display = 23;
+    optional .android.graphics.RectProto display_frame = 24;
+    optional .android.graphics.RectProto overscan_frame = 25;
+    optional .android.graphics.RectProto visible_frame = 26;
+    optional .android.graphics.RectProto decor_frame = 27;
+    optional .android.graphics.RectProto outset_frame = 28;
+    optional .android.graphics.RectProto overscan_insets = 29;
+    optional .android.graphics.RectProto visible_insets = 30;
+    optional .android.graphics.RectProto stable_insets = 31;
+    optional .android.graphics.RectProto outsets = 32;
+    optional .android.view.DisplayCutoutProto cutout = 33;
+    optional bool remove_on_exit = 34;
+    optional bool destroying = 35;
+    optional bool removed = 36;
+    optional bool is_on_screen = 37;
+    optional bool is_visible = 38;
 }
 
 message IdentifierProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional int32 hash_code = 1;
-  optional int32 user_id = 2;
-  optional string title = 3  [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional int32 hash_code = 1;
+    optional int32 user_id = 2;
+    optional string title = 3 [ (.android.privacy).dest = DEST_EXPLICIT ];
 }
 
 /* represents WindowStateAnimator */
 message WindowStateAnimatorProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional .android.graphics.RectProto last_clip_rect = 1;
-  optional WindowSurfaceControllerProto surface = 2;
-  enum DrawState {
-    NO_SURFACE = 0;
-    DRAW_PENDING = 1;
-    COMMIT_DRAW_PENDING = 2;
-    READY_TO_SHOW = 3;
-    HAS_DRAWN = 4;
-  }
-  optional DrawState draw_state = 3;
-  optional .android.graphics.RectProto system_decor_rect = 4;
+    optional .android.graphics.RectProto last_clip_rect = 1;
+    optional WindowSurfaceControllerProto surface = 2;
+    enum DrawState {
+        NO_SURFACE = 0;
+        DRAW_PENDING = 1;
+        COMMIT_DRAW_PENDING = 2;
+        READY_TO_SHOW = 3;
+        HAS_DRAWN = 4;
+    }
+    optional DrawState draw_state = 3;
+    optional .android.graphics.RectProto system_decor_rect = 4;
 }
 
 /* represents WindowSurfaceController */
 message WindowSurfaceControllerProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional bool shown = 1;
-  optional int32 layer = 2;
+    optional bool shown = 1;
+    optional int32 layer = 2;
 }
 
 /* represents ScreenRotationAnimation */
 message ScreenRotationAnimationProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional bool started = 1;
-  optional bool animation_running = 2;
+    optional bool started = 1;
+    optional bool animation_running = 2;
 }
 
 /* represents WindowContainer */
 message WindowContainerProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional ConfigurationContainerProto configuration_container = 1;
-  optional int32 orientation = 2;
-  optional bool visible = 3;
-  optional SurfaceAnimatorProto surface_animator = 4;
+    optional ConfigurationContainerProto configuration_container = 1;
+    optional int32 orientation = 2;
+    optional bool visible = 3;
+    optional SurfaceAnimatorProto surface_animator = 4;
 }
 
 /* represents ConfigurationContainer */
 message ConfigurationContainerProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional .android.content.ConfigurationProto override_configuration = 1;
-  optional .android.content.ConfigurationProto full_configuration = 2;
-  optional .android.content.ConfigurationProto merged_override_configuration = 3;
+    optional .android.content.ConfigurationProto override_configuration = 1;
+    optional .android.content.ConfigurationProto full_configuration = 2;
+    optional .android.content.ConfigurationProto merged_override_configuration = 3;
 }

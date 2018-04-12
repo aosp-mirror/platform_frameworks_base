@@ -38,995 +38,995 @@ import "frameworks/base/libs/incident/proto/android/privacy.proto";
 option java_multiple_files = true;
 
 message ActivityManagerServiceProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional ActivityManagerServiceDumpActivitiesProto activities = 1;
+    optional ActivityManagerServiceDumpActivitiesProto activities = 1;
 
-  optional ActivityManagerServiceDumpBroadcastsProto broadcasts = 2;
+    optional ActivityManagerServiceDumpBroadcastsProto broadcasts = 2;
 
-  optional ActivityManagerServiceDumpServicesProto services = 3;
+    optional ActivityManagerServiceDumpServicesProto services = 3;
 
-  optional ActivityManagerServiceDumpProcessesProto processes = 4;
+    optional ActivityManagerServiceDumpProcessesProto processes = 4;
 }
 
 // "dumpsys activity --proto activities"
 message ActivityManagerServiceDumpActivitiesProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional ActivityStackSupervisorProto activity_stack_supervisor = 1;
+    optional ActivityStackSupervisorProto activity_stack_supervisor = 1;
 }
 
 message ActivityStackSupervisorProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
-  repeated ActivityDisplayProto displays = 2;
-  optional KeyguardControllerProto keyguard_controller = 3;
-  optional int32 focused_stack_id = 4;
-  optional .com.android.server.wm.IdentifierProto resumed_activity = 5;
-  // Whether or not the home activity is the recents activity. This is needed for the CTS tests to
-  // know what activity types to check for when invoking splitscreen multi-window.
-  optional bool is_home_recents_component = 6;
+    optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
+    repeated ActivityDisplayProto displays = 2;
+    optional KeyguardControllerProto keyguard_controller = 3;
+    optional int32 focused_stack_id = 4;
+    optional .com.android.server.wm.IdentifierProto resumed_activity = 5;
+    // Whether or not the home activity is the recents activity. This is needed for the CTS tests to
+    // know what activity types to check for when invoking splitscreen multi-window.
+    optional bool is_home_recents_component = 6;
 }
 
 /* represents ActivityStackSupervisor.ActivityDisplay */
 message ActivityDisplayProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
-  optional int32 id = 2;
-  repeated ActivityStackProto stacks = 3;
+    optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
+    optional int32 id = 2;
+    repeated ActivityStackProto stacks = 3;
 }
 
 message ActivityStackProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
-  optional int32 id = 2;
-  repeated TaskRecordProto tasks = 3;
-  optional .com.android.server.wm.IdentifierProto resumed_activity = 4;
-  optional int32 display_id = 5;
-  optional bool fullscreen = 6;
-  optional .android.graphics.RectProto bounds = 7;
+    optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
+    optional int32 id = 2;
+    repeated TaskRecordProto tasks = 3;
+    optional .com.android.server.wm.IdentifierProto resumed_activity = 4;
+    optional int32 display_id = 5;
+    optional bool fullscreen = 6;
+    optional .android.graphics.RectProto bounds = 7;
 }
 
 message TaskRecordProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
-  optional int32 id = 2;
-  repeated ActivityRecordProto activities = 3;
-  optional int32 stack_id = 4;
-  optional .android.graphics.RectProto last_non_fullscreen_bounds = 5;
-  optional string real_activity = 6;
-  optional string orig_activity = 7;
-  optional int32 activity_type = 8;
-  optional int32 resize_mode = 9;
-  optional bool fullscreen = 10;
-  optional .android.graphics.RectProto bounds = 11;
-  optional int32 min_width = 12;
-  optional int32 min_height = 13;
+    optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
+    optional int32 id = 2;
+    repeated ActivityRecordProto activities = 3;
+    optional int32 stack_id = 4;
+    optional .android.graphics.RectProto last_non_fullscreen_bounds = 5;
+    optional string real_activity = 6;
+    optional string orig_activity = 7;
+    optional int32 activity_type = 8;
+    optional int32 resize_mode = 9;
+    optional bool fullscreen = 10;
+    optional .android.graphics.RectProto bounds = 11;
+    optional int32 min_width = 12;
+    optional int32 min_height = 13;
 }
 
 message ActivityRecordProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
-  optional .com.android.server.wm.IdentifierProto identifier = 2;
-  optional string state = 3;
-  optional bool visible = 4;
-  optional bool front_of_task = 5;
-  optional int32 proc_id = 6;
+    optional .com.android.server.wm.ConfigurationContainerProto configuration_container = 1;
+    optional .com.android.server.wm.IdentifierProto identifier = 2;
+    optional string state = 3;
+    optional bool visible = 4;
+    optional bool front_of_task = 5;
+    optional int32 proc_id = 6;
 }
 
 message KeyguardControllerProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional bool keyguard_showing = 1;
-  optional bool keyguard_occluded = 2;
+    optional bool keyguard_showing = 1;
+    optional bool keyguard_occluded = 2;
 }
 
 // "dumpsys activity --proto broadcasts"
 message ActivityManagerServiceDumpBroadcastsProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-  repeated ReceiverListProto  receiver_list = 1;
-
-  optional .com.android.server.IntentResolverProto receiver_resolver = 2;
-
-  repeated BroadcastQueueProto broadcast_queue = 3;
-
-  repeated StickyBroadcastProto sticky_broadcasts = 4;
-
-  message MainHandler {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional string handler = 1;
-    optional .android.os.LooperProto looper = 2;
-  }
-  optional MainHandler handler = 5;
+    repeated ReceiverListProto receiver_list = 1;
+
+    optional .com.android.server.IntentResolverProto receiver_resolver = 2;
+
+    repeated BroadcastQueueProto broadcast_queue = 3;
+
+    repeated StickyBroadcastProto sticky_broadcasts = 4;
+
+    message MainHandler {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional string handler = 1;
+        optional .android.os.LooperProto looper = 2;
+    }
+    optional MainHandler handler = 5;
 }
 
 message ReceiverListProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional ProcessRecordProto app = 1;
-  optional int32 pid = 2;
-  optional int32 uid = 3;
-  optional int32 user = 4;
-  optional BroadcastRecordProto current = 5;
-  optional bool linked_to_death = 6;
-  repeated BroadcastFilterProto filters = 7;
-  optional string hex_hash = 8; // used to find this ReceiverList object in IntentResolver
+    optional ProcessRecordProto app = 1;
+    optional int32 pid = 2;
+    optional int32 uid = 3;
+    optional int32 user = 4;
+    optional BroadcastRecordProto current = 5;
+    optional bool linked_to_death = 6;
+    repeated BroadcastFilterProto filters = 7;
+    optional string hex_hash = 8; // used to find this ReceiverList object in IntentResolver
 }
 
 message ProcessRecordProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-  optional int32 pid = 1;
-  optional string process_name = 2;
-  optional int32 uid = 3;
-  optional int32 user_id = 4;
-  optional int32 app_id = 5;
-  optional int32 isolated_app_id = 6;
-  optional bool persistent = 7;
-}
-
-message BroadcastRecordProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-  optional int32 user_id = 1;
-  optional string intent_action = 2;
-}
-
-message BroadcastFilterProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-  optional .android.content.IntentFilterProto intent_filter = 1;
-  optional string required_permission = 2;
-  optional string hex_hash = 3; // used to find the BroadcastFilter object in IntentResolver
-  optional int32 owning_user_id = 4;
-}
-
-message BroadcastQueueProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-  optional string queue_name = 1;
-  repeated BroadcastRecordProto parallel_broadcasts = 2;
-  repeated BroadcastRecordProto ordered_broadcasts = 3;
-  optional BroadcastRecordProto pending_broadcast = 4;
-  repeated BroadcastRecordProto historical_broadcasts = 5;
-
-  message BroadcastSummary {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    optional .android.content.IntentProto intent = 1;
-    optional int64 enqueue_clock_time_ms = 2;
-    optional int64 dispatch_clock_time_ms = 3;
-    optional int64 finish_clock_time_ms = 4;
-  }
-  repeated BroadcastSummary historical_broadcasts_summary = 6;
-}
-
-message MemInfoDumpProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-  optional int64 uptime_duration_ms = 1;
-  optional int64 elapsed_realtime_ms = 2;
-
-  message ProcessMemory {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional int32 pid = 1;
     optional string process_name = 2;
+    optional int32 uid = 3;
+    optional int32 user_id = 4;
+    optional int32 app_id = 5;
+    optional int32 isolated_app_id = 6;
+    optional bool persistent = 7;
+}
 
-    message MemoryInfo {
-      option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-      optional string name = 1;
-      // The proportional set size for the heap.
-      optional int32 total_pss_kb = 2;
-      // The proportional set size that is swappable for the heap.
-      optional int32 clean_pss_kb = 3;
-      // The private dirty pages used by the heap.
-      optional int32 shared_dirty_kb = 4;
-      // The shared dirty pages used by the heap.
-      optional int32 private_dirty_kb = 5;
-      // The shared clean pages used by the heap.
-      optional int32 shared_clean_kb = 6;
-      // The private clean pages used by the heap.
-      optional int32 private_clean_kb = 7;
-      oneof dirty_swap {
-        // The dirty the pages that have been swapped out.
-        int32 dirty_swap_kb = 8;
-        // The dirty the pages that have been swapped out, proportional.
-        int32 dirty_swap_pss_kb = 9;
-      }
-    }
-    message HeapInfo {
-      option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-      optional MemoryInfo mem_info = 1;
-      optional int32 heap_size_kb = 2;
-      optional int32 heap_alloc_kb = 3;
-      optional int32 heap_free_kb = 4;
-    }
-    optional HeapInfo native_heap = 3;
-    optional HeapInfo dalvik_heap = 4;
-    repeated MemoryInfo other_heaps = 5;
-    optional MemoryInfo unknown_heap = 6;
-    // Summation of native_heap, dalvik_heap, and other_heaps.
-    optional HeapInfo total_heap = 7;
-
-    repeated MemoryInfo dalvik_details = 8;
-
-    message AppSummary {
-      option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-      optional int32 java_heap_pss_kb = 1;
-      optional int32 native_heap_pss_kb = 2;
-      optional int32 code_pss_kb = 3;
-      optional int32 stack_pss_kb = 4;
-      optional int32 graphics_pss_kb = 5;
-      optional int32 private_other_pss_kb = 6;
-      optional int32 system_pss_kb = 7;
-
-      oneof total_swap {
-        int32 total_swap_pss = 8;
-        int32 total_swap_kb = 9;
-      }
-    }
-    optional AppSummary app_summary = 9;
-  }
-  repeated ProcessMemory native_processes = 3;
-
-  message AppData {
+message BroadcastRecordProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional ProcessMemory process_memory = 1;
+    optional int32 user_id = 1;
+    optional string intent_action = 2;
+}
 
-    message ObjectStats {
-      option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+message BroadcastFilterProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-      optional int32 view_instance_count = 1;
-      optional int32 view_root_instance_count = 2;
-      optional int32 app_context_instance_count = 3;
-      optional int32 activity_instance_count = 4;
-      optional int32 global_asset_count = 5;
-      optional int32 global_asset_manager_count = 6;
-      optional int32 local_binder_object_count = 7;
-      optional int32 proxy_binder_object_count = 8;
-      optional int64 parcel_memory_kb = 9;
-      optional int32 parcel_count = 10;
-      optional int32 binder_object_death_count = 11;
-      optional int32 open_ssl_socket_count = 12;
-      optional int32 webview_instance_count = 13;
-    }
-    optional ObjectStats objects = 2;
+    optional .android.content.IntentFilterProto intent_filter = 1;
+    optional string required_permission = 2;
+    optional string hex_hash = 3; // used to find the BroadcastFilter object in IntentResolver
+    optional int32 owning_user_id = 4;
+}
 
-    message SqlStats {
-      option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+message BroadcastQueueProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-      optional int32 memory_used_kb = 1;
-      optional int32 pagecache_overflow_kb = 2;
-      optional int32 malloc_size_kb = 3;
+    optional string queue_name = 1;
+    repeated BroadcastRecordProto parallel_broadcasts = 2;
+    repeated BroadcastRecordProto ordered_broadcasts = 3;
+    optional BroadcastRecordProto pending_broadcast = 4;
+    repeated BroadcastRecordProto historical_broadcasts = 5;
 
-      message Database {
+    message BroadcastSummary {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-        optional string name = 1;
-        optional int32 page_size = 2;
-        optional int32 db_size = 3;
-        // Number of lookaside slots:
-        // http://www.sqlite.org/c3ref/c_dbstatus_lookaside_used.html
-        optional int32 lookaside_b = 4;
-        // Statement cache stats: hits/misses/cachesize
-        optional string cache = 5;
-      }
-      repeated Database databases = 4;
+        optional .android.content.IntentProto intent = 1;
+        optional int64 enqueue_clock_time_ms = 2;
+        optional int64 dispatch_clock_time_ms = 3;
+        optional int64 finish_clock_time_ms = 4;
     }
-    optional SqlStats sql = 3;
+    repeated BroadcastSummary historical_broadcasts_summary = 6;
+}
 
-    optional string asset_allocations = 4;
-    optional string unreachable_memory = 5;
-  }
-  repeated AppData app_processes = 4;
-
-  message MemItem {
+message MemInfoDumpProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional string tag = 1;
-    optional string label = 2;
-    optional int32 id = 3;
-    optional bool is_proc = 4;
-    optional bool has_activities = 5;
-    optional int64 pss_kb = 6;
-    optional int64 swap_pss_kb = 7;
-    repeated MemItem sub_items = 8;
-  }
-  repeated MemItem total_pss_by_process = 5;
-  repeated MemItem total_pss_by_oom_adjustment = 6;
-  repeated MemItem total_pss_by_category = 7;
+    optional int64 uptime_duration_ms = 1;
+    optional int64 elapsed_realtime_ms = 2;
 
-  optional int64 total_ram_kb = 8;
-  optional .com.android.internal.app.procstats.ProcessStatsProto.MemoryFactor status = 9;
-  // Total free RAM = cached_pss_kb + cached_kernel_kb + free_kb.
-  optional int64 cached_pss_kb = 10;
-  optional int64 cached_kernel_kb = 11;
-  optional int64 free_kb = 12;
-  // Total used RAM = used_pss_kb + used_kernel_kb.
-  optional int64 used_pss_kb = 13;
-  optional int64 used_kernel_kb = 14;
+    message ProcessMemory {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional int64 lost_ram_kb = 15;
+        optional int32 pid = 1;
+        optional string process_name = 2;
 
-  optional int64 total_zram_kb = 16;
-  optional int64 zram_physical_used_in_swap_kb = 17;
-  optional int64 total_zram_swap_kb = 18;
+        message MemoryInfo {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional int64 ksm_sharing_kb = 19;
-  optional int64 ksm_shared_kb = 20;
-  optional int64 ksm_unshared_kb = 21;
-  optional int64 ksm_volatile_kb = 22;
+            optional string name = 1;
+            // The proportional set size for the heap.
+            optional int32 total_pss_kb = 2;
+            // The proportional set size that is swappable for the heap.
+            optional int32 clean_pss_kb = 3;
+            // The private dirty pages used by the heap.
+            optional int32 shared_dirty_kb = 4;
+            // The shared dirty pages used by the heap.
+            optional int32 private_dirty_kb = 5;
+            // The shared clean pages used by the heap.
+            optional int32 shared_clean_kb = 6;
+            // The private clean pages used by the heap.
+            optional int32 private_clean_kb = 7;
+            oneof dirty_swap {
+                // The dirty the pages that have been swapped out.
+                int32 dirty_swap_kb = 8;
+                // The dirty the pages that have been swapped out, proportional.
+                int32 dirty_swap_pss_kb = 9;
+            }
+        }
+        message HeapInfo {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  // The approximate per-application memory class of the current device. This
-  // gives developers an idea of how hard a memory limit you should impose on
-  // their application to let the overall system work best. The value is in
-  // megabytes; the baseline Android memory class is 16 (which happens to be the
-  // Java heap limit of those devices); some devices with more memory may have
-  // 24 or even higher numbers.
-  optional int32 tuning_mb = 23;
-  // The approximate per-application memory class of the current device when an
-  // application is running with a large heap. This is the space available for
-  // memory-intensive applications; most applications should not need this
-  // amount of memory, and should instead stay with the tuning_mb limit. The
-  // value is in megabytes. This may be the same size as tuning_mb on memory
-  // constrained devices, or it may be significantly larger on devices with a
-  // large amount of available RAM.
-  // This is the size of the application's Dalvik heap if it has specified
-  // 'android:largeHeap="true"' in its manifest.
-  optional int32 tuning_large_mb = 24;
+            optional MemoryInfo mem_info = 1;
+            optional int32 heap_size_kb = 2;
+            optional int32 heap_alloc_kb = 3;
+            optional int32 heap_free_kb = 4;
+        }
+        optional HeapInfo native_heap = 3;
+        optional HeapInfo dalvik_heap = 4;
+        repeated MemoryInfo other_heaps = 5;
+        optional MemoryInfo unknown_heap = 6;
+        // Summation of native_heap, dalvik_heap, and other_heaps.
+        optional HeapInfo total_heap = 7;
 
-  optional int64 oom_kb = 25;
+        repeated MemoryInfo dalvik_details = 8;
 
-  // The maximum pss size in kb that we consider a process acceptable to restore
-  // from its cached state for running in the background when RAM is low.
-  optional int64 restore_limit_kb = 26;
+        message AppSummary {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional bool is_low_ram_device = 27;
-  optional bool is_high_end_gfx = 28;
+            optional int32 java_heap_pss_kb = 1;
+            optional int32 native_heap_pss_kb = 2;
+            optional int32 code_pss_kb = 3;
+            optional int32 stack_pss_kb = 4;
+            optional int32 graphics_pss_kb = 5;
+            optional int32 private_other_pss_kb = 6;
+            optional int32 system_pss_kb = 7;
+
+            oneof total_swap {
+                int32 total_swap_pss = 8;
+                int32 total_swap_kb = 9;
+            }
+        }
+        optional AppSummary app_summary = 9;
+    }
+    repeated ProcessMemory native_processes = 3;
+
+    message AppData {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional ProcessMemory process_memory = 1;
+
+        message ObjectStats {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional int32 view_instance_count = 1;
+            optional int32 view_root_instance_count = 2;
+            optional int32 app_context_instance_count = 3;
+            optional int32 activity_instance_count = 4;
+            optional int32 global_asset_count = 5;
+            optional int32 global_asset_manager_count = 6;
+            optional int32 local_binder_object_count = 7;
+            optional int32 proxy_binder_object_count = 8;
+            optional int64 parcel_memory_kb = 9;
+            optional int32 parcel_count = 10;
+            optional int32 binder_object_death_count = 11;
+            optional int32 open_ssl_socket_count = 12;
+            optional int32 webview_instance_count = 13;
+        }
+        optional ObjectStats objects = 2;
+
+        message SqlStats {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional int32 memory_used_kb = 1;
+            optional int32 pagecache_overflow_kb = 2;
+            optional int32 malloc_size_kb = 3;
+
+            message Database {
+                option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+                optional string name = 1;
+                optional int32 page_size = 2;
+                optional int32 db_size = 3;
+                // Number of lookaside slots:
+                // http://www.sqlite.org/c3ref/c_dbstatus_lookaside_used.html
+                optional int32 lookaside_b = 4;
+                // Statement cache stats: hits/misses/cachesize
+                optional string cache = 5;
+            }
+            repeated Database databases = 4;
+        }
+        optional SqlStats sql = 3;
+
+        optional string asset_allocations = 4;
+        optional string unreachable_memory = 5;
+    }
+    repeated AppData app_processes = 4;
+
+    message MemItem {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional string tag = 1;
+        optional string label = 2;
+        optional int32 id = 3;
+        optional bool is_proc = 4;
+        optional bool has_activities = 5;
+        optional int64 pss_kb = 6;
+        optional int64 swap_pss_kb = 7;
+        repeated MemItem sub_items = 8;
+    }
+    repeated MemItem total_pss_by_process = 5;
+    repeated MemItem total_pss_by_oom_adjustment = 6;
+    repeated MemItem total_pss_by_category = 7;
+
+    optional int64 total_ram_kb = 8;
+    optional .com.android.internal.app.procstats.ProcessStatsProto.MemoryFactor status = 9;
+    // Total free RAM = cached_pss_kb + cached_kernel_kb + free_kb.
+    optional int64 cached_pss_kb = 10;
+    optional int64 cached_kernel_kb = 11;
+    optional int64 free_kb = 12;
+    // Total used RAM = used_pss_kb + used_kernel_kb.
+    optional int64 used_pss_kb = 13;
+    optional int64 used_kernel_kb = 14;
+
+    optional int64 lost_ram_kb = 15;
+
+    optional int64 total_zram_kb = 16;
+    optional int64 zram_physical_used_in_swap_kb = 17;
+    optional int64 total_zram_swap_kb = 18;
+
+    optional int64 ksm_sharing_kb = 19;
+    optional int64 ksm_shared_kb = 20;
+    optional int64 ksm_unshared_kb = 21;
+    optional int64 ksm_volatile_kb = 22;
+
+    // The approximate per-application memory class of the current device. This
+    // gives developers an idea of how hard a memory limit you should impose on
+    // their application to let the overall system work best. The value is in
+    // megabytes; the baseline Android memory class is 16 (which happens to be the
+    // Java heap limit of those devices); some devices with more memory may have
+    // 24 or even higher numbers.
+    optional int32 tuning_mb = 23;
+    // The approximate per-application memory class of the current device when an
+    // application is running with a large heap. This is the space available for
+    // memory-intensive applications; most applications should not need this
+    // amount of memory, and should instead stay with the tuning_mb limit. The
+    // value is in megabytes. This may be the same size as tuning_mb on memory
+    // constrained devices, or it may be significantly larger on devices with a
+    // large amount of available RAM.
+    // This is the size of the application's Dalvik heap if it has specified
+    // 'android:largeHeap="true"' in its manifest.
+    optional int32 tuning_large_mb = 24;
+
+    optional int64 oom_kb = 25;
+
+    // The maximum pss size in kb that we consider a process acceptable to restore
+    // from its cached state for running in the background when RAM is low.
+    optional int64 restore_limit_kb = 26;
+
+    optional bool is_low_ram_device = 27;
+    optional bool is_high_end_gfx = 28;
 }
 
 message StickyBroadcastProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-  optional int32 user = 1;
-
-  message StickyAction {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional string name = 1;
-    repeated .android.content.IntentProto intents = 2;
-  }
-  repeated StickyAction actions = 2;
+    optional int32 user = 1;
+
+    message StickyAction {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional string name = 1;
+        repeated .android.content.IntentProto intents = 2;
+    }
+    repeated StickyAction actions = 2;
 }
 
 // "dumpsys activity --proto service"
 message ActivityManagerServiceDumpServicesProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional ActiveServicesProto active_services = 1;
+    optional ActiveServicesProto active_services = 1;
 }
 
 message ActiveServicesProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-  message ServicesByUser {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional int32 user_id = 1;
-    repeated ServiceRecordProto service_records = 2;
-  }
-  repeated ServicesByUser services_by_users = 1;
+    message ServicesByUser {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 user_id = 1;
+        repeated ServiceRecordProto service_records = 2;
+    }
+    repeated ServicesByUser services_by_users = 1;
 }
 
 // corresponds to ActivityManagerService.GrantUri Java class
 message GrantUriProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional int32 source_user_id = 1;
-  optional string uri = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional int32 source_user_id = 1;
+    optional string uri = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
 }
 
 message NeededUriGrantsProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional string target_package = 1;
-  optional int32 target_uid = 2;
-  optional int32 flags = 3;
+    optional string target_package = 1;
+    optional int32 target_uid = 2;
+    optional int32 flags = 3;
 
-  repeated GrantUriProto grants = 4;
+    repeated GrantUriProto grants = 4;
 }
 
 message UriPermissionOwnerProto {
-  option (.android.msg_privacy).dest = DEST_EXPLICIT;
+    option (.android.msg_privacy).dest = DEST_EXPLICIT;
 
-  optional string owner = 1;
-  repeated GrantUriProto read_perms = 2;
-  repeated GrantUriProto write_perms = 3;
+    optional string owner = 1;
+    repeated GrantUriProto read_perms = 2;
+    repeated GrantUriProto write_perms = 3;
 }
 
 message ServiceRecordProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-  optional string short_name = 1;
-  optional bool is_running = 2; // false if the application service is null
-  optional int32 pid = 3;
-  optional .android.content.IntentProto intent = 4;
-  optional string package_name = 5;
-  optional string process_name = 6;
-  optional string permission = 7;
-
-  message AppInfo {
-    option (.android.msg_privacy).dest = DEST_EXPLICIT;
-
-    optional string base_dir = 1;
-    optional string res_dir = 2;
-    optional string data_dir = 3;
-  }
-  optional AppInfo appinfo = 8;
-  optional ProcessRecordProto app = 9;
-  optional ProcessRecordProto isolated_proc = 10;
-  optional bool whitelist_manager = 11;
-  optional bool delayed = 12;
-
-  message Foreground {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional int32 id = 1;
-    optional .android.app.NotificationProto notification = 2;
-  }
-  optional Foreground foreground = 13;
+    optional string short_name = 1;
+    optional bool is_running = 2; // false if the application service is null
+    optional int32 pid = 3;
+    optional .android.content.IntentProto intent = 4;
+    optional string package_name = 5;
+    optional string process_name = 6;
+    optional string permission = 7;
 
-  optional .android.util.Duration create_real_time = 14;
-  optional .android.util.Duration starting_bg_timeout = 15;
-  optional .android.util.Duration last_activity_time = 16;
-  optional .android.util.Duration restart_time = 17;
-  optional bool created_from_fg = 18;
+    message AppInfo {
+        option (.android.msg_privacy).dest = DEST_EXPLICIT;
 
-  // variables used to track states related to service start
-  message Start {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+        optional string base_dir = 1;
+        optional string res_dir = 2;
+        optional string data_dir = 3;
+    }
+    optional AppInfo appinfo = 8;
+    optional ProcessRecordProto app = 9;
+    optional ProcessRecordProto isolated_proc = 10;
+    optional bool whitelist_manager = 11;
+    optional bool delayed = 12;
 
-    optional bool start_requested = 1;
-    optional bool delayed_stop = 2;
-    optional bool stop_if_killed = 3;
-    optional bool call_start = 4;
-    optional int32 last_start_id = 5;
-  }
-  optional Start start = 19;
+    message Foreground {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  message ExecuteNesting {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+        optional int32 id = 1;
+        optional .android.app.NotificationProto notification = 2;
+    }
+    optional Foreground foreground = 13;
 
-    optional int32 execute_nesting = 1;
-    optional bool execute_fg = 2;
-    optional .android.util.Duration executing_start = 3;
-  }
-  optional ExecuteNesting execute = 20;
+    optional .android.util.Duration create_real_time = 14;
+    optional .android.util.Duration starting_bg_timeout = 15;
+    optional .android.util.Duration last_activity_time = 16;
+    optional .android.util.Duration restart_time = 17;
+    optional bool created_from_fg = 18;
 
-  optional .android.util.Duration destory_time = 21;
+    // variables used to track states related to service start
+    message Start {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  message Crash {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+        optional bool start_requested = 1;
+        optional bool delayed_stop = 2;
+        optional bool stop_if_killed = 3;
+        optional bool call_start = 4;
+        optional int32 last_start_id = 5;
+    }
+    optional Start start = 19;
 
-    optional int32 restart_count = 1;
-    optional .android.util.Duration restart_delay = 2;
-    optional .android.util.Duration next_restart_time = 3;
-    optional int32 crash_count = 4;
-  }
-  optional Crash crash = 22;
+    message ExecuteNesting {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  message StartItem {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+        optional int32 execute_nesting = 1;
+        optional bool execute_fg = 2;
+        optional .android.util.Duration executing_start = 3;
+    }
+    optional ExecuteNesting execute = 20;
 
-    optional int32 id = 1;
-    optional .android.util.Duration duration = 2;
-    optional int32 delivery_count = 3;
-    optional int32 done_executing_count = 4;
-    optional .android.content.IntentProto intent = 5;
-    optional NeededUriGrantsProto needed_grants = 6;
-    optional UriPermissionOwnerProto uri_permissions = 7;
-  }
-  repeated StartItem delivered_starts = 23;
-  repeated StartItem pending_starts = 24;
+    optional .android.util.Duration destory_time = 21;
 
-  repeated IntentBindRecordProto bindings = 25;
-  repeated ConnectionRecordProto connections = 26;
+    message Crash {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  // Next Tag: 27
+        optional int32 restart_count = 1;
+        optional .android.util.Duration restart_delay = 2;
+        optional .android.util.Duration next_restart_time = 3;
+        optional int32 crash_count = 4;
+    }
+    optional Crash crash = 22;
+
+    message StartItem {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 id = 1;
+        optional .android.util.Duration duration = 2;
+        optional int32 delivery_count = 3;
+        optional int32 done_executing_count = 4;
+        optional .android.content.IntentProto intent = 5;
+        optional NeededUriGrantsProto needed_grants = 6;
+        optional UriPermissionOwnerProto uri_permissions = 7;
+    }
+    repeated StartItem delivered_starts = 23;
+    repeated StartItem pending_starts = 24;
+
+    repeated IntentBindRecordProto bindings = 25;
+    repeated ConnectionRecordProto connections = 26;
+
+    // Next Tag: 27
 }
 
 message ConnectionRecordProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  // used to find same record, e.g. AppBindRecord has the hex_hash
-  optional string hex_hash = 1; // cross reference the object and avoid double logging.
-  optional int32 user_id = 2;
+    // used to find same record, e.g. AppBindRecord has the hex_hash
+    optional string hex_hash = 1; // cross reference the object and avoid double logging.
+    optional int32 user_id = 2;
 
-  enum Flag {
-    AUTO_CREATE = 0;
-    DEBUG_UNBIND = 1;
-    NOT_FG = 2;
-    IMPORTANT_BG = 3;
-    ABOVE_CLIENT = 4;
-    ALLOW_OOM_MANAGEMENT = 5;
-    WAIVE_PRIORITY = 6;
-    IMPORTANT = 7;
-    ADJUST_WITH_ACTIVITY = 8;
-    FG_SERVICE_WHILE_AWAKE = 9;
-    FG_SERVICE = 10;
-    TREAT_LIKE_ACTIVITY = 11;
-    VISIBLE = 12;
-    SHOWING_UI = 13;
-    NOT_VISIBLE = 14;
-    DEAD = 15;
-  }
-  repeated Flag flags = 3;
-  optional string service_name = 4;
+    enum Flag {
+        AUTO_CREATE = 0;
+        DEBUG_UNBIND = 1;
+        NOT_FG = 2;
+        IMPORTANT_BG = 3;
+        ABOVE_CLIENT = 4;
+        ALLOW_OOM_MANAGEMENT = 5;
+        WAIVE_PRIORITY = 6;
+        IMPORTANT = 7;
+        ADJUST_WITH_ACTIVITY = 8;
+        FG_SERVICE_WHILE_AWAKE = 9;
+        FG_SERVICE = 10;
+        TREAT_LIKE_ACTIVITY = 11;
+        VISIBLE = 12;
+        SHOWING_UI = 13;
+        NOT_VISIBLE = 14;
+        DEAD = 15;
+    }
+    repeated Flag flags = 3;
+    optional string service_name = 4;
 }
 
 message AppBindRecordProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional string service_name = 1;
-  optional string client_proc_name = 2;
-  repeated string connections = 3; // hex_hash of ConnectionRecordProto
+    optional string service_name = 1;
+    optional string client_proc_name = 2;
+    repeated string connections = 3; // hex_hash of ConnectionRecordProto
 }
 
 message IntentBindRecordProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional .android.content.IntentProto intent = 1;
-  optional string binder = 2;
-  optional bool auto_create = 3; // value of BIND_AUTO_CREATE flag.
-  optional bool requested = 4;
-  optional bool received = 5;
-  optional bool has_bound = 6;
-  optional bool do_rebind = 7;
+    optional .android.content.IntentProto intent = 1;
+    optional string binder = 2;
+    optional bool auto_create = 3; // value of BIND_AUTO_CREATE flag.
+    optional bool requested = 4;
+    optional bool received = 5;
+    optional bool has_bound = 6;
+    optional bool do_rebind = 7;
 
-  repeated AppBindRecordProto apps = 8;
+    repeated AppBindRecordProto apps = 8;
 }
 
 // TODO: "dumpsys activity --proto processes"
 message ActivityManagerServiceDumpProcessesProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-  repeated ProcessRecordProto procs = 1;
-  repeated ProcessRecordProto isolated_procs = 2;
-  repeated ActiveInstrumentationProto active_instrumentations = 3;
-  repeated UidRecordProto active_uids = 4;
-  repeated UidRecordProto validate_uids = 5;
-
-  // Process LRU list (sorted by oom_adj)
-  message LruProcesses {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional int32 size = 1;
-    optional int32 non_act_at = 2;
-    optional int32 non_svc_at = 3;
-    repeated ProcessOomProto list = 4;
-  }
-  optional LruProcesses lru_procs = 6;
-  repeated ProcessRecordProto pids_self_locked = 7;
-  // Foreground Processes
-  repeated ImportanceTokenProto important_procs = 8;
-  // Persisent processes that are starting
-  repeated ProcessRecordProto persistent_starting_procs = 9;
-  // Processes that are being removed
-  repeated ProcessRecordProto removed_procs = 10;
-  // Processes that are on old until the system is ready
-  repeated ProcessRecordProto on_hold_procs = 11;
-  // Processes that are waiting to GC
-  repeated ProcessToGcProto gc_procs = 12;
-  optional AppErrorsProto app_errors = 13;
-  optional UserControllerProto user_controller = 14;
-  optional ProcessRecordProto home_proc = 15;
-  optional ProcessRecordProto previous_proc = 16;
-  optional int64 previous_proc_visible_time_ms = 17;
-  optional ProcessRecordProto heavy_weight_proc = 18;
-  optional .android.content.ConfigurationProto global_configuration = 19;
-  // ActivityStackSupervisorProto dumps these values as well, still here?
-  // repeated ActivityDisplayProto displays = 20;
+    repeated ProcessRecordProto procs = 1;
+    repeated ProcessRecordProto isolated_procs = 2;
+    repeated ActiveInstrumentationProto active_instrumentations = 3;
+    repeated UidRecordProto active_uids = 4;
+    repeated UidRecordProto validate_uids = 5;
 
-  optional bool config_will_change = 21;
+    // Process LRU list (sorted by oom_adj)
+    message LruProcesses {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  message ScreenCompatPackage {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    optional string package = 1;
-    optional int32 mode = 2;
-  }
-  repeated ScreenCompatPackage screen_compat_packages = 22;
-
-  message UidObserverRegistrationProto {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    optional int32 uid = 1;
-    optional string package = 2;
-    repeated .android.app.UidObserverFlag flags = 3;
-    optional int32 cut_point = 4; // only available when UID_OBSERVER_PROCSTATE is on
-
-    message ProcState {
-      option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-      optional int32 uid = 1;
-      optional int32 state = 2;
+        optional int32 size = 1;
+        optional int32 non_act_at = 2;
+        optional int32 non_svc_at = 3;
+        repeated ProcessOomProto list = 4;
     }
-    repeated ProcState last_proc_states = 5;
-  }
-  repeated UidObserverRegistrationProto uid_observers = 23;
-  repeated int32 device_idle_whitelist = 24;
-  repeated int32 device_idle_temp_whitelist = 25;
+    optional LruProcesses lru_procs = 6;
+    repeated ProcessRecordProto pids_self_locked = 7;
+    // Foreground Processes
+    repeated ImportanceTokenProto important_procs = 8;
+    // Persisent processes that are starting
+    repeated ProcessRecordProto persistent_starting_procs = 9;
+    // Processes that are being removed
+    repeated ProcessRecordProto removed_procs = 10;
+    // Processes that are on old until the system is ready
+    repeated ProcessRecordProto on_hold_procs = 11;
+    // Processes that are waiting to GC
+    repeated ProcessToGcProto gc_procs = 12;
+    optional AppErrorsProto app_errors = 13;
+    optional UserControllerProto user_controller = 14;
+    optional ProcessRecordProto home_proc = 15;
+    optional ProcessRecordProto previous_proc = 16;
+    optional int64 previous_proc_visible_time_ms = 17;
+    optional ProcessRecordProto heavy_weight_proc = 18;
+    optional .android.content.ConfigurationProto global_configuration = 19;
+    // ActivityStackSupervisorProto dumps these values as well, still here?
+    // repeated ActivityDisplayProto displays = 20;
 
-  message PendingTempWhitelist {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    optional bool config_will_change = 21;
 
-    optional int32 target_uid = 1;
-    optional int64 duration_ms = 2;
-    optional string tag = 3;
-  }
-  repeated PendingTempWhitelist pending_temp_whitelist = 26;
+    message ScreenCompatPackage {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  message SleepStatus {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+        optional string package = 1;
+        optional int32 mode = 2;
+    }
+    repeated ScreenCompatPackage screen_compat_packages = 22;
 
-    optional .android.os.PowerManagerInternalProto.Wakefulness wakefulness = 1;
-    repeated string sleep_tokens = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
-    optional bool sleeping = 3;
-    optional bool shutting_down = 4;
-    optional bool test_pss_mode = 5;
-  }
-  optional SleepStatus sleep_status = 27;
-
-  message Voice {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    optional string session = 1;
-    optional .android.os.PowerManagerProto.WakeLock wakelock = 2;
-  }
-  optional Voice running_voice = 28;
-
-  optional VrControllerProto vr_controller = 29;
-
-  message DebugApp {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    optional string debug_app = 1;
-    optional string orig_debug_app = 2;
-    optional bool debug_transient = 3;
-    optional bool orig_wait_for_debugger = 4;
-  }
-  optional DebugApp debug = 30;
-  optional AppTimeTrackerProto current_tracker = 31;
-
-  message MemWatchProcess {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    message Process {
-      option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-      optional string name = 1;
-
-      message MemStats {
+    message UidObserverRegistrationProto {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
         optional int32 uid = 1;
-        optional string size = 2;
-        optional string report_to = 3;
-      }
-      repeated MemStats mem_stats = 2;
+        optional string package = 2;
+        repeated .android.app.UidObserverFlag flags = 3;
+        optional int32 cut_point = 4; // only available when UID_OBSERVER_PROCSTATE is on
+
+        message ProcState {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional int32 uid = 1;
+            optional int32 state = 2;
+        }
+        repeated ProcState last_proc_states = 5;
     }
-    repeated Process procs = 1;
+    repeated UidObserverRegistrationProto uid_observers = 23;
+    repeated int32 device_idle_whitelist = 24;
+    repeated int32 device_idle_temp_whitelist = 25;
 
-    message Dump {
-      option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    message PendingTempWhitelist {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-      optional string proc_name = 1;
-      optional string file = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
-      optional int32 pid = 3;
-      optional int32 uid = 4;
+        optional int32 target_uid = 1;
+        optional int64 duration_ms = 2;
+        optional string tag = 3;
     }
-    optional Dump dump = 2;
-  }
-  optional MemWatchProcess mem_watch_processes = 32;
-  optional string track_allocation_app = 33;
+    repeated PendingTempWhitelist pending_temp_whitelist = 26;
 
-  message Profile {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    message SleepStatus {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional string app_name = 1;
-    optional ProcessRecordProto proc = 2;
-    optional .android.app.ProfilerInfoProto info = 3;
-    optional int32 type = 4;
-  }
-  optional Profile profile = 34;
-  optional string native_debugging_app = 35;
-  optional bool always_finish_activities = 36;
+        optional .android.os.PowerManagerInternalProto.Wakefulness wakefulness = 1;
+        repeated string sleep_tokens = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
+        optional bool sleeping = 3;
+        optional bool shutting_down = 4;
+        optional bool test_pss_mode = 5;
+    }
+    optional SleepStatus sleep_status = 27;
 
-  message Controller {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    message Voice {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional string controller = 1;
-    optional bool is_a_monkey = 2;
-  }
-  optional Controller controller = 37;
+        optional string session = 1;
+        optional .android.os.PowerManagerProto.WakeLock wakelock = 2;
+    }
+    optional Voice running_voice = 28;
 
-  optional int32 total_persistent_procs = 38;
-  optional bool processes_ready = 39;
-  optional bool system_ready = 40;
-  optional bool booted = 41;
-  optional int32 factory_test = 42;
-  optional bool booting = 43;
-  optional bool call_finish_booting = 44;
-  optional bool boot_animation_complete = 45;
-  optional int64 last_power_check_uptime_ms = 46;
-  optional .android.os.PowerManagerProto.WakeLock going_to_sleep = 47;
-  optional .android.os.PowerManagerProto.WakeLock launching_activity = 48;
-  optional int32 adj_seq = 49;
-  optional int32 lru_seq = 50;
-  optional int32 num_non_cached_procs = 51;
-  optional int32 num_cached_hidden_procs = 52;
-  optional int32 num_service_procs = 53;
-  optional int32 new_num_service_procs = 54;
-  optional bool allow_lower_mem_level = 55;
-  optional int32 last_memory_level = 56;
-  optional int32 last_num_processes = 57;
-  optional .android.util.Duration last_idle_time = 58;
-  optional int64 low_ram_since_last_idle_ms = 59;
+    optional VrControllerProto vr_controller = 29;
+
+    message DebugApp {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional string debug_app = 1;
+        optional string orig_debug_app = 2;
+        optional bool debug_transient = 3;
+        optional bool orig_wait_for_debugger = 4;
+    }
+    optional DebugApp debug = 30;
+    optional AppTimeTrackerProto current_tracker = 31;
+
+    message MemWatchProcess {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        message Process {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional string name = 1;
+
+            message MemStats {
+                option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+                optional int32 uid = 1;
+                optional string size = 2;
+                optional string report_to = 3;
+            }
+            repeated MemStats mem_stats = 2;
+        }
+        repeated Process procs = 1;
+
+        message Dump {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional string proc_name = 1;
+            optional string file = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
+            optional int32 pid = 3;
+            optional int32 uid = 4;
+        }
+        optional Dump dump = 2;
+    }
+    optional MemWatchProcess mem_watch_processes = 32;
+    optional string track_allocation_app = 33;
+
+    message Profile {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional string app_name = 1;
+        optional ProcessRecordProto proc = 2;
+        optional .android.app.ProfilerInfoProto info = 3;
+        optional int32 type = 4;
+    }
+    optional Profile profile = 34;
+    optional string native_debugging_app = 35;
+    optional bool always_finish_activities = 36;
+
+    message Controller {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional string controller = 1;
+        optional bool is_a_monkey = 2;
+    }
+    optional Controller controller = 37;
+
+    optional int32 total_persistent_procs = 38;
+    optional bool processes_ready = 39;
+    optional bool system_ready = 40;
+    optional bool booted = 41;
+    optional int32 factory_test = 42;
+    optional bool booting = 43;
+    optional bool call_finish_booting = 44;
+    optional bool boot_animation_complete = 45;
+    optional int64 last_power_check_uptime_ms = 46;
+    optional .android.os.PowerManagerProto.WakeLock going_to_sleep = 47;
+    optional .android.os.PowerManagerProto.WakeLock launching_activity = 48;
+    optional int32 adj_seq = 49;
+    optional int32 lru_seq = 50;
+    optional int32 num_non_cached_procs = 51;
+    optional int32 num_cached_hidden_procs = 52;
+    optional int32 num_service_procs = 53;
+    optional int32 new_num_service_procs = 54;
+    optional bool allow_lower_mem_level = 55;
+    optional int32 last_memory_level = 56;
+    optional int32 last_num_processes = 57;
+    optional .android.util.Duration last_idle_time = 58;
+    optional int64 low_ram_since_last_idle_ms = 59;
 }
 
 message ActiveInstrumentationProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional .android.content.ComponentNameProto class = 1;
-  optional bool finished = 2;
-  repeated ProcessRecordProto running_processes = 3;
-  repeated string target_processes = 4;
-  optional .android.content.pm.ApplicationInfoProto target_info = 5;
-  optional string profile_file = 6;
-  optional string watcher = 7;
-  optional string ui_automation_connection = 8;
-  optional string arguments = 9  [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional .android.content.ComponentNameProto class = 1;
+    optional bool finished = 2;
+    repeated ProcessRecordProto running_processes = 3;
+    repeated string target_processes = 4;
+    optional .android.content.pm.ApplicationInfoProto target_info = 5;
+    optional string profile_file = 6;
+    optional string watcher = 7;
+    optional string ui_automation_connection = 8;
+    optional string arguments = 9 [ (.android.privacy).dest = DEST_EXPLICIT ];
 }
 
 // Proto definition of com.android.server.am.UidRecord.java
 message UidRecordProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-  optional int32 uid = 1;
-  optional .android.app.ProcessStateEnum current = 2;
-  optional bool ephemeral = 3;
-  optional bool fg_services = 4;
-  optional bool whilelist = 5;
-  optional .android.util.Duration last_background_time = 6;
-  optional bool idle = 7;
-
-  enum Change {
-    CHANGE_GONE = 0;
-    CHANGE_IDLE = 1;
-    CHANGE_ACTIVE = 2;
-    CHANGE_CACHED = 3;
-    CHANGE_UNCACHED = 4;
-  }
-  repeated Change last_reported_changes = 8;
-  optional int32 num_procs = 9;
-
-  message ProcStateSequence {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional int64 cururent = 1;
-    optional int64 last_network_updated = 2;
-    optional int64 last_dispatched = 3;
-  }
-  optional ProcStateSequence network_state_update = 10;
+    optional int32 uid = 1;
+    optional .android.app.ProcessStateEnum current = 2;
+    optional bool ephemeral = 3;
+    optional bool fg_services = 4;
+    optional bool whilelist = 5;
+    optional .android.util.Duration last_background_time = 6;
+    optional bool idle = 7;
 
-  // Next Tag: 11
+    enum Change {
+        CHANGE_GONE = 0;
+        CHANGE_IDLE = 1;
+        CHANGE_ACTIVE = 2;
+        CHANGE_CACHED = 3;
+        CHANGE_UNCACHED = 4;
+    }
+    repeated Change last_reported_changes = 8;
+    optional int32 num_procs = 9;
+
+    message ProcStateSequence {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int64 cururent = 1;
+        optional int64 last_network_updated = 2;
+        optional int64 last_dispatched = 3;
+    }
+    optional ProcStateSequence network_state_update = 10;
+
+    // Next Tag: 11
 }
 
 // proto of class ImportanceToken in ActivityManagerService
 message ImportanceTokenProto {
-  option (.android.msg_privacy).dest = DEST_EXPLICIT;
+    option (.android.msg_privacy).dest = DEST_EXPLICIT;
 
-  optional int32 pid = 1;
-  optional string token = 2;
-  optional string reason = 3;
+    optional int32 pid = 1;
+    optional string token = 2;
+    optional string reason = 3;
 }
 
 // proto of class VrController.java
 message VrControllerProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  enum VrMode {
-    FLAG_NON_VR_MODE = 0;
-    FLAG_VR_MODE = 1;
-    FLAG_PERSISTENT_VR_MODE = 2;
-  }
-  repeated VrMode vr_mode = 1;
-  optional int32 render_thread_id = 2;
+    enum VrMode {
+        FLAG_NON_VR_MODE = 0;
+        FLAG_VR_MODE = 1;
+        FLAG_PERSISTENT_VR_MODE = 2;
+    }
+    repeated VrMode vr_mode = 1;
+    optional int32 render_thread_id = 2;
 }
 
 message ProcessOomProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-  optional bool persistent = 1;
-  optional int32 num = 2;
-  optional string oom_adj = 3;
-
-  // Activity manager's version of Process enum, see ProcessList.java
-  enum SchedGroup {
-    SCHED_GROUP_UNKNOWN = -1;
-    SCHED_GROUP_BACKGROUND = 0;
-    SCHED_GROUP_DEFAULT = 1;
-    SCHED_GROUP_TOP_APP = 2;
-    SCHED_GROUP_TOP_APP_BOUND = 3;
-  }
-  optional SchedGroup sched_group = 4 [ default = SCHED_GROUP_UNKNOWN];
-
-  oneof Foreground {
-    bool activities = 5;
-    bool services = 6;
-  }
-
-  optional .android.app.ProcessStateEnum state = 7;
-  optional int32 trim_memory_level = 8;
-  optional ProcessRecordProto proc = 9;
-  optional string adj_type = 10;
-
-  oneof AdjTarget {
-    .android.content.ComponentNameProto adj_target_component_name = 11;
-    string adj_target_object = 12;
-  }
-
-  oneof AdjSource {
-    ProcessRecordProto adj_source_proc = 13;
-    string adj_source_object = 14;
-  }
-
-  message Detail {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional int32 max_adj = 1;
-    optional int32 cur_raw_adj = 2;
-    optional int32 set_raw_adj = 3;
-    optional int32 cur_adj = 4;
-    optional int32 set_adj = 5;
-    optional .android.app.ProcessStateEnum current_state = 7;
-    optional .android.app.ProcessStateEnum set_state = 8;
-    optional string last_pss = 9;
-    optional string last_swap_pss = 10;
-    optional string last_cached_pss = 11;
-    optional bool cached = 12;
-    optional bool empty = 13;
-    optional bool has_above_client = 14;
+    optional bool persistent = 1;
+    optional int32 num = 2;
+    optional string oom_adj = 3;
 
-    // only make sense if process is a service
-    message CpuRunTime {
-      option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-      optional int64 over_ms = 1;
-      optional int64 used_ms = 2;
-      optional float ultilization = 3; // ratio of cpu time usage
+    // Activity manager's version of Process enum, see ProcessList.java
+    enum SchedGroup {
+        SCHED_GROUP_UNKNOWN = -1;
+        SCHED_GROUP_BACKGROUND = 0;
+        SCHED_GROUP_DEFAULT = 1;
+        SCHED_GROUP_TOP_APP = 2;
+        SCHED_GROUP_TOP_APP_BOUND = 3;
     }
-    optional CpuRunTime service_run_time = 15;
-  }
-  optional Detail detail = 15;
+    optional SchedGroup sched_group = 4 [ default = SCHED_GROUP_UNKNOWN];
+
+    oneof Foreground {
+        bool activities = 5;
+        bool services = 6;
+    }
+
+    optional .android.app.ProcessStateEnum state = 7;
+    optional int32 trim_memory_level = 8;
+    optional ProcessRecordProto proc = 9;
+    optional string adj_type = 10;
+
+    oneof AdjTarget {
+        .android.content.ComponentNameProto adj_target_component_name = 11;
+        string adj_target_object = 12;
+    }
+
+    oneof AdjSource {
+        ProcessRecordProto adj_source_proc = 13;
+        string adj_source_object = 14;
+    }
+
+    message Detail {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 max_adj = 1;
+        optional int32 cur_raw_adj = 2;
+        optional int32 set_raw_adj = 3;
+        optional int32 cur_adj = 4;
+        optional int32 set_adj = 5;
+        optional .android.app.ProcessStateEnum current_state = 7;
+        optional .android.app.ProcessStateEnum set_state = 8;
+        optional string last_pss = 9;
+        optional string last_swap_pss = 10;
+        optional string last_cached_pss = 11;
+        optional bool cached = 12;
+        optional bool empty = 13;
+        optional bool has_above_client = 14;
+
+        // only make sense if process is a service
+        message CpuRunTime {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional int64 over_ms = 1;
+            optional int64 used_ms = 2;
+            optional float ultilization = 3; // ratio of cpu time usage
+        }
+        optional CpuRunTime service_run_time = 15;
+    }
+    optional Detail detail = 15;
 }
 
 message ProcessToGcProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional ProcessRecordProto proc = 1;
-  optional bool report_low_memory = 2;
-  optional int64 now_uptime_ms = 3;
-  optional int64 last_gced_ms = 4;
-  optional int64 last_low_memory_ms = 5;
+    optional ProcessRecordProto proc = 1;
+    optional bool report_low_memory = 2;
+    optional int64 now_uptime_ms = 3;
+    optional int64 last_gced_ms = 4;
+    optional int64 last_low_memory_ms = 5;
 }
 
 // sync with com.android.server.am.AppErrors.java
 message AppErrorsProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-  optional int64 now_uptime_ms = 1;
-
-  message ProcessCrashTime {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional string process_name = 1;
+    optional int64 now_uptime_ms = 1;
 
-    message Entry {
-      option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    message ProcessCrashTime {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-      optional int32 uid = 1;
-      optional int64 last_crashed_at_ms = 2;
+        optional string process_name = 1;
+
+        message Entry {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional int32 uid = 1;
+            optional int64 last_crashed_at_ms = 2;
+        }
+        repeated Entry entries = 2;
     }
-    repeated Entry entries = 2;
-  }
-  repeated ProcessCrashTime process_crash_times = 2;
+    repeated ProcessCrashTime process_crash_times = 2;
 
-  message BadProcess {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    message BadProcess {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional string process_name = 1;
+        optional string process_name = 1;
 
-    message Entry {
-      option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+        message Entry {
+            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-      optional int32 uid = 1;
-      optional int64 crashed_at_ms = 2;
-      optional string short_msg = 3;
-      optional string long_msg = 4  [ (.android.privacy).dest = DEST_EXPLICIT ];
-      optional string stack = 5  [ (.android.privacy).dest = DEST_EXPLICIT ];
+            optional int32 uid = 1;
+            optional int64 crashed_at_ms = 2;
+            optional string short_msg = 3;
+            optional string long_msg = 4 [ (.android.privacy).dest = DEST_EXPLICIT ];
+            optional string stack = 5 [ (.android.privacy).dest = DEST_EXPLICIT ];
+        }
+        repeated Entry entries = 2;
     }
-    repeated Entry entries = 2;
-  }
-  repeated BadProcess bad_processes = 3;
+    repeated BadProcess bad_processes = 3;
 }
 
 // sync with com.android.server.am.UserState.java
 message UserStateProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  enum State {
-    STATE_BOOTING = 0;
-    STATE_RUNNING_LOCKED = 1;
-    STATE_RUNNING_UNLOCKING = 2;
-    STATE_RUNNING_UNLOCKED = 3;
-    STATE_STOPPING = 4;
-    STATE_SHUTDOWN = 5;
-  }
-  optional State state = 1;
-  optional bool switching = 2;
+    enum State {
+        STATE_BOOTING = 0;
+        STATE_RUNNING_LOCKED = 1;
+        STATE_RUNNING_UNLOCKING = 2;
+        STATE_RUNNING_UNLOCKED = 3;
+        STATE_STOPPING = 4;
+        STATE_SHUTDOWN = 5;
+    }
+    optional State state = 1;
+    optional bool switching = 2;
 }
 
 // sync with com.android.server.am.UserController.java
 message UserControllerProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-  message User {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional int32 id = 1;
-    optional UserStateProto state = 2;
-  }
-  repeated User started_users = 1;
-  repeated int32 started_user_array = 2;
-  repeated int32 user_lru = 3;
+    message User {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  message UserProfile {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+        optional int32 id = 1;
+        optional UserStateProto state = 2;
+    }
+    repeated User started_users = 1;
+    repeated int32 started_user_array = 2;
+    repeated int32 user_lru = 3;
 
-    optional int32 user = 1;
-    optional int32 profile = 2;
-  }
-  repeated UserProfile user_profile_group_ids = 4;
+    message UserProfile {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int32 user = 1;
+        optional int32 profile = 2;
+    }
+    repeated UserProfile user_profile_group_ids = 4;
 }
 
 // sync with com.android.server.am.AppTimeTracker.java
 message AppTimeTrackerProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-  optional string receiver = 1;
-  optional int64 total_duration_ms = 2;
-
-  message PackageTime {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional string package = 1;
-    optional int64 duration_ms = 2;
-  }
-  repeated PackageTime package_times = 3;
+    optional string receiver = 1;
+    optional int64 total_duration_ms = 2;
 
-  optional .android.util.Duration started_time = 4;
-  optional string started_package = 5;
+    message PackageTime {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional string package = 1;
+        optional int64 duration_ms = 2;
+    }
+    repeated PackageTime package_times = 3;
+
+    optional .android.util.Duration started_time = 4;
+    optional string started_package = 5;
 }

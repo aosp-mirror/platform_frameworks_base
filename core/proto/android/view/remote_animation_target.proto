@@ -28,16 +28,16 @@ import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 /** Proto representation for RemoteAnimationTarget.java class. */
 message RemoteAnimationTargetProto {
-  option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional int32 task_id = 1;
-  optional int32 mode = 2;
-  optional .android.view.SurfaceControlProto leash = 3;
-  optional bool is_translucent = 4;
-  optional .android.graphics.RectProto clip_rect = 5;
-  optional .android.graphics.RectProto contentInsets = 6;
-  optional int32 prefix_order_index = 7;
-  optional .android.graphics.PointProto position = 8;
-  optional .android.graphics.RectProto source_container_bounds = 9;
-  optional .android.app.WindowConfigurationProto window_configuration = 10;
+    optional int32 task_id = 1;
+    optional int32 mode = 2;
+    optional .android.view.SurfaceControlProto leash = 3;
+    optional bool is_translucent = 4;
+    optional .android.graphics.RectProto clip_rect = 5;
+    optional .android.graphics.RectProto contentInsets = 6;
+    optional int32 prefix_order_index = 7;
+    optional .android.graphics.PointProto position = 8;
+    optional .android.graphics.RectProto source_container_bounds = 9;
+    optional .android.app.WindowConfigurationProto window_configuration = 10;
 }
