@@ -22,14 +22,13 @@
     android:alpha="0"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
-    android:gravity="fill_horizontal"
-    android:layout_marginTop="@dimen/car_padding_5"
-    android:layout_marginStart="@dimen/car_padding_4">
+    android:gravity="fill_horizontal">
 
     <ImageView android:id="@+id/user_avatar"
         android:layout_centerHorizontal="true"
         android:layout_width="@dimen/car_fullscreen_user_pod_image_avatar_width"
         android:layout_height="@dimen/car_fullscreen_user_pod_image_avatar_height"
+        android:background="@drawable/car_button_ripple_background_inverse"
         />
 
     <TextView android:id="@+id/user_name"
