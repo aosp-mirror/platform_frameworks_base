@@ -308,6 +308,12 @@ class WindowStateAnimator {
         if (!mLastHidden) {
             //dump();
             mLastHidden = true;
+
+            // We may have a preserved surface which we no longer need. If there was a quick
+            // VISIBLE, GONE, VISIBLE, GONE sequence, the surface may never draw, so we don't mark
+            // it to be destroyed in prepareSurfaceLocked.
+            markPreservedSurfaceForDestroy();
+
             if (mSurfaceController != null) {
                 mSurfaceController.hide(transaction, reason);
             }
