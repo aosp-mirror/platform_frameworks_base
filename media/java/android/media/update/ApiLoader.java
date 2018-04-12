@@ -16,68 +16,14 @@
 
 package android.media.update;
 
-import android.app.ActivityManager;
-import android.app.AppGlobals;
-import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Build;
-import android.os.RemoteException;
-import android.os.UserHandle;
-
-import com.android.internal.annotations.GuardedBy;
-
-import dalvik.system.PathClassLoader;
-
-import java.io.File;
-
 /**
  * @hide
  */
 public final class ApiLoader {
-    @GuardedBy("this")
-    private static StaticProvider sMediaUpdatable;
-
-    private static final String UPDATE_PACKAGE = "com.android.media.update";
-    private static final String UPDATE_CLASS = "com.android.media.update.ApiFactory";
-    private static final String UPDATE_METHOD = "initialize";
-    private static final boolean REGISTER_UPDATE_DEPENDENCY = true;
-
     private ApiLoader() { }
 
     public static StaticProvider getProvider() {
-        if (sMediaUpdatable != null) return sMediaUpdatable;
-
-        try {
-            return getMediaUpdatable();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } catch (NameNotFoundException | ReflectiveOperationException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    // TODO This method may do I/O; Ensure it does not violate (emit warnings in) strict mode.
-    private static synchronized StaticProvider getMediaUpdatable()
-            throws NameNotFoundException, ReflectiveOperationException, RemoteException {
-        if (sMediaUpdatable != null) return sMediaUpdatable;
-
-        // TODO Figure out when to use which package (query media update service)
-        int flags = Build.IS_DEBUGGABLE ? 0 : PackageManager.MATCH_FACTORY_ONLY;
-        flags |= PackageManager.GET_SHARED_LIBRARY_FILES;
-        ApplicationInfo ai = AppGlobals.getPackageManager().getApplicationInfo(
-                UPDATE_PACKAGE, flags, UserHandle.myUserId());
-
-        if (REGISTER_UPDATE_DEPENDENCY) {
-            // Register a dependency to the updatable in order to be killed during updates
-            ActivityManager.getService().addPackageDependency(ai.packageName);
-        }
-
-        ClassLoader classLoader = new PathClassLoader(ai.sourceDir,
-                ai.nativeLibraryDir + File.pathSeparator + System.getProperty("java.library.path"),
-                ClassLoader.getSystemClassLoader().getParent());
-        return sMediaUpdatable = (StaticProvider) classLoader.loadClass(UPDATE_CLASS)
-                .getMethod(UPDATE_METHOD, ApplicationInfo.class).invoke(null, ai);
+        throw new RuntimeException("Use MediaSession/Browser instead of"
+                + " hidden MediaSession2/Browser2 APIs.");
     }
 }
