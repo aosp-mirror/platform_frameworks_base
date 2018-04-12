@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"โทร"</string>
     <string name="dial_desc" msgid="6573723404985517250">"โทรหาหมายเลขโทรศัพท์ที่เลือก"</string>
     <string name="map" msgid="5441053548030107189">"แผนที่"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"หาที่อยู่ที่เลือก"</string>
     <string name="browse" msgid="1245903488306147205">"เปิด"</string>
     <string name="browse_desc" msgid="8220976549618935044">"เปิด URL ที่เลือก"</string>
     <string name="sms" msgid="4560537514610063430">"ข้อความ"</string>
@@ -1277,17 +1276,17 @@
     <string name="ext_media_new_notification_title" msgid="1621805083736634077">"<xliff:g id="NAME">%s</xliff:g> ใหม่"</string>
     <string name="ext_media_new_notification_message" msgid="3673685270558405087">"แตะเพื่อตั้งค่า"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"สำหรับการโอนรูปภาพและสื่อ"</string>
-    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"ปัญหาที่พบจาก <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"ปัญหาเกี่ยวกับ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"แตะเพื่อแก้ไข"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> เสียหาย เลือกเพื่อแก้ไข"</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"ไม่สนับสนุน <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"อุปกรณ์นี้ไม่สนับสนุน <xliff:g id="NAME">%s</xliff:g> นี้ แตะเพื่อตั้งค่าในรูปแบบที่สนับสนุน"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"อุปกรณ์นี้ไม่รองรับ <xliff:g id="NAME">%s</xliff:g> นี้ เลือกเพื่อตั้งค่าในรูปแบบที่รองรับ"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> ถูกนำออกไปโดยไม่คาดคิด"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"ดีดสื่อออกก่อนการนำออกเพื่อหลีกเลี่ยงเนื้อหาสูญหาย"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"ยกเลิกการต่อเชื่อมสื่อก่อนที่จะนำออกเพื่อหลีกเลี่ยงไม่ให้เนื้อหาสูญหาย"</string>
     <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"นำ <xliff:g id="NAME">%s</xliff:g> ออกแล้ว"</string>
     <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"ฟังก์ชันการทำงานบางอย่างอาจทำงานไม่ถูกต้อง โปรดใส่พื้นที่เก็บข้อมูลใหม่"</string>
-    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"กำลังดีด <xliff:g id="NAME">%s</xliff:g> ออก"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"กำลังยกเลิกการต่อเชื่อม <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"ห้ามนำออก"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"ตั้งค่า"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"นำอุปกรณ์ออก"</string>
@@ -1691,7 +1690,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"ติดตั้งโดยผู้ดูแลระบบ"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"อัปเดตโดยผู้ดูแลระบบ"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"ลบโดยผู้ดูแลระบบ"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"เพื่อช่วยยืดอายุการใช้งานแบตเตอรี่ โหมดประหยัดแบตเตอรี่จะลดการทำงานของอุปกรณ์และจำกัดหรือปิดการสั่น บริการตำแหน่ง และข้อมูลแบ็กกราวด์ นอกจากนี้ อีเมล การรับส่งข้อความ และแอปอื่นๆ ที่ใช้การซิงค์ก็จะไม่อัปเดตหากคุณไม่เปิดขึ้นมา\n\nโหมดประหยัดแบตเตอรี่จะปิดโดยอัตโนมัติขณะชาร์จอุปกรณ์"</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"เพื่อช่วยลดปริมาณการใช้อินเทอร์เน็ต โปรแกรมประหยัดอินเทอร์เน็ตจะช่วยป้องกันไม่ให้บางแอปส่งหรือรับข้อมูลเครือข่ายมือถือในการทำงานเบื้องหลัง แอปที่คุณกำลังใช้งานสามารถเข้าถึงข้อมูลเครือข่ายมือถือได้ แต่อาจไม่บ่อยเท่าเดิม ตัวอย่างเช่น ภาพต่างๆ จะไม่แสดงจนกว่าคุณจะแตะที่ภาพเหล่านั้น"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"เปิดการประหยัดอินเทอร์เน็ตไหม"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"เปิด"</string>
@@ -1778,6 +1778,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ทุกภาษา"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ภูมิภาคทั้งหมด"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ค้นหา"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"ไม่อนุญาตให้ดำเนินการนี้"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"แอปพลิเคชัน <xliff:g id="APP_NAME">%1$s</xliff:g> ปิดการใช้งานอยู่ในขณะนี้"</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"รายละเอียดเพิ่มเติม"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"เปิดโปรไฟล์งานไหม"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"ระบบจะเปิดแอปงาน การแจ้งเตือน ข้อมูล และฟีเจอร์อื่นๆ ในโปรไฟล์งาน"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"เปิด"</string>
@@ -1867,8 +1870,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"สายเรียกเข้าและการแจ้งเตือนจะไม่ส่งเสียง"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"การเปลี่ยนแปลงระบบ"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"ห้ามรบกวน"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"โหมดห้ามรบกวนซ่อนการแจ้งเตือนไว้เพื่อให้คุณจดจ่อกับสิ่งที่สนใจได้"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"นี่คือการทำงานใหม่ แตะเพื่อเปลี่ยน"</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"เปลี่ยน \"ห้ามรบกวน\" แล้ว"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"แตะเพื่อดูรายการที่ถูกบล็อก"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ระบบ"</string>

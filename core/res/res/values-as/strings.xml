@@ -82,8 +82,7 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"কোনো ভইচ সেৱা নাই"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"ধ্বনি সেৱা বা জৰুৰীকালীন কলৰ সেৱা উপলব্ধ নহয়"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"আপোনাৰ বাহকে সাময়িকভাৱে অফ কৰি থৈছে"</string>
-    <!-- no translation found for RestrictedStateContentMsimTemplate (673416791370248176) -->
-    <skip />
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"আপোনাৰ বাহকে <xliff:g id="SIMNUMBER">%d</xliff:g> ছিমৰ বাবে সাময়িকভাৱে অফ কৰিছে"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"ম\'বাইল নেটৱৰ্কৰ লগত সংযোগ কৰিব পৰা নাই"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"পচন্দৰ নেটৱৰ্ক সলনি কৰি চেষ্টা কৰি চাওক। সলনি কৰিবলৈ টিপক।"</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"জৰুৰীকালীন কল কৰাৰ সুবিধা উপলব্ধ নহয়"</string>
@@ -498,8 +497,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"চিনাক্ত কৰিবপৰা নগ\'ল"</string>
-    <!-- no translation found for fingerprint_authenticated (5309333983002526448) -->
-    <skip />
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"ফিংগাৰপ্ৰিণ্টৰ সত্যাপন কৰা হ’ল"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ফিংগাৰপ্ৰিণ্ট হাৰ্ডৱেৰ নাই।"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ফিংগাৰপ্ৰিণ্ট সঞ্চয় কৰিব পৰা নগ\'ল। পূর্বে সঞ্চিত ফিংগাৰপ্ৰিণ্ট এটা আঁতৰাওক।"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ফিংগাৰপ্ৰিণ্ট গ্ৰহণৰ সময়সীমা উকলি গৈছে। আকৌ চেষ্টা কৰক।"</string>
@@ -1015,10 +1013,8 @@
     <string name="email_desc" msgid="3638665569546416795">"বাছনি কৰা ঠিকনাত ইমেইল কৰক"</string>
     <string name="dial" msgid="1253998302767701559">"কল কৰক"</string>
     <string name="dial_desc" msgid="6573723404985517250">"বাছনি কৰা ফ\'ন নাম্বাৰত কল কৰক"</string>
-    <!-- no translation found for map (5441053548030107189) -->
-    <skip />
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map" msgid="5441053548030107189">"মেপ"</string>
+    <string name="map_desc" msgid="1836995341943772348">"বাছনি কৰা ঠিকনাটো বিচাৰি উলিয়াওক"</string>
     <string name="browse" msgid="1245903488306147205">"খোলক"</string>
     <string name="browse_desc" msgid="8220976549618935044">"বাছনি কৰা URL খোলক"</string>
     <string name="sms" msgid="4560537514610063430">"বাৰ্তা"</string>
@@ -1275,49 +1271,34 @@
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g>এ অইন এপবোৰৰ ওপৰত প্ৰদৰ্শিত হৈ আছে"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"আপুনি যদি <xliff:g id="NAME">%s</xliff:g>এ এই সুবিধাটো ব্যৱহাৰ কৰাটো নিবিচাৰে তেন্তে টিপি ছেটিংসমূহ খোলক আৰু ইয়াক অফ কৰক।"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"অফ কৰক"</string>
-    <!-- no translation found for ext_media_checking_notification_title (4411133692439308924) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (410185170877285434) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_title (1621805083736634077) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_message (3673685270558405087) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"<xliff:g id="NAME">%s</xliff:g> পৰীক্ষা কৰি থকা হৈছে…"</string>
+    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"বৰ্তমানৰ সমলৰ সমীক্ষা কৰি থকা হৈছে"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"নতুন <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"ছেট আপ কৰিবলৈ টিপক"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"ফট\' আৰু মিডিয়া স্থানান্তৰণৰ বাবে"</string>
-    <!-- no translation found for ext_media_unmountable_notification_title (4179418065210797130) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (4193858924381066522) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"<xliff:g id="NAME">%s</xliff:g>ত কিবা সমস্যা আছে"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"সমাধান কৰিবলৈ টিপক"</string>
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> ব্যৱহাৰযোগ্য হৈ থকা নাই। ঠিক কৰিবলৈ বাছনি কৰক।"</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g>ক ব্যৱহাৰ কৰিব নোৱাৰি"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"এই ডিভাইচটোৱে <xliff:g id="NAME">%s</xliff:g>ক ব্যৱহাৰ কৰিব নোৱাৰে। ব্যৱহাৰ কৰিব পৰা ফৰ্মেটত ছেট আপ কৰিবলৈ টিপক।"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"এই ডিভাইচটোৱে <xliff:g id="NAME">%s</xliff:g>ক চলাব নোৱাৰে। চলাব পৰা কোনো ফৰ্মেটত ছেট আপ কৰিবলৈ বাছনি কৰক।"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> অপ্ৰত্য়াশিতভাৱে আঁতৰোৱা হ\'ল"</string>
-    <!-- no translation found for ext_media_badremoval_notification_message (8556885808951260574) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (6593814191061956856) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (2110883356419799994) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (5046532339291216076) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (1003926904442321115) -->
-    <skip />
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"সমল হেৰুওৱাৰ পৰা হাত সাৰিবলৈ আঁতৰোৱাৰ আগতে মিডিয়া বাহিৰ কৰক"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g> আঁতৰোৱা হ\'ল"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"কিছুমান কাৰ্যক্ষমতাই সঠিকভাৱে কাম নকৰিব পাৰে। নতুন সঞ্চয়াগাৰ ভৰাওক।"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g> বাহিৰ কৰি থকা হৈছে"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"আঁতৰাই নিদিব"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"ছেট আপ কৰক"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"বাহিৰ কৰক"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"অন্বেষণ কৰক"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> উপলব্ধ নহয়"</string>
-    <!-- no translation found for ext_media_missing_message (4012389235250987930) -->
-    <skip />
+    <string name="ext_media_missing_message" msgid="4012389235250987930">"ডিভাইচ আকৌ ভৰাওক"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g>ক স্থানান্তৰ কৰি থকা হৈছে"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"ডেটা স্থানান্তৰ কৰি থকা হৈছে"</string>
-    <!-- no translation found for ext_media_move_success_title (7863652232242276066) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (8939137931961728009) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (1604422634177382092) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (7388950499623016135) -->
-    <skip />
+    <string name="ext_media_move_success_title" msgid="7863652232242276066">"সমলৰ স্থানান্তৰণ সমাপ্ত হ\'ল"</string>
+    <string name="ext_media_move_success_message" msgid="8939137931961728009">"<xliff:g id="NAME">%s</xliff:g>লৈ সমল স্থানান্তৰ কৰা হ\'ল"</string>
+    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"সমল স্থানান্তৰ কৰিব পৰা নগ\'ল"</string>
+    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"সমল আকৌ স্থানান্তৰ কৰিবলৈ চেষ্টা কৰক"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"আঁতৰোৱা হ\'ল"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"বাহিৰলৈ উলিওৱা হ\'ল"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"পৰীক্ষা কৰি থকা হৈছে…"</string>
@@ -1709,7 +1690,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"আপোনাৰ প্ৰশাসকে ইনষ্টল কৰিছে"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"আপোনাৰ প্ৰশাসকে আপেডট কৰিছে"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"আপোনাৰ প্ৰশাসকে মচিছে"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"বেটাৰিৰ জীৱনকাল বৃদ্ধি কৰিবলৈ বেটাৰি সঞ্চয়কাৰী সুবিধাই আপোনাৰ ডিভাইচৰ কাৰ্যদক্ষতা হ্ৰাস কৰে আৰু কম্পন, অৱস্থান সেৱা আৰু নেপথ্য ডেটা সীমিত কৰে বা বন্ধ কৰে। ছিংকৰ ওপৰত নির্ভৰশীল ইমেইল, মেছেজিং আৰু অন্য এপসমূহ আপুনি নোখোলা পৰ্যন্ত আপডেট নহ\'বও পাৰে।\n\nআপোনাৰ ডিভাইচ চ্চার্জ কৰি থকাৰ সময়ত বেটাৰি সঞ্চয়কাৰী সুবিধা স্বয়ংক্ৰিয়ভাৱে বন্ধ হ\'ব।"</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"ডেটা ব্য়ৱহাৰ মাত্ৰা কম কৰিবৰ বাবে ডেটা সঞ্চয়কাৰীয়ে কিছুমান এপক নেপথ্য়ত ডেটা প্ৰেৰণ বা সংগ্ৰহ কৰাত বাধা প্ৰদান কৰে। আপুনি বৰ্তমান ব্য়ৱহাৰ কৰি থকা এটা এপে ডেটা ব্য়ৱহাৰ কৰিব পাৰে, কিন্তু সঘনাই এই কার্য কৰিব নোৱাৰিব পাৰে। ইয়াৰ অৰ্থ এইয়ে হ\'ব পাৰে যে, উদাহৰণস্বৰূপে, আপুনি নিটিপা পর্যন্ত প্ৰতিচ্ছবিসমূহ দেখুওৱা নহ\'ব।"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ডেটা সঞ্চয়কাৰী অন কৰিবনে?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"অন কৰক"</string>
@@ -1796,6 +1778,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"সকলো ভাষা"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"সকলো অঞ্চল"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"অনুসন্ধান কৰক"</string>
+    <!-- no translation found for app_suspended_title (5360409799785895488) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (5876776530189983288) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (2901244470963918402) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"কৰ্মস্থানৰ প্ৰ\'ফাইল অন কৰিবনে?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"আপোনাৰ কৰ্মস্থানৰ এপসমূহ, জাননীসমূহ, ডেটা আৰু কৰ্মস্থানৰ প্ৰ\'ফাইলৰ অইন সুবিধাসমূহ অন কৰা হ\'ব"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"অন কৰক"</string>
@@ -1865,14 +1853,10 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"ভইচৰ বাবে ছিমৰ প্ৰ\'ভিজন কৰা হোৱা নাই"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"ভইচৰ বাবে ছিম ব্যৱহাৰৰ অনুমতি নাই"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"ভইচৰ বাবে ফ\'ন ব্যৱহাৰৰ অনুমতি নাই"</string>
-    <!-- no translation found for mmcc_authentication_reject_msim_template (1217031195834766479) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr_msim_template (5636464607596778986) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms_msim_template (5994323296399913454) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me_msim_template (5550259730350571826) -->
-    <skip />
+    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"ছিম <xliff:g id="SIMNUMBER">%d</xliff:g> অনুমোদিত নহয়"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"ছিম <xliff:g id="SIMNUMBER">%d</xliff:g>ৰ প্ৰ\'ভিজন কৰা হোৱা নাই"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"ছিম <xliff:g id="SIMNUMBER">%d</xliff:g> অনুমোদিত নহয়"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"ছিম <xliff:g id="SIMNUMBER">%d</xliff:g> অনুমোদিত নহয়"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"পপআপ ৱিণ্ড\'"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"এপৰ সংস্কৰণ অৱনমিত কৰা হৈছে, বা ই এই শ্বৰ্টকাটটোৰ লগত খাপ নাখায়"</string>
@@ -1889,8 +1873,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"কল আৰু জাননীসমূহ মিউট কৰা হ\'ব"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"ছিষ্টেমৰ সালসলনি"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"অসুবিধা নিদিব"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"আপুনি যাতে মনোযোগ দিব পাৰে তাৰ কাৰণে অসুবিধা নিদিবই জাননীসমূহ লুকুৱাই থৈছে"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"এইটো এটা নতুন আচৰণ। সলনি কৰিবলৈ টিপক।"</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"অসুবিধা নিদিব সলনি হৈছে"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"কি কি অৱৰোধ কৰা হৈছে জানিবলৈ টিপক।"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ছিষ্টেম"</string>
