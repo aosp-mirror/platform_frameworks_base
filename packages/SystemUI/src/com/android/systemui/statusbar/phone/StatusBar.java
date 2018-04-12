@@ -1193,12 +1193,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void manageNotifications() {
         Intent intent = new Intent(Settings.ACTION_ALL_APPS_NOTIFICATION_SETTINGS);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent, true, true);
+        startActivity(intent, true, true, Intent.FLAG_ACTIVITY_SINGLE_TOP);
     }
 
     public void clearAllNotifications() {
-
         // animate-swipe all dismissable notifications, then animate the shade closed
         int numChildren = mStackScroller.getChildCount();
 
@@ -1838,6 +1836,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         return new StatusBar.H();
     }
 
+    private void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade,
+            int flags) {
+        startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade, flags);
+    }
+
     @Override
     public void startActivity(Intent intent, boolean dismissShade) {
         startActivityDismissingKeyguard(intent, false, dismissShade);
@@ -1851,7 +1854,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void startActivity(Intent intent, boolean dismissShade, Callback callback) {
         startActivityDismissingKeyguard(intent, false, dismissShade,
-                false /* disallowEnterPictureInPictureWhileLaunching */, callback);
+                false /* disallowEnterPictureInPictureWhileLaunching */, callback, 0);
     }
 
     public void setQsExpanded(boolean expanded) {
@@ -2874,14 +2877,20 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
-            boolean dismissShade) {
+            boolean dismissShade, int flags) {
         startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade,
-                false /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */);
+                false /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */,
+                flags);
+    }
+
+    public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
+            boolean dismissShade) {
+        startActivityDismissingKeyguard(intent, onlyProvisioned, dismissShade, 0);
     }
 
     public void startActivityDismissingKeyguard(final Intent intent, boolean onlyProvisioned,
             final boolean dismissShade, final boolean disallowEnterPictureInPictureWhileLaunching,
-            final Callback callback) {
+            final Callback callback, int flags) {
         if (onlyProvisioned && !isDeviceProvisioned()) return;
 
         final boolean afterKeyguardGone = PreviewInflater.wouldLaunchResolverActivity(
@@ -2890,6 +2899,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mAssistManager.hideAssist();
             intent.setFlags(
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.addFlags(flags);
             int result = ActivityManager.START_CANCELED;
             ActivityOptions options = new ActivityOptions(getActivityOptions(
                     null /* remoteAnimation */));
@@ -4575,7 +4585,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (!mStatusBarKeyguardViewManager.isShowing()) {
             startActivityDismissingKeyguard(KeyguardBottomAreaView.INSECURE_CAMERA_INTENT,
                     false /* onlyProvisioned */, true /* dismissShade */,
-                    true /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */);
+                    true /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */, 0);
         } else {
             if (!mDeviceInteractive) {
                 // Avoid flickering of the scrim when we instant launch the camera and the bouncer
