@@ -119,6 +119,7 @@ public final class KeyChainSnapshot implements Parcelable {
      * See implementation for binary key format.
      *
      * @deprecated Use {@link #getTrustedHardwareCertPath} instead.
+     * @removed
      */
     @Deprecated
     public @NonNull byte[] getTrustedHardwarePublicKey() {
