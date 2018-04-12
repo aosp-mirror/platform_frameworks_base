@@ -213,9 +213,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
     private int fillColorForIntensity(float intensity, Context context) {
         if (intensity == 0) {
-            return context.getColor(R.color.light_mode_icon_color_dual_tone_fill);
+            return context.getColor(R.color.light_mode_icon_color_single_tone);
         }
-        return context.getColor(R.color.dark_mode_icon_color_dual_tone_fill);
+        return context.getColor(R.color.dark_mode_icon_color_single_tone);
     }
 
     @Override
