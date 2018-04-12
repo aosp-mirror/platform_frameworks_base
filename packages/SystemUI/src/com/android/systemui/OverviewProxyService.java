@@ -78,7 +78,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     private IOverviewProxy mOverviewProxy;
     private int mConnectionBackoffAttempts;
-    private CharSequence mOnboardingText;
     private @InteractionType int mInteractionFlags;
     private boolean mIsEnabled;
 
@@ -117,10 +116,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
-        }
-
-        public void setRecentsOnboardingText(CharSequence text) {
-            mOnboardingText = text;
         }
 
         public void setInteractionState(@InteractionType int flags) {
@@ -284,10 +279,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     public IOverviewProxy getProxy() {
         return mOverviewProxy;
-    }
-
-    public CharSequence getOnboardingText() {
-        return mOnboardingText;
     }
 
     public int getInteractionFlags() {
