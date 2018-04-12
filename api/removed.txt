@@ -72,6 +72,36 @@ package android.app.job {
 
 }
 
+package android.app.slice {
+
+  public final class Slice implements android.os.Parcelable {
+    field public static final deprecated java.lang.String EXTRA_SLIDER_VALUE = "android.app.slice.extra.SLIDER_VALUE";
+    field public static final deprecated java.lang.String SUBTYPE_SLIDER = "slider";
+  }
+
+  public static class Slice.Builder {
+    ctor public deprecated Slice.Builder(android.net.Uri);
+    method public deprecated android.app.slice.Slice.Builder addTimestamp(long, java.lang.String, java.util.List<java.lang.String>);
+    method public deprecated android.app.slice.Slice.Builder setSpec(android.app.slice.SliceSpec);
+  }
+
+  public final class SliceItem implements android.os.Parcelable {
+    method public deprecated long getTimestamp();
+    field public static final deprecated java.lang.String FORMAT_TIMESTAMP = "long";
+  }
+
+  public class SliceManager {
+    method public deprecated android.app.slice.Slice bindSlice(android.net.Uri, java.util.List<android.app.slice.SliceSpec>);
+    method public deprecated android.app.slice.Slice bindSlice(android.content.Intent, java.util.List<android.app.slice.SliceSpec>);
+    method public deprecated void pinSlice(android.net.Uri, java.util.List<android.app.slice.SliceSpec>);
+  }
+
+  public abstract class SliceProvider extends android.content.ContentProvider {
+    method public deprecated android.app.slice.Slice onBindSlice(android.net.Uri, java.util.List<android.app.slice.SliceSpec>);
+  }
+
+}
+
 package android.app.usage {
 
   public final class StorageStats implements android.os.Parcelable {
@@ -507,6 +537,18 @@ package android.speech.tts {
 
   public abstract class UtteranceProgressListener {
     method public deprecated void onUtteranceRangeStart(java.lang.String, int, int);
+  }
+
+}
+
+package android.telephony {
+
+  public class NetworkScan {
+    method public deprecated void stop() throws android.os.RemoteException;
+  }
+
+  public class TelephonyManager {
+    method public deprecated android.telephony.NetworkScan requestNetworkScan(android.telephony.NetworkScanRequest, android.telephony.TelephonyScanManager.NetworkScanCallback);
   }
 
 }
