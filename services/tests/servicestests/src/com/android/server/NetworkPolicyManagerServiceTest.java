@@ -1714,6 +1714,8 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private void expectNetworkState(boolean roaming) throws Exception {
+        when(mCarrierConfigManager.getConfigForSubId(eq(TEST_SUB_ID)))
+                .thenReturn(CarrierConfigManager.getDefaultConfig());
         when(mConnManager.getAllNetworkState()).thenReturn(new NetworkState[] {
                 new NetworkState(buildNetworkInfo(),
                         buildLinkProperties(TEST_IFACE),

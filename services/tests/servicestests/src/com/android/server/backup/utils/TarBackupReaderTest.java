@@ -41,7 +41,9 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.PackageParser;
 import android.content.pm.Signature;
+import android.content.pm.SigningInfo;
 import android.os.Bundle;
 import android.os.Process;
 import android.platform.test.annotations.Presubmit;
@@ -371,7 +373,13 @@ public class TarBackupReaderTest {
         packageInfo.applicationInfo.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
         packageInfo.applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         packageInfo.applicationInfo.backupAgentName = null;
-        packageInfo.signingCertificateHistory = new Signature[][] {{FAKE_SIGNATURE_2}};
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {FAKE_SIGNATURE_2},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         PackageManagerStub.sPackageInfo = packageInfo;
 
         RestorePolicy policy = tarBackupReader.chooseRestorePolicy(mPackageManagerStub,
@@ -402,7 +410,13 @@ public class TarBackupReaderTest {
                 ApplicationInfo.FLAG_ALLOW_BACKUP | ApplicationInfo.FLAG_RESTORE_ANY_VERSION;
         packageInfo.applicationInfo.uid = Process.SYSTEM_UID;
         packageInfo.applicationInfo.backupAgentName = "backup.agent";
-        packageInfo.signingCertificateHistory = new Signature[][] {{FAKE_SIGNATURE_1}};
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {FAKE_SIGNATURE_1},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         PackageManagerStub.sPackageInfo = packageInfo;
 
         doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(FAKE_SIGNATURE_1,
@@ -434,7 +448,13 @@ public class TarBackupReaderTest {
                 ApplicationInfo.FLAG_ALLOW_BACKUP | ApplicationInfo.FLAG_RESTORE_ANY_VERSION;
         packageInfo.applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         packageInfo.applicationInfo.backupAgentName = null;
-        packageInfo.signingCertificateHistory = new Signature[][] {{FAKE_SIGNATURE_1}};
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {FAKE_SIGNATURE_1},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         PackageManagerStub.sPackageInfo = packageInfo;
 
         doReturn(true).when(mMockPackageManagerInternal).isDataRestoreSafe(FAKE_SIGNATURE_1,
@@ -469,7 +489,13 @@ public class TarBackupReaderTest {
         packageInfo.applicationInfo.flags &= ~ApplicationInfo.FLAG_RESTORE_ANY_VERSION;
         packageInfo.applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         packageInfo.applicationInfo.backupAgentName = null;
-        packageInfo.signingCertificateHistory = new Signature[][] {{FAKE_SIGNATURE_1}};
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {FAKE_SIGNATURE_1},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.versionCode = 2;
         PackageManagerStub.sPackageInfo = packageInfo;
 
@@ -507,7 +533,13 @@ public class TarBackupReaderTest {
         packageInfo.applicationInfo.flags &= ~ApplicationInfo.FLAG_RESTORE_ANY_VERSION;
         packageInfo.applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         packageInfo.applicationInfo.backupAgentName = null;
-        packageInfo.signingCertificateHistory = new Signature[][] {{FAKE_SIGNATURE_1}};
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {FAKE_SIGNATURE_1},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.versionCode = 1;
         PackageManagerStub.sPackageInfo = packageInfo;
 
@@ -541,7 +573,13 @@ public class TarBackupReaderTest {
         packageInfo.applicationInfo.flags &= ~ApplicationInfo.FLAG_RESTORE_ANY_VERSION;
         packageInfo.applicationInfo.uid = Process.FIRST_APPLICATION_UID;
         packageInfo.applicationInfo.backupAgentName = null;
-        packageInfo.signingCertificateHistory = new Signature[][] {{FAKE_SIGNATURE_1}};
+        packageInfo.signingInfo = new SigningInfo(
+                new PackageParser.SigningDetails(
+                        new Signature[] {FAKE_SIGNATURE_1},
+                        PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
+                        null,
+                        null,
+                        null));
         packageInfo.versionCode = 1;
         PackageManagerStub.sPackageInfo = packageInfo;
 

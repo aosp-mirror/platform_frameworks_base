@@ -228,7 +228,7 @@ message IncidentProto {
     ];
 
     optional android.service.print.PrintServiceDumpProto print = 3010 [
-        (section).type = SECTION_NONE, // Turn off until we get approval for it.
+        (section).type = SECTION_DUMPSYS,
         (section).args = "print --proto"
     ];
 

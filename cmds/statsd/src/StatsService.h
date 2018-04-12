@@ -76,7 +76,7 @@ public:
     /**
      * Called by LogReader when there's a log event to process.
      */
-    virtual void OnLogEvent(LogEvent* event);
+    virtual void OnLogEvent(LogEvent* event, bool reconnectionStarts);
 
     /**
      * Binder call for clients to request data for this configuration key.
@@ -94,24 +94,23 @@ public:
      * Binder call to let clients send a configuration and indicate they're interested when they
      * should requestData for this configuration.
      */
-    virtual Status addConfiguration(int64_t key, const vector<uint8_t>& config,
-                                    bool* success) override;
+    virtual Status addConfiguration(int64_t key, const vector<uint8_t>& config) override;
 
     /**
      * Binder call to let clients register the data fetch operation for a configuration.
      */
-    virtual Status setDataFetchOperation(int64_t key, const sp<android::IBinder>& intentSender,
-                                         bool* success) override;
+    virtual Status setDataFetchOperation(int64_t key,
+                                         const sp<android::IBinder>& intentSender) override;
 
     /**
      * Binder call to remove the data fetch operation for the specified config key.
      */
-    virtual Status removeDataFetchOperation(int64_t key, bool* success) override;
+    virtual Status removeDataFetchOperation(int64_t key) override;
 
     /**
      * Binder call to allow clients to remove the specified configuration.
      */
-    virtual Status removeConfiguration(int64_t key, bool* success) override;
+    virtual Status removeConfiguration(int64_t key) override;
 
     /**
      * Binder call to associate the given config's subscriberId with the given intentSender.
@@ -119,17 +118,13 @@ public:
      */
     virtual Status setBroadcastSubscriber(int64_t configId,
                                           int64_t subscriberId,
-                                          const sp<android::IBinder>& intentSender,
-                                          bool* success) override;
+                                          const sp<android::IBinder>& intentSender) override;
 
     /**
      * Binder call to unassociate the given config's subscriberId with any intentSender.
      */
-    virtual Status unsetBroadcastSubscriber(int64_t configId, int64_t subscriberId,
-                                            bool* success) override;
+    virtual Status unsetBroadcastSubscriber(int64_t configId, int64_t subscriberId) override;
 
-    // TODO: public for testing since statsd doesn't run when system starts. Change to private
-    // later.
     /** Inform statsCompanion that statsd is ready. */
     virtual void sayHiToStatsCompanion();
 

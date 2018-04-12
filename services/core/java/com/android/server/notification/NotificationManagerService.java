@@ -121,6 +121,7 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
 import android.media.IRingtonePlayer;
+import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -394,6 +395,8 @@ public class NotificationManagerService extends SystemService {
     private SnoozeHelper mSnoozeHelper;
     private GroupHelper mGroupHelper;
     private boolean mIsTelevision;
+
+    private MetricsLogger mMetricsLogger;
 
     private static class Archive {
         final int mBufferSize;
@@ -801,6 +804,18 @@ public class NotificationManagerService extends SystemService {
                         // Report to usage stats that notification was made visible
                         if (DBG) Slog.d(TAG, "Marking notification as visible " + nv.key);
                         reportSeen(r);
+
+                        // If the newly visible notification has smart replies
+                        // then log that the user has seen them.
+                        if (r.getNumSmartRepliesAdded() > 0
+                                && !r.hasSeenSmartReplies()) {
+                            r.setSeenSmartReplies(true);
+                            LogMaker logMaker = r.getLogMaker()
+                                    .setCategory(MetricsEvent.SMART_REPLY_VISIBLE)
+                                    .addTaggedData(MetricsEvent.NOTIFICATION_SMART_REPLY_COUNT,
+                                            r.getNumSmartRepliesAdded());
+                            mMetricsLogger.write(logMaker);
+                        }
                     }
                     r.setVisibility(true, nv.rank);
                     nv.recycle();
@@ -849,6 +864,31 @@ public class NotificationManagerService extends SystemService {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
                     r.recordDirectReplied();
+                    reportUserInteraction(r);
+                }
+            }
+        }
+
+        @Override
+        public void onNotificationSmartRepliesAdded(String key, int replyCount) {
+            synchronized (mNotificationLock) {
+                NotificationRecord r = mNotificationsByKey.get(key);
+                if (r != null) {
+                    r.setNumSmartRepliesAdded(replyCount);
+                }
+            }
+        }
+
+        @Override
+        public void onNotificationSmartReplySent(String key, int replyIndex) {
+            synchronized (mNotificationLock) {
+                NotificationRecord r = mNotificationsByKey.get(key);
+                if (r != null) {
+                    LogMaker logMaker = r.getLogMaker()
+                            .setCategory(MetricsEvent.SMART_REPLY_ACTION)
+                            .setSubtype(replyIndex);
+                    mMetricsLogger.write(logMaker);
+                    // Treat clicking on a smart reply as a user interaction.
                     reportUserInteraction(r);
                 }
             }
@@ -1349,6 +1389,7 @@ public class NotificationManagerService extends SystemService {
             extractorNames = new String[0];
         }
         mUsageStats = usageStats;
+        mMetricsLogger = new MetricsLogger();
         mRankingHandler = new RankingHandlerWorker(mRankingThread.getLooper());
         mConditionProviders = conditionProviders;
         mZenModeHelper = new ZenModeHelper(getContext(), mHandler.getLooper(), mConditionProviders);
@@ -1831,7 +1872,7 @@ public class NotificationManagerService extends SystemService {
         };
 
         int newSuppressedVisualEffects = incomingPolicy.suppressedVisualEffects;
-        if (targetSdkVersion <= Build.VERSION_CODES.O_MR1) {
+        if (targetSdkVersion < Build.VERSION_CODES.P) {
             // unset higher order bits introduced in P, maintain the user's higher order bits
             for (int i = 0; i < effectsIntroducedInP.length ; i++) {
                 newSuppressedVisualEffects &= ~effectsIntroducedInP[i];
@@ -3188,7 +3229,7 @@ public class NotificationManagerService extends SystemService {
                         0, UserHandle.getUserId(MY_UID));
                 Policy currPolicy = mZenModeHelper.getNotificationPolicy();
 
-                if (applicationInfo.targetSdkVersion <= Build.VERSION_CODES.O_MR1) {
+                if (applicationInfo.targetSdkVersion < Build.VERSION_CODES.P) {
                     int priorityCategories = policy.priorityCategories;
                     // ignore alarm and media values from new policy
                     priorityCategories &= ~Policy.PRIORITY_CATEGORY_ALARMS;
@@ -3956,9 +3997,14 @@ public class NotificationManagerService extends SystemService {
                     + ", notificationUid=" + notificationUid
                     + ", notification=" + notification;
             Log.e(TAG, noChannelStr);
-            doChannelWarningToast("Developer warning for package \"" + pkg + "\"\n" +
-                    "Failed to post notification on channel \"" + channelId + "\"\n" +
-                    "See log for more details");
+            boolean appNotificationsOff = mRankingHelper.getImportance(pkg, notificationUid)
+                    == NotificationManager.IMPORTANCE_NONE;
+
+            if (!appNotificationsOff) {
+                doChannelWarningToast("Developer warning for package \"" + pkg + "\"\n" +
+                        "Failed to post notification on channel \"" + channelId + "\"\n" +
+                        "See log for more details");
+            }
             return;
         }
 

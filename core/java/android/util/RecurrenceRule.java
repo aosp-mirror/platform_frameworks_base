@@ -149,6 +149,10 @@ public class RecurrenceRule implements Parcelable {
         }
     };
 
+    public boolean isRecurring() {
+        return period != null;
+    }
+
     @Deprecated
     public boolean isMonthly() {
         return start != null

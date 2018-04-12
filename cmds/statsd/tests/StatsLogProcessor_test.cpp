@@ -178,6 +178,128 @@ TEST(StatsLogProcessorTest, TestReportIncludesSubConfig) {
     EXPECT_EQ(2, report.annotation(0).field_int32());
 }
 
+TEST(StatsLogProcessorTest, TestOutOfOrderLogs) {
+    // Setup simple config key corresponding to empty config.
+    sp<UidMap> m = new UidMap();
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    sp<AlarmMonitor> subscriberAlarmMonitor;
+    int broadcastCount = 0;
+    StatsLogProcessor p(m, anomalyAlarmMonitor, subscriberAlarmMonitor, 0,
+                        [&broadcastCount](const ConfigKey& key) { broadcastCount++; });
+
+    LogEvent event1(0, 1 /*logd timestamp*/, 1001 /*elapsedRealtime*/);
+    event1.init();
+
+    LogEvent event2(0, 2, 1002);
+    event2.init();
+
+    LogEvent event3(0, 3, 1005);
+    event3.init();
+
+    LogEvent event4(0, 4, 1004);
+    event4.init();
+
+    // <----- Reconnection happens
+
+    LogEvent event5(0, 5, 999);
+    event5.init();
+
+    LogEvent event6(0, 6, 2000);
+    event6.init();
+
+    // <----- Reconnection happens
+
+    LogEvent event7(0, 7, 3000);
+    event7.init();
+
+    // first event ever
+    p.OnLogEvent(&event1, true);
+    EXPECT_EQ(1UL, p.mLogCount);
+    EXPECT_EQ(1001LL, p.mLargestTimestampSeen);
+    EXPECT_EQ(1001LL, p.mLastTimestampSeen);
+
+    p.OnLogEvent(&event2, false);
+    EXPECT_EQ(2UL, p.mLogCount);
+    EXPECT_EQ(1002LL, p.mLargestTimestampSeen);
+    EXPECT_EQ(1002LL, p.mLastTimestampSeen);
+
+    p.OnLogEvent(&event3, false);
+    EXPECT_EQ(3UL, p.mLogCount);
+    EXPECT_EQ(1005LL, p.mLargestTimestampSeen);
+    EXPECT_EQ(1005LL, p.mLastTimestampSeen);
+
+    p.OnLogEvent(&event4, false);
+    EXPECT_EQ(4UL, p.mLogCount);
+    EXPECT_EQ(1005LL, p.mLargestTimestampSeen);
+    EXPECT_EQ(1004LL, p.mLastTimestampSeen);
+    EXPECT_FALSE(p.mInReconnection);
+
+    // Reconnect happens, event1 out of buffer. Read event2
+    p.OnLogEvent(&event2, true);
+    EXPECT_EQ(4UL, p.mLogCount);
+    EXPECT_EQ(1005LL, p.mLargestTimestampSeen);
+    EXPECT_EQ(1004LL, p.mLastTimestampSeen);
+    EXPECT_TRUE(p.mInReconnection);
+
+    p.OnLogEvent(&event3, false);
+    EXPECT_EQ(4UL, p.mLogCount);
+    EXPECT_EQ(1005LL, p.mLargestTimestampSeen);
+    EXPECT_EQ(1004LL, p.mLastTimestampSeen);
+    EXPECT_TRUE(p.mInReconnection);
+
+    p.OnLogEvent(&event4, false);
+    EXPECT_EQ(4UL, p.mLogCount);
+    EXPECT_EQ(1005LL, p.mLargestTimestampSeen);
+    EXPECT_EQ(1004LL, p.mLastTimestampSeen);
+    EXPECT_FALSE(p.mInReconnection);
+
+    // Fresh event comes.
+    p.OnLogEvent(&event5, false);
+    EXPECT_EQ(5UL, p.mLogCount);
+    EXPECT_EQ(1005LL, p.mLargestTimestampSeen);
+    EXPECT_EQ(999LL, p.mLastTimestampSeen);
+
+    p.OnLogEvent(&event6, false);
+    EXPECT_EQ(6UL, p.mLogCount);
+    EXPECT_EQ(2000LL, p.mLargestTimestampSeen);
+    EXPECT_EQ(2000LL, p.mLastTimestampSeen);
+
+    // Reconnect happens, read from event4
+    p.OnLogEvent(&event4, true);
+    EXPECT_EQ(6UL, p.mLogCount);
+    EXPECT_EQ(2000LL, p.mLargestTimestampSeen);
+    EXPECT_EQ(2000LL, p.mLastTimestampSeen);
+    EXPECT_TRUE(p.mInReconnection);
+
+    p.OnLogEvent(&event5, false);
+    EXPECT_EQ(6UL, p.mLogCount);
+    EXPECT_EQ(2000LL, p.mLargestTimestampSeen);
+    EXPECT_EQ(2000LL, p.mLastTimestampSeen);
+    EXPECT_TRUE(p.mInReconnection);
+
+    // Before we get out of reconnection state, it reconnects again.
+    p.OnLogEvent(&event5, true);
+    EXPECT_EQ(6UL, p.mLogCount);
+    EXPECT_EQ(2000LL, p.mLargestTimestampSeen);
+    EXPECT_EQ(2000LL, p.mLastTimestampSeen);
+    EXPECT_TRUE(p.mInReconnection);
+
+    p.OnLogEvent(&event6, false);
+    EXPECT_EQ(6UL, p.mLogCount);
+    EXPECT_EQ(2000LL, p.mLargestTimestampSeen);
+    EXPECT_EQ(2000LL, p.mLastTimestampSeen);
+    EXPECT_FALSE(p.mInReconnection);
+    EXPECT_EQ(0, p.mLogLossCount);
+
+    // it reconnects again. All old events are gone. We lose CP.
+    p.OnLogEvent(&event7, true);
+    EXPECT_EQ(7UL, p.mLogCount);
+    EXPECT_EQ(3000LL, p.mLargestTimestampSeen);
+    EXPECT_EQ(3000LL, p.mLastTimestampSeen);
+    EXPECT_EQ(1, p.mLogLossCount);
+    EXPECT_FALSE(p.mInReconnection);
+}
+
 #else
 GTEST_LOG_(INFO) << "This test does nothing.\n";
 #endif

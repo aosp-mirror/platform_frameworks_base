@@ -339,7 +339,7 @@ public final class TextLinks implements Parcelable {
 
         /**
          * @return The config representing the set of entities to look for
-         * @see #setEntityConfig(TextClassifier.EntityConfig)
+         * @see Builder#setEntityConfig(TextClassifier.EntityConfig)
          */
         @Nullable
         public TextClassifier.EntityConfig getEntityConfig() {

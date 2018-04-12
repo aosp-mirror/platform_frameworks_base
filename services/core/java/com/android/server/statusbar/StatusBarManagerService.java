@@ -1096,6 +1096,30 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     }
 
     @Override
+    public void onNotificationSmartRepliesAdded(String key, int replyCount)
+            throws RemoteException {
+        enforceStatusBarService();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mNotificationDelegate.onNotificationSmartRepliesAdded(key, replyCount);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void onNotificationSmartReplySent(String key, int replyIndex)
+            throws RemoteException {
+        enforceStatusBarService();
+        long identity = Binder.clearCallingIdentity();
+        try {
+            mNotificationDelegate.onNotificationSmartReplySent(key, replyIndex);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
     public void onNotificationSettingsViewed(String key) throws RemoteException {
         enforceStatusBarService();
         long identity = Binder.clearCallingIdentity();

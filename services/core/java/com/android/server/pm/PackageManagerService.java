@@ -5304,7 +5304,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mPackages) {
             final String[] packageNames = getPackagesForUid(uid);
             final PackageParser.Package pkg = (packageNames != null && packageNames.length > 0)
-                    ? mSettings.getPackageLPr(packageNames[0]).getPackage()
+                    ? mPackages.get(packageNames[0])
                     : null;
             return mPermissionManager.checkUidPermission(permName, pkg, uid, getCallingUid());
         }
@@ -8070,6 +8070,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 callingUid = mIsolatedOwners.get(callingUid);
             }
             final PackageSetting ps = mSettings.mPackages.get(packageName);
+            PackageParser.Package pkg = mPackages.get(packageName);
             final boolean returnAllowed =
                     ps != null
                     && (isCallerSameApp(packageName, callingUid)
@@ -8140,7 +8141,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private boolean isCallerSameApp(String packageName, int uid) {
-        PackageParser.Package pkg = mSettings.getPackageLPr(packageName).getPackage();
+        PackageParser.Package pkg = mPackages.get(packageName);
         return pkg != null
                 && UserHandle.getAppId(uid) == pkg.applicationInfo.uid;
     }
@@ -9706,7 +9707,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (expectedCertDigests.length > 1) {
 
                         // For apps targeting O MR1 we require explicit enumeration of all certs.
-                        final String[] libCertDigests = (targetSdk > Build.VERSION_CODES.O)
+                        final String[] libCertDigests = (targetSdk >= Build.VERSION_CODES.O_MR1)
                                 ? PackageUtils.computeSignaturesSha256Digests(
                                 libPkg.mSigningDetails.signatures)
                                 : PackageUtils.computeSignaturesSha256Digests(
@@ -10181,20 +10182,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 // The signature has changed, but this package is in the system
                 // image...  let's recover!
                 pkgSetting.signatures.mSigningDetails = pkg.mSigningDetails;
-                // However...  if this package is part of a shared user, but it
-                // doesn't match the signature of the shared user, let's fail.
-                // What this means is that you can't change the signatures
-                // associated with an overall shared user, which doesn't seem all
-                // that unreasonable.
+                // If the system app is part of a shared user we allow that shared user to change
+                // signatures as well in part as part of an OTA.
                 if (signatureCheckPs.sharedUser != null) {
-                    if (compareSignatures(
-                            signatureCheckPs.sharedUser.signatures.mSigningDetails.signatures,
-                            pkg.mSigningDetails.signatures) != PackageManager.SIGNATURE_MATCH) {
-                        throw new PackageManagerException(
-                                INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
-                                "Signature mismatch for shared user: "
-                                        + pkgSetting.sharedUser);
-                    }
+                    signatureCheckPs.sharedUser.signatures.mSigningDetails = pkg.mSigningDetails;
                 }
                 // File a report about this.
                 String msg = "System package " + pkg.packageName
@@ -14135,9 +14126,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 true /* requireFullPermission */, false /* checkShell */,
                 "isPackageSuspendedForUser for user " + userId);
-        if (getPackageUid(packageName, 0, userId) != callingUid) {
-            mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS, null);
-        }
         synchronized (mPackages) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
             if (ps == null || filterAppAccessLPr(ps, callingUid, userId)) {
@@ -23606,13 +23594,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 packageName = resolveInternalPackageNameLPr(
                         packageName, PackageManager.VERSION_CODE_HIGHEST);
                 return mPackages.get(packageName);
-            }
-        }
-
-        @Override
-        public Object getPackageSetting(String packageName) {
-            synchronized (mPackages) {
-                return mSettings.getPackageLPr(packageName);
             }
         }
 

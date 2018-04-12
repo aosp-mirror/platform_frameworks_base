@@ -230,10 +230,11 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 }
                 List<ActivityManager.RunningTaskInfo> runningTasks = mActivityManager.getTasks(1);
                 if (!runningTasks.isEmpty()) {
-                    if (runningTasks.get(0).topActivity.getPackageName()
-                            != mCurrentClient.getOwnerString()) {
+                    final String topPackage = runningTasks.get(0).topActivity.getPackageName();
+                    if (!topPackage.contentEquals(mCurrentClient.getOwnerString())) {
                         mCurrentClient.stop(false /* initiatedByClient */);
-                        Slog.e(TAG, "Stopping background authentication");
+                        Slog.e(TAG, "Stopping background authentication, top: " + topPackage
+                                + " currentClient: " + mCurrentClient.getOwnerString());
                     }
                 }
             } catch (RemoteException e) {

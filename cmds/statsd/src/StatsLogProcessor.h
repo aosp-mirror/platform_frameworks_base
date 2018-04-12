@@ -40,6 +40,9 @@ public:
                       const std::function<void(const ConfigKey&)>& sendBroadcast);
     virtual ~StatsLogProcessor();
 
+    void OnLogEvent(LogEvent* event, bool reconnectionStarts);
+
+    // for testing only.
     void OnLogEvent(LogEvent* event);
 
     void OnConfigUpdated(const int64_t timestampNs, const ConfigKey& key,
@@ -122,16 +125,30 @@ private:
     // Handler over the isolated uid change event.
     void onIsolatedUidChangedEventLocked(const LogEvent& event);
 
+    void resetConfigsLocked(const int64_t timestampNs, const std::vector<ConfigKey>& configs);
+
     // Function used to send a broadcast so that receiver for the config key can call getData
     // to retrieve the stored data.
     std::function<void(const ConfigKey& key)> mSendBroadcast;
 
     const int64_t mTimeBaseNs;
 
-    int64_t mLastLogTimestamp;
+    // Largest timestamp of the events that we have processed.
+    int64_t mLargestTimestampSeen = 0;
+
+    int64_t mLastTimestampSeen = 0;
+
+    bool mInReconnection = false;
+
+    // Processed log count
+    uint64_t mLogCount = 0;
+
+    // Log loss detected count
+    int mLogLossCount = 0;
 
     long mLastPullerCacheClearTimeSec = 0;
 
+    FRIEND_TEST(StatsLogProcessorTest, TestOutOfOrderLogs);
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitByteSize);
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitBroadcast);
     FRIEND_TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge);

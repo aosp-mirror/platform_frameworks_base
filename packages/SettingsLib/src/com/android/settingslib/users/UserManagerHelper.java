@@ -41,6 +41,7 @@ public final class UserManagerHelper {
     private static final String TAG = "UserManagerHelper";
     private final Context mContext;
     private final UserManager mUserManager;
+    private final ActivityManager mActivityManager;
     private OnUsersUpdateListener mUpdateListener;
     private final BroadcastReceiver mUserChangeReceiver = new BroadcastReceiver() {
         @Override
@@ -52,6 +53,7 @@ public final class UserManagerHelper {
     public UserManagerHelper(Context context) {
         mContext = context;
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
     }
 
     /**
@@ -72,30 +74,64 @@ public final class UserManagerHelper {
     }
 
     /**
-     * Gets {@link UserInfo} for the current user.
+     * Gets UserInfo for the foreground user.
      *
-     * @return {@link UserInfo} for the current user.
+     * Concept of foreground user is relevant for the multi-user deployment. Foreground user
+     * corresponds to the currently "logged in" user.
+     *
+     * @return {@link UserInfo} for the foreground user.
      */
-    public UserInfo getCurrentUserInfo() {
-        return mUserManager.getUserInfo(UserHandle.myUserId());
+    public UserInfo getForegroundUserInfo() {
+        return mUserManager.getUserInfo(getForegroundUserId());
     }
 
     /**
-     * Gets all the other users on the system that are not the current user.
-     *
-     * @return List of {@code UserInfo} for each user that is not the current user.
+     * @return Id of the foreground user.
      */
-    public List<UserInfo> getAllUsersExcludesCurrentUser() {
-        List<UserInfo> others = getAllUsers();
+    public int getForegroundUserId() {
+        return mActivityManager.getCurrentUser();
+    }
 
-        for (Iterator<UserInfo> iterator = others.iterator(); iterator.hasNext(); ) {
-            UserInfo userInfo = iterator.next();
-            if (userInfo.id == UserHandle.myUserId()) {
-                // Remove current user from the list.
-                iterator.remove();
-            }
-        }
-        return others;
+    /**
+     * Gets UserInfo for the user running the caller process.
+     *
+     * Differentiation between foreground user and current process user is relevant for multi-user
+     * deployments.
+     *
+     * Some multi-user aware components (like SystemUI) might run as a singleton - one component
+     * for all users. Current process user is then always the same for that component, even when
+     * the foreground user changes.
+     *
+     * @return {@link UserInfo} for the user running the current process.
+     */
+    public UserInfo getCurrentProcessUserInfo() {
+        return mUserManager.getUserInfo(getCurrentProcessUserId());
+    }
+
+    /**
+     * @return Id for the user running the current process.
+     */
+    public int getCurrentProcessUserId() {
+        return UserHandle.myUserId();
+    }
+
+    /**
+     * Gets all the other users on the system that are not the user running the current process.
+     *
+     * @return List of {@code UserInfo} for each user that is not the user running the process.
+     */
+    public List<UserInfo> getAllUsersExcludesCurrentProcessUser() {
+        return getAllUsersExceptUser(getCurrentProcessUserId());
+    }
+
+    /**
+     * Gets all the existing users on the system that are not the currently running as the
+     * foreground user.
+     *
+     * @return List of {@code UserInfo} for each user that is not the foreground user.
+     */
+    public List<UserInfo> getAllUsersExcludesForegroundUser() {
+        return getAllUsersExceptUser(getForegroundUserId());
     }
 
     /**
@@ -104,12 +140,22 @@ public final class UserManagerHelper {
      * @return List of {@code UserInfo} for each user that is not the system user.
      */
     public List<UserInfo> getAllUsersExcludesSystemUser() {
+        return getAllUsersExceptUser(UserHandle.USER_SYSTEM);
+    }
+
+    /**
+     * Get all the users except the one with userId passed in.
+     *
+     * @param userId of the user not to be returned.
+     * @return All users other than user with userId.
+     */
+    public List<UserInfo> getAllUsersExceptUser(int userId) {
         List<UserInfo> others = getAllUsers();
 
         for (Iterator<UserInfo> iterator = others.iterator(); iterator.hasNext(); ) {
             UserInfo userInfo = iterator.next();
-            if (userIsSystemUser(userInfo)) {
-                // Remove system user from the list.
+            if (userInfo.id == userId) {
+                // Remove user with userId from the list.
                 iterator.remove();
             }
         }
@@ -146,78 +192,115 @@ public final class UserManagerHelper {
     }
 
     /**
-     * Checks whether passed in user is the user that's currently logged in.
+     * Checks whether passed in user is the foreground user.
      *
      * @param userInfo User to check.
-     * @return {@code true} if current user, {@code false} otherwise.
+     * @return {@code true} if foreground user, {@code false} otherwise.
      */
-    public boolean userIsCurrentUser(UserInfo userInfo) {
-        return getCurrentUserInfo().id == userInfo.id;
+    public boolean userIsForegroundUser(UserInfo userInfo) {
+        return getForegroundUserId() == userInfo.id;
     }
 
-    // Current user information accessors
+    /**
+     * Checks whether passed in user is the user that's running the current process.
+     *
+     * @param userInfo User to check.
+     * @return {@code true} if user running the process, {@code false} otherwise.
+     */
+    public boolean userIsRunningCurrentProcess(UserInfo userInfo) {
+        return getCurrentProcessUserId() == userInfo.id;
+    }
+
+    // Foreground user information accessors.
 
     /**
-     * Checks if the current user is a demo user.
+     * Checks if the foreground user is a guest user.
      */
-    public boolean isDemoUser() {
+    public boolean foregroundUserIsGuestUser() {
+      return getForegroundUserInfo().isGuest();
+    }
+
+    /**
+     * Return whether the foreground user has a restriction.
+     *
+     * @param restriction Restriction to check. Should be a UserManager.* restriction.
+     * @return Whether that restriction exists for the foreground user.
+     */
+    public boolean foregroundUserHasUserRestriction(String restriction) {
+        return mUserManager.hasUserRestriction(restriction, getForegroundUserInfo().getUserHandle());
+    }
+
+    /**
+     * Checks if the foreground user can add new users.
+     */
+    public boolean foregroundUserCanAddUsers() {
+        return !foregroundUserHasUserRestriction(UserManager.DISALLOW_ADD_USER);
+    }
+
+    // Current process user information accessors
+
+    /**
+     * Checks if the calling app is running in a demo user.
+     */
+    public boolean currentProcessRunningAsDemoUser() {
         return mUserManager.isDemoUser();
     }
 
     /**
-     * Checks if the current user is a guest user.
+     * Checks if the calling app is running as a guest user.
      */
-    public boolean isGuestUser() {
+    public boolean currentProcessRunningAsGuestUser() {
         return mUserManager.isGuestUser();
     }
 
     /**
-     * Checks if the current user is the system user (User 0).
+     * Checks whether this process is running under the system user.
      */
-    public boolean isSystemUser() {
+    public boolean currentProcessRunningAsSystemUser() {
         return mUserManager.isSystemUser();
     }
 
-    // Current user restriction accessors
+    // Current process user restriction accessors
 
     /**
-     * Return whether the current user has a restriction.
+     * Return whether the user running the current process has a restriction.
      *
      * @param restriction Restriction to check. Should be a UserManager.* restriction.
-     * @return Whether that restriction exists for the current user.
+     * @return Whether that restriction exists for the user running the process.
      */
-    public boolean hasUserRestriction(String restriction) {
+    public boolean currentProcessHasUserRestriction(String restriction) {
         return mUserManager.hasUserRestriction(restriction);
     }
 
     /**
-     * Checks if the current user can add new users.
+     * Checks if the user running the current process can add new users.
      */
-    public boolean canAddUsers() {
-        return !hasUserRestriction(UserManager.DISALLOW_ADD_USER);
+    public boolean currentProcessCanAddUsers() {
+        return !currentProcessHasUserRestriction(UserManager.DISALLOW_ADD_USER);
     }
 
     /**
-     * Checks if the current user can remove users.
+     * Checks if the user running the current process can remove users.
      */
-    public boolean canRemoveUsers() {
-        return !hasUserRestriction(UserManager.DISALLOW_REMOVE_USER);
+    public boolean currentProcessCanRemoveUsers() {
+        return !currentProcessHasUserRestriction(UserManager.DISALLOW_REMOVE_USER);
     }
 
     /**
-     * Checks if the current user is allowed to switch to another user.
+     * Checks if the user running the current process is allowed to switch to another user.
      */
-    public boolean canSwitchUsers() {
-        return !hasUserRestriction(UserManager.DISALLOW_USER_SWITCH);
+    public boolean currentProcessCanSwitchUsers() {
+        return !currentProcessHasUserRestriction(UserManager.DISALLOW_USER_SWITCH);
     }
 
     /**
-     * Checks if the current user can modify accounts. Demo and Guest users cannot modify accounts
-     * even if the DISALLOW_MODIFY_ACCOUNTS restriction is not applied.
+     * Checks if the current process user can modify accounts. Demo and Guest users cannot modify
+     * accounts even if the DISALLOW_MODIFY_ACCOUNTS restriction is not applied.
      */
-    public boolean canModifyAccounts() {
-        return !hasUserRestriction(UserManager.DISALLOW_MODIFY_ACCOUNTS) && !isDemoUser()
-                && !isGuestUser();
+    public boolean currentProcessCanModifyAccounts() {
+        return !currentProcessHasUserRestriction(UserManager.DISALLOW_MODIFY_ACCOUNTS)
+                && !currentProcessRunningAsDemoUser()
+                && !currentProcessRunningAsGuestUser();
     }
 
     // User actions
@@ -242,8 +325,8 @@ public final class UserManagerHelper {
 
     /**
      * Tries to remove the user that's passed in. System user cannot be removed.
-     * If the user to be removed is current user, it switches to the system user first, and then
-     * removes the user.
+     * If the user to be removed is user currently running the process,
+     * it switches to the system user first, and then removes the user.
      *
      * @param userInfo User to be removed
      * @return {@code true} if user is successfully removed, {@code false} otherwise.
@@ -254,7 +337,7 @@ public final class UserManagerHelper {
             return false;
         }
 
-        if (userInfo.id == getCurrentUserInfo().id) {
+        if (userInfo.id == getCurrentProcessUserId()) {
             switchToUserId(UserHandle.USER_SYSTEM);
         }
 
@@ -267,22 +350,13 @@ public final class UserManagerHelper {
      * @param userInfo User to switch to.
      */
     public void switchToUser(UserInfo userInfo) {
-        if (userInfo.id == getCurrentUserInfo().id) {
+        if (userInfo.id == getForegroundUserId()) {
             return;
         }
 
         if (userInfo.isGuest()) {
             switchToGuest(userInfo.name);
             return;
-        }
-
-        if (UserManager.isGuestUserEphemeral()) {
-            // If switching from guest, we want to bring up the guest exit dialog instead of
-            // switching
-            UserInfo currUserInfo = getCurrentUserInfo();
-            if (currUserInfo != null && currUserInfo.isGuest()) {
-                return;
-            }
         }
 
         switchToUserId(userInfo.id);
@@ -348,6 +422,9 @@ public final class UserManagerHelper {
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_INFO_CHANGED);
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
+        filter.addAction(Intent.ACTION_USER_STOPPED);
+        filter.addAction(Intent.ACTION_USER_UNLOCKED);
         mContext.registerReceiverAsUser(mUserChangeReceiver, UserHandle.ALL, filter, null, null);
     }
 
@@ -366,9 +443,7 @@ public final class UserManagerHelper {
 
     private void switchToUserId(int id) {
         try {
-            final ActivityManager am = (ActivityManager)
-                    mContext.getSystemService(Context.ACTIVITY_SERVICE);
-            am.switchUser(id);
+            mActivityManager.switchUser(id);
         } catch (Exception e) {
             Log.e(TAG, "Couldn't switch user.", e);
         }
@@ -389,4 +464,3 @@ public final class UserManagerHelper {
         void onUsersUpdate();
     }
 }
-

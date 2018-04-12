@@ -383,7 +383,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
             if (TextUtils.equals(mInfo.typeContentDescription,
                     mContext.getString(R.string.data_connection_no_internet))
                 || TextUtils.equals(mInfo.typeContentDescription,
-                    mContext.getString(R.string.cell_data_off))) {
+                    mContext.getString(R.string.cell_data_off_content_description))) {
                 contentDescription.append(mInfo.typeContentDescription);
             }
             mMobileSignal.setContentDescription(contentDescription);

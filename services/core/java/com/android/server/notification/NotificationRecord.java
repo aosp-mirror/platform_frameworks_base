@@ -149,6 +149,8 @@ public final class NotificationRecord {
     private final NotificationStats mStats;
     private int mUserSentiment;
     private boolean mIsInterruptive;
+    private int mNumberOfSmartRepliesAdded;
+    private boolean mHasSeenSmartReplies;
 
     @VisibleForTesting
     public NotificationRecord(Context context, StatusBarNotification sbn,
@@ -960,6 +962,22 @@ public final class NotificationRecord {
 
     public void recordViewedSettings() {
         mStats.setViewedSettings();
+    }
+
+    public void setNumSmartRepliesAdded(int noReplies) {
+        mNumberOfSmartRepliesAdded = noReplies;
+    }
+
+    public int getNumSmartRepliesAdded() {
+        return mNumberOfSmartRepliesAdded;
+    }
+
+    public boolean hasSeenSmartReplies() {
+        return mHasSeenSmartReplies;
+    }
+
+    public void setSeenSmartReplies(boolean hasSeenSmartReplies) {
+        mHasSeenSmartReplies = hasSeenSmartReplies;
     }
 
     public Set<Uri> getNotificationUris() {

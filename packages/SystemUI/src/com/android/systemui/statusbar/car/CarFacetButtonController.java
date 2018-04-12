@@ -1,10 +1,12 @@
 package com.android.systemui.statusbar.car;
 
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.util.Log;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +21,7 @@ public class CarFacetButtonController {
 
     protected HashMap<String, CarFacetButton> mButtonsByCategory = new HashMap<>();
     protected HashMap<String, CarFacetButton> mButtonsByPackage = new HashMap<>();
+    protected HashMap<String, CarFacetButton> mButtonsByComponentName = new HashMap<>();
     protected CarFacetButton mSelectedFacetButton;
     protected Context mContext;
 
@@ -34,28 +37,32 @@ public class CarFacetButtonController {
      */
     public void addFacetButton(CarFacetButton facetButton) {
         String[] categories = facetButton.getCategories();
-        for (int j = 0; j < categories.length; j++) {
-            String category = categories[j];
-            mButtonsByCategory.put(category, facetButton);
+        for (int i = 0; i < categories.length; i++) {
+            mButtonsByCategory.put(categories[i], facetButton);
         }
 
         String[] facetPackages = facetButton.getFacetPackages();
-        for (int j = 0; j < facetPackages.length; j++) {
-            String facetPackage = facetPackages[j];
-            mButtonsByPackage.put(facetPackage, facetButton);
+        for (int i = 0; i < facetPackages.length; i++) {
+            mButtonsByPackage.put(facetPackages[i], facetButton);
+        }
+        String[] componentNames = facetButton.getComponentName();
+        for (int i = 0; i < componentNames.length; i++) {
+            mButtonsByComponentName.put(componentNames[i], facetButton);
         }
     }
 
     public void removeAll() {
         mButtonsByCategory.clear();
         mButtonsByPackage.clear();
+        mButtonsByComponentName.clear();
         mSelectedFacetButton = null;
     }
 
     /**
      * This will unselect the currently selected CarFacetButton and determine which one should be
      * selected next. It does this by reading the properties on the CarFacetButton and seeing if
-     * they are a match with the supplied taskino.
+     * they are a match with the supplied taskInfo.
+     * Order of selection detection ComponentName, PackageName, Category
      * @param taskInfo of the currently running application
      */
     public void taskChanged(ActivityManager.RunningTaskInfo taskInfo) {
@@ -69,7 +76,10 @@ public class CarFacetButtonController {
         if (mSelectedFacetButton != null) {
             mSelectedFacetButton.setSelected(false);
         }
-        CarFacetButton facetButton = mButtonsByPackage.get(packageName);
+        CarFacetButton facetButton = findFacetButtongByComponentName(taskInfo.topActivity);
+        if (facetButton == null) {
+            facetButton =  mButtonsByPackage.get(packageName);
+        }
         if (facetButton != null) {
             facetButton.setSelected(true);
             mSelectedFacetButton = facetButton;
@@ -81,6 +91,12 @@ public class CarFacetButtonController {
                 mSelectedFacetButton = facetButton;
             }
         }
+    }
+
+    private CarFacetButton findFacetButtongByComponentName(ComponentName componentName) {
+        CarFacetButton button = mButtonsByComponentName.get(componentName.flattenToShortString());
+        return (button != null) ? button :
+                mButtonsByComponentName.get(componentName.flattenToString());
     }
 
     protected String getPackageCategory(String packageName) {

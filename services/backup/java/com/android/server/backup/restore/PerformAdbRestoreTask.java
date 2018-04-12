@@ -99,6 +99,7 @@ public class PerformAdbRestoreTask implements Runnable {
     private FullBackupObbConnection mObbConnection = null;
     private ParcelFileDescriptor[] mPipes = null;
     private byte[] mWidgetData = null;
+    private long mAppVersion;
 
     private long mBytes;
     private final BackupAgentTimeoutParameters mAgentTimeoutParameters;
@@ -476,6 +477,9 @@ public class PerformAdbRestoreTask implements Runnable {
                 if (info.path.equals(BACKUP_MANIFEST_FILENAME)) {
                     Signature[] signatures = tarBackupReader.readAppManifestAndReturnSignatures(
                             info);
+                    // readAppManifestAndReturnSignatures() will have extracted the version from
+                    // the manifest, so we save it to use in key-value restore later.
+                    mAppVersion = info.version;
                     PackageManagerInternal pmi = LocalServices.getService(
                             PackageManagerInternal.class);
                     RestorePolicy restorePolicy = tarBackupReader.chooseRestorePolicy(
@@ -667,6 +671,8 @@ public class PerformAdbRestoreTask implements Runnable {
                                     Slog.d(TAG, "Restoring key-value file for " + pkg
                                             + " : " + info.path);
                                 }
+                                // Set the version saved from manifest entry.
+                                info.version = mAppVersion;
                                 KeyValueAdbRestoreEngine restoreEngine =
                                         new KeyValueAdbRestoreEngine(
                                                 mBackupManagerService,

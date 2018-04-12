@@ -68,11 +68,6 @@ interface IPhoneSubInfo {
     String getSubscriberIdForSubscriber(int subId, String callingPackage);
 
     /**
-     * Retrieves the Group Identifier Level1 for GSM phones.
-     */
-    String getGroupIdLevel1(String callingPackage);
-
-    /**
      * Retrieves the Group Identifier Level1 for GSM phones of a subId.
      */
     String getGroupIdLevel1ForSubscriber(int subId, String callingPackage);

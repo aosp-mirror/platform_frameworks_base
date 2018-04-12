@@ -219,7 +219,7 @@ public class LinkMovementMethod extends ScrollingMovementMethod {
                     links[0].onClick(widget);
                 } else if (action == MotionEvent.ACTION_DOWN) {
                     if (widget.getContext().getApplicationInfo().targetSdkVersion
-                            > Build.VERSION_CODES.O_MR1) {
+                            >= Build.VERSION_CODES.P) {
                         // Selection change will reposition the toolbar. Hide it for a few ms for a
                         // smoother transition.
                         widget.hideFloatingToolbar(HIDE_FLOATING_TOOLBAR_DELAY_MS);

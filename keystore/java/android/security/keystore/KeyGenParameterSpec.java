@@ -19,6 +19,7 @@ package android.security.keystore;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.KeyguardManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.security.GateKeeper;
@@ -594,6 +595,14 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     /**
      * Returns {@code true} if the key is authorized to be used only if a test of user presence has
      * been performed between the {@code Signature.initSign()} and {@code Signature.sign()} calls.
+     * It requires that the KeyStore implementation have a direct way to validate the user presence
+     * for example a KeyStore hardware backed strongbox can use a button press that is observable
+     * in hardware. A test for user presence is tangential to authentication. The test can be part
+     * of an authentication step as long as this step can be validated by the hardware protecting
+     * the key and cannot be spoofed. For example, a physical button press can be used as a test of
+     * user presence if the other pins connected to the button are not able to simulate a button
+     * press. There must be no way for the primary processor to fake a button press, or that
+     * button must not be used as a test of user presence.
      */
     public boolean isUserPresenceRequired() {
         return mUserPresenceRequired;
@@ -1180,6 +1189,14 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         /**
          * Sets whether a test of user presence is required to be performed between the
          * {@code Signature.initSign()} and {@code Signature.sign()} method calls.
+         * It requires that the KeyStore implementation have a direct way to validate the user
+         * presence for example a KeyStore hardware backed strongbox can use a button press that
+         * is observable in hardware. A test for user presence is tangential to authentication. The
+         * test can be part of an authentication step as long as this step can be validated by the
+         * hardware protecting the key and cannot be spoofed. For example, a physical button press
+         * can be used as a test of user presence if the other pins connected to the button are not
+         * able to simulate a button press.There must be no way for the primary processor to fake a
+         * button press, or that button must not be used as a test of user presence.
          */
         @NonNull
         public Builder setUserPresenceRequired(boolean required) {
@@ -1227,6 +1244,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          *
          * Sets whether to include a temporary unique ID field in the attestation certificate.
          */
+        @TestApi
         @NonNull
         public Builder setUniqueIdIncluded(boolean uniqueIdIncluded) {
             mUniqueIdIncluded = uniqueIdIncluded;

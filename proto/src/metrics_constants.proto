@@ -5618,6 +5618,47 @@ message MetricsEvent {
     // OS: P
     SETTINGS_AUTO_BRIGHTNESS = 1381;
 
+    // OPEN: Smart replies in a notification seen at least once
+    // CATEGORY: NOTIFICATION
+    //   PACKAGE: App that posted the notification
+    //   SUBTYPE: Number of smart replies.
+    // OS: P
+    SMART_REPLY_VISIBLE = 1382;
+
+    // ACTION: Smart reply in a notification clicked.
+    // CATEGORY: NOTIFICATION
+    //   PACKAGE: App that posted the notification
+    //   SUBTYPE: Index of smart reply clicked.
+    // OS: P
+    SMART_REPLY_ACTION = 1383;
+
+    // Tagged data for SMART_REPLY_VISIBLE. Count of number of smart replies.
+    // OS: P
+    NOTIFICATION_SMART_REPLY_COUNT = 1384;
+
+    // Volume dialog > ringer toggle
+    // OS: P
+    ACTION_VOLUME_RINGER_TOGGLE = 1385;
+
+    // Volume dialog > settings button
+    // OS: P
+    ACTION_VOLUME_SETTINGS = 1386;
+
+    // ACTION: Settings > Anomaly receiver > Anomaly ignored, don't show up in battery settings
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_ANOMALY_IGNORED = 1387;
+
+    // ACTION: Settings > Battery settings > Battery tip > Open battery saver page
+    // CATEGORY: SETTINGS
+    // OS: P
+    ACTION_TIP_OPEN_BATTERY_SAVER_PAGE = 1388;
+
+    // FIELD: the version code of an app
+    // CATEGORY: SETTINGS
+    // OS: P
+    FIELD_APP_VERSION_CODE = 1389;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

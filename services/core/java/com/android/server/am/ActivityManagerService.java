@@ -2902,6 +2902,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         private boolean mBlacklistDisabled;
         private String mExemptionsStr;
         private List<String> mExemptions = Collections.emptyList();
+        private int mLogSampleRate = -1;
         @HiddenApiEnforcementPolicy private int mPolicyPreP = HIDDEN_API_ENFORCEMENT_DEFAULT;
         @HiddenApiEnforcementPolicy private int mPolicyP = HIDDEN_API_ENFORCEMENT_DEFAULT;
 
@@ -2913,6 +2914,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void registerObserver() {
             mContext.getContentResolver().registerContentObserver(
                     Settings.Global.getUriFor(Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS),
+                    false,
+                    this);
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.HIDDEN_API_ACCESS_LOG_SAMPLING_RATE),
                     false,
                     this);
             mContext.getContentResolver().registerContentObserver(
@@ -2941,6 +2946,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                             : Arrays.asList(exemptions.split(","));
                 }
                 zygoteProcess.setApiBlacklistExemptions(mExemptions);
+            }
+            int logSampleRate = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.HIDDEN_API_ACCESS_LOG_SAMPLING_RATE, -1);
+            if (logSampleRate < 0 || logSampleRate > 0x10000) {
+                logSampleRate = -1;
+            }
+            if (logSampleRate != -1 && logSampleRate != mLogSampleRate) {
+                mLogSampleRate = logSampleRate;
+                zygoteProcess.setHiddenApiAccessLogSampleRate(mLogSampleRate);
             }
             mPolicyPreP = getValidEnforcementPolicy(Settings.Global.HIDDEN_API_POLICY_PRE_P_APPS);
             mPolicyP = getValidEnforcementPolicy(Settings.Global.HIDDEN_API_POLICY_P_APPS);
@@ -7684,7 +7698,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // target APIs higher than O MR1. Since access to the serial
             // is now behind a permission we push down the value.
             final String buildSerial = (appInfo.targetSandboxVersion < 2
-                    && appInfo.targetSdkVersion <= Build.VERSION_CODES.O_MR1)
+                    && appInfo.targetSdkVersion < Build.VERSION_CODES.P)
                             ? sTheRealBuildSerial : Build.UNKNOWN;
 
             // Check if this is a secondary process that should be incorporated into some
@@ -17042,6 +17056,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.println("ms");
                 }
                 mUidObservers.finishBroadcast();
+
+                pw.println();
+                pw.println("  ServiceManager statistics:");
+                ServiceManager.sStatLogger.dump(pw, "    ");
+                pw.println();
             }
         }
         pw.println("  mForceBackgroundCheck=" + mForceBackgroundCheck);
@@ -26667,7 +26686,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 record.waitingForNetwork = false;
                 final long totalTime = SystemClock.uptimeMillis() - startTime;
                 if (totalTime >= mWaitForNetworkTimeoutMs || DEBUG_NETWORK) {
-                    Slog.wtf(TAG_NETWORK, "Total time waited for network rules to get updated: "
+                    Slog.w(TAG_NETWORK, "Total time waited for network rules to get updated: "
                             + totalTime + ". Uid: " + callingUid + " procStateSeq: "
                             + procStateSeq + " UidRec: " + record
                             + " validateUidRec: " + mValidateUids.get(callingUid));

@@ -812,9 +812,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (mGestureHelper != null) {
             mGestureHelper.onDarkIntensityChange(intensity);
         }
-        if (mRecentsOnboarding != null) {
-            mRecentsOnboarding.setContentDarkIntensity(intensity);
-        }
     }
 
     @Override
@@ -831,6 +828,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         updateButtonLocationOnScreen(getHomeButton(), mHomeButtonBounds);
         updateButtonLocationOnScreen(getRecentsButton(), mRecentsButtonBounds);
         mGestureHelper.onLayout(changed, left, top, right, bottom);
+        mRecentsOnboarding.setNavBarHeight(getMeasuredHeight());
     }
 
     private void updateButtonLocationOnScreen(ButtonDispatcher button, Rect buttonBounds) {
@@ -873,9 +871,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mCurrentView = mRotatedViews[rot];
         mCurrentView.setVisibility(View.VISIBLE);
         mNavigationInflaterView.setAlternativeOrder(rot == Surface.ROTATION_90);
-        for (int i = 0; i < mButtonDispatchers.size(); i++) {
-            mButtonDispatchers.valueAt(i).setCurrentView(mCurrentView);
-        }
+        mNavigationInflaterView.updateButtonDispatchersCurrentView();
         updateLayoutTransitionsEnabled();
         mCurrentRotation = rot;
     }

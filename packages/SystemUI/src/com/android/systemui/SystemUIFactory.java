@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.ScrimView;
+import com.android.systemui.statusbar.SmartReplyLogger;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
@@ -146,5 +147,6 @@ public class SystemUIFactory {
                 () -> new NotificationViewHierarchyManager(context));
         providers.put(NotificationEntryManager.class, () -> new NotificationEntryManager(context));
         providers.put(KeyguardDismissUtil.class, KeyguardDismissUtil::new);
+        providers.put(SmartReplyLogger.class, () -> new SmartReplyLogger(context));
     }
 }

@@ -206,7 +206,7 @@
     <uses-permission android:name="android.permission.WATCH_APPOPS" />
 
     <!-- to read and change hvac values in a car -->
-    <uses-permission android:name="android.car.permission.ADJUST_CAR_CLIMATE" />
+    <uses-permission android:name="android.car.permission.CONTROL_CAR_CLIMATE" />
 
     <application
         android:name=".SystemUIApplication"

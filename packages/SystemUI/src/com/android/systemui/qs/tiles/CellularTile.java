@@ -108,20 +108,21 @@ public class CellularTile extends QSTileImpl<SignalState> {
         }
         if (mDataController.isMobileDataEnabled()) {
             if (mKeyguardMonitor.isSecure() && !mKeyguardMonitor.canSkipBouncer()) {
-                mActivityStarter.postQSRunnableDismissingKeyguard(this::showDisableDialog);
+                mActivityStarter.postQSRunnableDismissingKeyguard(this::maybeShowDisableDialog);
             } else {
-                if (Prefs.getBoolean(mContext, QS_HAS_TURNED_OFF_MOBILE_DATA, false)) {
-                    mDataController.setMobileDataEnabled(false);
-                } else {
-                    mUiHandler.post(this::showDisableDialog);
-                }
+                mUiHandler.post(this::maybeShowDisableDialog);
             }
         } else {
             mDataController.setMobileDataEnabled(true);
         }
     }
 
-    private void showDisableDialog() {
+    private void maybeShowDisableDialog() {
+        if (Prefs.getBoolean(mContext, QS_HAS_TURNED_OFF_MOBILE_DATA, false)) {
+            // Directly turn off mobile data if the user has seen the dialog before.
+            mDataController.setMobileDataEnabled(false);
+            return;
+        }
         mHost.collapsePanels();
         String carrierName = mController.getMobileDataNetworkName();
         if (TextUtils.isEmpty(carrierName)) {
@@ -194,7 +195,18 @@ public class CellularTile extends QSTileImpl<SignalState> {
             state.state = Tile.STATE_INACTIVE;
             state.secondaryLabel = r.getString(R.string.cell_data_off);
         }
-        state.contentDescription = state.label + ", " + state.secondaryLabel;
+
+
+        // TODO(b/77881974): Instead of switching out the description via a string check for
+        // we need to have two strings provided by the MobileIconGroup.
+        final CharSequence contentDescriptionSuffix;
+        if (state.state == Tile.STATE_INACTIVE) {
+            contentDescriptionSuffix = r.getString(R.string.cell_data_off_content_description);
+        } else {
+            contentDescriptionSuffix = state.secondaryLabel;
+        }
+
+        state.contentDescription = state.label + ", " + contentDescriptionSuffix;
     }
 
     private CharSequence getMobileDataDescription(CallbackInfo cb) {
