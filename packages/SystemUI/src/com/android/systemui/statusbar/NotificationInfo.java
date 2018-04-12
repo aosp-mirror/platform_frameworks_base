@@ -308,7 +308,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         minimize.setOnClickListener(mOnStopOrMinimizeNotifications);
 
         if (mIsNonblockable) {
-            keep.setText(R.string.notification_done);
+            keep.setText(android.R.string.ok);
             block.setVisibility(GONE);
             minimize.setVisibility(GONE);
         } else if (mIsForeground) {
