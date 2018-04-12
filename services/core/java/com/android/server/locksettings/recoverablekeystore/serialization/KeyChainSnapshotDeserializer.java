@@ -132,8 +132,7 @@ public class KeyChainSnapshotDeserializer {
                     break;
 
                 case TAG_BACKEND_PUBLIC_KEY:
-                    builder.setTrustedHardwarePublicKey(
-                            readBlobTag(parser, TAG_BACKEND_PUBLIC_KEY));
+                    // Unused
                     break;
 
                 case TAG_KEY_CHAIN_PROTECTION_PARAMS_LIST:

@@ -35,7 +35,7 @@ class KeyChainSnapshotSchema {
     static final String TAG_RECOVERY_KEY_MATERIAL = "recoveryKeyMaterial";
     static final String TAG_SERVER_PARAMS = "serverParams";
     static final String TAG_TRUSTED_HARDWARE_CERT_PATH = "thmCertPath";
-    static final String TAG_BACKEND_PUBLIC_KEY = "backendPublicKey";
+    static final String TAG_BACKEND_PUBLIC_KEY = "backendPublicKey"; // Deprecated.
 
     static final String TAG_KEY_CHAIN_PROTECTION_PARAMS_LIST =
             "keyChainProtectionParamsList";

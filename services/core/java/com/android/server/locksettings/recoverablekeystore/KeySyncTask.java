@@ -349,7 +349,6 @@ public class KeySyncTask implements Runnable {
                 .setSnapshotVersion(getSnapshotVersion(recoveryAgentUid, recreateCurrentVersion))
                 .setMaxAttempts(TRUSTED_HARDWARE_MAX_ATTEMPTS)
                 .setCounterId(counterId)
-                .setTrustedHardwarePublicKey(SecureBox.encodePublicKey(publicKey))
                 .setServerParams(vaultHandle)
                 .setKeyChainProtectionParams(metadataList)
                 .setWrappedApplicationKeys(createApplicationKeyEntries(encryptedApplicationKeys))
