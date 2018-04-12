@@ -38,35 +38,49 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginStart="16dp"
         android:layout_gravity="center_vertical"
         android:gravity="end" >
 
-        <include
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|start"
-            android:layout_marginEnd="8dp"
-            android:visibility="gone"
-            layout="@layout/mobile_signal_group" />
-
-        <com.android.keyguard.CarrierText
-            android:id="@+id/qs_carrier_text"
+        <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:layout_gravity="center_vertical|start"
-            android:layout_marginEnd="32dp"
-            android:ellipsize="marquee"
-            android:textAppearance="@style/TextAppearance.QS.TileLabel"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textDirection="locale"
-            android:singleLine="true" />
+            android:gravity="center_vertical|start"
+            android:paddingStart="16dp">
+
+            <include
+                layout="@layout/mobile_signal_group"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:visibility="gone" />
+
+            <com.android.keyguard.CarrierText
+                android:id="@+id/qs_carrier_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="32dp"
+                android:ellipsize="marquee"
+                android:textAppearance="@style/TextAppearance.QS.TileLabel"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textDirection="locale"
+                android:singleLine="true" />
+
+        </LinearLayout>
+
+        <com.android.systemui.qs.PageIndicator
+            android:id="@+id/footer_page_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:visibility="gone" />
 
         <com.android.keyguard.AlphaOptimizedLinearLayout
             android:id="@+id/qs_footer_actions_container"
-            android:layout_width="wrap_content"
+            android:layout_width="@integer/qs_footer_actions_width"
             android:layout_height="match_parent"
+            android:layout_weight="@integer/qs_footer_actions_weight"
             android:gravity="center_vertical|end" >
             <com.android.systemui.statusbar.phone.MultiUserSwitch
                 android:id="@+id/multi_user_switch"

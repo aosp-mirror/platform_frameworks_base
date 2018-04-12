@@ -17,6 +17,7 @@
 package com.android.systemui.qs;
 
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +36,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
@@ -66,6 +68,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     private UserInfoController mUserInfoController;
     private SettingsButton mSettingsButton;
     protected View mSettingsContainer;
+    private PageIndicator mPageIndicator;
     private CarrierText mCarrierText;
 
     private boolean mQsDisabled;
@@ -107,6 +110,8 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         mEdit.setOnClickListener(view ->
                 Dependency.get(ActivityStarter.class).postQSRunnableDismissingKeyguard(() ->
                         mQsPanel.showEdit(view)));
+
+        mPageIndicator = findViewById(R.id.footer_page_indicator);
 
         mSettingsButton = findViewById(R.id.settings_button);
         mSettingsContainer = findViewById(R.id.settings_button_container);
@@ -167,6 +172,14 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
 
     private void updateResources() {
         updateFooterAnimator();
+
+        // Update the width and weight of the actions container as the page indicator can sometimes
+        // show and the layout needs to center it between the carrier text and actions container.
+        LinearLayout.LayoutParams params =
+                (LinearLayout.LayoutParams) mActionsContainer.getLayoutParams();
+        params.width = mContext.getResources().getInteger(R.integer.qs_footer_actions_width);
+        params.weight = mContext.getResources().getInteger(R.integer.qs_footer_actions_weight);
+        mActionsContainer.setLayoutParams(params);
     }
 
     private void updateFooterAnimator() {
@@ -181,6 +194,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
                 .addFloat(mMobileGroup, "alpha", 0, 1)
                 .addFloat(mActionsContainer, "alpha", 0, 1)
                 .addFloat(mDragHandle, "alpha", 1, 0, 0)
+                .addFloat(mPageIndicator, "alpha", 0, 1)
                 .setStartDelay(0.15f)
                 .build();
     }
@@ -291,6 +305,7 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         mQsPanel = qsPanel;
         if (mQsPanel != null) {
             mMultiUserSwitch.setQsPanel(qsPanel);
+            mQsPanel.setFooterPageIndicator(mPageIndicator);
         }
     }
 
