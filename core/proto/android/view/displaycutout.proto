@@ -23,8 +23,8 @@ package android.view;
 option java_multiple_files = true;
 
 message DisplayCutoutProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional .android.graphics.RectProto insets = 1;
-  optional .android.graphics.RectProto bounds = 2;
+    optional .android.graphics.RectProto insets = 1;
+    optional .android.graphics.RectProto bounds = 2;
 }

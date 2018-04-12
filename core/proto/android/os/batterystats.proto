@@ -25,860 +25,860 @@ import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 message BatteryStatsProto {
-  option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional int32 report_version = 1;
-  optional int64 parcel_version = 2;
-  optional string start_platform_version = 3;
-  optional string end_platform_version = 4;
-  repeated UidProto uids = 5;
-  optional SystemProto system = 6;
+    optional int32 report_version = 1;
+    optional int64 parcel_version = 2;
+    optional string start_platform_version = 3;
+    optional string end_platform_version = 4;
+    repeated UidProto uids = 5;
+    optional SystemProto system = 6;
 }
 
 message ControllerActivityProto {
-  option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-  // Time (milliseconds) spent in the idle state.
-  optional int64 idle_duration_ms = 1;
-  // Time (milliseconds) spent in the receive state.
-  optional int64 rx_duration_ms = 2;
-  // Total power (mAh) consumed by the controller in all states. The value may
-  // always be 0 if the device doesn't support power calculations.
-  optional int64 power_mah = 3;
-
-  // Represents a transmit level, where each level may draw a different amount
-  // of power. The levels themselves are controller-specific (and may possibly
-  // be device specific...yet to be confirmed).
-  message TxLevel {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    // Transmit level. Higher levels draw more power.
-    optional int32 level = 1;
-    // Time spent in this specific transmit level state.
-    optional int64 duration_ms = 2;
-  }
-  repeated TxLevel tx = 4;
+    // Time (milliseconds) spent in the idle state.
+    optional int64 idle_duration_ms = 1;
+    // Time (milliseconds) spent in the receive state.
+    optional int64 rx_duration_ms = 2;
+    // Total power (mAh) consumed by the controller in all states. The value may
+    // always be 0 if the device doesn't support power calculations.
+    optional int64 power_mah = 3;
+
+    // Represents a transmit level, where each level may draw a different amount
+    // of power. The levels themselves are controller-specific (and may possibly
+    // be device specific...yet to be confirmed).
+    message TxLevel {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // Transmit level. Higher levels draw more power.
+        optional int32 level = 1;
+        // Time spent in this specific transmit level state.
+        optional int64 duration_ms = 2;
+    }
+    repeated TxLevel tx = 4;
 }
 
 message SystemProto {
-  option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-  message Battery {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    // Wall clock time when the data collection started.
-    // In case of device time manually reset by users:
-    //   start_clock_time_ms keeps the same value in the current collection
-    //   period and changes for later collection periods.
-    optional int64 start_clock_time_ms = 1;
-    // #times the device has been started since start_clock_time_millis.
-    optional int64 start_count = 2;
-    // Total realtime duration (= SINCE_UNPLUGGED battery_realtime_millis.)
-    optional int64 total_realtime_ms = 3;
-    optional int64 total_uptime_ms = 4;
-    // Realtime duration on battery.
-    optional int64 battery_realtime_ms = 5;
-    // Uptime duration (i.e., not suspend).
-    // Uptime is anytime the CPUs were on. The radio and Wifi chip
-    // can be running while the CPUs are off.
-    optional int64 battery_uptime_ms = 6;
-    // Total realtime duration measured with screen off or dozing.
-    optional int64 screen_off_realtime_ms = 7;
-    // Total uptime duration measured with screen off or dozing.
-    optional int64 screen_off_uptime_ms = 8;
-    // Total time the screen was dozing while the device was running on battery.
-    // For historical reasons, screen_doze_duration_msec is a subset of
-    // screen_off_realtime_msec.
-    optional int64 screen_doze_duration_ms = 9;
-    // The estimated real battery capacity, which may be less than the declared
-    // battery capacity (for example, because of battery aging). This field is
-    // less reliable than min(max)_learned_battery_capacity_uah, use those two
-    // fields whenever possible.
-    optional int64 estimated_battery_capacity_mah = 10;
-    // The minimum learned battery capacity in uAh.
-    optional int64 min_learned_battery_capacity_uah = 11;
-    // The maximum learned battery capacity in uAh.
-    optional int64 max_learned_battery_capacity_uah = 12;
-  };
-  optional Battery battery = 1;
+    message Battery {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  message BatteryDischarge {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+        // Wall clock time when the data collection started.
+        // In case of device time manually reset by users:
+        //     start_clock_time_ms keeps the same value in the current collection
+        //     period and changes for later collection periods.
+        optional int64 start_clock_time_ms = 1;
+        // #times the device has been started since start_clock_time_millis.
+        optional int64 start_count = 2;
+        // Total realtime duration (= SINCE_UNPLUGGED battery_realtime_millis.)
+        optional int64 total_realtime_ms = 3;
+        optional int64 total_uptime_ms = 4;
+        // Realtime duration on battery.
+        optional int64 battery_realtime_ms = 5;
+        // Uptime duration (i.e., not suspend).
+        // Uptime is anytime the CPUs were on. The radio and Wifi chip
+        // can be running while the CPUs are off.
+        optional int64 battery_uptime_ms = 6;
+        // Total realtime duration measured with screen off or dozing.
+        optional int64 screen_off_realtime_ms = 7;
+        // Total uptime duration measured with screen off or dozing.
+        optional int64 screen_off_uptime_ms = 8;
+        // Total time the screen was dozing while the device was running on battery.
+        // For historical reasons, screen_doze_duration_msec is a subset of
+        // screen_off_realtime_msec.
+        optional int64 screen_doze_duration_ms = 9;
+        // The estimated real battery capacity, which may be less than the declared
+        // battery capacity (for example, because of battery aging). This field is
+        // less reliable than min(max)_learned_battery_capacity_uah, use those two
+        // fields whenever possible.
+        optional int64 estimated_battery_capacity_mah = 10;
+        // The minimum learned battery capacity in uAh.
+        optional int64 min_learned_battery_capacity_uah = 11;
+        // The maximum learned battery capacity in uAh.
+        optional int64 max_learned_battery_capacity_uah = 12;
+    };
+    optional Battery battery = 1;
 
-    // Discharged battery percentage points since the stats were last reset
-    // after charging (lower bound approximation).
-    optional int32 lower_bound_since_charge = 1;
-    // Upper bound approximation.
-    optional int32 upper_bound_since_charge = 2;
-    // Discharged points while screen is on.
-    optional int32 screen_on_since_charge = 3;
-    // Discharged points while screen is off.
-    optional int32 screen_off_since_charge = 4;
-    // Discharged points while screen was dozing. For historical reasons,
-    // screen_doze_since_charge is a subset of screen_off_since_charge.
-    optional int32 screen_doze_since_charge = 5;
-    // Total amount of battery discharged in mAh. This will only be non-zero for
-    // devices that report battery discharge via a coulomb counter.
-    optional int64 total_mah = 6;
-    // Total amount of battery discharged while the screen was off in mAh.
-    // This will only be non-zero for devices that report battery discharge
-    // via a coulomb counter.
-    optional int64 total_mah_screen_off = 7;
-    // Total amount of battery discharged while the screen was dozing in mAh.
-    // This will only be non-zero for devices that report battery discharge
-    // via a coulomb counter. For historical reasons, total_mah_screen_doze is
-    // a subset of total_mah_screen_off.
-    optional int64 total_mah_screen_doze = 8;
-    // Total amount of battery discharged in mAh while the device was in light doze mode.
-    // This will only be non-zero for devices that report battery discharge
-    // via a coulomb counter.
-    optional int64 total_mah_light_doze = 9;
-    // Total amount of battery discharged in mAh while the device was in deep doze mode.
-    // This will only be non-zero for devices that report battery discharge
-    // via a coulomb counter.
-    optional int64 total_mah_deep_doze = 10;
-  };
-  optional BatteryDischarge battery_discharge = 2;
+    message BatteryDischarge {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  oneof time_remaining {
-    // Approximation for how much time remains until the battery is fully
-    // charged. The device will print -1 if there wasn't enough data to
-    // calculate an estimate, or if the battery is currently discharging.
-    int64 charge_time_remaining_ms = 3;
-    // Approximation for how much time remains until the battery is fully
-    // discharged. The device will print -1 if there wasn't enough data to
-    // calculate an estimate, or if the battery is currently charging.
-    int64 discharge_time_remaining_ms = 4;
-  }
+        // Discharged battery percentage points since the stats were last reset
+        // after charging (lower bound approximation).
+        optional int32 lower_bound_since_charge = 1;
+        // Upper bound approximation.
+        optional int32 upper_bound_since_charge = 2;
+        // Discharged points while screen is on.
+        optional int32 screen_on_since_charge = 3;
+        // Discharged points while screen is off.
+        optional int32 screen_off_since_charge = 4;
+        // Discharged points while screen was dozing. For historical reasons,
+        // screen_doze_since_charge is a subset of screen_off_since_charge.
+        optional int32 screen_doze_since_charge = 5;
+        // Total amount of battery discharged in mAh. This will only be non-zero for
+        // devices that report battery discharge via a coulomb counter.
+        optional int64 total_mah = 6;
+        // Total amount of battery discharged while the screen was off in mAh.
+        // This will only be non-zero for devices that report battery discharge
+        // via a coulomb counter.
+        optional int64 total_mah_screen_off = 7;
+        // Total amount of battery discharged while the screen was dozing in mAh.
+        // This will only be non-zero for devices that report battery discharge
+        // via a coulomb counter. For historical reasons, total_mah_screen_doze is
+        // a subset of total_mah_screen_off.
+        optional int64 total_mah_screen_doze = 8;
+        // Total amount of battery discharged in mAh while the device was in light doze mode.
+        // This will only be non-zero for devices that report battery discharge
+        // via a coulomb counter.
+        optional int64 total_mah_light_doze = 9;
+        // Total amount of battery discharged in mAh while the device was in deep doze mode.
+        // This will only be non-zero for devices that report battery discharge
+        // via a coulomb counter.
+        optional int64 total_mah_deep_doze = 10;
+    };
+    optional BatteryDischarge battery_discharge = 2;
 
-  // BatteryLevelStep tracks data for which conditions were continuously held for
-  // the entire duration. Field for which the conditions were not consistent
-  // for the entire duration should be marked MIXED.
-  message BatteryLevelStep {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    // How long the battery was at the current level.
-    optional int64 duration_ms = 1;
-    // Battery level
-    optional int32 level = 2;
-
-    // State of the display. A special enum is used rather than
-    // DisplayProto.State because a MIXED value needs to be in the enum, and
-    // batterystats doesn't care about all of the different display states.
-    enum DisplayState {
-      DS_MIXED = 0;
-      DS_ON = 1;
-      DS_OFF = 2;
-      DS_DOZE = 3;
-      DS_DOZE_SUSPEND = 4;
-      // Any display state error that comes through should be sent to hackbod@.
-      DS_ERROR = 5;
+    oneof time_remaining {
+        // Approximation for how much time remains until the battery is fully
+        // charged. The device will print -1 if there wasn't enough data to
+        // calculate an estimate, or if the battery is currently discharging.
+        int64 charge_time_remaining_ms = 3;
+        // Approximation for how much time remains until the battery is fully
+        // discharged. The device will print -1 if there wasn't enough data to
+        // calculate an estimate, or if the battery is currently charging.
+        int64 discharge_time_remaining_ms = 4;
     }
-    // The state of the display for the entire battery level step. MIXED is used
-    // if there were multiple states for this step.
-    optional DisplayState display_state = 3;
 
-    // Indicates status in power save mode.
-    enum PowerSaveMode {
-      PSM_MIXED = 0;
-      PSM_ON = 1;
-      PSM_OFF = 2;
+    // BatteryLevelStep tracks data for which conditions were continuously held for
+    // the entire duration. Field for which the conditions were not consistent
+    // for the entire duration should be marked MIXED.
+    message BatteryLevelStep {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // How long the battery was at the current level.
+        optional int64 duration_ms = 1;
+        // Battery level
+        optional int32 level = 2;
+
+        // State of the display. A special enum is used rather than
+        // DisplayProto.State because a MIXED value needs to be in the enum, and
+        // batterystats doesn't care about all of the different display states.
+        enum DisplayState {
+            DS_MIXED = 0;
+            DS_ON = 1;
+            DS_OFF = 2;
+            DS_DOZE = 3;
+            DS_DOZE_SUSPEND = 4;
+            // Any display state error that comes through should be sent to hackbod@.
+            DS_ERROR = 5;
+        }
+        // The state of the display for the entire battery level step. MIXED is used
+        // if there were multiple states for this step.
+        optional DisplayState display_state = 3;
+
+        // Indicates status in power save mode.
+        enum PowerSaveMode {
+            PSM_MIXED = 0;
+            PSM_ON = 1;
+            PSM_OFF = 2;
+        }
+        // Battery Saver mode for the entire battery level step. MIXED is used
+        // if there were multiple states for this step.
+        optional PowerSaveMode power_save_mode = 4;
+
+        // Indicates status in idle mode.
+        enum IdleMode {
+            IM_MIXED = 0;
+            IM_ON = 2;
+            IM_OFF = 3;
+        }
+        // Doze mode for the entire battery level step. MIXED is used if there were
+        // multiple states for this step.
+        optional IdleMode idle_mode = 5;
+    };
+    // Battery level steps when the device was charging.
+    repeated BatteryLevelStep charge_step = 5;
+    // Battery level steps when the device was discharging.
+    repeated BatteryLevelStep discharge_step = 6;
+
+    // All CPU frequencies of the device.
+    repeated int64 cpu_frequency = 7;
+
+    message DataConnection {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+        oneof type {
+            android.telephony.NetworkTypeEnum name = 1;
+            // If is_none is not set, then the name is a valid network type.
+            bool is_none = 2;
+        }
+        optional TimerProto total = 3;
+    };
+    repeated DataConnection data_connection = 8;
+
+    optional ControllerActivityProto global_bluetooth_controller = 9;
+    optional ControllerActivityProto global_modem_controller = 10;
+    optional ControllerActivityProto global_wifi_controller = 11;
+
+    message GlobalNetwork {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // Total Bytes received on mobile connections.
+        optional int64 mobile_bytes_rx = 1;
+        // Total Bytes transmitted on mobile connections.
+        optional int64 mobile_bytes_tx = 2;
+        // Total Bytes received on wifi connections.
+        optional int64 wifi_bytes_rx = 3;
+        // Total Bytes transmitted on wifi connections.
+        optional int64 wifi_bytes_tx = 4;
+        // Total Packets received on mobile connections.
+        optional int64 mobile_packets_rx = 5;
+        // Total Packets transmitted on mobile connections.
+        optional int64 mobile_packets_tx = 6;
+        // Total Packets received on wifi connections.
+        optional int64 wifi_packets_rx = 7;
+        // Total Packets transmitted on wifi connections.
+        optional int64 wifi_packets_tx = 8;
+        // Total Bytes received on bluetooth connections.
+        optional int64 bt_bytes_rx = 9;
+        // Total Bytes transmitted on bluetooth connections.
+        optional int64 bt_bytes_tx = 10;
+    };
+    optional GlobalNetwork global_network = 12;
+
+    message GlobalWifi {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // The amount of time that wifi has been on while the device was running on
+        // battery.
+        optional int64 on_duration_ms = 1;
+        // The amount of time that wifi has been on and the driver has been in the
+        // running state while the device was running on battery.
+        optional int64 running_duration_ms = 2;
     }
-    // Battery Saver mode for the entire battery level step. MIXED is used
-    // if there were multiple states for this step.
-    optional PowerSaveMode power_save_mode = 4;
+    optional GlobalWifi global_wifi = 13;
 
-    // Indicates status in idle mode.
-    enum IdleMode {
-      IM_MIXED = 0;
-      IM_ON = 2;
-      IM_OFF = 3;
+    // Kernel wakelock metrics are only recorded when the device is unplugged
+    // *and* the screen is off.
+    message KernelWakelock {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional string name = 1;
+        // Kernel wakelock stats aren't apportioned across all kernel wakelocks (as
+        // app wakelocks stats are).
+        optional TimerProto total = 2;
+        // The kernel doesn't have the data to enable printing out current and max
+        // durations.
+    };
+    repeated KernelWakelock kernel_wakelock = 14;
+
+    message Misc {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional int64 screen_on_duration_ms = 1;
+        optional int64 phone_on_duration_ms = 2;
+        optional int64 full_wakelock_total_duration_ms = 3;
+        // The total elapsed time that a partial wakelock was held. This duration
+        // does not double count wakelocks held at the same time.
+        optional int64 partial_wakelock_total_duration_ms = 4;
+        optional int64 mobile_radio_active_duration_ms = 5;
+        // The time that is the difference between the mobile radio time we saw
+        // based on the elapsed timestamp when going down vs. the given time stamp
+        // from the radio.
+        optional int64 mobile_radio_active_adjusted_time_ms = 6;
+        optional int32 mobile_radio_active_count = 7;
+        // The amount of time that the mobile network has been active (in a high
+        // power state) but not being able to blame on an app.
+        optional int32 mobile_radio_active_unknown_duration_ms = 8;
+        // Total amount of time the device was in the interactive state.
+        optional int64 interactive_duration_ms = 9;
+        optional int64 battery_saver_mode_enabled_duration_ms = 10;
+        optional int32 num_connectivity_changes = 11;
+        // Amount of time the device was in deep Doze.
+        optional int64 deep_doze_enabled_duration_ms = 12;
+        // How many times the device went into deep Doze mode.
+        optional int32 deep_doze_count = 13;
+        // Amount of time the device was idling in deep Doze. Idling time
+        // encompasses "doze" time and the maintenance windows that allow apps to
+        // operate.
+        optional int64 deep_doze_idling_duration_ms = 14;
+        // How many times the device idling for deep Doze mode.
+        optional int32 deep_doze_idling_count = 15;
+        optional int64 longest_deep_doze_duration_ms = 16;
+        // Amount of time the device was in Doze Light.
+        optional int64 light_doze_enabled_duration_ms = 17;
+        // How many times the device went into Doze Light mode.
+        optional int32 light_doze_count = 18;
+        // Amount of time the device was idling in Doze Light. Idling time
+        // encompasses "doze" time and the maintenance windows that allow apps to
+        // operate.
+        optional int64 light_doze_idling_duration_ms = 19;
+        // How many times the device idling for Doze Light mode.
+        optional int32 light_doze_idling_count = 20;
+        optional int64 longest_light_doze_duration_ms = 21;
     }
-    // Doze mode for the entire battery level step. MIXED is used if there were
-    // multiple states for this step.
-    optional IdleMode idle_mode = 5;
-  };
-  // Battery level steps when the device was charging.
-  repeated BatteryLevelStep charge_step = 5;
-  // Battery level steps when the device was discharging.
-  repeated BatteryLevelStep discharge_step = 6;
+    optional Misc misc = 15;
 
-  // All CPU frequencies of the device.
-  repeated int64 cpu_frequency = 7;
+    message PhoneSignalStrength {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  message DataConnection {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-    oneof type {
-      android.telephony.NetworkTypeEnum name = 1;
-      // If is_none is not set, then the name is a valid network type.
-      bool is_none = 2;
+        optional android.telephony.SignalStrengthEnum name = 1;
+        optional TimerProto total = 2;
+    };
+    repeated PhoneSignalStrength phone_signal_strength = 16;
+
+    message PowerUseItem {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        enum Sipper {
+            UNKNOWN_SIPPER = 0;
+            IDLE = 1;
+            CELL = 2;
+            PHONE = 3;
+            WIFI = 4;
+            BLUETOOTH = 5;
+            FLASHLIGHT = 6;
+            SCREEN = 7;
+            USER = 8;
+            UNACCOUNTED = 9;
+            OVERCOUNTED = 10;
+            CAMERA = 11;
+            MEMORY = 12;
+            AMBIENT_DISPLAY = 13;
+        };
+        optional Sipper name = 1;
+        // UID, only valid for the USER sipper.
+        optional int32 uid = 2;
+        // Estimated power use in mAh.
+        optional double computed_power_mah = 3;
+        // Starting in Oreo, Battery Settings has two modes to display the battery
+        // info. The first is "app usage list". In this mode, items with should_hide
+        // enabled are hidden.
+        optional bool should_hide = 4;
+        // Smeared power from screen usage. Screen usage power is split and smeared
+        // among apps, based on activity time.
+        optional double screen_power_mah = 5;
+        // Smeared power using proportional method. Power usage from hidden sippers
+        // is smeared to all apps proportionally (except for screen usage).
+        optional double proportional_smear_mah = 6;
+    };
+    repeated PowerUseItem power_use_item = 17;
+
+    message PowerUseSummary {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional double battery_capacity_mah = 1;
+        optional double computed_power_mah = 2;
+        // Lower bound of actual power drained.
+        optional double min_drained_power_mah = 3;
+        // Upper bound of actual power drained.
+        optional double max_drained_power_mah = 4;
+    };
+    optional PowerUseSummary power_use_summary = 18;
+
+    message ResourcePowerManager {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // Either StateName or StateName.VoterName.
+        optional string name = 1;
+        optional TimerProto total = 2;
+        optional TimerProto screen_off = 3;
     }
-    optional TimerProto total = 3;
-  };
-  repeated DataConnection data_connection = 8;
+    repeated ResourcePowerManager resource_power_manager = 19;
 
-  optional ControllerActivityProto global_bluetooth_controller = 9;
-  optional ControllerActivityProto global_modem_controller = 10;
-  optional ControllerActivityProto global_wifi_controller = 11;
+    message ScreenBrightness {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  message GlobalNetwork {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    // Total Bytes received on mobile connections.
-    optional int64 mobile_bytes_rx = 1;
-    // Total Bytes transmitted on mobile connections.
-    optional int64 mobile_bytes_tx = 2;
-    // Total Bytes received on wifi connections.
-    optional int64 wifi_bytes_rx = 3;
-    // Total Bytes transmitted on wifi connections.
-    optional int64 wifi_bytes_tx = 4;
-    // Total Packets received on mobile connections.
-    optional int64 mobile_packets_rx = 5;
-    // Total Packets transmitted on mobile connections.
-    optional int64 mobile_packets_tx = 6;
-    // Total Packets received on wifi connections.
-    optional int64 wifi_packets_rx = 7;
-    // Total Packets transmitted on wifi connections.
-    optional int64 wifi_packets_tx = 8;
-    // Total Bytes received on bluetooth connections.
-    optional int64 bt_bytes_rx = 9;
-    // Total Bytes transmitted on bluetooth connections.
-    optional int64 bt_bytes_tx = 10;
-  };
-  optional GlobalNetwork global_network = 12;
-
-  message GlobalWifi {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    // The amount of time that wifi has been on while the device was running on
-    // battery.
-    optional int64 on_duration_ms = 1;
-    // The amount of time that wifi has been on and the driver has been in the
-    // running state while the device was running on battery.
-    optional int64 running_duration_ms = 2;
-  }
-  optional GlobalWifi global_wifi = 13;
-
-  // Kernel wakelock metrics are only recorded when the device is unplugged
-  // *and* the screen is off.
-  message KernelWakelock {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    optional string name = 1;
-    // Kernel wakelock stats aren't apportioned across all kernel wakelocks (as
-    // app wakelocks stats are).
-    optional TimerProto total = 2;
-    // The kernel doesn't have the data to enable printing out current and max
-    // durations.
-  };
-  repeated KernelWakelock kernel_wakelock = 14;
-
-  message Misc {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    optional int64 screen_on_duration_ms = 1;
-    optional int64 phone_on_duration_ms = 2;
-    optional int64 full_wakelock_total_duration_ms = 3;
-    // The total elapsed time that a partial wakelock was held. This duration
-    // does not double count wakelocks held at the same time.
-    optional int64 partial_wakelock_total_duration_ms = 4;
-    optional int64 mobile_radio_active_duration_ms = 5;
-    // The time that is the difference between the mobile radio time we saw
-    // based on the elapsed timestamp when going down vs. the given time stamp
-    // from the radio.
-    optional int64 mobile_radio_active_adjusted_time_ms = 6;
-    optional int32 mobile_radio_active_count = 7;
-    // The amount of time that the mobile network has been active (in a high
-    // power state) but not being able to blame on an app.
-    optional int32 mobile_radio_active_unknown_duration_ms = 8;
-    // Total amount of time the device was in the interactive state.
-    optional int64 interactive_duration_ms = 9;
-    optional int64 battery_saver_mode_enabled_duration_ms = 10;
-    optional int32 num_connectivity_changes = 11;
-    // Amount of time the device was in deep Doze.
-    optional int64 deep_doze_enabled_duration_ms = 12;
-    // How many times the device went into deep Doze mode.
-    optional int32 deep_doze_count = 13;
-    // Amount of time the device was idling in deep Doze. Idling time
-    // encompasses "doze" time and the maintenance windows that allow apps to
-    // operate.
-    optional int64 deep_doze_idling_duration_ms = 14;
-    // How many times the device idling for deep Doze mode.
-    optional int32 deep_doze_idling_count = 15;
-    optional int64 longest_deep_doze_duration_ms = 16;
-    // Amount of time the device was in Doze Light.
-    optional int64 light_doze_enabled_duration_ms = 17;
-    // How many times the device went into Doze Light mode.
-    optional int32 light_doze_count = 18;
-    // Amount of time the device was idling in Doze Light. Idling time
-    // encompasses "doze" time and the maintenance windows that allow apps to
-    // operate.
-    optional int64 light_doze_idling_duration_ms = 19;
-    // How many times the device idling for Doze Light mode.
-    optional int32 light_doze_idling_count = 20;
-    optional int64 longest_light_doze_duration_ms = 21;
-  }
-  optional Misc misc = 15;
-
-  message PhoneSignalStrength {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    optional android.telephony.SignalStrengthEnum name = 1;
-    optional TimerProto total = 2;
-  };
-  repeated PhoneSignalStrength phone_signal_strength = 16;
-
-  message PowerUseItem {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    enum Sipper {
-      UNKNOWN_SIPPER = 0;
-      IDLE = 1;
-      CELL = 2;
-      PHONE = 3;
-      WIFI = 4;
-      BLUETOOTH = 5;
-      FLASHLIGHT = 6;
-      SCREEN = 7;
-      USER = 8;
-      UNACCOUNTED = 9;
-      OVERCOUNTED = 10;
-      CAMERA = 11;
-      MEMORY = 12;
-      AMBIENT_DISPLAY = 13;
+        enum Name {
+            DARK = 0; // Not screen-off.
+            DIM = 1;
+            MEDIUM = 2;
+            LIGHT = 3;
+            BRIGHT = 4;
+        };
+        optional Name name = 1;
+        optional TimerProto total = 2;
     };
-    optional Sipper name = 1;
-    // UID, only valid for the USER sipper.
-    optional int32 uid = 2;
-    // Estimated power use in mAh.
-    optional double computed_power_mah = 3;
-    // Starting in Oreo, Battery Settings has two modes to display the battery
-    // info. The first is "app usage list". In this mode, items with should_hide
-    // enabled are hidden.
-    optional bool should_hide = 4;
-    // Smeared power from screen usage. Screen usage power is split and smeared
-    // among apps, based on activity time.
-    optional double screen_power_mah = 5;
-    // Smeared power using proportional method. Power usage from hidden sippers
-    // is smeared to all apps proportionally (except for screen usage).
-    optional double proportional_smear_mah = 6;
-  };
-  repeated PowerUseItem power_use_item = 17;
+    repeated ScreenBrightness screen_brightness = 20;
 
-  message PowerUseSummary {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    // Duration and number of times trying to acquire a signal
+    optional TimerProto signal_scanning = 21;
 
-    optional double battery_capacity_mah = 1;
-    optional double computed_power_mah = 2;
-    // Lower bound of actual power drained.
-    optional double min_drained_power_mah = 3;
-    // Upper bound of actual power drained.
-    optional double max_drained_power_mah = 4;
-  };
-  optional PowerUseSummary power_use_summary = 18;
+    message WakeupReason {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  message ResourcePowerManager {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    // Either StateName or StateName.VoterName.
-    optional string name = 1;
-    optional TimerProto total = 2;
-    optional TimerProto screen_off = 3;
-  }
-  repeated ResourcePowerManager resource_power_manager = 19;
-
-  message ScreenBrightness {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    enum Name {
-      DARK = 0; // Not screen-off.
-      DIM = 1;
-      MEDIUM = 2;
-      LIGHT = 3;
-      BRIGHT = 4;
+        optional string name = 1;
+        optional TimerProto total = 2;
     };
-    optional Name name = 1;
-    optional TimerProto total = 2;
-  };
-  repeated ScreenBrightness screen_brightness = 20;
+    repeated WakeupReason wakeup_reason = 22;
 
-  // Duration and number of times trying to acquire a signal
-  optional TimerProto signal_scanning = 21;
+    message WifiMulticastWakelockTotal {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  message WakeupReason {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+        optional int64 duration_ms = 1;
+        optional int32 count = 2;
+    }
+    optional WifiMulticastWakelockTotal wifi_multicast_wakelock_total = 23;
 
-    optional string name = 1;
-    optional TimerProto total = 2;
-  };
-  repeated WakeupReason wakeup_reason = 22;
+    message WifiSignalStrength {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  message WifiMulticastWakelockTotal {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    optional int64 duration_ms = 1;
-    optional int32 count = 2;
-  }
-  optional WifiMulticastWakelockTotal wifi_multicast_wakelock_total = 23;
-
-  message WifiSignalStrength {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    enum Name {
-      NONE = 0;
-      POOR = 1;
-      MODERATE = 2;
-      GOOD = 3;
-      GREAT = 4;
+        enum Name {
+            NONE = 0;
+            POOR = 1;
+            MODERATE = 2;
+            GOOD = 3;
+            GREAT = 4;
+        };
+        optional Name name = 1;
+        optional TimerProto total = 2;
     };
-    optional Name name = 1;
-    optional TimerProto total = 2;
-  };
-  repeated WifiSignalStrength wifi_signal_strength = 24;
+    repeated WifiSignalStrength wifi_signal_strength = 24;
 
-  message WifiState {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    message WifiState {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    enum Name {
-      OFF = 0;
-      OFF_SCANNING = 1;
-      ON_NO_NETWORKS = 2;
-      ON_DISCONNECTED = 3;
-      ON_CONNECTED_STA = 4;
-      ON_CONNECTED_P2P = 5;
-      ON_CONNECTED_STA_P2P = 6;
-      SOFT_AP = 7;
+        enum Name {
+            OFF = 0;
+            OFF_SCANNING = 1;
+            ON_NO_NETWORKS = 2;
+            ON_DISCONNECTED = 3;
+            ON_CONNECTED_STA = 4;
+            ON_CONNECTED_P2P = 5;
+            ON_CONNECTED_STA_P2P = 6;
+            SOFT_AP = 7;
+        };
+        optional Name name = 1;
+        optional TimerProto total = 2;
     };
-    optional Name name = 1;
-    optional TimerProto total = 2;
-  };
-  repeated WifiState wifi_state = 25;
+    repeated WifiState wifi_state = 25;
 
-  message WifiSupplicantState {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    message WifiSupplicantState {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    enum Name {
-      INVALID = 0;
-      DISCONNECTED = 1;
-      INTERFACE_DISABLED = 2;
-      INACTIVE = 3;
-      SCANNING = 4;
-      AUTHENTICATING = 5;
-      ASSOCIATING = 6;
-      ASSOCIATED = 7;
-      FOUR_WAY_HANDSHAKE = 8;
-      GROUP_HANDSHAKE = 9;
-      COMPLETED = 10;
-      DORMANT = 11;
-      UNINITIALIZED = 12;
+        enum Name {
+            INVALID = 0;
+            DISCONNECTED = 1;
+            INTERFACE_DISABLED = 2;
+            INACTIVE = 3;
+            SCANNING = 4;
+            AUTHENTICATING = 5;
+            ASSOCIATING = 6;
+            ASSOCIATED = 7;
+            FOUR_WAY_HANDSHAKE = 8;
+            GROUP_HANDSHAKE = 9;
+            COMPLETED = 10;
+            DORMANT = 11;
+            UNINITIALIZED = 12;
+        };
+        optional Name name = 1;
+        optional TimerProto total = 2;
     };
-    optional Name name = 1;
-    optional TimerProto total = 2;
-  };
-  repeated WifiSupplicantState wifi_supplicant_state = 26;
+    repeated WifiSupplicantState wifi_supplicant_state = 26;
 }
 
 message TimerProto {
-  option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  // This may be an apportioned time.
-  optional int64 duration_ms = 1;
-  optional int64 count = 2;
-  // The max duration if it is being tracked. Not all Timer subclasses
-  // track the max duration.
-  optional int64 max_duration_ms = 3;
-  // The current time the timer has been active, if it is being tracked.
-  // Not all Timer subclasses track the current duration.
-  optional int64 current_duration_ms = 4;
-  // The total cumulative duration (i.e. sum of past durations) that this timer
-  // has been on since reset. This may differ from duration_ms since, depending
-  // on the Timer, getTotalTimeLocked may represent the total 'blamed' or
-  // 'pooled' time, rather than the actual time. By contrast, total_duration_ms
-  // always gives the actual total time. Not all Timer subclasses track the
-  // total duration.
-  optional int64 total_duration_ms = 5;
+    // This may be an apportioned time.
+    optional int64 duration_ms = 1;
+    optional int64 count = 2;
+    // The max duration if it is being tracked. Not all Timer subclasses
+    // track the max duration.
+    optional int64 max_duration_ms = 3;
+    // The current time the timer has been active, if it is being tracked.
+    // Not all Timer subclasses track the current duration.
+    optional int64 current_duration_ms = 4;
+    // The total cumulative duration (i.e. sum of past durations) that this timer
+    // has been on since reset. This may differ from duration_ms since, depending
+    // on the Timer, getTotalTimeLocked may represent the total 'blamed' or
+    // 'pooled' time, rather than the actual time. By contrast, total_duration_ms
+    // always gives the actual total time. Not all Timer subclasses track the
+    // total duration.
+    optional int64 total_duration_ms = 5;
 }
 
 message UidProto {
-  option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-  // Combination of app ID and user ID.
-  optional int32 uid = 1;
-
-  // The statistics associated with a particular package.
-  message Package {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional string name = 1;
+    // Combination of app ID and user ID.
+    optional int32 uid = 1;
 
-    message Service {
-      option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    // The statistics associated with a particular package.
+    message Package {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-      optional string name = 1;
-      // Time spent started.
-      optional int64 start_duration_ms = 2;
-      optional int32 start_count = 3;
-      optional int32 launch_count = 4;
+        optional string name = 1;
+
+        message Service {
+            option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional string name = 1;
+            // Time spent started.
+            optional int64 start_duration_ms = 2;
+            optional int32 start_count = 3;
+            optional int32 launch_count = 4;
+        }
+        repeated Service services = 2;
     }
-    repeated Service services = 2;
-  }
-  repeated Package packages = 2;
+    repeated Package packages = 2;
 
-  optional ControllerActivityProto bluetooth_controller = 3;
-  optional ControllerActivityProto modem_controller = 4;
-  optional ControllerActivityProto wifi_controller = 5;
+    optional ControllerActivityProto bluetooth_controller = 3;
+    optional ControllerActivityProto modem_controller = 4;
+    optional ControllerActivityProto wifi_controller = 5;
 
-  // Bluetooth misc data.
-  message BluetoothMisc {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    // Bluetooth misc data.
+    message BluetoothMisc {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    // Duration spent BLE scanning blamed on this App (i.e. apportioned to this
-    // app amongst all apps doing BLE scanning; see explanation of 'apportioned'
-    // in App's comment).
-    optional TimerProto apportioned_ble_scan = 1;
-    // Background times aren't apportioned.
-    optional TimerProto background_ble_scan = 2;
-    // Running unoptimized BLE scanning, as defined by Bluetooth's
-    // AppScanStats.recordScanStart. As of May 2017, these are unfiltered,
-    // non-opportunistic, non-first-match scans. Durations are not
-    // pooled/apportioned.
-    optional TimerProto unoptimized_ble_scan = 3;
-    // Running unoptimized BLE scanning when app is in background. Durations are
-    // not pooled/apportioned.
-    optional TimerProto background_unoptimized_ble_scan = 4;
-    // Count of results returned by BLE scanning.
-    optional int32 ble_scan_result_count = 5;
-    // Count of results returned by BLE scans when app is in background.
-    // (Included in ble_scan_result_count.)
-    optional int32 background_ble_scan_result_count = 6;
-  }
-  optional BluetoothMisc bluetooth_misc = 6;
-
-  message Cpu {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    // Total CPU time with processes executing in userspace. Summed up across
-    // multiple cores.
-    optional int64 user_duration_ms = 1;
-    // Total CPU time with processes executing kernel syscalls. Summed up across
-    // multiple cores.
-    optional int64 system_duration_ms = 2;
-
-    // CPU time broken down by CPU frequency (go/cpu-battery-metrics).
-    //
-    // These are real CPU time measurement from the kernel, so their sum can
-    // be different from the sum of user_duration_millis and
-    // system_duration_millis, which are just approximations. Data is not
-    // tracked when device is charging.
-    message ByFrequency {
-      option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-      // Index of the frequency in system.cpu_frequency. It starts from 1, to
-      // make it easier to analyze.
-      optional int32 frequency_index = 1;
-      // CPU time in milliseconds.
-      optional int64 total_duration_ms = 2;
-      // Screen-off CPU time in milliseconds.
-      optional int64 screen_off_duration_ms = 3;
+        // Duration spent BLE scanning blamed on this App (i.e. apportioned to this
+        // app amongst all apps doing BLE scanning; see explanation of 'apportioned'
+        // in App's comment).
+        optional TimerProto apportioned_ble_scan = 1;
+        // Background times aren't apportioned.
+        optional TimerProto background_ble_scan = 2;
+        // Running unoptimized BLE scanning, as defined by Bluetooth's
+        // AppScanStats.recordScanStart. As of May 2017, these are unfiltered,
+        // non-opportunistic, non-first-match scans. Durations are not
+        // pooled/apportioned.
+        optional TimerProto unoptimized_ble_scan = 3;
+        // Running unoptimized BLE scanning when app is in background. Durations are
+        // not pooled/apportioned.
+        optional TimerProto background_unoptimized_ble_scan = 4;
+        // Count of results returned by BLE scanning.
+        optional int32 ble_scan_result_count = 5;
+        // Count of results returned by BLE scans when app is in background.
+        // (Included in ble_scan_result_count.)
+        optional int32 background_ble_scan_result_count = 6;
     }
-    // CPU times accumulated across all process states.
-    repeated ByFrequency by_frequency = 3;
+    optional BluetoothMisc bluetooth_misc = 6;
 
-    enum ProcessState {
-      TOP = 0;
-      FOREGROUND_SERVICE = 1;
-      FOREGROUND = 2;
-      BACKGROUND = 3;
-      TOP_SLEEPING = 4;
-      HEAVY_WEIGHT = 5;
-      CACHED = 6;
+    message Cpu {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // Total CPU time with processes executing in userspace. Summed up across
+        // multiple cores.
+        optional int64 user_duration_ms = 1;
+        // Total CPU time with processes executing kernel syscalls. Summed up across
+        // multiple cores.
+        optional int64 system_duration_ms = 2;
+
+        // CPU time broken down by CPU frequency (go/cpu-battery-metrics).
+        //
+        // These are real CPU time measurement from the kernel, so their sum can
+        // be different from the sum of user_duration_millis and
+        // system_duration_millis, which are just approximations. Data is not
+        // tracked when device is charging.
+        message ByFrequency {
+            option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            // Index of the frequency in system.cpu_frequency. It starts from 1, to
+            // make it easier to analyze.
+            optional int32 frequency_index = 1;
+            // CPU time in milliseconds.
+            optional int64 total_duration_ms = 2;
+            // Screen-off CPU time in milliseconds.
+            optional int64 screen_off_duration_ms = 3;
+        }
+        // CPU times accumulated across all process states.
+        repeated ByFrequency by_frequency = 3;
+
+        enum ProcessState {
+            TOP = 0;
+            FOREGROUND_SERVICE = 1;
+            FOREGROUND = 2;
+            BACKGROUND = 3;
+            TOP_SLEEPING = 4;
+            HEAVY_WEIGHT = 5;
+            CACHED = 6;
+        }
+        // CPU times at different process states.
+        message ByProcessState {
+            option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+            optional ProcessState process_state = 1;
+            repeated ByFrequency by_frequency = 2;
+        }
+        repeated ByProcessState by_process_state = 4;
     }
-    // CPU times at different process states.
-    message ByProcessState {
-      option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    optional Cpu cpu = 7;
 
-      optional ProcessState process_state = 1;
-      repeated ByFrequency by_frequency = 2;
+    // Duration is pooled/apportioned.
+    optional TimerProto audio = 8;
+    // Duration is pooled/apportioned.
+    optional TimerProto camera = 9;
+    // Duration is pooled/apportioned.
+    optional TimerProto flashlight = 10;
+    // Duration is not pooled/apportioned.
+    optional TimerProto foreground_activity = 11;
+    // Duration is not pooled/apportioned.
+    optional TimerProto foreground_service = 12;
+    // Duration is not pooled/apportioned.
+    optional TimerProto vibrator = 13;
+    // Duration is pooled/apportioned.
+    optional TimerProto video = 14;
+
+    message Job {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional string name = 1;
+        // Job times aren't apportioned.
+        optional TimerProto total = 2;
+        optional TimerProto background = 3;
     }
-    repeated ByProcessState by_process_state = 4;
-  }
-  optional Cpu cpu = 7;
+    repeated Job jobs = 15;
 
-  // Duration is pooled/apportioned.
-  optional TimerProto audio = 8;
-  // Duration is pooled/apportioned.
-  optional TimerProto camera = 9;
-  // Duration is pooled/apportioned.
-  optional TimerProto flashlight = 10;
-  // Duration is not pooled/apportioned.
-  optional TimerProto foreground_activity = 11;
-  // Duration is not pooled/apportioned.
-  optional TimerProto foreground_service = 12;
-  // Duration is not pooled/apportioned.
-  optional TimerProto vibrator = 13;
-  // Duration is pooled/apportioned.
-  optional TimerProto video = 14;
+    message JobCompletion {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  message Job {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+        // Job name.
+        optional string name = 1;
 
-    optional string name = 1;
-    // Job times aren't apportioned.
-    optional TimerProto total = 2;
-    optional TimerProto background = 3;
-  }
-  repeated Job jobs = 15;
+        message ReasonCount {
+            option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  message JobCompletion {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+            optional android.app.job.StopReasonEnum name = 1;
+            optional int32 count = 2;
+        }
+        repeated ReasonCount reason_count = 2;
+    };
+    repeated JobCompletion job_completion = 16;
 
-    // Job name.
-    optional string name = 1;
+    message Network {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    message ReasonCount {
-      option (android.msg_privacy).dest = DEST_AUTOMATIC;
+        // Mobile data traffic (total, background + foreground).
+        optional int64 mobile_bytes_rx = 1;
+        optional int64 mobile_bytes_tx = 2;
+        // Wifi data traffic (total, background + foreground).
+        optional int64 wifi_bytes_rx = 3;
+        optional int64 wifi_bytes_tx = 4;
+        // Bluetooth data traffic (total, background + foreground).
+        optional int64 bt_bytes_rx = 5;
+        optional int64 bt_bytes_tx = 6;
+        // In packets (total, background + foreground).
+        optional int64 mobile_packets_rx = 7;
+        optional int64 mobile_packets_tx = 8;
+        optional int64 wifi_packets_rx = 9;
+        optional int64 wifi_packets_tx = 10;
+        // Radio active duration.
+        optional int64 mobile_active_duration_ms = 11;
+        optional int32 mobile_active_count = 12;
+        // Number of times the app woke up the mobile radio.
+        optional int32 mobile_wakeup_count = 13;
+        // Number of times the app woke up the wifi radio.
+        optional int32 wifi_wakeup_count = 14;
+        // Mobile data traffic in the background only, included in total above.
+        optional int64 mobile_bytes_bg_rx = 15;
+        optional int64 mobile_bytes_bg_tx = 16;
+        // Wifi data traffic in the background only, included in total above.
+        optional int64 wifi_bytes_bg_rx = 17;
+        optional int64 wifi_bytes_bg_tx = 18;
+        // In packets (background only, included in total packets above).
+        optional int64 mobile_packets_bg_rx = 19;
+        optional int64 mobile_packets_bg_tx = 20;
+        optional int64 wifi_packets_bg_rx = 21;
+        optional int64 wifi_packets_bg_tx = 22;
+    };
+    optional Network network = 17;
 
-      optional android.app.job.StopReasonEnum name = 1;
-      optional int32 count = 2;
+    // TODO: combine System and App messages?
+    message PowerUseItem {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // Estimated power use in mAh.
+        optional double computed_power_mah = 1;
+        // Starting in Oreo, Battery Settings has two modes to display the battery
+        // info. The first is "app usage list". In this mode, items with should_hide
+        // enabled are hidden.
+        optional bool should_hide = 2;
+        // Smeared power from screen usage. Screen usage power is split and smeared
+        // among apps, based on activity time.
+        optional double screen_power_mah = 3;
+        // Smeared power using proportional method. Power usage from hidden sippers
+        // is smeared to all apps proportionally (except for screen usage).
+        optional double proportional_smear_mah = 4;
+    };
+    optional PowerUseItem power_use_item = 18;
+
+    // Durations are not pooled/apportioned.
+    message Process {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        optional string name = 1;
+        // Time spent executing in user code.
+        optional int64 user_duration_ms = 2;
+        // Time spent executing in kernel code.
+        optional int64 system_duration_ms = 3;
+        // Time the process was running in the foreground.
+        optional int64 foreground_duration_ms = 4;
+        // Number of times the process has been started.
+        optional int32 start_count = 5;
+        // Number of times the process has had an ANR.
+        optional int32 anr_count = 6;
+        // Number of times the process has crashed.
+        optional int32 crash_count = 7;
+    };
+    repeated Process process = 19;
+
+    message StateTime {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // All of these (non-deprecated) states are mutually exclusive and can be
+        // added together to find the total time a uid has had any processes running
+        // at all.
+
+        // In approximate order or priority (top being what the framework considers
+        // most important and is thus least likely to kill when resources are
+        // needed:
+        // top > foreground service > foreground > background > top sleeping > heavy weight > cache
+        enum State {
+            // Time this uid has any processes in the top state.
+            PROCESS_STATE_TOP = 0;
+            // Time this uid has any process with a started foreground service, but
+            // none in the "top" state.
+            PROCESS_STATE_FOREGROUND_SERVICE = 1;
+            // Time this uid has any process in an active foreground state, but none in the
+            // "foreground service" or better state. Persistent and other foreground states go here.
+            PROCESS_STATE_FOREGROUND = 2;
+            // Time this uid has any process in an active background state, but none
+            // in the "foreground" or better state.
+            PROCESS_STATE_BACKGROUND = 3;
+            // Time this uid has any process that is top while the device is sleeping,
+            // but not active for any other reason. We consider is a kind of cached
+            // process for execution restrictions. Sleeping is mostly screen off, but
+            // also includes the time when the screen is on but the device has not yet
+            // been unlocked.
+            PROCESS_STATE_TOP_SLEEPING = 4;
+            // Time this uid has any process that is in the background but it has an
+            // activity marked as "can't save state". This is essentially a cached
+            // process, though the system will try much harder than normal to avoid
+            // killing it.
+            PROCESS_STATE_HEAVY_WEIGHT = 5;
+            // Time this uid has any processes that are sitting around cached, not in
+            // one of the other active states.
+            PROCESS_STATE_CACHED = 6;
+        }
+        optional State state = 1;
+        optional int64 duration_ms = 2;
     }
-    repeated ReasonCount reason_count = 2;
-  };
-  repeated JobCompletion job_completion = 16;
+    repeated StateTime states = 20;
 
-  message Network {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    message Sensor {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    // Mobile data traffic (total, background + foreground).
-    optional int64 mobile_bytes_rx = 1;
-    optional int64 mobile_bytes_tx = 2;
-    // Wifi data traffic (total, background + foreground).
-    optional int64 wifi_bytes_rx = 3;
-    optional int64 wifi_bytes_tx = 4;
-    // Bluetooth data traffic (total, background + foreground).
-    optional int64 bt_bytes_rx = 5;
-    optional int64 bt_bytes_tx = 6;
-    // In packets (total, background + foreground).
-    optional int64 mobile_packets_rx = 7;
-    optional int64 mobile_packets_tx = 8;
-    optional int64 wifi_packets_rx = 9;
-    optional int64 wifi_packets_tx = 10;
-    // Radio active duration.
-    optional int64 mobile_active_duration_ms = 11;
-    optional int32 mobile_active_count = 12;
-    // Number of times the app woke up the mobile radio.
-    optional int32 mobile_wakeup_count = 13;
-    // Number of times the app woke up the wifi radio.
-    optional int32 wifi_wakeup_count = 14;
-    // Mobile data traffic in the background only, included in total above.
-    optional int64 mobile_bytes_bg_rx = 15;
-    optional int64 mobile_bytes_bg_tx = 16;
-    // Wifi data traffic in the background only, included in total above.
-    optional int64 wifi_bytes_bg_rx = 17;
-    optional int64 wifi_bytes_bg_tx = 18;
-    // In packets (background only, included in total packets above).
-    optional int64 mobile_packets_bg_rx = 19;
-    optional int64 mobile_packets_bg_tx = 20;
-    optional int64 wifi_packets_bg_rx = 21;
-    optional int64 wifi_packets_bg_tx = 22;
-  };
-  optional Network network = 17;
-
-  // TODO: combine System and App messages?
-  message PowerUseItem {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    // Estimated power use in mAh.
-    optional double computed_power_mah = 1;
-    // Starting in Oreo, Battery Settings has two modes to display the battery
-    // info. The first is "app usage list". In this mode, items with should_hide
-    // enabled are hidden.
-    optional bool should_hide = 2;
-    // Smeared power from screen usage. Screen usage power is split and smeared
-    // among apps, based on activity time.
-    optional double screen_power_mah = 3;
-    // Smeared power using proportional method. Power usage from hidden sippers
-    // is smeared to all apps proportionally (except for screen usage).
-    optional double proportional_smear_mah = 4;
-  };
-  optional PowerUseItem power_use_item = 18;
-
-  // Durations are not pooled/apportioned.
-  message Process {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    optional string name = 1;
-    // Time spent executing in user code.
-    optional int64 user_duration_ms = 2;
-    // Time spent executing in kernel code.
-    optional int64 system_duration_ms = 3;
-    // Time the process was running in the foreground.
-    optional int64 foreground_duration_ms = 4;
-    // Number of times the process has been started.
-    optional int32 start_count = 5;
-    // Number of times the process has had an ANR.
-    optional int32 anr_count = 6;
-    // Number of times the process has crashed.
-    optional int32 crash_count = 7;
-  };
-  repeated Process process = 19;
-
-  message StateTime {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    // All of these (non-deprecated) states are mutually exclusive and can be
-    // added together to find the total time a uid has had any processes running
-    // at all.
-
-    // In approximate order or priority (top being what the framework considers
-    // most important and is thus least likely to kill when resources are
-    // needed:
-    // top > foreground service > foreground > background > top sleeping > heavy weight > cache
-    enum State {
-      // Time this uid has any processes in the top state.
-      PROCESS_STATE_TOP = 0;
-      // Time this uid has any process with a started foreground service, but
-      // none in the "top" state.
-      PROCESS_STATE_FOREGROUND_SERVICE = 1;
-      // Time this uid has any process in an active foreground state, but none in the
-      // "foreground service" or better state. Persistent and other foreground states go here.
-      PROCESS_STATE_FOREGROUND = 2;
-      // Time this uid has any process in an active background state, but none
-      // in the "foreground" or better state.
-      PROCESS_STATE_BACKGROUND = 3;
-      // Time this uid has any process that is top while the device is sleeping,
-      // but not active for any other reason. We consider is a kind of cached
-      // process for execution restrictions. Sleeping is mostly screen off, but
-      // also includes the time when the screen is on but the device has not yet
-      // been unlocked.
-      PROCESS_STATE_TOP_SLEEPING = 4;
-      // Time this uid has any process that is in the background but it has an
-      // activity marked as "can't save state".  This is essentially a cached
-      // process, though the system will try much harder than normal to avoid
-      // killing it.
-      PROCESS_STATE_HEAVY_WEIGHT = 5;
-      // Time this uid has any processes that are sitting around cached, not in
-      // one of the other active states.
-      PROCESS_STATE_CACHED = 6;
+        optional int32 id = 1;
+        optional TimerProto apportioned = 2;
+        // Background times aren't apportioned.
+        optional TimerProto background = 3;
     }
-    optional State state = 1;
-    optional int64 duration_ms = 2;
-  }
-  repeated StateTime states = 20;
+    repeated Sensor sensors = 21;
 
-  message Sensor {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    message Sync {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional int32 id = 1;
-    optional TimerProto apportioned = 2;
-    // Background times aren't apportioned.
-    optional TimerProto background = 3;
-  }
-  repeated Sensor sensors = 21;
+        optional string name = 1;
+        // Sync times aren't apportioned.
+        optional TimerProto total = 2;
+        optional TimerProto background = 3;
+    }
+    repeated Sync syncs = 22;
 
-  message Sync {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    message UserActivity {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional string name = 1;
-    // Sync times aren't apportioned.
-    optional TimerProto total = 2;
-    optional TimerProto background = 3;
-  }
-  repeated Sync syncs = 22;
+        optional android.os.PowerManagerProto.UserActivityEvent name = 1;
+        optional int32 count = 2;
+    };
+    repeated UserActivity user_activity = 23;
 
-  message UserActivity {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    // Aggregated wakelock data for an app overall, across all of its wakelocks.
+    // The Wakelock message holds data about each *individual* wakelock, but it
+    // cannot be used to ascertain the aggregated time the app spent holding
+    // wakelocks, since merely summing Wakelock data will either underestimate (in
+    // the case of wakelock.partial.duration_ms) or overestimate (in the case of
+    // wakelock.partial.total_duration_ms) the total time, due to overlapping
+    // wakelocks. AggregatedWakelock, on the other hand, holds overall per-app
+    // wakelock data.
+    message AggregatedWakelock {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional android.os.PowerManagerProto.UserActivityEvent name = 1;
-    optional int32 count = 2;
-  };
-  repeated UserActivity user_activity = 23;
+        // The total duration that the app spent holding partial wakelocks.
+        // It includes both foreground + background use.
+        optional int64 partial_duration_ms = 1;
+        // The total duration that the app spent holding partial wakelocks while the
+        // app was in the background. Subtracting from partial_duration_ms will
+        // yield foreground usage.
+        optional int64 background_partial_duration_ms = 2;
+    };
+    optional AggregatedWakelock aggregated_wakelock = 24;
 
-  // Aggregated wakelock data for an app overall, across all of its wakelocks.
-  // The Wakelock message holds data about each *individual* wakelock, but it
-  // cannot be used to ascertain the aggregated time the app spent holding
-  // wakelocks, since merely summing Wakelock data will either underestimate (in
-  // the case of wakelock.partial.duration_ms) or overestimate (in the case of
-  // wakelock.partial.total_duration_ms) the total time, due to overlapping
-  // wakelocks. AggregatedWakelock, on the other hand, holds overall per-app
-  // wakelock data.
-  message AggregatedWakelock {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    message Wakelock {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    // The total duration that the app spent holding partial wakelocks.
-    // It includes both foreground + background use.
-    optional int64 partial_duration_ms = 1;
-    // The total duration that the app spent holding partial wakelocks while the
-    // app was in the background. Subtracting from partial_duration_ms will
-    // yield foreground usage.
-    optional int64 background_partial_duration_ms = 2;
-  };
-  optional AggregatedWakelock aggregated_wakelock = 24;
+        optional string name = 1;
 
-  message Wakelock {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+        // Full wakelocks keep the screen on. Based on
+        // PowerManager.SCREEN_BRIGHT_WAKE_LOCK (deprecated in API 13) and
+        // PowerManager.SCREEN_DIM_WAKE_LOCK (deprecated in API 17). Current, max,
+        // and total durations are not tracked for full wakelocks.
+        optional TimerProto full = 2;
 
-    optional string name = 1;
+        // Partial wakelocks ensure the CPU is running while allowing the screen
+        // to turn off. Based on PowerManager.PARTIAL_WAKE_LOCK.
+        // Partial wakelock metrics are only recorded when the device is unplugged
+        // *and* the screen is off. Current, max, and total durations are tracked
+        // for partial wakelocks.
+        optional TimerProto partial = 3;
 
-    // Full wakelocks keep the screen on. Based on
-    // PowerManager.SCREEN_BRIGHT_WAKE_LOCK (deprecated in API 13) and
-    // PowerManager.SCREEN_DIM_WAKE_LOCK (deprecated in API 17). Current, max,
-    // and total durations are not tracked for full wakelocks.
-    optional TimerProto full = 2;
+        // These fields are for tracking partial wakelocks (see above), but only
+        // the time the wakelock was held while the app was in a background state.
+        // Since all background tracking is 'actual', not 'apportioned',
+        // background_partial.duration_ms is identical to
+        // background_partial.total_duration_ms.
+        optional TimerProto background_partial = 4;
 
-    // Partial wakelocks ensure the CPU is running while allowing the screen
-    // to turn off. Based on PowerManager.PARTIAL_WAKE_LOCK.
-    // Partial wakelock metrics are only recorded when the device is unplugged
-    // *and* the screen is off. Current, max, and total durations are tracked
-    // for partial wakelocks.
-    optional TimerProto partial = 3;
+        // Window wakelocks keep the screen on. Current, max, and total durations
+        // are not tracked for window wakelocks.
+        optional TimerProto window = 5;
+    };
+    repeated Wakelock wakelocks = 25;
 
-    // These fields are for tracking partial wakelocks (see above), but only
-    // the time the wakelock was held while the app was in a background state.
-    // Since all background tracking is 'actual', not 'apportioned',
-    // background_partial.duration_ms is identical to
-    // background_partial.total_duration_ms.
-    optional TimerProto background_partial = 4;
+    message WakeupAlarm {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    // Window wakelocks keep the screen on. Current, max, and total durations
-    // are not tracked for window wakelocks.
-    optional TimerProto window = 5;
-  };
-  repeated Wakelock wakelocks = 25;
+        // Wakeup alarm name.
+        optional string name = 1;
+        // Only includes counts when screen-off (& on battery).
+        optional int32 count = 2;
+    }
+    repeated WakeupAlarm wakeup_alarm = 26;
 
-  message WakeupAlarm {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+    message Wifi {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    // Wakeup alarm name.
-    optional string name = 1;
-    // Only includes counts when screen-off (& on battery).
-    optional int32 count = 2;
-  }
-  repeated WakeupAlarm wakeup_alarm = 26;
+        // Duration holding Wifi-lock. This time is apportioned.
+        optional int64 full_wifi_lock_duration_ms = 1;
+        // Duration running Wifi. This time is apportioned.
+        optional int64 running_duration_ms = 2;
+        // Duration performing Wifi-scan blamed on this App (i.e. apportioned to
+        // this app amongst all apps doing Wifi-scanning; see explanation of
+        // 'apportioned' in App's comment).
+        optional TimerProto apportioned_scan = 3;
+        // Scans performed when app is in background. (Included in
+        // apportioned_scan). This value is not apportioned. Subtracting
+        // background_scan.total_duration_ms from apportioned_scan.total_duration_ms
+        // will yield foreground usage.
+        optional TimerProto background_scan = 4;
+    };
+    optional Wifi wifi = 27;
 
-  message Wifi {
-    option (android.msg_privacy).dest = DEST_AUTOMATIC;
-
-    // Duration holding Wifi-lock. This time is apportioned.
-    optional int64 full_wifi_lock_duration_ms = 1;
-    // Duration running Wifi. This time is apportioned.
-    optional int64 running_duration_ms = 2;
-    // Duration performing Wifi-scan blamed on this App (i.e. apportioned to
-    // this app amongst all apps doing Wifi-scanning; see explanation of
-    // 'apportioned' in App's comment).
-    optional TimerProto apportioned_scan = 3;
-    // Scans performed when app is in background. (Included in
-    // apportioned_scan). This value is not apportioned. Subtracting
-    // background_scan.total_duration_ms from apportioned_scan.total_duration_ms
-    // will yield foreground usage.
-    optional TimerProto background_scan = 4;
-  };
-  optional Wifi wifi = 27;
-
-  // WiFi Multicast Wakelock
-  // This timer tracks the duration and count for the app to request the
-  // wakelock for wifi multicast traffic.
-  // This wakelock disables the filtering of multicast packets to reach the host
-  // processor, and results in a power penalty.
-  // It is useful to monitor the applications resulting in that
-  optional TimerProto wifi_multicast_wakelock = 28;
+    // WiFi Multicast Wakelock
+    // This timer tracks the duration and count for the app to request the
+    // wakelock for wifi multicast traffic.
+    // This wakelock disables the filtering of multicast packets to reach the host
+    // processor, and results in a power penalty.
+    // It is useful to monitor the applications resulting in that
+    optional TimerProto wifi_multicast_wakelock = 28;
 }

@@ -27,10 +27,9 @@ option java_multiple_files = true;
  * Represents a {@link com.android.server.wm.SurfaceAnimator} object.
  */
 message SurfaceAnimatorProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  reserved 1; // Was string animation_adapter = 1
-  optional .android.view.SurfaceControlProto leash = 2;
-  optional bool animation_start_delayed = 3;
-  optional AnimationAdapterProto animation_adapter = 4;
+    optional .android.view.SurfaceControlProto leash = 1;
+    optional bool animation_start_delayed = 2;
+    optional AnimationAdapterProto animation_adapter = 3;
 }

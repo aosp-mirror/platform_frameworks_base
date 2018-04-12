@@ -219,23 +219,6 @@ message ConstantsProto {
 message StateControllerProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    message AppIdleController {
-        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-        optional bool is_parole_on = 1;
-
-        message TrackedJob {
-            option (.android.msg_privacy).dest = DEST_AUTOMATIC;
-
-            optional JobStatusShortInfoProto info = 1;
-            optional int32 source_uid = 2;
-            optional string source_package_name = 3;
-            // If the constraints are satisfied, then the controller will mark
-            // the job as RUNNABLE, otherwise, it will be WAITING.
-            optional bool are_constraints_satisfied = 4;
-        }
-        repeated TrackedJob tracked_jobs = 2;
-    }
     message BackgroundJobsController {
         option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -413,15 +396,14 @@ message StateControllerProto {
         repeated TrackedJob tracked_jobs = 4;
     }
     oneof controller {
-        AppIdleController app_idle = 1;
-        BackgroundJobsController background = 2;
-        BatteryController battery = 3;
-        ConnectivityController connectivity = 4;
-        ContentObserverController content_observer = 5;
-        DeviceIdleJobsController device_idle = 6;
-        IdleController idle = 7;
-        StorageController storage = 8;
-        TimeController time = 9;
+        BackgroundJobsController background = 1;
+        BatteryController battery = 2;
+        ConnectivityController connectivity = 3;
+        ContentObserverController content_observer = 4;
+        DeviceIdleJobsController device_idle = 5;
+        IdleController idle = 6;
+        StorageController storage = 7;
+        TimeController time = 8;
     }
 }
 
@@ -618,8 +600,8 @@ message JobStatusDumpProto {
         CONSTRAINT_DEADLINE = 5;
         CONSTRAINT_IDLE = 6;
         CONSTRAINT_CONNECTIVITY = 7;
-        CONSTRAINT_CONTENT_TRIGGER = 9;
-        CONSTRAINT_DEVICE_NOT_DOZING = 10;
+        CONSTRAINT_CONTENT_TRIGGER = 8;
+        CONSTRAINT_DEVICE_NOT_DOZING = 9;
     }
     repeated Constraint required_constraints = 7;
     repeated Constraint satisfied_constraints = 8;

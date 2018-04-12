@@ -22,18 +22,18 @@ option java_outer_classname = "AppWidgetServiceProto";
 
 // represents the object holding the dump info of the app widget service
 message AppWidgetServiceDumpProto {
-  repeated WidgetProto widgets = 1; // the array of bound widgets
+    repeated WidgetProto widgets = 1; // the array of bound widgets
 }
 
 // represents a bound widget
 message WidgetProto {
-  optional bool isCrossProfile = 1; // true if host and provider belong to diff users
-  optional bool isHostStopped = 2; // true if host has not called startListening yet
-  optional string hostPackage = 3;
-  optional string providerPackage = 4;
-  optional string providerClass = 5;
-  optional int32 minWidth = 6;
-  optional int32 minHeight = 7;
-  optional int32 maxWidth = 8;
-  optional int32 maxHeight = 9;
+    optional bool isCrossProfile = 1; // true if host and provider belong to diff users
+    optional bool isHostStopped = 2; // true if host has not called startListening yet
+    optional string hostPackage = 3;
+    optional string providerPackage = 4;
+    optional string providerClass = 5;
+    optional int32 minWidth = 6;
+    optional int32 minHeight = 7;
+    optional int32 maxWidth = 8;
+    optional int32 maxHeight = 9;
 }

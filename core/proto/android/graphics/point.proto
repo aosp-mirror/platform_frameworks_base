@@ -22,9 +22,9 @@ import "frameworks/base/libs/incident/proto/android/privacy.proto";
 option java_multiple_files = true;
 
 message PointProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional int32 x = 1;
-  optional int32 y = 2;
+    optional int32 x = 1;
+    optional int32 y = 2;
 }
 

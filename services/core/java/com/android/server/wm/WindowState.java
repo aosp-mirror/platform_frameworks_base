@@ -112,7 +112,7 @@ import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.AnimationSpecProto.MOVE;
-import static com.android.server.wm.MoveAnimationSpecProto.DURATION;
+import static com.android.server.wm.MoveAnimationSpecProto.DURATION_MS;
 import static com.android.server.wm.MoveAnimationSpecProto.FROM;
 import static com.android.server.wm.MoveAnimationSpecProto.TO;
 import static com.android.server.wm.WindowStateProto.ANIMATING_EXIT;
@@ -4826,7 +4826,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final long token = proto.start(MOVE);
             mFrom.writeToProto(proto, FROM);
             mTo.writeToProto(proto, TO);
-            proto.write(DURATION, mDuration);
+            proto.write(DURATION_MS, mDuration);
             proto.end(token);
         }
     }
