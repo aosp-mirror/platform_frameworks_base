@@ -603,6 +603,7 @@ java_library {
         "core/java/android/content/EventLogTags.logtags",
         "core/java/android/speech/tts/EventLogTags.logtags",
         "core/java/android/net/EventLogTags.logtags",
+        "core/java/android/os/EventLogTags.logtags",
         "core/java/android/webkit/EventLogTags.logtags",
         "core/java/com/android/internal/app/EventLogTags.logtags",
         "core/java/com/android/internal/logging/EventLogTags.logtags",

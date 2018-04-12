@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.internal.util;
 
 import android.os.SystemClock;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.StatLoggerProto;
 import com.android.server.StatLoggerProto.Event;
 
 import java.io.PrintWriter;
@@ -29,8 +29,6 @@ import java.io.PrintWriter;
 /**
  * Simple class to keep track of the number of times certain events happened and their durations for
  * benchmarking.
- *
- * TODO Update shortcut service to switch to it.
  *
  * @hide
  */
@@ -47,12 +45,35 @@ public class StatLogger {
     @GuardedBy("mLock")
     private final long[] mDurationStats;
 
+    @GuardedBy("mLock")
+    private final int[] mCallsPerSecond;
+
+    @GuardedBy("mLock")
+    private final long[] mDurationPerSecond;
+
+    @GuardedBy("mLock")
+    private final int[] mMaxCallsPerSecond;
+
+    @GuardedBy("mLock")
+    private final long[] mMaxDurationPerSecond;
+
+    @GuardedBy("mLock")
+    private final long[] mMaxDurationStats;
+
+    @GuardedBy("mLock")
+    private long mNextTickTime = SystemClock.elapsedRealtime() + 1000;
+
     private final String[] mLabels;
 
     public StatLogger(String[] eventLabels) {
         SIZE = eventLabels.length;
         mCountStats = new int[SIZE];
         mDurationStats = new long[SIZE];
+        mCallsPerSecond = new int[SIZE];
+        mMaxCallsPerSecond = new int[SIZE];
+        mDurationPerSecond = new long[SIZE];
+        mMaxDurationPerSecond = new long[SIZE];
+        mMaxDurationStats = new long[SIZE];
         mLabels = eventLabels;
     }
 
@@ -67,19 +88,46 @@ public class StatLogger {
 
     /**
      * @see {@link #getTime()}
+     *
+     * @return the duration in microseconds.
      */
-    public void logDurationStat(int eventId, long start) {
+    public long logDurationStat(int eventId, long start) {
         synchronized (mLock) {
+            final long duration = getTime() - start;
             if (eventId >= 0 && eventId < SIZE) {
                 mCountStats[eventId]++;
-                mDurationStats[eventId] += (getTime() - start);
+                mDurationStats[eventId] += duration;
             } else {
                 Slog.wtf(TAG, "Invalid event ID: " + eventId);
+                return duration;
             }
+            if (mMaxDurationStats[eventId] < duration) {
+                mMaxDurationStats[eventId] = duration;
+            }
+
+            // Keep track of the per-second max.
+            final long nowRealtime = SystemClock.elapsedRealtime();
+            if (nowRealtime > mNextTickTime) {
+                if (mMaxCallsPerSecond[eventId] < mCallsPerSecond[eventId]) {
+                    mMaxCallsPerSecond[eventId] = mCallsPerSecond[eventId];
+                }
+                if (mMaxDurationPerSecond[eventId] < mDurationPerSecond[eventId]) {
+                    mMaxDurationPerSecond[eventId] = mDurationPerSecond[eventId];
+                }
+
+                mCallsPerSecond[eventId] = 0;
+                mDurationPerSecond[eventId] = 0;
+
+                mNextTickTime = nowRealtime + 1000;
+            }
+
+            mCallsPerSecond[eventId]++;
+            mDurationPerSecond[eventId] += duration;
+
+            return duration;
         }
     }
 
-    @Deprecated
     public void dump(PrintWriter pw, String prefix) {
         dump(new IndentingPrintWriter(pw, "  ").setIndent(prefix));
     }
@@ -91,9 +139,14 @@ public class StatLogger {
             for (int i = 0; i < SIZE; i++) {
                 final int count = mCountStats[i];
                 final double durationMs = mDurationStats[i] / 1000.0;
-                pw.println(String.format("%s: count=%d, total=%.1fms, avg=%.3fms",
+
+                pw.println(String.format(
+                        "%s: count=%d, total=%.1fms, avg=%.3fms, max calls/s=%d max dur/s=%.1fms"
+                        + " max time=%.1fms",
                         mLabels[i], count, durationMs,
-                        (count == 0 ? 0 : ((double) durationMs) / count)));
+                        (count == 0 ? 0 : durationMs / count),
+                        mMaxCallsPerSecond[i], mMaxDurationPerSecond[i] / 1000.0,
+                        mMaxDurationStats[i] / 1000.0));
             }
             pw.decreaseIndent();
         }
