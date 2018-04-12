@@ -227,12 +227,7 @@ public class RecentsOnboarding {
         if (!shouldShow()) {
             return;
         }
-        CharSequence onboardingText = mOverviewProxyService.getOnboardingText();
-        if (TextUtils.isEmpty(onboardingText)) {
-            Log.w(TAG, "Unable to get onboarding text");
-            return;
-        }
-        mTextView.setText(onboardingText);
+        mTextView.setText(R.string.recents_swipe_up_onboarding);
         // Only show in portrait.
         int orientation = mContext.getResources().getConfiguration().orientation;
         if (!mLayoutAttachedToWindow && orientation == Configuration.ORIENTATION_PORTRAIT) {
