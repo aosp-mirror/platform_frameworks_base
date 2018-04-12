@@ -115,7 +115,6 @@ public class ResumeActivityItem extends ActivityLifecycleItem {
     /** Write to Parcel. */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
         dest.writeInt(mProcState);
         dest.writeBoolean(mUpdateProcState);
         dest.writeBoolean(mIsForward);
@@ -123,7 +122,6 @@ public class ResumeActivityItem extends ActivityLifecycleItem {
 
     /** Read from Parcel. */
     private ResumeActivityItem(Parcel in) {
-        super(in);
         mProcState = in.readInt();
         mUpdateProcState = in.readBoolean();
         mIsForward = in.readBoolean();
