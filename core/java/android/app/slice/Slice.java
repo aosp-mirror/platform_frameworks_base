@@ -197,6 +197,7 @@ public final class Slice implements Parcelable {
     /**
      * Key to retrieve an extra added to an intent when the value of a slider is changed.
      * @deprecated remove once support lib is update to use EXTRA_RANGE_VALUE instead
+     * @removed
      */
     @Deprecated
     public static final String EXTRA_SLIDER_VALUE = "android.app.slice.extra.SLIDER_VALUE";
@@ -224,6 +225,7 @@ public final class Slice implements Parcelable {
     /**
      * Subtype to tag an item as representing a slider.
      * @deprecated remove once support lib is update to use SUBTYPE_RANGE instead
+     * @removed
      */
     @Deprecated
     public static final String SUBTYPE_SLIDER = "slider";
@@ -360,6 +362,7 @@ public final class Slice implements Parcelable {
 
         /**
          * @deprecated TO BE REMOVED
+         * @removed
          */
         @Deprecated
         public Builder(@NonNull Uri uri) {
@@ -388,7 +391,7 @@ public final class Slice implements Parcelable {
 
         /**
          * Tells the system whether for this slice the return value of
-         * {@link SliceProvider#onBindSlice(Uri, List)} may be different depending on
+         * {@link SliceProvider#onBindSlice(Uri, java.util.Set)} may be different depending on
          * {@link SliceProvider#getCallingPackage()} and should not be cached for multiple
          * apps.
          */
@@ -411,6 +414,7 @@ public final class Slice implements Parcelable {
 
         /**
          * @deprecated TO BE REMOVED
+         * @removed
          */
         public Builder setSpec(SliceSpec spec) {
             mSpec = spec;
@@ -490,6 +494,7 @@ public final class Slice implements Parcelable {
 
         /**
          * @deprecated TO BE REMOVED.
+         * @removed
          */
         @Deprecated
         public Slice.Builder addTimestamp(long time, @Nullable @SliceSubtype String subType,

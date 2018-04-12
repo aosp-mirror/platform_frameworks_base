@@ -302,6 +302,7 @@ public class RecoveryController {
 
     /**
      * @deprecated Use {@link #initRecoveryService(String, byte[], byte[])} instead.
+     * @removed
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -373,6 +374,7 @@ public class RecoveryController {
 
     /**
      * @deprecated Use {@link #getKeyChainSnapshot()}
+     * @removed
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -449,6 +451,7 @@ public class RecoveryController {
 
     /**
      * @deprecated Use {@link #getAliases()}.
+     * @removed
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -474,6 +477,7 @@ public class RecoveryController {
 
     /**
      * @deprecated Use {@link #setRecoveryStatus(String, int)}
+     * @removed
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -508,6 +512,7 @@ public class RecoveryController {
 
     /**
      * @deprecated Use {@link #getRecoveryStatus(String)}.
+     * @removed
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -600,7 +605,10 @@ public class RecoveryController {
      * @throws LockScreenRequiredException if the user has not set a lock screen. This is required
      *     to generate recoverable keys, as the snapshots are encrypted using a key derived from the
      *     lock screen.
+     * @deprecated Use {@link #generateKey(String)}
+     * @removed
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     public byte[] generateAndStoreKey(@NonNull String alias, byte[] account)
             throws InternalRecoveryServiceException, LockScreenRequiredException {
@@ -609,6 +617,7 @@ public class RecoveryController {
 
     /**
      * @deprecated Use {@link #generateKey(String)}.
+     * @removed
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)

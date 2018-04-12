@@ -139,6 +139,7 @@ public class SliceManager {
 
     /**
      * @deprecated TO BE REMOVED
+     * @removed
      */
     @Deprecated
     public void pinSlice(@NonNull Uri uri, @NonNull List<SliceSpec> specs) {
@@ -263,6 +264,7 @@ public class SliceManager {
 
     /**
      * @deprecated TO BE REMOVED
+     * @removed
      */
     @Deprecated
     public @Nullable Slice bindSlice(@NonNull Uri uri, @NonNull List<SliceSpec> supportedSpecs) {
@@ -354,7 +356,7 @@ public class SliceManager {
 
     /**
      * Turns a slice intent into slice content. Is a shortcut to perform the action
-     * of both {@link #mapIntentToUri(Intent)} and {@link #bindSlice(Uri, List)} at once.
+     * of both {@link #mapIntentToUri(Intent)} and {@link #bindSlice(Uri, Set)} at once.
      *
      * @param intent The intent associated with a slice.
      * @param supportedSpecs List of supported specs.
@@ -397,6 +399,7 @@ public class SliceManager {
 
     /**
      * @deprecated TO BE REMOVED.
+     * @removed
      */
     @Deprecated
     @Nullable
