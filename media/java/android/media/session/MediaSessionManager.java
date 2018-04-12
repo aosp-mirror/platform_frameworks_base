@@ -354,7 +354,10 @@ public final class MediaSessionManager {
      * @return {@code true} if the remote user is trusted and its package name matches with the UID.
      *            {@code false} otherwise.
      */
-    public boolean isTrustedForMediaControl(RemoteUserInfo userInfo) {
+    public boolean isTrustedForMediaControl(@NonNull RemoteUserInfo userInfo) {
+        if (userInfo == null) {
+            throw new IllegalArgumentException("userInfo may not be null");
+        }
         if (userInfo.getPackageName() == null) {
             return false;
         }
