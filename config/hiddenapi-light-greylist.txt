@@ -1042,6 +1042,7 @@ Landroid/media/AudioAttributes;->mFlags:I
 Landroid/media/AudioAttributes;->mFormattedTags:Ljava/lang/String;
 Landroid/media/AudioAttributes;->mSource:I
 Landroid/media/AudioAttributes;->mUsage:I
+Landroid/media/AudioAttributes$Builder;->addTag(Ljava/lang/String;)Landroid/media/AudioAttributes$Builder;
 Landroid/media/AudioDevicePortConfig;-><init>(Landroid/media/AudioDevicePort;IIILandroid/media/AudioGainConfig;)V
 Landroid/media/AudioDevicePort;-><init>(Landroid/media/AudioHandle;Ljava/lang/String;[I[I[I[I[Landroid/media/AudioGain;ILjava/lang/String;)V
 Landroid/media/AudioFormat;-><init>(IIII)V
