@@ -19,7 +19,6 @@ package com.android.systemui.fingerprint;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.biometrics.BiometricPrompt;
@@ -76,8 +75,28 @@ public class FingerprintDialogView extends LinearLayout {
     private Bundle mBundle;
     private final LinearLayout mDialog;
     private int mLastState;
+    private boolean mAnimatingAway;
+    private boolean mWasForceRemoved;
 
     private final float mDisplayWidth;
+
+    private final Runnable mShowAnimationRunnable = new Runnable() {
+        @Override
+        public void run() {
+            mLayout.animate()
+                    .alpha(1f)
+                    .setDuration(ANIMATION_DURATION_SHOW)
+                    .setInterpolator(mLinearOutSlowIn)
+                    .withLayer()
+                    .start();
+            mDialog.animate()
+                    .translationY(0)
+                    .setDuration(ANIMATION_DURATION_SHOW)
+                    .setInterpolator(mLinearOutSlowIn)
+                    .withLayer()
+                    .start();
+        }
+    };
 
     public FingerprintDialogView(Context context, Handler handler) {
         super(context);
@@ -192,26 +211,20 @@ public class FingerprintDialogView extends LinearLayout {
             positive.setVisibility(View.GONE);
         }
 
-        // Dim the background and slide the dialog up
-        mDialog.setTranslationY(mAnimationTranslationOffset);
-        mLayout.setAlpha(0f);
-        postOnAnimation(new Runnable() {
-            @Override
-            public void run() {
-                mLayout.animate()
-                        .alpha(1f)
-                        .setDuration(ANIMATION_DURATION_SHOW)
-                        .setInterpolator(mLinearOutSlowIn)
-                        .withLayer()
-                        .start();
-                mDialog.animate()
-                        .translationY(0)
-                        .setDuration(ANIMATION_DURATION_SHOW)
-                        .setInterpolator(mLinearOutSlowIn)
-                        .withLayer()
-                        .start();
-            }
-        });
+        if (!mWasForceRemoved) {
+            // Dim the background and slide the dialog up
+            mDialog.setTranslationY(mAnimationTranslationOffset);
+            mLayout.setAlpha(0f);
+            postOnAnimation(mShowAnimationRunnable);
+        } else {
+            // Show the dialog immediately
+            mLayout.animate().cancel();
+            mDialog.animate().cancel();
+            mDialog.setAlpha(1.0f);
+            mDialog.setTranslationY(0);
+            mLayout.setAlpha(1.0f);
+        }
+        mWasForceRemoved = false;
     }
 
     private void setDismissesDialog(View v) {
@@ -224,10 +237,13 @@ public class FingerprintDialogView extends LinearLayout {
     }
 
     public void startDismiss() {
+        mAnimatingAway = true;
+
         final Runnable endActionRunnable = new Runnable() {
             @Override
             public void run() {
                 mWindowManager.removeView(FingerprintDialogView.this);
+                mAnimatingAway = false;
             }
         };
 
@@ -249,6 +265,23 @@ public class FingerprintDialogView extends LinearLayout {
                         .start();
             }
         });
+    }
+
+    /**
+     * Force remove the window, cancelling any animation that's happening. This should only be
+     * called if we want to quickly show the dialog again (e.g. on rotation). Calling this method
+     * will cause the dialog to show without an animation the next time it's attached.
+     */
+    public void forceRemove() {
+        mLayout.animate().cancel();
+        mDialog.animate().cancel();
+        mWindowManager.removeView(FingerprintDialogView.this);
+        mAnimatingAway = false;
+        mWasForceRemoved = true;
+    }
+
+    public boolean isAnimatingAway() {
+        return mAnimatingAway;
     }
 
     public void setBundle(Bundle bundle) {
