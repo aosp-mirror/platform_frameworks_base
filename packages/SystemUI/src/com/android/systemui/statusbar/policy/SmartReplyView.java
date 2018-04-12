@@ -299,8 +299,8 @@ public class SmartReplyView extends ViewGroup {
         // We're done squeezing buttons, so we can clear the priority queue.
         mCandidateButtonQueueForSqueezing.clear();
 
-        // Finally, we need to update corner radius and re-measure some buttons.
-        updateCornerRadiusAndRemeasureButtonsIfNecessary(buttonPaddingHorizontal, maxChildHeight);
+        // Finally, we need to re-measure some buttons.
+        remeasureButtonsIfNecessary(buttonPaddingHorizontal, maxChildHeight);
 
         setMeasuredDimension(
                 resolveSize(Math.max(getSuggestedMinimumWidth(), measuredWidth), widthMeasureSpec),
@@ -412,9 +412,8 @@ public class SmartReplyView extends ViewGroup {
         }
     }
 
-    private void updateCornerRadiusAndRemeasureButtonsIfNecessary(
+    private void remeasureButtonsIfNecessary(
             int buttonPaddingHorizontal, int maxChildHeight) {
-        final float cornerRadius = ((float) maxChildHeight) / 2;
         final int maxChildHeightMeasure =
                 MeasureSpec.makeMeasureSpec(maxChildHeight, MeasureSpec.EXACTLY);
 
@@ -425,11 +424,6 @@ public class SmartReplyView extends ViewGroup {
             if (!lp.show) {
                 continue;
             }
-
-            // Update corner radius.
-            GradientDrawable backgroundDrawable =
-                    (GradientDrawable) ((RippleDrawable) child.getBackground()).getDrawable(0);
-            backgroundDrawable.setCornerRadius(cornerRadius);
 
             boolean requiresNewMeasure = false;
             int newWidth = child.getMeasuredWidth();
