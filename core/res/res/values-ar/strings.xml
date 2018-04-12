@@ -1094,8 +1094,7 @@
     <string name="dial" msgid="1253998302767701559">"اتصال"</string>
     <string name="dial_desc" msgid="6573723404985517250">"الاتصال برقم الهاتف المختار"</string>
     <string name="map" msgid="5441053548030107189">"خريطة"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"تحديد موقع العنوان المختار"</string>
     <string name="browse" msgid="1245903488306147205">"فتح"</string>
     <string name="browse_desc" msgid="8220976549618935044">"‏فتح عنوان URL المختار"</string>
     <string name="sms" msgid="4560537514610063430">"رسالة"</string>
@@ -1791,7 +1790,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"تم التثبيت بواسطة المشرف"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"تم الحذف بواسطة المشرف"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"لإطالة عمر البطارية، تعمل ميزة \"توفير شحن البطارية\" على تقليل أداء الجهاز والحد من استخدام الاهتزاز وخدمات الموقع الجغرافي وبيانات الخلفية أو إيقافه. وقد لا يتم تحديث البريد الإلكتروني والمراسلة والتطبيقات الأخرى التي تعتمد على المزامنة ما لم يتم فتحها.\n\nيتم إيقاف ميزة \"توفير شحن البطارية\" تلقائيًا عند شحن الجهاز."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"لإطالة عمر البطارية، يؤدي وضع توفير شحن البطارية إلى إيقاف بعض ميزات الجهاز وتقييد التطبيقات."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"للمساعدة في خفض استخدام البيانات، يمنع توفير البيانات بعض التطبيقات من إرسال البيانات وتلقيها في الخلفية. يمكن للتطبيق الذي تستخدمه الآن الوصول إلى البيانات، ولكن لا يمكنه تنفيذ ذلك كثيرًا. وهذا يعني أن الصور على سبيل المثال لا تظهر حتى تنقر عليها."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"هل تريد تشغيل توفير البيانات؟"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"تشغيل"</string>
@@ -1914,6 +1913,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"جميع اللغات"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"كل المناطق"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"البحث"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"غير مسموح بهذا الإجراء"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"تم إيقاف التطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> حاليًا."</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"المزيد من التفاصيل"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"تفعيل الملف الشخصي للعمل؟"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"سيتم تفعيل تطبيقات العمل التي تستخدمها والإشعارات والبيانات وغيرها من ميزات الملف الشخصي للعمل"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"تشغيل"</string>
@@ -2006,9 +2008,9 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"سيهتز الهاتف عند تلقي المكالمات والإشعارات"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"سيتم كتم صوت الهاتف عند تلقي المكالمات والإشعارات"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"تغييرات النظام"</string>
-    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"الرجاء عدم الإزعاج"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"يؤدي تفعيل وضع \"الرجاء عدم الإزعاج\" إلى إخفاء الإشعارات لمساعدتك على التركيز."</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"هذا السلوك جديد. انقر لتغييره."</string>
+    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"عدم الإزعاج"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"جديد: يؤدي تفعيل وضع \"الرجاء عدم الإزعاج\" إلى إخفاء الإشعارات."</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"انقر لمعرفة مزيد من المعلومات وإجراء التغيير."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"تم تغيير وضع \"الرجاء عدم الإزعاج\"."</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"انقر للاطّلاع على ما تم حظره."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"النظام"</string>

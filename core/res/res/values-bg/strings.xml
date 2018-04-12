@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Обаждане"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Обаждане на избрания телефонен номер"</string>
     <string name="map" msgid="5441053548030107189">"Карта"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Намиране на избрания адрес"</string>
     <string name="browse" msgid="1245903488306147205">"Отваряне"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Отваряне на избрания URL адрес"</string>
     <string name="sms" msgid="4560537514610063430">"Съобщение"</string>
@@ -1691,7 +1690,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Инсталирано от администратора ви"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Актуализирано от администратора ви"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Изтрито от администратора ви"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"С цел удължаване на живота на батерията режимът за запазването й намалява ефективността на устройството ви и ограничава или изключва вибрирането, услугите за местоположение и преноса на данни на заден план. Приложенията за електронна поща, съобщения и др., които разчитат на синхронизиране, може да не се актуализират, освен ако не ги отворите.\n\nРежимът за запазване на батерията се изключва автоматично, когато устройството ви се зарежда."</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"С цел намаляване на преноса на данни функцията за икономия на данни не позволява на някои приложения да изпращат или получават данни на заден план. Понастоящем използвано от вас приложение може да използва данни, но по-рядко. Това например може да означава, че изображенията не се показват, докато не ги докоснете."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ще вкл. ли Икономия на данни?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Включване"</string>
@@ -1778,6 +1778,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Всички езици"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Всички региони"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Търсене"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"Непозволено действие"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"Приложението <xliff:g id="APP_NAME">%1$s</xliff:g> понастоящем е деактивирано."</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"Още подробности"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Вкл. на служ. потр. профил?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Служебните ви приложения, известия и данни, както и другите функции на служебния потребителски профил ще бъдат включени"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Включване"</string>
@@ -1867,8 +1870,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Обажданията и известията ще бъдат заглушени"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Промени в системата"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Не безпокойте"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"Режимът „Не безпокойте“ скрива известията, за да ви помогне да се съсредоточите"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Това е ново поведение. Докоснете за промяна."</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Настройките за „Не безпокойте“ са променени"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Докоснете, за да проверите какво е блокирано."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Система"</string>

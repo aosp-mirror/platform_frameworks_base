@@ -1034,8 +1034,7 @@
     <string name="dial" msgid="1253998302767701559">"Apelați"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Apelați numărul de telefon selectat"</string>
     <string name="map" msgid="5441053548030107189">"Hartă"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Localizați adresa selectată"</string>
     <string name="browse" msgid="1245903488306147205">"Deschideți"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Deschideți adresa URL selectată"</string>
     <string name="sms" msgid="4560537514610063430">"Mesaj"</string>
@@ -1716,7 +1715,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalat de administratorul dvs."</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Actualizat de administratorul dvs."</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Șters de administratorul dvs."</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Pentru a prelungi autonomia bateriei, Economisirea bateriei reduce performanțele dispozitivului și limitează sau dezactivează vibrațiile, serviciile de localizare și datele de fundal. Este posibil ca e-mailurile, mesageria și alte aplicații care depind de sincronizare să nu se actualizeze dacă nu le deschideți.\n\nEconomisirea bateriei se dezactivează automat când dispozitivul se încarcă."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"Pentru a prelungi autonomia bateriei, Economisirea bateriei dezactivează anumite funcții ale dispozitivului și restricționează aplicații."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Pentru a contribui la reducerea utilizării de date, Economizorul de date împiedică unele aplicații să trimită sau să primească date în fundal. O aplicație pe care o folosiți poate accesa datele, însă mai rar. Aceasta poate însemna, de exemplu, că imaginile se afișează numai după ce le atingeți."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Activați Economizorul de date?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activați"</string>
@@ -1812,6 +1811,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Toate limbile"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Toate regiunile"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Căutați"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"Acțiunea nu este permisă"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"Momentan, aplicația <xliff:g id="APP_NAME">%1$s</xliff:g> este dezactivată."</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"Mai multe detalii"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Activați profilul de serviciu?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Se vor activa aplicațiile dvs. de serviciu, notificările, datele și alte funcții ale profilului de serviciu"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Activați"</string>
@@ -1902,8 +1904,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Apelurile și notificările vor avea sunetul dezactivat"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Modificări de sistem"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Nu deranja"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"Funcția Nu deranja ascunde notificările pentru a vă ajuta să vă concentrați"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Acesta este un comportament nou. Atingeți pentru a schimba."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Funcția nouă Nu deranja ascunde notificările"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Atingeți ca să aflați mai multe și să modificați"</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Funcția Nu deranja s-a schimbat"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Atingeți pentru a verifica ce este blocat."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistem"</string>

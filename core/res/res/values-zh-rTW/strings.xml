@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"通話"</string>
     <string name="dial_desc" msgid="6573723404985517250">"撥打所選電話號碼"</string>
     <string name="map" msgid="5441053548030107189">"地圖"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"尋找所選地址"</string>
     <string name="browse" msgid="1245903488306147205">"開啟"</string>
     <string name="browse_desc" msgid="8220976549618935044">"開啟所選網址"</string>
     <string name="sms" msgid="4560537514610063430">"訊息"</string>
@@ -1691,7 +1690,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"已由你的管理員安裝"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"已由你的管理員更新"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"已由你的管理員刪除"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"為了延長電池續航力，節約耗電量模式會降低裝置效能，並限制或關閉震動、定位服務及背景數據傳輸。此外，如果未開啟電子郵件、簡訊和其他需要使用同步功能的應用程式，系統將不會自動更新這些應用程式。\n\n當你為裝置充電時，節約耗電量模式會自動關閉。"</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"「數據節省模式」可防止部分應用程式在背景收發資料，以節省數據用量。你目前使用的某個應用程式可以存取資料，但存取頻率可能不如平時高。舉例來說，圖片可能不會自動顯示，而必須由你輕觸後才會顯示。"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"要開啟數據節省模式嗎？"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"開啟"</string>
@@ -1778,6 +1778,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"所有語言"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"所有地區"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"搜尋"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"不允許此動作"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"應用程式 <xliff:g id="APP_NAME">%1$s</xliff:g> 目前已停用。"</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"更多詳細資料"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"要開啟 Work 設定檔嗎？"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"系統將開啟你的辦公應用程式、通知、資料和其他 Work 設定檔功能"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"開啟"</string>
@@ -1867,8 +1870,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"有來電和通知時會靜音"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"系統變更"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"零打擾"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"「零打擾」模式會隱藏通知，協助你集中注意力"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"這是新的行為。輕觸即可變更。"</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"「零打擾」設定已變更"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"輕觸即可查看遭封鎖的項目。"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"系統"</string>

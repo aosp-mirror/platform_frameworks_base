@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"ហៅទូរសព្ទ"</string>
     <string name="dial_desc" msgid="6573723404985517250">"ហៅ​ទូរសព្ទ​ទៅ​លេខ​ដែល​បាន​ជ្រើសរើស"</string>
     <string name="map" msgid="5441053548030107189">"ផែនទី"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"កំណត់​ទីតាំង​អាសយដ្ឋាន​ដែល​បាន​ជ្រើសរើស"</string>
     <string name="browse" msgid="1245903488306147205">"បើក"</string>
     <string name="browse_desc" msgid="8220976549618935044">"បើក URL ដែល​បាន​ជ្រើសរើស"</string>
     <string name="sms" msgid="4560537514610063430">"សារ"</string>
@@ -1693,7 +1692,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"​ដំឡើង​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"ធ្វើ​បច្ចុប្បន្នភាព​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"លុប​ដោយ​អ្នកគ្រប់គ្រង​របស់​អ្នក"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"ដើម្បី​ជួយ​ឱ្យ​កម្រិត​ថាមពល​ថ្ម​ប្រសើរឡើង កម្មវិធី​សន្សំថ្ម​កាត់បន្ថយ​ប្រតិបត្តិការ​ឧបករណ៍​របស់អ្នក និងកម្រិត ឬបិទ​ការញ័រ សេវាកម្មទីតាំង និងទិន្នន័យ​ផ្ទៃខាងក្រោយ។ អ៊ីមែល ការផ្ញើសារ និងកម្មវិធី​ផ្សេងទៀត​ដែលពឹងផ្អែក​លើការ​ធ្វើ​សមកាលកម្ម​អាចនឹងមិន​​ដំឡើង​ជំនាន់ទេ ប្រសិនបើ​អ្នក​មិនបើក​ពួកវា។\n\nកម្មវិធី​សន្សំ​ថ្ម​បិទ​ដោយ​ស្វ័យប្រវត្តិ នៅពេលដែល​ឧបករណ៍​របស់អ្នក​កំពុង​សាកថ្ម។"</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"ដើម្បីជួយកាត់បន្ថយការប្រើប្រាស់ទិន្នន័យ កម្មវិធីសន្សំសំចៃទិន្នន័យរារាំងកម្មវិធីមួយចំនួនមិនឲ្យបញ្ជូន ឬទទួលទិន្នន័យនៅផ្ទៃខាងក្រោយទេ។ កម្មវិធីដែលអ្នកកំពុងប្រើនាពេលបច្ចុប្បន្នអាចចូលប្រើប្រាស់​ទិន្នន័យបាន ប៉ុន្តែអាចនឹងមិនញឹកញាប់ដូចមុនទេ។ ឧទាហរណ៍ រូបភាពមិនបង្ហាញទេ លុះត្រាតែអ្នកប៉ះរូបភាពទាំងនោះ។"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"បើកកម្មវិធីសន្សំសំចៃទិន្នន័យឬ?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"បើក"</string>
@@ -1780,6 +1780,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ភាសាទាំងអស់"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"តំបន់ទាំងអស់"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ស្វែងរក"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"សកម្មភាពមិនត្រូវបានអនុញ្ញាត"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"បច្ចុប្បន្ន កម្មវិធី <xliff:g id="APP_NAME">%1$s</xliff:g> ត្រូវបាន​បិទ។"</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"ព័ត៌មានលម្អិតបន្ថែម"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"បើក​កម្រង​ព័ត៌មាន​ការ​ងារ?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"កម្មវិធី​ការងារ ការ​ជូនដំណឹង ទិន្នន័យ និង​មុខងារ​កម្រង​ព័ត៌មាន​ការងារ​ផ្សេង​ទៀត​របស់អ្នក​នឹង​ត្រូវ​បាន​បើក"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"បើក"</string>
@@ -1869,8 +1872,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"ការហៅ​ទូរសព្ទ និងការជូន​ដំណឹងនឹង​បិទសំឡេង"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"ការផ្លាស់ប្ដូរ​ប្រព័ន្ធ"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"កុំ​រំខាន"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"មុខងារ​កុំរំខាន​កំពុងលាក់​ការជូនដំណឹង​ដើម្បីជួយ​អ្នកផ្តោត​អារម្មណ៍"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"នេះ​គឺជា​សកម្មភាព​ថ្មី។ សូមចុច​ដើម្បីផ្លាស់​ប្ដូរ។"</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"មុខងារ​កុំ​រំខាន​ត្រូវ​បាន​ប្ដូរ"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"សូមចុច​ដើម្បី​មើល​ថា​​បានទប់ស្កាត់អ្វីខ្លះ។"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"ប្រព័ន្ធ"</string>

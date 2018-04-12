@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Anrufen"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Ausgewählte Telefonnummer anrufen"</string>
     <string name="map" msgid="5441053548030107189">"Karte"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Ausgewählte Adresse finden"</string>
     <string name="browse" msgid="1245903488306147205">"Öffnen"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Ausgewählte URL öffnen"</string>
     <string name="sms" msgid="4560537514610063430">"SMS"</string>
@@ -1691,7 +1690,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Von deinem Administrator installiert"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Von deinem Administrator aktualisiert"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Von deinem Administrator gelöscht"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Der Energiesparmodus schont den Akku, indem er die Leistung des Geräts reduziert und die Vibrationsfunktion, Standortdienste sowie die Hintergrunddaten einschränkt oder deaktiviert. E-Mail, Messaging und andere Apps, die auf deinem Gerät synchronisiert werden, werden möglicherweise nur aktualisiert, wenn du sie öffnest.\n\nDer Energiesparmodus wird automatisch deaktiviert, wenn dein Gerät aufgeladen wird."</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Mit dem Datensparmodus wird die Datennutzung verringert, indem verhindert wird, dass im Hintergrund Daten von Apps gesendet oder empfangen werden. Datenzugriffe sind mit einer aktiven App zwar möglich, erfolgen aber seltener. Als Folge davon könnten Bilder beispielsweise erst dann sichtbar werden, wenn sie angetippt werden."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Datensparmodus aktivieren?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivieren"</string>
@@ -1778,6 +1778,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Alle Sprachen"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Alle Regionen"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Suche"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"Aktion nicht zulässig"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"Die App \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" ist derzeit deaktiviert."</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"Weitere Details"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Arbeitsprofil aktivieren?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Deine geschäftlichen Apps, Benachrichtigungen, Daten und andere Funktionen des Arbeitsprofils werden aktiviert"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Aktivieren"</string>
@@ -1867,8 +1870,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Anrufe und Benachrichtigungen stummgeschaltet"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Systemänderungen"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Bitte nicht stören"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"Mit \"Bitte nicht stören\" werden Benachrichtigungen ausgeblendet, damit du dich besser konzentrieren kannst"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Das ist ein neues Verhalten. Tippe, um die Einstellung zu ändern."</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\"Bitte nicht stören\" wurde geändert"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tippe, um zu überprüfen, welche Inhalte blockiert werden."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"System"</string>
