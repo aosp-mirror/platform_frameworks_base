@@ -204,6 +204,7 @@ public abstract class SliceProvider extends ContentProvider {
 
     /**
      * @deprecated TO BE REMOVED
+     * @removed
      */
     @Deprecated
     public Slice onBindSlice(Uri sliceUri, List<SliceSpec> supportedSpecs) {
