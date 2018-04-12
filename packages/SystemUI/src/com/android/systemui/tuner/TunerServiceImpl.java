@@ -58,7 +58,7 @@ public class TunerServiceImpl extends TunerService {
 
     private static final String TUNER_VERSION = "sysui_tuner_version";
 
-    private static final int CURRENT_TUNER_VERSION = 3;
+    private static final int CURRENT_TUNER_VERSION = 2;
 
     private final Observer mObserver = new Observer();
     // Map of Uris we listen on to their settings keys.
@@ -118,10 +118,6 @@ public class TunerServiceImpl extends TunerService {
         }
         if (oldVersion < 2) {
             setTunerEnabled(mContext, false);
-        }
-        if (oldVersion < 3) {
-            // Delay this so that we can wait for everything to be registered first.
-            new Handler(Dependency.get(Dependency.BG_LOOPER)).postDelayed(() -> clearAll(), 5000);
         }
         setValue(TUNER_VERSION, newVersion);
     }
