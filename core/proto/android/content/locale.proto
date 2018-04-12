@@ -23,10 +23,10 @@ import "frameworks/base/libs/incident/proto/android/privacy.proto";
 package android.content;
 
 message LocaleProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional string language = 1;
-  optional string country = 2;
-  optional string variant = 3;
+    optional string language = 1;
+    optional string country = 2;
+    optional string variant = 3;
 }
 

@@ -19,16 +19,16 @@ package android.graphics;
 option java_multiple_files = true;
 
 message PixelFormatProto {
-  enum Format {
-      UNKNOWN      = 0;
-      TRANSLUCENT  = -3;
-      TRANSPARENT  = -2;
-      OPAQUE       = -1;
-      RGBA_8888    = 1;
-      RGBX_8888    = 2;
-      RGB_888      = 3;
-      RGB_565      = 4;
-      RGBA_F16     = 0x16;
-      RGBA_1010102 = 0x2B;
-  }
+    enum Format {
+        UNKNOWN      = 0;
+        TRANSLUCENT  = -3;
+        TRANSPARENT  = -2;
+        OPAQUE       = -1;
+        RGBA_8888    = 1;
+        RGBX_8888    = 2;
+        RGB_888      = 3;
+        RGB_565      = 4;
+        RGBA_F16     = 0x16;
+        RGBA_1010102 = 0x2B;
+    }
 }

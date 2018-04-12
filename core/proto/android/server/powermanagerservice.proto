@@ -313,36 +313,41 @@ message PowerServiceSettingsAndConfigurationDumpProto {
 }
 
 message BatterySaverStateMachineProto {
-   // Whether battery saver is enabled.
-   optional bool enabled = 1;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-   // Whether system has booted.
-   optional bool boot_completed = 2;
+    // Whether battery saver is enabled.
+    optional bool enabled = 1;
 
-   // Whether settings have been loaded already.
-   optional bool settings_loaded = 3;
+    // Whether system has booted.
+    optional bool boot_completed = 2;
 
-   // Whether battery status has been set at least once.
-   optional bool battery_status_set = 4;
+    // Whether settings have been loaded already.
+    optional bool settings_loaded = 3;
 
-   // Whether automatic battery saver has been canceled by the user.
-   optional bool battery_saver_snoozing = 5;
+    // Whether battery status has been set at least once.
+    optional bool battery_status_set = 4;
 
-   // Whether the device is connected to any power source.
-   optional bool is_powered = 6;
+    // Whether automatic battery saver has been canceled by the user.
+    optional bool battery_saver_snoozing = 5;
 
-   // Current battery level in %, 0-100.
-   optional int32 battery_level = 7;
+    // Whether the device is connected to any power source.
+    optional bool is_powered = 6;
 
-   // Whether battery level is low or not.
-   optional bool is_battery_level_low = 8;
+    // Current battery level in %, 0-100.
+    optional int32 battery_level = 7;
 
-   // The value of Global.LOW_POWER_MODE.
-   optional bool setting_battery_saver_enabled = 9;
+    // Whether battery level is low or not.
+    optional bool is_battery_level_low = 8;
 
-   // The value of Global.LOW_POWER_MODE_STICKY.
-   optional bool setting_battery_saver_enabled_sticky = 10;
+    // The value of Global.LOW_POWER_MODE. This is a cached value, so it could
+    // be slightly different from what's in GlobalSettingsProto.LowPowerMode.
+    optional bool setting_battery_saver_enabled = 9;
 
-   // The value of Global.LOW_POWER_MODE_TRIGGER_LEVEL.
-   optional int32 setting_battery_saver_trigger_threshold = 11;
+    // The value of Global.LOW_POWER_MODE_STICKY. This is a cached value, so it could
+    // be slightly different from what's in GlobalSettingsProto.LowPowerMode.
+    optional bool setting_battery_saver_enabled_sticky = 10;
+
+    // The value of Global.LOW_POWER_MODE_TRIGGER_LEVEL. This is a cached value, so it could
+    // be slightly different from what's in GlobalSettingsProto.LowPowerMode.
+    optional int32 setting_battery_saver_trigger_threshold = 11;
 }
