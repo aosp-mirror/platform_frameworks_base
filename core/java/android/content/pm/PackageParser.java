@@ -2716,7 +2716,7 @@ public class PackageParser {
 
         // Fot apps targeting O-MR1 we require explicit enumeration of all certs.
         String[] additionalCertSha256Digests = EmptyArray.STRING;
-        if (pkg.applicationInfo.targetSdkVersion > Build.VERSION_CODES.O) {
+        if (pkg.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.O_MR1) {
             additionalCertSha256Digests = parseAdditionalCertificates(res, parser, outError);
             if (additionalCertSha256Digests == null) {
                 return false;

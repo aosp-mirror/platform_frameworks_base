@@ -1872,7 +1872,7 @@ public class NotificationManagerService extends SystemService {
         };
 
         int newSuppressedVisualEffects = incomingPolicy.suppressedVisualEffects;
-        if (targetSdkVersion <= Build.VERSION_CODES.O_MR1) {
+        if (targetSdkVersion < Build.VERSION_CODES.P) {
             // unset higher order bits introduced in P, maintain the user's higher order bits
             for (int i = 0; i < effectsIntroducedInP.length ; i++) {
                 newSuppressedVisualEffects &= ~effectsIntroducedInP[i];
@@ -3229,7 +3229,7 @@ public class NotificationManagerService extends SystemService {
                         0, UserHandle.getUserId(MY_UID));
                 Policy currPolicy = mZenModeHelper.getNotificationPolicy();
 
-                if (applicationInfo.targetSdkVersion <= Build.VERSION_CODES.O_MR1) {
+                if (applicationInfo.targetSdkVersion < Build.VERSION_CODES.P) {
                     int priorityCategories = policy.priorityCategories;
                     // ignore alarm and media values from new policy
                     priorityCategories &= ~Policy.PRIORITY_CATEGORY_ALARMS;
