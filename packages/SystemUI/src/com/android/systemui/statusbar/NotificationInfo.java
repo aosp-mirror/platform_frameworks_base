@@ -523,7 +523,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                 } else {
                     // For notifications with more than one channel, update notification enabled
                     // state. If the importance was lowered, we disable notifications.
-                    mINotificationManager.setNotificationsEnabledForPackage(
+                    mINotificationManager.setNotificationsEnabledWithImportanceLockForPackage(
                             mPackageName, mAppUid, mNewImportance >= mCurrentImportance);
                 }
             } catch (RemoteException e) {
