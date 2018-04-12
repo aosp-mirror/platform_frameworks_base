@@ -69,7 +69,6 @@ cc_defaults {
         "libRScpp",
     ],
     static_libs: [
-        "libplatformprotos",
         "libEGL_blobCache",
     ],
 }
@@ -269,7 +268,12 @@ cc_defaults {
         "TextureCache.cpp",
         "VectorDrawable.cpp",
         "VkLayer.cpp",
+        "protos/graphicsstats.proto",
     ],
+
+    proto: {
+        export_proto_headers: true,
+    },
 
     export_include_dirs: ["."],
     export_shared_lib_headers: ["libRScpp"],
