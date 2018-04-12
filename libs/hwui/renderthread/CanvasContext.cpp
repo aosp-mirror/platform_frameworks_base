@@ -23,7 +23,6 @@
 #include "EglManager.h"
 #include "Frame.h"
 #include "LayerUpdateQueue.h"
-#include "OpenGLPipeline.h"
 #include "Properties.h"
 #include "RenderThread.h"
 #include "hwui/Canvas.h"

@@ -19,7 +19,6 @@
 #include "CanvasContext.h"
 #include "DeviceInfo.h"
 #include "EglManager.h"
-#include "OpenGLReadback.h"
 #include "RenderProxy.h"
 #include "VulkanManager.h"
 #include "hwui/Bitmap.h"
@@ -28,7 +27,6 @@
 #include "pipeline/skia/SkiaVulkanPipeline.h"
 #include "pipeline/skia/SkiaVulkanReadback.h"
 #include "renderstate/RenderState.h"
-#include "renderthread/OpenGLPipeline.h"
 #include "utils/FatVector.h"
 #include "utils/TimeUtils.h"
 
