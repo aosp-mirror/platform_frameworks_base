@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="backup_confirm_title" msgid="827563724209303345">"Vollständige Sicherung"</string>
     <string name="restore_confirm_title" msgid="5469365809567486602">"Vollständige Wiederherstellung"</string>
-    <string name="backup_confirm_text" msgid="1878021282758896593">"Es wurde eine vollständige Sicherung sämtlicher Daten auf einen verbundenen Desktop-Computer angefordert. Möchtest du dies zulassen?\n\nWenn du die Sicherung nicht selbst angefordert hast, solltest du dem Vorgang nicht zustimmen."</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"Es wurde eine vollständige Sicherung sämtlicher Daten auf einen verbundenen Computer angefordert. Möchtest du dies zulassen?\n\nWenn du die Sicherung nicht selbst angefordert hast, solltest du dem Vorgang nicht zustimmen."</string>
     <string name="allow_backup_button_label" msgid="4217228747769644068">"Meine Daten sichern"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"Nicht sichern"</string>
     <string name="restore_confirm_text" msgid="7499866728030461776">"Es wurde eine vollständige Wiederherstellung aller Daten von einem verbundenen Desktop-Computer angefordert. Möchtest du dies zulassen?\n\nWenn du die Wiederherstellung nicht selbst angefordert hast, solltest du dem Vorgang nicht zustimmen. Dadurch werden alle derzeit auf dem Gerät befindlichen Daten ersetzt!"</string>
