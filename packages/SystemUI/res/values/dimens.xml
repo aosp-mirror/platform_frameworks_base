@@ -929,7 +929,7 @@
     <!-- Fingerprint Dialog values -->
     <dimen name="fingerprint_dialog_fp_icon_size">64dp</dimen>
     <dimen name="fingerprint_dialog_animation_translation_offset">350dp</dimen>
-    <dimen name="fingerprint_dialog_corner_size">2dp</dimen>
+    <dimen name="fingerprint_dialog_corner_size">4dp</dimen>
 
     <!-- Wireless Charging Animation values -->
     <dimen name="wireless_charging_dots_radius_start">0dp</dimen>
