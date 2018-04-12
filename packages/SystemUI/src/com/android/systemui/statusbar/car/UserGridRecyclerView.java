@@ -38,8 +38,6 @@ import android.widget.TextView;
 
 import com.android.settingslib.users.UserManagerHelper;
 import com.android.systemui.R;
-import com.android.systemui.qs.car.CarQSFragment;
-import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,8 +48,6 @@ import java.util.List;
  */
 public class UserGridRecyclerView extends RecyclerView implements
         UserManagerHelper.OnUsersUpdateListener {
-
-    private StatusBar mStatusBar;
     private UserSelectionListener mUserSelectionListener;
     private UserAdapter mAdapter;
     private UserManagerHelper mUserManagerHelper;
@@ -92,28 +88,21 @@ public class UserGridRecyclerView extends RecyclerView implements
         super.setAdapter(mAdapter);
     }
 
-    public void setStatusBar(@Nullable StatusBar statusBar) {
-        mStatusBar = statusBar;
-    }
-
     private List<UserRecord> createUserRecords(List<UserInfo> userInfoList) {
         List<UserRecord> userRecords = new ArrayList<>();
         for (UserInfo userInfo : userInfoList) {
-            boolean isCurrent = false;
-            if (ActivityManager.getCurrentUser() == userInfo.id) {
-                isCurrent = true;
-            }
+            boolean isForeground = mUserManagerHelper.getForegroundUserId() == userInfo.id;
             UserRecord record = new UserRecord(userInfo, false /* isGuest */,
-                    false /* isAddUser */, isCurrent);
+                    false /* isAddUser */, isForeground);
             userRecords.add(record);
         }
 
-        // Add guest user record if the current user is not a guest
+        // Add guest user record if the foreground user is not a guest
         if (!mUserManagerHelper.foregroundUserIsGuestUser()) {
             userRecords.add(addGuestUserRecord());
         }
 
-        // Add add user record if the current user can add users
+        // Add add user record if the foreground user can add users
         if (mUserManagerHelper.foregroundUserCanAddUsers()) {
             userRecords.add(addUserRecord());
         }
@@ -128,7 +117,7 @@ public class UserGridRecyclerView extends RecyclerView implements
         UserInfo userInfo = new UserInfo();
         userInfo.name = mContext.getString(R.string.car_guest);
         return new UserRecord(userInfo, true /* isGuest */,
-                false /* isAddUser */, false /* isCurrent */);
+                false /* isAddUser */, false /* isForeground */);
     }
 
     /**
@@ -138,24 +127,11 @@ public class UserGridRecyclerView extends RecyclerView implements
         UserInfo userInfo = new UserInfo();
         userInfo.name = mContext.getString(R.string.car_add_user);
         return new UserRecord(userInfo, false /* isGuest */,
-                true /* isAddUser */, false /* isCurrent */);
-    }
-
-    public void onUserSwitched(int newUserId) {
-        // Bring up security view after user switch is completed.
-        post(this::showOfflineAuthUi);
+                true /* isAddUser */, false /* isForeground */);
     }
 
     public void setUserSelectionListener(UserSelectionListener userSelectionListener) {
         mUserSelectionListener = userSelectionListener;
-    }
-
-    void showOfflineAuthUi() {
-        // TODO: Show keyguard UI in-place.
-        if (mStatusBar != null) {
-            mStatusBar.executeRunnableDismissingKeyguard(null/* runnable */, null /* cancelAction */,
-                    true /* dismissShade */, true /* afterKeyguardGone */, true /* deferred */);
-        }
     }
 
     @Override
@@ -332,21 +308,21 @@ public class UserGridRecyclerView extends RecyclerView implements
 
     /**
      * Object wrapper class for the userInfo.  Use it to distinguish if a profile is a
-     * guest profile, add user profile, or a current user.
+     * guest profile, add user profile, or the foreground user.
      */
     public static final class UserRecord {
 
         public final UserInfo mInfo;
         public final boolean mIsGuest;
         public final boolean mIsAddUser;
-        public final boolean mIsCurrent;
+        public final boolean mIsForeground;
 
         public UserRecord(UserInfo userInfo, boolean isGuest, boolean isAddUser,
-                boolean isCurrent) {
+                boolean isForeground) {
             mInfo = userInfo;
             mIsGuest = isGuest;
             mIsAddUser = isAddUser;
-            mIsCurrent = isCurrent;
+            mIsForeground = isForeground;
         }
     }
 
