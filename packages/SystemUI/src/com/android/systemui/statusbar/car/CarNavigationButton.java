@@ -3,6 +3,7 @@ package com.android.systemui.statusbar.car;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
+import android.os.UserHandle;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.ImageView;
@@ -64,10 +65,10 @@ public class CarNavigationButton extends com.android.keyguard.AlphaOptimizedImag
                 setOnClickListener(v -> {
                     try {
                         if (mBroadcastIntent) {
-                            mContext.sendBroadcast(intent);
+                            mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
                             return;
                         }
-                        mContext.startActivity(intent);
+                        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
                     } catch (Exception e) {
                         Log.e(TAG, "Failed to launch intent", e);
                     }
@@ -82,7 +83,7 @@ public class CarNavigationButton extends com.android.keyguard.AlphaOptimizedImag
                 final Intent intent = Intent.parseUri(mLongIntent, Intent.URI_INTENT_SCHEME);
                 setOnLongClickListener(v -> {
                     try {
-                        mContext.startActivity(intent);
+                        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
                     } catch (Exception e) {
                         Log.e(TAG, "Failed to launch intent", e);
                     }
