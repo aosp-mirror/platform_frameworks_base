@@ -185,6 +185,9 @@
     <!-- the padding on the start of the statusbar -->
     <dimen name="status_bar_padding_start">6dp</dimen>
 
+    <!-- the padding on the end of the statusbar -->
+    <dimen name="status_bar_padding_end">8dp</dimen>
+
     <!-- the radius of the overflow dot in the status bar -->
     <dimen name="overflow_dot_radius">1dp</dimen>
 
