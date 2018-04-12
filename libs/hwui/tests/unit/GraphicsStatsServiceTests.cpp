@@ -16,9 +16,8 @@
 
 #include <gtest/gtest.h>
 
+#include "protos/graphicsstats.pb.h"
 #include "service/GraphicsStatsService.h"
-
-#include <frameworks/base/core/proto/android/service/graphicsstats.pb.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -74,7 +73,7 @@ TEST(GraphicsStats, saveLoad) {
         mockData.editSlowFrameCounts()[i] = (i % 5) + 1;
     }
     GraphicsStatsService::saveBuffer(path, packageName, 5, 3000, 7000, &mockData);
-    service::GraphicsStatsProto loadedProto;
+    protos::GraphicsStatsProto loadedProto;
     EXPECT_TRUE(GraphicsStatsService::parseFromFile(path, &loadedProto));
     // Clean up the file
     unlink(path.c_str());
@@ -130,7 +129,7 @@ TEST(GraphicsStats, merge) {
     }
     GraphicsStatsService::saveBuffer(path, packageName, 5, 7050, 10000, &mockData);
 
-    service::GraphicsStatsProto loadedProto;
+    protos::GraphicsStatsProto loadedProto;
     EXPECT_TRUE(GraphicsStatsService::parseFromFile(path, &loadedProto));
     // Clean up the file
     unlink(path.c_str());

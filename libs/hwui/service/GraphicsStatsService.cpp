@@ -17,8 +17,8 @@
 #include "GraphicsStatsService.h"
 
 #include "JankTracker.h"
+#include "protos/graphicsstats.pb.h"
 
-#include <frameworks/base/core/proto/android/service/graphicsstats.pb.h>
 #include <google/protobuf/io/zero_copy_stream_impl_lite.h>
 #include <log/log.h>
 
@@ -41,10 +41,10 @@ static_assert(sizeof(sCurrentFileVersion) == sHeaderSize, "Header size is wrong"
 
 constexpr int sHistogramSize = ProfileData::HistogramSize();
 
-static bool mergeProfileDataIntoProto(service::GraphicsStatsProto* proto,
+static bool mergeProfileDataIntoProto(protos::GraphicsStatsProto* proto,
                                       const std::string& package, int64_t versionCode,
                                       int64_t startTime, int64_t endTime, const ProfileData* data);
-static void dumpAsTextToFd(service::GraphicsStatsProto* proto, int outFd);
+static void dumpAsTextToFd(protos::GraphicsStatsProto* proto, int outFd);
 
 class FileDescriptor {
 public:
@@ -104,7 +104,7 @@ private:
 };
 
 bool GraphicsStatsService::parseFromFile(const std::string& path,
-                                         service::GraphicsStatsProto* output) {
+                                         protos::GraphicsStatsProto* output) {
     FileDescriptor fd{open(path.c_str(), O_RDONLY)};
     if (!fd.valid()) {
         int err = errno;
@@ -153,7 +153,7 @@ bool GraphicsStatsService::parseFromFile(const std::string& path,
     return success;
 }
 
-bool mergeProfileDataIntoProto(service::GraphicsStatsProto* proto, const std::string& package,
+bool mergeProfileDataIntoProto(protos::GraphicsStatsProto* proto, const std::string& package,
                                int64_t versionCode, int64_t startTime, int64_t endTime,
                                const ProfileData* data) {
     if (proto->stats_start() == 0 || proto->stats_start() > startTime) {
@@ -193,7 +193,7 @@ bool mergeProfileDataIntoProto(service::GraphicsStatsProto* proto, const std::st
     data->histogramForEach([&](ProfileData::HistogramEntry entry) {
         if (hitMergeError) return;
 
-        service::GraphicsStatsHistogramBucketProto* bucket;
+        protos::GraphicsStatsHistogramBucketProto* bucket;
         if (creatingHistogram) {
             bucket = proto->add_histogram();
             bucket->set_render_millis(entry.renderTimeMs);
@@ -212,7 +212,7 @@ bool mergeProfileDataIntoProto(service::GraphicsStatsProto* proto, const std::st
     return !hitMergeError;
 }
 
-static int32_t findPercentile(service::GraphicsStatsProto* proto, int percentile) {
+static int32_t findPercentile(protos::GraphicsStatsProto* proto, int percentile) {
     int32_t pos = percentile * proto->summary().total_frames() / 100;
     int32_t remaining = proto->summary().total_frames() - pos;
     for (auto it = proto->histogram().rbegin(); it != proto->histogram().rend(); ++it) {
@@ -224,7 +224,7 @@ static int32_t findPercentile(service::GraphicsStatsProto* proto, int percentile
     return 0;
 }
 
-void dumpAsTextToFd(service::GraphicsStatsProto* proto, int fd) {
+void dumpAsTextToFd(protos::GraphicsStatsProto* proto, int fd) {
     // This isn't a full validation, just enough that we can deref at will
     if (proto->package_name().empty() || !proto->has_summary()) {
         ALOGW("Skipping dump, invalid package_name() '%s' or summary %d",
@@ -259,7 +259,7 @@ void dumpAsTextToFd(service::GraphicsStatsProto* proto, int fd) {
 void GraphicsStatsService::saveBuffer(const std::string& path, const std::string& package,
                                       int64_t versionCode, int64_t startTime, int64_t endTime,
                                       const ProfileData* data) {
-    service::GraphicsStatsProto statsProto;
+    protos::GraphicsStatsProto statsProto;
     if (!parseFromFile(path, &statsProto)) {
         statsProto.Clear();
     }
@@ -310,12 +310,12 @@ public:
     Dump(int outFd, DumpType type) : mFd(outFd), mType(type) {}
     int fd() { return mFd; }
     DumpType type() { return mType; }
-    service::GraphicsStatsServiceDumpProto& proto() { return mProto; }
+    protos::GraphicsStatsServiceDumpProto& proto() { return mProto; }
 
 private:
     int mFd;
     DumpType mType;
-    service::GraphicsStatsServiceDumpProto mProto;
+    protos::GraphicsStatsServiceDumpProto mProto;
 };
 
 GraphicsStatsService::Dump* GraphicsStatsService::createDump(int outFd, DumpType type) {
@@ -325,7 +325,7 @@ GraphicsStatsService::Dump* GraphicsStatsService::createDump(int outFd, DumpType
 void GraphicsStatsService::addToDump(Dump* dump, const std::string& path,
                                      const std::string& package, int64_t versionCode,
                                      int64_t startTime, int64_t endTime, const ProfileData* data) {
-    service::GraphicsStatsProto statsProto;
+    protos::GraphicsStatsProto statsProto;
     if (!path.empty() && !parseFromFile(path, &statsProto)) {
         statsProto.Clear();
     }
@@ -347,7 +347,7 @@ void GraphicsStatsService::addToDump(Dump* dump, const std::string& path,
 }
 
 void GraphicsStatsService::addToDump(Dump* dump, const std::string& path) {
-    service::GraphicsStatsProto statsProto;
+    protos::GraphicsStatsProto statsProto;
     if (!parseFromFile(path, &statsProto)) {
         return;
     }
