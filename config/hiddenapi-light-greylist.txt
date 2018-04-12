@@ -1408,6 +1408,7 @@ Landroid/os/Debug$MemoryInfo;->otherSwappablePss:I
 Landroid/os/Debug$MemoryInfo;->otherSwappedOut:I
 Landroid/os/Debug$MemoryInfo;->otherSwappedOutPss:I
 Landroid/os/Environment;->buildExternalStorageAppDataDirs(Ljava/lang/String;)[Ljava/io/File;
+Landroid/os/Environment;->getStorageDirectory()Ljava/io/File;
 Landroid/os/Environment;->getVendorDirectory()Ljava/io/File;
 Landroid/os/Environment;->maybeTranslateEmulatedPathToInternal(Ljava/io/File;)Ljava/io/File;
 Landroid/os/FileObserver$ObserverThread;->onEvent(IILjava/lang/String;)V
@@ -1427,6 +1428,19 @@ Landroid/os/Handler;->hasCallbacks(Ljava/lang/Runnable;)Z
 Landroid/os/Handler;-><init>(Z)V
 Landroid/os/Handler;->mCallback:Landroid/os/Handler$Callback;
 Landroid/os/Handler;->mMessenger:Landroid/os/IMessenger;
+Landroid/os/health/HealthKeys$Constants;-><init>(Ljava/lang/Class;)V
+Landroid/os/health/HealthStats;-><init>(Landroid/os/Parcel;)V
+Landroid/os/health/HealthStatsParceler;->getHealthStats()Landroid/os/health/HealthStats;
+Landroid/os/health/HealthStatsParceler;-><init>(Landroid/os/health/HealthStatsWriter;)V
+Landroid/os/health/HealthStatsParceler;-><init>(Landroid/os/Parcel;)V
+Landroid/os/health/HealthStatsWriter;->addMeasurement(IJ)V
+Landroid/os/health/HealthStatsWriter;->addMeasurements(ILjava/lang/String;J)V
+Landroid/os/health/HealthStatsWriter;->addStats(ILjava/lang/String;Landroid/os/health/HealthStatsWriter;)V
+Landroid/os/health/HealthStatsWriter;->addTimer(IIJ)V
+Landroid/os/health/HealthStatsWriter;->addTimers(ILjava/lang/String;Landroid/os/health/TimerStat;)V
+Landroid/os/health/HealthStatsWriter;->flattenToParcel(Landroid/os/Parcel;)V
+Landroid/os/health/HealthStatsWriter;-><init>(Landroid/os/health/HealthKeys$Constants;)V
+Landroid/os/health/SystemHealthManager;->from(Landroid/content/Context;)Landroid/os/health/SystemHealthManager;
 Landroid/os/HwParcel;-><init>(Z)V
 Landroid/os/HwRemoteBinder;-><init>()V
 Landroid/os/IBatteryPropertiesRegistrar$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
@@ -1439,6 +1453,7 @@ Landroid/os/IPowerManager;->userActivity(JII)V
 Landroid/os/IServiceManager;->checkService(Ljava/lang/String;)Landroid/os/IBinder;
 Landroid/os/IServiceManager;->getService(Ljava/lang/String;)Landroid/os/IBinder;
 Landroid/os/IUserManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
+Landroid/os/LocaleList;->setDefault(Landroid/os/LocaleList;I)V
 Landroid/os/Looper;->mQueue:Landroid/os/MessageQueue;
 Landroid/os/Looper;->setTraceTag(J)V
 Landroid/os/Looper;->sThreadLocal:Ljava/lang/ThreadLocal;
@@ -1454,9 +1469,12 @@ Landroid/os/MessageQueue;->mPtr:J
 Landroid/os/MessageQueue;->mQuitAllowed:Z
 Landroid/os/MessageQueue;->nativePollOnce(JI)V
 Landroid/os/MessageQueue;->next()Landroid/os/Message;
+Landroid/os/MessageQueue;->postSyncBarrier()I
+Landroid/os/MessageQueue;->removeSyncBarrier(I)V
 Landroid/os/Message;->recycleUnchecked()V
 Landroid/os/Message;->target:Landroid/os/Handler;
 Landroid/os/Message;->when:J
+Landroid/os/ParcelFileDescriptor;->fromData([BLjava/lang/String;)Landroid/os/ParcelFileDescriptor;
 Landroid/os/ParcelFileDescriptor;-><init>(Ljava/io/FileDescriptor;)V
 Landroid/os/Parcel;->mNativePtr:J
 Landroid/os/Parcel;->readArrayMap(Landroid/util/ArrayMap;Ljava/lang/ClassLoader;)V
@@ -1469,6 +1487,7 @@ Landroid/os/PowerManager;->getMaximumScreenBrightnessSetting()I
 Landroid/os/PowerManager;->getMinimumScreenBrightnessSetting()I
 Landroid/os/PowerManager;->isLightDeviceIdleMode()Z
 Landroid/os/PowerManager;->mService:Landroid/os/IPowerManager;
+Landroid/os/PowerManager;->nap(J)V
 Landroid/os/PowerManager;->userActivity(JZ)V
 Landroid/os/PowerManager;->validateWakeLockParameters(ILjava/lang/String;)V
 Landroid/os/PowerManager;->wakeUp(JLjava/lang/String;)V
@@ -1499,6 +1518,7 @@ Landroid/os/storage/IStorageManager$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
 Landroid/os/storage/StorageManager;->findVolumeByUuid(Ljava/lang/String;)Landroid/os/storage/VolumeInfo;
 Landroid/os/storage/StorageManager;->getBestVolumeDescription(Landroid/os/storage/VolumeInfo;)Ljava/lang/String;
 Landroid/os/storage/StorageManager;->getDisks()Ljava/util/List;
+Landroid/os/storage/StorageManager;->getPrimaryVolume()Landroid/os/storage/StorageVolume;
 Landroid/os/storage/StorageManager;->getStorageBytesUntilLow(Ljava/io/File;)J
 Landroid/os/storage/StorageManager;->getStorageFullBytes(Ljava/io/File;)J
 Landroid/os/storage/StorageManager;->getStorageLowBytes(Ljava/io/File;)J
@@ -1519,6 +1539,7 @@ Landroid/os/storage/VolumeInfo;->getState()I
 Landroid/os/storage/VolumeInfo;->getType()I
 Landroid/os/storage/VolumeInfo;->isPrimary()Z
 Landroid/os/storage/VolumeInfo;->isVisible()Z
+Landroid/os/StrictMode;->conditionallyCheckInstanceCounts()V
 Landroid/os/StrictMode;->disableDeathOnFileUriExposure()V
 Landroid/os/StrictMode;->enterCriticalSpan(Ljava/lang/String;)Landroid/os/StrictMode$Span;
 Landroid/os/StrictMode;->getThreadPolicyMask()I
@@ -2116,6 +2137,7 @@ Landroid/transition/TransitionManager;->sRunningTransitions:Ljava/lang/ThreadLoc
 Landroid/util/ArrayMap;->append(Ljava/lang/Object;Ljava/lang/Object;)V
 Landroid/util/ArrayMap;->mBaseCacheSize:I
 Landroid/util/ArrayMap;->mTwiceBaseCacheSize:I
+Landroid/util/ArraySet;-><init>(Ljava/util/Collection;)V
 Landroid/util/DisplayMetrics;->noncompatHeightPixels:I
 Landroid/util/DisplayMetrics;->noncompatWidthPixels:I
 Landroid/util/EventLog$Event;-><init>([B)V
@@ -3280,6 +3302,7 @@ Ldalvik/system/VMRuntime;->clearGrowthLimit()V
 Ldalvik/system/VMRuntime;->getCurrentInstructionSet()Ljava/lang/String;
 Ldalvik/system/VMRuntime;->getInstructionSet(Ljava/lang/String;)Ljava/lang/String;
 Ldalvik/system/VMRuntime;->getRuntime()Ldalvik/system/VMRuntime;
+Ldalvik/system/VMRuntime;->is64BitAbi(Ljava/lang/String;)Z
 Ldalvik/system/VMRuntime;->is64Bit()Z
 Ldalvik/system/VMRuntime;->newNonMovableArray(Ljava/lang/Class;I)Ljava/lang/Object;
 Ldalvik/system/VMRuntime;->registerNativeAllocation(I)V
