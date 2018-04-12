@@ -969,7 +969,7 @@ public final class SelectionActionModeHelper {
             mHot = true;
             trimText();
             final TextSelection selection;
-            if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.O_MR1) {
+            if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.P) {
                 final TextSelection.Request request = new TextSelection.Request.Builder(
                         mTrimmedText, mRelativeStart, mRelativeEnd)
                         .setDefaultLocales(mDefaultLocales)
@@ -1023,7 +1023,7 @@ public final class SelectionActionModeHelper {
 
                 trimText();
                 final TextClassification classification;
-                if (mContext.getApplicationInfo().targetSdkVersion > Build.VERSION_CODES.O_MR1) {
+                if (mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.P) {
                     final TextClassification.Request request =
                             new TextClassification.Request.Builder(
                                     mTrimmedText, mRelativeStart, mRelativeEnd)

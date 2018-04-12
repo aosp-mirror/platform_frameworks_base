@@ -5873,7 +5873,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         } finally {
             // If the app targets < O-MR1, or doesn't change the thread policy
             // during startup, clobber the policy to maintain behavior of b/36951662
-            if (data.appInfo.targetSdkVersion <= Build.VERSION_CODES.O
+            if (data.appInfo.targetSdkVersion < Build.VERSION_CODES.O_MR1
                     || StrictMode.getThreadPolicy().equals(writesAllowedPolicy)) {
                 StrictMode.setThreadPolicy(savedPolicy);
             }
