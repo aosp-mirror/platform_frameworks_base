@@ -558,13 +558,6 @@ public class NotificationColorUtil {
         }
     }
 
-    public static int resolveActionBarColor(Context context, int backgroundColor) {
-        if (backgroundColor == Notification.COLOR_DEFAULT) {
-            return context.getColor(com.android.internal.R.color.notification_action_list);
-        }
-        return getShiftedColor(backgroundColor, 7);
-    }
-
     /**
      * Get a color that stays in the same tint, but darkens or lightens it by a certain
      * amount.

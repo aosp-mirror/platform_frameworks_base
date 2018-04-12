@@ -239,7 +239,9 @@ public class NotificationContentView extends FrameLayout {
             }
         }
         if (mHeadsUpChild != null) {
-            int size = Math.min(maxSize, mHeadsUpHeight);
+            int maxHeight = mHeadsUpHeight;
+            maxHeight += mHeadsUpWrapper.getExtraMeasureHeight();
+            int size = Math.min(maxSize, maxHeight);
             ViewGroup.LayoutParams layoutParams = mHeadsUpChild.getLayoutParams();
             boolean useExactly = false;
             if (layoutParams.height >= 0) {

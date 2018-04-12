@@ -148,7 +148,6 @@
     <color name="notification_progress_background_color">@color/secondary_text_material_light</color>
 
     <color name="notification_action_list">#ffeeeeee</color>
-    <color name="notification_action_list_dark">#ffe0e0e0</color>
 
     <!-- Keyguard colors -->
     <color name="keyguard_avatar_frame_color">#ffffffff</color>
