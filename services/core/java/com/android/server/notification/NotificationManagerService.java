@@ -1883,7 +1883,6 @@ public class NotificationManagerService extends SystemService {
             if ((newSuppressedVisualEffects & SUPPRESSED_EFFECT_SCREEN_OFF) != 0) {
                 newSuppressedVisualEffects |= SUPPRESSED_EFFECT_LIGHTS;
                 newSuppressedVisualEffects |= SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
-                newSuppressedVisualEffects |= SUPPRESSED_EFFECT_AMBIENT;
             }
             if ((newSuppressedVisualEffects & SUPPRESSED_EFFECT_SCREEN_ON) != 0) {
                 newSuppressedVisualEffects |= SUPPRESSED_EFFECT_PEEK;
