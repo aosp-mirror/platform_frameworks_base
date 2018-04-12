@@ -677,7 +677,8 @@ public class UserSwitcherController {
             Drawable icon = UserIcons.getDefaultUserIcon(
                     context.getResources(), item.resolveId(), /* light= */ false);
             if (item.isGuest) {
-                icon.setColorFilter(Utils.getColorAttr(context, android.R.attr.colorForeground),
+                icon.setColorFilter(Utils.getColorAttrDefaultColor(context,
+                        android.R.attr.colorForeground),
                         Mode.SRC_IN);
             }
             return icon;

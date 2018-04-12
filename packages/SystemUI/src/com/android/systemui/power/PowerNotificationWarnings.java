@@ -242,7 +242,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         // remaining estimate is disabled
         if (mEstimate == null || mBucket < 0
                 || mEstimate.estimateMillis < mSevereWarningThreshold) {
-            nb.setColor(Utils.getColorAttr(mContext, android.R.attr.colorError));
+            nb.setColor(Utils.getColorAttrDefaultColor(mContext, android.R.attr.colorError));
         }
         nb.addAction(0,
                 mContext.getString(R.string.battery_saver_start_action),
@@ -337,7 +337,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         .setVisibility(Notification.VISIBILITY_PUBLIC)
                         .setContentIntent(pendingBroadcast(ACTION_CLICKED_TEMP_WARNING))
                         .setDeleteIntent(pendingBroadcast(ACTION_DISMISSED_TEMP_WARNING))
-                        .setColor(Utils.getColorAttr(mContext, android.R.attr.colorError));
+                        .setColor(Utils.getColorAttrDefaultColor(mContext,
+                                android.R.attr.colorError));
         SystemUI.overrideNotificationAppName(mContext, nb, false);
         final Notification n = nb.build();
         mNoMan.notifyAsUser(TAG_TEMPERATURE, SystemMessage.NOTE_HIGH_TEMP, n, UserHandle.ALL);
@@ -387,7 +388,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                         .setContentIntent(pendingBroadcast(ACTION_CLICKED_THERMAL_SHUTDOWN_WARNING))
                         .setDeleteIntent(
                                 pendingBroadcast(ACTION_DISMISSED_THERMAL_SHUTDOWN_WARNING))
-                        .setColor(Utils.getColorAttr(mContext, android.R.attr.colorError));
+                        .setColor(Utils.getColorAttrDefaultColor(mContext,
+                                android.R.attr.colorError));
         SystemUI.overrideNotificationAppName(mContext, nb, false);
         final Notification n = nb.build();
         mNoMan.notifyAsUser(

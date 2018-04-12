@@ -750,8 +750,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         final int dualToneLightTheme = Utils.getThemeAttr(ctx, R.attr.lightIconTheme);
         Context darkContext = new ContextThemeWrapper(ctx, dualToneDarkTheme);
         Context lightContext = new ContextThemeWrapper(ctx, dualToneLightTheme);
-        final int lightColor = Utils.getColorAttr(lightContext, R.attr.singleToneColor);
-        final int darkColor = Utils.getColorAttr(darkContext, R.attr.singleToneColor);
+        final int lightColor = Utils.getColorAttrDefaultColor(lightContext, R.attr.singleToneColor);
+        final int darkColor = Utils.getColorAttrDefaultColor(darkContext, R.attr.singleToneColor);
 
         // Use the supplied style to set the icon's rotation parameters
         Context rotateContext = new ContextThemeWrapper(ctx, style);
