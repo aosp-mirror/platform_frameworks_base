@@ -214,7 +214,11 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     }
 
     private boolean shouldDrawCutout() {
-        return mContext.getResources().getBoolean(
+        return shouldDrawCutout(mContext);
+    }
+
+    static boolean shouldDrawCutout(Context context) {
+        return context.getResources().getBoolean(
                 com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout);
     }
 
@@ -393,7 +397,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             mBoundingRect.setEmpty();
             mBoundingPath.reset();
             int newVisible;
-            if (hasCutout()) {
+            if (shouldDrawCutout(getContext()) && hasCutout()) {
                 mBounds.set(mInfo.displayCutout.getBounds());
                 localBounds(mBoundingRect);
                 updateBoundingPath();
