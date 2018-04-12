@@ -177,6 +177,7 @@ cc_test_host {
         "libgmock",
     ],
     defaults: ["aapt2_defaults"],
+    data: ["integration-tests/CompileTest/**/*"],
 }
 
 // ==========================================================
