@@ -205,12 +205,6 @@ public class KeyguardStatusBarView extends RelativeLayout
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        updateLayoutConsideringCutout();
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    }
-
-    @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
         mLayoutState = LAYOUT_NONE;
         if (updateLayoutConsideringCutout()) {

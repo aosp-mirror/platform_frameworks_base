@@ -56,6 +56,7 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.policy.Clock;
+import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.policy.DateView;
@@ -147,7 +148,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mDate.setOnClickListener(this);
         mSystemIconsView = findViewById(R.id.quick_status_bar_system_icons);
         mQuickQsStatusIcons = findViewById(R.id.quick_qs_status_icons);
-        mIconManager = new TintedIconManager(findViewById(R.id.statusIcons));
+        StatusIconContainer iconContainer = findViewById(R.id.statusIcons);
+        iconContainer.setShouldRestrictIcons(false);
+        mIconManager = new TintedIconManager(iconContainer);
 
         // Views corresponding to the header info section (e.g. tooltip and next alarm).
         mHeaderTextContainerView = findViewById(R.id.header_text_container);

@@ -163,7 +163,6 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         mNumberPain.setColor(context.getColor(R.drawable.notification_number_text_color));
         mNumberPain.setAntiAlias(true);
         setNotification(sbn);
-        maybeUpdateIconScaleDimens();
         setScaleType(ScaleType.CENTER);
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
         if (mNotification != null) {
@@ -171,24 +170,16 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
                     com.android.internal.R.color.notification_default_color_light));
         }
         reloadDimens();
+        maybeUpdateIconScaleDimens();
     }
 
+    /** Should always be preceded by {@link #reloadDimens()} */
     private void maybeUpdateIconScaleDimens() {
         // We do not resize and scale system icons (on the right), only notification icons (on the
         // left).
         if (mNotification != null || mAlwaysScaleIcon) {
-            updateIconScaleDimens();
+            updateIconScale();
         }
-    }
-
-    private void updateIconScaleDimens() {
-        Resources res = mContext.getResources();
-        mStatusBarIconSize = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
-        mStatusBarIconDrawingSizeDark =
-                res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size_dark);
-        mStatusBarIconDrawingSize =
-                res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size);
-        updateIconScale();
     }
 
     private void updateIconScale() {
@@ -214,15 +205,21 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         int density = newConfig.densityDpi;
         if (density != mDensity) {
             mDensity = density;
+            reloadDimens();
             maybeUpdateIconScaleDimens();
             updateDrawable();
-            reloadDimens();
         }
     }
 
     private void reloadDimens() {
         boolean applyRadius = mDotRadius == mStaticDotRadius;
-        mStaticDotRadius = getResources().getDimensionPixelSize(R.dimen.overflow_dot_radius);
+        Resources res = getResources();
+        mStaticDotRadius = res.getDimensionPixelSize(R.dimen.overflow_dot_radius);
+        mStatusBarIconSize = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
+        mStatusBarIconDrawingSizeDark =
+                res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size_dark);
+        mStatusBarIconDrawingSize =
+                res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size);
         if (applyRadius) {
             mDotRadius = mStaticDotRadius;
         }
@@ -240,7 +237,8 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         mDozer = new NotificationIconDozeHelper(context);
         mBlocked = false;
         mAlwaysScaleIcon = true;
-        updateIconScaleDimens();
+        reloadDimens();
+        updateIconScale();
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
     }
 
@@ -425,7 +423,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
                 radius = NotificationUtils.interpolate(mDotRadius, getWidth() / 4, fadeOutAmount);
             }
             mDotPaint.setAlpha((int) (alpha * 255));
-            canvas.drawCircle(getWidth() / 2, getHeight() / 2, radius, mDotPaint);
+            canvas.drawCircle(mStatusBarIconSize / 2, getHeight() / 2, radius, mDotPaint);
         }
     }
 
@@ -657,6 +655,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         mContrastedDrawableColor = contrastedColor;
     }
 
+    @Override
     public void setVisibleState(int state) {
         setVisibleState(state, true /* animate */, null /* endRunnable */);
     }
@@ -872,7 +871,10 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
 
     @Override
     public void onDarkChanged(Rect area, float darkIntensity, int tint) {
-        setImageTintList(ColorStateList.valueOf(getTint(area, this, tint)));
+        int areaTint = getTint(area, this, tint);
+        ColorStateList color = ColorStateList.valueOf(areaTint);
+        setImageTintList(color);
+        setDecorColor(areaTint);
     }
 
     @Override
