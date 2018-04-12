@@ -1011,6 +1011,21 @@ public class RankingHelper implements RankingConfig {
         return blockedCount;
     }
 
+    public int getBlockedAppCount(int userId) {
+        int count = 0;
+        synchronized (mRecords) {
+            final int N = mRecords.size();
+            for (int i = 0; i < N; i++) {
+                final Record r = mRecords.valueAt(i);
+                if (userId == UserHandle.getUserId(r.uid)
+                        && r.importance == IMPORTANCE_NONE) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
     /**
      * Sets importance.
      */

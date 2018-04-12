@@ -2394,6 +2394,12 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public int getBlockedAppCount(int userId) {
+            checkCallerIsSystem();
+            return mRankingHelper.getBlockedAppCount(userId);
+        }
+
+        @Override
         public void clearData(String packageName, int uid, boolean fromApp) throws RemoteException {
             checkCallerIsSystem();
 

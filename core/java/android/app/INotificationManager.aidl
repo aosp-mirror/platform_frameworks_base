@@ -86,6 +86,7 @@ interface INotificationManager
     ParceledListSlice getNotificationChannelGroups(String pkg);
     boolean onlyHasDefaultChannel(String pkg, int uid);
     ParceledListSlice getRecentNotifyingAppsForUser(int userId);
+    int getBlockedAppCount(int userId);
 
     // TODO: Remove this when callers have been migrated to the equivalent
     // INotificationListener method.
