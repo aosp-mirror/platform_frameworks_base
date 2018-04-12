@@ -1687,6 +1687,7 @@ public class CarrierConfigManager {
      * Controls if the device should automatically notify the user as they reach
      * their cellular data warning. When set to {@code false} the carrier is
      * expected to have implemented their own notification mechanism.
+     * @hide
      */
     public static final String KEY_DATA_WARNING_NOTIFICATION_BOOL =
             "data_warning_notification_bool";
@@ -1709,6 +1710,7 @@ public class CarrierConfigManager {
      * Controls if the device should automatically notify the user as they reach
      * their cellular data limit. When set to {@code false} the carrier is
      * expected to have implemented their own notification mechanism.
+     * @hide
      */
     public static final String KEY_DATA_LIMIT_NOTIFICATION_BOOL =
             "data_limit_notification_bool";
@@ -1717,6 +1719,7 @@ public class CarrierConfigManager {
      * Controls if the device should automatically notify the user when rapid
      * cellular data usage is observed. When set to {@code false} the carrier is
      * expected to have implemented their own notification mechanism.
+     * @hide
      */
     public static final String KEY_DATA_RAPID_NOTIFICATION_BOOL =
             "data_rapid_notification_bool";
