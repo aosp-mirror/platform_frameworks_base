@@ -415,12 +415,23 @@ public final class ActiveServices {
             return null;
         }
 
-        // If the app has strict background restrictions, we treat any service
-        // start analogously to the legacy-app forced-restrictions case.
+        // If we're starting indirectly (e.g. from PendingIntent), figure out whether
+        // we're launching into an app in a background state.
+        final int uidState = mAm.getUidStateLocked(r.appInfo.uid);
+        if (DEBUG_SERVICE) {
+            Slog.v(TAG_SERVICE, "Uid state " + uidState + " indirect starting " + r.shortName);
+        }
+        final boolean bgLaunch = (uidState >
+                ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
+
+        // If the app has strict background restrictions, we treat any bg service
+        // start analogously to the legacy-app forced-restrictions case, regardless
+        // of its target SDK version.
         boolean forcedStandby = false;
-        if (appRestrictedAnyInBackground(r.appInfo.uid, r.packageName)) {
+        if (bgLaunch && appRestrictedAnyInBackground(r.appInfo.uid, r.packageName)) {
             if (DEBUG_FOREGROUND_SERVICE) {
-                Slog.d(TAG, "Forcing bg-only service start only for " + r.shortName);
+                Slog.d(TAG, "Forcing bg-only service start only for " + r.shortName
+                        + " : bgLaunch=" + bgLaunch + " callerFg=" + callerFg);
             }
             forcedStandby = true;
         }
