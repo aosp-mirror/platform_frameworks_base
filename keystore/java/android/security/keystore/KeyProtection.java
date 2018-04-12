@@ -232,6 +232,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
     private final boolean mCriticalToDeviceEncryption;
     private final boolean mUserConfirmationRequired;
     private final boolean mUnlockedDeviceRequired;
+    private final boolean mIsStrongBoxBacked;
 
     private KeyProtection(
             Date keyValidityStart,
@@ -251,7 +252,8 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
             long boundToSecureUserId,
             boolean criticalToDeviceEncryption,
             boolean userConfirmationRequired,
-            boolean unlockedDeviceRequired) {
+            boolean unlockedDeviceRequired,
+            boolean isStrongBoxBacked) {
         mKeyValidityStart = Utils.cloneIfNotNull(keyValidityStart);
         mKeyValidityForOriginationEnd = Utils.cloneIfNotNull(keyValidityForOriginationEnd);
         mKeyValidityForConsumptionEnd = Utils.cloneIfNotNull(keyValidityForConsumptionEnd);
@@ -272,6 +274,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
         mCriticalToDeviceEncryption = criticalToDeviceEncryption;
         mUserConfirmationRequired = userConfirmationRequired;
         mUnlockedDeviceRequired = unlockedDeviceRequired;
+        mIsStrongBoxBacked = isStrongBoxBacked;
     }
 
     /**
@@ -529,6 +532,14 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
     }
 
     /**
+     * Returns {@code true} if the key is protected by a Strongbox security chip.
+     * @hide
+     */
+    public boolean isStrongBoxBacked() {
+        return mIsStrongBoxBacked;
+    }
+
+    /**
      * Builder of {@link KeyProtection} instances.
      */
     public final static class Builder {
@@ -552,6 +563,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
 
         private long mBoundToSecureUserId = GateKeeper.INVALID_SECURE_USER_ID;
         private boolean mCriticalToDeviceEncryption = false;
+        private boolean mIsStrongBoxBacked = false;
 
         /**
          * Creates a new instance of the {@code Builder}.
@@ -962,6 +974,16 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
         }
 
         /**
+         * Sets whether this key should be protected by a StrongBox security chip.
+         * @hide
+         */
+        @NonNull
+        public Builder setIsStrongBoxBacked(boolean isStrongBoxBacked) {
+            mIsStrongBoxBacked = isStrongBoxBacked;
+            return this;
+        }
+
+        /**
          * Builds an instance of {@link KeyProtection}.
          *
          * @throws IllegalArgumentException if a required field is missing
@@ -986,7 +1008,8 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
                     mBoundToSecureUserId,
                     mCriticalToDeviceEncryption,
                     mUserConfirmationRequired,
-                    mUnlockedDeviceRequired);
+                    mUnlockedDeviceRequired,
+                    mIsStrongBoxBacked);
         }
     }
 }
