@@ -39,6 +39,7 @@ import com.android.systemui.statusbar.stack.AnimationFilter;
 import com.android.systemui.statusbar.stack.AnimationProperties;
 import com.android.systemui.statusbar.stack.ViewState;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -226,5 +227,14 @@ public class PropertyAnimatorTest extends SysuiTestCase {
         ValueAnimator animator = ViewState.getChildTag(mView, mProperty.getAnimatorTag());
         assertNotNull(animator);
         assertTrue(animator.getListeners().contains(mFinishListener));
+    }
+
+    @Test
+    public void testIsAnimating() {
+        mAnimationFilter.reset();
+        mAnimationFilter.animate(mProperty.getProperty());
+        assertFalse(PropertyAnimator.isAnimating(mView, mProperty));
+        PropertyAnimator.startAnimation(mView, mProperty, 200f, mAnimationProperties);
+        assertTrue(PropertyAnimator.isAnimating(mView, mProperty));
     }
 }
