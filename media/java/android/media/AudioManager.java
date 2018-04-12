@@ -4817,7 +4817,10 @@ public class AudioManager {
         filterTypes.add(AudioDeviceInfo.TYPE_TELEPHONY);
         if (status != AudioManager.SUCCESS) {
             // fail and populate microphones with unknown characteristics by device information.
-            Log.e(TAG, "getMicrophones failed:" + status);
+            if (status != AudioManager.ERROR_INVALID_OPERATION) {
+                Log.e(TAG, "getMicrophones failed:" + status);
+            }
+            Log.i(TAG, "fallback on device info");
             addMicrophonesFromAudioDeviceInfo(microphones, filterTypes);
             return microphones;
         }
