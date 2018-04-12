@@ -277,7 +277,9 @@
     <!-- The width of the panel that holds the quick settings. -->
     <dimen name="qs_panel_width">@dimen/notification_panel_width</dimen>
 
-    <dimen name="volume_dialog_panel_transparent_padding">8dp</dimen>
+    <dimen name="volume_dialog_panel_transparent_padding_right">8dp</dimen>
+
+    <dimen name="volume_dialog_panel_transparent_padding">20dp</dimen>
 
     <!-- the amount the volume panel should be offset at the end from the view next to it (or
     the screen edge, in portrait-->
