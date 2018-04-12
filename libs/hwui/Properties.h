@@ -247,7 +247,6 @@ public:
 
     static ProfileType getProfileType();
     ANDROID_API static RenderPipelineType getRenderPipelineType();
-    static bool isSkiaEnabled();
 
     ANDROID_API static bool enableHighContrastText;
 

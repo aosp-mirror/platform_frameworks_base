@@ -215,10 +215,5 @@ void Properties::overrideRenderPipelineType(RenderPipelineType type) {
     sRenderPipelineType = type;
 }
 
-bool Properties::isSkiaEnabled() {
-    auto renderType = getRenderPipelineType();
-    return RenderPipelineType::SkiaGL == renderType || RenderPipelineType::SkiaVulkan == renderType;
-}
-
 };  // namespace uirenderer
 };  // namespace android

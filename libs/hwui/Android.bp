@@ -217,7 +217,6 @@ cc_defaults {
         "DeferredLayerUpdater.cpp",
         "DeviceInfo.cpp",
         "DisplayList.cpp",
-        "Extensions.cpp",
         "FboCache.cpp",
         "FontRenderer.cpp",
         "FrameBuilder.cpp",
