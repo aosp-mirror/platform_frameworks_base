@@ -909,7 +909,8 @@ public final class MediaCodecInfo {
             if (mMime.toLowerCase().startsWith("audio/")) {
                 mAudioCaps = AudioCapabilities.create(info, this);
                 mAudioCaps.getDefaultFormat(mDefaultFormat);
-            } else if (mMime.toLowerCase().startsWith("video/")) {
+            } else if (mMime.toLowerCase().startsWith("video/")
+                    || mMime.equalsIgnoreCase(MediaFormat.MIMETYPE_IMAGE_ANDROID_HEIC)) {
                 mVideoCaps = VideoCapabilities.create(info, this);
             }
             if (encoder) {
