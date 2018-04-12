@@ -45,10 +45,8 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
-import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
-import android.media.MediaPlayer;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.Looper;
@@ -132,8 +130,8 @@ public class VolumeDialogImpl implements VolumeDialog {
     private final AccessibilityManagerWrapper mAccessibilityMgr;
     private final Object mSafetyWarningLock = new Object();
     private final Accessibility mAccessibility = new Accessibility();
-    private final ColorStateList mActiveSliderTint;
-    private final ColorStateList mInactiveSliderTint;
+    private final ColorStateList mActiveTint;
+    private final ColorStateList mInactiveTint;
     private final Vibrator mVibrator;
 
     private boolean mShowing;
@@ -152,8 +150,8 @@ public class VolumeDialogImpl implements VolumeDialog {
         mController = Dependency.get(VolumeDialogController.class);
         mKeyguard = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         mAccessibilityMgr = Dependency.get(AccessibilityManagerWrapper.class);
-        mActiveSliderTint = ColorStateList.valueOf(Utils.getColorAccent(mContext));
-        mInactiveSliderTint = loadColorStateList(R.color.volume_slider_inactive);
+        mActiveTint = ColorStateList.valueOf(Utils.getColorAccent(mContext));
+        mInactiveTint = loadColorStateList(R.color.volume_slider_inactive);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
     }
@@ -614,7 +612,7 @@ public class VolumeDialogImpl implements VolumeDialog {
             final boolean shouldBeVisible = shouldBeVisibleH(row, activeRow);
             Util.setVisOrGone(row.view, shouldBeVisible);
             if (row.view.isShown()) {
-                updateVolumeRowSliderTintH(row, isActive);
+                updateVolumeRowTintH(row, isActive);
             }
         }
     }
@@ -848,21 +846,22 @@ public class VolumeDialogImpl implements VolumeDialog {
         updateVolumeRowSliderH(row, enableSlider, vlevel);
     }
 
-    private void updateVolumeRowSliderTintH(VolumeRow row, boolean isActive) {
+    private void updateVolumeRowTintH(VolumeRow row, boolean isActive) {
         if (isActive) {
             row.slider.requestFocus();
         }
-        final ColorStateList tint = isActive && row.slider.isEnabled() ? mActiveSliderTint
-                : mInactiveSliderTint;
-        if (tint == row.cachedSliderTint) return;
-        row.cachedSliderTint = tint;
+        final ColorStateList tint = isActive && row.slider.isEnabled() ? mActiveTint
+                : mInactiveTint;
+        if (tint == row.cachedTint) return;
         row.slider.setProgressTintList(tint);
         row.slider.setThumbTintList(tint);
+        row.icon.setImageTintList(tint);
+        row.cachedTint = tint;
     }
 
     private void updateVolumeRowSliderH(VolumeRow row, boolean enable, int vlevel) {
         row.slider.setEnabled(enable);
-        updateVolumeRowSliderTintH(row, row.stream == mActiveStream);
+        updateVolumeRowTintH(row, row.stream == mActiveStream);
         if (row.tracking) {
             return;  // don't update if user is sliding
         }
@@ -1234,7 +1233,7 @@ public class VolumeDialogImpl implements VolumeDialog {
         private int iconMuteRes;
         private boolean important;
         private boolean defaultStream;
-        private ColorStateList cachedSliderTint;
+        private ColorStateList cachedTint;
         private int iconState;  // from Events
         private ObjectAnimator anim;  // slider progress animation for non-touch-related updates
         private int animTargetProgress;
