@@ -107,6 +107,15 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     public static final int CODE_DATA_BROADCAST = 1;
     public static final int CODE_SUBSCRIBER_BROADCAST = 1;
+    /**
+     * The last report time is provided with each intent registered to
+     * StatsManager#setFetchReportsOperation. This allows easy de-duping in the receiver if
+     * statsd is requesting the client to retrieve the same statsd data. The last report time
+     * corresponds to the last_report_elapsed_nanos that will provided in the current
+     * ConfigMetricsReport, and this timestamp also corresponds to the
+     * current_report_elapsed_nanos of the most recently obtained ConfigMetricsReport.
+     */
+    public static final String EXTRA_LAST_REPORT_TIME = "android.app.extra.LAST_REPORT_TIME";
     public static final int DEATH_THRESHOLD = 10;
 
     private final Context mContext;
@@ -197,10 +206,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     }
 
     @Override
-    public void sendDataBroadcast(IBinder intentSenderBinder) {
+    public void sendDataBroadcast(IBinder intentSenderBinder, long lastReportTimeNs) {
         enforceCallingPermission();
         IntentSender intentSender = new IntentSender(intentSenderBinder);
         Intent intent = new Intent();
+        intent.putExtra(EXTRA_LAST_REPORT_TIME, lastReportTimeNs);
         try {
             intentSender.sendIntent(mContext, CODE_DATA_BROADCAST, intent, null, null);
         } catch (IntentSender.SendIntentException e) {
@@ -274,7 +284,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         // Add in all the apps for every user/profile.
         for (UserInfo profile : users) {
             List<PackageInfo> pi =
-                pm.getInstalledPackagesAsUser(PackageManager.MATCH_DISABLED_COMPONENTS, profile.id);
+                pm.getInstalledPackagesAsUser(PackageManager.MATCH_KNOWN_PACKAGES, profile.id);
             for (int j = 0; j < pi.size(); j++) {
                 if (pi.get(j).applicationInfo != null) {
                     uids.add(pi.get(j).applicationInfo.uid);

@@ -90,7 +90,7 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
             VLOG("Statscompanion could not find a broadcast receiver for %s",
                  key.ToString().c_str());
         } else {
-            sc->sendDataBroadcast(receiver);
+            sc->sendDataBroadcast(receiver, mProcessor->getLastReportTimeNs(key));
         }
     }
     );
@@ -377,14 +377,15 @@ status_t StatsService::cmd_trigger_broadcast(FILE* out, Vector<String8>& args) {
         print_cmd_help(out);
         return UNKNOWN_ERROR;
     }
-    auto receiver = mConfigManager->GetConfigReceiver(ConfigKey(uid, StrToInt64(name)));
+    ConfigKey key(uid, StrToInt64(name));
+    auto receiver = mConfigManager->GetConfigReceiver(key);
     sp<IStatsCompanionService> sc = getStatsCompanionService();
     if (sc == nullptr) {
         VLOG("Could not access statsCompanion");
     } else if (receiver == nullptr) {
         VLOG("Could not find receiver for %s, %s", args[1].c_str(), args[2].c_str())
     } else {
-        sc->sendDataBroadcast(receiver);
+        sc->sendDataBroadcast(receiver, mProcessor->getLastReportTimeNs(key));
         VLOG("StatsService::trigger broadcast succeeded to %s, %s", args[1].c_str(),
              args[2].c_str());
     }
