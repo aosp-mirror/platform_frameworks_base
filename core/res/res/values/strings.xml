@@ -4957,4 +4957,8 @@
     <string name="notification_app_name_system">System</string>
     <!-- Application name displayed in notifications [CHAR LIMIT=60] -->
     <string name="notification_app_name_settings">Settings</string>
+
+    <!-- Strings for car -->
+    <!-- String displayed when loading a user in the car [CHAR LIMIT=30] -->
+    <string name="car_loading_profile">Loading</string>
 </resources>
