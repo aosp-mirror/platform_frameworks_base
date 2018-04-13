@@ -414,6 +414,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     final Object mNetworkPoliciesSecondLock = new Object();
 
     @GuardedBy("allLocks") volatile boolean mSystemReady;
+    volatile boolean mSystemReallyReady;
 
     @GuardedBy("mUidRulesFirstLock") volatile boolean mRestrictBackground;
     @GuardedBy("mUidRulesFirstLock") volatile boolean mRestrictPower;
@@ -866,6 +867,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Service " + TAG + " init interrupted", e);
         }
+        mSystemReallyReady = true;
     }
 
     final private IUidObserver mUidObserver = new IUidObserver.Stub() {
@@ -1402,6 +1404,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // on background handler thread, and verified CONNECTIVITY_INTERNAL
             // permission above.
 
+            if (!mSystemReallyReady) return;
             synchronized (mUidRulesFirstLock) {
                 synchronized (mNetworkPoliciesSecondLock) {
                     ensureActiveMobilePolicyAL();
