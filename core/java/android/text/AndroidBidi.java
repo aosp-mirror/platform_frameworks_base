@@ -32,8 +32,12 @@ import com.android.internal.annotations.VisibleForTesting;
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public class AndroidBidi {
 
-    private static class EmojiBidiOverride extends BidiClassifier {
-        EmojiBidiOverride() {
+    /**
+     * Overrides ICU {@link BidiClassifier} in order to correctly handle character directions for
+     * newest emoji that ICU is not aware of.
+     */
+    public static class EmojiBidiOverride extends BidiClassifier {
+        public EmojiBidiOverride() {
             super(null /* No persisting object needed */);
         }
 
