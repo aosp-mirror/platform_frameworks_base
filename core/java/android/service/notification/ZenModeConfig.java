@@ -1470,6 +1470,17 @@ public class ZenModeConfig implements Parcelable {
     }
 
     /**
+     * Determines if DND is currently overriding the ringer
+     */
+    public static boolean isZenOverridingRinger(int zen, ZenModeConfig zenConfig) {
+        // TODO (beverlyt): check if apps can bypass dnd b/77729075
+        return zen == Global.ZEN_MODE_NO_INTERRUPTIONS
+                || zen == Global.ZEN_MODE_ALARMS
+                || (zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
+                && ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(zenConfig));
+    }
+
+    /**
      * Determines whether dnd behavior should mute all sounds controlled by ringer
      */
     public static boolean areAllPriorityOnlyNotificationZenSoundsMuted(ZenModeConfig config) {

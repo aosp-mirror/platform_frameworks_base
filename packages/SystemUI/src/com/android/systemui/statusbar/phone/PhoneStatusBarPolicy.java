@@ -50,6 +50,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.StatusBarNotification;
+import android.service.notification.ZenModeConfig;
 import android.telecom.TelecomManager;
 import android.util.ArraySet;
 import android.util.Log;
@@ -287,6 +288,11 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
     }
 
     @Override
+    public void onConfigChanged(ZenModeConfig config) {
+        updateVolumeZen();
+    }
+
+    @Override
     public void onLocationActiveChanged(boolean active) {
         updateLocation();
     }
@@ -363,16 +369,16 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
             zenDescription = mContext.getString(R.string.interruption_level_priority);
         }
 
-        if (zen != Global.ZEN_MODE_NO_INTERRUPTIONS && zen != Global.ZEN_MODE_ALARMS &&
-                audioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_VIBRATE) {
-            volumeVisible = true;
-            volumeIconId = R.drawable.stat_sys_ringer_vibrate;
-            volumeDescription = mContext.getString(R.string.accessibility_ringer_vibrate);
-        } else if (zen != Global.ZEN_MODE_NO_INTERRUPTIONS && zen != Global.ZEN_MODE_ALARMS &&
-                audioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_SILENT) {
-            volumeVisible = true;
-            volumeIconId = R.drawable.stat_sys_ringer_silent;
-            volumeDescription = mContext.getString(R.string.accessibility_ringer_silent);
+        if (!ZenModeConfig.isZenOverridingRinger(zen, mZenController.getConfig())) {
+            if (audioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_VIBRATE) {
+                volumeVisible = true;
+                volumeIconId = R.drawable.stat_sys_ringer_vibrate;
+                volumeDescription = mContext.getString(R.string.accessibility_ringer_vibrate);
+            } else if (audioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_SILENT) {
+                volumeVisible = true;
+                volumeIconId = R.drawable.stat_sys_ringer_silent;
+                volumeDescription = mContext.getString(R.string.accessibility_ringer_silent);
+            }
         }
 
         if (zenVisible) {
