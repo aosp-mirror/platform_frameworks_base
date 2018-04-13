@@ -31,4 +31,13 @@ interface ISchedulingPolicyService {
      */
     int requestPriority(int pid, int tid, int prio, boolean isForApp);
 
+    /**
+     * Move media.codec process between SP_FOREGROUND and SP_TOP_APP.
+     * When 'enable' is 'true', server will attempt to move media.codec process
+     * from SP_FOREGROUND into SP_TOP_APP cpuset. A valid 'client' must be
+     * provided for the server to receive death notifications. When 'enable'
+     * is 'false', server will attempt to move media.codec process back to
+     * the original cpuset, and 'client' is ignored in this case.
+     */
+    int requestCpusetBoost(boolean enable, IBinder client);
 }
