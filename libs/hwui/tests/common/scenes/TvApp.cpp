@@ -194,7 +194,8 @@ private:
 
         // re-recording card's canvas, not necessary but to add some burden to CPU
         std::unique_ptr<Canvas> cardcanvas(Canvas::create_recording_canvas(
-                card->stagingProperties().getWidth(), card->stagingProperties().getHeight()));
+                card->stagingProperties().getWidth(), card->stagingProperties().getHeight(),
+                card.get()));
         sp<RenderNode> image = mImages[ci];
         sp<RenderNode> infoArea = mInfoAreas[ci];
         cardcanvas->drawRenderNode(infoArea.get());
@@ -205,14 +206,16 @@ private:
             sp<RenderNode> overlay = mOverlays[ci];
             std::unique_ptr<Canvas> canvas(
                     Canvas::create_recording_canvas(overlay->stagingProperties().getWidth(),
-                                                    overlay->stagingProperties().getHeight()));
+                                                    overlay->stagingProperties().getHeight(),
+                                                    overlay.get()));
             canvas->drawColor((curFrame % 150) << 24, SkBlendMode::kSrcOver);
             overlay->setStagingDisplayList(canvas->finishRecording());
             cardcanvas->drawRenderNode(overlay.get());
         } else {
             // re-recording image node's canvas, animating ColorFilter
             std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(
-                    image->stagingProperties().getWidth(), image->stagingProperties().getHeight()));
+                    image->stagingProperties().getWidth(), image->stagingProperties().getHeight(),
+                    image.get()));
             SkPaint paint;
             sk_sp<SkColorFilter> filter(
                     SkColorFilter::MakeModeFilter((curFrame % 150) << 24, SkBlendMode::kSrcATop));
