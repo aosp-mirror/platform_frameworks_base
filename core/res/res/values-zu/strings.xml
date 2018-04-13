@@ -1777,9 +1777,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Zonke izilimi"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Zonke izifunda"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Sesha"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"Isenzo asivunyelwe"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"Uhlelo lokusebenza <xliff:g id="APP_NAME">%1$s</xliff:g> okwamanje likhutshaziwe."</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"Eminye imininingwane"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Vula iphrofayela yomsebenzi?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Izinhlelo zakho zokusebenza zomsebenzi, izaziso, idatha, nezinye izici zephrofayela yomsebenzi kuzovulwa"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Vula"</string>

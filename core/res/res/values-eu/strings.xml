@@ -1691,8 +1691,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Administratzaileak instalatu du"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Administratzaileak ezabatu du"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"Bateriak gehiago iraun dezan, bateria-aurrezleak gailuaren eginbide batzuk desaktibatu eta aplikazioak mugatzen ditu."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Datuen erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurrezleak aplikazio batzuei. Unean erabiltzen ari zaren aplikazioak atzi ditzake datuak, baina baliteke maiztasun txikiagoarekin atzitzea. Horrela, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Datu-aurrezlea aktibatu?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktibatu"</string>
@@ -1779,9 +1778,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Hizkuntza guztiak"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Lurralde guztiak"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Bilaketa"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"Ez da onartzen ekintza"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"Desgaituta dago <xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioa."</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"Xehetasun gehiago"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Laneko profila aktibatu?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Laneko aplikazioak, jakinarazpenak, datuak eta laneko profileko bestelako eginbideak aktibatuko dira"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Aktibatu"</string>
@@ -1871,10 +1873,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Ez da joko tonurik deiak eta jakinarazpenak jasotzean"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Sistema-aldaketak"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Ez molestatu"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Berria: \"Ez molestatu\" modua jakinarazpenak ezkutatzen ari da"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Sakatu informazio gehiago lortzeko eta portaera aldatzeko."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\"Ez molestatu\" modua aldatu da"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Sakatu zer dagoen blokeatuta ikusteko."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistema"</string>

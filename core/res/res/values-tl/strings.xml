@@ -389,14 +389,14 @@
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Binibigyan-daan ang app na baguhin ang log ng tawag ng iyong telepono, kabilang ang data tungkol sa mga paparating at papalabas na tawag. Maaari itong gamitin ng nakakahamak na apps upang burahin o baguhin ang iyong log ng tawag."</string>
     <string name="permlab_bodySensors" msgid="4683341291818520277">"i-access ang mga sensor sa katawan (tulad ng mga monitor ng bilis ng tibok ng puso)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Pinapayagan ang app na i-access ang data mula sa mga sensor na sumusubaybay sa iyong pisikal na kondisyon, tulad ng iyong heart rate."</string>
-    <string name="permlab_readCalendar" msgid="6716116972752441641">"Magbasa ng mga kaganapan sa kalendaryo at detalye"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Mababasa ng app na ito ang lahat ng kaganapan sa kalendaryo na naka-store sa iyong tablet at maibabahagi o mase-save nito ang data ng iyong kalendaryo."</string>
-    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Mababasa ng app na ito ang lahat ng kaganapan sa kalendaryo na naka-store sa iyong TV at maibabahagi o mase-save nito ang data ng iyong kalendaryo."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Mababasa ng app na ito ang lahat ng kaganapan sa kalendaryo na naka-store sa iyong telepono at maibabahagi o mase-save nito ang data ng iyong kalendaryo."</string>
-    <string name="permlab_writeCalendar" msgid="8438874755193825647">"magdagdag o magbago ng mga kaganapan sa kalendaryo at magpadala ng email sa mga bisita nang hindi nalalaman ng mga may-ari"</string>
-    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Makakapagdagdag, makakapag-alis o makakapagbago ang app na ito ng mga kaganapan sa kalendaryo sa iyong tablet. Magagawa ng app na ito na magpadala ng mga mensahe na maaaring mukhang mula sa mga may-ari ng kalendaryo o magbago ng mga kaganapan nang hindi inaabisuhan ang mga may-ari nito."</string>
-    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Makakapagdagdag, makakapag-alis o makakapagbago ang app na ito ng mga kaganapan sa kalendaryo sa iyong TV. Magagawa ng app na ito na magpadala ng mga mensahe na maaaring mukhang mula sa mga may-ari ng kalendaryo o magbago ng mga kaganapan nang hindi inaabisuhan ang mga may-ari nito."</string>
-    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Makakapagdagdag, makakapag-alis o makakapagbago ang app na ito ng mga kaganapan sa kalendaryo sa iyong telepono. Magagawa ng app na ito na magpadala ng mga mensahe na maaaring mukhang mula sa mga may-ari ng kalendaryo o magbago ng mga kaganapan nang hindi inaabisuhan ang mga may-ari nito."</string>
+    <string name="permlab_readCalendar" msgid="6716116972752441641">"Magbasa ng mga event sa kalendaryo at detalye"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Mababasa ng app na ito ang lahat ng event sa kalendaryo na naka-store sa iyong tablet at maibabahagi o mase-save nito ang data ng iyong kalendaryo."</string>
+    <string name="permdesc_readCalendar" product="tv" msgid="8837931557573064315">"Mababasa ng app na ito ang lahat ng event sa kalendaryo na naka-store sa iyong TV at maibabahagi o mase-save nito ang data ng iyong kalendaryo."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="4373978642145196715">"Mababasa ng app na ito ang lahat ng event sa kalendaryo na naka-store sa iyong telepono at maibabahagi o mase-save nito ang data ng iyong kalendaryo."</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"magdagdag o magbago ng mga event sa kalendaryo at magpadala ng email sa mga bisita nang hindi nalalaman ng mga may-ari"</string>
+    <string name="permdesc_writeCalendar" product="tablet" msgid="1675270619903625982">"Makakapagdagdag, makakapag-alis o makakapagbago ang app na ito ng mga event sa kalendaryo sa iyong tablet. Magagawa ng app na ito na magpadala ng mga mensahe na maaaring mukhang mula sa mga may-ari ng kalendaryo o magbago ng mga event nang hindi inaabisuhan ang mga may-ari nito."</string>
+    <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Makakapagdagdag, makakapag-alis o makakapagbago ang app na ito ng mga event sa kalendaryo sa iyong TV. Magagawa ng app na ito na magpadala ng mga mensahe na maaaring mukhang mula sa mga may-ari ng kalendaryo o magbago ng mga event nang hindi inaabisuhan ang mga may-ari nito."</string>
+    <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Makakapagdagdag, makakapag-alis o makakapagbago ang app na ito ng mga event sa kalendaryo sa iyong telepono. Magagawa ng app na ito na magpadala ng mga mensahe na maaaring mukhang mula sa mga may-ari ng kalendaryo o magbago ng mga event nang hindi inaabisuhan ang mga may-ari nito."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"i-access ang mga dagdag na command ng provider ng lokasyon"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Nagbibigay-daan sa app na mag-access ng mga karagdagang command ng provider ng lokasyon. Maaari nitong bigyang-daan ang app na gambalain ang pagpapatakbo ng GPS o ng iba pang mga pinagmulan ng lokasyon."</string>
     <string name="permlab_accessFineLocation" msgid="251034415460950944">"i-access ang tumpak na lokasyon (batay sa GPS at network)"</string>
@@ -517,7 +517,7 @@
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"I-toggle on at off ang pag-sync"</string>
     <string name="permdesc_writeSyncSettings" msgid="8956262591306369868">"Pinapayagan ang isang app na baguhin ang mga setting ng pag-sync para sa isang account. Halimbawa, magagamit ito upang paganahin ang pag-sync ng app na Mga Tao sa isang account."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"basahin ang mga istatistika ng sync"</string>
-    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Pinapayagan ang app na basahin ang mga istatistika ng pag-sync para sa isang account, kabilang ang kasaysayan ng mga kaganapan sa pag-sync at kung ilang data ang naka-sync."</string>
+    <string name="permdesc_readSyncStats" msgid="1510143761757606156">"Pinapayagan ang app na basahin ang mga istatistika ng pag-sync para sa isang account, kabilang ang kasaysayan ng mga event sa pag-sync at kung ilang data ang naka-sync."</string>
     <string name="permlab_sdcardRead" product="nosdcard" msgid="367275095159405468">"basa nilalaman USB storage mo"</string>
     <string name="permlab_sdcardRead" product="default" msgid="2188156462934977940">"basahin ang mga nilalaman ng iyong SD card"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3446988712598386079">"Pinapayagan ang app na basahin ang mga nilalaman ng iyong USB storage."</string>
@@ -889,9 +889,9 @@
     <string name="searchview_description_clear" msgid="1330281990951833033">"I-clear ang query"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"Isumite ang query"</string>
     <string name="searchview_description_voice" msgid="2453203695674994440">"Paghahanap gamit ang boses"</string>
-    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"Paganahin ang Galugad sa pagpindot?"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"Nais paganahin ng <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ang Galugarin sa pamamagitan ng pagpindot. Kapag naka-on ang Galugarin sa pamamagitan ng pagpindot, maaari mong marinig o makita ang mga paglalarawan ng nasa ilalim ng iyong daliri o maaari kang magsagawa ng mga galaw upang makipag-ugnayan sa tablet."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"Nais paganahin ng <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ang Galugarin sa pamamagitan ng pagpindot. Kapag naka-on ang Galugarin sa pamamagitan ng pagpindot, maaari mong marinig o makita ang mga paglalarawan ng nasa ilalim ng iyong daliri o maaari kang magsagawa ng mga galaw upang makipag-ugnayan sa telepono."</string>
+    <string name="enable_explore_by_touch_warning_title" msgid="7460694070309730149">"I-enable ang Explore by Touch?"</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="8655887539089910577">"Nais i-enable ng <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ang Explore by Touch. Kapag naka-on ang Explore by Touch, maaari mong marinig o makita ang mga paglalarawan ng nasa ilalim ng iyong daliri o maaari kang magsagawa ng mga galaw upang makipag-ugnayan sa tablet."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="2708199672852373195">"Nais i-enable ng <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ang Explore by Touch. Kapag naka-on ang Explore by Touch, maaari mong marinig o makita ang mga paglalarawan ng nasa ilalim ng iyong daliri o maaari kang magsagawa ng mga galaw upang makipag-ugnayan sa telepono."</string>
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"1 buwan ang nakalipas"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Bago ang nakalipas na 1 buwan"</string>
     <plurals name="last_num_days" formatted="false" msgid="5104533550723932025">
@@ -1024,7 +1024,7 @@
     <string name="view_calendar" msgid="979609872939597838">"Tingnan"</string>
     <string name="view_calendar_desc" msgid="5828320291870344584">"Tingnan ang piniling oras sa kalendaryo"</string>
     <string name="add_calendar_event" msgid="1953664627192056206">"Mag-iskedyul"</string>
-    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Mag-iskedyul ng kaganapan para sa piniling oras"</string>
+    <string name="add_calendar_event_desc" msgid="4326891793260687388">"Mag-iskedyul ng event para sa piniling oras"</string>
     <string name="view_flight" msgid="7691640491425680214">"Subaybayan"</string>
     <string name="view_flight_desc" msgid="3876322502674253506">"I-track ang piniling flight"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Nauubusan na ang puwang ng storage"</string>
@@ -1690,8 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Na-install ng iyong admin"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Na-update ng iyong admin"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Na-delete ng iyong admin"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"Para mas tumagal ang iyong baterya, ino-off ng Pangtipid sa Baterya ang ilang feature ng device at pinaghihigpitan nito ang mga app."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Upang makatulong na mabawasan ang paggamit ng data, pinipigilan ng Data Saver ang ilang app na magpadala o makatanggap ng data sa background. Maaaring mag-access ng data ang isang app na ginagamit mo sa kasalukuyan, ngunit mas bihira na nito magagawa iyon. Halimbawa, maaaring hindi lumabas ang mga larawan hangga\'t hindi mo nata-tap ang mga ito."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"I-on ang Data Saver?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"I-on"</string>
@@ -1737,7 +1736,7 @@
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Walang serbisyo"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Weeknight"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Weekend"</string>
-    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Kaganapan"</string>
+    <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Event"</string>
     <string name="zen_mode_default_every_night_name" msgid="3012363838882944175">"Pag-sleep"</string>
     <string name="muted_by" msgid="6147073845094180001">"Na-mute ng <xliff:g id="THIRD_PARTY">%1$s</xliff:g>"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"May internal na problema sa iyong device, at maaaring hindi ito maging stable hanggang sa i-reset mo ang factory data."</string>
@@ -1778,9 +1777,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Lahat ng wika"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Lahat ng rehiyon"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Maghanap"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"Hindi pinayagan ang pagkilos"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"Kasalukuyang naka-disable ang application na <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"Higit pang detalye"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"I-on ang profile sa trabaho?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Mao-on ang iyong mga app sa trabaho, notification, data, at iba pang feature sa profile sa trabaho"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"I-on"</string>
@@ -1870,10 +1872,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Mamu-mute ang mga tawag at notification"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Mga pagbabago sa system"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Huwag Istorbohin"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Bago: Itinatago ng Huwag Istorbohin ang mga notification"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"I-tap para matuto pa at baguhin."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Binago ang Huwag Istorbohin"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"I-tap para tingnan kung ano ang naka-block."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"System"</string>

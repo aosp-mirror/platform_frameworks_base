@@ -1913,9 +1913,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"جميع اللغات"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"كل المناطق"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"البحث"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"غير مسموح بهذا الإجراء"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"تم إيقاف التطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> حاليًا."</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"المزيد من التفاصيل"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"تفعيل الملف الشخصي للعمل؟"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"سيتم تفعيل تطبيقات العمل التي تستخدمها والإشعارات والبيانات وغيرها من ميزات الملف الشخصي للعمل"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"تشغيل"</string>
