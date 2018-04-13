@@ -27,6 +27,7 @@ import android.annotation.SuppressAutoDoc;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.WorkerThread;
 import android.app.ActivityThread;
 import android.app.PendingIntent;
@@ -1033,6 +1034,13 @@ public class TelephonyManager {
      * {@link #getSimOperator() MCC+MNC} cannot be identified.
      */
     public static final int UNKNOWN_CARRIER_ID = -1;
+
+    /**
+     * An unknown carrier id list version.
+     * @hide
+     */
+    @TestApi
+    public static final int UNKNOWN_CARRIER_ID_LIST_VERSION = -1;
 
     /**
      * Broadcast Action: The subscription carrier identity has changed.
@@ -7755,5 +7763,50 @@ public class TelephonyManager {
                 ex.rethrowAsRuntimeException();
             }
         }
+    }
+
+    /**
+     * A test API to override carrier information including mccmnc, imsi, iccid, gid1, gid2,
+     * plmn and spn. This would be handy for, eg, forcing a particular carrier id, carrier's config
+     * (also any country or carrier overlays) to be loaded when using a test SIM with a call box.
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
+     *
+     * @hide
+     */
+    @TestApi
+    public void setCarrierTestOverride(String mccmnc, String imsi, String iccid, String gid1,
+            String gid2, String plmn, String spn) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.setCarrierTestOverride(
+                        getSubId(), mccmnc, imsi, iccid, gid1, gid2, plmn, spn);
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+        }
+    }
+
+    /**
+     * A test API to return installed carrier id list version
+     *
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     *
+     * @hide
+     */
+    @TestApi
+    public int getCarrierIdListVersion() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getCarrierIdListVersion(getSubId());
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+        }
+        return UNKNOWN_CARRIER_ID_LIST_VERSION;
     }
 }

@@ -1481,4 +1481,17 @@ interface ITelephony {
      * screen is off) we want to turn on those indications even when the screen is off.
      */
     void setRadioIndicationUpdateMode(int subId, int filters, int mode);
+
+    /**
+     * A test API to override carrier information including mccmnc, imsi, iccid, gid1, gid2,
+     * plmn and spn. This would be handy for, eg, forcing a particular carrier id, carrier's config
+     * (also any country or carrier overlays) to be loaded when using a test SIM with a call box.
+     */
+    void setCarrierTestOverride(int subId, String mccmnc, String imsi, String iccid, String gid1,
+            String gid2, String plmn, String spn);
+
+    /**
+     * A test API to return installed carrier id list version.
+     */
+    int getCarrierIdListVersion(int subId);
 }
