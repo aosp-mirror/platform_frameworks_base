@@ -56,6 +56,10 @@ public final class MathUtils {
         return (float) Math.pow(a, b);
     }
 
+    public static float sqrt(float a) {
+        return (float) Math.sqrt(a);
+    }
+
     public static float max(float a, float b) {
         return a > b ? a : b;
     }
