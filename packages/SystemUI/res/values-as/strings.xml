@@ -148,20 +148,23 @@
     <string name="data_connection_gprs" msgid="7652872568358508452">"জিপিআৰএছ"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
     <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
-    <string name="data_connection_3_5g" msgid="5218328297191657602">"3.5G"</string>
-    <string name="data_connection_3_5g_plus" msgid="7570783890290275297">"3.5G+"</string>
+    <string name="data_connection_3_5g" msgid="3164370985817123144">"H"</string>
+    <string name="data_connection_3_5g_plus" msgid="4464630787664529264">"H+"</string>
     <string name="data_connection_4g" msgid="9139963475267449144">"4G"</string>
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"এলটিই"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"এলটিই+"</string>
-    <string name="data_connection_cdma" msgid="4677985502159869585">"CDMA"</string>
+    <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"ৰ\'মিং"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"ৱাই-ফাই"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"ছিম নাই।"</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"ম\'বাইল ডেটা"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"ম\'বাইল ডেটা অন অৱস্থাত আছে"</string>
-    <string name="cell_data_off" msgid="5287705247512911922">"ম\'বাইল ডেটা অফ হৈ আছে"</string>
+    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
+    <skip />
+    <!-- no translation found for cell_data_off (1051264981229902873) -->
+    <skip />
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"ব্লুটুথ টেডাৰিং।"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"এয়াৰপ্লেইন ম\'ড।"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"ভিপিএন অন অৱস্থাত আছে।"</string>
@@ -359,6 +362,10 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g>টো সুৰক্ষিত ম\'ডত অক্ষম কৰা হ\'ল।"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"সকলো মচক"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"বিভাজিত স্ক্ৰীণ ব্য়ৱহাৰ কৰিবলৈ ইয়ালৈ টানি আনি এৰক"</string>
+    <!-- no translation found for recents_swipe_up_onboarding (3824607135920170001) -->
+    <skip />
+    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
+    <skip />
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"আনুভূমিকভাৱে বিভাজিত কৰক"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"উলম্বভাৱে বিভাজিত কৰক"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"উপযোগিতা অনুসৰি বিভাজিত কৰক"</string>
@@ -531,18 +538,15 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"ৰিং"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"কম্পন"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"মিউট"</string>
-    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
-    <skip />
-    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
-    <skip />
+    <string name="qs_status_phone_vibrate" msgid="204362991135761679">"ফ\'ন কম্পন ম\'ডত আছে"</string>
+    <string name="qs_status_phone_muted" msgid="5437668875879171548">"ফ\'ন মিউট ম\'ডত আছে"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s। আনমিউট কৰিবৰ বাবে টিপক।"</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s। কম্পনৰ বাবে টিপক। দিব্য়াংগসকলৰ বাবে থকা সেৱা মিউট হৈ থাকিব পাৰে।"</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s। মিউট কৰিবলৈ টিপক। দিব্য়াংগসকলৰ বাবে থকা সেৱা মিউট হৈ থাকিব পাৰে।"</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s। কম্পন অৱস্থাত ছেট কৰিবলৈ টিপক।"</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s। মিউট কৰিবলৈ টিপক।"</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s ধ্বনি নিয়ন্ত্ৰণসমূহ"</string>
-    <!-- no translation found for volume_dialog_ringer_guidance_ring (3360373718388509040) -->
-    <skip />
+    <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"কল আৰু জাননীবোৰ ইমান ভলিউমত বাজিব (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"মিডিয়া আউটপুট"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"ফ\'ন কল আউটপুট"</string>
     <string name="output_none_found" msgid="5544982839808921091">"কোনো ডিভাইচ বিচাৰি পোৱা নগ\'ল"</string>
@@ -693,8 +697,7 @@
     <string name="battery" msgid="7498329822413202973">"বেটাৰি"</string>
     <string name="clock" msgid="7416090374234785905">"ঘড়ী"</string>
     <string name="headset" msgid="4534219457597457353">"হেডছেট"</string>
-    <!-- no translation found for accessibility_long_click_tile (6687350750091842525) -->
-    <skip />
+    <string name="accessibility_long_click_tile" msgid="6687350750091842525">"ছেটিংসমূহ খোলক"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"হেডফ\'ন সংযোগ হৈ আছে"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"হেডছেট সংযোগ হৈ আছে"</string>
     <string name="data_saver" msgid="5037565123367048522">"ডেটা সঞ্চয়কাৰী"</string>

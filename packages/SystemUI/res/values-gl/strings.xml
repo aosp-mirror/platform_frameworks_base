@@ -148,20 +148,23 @@
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
     <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
-    <string name="data_connection_3_5g" msgid="5218328297191657602">"3.5G"</string>
-    <string name="data_connection_3_5g_plus" msgid="7570783890290275297">"3.5G+"</string>
+    <string name="data_connection_3_5g" msgid="3164370985817123144">"H"</string>
+    <string name="data_connection_3_5g_plus" msgid="4464630787664529264">"H+"</string>
     <string name="data_connection_4g" msgid="9139963475267449144">"4G"</string>
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
-    <string name="data_connection_cdma" msgid="4677985502159869585">"CDMA"</string>
+    <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Itinerancia"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Sen SIM"</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Datos móbiles"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Os datos móbiles están activados"</string>
-    <string name="cell_data_off" msgid="5287705247512911922">"Os datos móbiles están desactivados"</string>
+    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
+    <skip />
+    <!-- no translation found for cell_data_off (1051264981229902873) -->
+    <skip />
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Conexión compartida por Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo avión"</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"A VPN está activada."</string>
@@ -361,6 +364,9 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"A aplicación <xliff:g id="APP">%s</xliff:g> está desactivada no modo seguro"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Borrar todo"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Arrastrar aquí para usar a pantalla dividida"</string>
+    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Pasar o dedo cara arriba para cambiar de aplicación"</string>
+    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
+    <skip />
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Dividir en horizontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Dividir en vertical"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Dividir de xeito personalizado"</string>
@@ -533,18 +539,15 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Facer soar"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Vibrar"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Silenciar"</string>
-    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
-    <skip />
-    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
-    <skip />
+    <string name="qs_status_phone_vibrate" msgid="204362991135761679">"O teléfono está no modo de vibración"</string>
+    <string name="qs_status_phone_muted" msgid="5437668875879171548">"O teléfono está silenciado"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Toca para activar o son."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Toca para establecer a vibración. Pódense silenciar os servizos de accesibilidade."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Toca para silenciar. Pódense silenciar os servizos de accesibilidade."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Toca para establecer a vibración."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Toca para silenciar."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"Controis de volume de %s"</string>
-    <!-- no translation found for volume_dialog_ringer_guidance_ring (3360373718388509040) -->
-    <skip />
+    <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"As chamadas e as notificacións soarán (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"Saída multimedia"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Saída de chamadas telefónicas"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Non se atopou ningún dispositivo"</string>
@@ -695,8 +698,7 @@
     <string name="battery" msgid="7498329822413202973">"Batería"</string>
     <string name="clock" msgid="7416090374234785905">"Reloxo"</string>
     <string name="headset" msgid="4534219457597457353">"Auriculares"</string>
-    <!-- no translation found for accessibility_long_click_tile (6687350750091842525) -->
-    <skip />
+    <string name="accessibility_long_click_tile" msgid="6687350750091842525">"Abre a configuración"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Conectáronse os auriculares"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Conectáronse os auriculares"</string>
     <string name="data_saver" msgid="5037565123367048522">"Economizador de datos"</string>
@@ -773,13 +775,13 @@
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"É posible que a aplicación non funcione nunha pantalla secundaria."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="7793821742158306742">"A aplicación non se pode iniciar en pantallas secundarias."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Abrir configuración."</string>
-    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Abrir a configuración rápida."</string>
+    <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Abrir configuración rápida."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Pechar a configuración rápida."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Alarma definida."</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Iniciaches sesión como <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="data_connection_no_internet" msgid="4503302451650972989">"Non hai conexión a Internet"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Abrir detalles."</string>
-    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Abrir a configuración de <xliff:g id="ID_1">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Abrir configuración de <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Editar a orde das opcións de configuración."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Páxina <xliff:g id="ID_1">%1$d</xliff:g> de <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="5755818559638850294">"Pantalla de bloqueo"</string>
