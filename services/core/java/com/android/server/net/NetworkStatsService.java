@@ -282,7 +282,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private Handler mHandler;
     private Handler.Callback mHandlerCallback;
 
-    private boolean mSystemReady;
+    private volatile boolean mSystemReady;
     private long mPersistThreshold = 2 * MB_IN_BYTES;
     private long mGlobalAlertBytes;
 
