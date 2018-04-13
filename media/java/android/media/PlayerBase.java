@@ -31,6 +31,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 
@@ -58,20 +59,29 @@ public abstract class PlayerBase {
     protected float mRightVolume = 1.0f;
     protected float mAuxEffectSendLevel = 0.0f;
 
-    // for AppOps
-    private IAppOpsService mAppOps; // may be null
-    private IAppOpsCallback mAppOpsCallback;
-    private boolean mHasAppOpsPlayAudio = true; // sync'd on mLock
+    // NEVER call into AudioService (see getService()) with mLock held: PlayerBase can run in
+    // the same process as AudioService, which can synchronously call back into this class,
+    // causing deadlocks between the two
     private final Object mLock = new Object();
+
+    // for AppOps
+    private @Nullable IAppOpsService mAppOps;
+    private IAppOpsCallback mAppOpsCallback;
+    @GuardedBy("mLock")
+    private boolean mHasAppOpsPlayAudio = true;
 
     private final int mImplType;
     // uniquely identifies the Player Interface throughout the system (P I Id)
-    private int mPlayerIId;
+    private int mPlayerIId = AudioPlaybackConfiguration.PLAYER_PIID_UNASSIGNED;
 
-    private int mState; // sync'd on mLock
-    private int mStartDelayMs = 0; // sync'd on mLock
-    private float mPanMultiplierL = 1.0f; // sync'd on mLock
-    private float mPanMultiplierR = 1.0f; // sync'd on mLock
+    @GuardedBy("mLock")
+    private int mState;
+    @GuardedBy("mLock")
+    private int mStartDelayMs = 0;
+    @GuardedBy("mLock")
+    private float mPanMultiplierL = 1.0f;
+    @GuardedBy("mLock")
+    private float mPanMultiplierR = 1.0f;
 
     /**
      * Constructor. Must be given audio attributes, as they are required for AppOps.
@@ -133,16 +143,24 @@ public abstract class PlayerBase {
         }
     }
 
+    private void updateState(int state) {
+        final int piid;
+        synchronized (mLock) {
+            mState = state;
+            piid = mPlayerIId;
+        }
+        try {
+            getService().playerEvent(piid, state);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error talking to audio service, "
+                    + AudioPlaybackConfiguration.toLogFriendlyPlayerState(state)
+                    + " state will not be tracked for piid=" + piid, e);
+        }
+    }
+
     void baseStart() {
         if (DEBUG) { Log.v(TAG, "baseStart() piid=" + mPlayerIId); }
-        try {
-            synchronized (mLock) {
-                mState = AudioPlaybackConfiguration.PLAYER_STATE_STARTED;
-                getService().playerEvent(mPlayerIId, mState);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error talking to audio service, STARTED state will not be tracked", e);
-        }
+        updateState(AudioPlaybackConfiguration.PLAYER_STATE_STARTED);
         synchronized (mLock) {
             if (isRestricted_sync()) {
                 playerSetVolume(true/*muting*/,0, 0);
@@ -164,26 +182,12 @@ public abstract class PlayerBase {
 
     void basePause() {
         if (DEBUG) { Log.v(TAG, "basePause() piid=" + mPlayerIId); }
-        try {
-            synchronized (mLock) {
-                mState = AudioPlaybackConfiguration.PLAYER_STATE_PAUSED;
-                getService().playerEvent(mPlayerIId, mState);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error talking to audio service, PAUSED state will not be tracked", e);
-        }
+        updateState(AudioPlaybackConfiguration.PLAYER_STATE_PAUSED);
     }
 
     void baseStop() {
         if (DEBUG) { Log.v(TAG, "baseStop() piid=" + mPlayerIId); }
-        try {
-            synchronized (mLock) {
-                mState = AudioPlaybackConfiguration.PLAYER_STATE_STOPPED;
-                getService().playerEvent(mPlayerIId, mState);
-            }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error talking to audio service, STOPPED state will not be tracked", e);
-        }
+        updateState(AudioPlaybackConfiguration.PLAYER_STATE_STOPPED);
     }
 
     void baseSetPan(float pan) {
@@ -227,12 +231,16 @@ public abstract class PlayerBase {
      */
     void baseRelease() {
         if (DEBUG) { Log.v(TAG, "baseRelease() piid=" + mPlayerIId + " state=" + mState); }
+        boolean releasePlayer = false;
+        synchronized (mLock) {
+            if (mState != AudioPlaybackConfiguration.PLAYER_STATE_RELEASED) {
+                releasePlayer = true;
+                mState = AudioPlaybackConfiguration.PLAYER_STATE_RELEASED;
+            }
+        }
         try {
-            synchronized (mLock) {
-                if (mState != AudioPlaybackConfiguration.PLAYER_STATE_RELEASED) {
-                    getService().releasePlayer(mPlayerIId);
-                    mState = AudioPlaybackConfiguration.PLAYER_STATE_RELEASED;
-                }
+            if (releasePlayer) {
+                getService().releasePlayer(mPlayerIId);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Error talking to audio service, the player will still be tracked", e);
