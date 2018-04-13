@@ -81,3 +81,38 @@ java_library_static {
         "junit",
     ],
 }
+
+droiddoc {
+    name: "android-test-base-api-stubs-gen-docs",
+    srcs: [
+        "src/**/*.java",
+    ],
+    custom_template: "droiddoc-templates-sdk",
+    installable: false,
+    args: "-stubpackages android.test:" +
+          "android.test.suitebuilder.annotation:" +
+          "com.android.internal.util:" +
+          "junit.framework -stubsourceonly -nodocs",
+    sdk_version: "current",
+    api_tag_name: "ANDROID_TEST_BASE",
+    api_filename: "android-test-base-api.txt",
+    removed_api_filename: "android-test-base-removed.txt",
+}
+
+// Build the android.test.base.stubs library
+// =========================================
+java_library_static {
+    name: "android.test.base.stubs",
+    srcs: [
+        ":android-test-base-api-stubs-gen-docs",
+    ],
+    product_variables: {
+        pdk: {
+            enabled: false,
+        },
+        unbundled_build: {
+            enabled: false,
+        },
+    },
+    sdk_version: "current",
+}
