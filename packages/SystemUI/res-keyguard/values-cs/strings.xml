@@ -76,7 +76,7 @@
     <string name="kg_pin_instructions" msgid="4069609316644030034">"Zadejte kód PIN"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"Zadejte heslo"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM karta byla zablokována. Chcete-li pokračovat, je třeba zadat kód PUK. Podrobné informace získáte od operátora."</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"SIM karta <xliff:g id="CARRIER">%1$s</xliff:g> je nyní zablokována. Chcete-li pokračovat, zadejte kód PUK. Podrobnosti vám poskytne operátor."</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="1373131883510840794">"SIM karta <xliff:g id="CARRIER">%1$s</xliff:g> je teď zablokována. Chcete-li pokračovat, zadejte kód PUK. Podrobnosti vám poskytne operátor."</string>
     <string name="kg_puk_enter_pin_hint" msgid="3137789674920391087">"Zadejte požadovaný kód PIN"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="3089485999116759671">"Potvrďte požadovaný kód PIN"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="4471738151810900114">"Odblokování SIM karty…"</string>
@@ -159,9 +159,9 @@
       <item quantity="one">Zadejte PIN SIM karty. Zbývá <xliff:g id="NUMBER_0">%d</xliff:g> pokus, poté bude muset zařízení odemknout operátor.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
-      <item quantity="few">SIM karta je nyní zablokována. Chcete-li pokračovat, zadejte kód PUK. Máte ještě <xliff:g id="_NUMBER_1">%d</xliff:g> pokusy, poté bude SIM karta natrvalo zablokována. Podrobnosti vám poskytne operátor.</item>
-      <item quantity="many">SIM karta je nyní zablokována. Chcete-li pokračovat, zadejte kód PUK. Máte ještě <xliff:g id="_NUMBER_1">%d</xliff:g> pokusu, poté bude SIM karta natrvalo zablokována. Podrobnosti vám poskytne operátor.</item>
-      <item quantity="other">SIM karta je nyní zablokována. Chcete-li pokračovat, zadejte kód PUK. Máte ještě <xliff:g id="_NUMBER_1">%d</xliff:g> pokusů, poté bude SIM karta natrvalo zablokována. Podrobnosti vám poskytne operátor.</item>
-      <item quantity="one">SIM karta je nyní zablokována. Chcete-li pokračovat, zadejte kód PUK. Máte ještě <xliff:g id="_NUMBER_0">%d</xliff:g> pokus, poté bude SIM karta natrvalo zablokována. Podrobnosti vám poskytne operátor.</item>
+      <item quantity="few">SIM karta je teď zablokována. Chcete-li pokračovat, zadejte kód PUK. Máte ještě <xliff:g id="_NUMBER_1">%d</xliff:g> pokusy, poté bude SIM karta natrvalo zablokována. Podrobnosti vám poskytne operátor.</item>
+      <item quantity="many">SIM karta je teď zablokována. Chcete-li pokračovat, zadejte kód PUK. Máte ještě <xliff:g id="_NUMBER_1">%d</xliff:g> pokusu, poté bude SIM karta natrvalo zablokována. Podrobnosti vám poskytne operátor.</item>
+      <item quantity="other">SIM karta je teď zablokována. Chcete-li pokračovat, zadejte kód PUK. Máte ještě <xliff:g id="_NUMBER_1">%d</xliff:g> pokusů, poté bude SIM karta natrvalo zablokována. Podrobnosti vám poskytne operátor.</item>
+      <item quantity="one">SIM karta je teď zablokována. Chcete-li pokračovat, zadejte kód PUK. Máte ještě <xliff:g id="_NUMBER_0">%d</xliff:g> pokus, poté bude SIM karta natrvalo zablokována. Podrobnosti vám poskytne operátor.</item>
     </plurals>
 </resources>

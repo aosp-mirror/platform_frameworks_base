@@ -144,26 +144,29 @@
     <string name="accessibility_three_bars" msgid="2648241415119396648">"три деления"</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"надежный сигнал"</string>
     <string name="accessibility_desc_on" msgid="2385254693624345265">"Вкл."</string>
-    <string name="accessibility_desc_off" msgid="6475508157786853157">"Выкл."</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"Отключено"</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Подключено"</string>
     <string name="accessibility_desc_connecting" msgid="3812924520316280149">"Соединение."</string>
     <string name="data_connection_gprs" msgid="7652872568358508452">"GPRS"</string>
     <string name="data_connection_hspa" msgid="1499615426569473562">"HSPA"</string>
     <string name="data_connection_3g" msgid="503045449315378373">"3G"</string>
-    <string name="data_connection_3_5g" msgid="5218328297191657602">"3,5G"</string>
-    <string name="data_connection_3_5g_plus" msgid="7570783890290275297">"3,5G+"</string>
+    <string name="data_connection_3_5g" msgid="3164370985817123144">"H"</string>
+    <string name="data_connection_3_5g_plus" msgid="4464630787664529264">"H+"</string>
     <string name="data_connection_4g" msgid="9139963475267449144">"4G"</string>
     <string name="data_connection_4g_plus" msgid="1148687201877800700">"4G+"</string>
     <string name="data_connection_lte" msgid="2694876797724028614">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="3423013208570937424">"LTE+"</string>
-    <string name="data_connection_cdma" msgid="4677985502159869585">"CDMA"</string>
+    <string name="data_connection_cdma" msgid="8176597308239086780">"1X"</string>
     <string name="data_connection_roaming" msgid="6037232010953697354">"Роуминг"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM-карта отсутствует."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Мобильный Интернет"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Мобильный Интернет включен"</string>
-    <string name="cell_data_off" msgid="5287705247512911922">"Мобильный Интернет отключен."</string>
+    <!-- no translation found for cell_data_off_content_description (4356113230238585072) -->
+    <skip />
+    <!-- no translation found for cell_data_off (1051264981229902873) -->
+    <skip />
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-модем"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Режим полета."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"Режим VPN включен."</string>
@@ -286,7 +289,7 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g>)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth выкл."</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Нет доступных сопряженных устройств"</string>
-    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="7106697106764717416">"Уровень заряда: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="7106697106764717416">"Заряд: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Аудиоустройство"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Гарнитура"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Устройство ввода"</string>
@@ -367,6 +370,9 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Приложение \"<xliff:g id="APP">%s</xliff:g>\" отключено в безопасном режиме."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Очистить все"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Перетащите сюда, чтобы разделить экран"</string>
+    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Чтобы переключиться между приложениями, проведите по экрану вверх."</string>
+    <!-- no translation found for recents_quick_scrub_onboarding (2778062804333285789) -->
+    <skip />
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Разделить по горизонтали"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Разделить по вертикали"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Разделить по-другому"</string>
@@ -539,18 +545,15 @@
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Со звуком"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Вибрация"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Без звука"</string>
-    <!-- no translation found for qs_status_phone_vibrate (204362991135761679) -->
-    <skip />
-    <!-- no translation found for qs_status_phone_muted (5437668875879171548) -->
-    <skip />
+    <string name="qs_status_phone_vibrate" msgid="204362991135761679">"Включена вибрация"</string>
+    <string name="qs_status_phone_muted" msgid="5437668875879171548">"Звук выключен"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Нажмите, чтобы включить звук."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Нажмите, чтобы включить вибрацию. Специальные возможности могут прекратить работу."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Нажмите, чтобы выключить звук. Специальные возможности могут прекратить работу."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Нажмите, чтобы включить вибрацию."</string>
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Нажмите, чтобы выключить звук."</string>
     <string name="volume_dialog_title" msgid="7272969888820035876">"%s: регулировка громкости"</string>
-    <!-- no translation found for volume_dialog_ringer_guidance_ring (3360373718388509040) -->
-    <skip />
+    <string name="volume_dialog_ringer_guidance_ring" msgid="3360373718388509040">"Для звонков и уведомлений включен звук (уровень громкости: <xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="output_title" msgid="5355078100792942802">"Выход мультимедиа"</string>
     <string name="output_calls_title" msgid="8717692905017206161">"Выход телефонных вызовов"</string>
     <string name="output_none_found" msgid="5544982839808921091">"Устройств не найдено"</string>
@@ -709,8 +712,7 @@
     <string name="battery" msgid="7498329822413202973">"Батарея"</string>
     <string name="clock" msgid="7416090374234785905">"Часы"</string>
     <string name="headset" msgid="4534219457597457353">"Гарнитура"</string>
-    <!-- no translation found for accessibility_long_click_tile (6687350750091842525) -->
-    <skip />
+    <string name="accessibility_long_click_tile" msgid="6687350750091842525">"Открыть настройки"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Наушники подключены"</string>
     <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Гарнитура подключена"</string>
     <string name="data_saver" msgid="5037565123367048522">"Экономия трафика"</string>
