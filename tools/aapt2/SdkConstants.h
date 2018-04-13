@@ -53,7 +53,7 @@ enum : ApiVersion {
   SDK_NOUGAT_MR1 = 25,
   SDK_O = 26,
   SDK_O_MR1 = 27,
-  SDK_P = 10000, // STOPSHIP Replace with the real version.
+  SDK_P = 28,
 };
 
 ApiVersion FindAttributeSdkLevel(const ResourceId& id);
