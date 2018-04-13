@@ -6645,6 +6645,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 int[] users = userId == UserHandle.USER_ALL
                         ? mUserController.getUsers() : new int[] { userId };
                 for (int user : users) {
+                    if (getPackageManagerInternalLocked().isPackageStateProtected(
+                            packageName, user)) {
+                        Slog.w(TAG, "Ignoring request to force stop protected package "
+                                + packageName + " u" + user);
+                        return;
+                    }
+
                     int pkgUid = -1;
                     try {
                         pkgUid = pm.getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING,
