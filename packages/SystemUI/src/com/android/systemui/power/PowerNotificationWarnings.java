@@ -533,6 +533,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
             filter.addAction(ACTION_SHOW_AUTO_SAVER_SUGGESTION);
             filter.addAction(ACTION_ENABLE_AUTO_SAVER);
             filter.addAction(ACTION_AUTO_SAVER_NO_THANKS);
+            filter.addAction(ACTION_DISMISS_AUTO_SAVER_SUGGESTION);
             mContext.registerReceiverAsUser(this, UserHandle.ALL, filter,
                     android.Manifest.permission.DEVICE_POWER, mHandler);
         }
