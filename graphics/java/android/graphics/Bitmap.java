@@ -33,6 +33,8 @@ import android.view.DisplayListCanvas;
 import android.view.RenderNode;
 import android.view.ThreadedRenderer;
 
+import dalvik.annotation.optimization.CriticalNative;
+
 import libcore.util.NativeAllocationRegistry;
 
 import java.io.OutputStream;
@@ -58,8 +60,6 @@ public final class Bitmap implements Parcelable {
 
     // Convenience for JNI access
     private final long mNativePtr;
-
-    private final boolean mIsMutable;
 
     /**
      * Represents whether the Bitmap's content is requested to be pre-multiplied.
@@ -117,8 +117,7 @@ public final class Bitmap implements Parcelable {
      * int (pointer).
      */
     // called from JNI
-    Bitmap(long nativeBitmap, int width, int height, int density,
-            boolean isMutable, boolean requestPremultiplied,
+    Bitmap(long nativeBitmap, int width, int height, int density, boolean requestPremultiplied,
             byte[] ninePatchChunk, NinePatch.InsetStruct ninePatchInsets) {
         if (nativeBitmap == 0) {
             throw new RuntimeException("internal error: native bitmap is 0");
@@ -126,7 +125,6 @@ public final class Bitmap implements Parcelable {
 
         mWidth = width;
         mHeight = height;
-        mIsMutable = isMutable;
         mRequestPremultiplied = requestPremultiplied;
 
         mNinePatchChunk = ninePatchChunk;
@@ -742,7 +740,7 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
-     * Returns an immutable bitmap from the source bitmap. The new bitmap may
+     * Returns a bitmap from the source bitmap. The new bitmap may
      * be the same object as source, or a copy may have been made.  It is
      * initialized with the same density and color space as the original bitmap.
      */
@@ -751,7 +749,7 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
-     * Returns an immutable bitmap from the specified subset of the source
+     * Returns a bitmap from the specified subset of the source
      * bitmap. The new bitmap may be the same object as source, or a copy may
      * have been made. It is initialized with the same density and color space
      * as the original bitmap.
@@ -771,7 +769,7 @@ public final class Bitmap implements Parcelable {
     }
 
     /**
-     * Returns an immutable bitmap from subset of the source bitmap,
+     * Returns a bitmap from subset of the source bitmap,
      * transformed by the optional matrix. The new bitmap may be the
      * same object as source, or a copy may have been made. It is
      * initialized with the same density and color space as the original
@@ -780,6 +778,12 @@ public final class Bitmap implements Parcelable {
      * If the source bitmap is immutable and the requested subset is the
      * same as the source bitmap itself, then the source bitmap is
      * returned and no new bitmap is created.
+     *
+     * The returned bitmap will always be mutable except in the following scenarios:
+     * (1) In situations where the source bitmap is returned and the source bitmap is immutable
+     *
+     * (2) The source bitmap is a hardware bitmap. That is {@link #getConfig()} is equivalent to
+     * {@link Config#HARDWARE}
      *
      * @param source   The bitmap we are subsetting
      * @param x        The x coordinate of the first pixel in source
@@ -1218,11 +1222,9 @@ public final class Bitmap implements Parcelable {
      *              scaled to match if necessary.
      * @param height The height of the bitmap to create. The picture's height will be
      *              scaled to match if necessary.
-     * @param config The {@link Config} of the created bitmap. If this is null then
-     *               the bitmap will be {@link Config#HARDWARE}.
+     * @param config The {@link Config} of the created bitmap.
      *
-     * @return An immutable bitmap with a HARDWARE config whose contents are created
-     * from the recorded drawing commands in the Picture source.
+     * @return An immutable bitmap with a configuration specified by the config parameter
      */
     public static @NonNull Bitmap createBitmap(@NonNull Picture source, int width, int height,
             @NonNull Config config) {
@@ -1260,7 +1262,7 @@ public final class Bitmap implements Parcelable {
             }
             canvas.drawPicture(source);
             canvas.setBitmap(null);
-            bitmap.makeImmutable();
+            bitmap.setImmutable();
             return bitmap;
         }
     }
@@ -1351,13 +1353,22 @@ public final class Bitmap implements Parcelable {
      * Returns true if the bitmap is marked as mutable (i.e.&nbsp;can be drawn into)
      */
     public final boolean isMutable() {
-        return mIsMutable;
+        return !nativeIsImmutable(mNativePtr);
     }
 
-    /** @hide */
-    public final void makeImmutable() {
-        // todo mIsMutable = false;
-        // todo nMakeImmutable();
+    /**
+     * Marks the Bitmap as immutable. Further modifications to this Bitmap are disallowed.
+     * After this method is called, this Bitmap cannot be made mutable again and subsequent calls
+     * to {@link #reconfigure(int, int, Config)}, {@link #setPixel(int, int, int)},
+     * {@link #setPixels(int[], int, int, int, int, int, int)} and {@link #eraseColor(int)} will
+     * fail and throw an IllegalStateException.
+     *
+     * @hide
+     */
+    public void setImmutable() {
+        if (isMutable()) {
+            nativeSetImmutable(mNativePtr);
+        }
     }
 
     /**
@@ -1923,7 +1934,7 @@ public final class Bitmap implements Parcelable {
     public void writeToParcel(Parcel p, int flags) {
         checkRecycled("Can't parcel a recycled bitmap");
         noteHardwareBitmapSlowCall();
-        if (!nativeWriteToParcel(mNativePtr, mIsMutable, mDensity, p)) {
+        if (!nativeWriteToParcel(mNativePtr, isMutable(), mDensity, p)) {
             throw new RuntimeException("native writeToParcel failed");
         }
     }
@@ -2096,4 +2107,11 @@ public final class Bitmap implements Parcelable {
     private static native boolean nativeIsSRGB(long nativePtr);
     private static native boolean nativeIsSRGBLinear(long nativePtr);
     private static native void nativeCopyColorSpace(long srcBitmap, long dstBitmap);
+
+    private static native void nativeSetImmutable(long nativePtr);
+
+    // ---------------- @CriticalNative -------------------
+
+    @CriticalNative
+    private static native boolean nativeIsImmutable(long nativePtr);
 }
