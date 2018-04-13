@@ -269,7 +269,7 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
             PorterDuff.Mode currentMode = porterDuffColorFilter.getMode();
             return currentColor != color || currentMode != mode;
         } else {
-            return false;
+            return true;
         }
     }
 
