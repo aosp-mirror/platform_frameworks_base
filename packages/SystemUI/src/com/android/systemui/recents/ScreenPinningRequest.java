@@ -217,7 +217,8 @@ public class ScreenPinningRequest implements View.OnClickListener {
             mLayout.findViewById(R.id.screen_pinning_text_area)
                     .setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
             View buttons = mLayout.findViewById(R.id.screen_pinning_buttons);
-            if (Recents.getSystemServices().hasSoftNavigationBar()) {
+            if (Recents.getSystemServices() != null &&
+                    Recents.getSystemServices().hasSoftNavigationBar()) {
                 buttons.setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
                 swapChildrenIfRtlAndVertical(buttons);
             } else {
@@ -235,7 +236,8 @@ public class ScreenPinningRequest implements View.OnClickListener {
             }
 
             StatusBar statusBar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
-            NavigationBarView navigationBarView = statusBar.getNavigationBarView();
+            NavigationBarView navigationBarView =
+                    statusBar != null ? statusBar.getNavigationBarView() : null;
             final boolean recentsVisible = navigationBarView != null
                     && navigationBarView.isRecentsButtonVisible();
             boolean touchExplorationEnabled = mAccessibilityService.isTouchExplorationEnabled();
@@ -256,10 +258,12 @@ public class ScreenPinningRequest implements View.OnClickListener {
                         : R.string.screen_pinning_description_recents_invisible;
             }
 
-            ((ImageView) mLayout.findViewById(R.id.screen_pinning_back_icon))
-                    .setImageDrawable(navigationBarView.getBackDrawable(mContext));
-            ((ImageView) mLayout.findViewById(R.id.screen_pinning_home_icon))
-                    .setImageDrawable(navigationBarView.getHomeDrawable(mContext));
+            if (navigationBarView != null) {
+                ((ImageView) mLayout.findViewById(R.id.screen_pinning_back_icon))
+                        .setImageDrawable(navigationBarView.getBackDrawable(mContext));
+                ((ImageView) mLayout.findViewById(R.id.screen_pinning_home_icon))
+                        .setImageDrawable(navigationBarView.getHomeDrawable(mContext));
+            }
 
             ((TextView) mLayout.findViewById(R.id.screen_pinning_description))
                     .setText(descriptionStringResId);
