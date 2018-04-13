@@ -5664,6 +5664,10 @@ message MetricsEvent {
     // OS: P
     BLUETOOTH_FRAGMENT = 1390;
 
+    // This value should never appear in log outputs - it is reserved for
+    // internal platform metrics use.
+    NOTIFICATION_SHADE_COUNT = 1395;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

@@ -54,12 +54,13 @@ interface IStatusBarService
     void onPanelHidden();
     // Mark current notifications as "seen" and stop ringing, vibrating, blinking.
     void clearNotificationEffects();
-    void onNotificationClick(String key);
-    void onNotificationActionClick(String key, int actionIndex);
+    void onNotificationClick(String key, in NotificationVisibility nv);
+    void onNotificationActionClick(String key, int actionIndex, in NotificationVisibility nv);
     void onNotificationError(String pkg, String tag, int id,
             int uid, int initialPid, String message, int userId);
     void onClearAllNotifications(int userId);
-    void onNotificationClear(String pkg, String tag, int id, int userId, String key, int dismissalSurface);
+    void onNotificationClear(String pkg, String tag, int id, int userId, String key,
+            int dismissalSurface, in NotificationVisibility nv);
     void onNotificationVisibilityChanged( in NotificationVisibility[] newlyVisibleKeys,
             in NotificationVisibility[] noLongerVisibleKeys);
     void onNotificationExpansionChanged(in String key, in boolean userAction, in boolean expanded);

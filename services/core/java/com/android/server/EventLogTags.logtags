@@ -72,11 +72,11 @@ option java_package com.android.server
 # when notifications are expanded, or contracted
 27511 notification_expansion (key|3),(user_action|1),(expanded|1),(lifespan|1),(freshness|1),(exposure|1)
 # when a notification has been clicked
-27520 notification_clicked (key|3),(lifespan|1),(freshness|1),(exposure|1)
+27520 notification_clicked (key|3),(lifespan|1),(freshness|1),(exposure|1),(rank|1),(count|1)
 # when a notification action button has been clicked
-27521 notification_action_clicked (key|3),(action_index|1),(lifespan|1),(freshness|1),(exposure|1)
+27521 notification_action_clicked (key|3),(action_index|1),(lifespan|1),(freshness|1),(exposure|1),(rank|1),(count|1)
 # when a notification has been canceled
-27530 notification_canceled (key|3),(reason|1),(lifespan|1),(freshness|1),(exposure|1),(listener|3)
+27530 notification_canceled (key|3),(reason|1),(lifespan|1),(freshness|1),(exposure|1),(rank|1),(count|1),(listener|3)
 # replaces 27510 with a row per notification
 27531 notification_visibility (key|3),(visibile|1),(lifespan|1),(freshness|1),(exposure|1),(rank|1)
 # a notification emited noise, vibration, or light

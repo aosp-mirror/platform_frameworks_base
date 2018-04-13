@@ -46,6 +46,7 @@ import android.view.ViewGroup;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dependency;
@@ -367,6 +368,10 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     }
 
     public void performRemoveNotification(StatusBarNotification n) {
+        final int rank = mNotificationData.getRank(n.getKey());
+        final int count = mNotificationData.getActiveNotifications().size();
+        final NotificationVisibility nv = NotificationVisibility.obtain(n.getKey(), rank, count,
+                true);
         NotificationData.Entry entry = mNotificationData.get(n.getKey());
         mRemoteInputManager.onPerformRemoveNotification(n, entry);
         final String pkg = n.getPackageName();
@@ -380,7 +385,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             } else if (mListContainer.hasPulsingNotifications()) {
                 dismissalSurface = NotificationStats.DISMISSAL_AOD;
             }
-            mBarService.onNotificationClear(pkg, tag, id, userId, n.getKey(), dismissalSurface);
+            mBarService.onNotificationClear(pkg, tag, id, userId, n.getKey(), dismissalSurface, nv);
             removeNotification(n.getKey(), null);
 
         } catch (RemoteException ex) {

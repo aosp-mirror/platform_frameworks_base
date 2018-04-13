@@ -509,6 +509,14 @@ public class NotificationData {
         return null;
     }
 
+    public int getRank(String key) {
+        if (mRankingMap != null) {
+            getRanking(key, mTmpRanking);
+            return mTmpRanking.getRank();
+        }
+        return 0;
+    }
+
     public boolean shouldHide(String key) {
         if (mRankingMap != null) {
             getRanking(key, mTmpRanking);

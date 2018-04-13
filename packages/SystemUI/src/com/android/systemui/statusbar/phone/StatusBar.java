@@ -131,6 +131,7 @@ import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.MessagingGroup;
@@ -5117,8 +5118,13 @@ public class StatusBar extends SystemUI implements DemoMode,
                     collapseOnMainThread();
                 }
 
+                final int count =
+                        mEntryManager.getNotificationData().getActiveNotifications().size();
+                final int rank = mEntryManager.getNotificationData().getRank(notificationKey);
+                final NotificationVisibility nv = NotificationVisibility.obtain(notificationKey,
+                        rank, count, true);
                 try {
-                    mBarService.onNotificationClick(notificationKey);
+                    mBarService.onNotificationClick(notificationKey, nv);
                 } catch (RemoteException ex) {
                     // system process is dead if we're here.
                 }
