@@ -124,6 +124,13 @@ public class TileUtils {
 
     /**
      * Name of the meta-data item that should be set in the AndroidManifest.xml
+     * to specify the icon background color. The value may or may not be used by Settings app.
+     */
+    public static final String META_DATA_PREFERENCE_ICON_BACKGROUND_HINT =
+            "com.android.settings.bg.hint";
+
+    /**
+     * Name of the meta-data item that should be set in the AndroidManifest.xml
      * to specify the content provider providing the icon that should be displayed for
      * the preference.
      *
