@@ -432,6 +432,9 @@ message WifiLog {
 
   // Number of times DFS channel scans are requested in single scan requests.
   optional int32 num_oneshot_has_dfs_channel_scans = 109;
+
+  // Wi-Fi RTT metrics
+  optional WifiRttLog wifi_rtt_log = 110;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -1312,4 +1315,163 @@ message WifiWakeStats {
 
   // Number of Wifi Wake sessions that have recorded wakeup events.
   optional int32 num_wakeups = 4;
+}
+
+// Metrics for Wi-Fi RTT
+message WifiRttLog {
+  // Number of RTT request API calls
+  optional int32 num_requests = 1;
+
+  // Histogram of RTT operation overall status
+  repeated RttOverallStatusHistogramBucket histogram_overall_status = 2;
+
+  // RTT to Access Points metrics
+  optional RttToPeerLog rtt_to_ap = 3;
+
+  // RTT to Wi-Fi Aware peers metrics
+  optional RttToPeerLog rtt_to_aware = 4;
+
+  // Metrics for a RTT to Peer (peer = AP or Wi-Fi Aware)
+  message RttToPeerLog {
+    // Total number of API calls
+    optional int32 num_requests = 1;
+
+    // Total number of individual requests
+    optional int32 num_individual_requests = 2;
+
+    // Total number of apps which requested RTT
+    optional int32 num_apps = 3;
+
+    // Histogram of total number of RTT requests by an app (WifiRttManager#startRanging)
+    repeated HistogramBucket histogram_num_requests_per_app = 4;
+
+    // Histogram of number of peers in a single RTT request (RangingRequest entries)
+    repeated HistogramBucket histogram_num_peers_per_request = 5;
+
+    // Histogram of status of individual RTT operations (RangingResult entries)
+    repeated RttIndividualStatusHistogramBucket histogram_individual_status = 6;
+
+    // Histogram of measured distances (RangingResult entries)
+    repeated HistogramBucket histogram_distance = 7;
+
+    // Histogram of interval of RTT requests by an app (WifiRttManager#startRanging)
+    repeated HistogramBucket histogram_request_interval_ms = 8;
+  }
+
+    // Histogram bucket for Wi-Fi RTT logs. Range is [start, end)
+  message HistogramBucket {
+    // lower range of the bucket (inclusive)
+    optional int64 start = 1;
+
+    // upper range of the bucket (exclusive)
+    optional int64 end = 2;
+
+    // number of samples in the bucket
+    optional int32 count = 3;
+  }
+
+  // Status codes for overall RTT operation
+  enum RttOverallStatusTypeEnum {
+    // constant to be used by proto
+    OVERALL_UNKNOWN = 0;
+
+    // RTT operation succeeded (individual results may still fail)
+    OVERALL_SUCCESS = 1;
+
+    // RTT operation failed (unspecified reason)
+    OVERALL_FAIL = 2;
+
+    // RTT operation failed since RTT was not available (e.g. Airplane mode)
+    OVERALL_RTT_NOT_AVAILABLE = 3;
+
+    // RTT operation timed-out: didn't receive response from HAL in expected time
+    OVERALL_TIMEOUT = 4;
+
+    // RTT operation aborted since the app is spamming the service
+    OVERALL_THROTTLE = 5;
+
+    // RTT request to HAL received immediate failure
+    OVERALL_HAL_FAILURE = 6;
+
+    // RTT to Wi-Fi Aware peer using PeerHandle failed to get a MAC address translation
+    OVERALL_AWARE_TRANSLATION_FAILURE = 7;
+
+    // RTT operation failed due to missing Location permission (post execution)
+    OVERALL_LOCATION_PERMISSION_MISSING = 8;
+  }
+
+  // Status codes for individual RTT operation
+  enum RttIndividualStatusTypeEnum {
+    // constant to be used by proto
+    UNKNOWN = 0;
+
+    // RTT operation succeeded
+    SUCCESS = 1;
+
+    // RTT failure: generic reason (no further information)
+    FAILURE = 2;
+
+    // Target STA does not respond to request
+    FAIL_NO_RSP = 3;
+
+    // Request rejected. Applies to 2-sided RTT only
+    FAIL_REJECTED = 4;
+
+    // Operation not scheduled
+    FAIL_NOT_SCHEDULED_YET = 5;
+
+    // Timing measurement times out
+    FAIL_TM_TIMEOUT = 6;
+
+    // Target on different channel, cannot range
+    FAIL_AP_ON_DIFF_CHANNEL = 7;
+
+    // Ranging not supported
+    FAIL_NO_CAPABILITY = 8;
+
+    // Request aborted for unknown reason
+    ABORTED = 9;
+
+    // Invalid T1-T4 timestamp
+    FAIL_INVALID_TS = 10;
+
+    // 11mc protocol failed
+    FAIL_PROTOCOL = 11;
+
+    // Request could not be scheduled
+    FAIL_SCHEDULE = 12;
+
+    // Responder cannot collaborate at time of request
+    FAIL_BUSY_TRY_LATER = 13;
+
+    // Bad request args
+    INVALID_REQ = 14;
+
+    // WiFi not enabled
+    NO_WIFI = 15;
+
+    // Responder overrides param info, cannot range with new params
+    FAIL_FTM_PARAM_OVERRIDE = 16;
+
+    // HAL did not provide a result to a framework request
+    MISSING_RESULT = 17;
+  }
+
+  // Histogram bucket for Wi-Fi RTT overall operation status
+  message RttOverallStatusHistogramBucket {
+    // status type defining the bucket
+    optional RttOverallStatusTypeEnum status_type = 1;
+
+    // number of samples in the bucket
+    optional int32 count = 2;
+  }
+
+  // Histogram bucket for Wi-Fi RTT individual operation status
+  message RttIndividualStatusHistogramBucket {
+    // status type defining the bucket
+    optional RttIndividualStatusTypeEnum status_type = 1;
+
+    // number of samples in the bucket
+    optional int32 count = 2;
+  }
 }
