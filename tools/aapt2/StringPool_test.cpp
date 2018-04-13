@@ -61,6 +61,17 @@ TEST(StringPoolTest, DoNotInsertNewDuplicateString) {
   EXPECT_THAT(pool.size(), Eq(1u));
 }
 
+TEST(StringPoolTest, DoNotDedupeSameStringDifferentPriority) {
+  StringPool pool;
+
+  StringPool::Ref ref_a = pool.MakeRef("wut", StringPool::Context(1));
+  StringPool::Ref ref_b = pool.MakeRef("wut", StringPool::Context(2));
+
+  EXPECT_THAT(*ref_a, Eq("wut"));
+  EXPECT_THAT(*ref_b, Eq("wut"));
+  EXPECT_THAT(pool.size(), Eq(2u));
+}
+
 TEST(StringPoolTest, MaintainInsertionOrderIndex) {
   StringPool pool;
 
@@ -291,7 +302,6 @@ TEST(StringPoolTest, Flatten) {
     EXPECT_THAT(span->name.index, Eq(ResStringPool_span::END));
   }
 }
-
 
 TEST(StringPoolTest, MaxEncodingLength) {
   StdErrDiagnostics diag;
