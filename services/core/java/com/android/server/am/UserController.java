@@ -79,6 +79,7 @@ import android.os.storage.StorageManager;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
 import android.util.IntArray;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -86,6 +87,7 @@ import android.util.SparseIntArray;
 import android.util.TimingsTraceLog;
 import android.util.proto.ProtoOutputStream;
 
+import android.view.Window;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -2177,9 +2179,18 @@ class UserController implements Handler.Callback {
 
         void showUserSwitchingDialog(UserInfo fromUser, UserInfo toUser,
                 String switchingFromSystemUserMessage, String switchingToSystemUserMessage) {
-            Dialog d = new UserSwitchingDialog(mService, mService.mContext, fromUser, toUser,
+            Dialog d;
+            if (!mService.mContext.getPackageManager()
+                    .hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+                d = new UserSwitchingDialog(mService, mService.mContext, fromUser, toUser,
                     true /* above system */, switchingFromSystemUserMessage,
                     switchingToSystemUserMessage);
+            } else {
+                d = new CarUserSwitchingDialog(mService, mService.mContext, fromUser, toUser,
+                    true /* above system */, switchingFromSystemUserMessage,
+                    switchingToSystemUserMessage);
+            }
+
             d.show();
         }
 

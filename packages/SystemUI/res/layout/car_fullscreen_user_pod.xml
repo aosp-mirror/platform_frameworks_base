@@ -37,7 +37,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/car_padding_4"
         android:textSize="@dimen/car_body1_size"
-        android:textColor="@color/qs_user_detail_name"
+        android:textColor="@color/car_body1_light"
         android:ellipsize="end"
         android:singleLine="true"
         android:gravity="center"
