@@ -107,21 +107,23 @@ public class NotificationActionListLayout extends LinearLayout {
                 }
             }
         }
-        if (notGoneChildren > 1 && needRebuild) {
+        boolean centerAligned = (mGravity & Gravity.CENTER_HORIZONTAL) != 0;
+        boolean singleChildCentered = notGoneChildren == 1 && centerAligned;
+        boolean needsRegularMeasurement = notGoneChildren > 1 || singleChildCentered;
+
+        if (needsRegularMeasurement && needRebuild) {
             rebuildMeasureOrder(textViews, otherViews);
         }
 
         final boolean constrained =
                 MeasureSpec.getMode(widthMeasureSpec) != MeasureSpec.UNSPECIFIED;
-        final boolean centerAligned = (mGravity & Gravity.CENTER_HORIZONTAL) != 0;
 
         final int innerWidth = MeasureSpec.getSize(widthMeasureSpec) - mPaddingLeft - mPaddingRight;
         final int otherSize = mMeasureOrderOther.size();
         int usedWidth = 0;
 
-        // Optimization: Don't do this if there's only one child.
         int measuredChildren = 0;
-        for (int i = 0; i < N && notGoneChildren > 1; i++) {
+        for (int i = 0; i < N && needsRegularMeasurement; i++) {
             // Measure shortest children first. To avoid measuring twice, we approximate by looking
             // at the text length.
             View c;
