@@ -66,9 +66,12 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
      * scrim alpha yet.
      */
     private boolean mHasLightNavigationBar;
-    private boolean mScrimAlphaBelowThreshold;
-    private boolean mInvertLightNavBarWithScrim;
-    private float mScrimAlpha;
+
+    /**
+     * {@code true} if {@link #mHasLightNavigationBar} should be ignored and forcefully make
+     * {@link #mNavigationLight} {@code false}.
+     */
+    private boolean mForceDarkForScrim;
 
     private final Rect mLastFullscreenBounds = new Rect();
     private final Rect mLastDockedBounds = new Rect();
@@ -129,9 +132,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
             boolean last = mNavigationLight;
             mHasLightNavigationBar = isLight(vis, navigationBarMode,
                     View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-            mNavigationLight = mHasLightNavigationBar
-                    && (mScrimAlphaBelowThreshold || !mInvertLightNavBarWithScrim)
-                    && !mQsCustomizing;
+            mNavigationLight = mHasLightNavigationBar && !mForceDarkForScrim && !mQsCustomizing;
             if (mNavigationLight != last) {
                 updateNavigation();
             }
@@ -154,20 +155,17 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         reevaluate();
     }
 
-    public void setScrimAlpha(float alpha) {
-        mScrimAlpha = alpha;
-        boolean belowThresholdBefore = mScrimAlphaBelowThreshold;
-        mScrimAlphaBelowThreshold = mScrimAlpha < NAV_BAR_INVERSION_SCRIM_ALPHA_THRESHOLD;
-        if (mHasLightNavigationBar && belowThresholdBefore != mScrimAlphaBelowThreshold) {
-            reevaluate();
-        }
-    }
-
-    public void setScrimColor(GradientColors colors) {
-        boolean invertLightNavBarWithScrimBefore = mInvertLightNavBarWithScrim;
-        mInvertLightNavBarWithScrim = !colors.supportsDarkText();
-        if (mHasLightNavigationBar
-                && invertLightNavBarWithScrimBefore != mInvertLightNavBarWithScrim) {
+    public void setScrimState(ScrimState scrimState, float scrimBehindAlpha,
+            GradientColors scrimInFrontColor) {
+        boolean forceDarkForScrimLast = mForceDarkForScrim;
+        // For BOUNCER/BOUNCER_SCRIMMED cases, we assume that alpha is always below threshold.
+        // This enables IMEs to control the navigation bar color.
+        // For other cases, scrim should be able to veto the light navigation bar.
+        mForceDarkForScrim = scrimState != ScrimState.BOUNCER
+                && scrimState != ScrimState.BOUNCER_SCRIMMED
+                && scrimBehindAlpha >= NAV_BAR_INVERSION_SCRIM_ALPHA_THRESHOLD
+                && !scrimInFrontColor.supportsDarkText();
+        if (mHasLightNavigationBar && (mForceDarkForScrim != forceDarkForScrimLast)) {
             reevaluate();
         }
     }
@@ -257,8 +255,9 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         pw.print(" mLastStatusBarMode="); pw.print(mLastStatusBarMode);
         pw.print(" mLastNavigationBarMode="); pw.println(mLastNavigationBarMode);
 
-        pw.print(" mScrimAlpha="); pw.print(mScrimAlpha);
-        pw.print(" mScrimAlphaBelowThreshold="); pw.println(mScrimAlphaBelowThreshold);
+        pw.print(" mForceDarkForScrim="); pw.print(mForceDarkForScrim);
+        pw.print(" mQsCustomizing="); pw.println(mQsCustomizing);
+
         pw.println();
 
         LightBarTransitionsController transitionsController =
