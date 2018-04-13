@@ -55,7 +55,7 @@
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="505558545611516707">"कभी भी HDCP जाँच का उपयोग न करें"</item>
-    <item msgid="3878793616631049349">"HDCP जाँच का उपयोग केवल DRM सामग्री के लिए करें"</item>
+    <item msgid="3878793616631049349">"एचडीसीपी जाँच का उपयोग केवल डीआरएम सामग्री के लिए करें"</item>
     <item msgid="45075631231212732">"हमेशा HDCP जाँच का उपयोग करें"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">

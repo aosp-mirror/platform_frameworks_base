@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ब्लुटुथको AVRCP संस्करण"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ब्लुटुथको AVRCP संस्करण चयन गर्नुहोस्"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ब्लुटुथ अडियोको कोडेक"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"ब्लुटुथ अडियो कोडेक ट्रिगर गर्नुहोस्\nचयन"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"ब्लुटुथ अडियोको नमूना दर"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"ब्लुटुथ अडियो कोडेक ट्रिगर गर्नुहोस्\nचयन: नमुना दर"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"प्रति नमूना ब्लुटुथ अडियोका बिटहरू"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"ब्लुटुथ अडियो कोडेक ट्रिगर गर्नुहोस्\nचयन: बिट प्रति नमुना"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"ब्लुटुथ अडियो च्यानलको मोड"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"ब्लुटुथ अडियो कोडेक ट्रिगर गर्नुहोस्\nचयन: च्यानल मोड"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"ब्लुटुथ अडियो LDAC कोडेक: प्लेब्याक गुणस्तर"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"ब्लुटुथ अडियो LDAC कोडेक ट्रिगर गर्नुहोस्\nचयन: प्लेब्याकको गुणस्तर"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"स्ट्रिमिङ: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"निजी DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"निजी DNS मोड चयन गर्नुहोस्"</string>
@@ -366,8 +361,8 @@
     <string name="picture_color_mode_desc" msgid="1141891467675548590">"sRGB प्रयोग गर्नुहोस्"</string>
     <string name="daltonizer_mode_disabled" msgid="7482661936053801862">"असक्षम गरिएको छ"</string>
     <string name="daltonizer_mode_monochromacy" msgid="8485709880666106721">"मोनोक्रोमेसी"</string>
-    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Deuteranomaly (रातो-हरियो)"</string>
-    <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"प्रोटानोमेली (रातो, हरियो)"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"ड्युटरएनोमली (रातो-हरियो)"</string>
+    <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"प्रोटानेमली (रातो, हरियो)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"ट्रिटानोमेली (निलो-पंहेलो)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"रङ्ग सुधार"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"यो सुविधा प्रयोगात्मक छ र प्रदर्शनमा असर गर्न सक्छ।"</string>
@@ -399,7 +394,7 @@
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"चार्ज हुँदै"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"चार्ज भइरहेको छैन"</string>
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"प्लगइन गरिएको छ, अहिले नै चार्ज गर्न सकिँदैन"</string>
-    <string name="battery_info_status_full" msgid="2824614753861462808">"पूर्ण"</string>
+    <string name="battery_info_status_full" msgid="2824614753861462808">"पूर्ण चार्ज भएको स्थिति"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"प्रशासकद्वारा नियन्त्रित"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"प्रशासकद्वारा सक्षम पारिएको छ"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"प्रशासकद्वारा असक्षम पारिएको छ"</string>

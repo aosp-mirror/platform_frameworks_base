@@ -207,29 +207,24 @@
     <string name="mock_location_app_set" msgid="8966420655295102685">"Asukohateavet imiteeriv rakendus: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"Võrgustik"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Juhtmeta ekraaniühenduse sertifitseerimine"</string>
-    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Luba WiFi paljusõnaline logimine"</string>
+    <string name="wifi_verbose_logging" msgid="4203729756047242344">"Luba WiFi sõnaline logimine"</string>
     <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Juhusliku MAC-aadressi määramine ühendamisel"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobiilne andmeside on alati aktiivne"</string>
-    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Jagamise riistvaraline kiirendus"</string>
-    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Kuva Bluetoothi seadmed ilma nimedeta"</string>
+    <string name="tethering_hardware_offload" msgid="7470077827090325814">"Ühenduse jagamise riistvaraline kiirendus"</string>
+    <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Kuva ilma nimedeta Bluetoothi seadmed"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Keela absoluutne helitugevus"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetoothi AVRCP versioon"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Valige Bluetoothi AVRCP versioon"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetoothi heli kodek"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Bluetoothi helikodeki käivitamine\nValik"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetoothi heli diskreetimissagedus"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Bluetoothi helikodeki käivitamine\nValik: diskreetimissagedus"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetoothi heli bitte diskreedi kohta"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Bluetoothi helikodeki käivitamine\nValik: bittide arv diskreedi kohta"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetoothi heli kanalirežiim"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Bluetoothi helikodeki käivitamine\nValik: kanalirežiim"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetoothi LDAC-helikodek: taasesituskvaliteet"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Bluetoothi LDAC-helikodeki käivitamine\nValik: taasesituskvaliteet"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Voogesitus: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Privaatne DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Valige privaatse DNS-i režiim"</string>
@@ -270,12 +265,12 @@
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP-kontrollimine"</string>
     <string name="hdcp_checking_dialog_title" msgid="5141305530923283">"HDCP käitumise määramine"</string>
     <string name="debug_debugging_category" msgid="6781250159513471316">"Silumine"</string>
-    <string name="debug_app" msgid="8349591734751384446">"Valige silumisrakendus"</string>
+    <string name="debug_app" msgid="8349591734751384446">"Silumisrakenduse valimine"</string>
     <string name="debug_app_not_set" msgid="718752499586403499">"Ühtegi silumisrakendust pole määratud"</string>
     <string name="debug_app_set" msgid="2063077997870280017">"Silumisrakendus: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="5156029161289091703">"Rakenduse valimine"</string>
     <string name="no_application" msgid="2813387563129153880">"Mitte ühtegi"</string>
-    <string name="wait_for_debugger" msgid="1202370874528893091">"Oodake silurit"</string>
+    <string name="wait_for_debugger" msgid="1202370874528893091">"Siluri ootamine"</string>
     <string name="wait_for_debugger_summary" msgid="1766918303462746804">"Silutud rakendus ootab toimimiseks siluri lisamist"</string>
     <string name="debug_input_category" msgid="1811069939601180246">"Sisend"</string>
     <string name="debug_drawing_category" msgid="6755716469267367852">"Joonis"</string>
@@ -283,7 +278,7 @@
     <string name="media_category" msgid="4388305075496848353">"Meedia"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Jälgimine"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Range režiim on lubatud"</string>
-    <string name="strict_mode_summary" msgid="142834318897332338">"Ekr. vilgub, kui rakend. teevad peateemal toiming."</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Ekraan vilgub, kui rakendused teevad pealõimes toiminguid"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Kursori asukoht"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Praegusi puuteandmeid kuvav ekraani ülekate"</string>
     <string name="show_touches" msgid="2642976305235070316">"Kuva puudutused"</string>
@@ -311,19 +306,19 @@
     <string name="force_msaa_summary" msgid="9123553203895817537">"Luba 4x MSAA OpenGL ES 2.0 rakendustes"</string>
     <string name="show_non_rect_clip" msgid="505954950474595172">"Silu klipi mittetäisnurksed toimingud"</string>
     <string name="track_frame_time" msgid="6146354853663863443">"GPU renderduse profiil"</string>
-    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU silum. kihtide lubam."</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"GPU sil. kiht. laadim. lubam. silumisrakendustele"</string>
-    <string name="window_animation_scale_title" msgid="6162587588166114700">"Akna animatsiooni skaala"</string>
-    <string name="transition_animation_scale_title" msgid="387527540523595875">"Ülemineku animats. skaala"</string>
-    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Animaatori kestuse skaala"</string>
+    <string name="enable_gpu_debug_layers" msgid="3848838293793255097">"GPU silumise kihtide lubamine"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="8009136940671194940">"GPU silumise kihtide laadimise lubamine silumisrakendustele"</string>
+    <string name="window_animation_scale_title" msgid="6162587588166114700">"Akna animatsioonimastaap"</string>
+    <string name="transition_animation_scale_title" msgid="387527540523595875">"Ülemineku animatsioonimastaap"</string>
+    <string name="animator_duration_scale_title" msgid="3406722410819934083">"Animaatori kestuse mastaap"</string>
     <string name="overlay_display_devices_title" msgid="5364176287998398539">"Modelleeri teisi ekraane"</string>
     <string name="debug_applications_category" msgid="4206913653849771549">"Rakendused"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Ära hoia tegevusi alles"</string>
-    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Kõigi tegev. hävit. kohe, kui kasutaja neist lahk."</string>
-    <string name="app_process_limit_title" msgid="4280600650253107163">"Taustaprotsesside piir"</string>
+    <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Kõigi tegevuste hävitamine kohe, kui kasutaja neist lahkub"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"Taustaprotsesside limiit"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"Kuva taustal toimuvad ANR-id"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Kuva taustarakenduste puhul dialoog Rakendus ei reageeri"</string>
-    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Kuva märguandekan. hoiat."</string>
+    <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Kuva märguandekanali hoiatused"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Esitab ekraanil hoiatuse, kui rakendus postitab kehtiva kanalita märguande"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Luba rakendused välises salvestusruumis"</string>
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"Lubab mis tahes rakendusi kirjutada välisesse salvestusruumi manifesti väärtustest olenemata"</string>

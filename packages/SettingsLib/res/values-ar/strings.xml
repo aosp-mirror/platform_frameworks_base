@@ -216,25 +216,20 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"‏إصدار Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"‏اختيار إصدار Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ترميز صوت بلوتوث"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"اختيار برنامج ترميز الصوت لمشغّل\nالبلوتوث"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"معدّل عيّنة صوت بلوتوث"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"اختيار برنامج ترميز الصوت لمشغّل\nالبلوتوث: معدّل العيّنة"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"وحدات البت لكل عيّنة في صوت بلوتوث"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"اختيار برنامج ترميز الصوت لمشغّل\nالبلوتوث: عدد وحدات البت لكل عيّنة"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"وضع قناة صوت بلوتوث"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"اختيار برنامج ترميز الصوت لمشغّل\nالبلوتوث: وضع القناة"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"‏برنامج ترميز LDAC لصوت البلوتوث: جودة التشغيل"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"‏اختيار برنامج ترميز LDAC لصوت مشغّل\nالبلوتوث: جودة التشغيل"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"البث: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"نظام أسماء النطاقات الخاص"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"اختر وضع نظام أسماء النطاقات الخاص"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"غير مفعّل"</string>
-    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"آلي"</string>
+    <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"تلقائي"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"اسم مضيف مزوّد نظام أسماء النطاقات الخاص"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"أدخل اسم مضيف مزوّد نظام أسماء النطاقات"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"تعذّر الاتصال"</string>

@@ -202,7 +202,7 @@
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Neka kôd za pokretanje sustava bude otključan"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Želite li dopustiti OEM otključavanje?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="5517144575601647022">"UPOZORENJE: značajke za zaštitu uređaja neće funkcionirati na ovom uređaju dok je ta postavka uključena."</string>
-    <string name="mock_location_app" msgid="7966220972812881854">"Odaberite aplikaciju za lažnu lokaciju"</string>
+    <string name="mock_location_app" msgid="7966220972812881854">"Odabir aplikacije za lažnu lokaciju"</string>
     <string name="mock_location_app_not_set" msgid="809543285495344223">"Aplikacija za lažnu lokaciju nije postavljena"</string>
     <string name="mock_location_app_set" msgid="8966420655295102685">"Aplikacija za lažnu lokaciju: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="7044075693643009662">"Umrežavanje"</string>
@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Verzija AVRCP-a za Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Odaberite verziju AVRCP-a za Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Kodek za Bluetooth Audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Pokreni odabir kodeka za Bluetooth\nAudio"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Brzina uzorka za Bluetooth Audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Pokreni odabir kodeka za Bluetooth\nAudio: brzina uzorkovanja"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bitovi po uzorku za Bluetooth Audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Pokreni odabir kodeka za Bluetooth\nAudio: bitovi po uzorku"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Način kanala za Bluetooth Audio"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Pokreni odabir kodeka za Bluetooth\nAudio: način kanala"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Kodek za Bluetooth Audio LDAC: kvaliteta reprodukcije"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Pokreni odabir kodeka za Bluetooth Audio\nLDAC: kvaliteta reprodukcije"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Strujanje: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Privatni DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Odaberite način privatnog DNS-a"</string>
@@ -322,7 +317,7 @@
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Aktivnost se prekida čim je korisnik napusti."</string>
     <string name="app_process_limit_title" msgid="4280600650253107163">"Ograničenje pozadinskog procesa"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"Pokaži pozadinske ANR-ove"</string>
-    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Dijalog o pozadinskim aplikacijama koja ne odgovaraju"</string>
+    <string name="show_all_anrs_summary" msgid="6636514318275139826">"Dijalog o pozadinskim aplikacijama koje ne reagiraju"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Prikaži upozorenja kanala obavijesti"</string>
     <string name="show_notification_channel_warnings_summary" msgid="5536803251863694895">"Prikazuje upozorenje na zaslonu kada aplikacija objavi obavijest bez važećeg kanala"</string>
     <string name="force_allow_on_external" msgid="3215759785081916381">"Prisilno dopusti aplikacije u vanjskoj pohrani"</string>

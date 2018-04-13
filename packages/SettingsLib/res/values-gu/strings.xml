@@ -196,7 +196,7 @@
     <string name="bugreport_in_power_summary" msgid="1778455732762984579">"બગ રિપોર્ટ લેવા માટે પાવર મેનૂમાં એક બટન બતાવો"</string>
     <string name="keep_screen_on" msgid="1146389631208760344">"સક્રિય રાખો"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"ચાર્જિંગ દરમિયાન સ્ક્રીન ક્યારેય નિષ્ક્રિય થશે નહીં"</string>
-    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"બ્લૂટૂથ HCI સ્નૂપ લૉગ સક્ષમ કરો"</string>
+    <string name="bt_hci_snoop_log" msgid="3340699311158865670">"બ્લૂટૂથ HCI સ્નૂપ લૉગ ચાલુ કરો"</string>
     <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"ફાઇલમાં બધા બ્લૂટૂથ HCI પૅકેટને કૅપ્ચર કરો (આ સેટિંગ બદલ્યા પછી બ્લૂટૂથને ટૉગલ કરો)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM અનલૉકિંગ"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"બુટલોડર અનલૉક કરવાની મંજૂરી આપો"</string>
@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"બ્લૂટૂથ AVRCP સંસ્કરણ"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"બ્લૂટૂથ AVRCP સંસ્કરણ પસંદ કરો"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"બ્લૂટૂથ ઑડિઓ કોડેક"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"બ્લૂટૂથ ઑડિઓ કોડેક\nપસંદગી ટ્રિગર કરો"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"બ્લૂટૂથ ઑડિઓ નમૂના દર"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"બ્લૂટૂથ ઑડિઓ કોડેક\nપસંદગી ટ્રિગર કરો: નમૂના રેટ"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"નમૂના દીઠ બ્લૂટૂથ ઑડિઓ બિટ"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"બ્લૂટૂથ ઑડિઓ કોડેક\nપસંદગી ટ્રિગર કરો: નમૂના દીઠ બિટ"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"બ્લૂટૂથ ઑડિઓ ચેનલ મોડ"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"બ્લૂટૂથ ઑડિઓ કોડેક\nપસંદગી ટ્રિગર કરો: ચૅનલ મોડ"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"બ્લૂટૂથ ઑડિઓ LDAC કોડેક: પ્લેબૅક ગુણવત્તા"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"બ્લૂટૂથ ઑડિઓ LDAC કોડેક\nપસંદગી ટ્રિગર કરો: પ્લેબૅક ક્વૉલિટી"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"સ્ટ્રીમિંગ: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"ખાનગી DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"ખાનગી DNS મોડને પસંદ કરો"</string>
@@ -329,7 +324,7 @@
     <string name="force_allow_on_external_summary" msgid="3640752408258034689">"મેનિફેસ્ટ મૂલ્યોને ધ્યાનમાં લીધા સિવાય, કોઈપણ ઍપ્લિકેશનને બાહ્ય સ્ટોરેજ પર લખાવા માટે લાયક બનાવે છે"</string>
     <string name="force_resizable_activities" msgid="8615764378147824985">"પ્રવૃત્તિઓને ફરીથી કદ યોગ્ય થવા માટે ફરજ પાડો"</string>
     <string name="force_resizable_activities_summary" msgid="6667493494706124459">"મૅનિફેસ્ટ મૂલ્યોને ધ્યાનમાં લીધા સિવાય, તમામ પ્રવૃત્તિઓને મલ્ટી-વિંડો માટે ફરીથી કદ બદલી શકે તેવી બનાવો."</string>
-    <string name="enable_freeform_support" msgid="1461893351278940416">"ફ્રિફોર્મ વિંડોઝ સક્ષમ કરો"</string>
+    <string name="enable_freeform_support" msgid="1461893351278940416">"ફ્રિફોર્મ વિંડોઝ ચાલુ કરો"</string>
     <string name="enable_freeform_support_summary" msgid="8247310463288834487">"પ્રાયોગિક ફ્રિફોર્મ વિંડોઝ માટે સમર્થનને સક્ષમ કરો."</string>
     <string name="local_backup_password_title" msgid="3860471654439418822">"ડેસ્કટૉપ બેકઅપ પાસવર્ડ"</string>
     <string name="local_backup_password_summary_none" msgid="6951095485537767956">"ડેસ્કટૉપ સંપૂર્ણ બેકઅપ હાલમાં સુરક્ષિત નથી"</string>

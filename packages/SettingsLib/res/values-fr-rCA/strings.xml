@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Version du profil Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Sélectionner la version du profil Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Codec audio Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Déclencher le codec audio Bluetooth\nSélection"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Taux d\'échantillonnage pour l\'audio Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Déclencher le codec audio Bluetooth\nSélection : taux d\'échantillonnage"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bits par échantillon pour l\'audio Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Déclencher le codec audio Bluetooth\nSélection : bits par échantillon"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Mode de canal pour l\'audio Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Déclencher le codec audio Bluetooth\nSélection : mode Canal"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Codec audio Bluetooth LDAC : qualité de lecture"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Déclencher le codec audio Bluetooth LDAC\nSélection : qualité de lecture"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Diffusion : <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS privé"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Sélectionnez le mode DNS privé"</string>
@@ -261,8 +256,8 @@
     <string name="adb_keys_warning_message" msgid="5659849457135841625">"Voulez-vous vraiment désactiver l\'accès au débogage USB de tous les ordinateurs précédemment autorisés?"</string>
     <string name="dev_settings_warning_title" msgid="7244607768088540165">"Activer les paramètres de développement?"</string>
     <string name="dev_settings_warning_message" msgid="2298337781139097964">"Ces paramètres sont en cours de développement. Ils peuvent endommager votre appareil et les applications qui s\'y trouvent, ou provoquer leur dysfonctionnement."</string>
-    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Vérifier les applis via USB"</string>
-    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Vérifiez que les applications installées par ADB/ADT ne présentent pas de comportement dangereux."</string>
+    <string name="verify_apps_over_usb_title" msgid="4177086489869041953">"Vérifier les applis par USB"</string>
+    <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Vérifier que les applications installées par ADB/ADT ne présentent pas de comportement dangereux."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Les appareils Bluetooth sans nom (adresses MAC seulement) seront affichés"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Désactive la fonctionnalité de volume absolu par Bluetooth en cas de problème de volume sur les appareils à distance, par exemple si le volume est trop élevé ou s\'il ne peut pas être contrôlé."</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal local"</string>
@@ -283,7 +278,7 @@
     <string name="media_category" msgid="4388305075496848353">"Médias"</string>
     <string name="debug_monitoring_category" msgid="7640508148375798343">"Surveillance"</string>
     <string name="strict_mode" msgid="1938795874357830695">"Mode Strict activé"</string>
-    <string name="strict_mode_summary" msgid="142834318897332338">"Afficher un cadre rouge si le thread principal reste occupé"</string>
+    <string name="strict_mode_summary" msgid="142834318897332338">"Afficher un cadre rouge si le fil principal reste occupé"</string>
     <string name="pointer_location" msgid="6084434787496938001">"Emplacement du curseur"</string>
     <string name="pointer_location_summary" msgid="840819275172753713">"Superposition écran indiquant données actuelles"</string>
     <string name="show_touches" msgid="2642976305235070316">"Afficher éléments sélect."</string>
@@ -303,8 +298,8 @@
     <string name="usb_audio_disable_routing_summary" msgid="980282760277312264">"Désactiver routage automatique appareils audio USB"</string>
     <string name="debug_layout" msgid="5981361776594526155">"Afficher les contours"</string>
     <string name="debug_layout_summary" msgid="2001775315258637682">"Afficher les limites, les marges de clip, etc."</string>
-    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Forcer orient. : g. à d."</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Forcer l\'orientation: g. à droite (toutes langues)"</string>
+    <string name="force_rtl_layout_all_locales" msgid="2259906643093138978">"Forcer droite à gauche"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="9192797796616132534">"Forcer l\'orientation droite à gauche (toutes langues)"</string>
     <string name="force_hw_ui" msgid="6426383462520888732">"Forcer le rendu GPU"</string>
     <string name="force_hw_ui_summary" msgid="5535991166074861515">"Forcer l\'utilisation du GPU pour le dessin 2D"</string>
     <string name="force_msaa" msgid="7920323238677284387">"Forcer MSAA 4x"</string>

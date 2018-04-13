@@ -50,13 +50,13 @@
   </string-array>
   <string-array name="hdcp_checking_titles">
     <item msgid="441827799230089869">"Никогаш не проверувај"</item>
-    <item msgid="6042769699089883931">"Провери само ДРМ содржина"</item>
+    <item msgid="6042769699089883931">"Провери само DRM содржина"</item>
     <item msgid="9174900380056846820">"Секогаш проверувај"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
-    <item msgid="505558545611516707">"Никогаш не користи ХДЦП проверка"</item>
-    <item msgid="3878793616631049349">"Користи ХДЦП проверка само за ДРМ содржина"</item>
-    <item msgid="45075631231212732">"Секогаш користи ХДЦП проверка"</item>
+    <item msgid="505558545611516707">"Никогаш не користи HDCP проверка"</item>
+    <item msgid="3878793616631049349">"Користи HDCP проверка само за DRM содржина"</item>
+    <item msgid="45075631231212732">"Секогаш користи HDCP проверка"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="5347678900838034763">"AVRCP 1.4 (Стандардно)"</item>

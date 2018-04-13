@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versi AVRCP Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Pilih Versi AVRCP Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Codec Audio Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Aktifkan Codec Audio Bluetooth\nPilihan"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Frekuensi Sampel Audio Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Aktifkan Codec Audio Bluetooth\nPilihan: Frekuensi Sampel"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bit Per Sampel Audio Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Aktifkan Codec Audio Bluetooth\nPilihan: Bit Per Sampel"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Mode Channel Audio Bluetooth"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Aktifkan Codec Audio Bluetooth\nPilihan: Mode Channel"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Codec LDAC Audio Bluetooth: Kualitas Pemutaran"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Aktifkan Codec LDAC Audio Bluetooth\nPilihan: Kualitas Pemutaran"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS Pribadi"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Pilih Mode DNS Pribadi"</string>
@@ -290,9 +285,9 @@
     <string name="show_touches_summary" msgid="6101183132903926324">"Tampilkan masukan visual untuk ketukan"</string>
     <string name="show_screen_updates" msgid="5470814345876056420">"Lihat pembaruan permukaan"</string>
     <string name="show_screen_updates_summary" msgid="2569622766672785529">"Sorot seluruh permukaan jendela saat diperbarui"</string>
-    <string name="show_hw_screen_updates" msgid="5036904558145941590">"Tampilkan pembaruan tampilan GPU"</string>
+    <string name="show_hw_screen_updates" msgid="5036904558145941590">"Tampilkan update tampilan GPU"</string>
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Tampilan cepat dlm jendela saat digambar dgn GPU"</string>
-    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Tunjukkan pembaruan lapisan hardware"</string>
+    <string name="show_hw_layers_updates" msgid="5645728765605699821">"Tunjukkan update lapisan hardware"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Lapisan hardware berkedip hijau saat memperbarui"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Debug overdraw oleh GPU"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Nonaktifkan lapisan HW"</string>
@@ -320,7 +315,7 @@
     <string name="debug_applications_category" msgid="4206913653849771549">"Aplikasi"</string>
     <string name="immediately_destroy_activities" msgid="1579659389568133959">"Jangan simpan kegiatan"</string>
     <string name="immediately_destroy_activities_summary" msgid="3592221124808773368">"Hancurkan tiap kgiatan setelah ditinggal pengguna"</string>
-    <string name="app_process_limit_title" msgid="4280600650253107163">"Batas proses latar blkg"</string>
+    <string name="app_process_limit_title" msgid="4280600650253107163">"Batas proses background"</string>
     <string name="show_all_anrs" msgid="4924885492787069007">"Tampilkan ANR background"</string>
     <string name="show_all_anrs_summary" msgid="6636514318275139826">"Tampilkan dialog Aplikasi Tidak Merespons untuk aplikasi yang berjalan di background"</string>
     <string name="show_notification_channel_warnings" msgid="1399948193466922683">"Menampilkan peringatan channel notifikasi"</string>
