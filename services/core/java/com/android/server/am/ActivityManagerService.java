@@ -52,6 +52,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
+import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DEFAULT;
 import static android.content.pm.PackageManager.FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY;
@@ -766,7 +767,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     /**
      * The controller for all operations related to locktask.
      */
-    final LockTaskController mLockTaskController;
+    private final LockTaskController mLockTaskController;
 
     final UserController mUserController;
 
@@ -1957,7 +1958,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     final ActivityManagerConstants mConstants;
 
     // Encapsulates the global setting "hidden_api_blacklist_exemptions"
-    final HiddenApiBlacklist mHiddenApiBlacklist;
+    final HiddenApiSettings mHiddenApiBlacklist;
 
     PackageManagerInternal mPackageManagerInt;
 
@@ -2892,17 +2893,20 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
-     * Encapsulates the global setting "hidden_api_blacklist_exemptions", including tracking the
-     * latest value via a content observer.
+     * Encapsulates global settings related to hidden API enforcement behaviour, including tracking
+     * the latest value via a content observer.
      */
-    static class HiddenApiBlacklist extends ContentObserver {
+    static class HiddenApiSettings extends ContentObserver {
 
         private final Context mContext;
         private boolean mBlacklistDisabled;
         private String mExemptionsStr;
         private List<String> mExemptions = Collections.emptyList();
+        private int mLogSampleRate = -1;
+        @HiddenApiEnforcementPolicy private int mPolicyPreP = HIDDEN_API_ENFORCEMENT_DEFAULT;
+        @HiddenApiEnforcementPolicy private int mPolicyP = HIDDEN_API_ENFORCEMENT_DEFAULT;
 
-        public HiddenApiBlacklist(Handler handler, Context context) {
+        public HiddenApiSettings(Handler handler, Context context) {
             super(handler);
             mContext = context;
         }
@@ -2910,6 +2914,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void registerObserver() {
             mContext.getContentResolver().registerContentObserver(
                     Settings.Global.getUriFor(Settings.Global.HIDDEN_API_BLACKLIST_EXEMPTIONS),
+                    false,
+                    this);
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.HIDDEN_API_ACCESS_LOG_SAMPLING_RATE),
+                    false,
+                    this);
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.HIDDEN_API_POLICY_PRE_P_APPS),
+                    false,
+                    this);
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.HIDDEN_API_POLICY_P_APPS),
                     false,
                     this);
             update();
@@ -2931,11 +2947,39 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 zygoteProcess.setApiBlacklistExemptions(mExemptions);
             }
+            int logSampleRate = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.HIDDEN_API_ACCESS_LOG_SAMPLING_RATE, -1);
+            if (logSampleRate < 0 || logSampleRate > 0x10000) {
+                logSampleRate = -1;
+            }
+            if (logSampleRate != -1 && logSampleRate != mLogSampleRate) {
+                mLogSampleRate = logSampleRate;
+                zygoteProcess.setHiddenApiAccessLogSampleRate(mLogSampleRate);
+            }
+            mPolicyPreP = getValidEnforcementPolicy(Settings.Global.HIDDEN_API_POLICY_PRE_P_APPS);
+            mPolicyP = getValidEnforcementPolicy(Settings.Global.HIDDEN_API_POLICY_P_APPS);
+        }
 
+        private @HiddenApiEnforcementPolicy int getValidEnforcementPolicy(String settingsKey) {
+            int policy = Settings.Global.getInt(mContext.getContentResolver(), settingsKey,
+                    ApplicationInfo.HIDDEN_API_ENFORCEMENT_DEFAULT);
+            if (ApplicationInfo.isValidHiddenApiEnforcementPolicy(policy)) {
+                return policy;
+            } else {
+                return ApplicationInfo.HIDDEN_API_ENFORCEMENT_DEFAULT;
+            }
         }
 
         boolean isDisabled() {
             return mBlacklistDisabled;
+        }
+
+        @HiddenApiEnforcementPolicy int getPolicyForPrePApps() {
+            return mPolicyPreP;
+        }
+
+        @HiddenApiEnforcementPolicy int getPolicyForPApps() {
+            return mPolicyP;
         }
 
         public void onChange(boolean selfChange) {
@@ -3110,7 +3154,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         };
 
-        mHiddenApiBlacklist = new HiddenApiBlacklist(mHandler, mContext);
+        mHiddenApiBlacklist = new HiddenApiSettings(mHandler, mContext);
 
         Watchdog.getInstance().addMonitor(this);
         Watchdog.getInstance().addThread(mHandler);
@@ -4226,6 +4270,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             if (!disableHiddenApiChecks && !mHiddenApiBlacklist.isDisabled()) {
+                app.info.maybeUpdateHiddenApiEnforcementPolicy(
+                        mHiddenApiBlacklist.getPolicyForPrePApps(),
+                        mHiddenApiBlacklist.getPolicyForPApps());
                 @HiddenApiEnforcementPolicy int policy =
                         app.info.getHiddenApiEnforcementPolicy();
                 int policyBits = (policy << Zygote.API_ENFORCEMENT_POLICY_SHIFT);
@@ -5259,7 +5306,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             synchronized (this) {
                 mWindowManager.cancelRecentsAnimation(restoreHomeStackPosition
                         ? REORDER_MOVE_TO_ORIGINAL_POSITION
-                        : REORDER_KEEP_IN_PLACE);
+                        : REORDER_KEEP_IN_PLACE, "cancelRecentsAnimation");
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -6598,6 +6645,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 int[] users = userId == UserHandle.USER_ALL
                         ? mUserController.getUsers() : new int[] { userId };
                 for (int user : users) {
+                    if (getPackageManagerInternalLocked().isPackageStateProtected(
+                            packageName, user)) {
+                        Slog.w(TAG, "Ignoring request to force stop protected package "
+                                + packageName + " u" + user);
+                        return;
+                    }
+
                     int pkgUid = -1;
                     try {
                         pkgUid = pm.getPackageUid(packageName, MATCH_DEBUG_TRIAGED_MISSING,
@@ -7525,7 +7579,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // target APIs higher than O MR1. Since access to the serial
             // is now behind a permission we push down the value.
             final String buildSerial = (appInfo.targetSandboxVersion < 2
-                    && appInfo.targetSdkVersion <= Build.VERSION_CODES.O_MR1)
+                    && appInfo.targetSdkVersion < Build.VERSION_CODES.P)
                             ? sTheRealBuildSerial : Build.UNKNOWN;
 
             // Check if this is a secondary process that should be incorporated into some
@@ -12282,6 +12336,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mActivityStartController;
     }
 
+    LockTaskController getLockTaskController() {
+        return mLockTaskController;
+    }
+
     ClientLifecycleManager getLifecycleManager() {
         return mLifecycleManager;
     }
@@ -16879,6 +16937,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.println("ms");
                 }
                 mUidObservers.finishBroadcast();
+
+                pw.println();
+                pw.println("  ServiceManager statistics:");
+                ServiceManager.sStatLogger.dump(pw, "    ");
+                pw.println();
             }
         }
         pw.println("  mForceBackgroundCheck=" + mForceBackgroundCheck);
@@ -26504,7 +26567,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 record.waitingForNetwork = false;
                 final long totalTime = SystemClock.uptimeMillis() - startTime;
                 if (totalTime >= mWaitForNetworkTimeoutMs || DEBUG_NETWORK) {
-                    Slog.wtf(TAG_NETWORK, "Total time waited for network rules to get updated: "
+                    Slog.w(TAG_NETWORK, "Total time waited for network rules to get updated: "
                             + totalTime + ". Uid: " + callingUid + " procStateSeq: "
                             + procStateSeq + " UidRec: " + record
                             + " validateUidRec: " + mValidateUids.get(callingUid));

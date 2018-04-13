@@ -19,6 +19,7 @@ package android.hardware.display;
 import android.content.pm.ParceledListSlice;
 import android.graphics.Point;
 import android.hardware.display.BrightnessConfiguration;
+import android.hardware.display.Curve;
 import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.WifiDisplay;
@@ -112,4 +113,7 @@ interface IDisplayManager {
 
     // Temporarily sets the auto brightness adjustment factor.
     void setTemporaryAutoBrightnessAdjustment(float adjustment);
+
+    // Get the minimum brightness curve.
+    Curve getMinimumBrightnessCurve();
 }

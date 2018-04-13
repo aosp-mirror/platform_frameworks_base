@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"कल"</string>
     <string name="dial_desc" msgid="6573723404985517250">"चयन गरिएको फोन नम्बरमा कल गर्नुहोस्"</string>
     <string name="map" msgid="5441053548030107189">"नक्सा"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"चयन गरिएको ठेगाना पत्ता लगाउनुहोस्"</string>
     <string name="browse" msgid="1245903488306147205">"खोल्नुहोस्"</string>
     <string name="browse_desc" msgid="8220976549618935044">"चयन गरिएको URL खोल्नुहोस्"</string>
     <string name="sms" msgid="4560537514610063430">"सन्देश"</string>
@@ -1697,7 +1696,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"तपाईंका प्रशासकले स्थापना गर्नुभएको"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"तपाईंका प्रशासकले अद्यावधिक गर्नुभएको"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"तपाईंका प्रशासकले मेट्नुभएको"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"ब्याट्री सेभरले ब्याट्रीको आयु लम्ब्याउनका लागि तपाईंको यन्त्रको कार्यसम्पादन घटाउनुका साथै कम्पन, स्थानसम्बन्धी सेवा र पृष्ठभूमिको डेटालाई सीमित वा निष्क्रिय पार्छ। इमेल, सन्देश प्रवाह तथा सिंक प्रक्रियामा निर्भर अन्य अनुप्रयोगहरू तपाईंले खोल्नुभएको अवस्थामाबाहेक स्वतः अद्यावधिक नहुन सक्छन्।\n\nतपाईंको यन्त्र चार्ज हुन थालेपछि ब्याट्री सेभर स्वतः निष्क्रिय हुन्छ।"</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"डेटाको प्रयोगलाई कम गर्नमा मद्दतका लागि डेटा सर्भरले केही अनुप्रयोगहरूलाई पृष्ठभूमिमा डेटा पठाउन वा प्राप्त गर्नबाट रोक्दछ। तपाईँले हाल प्रयोग गरिरहनुभएको अनु्प्रयोगले डेटामाथि पहुँच राख्न सक्छ, तर त्यसले यो काम थोरै पटक गर्न सक्छ। उदाहरणका लागि यसको मतलब यो हुन सक्छ: तपाईँले छविहरूलाई ट्याप नगरेसम्म ती प्रदर्शन हुँदैनन्।"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"डेटा सेभरलाई सक्रिय गर्ने हो?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"सक्रिय गर्नुहोस्"</string>
@@ -1784,6 +1784,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"सम्पूर्ण भाषाहरू"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"सबै क्षेत्रहरू"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"खोज"</string>
+    <!-- no translation found for app_suspended_title (5360409799785895488) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (5876776530189983288) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (2901244470963918402) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"कार्य प्रोफाइल सक्रिय गर्ने?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"तपाईंका कार्यसम्बन्धी अनुप्रयोग, सूचना, डेटा र कार्य प्रोफाइलका अन्य सुविधाहरू सक्रिय गरिने छन्‌"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"सक्रिय गर्नुहोस्"</string>
@@ -1873,8 +1879,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"कल तथा सूचनाहरूलाई म्युट गरिने छ"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"प्रणालीसम्बन्धी परिवर्तनहरू"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"बाधा नपुऱ्याउनुहोस्"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"तपाईंलाई ध्यान केन्द्रित गर्नमा मद्दत गर्नाका लागि बाधा नपुर्‍याउनुहोस् मोडले सूचनाहरू लुकाइरहेको छ"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"यो नयाँ व्यवहार हो। परिवर्तन गर्न ट्याप गर्नुहोस्।"</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"बाधा नपुर्‍याउनुहोस् मोड परिवर्तन भएको छ"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"रोक लगाइएका कुराहरू जाँच गर्न ट्याप गर्नुहोस्‌।"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"प्रणाली"</string>

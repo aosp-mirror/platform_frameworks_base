@@ -67,7 +67,6 @@ import android.view.animation.AnimationUtils;
 
 import com.android.server.policy.WindowManagerPolicy;
 
-import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 /**
@@ -217,6 +216,12 @@ class WindowStateAnimator {
     int mXOffset = 0;
     int mYOffset = 0;
 
+    /**
+     * A flag to determine if the WSA needs to offset its position to compensate for the stack's
+     * position update before the WSA surface has resized.
+     */
+    private boolean mOffsetPositionForStackResize;
+
     private final Rect mTmpSize = new Rect();
 
     private final SurfaceControl.Transaction mReparentTransaction = new SurfaceControl.Transaction();
@@ -229,6 +234,8 @@ class WindowStateAnimator {
     // and reset after the last to ensure we only reset mForceScaleUntilResize
     // once per animation.
     boolean mPipAnimationStarted = false;
+
+    private final Point mTmpPos = new Point();
 
     WindowStateAnimator(final WindowState win) {
         final WindowManagerService service = win.mService;
@@ -301,6 +308,12 @@ class WindowStateAnimator {
         if (!mLastHidden) {
             //dump();
             mLastHidden = true;
+
+            // We may have a preserved surface which we no longer need. If there was a quick
+            // VISIBLE, GONE, VISIBLE, GONE sequence, the surface may never draw, so we don't mark
+            // it to be destroyed in prepareSurfaceLocked.
+            markPreservedSurfaceForDestroy();
+
             if (mSurfaceController != null) {
                 mSurfaceController.hide(transaction, reason);
             }
@@ -498,6 +511,8 @@ class WindowStateAnimator {
             mSurfaceController = new WindowSurfaceController(mSession.mSurfaceSession,
                     attrs.getTitle().toString(), width, height, format, flags, this,
                     windowType, ownerUid);
+
+            setOffsetPositionForStackResize(false);
             mSurfaceFormat = format;
 
             w.setHasSurface(true);
@@ -859,7 +874,8 @@ class WindowStateAnimator {
         // However, this would be unsafe, as the client may be in the middle
         // of producing a frame at the old size, having just completed layout
         // to find the surface size changed underneath it.
-        if (!w.mRelayoutCalled || w.mInRelayout) {
+        final boolean relayout = !w.mRelayoutCalled || w.mInRelayout;
+        if (relayout) {
             mSurfaceResized = mSurfaceController.setSizeInTransaction(
                     mTmpSize.width(), mTmpSize.height(), recoveringMemory);
         } else {
@@ -996,7 +1012,38 @@ class WindowStateAnimator {
             mPipAnimationStarted = false;
 
             if (!w.mSeamlesslyRotated) {
-                mSurfaceController.setPositionInTransaction(mXOffset, mYOffset, recoveringMemory);
+                // Used to offset the WSA when stack position changes before a resize.
+                int xOffset = mXOffset;
+                int yOffset = mYOffset;
+                if (mOffsetPositionForStackResize) {
+                    if (relayout) {
+                        // Once a relayout is called, reset the offset back to 0 and defer
+                        // setting it until a new frame with the updated size. This ensures that
+                        // the WS position is reset (so the stack position is shown) at the same
+                        // time that the buffer size changes.
+                        setOffsetPositionForStackResize(false);
+                        mSurfaceController.deferTransactionUntil(mSurfaceController.getHandle(),
+                                mWin.getFrameNumber());
+                    } else {
+                        final TaskStack stack = mWin.getStack();
+                        mTmpPos.x = 0;
+                        mTmpPos.y = 0;
+                        if (stack != null) {
+                            stack.getRelativePosition(mTmpPos);
+                        }
+
+                        xOffset = -mTmpPos.x;
+                        yOffset = -mTmpPos.y;
+
+                        // Crop also needs to be extended so the bottom isn't cut off when the WSA
+                        // position is moved.
+                        if (clipRect != null) {
+                            clipRect.right += mTmpPos.x;
+                            clipRect.bottom += mTmpPos.y;
+                        }
+                    }
+                }
+                mSurfaceController.setPositionInTransaction(xOffset, yOffset, recoveringMemory);
             }
         }
 
@@ -1498,5 +1545,9 @@ class WindowStateAnimator {
 
     int getLayer() {
         return mLastLayer;
+    }
+
+    void setOffsetPositionForStackResize(boolean offsetPositionForStackResize) {
+        mOffsetPositionForStackResize = offsetPositionForStackResize;
     }
 }

@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -288,7 +289,20 @@ public class RecoveryController {
     }
 
     /**
+     * Checks whether the recoverable key store is currently available.
+     *
+     * <p>If it returns true, the device must currently be using a screen lock that is supported for
+     * use with the recoverable key store, i.e. AOSP PIN, pattern or password.
+     */
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
+    public static boolean isRecoverableKeyStoreEnabled(@NonNull Context context) {
+        KeyguardManager keyguardManager = context.getSystemService(KeyguardManager.class);
+        return keyguardManager != null && keyguardManager.isDeviceSecure();
+    }
+
+    /**
      * @deprecated Use {@link #initRecoveryService(String, byte[], byte[])} instead.
+     * @removed
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -360,6 +374,7 @@ public class RecoveryController {
 
     /**
      * @deprecated Use {@link #getKeyChainSnapshot()}
+     * @removed
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -436,6 +451,7 @@ public class RecoveryController {
 
     /**
      * @deprecated Use {@link #getAliases()}.
+     * @removed
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -461,6 +477,7 @@ public class RecoveryController {
 
     /**
      * @deprecated Use {@link #setRecoveryStatus(String, int)}
+     * @removed
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -495,6 +512,7 @@ public class RecoveryController {
 
     /**
      * @deprecated Use {@link #getRecoveryStatus(String)}.
+     * @removed
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -587,7 +605,10 @@ public class RecoveryController {
      * @throws LockScreenRequiredException if the user has not set a lock screen. This is required
      *     to generate recoverable keys, as the snapshots are encrypted using a key derived from the
      *     lock screen.
+     * @deprecated Use {@link #generateKey(String)}
+     * @removed
      */
+    @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     public byte[] generateAndStoreKey(@NonNull String alias, byte[] account)
             throws InternalRecoveryServiceException, LockScreenRequiredException {
@@ -596,6 +617,7 @@ public class RecoveryController {
 
     /**
      * @deprecated Use {@link #generateKey(String)}.
+     * @removed
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)

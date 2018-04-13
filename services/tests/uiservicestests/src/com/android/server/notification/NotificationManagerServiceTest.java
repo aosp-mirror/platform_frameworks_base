@@ -2558,8 +2558,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         int expected = SUPPRESSED_EFFECT_BADGE
                 | SUPPRESSED_EFFECT_SCREEN_ON | SUPPRESSED_EFFECT_SCREEN_OFF
-                | SUPPRESSED_EFFECT_PEEK | SUPPRESSED_EFFECT_AMBIENT
-                | SUPPRESSED_EFFECT_LIGHTS | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
+                | SUPPRESSED_EFFECT_PEEK | SUPPRESSED_EFFECT_LIGHTS
+                | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
         int actual = mService.calculateSuppressedVisualEffects(appPolicy, userPolicy, O_MR1);
 
         assertEquals(expected, actual);

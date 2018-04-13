@@ -136,6 +136,10 @@
          views where the distance can't be measured -->
     <dimen name="notification_icon_appear_padding">15dp</dimen>
 
+    <!-- Vertical translation of the shelf during animation that happens after the
+    notification panel collapses -->
+    <dimen name="shelf_appear_translation">9dp</dimen>
+
     <!-- The amount the content shifts upwards when transforming into the icon -->
     <dimen name="notification_icon_transform_content_shift">32dp</dimen>
 
@@ -180,6 +184,9 @@
 
     <!-- the padding on the start of the statusbar -->
     <dimen name="status_bar_padding_start">6dp</dimen>
+
+    <!-- the padding on the end of the statusbar -->
+    <dimen name="status_bar_padding_end">8dp</dimen>
 
     <!-- the radius of the overflow dot in the status bar -->
     <dimen name="overflow_dot_radius">1dp</dimen>
@@ -270,7 +277,9 @@
     <!-- The width of the panel that holds the quick settings. -->
     <dimen name="qs_panel_width">@dimen/notification_panel_width</dimen>
 
-    <dimen name="volume_dialog_panel_transparent_padding">8dp</dimen>
+    <dimen name="volume_dialog_panel_transparent_padding_right">8dp</dimen>
+
+    <dimen name="volume_dialog_panel_transparent_padding">20dp</dimen>
 
     <!-- the amount the volume panel should be offset at the end from the view next to it (or
     the screen edge, in portrait-->
@@ -371,7 +380,7 @@
     <dimen name="qs_header_alarm_icon_size">18dp</dimen>
     <dimen name="qs_header_alarm_text_margin_start">6dp</dimen>
     <dimen name="qs_footer_padding_start">16dp</dimen>
-    <dimen name="qs_footer_padding_end">24dp</dimen>
+    <dimen name="qs_footer_padding_end">16dp</dimen>
     <dimen name="qs_footer_icon_size">16dp</dimen>
 
     <dimen name="qs_notif_collapsed_space">64dp</dimen>
@@ -841,6 +850,9 @@
     <!-- The size of the drag hint text. -->
     <dimen name="recents_drag_hint_text_size">14sp</dimen>
 
+    <!-- The size of corner radius of the arrow in the onboarding toast. -->
+    <dimen name="recents_onboarding_toast_arrow_corner_radius">2dp</dimen>
+
     <!-- The min alpha to apply to a task affiliation group color. -->
     <item name="recents_task_affiliation_color_min_alpha_percentage" format="float" type="dimen">0.6</item>
 
@@ -926,10 +938,15 @@
     <dimen name="smart_reply_button_font_size">14sp</dimen>
     <dimen name="smart_reply_button_line_spacing_extra">6sp</dimen> <!-- Total line height 20sp. -->
 
+    <!-- A reasonable upper bound for the height of the smart reply button. The measuring code
+            needs to start with a guess for the maximum size. Currently two-line smart reply buttons
+            add about 88dp of height to the notifications. -->
+    <dimen name="smart_reply_button_max_height">100dp</dimen>
+
     <!-- Fingerprint Dialog values -->
     <dimen name="fingerprint_dialog_fp_icon_size">64dp</dimen>
     <dimen name="fingerprint_dialog_animation_translation_offset">350dp</dimen>
-    <dimen name="fingerprint_dialog_corner_size">2dp</dimen>
+    <dimen name="fingerprint_dialog_corner_size">4dp</dimen>
 
     <!-- Wireless Charging Animation values -->
     <dimen name="wireless_charging_dots_radius_start">0dp</dimen>

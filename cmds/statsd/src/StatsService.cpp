@@ -81,7 +81,7 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
     StatsPuller::SetUidMap(mUidMap);
     mConfigManager = new ConfigManager();
     mProcessor = new StatsLogProcessor(mUidMap, mAnomalyAlarmMonitor, mPeriodicAlarmMonitor,
-                                       getElapsedRealtimeSec(), [this](const ConfigKey& key) {
+                                       getElapsedRealtimeNs(), [this](const ConfigKey& key) {
         sp<IStatsCompanionService> sc = getStatsCompanionService();
         auto receiver = mConfigManager->GetConfigReceiver(key);
         if (sc == nullptr) {
@@ -745,7 +745,7 @@ Status StatsService::informPollAlarmFired() {
                                          "Only system uid can call informPollAlarmFired");
     }
 
-    mStatsPullerManager.OnAlarmFired();
+    mProcessor->informPullAlarmFired(getElapsedRealtimeNs());
 
     VLOG("StatsService::informPollAlarmFired succeeded");
 
@@ -780,8 +780,6 @@ Status StatsService::writeDataToDisk() {
 }
 
 void StatsService::sayHiToStatsCompanion() {
-    // TODO: This method needs to be private. It is temporarily public and unsecured for testing
-    // purposes.
     sp<IStatsCompanionService> statsCompanion = getStatsCompanionService();
     if (statsCompanion != nullptr) {
         VLOG("Telling statsCompanion that statsd is ready");
@@ -818,49 +816,44 @@ void StatsService::Startup() {
     mConfigManager->Startup();
 }
 
-void StatsService::OnLogEvent(LogEvent* event) {
-    mProcessor->OnLogEvent(event);
+void StatsService::OnLogEvent(LogEvent* event, bool reconnectionStarts) {
+    mProcessor->OnLogEvent(event, reconnectionStarts);
 }
 
 Status StatsService::getData(int64_t key, vector<uint8_t>* output) {
     IPCThreadState* ipc = IPCThreadState::self();
     VLOG("StatsService::getData with Pid %i, Uid %i", ipc->getCallingPid(), ipc->getCallingUid());
-    if (checkCallingPermission(String16(kPermissionDump))) {
-        ConfigKey configKey(ipc->getCallingUid(), key);
-        mProcessor->onDumpReport(configKey, getElapsedRealtimeNs(),
-                                 false /* include_current_bucket*/, output);
-        return Status::ok();
-    } else {
+    if (!checkCallingPermission(String16(kPermissionDump))) {
         return Status::fromExceptionCode(binder::Status::EX_SECURITY);
     }
+    ConfigKey configKey(ipc->getCallingUid(), key);
+    mProcessor->onDumpReport(configKey, getElapsedRealtimeNs(),
+                             false /* include_current_bucket*/, output);
+    return Status::ok();
 }
 
 Status StatsService::getMetadata(vector<uint8_t>* output) {
     IPCThreadState* ipc = IPCThreadState::self();
     VLOG("StatsService::getMetadata with Pid %i, Uid %i", ipc->getCallingPid(),
          ipc->getCallingUid());
-    if (checkCallingPermission(String16(kPermissionDump))) {
-        StatsdStats::getInstance().dumpStats(output, false); // Don't reset the counters.
-        return Status::ok();
-    } else {
+    if (!checkCallingPermission(String16(kPermissionDump))) {
         return Status::fromExceptionCode(binder::Status::EX_SECURITY);
     }
+    StatsdStats::getInstance().dumpStats(output, false); // Don't reset the counters.
+    return Status::ok();
 }
 
-Status StatsService::addConfiguration(int64_t key,
-                                      const vector <uint8_t>& config,
-                                      bool* success) {
+Status StatsService::addConfiguration(int64_t key, const vector <uint8_t>& config) {
+    if (!checkCallingPermission(String16(kPermissionDump))) {
+        return Status::fromExceptionCode(binder::Status::EX_SECURITY);
+    }
     IPCThreadState* ipc = IPCThreadState::self();
-    if (checkCallingPermission(String16(kPermissionDump))) {
-        if (addConfigurationChecked(ipc->getCallingUid(), key, config)) {
-            *success = true;
-        } else {
-            *success = false;
-        }
+    if (addConfigurationChecked(ipc->getCallingUid(), key, config)) {
         return Status::ok();
     } else {
-        *success = false;
-        return Status::fromExceptionCode(binder::Status::EX_SECURITY);
+        ALOGE("Could not parse malformatted StatsdConfig");
+        return Status::fromExceptionCode(binder::Status::EX_ILLEGAL_ARGUMENT,
+                                         "config does not correspond to a StatsdConfig proto");
     }
 }
 
@@ -876,80 +869,62 @@ bool StatsService::addConfigurationChecked(int uid, int64_t key, const vector<ui
     return true;
 }
 
-Status StatsService::removeDataFetchOperation(int64_t key, bool* success) {
-    IPCThreadState* ipc = IPCThreadState::self();
-    if (checkCallingPermission(String16(kPermissionDump))) {
-        ConfigKey configKey(ipc->getCallingUid(), key);
-        mConfigManager->RemoveConfigReceiver(configKey);
-        *success = true;
-        return Status::ok();
-    } else {
-        *success = false;
+Status StatsService::removeDataFetchOperation(int64_t key) {
+    if (!checkCallingPermission(String16(kPermissionDump))) {
         return Status::fromExceptionCode(binder::Status::EX_SECURITY);
     }
+    IPCThreadState* ipc = IPCThreadState::self();
+    ConfigKey configKey(ipc->getCallingUid(), key);
+    mConfigManager->RemoveConfigReceiver(configKey);
+    return Status::ok();
 }
 
-Status StatsService::setDataFetchOperation(int64_t key, const sp<android::IBinder>& intentSender,
-                                           bool* success) {
-    IPCThreadState* ipc = IPCThreadState::self();
-    if (checkCallingPermission(String16(kPermissionDump))) {
-        ConfigKey configKey(ipc->getCallingUid(), key);
-        mConfigManager->SetConfigReceiver(configKey, intentSender);
-        *success = true;
-        return Status::ok();
-    } else {
-        *success = false;
+Status StatsService::setDataFetchOperation(int64_t key, const sp<android::IBinder>& intentSender) {
+    if (!checkCallingPermission(String16(kPermissionDump))) {
         return Status::fromExceptionCode(binder::Status::EX_SECURITY);
     }
+    IPCThreadState* ipc = IPCThreadState::self();
+    ConfigKey configKey(ipc->getCallingUid(), key);
+    mConfigManager->SetConfigReceiver(configKey, intentSender);
+    return Status::ok();
 }
 
-Status StatsService::removeConfiguration(int64_t key, bool* success) {
-    IPCThreadState* ipc = IPCThreadState::self();
-    if (checkCallingPermission(String16(kPermissionDump))) {
-        ConfigKey configKey(ipc->getCallingUid(), key);
-        mConfigManager->RemoveConfig(configKey);
-        SubscriberReporter::getInstance().removeConfig(configKey);
-        *success = true;
-        return Status::ok();
-    } else {
-        *success = false;
+Status StatsService::removeConfiguration(int64_t key) {
+    if (!checkCallingPermission(String16(kPermissionDump))) {
         return Status::fromExceptionCode(binder::Status::EX_SECURITY);
     }
+    IPCThreadState* ipc = IPCThreadState::self();
+    ConfigKey configKey(ipc->getCallingUid(), key);
+    mConfigManager->RemoveConfig(configKey);
+    SubscriberReporter::getInstance().removeConfig(configKey);
+    return Status::ok();
 }
 
 Status StatsService::setBroadcastSubscriber(int64_t configId,
                                             int64_t subscriberId,
-                                            const sp<android::IBinder>& intentSender,
-                                            bool* success) {
+                                            const sp<android::IBinder>& intentSender) {
     VLOG("StatsService::setBroadcastSubscriber called.");
-    IPCThreadState* ipc = IPCThreadState::self();
-    if (checkCallingPermission(String16(kPermissionDump))) {
-        ConfigKey configKey(ipc->getCallingUid(), configId);
-        SubscriberReporter::getInstance()
-                .setBroadcastSubscriber(configKey, subscriberId, intentSender);
-        *success = true;
-        return Status::ok();
-    } else {
-        *success = false;
+    if (!checkCallingPermission(String16(kPermissionDump))) {
         return Status::fromExceptionCode(binder::Status::EX_SECURITY);
     }
+    IPCThreadState* ipc = IPCThreadState::self();
+    ConfigKey configKey(ipc->getCallingUid(), configId);
+    SubscriberReporter::getInstance()
+            .setBroadcastSubscriber(configKey, subscriberId, intentSender);
+    return Status::ok();
 }
 
 Status StatsService::unsetBroadcastSubscriber(int64_t configId,
-                                              int64_t subscriberId,
-                                              bool* success) {
+                                              int64_t subscriberId) {
     VLOG("StatsService::unsetBroadcastSubscriber called.");
-    IPCThreadState* ipc = IPCThreadState::self();
-    if (checkCallingPermission(String16(kPermissionDump))) {
-        ConfigKey configKey(ipc->getCallingUid(), configId);
-        SubscriberReporter::getInstance()
-                .unsetBroadcastSubscriber(configKey, subscriberId);
-        *success = true;
-        return Status::ok();
-    } else {
-        *success = false;
+    if (!checkCallingPermission(String16(kPermissionDump))) {
         return Status::fromExceptionCode(binder::Status::EX_SECURITY);
     }
+    IPCThreadState* ipc = IPCThreadState::self();
+    ConfigKey configKey(ipc->getCallingUid(), configId);
+    SubscriberReporter::getInstance()
+            .unsetBroadcastSubscriber(configKey, subscriberId);
+    return Status::ok();
 }
 
 

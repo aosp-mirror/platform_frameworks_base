@@ -38,6 +38,7 @@ public class PanProfile implements LocalBluetoothProfile {
 
     private BluetoothPan mService;
     private boolean mIsProfileReady;
+    private final LocalBluetoothAdapter mLocalAdapter;
 
     // Tethering direction for each device
     private final HashMap<BluetoothDevice, Integer> mDeviceRoleMap =
@@ -68,10 +69,10 @@ public class PanProfile implements LocalBluetoothProfile {
         return mIsProfileReady;
     }
 
-    PanProfile(Context context) {
-        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        adapter.getProfileProxy(context, new PanServiceListener(),
-                BluetoothProfile.PAN);
+    PanProfile(Context context, LocalBluetoothAdapter adapter) {
+        mLocalAdapter = adapter;
+        mLocalAdapter.getProfileProxy(context, new PanServiceListener(),
+            BluetoothProfile.PAN);
     }
 
     public boolean isConnectable() {

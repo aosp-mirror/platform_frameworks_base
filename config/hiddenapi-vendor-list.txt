@@ -501,7 +501,6 @@ Landroid/telephony/SubscriptionManager;->isValidSlotIndex(I)Z
 Landroid/telephony/SubscriptionManager;->isValidSubscriptionId(I)Z
 Landroid/telephony/SubscriptionManager;->putPhoneIdAndSubIdExtra(Landroid/content/Intent;II)V
 Landroid/telephony/SubscriptionManager;->putPhoneIdAndSubIdExtra(Landroid/content/Intent;I)V
-Landroid/telephony/SubscriptionManager;->setDefaultDataSubId(I)V
 Landroid/telephony/SubscriptionManager;->setDisplayName(Ljava/lang/String;IJ)I
 Landroid/telephony/SubscriptionManager;->setIconTint(II)I
 Landroid/telephony/TelephonyManager;->getIntAtIndex(Landroid/content/ContentResolver;Ljava/lang/String;I)I

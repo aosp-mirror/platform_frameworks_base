@@ -6479,17 +6479,17 @@ public final class ViewRootImpl implements ViewParent,
                     params.type = mOrigWindowType;
                 }
             }
-
-            if (mSurface.isValid()) {
-                params.frameNumber = mSurface.getNextFrameNumber();
-            }
         }
 
-        int relayoutResult = mWindowSession.relayout(
-                mWindow, mSeq, params,
+        long frameNumber = -1;
+        if (mSurface.isValid()) {
+            frameNumber = mSurface.getNextFrameNumber();
+        }
+
+        int relayoutResult = mWindowSession.relayout(mWindow, mSeq, params,
                 (int) (mView.getMeasuredWidth() * appScale + 0.5f),
-                (int) (mView.getMeasuredHeight() * appScale + 0.5f),
-                viewVisibility, insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0,
+                (int) (mView.getMeasuredHeight() * appScale + 0.5f), viewVisibility,
+                insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, frameNumber,
                 mWinFrame, mPendingOverscanInsets, mPendingContentInsets, mPendingVisibleInsets,
                 mPendingStableInsets, mPendingOutsets, mPendingBackDropFrame, mPendingDisplayCutout,
                 mPendingMergedConfiguration, mSurface);

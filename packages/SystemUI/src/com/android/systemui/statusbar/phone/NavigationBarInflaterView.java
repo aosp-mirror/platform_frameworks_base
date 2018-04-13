@@ -25,6 +25,7 @@ import android.view.Display;
 import android.view.Display.Mode;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -80,6 +81,7 @@ public class NavigationBarInflaterView extends FrameLayout
     private static final String WEIGHT_CENTERED_SUFFIX = "WC";
 
     private final List<NavBarButtonProvider> mPlugins = new ArrayList<>();
+    private final Display mDisplay;
 
     protected LayoutInflater mLayoutInflater;
     protected LayoutInflater mLandscapeInflater;
@@ -99,9 +101,9 @@ public class NavigationBarInflaterView extends FrameLayout
     public NavigationBarInflaterView(Context context, AttributeSet attrs) {
         super(context, attrs);
         createInflaters();
-        Display display = ((WindowManager)
+        mDisplay = ((WindowManager)
                 context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-        Mode displayMode = display.getMode();
+        Mode displayMode = mDisplay.getMode();
         isRot0Landscape = displayMode.getPhysicalWidth() > displayMode.getPhysicalHeight();
     }
 
@@ -173,6 +175,17 @@ public class NavigationBarInflaterView extends FrameLayout
         }
     }
 
+    public void updateButtonDispatchersCurrentView() {
+        if (mButtonDispatchers != null) {
+            final int rotation = mDisplay.getRotation();
+            final View view = rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180
+                    ? mRot0 : mRot90;
+            for (int i = 0; i < mButtonDispatchers.size(); i++) {
+                mButtonDispatchers.valueAt(i).setCurrentView(view);
+            }
+        }
+    }
+
     public void setAlternativeOrder(boolean alternativeOrder) {
         if (alternativeOrder != mAlternativeOrder) {
             mAlternativeOrder = alternativeOrder;
@@ -239,6 +252,8 @@ public class NavigationBarInflaterView extends FrameLayout
 
         inflateButtons(end, mRot0.findViewById(R.id.ends_group), isRot0Landscape, false);
         inflateButtons(end, mRot90.findViewById(R.id.ends_group), !isRot0Landscape, false);
+
+        updateButtonDispatchersCurrentView();
     }
 
     private void addGravitySpacer(LinearLayout layout) {

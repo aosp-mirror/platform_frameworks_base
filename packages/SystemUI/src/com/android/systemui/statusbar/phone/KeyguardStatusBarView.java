@@ -205,12 +205,6 @@ public class KeyguardStatusBarView extends RelativeLayout
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        updateLayoutConsideringCutout();
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    }
-
-    @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
         mLayoutState = LAYOUT_NONE;
         if (updateLayoutConsideringCutout()) {
@@ -437,9 +431,10 @@ public class KeyguardStatusBarView extends RelativeLayout
     }
 
     public void onThemeChanged() {
-        @ColorInt int textColor = Utils.getColorAttr(mContext, R.attr.wallpaperTextColor);
-        @ColorInt int iconColor = Utils.getDefaultColor(mContext, Color.luminance(textColor) < 0.5 ?
-                R.color.dark_mode_icon_color_single_tone :
+        @ColorInt int textColor = Utils.getColorAttrDefaultColor(mContext,
+                R.attr.wallpaperTextColor);
+        @ColorInt int iconColor = Utils.getColorStateListDefaultColor(mContext,
+                Color.luminance(textColor) < 0.5 ? R.color.dark_mode_icon_color_single_tone :
                 R.color.light_mode_icon_color_single_tone);
         float intensity = textColor == Color.WHITE ? 0 : 1;
         mCarrierLabel.setTextColor(iconColor);

@@ -366,10 +366,10 @@
     <string name="data_connection_3g">3G</string>
 
     <!-- Content description of the data connection type 3.5G. [CHAR LIMIT=NONE] -->
-    <string name="data_connection_3_5g">3.5G</string>
+    <string name="data_connection_3_5g">H</string>
 
     <!-- Content description of the data connection type 3.5G+. [CHAR LIMIT=NONE] -->
-    <string name="data_connection_3_5g_plus">3.5G+</string>
+    <string name="data_connection_3_5g_plus">H+</string>
 
     <!-- Content description of the data connection type 4G . [CHAR LIMIT=NONE] -->
     <string name="data_connection_4g">4G</string>
@@ -384,7 +384,7 @@
     <string name="data_connection_lte_plus">LTE+</string>
 
     <!-- Content description of the data connection type CDMA. [CHAR LIMIT=NONE] -->
-    <string name="data_connection_cdma">CDMA</string>
+    <string name="data_connection_cdma">1X</string>
 
     <!-- Content description of the roaming data connection type. [CHAR LIMIT=NONE] -->
     <string name="data_connection_roaming">Roaming</string>
@@ -405,7 +405,10 @@
     <string name="accessibility_cell_data_on">Mobile Data On</string>
 
     <!-- Content description of the cell data being disabled. [CHAR LIMIT=NONE] -->
-    <string name="cell_data_off">Mobile data off</string>
+    <string name="cell_data_off_content_description">Mobile data off</string>
+
+    <!-- Content description of the cell data being disabled but shortened. [CHAR LIMIT=20] -->
+    <string name="cell_data_off">Off</string>
 
     <!-- Content description of the bluetooth tethering icon for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_bluetooth_tether">Bluetooth tethering.</string>
@@ -841,6 +844,10 @@
     <string name="recents_stack_action_button_label">Clear all</string>
     <!-- Recents: Hint text that shows on the drop targets to start multiwindow. [CHAR LIMIT=NONE] -->
     <string name="recents_drag_hint_message">Drag here to use split screen</string>
+    <!-- Recents: Text that shows above the navigation bar after launching a few apps. [CHAR LIMIT=NONE] -->
+    <string name="recents_swipe_up_onboarding">Swipe up to switch apps</string>
+    <!-- Recents: Text that shows above the navigation bar after launching several apps. [CHAR LIMIT=NONE] -->
+    <string name="recents_quick_scrub_onboarding">Drag right to quickly switch apps</string>
 
     <!-- Recents: MultiStack add stack split horizontal radio button. [CHAR LIMIT=NONE] -->
     <string name="recents_multistack_add_stack_dialog_split_horizontal">Split Horizontal</string>

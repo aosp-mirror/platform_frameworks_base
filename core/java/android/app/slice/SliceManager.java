@@ -16,6 +16,8 @@
 
 package android.app.slice;
 
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -38,6 +40,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -47,6 +50,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Class to handle interactions with {@link Slice}s.
@@ -101,22 +105,6 @@ public class SliceManager {
     private final IBinder mToken = new Binder();
 
     /**
-     * Permission denied.
-     * @hide
-     */
-    public static final int PERMISSION_DENIED = -1;
-    /**
-     * Permission granted.
-     * @hide
-     */
-    public static final int PERMISSION_GRANTED = 0;
-    /**
-     * Permission just granted by the user, and should be granted uri permission as well.
-     * @hide
-     */
-    public static final int PERMISSION_USER_GRANTED = 1;
-
-    /**
      * @hide
      */
     public SliceManager(Context context, Handler handler) throws ServiceNotFoundException {
@@ -140,13 +128,22 @@ public class SliceManager {
      * @see Intent#ACTION_ASSIST
      * @see Intent#CATEGORY_HOME
      */
-    public void pinSlice(@NonNull Uri uri, @NonNull List<SliceSpec> specs) {
+    public void pinSlice(@NonNull Uri uri, @NonNull Set<SliceSpec> specs) {
         try {
             mService.pinSlice(mContext.getPackageName(), uri,
                     specs.toArray(new SliceSpec[specs.size()]), mToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * @deprecated TO BE REMOVED
+     * @removed
+     */
+    @Deprecated
+    public void pinSlice(@NonNull Uri uri, @NonNull List<SliceSpec> specs) {
+        pinSlice(uri, new ArraySet<>(specs));
     }
 
     /**
@@ -189,9 +186,10 @@ public class SliceManager {
      * into account all clients and returns only specs supported by all.
      * @see SliceSpec
      */
-    public @NonNull List<SliceSpec> getPinnedSpecs(Uri uri) {
+    public @NonNull Set<SliceSpec> getPinnedSpecs(Uri uri) {
         try {
-            return Arrays.asList(mService.getPinnedSpecs(uri, mContext.getPackageName()));
+            return new ArraySet<>(Arrays.asList(mService.getPinnedSpecs(uri,
+                    mContext.getPackageName())));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -240,7 +238,7 @@ public class SliceManager {
      * @return The Slice provided by the app or null if none is given.
      * @see Slice
      */
-    public @Nullable Slice bindSlice(@NonNull Uri uri, @NonNull List<SliceSpec> supportedSpecs) {
+    public @Nullable Slice bindSlice(@NonNull Uri uri, @NonNull Set<SliceSpec> supportedSpecs) {
         Preconditions.checkNotNull(uri, "uri");
         ContentResolver resolver = mContext.getContentResolver();
         try (ContentProviderClient provider = resolver.acquireContentProviderClient(uri)) {
@@ -265,6 +263,15 @@ public class SliceManager {
     }
 
     /**
+     * @deprecated TO BE REMOVED
+     * @removed
+     */
+    @Deprecated
+    public @Nullable Slice bindSlice(@NonNull Uri uri, @NonNull List<SliceSpec> supportedSpecs) {
+        return bindSlice(uri, new ArraySet<>(supportedSpecs));
+    }
+
+    /**
      * Turns a slice intent into a slice uri. Expects an explicit intent.
      * <p>
      * This goes through a several stage resolution process to determine if any slice
@@ -272,12 +279,12 @@ public class SliceManager {
      * <ol>
      *  <li> If the intent contains data that {@link ContentResolver#getType} is
      *  {@link SliceProvider#SLICE_TYPE} then the data will be returned.</li>
-     *  <li>If the intent with {@link #CATEGORY_SLICE} added resolves to a provider, then
-     *  the provider will be asked to {@link SliceProvider#onMapIntentToUri} and that result
-     *  will be returned.</li>
-     *  <li>Lastly, if the intent explicitly points at an activity, and that activity has
+     *  <li>If the intent explicitly points at an activity, and that activity has
      *  meta-data for key {@link #SLICE_METADATA_KEY}, then the Uri specified there will be
      *  returned.</li>
+     *  <li>Lastly, if the intent with {@link #CATEGORY_SLICE} added resolves to a provider, then
+     *  the provider will be asked to {@link SliceProvider#onMapIntentToUri} and that result
+     *  will be returned.</li>
      *  <li>If no slice is found, then {@code null} is returned.</li>
      * </ol>
      * @param intent The intent associated with a slice.
@@ -287,37 +294,12 @@ public class SliceManager {
      * @see Intent
      */
     public @Nullable Uri mapIntentToUri(@NonNull Intent intent) {
-        Preconditions.checkNotNull(intent, "intent");
-        Preconditions.checkArgument(intent.getComponent() != null || intent.getPackage() != null
-                || intent.getData() != null,
-                "Slice intent must be explicit %s", intent);
         ContentResolver resolver = mContext.getContentResolver();
-
-        // Check if the intent has data for the slice uri on it and use that
-        final Uri intentData = intent.getData();
-        if (intentData != null && SliceProvider.SLICE_TYPE.equals(resolver.getType(intentData))) {
-            return intentData;
-        }
+        final Uri staticUri = resolveStatic(intent, resolver);
+        if (staticUri != null) return staticUri;
         // Otherwise ask the app
-        Intent queryIntent = new Intent(intent);
-        if (!queryIntent.hasCategory(CATEGORY_SLICE)) {
-            queryIntent.addCategory(CATEGORY_SLICE);
-        }
-        List<ResolveInfo> providers =
-                mContext.getPackageManager().queryIntentContentProviders(queryIntent, 0);
-        if (providers == null || providers.isEmpty()) {
-            // There are no providers, see if this activity has a direct link.
-            ResolveInfo resolve = mContext.getPackageManager().resolveActivity(intent,
-                    PackageManager.GET_META_DATA);
-            if (resolve != null && resolve.activityInfo != null
-                    && resolve.activityInfo.metaData != null
-                    && resolve.activityInfo.metaData.containsKey(SLICE_METADATA_KEY)) {
-                return Uri.parse(
-                        resolve.activityInfo.metaData.getString(SLICE_METADATA_KEY));
-            }
-            return null;
-        }
-        String authority = providers.get(0).providerInfo.authority;
+        String authority = getAuthority(intent);
+        if (authority == null) return null;
         Uri uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(authority).build();
         try (ContentProviderClient provider = resolver.acquireContentProviderClient(uri)) {
@@ -338,10 +320,43 @@ public class SliceManager {
         }
     }
 
+    private String getAuthority(Intent intent) {
+        Intent queryIntent = new Intent(intent);
+        if (!queryIntent.hasCategory(CATEGORY_SLICE)) {
+            queryIntent.addCategory(CATEGORY_SLICE);
+        }
+        List<ResolveInfo> providers =
+                mContext.getPackageManager().queryIntentContentProviders(queryIntent, 0);
+        return providers != null && !providers.isEmpty() ? providers.get(0).providerInfo.authority
+                : null;
+    }
+
+    private Uri resolveStatic(@NonNull Intent intent, ContentResolver resolver) {
+        Preconditions.checkNotNull(intent, "intent");
+        Preconditions.checkArgument(intent.getComponent() != null || intent.getPackage() != null
+                || intent.getData() != null,
+                "Slice intent must be explicit %s", intent);
+
+        // Check if the intent has data for the slice uri on it and use that
+        final Uri intentData = intent.getData();
+        if (intentData != null && SliceProvider.SLICE_TYPE.equals(resolver.getType(intentData))) {
+            return intentData;
+        }
+        // There are no providers, see if this activity has a direct link.
+        ResolveInfo resolve = mContext.getPackageManager().resolveActivity(intent,
+                PackageManager.GET_META_DATA);
+        if (resolve != null && resolve.activityInfo != null
+                && resolve.activityInfo.metaData != null
+                && resolve.activityInfo.metaData.containsKey(SLICE_METADATA_KEY)) {
+            return Uri.parse(
+                    resolve.activityInfo.metaData.getString(SLICE_METADATA_KEY));
+        }
+        return null;
+    }
+
     /**
-     * Turns a slice intent into slice content. Expects an explicit intent. If there is no
-     * {@link android.content.ContentProvider} associated with the given intent this will throw
-     * {@link IllegalArgumentException}.
+     * Turns a slice intent into slice content. Is a shortcut to perform the action
+     * of both {@link #mapIntentToUri(Intent)} and {@link #bindSlice(Uri, Set)} at once.
      *
      * @param intent The intent associated with a slice.
      * @param supportedSpecs List of supported specs.
@@ -351,34 +366,17 @@ public class SliceManager {
      * @see Intent
      */
     public @Nullable Slice bindSlice(@NonNull Intent intent,
-            @NonNull List<SliceSpec> supportedSpecs) {
+            @NonNull Set<SliceSpec> supportedSpecs) {
         Preconditions.checkNotNull(intent, "intent");
         Preconditions.checkArgument(intent.getComponent() != null || intent.getPackage() != null
                 || intent.getData() != null,
                 "Slice intent must be explicit %s", intent);
         ContentResolver resolver = mContext.getContentResolver();
-
-        // Check if the intent has data for the slice uri on it and use that
-        final Uri intentData = intent.getData();
-        if (intentData != null && SliceProvider.SLICE_TYPE.equals(resolver.getType(intentData))) {
-            return bindSlice(intentData, supportedSpecs);
-        }
+        final Uri staticUri = resolveStatic(intent, resolver);
+        if (staticUri != null) return bindSlice(staticUri, supportedSpecs);
         // Otherwise ask the app
-        List<ResolveInfo> providers =
-                mContext.getPackageManager().queryIntentContentProviders(intent, 0);
-        if (providers == null || providers.isEmpty()) {
-            // There are no providers, see if this activity has a direct link.
-            ResolveInfo resolve = mContext.getPackageManager().resolveActivity(intent,
-                    PackageManager.GET_META_DATA);
-            if (resolve != null && resolve.activityInfo != null
-                    && resolve.activityInfo.metaData != null
-                    && resolve.activityInfo.metaData.containsKey(SLICE_METADATA_KEY)) {
-                return bindSlice(Uri.parse(resolve.activityInfo.metaData
-                        .getString(SLICE_METADATA_KEY)), supportedSpecs);
-            }
-            return null;
-        }
-        String authority = providers.get(0).providerInfo.authority;
+        String authority = getAuthority(intent);
+        if (authority == null) return null;
         Uri uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(authority).build();
         try (ContentProviderClient provider = resolver.acquireContentProviderClient(uri)) {
@@ -387,8 +385,6 @@ public class SliceManager {
             }
             Bundle extras = new Bundle();
             extras.putParcelable(SliceProvider.EXTRA_INTENT, intent);
-            extras.putParcelableArrayList(SliceProvider.EXTRA_SUPPORTED_SPECS,
-                    new ArrayList<>(supportedSpecs));
             final Bundle res = provider.call(SliceProvider.METHOD_MAP_INTENT, null, extras);
             if (res == null) {
                 return null;
@@ -399,6 +395,17 @@ public class SliceManager {
             // Manager will kill this process shortly anyway.
             return null;
         }
+    }
+
+    /**
+     * @deprecated TO BE REMOVED.
+     * @removed
+     */
+    @Deprecated
+    @Nullable
+    public Slice bindSlice(@NonNull Intent intent,
+            @NonNull List<SliceSpec> supportedSpecs) {
+        return bindSlice(intent, new ArraySet<>(supportedSpecs));
     }
 
     /**
@@ -417,9 +424,11 @@ public class SliceManager {
      * @see #grantSlicePermission(String, Uri)
      */
     public @PermissionResult int checkSlicePermission(@NonNull Uri uri, int pid, int uid) {
-        // TODO: Switch off Uri permissions.
-        return mContext.checkUriPermission(uri, pid, uid,
-                Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        try {
+            return mService.checkSlicePermission(uri, null, pid, uid, null);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -431,11 +440,11 @@ public class SliceManager {
      * @see #revokeSlicePermission
      */
     public void grantSlicePermission(@NonNull String toPackage, @NonNull Uri uri) {
-        // TODO: Switch off Uri permissions.
-        mContext.grantUriPermission(toPackage, uri,
-                Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-                        | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                        | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
+        try {
+            mService.grantSlicePermission(mContext.getPackageName(), toPackage, uri);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -453,11 +462,11 @@ public class SliceManager {
      * @see #grantSlicePermission
      */
     public void revokeSlicePermission(@NonNull String toPackage, @NonNull Uri uri) {
-        // TODO: Switch off Uri permissions.
-        mContext.revokeUriPermission(toPackage, uri,
-                Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-                        | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                        | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
+        try {
+            mService.revokeSlicePermission(mContext.getPackageName(), toPackage, uri);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -477,16 +486,6 @@ public class SliceManager {
             if (result == PERMISSION_DENIED) {
                 throw new SecurityException("User " + uid + " does not have slice permission for "
                         + uri + ".");
-            }
-            if (result == PERMISSION_USER_GRANTED) {
-                // We just had a user grant of this permission and need to grant this to the app
-                // permanently.
-                mContext.grantUriPermission(pkg, uri.buildUpon().path("").build(),
-                        Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-                                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                                | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
-                // Notify a change has happened because we just granted a permission.
-                mContext.getContentResolver().notifyChange(uri, null);
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

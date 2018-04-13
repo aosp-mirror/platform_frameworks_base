@@ -54,6 +54,13 @@ interface INotificationManager
     void setShowBadge(String pkg, int uid, boolean showBadge);
     boolean canShowBadge(String pkg, int uid);
     void setNotificationsEnabledForPackage(String pkg, int uid, boolean enabled);
+    /**
+     * Updates the notification's enabled state. Additionally locks importance for all of the
+     * notifications belonging to the app, such that future notifications aren't reconsidered for
+     * blocking helper.
+     */
+    void setNotificationsEnabledWithImportanceLockForPackage(String pkg, int uid, boolean enabled);
+
     boolean areNotificationsEnabledForPackage(String pkg, int uid);
     boolean areNotificationsEnabled(String pkg);
     int getPackageImportance(String pkg);
@@ -79,6 +86,7 @@ interface INotificationManager
     ParceledListSlice getNotificationChannelGroups(String pkg);
     boolean onlyHasDefaultChannel(String pkg, int uid);
     ParceledListSlice getRecentNotifyingAppsForUser(int userId);
+    int getBlockedAppCount(int userId);
 
     // TODO: Remove this when callers have been migrated to the equivalent
     // INotificationListener method.

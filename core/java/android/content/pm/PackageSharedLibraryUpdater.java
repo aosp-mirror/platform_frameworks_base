@@ -62,7 +62,7 @@ public abstract class PackageSharedLibraryUpdater {
 
     static boolean apkTargetsApiLevelLessThanOrEqualToOMR1(PackageParser.Package pkg) {
         int targetSdkVersion = pkg.applicationInfo.targetSdkVersion;
-        return targetSdkVersion <= Build.VERSION_CODES.O_MR1;
+        return targetSdkVersion < Build.VERSION_CODES.P;
     }
 
     /**

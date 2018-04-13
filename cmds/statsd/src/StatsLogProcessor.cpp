@@ -72,14 +72,15 @@ const int FIELD_ID_CURRENT_REPORT_WALL_CLOCK_NANOS = 6;
 StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
                                      const sp<AlarmMonitor>& anomalyAlarmMonitor,
                                      const sp<AlarmMonitor>& periodicAlarmMonitor,
-                                     const long timeBaseSec,
+                                     const int64_t timeBaseNs,
                                      const std::function<void(const ConfigKey&)>& sendBroadcast)
     : mUidMap(uidMap),
       mAnomalyAlarmMonitor(anomalyAlarmMonitor),
       mPeriodicAlarmMonitor(periodicAlarmMonitor),
       mSendBroadcast(sendBroadcast),
-      mTimeBaseSec(timeBaseSec),
-      mLastLogTimestamp(0) {
+      mTimeBaseNs(timeBaseNs),
+      mLargestTimestampSeen(0),
+      mLastTimestampSeen(0) {
 }
 
 StatsLogProcessor::~StatsLogProcessor() {
@@ -156,18 +157,54 @@ void StatsLogProcessor::onIsolatedUidChangedEventLocked(const LogEvent& event) {
 }
 
 void StatsLogProcessor::OnLogEvent(LogEvent* event) {
+    OnLogEvent(event, false);
+}
+
+void StatsLogProcessor::OnLogEvent(LogEvent* event, bool reconnected) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
     const int64_t currentTimestampNs = event->GetElapsedTimestampNs();
 
-    if (currentTimestampNs < mLastLogTimestamp) {
-        StatsdStats::getInstance().noteLogEventSkipped(
-            event->GetTagId(), event->GetElapsedTimestampNs());
-        return;
+    if (reconnected && mLastTimestampSeen != 0) {
+        // LogReader tells us the connection has just been reset. Now we need
+        // to enter reconnection state to find the last CP.
+        mInReconnection = true;
+    }
+
+    if (mInReconnection) {
+        // We see the checkpoint
+        if (currentTimestampNs == mLastTimestampSeen) {
+            mInReconnection = false;
+            // Found the CP. ignore this event, and we will start to read from next event.
+            return;
+        }
+        if (currentTimestampNs > mLargestTimestampSeen) {
+            // We see a new log but CP has not been found yet. Give up now.
+            mLogLossCount++;
+            mInReconnection = false;
+            StatsdStats::getInstance().noteLogLost(currentTimestampNs);
+            // Persist the data before we reset. Do we want this?
+            WriteDataToDiskLocked();
+            // We see fresher event before we see the checkpoint. We might have lost data.
+            // The best we can do is to reset.
+            std::vector<ConfigKey> configKeys;
+            for (auto it = mMetricsManagers.begin(); it != mMetricsManagers.end(); it++) {
+                configKeys.push_back(it->first);
+            }
+            resetConfigsLocked(currentTimestampNs, configKeys);
+        } else {
+            // Still in search of the CP. Keep going.
+            return;
+        }
+    }
+
+    mLogCount++;
+    mLastTimestampSeen = currentTimestampNs;
+    if (mLargestTimestampSeen < currentTimestampNs) {
+        mLargestTimestampSeen = currentTimestampNs;
     }
 
     resetIfConfigTtlExpiredLocked(currentTimestampNs);
 
-    mLastLogTimestamp = currentTimestampNs;
     StatsdStats::getInstance().noteAtomLogged(
         event->GetTagId(), event->GetElapsedTimestampNs() / NS_PER_SEC);
 
@@ -210,7 +247,7 @@ void StatsLogProcessor::OnConfigUpdatedLocked(
         const int64_t timestampNs, const ConfigKey& key, const StatsdConfig& config) {
     VLOG("Updated configuration for key %s", key.ToString().c_str());
     sp<MetricsManager> newMetricsManager =
-        new MetricsManager(key, config, mTimeBaseSec, (timestampNs - 1) / NS_PER_SEC + 1, mUidMap,
+        new MetricsManager(key, config, mTimeBaseNs, timestampNs, mUidMap,
                            mAnomalyAlarmMonitor, mPeriodicAlarmMonitor);
     auto it = mMetricsManagers.find(key);
     if (it != mMetricsManagers.end()) {
@@ -339,15 +376,9 @@ void StatsLogProcessor::onConfigMetricsReportLocked(const ConfigKey& key,
                 (long long)getWallClockNs());
 }
 
-void StatsLogProcessor::resetIfConfigTtlExpiredLocked(const int64_t timestampNs) {
-    std::vector<ConfigKey> configKeysTtlExpired;
-    for (auto it = mMetricsManagers.begin(); it != mMetricsManagers.end(); it++) {
-        if (it->second != nullptr && !it->second->isInTtl(timestampNs)) {
-            configKeysTtlExpired.push_back(it->first);
-        }
-    }
-
-    for (const auto& key : configKeysTtlExpired) {
+void StatsLogProcessor::resetConfigsLocked(const int64_t timestampNs,
+                                           const std::vector<ConfigKey>& configs) {
+    for (const auto& key : configs) {
         StatsdConfig config;
         if (StorageManager::readConfigFromDisk(key, &config)) {
             OnConfigUpdatedLocked(timestampNs, key, config);
@@ -359,6 +390,18 @@ void StatsLogProcessor::resetIfConfigTtlExpiredLocked(const int64_t timestampNs)
                 it->second->refreshTtl(timestampNs);
             }
         }
+    }
+}
+
+void StatsLogProcessor::resetIfConfigTtlExpiredLocked(const int64_t timestampNs) {
+    std::vector<ConfigKey> configKeysTtlExpired;
+    for (auto it = mMetricsManagers.begin(); it != mMetricsManagers.end(); it++) {
+        if (it->second != nullptr && !it->second->isInTtl(timestampNs)) {
+            configKeysTtlExpired.push_back(it->first);
+        }
+    }
+    if (configKeysTtlExpired.size() > 0) {
+        resetConfigsLocked(timestampNs, configKeysTtlExpired);
     }
 }
 
@@ -436,6 +479,10 @@ void StatsLogProcessor::WriteDataToDiskLocked() {
 void StatsLogProcessor::WriteDataToDisk() {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
     WriteDataToDiskLocked();
+}
+
+void StatsLogProcessor::informPullAlarmFired(const int64_t timestampNs) {
+    mStatsPullerManager.OnAlarmFired(timestampNs);
 }
 
 }  // namespace statsd

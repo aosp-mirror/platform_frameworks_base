@@ -82,7 +82,7 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Aucun service vocal"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Aucun de service vocal ni d\'appel d\'urgence"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"Temporairement désactivé par votre fournisseur de services"</string>
-    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"Temporairement désactivé par votre fournisseur de services pour la carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"Temporairement désactivé par votre fournisseur de services pour la carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"Impossible de joindre le réseau cellulaire"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Essayez de changer de réseau préféré. Touchez l\'écran pour changer."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Le service d\'appel d\'urgence n\'est pas accessible"</string>
@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Appel"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Téléphoner au numéro sélectionné"</string>
     <string name="map" msgid="5441053548030107189">"Carte"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Localiser l\'adresse sélectionnée"</string>
     <string name="browse" msgid="1245903488306147205">"Ouvrir"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Ouvrir l\'adresse URL sélectionnée"</string>
     <string name="sms" msgid="4560537514610063430">"Message"</string>
@@ -1274,7 +1273,7 @@
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"Désactiver"</string>
     <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"Vérification de <xliff:g id="NAME">%s</xliff:g> en cours…"</string>
     <string name="ext_media_checking_notification_message" msgid="410185170877285434">"Vérification du contenu actuel"</string>
-    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"Nouveau/nouvelle <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"Nouveau périphérique <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_new_notification_message" msgid="3673685270558405087">"Toucher pour configurer"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"Pour transférer des photos et d\'autres fichiers"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"Il y a un problème avec <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1298,7 +1297,7 @@
     <string name="ext_media_move_title" msgid="1022809140035962662">"Déplacement des données..."</string>
     <string name="ext_media_move_success_title" msgid="7863652232242276066">"Transfert de contenu terminé"</string>
     <string name="ext_media_move_success_message" msgid="8939137931961728009">"Contenu déplacé vers <xliff:g id="NAME">%s</xliff:g>"</string>
-    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"Impossible de déplacer contenu"</string>
+    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"Impossible de déplacer le contenu"</string>
     <string name="ext_media_move_failure_message" msgid="7388950499623016135">"Essayez de déplacer le contenu de nouveau"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"Supprimée"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"Éjectée"</string>
@@ -1691,7 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Installé par votre administrateur"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Mise à jour par votre administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Supprimé par votre administrateur"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Pour améliorer l\'autonomie de la pile, la fonction Économie d\'énergie réduit les performances de votre appareil et limite ou désactive la vibration, les services de localisation ainsi que la plupart des données en arrière-plan. Les applications de courriels, de messages et d\'autres qui reposent sur la synchronisation ne peuvent pas se mettre à jour, sauf si vous les ouvrez.\n\nLa fonction Économie d\'énergie se désactive automatiquement lorsque votre appareil est en charge."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"Pour augmenter l\'autonomie de votre appareil, le mode Économie d\'énergie désactive certaines fonctionnalités et restreint les applications"</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Pour aider à diminuer l\'utilisation des données, la fonction Économiseur de données empêche certaines applications d\'envoyer ou de recevoir des données en arrière-plan. Une application que vous utilisez actuellement peut accéder à des données, mais peut le faire moins souvent. Cela peut signifier, par exemple, que les images ne s\'affichent pas jusqu\'à ce que vous les touchiez."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Activer l\'Économiseur de données?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Activer"</string>
@@ -1778,6 +1777,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Toutes les langues"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Toutes les régions"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Rechercher"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"Action interdite"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"L\'application <xliff:g id="APP_NAME">%1$s</xliff:g> est actuellement désactivée."</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"Plus de détails"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Activer le profil professionnel?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Vos applications professionnelles, vos notifications, vos données et les autres fonctionnalités de profil professionnel seront activées"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Activer"</string>
@@ -1847,10 +1849,10 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"Cette carte SIM n\'est pas autorisée pour la voix"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"Cette carte SIM n\'est pas autorisée pour la voix"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Ce téléphone n\'est pas autorisé pour la voix"</string>
-    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"La carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g> n\'est pas autorisée"</string>
-    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"Carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g> non configurée"</string>
-    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"La carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g> n\'est pas autorisée"</string>
-    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"La carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g> n\'est pas autorisée"</string>
+    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"La carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g> n\'est pas autorisée"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"La carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g> n\'est pas configurée"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"La carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g> n\'est pas autorisée"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"La carte SIM <xliff:g id="SIMNUMBER">%d</xliff:g> n\'est pas autorisée"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Fenêtre contextuelle"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"La version de l\'application a été rétrogradée ou n\'est pas compatible avec ce raccourci"</string>
@@ -1867,8 +1869,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Les appels et les notifications seront silencieux"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Changements système"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Ne pas déranger"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"Le mode Ne pas déranger masque les notifications pour vous aider à vous concentrer"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"C\'est un nouveau comportement. Touchez l\'écran pour changer vos options."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Nouveau : Le mode Ne pas déranger masque les notifications"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Touchez ici pour en savoir plus et changer les paramètres"</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Les paramètres du mode Ne pas déranger ont changé"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Touchez l\'écran pour vérifier ce qui est bloqué."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Système"</string>

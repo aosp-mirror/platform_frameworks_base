@@ -46,6 +46,8 @@ import com.android.server.wm.WindowManagerService;
  */
 class RecentsAnimation implements RecentsAnimationCallbacks {
     private static final String TAG = RecentsAnimation.class.getSimpleName();
+    // TODO (b/73188263): Reset debugging flags
+    private static final boolean DEBUG = true;
 
     private final ActivityManagerService mService;
     private final ActivityStackSupervisor mStackSupervisor;
@@ -74,10 +76,13 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
 
     void startRecentsActivity(Intent intent, IRecentsAnimationRunner recentsAnimationRunner,
             ComponentName recentsComponent, int recentsUid) {
+        if (DEBUG) Slog.d(TAG, "startRecentsActivity(): intent=" + intent);
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "RecentsAnimation#startRecentsActivity");
 
         if (!mWindowManager.canStartRecentsAnimation()) {
             notifyAnimationCancelBeforeStart(recentsAnimationRunner);
+            if (DEBUG) Slog.d(TAG, "Can't start recents animation, nextAppTransition="
+                        + mWindowManager.getPendingAppTransition());
             return;
         }
 
@@ -97,6 +102,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
             mRestoreTargetBehindStack = display.getStackAbove(targetStack);
             if (mRestoreTargetBehindStack == null) {
                 notifyAnimationCancelBeforeStart(recentsAnimationRunner);
+                if (DEBUG) Slog.d(TAG, "No stack above target stack=" + targetStack);
                 return;
             }
         }
@@ -119,6 +125,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
                 // Move the recents activity into place for the animation if it is not top most
                 display = targetActivity.getDisplay();
                 display.moveStackBehindBottomMostVisibleStack(targetStack);
+                if (DEBUG) Slog.d(TAG, "Moved stack=" + targetStack + " behind stack="
+                            + display.getStackAbove(targetStack));
             } else {
                 // No recents activity
                 ActivityOptions options = ActivityOptions.makeBasic();
@@ -140,6 +148,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
                 display = targetActivity.getDisplay();
 
                 // TODO: Maybe wait for app to draw in this particular case?
+
+                if (DEBUG) Slog.d(TAG, "Started intent=" + intent);
             }
 
             // Mark the target activity as launch-behind to bump its visibility for the
@@ -148,7 +158,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
 
             // Fetch all the surface controls and pass them to the client to get the animation
             // started
-            mWindowManager.cancelRecentsAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
+            mWindowManager.cancelRecentsAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION,
+                    "startRecentsActivity");
             mWindowManager.initializeRecentsAnimation(mTargetActivityType, recentsAnimationRunner,
                     this, display.mDisplayId, mStackSupervisor.mRecentTasks.getRecentTaskIds());
 
@@ -158,6 +169,9 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
 
             mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunched(START_TASK_TO_FRONT,
                     targetActivity);
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to start recents activity", e);
+            throw e;
         } finally {
             mWindowManager.continueSurfaceLayout();
             Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
@@ -167,6 +181,9 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
     @Override
     public void onAnimationFinished(@RecentsAnimationController.ReorderMode int reorderMode) {
         synchronized (mService) {
+            if (DEBUG) Slog.d(TAG, "onAnimationFinished(): controller="
+                        + mWindowManager.getRecentsAnimationController()
+                        + " reorderMode=" + reorderMode);
             if (mWindowManager.getRecentsAnimationController() == null) return;
 
             // Just to be sure end the launch hint in case the target activity was never launched.
@@ -187,6 +204,9 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
                     final ActivityStack targetStack = mDefaultDisplay.getStack(
                             WINDOWING_MODE_UNDEFINED, mTargetActivityType);
                     final ActivityRecord targetActivity = targetStack.getTopActivity();
+                    if (DEBUG) Slog.d(TAG, "onAnimationFinished(): targetStack=" + targetStack
+                            + " targetActivity=" + targetActivity
+                            + " mRestoreTargetBehindStack=" + mRestoreTargetBehindStack);
                     if (targetActivity == null) {
                         return;
                     }
@@ -198,10 +218,27 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
                         // Bring the target stack to the front
                         mStackSupervisor.mNoAnimActivities.add(targetActivity);
                         targetStack.moveToFront("RecentsAnimation.onAnimationFinished()");
+                        if (DEBUG) {
+                            final ActivityStack topStack = getTopNonAlwaysOnTopStack();
+                            if (topStack != targetStack) {
+                                Slog.w(TAG, "Expected target stack=" + targetStack
+                                        + " to be top most but found stack=" + topStack);
+                            }
+                        }
                     } else if (reorderMode == REORDER_MOVE_TO_ORIGINAL_POSITION){
                         // Restore the target stack to its previous position
                         final ActivityDisplay display = targetActivity.getDisplay();
                         display.moveStackBehindStack(targetStack, mRestoreTargetBehindStack);
+                        if (DEBUG) {
+                            final ActivityStack aboveTargetStack =
+                                    mDefaultDisplay.getStackAbove(targetStack);
+                            if (mRestoreTargetBehindStack != null
+                                    && aboveTargetStack != mRestoreTargetBehindStack) {
+                                Slog.w(TAG, "Expected target stack=" + targetStack
+                                        + " to restored behind stack=" + mRestoreTargetBehindStack
+                                        + " but it is behind stack=" + aboveTargetStack);
+                            }
+                        }
                     } else {
                         // Keep target stack in place, nothing changes, so ignore the transition
                         // logic below
@@ -221,6 +258,9 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
                     // split-screen), or we will have returned to the app, and the minimized state
                     // should be reset
                     mWindowManager.checkSplitScreenMinimizedChanged(true /* animate */);
+                } catch (Exception e) {
+                    Slog.e(TAG, "Failed to clean up recents activity", e);
+                    throw e;
                 } finally {
                     mWindowManager.continueSurfaceLayout();
                     Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
@@ -238,5 +278,19 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to cancel recents animation before start", e);
         }
+    }
+
+    /**
+     * @return The top stack that is not always-on-top.
+     */
+    private ActivityStack getTopNonAlwaysOnTopStack() {
+        for (int i = mDefaultDisplay.getChildCount() - 1; i >= 0; i--) {
+            final ActivityStack s = mDefaultDisplay.getChildAt(i);
+            if (s.getWindowConfiguration().isAlwaysOnTop()) {
+                continue;
+            }
+            return s;
+        }
+        return null;
     }
 }

@@ -42,6 +42,7 @@ const std::string STRING_FIELD_2 = "\x12\vandroidwins";
 const std::string FIX64_FIELD_3 = "\x19\xff\xff\xff\xff\xff\xff\xff\xff";  // -1
 const std::string FIX32_FIELD_4 = "\x25\xff\xff\xff\xff";                  // -1
 const std::string MESSAGE_FIELD_5 = "\x2a\x10" + VARINT_FIELD_1 + STRING_FIELD_2;
+const std::string NEGATIVE_VARINT_FIELD_6 = "\x30\xff\xff\xff\xff\xff\xff\xff\xff\xff\x01";  // -1
 
 class PrivacyBufferTest : public Test {
 public:
@@ -161,6 +162,11 @@ TEST_F(PrivacyBufferTest, StripLengthDelimitedField_Message) {
     assertStripByFields(DEST_EXPLICIT, "", 1, create_privacy(5, MESSAGE_TYPE, DEST_LOCAL));
 }
 
+TEST_F(PrivacyBufferTest, StripNegativeVarint) {
+    writeToFdBuffer(NEGATIVE_VARINT_FIELD_6);
+    assertStripByFields(DEST_EXPLICIT, "", 1, create_privacy(6, OTHER_TYPE, DEST_LOCAL));
+}
+
 TEST_F(PrivacyBufferTest, NoStripVarintField) {
     writeToFdBuffer(VARINT_FIELD_1);
     assertStripByFields(DEST_EXPLICIT, VARINT_FIELD_1, 1,
@@ -189,6 +195,12 @@ TEST_F(PrivacyBufferTest, NoStripLengthDelimitedField_Message) {
     writeToFdBuffer(MESSAGE_FIELD_5);
     assertStripByFields(DEST_EXPLICIT, MESSAGE_FIELD_5, 1,
                         create_privacy(5, MESSAGE_TYPE, DEST_AUTOMATIC));
+}
+
+TEST_F(PrivacyBufferTest, NoStripNegativeVarintField) {
+    writeToFdBuffer(NEGATIVE_VARINT_FIELD_6);
+    assertStripByFields(DEST_EXPLICIT, NEGATIVE_VARINT_FIELD_6, 1,
+                        create_privacy(6, OTHER_TYPE, DEST_AUTOMATIC));
 }
 
 TEST_F(PrivacyBufferTest, StripVarintAndString) {

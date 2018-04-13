@@ -23,6 +23,9 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
+import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -286,5 +289,44 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
 
         // Verify that the stack was removed.
         assertEquals(originalStackCount, defaultDisplay.getChildCount());
+    }
+
+    @Test
+    public void testFocusability() throws Exception {
+        final ActivityStack stack = mService.mStackSupervisor.getDefaultDisplay().createStack(
+                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final ActivityRecord activity = new ActivityBuilder(mService).setCreateTask(true)
+                .setStack(stack).build();
+
+        // Under split screen primary we should be focusable when not minimized
+        mService.mStackSupervisor.setDockedStackMinimized(false);
+        assertTrue(stack.isFocusable());
+        assertTrue(activity.isFocusable());
+
+        // Under split screen primary we should not be focusable when minimized
+        mService.mStackSupervisor.setDockedStackMinimized(true);
+        assertFalse(stack.isFocusable());
+        assertFalse(activity.isFocusable());
+
+        final ActivityStack pinnedStack = mService.mStackSupervisor.getDefaultDisplay().createStack(
+                WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final ActivityRecord pinnedActivity = new ActivityBuilder(mService).setCreateTask(true)
+                .setStack(pinnedStack).build();
+
+        // We should not be focusable when in pinned mode
+        assertFalse(pinnedStack.isFocusable());
+        assertFalse(pinnedActivity.isFocusable());
+
+        // Add flag forcing focusability.
+        pinnedActivity.info.flags |= FLAG_ALWAYS_FOCUSABLE;
+
+        // We should not be focusable when in pinned mode
+        assertTrue(pinnedStack.isFocusable());
+        assertTrue(pinnedActivity.isFocusable());
+
+        // Without the overridding activity, stack should not be focusable.
+        pinnedStack.removeTask(pinnedActivity.getTask(), "testFocusability",
+                REMOVE_TASK_MODE_DESTROYING);
+        assertFalse(pinnedStack.isFocusable());
     }
 }

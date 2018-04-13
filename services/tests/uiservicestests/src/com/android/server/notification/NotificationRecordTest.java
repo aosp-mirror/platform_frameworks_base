@@ -554,6 +554,34 @@ public class NotificationRecordTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testUserSentiment_appImportanceUpdatesSentiment() throws Exception {
+        StatusBarNotification sbn = getNotification(false /*preO */, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        assertEquals(USER_SENTIMENT_NEUTRAL, record.getUserSentiment());
+
+        record.setIsAppImportanceLocked(true);
+        assertEquals(USER_SENTIMENT_POSITIVE, record.getUserSentiment());
+    }
+
+    @Test
+    public void testUserSentiment_appImportanceBlocksNegativeSentimentUpdate() throws Exception {
+        StatusBarNotification sbn = getNotification(false /*preO */, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+        record.setIsAppImportanceLocked(true);
+
+        Bundle signals = new Bundle();
+        signals.putInt(Adjustment.KEY_USER_SENTIMENT, USER_SENTIMENT_NEGATIVE);
+        record.addAdjustment(new Adjustment(pkg, record.getKey(), signals, null, sbn.getUserId()));
+        record.applyAdjustments();
+
+        assertEquals(USER_SENTIMENT_POSITIVE, record.getUserSentiment());
+    }
+
+    @Test
     public void testUserSentiment_userLocked() throws Exception {
         channel.lockFields(USER_LOCKED_IMPORTANCE);
         StatusBarNotification sbn = getNotification(false /*preO */, true /* noisy */,
@@ -570,5 +598,19 @@ public class NotificationRecordTest extends UiServiceTestCase {
         record.applyAdjustments();
 
         assertEquals(USER_SENTIMENT_POSITIVE, record.getUserSentiment());
+    }
+
+    @Test
+    public void testAppImportance_returnsCorrectly() throws Exception {
+        StatusBarNotification sbn = getNotification(false /*preO */, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        record.setIsAppImportanceLocked(true);
+        assertEquals(true, record.getIsAppImportanceLocked());
+
+        record.setIsAppImportanceLocked(false);
+        assertEquals(false, record.getIsAppImportanceLocked());
     }
 }

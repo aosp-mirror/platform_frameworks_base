@@ -24,55 +24,55 @@ package com.android.server.wm;
 option java_multiple_files = true;
 
 message AnimationAdapterProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional LocalAnimationAdapterProto local = 1;
-  optional RemoteAnimationAdapterWrapperProto remote = 2;
+    optional LocalAnimationAdapterProto local = 1;
+    optional RemoteAnimationAdapterWrapperProto remote = 2;
 }
 
 /* represents RemoteAnimationAdapterWrapper */
 message RemoteAnimationAdapterWrapperProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional .android.view.RemoteAnimationTargetProto target = 1;
+    optional .android.view.RemoteAnimationTargetProto target = 1;
 }
 
 /* represents LocalAnimationAdapter */
 message LocalAnimationAdapterProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional AnimationSpecProto animation_spec = 1;
+    optional AnimationSpecProto animation_spec = 1;
 }
 
 message AnimationSpecProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional WindowAnimationSpecProto window = 1;
-  optional MoveAnimationSpecProto move = 2;
-  optional AlphaAnimationSpecProto alpha = 3;
+    optional WindowAnimationSpecProto window = 1;
+    optional MoveAnimationSpecProto move = 2;
+    optional AlphaAnimationSpecProto alpha = 3;
 }
 
 /* represents WindowAnimationSpec */
 message WindowAnimationSpecProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional string animation = 1;
+    optional string animation = 1;
 }
 
 /* represents MoveAnimationSpec*/
 message MoveAnimationSpecProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional .android.graphics.PointProto from = 1;
-  optional .android.graphics.PointProto to = 2;
-  optional int64 duration = 3;
+    optional .android.graphics.PointProto from = 1;
+    optional .android.graphics.PointProto to = 2;
+    optional int64 duration_ms = 3;
 }
 
 /* represents AlphaAnimationSpec */
 message AlphaAnimationSpecProto {
-  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-  optional float from = 1;
-  optional float to = 2;
-  optional int64 duration = 3;
+    optional float from = 1;
+    optional float to = 2;
+    optional int64 duration_ms = 3;
 }

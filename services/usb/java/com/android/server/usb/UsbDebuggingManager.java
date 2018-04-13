@@ -461,7 +461,7 @@ public class UsbDebuggingManager {
         long token = dump.start(idName, id);
 
         dump.write("connected_to_adb", UsbDebuggingManagerProto.CONNECTED_TO_ADB, mThread != null);
-        writeStringIfNotNull(dump, "last_key_received", UsbDebuggingManagerProto.LAST_KEY_RECEVIED,
+        writeStringIfNotNull(dump, "last_key_received", UsbDebuggingManagerProto.LAST_KEY_RECEIVED,
                 mFingerprints);
 
         try {

@@ -239,11 +239,14 @@ SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface* surface) {
     mQueueSubmit(mBackendContext->fQueue, 1, &submitInfo, backbuffer->mUsageFences[0]);
 
     // We need to notify Skia that we changed the layout of the wrapped VkImage
-    GrVkImageInfo* imageInfo;
     sk_sp<SkSurface> skSurface = surface->mImageInfos[backbuffer->mImageIndex].mSurface;
-    skSurface->getRenderTargetHandle((GrBackendObject*)&imageInfo,
-                                     SkSurface::kFlushRead_BackendHandleAccess);
-    imageInfo->updateImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+    GrBackendRenderTarget backendRT = skSurface->getBackendRenderTarget(
+            SkSurface::kFlushRead_BackendHandleAccess);
+    if (!backendRT.isValid()) {
+        SkASSERT(backendRT.isValid());
+        return nullptr;
+    }
+    backendRT.setVkImageLayout(VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
     surface->mBackbuffer = std::move(skSurface);
     return surface->mBackbuffer.get();
@@ -608,16 +611,21 @@ void VulkanManager::swapBuffers(VulkanSurface* surface) {
     SkASSERT(surface->mBackbuffers);
     VulkanSurface::BackbufferInfo* backbuffer =
             surface->mBackbuffers + surface->mCurrentBackbufferIndex;
-    GrVkImageInfo* imageInfo;
+
     SkSurface* skSurface = surface->mImageInfos[backbuffer->mImageIndex].mSurface.get();
-    skSurface->getRenderTargetHandle((GrBackendObject*)&imageInfo,
-                                     SkSurface::kFlushRead_BackendHandleAccess);
+    GrBackendRenderTarget backendRT = skSurface->getBackendRenderTarget(
+            SkSurface::kFlushRead_BackendHandleAccess);
+    SkASSERT(backendRT.isValid());
+
+    GrVkImageInfo imageInfo;
+    SkAssertResult(backendRT.getVkImageInfo(&imageInfo));
+
     // Check to make sure we never change the actually wrapped image
-    SkASSERT(imageInfo->fImage == surface->mImages[backbuffer->mImageIndex]);
+    SkASSERT(imageInfo.fImage == surface->mImages[backbuffer->mImageIndex]);
 
     // We need to transition the image to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR and make sure that all
     // previous work is complete for before presenting. So we first add the necessary barrier here.
-    VkImageLayout layout = imageInfo->fImageLayout;
+    VkImageLayout layout = imageInfo.fImageLayout;
     VkPipelineStageFlags srcStageMask = layoutToPipelineStageFlags(layout);
     VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
     VkAccessFlags srcAccessMask = layoutToSrcAccessMask(layout);

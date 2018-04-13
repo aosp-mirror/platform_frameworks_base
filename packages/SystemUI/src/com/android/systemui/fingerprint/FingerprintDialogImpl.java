@@ -134,8 +134,11 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
     }
 
     private void handleShowDialog(SomeArgs args) {
-        if (DEBUG) Log.d(TAG, "handleShowDialog");
-        if (mDialogShowing) {
+        if (DEBUG) Log.d(TAG, "handleShowDialog, isAnimatingAway: "
+                + mDialogView.isAnimatingAway());
+        if (mDialogView.isAnimatingAway()) {
+            mDialogView.forceRemove();
+        } else if (mDialogShowing) {
             Log.w(TAG, "Dialog already showing");
             return;
         }
@@ -168,7 +171,7 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
     }
 
     private void handleHideDialog(boolean userCanceled) {
-        if (DEBUG) Log.d(TAG, "handleHideDialog");
+        if (DEBUG) Log.d(TAG, "handleHideDialog, userCanceled: " + userCanceled);
         if (!mDialogShowing) {
             // This can happen if there's a race and we get called from both
             // onAuthenticated and onError, etc.

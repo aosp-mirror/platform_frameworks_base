@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Bel"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Bel gekose foonnommer"</string>
     <string name="map" msgid="5441053548030107189">"Kaart"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Soek geselekteerde adres"</string>
     <string name="browse" msgid="1245903488306147205">"Maak oop"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Maak gekose URL oop"</string>
     <string name="sms" msgid="4560537514610063430">"SMS"</string>
@@ -1691,7 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Geïnstalleer deur jou administrateur"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Opgedateer deur jou administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Uitgevee deur jou administrateur"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Batterybespaarder verlaag jou toestel se werkverrigting en beperk of skakel vibrasie, liggingdienste en agtergronddata af om sodoende jou batterylewe te verleng. E-pos, boodskappe en ander programme wat op sinkronisering staatmaak, sal dalk nie opdateer nie tensy jy hulle oopmaak.\n\nBatterybespaarder skakel outomaties af wanneer jou toestel laai."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"Om jou batterylewe te verleng, skakel Batterybespaarder sommige toestelkenmerke af en beperk programme."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Databespaarder verhoed sommige programme om data in die agtergrond te stuur of te aanvaar om datagebruik te help verminder. \'n Program wat jy tans gebruik kan by data ingaan, maar sal dit dalk minder gereeld doen. Dit kan byvoorbeeld beteken dat prente nie wys totdat jy op hulle tik nie."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Skakel Databespaarder aan?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Skakel aan"</string>
@@ -1778,6 +1777,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Alle tale"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Allle streke"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Soek"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"Handeling nie toegelaat nie"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"Hierdie program <xliff:g id="APP_NAME">%1$s</xliff:g> is tans gedeaktiveer."</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"Meer besonderhede"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Skakel werkprofiel aan?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Jou werkprogramme, kennisgewings, data en ander werkprofielkenmerke sal aangeskakel word"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Skakel aan"</string>
@@ -1867,8 +1869,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Oproepe en kennisgewings sal gedemp wees"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Stelselveranderinge"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Moenie Steur Nie"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"Moenie Steur Nie versteek tans kennisgewings om jou te help om te fokus"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Dit is nuwe gedrag. Tik om te verander."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Nuut: Moenie Steur Nie versteek tans kennisgewings"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Tik om meer te wete te kom en te verander."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Moenie Steur Nie het verander"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Tik om te kyk wat geblokkeer word."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Stelsel"</string>

@@ -37,6 +37,7 @@ import static com.android.server.wm.StackProto.ADJUSTED_BOUNDS;
 import static com.android.server.wm.StackProto.ADJUSTED_FOR_IME;
 import static com.android.server.wm.StackProto.ADJUST_DIVIDER_AMOUNT;
 import static com.android.server.wm.StackProto.ADJUST_IME_AMOUNT;
+import static com.android.server.wm.StackProto.ANIMATING_BOUNDS;
 import static com.android.server.wm.StackProto.ANIMATION_BACKGROUND_SURFACE_IS_DIMMING;
 import static com.android.server.wm.StackProto.BOUNDS;
 import static com.android.server.wm.StackProto.DEFER_REMOVAL;
@@ -827,6 +828,14 @@ public class TaskStack extends WindowContainer<Task> implements
             }
         }
 
+        if (inSplitScreenSecondaryWindowingMode()) {
+            // When the stack is resized due to entering split screen secondary, offset the
+            // windows to compensate for the new stack position.
+            forAllWindows(w -> {
+                w.mWinAnimator.setOffsetPositionForStackResize(true);
+            }, true);
+        }
+
         updateDisplayInfo(bounds);
         updateSurfaceBounds();
     }
@@ -1363,6 +1372,7 @@ public class TaskStack extends WindowContainer<Task> implements
         proto.write(ADJUST_IME_AMOUNT, mAdjustImeAmount);
         proto.write(ADJUST_DIVIDER_AMOUNT, mAdjustDividerAmount);
         mAdjustedBounds.writeToProto(proto, ADJUSTED_BOUNDS);
+        proto.write(ANIMATING_BOUNDS, mBoundsAnimating);
         proto.end(token);
     }
 

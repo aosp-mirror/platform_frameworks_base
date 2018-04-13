@@ -1523,7 +1523,6 @@ public class PackageManagerService extends IPackageManager.Stub
                                     Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER,
                                             params.traceMethod, params.traceCookie);
                                 }
-                                return;
                             }
                             mPendingInstalls.clear();
                         } else {
@@ -5309,7 +5308,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mPackages) {
             final String[] packageNames = getPackagesForUid(uid);
             final PackageParser.Package pkg = (packageNames != null && packageNames.length > 0)
-                    ? mSettings.getPackageLPr(packageNames[0]).getPackage()
+                    ? mPackages.get(packageNames[0])
                     : null;
             return mPermissionManager.checkUidPermission(permName, pkg, uid, getCallingUid());
         }
@@ -8075,6 +8074,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 callingUid = mIsolatedOwners.get(callingUid);
             }
             final PackageSetting ps = mSettings.mPackages.get(packageName);
+            PackageParser.Package pkg = mPackages.get(packageName);
             final boolean returnAllowed =
                     ps != null
                     && (isCallerSameApp(packageName, callingUid)
@@ -8145,7 +8145,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     private boolean isCallerSameApp(String packageName, int uid) {
-        PackageParser.Package pkg = mSettings.getPackageLPr(packageName).getPackage();
+        PackageParser.Package pkg = mPackages.get(packageName);
         return pkg != null
                 && UserHandle.getAppId(uid) == pkg.applicationInfo.uid;
     }
@@ -9722,7 +9722,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (expectedCertDigests.length > 1) {
 
                         // For apps targeting O MR1 we require explicit enumeration of all certs.
-                        final String[] libCertDigests = (targetSdk > Build.VERSION_CODES.O)
+                        final String[] libCertDigests = (targetSdk >= Build.VERSION_CODES.O_MR1)
                                 ? PackageUtils.computeSignaturesSha256Digests(
                                 libPkg.mSigningDetails.signatures)
                                 : PackageUtils.computeSignaturesSha256Digests(
@@ -10197,20 +10197,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 // The signature has changed, but this package is in the system
                 // image...  let's recover!
                 pkgSetting.signatures.mSigningDetails = pkg.mSigningDetails;
-                // However...  if this package is part of a shared user, but it
-                // doesn't match the signature of the shared user, let's fail.
-                // What this means is that you can't change the signatures
-                // associated with an overall shared user, which doesn't seem all
-                // that unreasonable.
+                // If the system app is part of a shared user we allow that shared user to change
+                // signatures as well in part as part of an OTA.
                 if (signatureCheckPs.sharedUser != null) {
-                    if (compareSignatures(
-                            signatureCheckPs.sharedUser.signatures.mSigningDetails.signatures,
-                            pkg.mSigningDetails.signatures) != PackageManager.SIGNATURE_MATCH) {
-                        throw new PackageManagerException(
-                                INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
-                                "Signature mismatch for shared user: "
-                                        + pkgSetting.sharedUser);
-                    }
+                    signatureCheckPs.sharedUser.signatures.mSigningDetails = pkg.mSigningDetails;
                 }
                 // File a report about this.
                 String msg = "System package " + pkg.packageName
@@ -14036,7 +14026,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 "setPackagesSuspended for user " + userId);
         if (callingUid != Process.ROOT_UID &&
                 !UserHandle.isSameApp(getPackageUid(callingPackage, 0, userId), callingUid)) {
-            throw new IllegalArgumentException("callingPackage " + callingPackage + " does not"
+            throw new IllegalArgumentException("CallingPackage " + callingPackage + " does not"
                     + " belong to calling app id " + UserHandle.getAppId(callingUid));
         }
 
@@ -14060,20 +14050,18 @@ public class PackageManagerService extends IPackageManager.Stub
                     final PackageSetting pkgSetting = mSettings.mPackages.get(packageName);
                     if (pkgSetting == null
                             || filterAppAccessLPr(pkgSetting, callingUid, userId)) {
-                        Slog.w(TAG, "Could not find package setting for package \"" + packageName
-                                + "\". Skipping suspending/un-suspending.");
+                        Slog.w(TAG, "Could not find package setting for package: " + packageName
+                                + ". Skipping suspending/un-suspending.");
                         unactionedPackages.add(packageName);
                         continue;
                     }
-                    if (pkgSetting.getSuspended(userId) != suspended) {
-                        if (!canSuspendPackageForUserLocked(packageName, userId)) {
-                            unactionedPackages.add(packageName);
-                            continue;
-                        }
-                        pkgSetting.setSuspended(suspended, callingPackage, dialogMessage, appExtras,
-                                launcherExtras, userId);
-                        changedPackagesList.add(packageName);
+                    if (!canSuspendPackageForUserLocked(packageName, userId)) {
+                        unactionedPackages.add(packageName);
+                        continue;
                     }
+                    pkgSetting.setSuspended(suspended, callingPackage, dialogMessage, appExtras,
+                            launcherExtras, userId);
+                    changedPackagesList.add(packageName);
                 }
             }
         } finally {
@@ -14088,7 +14076,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 scheduleWritePackageRestrictionsLocked(userId);
             }
         }
-
         return unactionedPackages.toArray(new String[unactionedPackages.size()]);
     }
 
@@ -14096,7 +14083,8 @@ public class PackageManagerService extends IPackageManager.Stub
     public PersistableBundle getSuspendedPackageAppExtras(String packageName, int userId) {
         final int callingUid = Binder.getCallingUid();
         if (getPackageUid(packageName, 0, userId) != callingUid) {
-            mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS, null);
+            throw new SecurityException("Calling package " + packageName
+                    + " does not belong to calling uid " + callingUid);
         }
         synchronized (mPackages) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
@@ -14108,25 +14096,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 return packageUserState.suspendedAppExtras;
             }
             return null;
-        }
-    }
-
-    @Override
-    public void setSuspendedPackageAppExtras(String packageName, PersistableBundle appExtras,
-            int userId) {
-        final int callingUid = Binder.getCallingUid();
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS, null);
-        synchronized (mPackages) {
-            final PackageSetting ps = mSettings.mPackages.get(packageName);
-            if (ps == null || filterAppAccessLPr(ps, callingUid, userId)) {
-                throw new IllegalArgumentException("Unknown target package: " + packageName);
-            }
-            final PackageUserState packageUserState = ps.readUserState(userId);
-            if (packageUserState.suspended) {
-                packageUserState.suspendedAppExtras = appExtras;
-                sendMyPackageSuspendedOrUnsuspended(new String[] {packageName}, true, appExtras,
-                        userId);
-            }
         }
     }
 
@@ -14172,9 +14141,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 true /* requireFullPermission */, false /* checkShell */,
                 "isPackageSuspendedForUser for user " + userId);
-        if (getPackageUid(packageName, 0, userId) != callingUid) {
-            mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS, null);
-        }
         synchronized (mPackages) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
             if (ps == null || filterAppAccessLPr(ps, callingUid, userId)) {
@@ -14184,17 +14150,25 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    void onSuspendingPackageRemoved(String packageName, int userId) {
-        final int[] userIds = (userId == UserHandle.USER_ALL) ? sUserManager.getUserIds()
-                : new int[] {userId};
-        synchronized (mPackages) {
-            for (PackageSetting ps : mSettings.mPackages.values()) {
-                for (int user : userIds) {
-                    final PackageUserState pus = ps.readUserState(user);
+    void onSuspendingPackageRemoved(String packageName, int removedForUser) {
+        final int[] userIds = (removedForUser == UserHandle.USER_ALL) ? sUserManager.getUserIds()
+                : new int[] {removedForUser};
+        for (int userId : userIds) {
+            List<String> affectedPackages = new ArrayList<>();
+            synchronized (mPackages) {
+                for (PackageSetting ps : mSettings.mPackages.values()) {
+                    final PackageUserState pus = ps.readUserState(userId);
                     if (pus.suspended && packageName.equals(pus.suspendingPackage)) {
-                        ps.setSuspended(false, null, null, null, null, user);
+                        ps.setSuspended(false, null, null, null, null, userId);
+                        affectedPackages.add(ps.name);
                     }
                 }
+            }
+            if (!affectedPackages.isEmpty()) {
+                final String[] packageArray = affectedPackages.toArray(
+                        new String[affectedPackages.size()]);
+                sendMyPackageSuspendedOrUnsuspended(packageArray, false, null, userId);
+                sendPackagesSuspendedForUser(packageArray, userId, false, null);
             }
         }
     }
@@ -23639,13 +23613,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         }
 
         @Override
-        public Object getPackageSetting(String packageName) {
-            synchronized (mPackages) {
-                return mSettings.getPackageLPr(packageName);
-            }
-        }
-
-        @Override
         public PackageList getPackageList(PackageListObserver observer) {
             synchronized (mPackages) {
                 final int N = mPackages.size();
@@ -23901,6 +23868,11 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         @Override
         public boolean isPackageDataProtected(int userId, String packageName) {
             return mProtectedPackages.isPackageDataProtected(userId, packageName);
+        }
+
+        @Override
+        public boolean isPackageStateProtected(String packageName, int userId) {
+            return mProtectedPackages.isPackageStateProtected(userId, packageName);
         }
 
         @Override

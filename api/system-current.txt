@@ -383,12 +383,18 @@ package android.app {
   }
 
   public final class StatsManager {
+    method public void addConfig(long, byte[]) throws android.app.StatsManager.StatsUnavailableException;
     method public boolean addConfiguration(long, byte[]);
     method public byte[] getData(long);
     method public byte[] getMetadata();
+    method public byte[] getReports(long) throws android.app.StatsManager.StatsUnavailableException;
+    method public byte[] getStatsMetadata() throws android.app.StatsManager.StatsUnavailableException;
+    method public void removeConfig(long) throws android.app.StatsManager.StatsUnavailableException;
     method public boolean removeConfiguration(long);
+    method public void setBroadcastSubscriber(android.app.PendingIntent, long, long) throws android.app.StatsManager.StatsUnavailableException;
     method public boolean setBroadcastSubscriber(long, long, android.app.PendingIntent);
     method public boolean setDataFetchOperation(long, android.app.PendingIntent);
+    method public void setFetchReportsOperation(android.app.PendingIntent, long) throws android.app.StatsManager.StatsUnavailableException;
     field public static final java.lang.String ACTION_STATSD_STARTED = "android.app.action.STATSD_STARTED";
     field public static final java.lang.String EXTRA_STATS_BROADCAST_SUBSCRIBER_COOKIES = "android.app.extra.STATS_BROADCAST_SUBSCRIBER_COOKIES";
     field public static final java.lang.String EXTRA_STATS_CONFIG_KEY = "android.app.extra.STATS_CONFIG_KEY";
@@ -396,6 +402,11 @@ package android.app {
     field public static final java.lang.String EXTRA_STATS_DIMENSIONS_VALUE = "android.app.extra.STATS_DIMENSIONS_VALUE";
     field public static final java.lang.String EXTRA_STATS_SUBSCRIPTION_ID = "android.app.extra.STATS_SUBSCRIPTION_ID";
     field public static final java.lang.String EXTRA_STATS_SUBSCRIPTION_RULE_ID = "android.app.extra.STATS_SUBSCRIPTION_RULE_ID";
+  }
+
+  public static class StatsManager.StatsUnavailableException extends android.util.AndroidException {
+    ctor public StatsManager.StatsUnavailableException(java.lang.String);
+    ctor public StatsManager.StatsUnavailableException(java.lang.String, java.lang.Throwable);
   }
 
   public class VrManager {
@@ -1027,11 +1038,10 @@ package android.content.pm {
     method public abstract java.util.List<android.content.pm.IntentFilterVerificationInfo> getIntentFilterVerifications(java.lang.String);
     method public abstract int getIntentVerificationStatusAsUser(java.lang.String, int);
     method public abstract int getPermissionFlags(java.lang.String, java.lang.String, android.os.UserHandle);
-    method public android.os.PersistableBundle getSuspendedPackageAppExtras(java.lang.String);
     method public abstract void grantRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public abstract int installExistingPackage(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract int installExistingPackage(java.lang.String, int) throws android.content.pm.PackageManager.NameNotFoundException;
-    method public boolean isPackageSuspended(java.lang.String);
+    method public boolean isPackageSuspended(java.lang.String) throws android.content.pm.PackageManager.NameNotFoundException;
     method public java.util.List<android.content.pm.ResolveInfo> queryBroadcastReceiversAsUser(android.content.Intent, int, android.os.UserHandle);
     method public abstract void registerDexModule(java.lang.String, android.content.pm.PackageManager.DexModuleRegisterCallback);
     method public abstract void removeOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
@@ -1039,7 +1049,6 @@ package android.content.pm {
     method public abstract boolean setDefaultBrowserPackageNameAsUser(java.lang.String, int);
     method public void setHarmfulAppWarning(java.lang.String, java.lang.CharSequence);
     method public java.lang.String[] setPackagesSuspended(java.lang.String[], boolean, android.os.PersistableBundle, android.os.PersistableBundle, java.lang.String);
-    method public void setSuspendedPackageAppExtras(java.lang.String, android.os.PersistableBundle);
     method public abstract void setUpdateAvailable(java.lang.String, boolean);
     method public abstract boolean updateIntentVerificationStatusAsUser(java.lang.String, int, int);
     method public abstract void updatePermissionFlags(java.lang.String, java.lang.String, int, int, android.os.UserHandle);
@@ -1255,6 +1264,7 @@ package android.hardware.display {
     method public android.hardware.display.BrightnessConfiguration getBrightnessConfiguration();
     method public java.util.List<android.hardware.display.BrightnessChangeEvent> getBrightnessEvents();
     method public android.hardware.display.BrightnessConfiguration getDefaultBrightnessConfiguration();
+    method public android.util.Pair<float[], float[]> getMinimumBrightnessCurve();
     method public android.graphics.Point getStableDisplaySize();
     method public void setBrightnessConfiguration(android.hardware.display.BrightnessConfiguration);
     method public void setSaturationLevel(float);
@@ -4356,7 +4366,6 @@ package android.security.keystore.recovery {
     method public byte[] getServerParams();
     method public int getSnapshotVersion();
     method public java.security.cert.CertPath getTrustedHardwareCertPath();
-    method public deprecated byte[] getTrustedHardwarePublicKey();
     method public java.util.List<android.security.keystore.recovery.WrappedApplicationKey> getWrappedApplicationKeys();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.security.keystore.recovery.KeyChainSnapshot> CREATOR;
@@ -4381,25 +4390,19 @@ package android.security.keystore.recovery {
 
   public class RecoveryController {
     method public android.security.keystore.recovery.RecoverySession createRecoverySession();
-    method public byte[] generateAndStoreKey(java.lang.String, byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
-    method public deprecated java.security.Key generateKey(java.lang.String, byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
     method public java.security.Key generateKey(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
-    method public deprecated java.util.List<java.lang.String> getAliases(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public java.util.List<java.lang.String> getAliases() throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public static android.security.keystore.recovery.RecoveryController getInstance(android.content.Context);
     method public java.security.Key getKey(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException, java.security.UnrecoverableKeyException;
     method public android.security.keystore.recovery.KeyChainSnapshot getKeyChainSnapshot() throws android.security.keystore.recovery.InternalRecoveryServiceException;
-    method public deprecated android.security.keystore.recovery.KeyChainSnapshot getRecoveryData() throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public int[] getRecoverySecretTypes() throws android.security.keystore.recovery.InternalRecoveryServiceException;
-    method public deprecated int getRecoveryStatus(java.lang.String, java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public int getRecoveryStatus(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public java.util.Map<java.lang.String, java.security.cert.X509Certificate> getRootCertificates();
     method public java.security.Key importKey(java.lang.String, byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
-    method public deprecated void initRecoveryService(java.lang.String, byte[]) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void initRecoveryService(java.lang.String, byte[], byte[]) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public static boolean isRecoverableKeyStoreEnabled(android.content.Context);
     method public void removeKey(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void setRecoverySecretTypes(int[]) throws android.security.keystore.recovery.InternalRecoveryServiceException;
-    method public deprecated void setRecoveryStatus(java.lang.String, java.lang.String, int) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.content.pm.PackageManager.NameNotFoundException;
     method public void setRecoveryStatus(java.lang.String, int) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void setServerParams(byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException;
     method public void setSnapshotCreatedPendingIntent(android.app.PendingIntent) throws android.security.keystore.recovery.InternalRecoveryServiceException;
@@ -4411,9 +4414,6 @@ package android.security.keystore.recovery {
   public class RecoverySession implements java.lang.AutoCloseable {
     method public void close();
     method public java.util.Map<java.lang.String, java.security.Key> recoverKeyChainSnapshot(byte[], java.util.List<android.security.keystore.recovery.WrappedApplicationKey>) throws android.security.keystore.recovery.DecryptionFailedException, android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.SessionExpiredException;
-    method public deprecated java.util.Map<java.lang.String, byte[]> recoverKeys(byte[], java.util.List<android.security.keystore.recovery.WrappedApplicationKey>) throws android.security.keystore.recovery.DecryptionFailedException, android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.SessionExpiredException;
-    method public deprecated byte[] start(byte[], byte[], byte[], java.util.List<android.security.keystore.recovery.KeyChainProtectionParams>) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
-    method public deprecated byte[] start(java.security.cert.CertPath, byte[], byte[], java.util.List<android.security.keystore.recovery.KeyChainProtectionParams>) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
     method public byte[] start(java.lang.String, java.security.cert.CertPath, byte[], byte[], java.util.List<android.security.keystore.recovery.KeyChainProtectionParams>) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
   }
 
@@ -4423,7 +4423,6 @@ package android.security.keystore.recovery {
 
   public final class WrappedApplicationKey implements android.os.Parcelable {
     method public int describeContents();
-    method public deprecated byte[] getAccount();
     method public java.lang.String getAlias();
     method public byte[] getEncryptedKeyMaterial();
     method public void writeToParcel(android.os.Parcel, int);
@@ -4433,7 +4432,6 @@ package android.security.keystore.recovery {
   public static class WrappedApplicationKey.Builder {
     ctor public WrappedApplicationKey.Builder();
     method public android.security.keystore.recovery.WrappedApplicationKey build();
-    method public deprecated android.security.keystore.recovery.WrappedApplicationKey.Builder setAccount(byte[]);
     method public android.security.keystore.recovery.WrappedApplicationKey.Builder setAlias(java.lang.String);
     method public android.security.keystore.recovery.WrappedApplicationKey.Builder setEncryptedKeyMaterial(byte[]);
   }

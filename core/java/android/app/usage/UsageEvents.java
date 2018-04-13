@@ -111,7 +111,7 @@ public final class UsageEvents implements Parcelable {
 
         /**
          * An event type denoting a change in App Standby Bucket. The new bucket can be
-         * retrieved by calling {@link #getStandbyBucket()}.
+         * retrieved by calling {@link #getAppStandbyBucket()}.
          *
          * @see UsageStatsManager#getAppStandbyBucket()
          */
@@ -326,9 +326,19 @@ public final class UsageEvents implements Parcelable {
          * Returns the standby bucket of the app, if the event is of type
          * {@link #STANDBY_BUCKET_CHANGED}, otherwise returns 0.
          * @return the standby bucket associated with the event.
-         *
+         * @hide
          */
         public int getStandbyBucket() {
+            return (mBucketAndReason & 0xFFFF0000) >>> 16;
+        }
+
+        /**
+         * Returns the standby bucket of the app, if the event is of type
+         * {@link #STANDBY_BUCKET_CHANGED}, otherwise returns 0.
+         * @return the standby bucket associated with the event.
+         *
+         */
+        public int getAppStandbyBucket() {
             return (mBucketAndReason & 0xFFFF0000) >>> 16;
         }
 

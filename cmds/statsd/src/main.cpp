@@ -116,11 +116,6 @@ int main(int /*argc*/, char** /*argv*/) {
         ALOGE("Failed to add service");
         return -1;
     }
-
-    // TODO: This line is temporary, since statsd doesn't start up automatically (and therefore
-    // the call in StatsService::SystemRunning() won't ever be called right now).
-    // TODO: Are you sure? Don't we need to reconnect to the system process if we get restarted?
-    //  --joeo
     service->sayHiToStatsCompanion();
 
     // Start the log reader thread

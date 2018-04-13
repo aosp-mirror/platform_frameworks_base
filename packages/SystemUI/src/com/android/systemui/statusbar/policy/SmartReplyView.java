@@ -23,6 +23,9 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardHostView.OnDismissAction;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.NotificationData;
+import com.android.systemui.statusbar.SmartReplyLogger;
+import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 
 import java.text.BreakIterator;
@@ -46,6 +49,12 @@ public class SmartReplyView extends ViewGroup {
     private final SmartReplyConstants mConstants;
     private final KeyguardDismissUtil mKeyguardDismissUtil;
 
+    /**
+     * The upper bound for the height of this view in pixels. Notifications are automatically
+     * recreated on density or font size changes so caching this should be fine.
+     */
+    private final int mHeightUpperLimit;
+
     /** Spacing to be applied between views. */
     private final int mSpacing;
 
@@ -66,6 +75,9 @@ public class SmartReplyView extends ViewGroup {
         super(context, attrs);
         mConstants = Dependency.get(SmartReplyConstants.class);
         mKeyguardDismissUtil = Dependency.get(KeyguardDismissUtil.class);
+
+        mHeightUpperLimit = NotificationUtils.getFontScaledHeight(mContext,
+            R.dimen.smart_reply_button_max_height);
 
         int spacing = 0;
         int singleLineButtonPaddingHorizontal = 0;
@@ -96,8 +108,17 @@ public class SmartReplyView extends ViewGroup {
         mSingleToDoubleLineButtonWidthIncrease =
                 2 * (doubleLineButtonPaddingHorizontal - singleLineButtonPaddingHorizontal);
 
+
         mBreakIterator = BreakIterator.getLineInstance();
         reallocateCandidateButtonQueueForSqueezing();
+    }
+
+    /**
+     * Returns an upper bound for the height of this view in pixels. This method is intended to be
+     * invoked before onMeasure, so it doesn't do any analysis on the contents of the buttons.
+     */
+    public int getHeightUpperLimit() {
+       return mHeightUpperLimit;
     }
 
     private void reallocateCandidateButtonQueueForSqueezing() {
@@ -109,14 +130,16 @@ public class SmartReplyView extends ViewGroup {
                 Math.max(getChildCount(), 1), DECREASING_MEASURED_WIDTH_WITHOUT_PADDING_COMPARATOR);
     }
 
-    public void setRepliesFromRemoteInput(RemoteInput remoteInput, PendingIntent pendingIntent) {
+    public void setRepliesFromRemoteInput(RemoteInput remoteInput, PendingIntent pendingIntent,
+            SmartReplyLogger smartReplyLogger, NotificationData.Entry entry) {
         removeAllViews();
         if (remoteInput != null && pendingIntent != null) {
             CharSequence[] choices = remoteInput.getChoices();
             if (choices != null) {
-                for (CharSequence choice : choices) {
+                for (int i = 0; i < choices.length; ++i) {
                     Button replyButton = inflateReplyButton(
-                            getContext(), this, choice, remoteInput, pendingIntent);
+                            getContext(), this, i, choices[i], remoteInput, pendingIntent,
+                            smartReplyLogger, entry);
                     addView(replyButton);
                 }
             }
@@ -130,8 +153,9 @@ public class SmartReplyView extends ViewGroup {
     }
 
     @VisibleForTesting
-    Button inflateReplyButton(Context context, ViewGroup root, CharSequence choice,
-            RemoteInput remoteInput, PendingIntent pendingIntent) {
+    Button inflateReplyButton(Context context, ViewGroup root, int replyIndex,
+            CharSequence choice, RemoteInput remoteInput, PendingIntent pendingIntent,
+            SmartReplyLogger smartReplyLogger, NotificationData.Entry entry) {
         Button b = (Button) LayoutInflater.from(context).inflate(
                 R.layout.smart_reply_button, root, false);
         b.setText(choice);
@@ -147,6 +171,7 @@ public class SmartReplyView extends ViewGroup {
             } catch (PendingIntent.CanceledException e) {
                 Log.w(TAG, "Unable to send smart reply", e);
             }
+            smartReplyLogger.smartReplySent(entry, replyIndex);
             return false; // do not defer
         };
 

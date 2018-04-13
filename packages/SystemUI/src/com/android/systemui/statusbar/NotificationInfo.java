@@ -23,6 +23,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.annotation.Nullable;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -34,10 +35,12 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
@@ -63,10 +66,10 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private INotificationManager mINotificationManager;
     private PackageManager mPm;
 
-    private String mPkg;
+    private String mPackageName;
     private String mAppName;
     private int mAppUid;
-    private int mNumNotificationChannels;
+    private int mNumUniqueChannelsInRow;
     private NotificationChannel mSingleNotificationChannel;
     private int mStartingUserImportance;
     private int mChosenImportance;
@@ -87,7 +90,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     private OnClickListener mOnKeepShowing = this::closeControls;
 
-    private OnClickListener mOnStopMinNotifications = v -> {
+    private OnClickListener mOnStopOrMinimizeNotifications = v -> {
         swapContent(false);
     };
 
@@ -120,16 +123,16 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             final INotificationManager iNotificationManager,
             final String pkg,
             final NotificationChannel notificationChannel,
-            final int numChannels,
+            final int numUniqueChannelsInRow,
             final StatusBarNotification sbn,
             final CheckSaveListener checkSaveListener,
             final OnSettingsClickListener onSettingsClick,
             final OnAppSettingsClickListener onAppSettingsClick,
             boolean isNonblockable)
             throws RemoteException {
-        bindNotification(pm, iNotificationManager, pkg, notificationChannel, numChannels, sbn,
-                checkSaveListener, onSettingsClick, onAppSettingsClick, isNonblockable,
-                false /* isBlockingHelper */,
+        bindNotification(pm, iNotificationManager, pkg, notificationChannel,
+                numUniqueChannelsInRow, sbn, checkSaveListener, onSettingsClick,
+                onAppSettingsClick, isNonblockable, false /* isBlockingHelper */,
                 false /* isUserSentimentNegative */);
     }
 
@@ -138,7 +141,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             INotificationManager iNotificationManager,
             String pkg,
             NotificationChannel notificationChannel,
-            int numChannels,
+            int numUniqueChannelsInRow,
             StatusBarNotification sbn,
             CheckSaveListener checkSaveListener,
             OnSettingsClickListener onSettingsClick,
@@ -148,12 +151,12 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             boolean isUserSentimentNegative)
             throws RemoteException {
         mINotificationManager = iNotificationManager;
-        mPkg = pkg;
-        mNumNotificationChannels = numChannels;
+        mPackageName = pkg;
+        mNumUniqueChannelsInRow = numUniqueChannelsInRow;
         mSbn = sbn;
         mPm = pm;
         mAppSettingsClickListener = onAppSettingsClick;
-        mAppName = mPkg;
+        mAppName = mPackageName;
         mCheckSaveListener = checkSaveListener;
         mOnSettingsClickListener = onSettingsClick;
         mSingleNotificationChannel = notificationChannel;
@@ -167,11 +170,11 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
         int numTotalChannels = mINotificationManager.getNumNotificationChannelsForPackage(
                 pkg, mAppUid, false /* includeDeleted */);
-        if (mNumNotificationChannels == 0) {
+        if (mNumUniqueChannelsInRow == 0) {
             throw new IllegalArgumentException("bindNotification requires at least one channel");
         } else  {
             // Special behavior for the Default channel if no other channels have been defined.
-            mIsSingleDefaultChannel = mNumNotificationChannels == 1
+            mIsSingleDefaultChannel = mNumUniqueChannelsInRow == 1
                     && mSingleNotificationChannel.getId().equals(
                             NotificationChannel.DEFAULT_CHANNEL_ID)
                     && numTotalChannels == 1;
@@ -187,7 +190,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         Drawable pkgicon = null;
         ApplicationInfo info;
         try {
-            info = mPm.getApplicationInfo(mPkg,
+            info = mPm.getApplicationInfo(
+                    mPackageName,
                     PackageManager.MATCH_UNINSTALLED_PACKAGES
                             | PackageManager.MATCH_DISABLED_COMPONENTS
                             | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
@@ -208,7 +212,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         if (mSingleNotificationChannel != null && mSingleNotificationChannel.getGroup() != null) {
             final NotificationChannelGroup notificationChannelGroup =
                     mINotificationManager.getNotificationChannelGroupForPackage(
-                            mSingleNotificationChannel.getGroup(), mPkg, mAppUid);
+                            mSingleNotificationChannel.getGroup(), mPackageName, mAppUid);
             if (notificationChannelGroup != null) {
                 groupName = notificationChannelGroup.getName();
             }
@@ -232,7 +236,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             settingsButton.setOnClickListener(
                     (View view) -> {
                         mOnSettingsClickListener.onClick(view,
-                                mNumNotificationChannels > 1 ? null : mSingleNotificationChannel,
+                                mNumUniqueChannelsInRow > 1 ? null : mSingleNotificationChannel,
                                 appUidF);
                     });
         } else {
@@ -248,7 +252,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         } else {
             if (mNegativeUserSentiment) {
                 blockPrompt.setText(R.string.inline_blocking_helper);
-            }  else if (mIsSingleDefaultChannel || mNumNotificationChannels > 1) {
+            }  else if (mIsSingleDefaultChannel || mNumUniqueChannelsInRow > 1) {
                 blockPrompt.setText(R.string.inline_keep_showing_app);
             } else {
                 blockPrompt.setText(R.string.inline_keep_showing);
@@ -258,7 +262,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     private void bindName() {
         final TextView channelName = findViewById(R.id.channel_name);
-        if (mIsSingleDefaultChannel || mNumNotificationChannels > 1) {
+        if (mIsSingleDefaultChannel || mNumUniqueChannelsInRow > 1) {
             channelName.setVisibility(View.GONE);
         } else {
             channelName.setText(mSingleNotificationChannel.getName());
@@ -270,19 +274,26 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     }
 
     private void saveImportance() {
-        if (mIsNonblockable) {
-            return;
+        if (!mIsNonblockable) {
+            if (mCheckSaveListener != null) {
+                mCheckSaveListener.checkSave(this::updateImportance, mSbn);
+            } else {
+                updateImportance();
+            }
         }
+    }
+
+    /**
+     * Commits the updated importance values on the background thread.
+     */
+    private void updateImportance() {
         MetricsLogger.action(mContext, MetricsEvent.ACTION_SAVE_IMPORTANCE,
                 mChosenImportance - mStartingUserImportance);
-        mSingleNotificationChannel.setImportance(mChosenImportance);
-        mSingleNotificationChannel.lockFields(NotificationChannel.USER_LOCKED_IMPORTANCE);
-        try {
-            mINotificationManager.updateNotificationChannelForPackage(
-                    mPkg, mAppUid, mSingleNotificationChannel);
-        } catch (RemoteException e) {
-            // :(
-        }
+
+        Handler bgHandler = new Handler(Dependency.get(Dependency.BG_LOOPER));
+        bgHandler.post(new UpdateImportanceRunnable(mINotificationManager, mPackageName, mAppUid,
+                mNumUniqueChannelsInRow == 1 ? mSingleNotificationChannel : null,
+                mStartingUserImportance, mChosenImportance));
     }
 
     private void bindButtons() {
@@ -292,12 +303,12 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         View minimize = findViewById(R.id.minimize);
 
         findViewById(R.id.undo).setOnClickListener(mOnUndo);
-        block.setOnClickListener(mOnStopMinNotifications);
+        block.setOnClickListener(mOnStopOrMinimizeNotifications);
         keep.setOnClickListener(mOnKeepShowing);
-        minimize.setOnClickListener(mOnStopMinNotifications);
+        minimize.setOnClickListener(mOnStopOrMinimizeNotifications);
 
         if (mIsNonblockable) {
-            keep.setText(R.string.notification_done);
+            keep.setText(android.R.string.ok);
             block.setVisibility(GONE);
             minimize.setVisibility(GONE);
         } else if (mIsForeground) {
@@ -310,7 +321,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
         // Set up app settings link (i.e. Customize)
         TextView settingsLinkView = findViewById(R.id.app_settings);
-        Intent settingsIntent = getAppSettingsIntent(mPm, mPkg, mSingleNotificationChannel,
+        Intent settingsIntent = getAppSettingsIntent(mPm, mPackageName, mSingleNotificationChannel,
                 mSbn.getId(), mSbn.getTag());
         if (!mIsForBlockingHelper
                 && settingsIntent != null
@@ -415,12 +426,25 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         return intent;
     }
 
+    /**
+     * Closes the controls and commits the updated importance values (indirectly). If this view is
+     * being used to show the blocking helper, this will immediately dismiss the blocking helper and
+     * commit the updated importance.
+     *
+     * <p><b>Note,</b> this will only get called once the view is dismissing. This means that the
+     * user does not have the ability to undo the action anymore. See {@link #swapContent(boolean)}
+     * for where undo is handled.
+     */
     @VisibleForTesting
     void closeControls(View v) {
         if (mIsForBlockingHelper) {
             NotificationBlockingHelperManager manager =
                     Dependency.get(NotificationBlockingHelperManager.class);
             manager.dismissCurrentBlockingHelper();
+
+            // Since this won't get a callback via gutsContainer.closeControls, save the new
+            // importance values immediately.
+            saveImportance();
         } else {
             int[] parentLoc = new int[2];
             int[] targetLoc = new int[2];
@@ -454,11 +478,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         // Save regardless of the importance so we can lock the importance field if the user wants
         // to keep getting notifications
         if (save) {
-            if (mCheckSaveListener != null) {
-                mCheckSaveListener.checkSave(this::saveImportance, mSbn);
-            } else {
-                saveImportance();
-            }
+            saveImportance();
         }
         return false;
     }
@@ -466,5 +486,49 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     @Override
     public int getActualHeight() {
         return getHeight();
+    }
+
+    /**
+     * Runnable to either update the given channel (with a new importance value) or, if no channel
+     * is provided, update notifications enabled state for the package.
+     */
+    private static class UpdateImportanceRunnable implements Runnable {
+        private final INotificationManager mINotificationManager;
+        private final String mPackageName;
+        private final int mAppUid;
+        private final @Nullable NotificationChannel mChannelToUpdate;
+        private final int mCurrentImportance;
+        private final int mNewImportance;
+
+
+        public UpdateImportanceRunnable(INotificationManager notificationManager,
+                String packageName, int appUid, @Nullable NotificationChannel channelToUpdate,
+                int currentImportance, int newImportance) {
+            mINotificationManager = notificationManager;
+            mPackageName = packageName;
+            mAppUid = appUid;
+            mChannelToUpdate = channelToUpdate;
+            mCurrentImportance = currentImportance;
+            mNewImportance = newImportance;
+        }
+
+        @Override
+        public void run() {
+            try {
+                if (mChannelToUpdate != null) {
+                    mChannelToUpdate.setImportance(mNewImportance);
+                    mChannelToUpdate.lockFields(NotificationChannel.USER_LOCKED_IMPORTANCE);
+                    mINotificationManager.updateNotificationChannelForPackage(
+                            mPackageName, mAppUid, mChannelToUpdate);
+                } else {
+                    // For notifications with more than one channel, update notification enabled
+                    // state. If the importance was lowered, we disable notifications.
+                    mINotificationManager.setNotificationsEnabledWithImportanceLockForPackage(
+                            mPackageName, mAppUid, mNewImportance >= mCurrentImportance);
+                }
+            } catch (RemoteException e) {
+                Log.e(TAG, "Unable to update notification importance", e);
+            }
+        }
     }
 }

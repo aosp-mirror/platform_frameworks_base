@@ -103,7 +103,8 @@ public class BatteryMeterDrawableBase extends Drawable {
         for (int i = 0; i < N; i++) {
             mColors[2 * i] = levels.getInt(i, 0);
             if (colors.getType(i) == TypedValue.TYPE_ATTRIBUTE) {
-                mColors[2 * i + 1] = Utils.getColorAttr(context, colors.getThemeAttributeId(i, 0));
+                mColors[2 * i + 1] = Utils.getColorAttrDefaultColor(context,
+                        colors.getThemeAttributeId(i, 0));
             } else {
                 mColors[2 * i + 1] = colors.getColor(i, 0);
             }
@@ -145,14 +146,16 @@ public class BatteryMeterDrawableBase extends Drawable {
             mWarningTextPaint.setColor(mColors[1]);
         }
 
-        mChargeColor = Utils.getDefaultColor(mContext, R.color.meter_consumed_color);
+        mChargeColor = Utils.getColorStateListDefaultColor(mContext, R.color.meter_consumed_color);
 
         mBoltPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mBoltPaint.setColor(Utils.getDefaultColor(mContext, R.color.batterymeter_bolt_color));
+        mBoltPaint.setColor(Utils.getColorStateListDefaultColor(mContext,
+                R.color.batterymeter_bolt_color));
         mBoltPoints = loadPoints(res, R.array.batterymeter_bolt_points);
 
         mPlusPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mPlusPaint.setColor(Utils.getDefaultColor(mContext, R.color.batterymeter_plus_color));
+        mPlusPaint.setColor(Utils.getColorStateListDefaultColor(mContext,
+                R.color.batterymeter_plus_color));
         mPlusPoints = loadPoints(res, R.array.batterymeter_plus_points);
 
         mIntrinsicWidth = context.getResources().getDimensionPixelSize(R.dimen.battery_width);

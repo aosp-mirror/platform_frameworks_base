@@ -22,11 +22,10 @@
 #include "utils/Macros.h"
 
 namespace android {
-namespace service {
+namespace uirenderer {
+namespace protos {
 class GraphicsStatsProto;
 }
-
-namespace uirenderer {
 
 /*
  * The exported entry points used by GraphicsStatsService.java in f/b/services/core
@@ -55,7 +54,7 @@ public:
     ANDROID_API static void finishDump(Dump* dump);
 
     // Visible for testing
-    static bool parseFromFile(const std::string& path, service::GraphicsStatsProto* output);
+    static bool parseFromFile(const std::string& path, protos::GraphicsStatsProto* output);
 };
 
 } /* namespace uirenderer */

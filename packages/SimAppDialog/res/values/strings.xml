@@ -15,22 +15,21 @@
     limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- TODO character limits -->
-    <!-- The name of this application -->
+    <!-- The name of this application [CHAR LIMIT=NONE] -->
     <string name="app_name">Sim App Dialog</string>
     <!-- Install Carrier App Activity -->
-    <!-- Title of screen asking user to download the carrier app to match the inserted SIM card -->
+    <!-- Title of screen asking user to download the carrier app to match the inserted SIM card [CHAR LIMIT=30] -->
     <string name="install_carrier_app_title">Activate mobile service</string>
-    <!-- Description of screen asking user to download the carrier app to match the inserted SIM card if we know the name of the carrier-->
+    <!-- Description of screen asking user to download the carrier app to match the inserted SIM card if we know the name of the carrier [CHAR LIMIT=90] -->
     <string name="install_carrier_app_description">To get your new SIM working properly, you\'ll
         need to install the <xliff:g name="carrier_name" example="Project Fi">%1$s</xliff:g> app
     </string>
-    <!-- Description of screen asking user to download the carrier app to match the inserted SIM card if we don't know the name of the carrier-->
+    <!-- Description of screen asking user to download the carrier app to match the inserted SIM card if we don't know the name of the carrier  [CHAR LIMIT=100] -->
     <string name="install_carrier_app_description_default">To get your new SIM working properly,
         you\'ll need to install the carrier app
     </string>
-    <!-- Name of the button used to defer downloading the carrier app -->
+    <!-- Name of the button used to defer downloading the carrier app  [CHAR LIMIT=25]-->
     <string name="install_carrier_app_defer_action">Not now</string>
-    <!-- Name of the button for downloading the carrier app -->
+    <!-- Name of the button for downloading the carrier app [CHAR LIMIT=25] -->
     <string name="install_carrier_app_download_action">Download app</string>
 </resources>

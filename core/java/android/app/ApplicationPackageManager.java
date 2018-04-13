@@ -2165,27 +2165,15 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
-    public PersistableBundle getSuspendedPackageAppExtras(String packageName) {
+    public Bundle getSuspendedPackageAppExtras() {
+        final PersistableBundle extras;
         try {
-            return mPM.getSuspendedPackageAppExtras(packageName, mContext.getUserId());
+            extras = mPM.getSuspendedPackageAppExtras(mContext.getOpPackageName(),
+                    mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    @Override
-    public Bundle getSuspendedPackageAppExtras() {
-        final PersistableBundle extras = getSuspendedPackageAppExtras(mContext.getOpPackageName());
         return extras != null ? new Bundle(extras.deepCopy()) : null;
-    }
-
-    @Override
-    public void setSuspendedPackageAppExtras(String packageName, PersistableBundle appExtras) {
-        try {
-            mPM.setSuspendedPackageAppExtras(packageName, appExtras, mContext.getUserId());
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
     }
 
     @Override
@@ -2199,8 +2187,12 @@ public class ApplicationPackageManager extends PackageManager {
 
     /** @hide */
     @Override
-    public boolean isPackageSuspended(String packageName) {
-        return isPackageSuspendedForUser(packageName, mContext.getUserId());
+    public boolean isPackageSuspended(String packageName) throws NameNotFoundException {
+        try {
+            return isPackageSuspendedForUser(packageName, mContext.getUserId());
+        } catch (IllegalArgumentException ie) {
+            throw new NameNotFoundException(packageName);
+        }
     }
 
     @Override

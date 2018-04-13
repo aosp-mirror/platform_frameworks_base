@@ -23,6 +23,7 @@ import android.os.IBinder;
 import android.os.IStatsManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.AndroidException;
 import android.util.Slog;
 
 /**
@@ -82,28 +83,38 @@ public final class StatsManager {
     }
 
     /**
-     * Clients can send a configuration and simultaneously registers the name of a broadcast
-     * receiver that listens for when it should request data.
+     * Adds the given configuration and associates it with the given configKey. If a config with the
+     * given configKey already exists for the caller's uid, it is replaced with the new one.
      *
      * @param configKey An arbitrary integer that allows clients to track the configuration.
-     * @param config    Wire-encoded StatsDConfig proto that specifies metrics (and all
+     * @param config    Wire-encoded StatsdConfig proto that specifies metrics (and all
      *                  dependencies eg, conditions and matchers).
-     * @return true if successful
+     * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
+     * @throws IllegalArgumentException if config is not a wire-encoded StatsdConfig proto
      */
     @RequiresPermission(Manifest.permission.DUMP)
-    public boolean addConfiguration(long configKey, byte[] config) {
+    public void addConfig(long configKey, byte[] config) throws StatsUnavailableException {
         synchronized (this) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
-                if (service == null) {
-                    Slog.e(TAG, "Failed to find statsd when adding configuration");
-                    return false;
-                }
-                return service.addConfiguration(configKey, config);
+                service.addConfiguration(configKey, config); // can throw IllegalArgumentException
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to connect to statsd when adding configuration");
-                return false;
+                throw new StatsUnavailableException("could not connect", e);
             }
+        }
+    }
+
+    /**
+     * TODO: Temporary for backwards compatibility. Remove.
+     */
+    @RequiresPermission(Manifest.permission.DUMP)
+    public boolean addConfiguration(long configKey, byte[] config) {
+        try {
+            addConfig(configKey, config);
+            return true;
+        } catch (StatsUnavailableException | IllegalArgumentException e) {
+            return false;
         }
     }
 
@@ -111,22 +122,31 @@ public final class StatsManager {
      * Remove a configuration from logging.
      *
      * @param configKey Configuration key to remove.
-     * @return true if successful
+     * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
      */
     @RequiresPermission(Manifest.permission.DUMP)
-    public boolean removeConfiguration(long configKey) {
+    public void removeConfig(long configKey) throws StatsUnavailableException {
         synchronized (this) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
-                if (service == null) {
-                    Slog.e(TAG, "Failed to find statsd when removing configuration");
-                    return false;
-                }
-                return service.removeConfiguration(configKey);
+                service.removeConfiguration(configKey);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to connect to statsd when removing configuration");
-                return false;
+                throw new StatsUnavailableException("could not connect", e);
             }
+        }
+    }
+
+    /**
+     * TODO: Temporary for backwards compatibility. Remove.
+     */
+    @RequiresPermission(Manifest.permission.DUMP)
+    public boolean removeConfiguration(long configKey) {
+        try {
+            removeConfig(configKey);
+            return true;
+        } catch (StatsUnavailableException e) {
+            return false;
         }
     }
 
@@ -150,123 +170,165 @@ public final class StatsManager {
      * {@link #EXTRA_STATS_DIMENSIONS_VALUE}.
      * <p>
      * This function can only be called by the owner (uid) of the config. It must be called each
-     * time statsd starts. The config must have been added first (via addConfiguration()).
+     * time statsd starts. The config must have been added first (via {@link #addConfig}).
      *
-     * @param configKey     The integer naming the config to which this subscriber is attached.
-     * @param subscriberId  ID of the subscriber, as used in the config.
      * @param pendingIntent the PendingIntent to use when broadcasting info to the subscriber
      *                      associated with the given subscriberId. May be null, in which case
      *                      it undoes any previous setting of this subscriberId.
-     * @return true if successful
+     * @param configKey     The integer naming the config to which this subscriber is attached.
+     * @param subscriberId  ID of the subscriber, as used in the config.
+     * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
+     */
+    @RequiresPermission(Manifest.permission.DUMP)
+    public void setBroadcastSubscriber(
+            PendingIntent pendingIntent, long configKey, long subscriberId)
+            throws StatsUnavailableException {
+        synchronized (this) {
+            try {
+                IStatsManager service = getIStatsManagerLocked();
+                if (pendingIntent != null) {
+                    // Extracts IIntentSender from the PendingIntent and turns it into an IBinder.
+                    IBinder intentSender = pendingIntent.getTarget().asBinder();
+                    service.setBroadcastSubscriber(configKey, subscriberId, intentSender);
+                } else {
+                    service.unsetBroadcastSubscriber(configKey, subscriberId);
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to connect to statsd when adding broadcast subscriber", e);
+                throw new StatsUnavailableException("could not connect", e);
+            }
+        }
+    }
+
+    /**
+     * TODO: Temporary for backwards compatibility. Remove.
      */
     @RequiresPermission(Manifest.permission.DUMP)
     public boolean setBroadcastSubscriber(
             long configKey, long subscriberId, PendingIntent pendingIntent) {
-        synchronized (this) {
-            try {
-                IStatsManager service = getIStatsManagerLocked();
-                if (service == null) {
-                    Slog.e(TAG, "Failed to find statsd when adding broadcast subscriber");
-                    return false;
-                }
-                if (pendingIntent != null) {
-                    // Extracts IIntentSender from the PendingIntent and turns it into an IBinder.
-                    IBinder intentSender = pendingIntent.getTarget().asBinder();
-                    return service.setBroadcastSubscriber(configKey, subscriberId, intentSender);
-                } else {
-                    return service.unsetBroadcastSubscriber(configKey, subscriberId);
-                }
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to connect to statsd when adding broadcast subscriber", e);
-                return false;
-            }
+        try {
+            setBroadcastSubscriber(pendingIntent, configKey, subscriberId);
+            return true;
+        } catch (StatsUnavailableException e) {
+            return false;
         }
     }
 
     /**
      * Registers the operation that is called to retrieve the metrics data. This must be called
-     * each time statsd starts. The config must have been added first (via addConfiguration(),
-     * although addConfiguration could have been called on a previous boot). This operation allows
+     * each time statsd starts. The config must have been added first (via {@link #addConfig},
+     * although addConfig could have been called on a previous boot). This operation allows
      * statsd to send metrics data whenever statsd determines that the metrics in memory are
-     * approaching the memory limits. The fetch operation should call {@link #getData} to fetch the
-     * data, which also deletes the retrieved metrics from statsd's memory.
+     * approaching the memory limits. The fetch operation should call {@link #getReports} to fetch
+     * the data, which also deletes the retrieved metrics from statsd's memory.
      *
-     * @param configKey     The integer naming the config to which this operation is attached.
      * @param pendingIntent the PendingIntent to use when broadcasting info to the subscriber
      *                      associated with the given subscriberId. May be null, in which case
      *                      it removes any associated pending intent with this configKey.
-     * @return true if successful
+     * @param configKey     The integer naming the config to which this operation is attached.
+     * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
      */
     @RequiresPermission(Manifest.permission.DUMP)
-    public boolean setDataFetchOperation(long configKey, PendingIntent pendingIntent) {
+    public void setFetchReportsOperation(PendingIntent pendingIntent, long configKey)
+            throws StatsUnavailableException {
         synchronized (this) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
-                if (service == null) {
-                    Slog.e(TAG, "Failed to find statsd when registering data listener.");
-                    return false;
-                }
                 if (pendingIntent == null) {
-                    return service.removeDataFetchOperation(configKey);
+                    service.removeDataFetchOperation(configKey);
                 } else {
                     // Extracts IIntentSender from the PendingIntent and turns it into an IBinder.
                     IBinder intentSender = pendingIntent.getTarget().asBinder();
-                    return service.setDataFetchOperation(configKey, intentSender);
+                    service.setDataFetchOperation(configKey, intentSender);
                 }
 
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to connect to statsd when registering data listener.");
-                return false;
+                throw new StatsUnavailableException("could not connect", e);
             }
         }
     }
 
     /**
-     * Clients can request data with a binder call. This getter is destructive and also clears
-     * the retrieved metrics from statsd memory.
-     *
-     * @param configKey Configuration key to retrieve data from.
-     * @return Serialized ConfigMetricsReportList proto. Returns null on failure (eg, if statsd
-     * crashed).
+     * TODO: Temporary for backwards compatibility. Remove.
      */
     @RequiresPermission(Manifest.permission.DUMP)
-    public @Nullable byte[] getData(long configKey) {
+    public boolean setDataFetchOperation(long configKey, PendingIntent pendingIntent) {
+        try {
+            setFetchReportsOperation(pendingIntent, configKey);
+            return true;
+        } catch (StatsUnavailableException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Request the data collected for the given configKey.
+     * This getter is destructive - it also clears the retrieved metrics from statsd's memory.
+     *
+     * @param configKey Configuration key to retrieve data from.
+     * @return Serialized ConfigMetricsReportList proto.
+     * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
+     */
+    @RequiresPermission(Manifest.permission.DUMP)
+    public byte[] getReports(long configKey) throws StatsUnavailableException {
         synchronized (this) {
             try {
                 IStatsManager service = getIStatsManagerLocked();
-                if (service == null) {
-                    Slog.e(TAG, "Failed to find statsd when getting data");
-                    return null;
-                }
                 return service.getData(configKey);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to connect to statsd when getting data");
-                return null;
+                throw new StatsUnavailableException("could not connect", e);
+            }
+        }
+    }
+
+    /**
+     * TODO: Temporary for backwards compatibility. Remove.
+     */
+    @RequiresPermission(Manifest.permission.DUMP)
+    public @Nullable byte[] getData(long configKey) {
+        try {
+            return getReports(configKey);
+        } catch (StatsUnavailableException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Clients can request metadata for statsd. Will contain stats across all configurations but not
+     * the actual metrics themselves (metrics must be collected via {@link #getReports(long)}.
+     * This getter is not destructive and will not reset any metrics/counters.
+     *
+     * @return Serialized StatsdStatsReport proto.
+     * @throws StatsUnavailableException if unsuccessful due to failing to connect to stats service
+     */
+    @RequiresPermission(Manifest.permission.DUMP)
+    public byte[] getStatsMetadata() throws StatsUnavailableException {
+        synchronized (this) {
+            try {
+                IStatsManager service = getIStatsManagerLocked();
+                return service.getMetadata();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to connect to statsd when getting metadata");
+                throw new StatsUnavailableException("could not connect", e);
             }
         }
     }
 
     /**
      * Clients can request metadata for statsd. Will contain stats across all configurations but not
-     * the actual metrics themselves (metrics must be collected via {@link #getData(String)}.
+     * the actual metrics themselves (metrics must be collected via {@link #getReports(long)}.
      * This getter is not destructive and will not reset any metrics/counters.
      *
      * @return Serialized StatsdStatsReport proto. Returns null on failure (eg, if statsd crashed).
      */
     @RequiresPermission(Manifest.permission.DUMP)
     public @Nullable byte[] getMetadata() {
-        synchronized (this) {
-            try {
-                IStatsManager service = getIStatsManagerLocked();
-                if (service == null) {
-                    Slog.e(TAG, "Failed to find statsd when getting metadata");
-                    return null;
-                }
-                return service.getMetadata();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to connect to statsd when getting metadata");
-                return null;
-            }
+        try {
+            return getStatsMetadata();
+        } catch (StatsUnavailableException e) {
+            return null;
         }
     }
 
@@ -279,14 +341,33 @@ public final class StatsManager {
         }
     }
 
-    private IStatsManager getIStatsManagerLocked() throws RemoteException {
+    private IStatsManager getIStatsManagerLocked() throws StatsUnavailableException {
         if (mService != null) {
             return mService;
         }
         mService = IStatsManager.Stub.asInterface(ServiceManager.getService("stats"));
-        if (mService != null) {
+        if (mService == null) {
+            throw new StatsUnavailableException("could not be found");
+        }
+        try {
             mService.asBinder().linkToDeath(new StatsdDeathRecipient(), 0);
+        } catch (RemoteException e) {
+            throw new StatsUnavailableException("could not connect when linkToDeath", e);
         }
         return mService;
+    }
+
+    /**
+     * Exception thrown when communication with the stats service fails (eg if it is not available).
+     * This might be thrown early during boot before the stats service has started or if it crashed.
+     */
+    public static class StatsUnavailableException extends AndroidException {
+        public StatsUnavailableException(String reason) {
+            super("Failed to connect to statsd: " + reason);
+        }
+
+        public StatsUnavailableException(String reason, Throwable e) {
+            super("Failed to connect to statsd: " + reason, e);
+        }
     }
 }

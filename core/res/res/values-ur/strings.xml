@@ -82,8 +82,7 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"کوئی صوتی سروس نہیں"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"کوئی صوتی سروس یا ہنگامی کالنگ دستیاب نہیں ہے"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"آپ کے کیریئر نے عارضی طور پر آف کر دیا ہے"</string>
-    <!-- no translation found for RestrictedStateContentMsimTemplate (673416791370248176) -->
-    <skip />
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"‏SIM <xliff:g id="SIMNUMBER">%d</xliff:g> کے لئے آپ کے کیریئر نے عارضی طور پر آف کر دیا ہے"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"موبائل نیٹ ورک تک رسائی نہیں ہو سکتی"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"ترجیحی نیٹ ورک تبدیل کر کے دیکھیں۔ تبدیل کرنے کے لیے تھپتھپائیں۔"</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"ہنگامی کالنگ دستیاب نہیں ہے"</string>
@@ -498,8 +497,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"تسلیم شدہ نہیں ہے"</string>
-    <!-- no translation found for fingerprint_authenticated (5309333983002526448) -->
-    <skip />
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"فنگر پرنٹ کی تصدیق ہو گئی"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"فنگر پرنٹ ہارڈ ویئر دستیاب نہیں ہے۔"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"فنگر پرنٹ اسٹور نہیں کیا جا سکتا ہے۔ براہ کرم ایک موجودہ فنگر پرنٹ ہٹائیں۔"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"فنگر پرنٹ کی میعاد ختم ہوگئی۔ دوبارہ کوشش کریں۔"</string>
@@ -1016,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"کال کریں"</string>
     <string name="dial_desc" msgid="6573723404985517250">"منتخب کردہ فون نمبر پر کال کریں"</string>
     <string name="map" msgid="5441053548030107189">"نقشہ"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"منتخب کردہ پتہ تلاش کریں"</string>
     <string name="browse" msgid="1245903488306147205">"کھولیں"</string>
     <string name="browse_desc" msgid="8220976549618935044">"‏منتخب کردہ URL کھولیں"</string>
     <string name="sms" msgid="4560537514610063430">"پیغام"</string>
@@ -1275,49 +1272,34 @@
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"<xliff:g id="NAME">%s</xliff:g> دیگر ایپس پر ڈسپلے ہو رہی ہے"</string>
     <string name="alert_windows_notification_message" msgid="8917232109522912560">"اگر آپ نہیں چاہتے ہیں کہ <xliff:g id="NAME">%s</xliff:g> اس خصوصیت کا استعمال کرے تو ترتیبات کھولنے کیلئے تھپتھپائیں اور اسے بند کریں۔"</string>
     <string name="alert_windows_notification_turn_off_action" msgid="2902891971380544651">"آف کریں"</string>
-    <!-- no translation found for ext_media_checking_notification_title (4411133692439308924) -->
-    <skip />
-    <!-- no translation found for ext_media_checking_notification_message (410185170877285434) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_title (1621805083736634077) -->
-    <skip />
-    <!-- no translation found for ext_media_new_notification_message (3673685270558405087) -->
-    <skip />
+    <string name="ext_media_checking_notification_title" msgid="4411133692439308924">"<xliff:g id="NAME">%s</xliff:g> کو چیک کیا جا رہا ہے…"</string>
+    <string name="ext_media_checking_notification_message" msgid="410185170877285434">"موجودہ مواد کا جائزہ لیا جا رہا ہے"</string>
+    <string name="ext_media_new_notification_title" msgid="1621805083736634077">"نیا <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_message" msgid="3673685270558405087">"سیٹ اپ کرنے کیلئے تھپتھپائیں"</string>
     <string name="ext_media_ready_notification_message" msgid="4083398150380114462">"تصاویر اور میڈیا منتقل کرنے کیلئے"</string>
-    <!-- no translation found for ext_media_unmountable_notification_title (4179418065210797130) -->
-    <skip />
-    <!-- no translation found for ext_media_unmountable_notification_message (4193858924381066522) -->
-    <skip />
+    <string name="ext_media_unmountable_notification_title" msgid="4179418065210797130">"<xliff:g id="NAME">%s</xliff:g> کے ساتھ مسئلہ"</string>
+    <string name="ext_media_unmountable_notification_message" msgid="4193858924381066522">"درست کرنے کیلئے تھپتھپائیں"</string>
+    <string name="ext_media_unmountable_notification_message" product="tv" msgid="3941179940297874950">"<xliff:g id="NAME">%s</xliff:g> خراب ہے۔ اسے ٹھیک کرنے کیلئے منتخب کریں۔"</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"غیر تعاون یافتہ <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"یہ آلہ <xliff:g id="NAME">%s</xliff:g> کو سپورٹ نہیں کرتا۔ ایک سپورٹ یافتہ فارمیٹ میں سیٹ اپ کرنے کیلئے تھپتھپائیں۔"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"یہ آلہ اس <xliff:g id="NAME">%s</xliff:g> کو سپورٹ نہیں کرتا ہے۔ ایک سپورٹ یافتہ فارمیٹ میں سیٹ اپ کرنے کیلئے منتخب کریں۔"</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> غیر متوقع طور پر ہٹا دیا گیا"</string>
-    <!-- no translation found for ext_media_badremoval_notification_message (8556885808951260574) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_title (6593814191061956856) -->
-    <skip />
-    <!-- no translation found for ext_media_nomedia_notification_message (2110883356419799994) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_title (5046532339291216076) -->
-    <skip />
-    <!-- no translation found for ext_media_unmounting_notification_message (1003926904442321115) -->
-    <skip />
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"مواد کھونے سے بچنے کے لئے ہٹانے سے پہلے میڈیا خارج کریں"</string>
+    <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g> کو ہٹا دیا گیا"</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"شاید کچھ فنکشن ٹھیک طرح سے کام نہ کریں۔ نیا اسٹوریج داخل کریں۔"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g> کو خارج کیا جا رہا ہے"</string>
+    <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"نہ ہٹائیں"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"سیٹ اپ کریں"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"خارج کریں"</string>
     <string name="ext_media_browse_action" msgid="8322172381028546087">"دریافت کریں"</string>
     <string name="ext_media_missing_title" msgid="620980315821543904">"<xliff:g id="NAME">%s</xliff:g> غائب ہے"</string>
-    <!-- no translation found for ext_media_missing_message (4012389235250987930) -->
-    <skip />
+    <string name="ext_media_missing_message" msgid="4012389235250987930">"آلہ دوبارہ داخل کریں"</string>
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> کو منتقل کیا جا رہا ہے"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"ڈیٹا منتقل کیا جا رہا ہے…"</string>
-    <!-- no translation found for ext_media_move_success_title (7863652232242276066) -->
-    <skip />
-    <!-- no translation found for ext_media_move_success_message (8939137931961728009) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_title (1604422634177382092) -->
-    <skip />
-    <!-- no translation found for ext_media_move_failure_message (7388950499623016135) -->
-    <skip />
+    <string name="ext_media_move_success_title" msgid="7863652232242276066">"مواد کی منتقلی مکمل ہو گئی"</string>
+    <string name="ext_media_move_success_message" msgid="8939137931961728009">"مواد کو <xliff:g id="NAME">%s</xliff:g> میں منتقل کر دیا گیا"</string>
+    <string name="ext_media_move_failure_title" msgid="1604422634177382092">"مواد منتقل نہیں کیا جا سکا"</string>
+    <string name="ext_media_move_failure_message" msgid="7388950499623016135">"دوبارہ مواد کو منتقل کرنے کی کوشش کریں"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"ہٹا دیا گیا"</string>
     <string name="ext_media_status_unmounted" msgid="2551560878416417752">"اخراج شدہ"</string>
     <string name="ext_media_status_checking" msgid="6193921557423194949">"چیک کیا جا رہا ہے…"</string>
@@ -1709,7 +1691,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"آپ کے منتظم کے ذریعے انسٹال کیا گیا"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"آپ کے منتظم کے ذریعے اپ ڈیٹ کیا گیا"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"آپ کے منتظم کے ذریعے حذف کیا گیا"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"بیٹری لائف کی توسیع کیلئے، بیٹری سیور آپ کے آلہ کی کارکردگی میں تخفیف کر دیتی ہے اور وائبریشن، مقام کی سروسز اور پس منظر کے ڈیٹا کو محدود کر دیتی ہے یا بند کر دیتی ہے۔ ای میل، پیغام رسانی اور مطابقت پذیری پر انحصار کرنے والی دیگر ایپس ممکن ہے اس وقت تک اپ ڈیٹ نہ ہوں جب تک آپ انہیں نہ کھولیں۔\n\nآپ کا آلہ چارج ہوتے وقت بیٹری سیور خود بخود آف ہو جاتی ہے۔"</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"ڈیٹا کے استعمال کو کم کرنے میں مدد کیلئے، ڈیٹا سیور پس منظر میں کچھ ایپس کو ڈیٹا بھیجنے یا موصول کرنے سے روکتا ہے۔ آپ جو ایپ فی الحال استعمال کر رہے ہیں وہ ڈیٹا پر رسائی کر سکتی ہے مگر ہو سکتا ہے ایسا زیادہ نہ ہو۔ اس کا مطلب مثال کے طور پر یہ ہو سکتا ہے کہ تصاویر تھپتھپانے تک ظاہر نہ ہوں۔"</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"ڈیٹا سیور آن کریں؟"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"آن کریں"</string>
@@ -1796,6 +1779,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"سبھی زبانیں"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"تمام علاقے"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"تلاش"</string>
+    <!-- no translation found for app_suspended_title (5360409799785895488) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (5876776530189983288) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (2901244470963918402) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"دفتری پروفائل آن کریں؟"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"آپ کی دفتری ایپس، اطلاعات، ڈیٹا اور دفتری پروفائل کی دیگر خصوصیات آن کر دی جائیں گی"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"آن کریں"</string>
@@ -1865,14 +1854,10 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"‏SIM میں آواز کیلئے سہولت نہیں ہے"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"‏آواز کیلئے SIM کو اجازت نہیں ہے"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"آواز کیلئے فون کو اجازت نہیں ہے"</string>
-    <!-- no translation found for mmcc_authentication_reject_msim_template (1217031195834766479) -->
-    <skip />
-    <!-- no translation found for mmcc_imsi_unknown_in_hlr_msim_template (5636464607596778986) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_ms_msim_template (5994323296399913454) -->
-    <skip />
-    <!-- no translation found for mmcc_illegal_me_msim_template (5550259730350571826) -->
-    <skip />
+    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"‏SIM <xliff:g id="SIMNUMBER">%d</xliff:g> کو اجازت نہیں ہے"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"‏SIM <xliff:g id="SIMNUMBER">%d</xliff:g> فراہم کردہ نہیں ہے"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"‏SIM <xliff:g id="SIMNUMBER">%d</xliff:g> کو اجازت نہیں ہے"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"‏SIM <xliff:g id="SIMNUMBER">%d</xliff:g> کو اجازت نہیں ہے"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"پاپ اپ ونڈو"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"‎‎‎‎‎+ <xliff:g id="NUMBER">%1$d</xliff:g>‎‎"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"ایپ کے ورژن کا درجہ کم ہے یا اس شارٹ کٹ کے ساتھ مطابقت پذیر نہیں ہے"</string>
@@ -1889,8 +1874,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"کالز اور اطلاعات کی آواز خاموش کر دی جائے گی"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"سسٹم کی تبدیلیاں"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"ڈسٹرب نہ کریں"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"توجہ مرکوز کرنے میں آپ کی مدد کرنے کے لیے، \'ڈسٹرب نہ کریں\' اطلاعات کو چھپا رہی ہے"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"یہ نیا برتاؤ ہے۔ تبدیل کرنے کے لیے تھتھپائيں۔"</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\'ڈسٹرب نہ کریں\' تبدیل ہو گيا ہے"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"مسدود کی گئی چیزوں کو چیک کرنے کے لیے تھپتھپائیں۔"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"سسٹم"</string>

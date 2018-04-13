@@ -4515,7 +4515,7 @@
     <string name="package_deleted_device_owner">Deleted by your admin</string>
 
     <!-- [CHAR_LIMIT=NONE] Battery saver: Feature description -->
-    <string name="battery_saver_description">To extend battery life, Battery Saver reduces your device\'s performance and limits or turns off vibration, location services, and background data. Email, messaging, and other apps that rely on syncing may not update unless you open them.\n\nBattery Saver turns off automatically when your device is charging.</string>
+    <string name="battery_saver_description">To extend your battery life, Battery Saver turns off some device features and restricts apps.</string>
 
     <!-- [CHAR_LIMIT=NONE] Data saver: Feature description -->
     <string name="data_saver_description">To help reduce data usage, Data Saver prevents some apps from sending or receiving data in the background. An app you’re currently using can access data, but may do so less frequently. This may mean, for example, that images don’t display until you tap them.</string>
@@ -4704,11 +4704,13 @@
     <string name="locale_search_menu">Search</string>
 
     <!-- Title of the dialog that is shown when the user tries to launch a suspended application [CHAR LIMIT=30] -->
-    <string name="app_suspended_title">Action not allowed</string>
+    <string name="app_suspended_title">Can\u2019t open app</string>
     <!-- Default message shown in the dialog that is shown when the user tries to launch a suspended application [CHAR LIMIT=NONE] -->
-    <string name="app_suspended_default_message">The application <xliff:g id="app_name" example="GMail">%1$s</xliff:g> is currently disabled.</string>
+    <string name="app_suspended_default_message">
+        The app <xliff:g id="app_name" example="Gmail">%1$s</xliff:g> isn\u2019t available right now. This is managed by <xliff:g id="app_name" example="Settings">%2$s</xliff:g>.
+    </string>
     <!-- Title of the button to show users more details about why the app has been suspended [CHAR LIMIT=50]-->
-    <string name="app_suspended_more_details">More details</string>
+    <string name="app_suspended_more_details">Learn more</string>
 
     <!-- Title of a dialog. The string is asking if the user wants to turn on their work profile, which contains work apps that are managed by their employer. "Work" is an adjective. [CHAR LIMIT=30] -->
     <string name="work_mode_off_title">Turn on work profile?</string>
@@ -4943,9 +4945,9 @@
     <!-- Title for the notification channel notifying user of do not disturb system changes (i.e. Do Not Disturb has changed). [CHAR LIMIT=NONE] -->
     <string name="notification_channel_do_not_disturb">Do Not Disturb</string>
     <!-- Title of notification indicating do not disturb visual interruption settings have changed when upgrading to P -->
-    <string name="zen_upgrade_notification_visd_title">Do Not Disturb is hiding notifications to help you focus</string>
+    <string name="zen_upgrade_notification_visd_title">New: Do Not Disturb is hiding notifications</string>
     <!-- Content of notification indicating users can tap on the notification to go to dnd behavior settings -->
-    <string name="zen_upgrade_notification_visd_content">This is new behavior. Tap to change.</string>
+    <string name="zen_upgrade_notification_visd_content">Tap to learn more and change.</string>
     <!-- Title of notification indicating do not disturb settings have changed when upgrading to P -->
     <string name="zen_upgrade_notification_title">Do Not Disturb has changed</string>
     <!-- Content of notification indicating users can tap on the notification to go to dnd behavior settings -->
@@ -4955,4 +4957,8 @@
     <string name="notification_app_name_system">System</string>
     <!-- Application name displayed in notifications [CHAR LIMIT=60] -->
     <string name="notification_app_name_settings">Settings</string>
+
+    <!-- Strings for car -->
+    <!-- String displayed when loading a user in the car [CHAR LIMIT=30] -->
+    <string name="car_loading_profile">Loading</string>
 </resources>

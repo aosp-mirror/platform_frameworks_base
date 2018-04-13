@@ -5577,7 +5577,8 @@ public abstract class PackageManager {
      * @param packageName The name of the package to get the suspended status of.
      * @param userId The user id.
      * @return {@code true} if the package is suspended or {@code false} if the package is not
-     * suspended or could not be found.
+     * suspended.
+     * @throws IllegalArgumentException if the package was not found.
      * @hide
      */
     public abstract boolean isPackageSuspendedForUser(String packageName, int userId);
@@ -5586,12 +5587,13 @@ public abstract class PackageManager {
      * Query if an app is currently suspended.
      *
      * @return {@code true} if the given package is suspended, {@code false} otherwise
+     * @throws NameNotFoundException if the package could not be found.
      *
      * @see #setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle, String)
      * @hide
      */
     @SystemApi
-    public boolean isPackageSuspended(String packageName) {
+    public boolean isPackageSuspended(String packageName) throws NameNotFoundException {
         throw new UnsupportedOperationException("isPackageSuspended not implemented");
     }
 
@@ -5622,51 +5624,16 @@ public abstract class PackageManager {
     }
 
     /**
-     * Retrieve the {@link PersistableBundle} that was passed as {@code appExtras} when the given
-     * package was suspended.
+     * Returns a {@link Bundle} of extras that was meant to be sent to the calling app when it was
+     * suspended. An app with the permission {@code android.permission.SUSPEND_APPS} can supply this
+     * to the system at the time of suspending an app.
      *
-     * <p> The caller must hold permission {@link Manifest.permission#SUSPEND_APPS} to use this
-     * api.</p>
+     * <p>This is the same {@link Bundle} that is sent along with the broadcast
+     * {@link Intent#ACTION_MY_PACKAGE_SUSPENDED}, whenever the app is suspended. The contents of
+     * this {@link Bundle} are a contract between the suspended app and the suspending app.
      *
-     * @param packageName The package to retrieve extras for.
-     * @return The {@code appExtras} for the suspended package.
-     *
-     * @see #setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle, String)
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.SUSPEND_APPS)
-    public @Nullable PersistableBundle getSuspendedPackageAppExtras(String packageName) {
-        throw new UnsupportedOperationException("getSuspendedPackageAppExtras not implemented");
-    }
-
-    /**
-     * Set the app extras for a suspended package. This method can be used to update the appExtras
-     * for a package that was earlier suspended using
-     * {@link #setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle,
-     * String)}
-     * Does nothing if the given package is not already in a suspended state.
-     *
-     * @param packageName The package for which the appExtras need to be updated
-     * @param appExtras The new appExtras for the given package
-     *
-     * @see #setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle, String)
-     *
-     * @hide
-     */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.SUSPEND_APPS)
-    public void setSuspendedPackageAppExtras(String packageName,
-            @Nullable PersistableBundle appExtras) {
-        throw new UnsupportedOperationException("setSuspendedPackageAppExtras not implemented");
-    }
-
-    /**
-     * Returns any extra information supplied as {@code appExtras} to the system when the calling
-     * app was suspended.
-     *
-     * <p>Note: If no extras were supplied to the system, this method will return {@code null}, even
-     * when the calling app has been suspended.</p>
+     * <p>Note: These extras are optional, so if no extras were supplied to the system, this method
+     * will return {@code null}, even when the calling app has been suspended.
      *
      * @return A {@link Bundle} containing the extras for the app, or {@code null} if the
      * package is not currently suspended.
@@ -5674,6 +5641,7 @@ public abstract class PackageManager {
      * @see #isPackageSuspended()
      * @see Intent#ACTION_MY_PACKAGE_UNSUSPENDED
      * @see Intent#ACTION_MY_PACKAGE_SUSPENDED
+     * @see Intent#EXTRA_SUSPENDED_PACKAGE_EXTRAS
      */
     public @Nullable Bundle getSuspendedPackageAppExtras() {
         throw new UnsupportedOperationException("getSuspendedPackageAppExtras not implemented");

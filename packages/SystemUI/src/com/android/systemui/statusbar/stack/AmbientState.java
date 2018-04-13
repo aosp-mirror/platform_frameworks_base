@@ -70,8 +70,8 @@ public class AmbientState {
     private int mIntrinsicPadding;
     private int mExpandAnimationTopChange;
     private ExpandableNotificationRow mExpandingNotification;
-    private boolean mFullyDark;
     private int mDarkTopPadding;
+    private float mDarkAmount;
 
     public AmbientState(Context context) {
         reload(context);
@@ -147,6 +147,16 @@ public class AmbientState {
     /** In dark mode, we draw as little as possible, assuming a black background */
     public void setDark(boolean dark) {
         mDark = dark;
+    }
+
+    /** Dark ratio of the status bar **/
+    public void setDarkAmount(float darkAmount) {
+        mDarkAmount = darkAmount;
+    }
+
+    /** Returns the dark ratio of the status bar */
+    public float getDarkAmount() {
+        return mDarkAmount;
     }
 
     public void setHideSensitive(boolean hideSensitive) {
@@ -413,17 +423,10 @@ public class AmbientState {
     }
 
     /**
-     * {@see isFullyDark}
-     */
-    public void setFullyDark(boolean fullyDark) {
-        mFullyDark = fullyDark;
-    }
-
-    /**
      * @return {@code true } when shade is completely dark: in AOD or ambient display.
      */
     public boolean isFullyDark() {
-        return mFullyDark;
+        return mDarkAmount == 1;
     }
 
     public void setDarkTopPadding(int darkTopPadding) {

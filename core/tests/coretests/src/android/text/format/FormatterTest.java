@@ -16,12 +16,14 @@
 
 package android.text.format;
 
+import static android.text.format.Formatter.FLAG_IEC_UNITS;
+import static android.text.format.Formatter.FLAG_SI_UNITS;
+
 import static org.junit.Assert.assertEquals;
 
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.icu.util.MeasureUnit;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
@@ -34,7 +36,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Locale;
-import java.util.Set;
 
 @Presubmit
 @SmallTest
@@ -102,6 +103,27 @@ public class FormatterTest {
         // Make sure it works on different locales.
         setLocale(new Locale("es", "ES"));
         checkFormatBytes(9123000, false, "9,12", 9120000);
+    }
+
+    @Test
+    public void testFormatBytesSi() {
+        setLocale(Locale.US);
+
+        checkFormatBytes(1_000, FLAG_SI_UNITS, "1.00", 1_000);
+        checkFormatBytes(1_024, FLAG_SI_UNITS, "1.02", 1_020);
+        checkFormatBytes(1_500, FLAG_SI_UNITS, "1.50", 1_500);
+        checkFormatBytes(12_582_912L, FLAG_SI_UNITS, "12.58", 12_580_000L);
+    }
+
+    @Test
+    public void testFormatBytesIec() {
+        setLocale(Locale.US);
+
+        checkFormatBytes(1_000, FLAG_IEC_UNITS, "0.98", 1_003);
+        checkFormatBytes(1_024, FLAG_IEC_UNITS, "1.00", 1_024);
+        checkFormatBytes(1_500, FLAG_IEC_UNITS, "1.46", 1_495);
+        checkFormatBytes(12_500_000L, FLAG_IEC_UNITS, "11.92", 12_499_025L);
+        checkFormatBytes(12_582_912L, FLAG_IEC_UNITS, "12.00", 12_582_912L);
     }
 
     private static final long SECOND = 1000;
@@ -195,8 +217,14 @@ public class FormatterTest {
 
     private void checkFormatBytes(long bytes, boolean useShort,
             String expectedString, long expectedRounded) {
+        checkFormatBytes(bytes, (useShort ? Formatter.FLAG_SHORTER : 0),
+                expectedString, expectedRounded);
+    }
+
+    private void checkFormatBytes(long bytes, int flags,
+            String expectedString, long expectedRounded) {
         BytesResult r = Formatter.formatBytes(mContext.getResources(), bytes,
-                Formatter.FLAG_CALCULATE_ROUNDED | (useShort ? Formatter.FLAG_SHORTER : 0));
+                Formatter.FLAG_CALCULATE_ROUNDED | flags);
         assertEquals(expectedString, r.value);
         assertEquals(expectedRounded, r.roundedBytes);
     }

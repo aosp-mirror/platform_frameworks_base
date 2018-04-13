@@ -182,6 +182,12 @@
     <!-- The height of the notification action list -->
     <dimen name="notification_action_list_height">60dp</dimen>
 
+    <!-- The height of the notification action list -->
+    <dimen name="notification_action_emphasized_height">48dp</dimen>
+
+    <!-- Size of the stroke with for the emphasized notification button style -->
+    <dimen name="emphasized_button_stroke_width">1dp</dimen>
+
     <!-- height of the content margin to accomodate for the header -->
     <dimen name="notification_content_margin_top">46dp</dimen>
 

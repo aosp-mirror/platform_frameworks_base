@@ -50,7 +50,7 @@ const int FIELD_ID_ANOMALY_ALARM_STATS = 9;
 // const int FIELD_ID_PULLED_ATOM_STATS = 10; // The proto is written in stats_log_util.cpp
 const int FIELD_ID_LOGGER_ERROR_STATS = 11;
 const int FIELD_ID_PERIODIC_ALARM_STATS = 12;
-const int FIELD_ID_SKIPPED_LOG_EVENT_STATS = 13;
+const int FIELD_ID_LOG_LOSS_STATS = 14;
 
 const int FIELD_ID_ATOM_STATS_TAG = 1;
 const int FIELD_ID_ATOM_STATS_COUNT = 2;
@@ -60,9 +60,6 @@ const int FIELD_ID_PERIODIC_ALARMS_REGISTERED = 1;
 
 const int FIELD_ID_LOGGER_STATS_TIME = 1;
 const int FIELD_ID_LOGGER_STATS_ERROR_CODE = 2;
-
-const int FIELD_ID_SKIPPED_LOG_EVENT_STATS_TAG = 1;
-const int FIELD_ID_SKIPPED_LOG_EVENT_STATS_TIMESTAMP = 2;
 
 const int FIELD_ID_CONFIG_STATS_UID = 1;
 const int FIELD_ID_CONFIG_STATS_ID = 2;
@@ -180,6 +177,14 @@ void StatsdStats::noteConfigResetInternalLocked(const ConfigKey& key) {
 void StatsdStats::noteConfigReset(const ConfigKey& key) {
     lock_guard<std::mutex> lock(mLock);
     noteConfigResetInternalLocked(key);
+}
+
+void StatsdStats::noteLogLost(int64_t timestampNs) {
+    lock_guard<std::mutex> lock(mLock);
+    if (mLogLossTimestampNs.size() == kMaxLoggerErrors) {
+        mLogLossTimestampNs.pop_front();
+    }
+    mLogLossTimestampNs.push_back(timestampNs);
 }
 
 void StatsdStats::noteBroadcastSent(const ConfigKey& key) {
@@ -350,15 +355,6 @@ void StatsdStats::noteAtomLogged(int atomId, int32_t timeSec) {
     mPushedAtomStats[atomId]++;
 }
 
-void StatsdStats::noteLogEventSkipped(int tag, int64_t timestamp) {
-    lock_guard<std::mutex> lock(mLock);
-    // grows strictly one at a time. so it won't > kMaxSkippedLogEvents
-    if (mSkippedLogEvents.size() == kMaxSkippedLogEvents) {
-        mSkippedLogEvents.pop_front();
-    }
-    mSkippedLogEvents.push_back(std::make_pair(tag, timestamp));
-}
-
 void StatsdStats::noteLoggerError(int error) {
     lock_guard<std::mutex> lock(mLock);
     // grows strictly one at a time. so it won't > kMaxLoggerErrors
@@ -381,7 +377,7 @@ void StatsdStats::resetInternalLocked() {
     mAnomalyAlarmRegisteredStats = 0;
     mPeriodicAlarmRegisteredStats = 0;
     mLoggerErrors.clear();
-    mSkippedLogEvents.clear();
+    mLogLossTimestampNs.clear();
     for (auto& config : mConfigStats) {
         config.second->broadcast_sent_time_sec.clear();
         config.second->data_drop_time_sec.clear();
@@ -393,6 +389,14 @@ void StatsdStats::resetInternalLocked() {
         config.second->metric_dimension_in_condition_stats.clear();
         config.second->alert_stats.clear();
     }
+}
+
+string buildTimeString(int64_t timeSec) {
+    time_t t = timeSec;
+    struct tm* tm = localtime(&t);
+    char timeBuffer[80];
+    strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d %I:%M%p\n", tm);
+    return string(timeBuffer);
 }
 
 void StatsdStats::dumpStats(FILE* out) const {
@@ -437,15 +441,19 @@ void StatsdStats::dumpStats(FILE* out) const {
         }
 
         for (const auto& broadcastTime : configStats->broadcast_sent_time_sec) {
-            fprintf(out, "\tbroadcast time: %d\n", broadcastTime);
+            fprintf(out, "\tbroadcast time: %s(%lld)\n",
+                    buildTimeString(broadcastTime).c_str(), (long long)broadcastTime);
         }
 
         for (const auto& dataDropTime : configStats->data_drop_time_sec) {
-            fprintf(out, "\tdata drop time: %d\n", dataDropTime);
+            fprintf(out, "\tdata drop time: %s(%lld)\n",
+                    buildTimeString(dataDropTime).c_str(), (long long)dataDropTime);
         }
 
         for (const auto& dump : configStats->dump_report_stats) {
-            fprintf(out, "\tdump report time: %d bytes: %lld\n", dump.first, (long long)dump.second);
+            fprintf(out, "\tdump report time: %s(%lld) bytes: %lld\n",
+                    buildTimeString(dump.first).c_str(), (long long)dump.first,
+                    (long long)dump.second);
         }
 
         for (const auto& stats : pair.second->matcher_stats) {
@@ -503,8 +511,8 @@ void StatsdStats::dumpStats(FILE* out) const {
         strftime(buffer, sizeof(buffer), "%Y-%m-%d %I:%M%p\n", error_tm);
         fprintf(out, "Logger error %d at %s\n", error.second, buffer);
     }
-    for (const auto& skipped : mSkippedLogEvents) {
-        fprintf(out, "Log event (%d) skipped at %lld\n", skipped.first, (long long)skipped.second);
+    for (const auto& loss : mLogLossTimestampNs) {
+        fprintf(out, "Log loss detected at %lld (elapsedRealtimeNs)\n", (long long)loss);
     }
 }
 
@@ -660,13 +668,9 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
         proto.end(token);
     }
 
-    for (const auto& skipped : mSkippedLogEvents) {
-        uint64_t token = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_SKIPPED_LOG_EVENT_STATS |
-                                      FIELD_COUNT_REPEATED);
-        proto.write(FIELD_TYPE_INT32 | FIELD_ID_SKIPPED_LOG_EVENT_STATS_TAG, skipped.first);
-        proto.write(FIELD_TYPE_INT64 | FIELD_ID_SKIPPED_LOG_EVENT_STATS_TIMESTAMP,
-                    (long long)skipped.second);
-        proto.end(token);
+    for (const auto& loss : mLogLossTimestampNs) {
+        proto.write(FIELD_TYPE_INT64 | FIELD_ID_LOG_LOSS_STATS | FIELD_COUNT_REPEATED,
+                    (long long)loss);
     }
 
     output->clear();

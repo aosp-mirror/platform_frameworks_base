@@ -492,6 +492,27 @@ package android.media {
     method public int getProgramId();
   }
 
+  public final class BufferingParams implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getInitialMarkMs();
+    method public int getResumePlaybackMarkMs();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.media.BufferingParams> CREATOR;
+  }
+
+  public static class BufferingParams.Builder {
+    ctor public BufferingParams.Builder();
+    ctor public BufferingParams.Builder(android.media.BufferingParams);
+    method public android.media.BufferingParams build();
+    method public android.media.BufferingParams.Builder setInitialMarkMs(int);
+    method public android.media.BufferingParams.Builder setResumePlaybackMarkMs(int);
+  }
+
+  public class MediaPlayer implements android.media.AudioRouting android.media.VolumeAutomation {
+    method public android.media.BufferingParams getBufferingParams();
+    method public void setBufferingParams(android.media.BufferingParams);
+  }
+
   public final class PlaybackParams implements android.os.Parcelable {
     method public int getAudioStretchMode();
     method public android.media.PlaybackParams setAudioStretchMode(int);
@@ -743,6 +764,15 @@ package android.provider {
 
 }
 
+package android.security {
+
+  public class KeyStoreException extends java.lang.Exception {
+    ctor public KeyStoreException(int, java.lang.String);
+    method public int getErrorCode();
+  }
+
+}
+
 package android.security.keystore {
 
   public abstract class AttestationUtils {
@@ -750,6 +780,18 @@ package android.security.keystore {
     field public static final int ID_TYPE_IMEI = 2; // 0x2
     field public static final int ID_TYPE_MEID = 3; // 0x3
     field public static final int ID_TYPE_SERIAL = 1; // 0x1
+  }
+
+  public static final class KeyGenParameterSpec.Builder {
+    method public android.security.keystore.KeyGenParameterSpec.Builder setUniqueIdIncluded(boolean);
+  }
+
+  public final class KeyProtection implements java.security.KeyStore.ProtectionParameter {
+    method public long getBoundToSpecificSecureUserId();
+  }
+
+  public static final class KeyProtection.Builder {
+    method public android.security.keystore.KeyProtection.Builder setBoundToSpecificSecureUserId(long);
   }
 
 }
@@ -916,9 +958,19 @@ package android.telephony {
     field public static final int UNKNOWN_CARRIER_ID_LIST_VERSION = -1; // 0xffffffff
   }
 
+  public class TelephonyManager {
+    method public int getCarrierIdListVersion();
+    method public void setCarrierTestOverride(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String);
+    field public static final int UNKNOWN_CARRIER_ID_LIST_VERSION = -1; // 0xffffffff
+  }
+
 }
 
 package android.telephony.mbms {
+
+  public static class DownloadRequest.Builder {
+    method public android.telephony.mbms.DownloadRequest.Builder setServiceId(java.lang.String);
+  }
 
   public final class FileInfo implements android.os.Parcelable {
     ctor public FileInfo(android.net.Uri, java.lang.String);

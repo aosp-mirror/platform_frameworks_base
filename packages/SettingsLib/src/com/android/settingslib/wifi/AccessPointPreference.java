@@ -183,7 +183,7 @@ public class AccessPointPreference extends Preference {
 
         Drawable drawable = mIconInjector.getIcon(level);
         if (!mForSavedNetworks && drawable != null) {
-            drawable.setTint(Utils.getColorAttr(context, android.R.attr.colorControlNormal));
+            drawable.setTintList(Utils.getColorAttr(context, android.R.attr.colorControlNormal));
             setIcon(drawable);
         } else {
             safeSetDefaultIcon();

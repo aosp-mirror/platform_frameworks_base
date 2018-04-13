@@ -317,7 +317,6 @@ import java.util.function.Supplier;
  * @attr ref android.R.styleable#TextView_autoSizeMaxTextSize
  * @attr ref android.R.styleable#TextView_autoSizeStepGranularity
  * @attr ref android.R.styleable#TextView_autoSizePresetSizes
- * @attr ref android.R.styleable#TextView_accessibilityHeading
  */
 @RemoteView
 public class TextView extends View implements ViewTreeObserver.OnPreDrawListener {
@@ -417,7 +416,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private int mCurTextColor;
     private int mCurHintTextColor;
     private boolean mFreezesText;
-    private boolean mIsAccessibilityHeading;
 
     private Editable.Factory mEditableFactory = Editable.Factory.getInstance();
     private Spannable.Factory mSpannableFactory = Spannable.Factory.getInstance();
@@ -1294,8 +1292,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 case com.android.internal.R.styleable.TextView_lineHeight:
                     lineHeight = a.getDimensionPixelSize(attr, -1);
                     break;
-                case com.android.internal.R.styleable.TextView_accessibilityHeading:
-                    mIsAccessibilityHeading = a.getBoolean(attr, false);
             }
         }
 
@@ -5225,32 +5221,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (lineHeight != fontHeight) {
             // Set lineSpacingExtra by the difference of lineSpacing with lineHeight
             setLineSpacing(lineHeight - fontHeight, 1f);
-        }
-    }
-
-    /**
-     * Gets whether this view is a heading for accessibility purposes.
-     *
-     * @return {@code true} if the view is a heading, {@code false} otherwise.
-     *
-     * @attr ref android.R.styleable#TextView_accessibilityHeading
-     */
-    public boolean isAccessibilityHeading() {
-        return mIsAccessibilityHeading;
-    }
-
-    /**
-     * Set if view is a heading for a section of content for accessibility purposes.
-     *
-     * @param isHeading {@code true} if the view is a heading, {@code false} otherwise.
-     *
-     * @attr ref android.R.styleable#TextView_accessibilityHeading
-     */
-    public void setAccessibilityHeading(boolean isHeading) {
-        if (isHeading != mIsAccessibilityHeading) {
-            mIsAccessibilityHeading = isHeading;
-            notifyViewAccessibilityStateChangedIfNeeded(
-                    AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
         }
     }
 
@@ -10849,7 +10819,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         info.setText(getTextForAccessibility());
         info.setHintText(mHint);
         info.setShowingHintText(isShowingHint());
-        info.setHeading(mIsAccessibilityHeading);
 
         if (mBufferType == BufferType.EDITABLE) {
             info.setEditable(true);

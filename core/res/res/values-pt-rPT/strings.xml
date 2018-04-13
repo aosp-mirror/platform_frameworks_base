@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Telefonar"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Telefonar para o número de telefone selecionado"</string>
     <string name="map" msgid="5441053548030107189">"Mapa"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Localizar o endereço selecionado"</string>
     <string name="browse" msgid="1245903488306147205">"Abrir"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Abrir o URL selecionado"</string>
     <string name="sms" msgid="4560537514610063430">"Mensagem"</string>
@@ -1286,7 +1285,7 @@
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> foi removido inesperadamente"</string>
     <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"Ejete o armazenamento multimédia antes de o remover para evitar a perda de conteúdos."</string>
     <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g> removido"</string>
-    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Algumas funcionalidades podem não funcionar corretamente. Insira um novo armazenamento."</string>
+    <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Algumas funcionalidades podem não funcionar corretamente. Insira um novo dispositivo de armazenamento."</string>
     <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"A ejetar <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"Não remova."</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"Configurar"</string>
@@ -1691,7 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Instalado pelo seu gestor"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Atualizado pelo seu gestor"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Eliminado pelo seu gestor"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Para prolongar a autonomia da bateria, a Poupança de bateria reduz o desempenho do dispositivo e limita ou desativa a vibração, os serviços de localização e os dados de segundo plano. O email, as mensagens e outras aplicações que dependem da sincronização podem não ser atualizados, exceto se os abrir.\n\nA Poupança de bateria desliga-se automaticamente quando o dispositivo está a carregar."</string>
+    <string name="battery_saver_description" msgid="769989536172631582">"Para prolongar a autonomia da bateria, a Poupança de bateria desativa algumas funcionalidades do dispositivo e restringe aplicações."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Para ajudar a reduzir a utilização de dados, a Poupança de dados impede que algumas aplicações enviem ou recebam dados em segundo plano. Uma determinada aplicação que esteja a utilizar atualmente pode aceder aos dados, mas é possível que o faça com menos frequência. Isto pode significar, por exemplo, que as imagens não são apresentadas até que toque nas mesmas."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Ativar a Poupança de dados?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Ativar"</string>
@@ -1778,6 +1777,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Todos os idiomas"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Todas as regiões"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Pesquisa"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"Ação não permitida"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"A aplicação <xliff:g id="APP_NAME">%1$s</xliff:g> está atualmente desativada."</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"Mais detalhes"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Ativar o perfil de trabalho?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"As aplicações de trabalho, as notificações, os dados e outras funcionalidades do perfil de trabalho serão desativados"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Ativar"</string>
@@ -1848,7 +1850,7 @@
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"SIM não permitido para voz"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Telemóvel não permitido para voz"</string>
     <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> não autorizado"</string>
-    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> não aprovisionado"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> não fornecido"</string>
     <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> não autorizado"</string>
     <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> não autorizado"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Janela pop-up"</string>
@@ -1867,8 +1869,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"É desativado o som das chamadas e das notificações."</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Alterações ao sistema"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Não incomodar"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"Para se concentrar, o modo Não incomodar está a ocultar as notificações"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Este é um comportamento novo. Toque para alterar."</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Novo: o modo Não incomodar está a ocultar as notificações"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Toque para saber mais e alterar."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"O modo Não incomodar foi alterado"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Toque para verificar o que está bloqueado."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistema"</string>

@@ -82,7 +82,7 @@
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Аудио чалуу кызматы бөгөттөлгөн"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Чалуу жана шашылыш чалуу кызматы бөгөттөлгөн"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"Байланыш оператору убактылуу бөгөттөп койгон"</string>
-    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"<xliff:g id="SIMNUMBER">%d</xliff:g> SIM-картасы үчүн байланыш оператору тарабынан убактылуу бөгөттөлгөн"</string>
+    <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> үчүн байланыш оператору тарабынан убактылуу бөгөттөлгөн"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="6982395015324165258">"Мобилдик тармакка туташпай жатат"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="509327194863482733">"Тандалган тармакты өзгөртүп көрүңүз. Өзгөртүү үчүн таптаңыз."</string>
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Шашылыш чалуу жеткиликсиз"</string>
@@ -1014,8 +1014,7 @@
     <string name="dial" msgid="1253998302767701559">"Чалуу"</string>
     <string name="dial_desc" msgid="6573723404985517250">"Тандалган телефон номерине чалуу"</string>
     <string name="map" msgid="5441053548030107189">"Карта"</string>
-    <!-- no translation found for map_desc (1836995341943772348) -->
-    <skip />
+    <string name="map_desc" msgid="1836995341943772348">"Тандалган даректи картада табуу"</string>
     <string name="browse" msgid="1245903488306147205">"Ачуу"</string>
     <string name="browse_desc" msgid="8220976549618935044">"Тандалган URL\'ди ачуу"</string>
     <string name="sms" msgid="4560537514610063430">"Билдирүү"</string>
@@ -1286,10 +1285,10 @@
     <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Бул түзмөктө <xliff:g id="NAME">%s</xliff:g> колдоого алынбайт. Колдоого алынуучу форматта орнотуу үчүн таптап коюңуз."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="3725436899820390906">"Бул түзмөктө <xliff:g id="NAME">%s</xliff:g> колдоого алынбайт. Колдоого алынуучу форматта орнотуу үчүн тандаңыз."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"<xliff:g id="NAME">%s</xliff:g> күтүүсүздөн алынып салынды"</string>
-    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"Мазмунду жоготуунун алдын алуу үчүн алып салуудан мурда медианы чыгарыңыз"</string>
+    <string name="ext_media_badremoval_notification_message" msgid="8556885808951260574">"Мазмунду жоготуп албаш үчүн алып салуудан мурда медианы өчүрүңүз"</string>
     <string name="ext_media_nomedia_notification_title" msgid="6593814191061956856">"<xliff:g id="NAME">%s</xliff:g> чыгарылды"</string>
     <string name="ext_media_nomedia_notification_message" msgid="2110883356419799994">"Айрым функциялар талаптагыдай иштебей калышы мүмкүн. Жаңы сактагычты салыңыз."</string>
-    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g> чыгарылууда"</string>
+    <string name="ext_media_unmounting_notification_title" msgid="5046532339291216076">"<xliff:g id="NAME">%s</xliff:g> өчүрүлүүдө"</string>
     <string name="ext_media_unmounting_notification_message" msgid="1003926904442321115">"Чыгарбаңыз"</string>
     <string name="ext_media_init_action" msgid="7952885510091978278">"Орнотуу"</string>
     <string name="ext_media_unmount_action" msgid="1121883233103278199">"Чыгаруу"</string>
@@ -1299,7 +1298,7 @@
     <string name="ext_media_move_specific_title" msgid="1471100343872375842">"<xliff:g id="NAME">%s</xliff:g> сактагычына ооштурулууда"</string>
     <string name="ext_media_move_title" msgid="1022809140035962662">"Дайындар ооштурулууда…"</string>
     <string name="ext_media_move_success_title" msgid="7863652232242276066">"Мазмунду өткөрүү аягына чыкты"</string>
-    <string name="ext_media_move_success_message" msgid="8939137931961728009">"Мазмун <xliff:g id="NAME">%s</xliff:g> SD-картасына жылдырылды"</string>
+    <string name="ext_media_move_success_message" msgid="8939137931961728009">"Мазмун <xliff:g id="NAME">%s</xliff:g> сактагычына жылдырылды"</string>
     <string name="ext_media_move_failure_title" msgid="1604422634177382092">"Мазмун жылдырылбай койду"</string>
     <string name="ext_media_move_failure_message" msgid="7388950499623016135">"Мазмунду кайра жылдырып көрүңүз"</string>
     <string name="ext_media_status_removed" msgid="6576172423185918739">"Өчүрүлдү"</string>
@@ -1399,9 +1398,9 @@
     <string name="sync_really_delete" msgid="2572600103122596243">"Элементтерди жок кылуу"</string>
     <string name="sync_undo_deletes" msgid="2941317360600338602">"Жок кылынганды кайтаруу"</string>
     <string name="sync_do_nothing" msgid="3743764740430821845">"Азырынча эч нерсе кылбайм"</string>
-    <string name="choose_account_label" msgid="5655203089746423927">"Каттоо эсебин тандаңыз"</string>
-    <string name="add_account_label" msgid="2935267344849993553">"Каттоо эсебин кошуу"</string>
-    <string name="add_account_button_label" msgid="3611982894853435874">"Каттоо эсебин кошуу"</string>
+    <string name="choose_account_label" msgid="5655203089746423927">"Аккаунт тандаңыз"</string>
+    <string name="add_account_label" msgid="2935267344849993553">"Аккаунт кошуу"</string>
+    <string name="add_account_button_label" msgid="3611982894853435874">"Аккаунт кошуу"</string>
     <string name="number_picker_increment_button" msgid="2412072272832284313">"Жогорулатуу"</string>
     <string name="number_picker_decrement_button" msgid="476050778386779067">"Төмөндөтүү"</string>
     <string name="number_picker_increment_scroll_mode" msgid="5259126567490114216">"<xliff:g id="VALUE">%s</xliff:g> жолу басып, кармап туруңуз."</string>
@@ -1693,7 +1692,8 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Администраторуңуз орнотуп койгон"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Администраторуңуз жаңыртып койгон"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Администраторуңуз жок кылып салган"</string>
-    <string name="battery_saver_description" msgid="4660824093877546730">"Батареянын кубатынын мөөнөтүн узартуу үчүн Батареяны үнөмдөгүч режиминде түзмөгүңүздүн ишинин майнаптуулугу азайып, дирилдөө, жайгашкан жерди аныктоо кызматтары жана фондук дайындардын көпчүлүгү чектелип же өчүрүлөт. Электрондук почта, жазышуу жана башка шайкештирилүүчү колдонмолор ачылмайынча, жаңыртылбашы мүмкүн.\n\nБатареяны үнөмдөгүч режими түзмөгүңүз кубатталып жатканда автоматтык түрдө өчүп калат."</string>
+    <!-- no translation found for battery_saver_description (769989536172631582) -->
+    <skip />
     <string name="data_saver_description" msgid="6015391409098303235">"Трафикти үнөмдөө режиминде айрым колдонмолор дайындарды фондо өткөрө алышпайт. Учурда сиз пайдаланып жаткан колдонмо дайындарды жөнөтүп/ала алат, бирок адаттагыдан азыраак өткөргөндүктөн, анын айрым функциялары талаптагыдай иштебей коюшу мүмкүн. Мисалы, сүрөттөр басылмайынча жүктөлбөйт."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Дайындарды үнөмдөгүч күйсүнбү?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Күйгүзүү"</string>
@@ -1780,6 +1780,9 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Бардык тилдер"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Бардык аймактар"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Издөө"</string>
+    <string name="app_suspended_title" msgid="5360409799785895488">"Аракетке уруксат жок"</string>
+    <string name="app_suspended_default_message" msgid="5876776530189983288">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу учурда өчүрүлгөн."</string>
+    <string name="app_suspended_more_details" msgid="2901244470963918402">"Толук маалымат"</string>
     <string name="work_mode_off_title" msgid="1118691887588435530">"Жумуш профили күйгүзүлсүнбү?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Жумуш колдонмолоруңуз, эскертмелериңиз, дайындарыңыз жана жумуш профилинин башка функциялары күйгүзүлөт."</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Күйгүзүү"</string>
@@ -1849,10 +1852,10 @@
     <string name="mmcc_imsi_unknown_in_hlr" msgid="5316658473301462825">"SIM-карта сүйлөшүү үчүн таанылган жок"</string>
     <string name="mmcc_illegal_ms" msgid="807334478177362062">"SIM-картаны сүйлөшүү үчүн колдонууга тыюу салынган"</string>
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Телефонду сүйлөшүү үчүн колдонууга тыюу салынган"</string>
-    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"<xliff:g id="SIMNUMBER">%d</xliff:g> номериндеги SIM-картасына уруксат берилген жок"</string>
-    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"<xliff:g id="SIMNUMBER">%d</xliff:g> номериндеги SIM-карта таанылган жок"</string>
-    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"<xliff:g id="SIMNUMBER">%d</xliff:g> номериндеги SIM-картасына уруксат берилген жок"</string>
-    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"<xliff:g id="SIMNUMBER">%d</xliff:g> номериндеги SIM-картасына уруксат берилген жок"</string>
+    <string name="mmcc_authentication_reject_msim_template" msgid="1217031195834766479">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> картасына уруксат берилген жок"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="5636464607596778986">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> картасы таанылган жок"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="5994323296399913454">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> картасына уруксат берилген жок"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="5550259730350571826">"SIM <xliff:g id="SIMNUMBER">%d</xliff:g> картасына уруксат берилген жок"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Калкып чыкма терезе"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="4860853725206702336">"Колдонмонун мурунку версиясын иштетип жатасыз же ал бул шилтемеге шайкеш эмес"</string>
@@ -1869,8 +1872,10 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Чалуулар менен эскертмелердин үнү өчүрүлөт"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Тутум өзгөрүүлөрү"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Тынчымды алба"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="4168873821019741166">"Сизди алаксытпоо үчүн \"Тынчымды алба\" режими эскертмелерди жашырууда"</string>
-    <string name="zen_upgrade_notification_visd_content" msgid="6776377368195804354">"Бул жаңы тартип. Өзгөртүү үчүн таптаңыз."</string>
+    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
+    <skip />
+    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
+    <skip />
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"\"Тынчымды алба\" режими өзгөрдү"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Бөгөттөлгөн нерселерди көрүү үчүн таптаңыз."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Тутум"</string>

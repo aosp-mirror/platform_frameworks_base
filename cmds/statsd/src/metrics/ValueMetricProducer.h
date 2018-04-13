@@ -40,7 +40,7 @@ class ValueMetricProducer : public virtual MetricProducer, public virtual PullDa
 public:
     ValueMetricProducer(const ConfigKey& key, const ValueMetric& valueMetric,
                         const int conditionIndex, const sp<ConditionWizard>& wizard,
-                        const int pullTagId, const int64_t startTimeNs);
+                        const int pullTagId, const int64_t timeBaseNs, const int64_t startTimeNs);
 
     virtual ~ValueMetricProducer();
 
@@ -115,7 +115,7 @@ private:
     // for testing
     ValueMetricProducer(const ConfigKey& key, const ValueMetric& valueMetric,
                         const int conditionIndex, const sp<ConditionWizard>& wizard,
-                        const int pullTagId, const int64_t startTimeNs,
+                        const int pullTagId, const int64_t timeBaseNs, const int64_t startTimeNs,
                         std::shared_ptr<StatsPullerManager> statsPullerManager);
 
     // tagId for pulled data. -1 if this is not pulled
@@ -127,19 +127,22 @@ private:
     typedef struct {
         // Pulled data always come in pair of <start, end>. This holds the value
         // for start. The diff (end - start) is added to sum.
-        long start;
+        int64_t start;
         // Whether the start data point is updated
         bool startUpdated;
         // If end data point comes before the start, record this pair as tainted
         // and the value is not added to the running sum.
         int tainted;
         // Running sum of known pairs in this bucket
-        long sum;
+        int64_t sum;
+        // If this dimension has any non-tainted value. If not, don't report the
+        // dimension.
+        bool hasValue;
     } Interval;
 
     std::unordered_map<MetricDimensionKey, Interval> mCurrentSlicedBucket;
 
-    std::unordered_map<MetricDimensionKey, long> mCurrentFullBucket;
+    std::unordered_map<MetricDimensionKey, int64_t> mCurrentFullBucket;
 
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
     // TODO: Add a lock to mPastBuckets.

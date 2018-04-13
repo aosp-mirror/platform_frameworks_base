@@ -528,7 +528,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                     // we're otherwise fine.  Just drop it and go on to the next as usual.
                     mStatus = BackupTransport.TRANSPORT_OK;
                     BackupObserverUtils
-                            .sendBackupOnPackageResult(mObserver, mCurrentPackage.packageName,
+                            .sendBackupOnPackageResult(mObserver, request.packageName,
                                     BackupManager.ERROR_PACKAGE_NOT_FOUND);
                 } else {
                     // Transport-level failure means we reenqueue everything

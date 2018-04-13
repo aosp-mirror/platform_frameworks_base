@@ -1179,6 +1179,23 @@ public final class Settings {
     public static final String ACTION_ZEN_MODE_SETTINGS = "android.settings.ZEN_MODE_SETTINGS";
 
     /**
+     * Activity Action: Show Zen Mode visual effects configuration settings.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ZEN_MODE_BLOCKED_EFFECTS_SETTINGS =
+            "android.settings.ZEN_MODE_BLOCKED_EFFECTS_SETTINGS";
+
+    /**
+     * Activity Action: Show Zen Mode onboarding activity.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ZEN_MODE_ONBOARDING = "android.settings.ZEN_MODE_ONBOARDING";
+
+    /**
      * Activity Action: Show Zen Mode (aka Do Not Disturb) priority configuration settings.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -11755,6 +11772,38 @@ public final class Settings {
         @TestApi
         public static final String HIDDEN_API_BLACKLIST_EXEMPTIONS =
                 "hidden_api_blacklist_exemptions";
+
+        /**
+         * Sampling rate for hidden API access event logs, as an integer in the range 0 to 0x10000
+         * inclusive.
+         *
+         * @hide
+         */
+        public static final String HIDDEN_API_ACCESS_LOG_SAMPLING_RATE =
+                "hidden_api_access_log_sampling_rate";
+
+        /**
+         * Hidden API enforcement policy for apps targeting SDK versions prior to the latest
+         * version.
+         *
+         * Values correspond to @{@link
+         * android.content.pm.ApplicationInfo.HiddenApiEnforcementPolicy}
+         *
+         * @hide
+         */
+        public static final String HIDDEN_API_POLICY_PRE_P_APPS =
+                "hidden_api_policy_pre_p_apps";
+
+        /**
+         * Hidden API enforcement policy for apps targeting the current SDK version.
+         *
+         * Values correspond to @{@link
+         * android.content.pm.ApplicationInfo.HiddenApiEnforcementPolicy}
+         *
+         * @hide
+         */
+        public static final String HIDDEN_API_POLICY_P_APPS =
+                "hidden_api_policy_p_apps";
 
         /**
          * Timeout for a single {@link android.media.soundtrigger.SoundTriggerDetectionService}

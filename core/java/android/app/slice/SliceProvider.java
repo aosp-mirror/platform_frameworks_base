@@ -37,6 +37,7 @@ import android.os.Handler;
 import android.os.Process;
 import android.os.StrictMode;
 import android.os.StrictMode.ThreadPolicy;
+import android.util.ArraySet;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A SliceProvider allows an app to provide content to be displayed in system spaces. This content
@@ -197,6 +199,15 @@ public abstract class SliceProvider extends ContentProvider {
      * @see {@link Slice}.
      * @see {@link Slice#HINT_PARTIAL}
      */
+    public Slice onBindSlice(Uri sliceUri, Set<SliceSpec> supportedSpecs) {
+        return onBindSlice(sliceUri, new ArrayList<>(supportedSpecs));
+    }
+
+    /**
+     * @deprecated TO BE REMOVED
+     * @removed
+     */
+    @Deprecated
     public Slice onBindSlice(Uri sliceUri, List<SliceSpec> supportedSpecs) {
         return null;
     }
@@ -503,7 +514,7 @@ public abstract class SliceProvider extends ContentProvider {
                     .detectAll()
                     .penaltyDeath()
                     .build());
-            return onBindSlice(sliceUri, supportedSpecs);
+            return onBindSlice(sliceUri, new ArraySet<>(supportedSpecs));
         } finally {
             StrictMode.setThreadPolicy(oldPolicy);
         }

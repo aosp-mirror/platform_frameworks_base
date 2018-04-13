@@ -198,7 +198,7 @@ public class RecentsView extends FrameLayout {
     }
 
     public void reevaluateStyles() {
-        int textColor = Utils.getColorAttr(mContext, R.attr.wallpaperTextColor);
+        int textColor = Utils.getColorAttrDefaultColor(mContext, R.attr.wallpaperTextColor);
         boolean usingDarkText = Color.luminance(textColor) < 0.5f;
 
         mEmptyView.setTextColor(textColor);

@@ -489,13 +489,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      */
     void onActivityStateChanged(ActivityRecord record, ActivityState state, String reason) {
         if (record == mResumedActivity && state != RESUMED) {
-            clearResumedActivity(reason + " - onActivityStateChanged");
+            setResumedActivity(null, reason + " - onActivityStateChanged");
         }
 
         if (state == RESUMED) {
             if (DEBUG_STACK) Slog.v(TAG_STACK, "set resumed activity to:" + record + " reason:"
                     + reason);
-            mResumedActivity = record;
+            setResumedActivity(record, reason + " - onActivityStateChanged");
             mService.setResumedActivityUncheckLocked(record, reason);
             mStackSupervisor.mRecentTasks.add(record.getTask());
         }
@@ -1077,13 +1077,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     boolean isFocusable() {
-        if (getWindowConfiguration().canReceiveKeys()) {
-            return true;
-        }
-        // The stack isn't focusable. See if its top activity is focusable to force focus on the
-        // stack.
         final ActivityRecord r = topRunningActivityLocked();
-        return r != null && r.isFocusable();
+        return mStackSupervisor.isFocusable(this, r != null && r.isFocusable());
     }
 
     final boolean isAttached() {
@@ -2314,14 +2309,14 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         return mResumedActivity;
     }
 
-    /**
-     * Clears reference to currently resumed activity.
-     */
-    private void clearResumedActivity(String reason) {
-        if (DEBUG_STACK) Slog.d(TAG_STACK, "clearResumedActivity: " + mResumedActivity + " reason:"
-                + reason);
+    private void setResumedActivity(ActivityRecord r, String reason) {
+        if (mResumedActivity == r) {
+            return;
+        }
 
-        mResumedActivity = null;
+        if (DEBUG_STACK) Slog.d(TAG_STACK, "setResumedActivity stack:" + this + " + from: "
+                + mResumedActivity + " to:" + r + " reason:" + reason);
+        mResumedActivity = r;
     }
 
     @GuardedBy("mService")
@@ -3743,7 +3738,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 }
 
                 if (endTask) {
-                    mService.mLockTaskController.clearLockedTask(task);
+                    mService.getLockTaskController().clearLockedTask(task);
                 }
             } else if (!r.isState(PAUSING)) {
                 // If the activity is PAUSING, we will complete the finish once
@@ -4027,14 +4022,20 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * an activity moves away from the stack.
      */
     void onActivityRemovedFromStack(ActivityRecord r) {
-        if (mResumedActivity == r) {
-            clearResumedActivity("onActivityRemovedFromStack");
+        removeTimeoutsForActivityLocked(r);
+
+        if (mResumedActivity != null && mResumedActivity == r) {
+            setResumedActivity(null, "onActivityRemovedFromStack");
         }
-        if (mPausingActivity == r) {
+        if (mPausingActivity != null && mPausingActivity == r) {
             mPausingActivity = null;
         }
+    }
 
-        removeTimeoutsForActivityLocked(r);
+    void onActivityAddedToStack(ActivityRecord r) {
+        if(r.getState() == RESUMED) {
+            setResumedActivity(r, "onActivityAddedToStack");
+        }
     }
 
     /**
@@ -4639,7 +4640,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         // In LockTask mode, moving a locked task to the back of the stack may expose unlocked
         // ones. Therefore we need to check if this operation is allowed.
-        if (!mService.mLockTaskController.canMoveTaskToBack(tr)) {
+        if (!mService.getLockTaskController().canMoveTaskToBack(tr)) {
             return false;
         }
 
@@ -4752,30 +4753,32 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mTmpBounds.clear();
         mTmpInsetBounds.clear();
 
-        for (int i = mTaskHistory.size() - 1; i >= 0; i--) {
-            final TaskRecord task = mTaskHistory.get(i);
-            if (task.isResizeable()) {
-                if (inFreeformWindowingMode()) {
-                    // TODO: Can be removed now since each freeform task is in its own stack.
-                    // For freeform stack we don't adjust the size of the tasks to match that
-                    // of the stack, but we do try to make sure the tasks are still contained
-                    // with the bounds of the stack.
-                    mTmpRect2.set(task.getOverrideBounds());
-                    fitWithinBounds(mTmpRect2, bounds);
-                    task.updateOverrideConfiguration(mTmpRect2);
-                } else {
-                    task.updateOverrideConfiguration(taskBounds, insetBounds);
+        synchronized (mWindowManager.getWindowManagerLock()) {
+            for (int i = mTaskHistory.size() - 1; i >= 0; i--) {
+                final TaskRecord task = mTaskHistory.get(i);
+                if (task.isResizeable()) {
+                    if (inFreeformWindowingMode()) {
+                        // TODO: Can be removed now since each freeform task is in its own stack.
+                        // For freeform stack we don't adjust the size of the tasks to match that
+                        // of the stack, but we do try to make sure the tasks are still contained
+                        // with the bounds of the stack.
+                        mTmpRect2.set(task.getOverrideBounds());
+                        fitWithinBounds(mTmpRect2, bounds);
+                        task.updateOverrideConfiguration(mTmpRect2);
+                    } else {
+                        task.updateOverrideConfiguration(taskBounds, insetBounds);
+                    }
+                }
+
+                mTmpBounds.put(task.taskId, task.getOverrideBounds());
+                if (tempTaskInsetBounds != null) {
+                    mTmpInsetBounds.put(task.taskId, tempTaskInsetBounds);
                 }
             }
 
-            mTmpBounds.put(task.taskId, task.getOverrideBounds());
-            if (tempTaskInsetBounds != null) {
-                mTmpInsetBounds.put(task.taskId, tempTaskInsetBounds);
-            }
+            mWindowContainerController.resize(bounds, mTmpBounds, mTmpInsetBounds);
+            setBounds(bounds);
         }
-
-        mWindowContainerController.resize(bounds, mTmpBounds, mTmpInsetBounds);
-        setBounds(bounds);
     }
 
 
@@ -5084,7 +5087,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             onActivityRemovedFromStack(record);
         }
 
-        mTaskHistory.remove(task);
+        final boolean removed = mTaskHistory.remove(task);
+
+        if (removed) {
+            EventLog.writeEvent(EventLogTags.AM_REMOVE_TASK, task.taskId, getStackId());
+        }
+
         removeActivitiesFromLRUListLocked(task);
         updateTaskMovement(task, true);
 

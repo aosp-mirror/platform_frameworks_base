@@ -16,9 +16,10 @@
 
 package com.android.systemui.statusbar.notification;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
@@ -29,8 +30,9 @@ public class NotificationIconDozeHelper extends NotificationDozeHelper {
 
     private final int mImageDarkAlpha;
     private final int mImageDarkColor = 0xffffffff;
-    private final PorterDuffColorFilter mImageColorFilter = new PorterDuffColorFilter(
-            0, PorterDuff.Mode.SRC_ATOP);
+
+    @Nullable
+    private PorterDuffColorFilter mImageColorFilter = null;
 
     private int mColor = Color.BLACK;
 
@@ -80,7 +82,9 @@ public class NotificationIconDozeHelper extends NotificationDozeHelper {
 
     private void updateImageColorFilter(ImageView target, float intensity) {
         int color = NotificationUtils.interpolateColors(mColor, mImageDarkColor, intensity);
-        mImageColorFilter.setColor(color);
+        if (mImageColorFilter == null || mImageColorFilter.getColor() != color) {
+            mImageColorFilter = new PorterDuffColorFilter(color, Mode.SRC_ATOP);
+        }
         Drawable imageDrawable = target.getDrawable();
 
         // Also, the notification might have been modified during the animation, so background

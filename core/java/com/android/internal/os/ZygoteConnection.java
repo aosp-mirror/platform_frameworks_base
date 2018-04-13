@@ -166,6 +166,11 @@ class ZygoteConnection {
             return null;
         }
 
+        if (parsedArgs.hiddenApiAccessLogSampleRate != -1) {
+            handleHiddenApiAccessLogSampleRate(parsedArgs.hiddenApiAccessLogSampleRate);
+            return null;
+        }
+
         if (parsedArgs.permittedCapabilities != 0 || parsedArgs.effectiveCapabilities != 0) {
             throw new ZygoteSecurityException("Client may not specify capabilities: " +
                     "permitted=0x" + Long.toHexString(parsedArgs.permittedCapabilities) +
@@ -288,6 +293,15 @@ class ZygoteConnection {
     private void handleApiBlacklistExemptions(String[] exemptions) {
         try {
             ZygoteInit.setApiBlacklistExemptions(exemptions);
+            mSocketOutStream.writeInt(0);
+        } catch (IOException ioe) {
+            throw new IllegalStateException("Error writing to command socket", ioe);
+        }
+    }
+
+    private void handleHiddenApiAccessLogSampleRate(int percent) {
+        try {
+            ZygoteInit.setHiddenApiAccessLogSampleRate(percent);
             mSocketOutStream.writeInt(0);
         } catch (IOException ioe) {
             throw new IllegalStateException("Error writing to command socket", ioe);
@@ -461,6 +475,12 @@ class ZygoteConnection {
         String[] apiBlacklistExemptions;
 
         /**
+         * Sampling rate for logging hidden API accesses to the event log. This is sent to the
+         * pre-forked zygote at boot time, or when it changes, via --hidden-api-log-sampling-rate.
+         */
+        int hiddenApiAccessLogSampleRate = -1;
+
+        /**
          * Constructs instance and parses args
          * @param args zygote command-line args
          * @throws IllegalArgumentException
@@ -483,6 +503,7 @@ class ZygoteConnection {
 
             boolean seenRuntimeArgs = false;
 
+            boolean expectRuntimeArgs = true;
             for ( /* curArg */ ; curArg < args.length; curArg++) {
                 String arg = args[curArg];
 
@@ -612,6 +633,7 @@ class ZygoteConnection {
                     preloadPackageCacheKey = args[++curArg];
                 } else if (arg.equals("--preload-default")) {
                     preloadDefault = true;
+                    expectRuntimeArgs = false;
                 } else if (arg.equals("--start-child-zygote")) {
                     startChildZygote = true;
                 } else if (arg.equals("--set-api-blacklist-exemptions")) {
@@ -619,6 +641,16 @@ class ZygoteConnection {
                     // with the regular fork command.
                     apiBlacklistExemptions = Arrays.copyOfRange(args, curArg + 1, args.length);
                     curArg = args.length;
+                    expectRuntimeArgs = false;
+                } else if (arg.startsWith("--hidden-api-log-sampling-rate=")) {
+                    String rateStr = arg.substring(arg.indexOf('=') + 1);
+                    try {
+                        hiddenApiAccessLogSampleRate = Integer.parseInt(rateStr);
+                    } catch (NumberFormatException nfe) {
+                        throw new IllegalArgumentException(
+                                "Invalid log sampling rate: " + rateStr, nfe);
+                    }
+                    expectRuntimeArgs = false;
                 } else {
                     break;
                 }
@@ -633,7 +665,7 @@ class ZygoteConnection {
                     throw new IllegalArgumentException(
                             "Unexpected arguments after --preload-package.");
                 }
-            } else if (!preloadDefault && apiBlacklistExemptions == null) {
+            } else if (expectRuntimeArgs) {
                 if (!seenRuntimeArgs) {
                     throw new IllegalArgumentException("Unexpected argument : " + args[curArg]);
                 }

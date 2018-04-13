@@ -237,20 +237,26 @@ public final class NetworkStats implements AutoCloseable {
                 DEFAULT_NETWORK_YES
         })
         @Retention(RetentionPolicy.SOURCE)
-        public @interface DefaultNetwork {}
+        public @interface DefaultNetworkStatus {}
 
         /**
-         * Combined usage for this network regardless of whether it was the active default network.
+         * Combined usage for this network regardless of default network status.
          */
         public static final int DEFAULT_NETWORK_ALL = -1;
 
         /**
-         * Usage that occurs while this network is not the active default network.
+         * Usage that occurs while this network is not a default network.
+         *
+         * <p>This implies that the app responsible for this usage requested that it occur on a
+         * specific network different from the one(s) the system would have selected for it.
          */
         public static final int DEFAULT_NETWORK_NO = 0x1;
 
         /**
-         * Usage that occurs while this network is the active default network.
+         * Usage that occurs while this network is a default network.
+         *
+         * <p>This implies that the app either did not select a specific network for this usage,
+         * or it selected a network that the system could have selected for app traffic.
          */
         public static final int DEFAULT_NETWORK_YES = 0x2;
 
@@ -262,7 +268,7 @@ public final class NetworkStats implements AutoCloseable {
         private int mUid;
         private int mTag;
         private int mState;
-        private int mDefaultNetwork;
+        private int mDefaultNetworkStatus;
         private int mMetered;
         private int mRoaming;
         private long mBeginTimeStamp;
@@ -323,8 +329,9 @@ public final class NetworkStats implements AutoCloseable {
             return 0;
         }
 
-        private static @DefaultNetwork int convertDefaultNetwork(int defaultNetwork) {
-            switch (defaultNetwork) {
+        private static @DefaultNetworkStatus int convertDefaultNetworkStatus(
+                int defaultNetworkStatus) {
+            switch (defaultNetworkStatus) {
                 case android.net.NetworkStats.DEFAULT_NETWORK_ALL : return DEFAULT_NETWORK_ALL;
                 case android.net.NetworkStats.DEFAULT_NETWORK_NO: return DEFAULT_NETWORK_NO;
                 case android.net.NetworkStats.DEFAULT_NETWORK_YES: return DEFAULT_NETWORK_YES;
@@ -397,18 +404,15 @@ public final class NetworkStats implements AutoCloseable {
         }
 
         /**
-         * Default network state. One of the following values:<p/>
+         * Default network status. One of the following values:<p/>
          * <ul>
          * <li>{@link #DEFAULT_NETWORK_ALL}</li>
          * <li>{@link #DEFAULT_NETWORK_NO}</li>
          * <li>{@link #DEFAULT_NETWORK_YES}</li>
          * </ul>
-         * <p>Indicates whether the network usage occurred on the system default network for this
-         * type of traffic, or whether the application chose to send this traffic on a network that
-         * was not the one selected by the system.
          */
-        public @DefaultNetwork int getDefaultNetwork() {
-            return mDefaultNetwork;
+        public @DefaultNetworkStatus int getDefaultNetworkStatus() {
+            return mDefaultNetworkStatus;
         }
 
         /**
@@ -605,7 +609,7 @@ public final class NetworkStats implements AutoCloseable {
         bucketOut.mUid = Bucket.convertUid(mRecycledSummaryEntry.uid);
         bucketOut.mTag = Bucket.convertTag(mRecycledSummaryEntry.tag);
         bucketOut.mState = Bucket.convertState(mRecycledSummaryEntry.set);
-        bucketOut.mDefaultNetwork = Bucket.convertDefaultNetwork(
+        bucketOut.mDefaultNetworkStatus = Bucket.convertDefaultNetworkStatus(
                 mRecycledSummaryEntry.defaultNetwork);
         bucketOut.mMetered = Bucket.convertMetered(mRecycledSummaryEntry.metered);
         bucketOut.mRoaming = Bucket.convertRoaming(mRecycledSummaryEntry.roaming);
@@ -657,7 +661,7 @@ public final class NetworkStats implements AutoCloseable {
                 bucketOut.mUid = Bucket.convertUid(getUid());
                 bucketOut.mTag = Bucket.convertTag(mTag);
                 bucketOut.mState = mState;
-                bucketOut.mDefaultNetwork = Bucket.DEFAULT_NETWORK_ALL;
+                bucketOut.mDefaultNetworkStatus = Bucket.DEFAULT_NETWORK_ALL;
                 bucketOut.mMetered = Bucket.METERED_ALL;
                 bucketOut.mRoaming = Bucket.ROAMING_ALL;
                 bucketOut.mBeginTimeStamp = mRecycledHistoryEntry.bucketStart;

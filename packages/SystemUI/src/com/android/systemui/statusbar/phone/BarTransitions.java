@@ -166,7 +166,7 @@ public class BarTransitions {
                 mSemiTransparent = context.getColor(
                         com.android.internal.R.color.system_bar_background_semi_transparent);
                 mTransparent = context.getColor(R.color.system_bar_background_transparent);
-                mWarning = Utils.getColorAttr(context, android.R.attr.colorError);
+                mWarning = Utils.getColorAttrDefaultColor(context, android.R.attr.colorError);
             }
             mGradient = context.getDrawable(gradientResourceId);
         }
@@ -183,20 +183,19 @@ public class BarTransitions {
 
         @Override
         public void setTint(int color) {
-            if (mTintFilter == null) {
-                mTintFilter = new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN);
-            } else {
-                mTintFilter.setColor(color);
+            PorterDuff.Mode targetMode = mTintFilter == null ? Mode.SRC_IN :
+                mTintFilter.getMode();
+            if (mTintFilter == null || mTintFilter.getColor() != color) {
+                mTintFilter = new PorterDuffColorFilter(color, targetMode);
             }
             invalidateSelf();
         }
 
         @Override
         public void setTintMode(Mode tintMode) {
-            if (mTintFilter == null) {
-                mTintFilter = new PorterDuffColorFilter(0, tintMode);
-            } else {
-                mTintFilter.setMode(tintMode);
+            int targetColor = mTintFilter == null ? 0 : mTintFilter.getColor();
+            if (mTintFilter == null || mTintFilter.getMode() != tintMode) {
+                mTintFilter = new PorterDuffColorFilter(targetColor, tintMode);
             }
             invalidateSelf();
         }

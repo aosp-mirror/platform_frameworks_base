@@ -58,7 +58,7 @@ public class UserManagerHelperTest {
     private UserManagerHelper.OnUsersUpdateListener mTestListener;
 
     private UserManagerHelper mHelper;
-    private UserInfo mCurrentUser;
+    private UserInfo mCurrentProcessUser;
     private UserInfo mSystemUser;
 
     @Before
@@ -70,13 +70,13 @@ public class UserManagerHelperTest {
                 .thenReturn(InstrumentationRegistry.getTargetContext().getResources());
         mHelper = new UserManagerHelper(mContext);
 
-        mCurrentUser = createUserInfoForId(UserHandle.myUserId());
+        mCurrentProcessUser = createUserInfoForId(UserHandle.myUserId());
         mSystemUser = createUserInfoForId(UserHandle.USER_SYSTEM);
-        when(mUserManager.getUserInfo(UserHandle.myUserId())).thenReturn(mCurrentUser);
+        when(mUserManager.getUserInfo(UserHandle.myUserId())).thenReturn(mCurrentProcessUser);
     }
 
     @Test
-    public void testUserIsSystemUser() {
+    public void userIsSystemUser() {
         UserInfo testInfo = new UserInfo();
 
         testInfo.id = UserHandle.USER_SYSTEM;
@@ -87,33 +87,7 @@ public class UserManagerHelperTest {
     }
 
     @Test
-    public void testGetAllUsersExcludesCurrentUser() {
-        int currentUser = UserHandle.myUserId();
-
-        UserInfo otherUser1 = createUserInfoForId(currentUser + 1);
-        UserInfo otherUser2 = createUserInfoForId(currentUser - 1);
-        UserInfo otherUser3 = createUserInfoForId(currentUser + 2);
-
-        List<UserInfo> testUsers = new ArrayList<>();
-        testUsers.add(otherUser1);
-        testUsers.add(otherUser2);
-        testUsers.add(mCurrentUser);
-        testUsers.add(otherUser3);
-
-        when(mUserManager.getUsers(true)).thenReturn(testUsers);
-
-        // Should return 3 users that don't have currentUser id.
-        assertThat(mHelper.getAllUsersExcludesCurrentUser().size()).isEqualTo(3);
-        // Should not contain current user.
-        assertThat(mHelper.getAllUsersExcludesCurrentUser()).doesNotContain(mCurrentUser);
-        // Should contain non-current users.
-        assertThat(mHelper.getAllUsersExcludesCurrentUser()).contains(otherUser1);
-        assertThat(mHelper.getAllUsersExcludesCurrentUser()).contains(otherUser2);
-        assertThat(mHelper.getAllUsersExcludesCurrentUser()).contains(otherUser3);
-    }
-
-    @Test
-    public void testGetAllUsersExcludesSystemUser() {
+    public void getAllUsersExcludesSystemUser() {
         UserInfo otherUser1 = createUserInfoForId(10);
         UserInfo otherUser2 = createUserInfoForId(11);
         UserInfo otherUser3 = createUserInfoForId(12);
@@ -127,17 +101,41 @@ public class UserManagerHelperTest {
         when(mUserManager.getUsers(true)).thenReturn(testUsers);
 
         // Should return 3 users that don't have SYSTEM USER id.
-        assertThat(mHelper.getAllUsersExcludesSystemUser().size()).isEqualTo(3);
-        // Should not contain system user.
-        assertThat(mHelper.getAllUsersExcludesSystemUser()).doesNotContain(mSystemUser);
-        // Should contain non-system users.
-        assertThat(mHelper.getAllUsersExcludesSystemUser()).contains(otherUser1);
-        assertThat(mHelper.getAllUsersExcludesSystemUser()).contains(otherUser2);
-        assertThat(mHelper.getAllUsersExcludesSystemUser()).contains(otherUser3);
+        assertThat(mHelper.getAllUsersExcludesSystemUser()).hasSize(3);
+        assertThat(mHelper.getAllUsersExcludesSystemUser())
+                .containsExactly(otherUser1, otherUser2, otherUser3);
     }
 
     @Test
-    public void testGetAllUsers() {
+    public void getAllUsersExceptUser() {
+        UserInfo user1 = createUserInfoForId(10);
+        UserInfo user2 = createUserInfoForId(10);
+        UserInfo user3 = createUserInfoForId(12);
+
+        List<UserInfo> testUsers = new ArrayList<>();
+        testUsers.add(user1);
+        testUsers.add(user2);
+        testUsers.add(user3);
+
+        when(mUserManager.getUsers(true)).thenReturn(new ArrayList<>(testUsers));
+
+        // Should return all 3 users.
+        assertThat(mHelper.getAllUsersExceptUser(9).size()).isEqualTo(3);
+
+        // Should return only user 12.
+        assertThat(mHelper.getAllUsersExceptUser(10).size()).isEqualTo(1);
+        assertThat(mHelper.getAllUsersExceptUser(10)).contains(user3);
+
+        when(mUserManager.getUsers(true)).thenReturn(new ArrayList<>(testUsers));
+
+        // Should drop user 12.
+        assertThat(mHelper.getAllUsersExceptUser(12).size()).isEqualTo(2);
+        assertThat(mHelper.getAllUsersExceptUser(12)).contains(user1);
+        assertThat(mHelper.getAllUsersExceptUser(12)).contains(user2);
+    }
+
+    @Test
+    public void getAllUsers() {
         int currentUser = UserHandle.myUserId();
 
         UserInfo otherUser1 = createUserInfoForId(currentUser + 1);
@@ -147,21 +145,18 @@ public class UserManagerHelperTest {
         List<UserInfo> testUsers = new ArrayList<>();
         testUsers.add(otherUser1);
         testUsers.add(otherUser2);
-        testUsers.add(mCurrentUser);
+        testUsers.add(mCurrentProcessUser);
         testUsers.add(otherUser3);
 
         when(mUserManager.getUsers(true)).thenReturn(testUsers);
 
-        // Should return 3 users that don't have currentUser id.
         assertThat(mHelper.getAllUsers().size()).isEqualTo(4);
-        assertThat(mHelper.getAllUsers()).contains(mCurrentUser);
-        assertThat(mHelper.getAllUsers()).contains(otherUser1);
-        assertThat(mHelper.getAllUsers()).contains(otherUser2);
-        assertThat(mHelper.getAllUsers()).contains(otherUser3);
+        assertThat(mHelper.getAllUsers())
+                .containsExactly(mCurrentProcessUser, otherUser1, otherUser2, otherUser3);
     }
 
     @Test
-    public void testUserCanBeRemoved() {
+    public void userCanBeRemoved() {
         UserInfo testInfo = new UserInfo();
 
         // System user cannot be removed.
@@ -173,71 +168,59 @@ public class UserManagerHelperTest {
     }
 
     @Test
-    public void testUserIsCurrentUser() {
-        UserInfo testInfo = new UserInfo();
-
-        // System user cannot be removed.
-        testInfo.id = UserHandle.myUserId();
-        assertThat(mHelper.userIsCurrentUser(testInfo)).isTrue();
-
-        testInfo.id = UserHandle.myUserId() + 2;
-        assertThat(mHelper.userIsCurrentUser(testInfo)).isFalse();
-    }
-
-    @Test
-    public void testCanAddUsers() {
+    public void currentProcessCanAddUsers() {
         when(mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_USER)).thenReturn(false);
-        assertThat(mHelper.canAddUsers()).isTrue();
+        assertThat(mHelper.currentProcessCanAddUsers()).isTrue();
 
         when(mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_USER)).thenReturn(true);
-        assertThat(mHelper.canAddUsers()).isFalse();
+        assertThat(mHelper.currentProcessCanAddUsers()).isFalse();
     }
 
     @Test
-    public void testCanRemoveUsers() {
+    public void currentProcessCanRemoveUsers() {
         when(mUserManager.hasUserRestriction(UserManager.DISALLOW_REMOVE_USER)).thenReturn(false);
-        assertThat(mHelper.canRemoveUsers()).isTrue();
+        assertThat(mHelper.currentProcessCanRemoveUsers()).isTrue();
 
         when(mUserManager.hasUserRestriction(UserManager.DISALLOW_REMOVE_USER)).thenReturn(true);
-        assertThat(mHelper.canRemoveUsers()).isFalse();
+        assertThat(mHelper.currentProcessCanRemoveUsers()).isFalse();
     }
 
     @Test
-    public void testCanSwitchUsers() {
+    public void currentProcessCanSwitchUsers() {
         when(mUserManager.hasUserRestriction(UserManager.DISALLOW_USER_SWITCH)).thenReturn(false);
-        assertThat(mHelper.canSwitchUsers()).isTrue();
+        assertThat(mHelper.currentProcessCanSwitchUsers()).isTrue();
 
         when(mUserManager.hasUserRestriction(UserManager.DISALLOW_USER_SWITCH)).thenReturn(true);
-        assertThat(mHelper.canSwitchUsers()).isFalse();
+        assertThat(mHelper.currentProcessCanSwitchUsers()).isFalse();
     }
 
     @Test
-    public void testGuestCannotModifyAccounts() {
-        assertThat(mHelper.canModifyAccounts()).isTrue();
+    public void currentProcessRunningAsGuestCannotModifyAccounts() {
+        assertThat(mHelper.currentProcessCanModifyAccounts()).isTrue();
 
         when(mUserManager.isGuestUser()).thenReturn(true);
-        assertThat(mHelper.canModifyAccounts()).isFalse();
+        assertThat(mHelper.currentProcessCanModifyAccounts()).isFalse();
     }
 
     @Test
-    public void testDemoUserCannotModifyAccounts() {
-        assertThat(mHelper.canModifyAccounts()).isTrue();
+    public void currentProcessRunningAsDemoUserCannotModifyAccounts() {
+        assertThat(mHelper.currentProcessCanModifyAccounts()).isTrue();
 
         when(mUserManager.isDemoUser()).thenReturn(true);
-        assertThat(mHelper.canModifyAccounts()).isFalse();
+        assertThat(mHelper.currentProcessCanModifyAccounts()).isFalse();
     }
 
     @Test
-    public void testUserWithDisallowModifyAccountsRestrictionCannotModifyAccounts() {
-        assertThat(mHelper.canModifyAccounts()).isTrue();
+    public void currentProcessWithDisallowModifyAccountsRestrictionCannotModifyAccounts() {
+        assertThat(mHelper.currentProcessCanModifyAccounts()).isTrue();
 
         when(mUserManager.hasUserRestriction(UserManager.DISALLOW_MODIFY_ACCOUNTS))
                 .thenReturn(true);
-        assertThat(mHelper.canModifyAccounts()).isFalse();
+        assertThat(mHelper.currentProcessCanModifyAccounts()).isFalse();
     }
 
     @Test
-    public void testCreateNewUser() {
+    public void createNewUser() {
         // Verify createUser on UserManager gets called.
         mHelper.createNewUser("Test User");
         verify(mUserManager).createUser("Test User", 0);
@@ -252,52 +235,36 @@ public class UserManagerHelperTest {
     }
 
     @Test
-    public void testRemoveUser() {
+    public void removeUser() {
         // Cannot remove system user.
         assertThat(mHelper.removeUser(mSystemUser)).isFalse();
 
         // Removing non-current, non-system user, simply calls removeUser.
-        UserInfo userToRemove = createUserInfoForId(mCurrentUser.id + 2);
+        UserInfo userToRemove = createUserInfoForId(mCurrentProcessUser.id + 2);
+
         mHelper.removeUser(userToRemove);
-        verify(mUserManager).removeUser(mCurrentUser.id + 2);
+        verify(mUserManager).removeUser(mCurrentProcessUser.id + 2);
     }
 
     @Test
-    public void testSwitchToUser() {
-        // Switching to current user doesn't do anything.
-        mHelper.switchToUser(mCurrentUser);
-        verify(mActivityManager, never()).switchUser(mCurrentUser.id);
-
-        // Switching to Guest calls createGuest.
-        UserInfo guestInfo = new UserInfo(mCurrentUser.id + 1, "Test Guest", UserInfo.FLAG_GUEST);
-        mHelper.switchToUser(guestInfo);
-        verify(mUserManager).createGuest(mContext, "Test Guest");
-
-        // Switching to non-current, non-guest user, simply calls switchUser.
-        UserInfo userToSwitchTo = new UserInfo(mCurrentUser.id + 5, "Test User", 0);
-        mHelper.switchToUser(userToSwitchTo);
-        verify(mActivityManager).switchUser(mCurrentUser.id + 5);
-    }
-
-    @Test
-    public void testSwitchToGuest() {
+    public void switchToGuest() {
         mHelper.switchToGuest("Test Guest");
         verify(mUserManager).createGuest(mContext, "Test Guest");
 
-        UserInfo guestInfo = new UserInfo(mCurrentUser.id + 2, "Test Guest", UserInfo.FLAG_GUEST);
+        UserInfo guestInfo = new UserInfo(21, "Test Guest", UserInfo.FLAG_GUEST);
         when(mUserManager.createGuest(mContext, "Test Guest")).thenReturn(guestInfo);
         mHelper.switchToGuest("Test Guest");
-        verify(mActivityManager).switchUser(mCurrentUser.id + 2);
+        verify(mActivityManager).switchUser(21);
     }
 
     @Test
-    public void testGetUserIcon() {
-        mHelper.getUserIcon(mCurrentUser);
-        verify(mUserManager).getUserIcon(mCurrentUser.id);
+    public void getUserIcon() {
+        mHelper.getUserIcon(mCurrentProcessUser);
+        verify(mUserManager).getUserIcon(mCurrentProcessUser.id);
     }
 
     @Test
-    public void testScaleUserIcon() {
+    public void scaleUserIcon() {
         Bitmap fakeIcon = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
         Drawable scaledIcon = mHelper.scaleUserIcon(fakeIcon, 300);
         assertThat(scaledIcon.getIntrinsicWidth()).isEqualTo(300);
@@ -305,14 +272,14 @@ public class UserManagerHelperTest {
     }
 
     @Test
-    public void testSetUserName() {
-        UserInfo testInfo = createUserInfoForId(mCurrentUser.id + 3);
+    public void setUserName() {
+        UserInfo testInfo = createUserInfoForId(mCurrentProcessUser.id + 3);
         mHelper.setUserName(testInfo, "New Test Name");
-        verify(mUserManager).setUserName(mCurrentUser.id + 3, "New Test Name");
+        verify(mUserManager).setUserName(mCurrentProcessUser.id + 3, "New Test Name");
     }
 
     @Test
-    public void testRegisterUserChangeReceiver() {
+    public void registerUserChangeReceiver() {
         mHelper.registerOnUsersUpdateListener(mTestListener);
 
         ArgumentCaptor<BroadcastReceiver> receiverCaptor =
@@ -335,10 +302,14 @@ public class UserManagerHelperTest {
         // Verify the presence of each intent in the filter.
         // Verify the exact number of filters. Every time a new intent is added, this test should
         // get updated.
-        assertThat(filterCaptor.getValue().countActions()).isEqualTo(3);
+        assertThat(filterCaptor.getValue().countActions()).isEqualTo(6);
         assertThat(filterCaptor.getValue().hasAction(Intent.ACTION_USER_REMOVED)).isTrue();
         assertThat(filterCaptor.getValue().hasAction(Intent.ACTION_USER_ADDED)).isTrue();
         assertThat(filterCaptor.getValue().hasAction(Intent.ACTION_USER_INFO_CHANGED)).isTrue();
+        assertThat(filterCaptor.getValue().hasAction(Intent.ACTION_USER_SWITCHED)).isTrue();
+        assertThat(filterCaptor.getValue().hasAction(Intent.ACTION_USER_STOPPED)).isTrue();
+        assertThat(filterCaptor.getValue().hasAction(Intent.ACTION_USER_UNLOCKED)).isTrue();
+
 
         // Verify that calling the receiver calls the listener.
         receiverCaptor.getValue().onReceive(mContext, new Intent());

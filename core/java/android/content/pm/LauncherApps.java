@@ -212,7 +212,7 @@ public class LauncherApps {
          * an applicaton.
          *
          * <p>Note: On devices running {@link android.os.Build.VERSION_CODES#P Android P} or higher,
-         * any apps that override {@link #onPackagesSuspended(String[], Bundle, UserHandle)} will
+         * any apps that override {@link #onPackagesSuspended(String[], UserHandle, Bundle)} will
          * not receive this callback.
          *
          * @param packageNames The names of the packages that have just been
@@ -226,15 +226,20 @@ public class LauncherApps {
          * Indicates that one or more packages have been suspended. A device administrator or an app
          * with {@code android.permission.SUSPEND_APPS} can do this.
          *
-         * @param packageNames The names of the packages that have just been suspended.
-         * @param launcherExtras A {@link Bundle} of extras for the launcher.
-         * @param user the user for which the given packages were suspended.
+         * <p>A suspending app with the permission {@code android.permission.SUSPEND_APPS} can
+         * optionally provide a {@link Bundle} of extra information that it deems helpful for the
+         * launcher to handle the suspended state of these packages. The contents of this
+         * {@link Bundle} supposed to be a contract between the suspending app and the launcher.
          *
+         * @param packageNames The names of the packages that have just been suspended.
+         * @param user the user for which the given packages were suspended.
+         * @param launcherExtras A {@link Bundle} of extras for the launcher, if provided to the
+         *                      system, {@code null} otherwise.
          * @see PackageManager#isPackageSuspended()
          * @see #getSuspendedPackageLauncherExtras(String, UserHandle)
          */
-        public void onPackagesSuspended(String[] packageNames, @Nullable Bundle launcherExtras,
-                UserHandle user) {
+        public void onPackagesSuspended(String[] packageNames, UserHandle user,
+                @Nullable Bundle launcherExtras) {
             onPackagesSuspended(packageNames, user);
         }
 
@@ -662,6 +667,9 @@ public class LauncherApps {
      * {@code PackageManager#setPackagesSuspended(String[], boolean, PersistableBundle,
      * PersistableBundle, String)}.
      *
+     * <p>The contents of this {@link Bundle} are supposed to be a contract between the suspending
+     * app and the launcher.
+     *
      * <p>Note: This just returns whatever extras were provided to the system, <em>which might
      * even be {@code null}.</em>
      *
@@ -670,7 +678,7 @@ public class LauncherApps {
      * @return A {@link Bundle} of launcher extras. Or {@code null} if the package is not currently
      *         suspended.
      *
-     * @see Callback#onPackagesSuspended(String[], Bundle, UserHandle)
+     * @see Callback#onPackagesSuspended(String[], UserHandle, Bundle)
      * @see PackageManager#isPackageSuspended()
      */
     public @Nullable Bundle getSuspendedPackageLauncherExtras(String packageName, UserHandle user) {
@@ -1298,8 +1306,8 @@ public class LauncherApps {
                     mCallback.onPackagesUnavailable(info.packageNames, info.user, info.replacing);
                     break;
                 case MSG_SUSPENDED:
-                    mCallback.onPackagesSuspended(info.packageNames, info.launcherExtras,
-                            info.user);
+                    mCallback.onPackagesSuspended(info.packageNames, info.user, info.launcherExtras
+                    );
                     break;
                 case MSG_UNSUSPENDED:
                     mCallback.onPackagesUnsuspended(info.packageNames, info.user);

@@ -451,7 +451,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
     }
 
     void removeWindowContainer() {
-        mService.mLockTaskController.clearLockedTask(this);
+        mService.getLockTaskController().clearLockedTask(this);
         mWindowContainerController.removeContainer();
         if (!getWindowConfiguration().persistTaskBounds()) {
             // Reset current bounds for task whose bounds shouldn't be persisted so it uses
@@ -927,7 +927,26 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         if (stack != null && !stack.isInStackLocked(this)) {
             throw new IllegalStateException("Task must be added as a Stack child first.");
         }
+        final ActivityStack oldStack = mStack;
         mStack = stack;
+
+        // If the new {@link TaskRecord} is from a different {@link ActivityStack}, remove this
+        // {@link ActivityRecord} from its current {@link ActivityStack}.
+
+        if (oldStack != mStack) {
+            for (int i = getChildCount() - 1; i >= 0; --i) {
+                final ActivityRecord activity = getChildAt(i);
+
+                if (oldStack != null) {
+                    oldStack.onActivityRemovedFromStack(activity);
+                }
+
+                if (mStack != null) {
+                    stack.onActivityAddedToStack(activity);
+                }
+            }
+        }
+
         onParentChanged();
     }
 
@@ -1232,6 +1251,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
 
         index = Math.min(size, index);
         mActivities.add(index, r);
+
         updateEffectiveIntent();
         if (r.isPersistable()) {
             mService.notifyTaskPersisterLocked(this, false);
@@ -1257,7 +1277,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
      * @return true if this was the last activity in the task.
      */
     boolean removeActivity(ActivityRecord r) {
-        return removeActivity(r, false /*reparenting*/);
+        return removeActivity(r, false /* reparenting */);
     }
 
     boolean removeActivity(ActivityRecord r, boolean reparenting) {
@@ -1266,7 +1286,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                     "Activity=" + r + " does not belong to task=" + this);
         }
 
-        r.setTask(null /*task*/, reparenting);
+        r.setTask(null /* task */, reparenting /* reparenting */);
 
         if (mActivities.remove(r) && r.fullscreen) {
             // Was previously in list.
@@ -1446,9 +1466,10 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         }
 
         final String pkg = (realActivity != null) ? realActivity.getPackageName() : null;
+        final LockTaskController lockTaskController = mService.getLockTaskController();
         switch (r.lockTaskLaunchMode) {
             case LOCK_TASK_LAUNCH_MODE_DEFAULT:
-                mLockTaskAuth = mService.mLockTaskController.isPackageWhitelisted(userId, pkg)
+                mLockTaskAuth = lockTaskController.isPackageWhitelisted(userId, pkg)
                         ? LOCK_TASK_AUTH_WHITELISTED : LOCK_TASK_AUTH_PINNABLE;
                 break;
 
@@ -1461,7 +1482,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                 break;
 
             case LOCK_TASK_LAUNCH_MODE_IF_WHITELISTED:
-                mLockTaskAuth = mService.mLockTaskController.isPackageWhitelisted(userId, pkg)
+                mLockTaskAuth = lockTaskController.isPackageWhitelisted(userId, pkg)
                         ? LOCK_TASK_AUTH_LAUNCHABLE : LOCK_TASK_AUTH_PINNABLE;
                 break;
         }

@@ -285,6 +285,16 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private long mPersistThreshold = 2 * MB_IN_BYTES;
     private long mGlobalAlertBytes;
 
+    private static final long POLL_RATE_LIMIT_MS = 15_000;
+
+    private long mLastStatsSessionPoll;
+
+    /** Map from UID to number of opened sessions */
+    @GuardedBy("mOpenSessionCallsPerUid")
+    private final SparseIntArray mOpenSessionCallsPerUid = new SparseIntArray();
+
+    private final static int DUMP_STATS_SESSION_COUNT = 20;
+
     private static @NonNull File getDefaultSystemDir() {
         return new File(Environment.getDataDirectory(), "system");
     }
@@ -508,10 +518,31 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         return openSessionInternal(flags, callingPackage);
     }
 
+    private boolean isRateLimitedForPoll(int callingUid) {
+        if (callingUid == android.os.Process.SYSTEM_UID) {
+            return false;
+        }
+
+        final long lastCallTime;
+        final long now = SystemClock.elapsedRealtime();
+        synchronized (mOpenSessionCallsPerUid) {
+            int calls = mOpenSessionCallsPerUid.get(callingUid, 0);
+            mOpenSessionCallsPerUid.put(callingUid, calls + 1);
+            lastCallTime = mLastStatsSessionPoll;
+            mLastStatsSessionPoll = now;
+        }
+
+        return now - lastCallTime < POLL_RATE_LIMIT_MS;
+    }
+
     private INetworkStatsSession openSessionInternal(final int flags, final String callingPackage) {
         assertBandwidthControlEnabled();
 
-        if ((flags & NetworkStatsManager.FLAG_POLL_ON_OPEN) != 0) {
+        final int callingUid = Binder.getCallingUid();
+        final int usedFlags = isRateLimitedForPoll(callingUid)
+                ? flags & (~NetworkStatsManager.FLAG_POLL_ON_OPEN)
+                : flags;
+        if ((usedFlags & NetworkStatsManager.FLAG_POLL_ON_OPEN) != 0) {
             final long ident = Binder.clearCallingIdentity();
             try {
                 performPoll(FLAG_PERSIST_ALL);
@@ -524,7 +555,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // for its lifetime; when caller closes only weak references remain.
 
         return new INetworkStatsSession.Stub() {
-            private final int mCallingUid = Binder.getCallingUid();
+            private final int mCallingUid = callingUid;
             private final String mCallingPackage = callingPackage;
             private final @NetworkStatsAccess.Level int mAccessLevel = checkAccessLevel(
                     callingPackage);
@@ -558,20 +589,20 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             @Override
             public NetworkStats getDeviceSummaryForNetwork(
                     NetworkTemplate template, long start, long end) {
-                return internalGetSummaryForNetwork(template, flags, start, end, mAccessLevel,
+                return internalGetSummaryForNetwork(template, usedFlags, start, end, mAccessLevel,
                         mCallingUid);
             }
 
             @Override
             public NetworkStats getSummaryForNetwork(
                     NetworkTemplate template, long start, long end) {
-                return internalGetSummaryForNetwork(template, flags, start, end, mAccessLevel,
+                return internalGetSummaryForNetwork(template, usedFlags, start, end, mAccessLevel,
                         mCallingUid);
             }
 
             @Override
             public NetworkStatsHistory getHistoryForNetwork(NetworkTemplate template, int fields) {
-                return internalGetHistoryForNetwork(template, flags, fields, mAccessLevel,
+                return internalGetHistoryForNetwork(template, usedFlags, fields, mAccessLevel,
                         mCallingUid);
             }
 
@@ -1459,6 +1490,30 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 pw.println();
             }
             pw.decreaseIndent();
+
+            // Get the top openSession callers
+            final SparseIntArray calls;
+            synchronized (mOpenSessionCallsPerUid) {
+                calls = mOpenSessionCallsPerUid.clone();
+            }
+
+            final int N = calls.size();
+            final long[] values = new long[N];
+            for (int j = 0; j < N; j++) {
+                values[j] = ((long) calls.valueAt(j) << 32) | calls.keyAt(j);
+            }
+            Arrays.sort(values);
+
+            pw.println("Top openSession callers (uid=count):");
+            pw.increaseIndent();
+            final int end = Math.max(0, N - DUMP_STATS_SESSION_COUNT);
+            for (int j = N - 1; j >= end; j--) {
+                final int uid = (int) (values[j] & 0xffffffff);
+                final int count = (int) (values[j] >> 32);
+                pw.print(uid); pw.print("="); pw.println(count);
+            }
+            pw.decreaseIndent();
+            pw.println();
 
             pw.println("Dev stats:");
             pw.increaseIndent();

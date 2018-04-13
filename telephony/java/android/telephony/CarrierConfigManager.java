@@ -1013,11 +1013,13 @@ public class CarrierConfigManager {
     /**
      * Unconditionally override the carrier name string using #KEY_CARRIER_NAME_STRING.
      *
-     * If true, then the carrier display name will be #KEY_CARRIER_NAME_STRING, unconditionally.
+     * If true, then the carrier name string will be #KEY_CARRIER_NAME_STRING, unconditionally.
      *
      * <p>If false, then the override will be performed conditionally and the
      * #KEY_CARRIER_NAME_STRING will have the lowest-precedence; it will only be used in the event
-     * that the name string would otherwise be empty, allowing it to serve as a last-resort.
+     * that the name string would otherwise be empty, allowing it to serve as a last-resort. If
+     * used, this value functions in place of the SPN on any/all ICC records for the corresponding
+     * subscription.
      */
     public static final String KEY_CARRIER_NAME_OVERRIDE_BOOL = "carrier_name_override_bool";
 
@@ -1684,6 +1686,15 @@ public class CarrierConfigManager {
             "data_warning_threshold_bytes_long";
 
     /**
+     * Controls if the device should automatically notify the user as they reach
+     * their cellular data warning. When set to {@code false} the carrier is
+     * expected to have implemented their own notification mechanism.
+     * @hide
+     */
+    public static final String KEY_DATA_WARNING_NOTIFICATION_BOOL =
+            "data_warning_notification_bool";
+
+    /**
      * Controls the cellular data limit.
      * <p>
      * If the user uses more than this amount of data in their billing cycle, as defined by
@@ -1696,6 +1707,24 @@ public class CarrierConfigManager {
      */
     public static final String KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG =
             "data_limit_threshold_bytes_long";
+
+    /**
+     * Controls if the device should automatically notify the user as they reach
+     * their cellular data limit. When set to {@code false} the carrier is
+     * expected to have implemented their own notification mechanism.
+     * @hide
+     */
+    public static final String KEY_DATA_LIMIT_NOTIFICATION_BOOL =
+            "data_limit_notification_bool";
+
+    /**
+     * Controls if the device should automatically notify the user when rapid
+     * cellular data usage is observed. When set to {@code false} the carrier is
+     * expected to have implemented their own notification mechanism.
+     * @hide
+     */
+    public static final String KEY_DATA_RAPID_NOTIFICATION_BOOL =
+            "data_rapid_notification_bool";
 
     /**
      * Offset to be reduced from rsrp threshold while calculating signal strength level.
@@ -2165,7 +2194,10 @@ public class CarrierConfigManager {
 
         sDefaults.putInt(KEY_MONTHLY_DATA_CYCLE_DAY_INT, DATA_CYCLE_USE_PLATFORM_DEFAULT);
         sDefaults.putLong(KEY_DATA_WARNING_THRESHOLD_BYTES_LONG, DATA_CYCLE_USE_PLATFORM_DEFAULT);
+        sDefaults.putBoolean(KEY_DATA_WARNING_NOTIFICATION_BOOL, true);
         sDefaults.putLong(KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG, DATA_CYCLE_USE_PLATFORM_DEFAULT);
+        sDefaults.putBoolean(KEY_DATA_LIMIT_NOTIFICATION_BOOL, true);
+        sDefaults.putBoolean(KEY_DATA_RAPID_NOTIFICATION_BOOL, true);
 
         // Rat families: {GPRS, EDGE}, {EVDO, EVDO_A, EVDO_B}, {UMTS, HSPA, HSDPA, HSUPA, HSPAP},
         // {LTE, LTE_CA}

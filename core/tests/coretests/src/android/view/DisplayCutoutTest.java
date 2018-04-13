@@ -208,6 +208,12 @@ public class DisplayCutoutTest {
     }
 
     @Test
+    public void fromSpec_wontCacheIfScreenHeightChanges() {
+        DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 4000, 1f);
+        assertThat(fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f), not(sameInstance(cached)));
+    }
+
+    @Test
     public void fromSpec_wontCacheIfDensityChanges() {
         DisplayCutout cached = fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 2f);
         assertThat(fromSpec("L1,0 L1,1 L0,1 z", 200, 400, 1f), not(sameInstance(cached)));

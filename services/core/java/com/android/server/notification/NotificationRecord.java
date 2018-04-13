@@ -149,11 +149,16 @@ public final class NotificationRecord {
     private final NotificationStats mStats;
     private int mUserSentiment;
     private boolean mIsInterruptive;
+    private int mNumberOfSmartRepliesAdded;
+    private boolean mHasSeenSmartReplies;
+    /**
+     * Whether this notification (and its channels) should be considered user locked. Used in
+     * conjunction with user sentiment calculation.
+     */
+    private boolean mIsAppImportanceLocked;
 
-    @VisibleForTesting
     public NotificationRecord(Context context, StatusBarNotification sbn,
-            NotificationChannel channel)
-    {
+            NotificationChannel channel) {
         this.sbn = sbn;
         mOriginalFlags = sbn.getNotification().flags;
         mRankingTimeMs = calculateRankingTimeMs(0L);
@@ -501,6 +506,7 @@ public final class NotificationRecord {
         pw.println(prefix + "mImportance="
                 + NotificationListenerService.Ranking.importanceToString(mImportance));
         pw.println(prefix + "mImportanceExplanation=" + mImportanceExplanation);
+        pw.println(prefix + "mIsAppImportanceLocked=" + mIsAppImportanceLocked);
         pw.println(prefix + "mIntercept=" + mIntercept);
         pw.println(prefix + "mHidden==" + mHidden);
         pw.println(prefix + "mGlobalSortKey=" + mGlobalSortKey);
@@ -562,11 +568,11 @@ public final class NotificationRecord {
     public final String toString() {
         return String.format(
                 "NotificationRecord(0x%08x: pkg=%s user=%s id=%d tag=%s importance=%d key=%s" +
-                        ": %s)",
+                        "appImportanceLocked=%s: %s)",
                 System.identityHashCode(this),
                 this.sbn.getPackageName(), this.sbn.getUser(), this.sbn.getId(),
                 this.sbn.getTag(), this.mImportance, this.sbn.getKey(),
-                this.sbn.getNotification());
+                mIsAppImportanceLocked, this.sbn.getNotification());
     }
 
     public void addAdjustment(Adjustment adjustment) {
@@ -598,13 +604,19 @@ public final class NotificationRecord {
                 if (signals.containsKey(Adjustment.KEY_USER_SENTIMENT)) {
                     // Only allow user sentiment update from assistant if user hasn't already
                     // expressed a preference for this channel
-                    if ((getChannel().getUserLockedFields() & USER_LOCKED_IMPORTANCE) == 0) {
+                    if (!mIsAppImportanceLocked
+                            && (getChannel().getUserLockedFields() & USER_LOCKED_IMPORTANCE) == 0) {
                         setUserSentiment(adjustment.getSignals().getInt(
                                 Adjustment.KEY_USER_SENTIMENT, USER_SENTIMENT_NEUTRAL));
                     }
                 }
             }
         }
+    }
+
+    public void setIsAppImportanceLocked(boolean isAppImportanceLocked) {
+        mIsAppImportanceLocked = isAppImportanceLocked;
+        calculateUserSentiment();
     }
 
     public void setContactAffinity(float contactAffinity) {
@@ -868,6 +880,13 @@ public final class NotificationRecord {
         return mChannel;
     }
 
+    /**
+     * @see RankingHelper#getIsAppImportanceLocked(String, int)
+     */
+    public boolean getIsAppImportanceLocked() {
+        return mIsAppImportanceLocked;
+    }
+
     protected void updateNotificationChannel(NotificationChannel channel) {
         if (channel != null) {
             mChannel = channel;
@@ -925,7 +944,8 @@ public final class NotificationRecord {
     }
 
     private void calculateUserSentiment() {
-        if ((getChannel().getUserLockedFields() & USER_LOCKED_IMPORTANCE) != 0) {
+        if ((getChannel().getUserLockedFields() & USER_LOCKED_IMPORTANCE) != 0
+                || mIsAppImportanceLocked) {
             mUserSentiment = USER_SENTIMENT_POSITIVE;
         }
     }
@@ -960,6 +980,22 @@ public final class NotificationRecord {
 
     public void recordViewedSettings() {
         mStats.setViewedSettings();
+    }
+
+    public void setNumSmartRepliesAdded(int noReplies) {
+        mNumberOfSmartRepliesAdded = noReplies;
+    }
+
+    public int getNumSmartRepliesAdded() {
+        return mNumberOfSmartRepliesAdded;
+    }
+
+    public boolean hasSeenSmartReplies() {
+        return mHasSeenSmartReplies;
+    }
+
+    public void setSeenSmartReplies(boolean hasSeenSmartReplies) {
+        mHasSeenSmartReplies = hasSeenSmartReplies;
     }
 
     public Set<Uri> getNotificationUris() {

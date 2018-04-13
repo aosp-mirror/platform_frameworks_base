@@ -88,6 +88,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.LocalLog;
+import com.android.internal.util.StatLogger;
 import com.android.server.AppStateTracker.Listener;
 
 import java.io.ByteArrayOutputStream;

@@ -63,6 +63,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -4787,6 +4788,21 @@ public class AudioManager {
     }
 
     /**
+     * Add {@link MicrophoneInfo} by device information while filtering certain types.
+     */
+    private void addMicrophonesFromAudioDeviceInfo(ArrayList<MicrophoneInfo> microphones,
+                    HashSet<Integer> filterTypes) {
+        AudioDeviceInfo[] devices = getDevicesStatic(GET_DEVICES_INPUTS);
+        for (AudioDeviceInfo device : devices) {
+            if (filterTypes.contains(device.getType())) {
+                continue;
+            }
+            MicrophoneInfo microphone = microphoneInfoFromAudioDeviceInfo(device);
+            microphones.add(microphone);
+        }
+    }
+
+    /**
      * Returns a list of {@link MicrophoneInfo} that corresponds to the characteristics
      * of all available microphones. The list is empty when no microphones are available
      * on the device. An error during the query will result in an IOException being thrown.
@@ -4797,21 +4813,20 @@ public class AudioManager {
     public List<MicrophoneInfo> getMicrophones() throws IOException {
         ArrayList<MicrophoneInfo> microphones = new ArrayList<MicrophoneInfo>();
         int status = AudioSystem.getMicrophones(microphones);
+        HashSet<Integer> filterTypes = new HashSet<>();
+        filterTypes.add(AudioDeviceInfo.TYPE_TELEPHONY);
         if (status != AudioManager.SUCCESS) {
-            // fail and bail!
-            Log.e(TAG, "getMicrophones failed:" + status);
-            return new ArrayList<MicrophoneInfo>(); // Always return a list.
+            // fail and populate microphones with unknown characteristics by device information.
+            if (status != AudioManager.ERROR_INVALID_OPERATION) {
+                Log.e(TAG, "getMicrophones failed:" + status);
+            }
+            Log.i(TAG, "fallback on device info");
+            addMicrophonesFromAudioDeviceInfo(microphones, filterTypes);
+            return microphones;
         }
         setPortIdForMicrophones(microphones);
-        AudioDeviceInfo[] devices = getDevicesStatic(GET_DEVICES_INPUTS);
-        for (AudioDeviceInfo device : devices) {
-            if (device.getType() == AudioDeviceInfo.TYPE_BUILTIN_MIC ||
-                    device.getType() == AudioDeviceInfo.TYPE_TELEPHONY) {
-                continue;
-            }
-            MicrophoneInfo microphone = microphoneInfoFromAudioDeviceInfo(device);
-            microphones.add(microphone);
-        }
+        filterTypes.add(AudioDeviceInfo.TYPE_BUILTIN_MIC);
+        addMicrophonesFromAudioDeviceInfo(microphones, filterTypes);
         return microphones;
     }
 

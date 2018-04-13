@@ -194,7 +194,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             InputChannel outInputChannel) {
         return addToDisplay(window, seq, attrs, viewVisibility, Display.DEFAULT_DISPLAY,
                 new Rect() /* outFrame */, outContentInsets, outStableInsets, null /* outOutsets */,
-                null /* cutout */, outInputChannel);
+                new DisplayCutout.ParcelableWrapper()  /* cutout */, outInputChannel);
     }
 
     @Override
@@ -218,7 +218,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             int viewVisibility, int displayId, Rect outContentInsets, Rect outStableInsets) {
         return mService.addWindow(this, window, seq, attrs, viewVisibility, displayId,
                 new Rect() /* outFrame */, outContentInsets, outStableInsets, null /* outOutsets */,
-                null /* cutout */, null /* outInputChannel */);
+                new DisplayCutout.ParcelableWrapper() /* cutout */, null /* outInputChannel */);
     }
 
     @Override
@@ -233,16 +233,16 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public int relayout(IWindow window, int seq, WindowManager.LayoutParams attrs,
-            int requestedWidth, int requestedHeight, int viewFlags,
-            int flags, Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,
-            Rect outVisibleInsets, Rect outStableInsets, Rect outsets, Rect outBackdropFrame,
-            DisplayCutout.ParcelableWrapper cutout,
-            MergedConfiguration mergedConfiguration, Surface outSurface) {
+            int requestedWidth, int requestedHeight, int viewFlags, int flags, long frameNumber,
+            Rect outFrame, Rect outOverscanInsets, Rect outContentInsets, Rect outVisibleInsets,
+            Rect outStableInsets, Rect outsets, Rect outBackdropFrame,
+            DisplayCutout.ParcelableWrapper cutout, MergedConfiguration mergedConfiguration,
+            Surface outSurface) {
         if (false) Slog.d(TAG_WM, ">>>>>> ENTERED relayout from "
                 + Binder.getCallingPid());
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, mRelayoutTag);
         int res = mService.relayoutWindow(this, window, seq, attrs,
-                requestedWidth, requestedHeight, viewFlags, flags,
+                requestedWidth, requestedHeight, viewFlags, flags, frameNumber,
                 outFrame, outOverscanInsets, outContentInsets, outVisibleInsets,
                 outStableInsets, outsets, outBackdropFrame, cutout,
                 mergedConfiguration, outSurface);

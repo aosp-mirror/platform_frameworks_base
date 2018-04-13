@@ -234,8 +234,9 @@ class ActivityStartInterceptor {
     private Intent createSuspendedAppInterceptIntent(String suspendedPackage,
             String suspendingPackage, String dialogMessage, int userId) {
         final Intent interceptIntent = new Intent(mServiceContext, SuspendedAppActivity.class)
-                .putExtra(Intent.EXTRA_PACKAGE_NAME, suspendedPackage)
+                .putExtra(SuspendedAppActivity.EXTRA_SUSPENDED_PACKAGE, suspendedPackage)
                 .putExtra(SuspendedAppActivity.EXTRA_DIALOG_MESSAGE, dialogMessage)
+                .putExtra(SuspendedAppActivity.EXTRA_SUSPENDING_PACKAGE, suspendingPackage)
                 .putExtra(Intent.EXTRA_USER_ID, userId)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);

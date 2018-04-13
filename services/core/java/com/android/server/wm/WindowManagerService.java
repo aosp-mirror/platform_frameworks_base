@@ -1243,6 +1243,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     Slog.w(TAG_WM, "Attempted to add window with exiting application token "
                           + token + ".  Aborting.");
                     return WindowManagerGlobal.ADD_APP_EXITING;
+                } else if (type == TYPE_APPLICATION_STARTING && atoken.startingWindow != null) {
+                    Slog.w(TAG_WM, "Attempted to add starting window to token with already existing"
+                            + " starting window");
+                    return WindowManagerGlobal.ADD_DUPLICATE_ADD;
                 }
             } else if (rootType == TYPE_INPUT_METHOD) {
                 if (token.windowType != TYPE_INPUT_METHOD) {
@@ -1831,10 +1835,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public int relayoutWindow(Session session, IWindow client, int seq,
-            LayoutParams attrs, int requestedWidth,
-            int requestedHeight, int viewVisibility, int flags,
-            Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,
+    public int relayoutWindow(Session session, IWindow client, int seq, LayoutParams attrs,
+            int requestedWidth, int requestedHeight, int viewVisibility, int flags,
+            long frameNumber, Rect outFrame, Rect outOverscanInsets, Rect outContentInsets,
             Rect outVisibleInsets, Rect outStableInsets, Rect outOutsets, Rect outBackdropFrame,
             DisplayCutout.ParcelableWrapper outCutout, MergedConfiguration mergedConfiguration,
             Surface outSurface) {
@@ -1861,6 +1864,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.setRequestedSize(requestedWidth, requestedHeight);
             }
 
+            win.setFrameNumber(frameNumber);
             int attrChanges = 0;
             int flagChanges = 0;
             if (attrs != null) {
@@ -1930,7 +1934,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 winAnimator.setOpaqueLocked(false);
             }
 
-            boolean imMayMove = (flagChanges & (FLAG_ALT_FOCUSABLE_IM | FLAG_NOT_FOCUSABLE)) != 0;
+            final int oldVisibility = win.mViewVisibility;
+
+            // If the window is becoming visible, visibleOrAdding may change which may in turn
+            // change the IME target.
+            final boolean becameVisible =
+                    (oldVisibility == View.INVISIBLE || oldVisibility == View.GONE)
+                            && viewVisibility == View.VISIBLE;
+            boolean imMayMove = (flagChanges & (FLAG_ALT_FOCUSABLE_IM | FLAG_NOT_FOCUSABLE)) != 0
+                    || becameVisible;
             final boolean isDefaultDisplay = win.isDefaultDisplay();
             boolean focusMayChange = isDefaultDisplay && (win.mViewVisibility != viewVisibility
                     || ((flagChanges & FLAG_NOT_FOCUSABLE) != 0)
@@ -1946,7 +1958,6 @@ public class WindowManagerService extends IWindowManager.Stub
             win.mRelayoutCalled = true;
             win.mInRelayout = true;
 
-            final int oldVisibility = win.mViewVisibility;
             win.mViewVisibility = viewVisibility;
             if (DEBUG_SCREEN_ON) {
                 RuntimeException stack = new RuntimeException();
@@ -2718,13 +2729,19 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void cancelRecentsAnimation(@RecentsAnimationController.ReorderMode int reorderMode) {
+    /**
+     * Cancels any running recents animation. The caller should NOT hold the WM lock while calling
+     * this method, as it can call back into AM, and locking will be done in the animation
+     * controller itself.
+     */
+    public void cancelRecentsAnimation(@RecentsAnimationController.ReorderMode int reorderMode,
+            String reason) {
         // Note: Do not hold the WM lock, this will lock appropriately in the call which also
         // calls through to AM/RecentsAnimation.onAnimationFinished()
         if (mRecentsAnimationController != null) {
             // This call will call through to cleanupAnimation() below after the animation is
             // canceled
-            mRecentsAnimationController.cancelAnimation(reorderMode);
+            mRecentsAnimationController.cancelAnimation(reorderMode, reason);
         }
     }
 

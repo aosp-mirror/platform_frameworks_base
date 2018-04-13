@@ -58,7 +58,7 @@ public:
     // Verify if we know how to pull for this matcher
     bool PullerForMatcherExists(int tagId) const;
 
-    void OnAlarmFired();
+    void OnAlarmFired(const int64_t timeNs);
 
     bool Pull(const int tagId, const int64_t timeNs, vector<std::shared_ptr<LogEvent>>* data);
 
@@ -90,6 +90,11 @@ public:
     void updateAlarmLocked();
 
     int64_t mNextPullTimeNs;
+
+    FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents);
+    FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm);
+    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents);
+    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm);
 };
 
 }  // namespace statsd

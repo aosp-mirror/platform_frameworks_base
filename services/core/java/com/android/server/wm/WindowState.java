@@ -112,7 +112,7 @@ import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.AnimationSpecProto.MOVE;
-import static com.android.server.wm.MoveAnimationSpecProto.DURATION;
+import static com.android.server.wm.MoveAnimationSpecProto.DURATION_MS;
 import static com.android.server.wm.MoveAnimationSpecProto.FROM;
 import static com.android.server.wm.MoveAnimationSpecProto.TO;
 import static com.android.server.wm.WindowStateProto.ANIMATING_EXIT;
@@ -634,6 +634,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Used for testing because the real PowerManager is final.
      */
     private PowerManagerWrapper mPowerManagerWrapper;
+
+    /**
+     * A frame number in which changes requested in this layout will be rendered.
+     */
+    private long mFrameNumber = -1;
 
     /**
      * Compares two window sub-layers and returns -1 if the first is lesser than the second in terms
@@ -4101,11 +4106,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mDestroying = true;
 
         final boolean hasSurface = mWinAnimator.hasSurface();
-        if (hasSurface) {
-            // Use pendingTransaction here so hide is done the same transaction as the other
-            // animations when exiting
-            mWinAnimator.hide(getPendingTransaction(), "onExitAnimationDone");
-        }
+
+        // Use pendingTransaction here so hide is done the same transaction as the other
+        // animations when exiting
+        mWinAnimator.hide(getPendingTransaction(), "onExitAnimationDone");
 
         // If we have an app token, we ask it to destroy the surface for us, so that it can take
         // care to ensure the activity has actually stopped and the surface is not still in use.
@@ -4655,7 +4659,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 mLastSurfaceInsets.set(mAttrs.surfaceInsets);
                 t.deferTransactionUntil(mSurfaceControl,
                         mWinAnimator.mSurfaceController.mSurfaceControl.getHandle(),
-                        mAttrs.frameNumber);
+                        getFrameNumber());
             }
         }
     }
@@ -4771,6 +4775,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mService.mInputMethodTarget == this;
     }
 
+    long getFrameNumber() {
+        return mFrameNumber;
+    }
+
+    void setFrameNumber(long frameNumber) {
+        mFrameNumber = frameNumber;
+    }
+
     private final class MoveAnimationSpec implements AnimationSpec {
 
         private final long mDuration;
@@ -4813,7 +4825,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final long token = proto.start(MOVE);
             mFrom.writeToProto(proto, FROM);
             mTo.writeToProto(proto, TO);
-            proto.write(DURATION, mDuration);
+            proto.write(DURATION_MS, mDuration);
             proto.end(token);
         }
     }

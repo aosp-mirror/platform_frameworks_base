@@ -471,10 +471,19 @@ def parse_ucd(ucd_path):
     _emoji_zwj_sequences.update(parse_unicode_datafile(
         path.join(ucd_path, 'additions', 'emoji-zwj-sequences.txt')))
 
+    exclusions = parse_unicode_datafile(path.join(ucd_path, 'additions', 'emoji-exclusions.txt'))
+    _emoji_sequences = remove_emoji_exclude(_emoji_sequences, exclusions)
+    _emoji_zwj_sequences = remove_emoji_exclude(_emoji_zwj_sequences, exclusions)
+    _emoji_variation_sequences = remove_emoji_variation_exclude(_emoji_variation_sequences, exclusions)
+
+def remove_emoji_variation_exclude(source, items):
+    return source.difference(items.keys())
+
+def remove_emoji_exclude(source, items):
+    return {k: v for k, v in source.items() if k not in items}
 
 def flag_sequence(territory_code):
     return tuple(0x1F1E6 + ord(ch) - ord('A') for ch in territory_code)
-
 
 UNSUPPORTED_FLAGS = frozenset({
     flag_sequence('BL'), flag_sequence('BQ'), flag_sequence('DG'),
@@ -576,6 +585,8 @@ GENDER_DEFAULTS = [
     (0x1F9DD, FEMALE_SIGN), # ELF
     (0x1F9DE, FEMALE_SIGN), # GENIE
     (0x1F9DF, FEMALE_SIGN), # ZOMBIE
+    (0X1F9B8, FEMALE_SIGN), # SUPERVILLAIN
+    (0x1F9B9, FEMALE_SIGN), # SUPERHERO
 ]
 
 def is_fitzpatrick_modifier(cp):

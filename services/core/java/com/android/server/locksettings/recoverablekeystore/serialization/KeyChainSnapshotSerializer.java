@@ -162,10 +162,6 @@ public class KeyChainSnapshotSerializer {
         writePropertyTag(xmlSerializer, TAG_SERVER_PARAMS, keyChainSnapshot.getServerParams());
         writePropertyTag(xmlSerializer, TAG_TRUSTED_HARDWARE_CERT_PATH,
                 keyChainSnapshot.getTrustedHardwareCertPath());
-        if (keyChainSnapshot.getTrustedHardwarePublicKey() != null) {
-            writePropertyTag(xmlSerializer, TAG_BACKEND_PUBLIC_KEY,
-                    keyChainSnapshot.getTrustedHardwarePublicKey());
-        }
     }
 
     private static void writePropertyTag(

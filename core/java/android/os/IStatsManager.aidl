@@ -77,45 +77,51 @@ interface IStatsManager {
     /**
      * Fetches data for the specified configuration key. Returns a byte array representing proto
      * wire-encoded of ConfigMetricsReportList.
+     *
+     * Requires Manifest.permission.DUMP.
      */
     byte[] getData(in long key);
 
     /**
      * Fetches metadata across statsd. Returns byte array representing wire-encoded proto.
+     *
+     * Requires Manifest.permission.DUMP.
      */
     byte[] getMetadata();
 
     /**
      * Sets a configuration with the specified config key and subscribes to updates for this
      * configuration key. Broadcasts will be sent if this configuration needs to be collected.
-     * The configuration must be a wire-encoded StatsDConfig. The receiver for this data is
+     * The configuration must be a wire-encoded StatsdConfig. The receiver for this data is
      * registered in a separate function.
      *
-     * Returns if this configuration was correctly registered.
+     * Requires Manifest.permission.DUMP.
      */
-    boolean addConfiguration(in long configKey, in byte[] config);
+    void addConfiguration(in long configKey, in byte[] config);
 
     /**
      * Registers the given pending intent for this config key. This intent is invoked when the
      * memory consumed by the metrics for this configuration approach the pre-defined limits. There
      * can be at most one listener per config key.
      *
-     * Returns if this listener was correctly registered.
+     * Requires Manifest.permission.DUMP.
      */
-    boolean setDataFetchOperation(long configKey, in IBinder intentSender);
+    void setDataFetchOperation(long configKey, in IBinder intentSender);
 
     /**
      * Removes the data fetch operation for the specified configuration.
+     *
+     * Requires Manifest.permission.DUMP.
      */
-    boolean removeDataFetchOperation(long configKey);
+    void removeDataFetchOperation(long configKey);
 
     /**
      * Removes the configuration with the matching config key. No-op if this config key does not
      * exist.
      *
-     * Returns if this configuration key was removed.
+     * Requires Manifest.permission.DUMP.
      */
-    boolean removeConfiguration(in long configKey);
+    void removeConfiguration(in long configKey);
 
     /**
      * Set the IIntentSender (i.e. PendingIntent) to be used when broadcasting subscriber
@@ -133,16 +139,16 @@ interface IStatsManager {
      * intentSender must be convertible into an IntentSender using IntentSender(IBinder)
      * and cannot be null.
      *
-     * Returns true if successful.
+     * Requires Manifest.permission.DUMP.
      */
-    boolean setBroadcastSubscriber(long configKey, long subscriberId, in IBinder intentSender);
+    void setBroadcastSubscriber(long configKey, long subscriberId, in IBinder intentSender);
 
     /**
      * Undoes setBroadcastSubscriber() for the (configKey, subscriberId) pair.
      * Any broadcasts associated with subscriberId will henceforth not be sent.
      * No-op if this (configKey, subsriberId) pair was not associated with an IntentSender.
      *
-     * Returns true if successful.
+     * Requires Manifest.permission.DUMP.
      */
-    boolean unsetBroadcastSubscriber(long configKey, long subscriberId);
+    void unsetBroadcastSubscriber(long configKey, long subscriberId);
 }

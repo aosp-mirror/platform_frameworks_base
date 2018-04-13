@@ -87,6 +87,7 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
 import static android.view.WindowManager.LayoutParams.TYPE_DISPLAY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
@@ -5411,6 +5412,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean attachedInParent = attached != null && !layoutInScreen;
         final boolean requestedHideNavigation =
                 (requestedSysUiFl & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0;
+
+        // TYPE_BASE_APPLICATION windows are never considered floating here because they don't get
+        // cropped / shifted to the displayFrame in WindowState.
+        final boolean floatingInScreenWindow = !attrs.isFullscreen() && layoutInScreen
+                && type != TYPE_BASE_APPLICATION;
+
         // Ensure that windows with a DEFAULT or NEVER display cutout mode are laid out in
         // the cutout safe zone.
         if (cutoutMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
@@ -5445,7 +5452,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             // Windows that are attached to a parent and laid out in said parent already avoid
             // the cutout according to that parent and don't need to be further constrained.
-            if (!attachedInParent) {
+            // Floating IN_SCREEN windows get what they ask for and lay out in the full screen.
+            // They will later be cropped or shifted using the displayFrame in WindowState,
+            // which prevents overlap with the DisplayCutout.
+            if (!attachedInParent && !floatingInScreenWindow) {
                 mTmpRect.set(pf);
                 pf.intersectUnchecked(displayCutoutSafeExceptMaybeBars);
                 parentFrameWasClippedByDisplayCutout |= !mTmpRect.equals(pf);

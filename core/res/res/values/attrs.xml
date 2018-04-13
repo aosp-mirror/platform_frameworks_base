@@ -2154,9 +2154,6 @@
             Corresponds to <code>LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES</code>.
             -->
             <enum name="shortEdges" value="1" />
-            <!-- Use <code>shortEdges</code> instead. This is temporarily here to unblock pushing
-                 the SDK until all usages have been migrated to <code>shortEdges</code> -->
-            <enum name="always" value="1" />
             <!-- <p>
             The window is never allowed to overlap with the <code>DisplayCutout</code> area.
             <p>
@@ -3091,6 +3088,9 @@
         <!-- The title this view should present to accessibility as a pane title.
              See {@link android.view.View#setAccessibilityPaneTitle(CharSequence)} -->
         <attr name="accessibilityPaneTitle" format="string" />
+
+        <!-- Whether or not this view is a heading for accessibility purposes. -->
+        <attr name="accessibilityHeading" format="boolean"/>
 
         <!-- Sets the color of the spot shadow that is drawn when the view has a positive Z or
              elevation value.
@@ -4959,8 +4959,6 @@
             <!-- Justification by stretching word spacing. -->
             <enum name="inter_word" value = "1" />
         </attr>
-        <!-- Whether or not this view is a heading for accessibility purposes. -->
-        <attr name="accessibilityHeading" format="boolean"/>
     </declare-styleable>
     <declare-styleable name="TextViewAppearance">
         <!-- Base text color, typeface, size, and style. -->

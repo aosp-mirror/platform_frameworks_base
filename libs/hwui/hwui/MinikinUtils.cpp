@@ -78,8 +78,7 @@ float MinikinUtils::measureText(const Paint* paint, minikin::Bidi bidiFlags,
     const minikin::EndHyphenEdit endHyphen = minikin::endHyphenEdit(hyphenEdit);
 
     return minikin::Layout::measureText(textBuf, range, bidiFlags, minikinPaint, startHyphen,
-                                        endHyphen, advances, nullptr /* extent */,
-                                        nullptr /* layout pieces */);
+                                        endHyphen, advances, nullptr /* layout pieces */);
 }
 
 bool MinikinUtils::hasVariationSelector(const Typeface* typeface, uint32_t codepoint, uint32_t vs) {

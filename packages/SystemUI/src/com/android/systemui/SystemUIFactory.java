@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.Dependency.DependencyProvider;
 import com.android.systemui.classifier.FalsingManager;
@@ -41,6 +42,7 @@ import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.ScrimView;
+import com.android.systemui.statusbar.SmartReplyLogger;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBouncer;
@@ -101,12 +103,13 @@ public class SystemUIFactory {
                 dismissCallbackRegistry, FalsingManager.getInstance(context));
     }
 
-    public ScrimController createScrimController(LightBarController lightBarController,
-            ScrimView scrimBehind, ScrimView scrimInFront, LockscreenWallpaper lockscreenWallpaper,
+    public ScrimController createScrimController(ScrimView scrimBehind, ScrimView scrimInFront,
+            LockscreenWallpaper lockscreenWallpaper, Consumer<Float> scrimBehindAlphaListener,
+            Consumer<GradientColors> scrimInFrontColorListener,
             Consumer<Integer> scrimVisibleListener, DozeParameters dozeParameters,
             AlarmManager alarmManager) {
-        return new ScrimController(lightBarController, scrimBehind, scrimInFront,
-                scrimVisibleListener, dozeParameters, alarmManager);
+        return new ScrimController(scrimBehind, scrimInFront, scrimBehindAlphaListener,
+                scrimInFrontColorListener, scrimVisibleListener, dozeParameters, alarmManager);
     }
 
     public NotificationIconAreaController createNotificationIconAreaController(Context context,
@@ -144,5 +147,6 @@ public class SystemUIFactory {
                 () -> new NotificationViewHierarchyManager(context));
         providers.put(NotificationEntryManager.class, () -> new NotificationEntryManager(context));
         providers.put(KeyguardDismissUtil.class, KeyguardDismissUtil::new);
+        providers.put(SmartReplyLogger.class, () -> new SmartReplyLogger(context));
     }
 }

@@ -81,6 +81,7 @@ public class NotificationContentView extends FrameLayout {
 
     private SmartReplyConstants mSmartReplyConstants;
     private SmartReplyView mExpandedSmartReplyView;
+    private SmartReplyLogger mSmartReplyLogger;
 
     private NotificationViewWrapper mContractedWrapper;
     private NotificationViewWrapper mExpandedWrapper;
@@ -153,6 +154,7 @@ public class NotificationContentView extends FrameLayout {
         super(context, attrs);
         mHybridGroupManager = new HybridGroupManager(getContext(), this);
         mSmartReplyConstants = Dependency.get(SmartReplyConstants.class);
+        mSmartReplyLogger = Dependency.get(SmartReplyLogger.class);
         initView();
     }
 
@@ -183,7 +185,11 @@ public class NotificationContentView extends FrameLayout {
         }
         int maxChildHeight = 0;
         if (mExpandedChild != null) {
-            int size = Math.min(maxSize, mNotificationMaxHeight);
+            int notificationMaxHeight = mNotificationMaxHeight;
+            if (mExpandedSmartReplyView != null) {
+                notificationMaxHeight += mExpandedSmartReplyView.getHeightUpperLimit();
+            }
+            int size = Math.min(maxSize, notificationMaxHeight);
             ViewGroup.LayoutParams layoutParams = mExpandedChild.getLayoutParams();
             boolean useExactly = false;
             if (layoutParams.height >= 0) {
@@ -233,7 +239,9 @@ public class NotificationContentView extends FrameLayout {
             }
         }
         if (mHeadsUpChild != null) {
-            int size = Math.min(maxSize, mHeadsUpHeight);
+            int maxHeight = mHeadsUpHeight;
+            maxHeight += mHeadsUpWrapper.getExtraMeasureHeight();
+            int size = Math.min(maxSize, maxHeight);
             ViewGroup.LayoutParams layoutParams = mHeadsUpChild.getLayoutParams();
             boolean useExactly = false;
             if (layoutParams.height >= 0) {
@@ -1243,7 +1251,7 @@ public class NotificationContentView extends FrameLayout {
         }
 
         applyRemoteInput(entry, hasRemoteInput);
-        applySmartReplyView(remoteInputWithChoices, pendingIntentWithChoices);
+        applySmartReplyView(remoteInputWithChoices, pendingIntentWithChoices, entry);
     }
 
     private void applyRemoteInput(NotificationData.Entry entry, boolean hasRemoteInput) {
@@ -1344,13 +1352,21 @@ public class NotificationContentView extends FrameLayout {
         return null;
     }
 
-    private void applySmartReplyView(RemoteInput remoteInput, PendingIntent pendingIntent) {
-        mExpandedSmartReplyView = mExpandedChild == null ?
-                null : applySmartReplyView(mExpandedChild, remoteInput, pendingIntent);
+    private void applySmartReplyView(RemoteInput remoteInput, PendingIntent pendingIntent,
+            NotificationData.Entry entry) {
+        if (mExpandedChild != null) {
+            mExpandedSmartReplyView =
+                    applySmartReplyView(mExpandedChild, remoteInput, pendingIntent, entry);
+            if (mExpandedSmartReplyView != null && remoteInput != null
+                    && remoteInput.getChoices() != null && remoteInput.getChoices().length > 0) {
+                mSmartReplyLogger.smartRepliesAdded(entry, remoteInput.getChoices().length);
+            }
+        }
     }
 
     private SmartReplyView applySmartReplyView(
-            View view, RemoteInput remoteInput, PendingIntent pendingIntent) {
+            View view, RemoteInput remoteInput, PendingIntent pendingIntent,
+            NotificationData.Entry entry) {
         View smartReplyContainerCandidate = view.findViewById(
                 com.android.internal.R.id.smart_reply_container);
         if (!(smartReplyContainerCandidate instanceof LinearLayout)) {
@@ -1372,7 +1388,8 @@ public class NotificationContentView extends FrameLayout {
             }
         }
         if (smartReplyView != null) {
-            smartReplyView.setRepliesFromRemoteInput(remoteInput, pendingIntent);
+            smartReplyView.setRepliesFromRemoteInput(remoteInput, pendingIntent,
+                    mSmartReplyLogger, entry);
             smartReplyContainer.setVisibility(View.VISIBLE);
         }
         return smartReplyView;

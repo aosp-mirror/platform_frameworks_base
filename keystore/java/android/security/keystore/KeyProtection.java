@@ -19,6 +19,7 @@ package android.security.keystore;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.app.KeyguardManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.security.GateKeeper;
@@ -447,7 +448,12 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
      * been performed between the {@code Signature.initSign()} and {@code Signature.sign()} calls.
      * It requires that the KeyStore implementation have a direct way to validate the user presence
      * for example a KeyStore hardware backed strongbox can use a button press that is observable
-     * in hardware.
+     * in hardware. A test for user presence is tangential to authentication. The test can be part
+     * of an authentication step as long as this step can be validated by the hardware protecting
+     * the key and cannot be spoofed. For example, a physical button press can be used as a test of
+     * user presence if the other pins connected to the button are not able to simulate a button
+     * press. There must be no way for the primary processor to fake a button press, or that
+     * button must not be used as a test of user presence.
      */
     public boolean isUserPresenceRequired() {
         return mUserPresenceRequred;
@@ -496,6 +502,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
      * @see KeymasterUtils#addUserAuthArgs
      * @hide
      */
+    @TestApi
     public long getBoundToSpecificSecureUserId() {
         return mBoundToSecureUserId;
     }
@@ -511,8 +518,8 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
     }
 
     /**
-     * Returns {@code true} if the screen must be unlocked for this key to be used for encryption or
-     * signing. Decryption and signature verification will still be available when the screen is
+     * Returns {@code true} if the screen must be unlocked for this key to be used for decryption or
+     * signing. Encryption and signature verification will still be available when the screen is
      * locked.
      *
      * @see Builder#setUnlockedDeviceRequired(boolean)
@@ -843,7 +850,15 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
 
         /**
          * Sets whether a test of user presence is required to be performed between the
-         * {@code Signature.initSign()} and {@code Signature.sign()} method calls.
+         * {@code Signature.initSign()} and {@code Signature.sign()} method calls. It requires that
+         * the KeyStore implementation have a direct way to validate the user presence for example
+         * a KeyStore hardware backed strongbox can use a button press that is observable in
+         * hardware. A test for user presence is tangential to authentication. The test can be part
+         * of an authentication step as long as this step can be validated by the hardware
+         * protecting the key and cannot be spoofed. For example, a physical button press can be
+         * used as a test of user presence if the other pins connected to the button are not able
+         * to simulate a button press. There must be no way for the primary processor to fake a
+         * button press, or that button must not be used as a test of user presence.
          */
         @NonNull
         public Builder setUserPresenceRequired(boolean required) {
@@ -913,6 +928,7 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
          * @see KeyProtection#getBoundToSpecificSecureUserId()
          * @hide
          */
+        @TestApi
         public Builder setBoundToSpecificSecureUserId(long secureUserId) {
             mBoundToSecureUserId = secureUserId;
             return this;

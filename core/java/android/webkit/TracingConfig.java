@@ -54,37 +54,37 @@ public class TracingConfig {
 
     /**
      * Predefined set of categories typically useful for analyzing WebViews.
-     * Typically includes android_webview and Java.
+     * Typically includes "android_webview" and "Java" categories.
      */
     public static final int CATEGORIES_ANDROID_WEBVIEW = 1 << 1;
 
     /**
      * Predefined set of categories typically useful for web developers.
-     * Typically includes blink, compositor, renderer.scheduler and v8 categories.
+     * Typically includes "blink", "compositor", "renderer.scheduler" and "v8" categories.
      */
     public static final int CATEGORIES_WEB_DEVELOPER = 1 << 2;
 
     /**
      * Predefined set of categories for analyzing input latency issues.
-     * Typically includes input, renderer.scheduler categories.
+     * Typically includes "input", "renderer.scheduler" categories.
      */
     public static final int CATEGORIES_INPUT_LATENCY = 1 << 3;
 
     /**
      * Predefined set of categories for analyzing rendering issues.
-     * Typically includes blink, compositor and gpu categories.
+     * Typically includes "blink", "compositor" and "gpu" categories.
      */
     public static final int CATEGORIES_RENDERING = 1 << 4;
 
     /**
      * Predefined set of categories for analyzing javascript and rendering issues.
-     * Typically includes blink, compositor, gpu, renderer.scheduler and v8 categories.
+     * Typically includes "blink", "compositor", "gpu", "renderer.scheduler" and "v8" categories.
      */
     public static final int CATEGORIES_JAVASCRIPT_AND_RENDERING = 1 << 5;
 
     /**
      * Predefined set of categories for studying difficult rendering performance problems.
-     * Typically includes blink, compositor, gpu, renderer.scheduler, v8 and
+     * Typically includes "blink", "compositor", "gpu", "renderer.scheduler", "v8" and
      * some other compositor categories which are disabled by default.
      */
     public static final int CATEGORIES_FRAME_VIEWER = 1 << 6;
@@ -123,7 +123,9 @@ public class TracingConfig {
     }
 
     /**
-     * Returns a bitmask of the predefined categories values of this configuration.
+     * Returns a bitmask of the predefined category sets of this configuration.
+     *
+     * @return Bitmask of predefined category sets.
      */
     @PredefinedCategories
     public int getPredefinedCategories() {
@@ -133,7 +135,7 @@ public class TracingConfig {
     /**
      * Returns the list of included custom category patterns for this configuration.
      *
-     * @return empty list if no custom category patterns are specified.
+     * @return Empty list if no custom category patterns are specified.
      */
     @NonNull
     public List<String> getCustomIncludedCategories() {
@@ -142,6 +144,8 @@ public class TracingConfig {
 
     /**
      * Returns the tracing mode of this configuration.
+     *
+     * @return The tracing mode of this configuration.
      */
     @TracingMode
     public int getTracingMode() {
@@ -150,28 +154,37 @@ public class TracingConfig {
 
     /**
      * Builder used to create {@link TracingConfig} objects.
-     *
+     * <p>
      * Examples:
-     *   new TracingConfig.Builder().build()
-     *       -- creates a configuration with default options: {@link #CATEGORIES_NONE},
-     *          {@link #RECORD_UNTIL_FULL}.
-     *   new TracingConfig.Builder().addCategories(CATEGORIES_WEB_DEVELOPER).build()
-     *       -- records trace events from the "web developer" predefined category sets.
-     *   new TracingConfig.Builder().addCategories(CATEGORIES_RENDERING,
-     *                                             CATEGORIES_INPUT_LATENCY).build()
-     *       -- records trace events from the "rendering" and "input latency" predefined
-     *          category sets.
-     *   new TracingConfig.Builder().addCategories("browser").build()
-     *       -- records only the trace events from the "browser" category.
-     *   new TracingConfig.Builder().addCategories("blink*","renderer*").build()
-     *       -- records only the trace events matching the "blink*" and "renderer*" patterns
-     *          (e.g. "blink.animations", "renderer_host" and "renderer.scheduler" categories).
-     *   new TracingConfig.Builder().addCategories(CATEGORIES_WEB_DEVELOPER)
+     * <pre class="prettyprint">
+     *   // Create a configuration with default options: {@link #CATEGORIES_NONE},
+     *   // {@link #RECORD_CONTINUOUSLY}.
+     *   <code>new TracingConfig.Builder().build()</code>
+     *
+     *   // Record trace events from the "web developer" predefined category sets.
+     *   // Uses a ring buffer (the default {@link #RECORD_CONTINUOUSLY} mode) for
+     *   // internal storage during tracing.
+     *   <code>new TracingConfig.Builder().addCategories(CATEGORIES_WEB_DEVELOPER).build()</code>
+     *
+     *   // Record trace events from the "rendering" and "input latency" predefined
+     *   // category sets.
+     *   <code>new TracingConfig.Builder().addCategories(CATEGORIES_RENDERING,
+     *                                     CATEGORIES_INPUT_LATENCY).build()</code>
+     *
+     *   // Record only the trace events from the "browser" category.
+     *   <code>new TracingConfig.Builder().addCategories("browser").build()</code>
+     *
+     *   // Record only the trace events matching the "blink*" and "renderer*" patterns
+     *   // (e.g. "blink.animations", "renderer_host" and "renderer.scheduler" categories).
+     *   <code>new TracingConfig.Builder().addCategories("blink*","renderer*").build()</code>
+     *
+     *   // Record events from the "web developer" predefined category set and events from
+     *   // the "disabled-by-default-v8.gc" category to understand where garbage collection
+     *   // is being triggered. Uses a limited size buffer for internal storage during tracing.
+     *   <code>new TracingConfig.Builder().addCategories(CATEGORIES_WEB_DEVELOPER)
      *                              .addCategories("disabled-by-default-v8.gc")
-     *                              .setTracingMode(RECORD_CONTINUOUSLY).build()
-     *       -- records events from the "web developer" predefined category set and events from
-     *          the "disabled-by-default-v8.gc" category to understand where garbage collection
-     *          is being triggered. Uses a ring buffer for internal storage during tracing.
+     *                              .setTracingMode(RECORD_UNTIL_FULL).build()</code>
+     * </pre>
      */
     public static class Builder {
         private @PredefinedCategories int mPredefinedCategories = CATEGORIES_NONE;
@@ -185,6 +198,8 @@ public class TracingConfig {
 
         /**
          * Build {@link TracingConfig} using the current settings.
+         *
+         * @return The {@link TracingConfig} with the current settings.
          */
         public TracingConfig build() {
             return new TracingConfig(mPredefinedCategories, mCustomIncludedCategories,
@@ -192,16 +207,15 @@ public class TracingConfig {
         }
 
         /**
-         * Adds categories from a predefined set of categories to be included in the trace output.
+         * Adds predefined sets of categories to be included in the trace output.
          *
-         * @param predefinedCategories list or bitmask of predefined category sets to use:
-         *                    {@link #CATEGORIES_NONE}, {@link #CATEGORIES_ALL},
-         *                    {@link #CATEGORIES_ANDROID_WEBVIEW},
-         *                    {@link #CATEGORIES_WEB_DEVELOPER},
-         *                    {@link #CATEGORIES_INPUT_LATENCY},
-         *                    {@link #CATEGORIES_RENDERING},
-         *                    {@link #CATEGORIES_JAVASCRIPT_AND_RENDERING} or
-         *                    {@link #CATEGORIES_FRAME_VIEWER}.
+         * A predefined category set can be one of {@link #CATEGORIES_NONE},
+         * {@link #CATEGORIES_ALL}, {@link #CATEGORIES_ANDROID_WEBVIEW},
+         * {@link #CATEGORIES_WEB_DEVELOPER}, {@link #CATEGORIES_INPUT_LATENCY},
+         * {@link #CATEGORIES_RENDERING}, {@link #CATEGORIES_JAVASCRIPT_AND_RENDERING} or
+         * {@link #CATEGORIES_FRAME_VIEWER}.
+         *
+         * @param predefinedCategories A list or bitmask of predefined category sets.
          * @return The builder to facilitate chaining.
          */
         public Builder addCategories(@PredefinedCategories int... predefinedCategories) {
@@ -215,11 +229,11 @@ public class TracingConfig {
          * Adds custom categories to be included in trace output.
          *
          * Note that the categories are defined by the currently-in-use version of WebView. They
-         * live in chromium code and are not part of the Android API. See
+         * live in chromium code and are not part of the Android API.
          * See <a href="https://www.chromium.org/developers/how-tos/trace-event-profiling-tool">
          * chromium documentation on tracing</a> for more details.
          *
-         * @param categories a list of category patterns. A category pattern can contain wilcards,
+         * @param categories A list of category patterns. A category pattern can contain wildcards,
          *        e.g. "blink*" or full category name e.g. "renderer.scheduler".
          * @return The builder to facilitate chaining.
          */
@@ -235,7 +249,7 @@ public class TracingConfig {
          *
          * Same as {@link #addCategories(String...)} but allows to pass a Collection as a parameter.
          *
-         * @param categories a list of category patters.
+         * @param categories A list of category patterns.
          * @return The builder to facilitate chaining.
          */
         public Builder addCategories(Collection<String> categories) {
@@ -245,8 +259,9 @@ public class TracingConfig {
 
         /**
          * Sets the tracing mode for this configuration.
+         * When tracingMode is not set explicitly, the default is {@link #RECORD_CONTINUOUSLY}.
          *
-         * @param tracingMode tracing mode to use, one of {@link #RECORD_UNTIL_FULL} or
+         * @param tracingMode The tracing mode to use, one of {@link #RECORD_UNTIL_FULL} or
          *                    {@link #RECORD_CONTINUOUSLY}.
          * @return The builder to facilitate chaining.
          */

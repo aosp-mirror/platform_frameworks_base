@@ -750,8 +750,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         final int dualToneLightTheme = Utils.getThemeAttr(ctx, R.attr.lightIconTheme);
         Context darkContext = new ContextThemeWrapper(ctx, dualToneDarkTheme);
         Context lightContext = new ContextThemeWrapper(ctx, dualToneLightTheme);
-        final int lightColor = Utils.getColorAttr(lightContext, R.attr.singleToneColor);
-        final int darkColor = Utils.getColorAttr(darkContext, R.attr.singleToneColor);
+        final int lightColor = Utils.getColorAttrDefaultColor(lightContext, R.attr.singleToneColor);
+        final int darkColor = Utils.getColorAttrDefaultColor(darkContext, R.attr.singleToneColor);
 
         // Use the supplied style to set the icon's rotation parameters
         Context rotateContext = new ContextThemeWrapper(ctx, style);
@@ -812,9 +812,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (mGestureHelper != null) {
             mGestureHelper.onDarkIntensityChange(intensity);
         }
-        if (mRecentsOnboarding != null) {
-            mRecentsOnboarding.setContentDarkIntensity(intensity);
-        }
     }
 
     @Override
@@ -831,6 +828,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         updateButtonLocationOnScreen(getHomeButton(), mHomeButtonBounds);
         updateButtonLocationOnScreen(getRecentsButton(), mRecentsButtonBounds);
         mGestureHelper.onLayout(changed, left, top, right, bottom);
+        mRecentsOnboarding.setNavBarHeight(getMeasuredHeight());
     }
 
     private void updateButtonLocationOnScreen(ButtonDispatcher button, Rect buttonBounds) {
@@ -873,9 +871,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mCurrentView = mRotatedViews[rot];
         mCurrentView.setVisibility(View.VISIBLE);
         mNavigationInflaterView.setAlternativeOrder(rot == Surface.ROTATION_90);
-        for (int i = 0; i < mButtonDispatchers.size(); i++) {
-            mButtonDispatchers.valueAt(i).setCurrentView(mCurrentView);
-        }
+        mNavigationInflaterView.updateButtonDispatchersCurrentView();
         updateLayoutTransitionsEnabled();
         mCurrentRotation = rot;
     }

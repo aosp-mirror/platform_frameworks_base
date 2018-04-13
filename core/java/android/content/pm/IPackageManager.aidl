@@ -280,9 +280,6 @@ interface IPackageManager {
 
     PersistableBundle getSuspendedPackageAppExtras(String packageName, int userId);
 
-    void setSuspendedPackageAppExtras(String packageName, in PersistableBundle appExtras,
-            int userId);
-
     /**
      * Backup/restore support - only the system uid may use these.
      */

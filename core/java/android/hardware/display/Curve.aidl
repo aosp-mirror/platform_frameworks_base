@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,6 @@
  * limitations under the License.
  */
 
-#include <DeviceInfo.h>
+package android.hardware.display;
 
-#include <gtest/gtest.h>
-#include "tests/common/TestUtils.h"
-
-using namespace android;
-using namespace android::uirenderer;
-
-OPENGL_PIPELINE_TEST(DeviceInfo, basic) {
-    // can't assert state before init - another test may have initialized the singleton
-    DeviceInfo::initialize();
-    const DeviceInfo* di = DeviceInfo::get();
-    ASSERT_NE(nullptr, di) << "DeviceInfo initialization failed";
-    EXPECT_EQ(2048, di->maxTextureSize()) << "Max texture size didn't match";
-}
+parcelable Curve;

@@ -328,7 +328,8 @@ public final class NotificationChannel implements Parcelable {
      * Group information is only used for presentation, not for behavior.
      *
      * Only modifiable before the channel is submitted to
-     * {@link NotificationManager#notify(String, int, Notification)}.
+     * {@link NotificationManager#createNotificationChannel(NotificationChannel)}, unless the
+     * channel is not currently part of a group.
      *
      * @param groupId the id of a group created by
      * {@link NotificationManager#createNotificationChannelGroup(NotificationChannelGroup)}.
@@ -340,6 +341,9 @@ public final class NotificationChannel implements Parcelable {
     /**
      * Sets whether notifications posted to this channel can appear as application icon badges
      * in a Launcher.
+     *
+     * Only modifiable before the channel is submitted to
+     * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.
      *
      * @param showBadge true if badges should be allowed to be shown.
      */
@@ -353,7 +357,7 @@ public final class NotificationChannel implements Parcelable {
      * least {@link NotificationManager#IMPORTANCE_DEFAULT} should have a sound.
      *
      * Only modifiable before the channel is submitted to
-     * {@link NotificationManager#notify(String, int, Notification)}.
+     * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.
      */
     public void setSound(Uri sound, AudioAttributes audioAttributes) {
         this.mSound = sound;
@@ -365,7 +369,7 @@ public final class NotificationChannel implements Parcelable {
      * on devices that support that feature.
      *
      * Only modifiable before the channel is submitted to
-     * {@link NotificationManager#notify(String, int, Notification)}.
+     * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.
      */
     public void enableLights(boolean lights) {
         this.mLights = lights;
@@ -376,7 +380,7 @@ public final class NotificationChannel implements Parcelable {
      * {@link #enableLights(boolean) enabled} on this channel and the device supports that feature.
      *
      * Only modifiable before the channel is submitted to
-     * {@link NotificationManager#notify(String, int, Notification)}.
+     * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.
      */
     public void setLightColor(int argb) {
         this.mLightColor = argb;
@@ -387,7 +391,7 @@ public final class NotificationChannel implements Parcelable {
      * be set with {@link #setVibrationPattern(long[])}.
      *
      * Only modifiable before the channel is submitted to
-     * {@link NotificationManager#notify(String, int, Notification)}.
+     * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.
      */
     public void enableVibration(boolean vibration) {
         this.mVibrationEnabled = vibration;
@@ -399,7 +403,7 @@ public final class NotificationChannel implements Parcelable {
      * vibration} as well. Otherwise, vibration will be disabled.
      *
      * Only modifiable before the channel is submitted to
-     * {@link NotificationManager#notify(String, int, Notification)}.
+     * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.
      */
     public void setVibrationPattern(long[] vibrationPattern) {
         this.mVibrationEnabled = vibrationPattern != null && vibrationPattern.length > 0;
@@ -407,9 +411,10 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
-     * Sets the level of interruption of this notification channel. Only
-     * modifiable before the channel is submitted to
-     * {@link NotificationManager#notify(String, int, Notification)}.
+     * Sets the level of interruption of this notification channel.
+     *
+     * Only modifiable before the channel is submitted to
+     * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.
      *
      * @param importance the amount the user should be interrupted by
      *            notifications from this channel.
