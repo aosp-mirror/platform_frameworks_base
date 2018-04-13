@@ -174,30 +174,30 @@
   </string-array>
   <string-array name="window_animation_scale_entries">
     <item msgid="8134156599370824081">"Animatsioon väljas"</item>
-    <item msgid="6624864048416710414">"Animatsiooni skaala 0,5 korda"</item>
-    <item msgid="2219332261255416635">"Animatsiooni skaala 1 kord"</item>
-    <item msgid="3544428804137048509">"Animatsiooni skaala 1,5 korda"</item>
-    <item msgid="3110710404225974514">"Animatsiooni skaala 2 korda"</item>
-    <item msgid="4402738611528318731">"Animatsiooni skaala 5 korda"</item>
-    <item msgid="6189539267968330656">"Animatsiooni skaala 10 korda"</item>
+    <item msgid="6624864048416710414">"0,5-kordne animatsioonimastaap"</item>
+    <item msgid="2219332261255416635">"1-kordne animatsioonimastaap"</item>
+    <item msgid="3544428804137048509">"1,5-kordne animatsioonimastaap"</item>
+    <item msgid="3110710404225974514">"2-kordne animatsioonimastaap"</item>
+    <item msgid="4402738611528318731">"5-kordne animatsioonimastaap"</item>
+    <item msgid="6189539267968330656">"10-kordne animatsioonimastaap"</item>
   </string-array>
   <string-array name="transition_animation_scale_entries">
     <item msgid="8464255836173039442">"Animatsioon väljas"</item>
-    <item msgid="3375781541913316411">"Animatsiooni skaala 0,5 korda"</item>
-    <item msgid="1991041427801869945">"Animatsiooni skaala 1 kord"</item>
-    <item msgid="4012689927622382874">"Animatsiooni skaala 1,5 korda"</item>
-    <item msgid="3289156759925947169">"Animatsiooni skaala 2 korda"</item>
-    <item msgid="7705857441213621835">"Animatsiooni skaala 5 korda"</item>
-    <item msgid="6660750935954853365">"Animatsiooni skaala 10 korda"</item>
+    <item msgid="3375781541913316411">"0,5-kordne animatsioonimastaap"</item>
+    <item msgid="1991041427801869945">"1-kordne animatsioonimastaap"</item>
+    <item msgid="4012689927622382874">"1,5-kordne animatsioonimastaap"</item>
+    <item msgid="3289156759925947169">"2-kordne animatsioonimastaap"</item>
+    <item msgid="7705857441213621835">"5-kordne animatsioonimastaap"</item>
+    <item msgid="6660750935954853365">"10-kordne animatsioonimastaap"</item>
   </string-array>
   <string-array name="animator_duration_scale_entries">
     <item msgid="6039901060648228241">"Animatsioon väljas"</item>
-    <item msgid="1138649021950863198">"0,5-kordne animatsiooni skaala"</item>
-    <item msgid="4394388961370833040">"1-kordne animatsiooni skaala"</item>
-    <item msgid="8125427921655194973">"1,5-kordne animatsiooni skaala"</item>
-    <item msgid="3334024790739189573">"2-kordne animatsiooni skaala"</item>
-    <item msgid="3170120558236848008">"5-kordne animatsiooni skaala"</item>
-    <item msgid="1069584980746680398">"10-kordne animatsiooni skaala"</item>
+    <item msgid="1138649021950863198">"0,5-kordne animatsioonimastaap"</item>
+    <item msgid="4394388961370833040">"1-kordne animatsioonimastaap"</item>
+    <item msgid="8125427921655194973">"1,5-kordne animatsioonimastaap"</item>
+    <item msgid="3334024790739189573">"2-kordne animatsioonimastaap"</item>
+    <item msgid="3170120558236848008">"5-kordne animatsioonimastaap"</item>
+    <item msgid="1069584980746680398">"10-kordne animatsioonimastaap"</item>
   </string-array>
   <string-array name="overlay_display_devices_entries">
     <item msgid="1606809880904982133">"Puudub"</item>
@@ -235,7 +235,7 @@
     <item msgid="2290859360633824369">"Deuteranomaly jaoks alade kuvamine"</item>
   </string-array>
   <string-array name="app_process_limit_entries">
-    <item msgid="3401625457385943795">"Standardpiir"</item>
+    <item msgid="3401625457385943795">"Standardlimiit"</item>
     <item msgid="4071574792028999443">"Taustaprotsessideta"</item>
     <item msgid="4810006996171705398">"Maksimaalselt 1 protsess"</item>
     <item msgid="8586370216857360863">"Maksimaalselt 2 protsessi"</item>

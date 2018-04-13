@@ -140,8 +140,8 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"User: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Some defaults set"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"No defaults set"</string>
-    <string name="tts_settings" msgid="8186971894801348327">"Text-to-speech settings"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Text-to-speech output"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"Text-to-Speech settings"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Text-to-Speech output"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Speech rate"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Speed at which the text is spoken"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Pitch"</string>
@@ -155,7 +155,7 @@
     <string name="tts_install_data_title" msgid="4264378440508149986">"Install voice data"</string>
     <string name="tts_install_data_summary" msgid="5742135732511822589">"Install the voice data required for speech synthesis"</string>
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"This speech synthesis engine may be able to collect all the text that will be spoken, including personal data like passwords and credit card numbers. It comes from the <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> engine. Enable the use of this speech synthesis engine?"</string>
-    <string name="tts_engine_network_required" msgid="1190837151485314743">"This language requires a working network connection for text-to-speech output."</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"This language requires a working network connection for Text-to-Speech output."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"This is an example of speech synthesis"</string>
     <string name="tts_status_title" msgid="7268566550242584413">"Default language status"</string>
     <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> is fully supported"</string>
@@ -197,7 +197,7 @@
     <string name="keep_screen_on" msgid="1146389631208760344">"Stay awake"</string>
     <string name="keep_screen_on_summary" msgid="2173114350754293009">"Screen will never sleep while charging"</string>
     <string name="bt_hci_snoop_log" msgid="3340699311158865670">"Enable Bluetooth HCI snoop log"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Capture all Bluetooth HCI packets in a file (Toggle Bluetooth after changing this setting)"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="366083475849911315">"Capture all Bluetooth HCI packets in a file (toggle Bluetooth after changing this setting)"</string>
     <string name="oem_unlock_enable" msgid="6040763321967327691">"OEM unlocking"</string>
     <string name="oem_unlock_enable_summary" msgid="4720281828891618376">"Allow the bootloader to be unlocked"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="4802157344812385674">"Allow OEM unlocking?"</string>
@@ -216,20 +216,15 @@
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP Version"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Select Bluetooth AVRCP Version"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth Audio Codec"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_type_dialog_title (8436224899475822557) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="8436224899475822557">"Trigger Bluetooth Audio Codec\nSelection"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="4788245703824623062">"Bluetooth Audio Sample Rate"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_sample_rate_dialog_title (8010380028880963535) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="8010380028880963535">"Trigger Bluetooth Audio Codec\nSelection: Sample Rate"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="2099645202720164141">"Bluetooth Audio Bits Per Sample"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_bits_per_sample_dialog_title (8063859754619484760) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="8063859754619484760">"Trigger Bluetooth Audio Codec\nSelection: Bits Per Sample"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="884855779449390540">"Bluetooth Audio Channel Mode"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_channel_mode_dialog_title (7234956835280563341) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="7234956835280563341">"Trigger Bluetooth Audio Codec\nSelection: Channel Mode"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3619694372407843405">"Bluetooth Audio LDAC Codec: Playback Quality"</string>
-    <!-- no translation found for bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title (7595776220458732825) -->
-    <skip />
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7595776220458732825">"Trigger Bluetooth Audio LDAC Codec\nSelection: Playback Quality"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Streaming: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"Private DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Select private DNS mode"</string>
