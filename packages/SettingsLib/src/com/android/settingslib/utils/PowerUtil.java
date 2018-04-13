@@ -24,11 +24,10 @@ import android.icu.util.Measure;
 import android.icu.util.MeasureUnit;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import com.android.internal.annotations.VisibleForTesting;
+
 import com.android.settingslib.R;
-import java.time.Clock;
+
 import java.time.Instant;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -102,7 +101,7 @@ public class PowerUtil {
 
     private static String getMoreThanOneDayString(Context context, long drainTimeMs,
             String percentageString, boolean basedOnUsage) {
-        final long roundedTimeMs = roundToNearestThreshold(drainTimeMs, ONE_HOUR_MILLIS);
+        final long roundedTimeMs = roundTimeToNearestThreshold(drainTimeMs, ONE_HOUR_MILLIS);
         CharSequence timeString = StringUtil.formatElapsedTime(context,
                 roundedTimeMs,
                 false /* withSeconds */);
@@ -139,7 +138,7 @@ public class PowerUtil {
             String percentageString, boolean basedOnUsage) {
         // Get the time of day we think device will die rounded to the nearest 15 min.
         final long roundedTimeOfDayMs =
-                roundToNearestThreshold(
+                roundTimeToNearestThreshold(
                         System.currentTimeMillis() + drainTimeMs,
                         FIFTEEN_MINUTES_MILLIS);
 
@@ -170,12 +169,24 @@ public class PowerUtil {
         return timeMs * 1000;
     }
 
-    private static long roundToNearestThreshold(long drainTime, long threshold) {
-        final long remainder = drainTime % threshold;
-        if (remainder < threshold / 2) {
-            return drainTime - remainder;
+    /**
+     * Rounds a time to the nearest multiple of the provided threshold. Note: This function takes
+     * the absolute value of the inputs since it is only meant to be used for times, not general
+     * purpose rounding.
+     *
+     * ex: roundTimeToNearestThreshold(41, 24) = 48
+     * @param drainTime The amount to round
+     * @param threshold The value to round to a multiple of
+     * @return The rounded value as a long
+     */
+    public static long roundTimeToNearestThreshold(long drainTime, long threshold) {
+        long time = Math.abs(drainTime);
+        long multiple = Math.abs(threshold);
+        final long remainder = time % multiple;
+        if (remainder < multiple / 2) {
+            return time - remainder;
         } else {
-            return drainTime - remainder + threshold;
+            return time - remainder + multiple;
         }
     }
 }
