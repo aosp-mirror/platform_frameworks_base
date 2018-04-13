@@ -604,10 +604,6 @@ package android.os {
     field public static final android.os.Parcelable.Creator<android.os.IncidentReportArgs> CREATOR;
   }
 
-  public final class PowerManager {
-    method public void nap(long);
-  }
-
   public class Process {
     method public static final int getThreadScheduler(int) throws java.lang.IllegalArgumentException;
   }
