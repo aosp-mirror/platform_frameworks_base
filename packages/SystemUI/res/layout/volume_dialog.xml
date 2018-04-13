@@ -17,11 +17,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:padding="@dimen/volume_dialog_panel_transparent_padding"
     android:background="@android:color/transparent"
-    android:theme="@style/qs_theme"
-    android:clipChildren="false"
-    android:clipToPadding="false">
+    android:theme="@style/qs_theme">
     <!-- right-aligned to be physically near volume button -->
     <LinearLayout
         android:id="@+id/volume_dialog"
@@ -30,9 +27,11 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|right"
         android:background="@android:color/transparent"
-        android:layout_margin="@dimen/volume_dialog_base_margin"
+        android:paddingRight="@dimen/volume_dialog_panel_transparent_padding_right"
+        android:paddingTop="@dimen/volume_dialog_panel_transparent_padding"
+        android:paddingBottom="@dimen/volume_dialog_panel_transparent_padding"
+        android:paddingLeft="@dimen/volume_dialog_panel_transparent_padding"
         android:orientation="vertical"
-        android:clipChildren="false"
         android:clipToPadding="false" >
 
         <FrameLayout
@@ -42,7 +41,6 @@
             android:layout_marginBottom="@dimen/volume_dialog_spacer"
             android:translationZ="@dimen/volume_dialog_elevation"
             android:layout_gravity="right"
-            android:clipChildren="false"
             android:clipToPadding="false"
             android:background="@drawable/rounded_bg_full">
             <com.android.keyguard.AlphaOptimizedImageButton
@@ -65,7 +63,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:translationZ="@dimen/volume_dialog_elevation"
-            android:clipChildren="false"
             android:clipToPadding="false"
             android:background="@drawable/rounded_bg_full" >
             <LinearLayout
