@@ -21,7 +21,6 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.content.Context;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
@@ -961,7 +960,6 @@ public final class PowerManager {
      *
      * @hide Requires signature permission.
      */
-    @TestApi
     public void nap(long time) {
         try {
             mService.nap(time);
