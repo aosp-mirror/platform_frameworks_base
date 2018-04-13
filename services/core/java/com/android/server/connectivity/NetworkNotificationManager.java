@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.NetworkCapabilities;
+import android.net.wifi.WifiInfo;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
@@ -176,7 +177,8 @@ public class NetworkNotificationManager {
             switch (transportType) {
                 case TRANSPORT_WIFI:
                     title = r.getString(R.string.wifi_available_sign_in, 0);
-                    details = r.getString(R.string.network_available_sign_in_detailed, extraInfo);
+                    details = r.getString(R.string.network_available_sign_in_detailed,
+                            WifiInfo.removeDoubleQuotes(nai.networkCapabilities.getSSID()));
                     break;
                 case TRANSPORT_CELLULAR:
                     title = r.getString(R.string.network_available_sign_in, 0);
