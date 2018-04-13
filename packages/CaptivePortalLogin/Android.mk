@@ -2,7 +2,9 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE_TAGS := optional
-LOCAL_STATIC_JAVA_LIBRARIES := android-support-v4 services.net
+LOCAL_USE_AAPT2 := true
+LOCAL_STATIC_ANDROID_LIBRARIES := androidx.legacy_legacy-support-v4
+LOCAL_STATIC_JAVA_LIBRARIES := services.net
 
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
