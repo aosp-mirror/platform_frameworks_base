@@ -311,7 +311,7 @@
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Vključuje osebne podatke, kot so številke kreditnih kartic in gesla."</string>
     <string name="capability_title_canControlMagnification" msgid="3593493281059424855">"Nadzirati povečave prikaza"</string>
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Nadziranje stopnje povečave in položaja prikaza."</string>
-    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Izvajanje potez"</string>
+    <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Izvajati poteze"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Mogoče je izvajanje dotikov, vlečenja, primikanja in razmikanja prstov ter drugih potez."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Poteze po tipalu prstnih odtisov"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Prepoznava poteze, narejene po tipalu prstnih odtisov naprave."</string>
@@ -1740,8 +1740,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Namestil skrbnik"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Posodobil skrbnik"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Izbrisal skrbnik"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"Varčevanje z energijo akumulatorja izklopi nekatere funkcije naprave in omeji aplikacije, da podaljša čas delovanja akumulatorja."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Zaradi zmanjševanja prenesene količine podatkov varčevanje s podatki nekaterim aplikacijam preprečuje, da bi v ozadju pošiljale ali prejemale podatke. Aplikacija, ki jo trenutno uporabljate, lahko prenaša podatke, vendar to morda počne manj pogosto. To na primer pomeni, da se slike ne prikažejo, dokler se jih ne dotaknete."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Vklop varčevanja s podatki?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Vklop"</string>
@@ -1846,9 +1845,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Vsi jeziki"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Vse regije"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Išči"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"Dejanje ni dovoljeno"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> je trenutno onemogočena."</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"Več podrobnosti"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Želite vklopiti delovni profil?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Vklopili boste svoje delovne aplikacije, obvestila, podatke in druge funkcije delovnega profila"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Vklop"</string>
@@ -1940,10 +1942,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Zvonjenje bo izklopljeno za klice in obvestila"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Sistemske spremembe"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Ne moti"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Novi način »ne moti« skriva obvestila"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Dotaknite se, če želite izvedeti več in spremeniti."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Način »ne moti« je spremenjen"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Dotaknite se, da preverite, kaj je blokirano."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Sistem"</string>

@@ -1690,8 +1690,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Таны админ суулгасан"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Таны админ шинэчилсэн"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Таны админ устгасан"</string>
-    <!-- no translation found for battery_saver_description (769989536172631582) -->
-    <skip />
+    <string name="battery_saver_description" msgid="769989536172631582">"Батарейны ажиллах хугацааг ихэсгэхийн тулд Батарей хэмнэгч төхөөрөмжийн зарим онцлогийг унтрааж аппуудыг хязгаарладаг."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Дата ашиглалтыг багасгахын тулд дата хэмнэгч нь зарим апп-г өгөгдлийг дэвсгэрт илгээх болон авахаас сэргийлдэг. Таны одоогийн ашиглаж буй апп нь өгөгдөлд хандах боломжтой хэдий ч цөөн үйлдэл хийнэ. Жишээлбэл зураг харахын тулд та товших шаардлагатай болно."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Өгөгдөл хамгаалагчийг асаах уу?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Асаах"</string>
@@ -1778,9 +1777,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Бүх хэл"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Бүх бүс нутаг"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Хайх"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"Үйлдлийг зөвшөөрөөгүй"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"<xliff:g id="APP_NAME">%1$s</xliff:g> аппыг одоогоор цуцалсан байна"</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"Дэлгэрэнгүй мэдээлэл"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Ажлын профайлыг асаах уу?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Таны ажлын апп, мэдэгдэл, өгөгдөл болон бусад ажлын профайлын онцлогийг асаана"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Асаах"</string>
@@ -1870,10 +1872,8 @@
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"Дуудлага болон мэдэгдлийн дууг хаана"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"Системийн өөрчлөлт"</string>
     <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"Бүү саад бол"</string>
-    <!-- no translation found for zen_upgrade_notification_visd_title (3288313883409759733) -->
-    <skip />
-    <!-- no translation found for zen_upgrade_notification_visd_content (5533674060311631165) -->
-    <skip />
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"Шинэ: Бүү саад бол горим мэдэгдлийг нууж байна"</string>
+    <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"Илүү ихийг мэдэж, өөрчлөхийн тулд товшино уу."</string>
     <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"Бүү саад бол горимыг өөрчилсөн"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"Блоклосон зүйлийг шалгахын тулд товшино уу."</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"Систем"</string>

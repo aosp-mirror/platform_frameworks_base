@@ -776,10 +776,10 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Lupa pola?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Pembuka kunci akun"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"Terlalu banyak upaya pola"</string>
-    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Untuk membuka, masuk dengan akun Google Anda."</string>
+    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"Untuk membuka, login dengan akun Google Anda."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Nama pengguna (email)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Sandi"</string>
-    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Masuk"</string>
+    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Login"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Nama pengguna atau sandi tidak valid."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Lupa nama pengguna atau sandi Anda?\nKunjungi "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Memeriksa..."</string>
@@ -1166,8 +1166,8 @@
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Jangan aktifkan kembali"</string>
     <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi diaktifkan otomatis"</string>
     <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Anda berada di dekat jaringan yang tersimpan: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
-    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Masuk ke jaringan Wi-Fi"</string>
-    <string name="network_available_sign_in" msgid="1848877297365446605">"Masuk ke jaringan"</string>
+    <string name="wifi_available_sign_in" msgid="9157196203958866662">"Login ke jaringan Wi-Fi"</string>
+    <string name="network_available_sign_in" msgid="1848877297365446605">"Login ke jaringan"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi tidak memiliki akses internet"</string>
@@ -1526,10 +1526,10 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"Masukkan kembali kode PUK yang benar. Jika berulang kali gagal, SIM akan dinonaktifkan secara permanen."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"Kode PIN tidak cocok"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"Terlalu banyak upaya pola"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"Untuk membuka kunci, masuk dengan akun Google Anda."</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"Untuk membuka kunci, login dengan akun Google Anda."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"Nama pengguna (email)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Sandi"</string>
-    <string name="kg_login_submit_button" msgid="5355904582674054702">"Masuk"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"Login"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nama pengguna atau sandi tidak valid."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Lupa nama pengguna atau sandi Anda?\nKunjungi "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Memeriksa akun…"</string>
@@ -1777,9 +1777,12 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Semua bahasa"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Semua wilayah"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Telusuri"</string>
-    <string name="app_suspended_title" msgid="5360409799785895488">"Tindakan tidak diizinkan"</string>
-    <string name="app_suspended_default_message" msgid="5876776530189983288">"Aplikasi <xliff:g id="APP_NAME">%1$s</xliff:g> saat ini dinonaktifkan."</string>
-    <string name="app_suspended_more_details" msgid="2901244470963918402">"Detail selengkapnya"</string>
+    <!-- no translation found for app_suspended_title (1919029799438164552) -->
+    <skip />
+    <!-- no translation found for app_suspended_default_message (7875306315686531621) -->
+    <skip />
+    <!-- no translation found for app_suspended_more_details (1131804827776778187) -->
+    <skip />
     <string name="work_mode_off_title" msgid="1118691887588435530">"Aktifkan profil kerja?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Aplikasi kerja, notifikasi, data, dan fitur profil kerja lainnya akan diaktifkan"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Aktifkan"</string>
