@@ -24,7 +24,8 @@ public class LocationRequestStatistics {
      * @param providerName Name of provider that is requested (e.g. "gps").
      * @param intervalMs The interval that is requested in ms.
      */
-    public void startRequesting(String packageName, String providerName, long intervalMs) {
+    public void startRequesting(String packageName, String providerName, long intervalMs,
+            boolean isForeground) {
         PackageProviderKey key = new PackageProviderKey(packageName, providerName);
         PackageStatistics stats = statistics.get(key);
         if (stats == null) {
@@ -32,6 +33,7 @@ public class LocationRequestStatistics {
             statistics.put(key, stats);
         }
         stats.startRequesting(intervalMs);
+        stats.updateForeground(isForeground);
     }
 
     /**
@@ -45,9 +47,20 @@ public class LocationRequestStatistics {
         PackageStatistics stats = statistics.get(key);
         if (stats != null) {
             stats.stopRequesting();
-        } else {
-            // This shouldn't be a possible code path.
-            Log.e(TAG, "Couldn't find package statistics when removing location request.");
+        }
+    }
+
+    /**
+     * Signals that a package possibly switched background/foreground.
+     *
+     * @param packageName Name of package that has stopped requesting locations.
+     * @param providerName Provider that is no longer being requested.
+     */
+    public void updateForeground(String packageName, String providerName, boolean isForeground) {
+        PackageProviderKey key = new PackageProviderKey(packageName, providerName);
+        PackageStatistics stats = statistics.get(key);
+        if (stats != null) {
+            stats.updateForeground(isForeground);
         }
     }
 
@@ -103,12 +116,21 @@ public class LocationRequestStatistics {
         // The total time this app has requested location (not including currently running requests).
         private long mTotalDurationMs;
 
+        // Time when this package most recently went to foreground, requesting location. 0 means
+        // not currently in foreground.
+        private long mLastForegroundElapsedTimeMs;
+        // The time this app has requested location (not including currently running requests), while
+        // in foreground.
+        private long mForegroundDurationMs;
+
         private PackageStatistics() {
             mInitialElapsedTimeMs = SystemClock.elapsedRealtime();
             mNumActiveRequests = 0;
             mTotalDurationMs = 0;
             mFastestIntervalMs = Long.MAX_VALUE;
             mSlowestIntervalMs = 0;
+            mForegroundDurationMs = 0;
+            mLastForegroundElapsedTimeMs = 0;
         }
 
         private void startRequesting(long intervalMs) {
@@ -127,6 +149,15 @@ public class LocationRequestStatistics {
             mNumActiveRequests++;
         }
 
+        private void updateForeground(boolean isForeground) {
+            long nowElapsedTimeMs = SystemClock.elapsedRealtime();
+            // if previous interval was foreground, accumulate before resetting start
+            if (mLastForegroundElapsedTimeMs != 0) {
+                mForegroundDurationMs += (nowElapsedTimeMs - mLastForegroundElapsedTimeMs);
+            }
+            mLastForegroundElapsedTimeMs = isForeground ? nowElapsedTimeMs : 0;
+        }
+
         private void stopRequesting() {
             if (mNumActiveRequests <= 0) {
                 // Shouldn't be a possible code path
@@ -139,6 +170,7 @@ public class LocationRequestStatistics {
                 long lastDurationMs
                         = SystemClock.elapsedRealtime() - mLastActivitationElapsedTimeMs;
                 mTotalDurationMs += lastDurationMs;
+                updateForeground(false);
             }
         }
 
@@ -150,6 +182,18 @@ public class LocationRequestStatistics {
             if (mNumActiveRequests > 0) {
                 currentDurationMs
                         += SystemClock.elapsedRealtime() - mLastActivitationElapsedTimeMs;
+            }
+            return currentDurationMs;
+        }
+
+        /**
+         * Returns the duration that this request has been active.
+         */
+        public long getForegroundDurationMs() {
+            long currentDurationMs = mForegroundDurationMs;
+            if (mLastForegroundElapsedTimeMs != 0 ) {
+                currentDurationMs
+                        += SystemClock.elapsedRealtime() - mLastForegroundElapsedTimeMs;
             }
             return currentDurationMs;
         }
@@ -193,7 +237,9 @@ public class LocationRequestStatistics {
             }
             s.append(": Duration requested ")
                     .append((getDurationMs() / 1000) / 60)
-                    .append(" out of the last ")
+                    .append(" total, ")
+                    .append((getForegroundDurationMs() / 1000) / 60)
+                    .append(" foreground, out of the last ")
                     .append((getTimeSinceFirstRequestMs() / 1000) / 60)
                     .append(" minutes");
             if (isActive()) {
