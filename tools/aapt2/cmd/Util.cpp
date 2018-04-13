@@ -145,7 +145,7 @@ static xml::NamespaceDecl CreateAndroidNamespaceDecl() {
 //
 // See frameworks/base/core/java/android/content/pm/PackageParser.java which
 // checks this at runtime.
-static std::string MakePackageSafeName(const std::string &name) {
+std::string MakePackageSafeName(const std::string &name) {
   std::string result(name);
   bool first = true;
   for (char &c : result) {
