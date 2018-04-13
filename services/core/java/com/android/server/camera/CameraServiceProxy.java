@@ -165,12 +165,22 @@ public class CameraServiceProxy extends SystemService
     private final ICameraServiceProxy.Stub mCameraServiceProxy = new ICameraServiceProxy.Stub() {
         @Override
         public void pingForUserUpdate() {
+            if (Binder.getCallingUid() != Process.CAMERASERVER_UID) {
+                Slog.e(TAG, "Calling UID: " + Binder.getCallingUid() + " doesn't match expected " +
+                        " camera service UID!");
+                return;
+            }
             notifySwitchWithRetries(30);
         }
 
         @Override
         public void notifyCameraState(String cameraId, int newCameraState, int facing,
                 String clientName, int apiLevel) {
+            if (Binder.getCallingUid() != Process.CAMERASERVER_UID) {
+                Slog.e(TAG, "Calling UID: " + Binder.getCallingUid() + " doesn't match expected " +
+                        " camera service UID!");
+                return;
+            }
             String state = cameraStateToString(newCameraState);
             String facingStr = cameraFacingToString(facing);
             if (DEBUG) Slog.v(TAG, "Camera " + cameraId + " facing " + facingStr + " state now " +
@@ -301,7 +311,12 @@ public class CameraServiceProxy extends SystemService
             }
             mCameraUsageHistory.clear();
         }
-        CameraStatsJobService.schedule(mContext);
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            CameraStatsJobService.schedule(mContext);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     private void switchUserLocked(int userHandle) {
