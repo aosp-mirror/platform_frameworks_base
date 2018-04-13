@@ -263,13 +263,13 @@ public class UserGridRecyclerView extends RecyclerView implements
             GradientDrawable shape = new GradientDrawable();
             shape.setShape(GradientDrawable.RADIAL_GRADIENT);
             shape.setGradientRadius(1.0f);
-            shape.setColor(mContext.getColor(R.color.car_user_switcher_no_user_image_bgcolor));
+            shape.setColor(mContext.getColor(R.color.car_grey_50));
             shape.setBounds(0, 0, mPodImageAvatarWidth, mPodImageAvatarHeight);
             shape.draw(canvas);
 
             // Draw the letter in the center.
             Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            paint.setColor(mContext.getColor(R.color.car_user_switcher_no_user_image_fgcolor));
+            paint.setColor(mContext.getColor(R.color.car_grey_900));
             paint.setTextAlign(Align.CENTER);
             if (isAddUserText) {
                 paint.setTextSize(mRes.getDimensionPixelSize(
