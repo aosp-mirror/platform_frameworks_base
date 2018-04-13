@@ -37,6 +37,7 @@ import android.os.Handler;
 import android.os.Process;
 import android.os.StrictMode;
 import android.os.StrictMode.ThreadPolicy;
+import android.util.ArraySet;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -513,7 +514,7 @@ public abstract class SliceProvider extends ContentProvider {
                     .detectAll()
                     .penaltyDeath()
                     .build());
-            return onBindSlice(sliceUri, supportedSpecs);
+            return onBindSlice(sliceUri, new ArraySet<>(supportedSpecs));
         } finally {
             StrictMode.setThreadPolicy(oldPolicy);
         }
