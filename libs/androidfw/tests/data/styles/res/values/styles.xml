@@ -63,4 +63,20 @@
         <item name="attr_five">5</item>
     </style>
 
+    <!-- Circular parental dependency -->
+    <public type="style" name="StyleFour" id="0x7f020003" />
+    <style name="StyleFour" parent="StyleFive">
+        <item name="attr_one">1</item>
+    </style>
+
+    <public type="style" name="StyleFive" id="0x7f020004" />
+    <style name="StyleFive" parent="StyleSix">
+        <item name="attr_two">2</item>
+    </style>
+
+    <public type="style" name="StyleSix" id="0x7f020005" />
+    <style name="StyleSix" parent="StyleFour">
+        <item name="attr_three">3</item>
+    </style>
+
 </resources>

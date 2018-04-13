@@ -276,6 +276,10 @@ class AssetManager2 {
   // This should always be called when mutating the AssetManager's configuration or ApkAssets set.
   void RebuildFilterList();
 
+  // AssetManager2::GetBag(resid) wraps this function to track which resource ids have already
+  // been seen while traversing bag parents.
+  const ResolvedBag* GetBag(uint32_t resid, std::vector<uint32_t>& child_resids);
+
   // The ordered list of ApkAssets to search. These are not owned by the AssetManager, and must
   // have a longer lifetime.
   std::vector<const ApkAssets*> apk_assets_;
