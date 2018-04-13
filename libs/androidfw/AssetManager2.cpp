@@ -18,6 +18,7 @@
 
 #include "androidfw/AssetManager2.h"
 
+#include <algorithm>
 #include <iterator>
 #include <set>
 
@@ -567,6 +568,11 @@ ApkAssetsCookie AssetManager2::ResolveReference(ApkAssetsCookie cookie, Res_valu
 }
 
 const ResolvedBag* AssetManager2::GetBag(uint32_t resid) {
+  auto found_resids = std::vector<uint32_t>();
+  return GetBag(resid, found_resids);
+}
+
+const ResolvedBag* AssetManager2::GetBag(uint32_t resid, std::vector<uint32_t>& child_resids) {
   ATRACE_NAME("AssetManager::GetBag");
 
   auto cached_iter = cached_bags_.find(resid);
@@ -595,10 +601,15 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid) {
       reinterpret_cast<const ResTable_map*>(reinterpret_cast<const uint8_t*>(map) + map->size);
   const ResTable_map* const map_entry_end = map_entry + dtohl(map->count);
 
+  // Keep track of ids that have already been seen to prevent infinite loops caused by circular
+  // dependencies between bags
+  child_resids.push_back(resid);
+
   uint32_t parent_resid = dtohl(map->parent.ident);
-  if (parent_resid == 0 || parent_resid == resid) {
-    // There is no parent, meaning there is nothing to inherit and we can do a simple
-    // copy of the entries in the map.
+  if (parent_resid == 0 || std::find(child_resids.begin(), child_resids.end(), parent_resid)
+      != child_resids.end()) {
+    // There is no parent or that a circular dependency exist, meaning there is nothing to
+    // inherit and we can do a simple copy of the entries in the map.
     const size_t entry_count = map_entry_end - map_entry;
     util::unique_cptr<ResolvedBag> new_bag{reinterpret_cast<ResolvedBag*>(
         malloc(sizeof(ResolvedBag) + (entry_count * sizeof(ResolvedBag::Entry))))};
@@ -639,7 +650,7 @@ const ResolvedBag* AssetManager2::GetBag(uint32_t resid) {
   entry.dynamic_ref_table->lookupResourceId(&parent_resid);
 
   // Get the parent and do a merge of the keys.
-  const ResolvedBag* parent_bag = GetBag(parent_resid);
+  const ResolvedBag* parent_bag = GetBag(parent_resid, child_resids);
   if (parent_bag == nullptr) {
     // Failed to get the parent that should exist.
     LOG(ERROR) << base::StringPrintf("Failed to find parent 0x%08x of bag 0x%08x.", parent_resid,
