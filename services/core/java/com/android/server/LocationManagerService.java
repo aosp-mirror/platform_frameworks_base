@@ -960,7 +960,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                         // synchronize to ensure incrementPendingBroadcastsLocked()
                         // is called before decrementPendingBroadcasts()
                         mPendingIntent.send(mContext, 0, statusChanged, this, mLocationHandler,
-                                getResolutionPermission(mAllowedResolutionLevel));
+                                getResolutionPermission(mAllowedResolutionLevel),
+                                PendingIntentUtils.createDontSendToRestrictedAppsBundle(null));
                         // call this after broadcasting so we do not increment
                         // if we throw an exeption.
                         incrementPendingBroadcastsLocked();
@@ -995,7 +996,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                         // synchronize to ensure incrementPendingBroadcastsLocked()
                         // is called before decrementPendingBroadcasts()
                         mPendingIntent.send(mContext, 0, locationChanged, this, mLocationHandler,
-                                getResolutionPermission(mAllowedResolutionLevel));
+                                getResolutionPermission(mAllowedResolutionLevel),
+                                PendingIntentUtils.createDontSendToRestrictedAppsBundle(null));
                         // call this after broadcasting so we do not increment
                         // if we throw an exeption.
                         incrementPendingBroadcastsLocked();
@@ -1037,7 +1039,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                         // synchronize to ensure incrementPendingBroadcastsLocked()
                         // is called before decrementPendingBroadcasts()
                         mPendingIntent.send(mContext, 0, providerIntent, this, mLocationHandler,
-                                getResolutionPermission(mAllowedResolutionLevel));
+                                getResolutionPermission(mAllowedResolutionLevel),
+                                PendingIntentUtils.createDontSendToRestrictedAppsBundle(null));
                         // call this after broadcasting so we do not increment
                         // if we throw an exeption.
                         incrementPendingBroadcastsLocked();
